@@ -27,9 +27,11 @@ object HMDABuild extends Build {
   import Dependencies._
   import BuildSettings._
 
-  val akkaDeps = Seq(akka, akkaSlf4J)
+  val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-  val httpDeps = akkaDeps ++ Seq(akkaHttp)
+  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J)
+
+  val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson)
 
   lazy val hmda = (project in file("."))
     .settings(buildSettings: _*)
