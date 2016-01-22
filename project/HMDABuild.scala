@@ -1,5 +1,6 @@
 import sbt._
 import sbt.Keys._
+import spray.revolver.RevolverPlugin._
 
 object BuildSettings {
   val buildOrganization = "cfpb"
@@ -45,4 +46,5 @@ object HMDABuild extends Build {
 
   lazy val api = (project in file("api"))
     .settings(buildSettings: _*)
+    
 }

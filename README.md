@@ -39,6 +39,63 @@ This module is responsible for persisting information into the system. It become
 This module contains both public APIs for HMDA data for general use by third party clients and web applications, as well as endpoints for receiving data and providing information about the filing process for Financial Institutions
 
 
+## Dependencies
+
+### Java 8 SDK
+
+The HMDA Platform runs on the Java Virtual Machine (JVM), and requires the Java 8 JDK to build and run the project. This project is currenly being built and tested on [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). See [Oracle's JDK Install Overview](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) for install instructions.
+
+The HMDA Platform should also run on OpenJDK 8.
+
+### Scala
+
+The HMDA Platform is written in [Scala](http://www.scala-lang.org/). To build it, you will need to [download](http://www.scala-lang.org/download/) and [install](http://www.scala-lang.org/download/install.html) Scala 2.11.x
+
+In addition, you'll need Scala's interactive build tool [sbt](http://www.scala-sbt.org/0.13/tutorial/index.html). Please refer to sbt's [installation instructions](http://www.scala-sbt.org/0.13/tutorial/Setup.html) to get started.
+
+
+## Building and Running
+
+The HMDA Platform uses sbt's multi-project builds, each project representing a specific task.
+
+### Interactive
+
+1. Start `sbt`
+
+```shell
+$ sbt
+```
+
+2. Select project to build and run
+
+```shell
+> projects
+[info] In file:/Users/Juan/Development/hmda-platform/
+[info] 	   api
+[info] 	 * hmda
+[info] 	   model
+[info] 	   parser
+[info] 	   persistence
+[info] 	   validation
+
+> project api
+[info] Set current project to api (in build file: /path/to/hmda-platform)
+```
+
+3. Start the HMDA Platform API
+
+This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
+
+```shell
+> ~re-start
+```
+
+Confirm that the platform is up and running by browsing to http://localhost:8080
+
+
+### Docker
+
+
 ## Contributing
 
 CFPB is developing the HMDA Platform in the open to maximize transparency and encourage third party contributions. If you want to contribute, please read and abide by the terms of the [License](LICENSE) for this project.
