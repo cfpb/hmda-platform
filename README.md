@@ -20,6 +20,25 @@ This regulation applies to certain financial institutions, including banks, savi
 
 This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accomodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset. 
 
+The HMDA Platform is composed of the following modules: 
+
+### Parser
+
+Component responsible for reading incoming data and making sure that it conforms to the HMDA File Specification
+
+### Data Validation
+
+Module responsible for validating incoming data by executing validation rules as per the Edit Checks documentation
+
+### Persistence
+
+This module is responsible for persisting information into the system. It becomes the system of record for HMDA data
+
+### API
+
+This module contains both public APIs for HMDA data for general use by third party clients and web applications, as well as endpoints for receiving data and providing information about the filing process for Financial Institutions
+
+
 ## Contributing
 
 CFPB is developing the HMDA Platform in the open to maximize transparency and encourage third party contributions. If you want to contribute, please read and abide by the terms of the [License](LICENSE) for this project.
