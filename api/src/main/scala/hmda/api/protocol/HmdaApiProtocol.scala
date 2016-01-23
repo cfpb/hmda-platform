@@ -4,5 +4,5 @@ import spray.json.DefaultJsonProtocol
 import hmda.api.model.Status
 
 trait HmdaApiProtocol extends DefaultJsonProtocol {
-  implicit val statusFormat = jsonFormat3(Status.apply)
+  implicit val statusFormat = jsonFormat4(Status.apply)
 }
