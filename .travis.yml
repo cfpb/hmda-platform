@@ -1,0 +1,21 @@
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+    - $HOME/.sbt
+    - $HOME/.ivy2
+
+language: scala
+
+scala: 2.11.7
+
+jdk:
+- oraclejdk8
+- openjdk8
+
+script: 
+  - sbt ++$TRAVIS_SCALA_VERSION clean assembly 
+  
+  # Trick to avoid unnecessary cache updates
+  - find $HOME/.sbt -name "*.lock" | xargs rm
