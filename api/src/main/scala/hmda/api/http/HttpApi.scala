@@ -2,26 +2,17 @@ package hmda.api.http
 
 import java.net.InetAddress
 import java.time.Instant
-import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.stream.ActorMaterializer
-import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import spray.json._
 import akka.http.scaladsl.server.Directives._
-import com.typesafe.config.Config
 import hmda.api.model.Status
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.protocol.HmdaApiProtocol
+import spray.json._
 
-trait HttpService extends HmdaApiProtocol {
-
-  implicit val system: ActorSystem
-  implicit val ec: ExecutionContext
-  implicit val materializer: ActorMaterializer
+trait HttpApi extends HmdaApiProtocol {
 
   val log: LoggingAdapter
-  def config: Config
 
   val routes = {
     pathSingleSlash {
@@ -36,6 +27,4 @@ trait HttpService extends HmdaApiProtocol {
       }
     }
   }
-
 }
-
