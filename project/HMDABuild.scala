@@ -37,10 +37,17 @@ object HMDABuild extends Build {
     .settings(buildSettings: _*)
     .settings(
       Seq(
-        assemblyJarName in assembly := {s"${name.value}.jar"}  
-      )  
+        assemblyJarName in assembly := {s"${name.value}.jar"},
+        assemblyMergeStrategy in assembly := {
+          case "application.conf" => MergeStrategy.concat
+          case x =>
+            val oldStrategy = (assemblyMergeStrategy in assembly).value
+            oldStrategy(x)
+        },
+        libraryDependencies ++= httpDeps
+      )
     )
-    .aggregate(parser, validation, persistence, api)
+    .aggregate(parser)
 
   lazy val model = (project in file("model"))
     .settings(buildSettings: _*)
@@ -59,37 +66,6 @@ object HMDABuild extends Build {
     )
     .dependsOn(model)
 
-  lazy val validation = (project in file("validation"))
-    .settings(buildSettings: _*)
-    .settings(
-      Seq(
-        assemblyJarName in assembly := {s"hmda-${name.value}.jar"}  
-      )  
-    ) 
-    .dependsOn(model)
 
-  lazy val persistence = (project in file("persistence"))
-    .settings(buildSettings: _*)
-    .settings(
-      Seq(
-        assemblyJarName in assembly := {s"hmda-${name.value}.jar"}  
-      )  
-    )
-
-  lazy val api = (project in file("api"))
-    .settings(buildSettings: _*)
-    .settings(
-      Seq(
-        assemblyJarName in assembly := {s"hmda-${name.value}.jar"},
-        assemblyMergeStrategy in assembly := {
-          case "application.conf" => MergeStrategy.concat
-          case x =>
-            val oldStrategy = (assemblyMergeStrategy in assembly).value
-            oldStrategy(x)
-        },
-        libraryDependencies ++= httpDeps,
-        resolvers ++= repos  
-      )  
-    )
     
 }

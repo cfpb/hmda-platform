@@ -1,4 +1,4 @@
-# HMDA HTTP API Dockerfile
+# HMDA Platform Dockerfile
 # Version: 1.0.0
 
 # Image builds from the official Docker Java Image
@@ -11,8 +11,8 @@ WORKDIR /
 
 USER daemon
 
-ENTRYPOINT ["java", "-jar", "/opt/hmda-api.jar"]
+ENTRYPOINT ["java", "-jar", "/opt/hmda.jar"]
 
 EXPOSE 8080
 
-COPY target/scala-2.11/hmda-api.jar /opt/hmda-api.jar
+COPY target/scala-2.11/hmda.jar /opt/hmda.jar

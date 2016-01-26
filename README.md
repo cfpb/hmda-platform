@@ -66,28 +66,16 @@ The HMDA Platform uses sbt's multi-project builds, each project representing a s
 $ sbt
 ```
 
-2. Select project to build and run
+2. Select project to build and run.This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
 
 ```shell
 > projects
 [info] In file:/Users/Juan/Development/hmda-platform/
-[info] 	   api
 [info] 	 * hmda
 [info] 	   model
 [info] 	   parser
-[info] 	   persistence
-[info] 	   validation
 
-> project api
-[info] Set current project to api (in build file: /path/to/hmda-platform)
-```
-
-3. Start the HMDA Platform API
-
-This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
-
-```shell
-> ~re-start
+> re-start
 ```
 
 Confirm that the platform is up and running by browsing to http://localhost:8080
