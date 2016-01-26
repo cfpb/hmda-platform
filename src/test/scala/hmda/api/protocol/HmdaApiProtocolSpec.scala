@@ -1,6 +1,5 @@
 package hmda.api.protocol
 
-import scala.concurrent.ExecutionContext
 import org.scalatest._
 import prop._
 import hmda.api.model.{ Status, ModelGenerators }
@@ -10,7 +9,10 @@ class HmdaApiProtocolSpec extends PropSpec with PropertyChecks with MustMatchers
 
   property("status must convert to and from json") {
     forAll(statusGen) { (s) =>
-      s.toJson.convertTo[Status] mustBe (s)
+      whenever(s.host != "") {
+        println(s)
+        s.toJson.convertTo[Status] mustBe (s)
+      }
     }
 
   }
