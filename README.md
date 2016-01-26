@@ -95,6 +95,35 @@ Confirm that the platform is up and running by browsing to http://localhost:8080
 
 ### Docker
 
+First, make sure that you have the [Docker Toolbox](https://www.docker.com/docker-toolbox) installed.
+
+If you don't have a Docker machine created, you can create one by issuing the following:
+
+```shell
+docker-machine create --driver virtualbox dev
+```
+
+After the machine is created, make sure that you connect your shell with the newly created machine
+
+```shell
+$ eval "(docker-machine env dev)"
+```
+
+From the project's root directory, run the following:
+
+```shell
+docker-compose up -d
+```
+
+This will bring up all the HMDA Platform services (the first run might take a while). You can navigate to the HMDA HTTP API by
+going to the docker machine's endpoint. To find your docker machine endpoint:
+
+```shell
+docker-machine ip dev
+```
+
+The HMDA Platform will be available at `<dev-ip>:8080`
+
 
 ## Contributing
 
