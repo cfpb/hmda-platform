@@ -20,7 +20,7 @@ trait HttpApi extends HmdaApiProtocol {
         complete {
           val now = Instant.now.toString
           val host = InetAddress.getLocalHost.getHostName
-          val status = Status("OK", "hmda-hmda.api", now, host)
+          val status = Status("OK", "hmda.api", now, host)
           log.debug(status.toJson.toString)
           ToResponseMarshallable(status)
         }
