@@ -10,7 +10,6 @@ class HmdaApiProtocolSpec extends PropSpec with PropertyChecks with MustMatchers
   property("status must convert to and from json") {
     forAll(statusGen) { (s) =>
       whenever(s.host != "") {
-        println(s)
         s.toJson.convertTo[Status] mustBe (s)
       }
     }

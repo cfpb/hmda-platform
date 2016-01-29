@@ -1,7 +1,9 @@
 import sbt._
 import sbt.Keys._
-import spray.revolver.RevolverPlugin._
 import sbtassembly.AssemblyPlugin.autoImport._
+import org.scalajs.sbtplugin.ScalaJSPlugin
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import spray.revolver.RevolverPlugin.autoImport.Revolver
 
 object BuildSettings {
   val buildOrganization = "cfpb"
@@ -17,7 +19,8 @@ object BuildSettings {
         "-Xlint",
         "-deprecation",
         "-unchecked",
-        "-feature")
+        "-feature"),
+      aggregate in assembly := false
     )
 
 }
@@ -34,10 +37,12 @@ object HMDABuild extends Build {
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
   lazy val hmda = (project in file("."))
-    .settings(buildSettings: _*)
+    .settings(buildSettings:_*)
+    .settings(Revolver.settings:_*)
     .settings(
       Seq(
         assemblyJarName in assembly := {s"${name.value}.jar"},
+        mainClass in assembly := Some("hmda.Hmda"),
         assemblyMergeStrategy in assembly := {
           case "application.conf" => MergeStrategy.concat
           case x =>
@@ -46,25 +51,33 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= httpDeps
       )
-    )
-    .aggregate(parser)
+    ).dependsOn(parserJVM)
+    .aggregate(parserJVM, parserJS)
 
-  lazy val model = (project in file("model"))
+  lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
-    .settings(
-      Seq(
-        assemblyJarName in assembly := {s"hmda-${name.value}.jar"}  
-      )  
+    .jvmSettings(
+      assemblyJarName in assembly := {s"hmda-${name.value}.jar"}
     )
 
-  lazy val parser = (project in file("parser"))
+  lazy val modelJS = model.js
+  lazy val modelJVM = model.jvm
+
+  lazy val parser = (crossProject in file("parser"))
     .settings(buildSettings: _*)
-    .settings(
-      Seq(
-        assemblyJarName in assembly := {s"hmda-${name.value}.jar"}  
-      )  
+    .jvmSettings(
+      libraryDependencies ++= commonDeps
+    )
+    .jsSettings(
+      libraryDependencies ++= Seq(
+        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
+        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
+      )
     )
     .dependsOn(model)
+
+  lazy val parserJVM = parser.jvm
+  lazy val parserJS = parser.js
 
 
     

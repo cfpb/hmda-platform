@@ -1,4 +1,4 @@
-package hmda.model.ts
+package hmda.model.fi.ts
 
 case class Contact(
   name: String,

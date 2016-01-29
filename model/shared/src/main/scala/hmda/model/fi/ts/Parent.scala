@@ -1,7 +1,6 @@
-package hmda.model.ts
+package hmda.model.fi.ts
 
-case class Respondent(
-  id: String,
+case class Parent(
   name: String,
   address: String,
   city: String,

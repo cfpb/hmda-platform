@@ -1,4 +1,4 @@
-package hmda.model.lar
+package hmda.model.fi.lar
 
 case class LoanApplicationRegister(
   id: Int,
