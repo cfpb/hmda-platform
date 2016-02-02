@@ -5,5 +5,4 @@ object Version {
   val scalaCheck = "1.12.5" 
   val akkaHttp   = "2.0.2"
   val akka       = "2.4.1"
-
 }

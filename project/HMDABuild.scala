@@ -1,7 +1,6 @@
 import sbt._
 import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
-import org.scalajs.sbtplugin.ScalaJSPlugin
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import spray.revolver.RevolverPlugin.autoImport.Revolver
 

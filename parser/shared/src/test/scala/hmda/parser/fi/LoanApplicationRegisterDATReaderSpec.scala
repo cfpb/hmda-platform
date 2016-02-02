@@ -1,5 +1,6 @@
 package hmda.parser.fi
 
+import hmda.parser.test.FITestData
 import org.scalatest.{ MustMatchers, AsyncFlatSpec }
 
 import scala.concurrent.{ Future, ExecutionContext }
@@ -8,11 +9,7 @@ class LoanApplicationRegisterDATReaderSpec extends AsyncFlatSpec with MustMatche
 
   override implicit def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val larsDAT = Seq(
-    "201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x",
-    "201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B                                                                                                                                                                                                                                                                            x",
-    "201234567899ABCDEFGHIJKLMNOPQRSTUVWXY20130117432110000152013011906920060340100.01457432187654129000098701.0524B"
-  )
+  import FITestData._
 
   val lars = larsDAT.map(line => LoanApplicationRegisterDATReader(line))
 
