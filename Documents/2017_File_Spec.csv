@@ -18,7 +18,7 @@ Data Field Number, Data Field Name, Data Field Type, Valid Values , Descriptions
 8, Respondent Name, Alphanumeric, , Example: FICUS BANK,
 9, Respondent Address, Alphanumeric, , Example: 4321 RANDOM BLVD STE 201,
 10, Respondent City, Alphanumeric, , Example: SOMECITY,
-11, Respondent State, Alphanumeric,  , Postal Code abbreviation Example: ST,
+11, Respondent State, Alphanumeric,  , Postal Code abbreviation. Example: ST,
 12, Respondent ZIP Code, Alphanumeric,   , Example: 12345-1010,
 13, Parent Name, Alphanumeric,  , If applicable. Example: FERN BANK,
 14, Parent Address, Alphanumeric,  ,If applicable. Example: 456 SOMEWHERE AVE,
