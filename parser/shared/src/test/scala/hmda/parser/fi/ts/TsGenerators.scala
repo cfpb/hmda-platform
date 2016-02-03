@@ -1,10 +1,10 @@
-package hmda.parser.test
+package hmda.parser.fi.ts
 
-import hmda.model.fi.ts.{ Parent, Respondent, Contact, TransmittalSheet }
+import hmda.model.fi.ts.{Contact, Parent, Respondent, TransmittalSheet}
+import hmda.parser.util.FITestData._
 import org.scalacheck.Gen
-import hmda.parser.test.FITestData._
 
-trait TransmittalSheetGenerators {
+trait TsGenerators {
 
   implicit def tsGen: Gen[TransmittalSheet] = {
     for {

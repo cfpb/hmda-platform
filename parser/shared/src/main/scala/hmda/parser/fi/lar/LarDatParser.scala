@@ -1,8 +1,8 @@
-package hmda.parser.fi
+package hmda.parser.fi.lar
 
 import hmda.model.fi.lar._
 
-object LoanApplicationRegisterDATReader {
+object LarDatParser {
   def apply(s: String): LoanApplicationRegister = {
     val id = s.substring(0, 1).toInt
     val respId = s.substring(1, 11)

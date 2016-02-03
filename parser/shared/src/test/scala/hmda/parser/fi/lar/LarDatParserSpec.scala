@@ -1,17 +1,17 @@
-package hmda.parser.fi
+package hmda.parser.fi.lar
 
-import hmda.parser.test.FITestData
-import org.scalatest.{ MustMatchers, AsyncFlatSpec }
+import hmda.parser.util.FITestData
+import org.scalatest.{ AsyncFlatSpec, MustMatchers }
 
-import scala.concurrent.{ Future, ExecutionContext }
+import scala.concurrent.{ ExecutionContext, Future }
 
-class LoanApplicationRegisterDATReaderSpec extends AsyncFlatSpec with MustMatchers {
+class LarDatParserSpec extends AsyncFlatSpec with MustMatchers {
 
   override implicit def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   import FITestData._
 
-  val lars = larsDAT.map(line => LoanApplicationRegisterDATReader(line))
+  val lars = larsDAT.map(line => LarDatParser(line))
 
   "LAR Parser" should "parse correct number of LARs" in {
     val result = Future(lars.size)

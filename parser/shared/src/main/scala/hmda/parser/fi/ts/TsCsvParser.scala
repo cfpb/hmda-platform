@@ -1,8 +1,8 @@
-package hmda.parser.fi
+package hmda.parser.fi.ts
 
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 
-object TransmittalSheetCSVReader {
+object TsCsvParser {
   def apply(s: String): TransmittalSheet = {
     val values = s.split('|').map(_.trim)
     val id = values(0).toInt
