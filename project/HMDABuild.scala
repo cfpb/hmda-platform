@@ -68,7 +68,9 @@ object HMDABuild extends Build {
       libraryDependencies ++= commonDeps
     )
     .jsSettings(
+      scalaJSUseRhino in Global := false,
       libraryDependencies ++= Seq(
+        "org.scala-js" %%% "scalajs-dom" % Version.scalaJSDom,
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
       )

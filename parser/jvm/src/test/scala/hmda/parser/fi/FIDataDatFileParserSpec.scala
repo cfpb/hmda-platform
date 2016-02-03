@@ -9,7 +9,7 @@ import scala.concurrent.ExecutionContext
 class FIDataDatFileParserSpec extends AsyncFlatSpec with MustMatchers {
   override def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  "A DAT File" must "be parsed" in {
+  "A DAT File" must "be parsed in the JVM" in {
     val file = new File("parser/shared/src/test/resources/sample.dat")
     val datFile = io.Source.fromFile(file)
     val lines = datFile.getLines().toIterable
@@ -18,6 +18,7 @@ class FIDataDatFileParserSpec extends AsyncFlatSpec with MustMatchers {
     val ts = data.ts
     val lars = data.lars
     ts.respondent.id mustBe "0123456789"
+    lars.size mustBe 3
   }
 
 }
