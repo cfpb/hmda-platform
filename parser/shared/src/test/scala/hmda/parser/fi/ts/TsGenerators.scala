@@ -1,6 +1,6 @@
 package hmda.parser.fi.ts
 
-import hmda.model.fi.ts.{Contact, Parent, Respondent, TransmittalSheet}
+import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.parser.util.FITestData._
 import org.scalacheck.Gen
 

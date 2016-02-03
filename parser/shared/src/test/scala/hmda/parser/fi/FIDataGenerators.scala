@@ -10,7 +10,7 @@ trait FIDataGenerators extends TsGenerators with LarGenerators {
   implicit def fiDataGen: Gen[FIData] = {
     for {
       ts <- tsGen
-      n <- Gen.choose(1,1000)
+      n <- Gen.choose(1, 1000)
       lars <- Gen.listOfN(n, larGen)
     } yield FIData(ts, lars.iterator)
   }

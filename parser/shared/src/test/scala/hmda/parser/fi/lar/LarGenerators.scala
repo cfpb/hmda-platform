@@ -7,5 +7,4 @@ trait LarGenerators {
 
   implicit def larGen: Gen[LoanApplicationRegister] = ???
 
-
 }
