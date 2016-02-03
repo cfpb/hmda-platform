@@ -24,7 +24,7 @@ The HMDA Platform is composed of the following modules:
 
 ### Parser
 
-Component responsible for reading incoming data and making sure that it conforms to the HMDA File Specification
+Module responsible for reading incoming data and making sure that it conforms to the HMDA File Specification
 
 ### Data Validation
 
@@ -32,7 +32,7 @@ Module responsible for validating incoming data by executing validation rules as
 
 ### Persistence
 
-This module is responsible for persisting information into the system. It becomes the system of record for HMDA data
+Module responsible for persisting information into the system. It becomes the system of record for HMDA data
 
 ### API
 
