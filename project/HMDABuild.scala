@@ -65,7 +65,9 @@ object HMDABuild extends Build {
   lazy val parser = (crossProject in file("parser"))
     .settings(buildSettings: _*)
     .jvmSettings(
-      libraryDependencies ++= commonDeps
+      libraryDependencies ++= commonDeps ++ Seq(
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      )
     )
     .jsSettings(
       scalaJSUseRhino in Global := false,
