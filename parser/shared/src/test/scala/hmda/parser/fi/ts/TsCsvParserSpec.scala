@@ -5,7 +5,7 @@ import org.scalatest.{ MustMatchers, PropSpec }
 
 class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators {
 
-  property("status must convert to and from CSV") {
+  property("Transmittal Sheet must be parsed from CSV") {
     forAll(tsGen) { (ts) =>
       whenever(ts.id == 1) {
         TsCsvParser(ts.toCSV) mustBe ts

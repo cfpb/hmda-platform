@@ -1,18 +1,10 @@
 package hmda.parser.fi.ts
 
-import hmda.parser.util.FITestData
 import org.scalatest._
+import org.scalatest.prop.PropertyChecks
 
-import scala.concurrent.ExecutionContext
+class TsDatParserSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators {
 
-class TsDatParserSpec extends AsyncFlatSpec with MustMatchers {
+  property("Transmittal Sheet must be parsed from CSV")(pending)
 
-  override implicit def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-
-  import FITestData._
-
-  "Transmittal Sheet code" should "equals 1" in {
-    val ts = TsDatParser(tsDAT)
-    ts.id mustBe 1
-  }
 }

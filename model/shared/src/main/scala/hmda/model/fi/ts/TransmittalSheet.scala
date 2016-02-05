@@ -21,5 +21,10 @@ case class TransmittalSheet(
 
   }
 
+  def toDAT: String = {
+    //TODO: implement DAT output
+    ""
+  }
+
 }
 

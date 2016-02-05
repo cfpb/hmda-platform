@@ -20,5 +20,10 @@ case class LoanApplicationRegister(
     //TODO: implement CSV output
     ""
   }
+
+  def toDAT: String = {
+    //TODO: implement DAT output
+    ""
+  }
 }
 

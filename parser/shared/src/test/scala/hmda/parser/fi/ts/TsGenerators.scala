@@ -1,10 +1,11 @@
 package hmda.parser.fi.ts
 
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
+import hmda.parser.fi.FIGenerators
 import hmda.parser.util.FITestData._
 import org.scalacheck.Gen
 
-trait TsGenerators {
+trait TsGenerators extends FIGenerators {
 
   implicit def tsGen: Gen[TransmittalSheet] = {
     for {
@@ -29,9 +30,6 @@ trait TsGenerators {
     )
   }
 
-  implicit def agencyCodeGen: Gen[Int] = {
-    Gen.oneOf(1, 2, 3, 5, 7, 9)
-  }
 
   implicit def timeGen: Gen[Long] = {
     Gen.oneOf(201602021453L, 201602051234L)
@@ -51,7 +49,7 @@ trait TsGenerators {
 
   implicit def respondentGen: Gen[Respondent] = {
     for {
-      id <- Gen.alphaStr
+      id <- respIdGen
       name <- Gen.alphaStr
       address <- Gen.alphaStr
       city <- Gen.alphaStr

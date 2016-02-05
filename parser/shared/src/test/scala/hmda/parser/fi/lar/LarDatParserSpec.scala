@@ -5,6 +5,7 @@ import org.scalatest.{ AsyncFlatSpec, MustMatchers }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
+//TODO: Change tests from fixed data to property based testing
 class LarDatParserSpec extends AsyncFlatSpec with MustMatchers {
 
   override implicit def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
