@@ -1,10 +1,10 @@
 package hmda.parser.fi
 
-import hmda.js.io.IO
+import hmda.js.io.FileIO
 import org.scalatest.{ MustMatchers, AsyncFlatSpec }
 import scala.concurrent.ExecutionContext
 
-class FIDataDatFileParserSpec extends AsyncFlatSpec with MustMatchers with IO {
+class FIDataDatFileParserSpec extends AsyncFlatSpec with MustMatchers with FileIO {
   override def executionContext: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   implicit val ec = executionContext

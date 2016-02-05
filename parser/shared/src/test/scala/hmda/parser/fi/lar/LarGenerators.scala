@@ -32,7 +32,4 @@ trait LarGenerators extends FIGenerators {
 
   implicit def lienStatusGen: Gen[Int] = ???
 
-
-
-
 }

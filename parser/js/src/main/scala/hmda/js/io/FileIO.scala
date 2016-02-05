@@ -4,7 +4,7 @@ import scala.concurrent.{ Promise, Future }
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic._
 
-trait IO {
+trait FileIO {
   val fs = global.require("fs")
   val options = js.Dynamic.literal(encoding = "UTF-8")
 

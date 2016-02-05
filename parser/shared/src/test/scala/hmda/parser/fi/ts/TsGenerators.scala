@@ -30,7 +30,6 @@ trait TsGenerators extends FIGenerators {
     )
   }
 
-
   implicit def timeGen: Gen[Long] = {
     Gen.oneOf(201602021453L, 201602051234L)
   }
