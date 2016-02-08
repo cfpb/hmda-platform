@@ -75,7 +75,7 @@ $ sbt
 [info] 	   model
 [info] 	   parser
 
-> re-start
+> ~re-start
 ```
 
 Confirm that the platform is up and running by browsing to http://localhost:8080
