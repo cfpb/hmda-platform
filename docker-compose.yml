@@ -1,0 +1,8 @@
+# Docker compose configuration file for the HMDA Platform
+# Version: 1.0.0
+
+hmda:
+  build: .
+  ports:
+    - 8080:8080
+    - 2551:2551
