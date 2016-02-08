@@ -3,13 +3,47 @@
 <head>
     <title>Example HMDA Parser Application</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <script type="text/javascript" src="../parserjs-opt.js"></script>
+    <script type="text/javascript" src="../parserjs-fastopt.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body style="margin: 0px">
 
+  <h1>HMDA Parser Example (client side)</h1>
+  <input type="file" id="files" name="files[]">
+
 <script>
-    hmda.js.parser.ParserExample().main();
+
+    var encoding = "UTF-8";
+
+    function fileSelectListener(evt) {
+      var files = evt.target.files;
+      if (files.length > 0) {
+        var file = files[0];
+        //console.log(file);
+
+        var reader = new FileReader();
+
+        reader.onload = function(e) {
+          var text = reader.result;
+          var parser = hmda.parser.fi.FIDataDatParser();
+          var fiData = parser.readAll(text);
+          var ts = fiData.ts;
+          console.log(ts);
+          var lars = fiData.lars;
+          console.log(lars[0]);
+
+        };
+
+        reader.readAsText(file, encoding);
+
+      } else {
+        console.log("No file selected");
+      }
+    }
+
+    document.getElementById('files').addEventListener('change', fileSelectListener, false);
+
+
 </script>
 </body>
 </html>
