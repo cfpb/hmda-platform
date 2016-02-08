@@ -41,17 +41,16 @@ object HMDABuild extends Build {
     .settings(
       Seq(
         assemblyJarName in assembly := {s"${name.value}.jar"},
-        mainClass in assembly := Some("hmda.Hmda"),
+        mainClass in assembly := Some("hmda.api.HmdaApi"),
         assemblyMergeStrategy in assembly := {
           case "application.conf" => MergeStrategy.concat
           case x =>
             val oldStrategy = (assemblyMergeStrategy in assembly).value
             oldStrategy(x)
-        },
-        libraryDependencies ++= httpDeps
+        }
       )
-    ).dependsOn(parserJVM)
-    .aggregate(parserJVM, parserJS)
+    ).dependsOn(api)
+    .aggregate(parserJVM, parserJS, api)
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
@@ -82,6 +81,23 @@ object HMDABuild extends Build {
 
   lazy val parserJVM = parser.jvm
   lazy val parserJS = parser.js
+
+  lazy val api = (project in file("api"))
+    .settings(buildSettings: _*)
+    .settings(Revolver.settings:_*)
+    .settings(
+      Seq(
+        assemblyJarName in assembly := {s"${name.value}.jar"},
+        mainClass in assembly := Some("hmda.api.HmdaApi"),
+        assemblyMergeStrategy in assembly := {
+          case "application.conf" => MergeStrategy.concat
+          case x =>
+            val oldStrategy = (assemblyMergeStrategy in assembly).value
+            oldStrategy(x)
+        },
+        libraryDependencies ++= httpDeps
+      )
+    ).dependsOn(parserJVM)
 
 
     

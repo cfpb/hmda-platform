@@ -1,4 +1,4 @@
-package hmda
+package hmda.api
 
 import akka.actor.ActorSystem
 import akka.event.Logging
@@ -8,7 +8,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.http.HttpApi
 import hmda.api.service.Service
 
-object Hmda extends App with Service with HttpApi {
+object HmdaApi extends App with Service with HttpApi {
 
   override implicit val system = ActorSystem("hmda")
   override implicit val materializer = ActorMaterializer()
