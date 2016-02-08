@@ -1,3 +1,4 @@
+import org.scalajs.sbtplugin.ScalaJSPlugin
 import sbt._
 import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
@@ -54,8 +55,14 @@ object HMDABuild extends Build {
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
+    .enablePlugins(ScalaJSPlugin)
+    .jsSettings(
+
+    )
     .jvmSettings(
-      assemblyJarName in assembly := {s"hmda-${name.value}.jar"}
+      libraryDependencies ++= commonDeps ++ Seq(
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      )
     )
 
   lazy val modelJS = model.js
