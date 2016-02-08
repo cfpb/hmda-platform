@@ -7,11 +7,21 @@ import scala.scalajs.js.annotation.JSExport
 
 @JSExport
 class FIDataDatParser extends FIDataParser[String] {
-  @JSExport
+
   override def read(input: Iterable[String]): FIData = {
-    val tsLine = input.head
+    parseLines(input)
+  }
+
+  @JSExport
+  override def readAll(input: String): FIData = {
+    val lines = input.split("\n").toIterable
+    parseLines(lines)
+  }
+
+  def parseLines(lines: Iterable[String]): FIData = {
+    val tsLine = lines.head
     val ts = TsDatParser(tsLine)
-    val lars = input.tail.iterator.map(l => LarDatParser(l))
+    val lars = lines.tail.iterator.map(l => LarDatParser(l))
     FIData(ts, lars)
   }
 }
