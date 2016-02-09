@@ -1,16 +1,16 @@
 package hmda.js.parser
 
 import hmda.parser.fi.FIDataDatParser
+import org.scalajs.dom
 import org.scalajs.dom.Node
 import org.scalajs.dom.html._
 import org.scalajs.dom.raw.FileReader
 
+import scala.language.implicitConversions
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSExport
-import org.scalajs.dom
 import scalatags.JsDom._
-import all._
-import scala.language.implicitConversions
+import scalatags.JsDom.all._
 
 @JSExport
 object ParserExample {
@@ -20,7 +20,7 @@ object ParserExample {
 
     implicit def extendEventTarget(e: dom.EventTarget): EventTargetExt = e.asInstanceOf[EventTargetExt]
 
-    val title = h1("HMDA Parser Example (client side)").render
+    val title = h1("HMDA Parser Example (ScalaJS)").render
 
     addToBody(title)
 

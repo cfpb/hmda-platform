@@ -45,13 +45,14 @@ object HMDABuild extends Build {
         mainClass in assembly := Some("hmda.api.HmdaApi"),
         assemblyMergeStrategy in assembly := {
           case "application.conf" => MergeStrategy.concat
+          case "JS_DEPENDENCIES" => MergeStrategy.concat
           case x =>
             val oldStrategy = (assemblyMergeStrategy in assembly).value
             oldStrategy(x)
         }
       )
     ).dependsOn(api)
-    .aggregate(parserJVM, parserJS, api)
+    .aggregate(parserJVM, parserJS, api, platformTestJVM, platformTestJS)
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
@@ -107,5 +108,23 @@ object HMDABuild extends Build {
     ).dependsOn(parserJVM)
 
 
-    
+  lazy val platformTest = (crossProject in file("platform-test"))
+    .settings(buildSettings: _*)
+    .jvmSettings(
+      libraryDependencies ++= commonDeps ++ Seq(
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      )
+    )
+    .jsSettings(
+      scalaJSUseRhino in Global := false,
+      libraryDependencies ++= Seq(
+        "org.scala-js" %%% "scalajs-dom" % Version.scalaJSDom,
+        "com.lihaoyi" %%% "scalatags" % Version.scalaTags,
+        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
+        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
+      )
+    ).dependsOn(parser)
+
+  lazy val platformTestJVM = platformTest.jvm
+  lazy val platformTestJS = platformTest.js
 }
