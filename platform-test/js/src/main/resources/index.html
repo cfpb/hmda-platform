@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Example HMDA Parser Application</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <script type="text/javascript" src="../platformtestjs-fastopt.js"></script>
@@ -8,8 +11,30 @@
 </head>
 <body style="margin: 0px">
 
-  <h1>HMDA Parser Example (Javascript)</h1>
-  <input type="file" id="files" name="files[]">
+  <div class="container">
+     <h1>HMDA Parser Example (Javascript)</h1>
+     <input type="file" id="files" name="files[]">
+     <h2>Transmittal Sheet</h2>
+     <table class="table">
+       <thead>
+         <tr>
+           <th>Activity Year</th>
+           <th>Respondent Name</th>
+           <th>Contact Email</th>
+         </tr>
+         <tr>
+           <th><div id="activityYear"></div></th>
+           <th><div id="respondentName"></div></th>
+           <th><div id="contactEmail"></div></th>
+         </tr>
+       </thead>
+     </table>
+
+     <h2>Loan Application Register</h2>
+     <table id="larTable" class="table">
+     </table>
+  </div>
+
 
 <script>
 
@@ -28,8 +53,35 @@
           var parser = hmda.parser.fi.FIDataDatParser();
           var fiData = parser.readAll(text);
           var ts = fiData.ts;
+
+          document.getElementById('activityYear').innerHTML = ts.activityYear;
+          document.getElementById('respondentName').innerHTML = ts.respondent.name;
+          document.getElementById('contactEmail').innerHTML = ts.contact.email;
+
           var lars = fiData.lars;
-          console.log(lars);
+          var larTable = document.getElementById('larTable');
+          var larThead = document.createElement('thead');
+          larTable.appendChild(larThead);
+
+          var headerRow = document.createElement('tr');
+          var codeHeader = document.createElement('th');
+          var codeText = document.createTextNode('Agency Code');
+
+          codeHeader.appendChild(codeText);
+          headerRow.appendChild(codeHeader);
+          larTable.appendChild(headerRow);
+
+          for (var i = 0; i < lars.length; i++) {
+            var lar = lars[i];
+            var codeRow = document.createElement("tr");
+            var codeCell = document.createElement("th");
+            var codeValue = document.createTextNode(lar.agencyCode);
+            codeCell.appendChild(codeValue);
+            codeRow.appendChild(codeCell);
+            larTable.appendChild(codeRow);
+
+
+          }
 
         };
 
