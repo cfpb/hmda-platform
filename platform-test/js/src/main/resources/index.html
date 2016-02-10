@@ -15,7 +15,7 @@
      <h1>HMDA Parser Example (Javascript)</h1>
      <input type="file" id="files" name="files[]">
      <h2>Transmittal Sheet</h2>
-     <table class="table">
+     <table if="tsTable" class="table">
        <thead>
          <tr>
            <th>Activity Year</th>
@@ -32,69 +32,18 @@
 
      <h2>Loan Application Register</h2>
      <table id="larTable" class="table">
+       <thead>
+         <tr>
+           <th>Agency Code</th>
+           <th>Respondent ID</th>
+           <th>Action Taken Date</th>
+           <th>Loan Application Date</th>
+         </tr>
+       </thead>
      </table>
   </div>
 
 
-<script>
-
-    var encoding = "UTF-8";
-
-    function fileSelectListener(evt) {
-      var files = evt.target.files;
-      if (files.length > 0) {
-        var file = files[0];
-        //console.log(file);
-
-        var reader = new FileReader();
-
-        reader.onload = function(e) {
-          var text = reader.result;
-          var parser = hmda.parser.fi.FIDataDatParser();
-          var fiData = parser.readAll(text);
-          var ts = fiData.ts;
-
-          document.getElementById('activityYear').innerHTML = ts.activityYear;
-          document.getElementById('respondentName').innerHTML = ts.respondent.name;
-          document.getElementById('contactEmail').innerHTML = ts.contact.email;
-
-          var lars = fiData.lars;
-          var larTable = document.getElementById('larTable');
-          var larThead = document.createElement('thead');
-          larTable.appendChild(larThead);
-
-          var headerRow = document.createElement('tr');
-          var codeHeader = document.createElement('th');
-          var codeText = document.createTextNode('Agency Code');
-
-          codeHeader.appendChild(codeText);
-          headerRow.appendChild(codeHeader);
-          larTable.appendChild(headerRow);
-
-          for (var i = 0; i < lars.length; i++) {
-            var lar = lars[i];
-            var codeRow = document.createElement("tr");
-            var codeCell = document.createElement("th");
-            var codeValue = document.createTextNode(lar.agencyCode);
-            codeCell.appendChild(codeValue);
-            codeRow.appendChild(codeCell);
-            larTable.appendChild(codeRow);
-
-
-          }
-
-        };
-
-        reader.readAsText(file, encoding);
-
-      } else {
-        console.log("No file selected");
-      }
-    }
-
-    document.getElementById('files').addEventListener('change', fileSelectListener, false);
-
-
-</script>
+<script type="text/javascript" src="parser.js"></script>
 </body>
 </html>
