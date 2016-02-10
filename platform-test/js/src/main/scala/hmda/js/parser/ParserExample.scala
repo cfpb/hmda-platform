@@ -16,13 +16,8 @@ import scalatags.JsDom.all._
 object ParserExample {
   @JSExport
   def main(): Unit = {
-    println("Parser Example")
 
     implicit def extendEventTarget(e: dom.EventTarget): EventTargetExt = e.asInstanceOf[EventTargetExt]
-
-    val title = h1("HMDA Parser Example (ScalaJS)").render
-
-    addToBody(title)
 
     val inputFiles: Input = input(
       `type` := "file",
@@ -46,7 +41,47 @@ object ParserExample {
       reader.readAsText(file, "UTF-8")
     }
 
-    addToBody(inputFiles)
+    val content = div(`class` := "container")(
+      h1("HMDA Parser Example (Scala.js)"),
+      inputFiles,
+      h2("Transmittal Sheet"),
+      table(
+        `class` := "table",
+        thead(
+          tr(
+            th("Activity Year"),
+            th("Respondent Name"),
+            th("Contact Email")
+          ),
+          tr(
+            th(
+              id := "activityYear"
+            ),
+            th(
+              id := "respondentName"
+            ),
+            th(
+              id := "contactEmail"
+            )
+          )
+        )
+      ),
+      h2("Loan Application Register"),
+      table(
+        `class` := "table",
+        id := "larTable",
+        thead(
+          tr(
+            th("Agency Code"),
+            th("Respondent ID"),
+            th("Action Taken Date"),
+            th("Loan Application Date")
+          )
+        )
+      )
+    ).render
+
+    addToBody(content)
 
   }
 
