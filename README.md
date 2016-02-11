@@ -53,6 +53,7 @@ The HMDA Platform is written in [Scala](http://www.scala-lang.org/). To build it
 
 In addition, you'll need Scala's interactive build tool [sbt](http://www.scala-sbt.org/0.13/tutorial/index.html). Please refer to sbt's [installation instructions](http://www.scala-sbt.org/0.13/tutorial/Setup.html) to get started.
 
+Some of the projects for the HMDA Platform are configured to cross build to both the JVM and JavaScript runtimes. These projects will have the `JVM` and `JS` suffixes added to their name.
 
 ## Building and Running
 
@@ -70,15 +71,54 @@ $ sbt
 
 ```shell
 > projects
-[info] In file:/Users/Juan/Development/hmda-platform/
+[info] In file:/Users/marinj/Development/hmda-platform/
+[info] 	   api
 [info] 	 * hmda
-[info] 	   model
-[info] 	   parser
+[info] 	   modelJS
+[info] 	   modelJVM
+[info] 	   parserJS
+[info] 	   parserJVM
+[info] 	   platformTestJS
+[info] 	   platformTestJVM
 
 > ~re-start
 ```
 
 Confirm that the platform is up and running by browsing to http://localhost:8080
+
+To build the project artifacts, there are two options depending on which runtime is being targeted. 
+
+* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
+
+```shell
+> assembly
+```
+
+This task will create a `fat jar`, which can be executed directly on any JDK8 compliant JVM:
+
+```shell
+java -jar target/scala-2.11/hmda.jar
+```
+
+* To build JavaScript artifacts (only projects that are cross platform), there are two options:
+
+- While developing, it's convenient to listen for code changes and have the fast optimizer create the JS resources:
+
+```shell
+> ~fastOptJS
+```
+
+This mode allows for a fast development cycle, refreshing the browser as code changes are being made (the fast optimization takes little time to produce a new version).
+
+- To build an optimized and production ready JavaScript library:
+
+```shell
+> fullOptJS
+```
+This optimization takes longer but produces a smaller file, ready for production. 
+For instance, the parser JavaScript resource will be located at `target/scala-2.11/parserjs-opt.js`
+
+To see examples of how to use the JavaScript produced library, check out the `platformTestJS` project
 
 
 ### Docker
