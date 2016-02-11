@@ -1,7 +1,36 @@
-
 var encoding = "UTF-8";
 
-function addRows(lars) {
+function fileSelectListener(evt) {
+  var files = evt.target.files;
+  if (files.length > 0) {
+    var file = files[0];
+
+    var reader = new FileReader();
+
+    reader.onload = function(e) {
+      var text = reader.result;
+      var parser = hmda.parser.fi.FIDataDatParser();
+      var fiData = parser.readAll(text);
+      var ts = fiData.ts;
+      addTsToTable(ts);
+      var lars = fiData.lars;
+      addLarsToTable(lars);
+    };
+
+    reader.readAsText(file, encoding);
+
+  } else {
+    console.log("No file selected");
+  }
+}
+
+function addTsToTable(ts) {
+  document.getElementById('activityYear').innerHTML = ts.activityYear;
+  document.getElementById('respondentName').innerHTML = ts.respondent.name;
+  document.getElementById('contactEmail').innerHTML = ts.contact.email;
+}
+
+function addLarsToTable(lars) {
   var larTable = document.getElementById('larTable');
 
   for (var i = 0; i < lars.length; i++) {
@@ -27,34 +56,6 @@ function addRows(lars) {
     larTable.appendChild(row);
   }
 
-}
-
-function fileSelectListener(evt) {
-  var files = evt.target.files;
-  if (files.length > 0) {
-    var file = files[0];
-
-    var reader = new FileReader();
-
-    reader.onload = function(e) {
-      var text = reader.result;
-      var parser = hmda.parser.fi.FIDataDatParser();
-      var fiData = parser.readAll(text);
-      var ts = fiData.ts;
-
-      document.getElementById('activityYear').innerHTML = ts.activityYear;
-      document.getElementById('respondentName').innerHTML = ts.respondent.name;
-      document.getElementById('contactEmail').innerHTML = ts.contact.email;
-
-      var lars = fiData.lars;
-      addRows(lars);
-    };
-
-    reader.readAsText(file, encoding);
-
-  } else {
-    console.log("No file selected");
-  }
 }
 
 document.getElementById('files').addEventListener('change', fileSelectListener, false);
