@@ -7,7 +7,7 @@ object LarCsvParser {
     val values = s.split('|').map(_.trim)
     val id = values(0).toInt
     val respId = values(1)
-    val code = values(2).toInt
+    val agencyCode = values(2).toInt
     val loanId = values(3)
     val loanDate = values(4)
     val loanType = values(5).toInt
@@ -81,7 +81,7 @@ object LarCsvParser {
     LoanApplicationRegister(
       id,
       respId,
-      code,
+      agencyCode,
       loan,
       preapprovals,
       actionType,
