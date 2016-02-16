@@ -85,8 +85,27 @@ object HMDABuild extends Build {
     )
     .dependsOn(model)
 
+
   lazy val parserJVM = parser.jvm
   lazy val parserJS = parser.js
+
+  lazy val validation = (crossProject in file("validation"))
+    .settings(buildSettings: _*)
+    .jvmSettings(
+      libraryDependencies ++= commonDeps ++ Seq(
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      )
+    )
+    .jsSettings(
+      scalaJSUseRhino in Global := false,
+      libraryDependencies ++= Seq(
+        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
+        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
+      )
+    )
+
+  lazy val validationJVM = validation.jvm
+  lazy val validationJS = validation.js
 
   lazy val api = (project in file("api"))
     .settings(buildSettings: _*)
