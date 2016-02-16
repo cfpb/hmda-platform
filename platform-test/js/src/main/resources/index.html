@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Example HMDA Parser Application</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <script type="text/javascript" src="../platformtestjs-fastopt.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body style="margin: 0px">
+
+  <div class="container">
+     <h1>HMDA Parser Example (JavaScript)</h1>
+     <input type="file" id="files" name="files[]">
+     <h2>Transmittal Sheet</h2>
+     <table id="tsTable" class="table">
+       <thead>
+         <tr>
+           <th>Activity Year</th>
+           <th>Respondent Name</th>
+           <th>Contact Email</th>
+         </tr>
+         <tr>
+           <th><div id="activityYear"></div></th>
+           <th><div id="respondentName"></div></th>
+           <th><div id="contactEmail"></div></th>
+         </tr>
+       </thead>
+     </table>
+
+     <h2>Loan Application Register</h2>
+     <table id="larTable" class="table">
+       <thead>
+         <tr>
+           <th>Agency Code</th>
+           <th>Respondent ID</th>
+           <th>Action Taken Date</th>
+           <th>Loan Application Date</th>
+         </tr>
+       </thead>
+     </table>
+  </div>
+
+
+<script type="text/javascript" src="parser.js"></script>
+</body>
+</html>

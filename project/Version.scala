@@ -5,5 +5,6 @@ object Version {
   val scalaCheck = "1.12.5" 
   val akkaHttp   = "2.0.2"
   val akka       = "2.4.1"
-
+  val scalaJSDom = "0.8.2"
+  val scalaTags  = "0.5.4"
 }
