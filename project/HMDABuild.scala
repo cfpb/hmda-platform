@@ -52,7 +52,14 @@ object HMDABuild extends Build {
         }
       )
     ).dependsOn(api)
-    .aggregate(parserJVM, parserJS, api, platformTestJVM, platformTestJS)
+    .aggregate(
+      parserJVM,
+      parserJS,
+      api,
+      platformTestJVM,
+      platformTestJS,
+      validationJVM,
+      validationJS)
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
@@ -102,7 +109,7 @@ object HMDABuild extends Build {
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
       )
-    )
+    ).dependsOn(parser)
 
   lazy val validationJVM = validation.jvm
   lazy val validationJS = validation.js
