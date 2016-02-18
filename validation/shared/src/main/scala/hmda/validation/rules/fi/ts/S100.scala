@@ -9,7 +9,7 @@ import hmda.validation.dsl.HmdaDSL._
 object S100 {
 
   def apply(ts: TransmittalSheet, year: Int) = {
-    ts.activityYear shouldBe equalTo(year)
+    ts.activityYear is equalTo(year)
   }
 
 }
