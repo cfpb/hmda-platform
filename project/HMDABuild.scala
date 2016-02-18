@@ -109,7 +109,7 @@ object HMDABuild extends Build {
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
       )
-    ).dependsOn(parser)
+    ).dependsOn(parser % "compile->compile;test->test")
 
   lazy val validationJVM = validation.jvm
   lazy val validationJS = validation.js
