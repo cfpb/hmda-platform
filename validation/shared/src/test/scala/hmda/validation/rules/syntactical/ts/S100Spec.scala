@@ -1,8 +1,8 @@
-package hmda.validation.rules.fi.ts
+package hmda.validation.rules.syntactical.ts
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.ts.TsGenerators
-import hmda.validation.dsl.HmdaDSL.{ Failure, Success }
+import hmda.validation.dsl.{ Failure, Success }
 import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
