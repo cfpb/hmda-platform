@@ -31,8 +31,23 @@ trait CommonDsl {
     override def failure: String = s"not equal to $that"
   }
 
-  def >[T](that: T): Predicate[T] = new Predicate[T] {
-    override def validate: (T) => Boolean = ???
+  def greaterThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = ord.gt(_, that)
+    override def failure: String = s"not greater than $that"
+  }
+
+  def greaterThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = ord.gteq(_, that)
+    override def failure: String = s"not greater than $that"
+  }
+
+  def lessThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = ord.lt(_, that)
+    override def failure: String = s"not greater than $that"
+  }
+
+  def lessThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = ord.lteq(_, that)
     override def failure: String = s"not greater than $that"
   }
 
