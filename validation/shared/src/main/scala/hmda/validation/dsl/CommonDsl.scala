@@ -31,6 +31,11 @@ trait CommonDsl {
     override def failure: String = s"not equal to $that"
   }
 
+  def >[T](that: T): Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = ???
+    override def failure: String = s"not greater than $that"
+  }
+
   def containedIn[T](list: List[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = list.contains(_)
     override def failure: String = s"is not contained in valid values domain"
