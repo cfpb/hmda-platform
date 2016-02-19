@@ -43,4 +43,13 @@ trait CommonDsl {
     }
     override def failure: String = s"is not numeric"
   }
+
+  def empty[T]: Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
+      case s: String =>
+        if (s.isEmpty) true else false
+      case _ => false
+    }
+    override def failure: String = "is not empty"
+  }
 }

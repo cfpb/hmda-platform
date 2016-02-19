@@ -2,7 +2,6 @@ package hmda.validation.rules.syntactical.ts
 
 import hmda.parser.fi.ts.TsGenerators
 import hmda.validation.dsl.Success
-import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 

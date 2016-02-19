@@ -1,24 +1,24 @@
 package hmda.validation.rules.validity.ts
 
-import hmda.model.fi.ts.TransmittalSheet
+import hmda.model.fi.ts.Respondent
 import hmda.validation.dsl.{ Result, CommonDsl }
 
 /*
  Respondent name, address, city, state, and zip code must not = blank
  */
 object V105 extends CommonDsl {
-  def apply(ts: TransmittalSheet): Result = {
-    val respName = ts.respondent.name
-    val respAddress = ts.respondent.address
-    val respCity = ts.respondent.city
-    val respState = ts.respondent.state
-    val respZipCode = ts.respondent.zipCode
+  def apply(respondent: Respondent): Result = {
+    val respName = respondent.name
+    val respAddress = respondent.address
+    val respCity = respondent.city
+    val respState = respondent.state
+    val respZipCode = respondent.zipCode
 
-    (respName not equalTo("")) and
-      (respAddress not equalTo("")) and
-      (respCity not equalTo("")) and
-      (respState not equalTo("")) and
-      (respZipCode not equalTo(""))
-
+    (respName not empty) and
+      (respAddress not empty) and
+      (respCity not empty) and
+      (respState not empty) and
+      (respZipCode not empty)
   }
+
 }
