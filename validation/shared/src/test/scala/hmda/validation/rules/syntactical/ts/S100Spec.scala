@@ -33,7 +33,7 @@ class S100Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
     )
   }
 
-  property("Transmittal Sheet has valid activity year") {
+  property("Activity year must be the year being processed") {
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
         S100(ts, 2016) mustBe Success()

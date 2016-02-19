@@ -2,7 +2,7 @@ package hmda.validation.dsl
 
 import java.text.SimpleDateFormat
 
-trait PlatformPredicates {
+trait PlatformDsl {
   def validTimestampFormat[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case s: String =>
@@ -18,5 +18,4 @@ trait PlatformPredicates {
     }
     override def failure: String = s"invalid timestamp format"
   }
-
 }

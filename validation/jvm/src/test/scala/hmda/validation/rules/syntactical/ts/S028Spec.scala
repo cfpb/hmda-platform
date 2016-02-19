@@ -2,8 +2,8 @@ package hmda.validation.rules.syntactical.ts
 
 import hmda.parser.fi.ts.TsGenerators
 import hmda.validation.dsl.Success
-import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 
 class S028Spec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators {
 
