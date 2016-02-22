@@ -21,7 +21,7 @@ class FIDataDatParser extends FIDataParser[String] {
   def parseLines(lines: Iterable[String]): FIData = {
     val tsLine = lines.head
     val ts = TsDatParser(tsLine)
-    val lars = lines.tail.iterator.map(l => LarDatParser(l))
+    val lars = lines.tail.map(l => LarDatParser(l))
     FIData(ts, lars)
   }
 }
