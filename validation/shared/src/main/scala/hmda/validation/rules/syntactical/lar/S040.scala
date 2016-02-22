@@ -5,6 +5,7 @@ import hmda.validation.dsl.{ Failure, Success, Result, CommonDsl }
 
 object S040 extends CommonDsl {
 
+  //TODO: naive implementation, bail out as soon as a duplicate is found
   def apply(lars: Iterable[LoanApplicationRegister]): Result = {
 
     val loanIds = lars.map(lar => lar.loan.id)
