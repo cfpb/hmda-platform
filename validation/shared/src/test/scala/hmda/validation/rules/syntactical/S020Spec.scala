@@ -17,4 +17,6 @@ class S020Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
   }
 
   property("Loan Application Register Agency Code must = 1,2,3,5,7,9")(pending)
+
+  property("FIData Agency Code (TS and LAR) must = 1,2,3,5,7,9")(pending)
 }

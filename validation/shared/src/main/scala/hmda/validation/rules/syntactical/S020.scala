@@ -1,8 +1,9 @@
 package hmda.validation.rules.syntactical
 
+import hmda.model.fi.FIData
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.validation.dsl.{ Result, CommonDsl }
+import hmda.validation.dsl.{Failure, Success, Result, CommonDsl}
 
 /*
  Agency code must = 1,2,3,5,7,9.
@@ -19,6 +20,20 @@ object S020 extends CommonDsl {
 
   def apply(lar: LoanApplicationRegister): Result = {
     lar.agencyCode is containedIn(agencyCodes)
+  }
+
+  def apply(fiData: FIData): Result = {
+    val ts = fiData.ts
+    val lars = fiData.lars
+    val failures = lars.filter { lar =>
+      (lar.agencyCode is containedIn(agencyCodes)) != Success()
+    }
+
+    val tsCheck = ts.agencyCode is containedIn(agencyCodes)
+    val larCheck = if (failures.nonEmpty) Failure("Agency Code is incorrect") else Success()
+
+    tsCheck and larCheck
+
   }
 
 }

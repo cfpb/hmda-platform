@@ -32,7 +32,7 @@ object S010 extends CommonDsl {
     }
 
     val tsCheck: Result = ts.id is equalTo(tsId)
-    val larCheck: Result = if (failures.nonEmpty) Failure("") else Success()
+    val larCheck: Result = if (failures.nonEmpty) Failure("LAR ID is not = 2") else Success()
 
     tsCheck and larCheck
   }
