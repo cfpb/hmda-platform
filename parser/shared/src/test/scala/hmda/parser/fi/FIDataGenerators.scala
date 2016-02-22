@@ -12,7 +12,7 @@ trait FIDataGenerators extends TsGenerators with LarGenerators {
       ts <- tsGen
       n <- Gen.choose(1, 1000)
       lars <- Gen.listOfN(n, larGen)
-    } yield FIData(ts, lars.iterator)
+    } yield FIData(ts, lars)
   }
 
 }
