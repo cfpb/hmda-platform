@@ -72,4 +72,5 @@ trait CommonDsl {
     }
     override def failure: String = "is not empty"
   }
+
 }
