@@ -9,7 +9,7 @@ case class LoanApplicationRegister(
     agencyCode: Int,
     loan: Loan,
     preapprovals: Int,
-    actionTaken: Int,
+    actionTakenType: Int,
     actionTakenDate: Int,
     geography: Geography,
     applicant: Applicant,
