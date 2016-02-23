@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/cfpb/hmda-platform.svg?branch=master)](https://travis-ci.org/cfpb/hmda-platform)
 
 # HMDA Platform
 
