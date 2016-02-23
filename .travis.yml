@@ -14,7 +14,10 @@ jdk:
 - oraclejdk8
 
 script: 
-  - sbt ++$TRAVIS_SCALA_VERSION clean assembly 
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test assembly
   
   # Trick to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
