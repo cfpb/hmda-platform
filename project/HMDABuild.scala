@@ -3,6 +3,7 @@ import sbt._
 import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import scoverage.ScoverageSbtPlugin
 import spray.revolver.RevolverPlugin.autoImport.Revolver
 
 object BuildSettings {
@@ -59,7 +60,7 @@ object HMDABuild extends Build {
     .enablePlugins(ScalaJSPlugin)
     .jsSettings(
 
-    )
+    ).disablePlugins(ScoverageSbtPlugin)
     .jvmSettings(
       libraryDependencies ++= commonDeps ++ Seq(
         "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
@@ -71,16 +72,17 @@ object HMDABuild extends Build {
 
   lazy val parser = (crossProject in file("parser"))
     .settings(buildSettings: _*)
-    .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
-      )
-    )
+
     .jsSettings(
       scalaJSUseRhino in Global := false,
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
+      )
+    ).disablePlugins(ScoverageSbtPlugin)
+    .jvmSettings(
+      libraryDependencies ++= commonDeps ++ Seq(
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
       )
     )
     .dependsOn(model)
