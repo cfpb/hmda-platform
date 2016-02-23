@@ -12,7 +12,6 @@ scala: 2.11.7
 
 jdk:
 - oraclejdk8
-- openjdk8
 
 script: 
   - sbt ++$TRAVIS_SCALA_VERSION clean assembly 
