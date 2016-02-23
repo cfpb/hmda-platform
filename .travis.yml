@@ -15,8 +15,8 @@ jdk:
 
 before_install:
   - . $HOME/.nvm/nvm.sh
-  - nvm install stable
-  - nvm use stable
+  - nvm install 0.10.36
+  - nvm use 0.10.36
 
 script: 
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test assembly
