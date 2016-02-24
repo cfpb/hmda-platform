@@ -20,6 +20,8 @@ before_install:
 
 script: 
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test assembly
+  - sbt ++$TRAVIS_SCALA_VERSION coverageReport
+  - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
   
   # Trick to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm
