@@ -4,6 +4,7 @@ import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import scoverage.ScoverageSbtPlugin
+import ScoverageSbtPlugin._
 import spray.revolver.RevolverPlugin.autoImport.Revolver
 
 object BuildSettings {
@@ -74,6 +75,7 @@ object HMDABuild extends Build {
     .settings(buildSettings: _*)
 
     .jsSettings(
+      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
       scalaJSUseRhino in Global := false,
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
@@ -116,6 +118,7 @@ object HMDABuild extends Build {
       )
     )
     .jsSettings(
+      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
       scalaJSUseRhino in Global := false,
       libraryDependencies ++= Seq(
         "org.scala-js" %%% "scalajs-dom" % Version.scalaJSDom,
@@ -124,6 +127,7 @@ object HMDABuild extends Build {
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
       )
     ).dependsOn(parser)
+     .disablePlugins(ScoverageSbtPlugin)
 
   lazy val platformTestJVM = platformTest.jvm
   lazy val platformTestJS = platformTest.js
