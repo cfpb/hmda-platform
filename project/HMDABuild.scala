@@ -58,6 +58,7 @@ object HMDABuild extends Build {
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
     .enablePlugins(ScalaJSPlugin)
+    .disablePlugins(ScoverageSbtPlugin)
     .jsSettings(
 
     )
