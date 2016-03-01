@@ -12,4 +12,9 @@ trait FIGenerators {
     Gen.alphaStr
   }
 
+  // utility function(s)
+
+  def stringOfN(n: Int, genOne: Gen[Char]): Gen[String] = {
+    Gen.listOfN(n, genOne).map(_.mkString)
+  }
 }
