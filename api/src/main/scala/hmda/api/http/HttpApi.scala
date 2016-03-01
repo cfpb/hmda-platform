@@ -3,7 +3,7 @@ package hmda.api.http
 import java.net.InetAddress
 import java.time.Instant
 import akka.Done
-import akka.actor.ActorSystem
+import akka.actor.{ Kill, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.Multipart
@@ -14,6 +14,8 @@ import akka.stream.scaladsl.{ Sink, Framing }
 import akka.util.ByteString
 import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import hmda.api.processing.PrintActor
+import hmda.api.processing.PrintActor.StopActor
 import hmda.api.protocol.HmdaApiProtocol
 import spray.json._
 
@@ -37,28 +39,30 @@ trait HttpApi extends HmdaApiProtocol {
           log.debug(status.toJson.toString)
           ToResponseMarshallable(status)
         }
-      } ~
-        path("upload") {
-          post {
-            entity(as[Multipart.FormData]) { formData =>
-              val done: Future[Done] = formData.parts.mapAsync(1) {
-                case b: BodyPart if b.filename.exists(_.endsWith(".dat")) =>
-                  b.entity.dataBytes
-                    .via(splitLines)
-                    .map(_.utf8String)
-                    .runForeach(line => println(line))
-                //printActor ! line
-                case _ => Future.successful(Done)
-              }.runWith(Sink.ignore)
+      }
+    } ~
+      path("upload") {
+        post {
+          val processingActor = system.actorOf(PrintActor.props, "print")
+          entity(as[Multipart.FormData]) { formData =>
+            val done: Future[Done] = formData.parts.mapAsync(1) {
+              case b: BodyPart if b.filename.exists(_.endsWith(".dat")) =>
+                b.entity.dataBytes
+                  .via(splitLines)
+                  .map(_.utf8String)
+                  .runForeach(line => processingActor ! line)
 
-              onSuccess(done) { _ =>
-                complete {
-                  "ok!"
-                }
+              case _ => Future.successful(Done)
+            }.runWith(Sink.ignore)
+
+            onSuccess(done) { _ =>
+              processingActor ! StopActor
+              complete {
+                "ok!"
               }
             }
           }
         }
-    }
+      }
   }
 }
