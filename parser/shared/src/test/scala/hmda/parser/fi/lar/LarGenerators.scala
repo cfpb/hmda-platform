@@ -47,7 +47,7 @@ trait LarGenerators extends FIGenerators {
       propertyType <- Gen.oneOf(1, 2, 3)
       purpose <- Gen.oneOf(1, 2, 3)
       occupancy <- Gen.oneOf(1, 2, 3)
-      amount <- Gen.posNum[Int] // TODO is that right? can it be zero? (what would a loan for zero thousand dollars mean?)
+      amount <- Gen.posNum[Int]
     } yield Loan(
       id,
       "NA",
@@ -82,7 +82,7 @@ trait LarGenerators extends FIGenerators {
 
   implicit def censusTractGen = {
     for {
-      tract <- stringOfN(4, Gen.numChar).map(Some(_)) // TODO are leading zeroes required? (they are allowed.)
+      tract <- stringOfN(4, Gen.numChar).map(Some(_)) // TODO leading zeroes may or may not be present
       suffix <- Gen.option(stringOfN(2, Gen.numChar))
     } yield List(tract, Some("."), suffix).flatten.mkString
   }
@@ -92,9 +92,9 @@ trait LarGenerators extends FIGenerators {
       ethnicity <- Gen.choose(1, 4)
       coEthnicity <- Gen.choose(1, 5)
       race1 <- Gen.choose(1, 7)
-      //coRace <-  TODO this should be 8 if and only if coEthnicity is 5 (i.e. no co-applicant). do we care?
+      //coRace <-  TODO fill in this value and the rest (not worrying about valid combinations for now)
     } yield Applicant(
-      ethnicity, coEthnicity, race1, "", "", "", "", 2, "", "", "", "", 2, 2, "NA" // TODO implement for real
+      ethnicity, coEthnicity, race1, "", "", "", "", 2, "", "", "", "", 2, 2, "NA"
     )
   }
 
@@ -122,9 +122,4 @@ trait LarGenerators extends FIGenerators {
   implicit def hoepaStatusGen: Gen[Int] = Gen.oneOf(1, 2)
 
   implicit def lienStatusGen: Gen[Int] = Gen.oneOf(1, 2, 3, 4)
-
-  // TODO this is quite general and probably belongs elsewhere (if it turns out to be useful in clean/idiomatic code)
-  def stringOfN(n: Int, genOne: Gen[Char]): Gen[String] = {
-    Gen.listOfN(n, genOne).map(_.mkString)
-  }
 }
