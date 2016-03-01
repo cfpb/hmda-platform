@@ -14,8 +14,9 @@ object Dependencies {
   val logback = "ch.qos.logback" % "logback-classic" % Version.logback
   val akkaSlf4J = "com.typesafe.akka" %% "akka-slf4j" % Version.akka
   val akka = "com.typesafe.akka" %% "akka-actor" % Version.akka
-  val akkaHttp = "com.typesafe.akka" %% "akka-http-experimental" % Version.akkaHttp
-  val akkaHttpJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % Version.akkaHttp
-  val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit-experimental" % Version.akkaHttp
+  val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
+  val akkaHttp = "com.typesafe.akka" %% "akka-http-experimental" % Version.akka
+  val akkaHttpJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % Version.akka
+  val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akka % "test"
 
 }
