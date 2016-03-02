@@ -1,8 +1,5 @@
 package hmda.parser.fi
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import org.scalacheck.Gen
 
 trait FIGenerators {
@@ -26,11 +23,12 @@ trait FIGenerators {
     Gen.oneOf(g.map(_.toString), Gen.const(emptyVal))
   }
 
-  def dateGen: Gen[String] = {
+  // returns Int in yyyyMMdd format. this feels a bit primitive-obsessed, but is probably OK for now.
+  def dateGen: Gen[Int] = {
     for {
       year <- Gen.choose(2017, 2020) // or could parameterize if needed
       month <- Gen.choose(1, 12)
-      day <- Gen.choose(1, 28) // NOTE: this misses some dates! if that's a problem, we can do something more complex.
-    } yield LocalDate.of(year, month, day).format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+      day <- Gen.choose(1, 31) // now featuring lesser-known dates such as February 31! (OK in the current context)
+    } yield year * 10000 + month * 100 + day
   }
 }
