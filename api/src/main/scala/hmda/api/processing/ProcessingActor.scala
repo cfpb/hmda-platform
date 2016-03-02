@@ -1,17 +1,21 @@
 package hmda.api.processing
 
 import akka.actor.{ Actor, Props, ActorLogging }
-import hmda.api.processing.PrintActor.StopActor
+import hmda.api.processing.ProcessingActor.StopActor
 
-object PrintActor {
+object ProcessingActor {
   case object StopActor
-  def props: Props = Props(new PrintActor)
+  def props: Props = Props(new ProcessingActor)
 }
 
-class PrintActor extends Actor with ActorLogging {
+class ProcessingActor extends Actor with ActorLogging {
 
   override def preStart: Unit = {
-    log.debug(s"Print Actor started at ${self.path}")
+    log.debug(s"Processing Actor started at ${self.path}")
+  }
+
+  override def postStop: Unit = {
+    log.debug(s"Processing Actor stopped at ${self.path}")
   }
 
   override def receive: Receive = {

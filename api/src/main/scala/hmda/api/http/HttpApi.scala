@@ -3,10 +3,10 @@ package hmda.api.http
 import java.net.InetAddress
 import java.time.Instant
 import akka.Done
-import akka.actor.{ Kill, ActorSystem }
+import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.Multipart
+import akka.http.scaladsl.model.{ HttpResponse, StatusCodes, Multipart }
 import akka.http.scaladsl.model.Multipart.BodyPart
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
@@ -14,12 +14,13 @@ import akka.stream.scaladsl.{ Sink, Framing }
 import akka.util.ByteString
 import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import hmda.api.processing.PrintActor
-import hmda.api.processing.PrintActor.StopActor
+import hmda.api.processing.ProcessingActor
+import hmda.api.processing.ProcessingActor.StopActor
 import hmda.api.protocol.HmdaApiProtocol
 import spray.json._
 
 import scala.concurrent.Future
+import scala.util.{ Failure, Success }
 
 trait HttpApi extends HmdaApiProtocol {
 
@@ -43,23 +44,30 @@ trait HttpApi extends HmdaApiProtocol {
     } ~
       path("upload") {
         post {
-          val processingActor = system.actorOf(PrintActor.props, "print")
+          val processingActor = system.actorOf(ProcessingActor.props)
           entity(as[Multipart.FormData]) { formData =>
-            val done: Future[Done] = formData.parts.mapAsync(1) {
-              case b: BodyPart if b.filename.exists(_.endsWith(".dat")) =>
+            val uploaded: Future[Done] = formData.parts.mapAsync(1) {
+              case b: BodyPart if b.filename.exists(_.endsWith(".csv")) =>
                 b.entity.dataBytes
                   .via(splitLines)
                   .map(_.utf8String)
                   .runForeach(line => processingActor ! line)
 
-              case _ => Future.successful(Done)
+              case _ => Future.failed(throw new Exception("File is not CSV"))
             }.runWith(Sink.ignore)
 
-            onSuccess(done) { _ =>
-              processingActor ! StopActor
-              complete {
-                "ok!"
-              }
+            onComplete(uploaded) {
+              case Success(response) =>
+                processingActor ! StopActor
+                complete {
+                  "uploaded"
+                }
+              case Failure(error) =>
+                processingActor ! StopActor
+                log.error(error.getLocalizedMessage)
+                complete {
+                  HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
+                }
             }
           }
         }

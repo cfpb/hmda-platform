@@ -6,7 +6,6 @@ import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.HttpApi
-import hmda.api.processing.MasterActor
 
 object HmdaApi extends App with HttpApi {
 
@@ -25,8 +24,6 @@ object HmdaApi extends App with HttpApi {
     host,
     port
   )
-
-  val masterActor = system.actorOf(MasterActor.props, "master")
 
   http onFailure {
     case ex: Exception =>
