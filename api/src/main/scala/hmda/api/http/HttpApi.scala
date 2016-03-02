@@ -47,6 +47,7 @@ trait HttpApi extends HmdaApiProtocol {
           val processingActor = system.actorOf(ProcessingActor.props)
           entity(as[Multipart.FormData]) { formData =>
             val uploaded: Future[Done] = formData.parts.mapAsync(1) {
+              //TODO: check MIME type as well
               case b: BodyPart if b.filename.exists(_.endsWith(".csv")) =>
                 b.entity.dataBytes
                   .via(splitLines)
