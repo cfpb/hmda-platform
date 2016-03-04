@@ -106,7 +106,7 @@ object ParserExample {
     document.getElementById("contactEmail").innerHTML = ts.contact.email
   }
 
-  def addLarsToTable(lars: Iterator[LoanApplicationRegister]): Unit = {
+  def addLarsToTable(lars: Iterable[LoanApplicationRegister]): Unit = {
     val larTable = dom.document.getElementById("larTable")
     val document = dom.document
     lars.foreach { lar =>

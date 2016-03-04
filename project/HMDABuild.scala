@@ -3,6 +3,7 @@ import sbt._
 import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import scoverage.ScoverageSbtPlugin
 import spray.revolver.RevolverPlugin.autoImport.Revolver
 
 object BuildSettings {
@@ -64,6 +65,7 @@ object HMDABuild extends Build {
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
     .enablePlugins(ScalaJSPlugin)
+    .disablePlugins(ScoverageSbtPlugin)
     .jsSettings(
 
     )
@@ -73,16 +75,11 @@ object HMDABuild extends Build {
       )
     )
 
-  lazy val modelJS = model.js
+  lazy val modelJS = model.js.disablePlugins(ScoverageSbtPlugin)
   lazy val modelJVM = model.jvm
 
   lazy val parser = (crossProject in file("parser"))
     .settings(buildSettings: _*)
-    .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
-      )
-    )
     .jsSettings(
       scalaJSUseRhino in Global := false,
       libraryDependencies ++= Seq(
@@ -90,11 +87,16 @@ object HMDABuild extends Build {
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
       )
     )
+    .jvmSettings(
+      libraryDependencies ++= commonDeps ++ Seq(
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      )
+    )
     .dependsOn(model)
 
 
   lazy val parserJVM = parser.jvm
-  lazy val parserJS = parser.js
+  lazy val parserJS = parser.js.disablePlugins(ScoverageSbtPlugin)
 
   lazy val validation = (crossProject in file("validation"))
     .settings(buildSettings: _*)
@@ -119,6 +121,7 @@ object HMDABuild extends Build {
     .settings(Revolver.settings:_*)
     .settings(
       Seq(
+        scoverage.ScoverageKeys.coverageExcludedPackages := "hmda.api.HmdaApi",
         assemblyJarName in assembly := {s"${name.value}.jar"},
         mainClass in assembly := Some("hmda.api.HmdaApi"),
         assemblyMergeStrategy in assembly := {
@@ -140,6 +143,7 @@ object HMDABuild extends Build {
       )
     )
     .jsSettings(
+      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
       scalaJSUseRhino in Global := false,
       libraryDependencies ++= Seq(
         "org.scala-js" %%% "scalajs-dom" % Version.scalaJSDom,
@@ -148,6 +152,7 @@ object HMDABuild extends Build {
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
       )
     ).dependsOn(parser)
+     .disablePlugins(ScoverageSbtPlugin)
 
   lazy val platformTestJVM = platformTest.jvm
   lazy val platformTestJS = platformTest.js
