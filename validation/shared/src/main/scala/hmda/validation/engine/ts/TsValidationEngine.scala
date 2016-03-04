@@ -14,14 +14,16 @@ trait TsValidationEngine extends TsValidationApi {
 
   case class ValidationError(msg: String)
 
-  protected def s010(t: TransmittalSheet): ValidationNel[ValidationError, TransmittalSheet] = {
+  type TsValidation = ValidationNel[ValidationError, TransmittalSheet]
+
+  protected def s010(t: TransmittalSheet): TsValidation = {
     S010(t) match {
       case Success() => t.success
       case Failure(msg) => ValidationError(s"S010 failed: $msg").failure.toValidationNel
     }
   }
 
-  protected def s020(t: TransmittalSheet): ValidationNel[ValidationError, TransmittalSheet] = {
+  protected def s020(t: TransmittalSheet): TsValidation = {
     S020(t) match {
       case Success() => t.success
       case Failure(msg) => ValidationError(s"S020 failed: $msg").failure.toValidationNel
@@ -29,25 +31,25 @@ trait TsValidationEngine extends TsValidationApi {
   }
 
   //TODO: Implement S025 validation rule
-  //  protected def s025(t: TransmittalSheet): ValidationNel[ValidationError, TransmittalSheet] = {
+  //  protected def s025(t: TransmittalSheet): TsValidation = {
   //
   //  }
 
-  protected def s100(t: TransmittalSheet): ValidationNel[ValidationError, TransmittalSheet] = {
+  protected def s100(t: TransmittalSheet): TsValidation = {
     S100(t, findYearProcessed) match {
       case Success() => t.success
       case Failure(msg) => ValidationError(s"S100 failed: $msg").failure.toValidationNel
     }
   }
 
-  protected def s013(t: TransmittalSheet): ValidationNel[ValidationError, TransmittalSheet] = {
+  protected def s013(t: TransmittalSheet): TsValidation = {
     S013(t, findTimestamp) match {
       case Success() => t.success
       case Failure(msg) => ValidationError(s"S013 failed: $msg").failure.toValidationNel
     }
   }
 
-  def validate(ts: TransmittalSheet): ValidationNel[ValidationError, TransmittalSheet] = {
+  def validate(ts: TransmittalSheet): TsValidation = {
 
     (
       s010(ts)
