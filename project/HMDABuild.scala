@@ -102,12 +102,14 @@ object HMDABuild extends Build {
     .settings(buildSettings: _*)
     .jvmSettings(
       libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided",
+        "org.scalaz" %% "scalaz-core" % Version.scalaz
       )
     )
     .jsSettings(
       scalaJSUseRhino in Global := false,
       libraryDependencies ++= Seq(
+        "org.scalaz" %%% "scalaz-core" % Version.scalaz,
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
       )
