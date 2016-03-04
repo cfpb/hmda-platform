@@ -3,6 +3,8 @@ package hmda.validation.rules.syntactical.ts
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.{ CommonDsl, Result }
 
+import scala.concurrent.{ ExecutionContext, Future }
+
 /*
  Activity year must = year being processed (i.e. = 2016)
  */
