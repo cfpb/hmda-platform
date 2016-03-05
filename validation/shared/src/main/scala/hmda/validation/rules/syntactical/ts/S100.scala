@@ -14,4 +14,8 @@ object S100 extends CommonDsl {
     ts.activityYear is equalTo(year)
   }
 
+  def apply(ts: TransmittalSheet, fyear: Future[Int])(implicit ec: ExecutionContext): Future[Result] = {
+    fyear.map(year => ts.activityYear is equalTo(year))
+  }
+
 }
