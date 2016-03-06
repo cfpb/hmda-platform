@@ -12,6 +12,5 @@ import scala.concurrent.ExecutionContext
 //class PlatformTsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidationEngine with ScalaFutures with CommonTsValidationSpec {
 //
 //  override implicit val ec: ExecutionContext = scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
-//
 
 //}
