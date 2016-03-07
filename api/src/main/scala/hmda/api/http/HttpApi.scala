@@ -54,7 +54,7 @@ trait HttpApi extends HmdaApiProtocol {
                   .map(_.utf8String)
                   .runForeach(line => processingActor ! line)
 
-              case _ => Future.failed(throw new Exception("File is not CSV"))
+              case _ => Future.failed(throw new Exception("File could not be uploaded"))
             }.runWith(Sink.ignore)
 
             onComplete(uploaded) {
