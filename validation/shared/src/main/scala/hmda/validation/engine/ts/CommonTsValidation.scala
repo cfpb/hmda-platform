@@ -8,7 +8,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scalaz.Scalaz._
 import scalaz._
 
-trait CommonTsValidationEngine extends TsValidationApi {
+trait CommonTsValidation extends TsValidationApi {
 
   case class ValidationError(msg: String)
 

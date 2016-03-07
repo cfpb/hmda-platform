@@ -9,7 +9,7 @@ import org.scalatest.prop.PropertyChecks
 import org.scalatest.time.{ Seconds, Span, Millis }
 import scala.concurrent.{ ExecutionContext, Future }
 
-trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidationEngine with ScalaFutures {
+trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidation with ScalaFutures {
 
   /*
     The following methods simulate API calls to get values from remote resources

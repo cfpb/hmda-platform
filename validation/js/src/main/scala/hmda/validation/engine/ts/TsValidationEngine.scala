@@ -7,7 +7,7 @@ import scalaz._
 import Scalaz._
 import scala.concurrent.{ Future, ExecutionContext }
 
-trait TsValidationEngine extends CommonTsValidationEngine {
+trait TsValidationEngine extends CommonTsValidation {
 
   override def validate(ts: TransmittalSheet)(implicit ec: ExecutionContext): Future[TsValidation] = {
 

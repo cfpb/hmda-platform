@@ -8,7 +8,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scalaz._
 import Scalaz._
 
-trait TsValidationEngine extends CommonTsValidationEngine {
+trait TsValidationEngine extends CommonTsValidation {
 
   protected def s028(t: TransmittalSheet): TsValidation = {
     S028(t) match {
