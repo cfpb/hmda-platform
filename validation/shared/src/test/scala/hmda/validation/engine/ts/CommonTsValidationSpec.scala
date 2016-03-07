@@ -34,7 +34,7 @@ trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatch
   override implicit val ec: ExecutionContext
 
   implicit val defaultPatience =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
+    PatienceConfig(timeout = Span(5, Seconds), interval = Span(0, Millis))
 
   implicit def badIdGen: Gen[Int] = {
     Gen.choose(2, 10)
@@ -90,7 +90,7 @@ trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatch
 
   property("Transmittal Sheet fails S013 (Timestamp)") {
     forAll(tsGen) { ts =>
-      val badTs = ts.copy(timestamp = 201802051234L)
+      val badTs = ts.copy(timestamp = 1)
       failGenTs(badTs)
     }
   }

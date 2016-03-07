@@ -1,6 +1,7 @@
 package hmda.validation.engine.ts
 
 import hmda.parser.fi.ts.TsGenerators
+import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 import scala.concurrent.{ ExecutionContext, Future }
@@ -9,13 +10,20 @@ class TsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatch
 
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  //TODO: Review, always passes
-  //property("Transmittal Sheet fails S028 (Timestamp Format)") {
-  //  forAll(tsGen) { ts =>
-  //    whenever(ts.id == 1) {
-  //      val testTs = ts.copy(timestamp = 201301111330L)
-  //      failGenTs(testTs)
-  //    }
-  //  }
-  //}
+  implicit def badTimestamp: Gen[Int] = {
+    Gen.oneOf(0, 1000)
+  }
+
+  property("Transmittal Sheet fails S028 (Timestamp Format)") {
+    forAll(tsGen) { ts =>
+      whenever(ts.id == 1) {
+        val badTs = for {
+          t <- badTimestamp
+          x = ts.copy(timestamp = t)
+        } yield x
+
+        failGenTs(badTs)
+      }
+    }
+  }
 }
