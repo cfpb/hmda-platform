@@ -1,8 +1,24 @@
 package hmda.parser.fi
 
-import org.scalatest.{ MustMatchers, PropSpec }
-import org.scalatest.prop.PropertyChecks
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.ts.TransmittalSheet
+import hmda.parser.util.FITestData._
+import org.scalatest.{ MustMatchers, FlatSpec }
 
-class FIDataDatParserSpec extends PropSpec with PropertyChecks with MustMatchers with FIDataGenerators {
-  property("FI Data must be parsed from DAT")(pending)
+class FIDataDatParserSpec extends FlatSpec with MustMatchers {
+
+  val parser = new FIDataDatParser
+  val fiData = parser.read(fiDAT)
+
+  "FIDataDatParser" should "parse transmittal sheet" in {
+    fiData.ts mustBe a[TransmittalSheet]
+  }
+
+  "FIDataDatParser" should "parse lars" in {
+    fiData.lars.map(x => x mustBe a[LoanApplicationRegister])
+  }
+
+  it should "parse correct number of lars" in {
+    fiData.lars.size mustBe 3
+  }
 }
