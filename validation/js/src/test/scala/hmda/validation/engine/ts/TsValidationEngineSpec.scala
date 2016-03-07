@@ -7,10 +7,10 @@ import org.scalatest.{ MustMatchers, PropSpec }
 
 import scala.concurrent.ExecutionContext
 
-//TODO: fails with "Referring to non-existent method scala.concurrent.impl.Promise$CompletionLatch"
+//TODO: fails if JSExecutionContext.Implicits.queue is used (runNow is deprecated, but works)
 
-//class PlatformTsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidationEngine with ScalaFutures with CommonTsValidationSpec {
-//
-//  override implicit val ec: ExecutionContext = scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
+class TsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidationEngine with ScalaFutures with CommonTsValidationSpec {
 
-//}
+  override implicit val ec: ExecutionContext = scala.scalajs.concurrent.JSExecutionContext.Implicits.runNow
+
+}
