@@ -4,7 +4,6 @@ import hmda.parser.fi.ts.TsGenerators
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
-
 import scala.concurrent.{ ExecutionContext, Future }
 
 class TsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidationEngine with ScalaFutures with CommonTsValidationSpec {

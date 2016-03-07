@@ -6,9 +6,8 @@ import org.scalacheck.Gen
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.PropertyChecks
-
-import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import org.scalatest.time.{ Seconds, Span, Millis }
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidationEngine with ScalaFutures {
 
@@ -34,7 +33,8 @@ trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatch
 
   override implicit val ec: ExecutionContext
 
-  implicit val timeout = 2.seconds
+  implicit val defaultPatience =
+    PatienceConfig(timeout = Span(5, Seconds), interval = Span(500, Millis))
 
   implicit def badIdGen: Gen[Int] = {
     Gen.choose(2, 10)
@@ -92,8 +92,9 @@ trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatch
     badTs.sample match {
       case Some(x) => {
         val fValidated = validate(x)
-        val validated = Await.result(fValidated, timeout)
-        validated.isFailure mustBe true
+        whenReady(fValidated) { validated =>
+          validated.isFailure mustBe true
+        }
       }
       case None => throw new scala.Exception("Test failed")
     }
@@ -103,8 +104,9 @@ trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatch
     goodTs.sample match {
       case Some(x) => {
         val fValidated = validate(x)
-        val validated = Await.result(fValidated, timeout)
-        validated.isSuccess mustBe true
+        whenReady(fValidated) { validated =>
+          validated.isSuccess mustBe true
+        }
       }
       case None => throw new scala.Exception("Test failed")
     }
