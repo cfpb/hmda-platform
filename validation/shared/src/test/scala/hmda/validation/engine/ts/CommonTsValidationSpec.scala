@@ -34,7 +34,7 @@ trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatch
   override implicit val ec: ExecutionContext
 
   implicit val defaultPatience =
-    PatienceConfig(timeout = Span(5, Seconds), interval = Span(0, Millis))
+    PatienceConfig(timeout = Span(30, Seconds), interval = Span(0, Millis))
 
   implicit def badIdGen: Gen[Int] = {
     Gen.choose(2, 10)

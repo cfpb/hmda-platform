@@ -7,7 +7,7 @@ import org.scalacheck.Gen
 trait LarGenerators extends FIGenerators {
 
   implicit def larListGen: Gen[List[LoanApplicationRegister]] = {
-    Gen.listOfN(20, larGen)
+    Gen.listOfN(10, larGen)
   }
 
   implicit def larGen: Gen[LoanApplicationRegister] = {
