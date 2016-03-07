@@ -88,6 +88,13 @@ trait CommonTsValidationSpec extends PropSpec with PropertyChecks with MustMatch
     }
   }
 
+  property("Transmittal Sheet fails S013 (Timestamp)") {
+    forAll(tsGen) { ts =>
+      val badTs = ts.copy(timestamp = 201802051234L)
+      failGenTs(badTs)
+    }
+  }
+
   protected def failGenTs(badTs: Gen[TransmittalSheet]): Assertion = {
     badTs.sample match {
       case Some(x) => {
