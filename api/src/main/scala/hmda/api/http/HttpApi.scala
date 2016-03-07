@@ -48,7 +48,7 @@ trait HttpApi extends HmdaApiProtocol {
           entity(as[Multipart.FormData]) { formData =>
             val uploaded: Future[Done] = formData.parts.mapAsync(1) {
               //TODO: check Content-Type type as well?
-              case b: BodyPart if b.filename.exists(_.endsWith(".csv")) =>
+              case b: BodyPart if b.filename.exists(_.endsWith(".txt")) =>
                 b.entity.dataBytes
                   .via(splitLines)
                   .map(_.utf8String)
