@@ -25,7 +25,7 @@ class V155Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
     }
   }
 
-  implicit def badContactGen = {
+  implicit def badContactGen: Gen[Contact] = {
     for {
       name <- Gen.alphaStr
       phone <- phoneGen
@@ -34,7 +34,7 @@ class V155Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
     } yield Contact(name, phone, fax, email)
   }
 
-  implicit def badEmailGen = {
+  implicit def badEmailGen: Gen[String] = {
     for {
       name <- Gen.alphaStr.filter(s => s.nonEmpty)
       at <- Gen.oneOf("@.", "", "@@", ".@")
