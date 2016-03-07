@@ -28,7 +28,7 @@ class HttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest wit
         "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
         "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
 
-      val file = multiPartFile(csv, "sample.csv")
+      val file = multiPartFile(csv, "sample.txt")
 
       Post("/upload", file) ~> routes ~> check {
         status mustEqual StatusCodes.OK
@@ -37,7 +37,7 @@ class HttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest wit
 
     "return 400 when trying to upload the wrong file" in {
       val badContent = "qdemd"
-      val file = multiPartFile(badContent, "sample.txt")
+      val file = multiPartFile(badContent, "sample.dat")
       Post("/upload", file) ~> routes ~> check {
         status mustEqual StatusCodes.BadRequest
       }
