@@ -108,7 +108,6 @@ object HMDABuild extends Build {
     )
     .jsSettings(
       scalaJSUseRhino in Global := false,
-      jsEnv := new org.scalajs.jsenv.RetryingComJSEnv(NodeJSEnv().value),
       libraryDependencies ++= Seq(
         "org.scalaz" %%% "scalaz-core" % Version.scalaz,
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",

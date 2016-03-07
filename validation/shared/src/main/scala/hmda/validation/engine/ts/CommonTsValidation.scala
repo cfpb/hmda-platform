@@ -3,14 +3,13 @@ package hmda.validation.engine.ts
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.api.TsValidationApi
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.engine.ValidationError
 import hmda.validation.rules.ts.syntactical.{ S020, S010, S100, S013 }
 import scala.concurrent.{ ExecutionContext, Future }
 import scalaz.Scalaz._
 import scalaz._
 
 trait CommonTsValidation extends TsValidationApi {
-
-  case class ValidationError(msg: String)
 
   type TsValidation = ValidationNel[ValidationError, TransmittalSheet]
 

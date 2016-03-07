@@ -2,6 +2,7 @@ package hmda.validation.engine.ts
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.engine.ValidationError
 import hmda.validation.rules.ts.syntactical.S028
 import scalaz._
 import Scalaz._
