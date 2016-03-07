@@ -116,7 +116,7 @@ object HMDABuild extends Build {
     ).dependsOn(parser % "compile->compile;test->test")
 
   lazy val validationJVM = validation.jvm
-  lazy val validationJS = validation.js
+  lazy val validationJS = validation.js.disablePlugins(ScoverageSbtPlugin)
 
   lazy val api = (project in file("api"))
     .settings(buildSettings: _*)
