@@ -4,7 +4,7 @@ import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
-class PlatformDslSpec extends PropSpec with PropertyChecks with MustMatchers with CommonDsl with PlatformDsl {
+class HmdaDslSpec extends PropSpec with PropertyChecks with MustMatchers with CommonDsl with HmdaDsl {
 
   property("Timestamp format is correct") {
     forAll(timestampGen) { ts =>

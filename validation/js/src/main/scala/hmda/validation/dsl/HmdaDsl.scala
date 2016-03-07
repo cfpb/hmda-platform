@@ -1,8 +1,8 @@
 package hmda.validation.dsl
 
-import java.text.SimpleDateFormat
+import scala.scalajs.js.Date
 
-trait PlatformDsl {
+trait HmdaDsl {
   def validTimestampFormat[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case s: String =>
@@ -14,10 +14,12 @@ trait PlatformDsl {
 
   def checkDateFormat[T](s: String): Boolean = {
     try {
-      val format = new SimpleDateFormat("yyyyMMddHHmm")
-      format.setLenient(false)
-      format.parse(s)
-      true
+      val year = s.substring(0, 4)
+      val d = Date.parse(s)
+      d.asInstanceOf[AnyRef] match {
+        case n: Number => true
+        case _ => false
+      }
     } catch {
       case e: Exception => false
     }

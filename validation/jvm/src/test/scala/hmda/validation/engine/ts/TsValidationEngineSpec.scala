@@ -7,7 +7,7 @@ import org.scalatest.{ MustMatchers, PropSpec }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class PlatformTsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidationEngine with ScalaFutures with CommonTsValidationSpec {
+class TsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with CommonTsValidationEngine with ScalaFutures with CommonTsValidationSpec {
 
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
