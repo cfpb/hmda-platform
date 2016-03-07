@@ -3,8 +3,8 @@ package hmda.validation.engine.ts
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.api.TsValidationApi
 import hmda.validation.dsl.{ Failure, Success }
-import hmda.validation.rules.syntactical.ts.{ S013, S100 }
-import hmda.validation.rules.syntactical.{ S010, S020 }
+import hmda.validation.rules.{ S020, S010 }
+import hmda.validation.rules.ts.syntactical.{ S100, S013 }
 import scala.concurrent.{ ExecutionContext, Future }
 import scalaz.Scalaz._
 import scalaz._
