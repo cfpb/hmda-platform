@@ -9,7 +9,7 @@ Data Field Number, Data Field Name, Data Field Type, Valid Values , Descriptions
 7, Property Type, Numeric, 1 2 3, Descriptions: 1. One to four-family (other than manufactured housing) 2. Manufactured housing 3. Multifamily,
 8, Loan Purpose, Numeric, 1 2 3, Descriptions: 1. Home purchase 2. Home improvement 3. Refinancing,
 9, Owner Occupancy, Numeric, 1 2 3, Descriptions: 1. Owner-occupied as a principal dwelling  2. Not owner-occupied 3. Not applicable,
-10, Loan Amount, Numeric,  , Report in thousands. Round to the nearest thousand with leading zeros and without commas. Example: 111,
+10, Loan Amount, Numeric,  , Report in thousands. Round to the nearest thousand without leading zeros and without commas. Example: 111,
 11, Preapprovals, Numeric, 1 2 3, Descriptions: 1. Preapproval was requested 2. Preapproval was not requested 3. Not applicable,
 12, Type of Action Taken, Numeric, 1 2 3 4 5 6 7 8, Descriptions: 1. Loan originated 2. Application approved but not accepted 3. Application denied by financial institution 4. Application withdrawn by applicant  5. File closed for incompleteness 6. Loan purchased by your institution 7. Preapproval request denied by financial institution 8. Preapproval request approved but not accepted (optional reporting),
 13, Date of Action, Numeric,  , Format is ccyymmdd.  Example: 20170117,
