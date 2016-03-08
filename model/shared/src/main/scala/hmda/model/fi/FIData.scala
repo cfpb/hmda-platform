@@ -8,7 +8,7 @@ import scala.scalajs.js.JSConverters._
 case class FIData(ts: TransmittalSheet, lars: Iterable[LoanApplicationRegister]) {
   def toCSV: String = {
     s"${ts.toCSV}\n" +
-      s"${lars.map(lar => lar.toCSV + "\n")}"
+      lars.map(lar => lar.toCSV).mkString("", "\n", "\n")
   }
 
   @JSExport("ts")

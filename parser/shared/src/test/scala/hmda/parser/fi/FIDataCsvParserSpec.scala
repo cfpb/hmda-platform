@@ -4,5 +4,7 @@ import org.scalatest.{ PropSpec, MustMatchers }
 import org.scalatest.prop.PropertyChecks
 
 class FIDataCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers with FIDataGenerators {
-  property("FI Data must be parsed from CSV")(pending)
+  forAll(fiDataGen) { (fiData) =>
+    new FIDataCsvParser().readAll(fiData.toCSV) mustBe fiData
+  }
 }
