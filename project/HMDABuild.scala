@@ -33,7 +33,7 @@ object HMDABuild extends Build {
 
   val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J)
+  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
@@ -112,7 +112,7 @@ object HMDABuild extends Build {
   lazy val platformTest = (crossProject in file("platform-test"))
     .settings(buildSettings: _*)
     .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
+      libraryDependencies ++= akkaDeps ++ Seq(
         "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
       )
     )

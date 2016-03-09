@@ -10,7 +10,7 @@ class FIDataDatFileParserSpec extends AsyncFlatSpec with MustMatchers with FileI
   implicit val ec = executionContext
 
   "A DAT File" must "be parsed in JS" in {
-    val path = "parser/shared/src/test/resources/sample.dat"
+    val path = "parser/shared/src/test/resources/dat/sample.dat"
     val f = readFile(path)
     f.map { s =>
       val parser = new FIDataDatParser
