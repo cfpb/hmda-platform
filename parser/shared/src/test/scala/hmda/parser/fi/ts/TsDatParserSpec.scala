@@ -45,4 +45,15 @@ class TsDatParserSpec extends FlatSpec with MustMatchers {
     contact.fax mustBe "999-999-9999"
     contact.email mustBe "bob.smith@bank.com"
   }
+
+  it should "parse ok when there is no parent info" in {
+    val tsData_noParent = TsDatParser(tsDAT_noParent)
+    val parent = tsData_noParent.parent
+    parent.name mustBe ""
+    parent.address mustBe ""
+    parent.city mustBe ""
+    parent.zipCode mustBe ""
+    // other stuff still parses ok
+    tsData_noParent.respondent.name mustBe "SMALL BANK USA, NA"
+  }
 }
