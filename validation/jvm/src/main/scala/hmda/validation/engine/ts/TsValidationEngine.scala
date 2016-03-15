@@ -12,10 +12,7 @@ import Scalaz._
 trait TsValidationEngine extends CommonTsValidation {
 
   protected def s028(t: TransmittalSheet): TsValidation = {
-    S028(t) match {
-      case Success() => t.success
-      case Failure(msg) => ValidationError(s"S028 failed: $msg").failure.toValidationNel
-    }
+    convertResult(t, S028(t), "S028")
   }
 
   override def validate(ts: TransmittalSheet)(implicit ec: ExecutionContext): Future[TsValidation] = {

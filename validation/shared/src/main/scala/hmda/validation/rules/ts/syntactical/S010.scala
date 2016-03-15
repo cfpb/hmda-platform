@@ -4,7 +4,7 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.{ Result, CommonDsl }
 
 /*
- The first record in the file mest = 1 (TS)
+ The first record in the file must = 1 (TS)
  */
 
 object S010 extends CommonDsl {
