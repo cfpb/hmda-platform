@@ -34,7 +34,7 @@ trait CommonTsValidation extends TsValidationApi {
   //
   //  }
 
-  protected def s100(t: TransmittalSheet)(implicit ec: ExecutionContext): Future[TsValidation] = {
+  protected def s100(t: TransmittalSheet): Future[TsValidation] = {
     S100(t, findYearProcessed).map { result =>
       result match {
         case Success() => t.success
@@ -52,7 +52,7 @@ trait CommonTsValidation extends TsValidationApi {
     }
   }
 
-  def validate(ts: TransmittalSheet)(implicit ec: ExecutionContext): Future[TsValidation] = {
+  def validate(ts: TransmittalSheet): Future[TsValidation] = {
 
     val fs100 = s100(ts)
     val fs013 = s013(ts)
