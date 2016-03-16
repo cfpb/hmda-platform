@@ -4,7 +4,7 @@ object FITestData {
 
   val tsDAT =
     "100110132019201501171330 201320-1177984  551  SMALL BANK USA, NA            1850 TYSONS BLVD., SUITE 50             MCLEAN                   VA22102     BIGS USA, INC.                412 THIRD AVENUE                        NEW YORK                 NY10012     Bob Smith                     555-555-5555999-999-9999bob.smith@bank.com                                                "
-  val tsDAT_noParent =
+  val tsDATNoParent =
     "100110132019201501171330 201320-1177984  551  SMALL BANK USA, NA            1850 TYSONS BLVD., SUITE 50             MCLEAN                   VA22102                                                                                                                Bob Smith                     555-555-5555999-999-9999bob.smith@bank.com                                                "
 
   val larsDAT = Seq(
