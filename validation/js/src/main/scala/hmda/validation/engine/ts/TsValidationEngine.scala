@@ -13,10 +13,7 @@ trait TsValidationEngine extends CommonTsValidation {
   override def validate(ts: TransmittalSheet): Future[TsValidation] = {
 
     def s028(t: TransmittalSheet): ValidationNel[ValidationError, TransmittalSheet] = {
-      S028(t) match {
-        case Success() => t.success
-        case Failure(msg) => ValidationError(s"S028 failed: $msg").failure.toValidationNel
-      }
+      convertResult(t, S028(t), "S028")
     }
 
     val fs100 = s100(ts)

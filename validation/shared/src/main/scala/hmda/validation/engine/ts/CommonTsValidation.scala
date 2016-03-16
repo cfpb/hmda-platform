@@ -2,7 +2,7 @@ package hmda.validation.engine.ts
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.api.TsValidationApi
-import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.dsl.{ Result, Failure, Success }
 import hmda.validation.engine.ValidationError
 import hmda.validation.rules.ts.syntactical.{ S020, S010, S100, S013 }
 import scala.concurrent.{ ExecutionContext, Future }
@@ -16,17 +16,11 @@ trait CommonTsValidation extends TsValidationApi {
   implicit val ec: ExecutionContext
 
   protected def s010(t: TransmittalSheet): TsValidation = {
-    S010(t) match {
-      case Success() => t.success
-      case Failure(msg) => ValidationError(s"S010 failed: $msg").failure.toValidationNel
-    }
+    convertResult(t, S010(t), "S010")
   }
 
   protected def s020(t: TransmittalSheet): TsValidation = {
-    S020(t) match {
-      case Success() => t.success
-      case Failure(msg) => ValidationError(s"S020 failed: $msg").failure.toValidationNel
-    }
+    convertResult(t, S020(t), "S020")
   }
 
   //TODO: Implement S025 validation rule
@@ -36,19 +30,20 @@ trait CommonTsValidation extends TsValidationApi {
 
   protected def s100(t: TransmittalSheet): Future[TsValidation] = {
     S100(t, findYearProcessed).map { result =>
-      result match {
-        case Success() => t.success
-        case Failure(msg) => ValidationError(s"s100 failed: $msg").failure.toValidationNel
-      }
+      convertResult(t, result, "S100")
     }
   }
 
   protected def s013(t: TransmittalSheet): Future[TsValidation] = {
     S013(t, findTimestamp).map { result =>
-      result match {
-        case Success() => t.success
-        case Failure(msg) => ValidationError(s"S013 failed: $msg").failure.toValidationNel
-      }
+      convertResult(t, result, "S013")
+    }
+  }
+
+  protected def convertResult[A](input: A, result: Result, ruleName: String): ValidationNel[ValidationError, A] = {
+    result match {
+      case Success() => input.success
+      case Failure(msg) => ValidationError(ruleName + s" failed: $msg").failure.toValidationNel
     }
   }
 
