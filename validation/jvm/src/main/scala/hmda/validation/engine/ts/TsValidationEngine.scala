@@ -18,7 +18,7 @@ trait TsValidationEngine extends CommonTsValidation {
     }
   }
 
-  override def validate(ts: TransmittalSheet)(implicit ec: ExecutionContext): Future[TsValidation] = {
+  override def validate(ts: TransmittalSheet): Future[TsValidation] = {
 
     val fs100 = s100(ts)
     val fs013 = s013(ts)

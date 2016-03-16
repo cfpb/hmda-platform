@@ -10,7 +10,7 @@ import scala.concurrent.{ Future, ExecutionContext }
 
 trait TsValidationEngine extends CommonTsValidation {
 
-  override def validate(ts: TransmittalSheet)(implicit ec: ExecutionContext): Future[TsValidation] = {
+  override def validate(ts: TransmittalSheet): Future[TsValidation] = {
 
     def s028(t: TransmittalSheet): ValidationNel[ValidationError, TransmittalSheet] = {
       S028(t) match {
