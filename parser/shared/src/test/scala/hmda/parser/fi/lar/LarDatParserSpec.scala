@@ -22,7 +22,7 @@ class LarDatParserSpec extends FlatSpec with MustMatchers {
     firstLar.respondentId mustBe "0123456789"
     firstLar.agencyCode mustBe 9
     firstLar.preapprovals mustBe 1
-    firstLar.actionTaken mustBe 5
+    firstLar.actionTakenType mustBe 5
     firstLar.actionTakenDate mustBe 20130119
     firstLar.purchaserType mustBe 0
     firstLar.rateSpread mustBe "01.05"
