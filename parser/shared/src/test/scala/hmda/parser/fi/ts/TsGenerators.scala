@@ -109,9 +109,9 @@ trait TsGenerators extends FIGenerators {
 
   implicit def emailGen: Gen[String] = {
     for {
-      name <- Gen.alphaStr
+      name <- Gen.alphaStr.filter(s => s.nonEmpty)
       at = "@"
-      domain <- Gen.alphaStr
+      domain <- Gen.alphaStr.filter(s => s.nonEmpty)
       dotCom = ".com"
     } yield List(name, at, domain, dotCom).mkString
   }

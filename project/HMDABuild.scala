@@ -53,7 +53,14 @@ object HMDABuild extends Build {
         }
       )
     ).dependsOn(api)
-    .aggregate(parserJVM, parserJS, api, platformTestJVM, platformTestJS)
+    .aggregate(
+      parserJVM,
+      parserJS,
+      api,
+      platformTestJVM,
+      platformTestJS,
+      validationJVM,
+      validationJS)
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
@@ -87,8 +94,30 @@ object HMDABuild extends Build {
     )
     .dependsOn(model)
 
+
   lazy val parserJVM = parser.jvm
   lazy val parserJS = parser.js.disablePlugins(ScoverageSbtPlugin)
+
+  lazy val validation = (crossProject in file("validation"))
+    .settings(buildSettings: _*)
+    .jvmSettings(
+      libraryDependencies ++= commonDeps ++ Seq(
+        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided",
+        "org.scalaz" %% "scalaz-core" % Version.scalaz
+      )
+    )
+    .jsSettings(
+      scalaJSUseRhino in Global := false,
+      jsEnv := new org.scalajs.jsenv.RetryingComJSEnv(NodeJSEnv().value),
+      libraryDependencies ++= Seq(
+        "org.scalaz" %%% "scalaz-core" % Version.scalaz,
+        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
+        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
+      )
+    ).dependsOn(parser % "compile->compile;test->test")
+
+  lazy val validationJVM = validation.jvm
+  lazy val validationJS = validation.js.disablePlugins(ScoverageSbtPlugin)
 
   lazy val api = (project in file("api"))
     .settings(buildSettings: _*)

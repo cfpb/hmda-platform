@@ -9,7 +9,7 @@ case class LoanApplicationRegister(
     agencyCode: Int,
     loan: Loan,
     preapprovals: Int,
-    actionTaken: Int,
+    actionTakenType: Int,
     actionTakenDate: Int,
     geography: Geography,
     applicant: Applicant,
@@ -22,7 +22,7 @@ case class LoanApplicationRegister(
   def toCSV: String = {
     s"$id|$respondentId|$agencyCode|${loan.id}|${loan.applicationDate}" +
       s"|${loan.loanType}|${loan.propertyType}|${loan.purpose}|${loan.occupancy}" +
-      s"|${loan.amount}|$preapprovals|$actionTaken|$actionTakenDate" +
+      s"|${loan.amount}|$preapprovals|$actionTakenType|$actionTakenDate" +
       s"|${geography.msa}|${geography.state}|${geography.county}|${geography.tract}" +
       s"|${applicant.ethnicity}|${applicant.coEthnicity}|${applicant.race1}" +
       s"|${applicant.race2}|${applicant.race3}|${applicant.race4}|${applicant.race5}" +
