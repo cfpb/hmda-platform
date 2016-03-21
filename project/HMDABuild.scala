@@ -1,6 +1,7 @@
 import sbt._
 import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
+import scoverage.ScoverageSbtPlugin
 import spray.revolver.RevolverPlugin.autoImport.Revolver
 
 object BuildSettings {
@@ -98,11 +99,12 @@ object HMDABuild extends Build {
 
   lazy val platformTest = (project in file("platform-test"))
     .settings(buildSettings: _*)
-      .settings(
-        Seq(
-          libraryDependencies ++= akkaDeps
-        )
+    .settings(
+      Seq(
+        libraryDependencies ++= akkaDeps
       )
+    )
+    .disablePlugins(ScoverageSbtPlugin)
     .dependsOn(parser)
 
 
