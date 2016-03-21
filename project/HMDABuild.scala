@@ -61,6 +61,7 @@ object HMDABuild extends Build {
 
   lazy val model = (project in file("model"))
     .settings(buildSettings: _*)
+    .disablePlugins(ScoverageSbtPlugin)
 
   lazy val parser = (project in file("parser"))
     .settings(buildSettings: _*)
