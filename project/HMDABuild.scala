@@ -1,9 +1,6 @@
-import org.scalajs.sbtplugin.ScalaJSPlugin
 import sbt._
 import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
-import scoverage.ScoverageSbtPlugin
 import spray.revolver.RevolverPlugin.autoImport.Revolver
 
 object BuildSettings {
@@ -56,53 +53,28 @@ object HMDABuild extends Build {
       )
     ).dependsOn(api)
     .aggregate(
-      parserJVM,
-      parserJS,
+      parser,
       api,
       platformTest,
       validation)
 
-  lazy val model = (crossProject in file("model"))
+  lazy val model = (project in file("model"))
     .settings(buildSettings: _*)
-    .enablePlugins(ScalaJSPlugin)
-    .disablePlugins(ScoverageSbtPlugin)
-    .jsSettings(
 
-    )
-    .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
-      )
-    )
-
-  lazy val modelJS = model.js.disablePlugins(ScoverageSbtPlugin)
-  lazy val modelJVM = model.jvm
-
-  lazy val parser = (crossProject in file("parser"))
+  lazy val parser = (project in file("parser"))
     .settings(buildSettings: _*)
-    .jsSettings(
-      scalaJSUseRhino in Global := false,
-      libraryDependencies ++= Seq(
-        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
-        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
+      .settings(
+        Seq(
+          libraryDependencies ++= commonDeps
+        )
       )
-    )
-    .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
-      )
-    )
     .dependsOn(model)
-
-
-  lazy val parserJVM = parser.jvm
-  lazy val parserJS = parser.js.disablePlugins(ScoverageSbtPlugin)
 
   lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
     .settings(
       libraryDependencies ++= commonDeps ++ Seq(scalazDeps)
-    ).dependsOn(parserJVM % "compile->compile;test->test")
+    ).dependsOn(parser % "compile->compile;test->test")
 
 
   lazy val api = (project in file("api"))
@@ -121,7 +93,7 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= httpDeps
       )
-    ).dependsOn(parserJVM)
+    ).dependsOn(parser)
 
 
   lazy val platformTest = (project in file("platform-test"))
@@ -131,7 +103,7 @@ object HMDABuild extends Build {
           libraryDependencies ++= akkaDeps
         )
       )
-    .dependsOn(parserJVM)
+    .dependsOn(parser)
 
 
 }
