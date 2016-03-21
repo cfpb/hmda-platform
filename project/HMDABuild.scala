@@ -37,6 +37,8 @@ object HMDABuild extends Build {
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
+  val scalazDeps = scalaz
+
   lazy val hmda = (project in file("."))
     .settings(buildSettings:_*)
     .settings(Revolver.settings:_*)
@@ -58,8 +60,7 @@ object HMDABuild extends Build {
       parserJS,
       api,
       platformTest,
-      validationJVM,
-      validationJS)
+      validation)
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
@@ -97,26 +98,12 @@ object HMDABuild extends Build {
   lazy val parserJVM = parser.jvm
   lazy val parserJS = parser.js.disablePlugins(ScoverageSbtPlugin)
 
-  lazy val validation = (crossProject in file("validation"))
+  lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
-    .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided",
-        "org.scalaz" %% "scalaz-core" % Version.scalaz
-      )
-    )
-    .jsSettings(
-      scalaJSUseRhino in Global := false,
-      jsEnv := new org.scalajs.jsenv.RetryingComJSEnv(NodeJSEnv().value),
-      libraryDependencies ++= Seq(
-        "org.scalaz" %%% "scalaz-core" % Version.scalaz,
-        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
-        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
-      )
-    ).dependsOn(parser % "compile->compile;test->test")
+    .settings(
+      libraryDependencies ++= commonDeps ++ Seq(scalazDeps)
+    ).dependsOn(parserJVM % "compile->compile;test->test")
 
-  lazy val validationJVM = validation.jvm
-  lazy val validationJS = validation.js.disablePlugins(ScoverageSbtPlugin)
 
   lazy val api = (project in file("api"))
     .settings(buildSettings: _*)
