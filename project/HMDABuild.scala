@@ -57,8 +57,7 @@ object HMDABuild extends Build {
       parserJVM,
       parserJS,
       api,
-      platformTestJVM,
-      platformTestJS,
+      platformTest,
       validationJVM,
       validationJS)
 
@@ -138,25 +137,14 @@ object HMDABuild extends Build {
     ).dependsOn(parserJVM)
 
 
-  lazy val platformTest = (crossProject in file("platform-test"))
+  lazy val platformTest = (project in file("platform-test"))
     .settings(buildSettings: _*)
-    .jvmSettings(
-      libraryDependencies ++= akkaDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+      .settings(
+        Seq(
+          libraryDependencies ++= akkaDeps
+        )
       )
-    )
-    .jsSettings(
-      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
-      scalaJSUseRhino in Global := false,
-      libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % Version.scalaJSDom,
-        "com.lihaoyi" %%% "scalatags" % Version.scalaTags,
-        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
-        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
-      )
-    ).dependsOn(parser)
-     .disablePlugins(ScoverageSbtPlugin)
+    .dependsOn(parserJVM)
 
-  lazy val platformTestJVM = platformTest.jvm
-  lazy val platformTestJS = platformTest.js
+
 }
