@@ -10,7 +10,7 @@ import org.scalatest.time.{ Millis, Seconds, Span }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-trait TsValidationSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsValidation with ScalaFutures {
+class TsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsValidationEngine with ScalaFutures {
 
   /*
     The following methods simulate API calls to get values from remote resources
@@ -32,7 +32,7 @@ trait TsValidationSpec extends PropSpec with PropertyChecks with MustMatchers wi
    */
   override def findControlNumber: Future[String] = Future("")
 
-  override implicit val ec: ExecutionContext
+  override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(30, Seconds), interval = Span(2, Millis))

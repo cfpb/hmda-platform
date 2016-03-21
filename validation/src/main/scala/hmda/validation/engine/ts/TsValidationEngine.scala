@@ -10,7 +10,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scalaz.Scalaz._
 import scalaz._
 
-trait TsValidation extends TsValidationApi {
+trait TsValidationEngine extends TsValidationApi {
 
   type TsValidation = ValidationNel[ValidationError, TransmittalSheet]
 
