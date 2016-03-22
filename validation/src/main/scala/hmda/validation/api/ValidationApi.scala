@@ -1,0 +1,24 @@
+package hmda.validation.api
+
+import hmda.validation.dsl.{ Failure, Result, Success }
+import hmda.validation.engine.ValidationError
+import scalaz._
+import scalaz.Scalaz._
+
+trait ValidationApi {
+
+  def convertResult[A](input: A, result: Result, ruleName: String): ValidationNel[ValidationError, A] = {
+    result match {
+      case Success() => input.success
+      case Failure(msg) => ValidationError(s"$ruleName  failed: $msg").failure.toValidationNel
+    }
+  }
+
+  def validateAllT[E, T](checks: List[ValidationNel[E, T]], t: T): ValidationNel[E, T] = {
+    checks.sequenceU.map {
+      case c :: _ => c
+      case Nil => t
+    }
+  }
+
+}
