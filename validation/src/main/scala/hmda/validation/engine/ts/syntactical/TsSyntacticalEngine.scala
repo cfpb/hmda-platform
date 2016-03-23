@@ -1,15 +1,16 @@
-package hmda.validation.engine.ts
+package hmda.validation.engine.ts.syntactical
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.api.ValidationApi
 import hmda.validation.api.ts.TsValidationApi
 import hmda.validation.engine.ValidationError
 import hmda.validation.rules.ts.syntactical._
-import scala.concurrent.{ ExecutionContext, Future }
-import scalaz._
-import scalaz.Scalaz._
 
-trait TsValidationEngine extends ValidationApi with TsValidationApi {
+import scala.concurrent.{ExecutionContext, Future}
+import scalaz.Scalaz._
+import scalaz._
+
+trait TsSyntacticalEngine extends ValidationApi with TsValidationApi {
 
   type TsValidation = ValidationNel[ValidationError, TransmittalSheet]
 
