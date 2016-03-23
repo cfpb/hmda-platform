@@ -12,15 +12,17 @@ class V155Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
   property("A valid email address for the institution must be provided") {
     forAll(tsGen) { ts =>
       whenever(ts.contact.email != "") {
-        V155(ts.contact) mustBe Success()
+        V155(ts) mustBe Success()
       }
     }
   }
 
   property("Invalid emails should be detected") {
-    forAll(badContactGen) { contact =>
-      whenever(contact.email != "") {
-        V155(contact) mustBe Failure("is not a valid email")
+    forAll(tsGen) { ts =>
+      val badContact = badContactGen.sample.getOrElse(Contact("", "", "", ""))
+      val badTs = ts.copy(contact = badContact)
+      whenever(badTs.contact.email != "") {
+        V155(badTs) mustBe Failure("is not a valid email")
       }
     }
   }

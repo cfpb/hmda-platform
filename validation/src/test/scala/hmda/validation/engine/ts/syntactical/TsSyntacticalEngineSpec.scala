@@ -6,9 +6,9 @@ import org.scalacheck.Gen
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.PropertyChecks
-import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.time.{ Millis, Seconds, Span }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsSyntacticalEngine with ScalaFutures {
 
