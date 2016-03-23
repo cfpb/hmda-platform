@@ -1,8 +1,6 @@
-import org.scalajs.sbtplugin.ScalaJSPlugin
 import sbt._
 import sbt.Keys._
 import sbtassembly.AssemblyPlugin.autoImport._
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 import scoverage.ScoverageSbtPlugin
 import spray.revolver.RevolverPlugin.autoImport.Revolver
 
@@ -37,6 +35,8 @@ object HMDABuild extends Build {
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
+  val scalazDeps = Seq(scalaz)
+
   lazy val hmda = (project in file("."))
     .settings(buildSettings:_*)
     .settings(Revolver.settings:_*)
@@ -54,70 +54,30 @@ object HMDABuild extends Build {
       )
     ).dependsOn(api)
     .aggregate(
-      parserJVM,
-      parserJS,
+      parser,
       api,
-      platformTestJVM,
-      platformTestJS,
-      validationJVM,
-      validationJS)
+      platformTest,
+      validation)
 
-  lazy val model = (crossProject in file("model"))
+  lazy val model = (project in file("model"))
     .settings(buildSettings: _*)
-    .enablePlugins(ScalaJSPlugin)
     .disablePlugins(ScoverageSbtPlugin)
-    .jsSettings(
 
-    )
-    .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
-      )
-    )
-
-  lazy val modelJS = model.js.disablePlugins(ScoverageSbtPlugin)
-  lazy val modelJVM = model.jvm
-
-  lazy val parser = (crossProject in file("parser"))
+  lazy val parser = (project in file("parser"))
     .settings(buildSettings: _*)
-    .jsSettings(
-      scalaJSUseRhino in Global := false,
-      libraryDependencies ++= Seq(
-        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
-        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
+      .settings(
+        Seq(
+          libraryDependencies ++= commonDeps
+        )
       )
-    )
-    .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
-      )
-    )
     .dependsOn(model)
 
-
-  lazy val parserJVM = parser.jvm
-  lazy val parserJS = parser.js.disablePlugins(ScoverageSbtPlugin)
-
-  lazy val validation = (crossProject in file("validation"))
+  lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
-    .jvmSettings(
-      libraryDependencies ++= commonDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided",
-        "org.scalaz" %% "scalaz-core" % Version.scalaz
-      )
-    )
-    .jsSettings(
-      scalaJSUseRhino in Global := false,
-      jsEnv := new org.scalajs.jsenv.RetryingComJSEnv(NodeJSEnv().value),
-      libraryDependencies ++= Seq(
-        "org.scalaz" %%% "scalaz-core" % Version.scalaz,
-        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
-        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
-      )
+    .settings(
+      libraryDependencies ++= commonDeps ++ scalazDeps
     ).dependsOn(parser % "compile->compile;test->test")
 
-  lazy val validationJVM = validation.jvm
-  lazy val validationJS = validation.js.disablePlugins(ScoverageSbtPlugin)
 
   lazy val api = (project in file("api"))
     .settings(buildSettings: _*)
@@ -135,28 +95,18 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= httpDeps
       )
-    ).dependsOn(parserJVM)
+    ).dependsOn(parser)
 
 
-  lazy val platformTest = (crossProject in file("platform-test"))
+  lazy val platformTest = (project in file("platform-test"))
     .settings(buildSettings: _*)
-    .jvmSettings(
-      libraryDependencies ++= akkaDeps ++ Seq(
-        "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+    .settings(
+      Seq(
+        libraryDependencies ++= akkaDeps
       )
     )
-    .jsSettings(
-      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
-      scalaJSUseRhino in Global := false,
-      libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % Version.scalaJSDom,
-        "com.lihaoyi" %%% "scalatags" % Version.scalaTags,
-        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
-        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test"
-      )
-    ).dependsOn(parser)
-     .disablePlugins(ScoverageSbtPlugin)
+    .disablePlugins(ScoverageSbtPlugin)
+    .dependsOn(parser)
 
-  lazy val platformTestJVM = platformTest.jvm
-  lazy val platformTestJS = platformTest.js
+
 }
