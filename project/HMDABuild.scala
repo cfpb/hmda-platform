@@ -35,7 +35,7 @@ object HMDABuild extends Build {
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
-  val scalazDeps = scalaz
+  val scalazDeps = Seq(scalaz)
 
   lazy val hmda = (project in file("."))
     .settings(buildSettings:_*)
@@ -75,7 +75,7 @@ object HMDABuild extends Build {
   lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
     .settings(
-      libraryDependencies ++= commonDeps ++ Seq(scalazDeps)
+      libraryDependencies ++= commonDeps ++ scalazDeps
     ).dependsOn(parser % "compile->compile;test->test")
 
 
