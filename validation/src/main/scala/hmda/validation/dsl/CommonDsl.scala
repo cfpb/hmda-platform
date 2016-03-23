@@ -66,9 +66,8 @@ trait CommonDsl {
 
   def empty[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
-      case s: String =>
-        if (s.isEmpty) true else false
-      case _ => false
+      case s: String => s.isEmpty
+      case _ => throw new NotImplementedError("'empty' doesn't handle non-string values yet")
     }
     override def failure: String = "is not empty"
   }
