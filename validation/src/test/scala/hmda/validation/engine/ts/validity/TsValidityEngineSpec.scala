@@ -23,7 +23,7 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
   property("Transmittal Sheet fails V105 (Respondent Mailing Address)") {
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
-        val badTs = ts.copy(contact = Contact("", "", "", "sqwdqw"))
+        val badTs = ts.copy(respondent = Respondent("", "", "", "", "", ""))
         validate(badTs).isFailure mustBe true
       }
     }
@@ -38,10 +38,10 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
     }
   }
 
-  property("Transmittal Sheet fails V155 (Respondent Email Address)") {
+  property("Transmittal Sheet fails V155 (Respondent E-Mail Address)") {
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
-        val badTs = ts.copy(respondent = Respondent("", "", "", "", "CA", "awdqwd"))
+        val badTs = ts.copy(contact = Contact("", "", "", "sqwdqw"))
         validate(badTs).isFailure mustBe true
       }
     }
