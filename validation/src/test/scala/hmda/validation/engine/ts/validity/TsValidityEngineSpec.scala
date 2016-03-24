@@ -33,7 +33,9 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
         val badTs = ts.copy(respondent = Respondent("", "", "", "", "XXX", ""))
+        val badTs2 = ts.copy(respondent = Respondent("", "", "", "", "XX", ""))
         validate(badTs).isFailure mustBe true
+        validate(badTs2).isFailure mustBe true
       }
     }
   }
