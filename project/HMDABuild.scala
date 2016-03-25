@@ -52,12 +52,13 @@ object HMDABuild extends Build {
             oldStrategy(x)
         }
       )
-    ).dependsOn(api)
+    ).dependsOn(frontend)
     .aggregate(
       parser,
-      api,
-      platformTest,
-      validation)
+      frontend,
+      backend,
+      validation,
+      platformTest)
 
   lazy val model = (project in file("model"))
     .settings(buildSettings: _*)
@@ -79,14 +80,14 @@ object HMDABuild extends Build {
     ).dependsOn(parser % "compile->compile;test->test")
 
 
-  lazy val persistence = (project in file("persistence"))
+  lazy val backend = (project in file("backend"))
     .settings(buildSettings: _*)
     .settings(
       libraryDependencies ++= akkaDeps
     ).dependsOn(model)
 
 
-  lazy val api = (project in file("api"))
+  lazy val frontend = (project in file("frontend"))
     .settings(buildSettings: _*)
     .settings(Revolver.settings:_*)
     .settings(
