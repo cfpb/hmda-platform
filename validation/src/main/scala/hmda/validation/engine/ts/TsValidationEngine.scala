@@ -60,7 +60,7 @@ trait TsValidationEngine extends ValidationApi with TsValidationApi {
       f013 <- fs013
     } yield {
       (
-        validateAllT(checks, ts)
+        validateAll(checks, ts)
         |@| f100
         |@| f013
       )((_, _, _) => ts)
