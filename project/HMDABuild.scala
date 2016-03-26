@@ -31,7 +31,7 @@ object HMDABuild extends Build {
 
   val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream, akkaPersistence)
+  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream, akkaPersistence, akkaTestkit)
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
@@ -84,7 +84,7 @@ object HMDABuild extends Build {
     .settings(buildSettings: _*)
     .settings(
       libraryDependencies ++= akkaDeps
-    ).dependsOn(model)
+    ).dependsOn(parser % "compile->compile;test->test")
 
 
   lazy val frontend = (project in file("frontend"))
