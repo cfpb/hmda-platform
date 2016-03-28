@@ -26,6 +26,6 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
       v155(ts)
     )
 
-    validateAllT(checks, ts)
+    validateAll(checks, ts)
   }
 }
