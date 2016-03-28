@@ -14,10 +14,10 @@ trait ValidationApi {
     }
   }
 
-  def validateAll[E, T](checks: List[ValidationNel[E, T]], t: T): ValidationNel[E, T] = {
+  def validateAll[E, T](checks: List[ValidationNel[E, T]], input: T): ValidationNel[E, T] = {
     checks.sequenceU.map {
       case c :: _ => c
-      case Nil => t
+      case Nil => input
     }
   }
 
