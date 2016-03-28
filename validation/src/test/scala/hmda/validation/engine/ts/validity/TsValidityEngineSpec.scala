@@ -44,7 +44,9 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
         val badTs = ts.copy(contact = Contact("", "", "", "sqwdqw"))
+        val badTs2 = ts.copy(contact = Contact("", "", "", ""))
         validate(badTs).isFailure mustBe true
+        validate(badTs2).isFailure mustBe true
       }
     }
   }
