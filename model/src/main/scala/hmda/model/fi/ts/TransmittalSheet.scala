@@ -1,11 +1,5 @@
 package hmda.model.fi.ts
 
-object TransmittalSheet {
-  def empty: TransmittalSheet = {
-    TransmittalSheet(0, 0, 0, 0, "", 0, Respondent.empty, Parent.empty, Contact.empty)
-  }
-}
-
 case class TransmittalSheet(
     id: Int,
     agencyCode: Int,
