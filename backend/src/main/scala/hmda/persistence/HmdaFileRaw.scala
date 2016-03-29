@@ -1,4 +1,4 @@
-package persistence
+package hmda.persistence
 
 import akka.actor.{ ActorLogging, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }

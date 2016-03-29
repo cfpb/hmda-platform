@@ -16,8 +16,8 @@ import akka.util.ByteString
 import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.protocol.HmdaApiProtocol
-import persistence.HmdaFileRaw
-import persistence.HmdaFileRaw.{ AddLine, StopActor }
+import hmda.persistence.HmdaFileRaw
+import hmda.persistence.HmdaFileRaw.{ AddLine, StopActor }
 import spray.json._
 
 import scala.concurrent.Future
