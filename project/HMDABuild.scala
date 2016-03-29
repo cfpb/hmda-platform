@@ -105,7 +105,7 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= httpDeps
       )
-    ).dependsOn(parser)
+    ).dependsOn(parser, backend)
 
 
   lazy val platformTest = (project in file("platform-test"))

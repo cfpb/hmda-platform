@@ -11,8 +11,9 @@ object HmdaFileRaw {
     def data: String
   }
   case class AddLine(data: String) extends Command
-  case class GetState() extends Command
   case class LineAdded(data: String) extends Event
+  case object GetState extends Command
+  case object StopActor extends Command
 
   case class HmdaFileRawState(events: List[String] = Nil) {
     def updated(event: Event): HmdaFileRawState = copy(event.data :: events)
@@ -43,6 +44,8 @@ class HmdaFileRaw(id: String) extends PersistentActor with ActorLogging {
     case GetState =>
       log.debug(state.toString)
       sender() ! state
+    case StopActor =>
+      context.stop(self)
   }
 
   override def receiveRecover: Receive = {

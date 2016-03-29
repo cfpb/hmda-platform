@@ -30,7 +30,7 @@ class HttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest wit
 
       val file = multiPartFile(csv, "sample.txt")
 
-      Post("/upload", file) ~> routes ~> check {
+      Post("/upload/1", file) ~> routes ~> check {
         status mustEqual StatusCodes.OK
       }
     }
@@ -38,7 +38,7 @@ class HttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest wit
     "return 400 when trying to upload the wrong file" in {
       val badContent = "qdemd"
       val file = multiPartFile(badContent, "sample.dat")
-      Post("/upload", file) ~> routes ~> check {
+      Post("/upload/0123456789", file) ~> routes ~> check {
         status mustEqual StatusCodes.BadRequest
       }
     }
