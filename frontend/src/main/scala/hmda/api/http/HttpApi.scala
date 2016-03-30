@@ -31,48 +31,49 @@ trait HttpApi extends HmdaApiProtocol {
 
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
-  val routes = {
-    pathSingleSlash {
-      get {
-        complete {
-          val now = Instant.now.toString
-          val host = InetAddress.getLocalHost.getHostName
-          val status = Status("OK", "hmda-api", now, host)
-          log.debug(status.toJson.toString)
-          ToResponseMarshallable(status)
-        }
+  val rootPath = pathSingleSlash {
+    get {
+      complete {
+        val now = Instant.now.toString
+        val host = InetAddress.getLocalHost.getHostName
+        val status = Status("OK", "hmda-api", now, host)
+        log.debug(status.toJson.toString)
+        ToResponseMarshallable(status)
       }
-    } ~
-      path("upload" / Segment) { id =>
-        post {
-          val hmdaRawFile = system.actorOf(HmdaFileRaw.props(id))
-          entity(as[Multipart.FormData]) { formData =>
-            val uploaded: Future[Done] = formData.parts.mapAsync(1) {
-              //TODO: check Content-Type type as well?
-              case b: BodyPart if b.filename.exists(_.endsWith(".txt")) =>
-                b.entity.dataBytes
-                  .via(splitLines)
-                  .map(_.utf8String)
-                  .runForeach(line => hmdaRawFile ! AddLine(line))
-
-              case _ => Future.failed(throw new Exception("File could not be uploaded"))
-            }.runWith(Sink.ignore)
-
-            onComplete(uploaded) {
-              case Success(response) =>
-                hmdaRawFile ! Shutdown
-                complete {
-                  "uploaded"
-                }
-              case Failure(error) =>
-                hmdaRawFile ! Shutdown
-                log.error(error.getLocalizedMessage)
-                complete {
-                  HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
-                }
-            }
-          }
-        }
-      }
+    }
   }
+
+  val uploadPath = path("upload" / Segment) { id =>
+    post {
+      val hmdaRawFile = system.actorOf(HmdaFileRaw.props(id))
+      entity(as[Multipart.FormData]) { formData =>
+        val uploaded: Future[Done] = formData.parts.mapAsync(1) {
+          //TODO: check Content-Type type as well?
+          case b: BodyPart if b.filename.exists(_.endsWith(".txt")) =>
+            b.entity.dataBytes
+              .via(splitLines)
+              .map(_.utf8String)
+              .runForeach(line => hmdaRawFile ! AddLine(line))
+
+          case _ => Future.failed(throw new Exception("File could not be uploaded"))
+        }.runWith(Sink.ignore)
+
+        onComplete(uploaded) {
+          case Success(response) =>
+            hmdaRawFile ! Shutdown
+            complete {
+              "uploaded"
+            }
+          case Failure(error) =>
+            hmdaRawFile ! Shutdown
+            log.error(error.getLocalizedMessage)
+            complete {
+              HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
+            }
+        }
+      }
+    }
+  }
+
+  val routes = rootPath ~ uploadPath
 }
