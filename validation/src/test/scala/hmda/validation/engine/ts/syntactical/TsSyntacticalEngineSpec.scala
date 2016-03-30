@@ -1,4 +1,4 @@
-package hmda.validation.engine.ts
+package hmda.validation.engine.ts.syntactical
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.ts.TsGenerators
@@ -10,7 +10,7 @@ import org.scalatest.time.{ Millis, Seconds, Span }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class TsValidationEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsValidationEngine with ScalaFutures {
+class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsSyntacticalEngine with ScalaFutures {
 
   /*
     The following methods simulate API calls to get values from remote resources

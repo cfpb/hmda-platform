@@ -1,10 +1,8 @@
-package hmda.validation.api
+package hmda.validation.api.ts
 
 import scala.concurrent.Future
 
 trait TsValidationApi {
-
-  //TODO: These methods are modelled as synchronous operations for simplicity. They should return Future[T]
 
   /*
   Gets latest timestamp from database (see S013)
