@@ -13,14 +13,7 @@ class HmdaFileRawSpec(_system: ActorSystem)
     with MustMatchers
     with BeforeAndAfterAll {
 
-  def this() = this(ActorSystem("hmda", ConfigFactory.parseString(
-    """
-      |akka.loglevel = "INFO"
-      |akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
-      |akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
-      |akka.persistence.snapshot-store.local.dir = "target/snapshots"
-    """.stripMargin
-  )))
+  def this() = this(ActorSystem("hmda-persistence-test"))
 
   val hmdaFileRaw = system.actorOf(HmdaFileRaw.props("1"))
 
