@@ -31,7 +31,7 @@ class HttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest wit
 
       val file = multiPartFile(csv, "sample.txt")
 
-      Post("/upload/1", file) ~> routes ~> check {
+      Post("/upload/0123456789", file) ~> routes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[String] mustEqual "uploaded"
       }
