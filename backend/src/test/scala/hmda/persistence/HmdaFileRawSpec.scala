@@ -18,6 +18,7 @@ class HmdaFileRawSpec(_system: ActorSystem)
       |akka.loglevel = "INFO"
       |akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
       |akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
+      |akka.persistence.snapshot-store.local.dir = "target/snapshots"
     """.stripMargin
   )))
 
