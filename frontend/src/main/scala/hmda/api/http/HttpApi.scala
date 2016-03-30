@@ -17,7 +17,7 @@ import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.protocol.HmdaApiProtocol
 import hmda.persistence.HmdaFileRaw
-import hmda.persistence.HmdaFileRaw.{ AddLine, StopActor }
+import hmda.persistence.HmdaFileRaw.{ AddLine, Shutdown }
 import spray.json._
 
 import scala.concurrent.Future
@@ -60,12 +60,12 @@ trait HttpApi extends HmdaApiProtocol {
 
             onComplete(uploaded) {
               case Success(response) =>
-                hmdaRawFile ! StopActor
+                hmdaRawFile ! Shutdown
                 complete {
                   "uploaded"
                 }
               case Failure(error) =>
-                hmdaRawFile ! StopActor
+                hmdaRawFile ! Shutdown
                 log.error(error.getLocalizedMessage)
                 complete {
                   HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
