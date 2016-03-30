@@ -59,7 +59,7 @@ trait CommonDsl {
   def numeric[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case n: Number => true
-      case _ => false
+      case _ => throw new NotImplementedError("'numeric' doesn't handle string (or other) values yet")
     }
     override def failure: String = s"is not numeric"
   }
