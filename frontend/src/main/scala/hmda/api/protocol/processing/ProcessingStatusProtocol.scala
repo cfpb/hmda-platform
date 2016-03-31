@@ -1,6 +1,6 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.processing.ProcessingStatus
+import hmda.model.messages.ProcessingStatus
 import spray.json.DefaultJsonProtocol
 
 trait ProcessingStatusProtocol extends DefaultJsonProtocol {

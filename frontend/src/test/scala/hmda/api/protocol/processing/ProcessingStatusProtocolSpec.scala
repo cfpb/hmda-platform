@@ -1,7 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.ModelGenerators
-import hmda.api.model.processing.ProcessingStatus
+import hmda.model.messages.ProcessingStatus
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._

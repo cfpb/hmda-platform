@@ -1,7 +1,8 @@
 package hmda.api.model
 
 import java.time.LocalDate
-import hmda.api.model.processing.ProcessingStatus
+
+import hmda.model.messages.ProcessingStatus
 import org.scalacheck.Gen
 
 import scala.util.Try
