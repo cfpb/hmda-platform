@@ -73,4 +73,11 @@ trait CommonDsl {
     override def failure: String = "is not empty"
   }
 
+  def when(condition: Result, thenTest: => Result): Result = {
+    condition match {
+      case Success() => thenTest
+      case Failure(_) => Success()
+    }
+  }
+
 }
