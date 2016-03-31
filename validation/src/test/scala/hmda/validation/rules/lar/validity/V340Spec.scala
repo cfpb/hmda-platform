@@ -21,7 +21,6 @@ class V340Spec extends PropSpec with PropertyChecks with MustMatchers with LarGe
     }
   }
 
-  // I don't like having this logic split: this part here, the (complementary) happy path in LarGenerators. Ideas?
   val badPurchaserTypeGen: Gen[Int] = Gen.oneOf(Gen.negNum[Int], Gen.choose(10, Integer.MAX_VALUE))
 
 }
