@@ -27,10 +27,10 @@ class V262Spec extends PropSpec with PropertyChecks with MustMatchers with LarGe
   }
 
   property("If date application received != NA, V262 should pass") {
-    forAll(larGen) { lar =>
-      whenever(lar.id == 2 && lar.loan.applicationDate != "NA") {
-        V262(lar) mustBe Success()
-      }
+    forAll(larGen, dateGen) { (lar, altDate) =>
+      val datedLoan = lar.loan.copy(applicationDate = altDate.toString)
+      val datedLar = lar.copy(loan = datedLoan)
+      V262(datedLar) mustBe Success()
     }
   }
 }
