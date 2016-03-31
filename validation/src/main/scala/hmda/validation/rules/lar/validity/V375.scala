@@ -8,6 +8,6 @@ object V375 extends CommonDsl {
   val okLoanTypes = List(2, 3, 4)
 
   def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.purchaserType is equalTo(2), lar.loan.loanType is containedIn(okLoanTypes))
+    when(lar.purchaserType is equalTo(2)) { lar.loan.loanType is containedIn(okLoanTypes) }
   }
 }
