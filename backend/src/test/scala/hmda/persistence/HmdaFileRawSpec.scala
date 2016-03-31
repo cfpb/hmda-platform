@@ -1,5 +1,7 @@
 package hmda.persistence
 
+import java.time.Instant
+
 import akka.actor.ActorSystem
 import akka.testkit.{ ImplicitSender, TestKit }
 import com.typesafe.config.ConfigFactory
@@ -27,14 +29,15 @@ class HmdaFileRawSpec(_system: ActorSystem)
     "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
 
   val lines = data.split("\n")
+  val timestamp = Instant.now.toEpochMilli
 
   "A HMDA File" must {
     "be persisted" in {
       for (line <- lines) {
-        hmdaFileRaw ! AddLine(line.toString)
+        hmdaFileRaw ! AddLine(timestamp, line.toString)
       }
       hmdaFileRaw ! GetState
-      expectMsg(HmdaFileRawState(lines.reverse.toList))
+      expectMsg(HmdaFileRawState(Map(timestamp -> 4)))
     }
   }
 

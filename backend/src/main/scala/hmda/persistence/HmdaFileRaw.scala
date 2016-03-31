@@ -7,17 +7,20 @@ object HmdaFileRaw {
   def props(id: String): Props = Props(new HmdaFileRaw(id))
 
   sealed trait Command
-  sealed trait Event {
-    def data: String
-  }
-  case class AddLine(data: String) extends Command
-  case class LineAdded(data: String) extends Event
+  sealed trait Event
+  case class AddLine(timestamp: Long, data: String) extends Command
+  case object CompleteUpload extends Command
+  case class LineAdded(timestamp: Long, data: String) extends Event
   case object GetState
   case object Shutdown
 
-  case class HmdaFileRawState(events: List[String] = Nil) {
-    def updated(event: Event): HmdaFileRawState = copy(event.data :: events)
-    def size: Int = events.length
+  // uploads is a Map of timestamp -> number of rows
+  case class HmdaFileRawState(uploads: Map[Long, Int] = Map.empty) {
+    def updated(event: Event): HmdaFileRawState = event match {
+      case LineAdded(t, d) =>
+        val updatedUploads = uploads.updated(t, uploads.getOrElse(t, 0) + 1)
+        HmdaFileRawState(updatedUploads)
+    }
   }
 
 }
@@ -36,14 +39,19 @@ class HmdaFileRaw(id: String) extends PersistentActor with ActorLogging {
 
   override def receiveCommand: Receive = {
     case cmd: AddLine =>
-      persist(LineAdded(cmd.data)) { e =>
+      persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
         log.debug(s"Persisted: ${e.data}")
         updateState(e)
         context.system.eventStream.publish(e)
       }
+
+    case CompleteUpload =>
+      saveSnapshot(state)
+
     case GetState =>
       log.debug(state.toString)
       sender() ! state
+
     case Shutdown =>
       context.stop(self)
   }

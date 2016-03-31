@@ -17,7 +17,7 @@ import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.protocol.HmdaApiProtocol
 import hmda.persistence.HmdaFileRaw
-import hmda.persistence.HmdaFileRaw.{ AddLine, Shutdown }
+import hmda.persistence.HmdaFileRaw.{ AddLine, CompleteUpload, Shutdown }
 import spray.json._
 
 import scala.concurrent.Future
@@ -45,6 +45,7 @@ trait HttpApi extends HmdaApiProtocol {
 
   val uploadPath = path("upload" / Segment) { id =>
     post {
+      val uploadTimestamp = Instant.now.toEpochMilli
       val hmdaRawFile = system.actorOf(HmdaFileRaw.props(id))
       entity(as[Multipart.FormData]) { formData =>
         val uploaded: Future[Done] = formData.parts.mapAsync(1) {
@@ -53,13 +54,14 @@ trait HttpApi extends HmdaApiProtocol {
             b.entity.dataBytes
               .via(splitLines)
               .map(_.utf8String)
-              .runForeach(line => hmdaRawFile ! AddLine(line))
+              .runForeach(line => hmdaRawFile ! AddLine(uploadTimestamp, line))
 
           case _ => Future.failed(throw new Exception("File could not be uploaded"))
         }.runWith(Sink.ignore)
 
         onComplete(uploaded) {
           case Success(response) =>
+            hmdaRawFile ! CompleteUpload
             hmdaRawFile ! Shutdown
             complete {
               "uploaded"
@@ -75,5 +77,9 @@ trait HttpApi extends HmdaApiProtocol {
     }
   }
 
-  val routes = rootPath ~ uploadPath
+  val uploadedStatsPath = path("uploaded" / Segment) { id =>
+    complete("ok")
+  }
+
+  val routes = rootPath ~ uploadPath ~ uploadedStatsPath
 }
