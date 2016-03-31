@@ -7,14 +7,20 @@ import org.scalatest.{ MustMatchers, PropSpec }
 
 class V375Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
 
-  property("if purchaser type is 2, then loan type must be 2, 3, or 4") {
+  property("if purchaser type is 2, then loan type 2, 3, or 4 must succeed") {
     forAll(larGen) { lar =>
       val newLar = lar.copy(purchaserType = 2)
-      if (List(2, 3, 4).contains(newLar.loan.loanType)) {
+      whenever(List(2, 3, 4).contains(newLar.loan.loanType)) {
         V375(newLar) mustBe Success()
-      } else {
-        V375(newLar) mustBe a[Failure]
       }
+    }
+  }
+
+  property("if purchaser type is 2, then loan type other than 2, 3, or 4 must fail") {
+    forAll(larGen) { lar =>
+      val newLoan = lar.loan.copy(loanType = 1)
+      val newLar = lar.copy(purchaserType = 2, loan = newLoan)
+      V375(newLar) mustBe a[Failure]
     }
   }
 
