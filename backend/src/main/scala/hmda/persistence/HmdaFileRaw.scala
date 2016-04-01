@@ -12,7 +12,7 @@ object HmdaFileRaw {
   case class AddLine(timestamp: Long, data: String) extends Command
   case object CompleteUpload extends Command
   case class LineAdded(timestamp: Long, data: String) extends Event
-  case object GetState
+  case object GetStatus
   case object Shutdown
 
   // uploads is a Map of timestamp -> number of rows
@@ -34,12 +34,11 @@ class HmdaFileRaw(id: String) extends PersistentActor with ActorLogging {
 
   var state = HmdaFileRawState()
 
+  var status = ProcessingStatusSeq()
+
   def updateState(event: Event): Unit = {
     state = state.updated(event)
-    val statusSeq = state.uploads.toSeq.map { case (l, i) => ProcessingStatus(id, l.toString, i) }
-    val status = ProcessingStatusSeq(statusSeq)
-    log.info(s"$status")
-    context.system.eventStream.publish(status)
+
   }
 
   override def receiveCommand: Receive = {
@@ -53,9 +52,10 @@ class HmdaFileRaw(id: String) extends PersistentActor with ActorLogging {
     case CompleteUpload =>
       saveSnapshot(state)
 
-    case GetState =>
-      log.debug(state.toString)
-      sender() ! state
+    case GetStatus =>
+      val statusSeq = state.uploads.toSeq.map { case (l, i) => ProcessingStatus(id, l.toString, i) }
+      val status = ProcessingStatusSeq(statusSeq)
+      sender() ! status
 
     case Shutdown =>
       context.stop(self)

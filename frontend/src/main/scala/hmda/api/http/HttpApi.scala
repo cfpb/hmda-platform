@@ -22,7 +22,7 @@ import hmda.api.protocol.HmdaApiProtocol
 import hmda.api.protocol.processing.ProcessingStatusProtocol
 import hmda.model.messages.{ ProcessingStatus, ProcessingStatusSeq }
 import hmda.persistence.HmdaFileRaw
-import hmda.persistence.HmdaFileRaw.{ AddLine, CompleteUpload, Shutdown }
+import hmda.persistence.HmdaFileRaw.{ AddLine, CompleteUpload, GetStatus, Shutdown }
 import spray.json._
 
 import scala.concurrent.duration._
@@ -87,10 +87,14 @@ trait HttpApi extends HmdaApiProtocol with ProcessingStatusProtocol {
     //TODO: make timeout configurable?
     implicit val timeout = Timeout(5.seconds)
     get {
-      val processingActor = system.actorOf(ProcessingStatusActor.props(id))
-      onComplete((processingActor ? GetProcessingStatus).mapTo[ProcessingStatusSeq]) {
-        case Success(s) => complete(ToResponseMarshallable(s))
-        case Failure(e) => complete(HttpResponse(StatusCodes.InternalServerError))
+      val processingActor = system.actorOf(HmdaFileRaw.props(id))
+      onComplete((processingActor ? GetStatus).mapTo[ProcessingStatusSeq]) {
+        case Success(s) =>
+          processingActor ! Shutdown
+          complete(ToResponseMarshallable(s))
+        case Failure(e) =>
+          processingActor ! Shutdown
+          complete(HttpResponse(StatusCodes.InternalServerError))
       }
     }
   }
