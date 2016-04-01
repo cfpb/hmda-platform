@@ -74,10 +74,6 @@ trait CommonDsl {
   }
 
   def when(condition: Result)(thenTest: => Result): Result = {
-    condition match {
-      case Success() => thenTest
-      case Failure(_) => Success()
-    }
+    condition.implies(thenTest)
   }
-
 }
