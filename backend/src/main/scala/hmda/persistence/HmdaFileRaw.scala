@@ -32,6 +32,7 @@ class HmdaFileRaw(id: String) extends PersistentActor with ActorLogging {
 
   override def persistenceId: String = s"HmdaFileRaw-$id"
 
+  //TODO: simplify state management with an uploads counter and using ProcessingStatus directly?
   var state = HmdaFileRawState()
 
   var status = ProcessingStatusSeq()
