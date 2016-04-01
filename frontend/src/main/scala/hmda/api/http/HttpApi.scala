@@ -20,7 +20,7 @@ import hmda.api.model.processing.ProcessingStatusActor
 import hmda.api.model.processing.ProcessingStatusActor.GetProcessingStatus
 import hmda.api.protocol.HmdaApiProtocol
 import hmda.api.protocol.processing.ProcessingStatusProtocol
-import hmda.model.messages.ProcessingStatus
+import hmda.model.messages.{ ProcessingStatus, ProcessingStatusSeq }
 import hmda.persistence.HmdaFileRaw
 import hmda.persistence.HmdaFileRaw.{ AddLine, CompleteUpload, Shutdown }
 import spray.json._
@@ -83,18 +83,17 @@ trait HttpApi extends HmdaApiProtocol with ProcessingStatusProtocol {
     }
   }
 
-//  val processingStatusPath = path("status" / Segment) { id =>
-//    //TODO: make timeout configurable?
-//    implicit val timeout = Timeout(5.seconds)
-//    implicit val ec = system.dispatcher
-//    get {
-//      val processingActor = system.actorOf(ProcessingStatusActor.props(id))
-//      (processingActor ? GetProcessingStatus).mapTo[List[ProcessingStatus]]
-//        .map(result => complete(ToResponseMarshallable(result)))
-//        .recover { case ex => complete(HttpResponse(StatusCodes.InternalServerError)) }
-//    }
-//
-//  }
+  val processingStatusPath = path("status" / Segment) { id =>
+    //TODO: make timeout configurable?
+    implicit val timeout = Timeout(5.seconds)
+    get {
+      val processingActor = system.actorOf(ProcessingStatusActor.props(id))
+      onComplete((processingActor ? GetProcessingStatus).mapTo[ProcessingStatusSeq]) {
+        case Success(s) => complete(ToResponseMarshallable(s))
+        case Failure(e) => complete(HttpResponse(StatusCodes.InternalServerError))
+      }
+    }
+  }
 
-  val routes = rootPath ~ uploadPath //~ processingStatusPath
+  val routes = rootPath ~ uploadPath ~ processingStatusPath
 }

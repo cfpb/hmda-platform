@@ -2,6 +2,7 @@ package hmda.persistence
 
 import akka.actor.{ ActorLogging, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
+import hmda.model.messages.{ ProcessingStatus, ProcessingStatusSeq }
 
 object HmdaFileRaw {
   def props(id: String): Props = Props(new HmdaFileRaw(id))
@@ -35,6 +36,10 @@ class HmdaFileRaw(id: String) extends PersistentActor with ActorLogging {
 
   def updateState(event: Event): Unit = {
     state = state.updated(event)
+    val statusSeq = state.uploads.toSeq.map { case (l, i) => ProcessingStatus(id, l.toString, i) }
+    val status = ProcessingStatusSeq(statusSeq)
+    log.info(s"$status")
+    context.system.eventStream.publish(status)
   }
 
   override def receiveCommand: Receive = {
