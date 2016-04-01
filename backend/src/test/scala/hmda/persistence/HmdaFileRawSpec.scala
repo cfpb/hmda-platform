@@ -4,8 +4,8 @@ import java.time.Instant
 
 import akka.actor.ActorSystem
 import akka.testkit.{ ImplicitSender, TestKit }
-import com.typesafe.config.ConfigFactory
-import hmda.persistence.HmdaFileRaw.{ AddLine, GetState, HmdaFileRawState }
+import hmda.model.messages.{ ProcessingStatus, ProcessingStatusSeq }
+import hmda.persistence.HmdaFileRaw.{ AddLine, GetStatus, HmdaFileRawState }
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpecLike }
 
 class HmdaFileRawSpec(_system: ActorSystem)
@@ -36,8 +36,10 @@ class HmdaFileRawSpec(_system: ActorSystem)
       for (line <- lines) {
         hmdaFileRaw ! AddLine(timestamp, line.toString)
       }
-      hmdaFileRaw ! GetState
-      expectMsg(HmdaFileRawState(Map(timestamp -> 4)))
+      hmdaFileRaw ! GetStatus
+      expectMsg(ProcessingStatusSeq(
+        Seq(ProcessingStatus("1", timestamp.toString, 4))
+      ))
     }
   }
 

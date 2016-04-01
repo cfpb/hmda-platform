@@ -4,7 +4,7 @@ import java.net.InetAddress
 import java.time.Instant
 
 import akka.Done
-import akka.actor.{ ActorSystem, PoisonPill }
+import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model._
@@ -16,15 +16,12 @@ import akka.pattern.ask
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import hmda.api.model.processing.ProcessingStatusActor
-import hmda.api.model.processing.ProcessingStatusActor.GetProcessingStatus
 import hmda.api.protocol.HmdaApiProtocol
 import hmda.api.protocol.processing.ProcessingStatusProtocol
-import hmda.model.messages.{ ProcessingStatus, ProcessingStatusSeq }
+import hmda.model.messages.ProcessingStatusSeq
 import hmda.persistence.HmdaFileRaw
 import hmda.persistence.HmdaFileRaw.{ AddLine, CompleteUpload, GetStatus, Shutdown }
 import spray.json._
-
 import scala.concurrent.duration._
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
