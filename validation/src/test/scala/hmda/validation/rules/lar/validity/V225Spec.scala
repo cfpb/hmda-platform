@@ -10,9 +10,7 @@ import org.scalatest.{ MustMatchers, PropSpec }
 class V225Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
   property("Loan Purpose must = 1, 2, or 3") {
     forAll(larGen) { lar =>
-      whenever(lar.id == 2) {
-        V220(lar.loan) mustBe Success()
-      }
+      V225(lar) mustBe Success()
     }
   }
 
