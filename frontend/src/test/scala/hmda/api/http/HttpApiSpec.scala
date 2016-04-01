@@ -6,6 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.util.ByteString
+import hmda.model.messages.ProcessingStatusSeq
 import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.ExecutionContext
@@ -34,6 +35,11 @@ class HttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest wit
       Post("/upload/0123456789", file) ~> routes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[String] mustEqual "uploaded"
+      }
+
+      Get("/status/0123456789") ~> routes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[ProcessingStatusSeq].uploads.head.rowsUploaded mustBe 4
       }
     }
 
