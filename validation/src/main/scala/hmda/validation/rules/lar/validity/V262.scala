@@ -1,9 +1,10 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ CommonDsl, Result, Success }
+import hmda.validation.dsl.{ Result, Success }
+import hmda.validation.rules.EditCheck
 
-object V262 extends CommonDsl {
+object V262 extends EditCheck[LoanApplicationRegister] {
   def apply(lar: LoanApplicationRegister): Result = {
     val applicationDate = lar.loan.applicationDate
     if (applicationDate == "NA") {
@@ -12,4 +13,6 @@ object V262 extends CommonDsl {
       Success()
     }
   }
+
+  def name = "V262"
 }

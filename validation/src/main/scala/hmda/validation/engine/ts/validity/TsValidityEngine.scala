@@ -2,29 +2,25 @@ package hmda.validation.engine.ts.validity
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.api.ValidationApi
+import hmda.validation.engine.ValidationError
 import hmda.validation.engine.ts.TsCommonEngine
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.validity.{ V105, V140, V155 }
+
+import scalaz._
 
 trait TsValidityEngine extends TsCommonEngine with ValidationApi {
 
-  private def v105(t: TransmittalSheet): TsValidation = {
-    convertResult(t, V105(t), "V105")
-  }
-
-  private def v140(t: TransmittalSheet): TsValidation = {
-    convertResult(t, V140(t), "V140")
-  }
-
-  private def v155(t: TransmittalSheet): TsValidation = {
-    convertResult(t, V155(t), "V155")
+  private def doCheck[T](editCheck: EditCheck[T], input: T): ValidationNel[ValidationError, T] = {
+    convertResult(input, editCheck(input), editCheck.name)
   }
 
   def validate(ts: TransmittalSheet): TsValidation = {
-    val checks = List(
-      v105(ts),
-      v140(ts),
-      v155(ts)
-    )
+    val checks: List[TsValidation] = List(
+      V105,
+      V140,
+      V155
+    ).map(doCheck(_, ts))
 
     validateAll(checks, ts)
   }
