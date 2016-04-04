@@ -1,7 +1,7 @@
 package hmda.validation.dsl
 
 trait CommonDsl {
-  implicit class Rule[T](data: T) {
+  implicit class Subject[T](data: T) {
     private def test(predicate: Predicate[T]): Result = {
       predicate.validate(data) match {
         case true => Success()
@@ -72,4 +72,7 @@ trait CommonDsl {
     override def failure: String = "is not empty"
   }
 
+  def when(condition: Result)(thenTest: => Result): Result = {
+    condition.implies(thenTest)
+  }
 }

@@ -15,6 +15,13 @@ sealed trait Result {
       Failure(s"$this $that")
   }
 
+  def implies(that: => Result): Result = {
+    this match {
+      case Success() => that
+      case Failure(_) => Success()
+    }
+  }
+
 }
 case class Success() extends Result
 case class Failure(message: String) extends Result

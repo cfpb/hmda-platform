@@ -4,7 +4,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.rules.EditCheck
-import hmda.validation.rules.lar.validity.{ V262, V220, V225 }
+import hmda.validation.rules.lar.validity._
 
 trait LarValidityEngine extends LarCommonEngine with ValidationApi {
 
@@ -16,7 +16,9 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
     val checks = List(
       V220,
       V225,
-      V262
+      V255,
+      V262,
+      V400
     ).map(doCheck(_, lar))
 
     validateAll(checks, lar)
