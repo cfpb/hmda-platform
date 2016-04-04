@@ -1,7 +1,7 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ CommonDsl, Result }
+import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
 object V262 extends EditCheck[LoanApplicationRegister] {
