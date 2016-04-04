@@ -2,23 +2,22 @@ package hmda.api.http
 
 import java.net.InetAddress
 import java.time.Instant
+
 import akka.Done
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ HttpResponse, StatusCodes, Multipart }
+import akka.http.scaladsl.model.{ HttpResponse, Multipart, StatusCodes }
 import akka.http.scaladsl.model.Multipart.BodyPart
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Framing }
+import akka.stream.scaladsl.{ Framing, Sink }
 import akka.util.ByteString
 import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import hmda.api.processing.ProcessingActor
-import hmda.api.processing.ProcessingActor.StopActor
+import hmda.api.processing.HmdaFileUpload
 import hmda.api.protocol.HmdaApiProtocol
 import spray.json._
-
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
@@ -42,9 +41,10 @@ trait HttpApi extends HmdaApiProtocol {
         }
       }
     } ~
-      path("upload") {
+      path("upload" / Segment) { id =>
+        import HmdaFileUpload._
         post {
-          val processingActor = system.actorOf(ProcessingActor.props)
+          val processingActor = system.actorOf(HmdaFileUpload.props(id))
           entity(as[Multipart.FormData]) { formData =>
             val uploaded: Future[Done] = formData.parts.mapAsync(1) {
               //TODO: check Content-Type type as well?
@@ -59,12 +59,13 @@ trait HttpApi extends HmdaApiProtocol {
 
             onComplete(uploaded) {
               case Success(response) =>
-                processingActor ! StopActor
+                processingActor ! CompleteUpload
+                processingActor ! Shutdown
                 complete {
                   "uploaded"
                 }
               case Failure(error) =>
-                processingActor ! StopActor
+                processingActor ! Shutdown
                 log.error(error.getLocalizedMessage)
                 complete {
                   HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
