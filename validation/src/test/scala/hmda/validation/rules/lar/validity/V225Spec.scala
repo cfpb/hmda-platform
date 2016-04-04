@@ -1,13 +1,11 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.{ Loan, LoanApplicationRegister }
-import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{ MustMatchers, PropSpec }
 
-class V225Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
+class V225Spec extends LarEditCheckSpec {
   property("Loan Purpose must = 1, 2, or 3") {
     forAll(larGen) { lar =>
       V225(lar) mustBe Success()
