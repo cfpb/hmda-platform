@@ -31,7 +31,9 @@ object HMDABuild extends Build {
 
   val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
+  val persistence = commonDeps ++ Seq(leveldb, leveldbjni, akkaPersistence)
+
+  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream, akkaTestkit)
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
@@ -52,12 +54,13 @@ object HMDABuild extends Build {
             oldStrategy(x)
         }
       )
-    ).dependsOn(api)
+    ).dependsOn(frontend)
     .aggregate(
       parser,
-      api,
-      platformTest,
-      validation)
+      frontend,
+      backend,
+      validation,
+      platformTest)
 
   lazy val model = (project in file("model"))
     .settings(buildSettings: _*)
@@ -65,11 +68,11 @@ object HMDABuild extends Build {
 
   lazy val parser = (project in file("parser"))
     .settings(buildSettings: _*)
-      .settings(
-        Seq(
-          libraryDependencies ++= commonDeps
-        )
-      )
+    .settings(
+       Seq(
+         libraryDependencies ++= commonDeps
+       )
+    )
     .dependsOn(model)
 
   lazy val validation = (project in file("validation"))
@@ -79,7 +82,14 @@ object HMDABuild extends Build {
     ).dependsOn(parser % "compile->compile;test->test")
 
 
-  lazy val api = (project in file("api"))
+  lazy val backend = (project in file("backend"))
+    .settings(buildSettings: _*)
+    .settings(
+      libraryDependencies ++= akkaDeps ++ persistence
+    ).dependsOn(parser % "compile->compile;test->test")
+
+
+  lazy val frontend = (project in file("frontend"))
     .settings(buildSettings: _*)
     .settings(Revolver.settings:_*)
     .settings(
@@ -95,7 +105,7 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= httpDeps
       )
-    ).dependsOn(parser)
+    ).dependsOn(parser, backend)
 
 
   lazy val platformTest = (project in file("platform-test"))
