@@ -44,6 +44,7 @@ trait HttpApi extends HmdaApiProtocol {
       path("upload" / Segment) { id =>
         import HmdaFileUpload._
         post {
+          val uploadTimestamp = Instant.now.toEpochMilli
           val processingActor = system.actorOf(HmdaFileUpload.props(id))
           entity(as[Multipart.FormData]) { formData =>
             val uploaded: Future[Done] = formData.parts.mapAsync(1) {
@@ -52,7 +53,7 @@ trait HttpApi extends HmdaApiProtocol {
                 b.entity.dataBytes
                   .via(splitLines)
                   .map(_.utf8String)
-                  .runForeach(line => processingActor ! line)
+                  .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
 
               case _ => Future.failed(throw new Exception("File could not be uploaded"))
             }.runWith(Sink.ignore)
