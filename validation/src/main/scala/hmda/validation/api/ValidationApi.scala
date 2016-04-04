@@ -8,8 +8,8 @@ import scalaz.Scalaz._
 
 trait ValidationApi {
 
-  def doCheck[T](check: EditCheck[T], input: T): ValidationNel[ValidationError, T] = {
-    convertResult(input, check(input), check.name)
+  def check[T](editCheck: EditCheck[T], input: T): ValidationNel[ValidationError, T] = {
+    convertResult(input, editCheck(input), editCheck.name)
   }
 
   def convertResult[T](input: T, result: Result, ruleName: String): ValidationNel[ValidationError, T] = {

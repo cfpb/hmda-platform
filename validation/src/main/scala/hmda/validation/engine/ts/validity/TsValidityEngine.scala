@@ -12,7 +12,7 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
       V105,
       V140,
       V155
-    ).map(doCheck(_, ts))
+    ).map(check(_, ts))
 
     validateAll(checks, ts)
   }
