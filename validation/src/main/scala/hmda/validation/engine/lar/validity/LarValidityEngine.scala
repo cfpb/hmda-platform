@@ -8,8 +8,8 @@ import hmda.validation.rules.lar.validity.{ V262, V220, V225 }
 
 trait LarValidityEngine extends LarCommonEngine with ValidationApi {
 
-  private def doCheck(editCheck: EditCheck[LoanApplicationRegister], lar: LoanApplicationRegister): LarValidation = {
-    convertResult(lar, editCheck(lar), editCheck.name)
+  private def doCheck(check: EditCheck[LoanApplicationRegister], lar: LoanApplicationRegister): LarValidation = {
+    convertResult(lar, check(lar), check.name)
   }
 
   def validate(lar: LoanApplicationRegister): LarValidation = {

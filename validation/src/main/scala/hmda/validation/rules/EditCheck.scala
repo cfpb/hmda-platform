@@ -6,5 +6,5 @@ abstract class EditCheck[T] extends CommonDsl {
 
   def name: String
 
-  def apply(lar: T): Result
+  def apply(input: T): Result
 }
