@@ -3,11 +3,12 @@ package hmda.validation.rules.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ CommonDsl, Result }
 
-object V262 extends CommonDsl {
+object V400 extends CommonDsl {
+
+  val propertyTypes = List(1, 2, 3)
+
   def apply(lar: LoanApplicationRegister): Result = {
-    val applicationDate = lar.loan.applicationDate
-    when(applicationDate is equalTo("NA")) {
-      lar.actionTakenType is equalTo(6)
-    }
+    lar.loan.propertyType is containedIn(propertyTypes)
   }
+
 }
