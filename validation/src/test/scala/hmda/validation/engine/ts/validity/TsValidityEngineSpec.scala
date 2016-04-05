@@ -15,7 +15,7 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
   property("Transmittal Sheet must be valid") {
     forAll(tsGen) { ts =>
       whenever(respondentNotEmpty(ts.respondent)) {
-        validate(ts).isSuccess mustBe true
+        checkValidity(ts).isSuccess mustBe true
       }
     }
   }
@@ -24,7 +24,7 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
         val badTs = ts.copy(respondent = Respondent("", "", "", "", "", ""))
-        validate(badTs).isFailure mustBe true
+        checkValidity(badTs).isFailure mustBe true
       }
     }
   }
@@ -34,8 +34,8 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
       whenever(ts.id == 1) {
         val badTs = ts.copy(respondent = Respondent("", "", "", "", "XXX", ""))
         val badTs2 = ts.copy(respondent = Respondent("", "", "", "", "XX", ""))
-        validate(badTs).isFailure mustBe true
-        validate(badTs2).isFailure mustBe true
+        checkValidity(badTs).isFailure mustBe true
+        checkValidity(badTs2).isFailure mustBe true
       }
     }
   }
@@ -45,8 +45,8 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
       whenever(ts.id == 1) {
         val badTs = ts.copy(contact = Contact("", "", "", "sqwdqw"))
         val badTs2 = ts.copy(contact = Contact("", "", "", ""))
-        validate(badTs).isFailure mustBe true
-        validate(badTs2).isFailure mustBe true
+        checkValidity(badTs).isFailure mustBe true
+        checkValidity(badTs2).isFailure mustBe true
       }
     }
   }
