@@ -7,4 +7,5 @@ import scalaz._
 
 trait LarCommonEngine {
   type LarValidation = ValidationNel[ValidationError, LoanApplicationRegister]
+  type LarsValidation = ValidationNel[ValidationError, Iterable[LoanApplicationRegister]]
 }

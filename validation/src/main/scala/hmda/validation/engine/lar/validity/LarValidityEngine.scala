@@ -7,7 +7,7 @@ import hmda.validation.rules.lar.validity._
 
 trait LarValidityEngine extends LarCommonEngine with ValidationApi {
 
-  def validate(lar: LoanApplicationRegister): LarValidation = {
+  def checkValidity(lar: LoanApplicationRegister): LarValidation = {
     val checks = List(
       V220,
       V225,
