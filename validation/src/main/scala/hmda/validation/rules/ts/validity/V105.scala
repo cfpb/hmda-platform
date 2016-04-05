@@ -1,12 +1,13 @@
 package hmda.validation.rules.ts.validity
 
-import hmda.model.fi.ts.{ Respondent, TransmittalSheet }
-import hmda.validation.dsl.{ CommonDsl, Result }
+import hmda.model.fi.ts.TransmittalSheet
+import hmda.validation.dsl.Result
+import hmda.validation.rules.EditCheck
 
 /*
  Respondent name, address, city, state, and zip code must not = blank
  */
-object V105 extends CommonDsl {
+object V105 extends EditCheck[TransmittalSheet] {
   def apply(ts: TransmittalSheet): Result = {
     val respondent = ts.respondent
     val respName = respondent.name
@@ -22,4 +23,5 @@ object V105 extends CommonDsl {
       (respZipCode not empty)
   }
 
+  override def name: String = "V105"
 }

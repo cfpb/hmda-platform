@@ -2,10 +2,15 @@ package hmda.validation.api
 
 import hmda.validation.dsl.{ Failure, Result, Success }
 import hmda.validation.engine.ValidationError
+import hmda.validation.rules.EditCheck
 import scalaz._
 import scalaz.Scalaz._
 
 trait ValidationApi {
+
+  def check[T](editCheck: EditCheck[T], input: T): ValidationNel[ValidationError, T] = {
+    convertResult(input, editCheck(input), editCheck.name)
+  }
 
   def convertResult[T](input: T, result: Result, ruleName: String): ValidationNel[ValidationError, T] = {
     result match {
