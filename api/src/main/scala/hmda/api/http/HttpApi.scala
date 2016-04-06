@@ -29,7 +29,7 @@ trait HttpApi extends HmdaApiProtocol {
 
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
-  val routes = {
+  val rootPath =
     pathSingleSlash {
       get {
         complete {
@@ -40,40 +40,43 @@ trait HttpApi extends HmdaApiProtocol {
           ToResponseMarshallable(status)
         }
       }
-    } ~
-      path("upload" / Segment) { id =>
-        import HmdaFileUpload._
-        post {
-          val uploadTimestamp = Instant.now.toEpochMilli
-          val processingActor = system.actorOf(HmdaFileUpload.props(id))
-          entity(as[Multipart.FormData]) { formData =>
-            val uploaded: Future[Done] = formData.parts.mapAsync(1) {
-              //TODO: check Content-Type type as well?
-              case b: BodyPart if b.filename.exists(_.endsWith(".txt")) =>
-                b.entity.dataBytes
-                  .via(splitLines)
-                  .map(_.utf8String)
-                  .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
+    }
 
-              case _ => Future.failed(throw new Exception("File could not be uploaded"))
-            }.runWith(Sink.ignore)
+  val uploadPath =
+    path("upload" / Segment) { id =>
+      import HmdaFileUpload._
+      post {
+        val uploadTimestamp = Instant.now.toEpochMilli
+        val processingActor = system.actorOf(HmdaFileUpload.props(id))
+        entity(as[Multipart.FormData]) { formData =>
+          val uploaded: Future[Done] = formData.parts.mapAsync(1) {
+            //TODO: check Content-Type type as well?
+            case b: BodyPart if b.filename.exists(_.endsWith(".txt")) =>
+              b.entity.dataBytes
+                .via(splitLines)
+                .map(_.utf8String)
+                .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
 
-            onComplete(uploaded) {
-              case Success(response) =>
-                processingActor ! CompleteUpload
-                processingActor ! Shutdown
-                complete {
-                  "uploaded"
-                }
-              case Failure(error) =>
-                processingActor ! Shutdown
-                log.error(error.getLocalizedMessage)
-                complete {
-                  HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
-                }
-            }
+            case _ => Future.failed(throw new Exception("File could not be uploaded"))
+          }.runWith(Sink.ignore)
+
+          onComplete(uploaded) {
+            case Success(response) =>
+              processingActor ! CompleteUpload
+              processingActor ! Shutdown
+              complete {
+                "uploaded"
+              }
+            case Failure(error) =>
+              processingActor ! Shutdown
+              log.error(error.getLocalizedMessage)
+              complete {
+                HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
+              }
           }
         }
       }
-  }
+    }
+
+  val routes = rootPath ~ uploadPath
 }
