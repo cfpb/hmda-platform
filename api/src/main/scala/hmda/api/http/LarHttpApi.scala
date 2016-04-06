@@ -45,14 +45,16 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
   val validateLarRoute =
     pathPrefix("lar") {
       path("validate") {
-        post {
-          entity(as[LoanApplicationRegister]) { lar =>
-            val larValidation = system.actorSelection("/user/larValidation")
-            onComplete((larValidation ? CheckLar(lar)).mapTo[List[ValidationError]]) {
-              case Success(xs) =>
-                complete(ToResponseMarshallable(xs))
-              case Failure(e) =>
-                complete(HttpResponse(StatusCodes.InternalServerError))
+        parameters('type.as[String] ? "all") { (checkType) =>
+          post {
+            entity(as[LoanApplicationRegister]) { lar =>
+              val larValidation = system.actorSelection("/user/larValidation")
+              onComplete((larValidation ? CheckLar(lar)).mapTo[List[ValidationError]]) {
+                case Success(xs) =>
+                  complete(ToResponseMarshallable(xs))
+                case Failure(e) =>
+                  complete(HttpResponse(StatusCodes.InternalServerError))
+              }
             }
           }
         }
