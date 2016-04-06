@@ -33,6 +33,8 @@ object HMDABuild extends Build {
 
   val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
 
+  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, leveldb, leveldbjni)
+
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
   val scalazDeps = Seq(scalaz)
@@ -93,7 +95,7 @@ object HMDABuild extends Build {
             val oldStrategy = (assemblyMergeStrategy in assembly).value
             oldStrategy(x)
         },
-        libraryDependencies ++= httpDeps
+        libraryDependencies ++= httpDeps ++ akkaPersistenceDeps
       )
     ).dependsOn(parser, validation % "compile->compile;test->test")
 
