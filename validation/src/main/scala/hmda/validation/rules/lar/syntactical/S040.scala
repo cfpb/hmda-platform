@@ -2,8 +2,9 @@ package hmda.validation.rules.lar.syntactical
 
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ CommonDsl, Failure, Result, Success }
+import hmda.validation.rules.EditCheck
 
-object S040 extends CommonDsl {
+object S040 extends EditCheck[Iterable[LoanApplicationRegister]] {
 
   //TODO: naive implementation, bail out as soon as a duplicate is found
   def apply(lars: Iterable[LoanApplicationRegister]): Result = {
@@ -14,4 +15,6 @@ object S040 extends CommonDsl {
     val uniqueSize = uniqueIds.size
     if (size != uniqueSize) Failure("Submission contains duplicates") else Success()
   }
+
+  def name = "S040"
 }

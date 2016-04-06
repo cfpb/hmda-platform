@@ -7,7 +7,7 @@ import hmda.validation.rules.ts.validity.{ V105, V140, V155 }
 
 trait TsValidityEngine extends TsCommonEngine with ValidationApi {
 
-  def validate(ts: TransmittalSheet): TsValidation = {
+  def checkValidity(ts: TransmittalSheet): TsValidation = {
     val checks: List[TsValidation] = List(
       V105,
       V140,
