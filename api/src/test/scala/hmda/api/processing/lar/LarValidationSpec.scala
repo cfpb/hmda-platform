@@ -28,7 +28,7 @@ class LarValidationSpec(_system: ActorSystem)
   val lines = Source.fromFile(new File("parser/src/test/resources/txt/THE_LYONS_NATIONAL_BANK.txt")).getLines()
   val lars = lines.drop(1).map(l => LarCsvParser(l))
 
-  "A valid HMDA File" must {
+  "LAR Validation" must {
     "validate all lars in sample files" in {
       lars.foreach { lar =>
         larValidation ! CheckLar(lar)
