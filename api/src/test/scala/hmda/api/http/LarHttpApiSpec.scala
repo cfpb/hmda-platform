@@ -43,6 +43,14 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
         responseAs[List[ValidationError]] mustBe Nil
       }
     }
+
+    "return validation error for invalid LAR (S020, agency code not in valid values domain)" in {
+      val badLar = lar.copy(agencyCode = 0)
+      Post("/lar/validate", badLar) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[List[ValidationError]].length mustBe 1
+      }
+    }
   }
 
 }
