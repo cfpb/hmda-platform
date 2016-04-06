@@ -19,4 +19,10 @@ class LarSyntacticalEngineSpec
     }
   }
 
+  property("Pass syntactical checks on groups of LARs") {
+    forAll(larListGen) { lars =>
+      checkSyntacticalCollection(lars).isSuccess mustBe true
+    }
+  }
+
 }
