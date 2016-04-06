@@ -28,10 +28,13 @@ class LarValidation extends Actor with ActorLogging with LarEngine {
 
   override def receive: Receive = {
     case CheckSyntacticalLar(lar) =>
+      log.debug(s"Checking syntactical on LAR: ${lar.toCSV}")
       sender() ! validationErrors(lar, LarSyntactical)
     case CheckValidityLar(lar) =>
+      log.debug(s"Checking validity on LAR: ${lar.toCSV}")
       sender() ! validationErrors(lar, LarValidity)
     case CheckLar(lar) =>
+      log.debug(s"Checking all edits on LAR: ${lar.toCSV}")
       sender() ! validationErrors(lar, LarFull)
 
     case _ =>
