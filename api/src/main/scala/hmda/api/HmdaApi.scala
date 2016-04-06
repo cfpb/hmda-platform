@@ -3,11 +3,12 @@ package hmda.api
 import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.HttpApi
+import hmda.api.http.{ HttpApi, LarHttpApi }
 
-object HmdaApi extends App with HttpApi {
+object HmdaApi extends App with HttpApi with LarHttpApi {
 
   override implicit val system = ActorSystem("hmda")
   override implicit val materializer = ActorMaterializer()
@@ -20,7 +21,7 @@ object HmdaApi extends App with HttpApi {
   lazy val port = config.getInt("hmda.http.port")
 
   val http = Http().bindAndHandle(
-    routes,
+    routes ~ larRoutes,
     host,
     port
   )
