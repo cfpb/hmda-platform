@@ -15,7 +15,11 @@ object Dependencies {
   val scalaz = "org.scalaz" %% "scalaz-core" % Version.scalaz
   val akkaSlf4J = "com.typesafe.akka" %% "akka-slf4j" % Version.akka
   val akka = "com.typesafe.akka" %% "akka-actor" % Version.akka
+  val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % Version.akka % "test"
   val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
+  val akkaPersistence = "com.typesafe.akka" %% "akka-persistence" % Version.akka
+  val leveldb = "org.iq80.leveldb" % "leveldb" % Version.leveldb
+  val leveldbjni = "org.fusesource.leveldbjni" % "leveldbjni-all" % Version.leveldbjni
   val akkaHttp = "com.typesafe.akka" %% "akka-http-experimental" % Version.akka
   val akkaHttpJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % Version.akka
   val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akka % "test"
