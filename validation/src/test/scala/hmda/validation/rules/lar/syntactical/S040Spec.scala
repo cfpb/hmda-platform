@@ -1,11 +1,9 @@
 package hmda.validation.rules.lar.syntactical
 
-import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.dsl.{ Failure, Success }
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{ MustMatchers, PropSpec }
+import hmda.validation.rules.lar.LarEditCheckSpec
 
-class S040Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
+class S040Spec extends LarEditCheckSpec {
 
   property("Loan/Application number must be unique") {
     forAll(larListGen) { lars =>

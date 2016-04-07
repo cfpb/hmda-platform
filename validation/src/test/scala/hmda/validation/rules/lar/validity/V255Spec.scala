@@ -1,12 +1,10 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{ MustMatchers, PropSpec }
 
-class V255Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
+class V255Spec extends LarEditCheckSpec {
   property("Succeeds when Action Taken Type = 1, 2, 3, 4, 5, 6, 7, or 8") {
     forAll(larGen) { lar =>
       V255(lar) mustBe Success()
