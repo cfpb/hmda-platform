@@ -16,7 +16,8 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V340,
       V347,
       V375,
-      V400
+      V400,
+      V575
     ).map(check(_, lar))
 
     validateAll(checks, lar)
