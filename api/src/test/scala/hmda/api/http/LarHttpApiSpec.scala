@@ -1,13 +1,11 @@
 package hmda.api.http
 
-import akka.actor.ActorSystem
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
 import org.scalatest.{ MustMatchers, WordSpec }
-
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -47,6 +45,23 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
     "return validation error for invalid LAR (S020, agency code not in valid values domain)" in {
       val badLar = lar.copy(agencyCode = 0)
       Post("/lar/validate", badLar) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[List[ValidationError]].length mustBe 1
+      }
+    }
+
+    "filters syntactical or validity only for invalid LAR with both syntactical and validity errors" in {
+      val badLoanType = lar.loan.copy(loanType = 0)
+      val badLar = lar.copy(agencyCode = 0, loan = badLoanType)
+      Post("/lar/validate", badLar) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[List[ValidationError]].length mustBe 2
+      }
+      Post("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[List[ValidationError]].length mustBe 1
+      }
+      Post("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 1
       }
