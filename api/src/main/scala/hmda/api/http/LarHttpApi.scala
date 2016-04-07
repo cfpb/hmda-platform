@@ -11,7 +11,7 @@ import hmda.parser.fi.lar.LarCsvParser
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.util.Timeout
-import hmda.api.processing.lar.LarValidation.{ CheckLar, CheckSyntacticalLar, CheckValidityLar }
+import hmda.api.processing.lar.SingleLarValidation.{ CheckLar, CheckSyntacticalLar, CheckValidityLar }
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.engine.ValidationError

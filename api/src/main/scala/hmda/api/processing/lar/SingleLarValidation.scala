@@ -5,8 +5,8 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.engine.ValidationError
 import hmda.validation.engine.lar.LarEngine
 
-object LarValidation {
-  def props: Props = Props(new LarValidation)
+object SingleLarValidation {
+  def props: Props = Props(new SingleLarValidation)
 
   case class CheckLar(lar: LoanApplicationRegister)
   case class CheckSyntacticalLar(lar: LoanApplicationRegister)
@@ -23,8 +23,8 @@ object LarValidation {
 
 }
 
-class LarValidation extends Actor with ActorLogging with LarEngine {
-  import LarValidation._
+class SingleLarValidation extends Actor with ActorLogging with LarEngine {
+  import SingleLarValidation._
 
   override def receive: Receive = {
     case CheckSyntacticalLar(lar) =>
