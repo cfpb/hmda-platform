@@ -1,27 +1,12 @@
 package hmda.api.processing.lar
 
 import java.io.File
-
-import akka.actor.ActorSystem
-import akka.testkit.{ ImplicitSender, TestKit }
+import hmda.api.processing.ActorSpec
 import hmda.api.processing.lar.LarValidation.CheckLar
 import hmda.parser.fi.lar.LarCsvParser
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpecLike }
-
 import scala.io.Source
 
-class LarValidationSpec(_system: ActorSystem)
-    extends TestKit(_system)
-    with WordSpecLike
-    with ImplicitSender
-    with MustMatchers
-    with BeforeAndAfterAll {
-
-  def this() = this(ActorSystem("hmda-lar-validation-test"))
-
-  override def afterAll(): Unit = {
-    TestKit.shutdownActorSystem(system)
-  }
+class LarValidationSpec extends ActorSpec {
 
   val larValidation = system.actorOf(LarValidation.props, "larValidation")
 
