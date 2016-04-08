@@ -1,11 +1,9 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.dsl.{ Failure, Success }
-import org.scalatest.{ MustMatchers, PropSpec }
-import org.scalatest.prop.PropertyChecks
+import hmda.validation.rules.lar.LarEditCheckSpec
 
-class V262Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
+class V262Spec extends LarEditCheckSpec {
   property("If date application received = NA, then action taken type must = 6") {
     forAll(larGen) { lar =>
       whenever(lar.id == 2) {

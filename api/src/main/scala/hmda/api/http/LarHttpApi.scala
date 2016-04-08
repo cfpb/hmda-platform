@@ -11,10 +11,11 @@ import hmda.parser.fi.lar.LarCsvParser
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.util.Timeout
-import hmda.api.processing.lar.LarValidation.CheckLar
+import hmda.api.processing.lar.SingleLarValidation.{ CheckLar, CheckSyntacticalLar, CheckValidityLar }
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.engine.ValidationError
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
@@ -45,11 +46,16 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
   val validateLarRoute =
     pathPrefix("lar") {
       path("validate") {
-        parameters('type.as[String] ? "all") { (checkType) =>
+        parameters('check.as[String] ? "all") { (checkType) =>
           post {
             entity(as[LoanApplicationRegister]) { lar =>
               val larValidation = system.actorSelection("/user/larValidation")
-              onComplete((larValidation ? CheckLar(lar)).mapTo[List[ValidationError]]) {
+              val checkMessage = checkType match {
+                case "syntactical" => CheckSyntacticalLar(lar)
+                case "validity" => CheckValidityLar(lar)
+                case _ => CheckLar(lar)
+              }
+              onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
                 case Success(xs) =>
                   complete(ToResponseMarshallable(xs))
                 case Failure(e) =>

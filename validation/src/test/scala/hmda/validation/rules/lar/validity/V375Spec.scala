@@ -1,11 +1,9 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.dsl.{ Failure, Success }
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{ MustMatchers, PropSpec }
+import hmda.validation.rules.lar.LarEditCheckSpec
 
-class V375Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
+class V375Spec extends LarEditCheckSpec {
 
   property("if purchaser type is 2, then loan type 2, 3, or 4 must succeed") {
     forAll(larGen) { lar =>

@@ -1,11 +1,9 @@
 package hmda.validation.rules.lar.syntactical
 
-import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.dsl.Success
-import org.scalatest.{ MustMatchers, PropSpec }
-import org.scalatest.prop.PropertyChecks
+import hmda.validation.rules.lar.LarEditCheckSpec
 
-class S010Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
+class S010Spec extends LarEditCheckSpec {
 
   property("Record identifier must be 2") {
     forAll(larGen) { lar =>
