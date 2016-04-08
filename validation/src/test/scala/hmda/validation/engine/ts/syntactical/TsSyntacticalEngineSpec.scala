@@ -2,6 +2,7 @@ package hmda.validation.engine.ts.syntactical
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.ts.TsGenerators
+import hmda.validation.engine.ts.TsValidationApiSpec
 import org.scalacheck.Gen
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
@@ -10,27 +11,7 @@ import org.scalatest.time.{ Millis, Seconds, Span }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsSyntacticalEngine with ScalaFutures {
-
-  /*
-    The following methods simulate API calls to get values from remote resources
-    */
-
-  /*
-    Gets latest timestamp from database (see S013)
-   */
-  override def findTimestamp: Future[Long] = Future(201301111330L)
-
-  /*
-    Returns year to be processed (see S100)
-   */
-  override def findYearProcessed: Future[Int] = Future(2017)
-
-  /*
-  Returns control number (valid respondent id / agency code combination for date processed, see S025)
-  TODO: figure out what this means (???). S025 is not implemented yet
-   */
-  override def findControlNumber: Future[String] = Future("")
+class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsSyntacticalEngine with ScalaFutures with TsValidationApiSpec {
 
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -116,7 +97,7 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
   protected def failGenTs(badTs: Gen[TransmittalSheet]): Assertion = {
     badTs.sample match {
       case Some(x) => {
-        val fValidated = validate(x)
+        val fValidated = checkSyntactical(x)
         whenReady(fValidated) { validated =>
           validated.isFailure mustBe true
         }
@@ -128,7 +109,7 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
   protected def passGenTs(goodTs: Gen[TransmittalSheet]): Assertion = {
     goodTs.sample match {
       case Some(x) => {
-        val fValidated = validate(x)
+        val fValidated = checkSyntactical(x)
         whenReady(fValidated) { validated =>
           validated.isSuccess mustBe true
         }

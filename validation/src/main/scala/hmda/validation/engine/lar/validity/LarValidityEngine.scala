@@ -3,32 +3,25 @@ package hmda.validation.engine.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.engine.lar.LarCommonEngine
-import hmda.validation.rules.lar.validity.{ V262, V220, V225, V400 }
+import hmda.validation.rules.lar.validity._
 
 trait LarValidityEngine extends LarCommonEngine with ValidationApi {
-  private def v220(lar: LoanApplicationRegister): LarValidation = {
-    convertResult(lar, V220(lar.loan), "V220")
-  }
 
-  private def v225(lar: LoanApplicationRegister): LarValidation = {
-    convertResult(lar, V225(lar), "V225")
-  }
-
-  private def v262(lar: LoanApplicationRegister): LarValidation = {
-    convertResult(lar, V262(lar), "V262")
-  }
-
-  private def v400(lar: LoanApplicationRegister): LarValidation = {
-    convertResult(lar, V400(lar), "V400")
-  }
-
-  def validate(lar: LoanApplicationRegister): LarValidation = {
+  def checkValidity(lar: LoanApplicationRegister): LarValidation = {
     val checks = List(
-      v220(lar),
-      v225(lar),
-      v262(lar),
-      v400(lar)
-    )
+      V220,
+      V225,
+      V255,
+      V262,
+      V310,
+      V340,
+      V347,
+      V375,
+      V400,
+      V410,
+      V455,
+      V575
+    ).map(check(_, lar))
 
     validateAll(checks, lar)
   }

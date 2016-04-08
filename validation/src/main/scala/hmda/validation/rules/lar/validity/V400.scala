@@ -1,9 +1,10 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ CommonDsl, Result }
+import hmda.validation.dsl.Result
+import hmda.validation.rules.EditCheck
 
-object V400 extends CommonDsl {
+object V400 extends EditCheck[LoanApplicationRegister] {
 
   val propertyTypes = List(1, 2, 3)
 
@@ -11,4 +12,5 @@ object V400 extends CommonDsl {
     lar.loan.propertyType is containedIn(propertyTypes)
   }
 
+  override def name: String = "V400"
 }

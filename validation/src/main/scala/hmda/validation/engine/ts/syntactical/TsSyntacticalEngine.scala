@@ -42,7 +42,7 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
     convertResult(t, S028(t), "S028")
   }
 
-  def validate(ts: TransmittalSheet): Future[TsValidation] = {
+  def checkSyntactical(ts: TransmittalSheet): Future[TsValidation] = {
 
     val checks = List(
       s010(ts),
