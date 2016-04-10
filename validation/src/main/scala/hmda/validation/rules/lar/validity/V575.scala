@@ -1,7 +1,5 @@
 package hmda.validation.rules.lar.validity
 
-import java.lang.NumberFormatException
-
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ Failure, RegexDsl, Result }
 import hmda.validation.rules.EditCheck
