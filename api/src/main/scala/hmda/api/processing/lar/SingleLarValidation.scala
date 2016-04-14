@@ -17,9 +17,9 @@ object SingleLarValidation {
   case object LarValidityError extends LarValidationError
 
   trait ValidationType
-  case object LarSyntactical extends ValidationType
-  case object LarValidity extends ValidationType
-  case object LarFull extends ValidationType
+  case object LarSyntacticalValidation extends ValidationType
+  case object LarValidityValidation extends ValidationType
+  case object LarFullValidation extends ValidationType
 
 }
 
@@ -29,13 +29,13 @@ class SingleLarValidation extends Actor with ActorLogging with LarEngine {
   override def receive: Receive = {
     case CheckSyntacticalLar(lar) =>
       log.debug(s"Checking syntactical on LAR: ${lar.toCSV}")
-      sender() ! validationErrors(lar, LarSyntactical)
+      sender() ! validationErrors(lar, LarSyntacticalValidation)
     case CheckValidityLar(lar) =>
       log.debug(s"Checking validity on LAR: ${lar.toCSV}")
-      sender() ! validationErrors(lar, LarValidity)
+      sender() ! validationErrors(lar, LarValidityValidation)
     case CheckLar(lar) =>
       log.debug(s"Checking all edits on LAR: ${lar.toCSV}")
-      sender() ! validationErrors(lar, LarFull)
+      sender() ! validationErrors(lar, LarFullValidation)
 
     case _ =>
       log.error(s"Unsupported message sent to ${self.path}")
@@ -43,9 +43,9 @@ class SingleLarValidation extends Actor with ActorLogging with LarEngine {
 
   private def validationErrors(lar: LoanApplicationRegister, validationType: ValidationType): List[ValidationError] = {
     val validation = validationType match {
-      case LarFull => validateLar(lar).disjunction
-      case LarSyntactical => checkSyntactical(lar).disjunction
-      case LarValidity => checkValidity(lar).disjunction
+      case LarFullValidation => validateLar(lar).disjunction
+      case LarSyntacticalValidation => checkSyntactical(lar).disjunction
+      case LarValidityValidation => checkValidity(lar).disjunction
     }
     if (validation.isRight) {
       Nil
