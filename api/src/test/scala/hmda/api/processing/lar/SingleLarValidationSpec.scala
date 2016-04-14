@@ -10,7 +10,7 @@ class SingleLarValidationSpec extends ActorSpec {
 
   val larValidation = system.actorOf(SingleLarValidation.props, "larValidation")
 
-  val lines = Source.fromFile(new File("parser/src/test/resources/txt/THE_LYONS_NATIONAL_BANK.txt")).getLines()
+  val lines = Source.fromFile(new File("parser/src/test/resources/txt/FirstTestBankData_clean_407_2017.txt")).getLines()
   val lars = lines.drop(1).map(l => LarCsvParser(l))
 
   "LAR Validation" must {
