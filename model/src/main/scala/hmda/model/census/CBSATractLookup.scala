@@ -5,7 +5,7 @@ import java.io.File
 import scala.io.Source
 
 object CBSATractLookup {
-  def apply(): Seq[CBSATract] = {
+  val values: Seq[CBSATract] = {
     val lines = Source.fromFile(new File("model/src/main/resources/tract_to_cbsa_2013.csv")).getLines
     lines.map { line =>
       val values = line.split('|').map(_.trim)
