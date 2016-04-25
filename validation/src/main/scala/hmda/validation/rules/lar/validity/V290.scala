@@ -20,7 +20,7 @@ object V290 extends EditCheck[LoanApplicationRegister] {
 
     when(msa not equalTo("NA")) {
       val values = cbsaTracts.filter { c =>
-        c.geoid_msa == msa &&
+        c.geoidMsa == msa &&
           c.state == state &&
           c.county == county
       }
@@ -39,7 +39,7 @@ object V290 extends EditCheck[LoanApplicationRegister] {
   private def msaCode(code: String): String = {
     val md = cbsaTracts.filter(m => m.metdivfp == code)
     if (md.nonEmpty) {
-      md.head.geoid_msa
+      md.head.geoidMsa
     } else {
       code
     }

@@ -51,8 +51,8 @@ case class CBSATract(
   state: String,
   county: String,
   tracts: String,
-  geoid_msa: String,
-  geoid_metdiv: String,
+  geoidMsa: String,
+  geoidMetdiv: String,
   metdivfp: String,
-  small_county: String
+  smallCounty: String
 )
