@@ -98,8 +98,8 @@ trait LarGenerators extends FIGenerators {
 
   implicit def censusTractGen = {
     for {
-      tract <- Gen.oneOf(stringOfN(4, Gen.numChar), Gen.choose(1, 9999)) // with or without leading zeroes
-      suffix <- optional(stringOfN(2, Gen.numChar))
+      tract <- stringOfN(4, Gen.numChar) // with or without leading zeroes
+      suffix <- stringOfN(2, Gen.numChar)
     } yield List(tract, suffix).mkString(".")
   }
 
