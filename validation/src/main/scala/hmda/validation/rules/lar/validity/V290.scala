@@ -16,7 +16,7 @@ object V290 extends EditCheck[LoanApplicationRegister] {
   override def apply(input: LoanApplicationRegister): Result = {
     val msa = msaCode(input.geography.msa)
     val state = input.geography.state
-    val county = state + input.geography.county
+    val county = input.geography.county
 
     val combination = (state, county, msa)
 
@@ -30,7 +30,7 @@ object V290 extends EditCheck[LoanApplicationRegister] {
   }
 
   private def msaCode(code: String): String = {
-    val md = cbsaTracts.filter(m => m.metdivfp == code)
+    val md = cbsaTracts.filter(m => m.metDivFp == code)
     if (md.nonEmpty) {
       md.head.geoidMsa
     } else {
