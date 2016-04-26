@@ -18,23 +18,14 @@ object V290 extends EditCheck[LoanApplicationRegister] {
     val state = input.geography.state
     val county = state + input.geography.county
 
+    val combination = (state, county, msa)
+
     val validCombinations = cbsaTracts.map { cbsa =>
-      (state, county, msa)
+      (cbsa.state, cbsa.county, cbsa.geoidMsa)
     }
 
     when(msa not equalTo("NA")) {
-      val values = cbsaTracts.filter { c =>
-        c.geoidMsa == msa &&
-          c.state == state &&
-          c.county == county
-      }
-      if (values.nonEmpty) {
-        val value = values.head
-        val combination = (value.state, value.county, value.geoidMsa)
-        combination is containedIn(validCombinations)
-      } else {
-        Failure(failureMessage)
-      }
+      combination is containedIn(validCombinations)
     }
   }
 
