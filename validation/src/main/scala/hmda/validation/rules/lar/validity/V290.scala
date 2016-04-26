@@ -5,7 +5,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ Failure, Result }
 import hmda.validation.rules.EditCheck
 
-object V290 extends EditCheck[LoanApplicationRegister] {
+object V290 extends EditCheck[LoanApplicationRegister] with CensusEditCheck {
 
   val cbsaTracts = CBSATractLookup.values
 
@@ -14,7 +14,7 @@ object V290 extends EditCheck[LoanApplicationRegister] {
   def failureMessage = "MSA/MD, state, and county codes do not = a valid combination"
 
   override def apply(input: LoanApplicationRegister): Result = {
-    val msa = msaCode(input.geography.msa)
+    val msa = msaCode(cbsaTracts, input.geography.msa)
     val state = input.geography.state
     val county = state + input.geography.county
 
@@ -29,12 +29,4 @@ object V290 extends EditCheck[LoanApplicationRegister] {
     }
   }
 
-  private def msaCode(code: String): String = {
-    val md = cbsaTracts.filter(m => m.metdivfp == code)
-    if (md.nonEmpty) {
-      md.head.geoidMsa
-    } else {
-      code
-    }
-  }
 }
