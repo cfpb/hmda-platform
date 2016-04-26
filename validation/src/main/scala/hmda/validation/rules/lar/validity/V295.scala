@@ -11,17 +11,14 @@ object V295 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V295"
 
-  def failureMessage = ""
+  def failureMessage = "State and county does not equal a valid combination or (county equals NA and MSA/MD not NA)"
 
   override def apply(input: LoanApplicationRegister): Result = {
 
+    val msa = input.geography.msa
     val state = input.geography.state
     val county = input.geography.county
     val countyFips = input.geography.state + county
-
-    val NA = when(input.geography.msa is equalTo("NA")) {
-      county is equalTo("NA")
-    }
 
     val combination = (state, countyFips)
 
@@ -31,7 +28,14 @@ object V295 extends EditCheck[LoanApplicationRegister] {
 
     val validStateCountyCombination = combination is containedIn(validCombination)
 
-    validStateCountyCombination or NA
+    val NA = when(county is equalTo("NA")) {
+      msa is equalTo("NA")
+    }
+
+    if (county == "NA")
+      NA
+    else
+      validStateCountyCombination
 
   }
 

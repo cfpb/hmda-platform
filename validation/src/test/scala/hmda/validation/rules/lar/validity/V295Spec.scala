@@ -15,6 +15,16 @@ class V295Spec extends LarEditCheckSpec {
     }
   }
 
+  property("Fails for invalid State/County combinations when MSA/MD is not NA") {
+    forAll(larGen) { lar =>
+      whenever(lar.geography.msa != "NA") {
+        val invalidGeography = lar.geography.copy(state = "11", county = "555")
+        val invalidLar = lar.copy(geography = invalidGeography)
+        V295(invalidLar) mustBe a[Failure]
+      }
+    }
+  }
+
   property("Succeeds when MSA/MD is NA and county is also NA") {
     forAll(larGen) { lar =>
       val validGeography = lar.geography.copy(msa = "NA", county = "NA")
@@ -23,15 +33,14 @@ class V295Spec extends LarEditCheckSpec {
     }
   }
 
-  //TODO: this fails, but should it? if there is a valid combination of state/county, do we care if msa == NA?
-  //property("Fails when MSA/MD is NA but county has a value") {
-  //  forAll(larGen) { lar =>
-  //    whenever(lar.geography.county != "NA") {
-  //      val invalidGeography = lar.geography.copy(msa = "NA", county = "001", state = "06")
-  //      val invalidLar = lar.copy(geography = invalidGeography)
-  //      println(invalidLar)
-  //      V295(invalidLar) mustBe a[Failure]
-  //    }
-  //  }
-  //}
+  property("Fails when county is NA and MSA/MD is not NA") {
+    forAll(larGen) { lar =>
+      whenever(lar.geography.msa != "NA") {
+        val invalidGeography = lar.geography.copy(county = "NA")
+        val invalidLar = lar.copy(geography = invalidGeography)
+        V295(invalidLar) mustBe a[Failure]
+      }
+    }
+  }
+
 }
