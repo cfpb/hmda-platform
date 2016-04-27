@@ -27,12 +27,4 @@ object V290 extends EditCheck[LoanApplicationRegister] with CensusEditCheck {
     }
   }
 
-  private def msaCode(code: String): String = {
-    val md = cbsaTracts.filter(m => m.metDivFp == code)
-    if (md.nonEmpty) {
-      md.head.geoidMsa
-    } else {
-      code
-    }
-  }
 }
