@@ -3,6 +3,7 @@ package hmda.validation.rules.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import scala.util.Try
 
 object V470 extends EditCheck[LoanApplicationRegister] {
 
@@ -17,16 +18,11 @@ object V470 extends EditCheck[LoanApplicationRegister] {
   }
 
   private def validRace(input: String): Boolean = {
-    (input == "") || inRange(1 to 5, input)
+    (input == "") || inRange(1 to 5, input).getOrElse(false)
   }
 
-  private def inRange(domain: Seq[Int], input: String): Boolean = {
-    try {
-      val x = input.toInt
-      domain.contains(x)
-    } catch {
-      case ex: NumberFormatException => false
-    }
+  private def inRange(domain: Seq[Int], input: String): Try[Boolean] = {
+    Try(domain.contains(input.toInt))
   }
 
   def name: String = "V470"
