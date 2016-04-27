@@ -1,26 +1,11 @@
 package hmda.api.processing
 
 import java.time.Instant
-
-import akka.actor.ActorSystem
-import akka.testkit.{ ImplicitSender, TestKit }
 import hmda.api.processing.HmdaFileUpload.{ AddLine, GetState, HmdaFileUploadState }
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpecLike }
 
-class HmdaFileUploadSpec(_system: ActorSystem)
-    extends TestKit(_system)
-    with WordSpecLike
-    with ImplicitSender
-    with MustMatchers
-    with BeforeAndAfterAll {
+class HmdaFileUploadSpec extends ActorSpec {
 
   import hmda.parser.util.FITestData._
-
-  def this() = this(ActorSystem("hmda-persistence-test"))
-
-  override def afterAll(): Unit = {
-    TestKit.shutdownActorSystem(system)
-  }
 
   val hmdaFileUpload = system.actorOf(HmdaFileUpload.props("1"))
 
