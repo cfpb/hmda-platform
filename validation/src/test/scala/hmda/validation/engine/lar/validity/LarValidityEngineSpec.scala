@@ -15,6 +15,9 @@ class LarValidityEngineSpec extends WordSpec with MustMatchers with LarValidityE
 
       lars.foreach { lar =>
         val validity = checkValidity(lar)
+        if (validity.isFailure) {
+          println(lar)
+        }
         checkValidity(lar) mustBe a[scalaz.Success[_]]
       }
     }
