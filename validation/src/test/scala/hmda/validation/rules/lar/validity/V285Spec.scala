@@ -35,7 +35,7 @@ class V285Spec extends LarEditCheckSpec {
   property("Fails when state is NA but MSA/MD is not NA") {
     forAll(larGen) { lar =>
       whenever(lar.geography.msa != "NA") {
-        val invalidGeography = lar.geography.copy(state = "11")
+        val invalidGeography = lar.geography.copy(state = "NA")
         val invalidLar = lar.copy(geography = invalidGeography)
         V285(invalidLar) mustBe a[Failure]
       }

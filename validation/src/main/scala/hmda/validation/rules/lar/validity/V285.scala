@@ -26,10 +26,7 @@ object V285 extends EditCheck[LoanApplicationRegister] with CensusEditCheck {
       validState
     }
 
-    if (state != "NA")
-      checkState
-    else
-      NA
+    checkState and NA
 
   }
 
