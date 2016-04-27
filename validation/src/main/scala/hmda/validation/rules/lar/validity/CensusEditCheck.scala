@@ -1,9 +1,12 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.census.CBSATract
+import hmda.model.census.{ CBSATract, CBSATractLookup }
 
 trait CensusEditCheck {
-  def msaCode(cbsaTracts: Seq[CBSATract], code: String): String = {
+
+  val cbsaTracts = CBSATractLookup.values
+
+  def msaCode(code: String): String = {
     val md = cbsaTracts.filter(m => m.metDivFp == code)
     if (md.nonEmpty) {
       md.head.geoidMsa
