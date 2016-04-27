@@ -11,8 +11,6 @@ object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
 
   override def name: String = "V300"
 
-  def failureMessage = "Census tract not in valid format or is missing, does not equal NA, or does not equal a valid census tract number"
-
   override def apply(input: LoanApplicationRegister): Result = {
     val validFormat = input.geography.tract is validCensusTractFormat
 
