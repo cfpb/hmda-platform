@@ -8,9 +8,9 @@ import hmda.validation.engine.lar.LarEngine
 object SingleLarValidation {
   def props: Props = Props(new SingleLarValidation)
 
-  case class CheckLar(lar: LoanApplicationRegister)
-  case class CheckSyntacticalLar(lar: LoanApplicationRegister)
-  case class CheckValidityLar(lar: LoanApplicationRegister)
+  case class CheckAll(lar: LoanApplicationRegister)
+  case class CheckSyntactical(lar: LoanApplicationRegister)
+  case class CheckValidity(lar: LoanApplicationRegister)
 
   trait LarValidationError
   case object LarSyntacticalError extends LarValidationError
@@ -27,32 +27,27 @@ class SingleLarValidation extends Actor with ActorLogging with LarEngine {
   import SingleLarValidation._
 
   override def receive: Receive = {
-    case CheckSyntacticalLar(lar) =>
+    case CheckSyntactical(lar) =>
       log.debug(s"Checking syntactical on LAR: ${lar.toCSV}")
-      sender() ! validationErrors(lar, LarSyntacticalValidation)
-    case CheckValidityLar(lar) =>
+      sender() ! validationErrors(lar, checkSyntactical)
+    case CheckValidity(lar) =>
       log.debug(s"Checking validity on LAR: ${lar.toCSV}")
-      sender() ! validationErrors(lar, LarValidityValidation)
-    case CheckLar(lar) =>
+      sender() ! validationErrors(lar, checkValidity)
+    case CheckAll(lar) =>
       log.debug(s"Checking all edits on LAR: ${lar.toCSV}")
-      sender() ! validationErrors(lar, LarFullValidation)
+      sender() ! validationErrors(lar, validateLar)
 
     case _ =>
       log.error(s"Unsupported message sent to ${self.path}")
   }
 
-  private def validationErrors(lar: LoanApplicationRegister, validationType: ValidationType): List[ValidationError] = {
-    val validation = validationType match {
-      case LarFullValidation => validateLar(lar).disjunction
-      case LarSyntacticalValidation => checkSyntactical(lar).disjunction
-      case LarValidityValidation => checkValidity(lar).disjunction
-    }
+  private def validationErrors(lar: LoanApplicationRegister, f: LoanApplicationRegister => LarValidation): List[ValidationError] = {
+    val validation = f(lar).disjunction
     if (validation.isRight) {
       Nil
     } else {
       val lErrors = validation.toEither.left.get
-      val errors = lErrors.head :: lErrors.tail.toList
-      errors
+      lErrors.list.toList
     }
   }
 

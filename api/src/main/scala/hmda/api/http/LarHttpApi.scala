@@ -11,7 +11,7 @@ import hmda.parser.fi.lar.LarCsvParser
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.util.Timeout
-import hmda.api.processing.lar.SingleLarValidation.{ CheckLar, CheckSyntacticalLar, CheckValidityLar }
+import hmda.api.processing.lar.SingleLarValidation.{ CheckAll, CheckSyntactical, CheckValidity }
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.engine.ValidationError
@@ -51,9 +51,9 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
             entity(as[LoanApplicationRegister]) { lar =>
               val larValidation = system.actorSelection("/user/larValidation")
               val checkMessage = checkType match {
-                case "syntactical" => CheckSyntacticalLar(lar)
-                case "validity" => CheckValidityLar(lar)
-                case _ => CheckLar(lar)
+                case "syntactical" => CheckSyntactical(lar)
+                case "validity" => CheckValidity(lar)
+                case _ => CheckAll(lar)
               }
               onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
                 case Success(xs) =>

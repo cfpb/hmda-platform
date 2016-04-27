@@ -50,7 +50,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
       }
     }
 
-    "filters syntactical or validity only for invalid LAR with both syntactical and validity errors" in {
+    "filter syntactical or validity only for invalid LAR with both syntactical and validity errors" in {
       val badLoanType = lar.loan.copy(loanType = 0)
       val badLar = lar.copy(agencyCode = 0, loan = badLoanType)
       Post("/lar/validate", badLar) ~> larRoutes ~> check {

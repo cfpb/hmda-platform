@@ -2,7 +2,7 @@ package hmda.api.processing.lar
 
 import java.io.File
 import hmda.api.processing.ActorSpec
-import hmda.api.processing.lar.SingleLarValidation.CheckLar
+import hmda.api.processing.lar.SingleLarValidation.CheckAll
 import hmda.parser.fi.lar.LarCsvParser
 import scala.io.Source
 
@@ -16,7 +16,7 @@ class SingleLarValidationSpec extends ActorSpec {
   "LAR Validation" must {
     "validate all lars in sample files" in {
       lars.foreach { lar =>
-        larValidation ! CheckLar(lar)
+        larValidation ! CheckAll(lar)
         expectMsg(Nil)
       }
     }
