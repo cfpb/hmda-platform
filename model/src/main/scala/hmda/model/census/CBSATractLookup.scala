@@ -10,32 +10,29 @@ object CBSATractLookup {
     lines.map { line =>
       val values = line.split('|').map(_.trim)
       val name = values(0)
-      val namelsad = values(1)
-      val lsad = values(2)
-      val memi = values(3)
-      val mtfcc = values(4)
-      val tract = values(5)
-      val state = values(6)
-      val county = values(7)
-      val tracts = values(8)
-      val geoidMsa = values(9)
-      val geoidMetDiv = values(10)
-      val metDivFp = values(11)
-      val smallCounty = values(12)
+      val metDivName = values(1)
+      val state = values(2)
+      val countyFips = values(3)
+      val county = values(4)
+      val tracts = values(5)
+      val geoIdMsa = values(6)
+      val metDivFp = values(7)
+      val smallCounty = values(8).toInt
+      val stateCode = values(9)
+      val tractDecimal = values(10)
+
       CBSATract(
         name,
-        namelsad,
-        lsad,
-        memi,
-        mtfcc,
-        tract,
+        metDivName,
         state,
+        countyFips,
         county,
         tracts,
-        geoidMsa,
-        geoidMetDiv,
+        geoIdMsa,
         metDivFp,
-        smallCounty
+        smallCounty,
+        stateCode,
+        tractDecimal
       )
     }.toSeq
   }
@@ -43,16 +40,14 @@ object CBSATractLookup {
 
 case class CBSATract(
   name: String,
-  namelsad: String,
-  lsad: String,
-  memi: String,
-  mtfcc: String,
-  tract: String,
+  metDivName: String,
   state: String,
+  countyFips: String,
   county: String,
   tracts: String,
   geoidMsa: String,
-  geoidMetdiv: String,
-  metdivfp: String,
-  smallCounty: String
+  metDivFp: String,
+  smallCounty: Int,
+  stateCode: String,
+  tractDecimal: String
 )
