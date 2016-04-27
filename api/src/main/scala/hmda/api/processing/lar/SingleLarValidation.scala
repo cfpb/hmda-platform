@@ -12,15 +12,6 @@ object SingleLarValidation {
   case class CheckSyntactical(lar: LoanApplicationRegister)
   case class CheckValidity(lar: LoanApplicationRegister)
 
-  trait LarValidationError
-  case object LarSyntacticalError extends LarValidationError
-  case object LarValidityError extends LarValidationError
-
-  trait ValidationType
-  case object LarSyntacticalValidation extends ValidationType
-  case object LarValidityValidation extends ValidationType
-  case object LarFullValidation extends ValidationType
-
 }
 
 class SingleLarValidation extends Actor with ActorLogging with LarEngine {
