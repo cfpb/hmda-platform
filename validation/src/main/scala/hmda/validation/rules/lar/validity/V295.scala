@@ -23,16 +23,15 @@ object V295 extends EditCheck[LoanApplicationRegister] {
 
     val combination = (state, county)
 
-    val validStateCountyCombination = combination is containedIn(validCombination)
+    val validStateCountyCombination = when(county not equalTo("NA")) {
+      combination is containedIn(validCombination)
+    }
 
     val NA = when(county is equalTo("NA")) {
       msa is equalTo("NA")
     }
 
-    if (county == "NA")
-      NA
-    else
-      validStateCountyCombination
+    validStateCountyCombination and NA
 
   }
 
