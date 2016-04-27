@@ -9,9 +9,11 @@ object V290 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 
-  override def name: String = "V290"
+  val validCombinations = cbsaTracts.map { cbsa =>
+    (cbsa.state, cbsa.county, cbsa.geoidMsa)
+  }
 
-  def failureMessage = "MSA/MD, state, and county codes do not = a valid combination"
+  override def name: String = "V290"
 
   override def apply(input: LoanApplicationRegister): Result = {
     val msa = msaCode(input.geography.msa)
@@ -19,10 +21,6 @@ object V290 extends EditCheck[LoanApplicationRegister] {
     val county = input.geography.county
 
     val combination = (state, county, msa)
-
-    val validCombinations = cbsaTracts.map { cbsa =>
-      (cbsa.state, cbsa.county, cbsa.geoidMsa)
-    }
 
     when(msa not equalTo("NA")) {
       combination is containedIn(validCombinations)
