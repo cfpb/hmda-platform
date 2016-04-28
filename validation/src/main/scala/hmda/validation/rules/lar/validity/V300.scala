@@ -39,22 +39,27 @@ object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
 
     val validFormat = (tract is validCensusTractFormat) or (tract is equalTo("NA"))
 
-    val counties = cbsaTracts.filter(c => c.county == county)
+    val counties = cbsaTracts.filter { c =>
+      c.geoidMsa == msa &&
+        c.state == state &&
+        c.county == county &&
+        c.tractDecimal == tract
+    }
 
     val smallCountyValue =
       if (counties.isEmpty)
-        1
+        0
       else
         counties.map(c => c.smallCounty).head
 
-    //val smallCounty = when(smallCountyValue is equalTo(0)) {
-    //  tract is equalTo("NA")
-    //}
+    val smallCounty = when(smallCountyValue is equalTo(1)) {
+      tract is equalTo("NA")
+    }
 
     validFormat and
       validCensusTractCombination and
-      tractStateCountyCombination //or
-    //smallCounty
+      tractStateCountyCombination and
+      smallCounty
 
   }
 
