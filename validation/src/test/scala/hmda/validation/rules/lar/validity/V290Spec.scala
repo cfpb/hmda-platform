@@ -7,11 +7,9 @@ class V290Spec extends LarEditCheckSpec {
 
   property("Succeeds when valid MSA/MD, state and county codes are present") {
     forAll(larGen) { lar =>
-      whenever(lar.geography.msa != "NA") {
-        val validGeography = lar.geography.copy(msa = "17020", county = "007", state = "06")
-        val validLar = lar.copy(geography = validGeography)
-        V290(validLar) mustBe a[Success]
-      }
+      val validGeography = lar.geography.copy(msa = "17020", county = "007", state = "06")
+      val validLar = lar.copy(geography = validGeography)
+      V290(validLar) mustBe a[Success]
     }
   }
 
