@@ -11,9 +11,7 @@ object V570 extends EditCheck[LoanApplicationRegister] {
     when(lar.lienStatus is equalTo(1)) {
       lar.rateSpread is equalTo("NA") or {
         try {
-          val rateSpread = BigDecimal(lar.rateSpread)
-          (rateSpread is greaterThanOrEqual(BigDecimal("1.50"))) and
-            (rateSpread is lessThanOrEqual(BigDecimal("99.99")))
+          BigDecimal(lar.rateSpread) is between(BigDecimal("1.50"), BigDecimal("99.99"))
         } catch {
           case ex: NumberFormatException => Failure(s"can't parse ${lar.rateSpread} as decimal")
         }

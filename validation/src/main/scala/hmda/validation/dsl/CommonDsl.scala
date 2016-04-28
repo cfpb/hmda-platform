@@ -51,6 +51,11 @@ trait CommonDsl {
     override def failure: String = s"not greater than $that"
   }
 
+  def between[T](lower: T, upper: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = { x => ord.lteq(lower, x) && ord.lteq(x, upper) }
+    override def failure: String = s"not between $lower and $upper (inclusive)"
+  }
+
   def containedIn[T](domain: Seq[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = domain.contains(_)
     override def failure: String = s"is not contained in valid values domain"
