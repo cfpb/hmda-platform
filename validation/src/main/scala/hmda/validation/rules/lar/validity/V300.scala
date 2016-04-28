@@ -13,6 +13,10 @@ object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
     (cbsa.geoidMsa, cbsa.state, cbsa.county, cbsa.tractDecimal)
   }
 
+  val validStateCountyCombination = cbsaTracts.map { cbsa =>
+    (cbsa.state, cbsa.county, cbsa.tractDecimal)
+  }
+
   override def name: String = "V300"
 
   override def apply(input: LoanApplicationRegister): Result = {
@@ -23,14 +27,34 @@ object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
     val tract = input.geography.tract
 
     val combination = (msa, state, county, tract)
+    val stateCountyCombination = (state, county, tract)
 
     val validCensusTractCombination = when(msa not equalTo("NA")) {
       combination is containedIn(validCombination)
     }
 
+    val tractStateCountyCombination = when(msa is equalTo("NA")) {
+      (stateCountyCombination is containedIn(validStateCountyCombination)) or (tract is equalTo("NA"))
+    }
+
     val validFormat = (tract is validCensusTractFormat) or (tract is equalTo("NA"))
 
-    validCensusTractCombination and validFormat
+    val counties = cbsaTracts.filter(c => c.county == county)
+
+    val smallCountyValue =
+      if (counties.isEmpty)
+        1
+      else
+        counties.map(c => c.smallCounty).head
+
+    //val smallCounty = when(smallCountyValue is equalTo(0)) {
+    //  tract is equalTo("NA")
+    //}
+
+    validFormat and
+      validCensusTractCombination and
+      tractStateCountyCombination //or
+    //smallCounty
 
   }
 

@@ -16,9 +16,9 @@ class V300Spec extends LarEditCheckSpec {
 
   property("Fails for invalid combination of MSA/MD, state, county and tract when msa != NA") {
     forAll(larGen) { lar =>
-      whenever(lar.geography.msa != "NA") {
-        V300(lar) mustBe a[Failure]
-      }
+      val inValidGeography = Geography("17021", "06", "007", "0606.00")
+      val inValidLar = lar.copy(geography = inValidGeography)
+      V300(inValidLar) mustBe a[Failure]
     }
   }
 }
