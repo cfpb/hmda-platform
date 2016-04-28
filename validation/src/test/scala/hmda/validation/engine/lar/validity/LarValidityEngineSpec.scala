@@ -14,7 +14,6 @@ class LarValidityEngineSpec extends WordSpec with MustMatchers with LarValidityE
       val lars = lines.drop(1).map(l => LarCsvParser(l))
 
       lars.foreach { lar =>
-        val validity = checkValidity(lar)
         checkValidity(lar) mustBe a[scalaz.Success[_]]
       }
     }
