@@ -1,5 +1,7 @@
 package hmda.validation.dsl
 
+import scala.util.Try
+
 trait CommonDsl {
   implicit class Subject[T](data: T) {
     private def test(predicate: Predicate[T]): Result = {
@@ -53,6 +55,13 @@ trait CommonDsl {
 
   def between[T](lower: T, upper: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = { x => ord.lteq(lower, x) && ord.lteq(x, upper) }
+    override def failure: String = s"not between $lower and $upper (inclusive)"
+  }
+
+  def numericallyBetween(lower: String, upper: String): Predicate[String] = new Predicate[String] {
+    override def validate: (String) => Boolean = { x =>
+      Try(between(BigDecimal(lower), BigDecimal(upper)).validate(BigDecimal(x))).getOrElse(false)
+    }
     override def failure: String = s"not between $lower and $upper (inclusive)"
   }
 
