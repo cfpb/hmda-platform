@@ -25,7 +25,7 @@ class V295Spec extends LarEditCheckSpec {
     }
   }
 
-  property("Succeeds when MSA/MD is NA and county is also NA") {
+  property("Succeeds when county is NA and MSA/MD is also NA") {
     forAll(larGen) { lar =>
       val validGeography = lar.geography.copy(msa = "NA", county = "NA")
       val validLar = lar.copy(geography = validGeography)
