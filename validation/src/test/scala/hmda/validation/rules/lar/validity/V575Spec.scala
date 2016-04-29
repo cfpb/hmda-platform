@@ -39,6 +39,7 @@ class V575Spec extends RateSpreadEditCheckSpec {
     succeedsWhen(lienStatus = 2, rateSpread = "03.500")
     succeedsWhen(lienStatus = 2, rateSpread = "03.501")
 
+    failsWhen(lienStatus = 2, rateSpread = "100.0")
     failsWhen(lienStatus = 2, rateSpread = "100.01")
   }
 

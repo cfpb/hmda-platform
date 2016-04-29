@@ -23,6 +23,11 @@ class V570Spec extends RateSpreadEditCheckSpec {
     succeedsWhen(lienStatus = 1, rateSpread = "99.99")
   }
 
+  property("fails if lien status = 1 and rate spread is > 99.99%") {
+    failsWhen(lienStatus = 1, rateSpread = "100.00")
+    failsWhen(lienStatus = 1, rateSpread = "999.99")
+  }
+
   property("works right without leading zeroes, too") {
     failsWhen(lienStatus = 1, rateSpread = "1.49")
     failsWhen(lienStatus = 1, rateSpread = "1")
