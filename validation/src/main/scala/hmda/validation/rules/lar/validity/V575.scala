@@ -1,12 +1,14 @@
 package hmda.validation.rules.lar.validity
 
-import java.lang.NumberFormatException
-
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, RegexDsl, Result }
+import hmda.validation.dsl.{ Failure, Result }
 import hmda.validation.rules.EditCheck
 
-object V575 extends EditCheck[LoanApplicationRegister] with RegexDsl {
+object V575 extends EditCheck[LoanApplicationRegister] {
+
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   override def name: String = "V575"
 
   override def apply(lar: LoanApplicationRegister): Result = {

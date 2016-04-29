@@ -6,6 +6,9 @@ import hmda.validation.rules.EditCheck
 
 object V400 extends EditCheck[LoanApplicationRegister] {
 
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   val propertyTypes = List(1, 2, 3)
 
   def apply(lar: LoanApplicationRegister): Result = {

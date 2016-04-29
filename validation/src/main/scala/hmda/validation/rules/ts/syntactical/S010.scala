@@ -1,13 +1,17 @@
 package hmda.validation.rules.ts.syntactical
 
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.validation.dsl.{ CommonDsl, Result }
+import hmda.validation.dsl.Result
+import hmda.validation.rules.EditCheck
 
 /*
  The first record in the file must = 1 (TS)
  */
 
-object S010 extends CommonDsl {
+object S010 extends EditCheck[TransmittalSheet] {
+
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
 
   //Hardcoded for now
   val tsId = 1
@@ -15,4 +19,6 @@ object S010 extends CommonDsl {
   def apply(ts: TransmittalSheet): Result = {
     ts.id is equalTo(tsId)
   }
+
+  override def name: String = "S010"
 }

@@ -1,10 +1,13 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.{ LoanApplicationRegister, Loan }
-import hmda.validation.dsl.{ CommonDsl, Result }
+import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
 object V220 extends EditCheck[LoanApplicationRegister] {
+
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
 
   val loanTypes = List(1, 2, 3, 4)
 

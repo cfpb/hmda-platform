@@ -6,6 +6,10 @@ import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
 object V140 extends EditCheck[TransmittalSheet] {
+
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   def apply(ts: TransmittalSheet): Result = {
     val resp = ts.respondent
     val stateCodes = states.keys.toList

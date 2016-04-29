@@ -1,6 +1,6 @@
 package hmda.validation.dsl
 
-trait RegexDsl {
+object PredicateRegEx {
 
   def validEmail: Predicate[String] = new Predicate[String] {
     override def validate: (String) => Boolean = {

@@ -6,6 +6,9 @@ import hmda.validation.rules.EditCheck
 
 object V410 extends EditCheck[LoanApplicationRegister] {
 
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   def apply(lar: LoanApplicationRegister): Result = {
     when(lar.lienStatus is equalTo(3)) {
       lar.loan.purpose is equalTo(2)

@@ -6,6 +6,9 @@ import hmda.validation.rules.EditCheck
 
 object V455 extends EditCheck[LoanApplicationRegister] {
 
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   def apply(lar: LoanApplicationRegister): Result = {
     when(lar.applicant.ethnicity is containedIn(List(1, 2, 3))) {
       lar.applicant.race1 not equalTo(7)

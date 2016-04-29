@@ -5,6 +5,10 @@ import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
 object V262 extends EditCheck[LoanApplicationRegister] {
+
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   def apply(lar: LoanApplicationRegister): Result = {
     val applicationDate = lar.loan.applicationDate
     when(applicationDate is equalTo("NA")) {

@@ -1,7 +1,7 @@
 package hmda.validation.rules.lar.syntactical
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ CommonDsl, Failure, Result, Success }
+import hmda.validation.dsl.{ Failure, Result, Success }
 import hmda.validation.rules.EditCheck
 
 object S040 extends EditCheck[Iterable[LoanApplicationRegister]] {

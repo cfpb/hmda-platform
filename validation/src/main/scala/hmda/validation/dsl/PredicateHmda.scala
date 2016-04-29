@@ -2,7 +2,7 @@ package hmda.validation.dsl
 
 import java.text.SimpleDateFormat
 
-trait HmdaDsl {
+object PredicateHmda {
   def validTimestampFormat[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case s: String =>
