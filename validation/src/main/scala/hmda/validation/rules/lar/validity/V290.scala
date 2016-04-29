@@ -10,7 +10,7 @@ object V290 extends EditCheck[LoanApplicationRegister] {
   val cbsaTracts = CBSATractLookup.values
 
   val validCombinations = cbsaTracts.map { cbsa =>
-    (cbsa.state, cbsa.county, cbsa.geoidMsa)
+    (cbsa.state, cbsa.county, cbsa.geoIdMsa)
   }
 
   val validMdCombinations = cbsaTracts.map { cbsa =>
