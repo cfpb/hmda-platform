@@ -10,7 +10,11 @@ object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
   val cbsaTracts = CBSATractLookup.values
 
   val validCombination = cbsaTracts.map { cbsa =>
-    (cbsa.geoidMsa, cbsa.state, cbsa.county, cbsa.tractDecimal)
+    (cbsa.geoIdMsa, cbsa.state, cbsa.county, cbsa.tractDecimal)
+  }
+
+  val validMdCombination = cbsaTracts.map { cbsa =>
+    (cbsa.metDivFp, cbsa.state, cbsa.county, cbsa.tractDecimal)
   }
 
   val validStateCountyCombination = cbsaTracts.map { cbsa =>
@@ -30,7 +34,8 @@ object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
     val stateCountyCombination = (state, county, tract)
 
     val validCensusTractCombination = when(msa not equalTo("NA")) {
-      combination is containedIn(validCombination)
+      (combination is containedIn(validCombination)) or
+        (combination is containedIn(validMdCombination))
     }
 
     val tractStateCountyCombination = when(msa is equalTo("NA")) {
@@ -40,7 +45,7 @@ object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
     val validFormat = (tract is validCensusTractFormat) or (tract is equalTo("NA"))
 
     val counties = cbsaTracts.filter { c =>
-      c.geoidMsa == msa &&
+      c.geoIdMsa == msa &&
         c.state == state &&
         c.county == county &&
         c.tractDecimal == tract
