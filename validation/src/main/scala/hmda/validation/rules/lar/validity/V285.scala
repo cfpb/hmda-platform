@@ -5,8 +5,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
-
-object V285 extends EditCheck[LoanApplicationRegister]  {
+object V285 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 
