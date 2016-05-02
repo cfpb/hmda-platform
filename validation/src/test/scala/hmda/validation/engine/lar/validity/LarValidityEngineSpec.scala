@@ -1,17 +1,22 @@
 package hmda.validation.engine.lar.validity
 
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.parser.fi.lar.LarGenerators
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{ MustMatchers, PropSpec }
+import java.io.File
+import hmda.parser.fi.lar.LarCsvParser
+import org.scalatest.{ MustMatchers, WordSpec }
 
-import scalaz.Success
+import scala.io.Source
 
-class LarValidityEngineSpec extends PropSpec with PropertyChecks
-    with MustMatchers with LarGenerators with LarValidityEngine {
+class LarValidityEngineSpec extends WordSpec with MustMatchers with LarValidityEngine {
 
-  property("Engine returns success for valid LAR") {
-    //TODO: test using a file of sample LARs, since the generator does not
-    //  produce records that pass all edit checks
+  "LAR Validity engine" must {
+    "pass validation on valid sample file" in {
+      val lines = Source.fromFile(new File("parser/src/test/resources/txt/FirstTestBankData_clean_407_2017.txt")).getLines()
+      val lars = lines.drop(1).map(l => LarCsvParser(l))
+
+      lars.foreach { lar =>
+        checkValidity(lar) mustBe a[scalaz.Success[_]]
+      }
+    }
   }
+
 }

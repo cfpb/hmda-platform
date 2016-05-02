@@ -13,13 +13,19 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V225,
       V255,
       V262,
+      V290,
       V310,
+      V315,
       V340,
       V347,
       V375,
       V400,
       V410,
       V455,
+      V465,
+      V470,
+      V475,
+      V490,
       V575
     ).map(check(_, lar))
 
