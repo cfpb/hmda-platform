@@ -5,7 +5,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
-object V285 extends EditCheck[LoanApplicationRegister] with CensusEditCheck {
+object V285 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 
@@ -14,7 +14,7 @@ object V285 extends EditCheck[LoanApplicationRegister] with CensusEditCheck {
   override def apply(input: LoanApplicationRegister): Result = {
     val state = input.geography.state
     val stateCodes = cbsaTracts.map(c => c.state)
-    val msa = msaCode(cbsaTracts, input.geography.msa)
+    val msa = input.geography.msa
 
     val validState = state is containedIn(stateCodes)
 
