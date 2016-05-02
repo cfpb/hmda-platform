@@ -8,9 +8,7 @@ import org.scalacheck.Gen
 class V525Spec extends LarEditCheckSpec {
   property("HOEPA Type must = 1, or 2") {
     forAll(larGen) { lar =>
-      whenever(lar.id == 2) {
-        V525(lar) mustBe Success()
-      }
+      V525(lar) mustBe Success()
     }
   }
 
