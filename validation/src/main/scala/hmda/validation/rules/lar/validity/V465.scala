@@ -6,6 +6,9 @@ import hmda.validation.rules.EditCheck
 
 object V465 extends EditCheck[LoanApplicationRegister] {
 
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   def apply(lar: LoanApplicationRegister): Result = {
     when(lar.applicant.coEthnicity is containedIn(List(1, 2, 3))) {
       lar.applicant.coRace1 not containedIn(List(7, 8))
