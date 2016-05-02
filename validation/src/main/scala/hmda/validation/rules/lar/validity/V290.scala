@@ -1,10 +1,13 @@
 package hmda.validation.rules.lar.validity
 
+import hmda.model.census.CBSATractLookup
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
-object V290 extends EditCheck[LoanApplicationRegister] with CensusEditCheck {
+object V290 extends EditCheck[LoanApplicationRegister] {
+
+  val cbsaTracts = CBSATractLookup.values
 
   val validCombinations = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county, cbsa.geoIdMsa)

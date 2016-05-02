@@ -1,9 +1,10 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.validation.dsl.{ Failure, Success }
-import hmda.validation.rules.lar.LarEditCheckSpec
+import hmda.validation.dsl.Success
 
-class V575Spec extends LarEditCheckSpec {
+class V575Spec extends RateSpreadEditCheckSpec {
+
+  override val check = V575
 
   property("succeeds if lien status is 2 and rate spread is NA") {
     succeedsWhen(lienStatus = 2, rateSpread = "NA")
@@ -38,6 +39,7 @@ class V575Spec extends LarEditCheckSpec {
     succeedsWhen(lienStatus = 2, rateSpread = "03.500")
     succeedsWhen(lienStatus = 2, rateSpread = "03.501")
 
+    failsWhen(lienStatus = 2, rateSpread = "100.0")
     failsWhen(lienStatus = 2, rateSpread = "100.01")
   }
 
@@ -49,22 +51,8 @@ class V575Spec extends LarEditCheckSpec {
   property("succeeds in any case when lien status is not 2") {
     forAll(larGen) { lar =>
       whenever(lar.lienStatus != 2) {
-        V575(lar) mustBe Success()
+        check(lar) mustBe Success()
       }
-    }
-  }
-
-  def failsWhen(lienStatus: Int, rateSpread: String): Any = {
-    forAll(larGen) { lar =>
-      val newLar = lar.copy(lienStatus = lienStatus, rateSpread = rateSpread)
-      V575(newLar) mustBe a[Failure]
-    }
-  }
-
-  def succeedsWhen(lienStatus: Int, rateSpread: String): Any = {
-    forAll(larGen) { lar =>
-      val newLar = lar.copy(lienStatus = lienStatus, rateSpread = rateSpread)
-      V575(newLar) mustBe a[Success]
     }
   }
 }
