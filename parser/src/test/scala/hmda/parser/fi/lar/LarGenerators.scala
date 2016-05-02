@@ -83,7 +83,9 @@ trait LarGenerators extends FIGenerators {
     )
   }
 
-  implicit def stateCodeGen: Gen[String] = { // see http://www2.census.gov/geo/docs/reference/state.txt
+  // see http://www2.census.gov/geo/docs/reference/state.txt
+  // Only includes states + DC and PR (HMDA Filers)
+  implicit def stateCodeGen: Gen[String] = {
     Gen.oneOf(
       "01", "02", "04", "05", "06", "08", "09",
       "10", "11", "12", "13", "15", "16", "17", "18", "19",
