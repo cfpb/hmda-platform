@@ -5,18 +5,14 @@ import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
-class V225Spec extends LarEditCheckSpec {
+class V225Spec extends LarEditCheckSpec with BadValueUtils {
   property("Loan Purpose must = 1, 2, or 3") {
     forAll(larGen) { lar =>
       V225(lar) mustBe Success()
     }
   }
 
-  val badLoanPurposeGen: Gen[Int] = {
-    val belowRange = Gen.choose(Integer.MIN_VALUE, 0)
-    val aboveRange = Gen.choose(4, Integer.MAX_VALUE)
-    Gen.oneOf(belowRange, aboveRange)
-  }
+  val badLoanPurposeGen: Gen[Int] = intOutsideRange(1, 3)
 
   property("Loan Purpose other than 1,2,3 is invalid") {
     forAll(larGen, badLoanPurposeGen) { (lar: LoanApplicationRegister, x: Int) =>
