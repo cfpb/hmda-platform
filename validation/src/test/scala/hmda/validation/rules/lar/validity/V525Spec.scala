@@ -6,7 +6,7 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
 class V525Spec extends LarEditCheckSpec with BadValueUtils {
-  property("HOEPA Type must = 1, or 2") {
+  property("HOEPA status must = 1, or 2") {
     forAll(larGen) { lar =>
       whenever(lar.id == 2) {
         V525(lar) mustBe Success()

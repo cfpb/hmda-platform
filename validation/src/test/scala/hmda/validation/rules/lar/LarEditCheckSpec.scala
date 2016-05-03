@@ -5,5 +5,6 @@ import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
 abstract class LarEditCheckSpec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
-
+  implicit val generatorDriverConfig =
+    PropertyCheckConfig(minSuccessful = 100, maxDiscarded = 500)
 }
