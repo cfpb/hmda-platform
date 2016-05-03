@@ -5,18 +5,16 @@ import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
-class V525Spec extends LarEditCheckSpec {
+class V525Spec extends LarEditCheckSpec with BadValueUtils {
   property("HOEPA Type must = 1, or 2") {
     forAll(larGen) { lar =>
-      V525(lar) mustBe Success()
+      whenever(lar.id == 2) {
+        V525(lar) mustBe Success()
+      }
     }
   }
 
-  val badHoepaStatusGen: Gen[Int] = {
-    val belowRange = Gen.choose(Integer.MIN_VALUE, 0)
-    val aboveRange = Gen.choose(2, Integer.MAX_VALUE)
-    Gen.oneOf(belowRange, aboveRange)
-  }
+  val badHoepaStatusGen: Gen[Int] = intOutsideRange(1, 2)
 
   property("HOEPA status other than 1, or 2 is invalid") {
     forAll(larGen, badHoepaStatusGen) { (lar: LoanApplicationRegister, x: Int) =>
