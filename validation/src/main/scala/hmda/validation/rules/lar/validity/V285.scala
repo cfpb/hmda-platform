@@ -9,11 +9,13 @@ object V285 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 
+  val stateCodes = cbsaTracts.map(c => c.state).distinct
+
   override def name: String = "V285"
 
   override def apply(input: LoanApplicationRegister): Result = {
     val state = input.geography.state
-    val stateCodes = cbsaTracts.map(c => c.state)
+
     val msa = input.geography.msa
 
     val validState = state is containedIn(stateCodes)

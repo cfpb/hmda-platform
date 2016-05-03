@@ -6,7 +6,7 @@ import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
-class V347Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators with PurchaserTypeUtils {
+class V347Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators with BadValueUtils {
 
   property("Succeeds when there is a relevant purchaser type (1-9) and loan was originated or purchased (1 or 6)") {
     forAll(larGen, Gen.choose(1, 9), Gen.oneOf(1, 6)) { (lar, pt, action) =>
