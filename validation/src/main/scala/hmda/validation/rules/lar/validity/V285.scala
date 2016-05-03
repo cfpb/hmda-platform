@@ -9,7 +9,7 @@ object V285 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 
-  val stateCodes = cbsaTracts.map(c => c.state).distinct
+  val stateCodes = cbsaTracts.map(c => c.state).toSet
 
   override def name: String = "V285"
 

@@ -70,6 +70,11 @@ trait CommonDsl {
     override def failure: String = s"is not contained in valid values domain"
   }
 
+  def containedIn[T](domain: Set[T]): Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = domain.contains
+    override def failure: String = s"is not contained in valid values domain"
+  }
+
   def numeric[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case n: Number => true
