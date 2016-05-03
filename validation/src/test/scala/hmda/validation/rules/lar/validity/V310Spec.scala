@@ -4,7 +4,7 @@ import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
-class V310Spec extends LarEditCheckSpec {
+class V310Spec extends LarEditCheckSpec with BadValueUtils {
 
   property("Succeeds when Applicant Race1 is 1,2,3,4,5,6,7") {
     forAll(larGen) { lar =>
@@ -13,9 +13,7 @@ class V310Spec extends LarEditCheckSpec {
   }
 
   val badApplicantRaceGen: Gen[Int] = {
-    val belowRange = Gen.choose(Integer.MIN_VALUE, 0)
-    val aboveRange = Gen.choose(8, Integer.MAX_VALUE)
-    Gen.oneOf(belowRange, aboveRange)
+    intOutsideRange(1, 7)
   }
 
   property("Fails when Applicant Race1 is < 1 or > 7") {
