@@ -7,6 +7,9 @@ import hmda.validation.rules.EditCheck
 
 object V285 extends EditCheck[LoanApplicationRegister] {
 
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   val cbsaTracts = CBSATractLookup.values
 
   val stateCodes = cbsaTracts.map(c => c.state).distinct
