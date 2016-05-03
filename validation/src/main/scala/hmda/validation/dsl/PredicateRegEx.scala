@@ -1,8 +1,10 @@
 package hmda.validation.dsl
 
+import scala.language.implicitConversions
+
 object PredicateRegEx {
 
-  def validEmail: Predicate[String] = new Predicate[String] {
+  implicit def validEmail: Predicate[String] = new Predicate[String] {
     override def validate: (String) => Boolean = {
       val emailRegEx = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"
       val Email = emailRegEx.r
