@@ -4,18 +4,14 @@ import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
-class V450Spec extends LarEditCheckSpec {
+class V450Spec extends LarEditCheckSpec with BadValueUtils {
   property("Applicant ethnicity must = 1,2,3, or 4") {
     forAll(larGen) { lar =>
       V450(lar) mustBe Success()
     }
   }
 
-  val badEthnicityGen: Gen[Int] = {
-    val belowRange = Gen.choose(Integer.MIN_VALUE, 0)
-    val aboveRange = Gen.choose(5, Integer.MAX_VALUE)
-    Gen.oneOf(belowRange, aboveRange)
-  }
+  val badEthnicityGen: Gen[Int] = intOutsideRange(1, 4)
 
   property("Applicant ethnicity other than 1,2,3,4 is invalid") {
     forAll(larGen, badEthnicityGen) { (lar, x) =>
