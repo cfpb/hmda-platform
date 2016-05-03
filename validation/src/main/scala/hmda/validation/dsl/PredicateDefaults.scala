@@ -1,37 +1,39 @@
 package hmda.validation.dsl
 
+import scala.language.implicitConversions
+
 object PredicateDefaults {
-  def equalTo[T](that: T): Predicate[T] = new Predicate[T] {
+  implicit def equalTo[T](that: T): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _ == that
     override def failure: String = s"not equal to $that"
   }
 
-  def greaterThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+  implicit def greaterThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = ord.gt(_, that)
     override def failure: String = s"not greater than $that"
   }
 
-  def greaterThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+  implicit def greaterThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = ord.gteq(_, that)
     override def failure: String = s"not greater than $that"
   }
 
-  def lessThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+  implicit def lessThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = ord.lt(_, that)
     override def failure: String = s"not greater than $that"
   }
 
-  def lessThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
+  implicit def lessThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = ord.lteq(_, that)
     override def failure: String = s"not greater than $that"
   }
 
-  def containedIn[T](domain: Seq[T]): Predicate[T] = new Predicate[T] {
+  implicit def containedIn[T](domain: Seq[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = domain.contains(_)
     override def failure: String = s"is not contained in valid values domain"
   }
 
-  def numeric[T]: Predicate[T] = new Predicate[T] {
+  implicit def numeric[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case n: Number => true
       case _ => throw new NotImplementedError("'numeric' doesn't handle string (or other) values yet")
@@ -39,7 +41,7 @@ object PredicateDefaults {
     override def failure: String = s"is not numeric"
   }
 
-  def empty[T]: Predicate[T] = new Predicate[T] {
+  implicit def empty[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case s: String => s.isEmpty
       case _ => throw new NotImplementedError("'empty' doesn't handle non-string values yet")
@@ -47,7 +49,7 @@ object PredicateDefaults {
     override def failure: String = "is not empty"
   }
 
-  def when(condition: Result)(thenTest: => Result): Result = {
+  implicit def when(condition: Result)(thenTest: => Result): Result = {
     condition.implies(thenTest)
   }
 }

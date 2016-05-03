@@ -1,5 +1,7 @@
 package hmda.validation.dsl
 
+import scala.language.implicitConversions
+
 object PredicateSyntax {
   implicit class PredicateOps[T](data: T) {
     private def test(predicate: Predicate[T]): Result = {

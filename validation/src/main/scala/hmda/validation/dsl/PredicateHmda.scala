@@ -1,9 +1,10 @@
 package hmda.validation.dsl
 
 import java.text.SimpleDateFormat
+import scala.language.implicitConversions
 
 object PredicateHmda {
-  def validTimestampFormat[T]: Predicate[T] = new Predicate[T] {
+  implicit def validTimestampFormat[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case s: String =>
         checkDateFormat(s)
@@ -12,7 +13,7 @@ object PredicateHmda {
     override def failure: String = s"invalid timestamp format"
   }
 
-  def checkDateFormat[T](s: String): Boolean = {
+  implicit def checkDateFormat[T](s: String): Boolean = {
     try {
       val format = new SimpleDateFormat("yyyyMMddHHmm")
       format.setLenient(false)
