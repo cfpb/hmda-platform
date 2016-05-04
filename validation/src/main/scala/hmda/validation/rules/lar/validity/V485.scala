@@ -7,6 +7,9 @@ import scala.util.Try
 
 object V485 extends EditCheck[LoanApplicationRegister] {
 
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   def apply(lar: LoanApplicationRegister): Result = {
     val applicant = lar.applicant
     when(applicant.coRace1 is containedIn(1 to 5)) {
