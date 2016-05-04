@@ -56,6 +56,7 @@ object HMDABuild extends Build {
       )
     ).dependsOn(api)
     .aggregate(
+      model,
       parser,
       api,
       platformTest,
