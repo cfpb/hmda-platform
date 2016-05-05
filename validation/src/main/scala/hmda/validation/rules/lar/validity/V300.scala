@@ -44,18 +44,14 @@ object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
 
     val validFormat = (tract is validCensusTractFormat) or (tract is equalTo("NA"))
 
-    val counties = cbsaTracts.filter { c =>
+    val counties = cbsaTracts.find { c =>
       c.geoIdMsa == msa &&
         c.state == state &&
         c.county == county &&
         c.tractDecimal == tract
     }
 
-    val smallCountyValue =
-      if (counties.isEmpty)
-        0
-      else
-        counties.map(c => c.smallCounty).head
+    val smallCountyValue = counties.map(c => c.smallCounty).getOrElse(0)
 
     val smallCounty = when(smallCountyValue is equalTo(1)) {
       tract is equalTo("NA")

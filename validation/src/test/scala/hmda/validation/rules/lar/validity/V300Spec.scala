@@ -6,9 +6,17 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 
 class V300Spec extends LarEditCheckSpec {
 
-  property("Succeeds for valid combination of MSA/MD, state, county and tract when MSA != NA") {
+  property("Succeeds for valid combination of MSA, state, county and tract when MSA != NA") {
     forAll(larGen) { lar =>
       val validGeography = Geography("17020", "06", "007", "0036.00")
+      val validLar = lar.copy(geography = validGeography)
+      V300(validLar) mustBe a[Success]
+    }
+  }
+
+  property("Succeeds for valid combination of MD, state, county and tract when MSA != NA") {
+    forAll(larGen) { lar =>
+      val validGeography = Geography("14454", "25", "025", "0001.00")
       val validLar = lar.copy(geography = validGeography)
       V300(validLar) mustBe a[Success]
     }
@@ -21,4 +29,5 @@ class V300Spec extends LarEditCheckSpec {
       V300(inValidLar) mustBe a[Failure]
     }
   }
+
 }
