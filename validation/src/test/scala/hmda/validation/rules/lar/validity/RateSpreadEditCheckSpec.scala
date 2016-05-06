@@ -16,9 +16,23 @@ abstract class RateSpreadEditCheckSpec extends LarEditCheckSpec {
     }
   }
 
+  def failsWhen(rateSpread: String): Any = {
+    forAll(larGen) { lar =>
+      val newLar = lar.copy(rateSpread = rateSpread)
+      check(newLar) mustBe a[Failure]
+    }
+  }
+
   def succeedsWhen(lienStatus: Int, rateSpread: String): Any = {
     forAll(larGen) { lar =>
       val newLar = lar.copy(lienStatus = lienStatus, rateSpread = rateSpread)
+      check(newLar) mustBe a[Success]
+    }
+  }
+
+  def succeedsWhen(rateSpread: String): Any = {
+    forAll(larGen) { lar =>
+      val newLar = lar.copy(rateSpread = rateSpread)
       check(newLar) mustBe a[Success]
     }
   }
