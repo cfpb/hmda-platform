@@ -8,6 +8,6 @@ object V500 extends EditCheck[LoanApplicationRegister] with RegexDsl {
   override def name: String = "V500"
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    (lar.rateSpread is equalTo("NA")) or (lar.rateSpread is numericMatching)
+    (lar.rateSpread is equalTo("NA")) or (lar.rateSpread is numericMatching("NN.NN"))
   }
 }

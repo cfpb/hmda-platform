@@ -14,10 +14,18 @@ trait RegexDsl {
     override def failure: String = s"is not a valid email"
   }
 
-  def numericMatching: Predicate[String] = new Predicate[String] {
-    val regEx = "^[0-9][0-9]\\.[0-9][0-9]$".r
+  def numericMatching(pattern: String): Predicate[String] = new Predicate[String] {
+    val regEx = regExFor(pattern).r
     override def validate: (String) => Boolean = matches(regEx)
     override def failure: String = s"does not match provided numeric format"
+  }
+
+  private def regExFor(pattern: String): String = {
+    val result = pattern.map {
+      case 'N' => "[0-9]"
+      case '.' => "\\."
+    }
+    "^" + result.reduce(_ + _) + "$"
   }
 
   private def matches(regEx: Regex): (String) => Boolean = {
