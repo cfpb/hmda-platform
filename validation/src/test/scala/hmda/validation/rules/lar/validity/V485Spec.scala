@@ -1,7 +1,8 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.fi.lar.Applicant
+import hmda.model.fi.lar.{ Applicant, LoanApplicationRegister }
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
@@ -80,4 +81,5 @@ class V485Spec extends LarEditCheckSpec {
     applicant.copy(coRace2 = vals(0), coRace3 = vals(1), coRace4 = vals(2), coRace5 = vals(3))
   }
 
+  override def check: EditCheck[LoanApplicationRegister] = V485
 }

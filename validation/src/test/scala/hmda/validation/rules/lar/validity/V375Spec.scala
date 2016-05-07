@@ -1,6 +1,8 @@
 package hmda.validation.rules.lar.validity
 
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
 class V375Spec extends LarEditCheckSpec {
@@ -30,4 +32,5 @@ class V375Spec extends LarEditCheckSpec {
     }
   }
 
+  override def check: EditCheck[LoanApplicationRegister] = V375
 }
