@@ -47,7 +47,7 @@ trait HttpApi extends HmdaApiProtocol {
       import HmdaFileUpload._
       post {
         val uploadTimestamp = Instant.now.toEpochMilli
-        val processingActor = system.actorOf(HmdaFileUpload.props(id))
+        val processingActor = createHmdaFileUpload(system, id)
         entity(as[Multipart.FormData]) { formData =>
           val uploaded: Future[Done] = formData.parts.mapAsync(1) {
             //TODO: check Content-Type type as well?
