@@ -5,7 +5,7 @@ import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
-class V330Spec extends LarEditCheckSpec with BadValueUtils {
+class V330Spec extends LarEditCheckSpec {
   property("Income must be greater than 0 or 'NA'") {
     forAll(larGen) { lar =>
       V330(lar) mustBe Success()
