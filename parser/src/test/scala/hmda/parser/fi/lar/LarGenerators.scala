@@ -114,7 +114,7 @@ trait LarGenerators extends FIGenerators {
       (coRace2 :: coRace3 :: coRace4 :: coRace5 :: _) <- Gen.listOfN(4, optional(Gen.choose(1, 5)))
       sex <- Gen.choose(1, 4)
       coSex <- Gen.choose(1, 5)
-      income <- optional(Gen.choose(0, 9999), "NA")
+      income <- optional(Gen.choose(1, 9999), "NA")
     } yield Applicant(
       ethnicity,
       coEthnicity,
