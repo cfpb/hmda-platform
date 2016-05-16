@@ -22,6 +22,7 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V320,
       V325,
       V330,
+      V335,
       V340,
       V347,
       V375,
