@@ -2,15 +2,14 @@ package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.{ Loan, LoanApplicationRegister }
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
 class V525Spec extends LarEditCheckSpec with BadValueUtils {
   property("HOEPA status must be 1, or 2") {
     forAll(larGen) { lar =>
-      whenever(lar.id == 2) {
-        V525(lar) mustBe Success()
-      }
+      V525(lar) mustBe Success()
     }
   }
 
@@ -23,4 +22,5 @@ class V525Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
+  override def check: EditCheck[LoanApplicationRegister] = V525
 }
