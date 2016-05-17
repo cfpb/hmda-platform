@@ -40,7 +40,8 @@ class V338Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V338
 
   private def applicantNotOk(lar: LoanApplicationRegister): Boolean = {
-    (lar.applicant.race1 != 7) ||
+    (lar.applicant.ethnicity != 4) ||
+      (lar.applicant.race1 != 7) ||
       (lar.applicant.sex != 4) ||
       (lar.applicant.coEthnicity != 5) ||
       (lar.applicant.coRace1 != 8) ||
