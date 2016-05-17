@@ -10,7 +10,7 @@ class V335Spec extends LarEditCheckSpec {
   property("Succeeds when property type is not 3") {
     forAll(larGen) { lar =>
       whenever(lar.loan.propertyType != 3) {
-        V335(lar) mustBe Success()
+        lar.mustPass
       }
     }
   }
@@ -20,7 +20,7 @@ class V335Spec extends LarEditCheckSpec {
       val loan = lar.loan.copy(propertyType = 3)
       val applicant = lar.applicant.copy(income = "NA")
       val validLar = lar.copy(applicant = applicant, loan = loan)
-      V335(validLar) mustBe Success()
+      validLar.mustPass
     }
   }
 
@@ -31,7 +31,7 @@ class V335Spec extends LarEditCheckSpec {
       val loan = lar.loan.copy(propertyType = 3)
       val invalidApplicant = lar.applicant.copy(income = x.toString)
       val invalidLar = lar.copy(applicant = invalidApplicant, loan = loan)
-      V335(invalidLar) mustBe a[Failure]
+      invalidLar.mustFail
     }
   }
   override def check: EditCheck[LoanApplicationRegister] = V335
