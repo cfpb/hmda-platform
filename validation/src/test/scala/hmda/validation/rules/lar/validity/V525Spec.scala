@@ -9,7 +9,7 @@ import org.scalacheck.Gen
 class V525Spec extends LarEditCheckSpec with BadValueUtils {
   property("HOEPA status must be 1, or 2") {
     forAll(larGen) { lar =>
-      V525(lar) mustBe Success()
+      lar.mustPass
     }
   }
 
@@ -18,7 +18,7 @@ class V525Spec extends LarEditCheckSpec with BadValueUtils {
   property("HOEPA status other than 1, or 2 is invalid") {
     forAll(larGen, badHoepaStatusGen) { (lar: LoanApplicationRegister, x: Int) =>
       val invalidLar: LoanApplicationRegister = lar.copy(hoepaStatus = x)
-      V525(invalidLar) mustBe a[Failure]
+      invalidLar.mustFail
     }
   }
 
