@@ -1,9 +1,9 @@
 package hmda.validation.rules.lar.syntactical
 
 import hmda.validation.dsl.{ Failure, Success }
-import hmda.validation.rules.lar.LarEditCheckSpec
+import hmda.validation.rules.lar.MultipleLarEditCheckSpec
 
-class S040Spec extends LarEditCheckSpec {
+class S040Spec extends MultipleLarEditCheckSpec {
 
   property("Loan/Application number must be unique") {
     forAll(larListGen) { lars =>
