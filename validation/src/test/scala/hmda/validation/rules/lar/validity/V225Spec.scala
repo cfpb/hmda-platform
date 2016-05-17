@@ -2,6 +2,7 @@ package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.{ Loan, LoanApplicationRegister }
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
@@ -22,4 +23,5 @@ class V225Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
+  override def check: EditCheck[LoanApplicationRegister] = V225
 }
