@@ -8,6 +8,9 @@ import scala.util.Try
 
 object V330 extends EditCheck[LoanApplicationRegister] {
 
+  import hmda.validation.dsl.PredicateDefaults._
+  import hmda.validation.dsl.PredicateSyntax._
+
   def apply(lar: LoanApplicationRegister): Result = {
     lar.applicant.income is equalTo("NA") or
       Try(lar.applicant.income.toInt is greaterThan(0))
