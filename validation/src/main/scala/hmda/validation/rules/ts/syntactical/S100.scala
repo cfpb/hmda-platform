@@ -4,14 +4,13 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.Result
 
 import scala.concurrent.{ ExecutionContext, Future }
+import hmda.validation.dsl.PredicateDefaults._
+import hmda.validation.dsl.PredicateSyntax._
 
 /*
  Activity year must = year being processed (i.e. = 2016)
  */
 object S100 {
-
-  import hmda.validation.dsl.PredicateDefaults._
-  import hmda.validation.dsl.PredicateSyntax._
 
   def apply(ts: TransmittalSheet, year: Int): Result = {
     ts.activityYear is equalTo(year)

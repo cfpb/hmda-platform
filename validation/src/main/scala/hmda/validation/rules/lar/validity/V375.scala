@@ -3,11 +3,10 @@ package hmda.validation.rules.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateDefaults._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V375 extends EditCheck[LoanApplicationRegister] {
-
-  import hmda.validation.dsl.PredicateDefaults._
-  import hmda.validation.dsl.PredicateSyntax._
 
   val okLoanTypes = List(2, 3, 4)
 

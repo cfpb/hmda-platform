@@ -3,11 +3,10 @@ package hmda.validation.rules.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateDefaults._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V460 extends EditCheck[LoanApplicationRegister] {
-
-  import hmda.validation.dsl.PredicateDefaults._
-  import hmda.validation.dsl.PredicateSyntax._
 
   override def name: String = "V460"
 

@@ -4,11 +4,10 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import scala.util.Try
+import hmda.validation.dsl.PredicateDefaults._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V485 extends EditCheck[LoanApplicationRegister] {
-
-  import hmda.validation.dsl.PredicateDefaults._
-  import hmda.validation.dsl.PredicateSyntax._
 
   def apply(lar: LoanApplicationRegister): Result = {
     val applicant = lar.applicant

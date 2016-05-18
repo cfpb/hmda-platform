@@ -3,11 +3,10 @@ package hmda.validation.rules.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateDefaults._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V475 extends EditCheck[LoanApplicationRegister] {
-
-  import hmda.validation.dsl.PredicateDefaults._
-  import hmda.validation.dsl.PredicateSyntax._
 
   def apply(lar: LoanApplicationRegister): Result = {
     when(lar.applicant.race1 is containedIn(List(6, 7))) {
