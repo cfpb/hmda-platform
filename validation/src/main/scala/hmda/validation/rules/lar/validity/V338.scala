@@ -7,7 +7,7 @@ import hmda.validation.rules.EditCheck
 object V338 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V338"
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     when(applicantOk(lar)) {
       lar.applicant.income is equalTo("NA")
     }

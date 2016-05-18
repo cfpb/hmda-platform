@@ -8,7 +8,7 @@ import org.scalacheck.Gen
 class V338Spec extends LarEditCheckSpec {
   property("All applicants not meeting the criteria must pass") {
     forAll(larGen) { lar =>
-      whenever(applicantNotOk(lar)) {
+      whenever(larNotApplicable(lar)) {
         lar.mustPass
       }
     }
@@ -39,7 +39,7 @@ class V338Spec extends LarEditCheckSpec {
 
   override def check: EditCheck[LoanApplicationRegister] = V338
 
-  private def applicantNotOk(lar: LoanApplicationRegister): Boolean = {
+  private def larNotApplicable(lar: LoanApplicationRegister): Boolean = {
     (lar.applicant.ethnicity != 4) ||
       (lar.applicant.race1 != 7) ||
       (lar.applicant.sex != 4) ||
