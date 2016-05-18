@@ -12,10 +12,10 @@ class V415Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val invalidPreaaprovalsGen: Gen[Int] = intOutsideRange(1, 3)
+  val invalidPreaprovalsGen: Gen[Int] = intOutsideRange(1, 3)
 
   property("Preapproval other than 1, 2, or 3 is invalid") {
-    forAll(larGen, invalidPreaaprovalsGen) { (lar: LoanApplicationRegister, x: Int) =>
+    forAll(larGen, invalidPreaprovalsGen) { (lar: LoanApplicationRegister, x: Int) =>
       val invalidLar: LoanApplicationRegister = lar.copy(preapprovals = x)
       invalidLar.mustFail
     }
