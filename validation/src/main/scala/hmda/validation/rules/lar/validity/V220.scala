@@ -3,7 +3,7 @@ package hmda.validation.rules.lar.validity
 import hmda.model.fi.lar.{ LoanApplicationRegister, Loan }
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
-import hmda.validation.dsl.PredicateDefaults._
+import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 object V220 extends EditCheck[LoanApplicationRegister] {

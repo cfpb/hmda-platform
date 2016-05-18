@@ -3,7 +3,7 @@ package hmda.validation.dsl
 import scala.language.implicitConversions
 import scala.util.Try
 
-object PredicateDefaults {
+object PredicateCommon {
   implicit def equalTo[T](that: T): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _ == that
     override def failure: String = s"not equal to $that"

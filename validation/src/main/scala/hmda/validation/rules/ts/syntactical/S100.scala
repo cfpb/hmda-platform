@@ -4,7 +4,7 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.Result
 
 import scala.concurrent.{ ExecutionContext, Future }
-import hmda.validation.dsl.PredicateDefaults._
+import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 /*
