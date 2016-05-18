@@ -1,6 +1,8 @@
 package hmda.validation.rules.lar.syntactical
 
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Success
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
 class S010Spec extends LarEditCheckSpec {
@@ -12,4 +14,6 @@ class S010Spec extends LarEditCheckSpec {
       }
     }
   }
+
+  override def check: EditCheck[LoanApplicationRegister] = S010
 }

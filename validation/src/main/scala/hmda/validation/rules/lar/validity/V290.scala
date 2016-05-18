@@ -14,11 +14,11 @@ object V290 extends EditCheck[LoanApplicationRegister] {
 
   val validCombinations = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county, cbsa.geoIdMsa)
-  }
+  }.toSet
 
   val validMdCombinations = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county, cbsa.metDivFp)
-  }
+  }.toSet
 
   override def name: String = "V290"
 

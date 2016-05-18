@@ -14,7 +14,7 @@ object V295 extends EditCheck[LoanApplicationRegister] {
 
   val validCombination = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county)
-  }
+  }.toSet
 
   override def name: String = "V295"
 

@@ -46,7 +46,12 @@ object PredicateDefaults {
     override def failure: String = s"is not contained in valid values domain"
   }
 
-  implicit def numeric[T]: Predicate[T] = new Predicate[T] {
+  def containedIn[T](domain: Set[T]): Predicate[T] = new Predicate[T] {
+    override def validate: (T) => Boolean = domain.contains
+    override def failure: String = s"is not contained in valid values domain"
+  }
+
+  def numeric[T]: Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = _.asInstanceOf[AnyRef] match {
       case n: Number => true
       case _ => throw new NotImplementedError("'numeric' doesn't handle string (or other) values yet")
