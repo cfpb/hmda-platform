@@ -39,6 +39,7 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V500,
       V520,
       V525,
+      V555,
       V570,
       V575
     ).map(check(_, lar))
