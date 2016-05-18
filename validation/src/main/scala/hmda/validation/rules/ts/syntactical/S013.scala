@@ -6,7 +6,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import hmda.validation.dsl.PredicateDefaults._
 import hmda.validation.dsl.PredicateSyntax._
 
-object S013 {
+object S013 extends {
 
   def apply(ts: TransmittalSheet, timestamp: Long): Result = {
     val t = ts.timestamp

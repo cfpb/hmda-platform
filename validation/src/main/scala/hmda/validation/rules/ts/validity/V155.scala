@@ -8,7 +8,7 @@ import hmda.validation.dsl.PredicateRegEx._
 
 object V155 extends EditCheck[TransmittalSheet] {
 
-  def apply(ts: TransmittalSheet): Result = {
+  override def apply(ts: TransmittalSheet): Result = {
     val contact = ts.contact
     val email = contact.email
     email is validEmail

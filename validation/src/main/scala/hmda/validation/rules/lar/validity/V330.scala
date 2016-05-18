@@ -10,12 +10,12 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object V330 extends EditCheck[LoanApplicationRegister] {
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     lar.applicant.income is equalTo("NA") or
       Try(lar.applicant.income.toInt is greaterThan(0))
       .getOrElse(Failure(s"Can't parse '${lar.applicant.income}' as an Int"))
   }
 
-  def name: String = "V330"
+  override def name: String = "V330"
 
 }

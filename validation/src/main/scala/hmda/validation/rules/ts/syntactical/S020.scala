@@ -11,7 +11,7 @@ object S020 extends EditCheck[TransmittalSheet] {
   //Hardcoded for now
   val agencyCodes: List[Int] = List(1, 2, 3, 5, 7, 9)
 
-  def apply(ts: TransmittalSheet): Result = {
+  override def apply(ts: TransmittalSheet): Result = {
     ts.agencyCode is containedIn(agencyCodes)
   }
 

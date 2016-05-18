@@ -8,10 +8,10 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object S011 extends EditCheck[Iterable[LoanApplicationRegister]] {
 
-  def apply(lars: Iterable[LoanApplicationRegister]): Result = {
+  override def apply(lars: Iterable[LoanApplicationRegister]): Result = {
     lars.size is greaterThan(0)
   }
 
-  def name = "S011"
+  override def name = "S011"
 
 }

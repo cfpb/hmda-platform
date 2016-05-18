@@ -15,7 +15,7 @@ object S010 extends EditCheck[TransmittalSheet] {
   //Hardcoded for now
   val tsId = 1
 
-  def apply(ts: TransmittalSheet): Result = {
+  override def apply(ts: TransmittalSheet): Result = {
     ts.id is equalTo(tsId)
   }
 

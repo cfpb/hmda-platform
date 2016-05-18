@@ -12,7 +12,7 @@ import hmda.validation.dsl.PredicateHmda._
  */
 object S028 extends EditCheck[TransmittalSheet] {
 
-  def apply(ts: TransmittalSheet): Result = {
+  override def apply(ts: TransmittalSheet): Result = {
     import scala.language.postfixOps
     val timestamp = ts.timestamp
     (timestamp is numeric) and (timestamp.toString is validTimestampFormat)

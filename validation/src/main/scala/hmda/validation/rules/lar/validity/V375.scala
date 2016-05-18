@@ -10,7 +10,7 @@ object V375 extends EditCheck[LoanApplicationRegister] {
 
   val okLoanTypes = List(2, 3, 4)
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.purchaserType is equalTo(2)) { lar.loan.loanType is containedIn(okLoanTypes) }
   }
 

@@ -14,7 +14,7 @@ object V220 extends EditCheck[LoanApplicationRegister] {
     loan.loanType is containedIn(loanTypes)
   }
 
-  def apply(lar: LoanApplicationRegister) = this.apply(lar.loan)
+  override def apply(lar: LoanApplicationRegister) = this.apply(lar.loan)
 
-  def name = "V220"
+  override def name = "V220"
 }

@@ -11,7 +11,7 @@ import hmda.validation.dsl.PredicateSyntax._
  */
 object V105 extends EditCheck[TransmittalSheet] {
 
-  def apply(ts: TransmittalSheet): Result = {
+  override def apply(ts: TransmittalSheet): Result = {
     val respondent = ts.respondent
     val respName = respondent.name
     val respAddress = respondent.address

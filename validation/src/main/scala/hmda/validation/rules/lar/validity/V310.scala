@@ -8,7 +8,7 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object V310 extends EditCheck[LoanApplicationRegister] {
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     lar.applicant.race1 is containedIn(1 to 7)
   }
 

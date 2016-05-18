@@ -9,7 +9,7 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object V470 extends EditCheck[LoanApplicationRegister] {
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     val applicant = lar.applicant
     when(applicant.race1 is containedIn(1 to 5)) {
       (validRace(applicant.race2) is equalTo(true)) and
@@ -27,6 +27,6 @@ object V470 extends EditCheck[LoanApplicationRegister] {
     Try(domain.contains(input.toInt))
   }
 
-  def name: String = "V470"
+  override def name: String = "V470"
 
 }

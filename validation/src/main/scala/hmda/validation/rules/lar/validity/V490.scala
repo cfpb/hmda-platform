@@ -8,7 +8,7 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object V490 extends EditCheck[LoanApplicationRegister] {
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.applicant.coRace1 is containedIn(List(6, 7, 8))) {
       (lar.applicant.coRace2 is equalTo("")) and
         (lar.applicant.coRace3 is equalTo("")) and
@@ -17,6 +17,6 @@ object V490 extends EditCheck[LoanApplicationRegister] {
     }
   }
 
-  def name: String = "V490"
+  override def name: String = "V490"
 
 }

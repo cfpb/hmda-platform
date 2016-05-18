@@ -11,9 +11,9 @@ object S010 extends EditCheck[LoanApplicationRegister] {
   //Hardcoded for now
   val larId = 2
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     lar.id is equalTo(larId)
   }
 
-  def name = "S010"
+  override def name = "S010"
 }

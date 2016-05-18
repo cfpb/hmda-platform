@@ -11,9 +11,9 @@ object S020 extends EditCheck[LoanApplicationRegister] {
   //Hardcoded for now
   val agencyCodes: List[Int] = List(1, 2, 3, 5, 7, 9)
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     lar.agencyCode is containedIn(agencyCodes)
   }
 
-  def name = "S020"
+  override def name = "S020"
 }

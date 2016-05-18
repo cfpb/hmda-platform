@@ -7,7 +7,7 @@ import hmda.validation.rules.EditCheck
 object S040 extends EditCheck[Iterable[LoanApplicationRegister]] {
 
   //TODO: naive implementation, bail out as soon as a duplicate is found
-  def apply(lars: Iterable[LoanApplicationRegister]): Result = {
+  override def apply(lars: Iterable[LoanApplicationRegister]): Result = {
 
     val loanIds = lars.map(lar => lar.loan.id)
     val size = loanIds.size
@@ -16,5 +16,5 @@ object S040 extends EditCheck[Iterable[LoanApplicationRegister]] {
     if (size != uniqueSize) Failure("Submission contains duplicates") else Success()
   }
 
-  def name = "S040"
+  override def name = "S040"
 }
