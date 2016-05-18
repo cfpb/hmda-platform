@@ -23,7 +23,7 @@ class V545Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val invalidHoepaGen: Gen[Int] = intOutsideRange(2, 2)
+  val invalidHoepaGen: Gen[Int] = Gen.choose(Int.MinValue, Int.MaxValue).filter(_ != 2)
 
   property("Invalid when lien status is 3 and HOEPA status not 2") {
     forAll(larGen, invalidHoepaGen) { (lar: LoanApplicationRegister, x: Int) =>
