@@ -8,9 +8,9 @@ object V230 extends EditCheck[LoanApplicationRegister] {
 
   val occupancyStatusTypes = List(1, 2, 3)
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     lar.loan.occupancy is containedIn(occupancyStatusTypes)
   }
 
-  def name = "V230"
+  override def name = "V230"
 }
