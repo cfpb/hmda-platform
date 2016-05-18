@@ -21,7 +21,7 @@ class V565Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val invalidLienStatusGen: Gen[Int] = intOutsideRange(4, 4)
+  val invalidLienStatusGen: Gen[Int] = Gen.choose(Int.MinValue, Int.MaxValue).filter(_ != 4)
 
   property("When action taken = 6, lien status not equal to 4 is invalid") {
     forAll(larGen, invalidLienStatusGen) { (lar: LoanApplicationRegister, x: Int) =>
