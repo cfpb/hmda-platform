@@ -8,6 +8,7 @@ import hmda.api.processing.lar.SingleLarValidation.CheckAll
 import hmda.parser.fi.lar.LarCsvParser
 import scala.io.Source
 import hmda.api.processing.lar.SingleLarValidation._
+import scala.concurrent.duration._
 
 class SingleLarValidationSpec extends ActorSpec {
 
@@ -22,7 +23,7 @@ class SingleLarValidationSpec extends ActorSpec {
     "validate all lars in sample files" in {
       lars.foreach { lar =>
         probe.send(larValidation, CheckAll(lar))
-        probe.expectMsg(Nil)
+        probe.expectMsg(10.seconds, Nil)
       }
     }
   }
