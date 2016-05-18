@@ -24,15 +24,15 @@ class V338Spec extends LarEditCheckSpec {
     forAll(larGen, actionTakenGen, incomeGen) { (lar: LoanApplicationRegister, x: Int, y: Int) =>
       val applicant = lar.applicant.copy(ethnicity = 4, race1 = 7, sex = 4, coEthnicity = 5,
         coRace1 = 8, coSex = 5, income = y.toString)
-      val invalidLar = lar.copy(applicant = applicant, actionTakenType = x)
-      invalidLar.mustFail
+      val newLar = lar.copy(applicant = applicant, actionTakenType = x)
+      newLar.mustFail
     }
   }
 
-  val invalidEthnicityGen: Gen[Int] = Gen.choose(1, 3)
+  val disqualifyingEthnicityGen: Gen[Int] = Gen.choose(1, 3)
 
   property("Applicant not meeting the ethnicity criteria must pass") {
-    forAll(larGen, actionTakenGen, invalidEthnicityGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
+    forAll(larGen, actionTakenGen, disqualifyingEthnicityGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
       val applicant = lar.applicant.copy(ethnicity = x, race1 = 7, sex = 4, coEthnicity = 5,
         coRace1 = 8, coSex = 5, income = "whatever")
       val newLar = lar.copy(applicant = applicant, actionTakenType = y)
@@ -40,10 +40,10 @@ class V338Spec extends LarEditCheckSpec {
     }
   }
 
-  val invalidRaceGen: Gen[Int] = Gen.choose(1, 6)
+  val disqualifyingRaceGen: Gen[Int] = Gen.choose(1, 6)
 
   property("Applicant not meeting the race criteria must pass") {
-    forAll(larGen, actionTakenGen, invalidRaceGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
+    forAll(larGen, actionTakenGen, disqualifyingRaceGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
       val applicant = lar.applicant.copy(ethnicity = 4, race1 = x, sex = 4, coEthnicity = 5,
         coRace1 = 8, coSex = 5, income = "whatever")
       val newLar = lar.copy(applicant = applicant, actionTakenType = y)
@@ -51,10 +51,10 @@ class V338Spec extends LarEditCheckSpec {
     }
   }
 
-  val invalidSexGen: Gen[Int] = Gen.choose(1, 3)
+  val disqualifyingSexGen: Gen[Int] = Gen.choose(1, 3)
 
   property("Applicant not meeting the sex criteria must pass") {
-    forAll(larGen, actionTakenGen, invalidSexGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
+    forAll(larGen, actionTakenGen, disqualifyingSexGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
       val applicant = lar.applicant.copy(ethnicity = 4, race1 = 7, sex = x, coEthnicity = 5,
         coRace1 = 8, coSex = 5, income = "whatever")
       val newLar = lar.copy(applicant = applicant, actionTakenType = y)
@@ -62,10 +62,10 @@ class V338Spec extends LarEditCheckSpec {
     }
   }
 
-  val invalidCoEthnicityGen: Gen[Int] = Gen.choose(1, 4)
+  val disqualifyingCoEthnicityGen: Gen[Int] = Gen.choose(1, 4)
 
   property("Applicant not meeting the co-ethnicity criteria must pass") {
-    forAll(larGen, actionTakenGen, invalidCoEthnicityGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
+    forAll(larGen, actionTakenGen, disqualifyingCoEthnicityGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
       val applicant = lar.applicant.copy(ethnicity = 4, race1 = 7, sex = 4, coEthnicity = x,
         coRace1 = 8, coSex = 5, income = "whatever")
       val newLar = lar.copy(applicant = applicant, actionTakenType = y)
@@ -73,10 +73,10 @@ class V338Spec extends LarEditCheckSpec {
     }
   }
 
-  val invalidCoRaceGen: Gen[Int] = Gen.choose(1, 7)
+  val disqualifyingCoRaceGen: Gen[Int] = Gen.choose(1, 7)
 
   property("Applicant not meeting the co-race criteria must pass") {
-    forAll(larGen, actionTakenGen, invalidCoRaceGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
+    forAll(larGen, actionTakenGen, disqualifyingCoRaceGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
       val applicant = lar.applicant.copy(ethnicity = 4, race1 = 7, sex = 4, coEthnicity = 5,
         coRace1 = x, coSex = 5, income = "whatever")
       val newLar = lar.copy(applicant = applicant, actionTakenType = y)
@@ -84,10 +84,10 @@ class V338Spec extends LarEditCheckSpec {
     }
   }
 
-  val invalidCoSexGen: Gen[Int] = Gen.choose(1, 4)
+  val disqualifyingCoSexGen: Gen[Int] = Gen.choose(1, 4)
 
   property("Applicant not meeting the co-sex criteria must pass") {
-    forAll(larGen, actionTakenGen, invalidCoSexGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
+    forAll(larGen, actionTakenGen, disqualifyingCoSexGen) { (lar: LoanApplicationRegister, y: Int, x: Int) =>
       val applicant = lar.applicant.copy(ethnicity = 4, race1 = 7, sex = 4, coEthnicity = 5,
         coRace1 = 8, coSex = x, income = "whatever")
       val newLar = lar.copy(applicant = applicant, actionTakenType = y)
