@@ -11,6 +11,7 @@ object V360 extends EditCheck[LoanApplicationRegister] {
     notEqualIgnoreSpace(lar.denial.reason1, lar.denial.reason2) and
       notEqualIgnoreSpace(lar.denial.reason2, lar.denial.reason3) and
       notEqualIgnoreSpace(lar.denial.reason3, lar.denial.reason1)
+
   }
 
   private def notEqualIgnoreSpace(reason1: String, reason2: String): Result = {
