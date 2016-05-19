@@ -3,6 +3,8 @@ package hmda.validation.rules.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V385 extends EditCheck[LoanApplicationRegister] {
 
@@ -11,9 +13,6 @@ object V385 extends EditCheck[LoanApplicationRegister] {
   val okActionTaken = List(3, 7)
 
   def apply(lar: LoanApplicationRegister): Result = {
-    import hmda.validation.dsl.PredicateCommon._
-    import hmda.validation.dsl.PredicateSyntax._
-
     val denialReasons = List(lar.denial.reason1, lar.denial.reason2, lar.denial.reason3)
 
     denialReasons.foreach(_ is containedIn(validDenialReasons)) and
