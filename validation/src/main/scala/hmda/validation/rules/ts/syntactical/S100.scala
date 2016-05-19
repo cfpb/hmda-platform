@@ -1,14 +1,16 @@
 package hmda.validation.rules.ts.syntactical
 
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.validation.dsl.{ CommonDsl, Result }
+import hmda.validation.dsl.Result
 
 import scala.concurrent.{ ExecutionContext, Future }
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
 
 /*
  Activity year must = year being processed (i.e. = 2016)
  */
-object S100 extends CommonDsl {
+object S100 {
 
   def apply(ts: TransmittalSheet, year: Int): Result = {
     ts.activityYear is equalTo(year)
@@ -17,5 +19,7 @@ object S100 extends CommonDsl {
   def apply(ts: TransmittalSheet, fyear: Future[Int])(implicit ec: ExecutionContext): Future[Result] = {
     fyear.map(year => ts.activityYear is equalTo(year))
   }
+
+  def name: String = "S100"
 
 }
