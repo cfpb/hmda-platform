@@ -5,6 +5,9 @@ import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
 object V338 extends EditCheck[LoanApplicationRegister] {
+  import hmda.validation.dsl.PredicateCommon._
+  import hmda.validation.dsl.PredicateSyntax._
+
   override def name: String = "V338"
 
   override def apply(lar: LoanApplicationRegister): Result = {
