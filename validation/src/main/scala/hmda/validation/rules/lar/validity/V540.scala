@@ -8,9 +8,9 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object V540 extends EditCheck[LoanApplicationRegister] {
 
-  val ActionTakenTypes = List(2, 3, 4, 5, 7, 8)
+  val ActionTakenList = List(2, 3, 4, 5, 7, 8)
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.actionTakenType is containedIn(ActionTakenTypes)) {
+    when(lar.actionTakenType is containedIn(ActionTakenList)) {
       (lar.hoepaStatus is equalTo(2))
     }
   }
