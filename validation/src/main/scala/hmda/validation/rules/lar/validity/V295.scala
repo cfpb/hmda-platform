@@ -4,6 +4,8 @@ import hmda.model.census.CBSATractLookup
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V295 extends EditCheck[LoanApplicationRegister] {
 

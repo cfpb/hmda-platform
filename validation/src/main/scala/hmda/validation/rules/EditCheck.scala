@@ -1,8 +1,8 @@
 package hmda.validation.rules
 
-import hmda.validation.dsl.{ CommonDsl, Result }
+import hmda.validation.dsl.Result
 
-abstract class EditCheck[T] extends CommonDsl {
+abstract class EditCheck[T] {
 
   def name: String
 
