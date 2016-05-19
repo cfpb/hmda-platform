@@ -1,8 +1,10 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.{ LoanApplicationRegister, Loan }
-import hmda.validation.dsl.{ CommonDsl, Result }
+import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V220 extends EditCheck[LoanApplicationRegister] {
 
@@ -12,7 +14,7 @@ object V220 extends EditCheck[LoanApplicationRegister] {
     loan.loanType is containedIn(loanTypes)
   }
 
-  def apply(lar: LoanApplicationRegister) = this.apply(lar.loan)
+  override def apply(lar: LoanApplicationRegister) = this.apply(lar.loan)
 
-  def name = "V220"
+  override def name = "V220"
 }
