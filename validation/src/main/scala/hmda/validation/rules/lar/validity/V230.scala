@@ -1,19 +1,18 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.{ LoanApplicationRegister }
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
-object V465 extends EditCheck[LoanApplicationRegister] {
+object V230 extends EditCheck[LoanApplicationRegister] {
+
+  val occupancyStatuses = List(1, 2, 3)
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.applicant.coEthnicity is containedIn(List(1, 2, 3))) {
-      lar.applicant.coRace1 not containedIn(List(7, 8))
-    }
+    lar.loan.occupancy is containedIn(occupancyStatuses)
   }
 
-  override def name: String = "V465"
-
+  override def name = "V230"
 }

@@ -11,6 +11,7 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
     val checks = List(
       V220,
       V225,
+      V230,
       V255,
       V262,
       V280,
@@ -40,6 +41,7 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V520,
       V525,
       V545,
+      V550,
       V570,
       V575
     ).map(check(_, lar))
