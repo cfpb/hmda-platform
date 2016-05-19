@@ -6,16 +6,13 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
-object V555 extends EditCheck[LoanApplicationRegister] {
-
-  val loanPurposeList = List(1, 3)
-  val lienStatusList = List(1, 2, 4)
+object V545 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.loan.purpose is containedIn(loanPurposeList)) {
-      lar.lienStatus is containedIn(lienStatusList)
+    when(lar.lienStatus is equalTo(3)) {
+      lar.hoepaStatus is equalTo(2)
     }
   }
 
-  override def name = "V555"
+  override def name = "V545"
 }
