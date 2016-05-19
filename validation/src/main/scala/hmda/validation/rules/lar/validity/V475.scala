@@ -3,10 +3,12 @@ package hmda.validation.rules.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V475 extends EditCheck[LoanApplicationRegister] {
 
-  def apply(lar: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.applicant.race1 is containedIn(List(6, 7))) {
       (lar.applicant.race2 is equalTo("")) and
         (lar.applicant.race3 is equalTo("")) and
@@ -15,6 +17,6 @@ object V475 extends EditCheck[LoanApplicationRegister] {
     }
   }
 
-  def name: String = "V475"
+  override def name: String = "V475"
 
 }

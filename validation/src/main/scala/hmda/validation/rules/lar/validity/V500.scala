@@ -1,10 +1,14 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ RegexDsl, Result }
+import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.dsl.PredicateRegEx._
 
-object V500 extends EditCheck[LoanApplicationRegister] with RegexDsl {
+object V500 extends EditCheck[LoanApplicationRegister] {
+
   override def name: String = "V500"
 
   override def apply(lar: LoanApplicationRegister): Result = {
