@@ -37,6 +37,7 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V480,
       V485,
       V490,
+      V495,
       V500,
       V520,
       V525,
