@@ -15,7 +15,13 @@ object V385 extends EditCheck[LoanApplicationRegister] {
   def apply(lar: LoanApplicationRegister): Result = {
     val denialReasons = List(lar.denial.reason1, lar.denial.reason2, lar.denial.reason3)
 
-    denialReasons.foreach(_ is containedIn(validDenialReasons)) and
+    /*
+        denialReasons.foreach(_ is containedIn(validDenialReasons)) and
+     */
+
+    (denialReasons(0) is containedIn(validDenialReasons)) and
+      (denialReasons(1) is containedIn(validDenialReasons)) and
+      (denialReasons(2) is containedIn(validDenialReasons)) and
       when((lar.agencyCode is equalTo(1)) and (lar.actionTakenType is containedIn(okActionTaken))) {
         denialReasons.intersect(requiredDenialReasons).length is greaterThan(0)
       }

@@ -28,5 +28,13 @@ class V385Spec extends LarEditCheckSpec {
     }
   }
 
+  property("If the agency code and actionTaken are correct and denial reasons are incorrect, lar must fail") {
+    forAll(larGen, actionTakenGen, validDenialGen) { (lar: LoanApplicationRegister, action: Int, denial: Int) =>
+      val newDenial = lar.denial.copy(reason2 = "failure")
+      val newLar = lar.copy(agencyCode = 1, actionTakenType = action, denial = newDenial)
+      newLar.mustFail
+    }
+  }
+
   override def check: EditCheck[LoanApplicationRegister] = V385
 }
