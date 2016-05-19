@@ -8,12 +8,12 @@ object V338 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V338"
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(applicantOk(lar)) {
+    when(notANaturalPerson(lar)) {
       lar.applicant.income is equalTo("NA")
     }
   }
 
-  private def applicantOk(lar: LoanApplicationRegister): Result = {
+  private def notANaturalPerson(lar: LoanApplicationRegister): Result = {
     val okAction = List(1, 2, 3, 4, 5, 7, 8)
 
     (lar.applicant.ethnicity is equalTo(4)) and
