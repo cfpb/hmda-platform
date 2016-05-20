@@ -1,18 +1,16 @@
 package hmda.validation.rules.ts.validity
 
-import hmda.model.fi.ts.Contact
-import hmda.parser.fi.ts.TsGenerators
-import hmda.validation.dsl.{ Failure, Success }
+import hmda.model.fi.ts.{ Contact, TransmittalSheet }
+import hmda.validation.rules.ts.TsEditCheckSpec
+import hmda.validation.rules.EditCheck
 import org.scalacheck.Gen
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{ MustMatchers, PropSpec }
 
-class V155Spec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators {
+class V155Spec extends TsEditCheckSpec {
 
   property("A valid email address for the institution must be provided") {
     forAll(tsGen) { ts =>
       whenever(ts.contact.email != "") {
-        V155(ts) mustBe Success()
+        ts.mustPass
       }
     }
   }
@@ -24,8 +22,8 @@ class V155Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
       val badTs = ts.copy(contact = badContact)
       val badTs2 = ts.copy(contact = badContact.copy(email = ""))
       whenever(badTs.id == 1) {
-        V155(badTs) mustBe Failure("is not a valid email")
-        V155(badTs2) mustBe Failure("is not a valid email")
+        badTs.mustFail
+        badTs2.mustFail
       }
     }
   }
@@ -47,5 +45,7 @@ class V155Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
       dotCom = ".com"
     } yield List(name, at, domain, dotCom).mkString
   }
+
+  override def check: EditCheck[TransmittalSheet] = V155
 
 }

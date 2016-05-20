@@ -100,11 +100,17 @@ trait TsGenerators extends FIGenerators {
 
   implicit def phoneGen: Gen[String] = {
     for {
-      p1 <- Gen.numStr
-      p2 <- Gen.numStr
-      p3 <- Gen.numStr
+      p1 <- Gen.choose(0, 999)
+      p2 <- Gen.choose(0, 999)
+      p3 <- Gen.choose(0, 9999)
       sep = "-"
-    } yield List(p1.take(3).toString, sep, p2.take(3).toString, sep, p3.take(4).toString).mkString
+    } yield List(
+      p1.toString.reverse.padTo(3, "0").reverse.mkString,
+      sep,
+      p2.toString.reverse.padTo(3, "0").reverse.mkString,
+      sep,
+      p3.toString.reverse.padTo(4, "0").reverse.mkString
+    ).mkString
   }
 
   implicit def emailGen: Gen[String] = {
