@@ -7,10 +7,10 @@ import org.scalacheck.Gen
 
 class V540Spec extends LarEditCheckSpec with BadValueUtils {
 
-  val badActionTakenTypes = List(2, 3, 4, 5, 7, 8)
+  val badActionTakenList = List(2, 3, 4, 5, 7, 8)
   val validActionTakenGen: Gen[Int] =
     Gen.choose(Int.MinValue, Int.MaxValue)
-      .filter(!badActionTakenTypes.contains(_))
+      .filter(!badActionTakenList.contains(_))
 
   property("Valid Action taken not 2,3,4,5,7 or 8") {
     forAll(larGen, validActionTakenGen) { (lar, x) =>
@@ -26,7 +26,7 @@ class V540Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val badActionTakenGen: Gen[Int] = Gen.oneOf(badActionTakenTypes)
+  val badActionTakenGen: Gen[Int] = Gen.oneOf(badActionTakenList)
   val badHoepaStatusGen: Gen[Int] = Gen.choose(Int.MinValue, Int.MaxValue).filter(_ != 2)
 
   property("HOEPA status other than 2 is invalid with certain action types") {

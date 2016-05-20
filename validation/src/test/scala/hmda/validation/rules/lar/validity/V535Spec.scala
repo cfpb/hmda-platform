@@ -30,11 +30,10 @@ class V535Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Valid if action taken not 6") {
+  property("Valid if action taken is 6") {
     forAll(larGen) { lar =>
-      whenever(lar.actionTakenType != 6) {
-        lar.mustPass
-      }
+      val validLar = lar.copy(actionTakenType = 6)
+      validLar.mustPass
     }
   }
 
