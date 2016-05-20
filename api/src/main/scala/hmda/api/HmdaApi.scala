@@ -1,6 +1,6 @@
 package hmda.api
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
@@ -22,7 +22,8 @@ object HmdaApi extends App with HttpApi with LarHttpApi {
   lazy val port = config.getInt("hmda.http.port")
 
   //Start up API Actors
-  val larValidation = system.actorOf(SingleLarValidation.props, "larValidation")
+  import hmda.api.processing.lar.SingleLarValidation._
+  val larValidation = createSingleLarValidator(system)
 
   val http = Http().bindAndHandle(
     routes ~ larRoutes,
