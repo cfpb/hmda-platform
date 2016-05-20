@@ -1,6 +1,6 @@
 package hmda.api.processing.lar
 
-import akka.actor.{ Actor, ActorLogging, Props }
+import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.engine.ValidationError
 import hmda.validation.engine.lar.LarEngine
@@ -11,6 +11,10 @@ object SingleLarValidation {
   case class CheckAll(lar: LoanApplicationRegister)
   case class CheckSyntactical(lar: LoanApplicationRegister)
   case class CheckValidity(lar: LoanApplicationRegister)
+
+  def createSingleLarValidator(system: ActorSystem): ActorRef = {
+    system.actorOf(SingleLarValidation.props, "larValidation")
+  }
 
 }
 
