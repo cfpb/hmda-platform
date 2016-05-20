@@ -14,7 +14,7 @@ class V430Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val validPurpose: Gen[Int] = intOutsideRange(1, 2)
+  val validPurpose: Gen[Int] = intOutsideRange(2, 3)
 
   property("Valid if loan purpose not 1 or 2") {
     forAll(larGen, validPurpose) { (lar, x) =>
@@ -24,7 +24,7 @@ class V430Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val invalidPurpose: Gen[Int] = Gen.oneOf(1, 2)
+  val invalidPurpose: Gen[Int] = Gen.oneOf(2, 3)
   val invalidPreApproval: Gen[Int] = intOtherThan(3)
 
   property("Preapproval other than 3 is invalid") {
