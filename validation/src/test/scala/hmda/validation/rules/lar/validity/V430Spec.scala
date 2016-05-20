@@ -25,9 +25,9 @@ class V430Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   val invalidPurpose: Gen[Int] = Gen.oneOf(1, 2)
-  val invalidPreApproval: Gen[Int] = Gen.choose(Int.MinValue, Int.MaxValue).filter(_ != 3)
+  val invalidPreApproval: Gen[Int] = intOtherThan(3)
 
-  property("HOEPA status other than 1, or 2 is invalid") {
+  property("Preapproval other than 3 is invalid") {
     forAll(larGen, invalidPurpose, invalidPreApproval) { (lar: LoanApplicationRegister, pu: Int, pr: Int) =>
       val invalidLoan = lar.loan.copy(purpose = pu)
       val invalidLar: LoanApplicationRegister = lar.copy(
