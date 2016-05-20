@@ -9,7 +9,7 @@ import hmda.validation.dsl.PredicateSyntax._
 object V385 extends EditCheck[LoanApplicationRegister] {
 
   val requiredDenialReasons = (1 to 9).map(_.toString()).toList
-  val validDenialReasons = List("") ::: requiredDenialReasons
+  val validDenialReasons = "" :: requiredDenialReasons
   val okActionTaken = List(3, 7)
 
   override def apply(lar: LoanApplicationRegister): Result = {
