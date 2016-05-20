@@ -7,11 +7,16 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
 class V360Spec extends LarEditCheckSpec {
+  val goodOptionGen: Gen[List[String]] = Gen.listOfN(3, Gen.alphaStr)
+
   property("Denials with all different values must pass") {
-    forAll(larGen) { lar =>
-      val goodDenial = lar.denial.copy(reason1 = "1", reason2 = "2", reason3 = "")
-      val newLar = lar.copy(denial = goodDenial)
-      newLar.mustPass
+    forAll(larGen, goodOptionGen) { (lar: LoanApplicationRegister, goodOptions: List[String]) =>
+      val goodOptionList = goodOptions.filterNot(_.isEmpty)
+      whenever(goodOptionList.distinct.length == goodOptionList.length) {
+        val goodDenial = lar.denial.copy(reason1 = goodOptions(0), reason2 = goodOptions(1), reason3 = goodOptions(2))
+        val newLar = lar.copy(denial = goodDenial)
+        newLar.mustPass
+      }
     }
   }
 
@@ -23,7 +28,7 @@ class V360Spec extends LarEditCheckSpec {
     }
   }
 
-  val badOptionGen: Gen[Int] = Gen.choose(1, 9)
+  val badOptionGen: Gen[Int] = Gen.choose(Int.MinValue, Int.MaxValue)
 
   property("Denials with the two of the same value must fail") {
     forAll(larGen, badOptionGen) { (lar: LoanApplicationRegister, x: Int) =>
