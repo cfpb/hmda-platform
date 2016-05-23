@@ -8,11 +8,9 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object V505 extends EditCheck[LoanApplicationRegister] {
 
-  val actionTakenList = List(1, 2, 3, 4, 5, 6, 7, 8)
-
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.actionTakenType is containedIn(actionTakenList)) {
-      lar.rateSpread is equalTo("NA")
+    when(lar.actionTakenType is containedIn(2 to 8)) {
+      lar.rateSpread.trim is equalTo("NA")
     }
   }
 
