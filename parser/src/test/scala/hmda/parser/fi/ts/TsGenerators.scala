@@ -41,10 +41,10 @@ trait TsGenerators extends FIGenerators with GeneratorUtils {
 
   implicit def taxIdGen: Gen[String] = {
     for {
-      prefix <- Gen.numStr
+      prefix <- Gen.choose(0, 99)
       sep = "-"
-      suffix <- Gen.numStr
-    } yield List(prefix.take(2), sep, suffix.take(7)).mkString
+      suffix <- Gen.choose(0, 9999999)
+    } yield List(padIntWithZeros(prefix, 2), sep, padIntWithZeros(suffix, 7)).mkString
   }
 
   implicit def respondentGen: Gen[Respondent] = {

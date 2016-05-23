@@ -9,9 +9,7 @@ class V125Spec extends TsEditCheckSpec with ValidityUtils {
 
   property("Correct tax id should pass") {
     forAll(tsGen) { ts =>
-      whenever(ts.taxId.length == 10) {
-        ts.mustPass
-      }
+      ts.mustPass
     }
   }
 
