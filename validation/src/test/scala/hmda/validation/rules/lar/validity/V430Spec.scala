@@ -16,7 +16,7 @@ class V430Spec extends LarEditCheckSpec with BadValueUtils {
 
   val validPurpose: Gen[Int] = intOutsideRange(2, 3)
 
-  property("Valid if loan purpose not 1 or 2") {
+  property("Valid if loan purpose not 2 or 3") {
     forAll(larGen, validPurpose) { (lar, x) =>
       val validLoan = lar.loan.copy(purpose = x)
       val validLar = lar.copy(loan = validLoan)
