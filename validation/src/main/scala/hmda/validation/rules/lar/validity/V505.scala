@@ -10,7 +10,7 @@ object V505 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.actionTakenType is containedIn(2 to 8)) {
-      lar.rateSpread.trim is equalTo("NA")
+      lar.rateSpread is equalTo("NA")
     }
   }
 
