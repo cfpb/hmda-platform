@@ -1,5 +1,6 @@
 package hmda.validation.rules.ts.validity
 
+import hmda.model.census.Census._
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
@@ -9,22 +10,11 @@ import hmda.validation.dsl.PredicateSyntax._
 /*
  Respondent name, address, city, state, and zip code must not = blank
  */
-object V105 extends EditCheck[TransmittalSheet] {
+object V111 extends EditCheck[TransmittalSheet] {
 
   override def apply(ts: TransmittalSheet): Result = {
-    val respondent = ts.respondent
-    val respName = respondent.name
-    val respAddress = respondent.address
-    val respCity = respondent.city
-    val respState = respondent.state
-    val respZipCode = respondent.zipCode
-
-    (respName not empty) and
-      (respAddress not empty) and
-      (respCity not empty) and
-      (respState not empty) and
-      (respZipCode not empty)
+    ts.parent.state is containedIn(states.keys.toList)
   }
 
-  override def name: String = "V105"
+  override def name: String = "V111"
 }
