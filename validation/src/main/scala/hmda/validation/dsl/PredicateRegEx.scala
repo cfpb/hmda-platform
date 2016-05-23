@@ -15,6 +15,17 @@ object PredicateRegEx {
     override def failure: String = s"is not a valid email"
   }
 
+  implicit def validPhoneNumber: Predicate[String] = new Predicate[String] {
+
+    override def validate: (String) => Boolean = {
+      val phoneNumberRegEx = "^\\d{3}-\\d{3}-\\d{4}$"
+      val PhoneNumber = phoneNumberRegEx.r
+      matches(PhoneNumber)
+    }
+
+    override def failure: String = s"is not a valid phone number"
+  }
+
   def numericMatching(pattern: String): Predicate[String] = new Predicate[String] {
     val regEx = regExFor(pattern).r
     override def validate: (String) => Boolean = matches(regEx)
