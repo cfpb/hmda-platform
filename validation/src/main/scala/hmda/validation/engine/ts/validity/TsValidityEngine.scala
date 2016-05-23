@@ -13,6 +13,7 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
       V111,
       V112,
       V120,
+      V125,
       V135,
       V140,
       V155
