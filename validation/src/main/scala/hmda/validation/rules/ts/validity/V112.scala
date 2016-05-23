@@ -1,6 +1,5 @@
 package hmda.validation.rules.ts.validity
 
-import hmda.model.census.Census._
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
@@ -8,15 +7,15 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 /*
- Parent state must be a proper state abbreviation
+ Parent zip code must be in the proper format
  */
-object V111 extends EditCheck[TransmittalSheet] {
+object V112 extends EditCheck[TransmittalSheet] {
 
   override def apply(ts: TransmittalSheet): Result = {
-    when(ts.parent.state not empty) {
-      ts.parent.state is containedIn(states.keys.toList)
-    }
+    val regex = "^(?:\\d{5}(?:-\\d{4})?)?$".r // Matches "", "12345", or "12345-6789"
+
+    regex.findFirstIn(ts.parent.zipCode).isEmpty is equalTo(false)
   }
 
-  override def name: String = "V111"
+  override def name: String = "V112"
 }

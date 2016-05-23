@@ -7,7 +7,7 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 /*
- Respondent name, address, city, state, and zip code must not = blank
+ Tax ID must be properly formatted
  */
 object V125 extends EditCheck[TransmittalSheet] {
 

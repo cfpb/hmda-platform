@@ -3,9 +3,10 @@ package hmda.parser.fi.ts
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.parser.fi.FIGenerators
 import hmda.parser.util.FITestData._
+import hmda.parser.util.GeneratorUtils
 import org.scalacheck.Gen
 
-trait TsGenerators extends FIGenerators {
+trait TsGenerators extends FIGenerators with GeneratorUtils {
 
   implicit def tsGen: Gen[TransmittalSheet] = {
     for {
@@ -77,16 +78,16 @@ trait TsGenerators extends FIGenerators {
 
   implicit def zip5Gen: Gen[String] = {
     for {
-      zip <- Gen.numStr
-    } yield zip.take(5)
+      zip <- Gen.choose(0, 99999)
+    } yield padIntWithZeros(zip, 5)
   }
 
   implicit def zipPlus4Gen: Gen[String] = {
     for {
-      zip <- Gen.numStr
-      plus <- Gen.numStr
+      zip <- zip5Gen
+      plus <- Gen.choose(0, 9999)
       sep = "-"
-    } yield List(zip.take(5), sep, plus.take(4)).mkString
+    } yield List(zip, sep, padIntWithZeros(plus, 4)).mkString
   }
 
   implicit def contactGen: Gen[Contact] = {
@@ -105,11 +106,11 @@ trait TsGenerators extends FIGenerators {
       p3 <- Gen.choose(0, 9999)
       sep = "-"
     } yield List(
-      p1.toString.reverse.padTo(3, "0").reverse.mkString,
+      padIntWithZeros(p1, 3),
       sep,
-      p2.toString.reverse.padTo(3, "0").reverse.mkString,
+      padIntWithZeros(p2, 3),
       sep,
-      p3.toString.reverse.padTo(4, "0").reverse.mkString
+      padIntWithZeros(p3, 4)
     ).mkString
   }
 
@@ -121,5 +122,4 @@ trait TsGenerators extends FIGenerators {
       dotCom = ".com"
     } yield List(name, at, domain, dotCom).mkString
   }
-
 }
