@@ -12,8 +12,7 @@ abstract class TsEditCheckSpec extends PropSpec with PropertyChecks with MustMat
     PropertyCheckConfig(minSuccessful = 100, maxDiscarded = 500)
 
   def check: EditCheck[TransmittalSheet]
-
-  // TODO consider trying Matcher instead of these methods
+  
   implicit class LarChecker(ts: TransmittalSheet) {
     def mustFail = check(ts) mustBe a[Failure]
     def mustPass = check(ts) mustBe a[Success]
