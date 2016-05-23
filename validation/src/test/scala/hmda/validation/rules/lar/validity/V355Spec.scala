@@ -8,7 +8,7 @@ import org.scalacheck.Gen
 
 class V355Spec extends LarEditCheckSpec with BadValueUtils {
 
-  property("If agency code is valid, lar must pass") {
+  property("If agency code is valid, lar with valid denial reasons must pass") {
     forAll(larGen) { lar =>
       whenever(agencyCodeValid(lar)) {
         lar.mustPass
@@ -16,7 +16,7 @@ class V355Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("If agency code is 1 and action taken is 3 or 7, lar must pass") {
+  property("If agency code is 1 and action taken is 3 or 7, lar with valid denial reasons must pass") {
     forAll(larGen) { lar =>
       val validLar = lar.copy(agencyCode = 1)
       whenever(agencyCodeAndActionTakenValid(validLar)) {
