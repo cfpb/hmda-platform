@@ -20,7 +20,7 @@ class V505Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("When ratespread in 1-8 and ratespread not NA lar is invalid") {
+  property("When action taken in 1-8 and ratespread not NA lar is invalid") {
     forAll(larGen, Gen.choose(1, 8), Gen.numStr) { (lar, actionTaken, rate) =>
       val invalidLar: LoanApplicationRegister = lar.copy(actionTakenType = actionTaken, rateSpread = rate)
       invalidLar.mustFail
