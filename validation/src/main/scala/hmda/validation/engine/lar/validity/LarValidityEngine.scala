@@ -50,6 +50,8 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V500,
       V520,
       V525,
+      V535,
+      V540,
       V545,
       V550,
       V555,
