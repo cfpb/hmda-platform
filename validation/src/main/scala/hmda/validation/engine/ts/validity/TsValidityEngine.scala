@@ -10,6 +10,7 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
   def checkValidity(ts: TransmittalSheet): TsValidation = {
     val checks: List[TsValidation] = List(
       V105,
+      V108,
       V111,
       V112,
       V120,
