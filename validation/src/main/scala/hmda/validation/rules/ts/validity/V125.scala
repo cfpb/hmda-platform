@@ -5,6 +5,7 @@ import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.dsl.PredicateRegEx._
 
 /*
  Tax ID must be properly formatted
@@ -12,8 +13,7 @@ import hmda.validation.dsl.PredicateSyntax._
 object V125 extends EditCheck[TransmittalSheet] {
 
   override def apply(ts: TransmittalSheet): Result = {
-    val regex = "^\\d{2}-\\d{7}$".r
-    (regex.findFirstIn(ts.taxId).isEmpty is equalTo(false)) and
+    (ts.taxId is validTaxId) and
       (ts.taxId not equalTo("99-9999999")) and
       (ts.taxId not equalTo("00-0000000"))
   }
