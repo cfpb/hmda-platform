@@ -22,9 +22,11 @@ class V210Spec extends LarEditCheckSpec {
     }
   }
 
+  val invalidYearGen: Gen[Int] = Gen.choose(1000, 1999)
+
   property("An application dated with an incorrect century must fail") {
-    forAll(larGen) { lar =>
-      val badLoan = lar.loan.copy(applicationDate = "19990101")
+    forAll(larGen, invalidYearGen) { (lar, year) =>
+      val badLoan = lar.loan.copy(applicationDate = year + "0101")
       val badLar = lar.copy(loan = badLoan)
       badLar.mustFail
     }
@@ -38,17 +40,21 @@ class V210Spec extends LarEditCheckSpec {
     }
   }
 
+  val invalidMonthGen: Gen[Int] = Gen.choose(13, 99)
+
   property("An application with an invalid month must fail") {
-    forAll(larGen) { lar =>
-      val badLoan = lar.loan.copy(applicationDate = "20001301")
+    forAll(larGen, invalidMonthGen) { (lar, month) =>
+      val badLoan = lar.loan.copy(applicationDate = "2000" + month + "01")
       val badLar = lar.copy(loan = badLoan)
       badLar.mustFail
     }
   }
 
+  val invalidDayGen: Gen[Int] = Gen.choose(32, 99)
+
   property("An application with an invalid day must fail") {
-    forAll(larGen) { lar =>
-      val badLoan = lar.loan.copy(applicationDate = "20001232")
+    forAll(larGen, invalidDayGen) { (lar, day) =>
+      val badLoan = lar.loan.copy(applicationDate = "200012" + day)
       val badLar = lar.copy(loan = badLoan)
       badLar.mustFail
     }
