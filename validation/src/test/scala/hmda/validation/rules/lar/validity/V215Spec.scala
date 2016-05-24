@@ -7,12 +7,11 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
 class V215Spec extends LarEditCheckSpec {
-  property("If action taken type must = 6, then date application received = NA") {
+  property("Passes if application date is NA") {
     forAll(larGen) { lar =>
-      whenever(lar.loan.applicationDate == "NA") {
-        val newLar = lar.copy(actionTakenType = 6)
-        newLar.mustPass
-      }
+      val naLoan = lar.loan.copy(applicationDate = "NA")
+      val newLar = lar.copy(loan = naLoan)
+      newLar.mustPass
     }
   }
 
