@@ -19,7 +19,7 @@ class V215Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       whenever(lar.actionTakenType != 6) {
         lar.mustPass
-      
+      }
     }
   }
 
