@@ -14,7 +14,7 @@ class V260Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Valid when no denial not in range 1-9") {
+  property("Valid when no denial in range 1-9") {
     forAll(
       larGen,
       intOutsideRange(1, 9),
@@ -37,13 +37,13 @@ class V260Spec extends LarEditCheckSpec with BadValueUtils {
   val intGen = Gen.oneOf(deniedGen, notDeniedGen)
 
   property("Invalid when action taken not 3 or 7 when any denial in 1 to 9") {
-    forAll(larGen, actionGen, intGen, intGen, intGen) { (lar, action, D1, D2, D3) =>
+    forAll(larGen, actionGen, intGen, intGen, intGen) { (lar, action, d1, d2, d3) =>
       whenever(
-        D1 <= 9 && D1 >= 1 ||
-          D2 <= 9 && D2 >= 1 ||
-          D3 <= 9 && D3 >= 1
+        d1 <= 9 && d1 >= 1 ||
+          d2 <= 9 && d2 >= 1 ||
+          d3 <= 9 && d3 >= 1
       ) {
-          val invalidDenial = lar.denial.copy(reason1 = D1.toString, reason2 = D2.toString, reason3 = D3.toString)
+          val invalidDenial = lar.denial.copy(reason1 = d1.toString, reason2 = d2.toString, reason3 = d3.toString)
           val invalidLar: LoanApplicationRegister = lar.copy(actionTakenType = action, denial = invalidDenial)
           invalidLar.mustFail
         }
