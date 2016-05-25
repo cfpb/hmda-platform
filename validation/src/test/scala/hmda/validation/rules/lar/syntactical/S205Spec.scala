@@ -7,7 +7,7 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 class S205Spec extends LarEditCheckSpec {
   property("All lars must have a valid loan ID") {
     forAll(larGen) { lar =>
-      whenever(!lar.loan.id.forall(_ == '0') && lar.loan.id.length != 0) {
+      whenever(!lar.loan.id.forall(_ == '0')) {
         lar.mustPass
       }
     }

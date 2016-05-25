@@ -45,7 +45,7 @@ trait LarGenerators extends FIGenerators {
 
   implicit def loanGen: Gen[Loan] = {
     for {
-      id <- Gen.listOf(Gen.alphaNumChar).map(_.mkString)
+      id <- Gen.nonEmptyListOf(Gen.alphaNumChar).map(_.mkString)
       applicationDate <- optional(dateGen, "NA")
       loanType <- Gen.oneOf(1, 2, 3, 4)
       propertyType <- Gen.oneOf(1, 2, 3)
