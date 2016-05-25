@@ -1,5 +1,8 @@
 package hmda.parser.fi
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import org.scalacheck.Gen
 
 trait FIGenerators {
@@ -23,12 +26,14 @@ trait FIGenerators {
     Gen.oneOf(g.map(_.toString), Gen.const(emptyVal))
   }
 
-  // returns Int in yyyyMMdd format. this feels a bit primitive-obsessed, but is probably OK for now.
+  // returns Int in yyyyMMdd format. must be a correct calendar date.
   def dateGen: Gen[Int] = {
+    val dateFormat = new SimpleDateFormat("yyyyMMdd")
+
+    val beginDate = dateFormat.parse("20170101")
+    val endDate = dateFormat.parse("202021231")
     for {
-      year <- Gen.choose(2017, 2020) // or could parameterize if needed
-      month <- Gen.choose(1, 12)
-      day <- Gen.choose(1, 31) // now featuring lesser-known dates such as February 31! (OK in the current context)
-    } yield year * 10000 + month * 100 + day
+      randomDate <- Gen.choose(beginDate.getTime, endDate.getTime)
+    } yield dateFormat.format(new Date(randomDate)).toInt
   }
 }
