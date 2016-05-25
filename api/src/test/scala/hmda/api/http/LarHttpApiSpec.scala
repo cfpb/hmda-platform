@@ -23,7 +23,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
   //Start up API Actors
   val larValidation = system.actorOf(SingleLarValidation.props, "larValidation")
 
-  val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|3|6|20130119|12540|06|029|001.01|4|3|5|4|3|2|1|6|||||1|2|NA|0|9|8|7|NA|2|4"
+  val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|3|2|1|10000|3|6|20130119|12540|06|029|001.01|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
 
   val lar = LarCsvParser(larCsv)
   val larJson = lar.toJson
