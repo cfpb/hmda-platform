@@ -8,7 +8,7 @@ import org.scalacheck.Gen
 
 class V355Spec extends LarEditCheckSpec with BadValueUtils {
 
-  property("If agency code is valid, lar with valid denial reasons must pass") {
+  property("If agency code is relevant, lar with valid denial reasons must pass") {
     forAll(larGen) { lar =>
       whenever(agencyCodeRelevant(lar)) {
         lar.mustPass
@@ -26,7 +26,7 @@ class V355Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   val irrelevantAgencyCode: Gen[Int] = Gen.oneOf(4, 6, 8)
-  property("If both agency code and action taken are invalid, lar should pass") {
+  property("If both agency code and action taken are irrelevant, lar should pass") {
     forAll(larGen, irrelevantAgencyCode) { (lar: LoanApplicationRegister, x: Int) =>
       val newLar = lar.copy(agencyCode = x)
       whenever(!agencyCodeAndActionTakenRelevant(newLar)) {
@@ -36,7 +36,7 @@ class V355Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   val invalidDenialCode: Gen[Int] = intOutsideRange(1, 9)
-  property("If both agency code and action taken are valid and denial is invalid, lar should fail") {
+  property("If both agency code and action taken are relevant and denial is invalid, lar should fail") {
     forAll(larGen, invalidDenialCode) { (lar: LoanApplicationRegister, x: Int) =>
       val invalidDenial = lar.denial.copy(reason1 = x.toString)
       val invalidLar = lar.copy(denial = invalidDenial)
