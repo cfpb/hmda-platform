@@ -14,7 +14,7 @@ object V112 extends EditCheck[TransmittalSheet] {
 
   override def apply(ts: TransmittalSheet): Result = {
     (ts.parent.zipCode is validZipCode) or
-      (ts.parent.zipCode.length is equalTo(0))
+      (ts.parent.zipCode is empty)
   }
 
   override def name: String = "V112"
