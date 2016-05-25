@@ -16,7 +16,7 @@ class V355Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("If agency code is 1 and action taken is 3 or 7, lar with valid denial reasons must pass") {
+  property("If agency code is 1 and action taken is not 3 or 7, lar with valid denial reasons must pass") {
     forAll(larGen) { lar =>
       val validLar = lar.copy(agencyCode = 1)
       whenever(agencyCodeAndActionTakenValid(validLar)) {
@@ -51,7 +51,7 @@ class V355Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   def agencyCodeAndActionTakenValid(lar: LoanApplicationRegister) = {
-    lar.agencyCode == 1 && List(3, 7).contains(lar.actionTakenType)
+    lar.agencyCode == 1 && !List(3, 7).contains(lar.actionTakenType)
   }
 
   override def check: EditCheck[LoanApplicationRegister] = V355
