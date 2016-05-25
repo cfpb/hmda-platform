@@ -15,8 +15,8 @@ class V150Spec extends TsEditCheckSpec {
 
   property("invalid when contact name and respondent name are the same") {
     forAll(tsGen) { ts =>
-      val name = ts.respondent.name
-      val invalidContact = ts.contact.copy(name = name)
+      val respondentName = ts.respondent.name
+      val invalidContact = ts.contact.copy(name = respondentName)
       val invalidTs = ts.copy(contact = invalidContact)
       invalidTs.mustFail
     }
