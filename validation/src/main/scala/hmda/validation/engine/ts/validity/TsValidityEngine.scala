@@ -11,9 +11,11 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
     val checks: List[TsValidation] = List(
       V105,
       V108,
+      V115,
       V120,
       V135,
       V140,
+      V150,
       V155
     ).map(check(_, ts))
 
