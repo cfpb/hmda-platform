@@ -14,7 +14,7 @@ trait BadValueUtils extends LarGenerators {
 
   def intOtherThan(x: Any): Gen[Int] = x match {
     case x: Int => Gen.choose(Int.MinValue, Int.MaxValue).filter(_ != x)
-    case x: List[Int] => Gen.choose(Int.MinValue, Int.MaxValue).filter(!x.contains(_))
+    case x: Seq[Int] => Gen.choose(Int.MinValue, Int.MaxValue).filter(!x.contains(_))
   }
 
   val badPurchaserTypeGen: Gen[Int] = intOutsideRange(1, 9)
