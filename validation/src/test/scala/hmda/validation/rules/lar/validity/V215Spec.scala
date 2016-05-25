@@ -25,7 +25,7 @@ class V215Spec extends LarEditCheckSpec {
 
   val invalidDate: Gen[String] = Gen.alphaStr.filter(_ != "NA")
 
-  property("Fails if actionTakenType is 6 and date application received is not NA") {
+  property("Fails if actionTakenType is 6 and application date is not a valid format") {
     forAll(larGen, invalidDate) { (lar, altDate) =>
       val naLoan = lar.loan.copy(applicationDate = altDate)
       val newLar = lar.copy(loan = naLoan, actionTakenType = 6)
