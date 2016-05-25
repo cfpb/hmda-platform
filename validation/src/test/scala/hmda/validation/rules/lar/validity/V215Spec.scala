@@ -1,13 +1,12 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
+import hmda.parser.fi.FIGenerators
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
-import org.scalacheck.Gen
 
-class V215Spec extends LarEditCheckSpec {
-  property("Passes if application date is NA") {
+class V215Spec extends LarEditCheckSpec with FIGenerators {
+  property("Passes if loan application date is NA") {
     forAll(larGen) { lar =>
       val naLoan = lar.loan.copy(applicationDate = "NA")
       val newLar = lar.copy(loan = naLoan)
@@ -23,12 +22,10 @@ class V215Spec extends LarEditCheckSpec {
     }
   }
 
-  val invalidDate: Gen[String] = Gen.alphaStr.filter(_ != "NA")
-
-  property("Fails if actionTakenType is 6 and application date is not a valid format") {
-    forAll(larGen, invalidDate) { (lar, altDate) =>
-      val naLoan = lar.loan.copy(applicationDate = altDate)
-      val newLar = lar.copy(loan = naLoan, actionTakenType = 6)
+  property("Fails if actionTakenType is 6 and loan application date is not NA") {
+    forAll(larGen, dateGen) { (lar, date) =>
+      val naLoan = lar.loan.copy(applicationDate = date.toString)
+      val newLar = lar.copy(actionTakenType = 6, loan = naLoan)
       newLar.mustFail
     }
   }
