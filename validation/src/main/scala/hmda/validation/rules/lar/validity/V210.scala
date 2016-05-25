@@ -8,18 +8,16 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
+import scala.util.Try
+
 object V210 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
     val date = lar.loan.applicationDate
+    val format = new SimpleDateFormat("yyyyMMdd")
+    format.setLenient(false)
 
-    try {
-      val format = new SimpleDateFormat("yyyyMMdd")
-      format.setLenient(false)
-      val dateObject = format.parse(date)
-      dateObject.after(format.parse("20000101")) is equalTo(true)
-    } catch {
-      case e: Exception => date is equalTo("NA")
-    }
+    Try(format.parse(date).after(format.parse("20000101")) is equalTo(true))
+      .getOrElse(date is equalTo("NA"))
   }
 
   override def name = "V210"
