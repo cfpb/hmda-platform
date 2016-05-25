@@ -9,6 +9,8 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
 
   def checkValidity(lar: LoanApplicationRegister): LarValidation = {
     val checks = List(
+      V210,
+      V215,
       V220,
       V225,
       V230,
