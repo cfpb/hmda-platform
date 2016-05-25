@@ -92,7 +92,7 @@ trait TsGenerators extends FIGenerators with GeneratorUtils {
 
   implicit def contactGen: Gen[Contact] = {
     for {
-      name <- Gen.alphaStr
+      name <- Gen.alphaStr.filter(!_.isEmpty)
       phone <- phoneGen
       fax <- phoneGen
       email <- emailGen
