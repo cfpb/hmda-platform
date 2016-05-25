@@ -7,30 +7,31 @@ import org.scalacheck.Gen
 
 class V540Spec extends LarEditCheckSpec with BadValueUtils {
 
-  val badActionTakenList = List(2, 3, 4, 5, 7, 8)
-  val validActionTakenGen: Gen[Int] =
-    Gen.choose(Int.MinValue, Int.MaxValue)
-      .filter(!badActionTakenList.contains(_))
+  val relevantActions = List(2, 3, 4, 5, 7, 8)
 
-  property("Valid Action taken not 2,3,4,5,7 or 8") {
-    forAll(larGen, validActionTakenGen) { (lar, x) =>
+  val irrelevantActionGen: Gen[Int] =
+    Gen.choose(Int.MinValue, Int.MaxValue)
+      .filter(!relevantActions.contains(_))
+
+  property("Valid when Action Taken not 2,3,4,5,7 or 8") {
+    forAll(larGen, irrelevantActionGen) { (lar, x) =>
       val validLar = lar.copy(actionTakenType = x)
       validLar.mustPass
     }
   }
 
-  property("Valid if HOEPA status is 2") {
+  property("Valid when HOEPA status is 2") {
     forAll(larGen) { lar =>
       val validLar = lar.copy(hoepaStatus = 2)
       validLar.mustPass
     }
   }
 
-  val badActionTakenGen: Gen[Int] = Gen.oneOf(badActionTakenList)
+  val relevantActionGen: Gen[Int] = Gen.oneOf(relevantActions)
   val badHoepaStatusGen: Gen[Int] = Gen.choose(Int.MinValue, Int.MaxValue).filter(_ != 2)
 
-  property("HOEPA status other than 2 is invalid with certain action types") {
-    forAll(larGen, badHoepaStatusGen, badActionTakenGen) { (lar: LoanApplicationRegister, hs: Int, at: Int) =>
+  property("HOEPA status other than 2 is invalid when action taken = 2,3,4,5,7,8") {
+    forAll(larGen, badHoepaStatusGen, relevantActionGen) { (lar: LoanApplicationRegister, hs: Int, at: Int) =>
       val invalidLar: LoanApplicationRegister = lar.copy(
         actionTakenType = at,
         hoepaStatus = hs
