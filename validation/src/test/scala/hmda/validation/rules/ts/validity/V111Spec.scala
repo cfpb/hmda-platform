@@ -6,7 +6,7 @@ import hmda.validation.rules.ts.TsEditCheckSpec
 
 class V111Spec extends TsEditCheckSpec with ValidityUtils {
 
-  property("Parent state code must equal a valid postal code abbreviation") {
+  property("Parent state code must equal a valid state code abbreviation") {
     forAll(tsGen) { ts =>
       whenever(!ts.parent.state.isEmpty) {
         ts.mustPass
@@ -22,7 +22,7 @@ class V111Spec extends TsEditCheckSpec with ValidityUtils {
     }
   }
 
-  property("Wrong state code should fail") {
+  property("Invalid state code should fail") {
     forAll(tsGen) { ts =>
       val s2 = ts.parent.copy(state = "XXX")
       val badTs2 = ts.copy(parent = s2)

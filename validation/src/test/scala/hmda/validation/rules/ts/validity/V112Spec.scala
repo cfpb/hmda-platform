@@ -23,7 +23,7 @@ class V112Spec extends TsEditCheckSpec with ValidityUtils {
 
   val badZipGen: Gen[String] = Gen.numStr.filter(_.length > 5)
 
-  property("Wrong zip code should fail") {
+  property("Invalid zip code should fail") {
     forAll(tsGen, badZipGen) { (ts, zip) =>
       val s2 = ts.parent.copy(zipCode = zip)
       val badTs2 = ts.copy(parent = s2)

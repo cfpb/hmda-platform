@@ -7,13 +7,13 @@ import org.scalacheck.Gen
 
 class V125Spec extends TsEditCheckSpec with ValidityUtils {
 
-  property("Correct tax id should pass") {
+  property("Valid tax id should pass") {
     forAll(tsGen) { ts =>
       ts.mustPass
     }
   }
 
-  property("Incorrect tax id should not pass") {
+  property("Invalid tax id should not pass") {
     forAll(tsGen, Gen.alphaStr) { (ts, tax) =>
       val badTs = ts.copy(taxId = tax)
       badTs.mustFail
