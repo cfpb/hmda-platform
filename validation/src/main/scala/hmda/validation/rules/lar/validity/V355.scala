@@ -13,10 +13,10 @@ object V355 extends EditCheck[LoanApplicationRegister] {
 
     val validDenialReason = "" :: (1 to 9).map(_.toString()).toList
 
-    val agencyCodeValid = lar.agencyCode is containedIn(List(2, 3, 5, 7, 9))
-    val agencyCodeAndActionTakenValid = (lar.agencyCode is equalTo(1)) and (lar.actionTakenType not containedIn(List(3, 7)))
+    val agencyCodeRelevant = lar.agencyCode is containedIn(List(2, 3, 5, 7, 9))
+    val agencyCodeAndActionTakenRelevant = (lar.agencyCode is equalTo(1)) and (lar.actionTakenType not containedIn(List(3, 7)))
 
-    when(agencyCodeValid or agencyCodeAndActionTakenValid) {
+    when(agencyCodeRelevant or agencyCodeAndActionTakenRelevant) {
       denialReasons.forall(validDenialReason.contains(_)) is equalTo(true)
     }
   }
