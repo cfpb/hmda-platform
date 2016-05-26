@@ -21,7 +21,7 @@ class V112Spec extends TsEditCheckSpec with ValidityUtils {
     }
   }
 
-  val badZipGen: Gen[String] = Gen.numStr.filter(_.length > 5)
+  val badZipGen: Gen[String] = Gen.numStr.filter(s => s.length != 5 && !s.isEmpty)
 
   property("Invalid zip code should fail") {
     forAll(tsGen, badZipGen) { (ts, zip) =>
