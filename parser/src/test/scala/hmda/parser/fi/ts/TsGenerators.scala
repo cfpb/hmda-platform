@@ -101,17 +101,11 @@ trait TsGenerators extends FIGenerators with GeneratorUtils {
 
   implicit def phoneGen: Gen[String] = {
     for {
-      p1 <- Gen.choose(0, 999)
-      p2 <- Gen.choose(0, 999)
-      p3 <- Gen.choose(0, 9999)
+      p1 <- Gen.listOfN(3, Gen.numChar)
+      p2 <- Gen.listOfN(3, Gen.numChar)
+      p3 <- Gen.listOfN(4, Gen.numChar)
       sep = "-"
-    } yield List(
-      padIntWithZeros(p1, 3),
-      sep,
-      padIntWithZeros(p2, 3),
-      sep,
-      padIntWithZeros(p3, 4)
-    ).mkString
+    } yield List(p1, p2, p3).map(_.mkString).mkString(sep)
   }
 
   implicit def emailGen: Gen[String] = {
