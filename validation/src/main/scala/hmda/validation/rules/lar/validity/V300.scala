@@ -2,10 +2,13 @@ package hmda.validation.rules.lar.validity
 
 import hmda.model.census.CBSATractLookup
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ RegexDsl, Result, Success }
+import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.dsl.PredicateRegEx._
 
-object V300 extends EditCheck[LoanApplicationRegister] with RegexDsl {
+object V300 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 

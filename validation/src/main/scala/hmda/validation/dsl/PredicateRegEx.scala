@@ -4,8 +4,20 @@ import scala.language.implicitConversions
 import scala.util.matching.Regex
 
 object PredicateRegEx {
+  implicit def validCensusTractFormat: Predicate[String] = new Predicate[String] {
+
+    override def validate: (String) => Boolean = {
+      val censusTractRegEx = "^[0-9]{4}.[0-9]{2}$"
+      val CensusTract = censusTractRegEx.r
+      matches(CensusTract)
+    }
+
+    override def failure: String = s"census tract is not in valid format"
+
+  }
 
   implicit def validEmail: Predicate[String] = new Predicate[String] {
+
     override def validate: (String) => Boolean = {
       val emailRegEx = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"
       val Email = emailRegEx.r
