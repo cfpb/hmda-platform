@@ -18,6 +18,7 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
       V125,
       V135,
       V140,
+      V145,
       V150,
       V155
     ).map(check(_, ts))

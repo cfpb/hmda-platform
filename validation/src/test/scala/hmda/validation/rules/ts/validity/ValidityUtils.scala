@@ -31,4 +31,6 @@ trait ValidityUtils {
     } yield List(p1.take(3).toString, sep, p2.take(3).toString, sep, p3.take(4).toString).mkString
   }
 
+  def invalidZipGen: Gen[String] = Gen.numStr.filter(s => !s.isEmpty && s.length != 5)
+
 }
