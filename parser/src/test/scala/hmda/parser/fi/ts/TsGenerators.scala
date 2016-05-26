@@ -3,10 +3,9 @@ package hmda.parser.fi.ts
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.parser.fi.FIGenerators
 import hmda.parser.util.FITestData._
-import hmda.parser.util.GeneratorUtils
 import org.scalacheck.Gen
 
-trait TsGenerators extends FIGenerators with GeneratorUtils {
+trait TsGenerators extends FIGenerators {
 
   implicit def tsGen: Gen[TransmittalSheet] = {
     for {
@@ -41,10 +40,10 @@ trait TsGenerators extends FIGenerators with GeneratorUtils {
 
   implicit def taxIdGen: Gen[String] = {
     for {
-      prefix <- Gen.choose(0, 99)
+      prefix <- Gen.listOfN(2, Gen.numChar)
       sep = "-"
-      suffix <- Gen.choose(0, 9999999)
-    } yield List(padIntWithZeros(prefix, 2), sep, padIntWithZeros(suffix, 7)).mkString
+      suffix <- Gen.listOfN(7, Gen.numChar)
+    } yield List(prefix, suffix).map(_.mkString).mkString(sep)
   }
 
   implicit def respondentGen: Gen[Respondent] = {
@@ -78,16 +77,16 @@ trait TsGenerators extends FIGenerators with GeneratorUtils {
 
   implicit def zip5Gen: Gen[String] = {
     for {
-      zip <- Gen.choose(0, 99999)
-    } yield padIntWithZeros(zip, 5)
+      zip <- Gen.listOfN(5, Gen.numChar)
+    } yield zip.mkString
   }
 
   implicit def zipPlus4Gen: Gen[String] = {
     for {
-      zip <- zip5Gen
-      plus <- Gen.choose(0, 9999)
+      zip <- Gen.listOfN(5, Gen.numChar)
+      plus <- Gen.listOfN(4, Gen.numChar)
       sep = "-"
-    } yield List(zip, sep, padIntWithZeros(plus, 4)).mkString
+    } yield List(zip, plus).map(_.mkString).mkString(sep)
   }
 
   implicit def contactGen: Gen[Contact] = {
