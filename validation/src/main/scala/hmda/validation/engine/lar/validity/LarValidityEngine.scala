@@ -18,6 +18,8 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V255,
       V260,
       V262,
+      V265,
+      V275,
       V280,
       V285,
       V290,
