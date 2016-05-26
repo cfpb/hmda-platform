@@ -24,28 +24,34 @@ object V300 extends EditCheck[LoanApplicationRegister] {
     (cbsa.state, cbsa.county, cbsa.tractDecimal)
   }
 
+  val smallCounties = cbsaTracts
+    .filter { cbsa => cbsa.smallCounty == 1 }
+    .map { cbsa => (cbsa.state, cbsa.county) }
+
   override def name: String = "V300"
 
-  override def apply(input: LoanApplicationRegister): Result = {
+  override def apply(lar: LoanApplicationRegister): Result = {
 
-    val msa = input.geography.msa
-    val state = input.geography.state
-    val county = input.geography.county
-    val tract = input.geography.tract
+    val msa = lar.geography.msa
+    val state = lar.geography.state
+    val county = lar.geography.county
+    val tract = lar.geography.tract
 
-    val combination = (msa, state, county, tract)
+    val allCombination = (msa, state, county, tract)
     val stateCountyCombination = (state, county, tract)
 
     val validCensusTractCombination = when(msa not equalTo("NA")) {
-      (combination is containedIn(validCombination)) or
-        (combination is containedIn(validMdCombination))
+      (allCombination is containedIn(validCombination)) or
+        (allCombination is containedIn(validMdCombination))
     }
 
     val tractStateCountyCombination = when(msa is equalTo("NA")) {
-      (stateCountyCombination is containedIn(validStateCountyCombination)) or (tract is equalTo("NA"))
+      (stateCountyCombination is containedIn(validStateCountyCombination))
     }
 
-    val validFormat = (tract is validCensusTractFormat) or (tract is equalTo("NA"))
+    val validFormat = (tract is validCensusTractFormat)
+
+    val smallCounty = (state, county) not containedIn(smallCounties)
 
     val counties = cbsaTracts.find { c =>
       c.geoIdMsa == msa &&
@@ -56,14 +62,14 @@ object V300 extends EditCheck[LoanApplicationRegister] {
 
     val smallCountyValue = counties.map(c => c.smallCounty).getOrElse(0)
 
-    val smallCounty = when(smallCountyValue is equalTo(1)) {
-      tract is equalTo("NA")
-    }
+    val smallCountyOrig = smallCountyValue not equalTo(1)
 
-    validFormat and
-      validCensusTractCombination and
-      tractStateCountyCombination and
-      smallCounty
+    when(tract not equalTo("NA")) {
+      validFormat and
+        validCensusTractCombination and
+        tractStateCountyCombination and
+        smallCounty
+    }
 
   }
 
