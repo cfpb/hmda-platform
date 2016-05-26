@@ -26,6 +26,26 @@ object PredicateRegEx {
     override def failure: String = s"is not a valid phone number"
   }
 
+  implicit def validZipCode: Predicate[String] = new Predicate[String] {
+
+    override def validate: (String) => Boolean = {
+      val zipCodeRegex = "^\\d{5}(?:-\\d{4})?$".r
+      matches(zipCodeRegex)
+    }
+
+    override def failure: String = s"is not a valid zip code"
+  }
+
+  implicit def validTaxId: Predicate[String] = new Predicate[String] {
+
+    override def validate: (String) => Boolean = {
+      val taxIdRegex = "^\\d{2}-\\d{7}$".r
+      matches(taxIdRegex)
+    }
+
+    override def failure: String = s"is not a valid tax ID"
+  }
+
   def numericMatching(pattern: String): Predicate[String] = new Predicate[String] {
     val regEx = regExFor(pattern).r
     override def validate: (String) => Boolean = matches(regEx)

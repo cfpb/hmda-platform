@@ -40,10 +40,10 @@ trait TsGenerators extends FIGenerators {
 
   implicit def taxIdGen: Gen[String] = {
     for {
-      prefix <- Gen.numStr
+      prefix <- Gen.listOfN(2, Gen.numChar)
       sep = "-"
-      suffix <- Gen.numStr
-    } yield List(prefix.take(2), sep, suffix.take(7)).mkString
+      suffix <- Gen.listOfN(7, Gen.numChar)
+    } yield List(prefix, suffix).map(_.mkString).mkString(sep)
   }
 
   implicit def respondentGen: Gen[Respondent] = {
@@ -77,16 +77,16 @@ trait TsGenerators extends FIGenerators {
 
   implicit def zip5Gen: Gen[String] = {
     for {
-      zip <- Gen.numStr
-    } yield zip.take(5)
+      zip <- Gen.listOfN(5, Gen.numChar)
+    } yield zip.mkString
   }
 
   implicit def zipPlus4Gen: Gen[String] = {
     for {
-      zip <- Gen.numStr
-      plus <- Gen.numStr
+      zip <- Gen.listOfN(5, Gen.numChar)
+      plus <- Gen.listOfN(4, Gen.numChar)
       sep = "-"
-    } yield List(zip.take(5), sep, plus.take(4)).mkString
+    } yield List(zip, plus).map(_.mkString).mkString(sep)
   }
 
   implicit def contactGen: Gen[Contact] = {
@@ -115,5 +115,4 @@ trait TsGenerators extends FIGenerators {
       dotCom = ".com"
     } yield List(name, at, domain, dotCom).mkString
   }
-
 }
