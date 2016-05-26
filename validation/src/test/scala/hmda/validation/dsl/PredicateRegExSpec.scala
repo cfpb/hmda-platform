@@ -1,29 +1,25 @@
 package hmda.validation.dsl
 
 import hmda.parser.fi.lar.LarGenerators
+import hmda.parser.fi.ts.TsGenerators
 import hmda.validation.engine.lar.syntactical.LarSyntacticalEngine
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
+import hmda.validation.dsl.PredicateRegEx._
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
 
 class PredicateRegExSpec
     extends PropSpec
     with PropertyChecks
     with MustMatchers
     with LarGenerators
-    with LarSyntacticalEngine {
+    with LarSyntacticalEngine
+    with TsGenerators {
 
-  property("A LAR must pass syntactical checks") {
-    forAll(larGen) { lar =>
-      whenever(lar.id == 2) {
-        checkSyntactical(lar).isSuccess mustBe true
-      }
+  property("A valid email must pass the regex") {
+    forAll(emailGen) { email =>
+      email is validEmail
     }
   }
-
-  property("Pass syntactical checks on groups of LARs") {
-    forAll(larListGen) { lars =>
-      checkSyntacticalCollection(lars).isSuccess mustBe true
-    }
-  }
-
 }
