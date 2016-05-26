@@ -42,8 +42,7 @@ class V265Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("LARs with a valid date of an incorrect length must fail")
-  {
+  property("LARs with a valid date of an incorrect length must fail") {
     forAll(larGen) { lar =>
       val invalidLar = lar.copy(actionTakenDate = 384704001)
       invalidLar.mustFail
