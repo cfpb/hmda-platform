@@ -5,7 +5,7 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.TsEditCheckSpec
 import org.scalacheck.Gen
 
-class V145Spec extends TsEditCheckSpec {
+class V145Spec extends TsEditCheckSpec with ValidityUtils {
   property("Succeeds for respondents with valid 5-digit ZIP codes") {
     forAll(tsGen, zip5Gen) { (ts, zip) =>
       val newRespondent = ts.respondent.copy(zipCode = zip)
@@ -21,8 +21,6 @@ class V145Spec extends TsEditCheckSpec {
       newTs.mustPass
     }
   }
-
-  val invalidZipGen: Gen[String] = Gen.numStr.filter(s => !s.isEmpty && s.length != 5)
 
   property("Fails for respondents with numeric ZIP of the wrong length") {
     forAll(tsGen, invalidZipGen) { (ts, zip) =>
