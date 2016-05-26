@@ -4,14 +4,16 @@ import hmda.model.census.CBSATractLookup
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V280 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 
-  val validMSAs = cbsaTracts.map(cbsa => cbsa.geoIdMsa)
+  val validMSAs = cbsaTracts.map(cbsa => cbsa.geoIdMsa).toSet
 
-  val validMDs = cbsaTracts.map(cbsa => cbsa.metDivFp)
+  val validMDs = cbsaTracts.map(cbsa => cbsa.metDivFp).toSet
 
   override def name: String = "V280"
 

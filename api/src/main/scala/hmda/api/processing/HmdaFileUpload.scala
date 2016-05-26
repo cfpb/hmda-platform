@@ -1,10 +1,14 @@
 package hmda.api.processing
 
-import akka.actor.{ ActorLogging, Props }
+import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
 
 object HmdaFileUpload {
   def props(id: String): Props = Props(new HmdaFileUpload(id))
+
+  def createHmdaFileUpload(system: ActorSystem, id: String): ActorRef = {
+    system.actorOf(HmdaFileUpload.props(id))
+  }
 
   sealed trait Command
   sealed trait Event

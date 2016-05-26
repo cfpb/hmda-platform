@@ -1,6 +1,8 @@
 package hmda.validation.rules.lar.validity
 
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
@@ -44,4 +46,5 @@ class V285Spec extends LarEditCheckSpec {
 
   private def badStateGen: Gen[String] = Gen.choose(73, 99).toString
 
+  override def check: EditCheck[LoanApplicationRegister] = V285
 }

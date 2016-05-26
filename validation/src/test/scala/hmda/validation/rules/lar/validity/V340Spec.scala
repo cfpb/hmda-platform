@@ -1,6 +1,8 @@
 package hmda.validation.rules.lar.validity
 
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
 class V340Spec extends LarEditCheckSpec with BadValueUtils {
@@ -18,4 +20,5 @@ class V340Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
+  override def check: EditCheck[LoanApplicationRegister] = V340
 }

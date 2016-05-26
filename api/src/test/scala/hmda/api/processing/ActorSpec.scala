@@ -1,20 +1,14 @@
 package hmda.api.processing
 
 import akka.actor.ActorSystem
-import akka.testkit.{ ImplicitSender, TestKit }
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpecLike }
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
-class ActorSpec(_system: ActorSystem)
-    extends TestKit(_system)
-    with WordSpecLike
-    with ImplicitSender
-    with MustMatchers
-    with BeforeAndAfterAll {
+class ActorSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
-  def this() = this(ActorSystem("hmda-test"))
+  implicit lazy val system = ActorSystem()
 
   override def afterAll(): Unit = {
-    TestKit.shutdownActorSystem(system)
+    system.terminate()
   }
 
 }

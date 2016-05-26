@@ -3,14 +3,15 @@ package hmda.validation.engine.lar.syntactical
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.engine.lar.LarCommonEngine
-import hmda.validation.rules.lar.syntactical.{ S010, S011, S020, S040 }
+import hmda.validation.rules.lar.syntactical._
 
 trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
 
   def checkSyntactical(lar: LoanApplicationRegister): LarValidation = {
     val checks = List(
       S010,
-      S020
+      S020,
+      S205
     ).map(check(_, lar))
 
     validateAll(checks, lar)

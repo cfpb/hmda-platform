@@ -4,6 +4,8 @@ import hmda.model.census.CBSATractLookup
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
 
 object V290 extends EditCheck[LoanApplicationRegister] {
 
@@ -11,11 +13,11 @@ object V290 extends EditCheck[LoanApplicationRegister] {
 
   val validCombinations = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county, cbsa.geoIdMsa)
-  }
+  }.toSet
 
   val validMdCombinations = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county, cbsa.metDivFp)
-  }
+  }.toSet
 
   override def name: String = "V290"
 
