@@ -53,17 +53,6 @@ object V300 extends EditCheck[LoanApplicationRegister] {
 
     val smallCounty = (state, county) not containedIn(smallCounties)
 
-    val counties = cbsaTracts.find { c =>
-      c.geoIdMsa == msa &&
-        c.state == state &&
-        c.county == county &&
-        c.tractDecimal == tract
-    }
-
-    val smallCountyValue = counties.map(c => c.smallCounty).getOrElse(0)
-
-    val smallCountyOrig = smallCountyValue not equalTo(1)
-
     when(tract not equalTo("NA")) {
       validFormat and
         validCensusTractCombination and
