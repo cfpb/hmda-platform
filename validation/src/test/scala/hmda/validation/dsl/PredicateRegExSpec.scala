@@ -18,42 +18,76 @@ class PredicateRegExSpec
     with LarSyntacticalEngine
     with TsGenerators {
 
-  // Email
+  // Email **************
 
-  property("A valid email must pass the regex") {
+  property("A valid email must pass the email regex") {
     forAll(emailGen) { email =>
       email is validEmail
     }
   }
 
-  property("An alphanumeric string will fail the regex") {
+  property("An alphanumeric string will fail the email regex") {
     forAll(Gen.alphaStr) { email =>
       email not validEmail
     }
   }
 
-  // Phone
+  property("An empty string will fail the regex") {
+    "" not validEmail
+  }
 
-  property("A valid phone number must pass the regex") {
+  // Phone **************
+
+  property("A valid phone number must pass the phone regex") {
     forAll(phoneGen) { phone =>
       phone is validPhoneNumber
     }
   }
 
-  // Zip code
+  property("A numeric string will fail the phone regex") {
+    forAll(Gen.numStr) { phone =>
+      phone not validPhoneNumber
+    }
+  }
 
-  property("A valid zip code must pass the regex") {
+  property("An empty string will fail the phone regex") {
+    "" not validPhoneNumber
+  }
+
+  // Zip code **************
+
+  property("A valid zip code must pass the zip code regex") {
     forAll(zipGen) { zip =>
       zip is validZipCode
     }
   }
 
-  // Tax ID
+  property("A numeric string of length != 5 will fail the zip code regex") {
+    forAll(Gen.numStr.filter(_.length != 5)) { zip =>
+      zip not validZipCode
+    }
+  }
 
-  property("A valid tax ID must pass the regex") {
+  property("An empty string will fail the zip code regex") {
+    "" not validZipCode
+  }
+
+  // Tax ID **************
+
+  property("A valid tax ID must pass the tax ID regex") {
     forAll(taxIdGen) { taxId =>
       taxId is validTaxId
     }
+  }
+
+  property("A numeric string must fail the tax ID regex") {
+    forAll(Gen.numStr) { taxId =>
+      taxId not validTaxId
+    }
+  }
+
+  property("An empty string must fail the tax ID regex") {
+    "" not validTaxId
   }
 
 }
