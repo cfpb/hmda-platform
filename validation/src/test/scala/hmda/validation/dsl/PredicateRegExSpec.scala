@@ -37,8 +37,8 @@ class PredicateRegExSpec
   }
 
   property("An improperly formatted email must fail the email regex") {
-    val testCases = List("test@.", "test@test.", "test@.com", "@test.com", " @ . ", "!test@test.com", "test@test.com!",
-      "123@456.789")
+    val testCases = List("test@.", "test@test.", "test@.com", "@test.com", "@.", " @ . ", "!test@test.com",
+      "test@test.com!", "123@456.789")
     testCases.foreach(_ not validEmail)
   }
 
@@ -107,7 +107,7 @@ class PredicateRegExSpec
   }
 
   property("An improperly formatted tax ID must fail the tax ID regex") {
-    val testCases = List(" - ", "-", "123-456789", "abc-defjhij")
+    val testCases = List(" - ", "-", "123-456789", "ab-defjhij")
     testCases.foreach(_ not validTaxId)
   }
 }
