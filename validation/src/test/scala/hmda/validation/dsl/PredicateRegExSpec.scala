@@ -55,7 +55,8 @@ class PredicateRegExSpec
   }
 
   property("An improperly formatted phone number must fail the phone number regex") {
-    val testCases = List("123-456-789", "--", " - - ", "0-0-0", "abc-def-ghij")
+    val testCases = List("123-456-789", "--", " - - ", "0-0-0", "abc-def-ghij", "(123) 456-7890", "123 456 7890",
+      "1-800-123-4567")
     testCases.foreach(_ not validPhoneNumber)
   }
 
