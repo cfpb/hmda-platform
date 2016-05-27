@@ -7,7 +7,7 @@ object PredicateRegEx {
   implicit def validCensusTractFormat: Predicate[String] = new Predicate[String] {
 
     override def validate: (String) => Boolean = {
-      val censusTractRegEx = "^[0-9]{4}.[0-9]{2}$"
+      val censusTractRegEx = "^\\d{4}.\\d{2}$"
       val CensusTract = censusTractRegEx.r
       matches(CensusTract)
     }
