@@ -32,8 +32,14 @@ class PredicateRegExSpec
     }
   }
 
-  property("An empty string will fail the regex") {
+  property("An empty string will fail the email regex") {
     "" not validEmail
+  }
+
+  property("An improperly formatted email must fail the email regex") {
+    val testCases = List("test@.", "test@test.", "test@.com", "@test.com", " @ . ", "!test@test.com", "test@test.com!",
+      "123@456.789")
+    testCases.foreach(_ not validEmail)
   }
 
   // Phone **************
@@ -54,6 +60,11 @@ class PredicateRegExSpec
     "" not validPhoneNumber
   }
 
+  property("An improperly formatted phone number must fail the phone number regex") {
+    val testCases = List("123-456-789", "--", " - - ", "0-0-0", "abc-def-ghij")
+    testCases.foreach(_ not validPhoneNumber)
+  }
+
   // Zip code **************
 
   property("A valid zip code must pass the zip code regex") {
@@ -70,6 +81,11 @@ class PredicateRegExSpec
 
   property("An empty string will fail the zip code regex") {
     "" not validZipCode
+  }
+
+  property("An improperly formatted zip code must fail the zip code regex") {
+    val testCases = List("1234", " ", "     ", "0-0", "1234-5678", "123456-789", "abcde")
+    testCases.foreach(_ not validZipCode)
   }
 
   // Tax ID **************
@@ -90,4 +106,8 @@ class PredicateRegExSpec
     "" not validTaxId
   }
 
+  property("An improperly formatted tax ID must fail the tax ID regex") {
+    val testCases = List(" - ", "-", "123-456789", "abc-defjhij")
+    testCases.foreach(_ not validTaxId)
+  }
 }
