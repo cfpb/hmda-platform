@@ -27,6 +27,7 @@ object V300 extends EditCheck[LoanApplicationRegister] {
   val smallCounties = cbsaTracts
     .filter { cbsa => cbsa.smallCounty == 1 }
     .map { cbsa => (cbsa.state, cbsa.county) }
+    .distinct
 
   override def name: String = "V300"
 
