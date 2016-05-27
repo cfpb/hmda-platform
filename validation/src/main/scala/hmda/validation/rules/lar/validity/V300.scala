@@ -47,10 +47,10 @@ object V300 extends EditCheck[LoanApplicationRegister] {
     }
 
     val tractStateCountyCombination = when(msa is equalTo("NA")) {
-      (stateCountyCombination is containedIn(validStateCountyCombination))
+      stateCountyCombination is containedIn(validStateCountyCombination)
     }
 
-    val validFormat = (tract is validCensusTractFormat)
+    val validFormat = tract is validCensusTractFormat
 
     val smallCounty = (state, county) not containedIn(smallCounties)
 
