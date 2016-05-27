@@ -16,29 +16,36 @@ class V265Spec extends LarEditCheckSpec with BadValueUtils {
 
   property("LARs with an invalid date must fail") {
     forAll(larGen, invalidDate) { (lar, date) =>
-      val badLar = lar.copy(actionTakenDate = date)
-      badLar.mustFail
+      val invalidLar = lar.copy(actionTakenDate = date)
+      invalidLar.mustFail
     }
   }
 
   property("LARs missing part of the date must fail") {
     forAll(larGen) { lar =>
-      val badLar = lar.copy(actionTakenDate = 200001)
-      badLar.mustFail
+      val invalidLar = lar.copy(actionTakenDate = 200001)
+      invalidLar.mustFail
     }
   }
 
   property("LARs with an invalid month must fail") {
     forAll(larGen) { lar =>
-      val badLar = lar.copy(actionTakenDate = 20001301)
-      badLar.mustFail
+      val invalidLar = lar.copy(actionTakenDate = 20001301)
+      invalidLar.mustFail
     }
   }
 
   property("LARs with an invalid day must fail") {
     forAll(larGen) { lar =>
-      val badLar = lar.copy(actionTakenDate = 20001232)
-      badLar.mustFail
+      val invalidLar = lar.copy(actionTakenDate = 20001232)
+      invalidLar.mustFail
+    }
+  }
+
+  property("LARs with a valid date of an incorrect length must fail") {
+    forAll(larGen) { lar =>
+      val invalidLar = lar.copy(actionTakenDate = 384704001)
+      invalidLar.mustFail
     }
   }
 

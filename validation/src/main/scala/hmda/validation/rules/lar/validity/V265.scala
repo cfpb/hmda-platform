@@ -13,11 +13,13 @@ import scala.util.Try
 object V265 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
     val date = lar.actionTakenDate.toString
+    val dateFormat = "yyyyMMdd"
 
-    val format = new SimpleDateFormat("yyyyMMdd")
+    val format = new SimpleDateFormat(dateFormat)
     format.setLenient(false)
 
-    Try(format.parse(date)).isSuccess is equalTo(true)
+    (Try(format.parse(date)).isSuccess is equalTo(true)) and
+      (date.length is equalTo(dateFormat.length))
   }
 
   override def name = "V265"
