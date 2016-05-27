@@ -40,10 +40,10 @@ trait TsGenerators extends FIGenerators {
 
   implicit def taxIdGen: Gen[String] = {
     for {
-      prefix <- Gen.listOfN(2, Gen.numChar)
+      prefix <- stringOfN(2, Gen.numChar)
       sep = "-"
-      suffix <- Gen.listOfN(7, Gen.numChar)
-    } yield List(prefix, suffix).map(_.mkString).mkString(sep)
+      suffix <- stringOfN(7, Gen.numChar)
+    } yield List(prefix, suffix).mkString(sep)
   }
 
   implicit def respondentGen: Gen[Respondent] = {
@@ -75,18 +75,14 @@ trait TsGenerators extends FIGenerators {
     Gen.oneOf(zip5Gen, zipPlus4Gen)
   }
 
-  implicit def zip5Gen: Gen[String] = {
-    for {
-      zip <- Gen.listOfN(5, Gen.numChar)
-    } yield zip.mkString
-  }
+  implicit def zip5Gen: Gen[String] = stringOfN(5, Gen.numChar)
 
   implicit def zipPlus4Gen: Gen[String] = {
     for {
-      zip <- Gen.listOfN(5, Gen.numChar)
-      plus <- Gen.listOfN(4, Gen.numChar)
+      zip <- zip5Gen
+      plus <- stringOfN(4, Gen.numChar)
       sep = "-"
-    } yield List(zip, plus).map(_.mkString).mkString(sep)
+    } yield List(zip, plus).mkString(sep)
   }
 
   implicit def contactGen: Gen[Contact] = {
@@ -100,11 +96,11 @@ trait TsGenerators extends FIGenerators {
 
   implicit def phoneGen: Gen[String] = {
     for {
-      p1 <- Gen.listOfN(3, Gen.numChar)
-      p2 <- Gen.listOfN(3, Gen.numChar)
-      p3 <- Gen.listOfN(4, Gen.numChar)
+      p1 <- stringOfN(3, Gen.numChar)
+      p2 <- stringOfN(3, Gen.numChar)
+      p3 <- stringOfN(4, Gen.numChar)
       sep = "-"
-    } yield List(p1, p2, p3).map(_.mkString).mkString(sep)
+    } yield List(p1, p2, p3).mkString(sep)
   }
 
   implicit def emailGen: Gen[String] = {
