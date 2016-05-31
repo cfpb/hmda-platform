@@ -28,7 +28,7 @@ class PredicateRegExSpec
   }
 
   property("An empty string will fail the email regex") {
-    "" not validEmail
+    validEmail.validate("") mustBe false
   }
 
   property("An improperly formatted email must fail the email regex") {
