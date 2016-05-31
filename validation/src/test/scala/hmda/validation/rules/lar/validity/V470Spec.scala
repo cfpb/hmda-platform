@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
@@ -14,7 +13,7 @@ class V470Spec extends LarEditCheckSpec {
       whenever(race > 5) {
         val applicant = lar.applicant.copy(race1 = race)
         val newLar = lar.copy(applicant = applicant)
-        V470(newLar) mustBe a[Success]
+        newLar.mustPass
       }
     }
   }
@@ -28,7 +27,7 @@ class V470Spec extends LarEditCheckSpec {
       (lar: LoanApplicationRegister, raceVals) =>
         val applicant = lar.applicant.copy(race2 = raceVals(0), race3 = raceVals(1), race4 = raceVals(2), race5 = raceVals(3))
         val newLar = lar.copy(applicant = applicant)
-        V470(newLar) mustBe a[Success]
+        newLar.mustPass
     }
   }
 
@@ -37,7 +36,7 @@ class V470Spec extends LarEditCheckSpec {
       whenever(race2 > 5) {
         val applicant = lar.applicant.copy(race1 = race1, race2 = race2.toString)
         val newLar = lar.copy(applicant = applicant)
-        V470(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }
@@ -47,7 +46,7 @@ class V470Spec extends LarEditCheckSpec {
       whenever(race3 > 5) {
         val applicant = lar.applicant.copy(race1 = race1, race3 = race3.toString)
         val newLar = lar.copy(applicant = applicant)
-        V470(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }
@@ -57,7 +56,7 @@ class V470Spec extends LarEditCheckSpec {
       whenever(race4 > 5) {
         val applicant = lar.applicant.copy(race1 = race1, race4 = race4.toString)
         val newLar = lar.copy(applicant = applicant)
-        V470(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }
@@ -67,7 +66,7 @@ class V470Spec extends LarEditCheckSpec {
       whenever(race5 > 5) {
         val applicant = lar.applicant.copy(race1 = race1, race5 = race5.toString)
         val newLar = lar.copy(applicant = applicant)
-        V470(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }

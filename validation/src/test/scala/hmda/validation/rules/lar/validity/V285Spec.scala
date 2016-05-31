@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
@@ -11,7 +10,7 @@ class V285Spec extends LarEditCheckSpec {
   property("Succeeds when state is valid FIPS code") {
     forAll(larGen) { lar =>
       whenever(lar.geography.state != "NA") {
-        V285(lar) mustBe a[Success]
+        lar.mustPass
       }
     }
   }
@@ -21,7 +20,7 @@ class V285Spec extends LarEditCheckSpec {
       whenever(lar.geography.state != "NA") {
         val invalidGeography = lar.geography.copy(state = state)
         val invalidLar = lar.copy(geography = invalidGeography)
-        V285(invalidLar) mustBe a[Failure]
+        invalidLar.mustFail
       }
     }
   }
@@ -30,7 +29,7 @@ class V285Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val validGeography = lar.geography.copy(state = "NA", msa = "NA")
       val validLar = lar.copy(geography = validGeography)
-      V285(validLar) mustBe a[Success]
+      validLar.mustPass
     }
   }
 
@@ -39,7 +38,7 @@ class V285Spec extends LarEditCheckSpec {
       whenever(lar.geography.msa != "NA") {
         val invalidGeography = lar.geography.copy(state = "NA")
         val invalidLar = lar.copy(geography = invalidGeography)
-        V285(invalidLar) mustBe a[Failure]
+        invalidLar.mustFail
       }
     }
   }

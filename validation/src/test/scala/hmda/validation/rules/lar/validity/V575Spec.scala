@@ -1,7 +1,5 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.validation.dsl.Success
-
 class V575Spec extends RateSpreadEditCheckSpec {
 
   override val check = V575
@@ -51,7 +49,7 @@ class V575Spec extends RateSpreadEditCheckSpec {
   property("succeeds in any case when lien status is not 2") {
     forAll(larGen) { lar =>
       whenever(lar.lienStatus != 2) {
-        check(lar) mustBe Success()
+        lar.mustPass
       }
     }
   }

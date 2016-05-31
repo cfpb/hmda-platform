@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
@@ -11,7 +10,7 @@ class V375Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val newLar = lar.copy(purchaserType = 2)
       whenever(List(2, 3, 4).contains(newLar.loan.loanType)) {
-        V375(newLar) mustBe Success()
+        newLar.mustPass
       }
     }
   }
@@ -20,14 +19,14 @@ class V375Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val newLoan = lar.loan.copy(loanType = 1)
       val newLar = lar.copy(purchaserType = 2, loan = newLoan)
-      V375(newLar) mustBe a[Failure]
+      newLar.mustFail
     }
   }
 
   property("if purchaser type is not 2, then any loan type succeeds") {
     forAll(larGen) { lar =>
       whenever(lar.purchaserType != 2) {
-        V375(lar) mustBe Success()
+        lar.mustPass
       }
     }
   }

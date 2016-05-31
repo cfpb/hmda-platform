@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
@@ -13,7 +12,7 @@ class V410Spec extends LarEditCheckSpec {
   property("succeeds when lien status is not 3") {
     forAll(larGen) { lar =>
       whenever(lar.lienStatus != 3) {
-        V410(lar) mustBe a[Success]
+        lar.mustPass
       }
     }
   }
@@ -22,7 +21,7 @@ class V410Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val loan = lar.loan.copy(purpose = 2)
       val validLar = lar.copy(lienStatus = 3, loan = loan)
-      V410(validLar) mustBe a[Success]
+      validLar.mustPass
     }
   }
 
@@ -31,7 +30,7 @@ class V410Spec extends LarEditCheckSpec {
       whenever(x != 2) {
         val loan = lar.loan.copy(purpose = x)
         val invalidLar = lar.copy(lienStatus = 3, loan = loan)
-        V410(invalidLar) mustBe a[Failure]
+        invalidLar.mustFail
       }
     }
   }

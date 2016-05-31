@@ -1,17 +1,16 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.parser.fi.lar.LarGenerators
-import hmda.validation.dsl.{ Failure, Success }
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.validation.rules.EditCheck
+import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
-import org.scalatest.{ MustMatchers, PropSpec }
-import org.scalatest.prop.PropertyChecks
 
-class V347Spec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators with BadValueUtils {
+class V347Spec extends LarEditCheckSpec with BadValueUtils {
 
   property("Succeeds when there is a relevant purchaser type (1-9) and loan was originated or purchased (1 or 6)") {
     forAll(larGen, Gen.choose(1, 9), Gen.oneOf(1, 6)) { (lar, pt, action) =>
       val newLar = lar.copy(purchaserType = pt, actionTakenType = action)
-      V347(newLar) mustBe Success()
+      newLar.mustPass
     }
   }
 
@@ -19,20 +18,22 @@ class V347Spec extends PropSpec with PropertyChecks with MustMatchers with LarGe
     forAll(larGen, Gen.choose(1, 9)) { (lar, pt) =>
       whenever(!List(1, 6).contains(lar.actionTakenType)) {
         val newLar = lar.copy(purchaserType = pt)
-        V347(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }
 
   property("Succeeds when Type of Purchaser = 0") {
     forAll(larGen) { lar =>
-      V347(lar.copy(purchaserType = 0)) mustBe Success()
+      lar.copy(purchaserType = 0).mustPass
     }
   }
 
   property("Succeeds when Type of Purchaser is invalid") {
     forAll(badPurchaserTypeLarGen) { lar =>
-      V347(lar) mustBe Success()
+      lar.mustPass
     }
   }
+
+  override def check: EditCheck[LoanApplicationRegister] = V347
 }

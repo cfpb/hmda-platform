@@ -10,11 +10,9 @@ object V220 extends EditCheck[LoanApplicationRegister] {
 
   val loanTypes = List(1, 2, 3, 4)
 
-  def apply(loan: Loan): Result = {
-    loan.loanType is containedIn(loanTypes)
+  def apply(lar: LoanApplicationRegister): Result = {
+    lar.loan.loanType is containedIn(loanTypes)
   }
-
-  override def apply(lar: LoanApplicationRegister) = this.apply(lar.loan)
 
   override def name = "V220"
 }

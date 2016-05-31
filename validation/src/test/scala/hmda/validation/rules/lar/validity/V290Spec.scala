@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
@@ -11,7 +10,7 @@ class V290Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val validGeography = lar.geography.copy(msa = "NA")
       val validLar = lar.copy(geography = validGeography)
-      V290(validLar) mustBe a[Success]
+      validLar.mustPass
     }
   }
 
@@ -19,7 +18,7 @@ class V290Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val validGeography = lar.geography.copy(msa = "17020", county = "007", state = "06")
       val validLar = lar.copy(geography = validGeography)
-      V290(validLar) mustBe a[Success]
+      validLar.mustPass
     }
   }
 
@@ -27,7 +26,7 @@ class V290Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val invalidGeography = lar.geography.copy(msa = "17020", county = "001", state = "05")
       val invalidLar = lar.copy(geography = invalidGeography)
-      V290(invalidLar) mustBe a[Failure]
+      invalidLar.mustFail
     }
   }
 
@@ -35,7 +34,7 @@ class V290Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val validGeography = lar.geography.copy(msa = "48424", state = "12", county = "099")
       val validLar = lar.copy(geography = validGeography)
-      V290(validLar) mustBe a[Success]
+      validLar.mustPass
     }
   }
 
@@ -43,7 +42,7 @@ class V290Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val validGeography = lar.geography.copy(msa = "48424", state = "12", county = "086")
       val validLar = lar.copy(geography = validGeography)
-      V290(validLar) mustBe a[Failure]
+      validLar.mustFail
     }
   }
 

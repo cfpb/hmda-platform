@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
@@ -14,7 +13,7 @@ class V465Spec extends LarEditCheckSpec {
       whenever(coEthn > 3) {
         val applicant = lar.applicant.copy(coEthnicity = coEthn)
         val newLar = lar.copy(applicant = applicant)
-        V465(newLar) mustBe a[Success]
+        newLar.mustPass
       }
     }
   }
@@ -23,7 +22,7 @@ class V465Spec extends LarEditCheckSpec {
       whenever(cr1 != 7 && cr1 != 8) {
         val applicant = lar.applicant.copy(coRace1 = cr1)
         val newLar = lar.copy(applicant = applicant)
-        V465(newLar) mustBe a[Success]
+        newLar.mustPass
       }
     }
   }
@@ -33,7 +32,7 @@ class V465Spec extends LarEditCheckSpec {
       whenever(List(1, 2, 3).contains(lar.applicant.coEthnicity)) {
         val applicant = lar.applicant.copy(coRace1 = cr1)
         val newLar = lar.copy(applicant = applicant)
-        V465(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }

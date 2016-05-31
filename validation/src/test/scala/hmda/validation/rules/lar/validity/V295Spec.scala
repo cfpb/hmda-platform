@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
@@ -12,7 +11,7 @@ class V295Spec extends LarEditCheckSpec {
       whenever(lar.geography.msa != "NA") {
         val validGeography = lar.geography.copy(state = "06", county = "007")
         val validLar = lar.copy(geography = validGeography)
-        V295(validLar) mustBe a[Success]
+        validLar.mustPass
       }
     }
   }
@@ -22,7 +21,7 @@ class V295Spec extends LarEditCheckSpec {
       whenever(lar.geography.msa != "NA") {
         val invalidGeography = lar.geography.copy(state = "11", county = "555")
         val invalidLar = lar.copy(geography = invalidGeography)
-        V295(invalidLar) mustBe a[Failure]
+        invalidLar.mustFail
       }
     }
   }
@@ -31,7 +30,7 @@ class V295Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val validGeography = lar.geography.copy(msa = "NA", county = "NA")
       val validLar = lar.copy(geography = validGeography)
-      V295(validLar) mustBe a[Success]
+      validLar.mustPass
     }
   }
 
@@ -40,7 +39,7 @@ class V295Spec extends LarEditCheckSpec {
       whenever(lar.geography.msa != "NA") {
         val invalidGeography = lar.geography.copy(county = "NA")
         val invalidLar = lar.copy(geography = invalidGeography)
-        V295(invalidLar) mustBe a[Failure]
+        invalidLar.mustFail
       }
     }
   }
