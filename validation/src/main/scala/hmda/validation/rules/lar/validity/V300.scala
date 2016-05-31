@@ -14,20 +14,20 @@ object V300 extends EditCheck[LoanApplicationRegister] {
 
   val validMsaCombination = cbsaTracts.map { cbsa =>
     (cbsa.geoIdMsa, cbsa.state, cbsa.county, cbsa.tractDecimal)
-  }
+  }.toSet
 
   val validMdCombination = cbsaTracts.map { cbsa =>
     (cbsa.metDivFp, cbsa.state, cbsa.county, cbsa.tractDecimal)
-  }
+  }.toSet
 
   val validStateCountyCombination = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county, cbsa.tractDecimal)
-  }
+  }.toSet
 
   val smallCounties = cbsaTracts
     .filter { cbsa => cbsa.smallCounty == 1 }
     .map { cbsa => (cbsa.state, cbsa.county) }
-    .distinct
+    .toSet
 
   override def name: String = "V300"
 
