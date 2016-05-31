@@ -19,7 +19,7 @@ class V520Spec extends RateSpreadEditCheckSpec {
   property("succeeds in any case if lien status != 3") {
     forAll(larGen) { lar =>
       whenever(lar.lienStatus != 3) {
-        check(lar) mustBe Success()
+        lar.mustPass
       }
     }
   }

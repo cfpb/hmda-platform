@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
@@ -10,7 +9,7 @@ class V310Spec extends LarEditCheckSpec with BadValueUtils {
 
   property("Succeeds when Applicant Race1 is 1,2,3,4,5,6,7") {
     forAll(larGen) { lar =>
-      V310(lar) mustBe Success()
+      lar.mustPass
     }
   }
 
@@ -22,7 +21,7 @@ class V310Spec extends LarEditCheckSpec with BadValueUtils {
     forAll(larGen, badApplicantRaceGen) { (lar, r1) =>
       val invalidApplicant = lar.applicant.copy(race1 = r1)
       val invalidLar = lar.copy(applicant = invalidApplicant)
-      V310(invalidLar) mustBe a[Failure]
+      invalidLar.mustFail
     }
   }
 

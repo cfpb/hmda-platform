@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.{ Applicant, LoanApplicationRegister }
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
@@ -14,7 +13,7 @@ class V485Spec extends LarEditCheckSpec {
       whenever(coRace > 5) {
         val applicant = lar.applicant.copy(coRace1 = coRace)
         val newLar = lar.copy(applicant = applicant)
-        V485(newLar) mustBe a[Success]
+        newLar.mustPass
       }
     }
   }
@@ -27,7 +26,7 @@ class V485Spec extends LarEditCheckSpec {
     forAll(larGen, coRace1Gen, Gen.listOfN(4, otherCoRaceGen)) { (lar, cr1, crVals) =>
       val applicant = lar.applicant.copy(coRace1 = cr1, coRace2 = crVals.head, coRace3 = crVals(1), coRace4 = crVals(2), coRace5 = crVals(3))
       val newLar = lar.copy(applicant = applicant)
-      V485(newLar) mustBe a[Success]
+      newLar.mustPass
     }
   }
 
@@ -38,7 +37,7 @@ class V485Spec extends LarEditCheckSpec {
           val validApplicant = withValidCoRace2To5(lar.applicant)
           val invalidApplicant = validApplicant.copy(coRace1 = cr1, coRace2 = cr2.toString)
           val newLar = lar.copy(applicant = invalidApplicant)
-          V485(newLar) mustBe a[Failure]
+          newLar.mustFail
         }
     }
   }
@@ -49,7 +48,7 @@ class V485Spec extends LarEditCheckSpec {
         val validApplicant = withValidCoRace2To5(lar.applicant)
         val invalidApplicant = validApplicant.copy(coRace1 = cr1, coRace3 = cr3.toString)
         val newLar = lar.copy(applicant = invalidApplicant)
-        V485(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }
@@ -60,7 +59,7 @@ class V485Spec extends LarEditCheckSpec {
         val validApplicant = withValidCoRace2To5(lar.applicant)
         val invalidApplicant = validApplicant.copy(coRace1 = cr1, coRace4 = cr4.toString)
         val newLar = lar.copy(applicant = invalidApplicant)
-        V485(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }
@@ -71,7 +70,7 @@ class V485Spec extends LarEditCheckSpec {
         val validApplicant = withValidCoRace2To5(lar.applicant)
         val invalidApplicant = validApplicant.copy(coRace1 = cr1, coRace5 = cr5.toString)
         val newLar = lar.copy(applicant = invalidApplicant)
-        V485(newLar) mustBe a[Failure]
+        newLar.mustFail
       }
     }
   }

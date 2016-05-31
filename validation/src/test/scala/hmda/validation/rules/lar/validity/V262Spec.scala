@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
@@ -11,7 +10,7 @@ class V262Spec extends LarEditCheckSpec {
       whenever(lar.id == 2) {
         val naLoan = lar.loan.copy(applicationDate = "NA")
         val v262Lar = lar.copy(loan = naLoan, actionTakenType = 6)
-        V262(v262Lar) mustBe Success()
+        v262Lar.mustPass
       }
     }
   }
@@ -21,7 +20,7 @@ class V262Spec extends LarEditCheckSpec {
       whenever(lar.actionTakenType != 6) {
         val naLoan = lar.loan.copy(applicationDate = "NA")
         val v262Lar = lar.copy(loan = naLoan)
-        V262(v262Lar) mustBe a[Failure]
+        v262Lar.mustFail
       }
     }
   }
@@ -30,7 +29,7 @@ class V262Spec extends LarEditCheckSpec {
     forAll(larGen, dateGen) { (lar, altDate) =>
       val datedLoan = lar.loan.copy(applicationDate = altDate.toString)
       val datedLar = lar.copy(loan = datedLoan)
-      V262(datedLar) mustBe Success()
+      datedLar.mustPass
     }
   }
 

@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
@@ -9,7 +8,7 @@ import org.scalacheck.Gen
 class V450Spec extends LarEditCheckSpec with BadValueUtils {
   property("Applicant ethnicity must = 1,2,3, or 4") {
     forAll(larGen) { lar =>
-      V450(lar) mustBe Success()
+      lar.mustPass
     }
   }
 
@@ -19,7 +18,7 @@ class V450Spec extends LarEditCheckSpec with BadValueUtils {
     forAll(larGen, badEthnicityGen) { (lar, x) =>
       val invalidApplicant = lar.applicant.copy(ethnicity = x)
       val invalidLar = lar.copy(applicant = invalidApplicant)
-      V450(invalidLar) mustBe a[Failure]
+      invalidLar.mustFail
     }
   }
 
