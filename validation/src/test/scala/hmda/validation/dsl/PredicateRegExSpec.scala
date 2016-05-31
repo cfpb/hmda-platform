@@ -4,7 +4,6 @@ import hmda.parser.fi.ts.TsGenerators
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import hmda.validation.dsl.PredicateRegEx._
-import hmda.validation.dsl.PredicateSyntax._
 import org.scalacheck.Gen
 
 class PredicateRegExSpec
@@ -15,10 +14,17 @@ class PredicateRegExSpec
 
   // Email **************
 
-  property("A valid email must pass the email regex") {
+  property("All generated emails must pass the email regex") {
     forAll(emailGen) { email =>
       validEmail.validate(email) mustBe true
     }
+  }
+
+  property("All valid emails must pass the email regex") {
+    val testCases = List("what.e.v.e.r@example.co.uk", "6237468@example.gov",
+      "f@a.ke", "lol@12345.lol", "hi__mom@example.club", "this+that@there.then",
+      "_@here.or", "-@there.and", "+@12.three", "a@-.bc")
+    testCases.foreach(validEmail.validate(_) mustBe true)
   }
 
   property("An alphanumeric string will fail the email regex") {
