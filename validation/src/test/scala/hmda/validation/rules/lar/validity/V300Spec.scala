@@ -46,7 +46,7 @@ class V300Spec extends LarEditCheckSpec {
     }
   }
 
-  property("Fails for valid MSA not NA in a small county") {
+  property("Fails for a valid combination where tract not NA in a small county") {
     forAll(larGen) { lar =>
       val invalidGeography = Geography("962100", "46", "045", "9621.00")
       val invalidLar = lar.copy(geography = invalidGeography)
@@ -54,7 +54,7 @@ class V300Spec extends LarEditCheckSpec {
     }
   }
 
-  property("Succeeds for NA track in a small county") {
+  property("Succeeds for NA tract in a small county") {
     forAll(larGen) { lar =>
       val validGeography = Geography("962100", "46", "045", "NA")
       val validLar = lar.copy(geography = validGeography)

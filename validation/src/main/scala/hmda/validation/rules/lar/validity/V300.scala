@@ -12,7 +12,7 @@ object V300 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 
-  val validCombination = cbsaTracts.map { cbsa =>
+  val validMsaCombination = cbsaTracts.map { cbsa =>
     (cbsa.geoIdMsa, cbsa.state, cbsa.county, cbsa.tractDecimal)
   }
 
@@ -42,7 +42,7 @@ object V300 extends EditCheck[LoanApplicationRegister] {
     val stateCountyCombination = (state, county, tract)
 
     val validCensusTractCombination = when(msa not equalTo("NA")) {
-      (allCombination is containedIn(validCombination)) or
+      (allCombination is containedIn(validMsaCombination)) or
         (allCombination is containedIn(validMdCombination))
     }
 
