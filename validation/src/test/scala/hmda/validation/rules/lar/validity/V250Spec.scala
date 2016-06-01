@@ -1,8 +1,8 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.fi.lar.{ LoanApplicationRegister, Loan }
+import hmda.model.fi.lar.{Loan, LoanApplicationRegister}
 import hmda.validation.rules.EditCheck
-import hmda.validation.rules.lar.LarEditCheckSpec
+import hmda.validation.rules.lar.{BadValueUtils, LarEditCheckSpec}
 import org.scalacheck.Gen
 
 class V250Spec extends LarEditCheckSpec with BadValueUtils {
