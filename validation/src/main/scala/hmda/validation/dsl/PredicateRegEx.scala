@@ -5,65 +5,33 @@ import scala.util.matching.Regex
 
 object PredicateRegEx {
 
-  implicit def validEmail: Predicate[String] = new Predicate[String] {
-    override def validate: (String) => Boolean = {
-      val emailRegEx = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$"
-      val Email = emailRegEx.r
-      matches(Email)
-    }
+  implicit def validEmail: Predicate[String] =
+    stringMatching("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$".r)
 
-    override def failure: String = s"is not a valid email"
-  }
+  implicit def validPhoneNumber: Predicate[String] = stringMatching("^\\d{3}-\\d{3}-\\d{4}$".r)
 
-  implicit def validPhoneNumber: Predicate[String] = new Predicate[String] {
+  implicit def validZipCode: Predicate[String] = stringMatching("^\\d{5}(?:-\\d{4})?$".r)
 
-    override def validate: (String) => Boolean = {
-      val phoneNumberRegEx = "^\\d{3}-\\d{3}-\\d{4}$"
-      val PhoneNumber = phoneNumberRegEx.r
-      matches(PhoneNumber)
-    }
+  implicit def validTaxId: Predicate[String] = stringMatching("^\\d{2}-\\d{7}$".r)
 
-    override def failure: String = s"is not a valid phone number"
-  }
+  def numericMatching(pattern: String): Predicate[String] = stringMatching(regExFor(pattern))
 
-  implicit def validZipCode: Predicate[String] = new Predicate[String] {
-
-    override def validate: (String) => Boolean = {
-      val zipCodeRegex = "^\\d{5}(?:-\\d{4})?$".r
-      matches(zipCodeRegex)
-    }
-
-    override def failure: String = s"is not a valid zip code"
-  }
-
-  implicit def validTaxId: Predicate[String] = new Predicate[String] {
-
-    override def validate: (String) => Boolean = {
-      val taxIdRegex = "^\\d{2}-\\d{7}$".r
-      matches(taxIdRegex)
-    }
-
-    override def failure: String = s"is not a valid tax ID"
-  }
-
-  def numericMatching(pattern: String): Predicate[String] = new Predicate[String] {
-    val regEx = regExFor(pattern).r
-    override def validate: (String) => Boolean = matches(regEx)
-    override def failure: String = s"does not match provided numeric format"
-  }
-
-  private def regExFor(pattern: String): String = {
+  private def regExFor(pattern: String): Regex = {
     val result = pattern.map {
       case 'N' => "\\d"
       case '.' => "\\."
     }
-    result.mkString("^", "", "$")
+    result.mkString("^", "", "$").r
   }
 
-  private def matches(regEx: Regex): (String) => Boolean = {
-    regEx.findFirstIn(_) match {
-      case Some(_) => true
-      case None => false
+  private def stringMatching(regEx: Regex): Predicate[String] = new Predicate[String] {
+    override def validate: (String) => Boolean = {
+      regEx.findFirstIn(_) match {
+        case Some(_) => true
+        case None => false
+      }
     }
+
+    override def failure: String = "does not match provided pattern"
   }
 }
