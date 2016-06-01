@@ -2,7 +2,7 @@ package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
-import hmda.validation.rules.lar.{BadValueUtils, LarEditCheckSpec}
+import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 
 class V340Spec extends LarEditCheckSpec with BadValueUtils {
 
