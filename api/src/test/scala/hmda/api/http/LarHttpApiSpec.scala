@@ -51,26 +51,27 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
       }
     }
 
-    "filter syntactical or validity only for invalid LAR with both syntactical and validity errors" in {
-      val badLoanType = lar.loan.copy(loanType = 0)
-      val badLar = lar.copy(agencyCode = 0, loan = badLoanType)
-      Post("/lar/validate", badLar) ~> larRoutes ~> check {
-        status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 2
+    "filter syntactical, validity, or quality only for invalid LAR with " +
+      "both syntactical, validity, and quality errors" in {
+        val badLoanType = lar.loan.copy(loanType = 0, amount = 9000, propertyType = 2)
+        val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 1)
+        Post("/lar/validate", badLar) ~> larRoutes ~> check {
+          status mustEqual StatusCodes.OK
+          responseAs[List[ValidationError]].length mustBe 3
+        }
+        Post("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
+          status mustEqual StatusCodes.OK
+          responseAs[List[ValidationError]].length mustBe 1
+        }
+        Post("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
+          status mustEqual StatusCodes.OK
+          responseAs[List[ValidationError]].length mustBe 1
+        }
+        Post("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
+          status mustEqual StatusCodes.OK
+          responseAs[List[ValidationError]].length mustBe 1
+        }
       }
-      Post("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
-        status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
-      }
-      Post("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
-        status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
-      }
-      Post("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
-        status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 0
-      }
-    }
   }
 
 }
