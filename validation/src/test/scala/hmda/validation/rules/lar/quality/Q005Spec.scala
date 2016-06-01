@@ -6,7 +6,7 @@ import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
 class Q005Spec extends LarEditCheckSpec with BadValueUtils {
-  property("Whenever purchaser type and property type are relevant, loan amount must be <= 1203") {
+  property("All generated lars must pass") {
     forAll(larGen) { lar =>
       lar.mustPass
     }
