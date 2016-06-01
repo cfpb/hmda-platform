@@ -66,6 +66,10 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 1
       }
+      Post("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[List[ValidationError]].length mustBe 0
+      }
     }
   }
 

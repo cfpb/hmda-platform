@@ -11,6 +11,7 @@ object SingleLarValidation {
   case class CheckAll(lar: LoanApplicationRegister)
   case class CheckSyntactical(lar: LoanApplicationRegister)
   case class CheckValidity(lar: LoanApplicationRegister)
+  case class CheckQuality(lar: LoanApplicationRegister)
 
   def createSingleLarValidator(system: ActorSystem): ActorRef = {
     system.actorOf(SingleLarValidation.props, "larValidation")
@@ -28,6 +29,9 @@ class SingleLarValidation extends Actor with ActorLogging with LarEngine {
     case CheckValidity(lar) =>
       log.debug(s"Checking validity on LAR: ${lar.toCSV}")
       sender() ! validationErrors(lar, checkValidity)
+    case CheckQuality(lar) =>
+      log.debug(s"Checking quality on LAR: ${lar.toCSV}")
+      sender() ! validationErrors(lar, checkQuality)
     case CheckAll(lar) =>
       log.debug(s"Checking all edits on LAR: ${lar.toCSV}")
       sender() ! validationErrors(lar, validateLar)
