@@ -4,7 +4,7 @@
 
 ## This project is a work in progress
 
-Information contained in this respository should be considered provisional and a work in progress, and not the final implementation for the HMDA Platform, unless otherwise indicated. 
+Information contained in this repository should be considered provisional and a work in progress, and not the final implementation for the HMDA Platform, unless otherwise indicated.
 
 ## Introduction
 
@@ -19,9 +19,9 @@ This regulation applies to certain financial institutions, including banks, savi
 
 ## The HMDA Platform
 
-This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accomodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset. 
+This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset.
 
-The HMDA Platform is composed of the following modules: 
+The HMDA Platform is composed of the following modules:
 
 ### Parser
 
@@ -44,7 +44,7 @@ This module contains both public APIs for HMDA data for general use by third par
 
 ### Java 8 SDK
 
-The HMDA Platform runs on the Java Virtual Machine (JVM), and requires the Java 8 JDK to build and run the project. This project is currenly being built and tested on [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). See [Oracle's JDK Install Overview](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) for install instructions.
+The HMDA Platform runs on the Java Virtual Machine (JVM), and requires the Java 8 JDK to build and run the project. This project is currently being built and tested on [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). See [Oracle's JDK Install Overview](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) for install instructions.
 
 The HMDA Platform should also run on OpenJDK 8.
 
