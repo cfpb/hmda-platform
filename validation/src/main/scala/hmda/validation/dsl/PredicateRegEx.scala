@@ -54,10 +54,10 @@ object PredicateRegEx {
 
   private def regExFor(pattern: String): String = {
     val result = pattern.map {
-      case 'N' => "[0-9]"
+      case 'N' => "\\d"
       case '.' => "\\."
     }
-    "^" + result.reduce(_ + _) + "$"
+    result.mkString("^", "", "$")
   }
 
   private def matches(regEx: Regex): (String) => Boolean = {
