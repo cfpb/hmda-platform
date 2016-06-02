@@ -71,11 +71,11 @@ $ sbt
 ```shell
 > projects
 [info] In file:/Users/marinj/Development/hmda-platform/
-[info] 	   api
-[info] 	 * hmda
-[info] 	   model
-[info] 	   parser
-[info] 	   platformTest
+[info]     api
+[info]   * hmda
+[info]     model
+[info]     parser
+[info]     platformTest
 [info]     validation
 
 > ~re-start
