@@ -6,9 +6,11 @@ import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
 class Q005Spec extends LarEditCheckSpec with BadValueUtils {
-  property("All generated lars must pass") {
-    forAll(larGen) { lar =>
-      lar.mustPass
+  property("All lars with loan amounts less than $1203 must pass") {
+    forAll(larGen, Gen.choose(0, 1203)) { (lar, x) =>
+      val newLoan = lar.loan.copy(amount = x)
+      val newLar = lar.copy(loan = newLoan)
+      newLar.mustPass
     }
   }
 

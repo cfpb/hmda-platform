@@ -1,8 +1,12 @@
 package hmda.validation.engine.lar.quality
 
-import hmda.parser.fi.lar.LarGenerators
+import java.io.File
+
+import hmda.parser.fi.lar.{ LarCsvParser, LarGenerators }
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
+
+import scala.io.Source
 
 class LarQualityEngineSpec
     extends PropSpec
@@ -12,10 +16,11 @@ class LarQualityEngineSpec
     with LarQualityEngine {
 
   property("A LAR must pass quality checks") {
-    forAll(larGen) { lar =>
-      whenever(lar.id == 2) {
-        checkQuality(lar).isSuccess mustBe true
-      }
+    val lines = Source.fromFile(new File("parser/src/test/resources/txt/FirstTestBankData_clean_407_2017.txt")).getLines()
+    val lars = lines.drop(1).map(l => LarCsvParser(l))
+
+    lars.foreach { lar =>
+      checkQuality(lar).isSuccess mustBe true
     }
   }
 }
