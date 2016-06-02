@@ -4,6 +4,7 @@ import scala.language.implicitConversions
 import scala.util.matching.Regex
 
 object PredicateRegEx {
+  implicit def validCensusTractFormat: Predicate[String] = stringMatching("^\\d{4}.\\d{2}$".r)
 
   implicit def validEmail: Predicate[String] =
     stringMatching("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$".r)
