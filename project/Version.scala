@@ -7,4 +7,5 @@ object Version {
   val akka       = "2.4.3"
   val leveldb    = "0.7"
   val leveldbjni = "1.8"
+  val config     = "1.3.0"
 }

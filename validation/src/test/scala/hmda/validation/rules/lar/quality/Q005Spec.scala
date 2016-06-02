@@ -5,9 +5,14 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
+import com.typesafe.config.ConfigFactory
+
 class Q005Spec extends LarEditCheckSpec with BadValueUtils {
+  val config = ConfigFactory.load()
+  val loanAmount = config.getInt("hmda.validation.quality.Q005.loan.amount")
+
   property("All lars with loan amounts less than $1203 must pass") {
-    forAll(larGen, Gen.choose(0, 1203)) { (lar, x) =>
+    forAll(larGen, Gen.choose(0, loanAmount)) { (lar, x) =>
       val newLoan = lar.loan.copy(amount = x)
       val newLar = lar.copy(loan = newLoan)
       newLar.mustPass
@@ -34,7 +39,7 @@ class Q005Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   property("A lar with relevant property and purchaser types with a loan amount > 1203 must fail") {
-    forAll(larGen, Gen.choose(1, 4), Gen.oneOf(1, 2), Gen.choose(1204, Int.MaxValue)) { (lar, x, y, amount) =>
+    forAll(larGen, Gen.choose(1, 4), Gen.oneOf(1, 2), Gen.choose(loanAmount + 1, Int.MaxValue)) { (lar, x, y, amount) =>
       val newLoan = lar.loan.copy(propertyType = y, amount = amount)
       val newLar = lar.copy(purchaserType = x, loan = newLoan)
       newLar.mustFail
