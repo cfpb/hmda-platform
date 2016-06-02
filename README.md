@@ -4,7 +4,7 @@
 
 ## This project is a work in progress
 
-Information contained in this respository should be considered provisional and a work in progress, and not the final implementation for the HMDA Platform, unless otherwise indicated. 
+Information contained in this repository should be considered provisional and a work in progress, and not the final implementation for the HMDA Platform, unless otherwise indicated.
 
 ## Introduction
 
@@ -19,9 +19,9 @@ This regulation applies to certain financial institutions, including banks, savi
 
 ## The HMDA Platform
 
-This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accomodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset. 
+This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset.
 
-The HMDA Platform is composed of the following modules: 
+The HMDA Platform is composed of the following modules:
 
 ### Parser
 
@@ -44,7 +44,7 @@ This module contains both public APIs for HMDA data for general use by third par
 
 ### Java 8 SDK
 
-The HMDA Platform runs on the Java Virtual Machine (JVM), and requires the Java 8 JDK to build and run the project. This project is currenly being built and tested on [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). See [Oracle's JDK Install Overview](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) for install instructions.
+The HMDA Platform runs on the Java Virtual Machine (JVM), and requires the Java 8 JDK to build and run the project. This project is currently being built and tested on [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). See [Oracle's JDK Install Overview](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) for install instructions.
 
 The HMDA Platform should also run on OpenJDK 8.
 
@@ -53,8 +53,6 @@ The HMDA Platform should also run on OpenJDK 8.
 The HMDA Platform is written in [Scala](http://www.scala-lang.org/). To build it, you will need to [download](http://www.scala-lang.org/download/) and [install](http://www.scala-lang.org/download/install.html) Scala 2.11.x
 
 In addition, you'll need Scala's interactive build tool [sbt](http://www.scala-sbt.org/0.13/tutorial/index.html). Please refer to sbt's [installation instructions](http://www.scala-sbt.org/0.13/tutorial/Setup.html) to get started.
-
-Some of the projects for the HMDA Platform are configured to cross build to both the JVM and JavaScript runtimes. These projects will have the `JVM` and `JS` suffixes added to their name.
 
 ## Building and Running
 
@@ -75,21 +73,17 @@ $ sbt
 [info] In file:/Users/marinj/Development/hmda-platform/
 [info] 	   api
 [info] 	 * hmda
-[info] 	   modelJS
-[info] 	   modelJVM
-[info] 	   parserJS
-[info] 	   parserJVM
-[info] 	   platformTestJS
-[info] 	   platformTestJVM
+[info] 	   model
+[info] 	   parser
+[info] 	   platformTest
+[info]     validation
 
 > ~re-start
 ```
 
 Confirm that the platform is up and running by browsing to http://localhost:8080
 
-To build the project artifacts, there are two options depending on which runtime is being targeted. 
-
-* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
+3. To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
 ```shell
 > assembly
@@ -100,26 +94,6 @@ This task will create a `fat jar`, which can be executed directly on any JDK8 co
 ```shell
 java -jar target/scala-2.11/hmda.jar
 ```
-
-* To build JavaScript artifacts (only projects that are cross platform), there are two options:
-
-- While developing, it's convenient to listen for code changes and have the fast optimizer create the JS resources:
-
-```shell
-> ~fastOptJS
-```
-
-This mode allows for a fast development cycle, refreshing the browser as code changes are being made (the fast optimization takes little time to produce a new version).
-
-- To build an optimized and production ready JavaScript library:
-
-```shell
-> fullOptJS
-```
-This optimization takes longer but produces a smaller file, ready for production. 
-For instance, the parser JavaScript resource will be located at `target/scala-2.11/parserjs-opt.js`
-
-To see examples of how to use the JavaScript produced library, check out the `platformTestJS` project
 
 
 ### Docker
