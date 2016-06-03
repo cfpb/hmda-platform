@@ -56,7 +56,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
       val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 1)
       Post("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 3
+        responseAs[List[ValidationError]].length mustBe 4
       }
       Post("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
@@ -68,7 +68,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
       }
       Post("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[List[ValidationError]].length mustBe 2
       }
     }
   }
