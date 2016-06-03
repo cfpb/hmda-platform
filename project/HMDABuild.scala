@@ -39,6 +39,8 @@ object HMDABuild extends Build {
 
   val scalazDeps = Seq(scalaz)
 
+  val configDeps = Seq(config)
+
   lazy val hmda = (project in file("."))
     .settings(buildSettings:_*)
     .settings(Revolver.settings:_*)
@@ -84,7 +86,7 @@ object HMDABuild extends Build {
   lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
     .settings(
-      libraryDependencies ++= commonDeps ++ scalazDeps
+      libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps
     ).dependsOn(parser % "compile->compile;test->test")
 
 
