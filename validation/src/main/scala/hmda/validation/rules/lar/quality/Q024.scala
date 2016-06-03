@@ -1,5 +1,6 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
@@ -7,6 +8,9 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 object Q024 extends EditCheck[LoanApplicationRegister] {
+  val config = ConfigFactory.load()
+  val min_income = config.getInt("hmda.validation.quality.Q024.min_income_for_high_loan")
+
   override def name: String = "Q024"
 
   override def apply(lar: LoanApplicationRegister): Result = {
@@ -14,7 +18,7 @@ object Q024 extends EditCheck[LoanApplicationRegister] {
 
     when((lar.actionTakenType is equalTo(1)) and (income is numeric)) {
       when(lar.loan.amount is greaterThanOrEqual(income.toInt * 5)) {
-        income.toInt is greaterThan(9)
+        income.toInt is greaterThan(min_income)
       }
     }
   }
