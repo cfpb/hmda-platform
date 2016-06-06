@@ -6,7 +6,7 @@ import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
 class Q059Spec extends LarEditCheckSpec with BadValueUtils {
-  property("Lars with loan type equal to 1 must pass") {
+  property("Lars with loan type not equal to 2, 3, or 4g must pass") {
     forAll(larGen, intOutsideRange(2, 4)) { (lar, x) =>
       val newLoan = lar.loan.copy(loanType = x)
       val newLar = lar.copy(loan = newLoan)
