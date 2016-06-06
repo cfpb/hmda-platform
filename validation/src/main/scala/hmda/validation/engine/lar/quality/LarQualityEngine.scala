@@ -11,7 +11,8 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
     val checks = List(
       Q005,
       Q014,
-      Q024
+      Q024,
+      Q035
     ).map(check(_, lar))
 
     validateAll(checks, lar)
