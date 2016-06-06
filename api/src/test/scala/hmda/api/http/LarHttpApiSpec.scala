@@ -23,7 +23,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
   //Start up API Actors
   val larValidation = system.actorOf(SingleLarValidation.props, "larValidation")
 
-  val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|3|2|1|10000|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
+  val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|10000|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
 
   val lar = LarCsvParser(larCsv)
   val larJson = lar.toJson
@@ -53,7 +53,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
 
     "filter syntactical, validity, or quality only for invalid LAR with all 3 kinds of errors" in {
       val badLoanType = lar.loan.copy(loanType = 0, amount = 9000, propertyType = 2)
-      val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 1)
+      val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 4)
       Post("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 3
