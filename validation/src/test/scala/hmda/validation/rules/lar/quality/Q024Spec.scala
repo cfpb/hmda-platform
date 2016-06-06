@@ -8,13 +8,13 @@ import org.scalacheck.Gen
 
 class Q024Spec extends LarEditCheckSpec {
   val config = ConfigFactory.load()
-  val min_income = config.getInt("hmda.validation.quality.Q024.min_income_for_high_loan")
+  val minIncome = config.getInt("hmda.validation.quality.Q024.min-income-for-high-loan")
 
   // Cases meeting preconditions
   property("passes if actionTaken = 1, loan amount >= 5xincome, and income > 9") {
     forAll(larGen) { lar =>
       val income = lar.applicant.income
-      whenever(income != "NA" && income.toInt > min_income) {
+      whenever(income != "NA" && income.toInt > minIncome) {
         val newLoan = lar.loan.copy(amount = income.toInt * 5 + 1)
         val newLar = lar.copy(actionTakenType = 1, loan = newLoan)
         newLar.mustPass
@@ -22,7 +22,7 @@ class Q024Spec extends LarEditCheckSpec {
     }
   }
   property("fails if actionTaken = 1, loan amount >= 5xincome, and income <= 9") {
-    forAll(larGen, Gen.choose(1, min_income)) { (lar, i) =>
+    forAll(larGen, Gen.choose(1, minIncome)) { (lar, i) =>
       val newLoan = lar.loan.copy(amount = i * 5 + 1)
       val newApplicant = lar.applicant.copy(income = i.toString)
       val newLar = lar.copy(actionTakenType = 1, loan = newLoan, applicant = newApplicant)

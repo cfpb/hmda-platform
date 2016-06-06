@@ -9,7 +9,7 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object Q024 extends EditCheck[LoanApplicationRegister] {
   val config = ConfigFactory.load()
-  val min_income = config.getInt("hmda.validation.quality.Q024.min_income_for_high_loan")
+  val minIncome = config.getInt("hmda.validation.quality.Q024.min-income-for-high-loan")
 
   override def name: String = "Q024"
 
@@ -18,7 +18,7 @@ object Q024 extends EditCheck[LoanApplicationRegister] {
 
     when((lar.actionTakenType is equalTo(1)) and (income is numeric)) {
       when(lar.loan.amount is greaterThanOrEqual(income.toInt * 5)) {
-        income.toInt is greaterThan(min_income)
+        income.toInt is greaterThan(minIncome)
       }
     }
   }

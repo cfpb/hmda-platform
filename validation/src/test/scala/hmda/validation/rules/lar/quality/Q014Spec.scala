@@ -8,10 +8,10 @@ import org.scalacheck.Gen
 
 class Q014Spec extends LarEditCheckSpec with BadValueUtils {
   val config = ConfigFactory.load()
-  val max_income = config.getInt("hmda.validation.quality.Q014.applicant.max_income")
+  val maxIncome = config.getInt("hmda.validation.quality.Q014.applicant.max-income")
 
   property("passes when income is less than stated limit") {
-    forAll(larGen, Gen.choose(1, max_income)) { (lar, i) =>
+    forAll(larGen, Gen.choose(1, maxIncome)) { (lar, i) =>
       val validApplicant = lar.applicant.copy(income = i.toString)
       val validLar = lar.copy(applicant = validApplicant)
       validLar.mustPass
@@ -19,7 +19,7 @@ class Q014Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   property("fails when income is too high (over configured limit)") {
-    forAll(larGen, Gen.choose(max_income + 1, Int.MaxValue)) { (lar, i) =>
+    forAll(larGen, Gen.choose(maxIncome + 1, Int.MaxValue)) { (lar, i) =>
       val validApplicant = lar.applicant.copy(income = i.toString)
       val validLar = lar.copy(applicant = validApplicant)
       validLar.mustFail
