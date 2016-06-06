@@ -1,11 +1,15 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
 class Q045Spec extends LarEditCheckSpec with BadValueUtils {
+
+  val config = ConfigFactory.load()
+  val rateSpread = config.getDouble("hmda.validation.quality.Q045.rateSpread")
 
   property("Valid if action not 1") {
     forAll(larGen, intOtherThan(1)) { (lar, x) =>
@@ -29,7 +33,7 @@ class Q045Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   property("Valid when ratespread less than or equal to 8.5") {
-    forAll(larGen, Gen.choose(Double.MinValue, 8.5)) { (lar, x) =>
+    forAll(larGen, Gen.choose(Double.MinValue, rateSpread)) { (lar, x) =>
       val newLar = lar.copy(rateSpread = x.toString)
       newLar.mustPass
     }
@@ -43,7 +47,7 @@ class Q045Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   property("Invalid when hoepa not 1 and other conditions met") {
-    forAll(larGen, Gen.choose(8.5, Double.MaxValue), intOtherThan(1)) { (lar, r, h) =>
+    forAll(larGen, Gen.choose(rateSpread + .1, Double.MaxValue), intOtherThan(1)) { (lar, r, h) =>
       val newLar = lar.copy(
         rateSpread = r.toString,
         hoepaStatus = h,
