@@ -1,11 +1,16 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
 class Q002Spec extends LarEditCheckSpec with BadValueUtils {
+
+  val config = ConfigFactory.load()
+  val loanAmount = config.getInt("hmda.validation.quality.Q002.loan.amount")
+  val income = config.getInt("hmda.validation.quality.Q002.applicant.income")
 
   property("Valid with non-numeric income") {
     forAll(larGen, Gen.alphaStr) { (lar, x) =>
@@ -25,7 +30,7 @@ class Q002Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val irrelevantIncome: Gen[Int] = Gen.choose(200, Int.MaxValue)
+  val irrelevantIncome: Gen[Int] = Gen.choose(income, Int.MaxValue)
 
   property("Valid whenever Income greater than 200 ($200,00)") {
     forAll(larGen, irrelevantIncome) { (lar, x) =>
@@ -35,7 +40,7 @@ class Q002Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val validLoan: Gen[Int] = Gen.choose(Int.MinValue, 1999)
+  val validLoan: Gen[Int] = Gen.choose(Int.MinValue, loanAmount - 1)
 
   property("Valid when loan less than 2000 ($2 million") {
     forAll(larGen, validLoan) { (lar, x) =>
@@ -45,8 +50,8 @@ class Q002Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val relevantIncome: Gen[Int] = Gen.choose(0, 199)
-  val invalidLoan: Gen[Int] = Gen.choose(2000, Int.MaxValue)
+  val relevantIncome: Gen[Int] = Gen.choose(0, income - 1)
+  val invalidLoan: Gen[Int] = Gen.choose(loanAmount, Int.MaxValue)
 
   property("Invalid when conditions met and loan greater than 2000") {
     forAll(larGen, relevantIncome, invalidLoan) { (lar, i, l) =>

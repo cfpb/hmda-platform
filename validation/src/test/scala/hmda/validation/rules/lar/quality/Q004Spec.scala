@@ -1,11 +1,15 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
 class Q004Spec extends LarEditCheckSpec with BadValueUtils {
+
+  val config = ConfigFactory.load()
+  val loanAmount = config.getInt("hmda.validation.quality.Q004.loan.amount")
 
   val irrelevantLoanType = intOtherThan(3)
 
@@ -27,7 +31,7 @@ class Q004Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val validLoan: Gen[Int] = Gen.choose(Int.MinValue, 1050)
+  val validLoan: Gen[Int] = Gen.choose(Int.MinValue, loanAmount)
 
   property("Valid when loan less than 1050 ($1,050,000") {
     forAll(larGen, validLoan) { (lar, x) =>
@@ -38,7 +42,7 @@ class Q004Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   val relevantPropertyType: Gen[Int] = Gen.oneOf(1, 2)
-  val invalidLoan: Gen[Int] = Gen.choose(1051, Int.MaxValue)
+  val invalidLoan: Gen[Int] = Gen.choose(loanAmount + 1, Int.MaxValue)
 
   property("Invalid when conditions met and loan greater than 1050") {
     forAll(larGen, relevantPropertyType, invalidLoan) { (lar, p, l) =>

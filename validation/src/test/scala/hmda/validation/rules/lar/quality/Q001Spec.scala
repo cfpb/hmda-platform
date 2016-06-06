@@ -1,11 +1,16 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
 class Q001Spec extends LarEditCheckSpec with BadValueUtils {
+
+  val config = ConfigFactory.load()
+  val loanAmount = config.getInt("hmda.validation.quality.Q001.loan.amount")
+  val multiplier = config.getInt("hmda.validation.quality.Q001.incomeMultiplier")
 
   property("Valid with non-numeric income") {
     forAll(larGen, Gen.alphaStr) { (lar, x) =>
@@ -15,7 +20,7 @@ class Q001Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val irrelevantLoanAmount: Gen[Int] = Gen.choose(Int.MinValue, 999)
+  val irrelevantLoanAmount: Gen[Int] = Gen.choose(Int.MinValue, loanAmount - 1)
 
   property("Valid whenever loan less than 1000 ($1 million)") {
     forAll(larGen, irrelevantLoanAmount) { (lar, x) =>
@@ -36,7 +41,7 @@ class Q001Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   val relevantIncome: Gen[Int] = Gen.choose(1000, 100000)
-  val validMultiplier: Gen[Int] = Gen.choose(1, 4)
+  val validMultiplier: Gen[Int] = Gen.choose(1, multiplier - 1)
 
   property("Valid when loan less than five times income") {
     forAll(larGen, relevantIncome, validMultiplier) { (lar, x, m) =>
@@ -47,7 +52,7 @@ class Q001Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val invalidMultiplier: Gen[Int] = Gen.choose(5, 100)
+  val invalidMultiplier: Gen[Int] = Gen.choose(multiplier, 100)
 
   property("Invalid when loan greater than five times income") {
     forAll(larGen, relevantIncome, invalidMultiplier) { (lar, x, m) =>
