@@ -10,6 +10,8 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
   def checkQuality(lar: LoanApplicationRegister): LarValidation = {
     val checks = List(
       Q005,
+      Q014,
+      Q024,
       Q059
     ).map(check(_, lar))
 
