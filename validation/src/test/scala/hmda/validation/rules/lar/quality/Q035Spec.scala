@@ -25,10 +25,10 @@ class Q035Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val irrelevantLoanType: Gen[Int] = intOtherThan(1)
+  val validLoanType: Gen[Int] = intOtherThan(1)
 
   property("Lars with purchaser type equal to 1 or 3 and a loan type not equal to 1 must fail") {
-    forAll(larGen, irrelevantLoanType, purchaserGen) { (lar, x, y) =>
+    forAll(larGen, validLoanType, purchaserGen) { (lar, x, y) =>
       val newLoan = lar.loan.copy(loanType = x)
       val newLar = lar.copy(loan = newLoan, purchaserType = y)
       newLar.mustFail
