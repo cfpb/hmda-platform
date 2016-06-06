@@ -7,8 +7,8 @@ import org.scalacheck.Gen
 
 class Q059Spec extends LarEditCheckSpec with BadValueUtils {
   property("Lars with loan type equal to 1 must pass") {
-    forAll(larGen) { lar =>
-      val newLoan = lar.loan.copy(loanType = 1)
+    forAll(larGen, intOutsideRange(2, 4)) { (lar, x) =>
+      val newLoan = lar.loan.copy(loanType = x)
       val newLar = lar.copy(loan = newLoan)
       newLar.mustPass
     }
