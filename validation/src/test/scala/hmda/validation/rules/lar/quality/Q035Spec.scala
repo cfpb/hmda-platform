@@ -25,7 +25,7 @@ class Q035Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val irrelevantLoanType: Gen[Int] = Gen.choose(Int.MinValue, Int.MaxValue).filter(_ != 1)
+  val irrelevantLoanType: Gen[Int] = intOtherThan(1)
 
   property("Lars with purchaser type equal to 1 or 3 and a loan type not equal to 1 must fail") {
     forAll(larGen, irrelevantLoanType, purchaserGen) { (lar, x, y) =>
