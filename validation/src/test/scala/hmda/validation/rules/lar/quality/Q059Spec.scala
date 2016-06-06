@@ -2,10 +2,10 @@ package hmda.validation.rules.lar.quality
 
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
-import hmda.validation.rules.lar.LarEditCheckSpec
+import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
 import org.scalacheck.Gen
 
-class Q059Spec extends LarEditCheckSpec {
+class Q059Spec extends LarEditCheckSpec with BadValueUtils {
   property("Lars with loan type equal to 1 must pass") {
     forAll(larGen) { lar =>
       val newLoan = lar.loan.copy(loanType = 1)
@@ -24,10 +24,10 @@ class Q059Spec extends LarEditCheckSpec {
     }
   }
 
-  val irrelevantPropertyType: Gen[Int] = Gen.choose(Int.MinValue, Int.MaxValue).filter(_ != 1)
+  val validPropertyType: Gen[Int] = intOtherThan(3)
 
   property("Lar with relevant loan type and property type not equal to 3 must pass") {
-    forAll(larGen, relevantLoanType, irrelevantPropertyType) { (lar, x, y) =>
+    forAll(larGen, relevantLoanType, validPropertyType) { (lar, x, y) =>
       val newLoan = lar.loan.copy(loanType = x, propertyType = y)
       val newLar = lar.copy(loan = newLoan)
       newLar.mustPass
