@@ -32,7 +32,7 @@ class Q045Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Valid when ratespread less than or equal to 8.5") {
+  property(s"Valid when ratespread less than or equal to $rateSpread") {
     forAll(larGen, Gen.choose(Double.MinValue, rateSpread)) { (lar, x) =>
       val newLar = lar.copy(rateSpread = x.toString)
       newLar.mustPass
