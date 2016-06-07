@@ -40,24 +40,28 @@ class Q001Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  val relevantIncome: Gen[Int] = Gen.choose(1000, 100000)
+  val relevantIncome: Gen[Int] = Gen.choose(200, 10000)
   val validMultiplier: Gen[Int] = Gen.choose(1, multiplier - 1)
 
   property(s"Valid when loan less than $multiplier times income") {
     forAll(larGen, relevantIncome, validMultiplier) { (lar, x, m) =>
-      val newLoan = lar.loan.copy(amount = x * m)
-      val newApplicant = lar.applicant.copy(income = x.toString)
-      val newLar = lar.copy(loan = newLoan, applicant = newApplicant)
-      newLar.mustPass
+      whenever(x * m > loanAmount) {
+        val newLoan = lar.loan.copy(amount = x * m)
+        val newApplicant = lar.applicant.copy(income = x.toString)
+        val newLar = lar.copy(loan = newLoan, applicant = newApplicant)
+        newLar.mustPass
+      }
     }
   }
 
   property(s"Valid when loan barely less than $multiplier times income") {
     forAll(larGen, relevantIncome) { (lar, x) =>
-      val newLoan = lar.loan.copy(amount = (x * multiplier) - 1)
-      val newApplicant = lar.applicant.copy(income = x.toString)
-      val newLar = lar.copy(loan = newLoan, applicant = newApplicant)
-      newLar.mustPass
+      whenever((x * 5) - 1 > loanAmount) {
+        val newLoan = lar.loan.copy(amount = (x * multiplier) - 1)
+        val newApplicant = lar.applicant.copy(income = x.toString)
+        val newLar = lar.copy(loan = newLoan, applicant = newApplicant)
+        newLar.mustPass
+      }
     }
   }
 
@@ -65,10 +69,12 @@ class Q001Spec extends LarEditCheckSpec with BadValueUtils {
 
   property(s"Invalid when loan greater than $multiplier times income") {
     forAll(larGen, relevantIncome, invalidMultiplier) { (lar, x, m) =>
-      val newLoan = lar.loan.copy(amount = x * m)
-      val newApplicant = lar.applicant.copy(income = x.toString)
-      val newLar = lar.copy(loan = newLoan, applicant = newApplicant)
-      newLar.mustFail
+      whenever(x * m > loanAmount) {
+        val newLoan = lar.loan.copy(amount = x * m)
+        val newApplicant = lar.applicant.copy(income = x.toString)
+        val newLar = lar.copy(loan = newLoan, applicant = newApplicant)
+        newLar.mustFail
+      }
     }
   }
 
