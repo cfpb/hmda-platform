@@ -18,7 +18,7 @@ class Q037Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Valid if loan amount less than or equal to 250 ($250,000)") {
+  property(s"Valid if loan amount less than or equal to $loanAmount") {
     forAll(larGen, Gen.choose(Int.MinValue, loanAmount)) { (lar, x) =>
       val newLoan = lar.loan.copy(amount = x)
       val newLar = lar.copy(loan = newLoan)
@@ -26,7 +26,7 @@ class Q037Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Invalid when loan greater than 250 and lien status 2") {
+  property(s"Invalid when loan greater than $loanAmount and lien status 2") {
     forAll(larGen, Gen.choose(loanAmount + 1, Int.MaxValue)) { (lar, x) =>
       val newLoan = lar.loan.copy(amount = x)
       val newLar = lar.copy(loan = newLoan, lienStatus = 2)

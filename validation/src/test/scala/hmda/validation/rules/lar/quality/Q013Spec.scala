@@ -20,7 +20,7 @@ class Q013Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Valid if loan amount between 100 ($100,000) and 10000 ($10,000,000)") {
+  property(s"Valid if loan amount between $minAmount and $maxAmount") {
     forAll(larGen, Gen.choose(minAmount, maxAmount)) { (lar, x) =>
       val newLoan = lar.loan.copy(amount = x)
       val newLar = lar.copy(loan = newLoan)
@@ -28,7 +28,7 @@ class Q013Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Invalid when loan not between 100 ($100,000) and 10000 ($10,000,000) and propety type 3") {
+  property(s"Invalid when loan not between $minAmount and $maxAmount and propety type 3") {
     forAll(larGen, intOutsideRange(minAmount, maxAmount)) { (lar, x) =>
       val newLoan = lar.loan.copy(propertyType = 3, amount = x)
       val newLar = lar.copy(loan = newLoan)
