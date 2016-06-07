@@ -17,17 +17,17 @@ class Q032Spec extends LarEditCheckSpec with FIGenerators {
   }
 
   property("Lars with action taken = 1 must have different application and action taken dates") {
-    forAll(larGen, dateGen) { (lar, x) =>
-      val newLoan = lar.loan.copy(applicationDate = x.toString)
-      val newLar = lar.copy(actionTakenType = 1, actionTakenDate = x + 1, loan = newLoan)
+    forAll(larGen) { lar =>
+      val newLoan = lar.loan.copy(applicationDate = (lar.actionTakenDate - 1).toString)
+      val newLar = lar.copy(actionTakenType = 1, loan = newLoan)
       newLar.mustPass
     }
   }
 
   property("Lars with action taken = 1 and equal application and action taken dates must fail") {
-    forAll(larGen, dateGen) { (lar, x) =>
-      val newLoan = lar.loan.copy(applicationDate = x.toString)
-      val newLar = lar.copy(actionTakenType = 1, actionTakenDate = x, loan = newLoan)
+    forAll(larGen) { lar =>
+      val newLoan = lar.loan.copy(applicationDate = lar.actionTakenDate.toString)
+      val newLar = lar.copy(actionTakenType = 1, loan = newLoan)
       newLar.mustFail
     }
   }
