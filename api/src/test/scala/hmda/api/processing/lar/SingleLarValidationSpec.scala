@@ -22,7 +22,11 @@ class SingleLarValidationSpec extends ActorSpec {
   "LAR Validation" must {
     "validate all lars in sample files" in {
       lars.foreach { lar =>
-        probe.send(larValidation, CheckAll(lar))
+        probe.send(larValidation, CheckSyntactical(lar))
+        probe.expectMsg(10.seconds, Nil)
+      }
+      lars.foreach { lar =>
+        probe.send(larValidation, CheckValidity(lar))
         probe.expectMsg(10.seconds, Nil)
       }
     }
