@@ -16,6 +16,7 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q035,
       Q036,
       Q037,
+      Q049,
       Q059
     ).map(check(_, lar))
 
