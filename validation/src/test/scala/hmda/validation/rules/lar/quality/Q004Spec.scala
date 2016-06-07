@@ -33,7 +33,7 @@ class Q004Spec extends LarEditCheckSpec with BadValueUtils {
 
   val validLoan: Gen[Int] = Gen.choose(Int.MinValue, loanAmount)
 
-  property("Valid when loan less than 1050 ($1,050,000") {
+  property(s"Valid when loan less than $loanAmount") {
     forAll(larGen, validLoan) { (lar, x) =>
       val newLoan = lar.loan.copy(amount = x)
       val newLar = lar.copy(loan = newLoan)
@@ -44,7 +44,7 @@ class Q004Spec extends LarEditCheckSpec with BadValueUtils {
   val relevantPropertyType: Gen[Int] = Gen.oneOf(1, 2)
   val invalidLoan: Gen[Int] = Gen.choose(loanAmount + 1, Int.MaxValue)
 
-  property("Invalid when conditions met and loan greater than 1050") {
+  property(s"Invalid when conditions met and loan greater than $loanAmount") {
     forAll(larGen, relevantPropertyType, invalidLoan) { (lar, p, l) =>
       val newLoan = lar.loan.copy(loanType = 3, propertyType = p, amount = l)
       val newLar = lar.copy(loan = newLoan)
