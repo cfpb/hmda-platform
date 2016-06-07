@@ -9,7 +9,7 @@ import hmda.validation.dsl.PredicateSyntax._
 object V455 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.applicant.ethnicity is containedIn(List(1, 2, 3))) {
+    when(lar.applicant.ethnicity is containedIn(1, 2, 3)) {
       lar.applicant.race1 not equalTo(7)
     }
   }

@@ -14,8 +14,8 @@ object Q005 extends EditCheck[LoanApplicationRegister] {
     val config = ConfigFactory.load()
     val loanAmount = config.getInt("hmda.validation.quality.Q005.loan.amount")
 
-    when((lar.purchaserType is containedIn(List(1, 2, 3, 4))) and
-      (lar.loan.propertyType is containedIn(List(1, 2)))) {
+    when((lar.purchaserType is containedIn(1, 2, 3, 4)) and
+      (lar.loan.propertyType is containedIn(1, 2))) {
       lar.loan.amount is lessThanOrEqual(loanAmount)
     }
   }
