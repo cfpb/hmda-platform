@@ -21,7 +21,7 @@ class Q046Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Invalid if hopea 1 and loan purpose 1") {
+  property("Invalid if hoepa 1 and loan purpose 1") {
     forAll(larGen) { (lar) =>
       val newLoan = lar.loan.copy(purpose = 1)
       val newLar = lar.copy(hoepaStatus = 1, loan = newLoan)

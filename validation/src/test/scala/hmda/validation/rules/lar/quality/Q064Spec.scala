@@ -21,7 +21,7 @@ class Q064Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
-  property("Invalid if hopea 1 and purchaser 1 or 3") {
+  property("Invalid if hoepa 1 and purchaser 1 or 3") {
     forAll(larGen, Gen.oneOf(1, 3)) { (lar, x) =>
       val newLar = lar.copy(hoepaStatus = 1, purchaserType = x)
       newLar.mustFail
