@@ -52,6 +52,15 @@ class Q001Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
+  property(s"Valid when loan barely less than $multiplier times income") {
+    forAll(larGen, relevantIncome) { (lar, x) =>
+      val newLoan = lar.loan.copy(amount = (x * multiplier) - 1)
+      val newApplicant = lar.applicant.copy(income = x.toString)
+      val newLar = lar.copy(loan = newLoan, applicant = newApplicant)
+      newLar.mustPass
+    }
+  }
+
   val invalidMultiplier: Gen[Int] = Gen.choose(multiplier, 100)
 
   property(s"Invalid when loan greater than $multiplier times income") {
