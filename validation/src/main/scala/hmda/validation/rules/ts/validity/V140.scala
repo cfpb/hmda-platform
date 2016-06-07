@@ -11,7 +11,7 @@ object V140 extends EditCheck[TransmittalSheet] {
 
   override def apply(ts: TransmittalSheet): Result = {
     val resp = ts.respondent
-    val stateCodes = states.keys.toList
+    val stateCodes = states.keySet
     resp.state is containedIn(stateCodes)
   }
 
