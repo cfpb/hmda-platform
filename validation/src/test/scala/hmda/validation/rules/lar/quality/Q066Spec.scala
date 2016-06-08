@@ -32,5 +32,12 @@ class Q066Spec extends LarEditCheckSpec with BadValueUtils {
     }
   }
 
+  property("Lars with a random string as rate spread must fail") {
+    forAll(larGen, Gen.alphaStr.filter(_ != "NA")) { (lar, x) =>
+      val newLar = lar.copy(rateSpread = x)
+      newLar.mustFail
+    }
+  }
+
   override def check: EditCheck[LoanApplicationRegister] = Q066
 }
