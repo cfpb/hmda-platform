@@ -7,9 +7,17 @@ import org.scalacheck.Gen
 
 class Q039Spec extends LarEditCheckSpec with BadValueUtils {
 
-  property("All lars with HOEPA status and action taken type not equal to 1 must pass") {
+  property("All lars with HOEPA status not equal to 1 must pass") {
     forAll(larGen) { lar =>
-      whenever(lar.hoepaStatus != 1 && lar.actionTakenType != 1) {
+      whenever(lar.hoepaStatus != 1) {
+        lar.mustPass
+      }
+    }
+  }
+
+  property("All lars with action taken type not equal to 1 must pass") {
+    forAll(larGen) { lar =>
+      whenever(lar.actionTakenType != 1) {
         lar.mustPass
       }
     }
