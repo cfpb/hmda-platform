@@ -11,7 +11,7 @@ class Q014Spec extends LarEditCheckSpec with BadValueUtils {
   val maxIncome = config.getInt("hmda.validation.quality.Q014.applicant.max-income")
 
   property("passes when income is less than stated limit") {
-    forAll(larGen, Gen.choose(1, maxIncome)) { (lar, i) =>
+    forAll(larGen, Gen.choose(1, maxIncome - 1)) { (lar, i) =>
       val validApplicant = lar.applicant.copy(income = i.toString)
       val validLar = lar.copy(applicant = validApplicant)
       validLar.mustPass
