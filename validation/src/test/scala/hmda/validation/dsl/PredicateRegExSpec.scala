@@ -1,5 +1,6 @@
 package hmda.validation.dsl
 
+import hmda.parser.fi.lar.LarGenerators
 import hmda.parser.fi.ts.TsGenerators
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
@@ -10,6 +11,7 @@ class PredicateRegExSpec
     extends PropSpec
     with PropertyChecks
     with TsGenerators
+    with LarGenerators
     with MustMatchers {
 
   // Email **************
@@ -111,5 +113,23 @@ class PredicateRegExSpec
   property("An improperly formatted tax ID must fail the tax ID regex") {
     val testCases = List(" - ", "-", "123-456789", "ab-defjhij")
     testCases.foreach(validTaxId.validate(_) mustBe false)
+  }
+
+  // Census tract **************
+  property("A valid census tract must pass the regex") {
+    forAll(censusTractGen) { censusTract =>
+      validCensusTractFormat.validate(censusTract) mustBe true
+    }
+  }
+
+  property("A numeric string must fail the census tract regex") {
+    forAll(Gen.numStr) { censusTract =>
+      validCensusTractFormat.validate(censusTract) mustBe false
+    }
+  }
+
+  property("An improperly formatted census tract must fail the census tract regex") {
+    val testCases = List("1234.ab", " 1234.56", "1234-56", "OOOO.O1", "12.3456", "", ".")
+    testCases.foreach(validCensusTractFormat.validate(_) mustBe false)
   }
 }
