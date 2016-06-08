@@ -72,8 +72,8 @@ class PredicateRegExSpec
   // Zip code **************
 
   property("A valid zip code must pass the zip code regex") {
-    forAll(censusTractGen) { censusTract =>
-      validCensusTractFormat.validate(censusTract) mustBe true
+    forAll(zipGen) { zip =>
+      validZipCode.validate(zip) mustBe true
     }
   }
 
