@@ -41,7 +41,7 @@ object PredicateCommon {
     override def failure: String = s"not between $lower and $upper (inclusive)"
   }
 
-  implicit def containedIn[T](first: T, rest: T*): Predicate[T] = containedIn(first +: rest)
+  implicit def oneOf[T](domain: T*): Predicate[T] = containedIn(domain)
 
   implicit def containedIn[T](domain: Seq[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = domain.contains(_)

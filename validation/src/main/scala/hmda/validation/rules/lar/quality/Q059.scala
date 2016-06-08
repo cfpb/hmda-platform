@@ -8,7 +8,7 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object Q059 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.loan.loanType is containedIn(2, 3, 4)) {
+    when(lar.loan.loanType is oneOf(2, 3, 4)) {
       lar.loan.propertyType not equalTo(3)
     }
   }

@@ -9,8 +9,8 @@ import hmda.validation.dsl.PredicateSyntax._
 object V465 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.applicant.coEthnicity is containedIn(1, 2, 3)) {
-      lar.applicant.coRace1 not containedIn(7, 8)
+    when(lar.applicant.coEthnicity is oneOf(1, 2, 3)) {
+      lar.applicant.coRace1 not oneOf(7, 8)
     }
   }
 

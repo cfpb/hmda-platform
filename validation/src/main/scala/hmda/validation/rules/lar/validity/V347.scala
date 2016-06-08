@@ -12,7 +12,7 @@ object V347 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.purchaserType is containedIn(1 to 9)) {
-      lar.actionTakenType is containedIn(1, 6)
+      lar.actionTakenType is oneOf(1, 6)
     }
   }
 }

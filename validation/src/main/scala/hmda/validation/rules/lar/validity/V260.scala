@@ -14,7 +14,7 @@ object V260 extends EditCheck[LoanApplicationRegister] {
     when((lar.denial.reason1 is containedIn(denialReasons))
       or (lar.denial.reason2 is containedIn(denialReasons))
       or (lar.denial.reason3 is containedIn(denialReasons))) {
-      lar.actionTakenType is containedIn(3, 7)
+      lar.actionTakenType is oneOf(3, 7)
     }
   }
 
