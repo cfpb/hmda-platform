@@ -46,17 +46,17 @@ class V300Spec extends LarEditCheckSpec {
     }
   }
 
-  property("Fails for a valid combination where tract not NA in a small county") {
+  property("Succeeds for a valid combination where tract not NA in a small county") {
     forAll(larGen) { lar =>
-      val invalidGeography = Geography("962100", "46", "045", "9621.00")
-      val invalidLar = lar.copy(geography = invalidGeography)
-      invalidLar.mustFail
+      val validGeography = Geography("10100", "46", "045", "9621.00")
+      val validLar = lar.copy(geography = validGeography)
+      validLar.mustPass
     }
   }
 
   property("Succeeds for NA tract in a small county") {
     forAll(larGen) { lar =>
-      val validGeography = Geography("962100", "46", "045", "NA")
+      val validGeography = Geography("10100", "46", "045", "NA")
       val validLar = lar.copy(geography = validGeography)
       validLar.mustPass
     }
