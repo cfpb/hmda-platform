@@ -20,7 +20,8 @@ trait TsEngine extends TsSyntacticalEngine with TsValidityEngine with TsQualityE
       (
         checkValidity(ts)
         |@| fs
-      )((_, _) => ts)
+        |@| checkQuality(ts)
+      )((_, _, _) => ts)
     }
   }
 
