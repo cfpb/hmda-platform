@@ -15,7 +15,7 @@ object Q003 extends EditCheck[LoanApplicationRegister] {
 
     when(
       (lar.loan.loanType is equalTo(2)) and
-        (lar.loan.propertyType is containedIn(List(1, 2)))
+        (lar.loan.propertyType is oneOf(1, 2))
     ) {
         lar.loan.amount is lessThanOrEqual(loanAmount)
       }
