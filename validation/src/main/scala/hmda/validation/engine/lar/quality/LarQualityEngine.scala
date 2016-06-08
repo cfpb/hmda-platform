@@ -13,6 +13,7 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q013,
       Q014,
       Q024,
+      Q027,
       Q035,
       Q036,
       Q037,
