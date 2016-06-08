@@ -10,7 +10,7 @@ class Q066Spec extends LarEditCheckSpec with BadValueUtils {
   val config = ConfigFactory.load()
   val rateSpreadConfig = config.getDouble("hmda.validation.quality.Q066.rate-spread")
 
-  property("All lars rate spread equal to NA") {
+  property("All lars with rate spread equal to NA must pass") {
     forAll(larGen) { lar =>
       whenever(lar.rateSpread == "NA") {
         lar.mustPass
