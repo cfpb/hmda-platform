@@ -1,24 +1,22 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
-import com.typesafe.config.ConfigFactory
-
-object Q005 extends EditCheck[LoanApplicationRegister] {
+object Q036 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
 
     val config = ConfigFactory.load()
-    val loanAmount = config.getInt("hmda.validation.quality.Q005.loan.amount")
+    val loanAmount = config.getInt("hmda.validation.quality.Q036.loan.amount")
 
-    when((lar.purchaserType is oneOf(1, 2, 3, 4)) and
-      (lar.loan.propertyType is oneOf(1, 2))) {
+    when(lar.loan.propertyType is equalTo(2)) {
       lar.loan.amount is lessThanOrEqual(loanAmount)
     }
   }
 
-  override def name = "Q005"
+  override def name = "Q036"
 }

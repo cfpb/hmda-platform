@@ -14,7 +14,7 @@ object V111 extends EditCheck[TransmittalSheet] {
 
   override def apply(ts: TransmittalSheet): Result = {
     when(ts.parent.state not empty) {
-      ts.parent.state is containedIn(states.keys.toList)
+      ts.parent.state is containedIn(states.keySet)
     }
   }
 
