@@ -12,10 +12,10 @@ import scala.util.Try
 object Q040 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
     val config = ConfigFactory.load()
-    val rateSpread = config.getDouble("hmda.validation.quality.Q040.rate-spread")
+    val rateSpread = config.getString("hmda.validation.quality.Q040.rate-spread")
 
     when((lar.purchaserType is oneOf(1, 2, 3, 4)) and (lar.lienStatus is oneOf(1, 2))) {
-      Try(lar.rateSpread.toDouble is lessThanOrEqual(rateSpread)).getOrElse(lar.rateSpread is equalTo("NA"))
+      (lar.rateSpread is numericallyLessThanOrEqual(rateSpread)) or (lar.rateSpread is equalTo("NA"))
     }
   }
 
