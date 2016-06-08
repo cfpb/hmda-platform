@@ -8,17 +8,16 @@ import hmda.validation.dsl.PredicateSyntax._
 
 import com.typesafe.config.ConfigFactory
 
-object Q005 extends EditCheck[LoanApplicationRegister] {
+object Q038 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
 
     val config = ConfigFactory.load()
-    val loanAmount = config.getInt("hmda.validation.quality.Q005.loan.amount")
+    val loanAmount = config.getInt("hmda.validation.quality.Q038.loan.amount")
 
-    when((lar.purchaserType is oneOf(1, 2, 3, 4)) and
-      (lar.loan.propertyType is oneOf(1, 2))) {
+    when(lar.lienStatus is equalTo(3)) {
       lar.loan.amount is lessThanOrEqual(loanAmount)
     }
   }
 
-  override def name = "Q005"
+  override def name = "Q038"
 }
