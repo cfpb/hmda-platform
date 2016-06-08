@@ -4,8 +4,10 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
-import hmda.validation.dsl.Result
+import hmda.validation.dsl.{Failure, Result}
 import hmda.validation.rules.EditCheck
+
+import scala.util.Try
 
 object Q066 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
@@ -13,7 +15,8 @@ object Q066 extends EditCheck[LoanApplicationRegister] {
     val rateSpread = config.getDouble("hmda.validation.quality.Q066.rate-spread")
 
     when(lar.rateSpread not equalTo("NA")) {
-      lar.rateSpread.toDouble is lessThan(rateSpread)
+      Try(lar.rateSpread.toDouble is lessThan(rateSpread))
+        .getOrElse(Failure(s"Can't parse '${lar.rateSpread}' as a Double"))
     }
   }
 

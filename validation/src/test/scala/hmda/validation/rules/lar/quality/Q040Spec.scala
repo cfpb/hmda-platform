@@ -33,7 +33,7 @@ class Q040Spec extends LarEditCheckSpec with BadValueUtils {
   }
 
   property(s"Lars with relevant purchaser type and lien status with rate spread > $rateSpreadConfig% must fail") {
-    forAll(larGen, Gen.choose(1, 4), Gen.oneOf(1, 2), Gen.choose(rateSpreadConfig, Double.MaxValue)) {
+    forAll(larGen, Gen.choose(1, 4), Gen.oneOf(1, 2), Gen.choose(rateSpreadConfig + 0.1, Double.MaxValue)) {
       (lar, purchaser, lien, spread) =>
         val newLar = lar.copy(purchaserType = purchaser, lienStatus = lien, rateSpread = spread.toString)
         newLar.mustFail
