@@ -52,7 +52,7 @@ object PredicateCommon {
     override def validate: (String) => Boolean = { x =>
       Try(lessThanOrEqual(BigDecimal(upper)).validate(BigDecimal(x))).getOrElse(false)
     }
-    override def failure: String = s"not less than $upper (exclusive)"
+    override def failure: String = s"not less than or equal to $upper"
   }
 
   implicit def oneOf[T](domain: T*): Predicate[T] = containedIn(domain)
