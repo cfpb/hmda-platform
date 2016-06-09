@@ -5,8 +5,9 @@ import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.rules.lar.ApplicantUtils
 
-object Q067 extends EditCheck[LoanApplicationRegister] {
+object Q067 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
   override def name: String = "Q067"
 
   override def apply(lar: LoanApplicationRegister): Result = {
@@ -18,16 +19,4 @@ object Q067 extends EditCheck[LoanApplicationRegister] {
     }
   }
 
-  private def applicantNotNaturalPerson(app: Applicant): Result = {
-    app.ethnicity is equalTo(4) and
-      (app.race1 is equalTo(7)) and
-      (app.sex is equalTo(4))
-  }
-
-  private def coApplicantNotNaturalPerson(app: Applicant): Result = {
-    app.coEthnicity is equalTo(4) and
-      (app.coRace1 is equalTo(7)) and
-      (app.coSex is equalTo(4))
-
-  }
 }

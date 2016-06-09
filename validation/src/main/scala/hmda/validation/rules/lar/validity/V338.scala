@@ -5,8 +5,9 @@ import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.rules.lar.ApplicantUtils
 
-object V338 extends EditCheck[LoanApplicationRegister] {
+object V338 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
   override def name: String = "V338"
 
   override def apply(lar: LoanApplicationRegister): Result = {
@@ -18,9 +19,7 @@ object V338 extends EditCheck[LoanApplicationRegister] {
   private def notANaturalPerson(lar: LoanApplicationRegister): Result = {
     val okAction = List(1, 2, 3, 4, 5, 7, 8)
 
-    (lar.applicant.ethnicity is equalTo(4)) and
-      (lar.applicant.race1 is equalTo(7)) and
-      (lar.applicant.sex is equalTo(4)) and
+    applicantNotNaturalPerson(lar.applicant) and
       (lar.applicant.coEthnicity is equalTo(5)) and
       (lar.applicant.coRace1 is equalTo(8)) and
       (lar.applicant.coSex is equalTo(5)) and
