@@ -20,9 +20,7 @@ object V338 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
     val okAction = List(1, 2, 3, 4, 5, 7, 8)
 
     applicantNotNaturalPerson(lar.applicant) and
-      (lar.applicant.coEthnicity is equalTo(5)) and
-      (lar.applicant.coRace1 is equalTo(8)) and
-      (lar.applicant.coSex is equalTo(5)) and
+      coApplicantDoesNotExist(lar.applicant) and
       (lar.actionTakenType is containedIn(okAction))
   }
 }

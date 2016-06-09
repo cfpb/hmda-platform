@@ -16,7 +16,11 @@ trait ApplicantUtils {
     app.coEthnicity is equalTo(4) and
       (app.coRace1 is equalTo(7)) and
       (app.coSex is equalTo(4))
-
   }
 
+  def coApplicantDoesNotExist(app: Applicant): Result = {
+    app.coEthnicity is equalTo(5) and
+      (app.coRace1 is equalTo(8)) and
+      (app.coSex is equalTo(5))
+  }
 }
