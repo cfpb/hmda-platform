@@ -41,6 +41,20 @@ object PredicateCommon {
     override def failure: String = s"not between $lower and $upper (inclusive)"
   }
 
+  implicit def numericallyLessThan(upper: String): Predicate[String] = new Predicate[String] {
+    override def validate: (String) => Boolean = { x =>
+      Try(lessThan(BigDecimal(upper)).validate(BigDecimal(x))).getOrElse(false)
+    }
+    override def failure: String = s"not less than $upper (exclusive)"
+  }
+
+  implicit def numericallyLessThanOrEqual(upper: String): Predicate[String] = new Predicate[String] {
+    override def validate: (String) => Boolean = { x =>
+      Try(lessThanOrEqual(BigDecimal(upper)).validate(BigDecimal(x))).getOrElse(false)
+    }
+    override def failure: String = s"not less than or equal to $upper"
+  }
+
   implicit def oneOf[T](domain: T*): Predicate[T] = containedIn(domain)
 
   implicit def containedIn[T](domain: Seq[T]): Predicate[T] = new Predicate[T] {
