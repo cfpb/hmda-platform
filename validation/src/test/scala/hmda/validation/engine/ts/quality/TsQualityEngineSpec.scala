@@ -17,7 +17,7 @@ class TsQualityEngineSpec
 
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  property("A LAR must pass quality checks") {
+  property("A Transmittal Sheet must pass quality checks") {
     for (x <- 1 to 5) {
       val line = Source.fromFile(new File("parser/src/test/resources/txt/QualityMacroPasses_Test" + x + ".txt")).getLines().take(1)
       val ts = line.map(l => TsCsvParser(l))
