@@ -22,6 +22,18 @@ object PredicateGeo {
     (cbsa.metDivFp, cbsa.state, cbsa.county)
   }.toSet
 
+  val hasMsaSet = cbsaTracts.map { cbsa =>
+    (cbsa.geoIdMsa, cbsa.state, cbsa.county)
+  }.filter(x => x._1 != "").map { x =>
+    (x._2, x._3)
+  }.toSet
+
+  val hasMdSet = cbsaTracts.map { cbsa =>
+    (cbsa.metDivFp, cbsa.state, cbsa.county)
+  }.filter(x => x._1 != "").map { x =>
+    (x._2, x._3)
+  }.toSet
+
   val validStateCountyTractCombinationSet = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county, cbsa.tractDecimal)
   }.toSet
@@ -72,6 +84,15 @@ object PredicateGeo {
     override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
       case geo: Geography => validMsaCombinationSetNoTract.contains((geo.msa, geo.state, geo.county)) ||
         validMdCombinationSetNoTract.contains((geo.msa, geo.state, geo.county))
+      case _ => false
+    }
+    override def failure: String = "state, county, msa, and census tract combination is not valid"
+  }
+
+  implicit def shouldHaveMsa: Predicate[Geography] = new Predicate[Geography] {
+    override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
+      case geo: Geography => hasMsaSet.contains((geo.state, geo.county)) ||
+        hasMdSet.contains((geo.state, geo.county))
       case _ => false
     }
     override def failure: String = "state, county, msa, and census tract combination is not valid"
