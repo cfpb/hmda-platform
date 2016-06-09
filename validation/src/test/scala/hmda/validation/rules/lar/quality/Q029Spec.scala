@@ -1,13 +1,8 @@
 package hmda.validation.rules.lar.quality
 
-import java.io.File
-
 import hmda.model.fi.lar.{ Geography, LoanApplicationRegister }
-import hmda.parser.fi.lar.LarCsvParser
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
-
-import scala.io.Source
 
 class Q029Spec extends LarEditCheckSpec with BadValueUtils {
 
@@ -58,7 +53,6 @@ class Q029Spec extends LarEditCheckSpec with BadValueUtils {
       validLar.mustFail
     }
   }
-  
 
   override def check: EditCheck[LoanApplicationRegister] = Q029
 }
