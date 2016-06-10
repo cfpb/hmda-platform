@@ -7,6 +7,10 @@ import hmda.validation.rules.lar.quality._
 
 trait LarQualityEngine extends LarCommonEngine with ValidationApi {
 
+  private def q022(lar:LoanApplicationRegister): LarValidation = {
+    Q022(lar, 2017)
+  }
+
   def checkQuality(lar: LoanApplicationRegister): LarValidation = {
     val checks = List(
       Q001,
@@ -16,6 +20,7 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q005,
       Q013,
       Q014,
+      q022,
       Q024,
       Q025,
       Q032,
