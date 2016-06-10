@@ -8,6 +8,7 @@ import hmda.validation.rules.lar.quality._
 trait LarQualityEngine extends LarCommonEngine with ValidationApi {
 
   private def q022(lar: LoanApplicationRegister): LarValidation = {
+    // TODO: 2017 is hardcoded for now.  It will be passed in through the API at a later date
     convertResult(lar, Q022(lar, 2017), "Q022")
   }
 
