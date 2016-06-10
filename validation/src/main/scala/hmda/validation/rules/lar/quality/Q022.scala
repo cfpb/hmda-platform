@@ -19,9 +19,9 @@ object Q022 {
   def apply(lar: LoanApplicationRegister, fYear: Future[Int])(implicit ec: ExecutionContext): Future[Result] = {
     val applicationYear = Try(lar.loan.applicationDate.substring(0, 4).toInt)
 
-    fYear.map(year => {
+    fYear.map { year =>
       (year - applicationYear.getOrElse(year)) is between(0, 2)
-    })
+    }
   }
 
   def name = "Q025"
