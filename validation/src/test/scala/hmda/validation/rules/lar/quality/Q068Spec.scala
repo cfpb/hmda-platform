@@ -3,20 +3,18 @@ package hmda.validation.rules.lar.quality
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
+import org.scalacheck.Gen
 
 class Q068Spec extends LarEditCheckSpec {
   // Cases meeting preconditions
   property("passes when applicant is not a natural person and coapplicant is a natural person") {
-    forAll(larGen) { lar =>
-      val app = lar.applicant
-      whenever(app.coEthnicity != 4 &&
-        app.coRace1 != 7 &&
-        app.coSex != 4 &&
-        lar.actionTakenType != 6) {
-        val notNaturalApplicant = lar.applicant.copy(ethnicity = 4, race1 = 7, sex = 4)
-        val validLar = lar.copy(applicant = notNaturalApplicant)
+    forAll(larGen, Gen.choose(1, 3), Gen.choose(1, 6), Gen.choose(1, 3)) {
+      (lar, coEth, coRace, coSex) =>
+        val app = lar.applicant
+        val naturalCoApp = lar.applicant.copy(ethnicity = 4, race1 = 7, sex = 4,
+          coEthnicity = coEth, coRace1 = coRace, coSex = coSex)
+        val validLar = lar.copy(applicant = naturalCoApp)
         validLar.mustPass
-      }
     }
   }
   property("passes when applicant is not a natural person and coapplicant does not exist") {
