@@ -24,33 +24,18 @@ object PredicateGeo {
     (cbsa.metDivFp, cbsa.state, cbsa.county)
   }.toSet
 
-  val hasMsaSet = cbsaTracts.map { cbsa =>
-    (cbsa.geoIdMsa, cbsa.state, cbsa.county)
-  }.filter(x => x._1 != "").map { x =>
-    (x._2, x._3)
-  }.toSet
+  private val MsaNotMicro = cbsaMetroMicro
+    .filter(_.MEMI == 1)
+    .map { _.GEOIOD }
 
-  val hasMdSet = cbsaTracts.map { cbsa =>
-    (cbsa.metDivFp, cbsa.state, cbsa.county)
-  }.filter(x => x._1 != "").map { x =>
-    (x._2, x._3)
-  }.toSet
+  val hasMsaNotMicroSet = cbsaTracts
+    .filter(cbsa => MsaNotMicro.contains(cbsa.geoIdMsa))
+    .map(cbsa => (cbsa.state, cbsa.county))
+    .toSet
 
-  val MsaNotMicro = cbsaMetroMicro.map { cbsa =>
-    (cbsa.GEOIOD, cbsa.MEMI)
-  }.filter(x => x._2 == 1).map { x =>
-    x._1
-  }
-
-  val hasMsaNotMicroSet = cbsaTracts.map { cbsa =>
-    (cbsa.geoIdMsa, cbsa.state, cbsa.county)
-  }.filter(x => MsaNotMicro.contains(x._1)).map { x =>
-    (x._2, x._3)
-  }.toSet
-
-  val validStateCountyTractCombinationSet = cbsaTracts.map { cbsa =>
-    (cbsa.state, cbsa.county, cbsa.tractDecimal)
-  }.toSet
+  val validStateCountyTractCombinationSet = cbsaTracts
+    .map { cbsa => (cbsa.state, cbsa.county, cbsa.tractDecimal)}
+    .toSet
 
   val validStateCountyCombinationSet = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county)
