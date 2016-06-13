@@ -7,19 +7,22 @@ import akka.Done
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ HttpResponse, Multipart, StatusCodes }
+import akka.http.scaladsl.model.{HttpResponse, Multipart, StatusCodes}
 import akka.http.scaladsl.model.Multipart.BodyPart
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Framing, Sink }
+import akka.stream.scaladsl.{Framing, Sink}
 import akka.util.ByteString
 import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.typesafe.config.ConfigFactory
 import hmda.api.processing.HmdaFileUpload
 import hmda.api.protocol.HmdaApiProtocol
+import hmda.parser.fi.lar.LarCsvParser
 import spray.json._
+
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
+import scala.util.{Failure, Success}
 
 trait HttpApi extends HmdaApiProtocol {
 
@@ -77,6 +80,21 @@ trait HttpApi extends HmdaApiProtocol {
         }
       }
     }
+
+  val config = ConfigFactory.load()
+
+  val periodPath =
+    path("period") {
+      post {
+        entity(as[Int]) { year =>
+          
+          complete {
+            "Activity year set"
+          }
+        }
+      }
+    }
+
 
   val routes = rootPath ~ uploadPath
 }
