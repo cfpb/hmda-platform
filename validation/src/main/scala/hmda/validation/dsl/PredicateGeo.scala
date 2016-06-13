@@ -4,23 +4,23 @@ import hmda.model.census.{ CBSAMetroMicroLookup, CBSATractLookup }
 import hmda.model.fi.lar.Geography
 
 object PredicateGeo {
-  val cbsaTracts = CBSATractLookup.values
+  private val cbsaTracts = CBSATractLookup.values
 
-  val cbsaMetroMicro = CBSAMetroMicroLookup.values
+  private val cbsaMetroMicro = CBSAMetroMicroLookup.values
 
-  val validMsaCombinationSet = cbsaTracts.map { cbsa =>
+  private val validMsaCombinationSet = cbsaTracts.map { cbsa =>
     (cbsa.geoIdMsa, cbsa.state, cbsa.county, cbsa.tractDecimal)
   }.toSet
 
-  val validMdCombinationSet = cbsaTracts.map { cbsa =>
+  private val validMdCombinationSet = cbsaTracts.map { cbsa =>
     (cbsa.metDivFp, cbsa.state, cbsa.county, cbsa.tractDecimal)
   }.toSet
 
-  val validMsaCombinationSetNoTract = cbsaTracts.map { cbsa =>
+  private val validMsaCombinationSetNoTract = cbsaTracts.map { cbsa =>
     (cbsa.geoIdMsa, cbsa.state, cbsa.county)
   }.toSet
 
-  val validMdCombinationSetNoTract = cbsaTracts.map { cbsa =>
+  private val validMdCombinationSetNoTract = cbsaTracts.map { cbsa =>
     (cbsa.metDivFp, cbsa.state, cbsa.county)
   }.toSet
 
@@ -28,20 +28,20 @@ object PredicateGeo {
     .filter(_.MEMI == 1)
     .map { _.GEOIOD }
 
-  val hasMsaNotMicroSet = cbsaTracts
+  private val hasMsaNotMicroSet = cbsaTracts
     .filter(cbsa => MsaNotMicro.contains(cbsa.geoIdMsa))
     .map(cbsa => (cbsa.state, cbsa.county))
     .toSet
 
-  val validStateCountyTractCombinationSet = cbsaTracts
+  private val validStateCountyTractCombinationSet = cbsaTracts
     .map { cbsa => (cbsa.state, cbsa.county, cbsa.tractDecimal) }
     .toSet
 
-  val validStateCountyCombinationSet = cbsaTracts.map { cbsa =>
+  private val validStateCountyCombinationSet = cbsaTracts.map { cbsa =>
     (cbsa.state, cbsa.county)
   }.toSet
 
-  val smallCounties = cbsaTracts
+  private val smallCounties = cbsaTracts
     .filter { cbsa => cbsa.smallCounty == 1 }
     .map { cbsa => (cbsa.state, cbsa.county) }
     .toSet
