@@ -34,7 +34,7 @@ object PredicateGeo {
     .toSet
 
   val validStateCountyTractCombinationSet = cbsaTracts
-    .map { cbsa => (cbsa.state, cbsa.county, cbsa.tractDecimal)}
+    .map { cbsa => (cbsa.state, cbsa.county, cbsa.tractDecimal) }
     .toSet
 
   val validStateCountyCombinationSet = cbsaTracts.map { cbsa =>
@@ -47,52 +47,40 @@ object PredicateGeo {
     .toSet
 
   implicit def smallCounty: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
-      case geo: Geography => smallCounties.contains((geo.state, geo.county))
-      case _ => false
-    }
+    override def validate: (Geography) => Boolean = (geo) =>
+      smallCounties.contains((geo.state, geo.county))
     override def failure: String = "county is not small"
   }
 
   implicit def validStateCountyCombination: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
-      case geo: Geography => validStateCountyCombinationSet.contains((geo.state, geo.county))
-      case _ => false
-    }
+    override def validate: (Geography) => Boolean = (geo) =>
+      validStateCountyCombinationSet.contains((geo.state, geo.county))
     override def failure: String = "state and county combination is not valid"
   }
 
   implicit def validStateCountyTractCombination: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
-      case geo: Geography => validStateCountyTractCombinationSet.contains((geo.state, geo.county, geo.tract))
-      case _ => false
-    }
+    override def validate: (Geography) => Boolean = (geo) =>
+      validStateCountyTractCombinationSet.contains((geo.state, geo.county, geo.tract))
     override def failure: String = "state, county, and census tract combination is not valid"
   }
 
   implicit def validCompleteCombination: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
-      case geo: Geography => validMsaCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract)) ||
+    override def validate: (Geography) => Boolean = (geo) =>
+      validMsaCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract)) ||
         validMdCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract))
-      case _ => false
-    }
     override def failure: String = "state, county, msa, and census tract combination is not valid"
   }
 
   implicit def validStateCountyMsaCombination: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
-      case geo: Geography => validMsaCombinationSetNoTract.contains((geo.msa, geo.state, geo.county)) ||
+    override def validate: (Geography) => Boolean = (geo) =>
+      validMsaCombinationSetNoTract.contains((geo.msa, geo.state, geo.county)) ||
         validMdCombinationSetNoTract.contains((geo.msa, geo.state, geo.county))
-      case _ => false
-    }
     override def failure: String = "state, county, msa, and census tract combination is not valid"
   }
 
   implicit def shouldHaveMsa: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
-      case geo: Geography => hasMsaNotMicroSet.contains((geo.state, geo.county))
-      case _ => false
-    }
+    override def validate: (Geography) => Boolean = (geo) =>
+      hasMsaNotMicroSet.contains((geo.state, geo.county))
     override def failure: String = "state, county, msa, and census tract combination is not valid"
   }
 
