@@ -16,17 +16,17 @@ object PredicateCommon {
 
   implicit def greaterThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = ord.gteq(_, that)
-    override def failure: String = s"not greater than $that"
+    override def failure: String = s"not greater than or equal to $that"
   }
 
   implicit def lessThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = ord.lt(_, that)
-    override def failure: String = s"not greater than $that"
+    override def failure: String = s"not less than $that"
   }
 
   implicit def lessThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
     override def validate: (T) => Boolean = ord.lteq(_, that)
-    override def failure: String = s"not greater than $that"
+    override def failure: String = s"not less than or equal to $that"
   }
 
   implicit def between[T](lower: T, upper: T)(implicit ord: Ordering[T]): Predicate[T] = new Predicate[T] {
