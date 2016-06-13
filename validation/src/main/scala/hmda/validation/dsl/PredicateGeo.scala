@@ -1,10 +1,12 @@
 package hmda.validation.dsl
 
-import hmda.model.census.CBSATractLookup
+import hmda.model.census.{ CBSAMetroMicroLookup, CBSATractLookup }
 import hmda.model.fi.lar.Geography
 
 object PredicateGeo {
   val cbsaTracts = CBSATractLookup.values
+
+  val cbsaMetroMicro = CBSAMetroMicroLookup.values
 
   val validMsaCombinationSet = cbsaTracts.map { cbsa =>
     (cbsa.geoIdMsa, cbsa.state, cbsa.county, cbsa.tractDecimal)
@@ -31,6 +33,18 @@ object PredicateGeo {
   val hasMdSet = cbsaTracts.map { cbsa =>
     (cbsa.metDivFp, cbsa.state, cbsa.county)
   }.filter(x => x._1 != "").map { x =>
+    (x._2, x._3)
+  }.toSet
+
+  val MsaNotMicro = cbsaMetroMicro.map { cbsa =>
+    (cbsa.GEOIOD, cbsa.MEMI)
+  }.filter(x => x._2 == 1).map { x =>
+    x._1
+  }
+
+  val hasMsaNotMicroSet = cbsaTracts.map { cbsa =>
+    (cbsa.geoIdMsa, cbsa.state, cbsa.county)
+  }.filter(x => MsaNotMicro.contains(x._1)).map { x =>
     (x._2, x._3)
   }.toSet
 
@@ -91,8 +105,7 @@ object PredicateGeo {
 
   implicit def shouldHaveMsa: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = _.asInstanceOf[AnyRef] match {
-      case geo: Geography => hasMsaSet.contains((geo.state, geo.county)) ||
-        hasMdSet.contains((geo.state, geo.county))
+      case geo: Geography => hasMsaNotMicroSet.contains((geo.state, geo.county))
       case _ => false
     }
     override def failure: String = "state, county, msa, and census tract combination is not valid"

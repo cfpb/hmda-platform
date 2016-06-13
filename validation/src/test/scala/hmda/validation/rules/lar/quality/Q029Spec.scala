@@ -16,7 +16,7 @@ class Q029Spec extends LarEditCheckSpec with BadValueUtils {
 
   property("Fails when combo has MSA but MSA == NA") {
     forAll(larGen) { lar =>
-      val validGeography = Geography("NA", "06", "007", "0036.00")
+      val validGeography = Geography("NA", "06", "037", "2247.00")
       val validLar = lar.copy(geography = validGeography)
       validLar.mustFail
     }
