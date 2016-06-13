@@ -5,18 +5,13 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
+import hmda.validation.rules.lar.ApplicantUtils
 
-object Q051 extends EditCheck[LoanApplicationRegister] {
+object Q051 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(notANaturalPerson(lar) and (lar.actionTakenType is equalTo(6))) {
+    when(applicantNotNaturalPerson(lar.applicant) and (lar.actionTakenType is equalTo(6))) {
       lar.hoepaStatus not equalTo(1)
     }
-  }
-
-  def notANaturalPerson(lar: LoanApplicationRegister): Result = {
-    (lar.applicant.ethnicity is equalTo(4)) and
-      (lar.applicant.race1 is equalTo(7)) and
-      (lar.applicant.sex is equalTo(4))
   }
 
   override def name = "Q051"
