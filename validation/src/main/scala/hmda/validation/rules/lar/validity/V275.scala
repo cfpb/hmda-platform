@@ -15,7 +15,7 @@ object V275 extends EditCheck[LoanApplicationRegister] {
 
     when(dateReceived not equalTo("NA")) {
       Try((actionTakenDate - dateReceived.toInt) is greaterThanOrEqual(0))
-        .getOrElse(Failure(s"Can't parse '$dateReceived' as an Int"))
+        .getOrElse(Failure())
     }
   }
 

@@ -15,7 +15,7 @@ trait ValidationApi {
   def convertResult[T](input: T, result: Result, ruleName: String): ValidationNel[ValidationError, T] = {
     result match {
       case Success() => input.success
-      case Failure(_) => ValidationError(ruleName).failure.toValidationNel
+      case Failure() => ValidationError(ruleName).failure.toValidationNel
     }
   }
 
