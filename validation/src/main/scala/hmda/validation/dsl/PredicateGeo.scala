@@ -78,7 +78,7 @@ object PredicateGeo {
     override def failure: String = "state, county, msa, and census tract combination is not valid"
   }
 
-  implicit def shouldHaveMsa: Predicate[Geography] = new Predicate[Geography] {
+  implicit def stateCountyCombinationInMsa: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = (geo) =>
       hasMsaNotMicroSet.contains((geo.state, geo.county))
     override def failure: String = "state, county, msa, and census tract combination is not valid"
