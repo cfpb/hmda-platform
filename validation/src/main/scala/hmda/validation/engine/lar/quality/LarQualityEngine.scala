@@ -1,6 +1,5 @@
 package hmda.validation.engine.lar.quality
 
-import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.engine.lar.LarCommonEngine
@@ -9,9 +8,7 @@ import hmda.validation.rules.lar.quality._
 trait LarQualityEngine extends LarCommonEngine with ValidationApi {
 
   private def q022(lar: LoanApplicationRegister): LarValidation = {
-    val config = ConfigFactory.load()
-    val activityYear = config.getInt("hmda.activity-year")
-    convertResult(lar, Q022(lar, activityYear), "Q022")
+    convertResult(lar, Q022(lar, 2017), "Q022")
   }
 
   def checkQuality(lar: LoanApplicationRegister): LarValidation = {

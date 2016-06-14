@@ -11,18 +11,22 @@ import scala.util.Try
 object Q022 {
   def apply(lar: LoanApplicationRegister, year: Int): Result = {
     // This edit should not fail if applicationDate is equal to "NA" or is otherwise non-convertible
-    val applicationYear = Try(lar.loan.applicationDate.substring(0, 4).toInt).getOrElse(year)
+    val applicationYear = parseYear(lar).getOrElse(year)
 
     (year - applicationYear) is between(0, 2)
   }
 
   def apply(lar: LoanApplicationRegister, fYear: Future[Int])(implicit ec: ExecutionContext): Future[Result] = {
-    val applicationYear = Try(lar.loan.applicationDate.substring(0, 4).toInt)
+    val applicationYear = parseYear(lar)
 
     fYear.map { year =>
       (year - applicationYear.getOrElse(year)) is between(0, 2)
     }
   }
 
-  def name = "Q025"
+  private def parseYear(lar: LoanApplicationRegister): Try[Int] = {
+    Try(lar.loan.applicationDate.substring(0, 4).toInt)
+  }
+
+  def name = "Q022"
 }
