@@ -51,7 +51,7 @@ trait LarGenerators extends FIGenerators {
       propertyType <- Gen.oneOf(1, 2, 3)
       purpose <- Gen.oneOf(1, 2, 3)
       occupancy <- Gen.oneOf(1, 2, 3)
-      amount <- Gen.choose(0, 100000)
+      amount <- Gen.choose(1, 100000)
     } yield Loan(
       id,
       applicationDate,
