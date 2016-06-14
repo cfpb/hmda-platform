@@ -1,9 +1,7 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
-import hmda.validation.rules.lar.LarEditCheckSpec
 import org.scalacheck.Gen
 
 class V475Spec extends RaceEditCheckSpec {
@@ -14,7 +12,7 @@ class V475Spec extends RaceEditCheckSpec {
       whenever(race1 != 6 && race1 != 7) {
         val applicant = lar.applicant.copy(race1 = race1)
         val newLar = lar.copy(applicant = applicant)
-        V475(newLar) mustBe a[Success]
+        newLar.mustPass
       }
     }
   }
