@@ -22,10 +22,10 @@ object V300 extends EditCheck[LoanApplicationRegister] {
     when(tract not equalTo("NA")) {
       validFormat and
         when(msa not equalTo("NA")) {
-          (lar.geography is validCompleteCombination)
+          lar.geography is validCompleteCombination
         } and
         when(msa is equalTo("NA")) {
-          (lar.geography is validStateCountyTractCombination)
+          lar.geography is validStateCountyTractCombination
         }
     } and
       when(tract is equalTo("NA")) {
