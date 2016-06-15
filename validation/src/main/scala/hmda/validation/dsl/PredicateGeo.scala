@@ -25,8 +25,9 @@ object PredicateGeo {
   }.toSet
 
   private val MsaNotMicro = cbsaMetroMicro
-    .filter(_.MEMI == 1)
-    .map { _.GEOIOD }
+    .filter(_.metroMicro == 1)
+    .map { _.geoId }
+      .toSet
 
   private val hasMsaNotMicroSet = cbsaTracts
     .filter(cbsa => MsaNotMicro.contains(cbsa.geoIdMsa))

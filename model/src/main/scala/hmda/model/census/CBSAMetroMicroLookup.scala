@@ -9,46 +9,48 @@ object CBSAMetroMicroLookup {
     val lines = Source.fromFile(new File("model/src/main/resources/tl_2013_us_cbsa.csv")).getLines
     lines.map { line =>
       val values = line.split('|').map(_.trim)
-      val CSAFP = values(0)
-      val CBSAFP = values(1)
-      val GEOIOD = values(2)
+      val combinedCode = values(0)
+      val metroOrMicroCode = values(1)
+      val geoId = values(2)
       val name = values(3)
-      val nameLSAD = values(4)
-      val LSAD = values(5)
-      val MEMI = values(6).toInt
-      val MTFCC = values(7)
-      val ALAND = values(8)
-      val AWATER = values(9)
-      val INTPTLAT = values(10)
-      val INTPTLON = values(11)
+      val legalStatname = values(4)
+      val legalStatMetroMicro = values(5)
+      val metroMicro = values(6).toInt
+      val metroMicroStatArea = values(7)
+      val areaLand = values(8)
+      val areaWater = values(9)
+      val internalPointLat = values(10)
+      val internalPointLon = values(11)
 
       CBSAMetroMicro(
-        CBSAFP,
-        GEOIOD,
+        combinedCode,
+        metroOrMicroCode,
+        geoId,
         name,
-        nameLSAD,
-        LSAD,
-        MEMI,
-        MTFCC,
-        ALAND,
-        AWATER,
-        INTPTLAT,
-        INTPTLON
+        legalStatname,
+        legalStatMetroMicro,
+        metroMicro,
+        metroMicroStatArea,
+        areaLand,
+        areaWater,
+        internalPointLat,
+        internalPointLon
       )
     }.toSeq
   }
 }
 
 case class CBSAMetroMicro(
-  CBSAFP: String,
-  GEOIOD: String,
+  combinedCode: String,
+  metroOrMicroCode: String,
+  geoId: String,
   name: String,
-  nameLSAD: String,
-  LSAD: String,
-  MEMI: Int,
-  MTFCC: String,
-  ALAND: String,
-  AWATER: String,
-  INTPTLAT: String,
-  INTPTLON: String
+  legalStatname: String,
+  legalStatMetroMicro: String,
+  metroMicro: Int,
+  metroMicroStatArea: String,
+  areaLand: String,
+  areaWater: String,
+  internalPointLat: String,
+  internalPointLon: String
 )
