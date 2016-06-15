@@ -10,7 +10,7 @@ import hmda.validation.dsl.PredicateGeo._
 object Q029 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
     val geo = lar.geography
-    when(geo is stateCountyCombinationInMsa) {
+    when(geo is stateCountyCombinationInMsaNotMicro) {
       geo.msa not equalTo("NA")
     }
   }
