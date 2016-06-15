@@ -7,13 +7,13 @@ object PredicateSyntax {
     private def test(predicate: Predicate[T]): Result = {
       predicate.validate(data) match {
         case true => Success()
-        case false => Failure(predicate.failure)
+        case false => Failure()
       }
     }
 
     private def testNot(predicate: Predicate[T]): Result = {
       predicate.validate(data) match {
-        case true => Failure(predicate.failure)
+        case true => Failure()
         case false => Success()
       }
     }

@@ -5,24 +5,24 @@ sealed trait Result {
     if (this == Success() && that == Success())
       Success()
     else
-      Failure(s"$this $that")
+      Failure()
   }
 
   def or(that: Result): Result = {
     if (this == Success() || that == Success())
       Success()
     else
-      Failure(s"$this $that")
+      Failure()
   }
 
   def implies(that: => Result): Result = {
     this match {
       case Success() => that
-      case Failure(_) => Success()
+      case Failure() => Success()
     }
   }
 
 }
 case class Success() extends Result
-case class Failure(message: String) extends Result
+case class Failure() extends Result
 

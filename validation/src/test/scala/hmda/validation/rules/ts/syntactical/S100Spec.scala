@@ -49,8 +49,8 @@ class S100Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
   property("Transmittal Sheet has invalid activity year") {
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
-        S100(ts, 2017) mustBe Failure("not equal to 2017")
-        S100(ts, Future(2017)).map(x => x mustBe Failure("not equal to 2017"))
+        S100(ts, 2017) mustBe Failure()
+        S100(ts, Future(2017)).map(x => x mustBe Failure())
       }
     }
   }
