@@ -1,13 +1,13 @@
 package hmda.api.protocol
 
 import hmda.api.model.ModelGenerators
-import hmda.api.protocol.processing.ProcessingProtocol
+import hmda.api.protocol.processing.InstitutionProtocol
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import hmda.model.fi.{ Institution, InstitutionStatus }
 import spray.json._
 
-class ProcessingProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with ModelGenerators with ProcessingProtocol {
+class InstitutionProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with ModelGenerators with InstitutionProtocol {
 
   property("Institution status must convert to and from json") {
     forAll(institutionStatusGen) { p =>

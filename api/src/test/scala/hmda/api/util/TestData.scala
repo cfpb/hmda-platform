@@ -4,13 +4,13 @@ import java.io.File
 
 import akka.actor.ActorSystem
 import hmda.api.persistence.InstitutionPersistence.CreateInstitution
-import hmda.api.protocol.processing.ProcessingProtocol
+import hmda.api.protocol.processing.InstitutionProtocol
 import hmda.model.fi.Institution
 import spray.json._
 
 import scala.io.Source
 
-object TestData extends ProcessingProtocol {
+object TestData extends InstitutionProtocol {
 
   val institutions = {
     val file = new File("api/src/test/resources/institutions.json")

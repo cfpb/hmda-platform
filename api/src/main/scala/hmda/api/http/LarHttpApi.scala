@@ -15,9 +15,7 @@ import hmda.api.processing.lar.SingleLarValidation.{ CheckAll, CheckQuality, Che
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.engine.ValidationError
-
 import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
 trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
@@ -26,7 +24,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
   implicit val ec: ExecutionContext
-  implicit val timeout = Timeout(30.seconds)
+  implicit val timeout: Timeout
 
   val parseLarRoute =
     pathPrefix("lar") {

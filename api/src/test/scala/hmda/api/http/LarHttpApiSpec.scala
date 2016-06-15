@@ -9,6 +9,7 @@ import org.scalatest.{ MustMatchers, WordSpec }
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.util.Timeout
 import hmda.api.processing.lar.SingleLarValidation
 import hmda.validation.engine.ValidationError
 import spray.json._
@@ -16,6 +17,8 @@ import spray.json._
 class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with LarHttpApi {
 
   override val log: LoggingAdapter = NoLogging
+  override implicit val timeout: Timeout = Timeout(5.seconds)
+
   val ec: ExecutionContext = system.dispatcher
 
   implicit val routeTestTimeout: RouteTestTimeout = RouteTestTimeout(5.seconds)

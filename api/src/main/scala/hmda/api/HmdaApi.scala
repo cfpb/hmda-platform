@@ -5,15 +5,24 @@ import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.{ HttpApi, LarHttpApi }
-import hmda.api.processing.lar.SingleLarValidation
+import hmda.api.http.{ HttpApi, InstitutionsHttpApi, LarHttpApi }
+import hmda.api.persistence.InstitutionPersistence._
+import hmda.api.processing.lar.SingleLarValidation._
+import scala.concurrent.duration._
 
-object HmdaApi extends App with HttpApi with LarHttpApi {
+object HmdaApi
+    extends App
+    with HttpApi
+    with LarHttpApi
+    with InstitutionsHttpApi {
 
   override implicit val system = ActorSystem("hmda")
   override implicit val materializer = ActorMaterializer()
   override implicit val ec = system.dispatcher
+
+  override implicit val timeout = Timeout(30.seconds)
 
   override val log = Logging(system, getClass)
   val config = ConfigFactory.load()
@@ -22,11 +31,12 @@ object HmdaApi extends App with HttpApi with LarHttpApi {
   lazy val port = config.getInt("hmda.http.port")
 
   //Start up API Actors
-  import hmda.api.processing.lar.SingleLarValidation._
-  val larValidation = createSingleLarValidator(system)
+
+  createSingleLarValidator(system)
+  createInstitutionsFiling(system)
 
   val http = Http().bindAndHandle(
-    routes ~ larRoutes,
+    routes ~ larRoutes ~ institutionsRoutes,
     host,
     port
   )
