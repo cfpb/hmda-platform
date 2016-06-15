@@ -1,9 +1,11 @@
-package hmda.api.processing
+package hmda.api.persistence
 
 import java.time.Instant
+
 import akka.testkit.TestProbe
-import hmda.api.processing.HmdaFileUpload.{ AddLine, GetState, HmdaFileUploadState }
-import hmda.api.processing.HmdaFileUpload._
+import hmda.api.persistence.CommonMessages.GetState
+import hmda.api.persistence.HmdaFileUpload._
+import hmda.api.processing.ActorSpec
 
 class HmdaFileUploadSpec extends ActorSpec {
 

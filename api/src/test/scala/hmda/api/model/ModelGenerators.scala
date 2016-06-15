@@ -14,4 +14,16 @@ trait ModelGenerators {
     } yield Status(status, service, time, host)
   }
 
+  implicit def institutionStatusGen: Gen[InstitutionStatus] = {
+    Gen.oneOf(Active, Inactive)
+  }
+
+  implicit def institutionGen: Gen[Institution] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+      status <- institutionStatusGen
+    } yield Institution(id, name, status)
+  }
+
 }
