@@ -1,7 +1,9 @@
 package hmda.api.model
 
 import java.util.Calendar
-import org.scalacheck.{ Gen, Arbitrary }
+
+import hmda.model.fi.{ Active, Inactive, Institution, InstitutionStatus }
+import org.scalacheck.{ Arbitrary, Gen }
 
 trait ModelGenerators {
 

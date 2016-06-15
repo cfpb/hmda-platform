@@ -4,8 +4,7 @@ import hmda.api.model.ModelGenerators
 import hmda.api.protocol.processing.ProcessingProtocol
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
-import hmda.api.model.InstitutionStatus
-import hmda.api.model.Institution
+import hmda.model.fi.{ Institution, InstitutionStatus }
 import spray.json._
 
 class ProcessingProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with ModelGenerators with ProcessingProtocol {

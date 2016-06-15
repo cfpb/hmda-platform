@@ -1,4 +1,4 @@
-package hmda.api.model
+package hmda.model.fi
 
 trait InstitutionStatus
 case object Active extends InstitutionStatus

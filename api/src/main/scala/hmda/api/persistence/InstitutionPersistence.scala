@@ -2,9 +2,9 @@ package hmda.api.persistence
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
-import hmda.api.model.Institution
 import hmda.api.persistence.CommonMessages._
 import hmda.api.persistence.InstitutionPersistence._
+import hmda.model.fi.Institution
 
 object InstitutionPersistence {
 

@@ -3,10 +3,11 @@ package hmda.api.util
 import java.io.File
 
 import akka.actor.ActorSystem
-import hmda.api.model.Institution
 import hmda.api.persistence.InstitutionPersistence.CreateInstitution
 import hmda.api.protocol.processing.ProcessingProtocol
+import hmda.model.fi.Institution
 import spray.json._
+
 import scala.io.Source
 
 object TestData extends ProcessingProtocol {
