@@ -74,7 +74,7 @@ object PredicateGeo {
         validMdCombinationSetNoTract.contains((geo.msa, geo.state, geo.county))
   }
 
-  implicit def stateCountyCombinationInMsa: Predicate[Geography] = new Predicate[Geography] {
+  implicit def stateCountyCombinationInMsaNotMicro: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = (geo) =>
       hasMsaNotMicroSet.contains((geo.state, geo.county))
   }
