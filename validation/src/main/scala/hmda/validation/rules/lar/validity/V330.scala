@@ -13,7 +13,7 @@ object V330 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
     lar.applicant.income is equalTo("NA") or
       Try(lar.applicant.income.toInt is greaterThan(0))
-      .getOrElse(Failure(s"Can't parse '${lar.applicant.income}' as an Int"))
+      .getOrElse(Failure())
   }
 
   override def name: String = "V330"

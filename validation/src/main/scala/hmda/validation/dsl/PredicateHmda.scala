@@ -10,7 +10,6 @@ object PredicateHmda {
         checkDateFormat(s)
       case _ => false
     }
-    override def failure: String = s"invalid timestamp format"
   }
 
   implicit def checkDateFormat[T](s: String): Boolean = {

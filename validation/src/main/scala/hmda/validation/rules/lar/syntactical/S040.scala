@@ -13,7 +13,7 @@ object S040 extends EditCheck[Iterable[LoanApplicationRegister]] {
     val size = loanIds.size
     val uniqueIds = lars.toSeq.distinct
     val uniqueSize = uniqueIds.size
-    if (size != uniqueSize) Failure("Submission contains duplicates") else Success()
+    if (size != uniqueSize) Failure() else Success()
   }
 
   override def name = "S040"

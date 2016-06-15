@@ -32,7 +32,5 @@ object PredicateRegEx {
         case None => false
       }
     }
-
-    override def failure: String = "does not match provided pattern"
   }
 }
