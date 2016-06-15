@@ -17,10 +17,8 @@ object V300 extends EditCheck[LoanApplicationRegister] {
     val msa = lar.geography.msa
     val tract = lar.geography.tract
 
-    val validFormat = tract is validCensusTractFormat
-
     when(tract not equalTo("NA")) {
-      validFormat and
+      tract is validCensusTractFormat and
         when(msa not equalTo("NA")) {
           lar.geography is validCompleteCombination
         } and
