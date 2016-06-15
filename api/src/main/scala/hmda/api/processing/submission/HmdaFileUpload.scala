@@ -1,7 +1,7 @@
-package hmda.api.processing
+package hmda.api.processing.submission
 
-import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
-import akka.persistence.{ PersistentActor, SnapshotOffer }
+import akka.actor.{ActorLogging, ActorRef, ActorSystem, Props}
+import akka.persistence.{PersistentActor, SnapshotOffer}
 
 object HmdaFileUpload {
   def props(id: String): Props = Props(new HmdaFileUpload(id))
