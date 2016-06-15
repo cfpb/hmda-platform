@@ -1,7 +1,8 @@
 package hmda.api.processing.submission
 
-import akka.actor.{ActorLogging, ActorRef, ActorSystem, Props}
-import akka.persistence.{PersistentActor, SnapshotOffer}
+import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
+import akka.persistence.{ PersistentActor, SnapshotOffer }
+import hmda.api.processing.submission.CommonMessages.{ Command, Event }
 
 object HmdaFileUpload {
   def props(id: String): Props = Props(new HmdaFileUpload(id))
@@ -10,8 +11,6 @@ object HmdaFileUpload {
     system.actorOf(HmdaFileUpload.props(id))
   }
 
-  sealed trait Command
-  sealed trait Event
   case class AddLine(timestamp: Long, data: String) extends Command
   case object CompleteUpload extends Command
   case class LineAdded(timestamp: Long, data: String) extends Event
