@@ -22,5 +22,13 @@ class InstitutionsFilingSpec extends ActorSpec {
       probe.send(institutionActor, GetState)
       probe.expectMsg(Institutions(institutions))
     }
+    "be created, modified and read back" in {
+      val institution = DemoData.institutions.head
+      probe.send(institutionActor, CreateInstitution(institution))
+      val modified = institution.copy(name = "new name")
+      probe.send(institutionActor, ModifyInstitution(modified))
+      probe.send(institutionActor, GetInstitutionByIdAndPeriod(modified.id, modified.period))
+      probe.expectMsg(modified)
+    }
   }
 }
