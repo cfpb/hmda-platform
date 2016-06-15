@@ -1,4 +1,4 @@
-package hmda.api.processing.submission
+package hmda.api.processing
 
 object CommonMessages {
   trait Command

@@ -3,8 +3,9 @@ package hmda.api.processing.submission
 import java.time.Instant
 
 import akka.testkit.TestProbe
-import hmda.api.processing.ActorSpec
+import hmda.api.processing.{ ActorSpec, CommonMessages }
 import hmda.api.processing.submission.HmdaFileUpload._
+import CommonMessages._
 
 class HmdaFileUploadSpec extends ActorSpec {
 
