@@ -27,7 +27,7 @@ object PredicateGeo {
   private val msaNotMicro = cbsaMetroMicro
     .filter(_.metroMicro == 1)
     .map { _.geoId }
-      .toSet
+    .toSet
 
   private val hasMsaNotMicroSet = cbsaTracts
     .filter(cbsa => msaNotMicro.contains(cbsa.geoIdMsa))
@@ -50,39 +50,33 @@ object PredicateGeo {
   implicit def smallCounty: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = (geo) =>
       smallCounties.contains((geo.state, geo.county))
-    override def failure: String = "county is not small"
   }
 
   implicit def validStateCountyCombination: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = (geo) =>
       validStateCountyCombinationSet.contains((geo.state, geo.county))
-    override def failure: String = "state and county combination is not valid"
   }
 
   implicit def validStateCountyTractCombination: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = (geo) =>
       validStateCountyTractCombinationSet.contains((geo.state, geo.county, geo.tract))
-    override def failure: String = "state, county, and census tract combination is not valid"
   }
 
   implicit def validCompleteCombination: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = (geo) =>
       validMsaCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract)) ||
         validMdCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract))
-    override def failure: String = "state, county, msa, and census tract combination is not valid"
   }
 
   implicit def validStateCountyMsaCombination: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = (geo) =>
       validMsaCombinationSetNoTract.contains((geo.msa, geo.state, geo.county)) ||
         validMdCombinationSetNoTract.contains((geo.msa, geo.state, geo.county))
-    override def failure: String = "state, county, and msa combination is not valid"
   }
 
   implicit def stateCountyCombinationInMsa: Predicate[Geography] = new Predicate[Geography] {
     override def validate: (Geography) => Boolean = (geo) =>
       hasMsaNotMicroSet.contains((geo.state, geo.county))
-    override def failure: String = "state and county combination have an associated census tract"
   }
 
 }
