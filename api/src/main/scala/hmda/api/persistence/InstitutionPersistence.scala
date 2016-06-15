@@ -10,6 +10,7 @@ object InstitutionPersistence {
 
   case class CreateInstitution(i: Institution) extends Command
   case class ModifyInstitution(i: Institution) extends Command
+  case class GetInstitutionById(fid: String) extends Command
 
   case class InstitutionCreated(i: Institution) extends Event
   case class InstitutionModified(i: Institution) extends Event
@@ -70,6 +71,10 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
           updateState(e)
         }
       }
+
+    case GetInstitutionById(fid) =>
+      val institution = state.institutions.find(x => x.id == fid).getOrElse(Institution())
+      sender() ! institution
 
     case GetState =>
       sender() ! state.institutions

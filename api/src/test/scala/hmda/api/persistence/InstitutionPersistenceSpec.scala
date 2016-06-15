@@ -21,14 +21,14 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.send(institutionsActor, GetState)
       probe.expectMsg(institutions)
     }
-    //    "be created, modified and read back" in {
-    //      val institution = TestData.institutions.head
-    //      probe.send(institutionActor, CreateInstitution(institution))
-    //      val modified = institution.copy(name = "new name")
-    //      probe.send(institutionActor, ModifyInstitution(modified))
-    //      probe.send(institutionActor, GetInstitutionByIdAndPeriod(modified.id, modified.period))
-    //      probe.expectMsg(modified)
-    //    }
+    "be created, modified and read back" in {
+      val institution = TestData.institutions.head
+      probe.send(institutionsActor, CreateInstitution(institution))
+      val modified = institution.copy(name = "new name")
+      probe.send(institutionsActor, ModifyInstitution(modified))
+      probe.send(institutionsActor, GetInstitutionById(modified.id))
+      probe.expectMsg(modified)
+    }
   }
 
 }
