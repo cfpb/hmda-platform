@@ -1,7 +1,7 @@
 package hmda.api.processing.submission
 
 import akka.testkit.TestProbe
-import hmda.api.demo.DemoData
+import hmda.api.util.TestData
 import hmda.api.processing.{ ActorSpec, CommonMessages }
 import CommonMessages.GetState
 import hmda.api.model.processing.Institutions
@@ -15,7 +15,7 @@ class InstitutionsFilingSpec extends ActorSpec {
 
   "Institution Filings" must {
     "be created and read back" in {
-      val institutions = DemoData.institutions
+      val institutions = TestData.institutions
       for (institution <- institutions) {
         probe.send(institutionActor, CreateInstitution(institution))
       }
@@ -23,7 +23,7 @@ class InstitutionsFilingSpec extends ActorSpec {
       probe.expectMsg(Institutions(institutions))
     }
     "be created, modified and read back" in {
-      val institution = DemoData.institutions.head
+      val institution = TestData.institutions.head
       probe.send(institutionActor, CreateInstitution(institution))
       val modified = institution.copy(name = "new name")
       probe.send(institutionActor, ModifyInstitution(modified))

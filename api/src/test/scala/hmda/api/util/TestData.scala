@@ -1,4 +1,4 @@
-package hmda.api.demo
+package hmda.api.util
 
 import java.io.File
 
@@ -10,7 +10,7 @@ import spray.json._
 
 import scala.io.Source
 
-object DemoData extends ProcessingProtocol {
+object TestData extends ProcessingProtocol {
 
   val institutions = {
     val file = new File("api/src/test/resources/institutions.json")
