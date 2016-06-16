@@ -1,4 +1,4 @@
-package hmda.api.util
+package hmda.api.demo
 
 import java.io.File
 
@@ -10,10 +10,8 @@ import spray.json._
 
 import scala.io.Source
 
-object TestData extends InstitutionProtocol {
-
+case class DemoData(file: File) extends InstitutionProtocol {
   val institutions = {
-    val file = new File("api/src/test/resources/institutions.json")
     val instFile = Source.fromFile(file)
     val json = instFile.getLines().toIterable.head.toString
     json.parseJson.convertTo[Set[Institution]]
@@ -28,5 +26,4 @@ object TestData extends InstitutionProtocol {
     val institutionsActor = system.actorSelection("/user/institutions")
     institutions.foreach(i => institutionsActor ! CreateInstitution(i))
   }
-
 }

@@ -1,12 +1,16 @@
 package hmda.api.persistence
 
+import java.io.File
+
 import akka.testkit.TestProbe
+import hmda.api.demo.DemoData
 import hmda.api.persistence.CommonMessages.GetState
 import hmda.api.processing.ActorSpec
 import hmda.api.persistence.InstitutionPersistence._
-import hmda.api.util.TestData
 
 class InstitutionPersistenceSpec extends ActorSpec {
+
+  val file = new File("api/src/main/resources/institutions.json")
 
   val institutionsActor = createInstitutionsFiling(system)
 
@@ -14,7 +18,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
 
   "Institution Filings" must {
     "be created and read back" in {
-      val institutions = TestData.institutions
+      val institutions = DemoData(file).institutions
       for (institution <- institutions) {
         probe.send(institutionsActor, CreateInstitution(institution))
       }
@@ -22,7 +26,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.expectMsg(institutions)
     }
     "be created, modified and read back" in {
-      val institution = TestData.institutions.head
+      val institution = DemoData(file).institutions.head
       probe.send(institutionsActor, CreateInstitution(institution))
       val modified = institution.copy(name = "new name")
       probe.send(institutionsActor, ModifyInstitution(modified))
