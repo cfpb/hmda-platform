@@ -29,9 +29,12 @@ case class LoanApplicationRegister(
       s"|${denial.reason3}|$rateSpread|$hoepaStatus|$lienStatus"
   }
 
+  /**
+   * NOTE:  The DAT file format is not supported by CFPB
+   */
   def toDAT: String = {
     s"$id" +
-      padRight(respondentId, 10) + //Parser does not parse leading zeroes
+      padLeftWithZero(respondentId, 10) + //Parser does not parse leading zeroes
       s"$agencyCode" +
       padRight(loan.id, 25) +
       padRight(loan.applicationDate, 8) +
@@ -61,7 +64,7 @@ case class LoanApplicationRegister(
       padRight(applicant.coRace5, 1) +
       s"${applicant.sex}" +
       s"${applicant.coSex}" +
-      padRight(applicant.income, 4) + //Parser does not parse leading zeroes
+      padLeftWithZero(applicant.income, 4) + //Parser does not parse leading zeroes
       s"$purchaserType" +
       padRight(denial.reason1, 1) +
       padRight(denial.reason2, 1) +

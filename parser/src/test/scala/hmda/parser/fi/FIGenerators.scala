@@ -22,7 +22,7 @@ trait FIGenerators {
   }
 
   def stringOfUpToN(n: Int, genOne: Gen[Char]): Gen[String] = {
-    val stringGen = Gen.listOf(genOne).map(_.mkString)
+    val stringGen = Gen.nonEmptyListOf(genOne).map(_.mkString)
     Gen.resize(n, stringGen)
   }
 
