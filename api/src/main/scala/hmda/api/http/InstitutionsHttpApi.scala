@@ -11,6 +11,7 @@ import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.util.Timeout
 import hmda.api.model.Institutions
 import hmda.api.persistence.CommonMessages.GetState
+import hmda.api.persistence.InstitutionPersistence.GetInstitutionById
 import hmda.api.protocol.processing.InstitutionProtocol
 import hmda.model.fi.Institution
 
@@ -39,5 +40,20 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
       }
     }
 
-  val institutionsRoutes = institutionsPath
+  val institutionByIdPath =
+    path("institutions" / Segment) { fid =>
+      val institutionsActor = system.actorSelection("/user/institutions")
+      get {
+        val fInstitutions = (institutionsActor ? GetInstitutionById(fid)).mapTo[Institution]
+        onComplete(fInstitutions) {
+          case Success(institution) =>
+            complete(ToResponseMarshallable(institution))
+          case Failure(error) =>
+            log.error(error.getLocalizedMessage)
+            complete(HttpResponse(StatusCodes.InternalServerError))
+        }
+      }
+    }
+
+  val institutionsRoutes = institutionsPath ~ institutionByIdPath
 }

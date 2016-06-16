@@ -10,7 +10,7 @@ import hmda.api.persistence.InstitutionPersistence._
 
 class InstitutionPersistenceSpec extends ActorSpec {
 
-  val file = new File("api/src/main/resources/institutions.json")
+  val file = new File("api/src/main/resources/demo-data.txt")
 
   val institutionsActor = createInstitutionsFiling(system)
 

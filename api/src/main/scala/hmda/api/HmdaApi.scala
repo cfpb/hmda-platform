@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.{ HttpApi, InstitutionsHttpApi, LarHttpApi }
+import hmda.api.http.{ FilingsHttpApi, HttpApi, InstitutionsHttpApi, LarHttpApi }
 import hmda.api.persistence.InstitutionPersistence._
 import hmda.api.processing.lar.SingleLarValidation._
 import hmda.api.demo.DemoData
@@ -21,7 +21,8 @@ object HmdaApi
     extends App
     with HttpApi
     with LarHttpApi
-    with InstitutionsHttpApi {
+    with InstitutionsHttpApi
+    with FilingsHttpApi {
 
   override implicit val system = ActorSystem("hmda")
   override implicit val materializer = ActorMaterializer()
@@ -41,7 +42,7 @@ object HmdaApi
   createInstitutionsFiling(system)
 
   val http = Http().bindAndHandle(
-    routes ~ larRoutes ~ institutionsRoutes,
+    routes ~ larRoutes ~ institutionsRoutes ~ filingsRoutes,
     host,
     port
   )
@@ -49,7 +50,7 @@ object HmdaApi
   //Load demo data
   lazy val isDemo = config.getBoolean("hmda.isDemo")
   if (isDemo) {
-    val file = new File("src/main/resources/institutions.json")
+    val file = new File("src/main/resources/demo-data.txt")
     DemoData(file).loadData(system)
   }
 

@@ -6,4 +6,4 @@ case object InProgress extends FilingStatus
 case object Completed extends FilingStatus
 case object Cancelled extends FilingStatus
 
-case class Filing(id: String, fid: String, status: FilingStatus)
+case class Filing(id: String = "", fid: String = "", status: FilingStatus = NotStarted)

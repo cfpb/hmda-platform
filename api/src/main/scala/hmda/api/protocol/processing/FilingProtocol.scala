@@ -1,5 +1,6 @@
 package hmda.api.protocol.processing
 
+import hmda.api.model.Filings
 import hmda.model.fi._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
@@ -28,4 +29,5 @@ trait FilingProtocol extends DefaultJsonProtocol {
   }
 
   implicit val filingFormat = jsonFormat3(Filing.apply)
+  implicit val filingsFormat = jsonFormat1(Filings.apply)
 }

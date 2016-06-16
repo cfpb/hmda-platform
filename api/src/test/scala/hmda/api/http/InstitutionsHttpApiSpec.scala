@@ -21,7 +21,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
   val ec = system.dispatcher
 
-  val file = new File("api/src/main/resources/institutions.json")
+  val file = new File("api/src/main/resources/demo-data.txt")
 
   override def beforeAll(): Unit = {
     createInstitutionsFiling(system)
@@ -34,6 +34,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Get("/institutions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[Institutions] mustBe Institutions(DemoData(file).institutions)
+      }
+    }
+
+    "return an institution by id" in {
+      Get("/institutions/12345") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[Institution] mustBe DemoData(file).institutions.head
       }
     }
   }
