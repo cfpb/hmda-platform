@@ -9,9 +9,11 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.util.Timeout
+import hmda.api.model.Institutions
 import hmda.api.persistence.CommonMessages.GetState
 import hmda.api.protocol.processing.InstitutionProtocol
 import hmda.model.fi.Institution
+
 import scala.util.{ Failure, Success }
 
 trait InstitutionsHttpApi extends InstitutionProtocol {
@@ -29,7 +31,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
         val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
         onComplete(fInstitutions) {
           case Success(institutions) =>
-            complete(ToResponseMarshallable(institutions))
+            complete(ToResponseMarshallable(Institutions(institutions)))
           case Failure(error) =>
             log.error(error.getLocalizedMessage)
             complete(HttpResponse(StatusCodes.InternalServerError))
