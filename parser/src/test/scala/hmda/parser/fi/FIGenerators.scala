@@ -12,13 +12,18 @@ trait FIGenerators {
   }
 
   implicit def respIdGen: Gen[String] = {
-    Gen.alphaStr
+    stringOfUpToN(10, Gen.alphaChar)
   }
 
   // utility functions
 
   def stringOfN(n: Int, genOne: Gen[Char]): Gen[String] = {
     Gen.listOfN(n, genOne).map(_.mkString)
+  }
+
+  def stringOfUpToN(n: Int, genOne: Gen[Char]): Gen[String] = {
+    val stringGen = Gen.listOf(genOne).map(_.mkString)
+    Gen.resize(n, stringGen)
   }
 
   // this name may be too similar to Gen.option. (to be fair, it's not unrelated. just... domain-specific.)
