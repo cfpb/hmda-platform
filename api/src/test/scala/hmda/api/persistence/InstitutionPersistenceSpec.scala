@@ -8,11 +8,11 @@ import hmda.api.persistence.InstitutionPersistence._
 
 class InstitutionPersistenceSpec extends ActorSpec {
 
-  val institutionsActor = createInstitutionsFiling(system)
+  val institutionsActor = createInstitutions(system)
 
   val probe = TestProbe()
 
-  "Institution Filings" must {
+  "Institutions" must {
     "be created and read back" in {
       val institutions = DemoData.institutions
       for (institution <- institutions) {

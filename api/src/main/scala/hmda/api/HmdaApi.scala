@@ -36,7 +36,7 @@ object HmdaApi
   //Start up API Actors
 
   createSingleLarValidator(system)
-  createInstitutionsFiling(system)
+  createInstitutions(system)
 
   val http = Http().bindAndHandle(
     routes ~ larRoutes ~ institutionsRoutes ~ filingsRoutes,

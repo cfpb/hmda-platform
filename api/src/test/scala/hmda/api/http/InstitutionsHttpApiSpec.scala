@@ -20,7 +20,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
   val ec = system.dispatcher
 
   override def beforeAll(): Unit = {
-    createInstitutionsFiling(system)
+    createInstitutions(system)
 
     DemoData.loadData(system)
   }

@@ -1,34 +1,35 @@
 package hmda.api.persistence
 
-import akka.actor.{ ActorLogging, Props }
+import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
 import hmda.api.persistence.CommonMessages._
 import hmda.api.persistence.FilingPersistence._
-import hmda.model.fi.{ Filing, FilingStatus }
+import hmda.model.fi.Filing
 
 object FilingPersistence {
 
   case class CreateFiling(filing: Filing) extends Command
-  case class UpdateFilingStatus(filing: Filing, status: FilingStatus) extends Command
+  case class UpdateFilingStatus(filing: Filing) extends Command
+  case class GetFilingById(id: String) extends Command
 
   case class FilingCreated(filing: Filing) extends Event
-  case class FilingStatusUpdated(filing: Filing, status: FilingStatus) extends Event
+  case class FilingStatusUpdated(filing: Filing) extends Event
 
   def props(fid: String): Props = Props(new FilingPersistence(fid))
+
+  def createFilings(fid: String, system: ActorSystem): ActorRef = {
+    system.actorOf(FilingPersistence.props(fid))
+  }
 
   case class FilingState(filings: Seq[Filing] = Nil) {
     def updated(event: Event): FilingState = {
       event match {
         case FilingCreated(f) =>
           FilingState(f +: filings)
-        case FilingStatusUpdated(modified, newStatus) =>
-          val filing = filings.find(x => x.id == modified.id && x.fid == modified.fid).getOrElse(Filing())
-          if (filing.fid != "" && filing.id != "") {
-            val i = filings.indexOf(filing)
-            FilingState(filings.updated(i, modified))
-          } else {
-            FilingState(filings)
-          }
+        case FilingStatusUpdated(modified) =>
+          val x = filings.find(x => x.id == modified.id).getOrElse(Filing())
+          val i = filings.indexOf(x)
+          FilingState(filings.updated(i, modified))
       }
     }
   }
@@ -66,12 +67,17 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
         }
       }
 
-    case UpdateFilingStatus(f, s) =>
-      if (state.filings.map(x => (x.id, x.fid)).contains((f.id, f.fid))) {
-        persist(FilingStatusUpdated(f, s)) { e =>
+    case UpdateFilingStatus(modified) =>
+      if (state.filings.map(x => x.id).contains(modified.id)) {
+        persist(FilingStatusUpdated(modified)) { e =>
+          log.info(s"persisted: $modified")
           updateState(e)
         }
       }
+
+    case GetFilingById(id) =>
+      val filing = state.filings.find(f => f.id == id).getOrElse(Filing())
+      sender() ! filing
 
     case GetState =>
       sender() ! state.filings

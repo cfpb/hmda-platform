@@ -17,7 +17,7 @@ object InstitutionPersistence {
 
   def props: Props = Props(new InstitutionPersistence)
 
-  def createInstitutionsFiling(system: ActorSystem): ActorRef = {
+  def createInstitutions(system: ActorSystem): ActorRef = {
     system.actorOf(InstitutionPersistence.props, "institutions")
   }
 
