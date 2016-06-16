@@ -1,10 +1,9 @@
-package hmda.api.protocol
+package hmda.api.protocol.processing
 
 import hmda.api.model.ModelGenerators
-import hmda.api.protocol.processing.InstitutionProtocol
-import org.scalatest.{ MustMatchers, PropSpec }
-import org.scalatest.prop.PropertyChecks
 import hmda.model.fi.{ Institution, InstitutionStatus }
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 import spray.json._
 
 class InstitutionProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with ModelGenerators with InstitutionProtocol {

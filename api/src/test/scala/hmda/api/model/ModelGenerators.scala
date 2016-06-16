@@ -2,7 +2,7 @@ package hmda.api.model
 
 import java.util.Calendar
 
-import hmda.model.fi.{ Active, Inactive, Institution, InstitutionStatus }
+import hmda.model.fi._
 import org.scalacheck.{ Arbitrary, Gen }
 
 trait ModelGenerators {
@@ -26,6 +26,18 @@ trait ModelGenerators {
       name <- Gen.alphaStr
       status <- institutionStatusGen
     } yield Institution(id, name, status)
+  }
+
+  implicit def filingStatusGen: Gen[FilingStatus] = {
+    Gen.oneOf(NotStarted, InProgress, Completed, Cancelled)
+  }
+
+  implicit def filingGen: Gen[Filing] = {
+    for {
+      id <- Gen.alphaStr
+      fid <- Gen.alphaStr
+      status <- filingStatusGen
+    } yield Filing(id, fid, status)
   }
 
 }
