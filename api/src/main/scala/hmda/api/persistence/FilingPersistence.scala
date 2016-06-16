@@ -61,6 +61,7 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
     case CreateFiling(f) =>
       if (!state.filings.contains(f)) {
         persist(FilingCreated(f)) { e =>
+          log.info(s"Persisted: $f")
           updateState(e)
         }
       }

@@ -36,6 +36,7 @@ object DemoData {
     filings.foreach { filing =>
       val filingActor = system.actorOf(FilingPersistence.props(filing.fid))
       filingActor ! CreateFiling(filing)
+      Thread.sleep(100)
       filingActor ! Shutdown
     }
   }
