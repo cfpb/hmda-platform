@@ -1,7 +1,5 @@
 package hmda.api.http
 
-import java.io.File
-
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
@@ -21,26 +19,24 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
   val ec = system.dispatcher
 
-  val file = new File("api/src/main/resources/demo-data.txt")
-
   override def beforeAll(): Unit = {
     createInstitutionsFiling(system)
 
-    DemoData(file).loadData(system)
+    DemoData.loadData(system)
   }
 
   "Institutions HTTP API" must {
     "return a list of existing institutions" in {
       Get("/institutions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Institutions] mustBe Institutions(DemoData(file).institutions)
+        responseAs[Institutions] mustBe Institutions(DemoData.institutions)
       }
     }
 
     "return an institution by id" in {
       Get("/institutions/12345") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Institution] mustBe DemoData(file).institutions.head
+        responseAs[Institution] mustBe DemoData.institutions.head
       }
     }
   }

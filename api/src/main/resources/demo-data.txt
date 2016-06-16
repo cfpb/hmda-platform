@@ -1,2 +1,0 @@
-[{"name": "First Bank", "id": "12345", "status": "active"},{"name": "Second Bank", "id": "123456", "status": "inactive"}]
-[{"id": "2016", "fid": "12345", "status": "completed"}, {"id": "2017", "fid": "12345", "status": "not-started"},{"id": "2017", "fid": "123456", "status": "in-progress"}]

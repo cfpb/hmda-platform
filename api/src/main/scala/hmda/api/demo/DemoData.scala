@@ -1,29 +1,24 @@
 package hmda.api.demo
 
-import java.io.File
-
 import akka.actor.ActorSystem
 import hmda.api.persistence.CommonMessages._
 import hmda.api.persistence.FilingPersistence
 import hmda.api.persistence.FilingPersistence.CreateFiling
 import hmda.api.persistence.InstitutionPersistence.CreateInstitution
-import hmda.api.protocol.processing.{ FilingProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Filing, Institution }
-import spray.json._
+import hmda.model.fi._
 
-import scala.io.Source
-
-case class DemoData(file: File) extends InstitutionProtocol with FilingProtocol {
+object DemoData {
   val institutions = {
-    val instFile = Source.fromFile(file)
-    val json = instFile.getLines().toIterable.head.toString
-    json.parseJson.convertTo[Set[Institution]]
+    val i1 = Institution("12345", "First Bank", Active)
+    val i2 = Institution("123456", "Second Bank", Inactive)
+    Set(i1, i2)
   }
 
   val filings = {
-    val instFile = Source.fromFile(file)
-    val json = instFile.getLines().drop(1).toIterable.head.toString
-    json.parseJson.convertTo[Seq[Filing]]
+    val f1 = Filing("2016", "12345", Completed)
+    val f2 = Filing("2017", "12345", NotStarted)
+    val f3 = Filing("2017", "123456", InProgress)
+    Seq(f1, f2, f3)
   }
 
   def loadData(system: ActorSystem): Unit = {

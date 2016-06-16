@@ -1,8 +1,6 @@
 package hmda.api
 
-import java.io.File
-
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
@@ -13,7 +11,6 @@ import hmda.api.http.{ FilingsHttpApi, HttpApi, InstitutionsHttpApi, LarHttpApi 
 import hmda.api.persistence.InstitutionPersistence._
 import hmda.api.processing.lar.SingleLarValidation._
 import hmda.api.demo.DemoData
-import hmda.api.demo.DemoData._
 
 import scala.concurrent.duration._
 
@@ -50,8 +47,7 @@ object HmdaApi
   //Load demo data
   lazy val isDemo = config.getBoolean("hmda.isDemo")
   if (isDemo) {
-    val file = new File("src/main/resources/demo-data.txt")
-    DemoData(file).loadData(system)
+    DemoData.loadData(system)
   }
 
   http onFailure {
