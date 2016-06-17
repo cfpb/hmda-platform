@@ -13,7 +13,7 @@ object CBSAMetroMicroLookup {
       val metroOrMicroCode = values(1)
       val geoId = values(2)
       val name = values(3)
-      val legalStatname = values(4)
+      val legalStatName = values(4)
       val legalStatMetroMicro = values(5)
       val metroMicro = values(6).toInt
       val metroMicroStatArea = values(7)
@@ -27,7 +27,7 @@ object CBSAMetroMicroLookup {
         metroOrMicroCode,
         geoId,
         name,
-        legalStatname,
+        legalStatName,
         legalStatMetroMicro,
         metroMicro,
         metroMicroStatArea,
@@ -45,7 +45,7 @@ case class CBSAMetroMicro(
   metroOrMicroCode: String,
   geoId: String,
   name: String,
-  legalStatname: String,
+  legalStatName: String,
   legalStatMetroMicro: String,
   metroMicro: Int,
   metroMicroStatArea: String,
