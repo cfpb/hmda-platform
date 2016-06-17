@@ -44,7 +44,7 @@ trait FilingsHttpApi extends FilingProtocol {
 
   val filingByPeriod =
     path("institutions" / Segment / "filings" / Segment) { (fid, period) =>
-      val filingsActor = system.actorOf(FilingPersistence.props(fid), s"filings-$fid")
+      val filingsActor = system.actorOf(FilingPersistence.props(fid))
       get {
         val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
         onComplete(fFiling) {
