@@ -15,9 +15,11 @@ import akka.stream.scaladsl.{ Framing, Sink }
 import akka.util.ByteString
 import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import hmda.api.processing.HmdaFileUpload
+import hmda.api.processing.CommonMessages._
+import hmda.api.processing.submission.HmdaFileUpload
 import hmda.api.protocol.HmdaApiProtocol
 import spray.json._
+
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
