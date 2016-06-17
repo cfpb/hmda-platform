@@ -59,7 +59,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with FilingProtocol {
   val institutionSummaryPath =
     path("institutions" / Segment / "summary") { fid =>
       val institutionsActor = system.actorSelection("/user/institutions")
-      val filingsActor = system.actorOf(FilingPersistence.props(fid), s"filings-$fid")
+      val filingsActor = system.actorOf(FilingPersistence.props(fid))
       implicit val ec = system.dispatcher //TODO: customize ExecutionContext
       get {
         val fInstitution = (institutionsActor ? GetInstitutionById(fid)).mapTo[Institution]
