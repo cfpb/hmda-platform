@@ -10,7 +10,7 @@ object FilingPersistence {
 
   case class CreateFiling(filing: Filing) extends Command
   case class UpdateFilingStatus(filing: Filing) extends Command
-  case class GetFilingById(id: String) extends Command
+  case class GetFilingByPeriod(period: String) extends Command
 
   case class FilingCreated(filing: Filing) extends Event
   case class FilingStatusUpdated(filing: Filing) extends Event
@@ -75,8 +75,8 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
         }
       }
 
-    case GetFilingById(id) =>
-      val filing = state.filings.find(f => f.period == id).getOrElse(Filing())
+    case GetFilingByPeriod(period) =>
+      val filing = state.filings.find(f => f.period == period).getOrElse(Filing())
       sender() ! filing
 
     case GetState =>

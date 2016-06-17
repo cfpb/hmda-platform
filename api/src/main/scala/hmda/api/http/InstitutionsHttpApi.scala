@@ -9,15 +9,16 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.util.Timeout
-import hmda.api.model.Institutions
-import hmda.api.persistence.CommonMessages.GetState
+import hmda.api.model.{ InstitutionSummary, Institutions }
+import hmda.api.persistence.CommonMessages._
+import hmda.api.persistence.FilingPersistence
 import hmda.api.persistence.InstitutionPersistence.GetInstitutionById
-import hmda.api.protocol.processing.InstitutionProtocol
-import hmda.model.fi.Institution
+import hmda.api.protocol.processing.{ FilingProtocol, InstitutionProtocol }
+import hmda.model.fi.{ Filing, Institution }
 
 import scala.util.{ Failure, Success }
 
-trait InstitutionsHttpApi extends InstitutionProtocol {
+trait InstitutionsHttpApi extends InstitutionProtocol with FilingProtocol {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -55,5 +56,29 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
       }
     }
 
-  val institutionsRoutes = institutionsPath ~ institutionByIdPath
+  val institutionSummaryPath =
+    path("institutions" / Segment / "summary") { fid =>
+      val institutionsActor = system.actorSelection("/user/institutions")
+      val filingsActor = system.actorOf(FilingPersistence.props(fid), s"filings-$fid")
+      implicit val ec = system.dispatcher //TODO: customize ExecutionContext
+      get {
+        val fInstitution = (institutionsActor ? GetInstitutionById(fid)).mapTo[Institution]
+        val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
+        val fSummary = for {
+          institution <- fInstitution
+          filings <- fFilings
+        } yield InstitutionSummary(institution.id, institution.name, filings)
+
+        onComplete(fSummary) {
+          case Success(summary) =>
+            filingsActor ! Shutdown
+            complete(ToResponseMarshallable(summary))
+          case Failure(error) =>
+            filingsActor ! Shutdown
+            complete(HttpResponse(StatusCodes.InternalServerError))
+        }
+      }
+    }
+
+  val institutionsRoutes = institutionsPath ~ institutionByIdPath ~ institutionSummaryPath
 }

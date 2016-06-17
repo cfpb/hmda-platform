@@ -1,6 +1,7 @@
 package hmda.api.demo
 
 import akka.actor.ActorSystem
+import hmda.api.model.InstitutionSummary
 import hmda.api.persistence.CommonMessages._
 import hmda.api.persistence.FilingPersistence
 import hmda.api.persistence.FilingPersistence.CreateFiling
@@ -19,6 +20,12 @@ object DemoData {
     val f2 = Filing("2017", "12345", NotStarted)
     val f3 = Filing("2017", "123456", InProgress)
     Seq(f1, f2, f3)
+  }
+
+  val institutionSummary = {
+    val institution = institutions.head
+    val f = filings.filter(x => x.fid == institution.id)
+    InstitutionSummary(institution.id, institution.name, f.reverse)
   }
 
   def loadData(system: ActorSystem): Unit = {

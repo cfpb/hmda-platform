@@ -43,7 +43,7 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
   }
 
   override def preStart(): Unit = {
-    log.info(s"Institutions Filing started at ${self.path}")
+    log.info(s"Institutions started at ${self.path}")
   }
 
   override def persistenceId: String = "institutions"

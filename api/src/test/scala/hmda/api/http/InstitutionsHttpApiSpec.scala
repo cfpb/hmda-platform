@@ -7,7 +7,7 @@ import akka.util.Timeout
 import hmda.api.persistence.InstitutionPersistence._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.demo.DemoData
-import hmda.api.model.Institutions
+import hmda.api.model.{ InstitutionSummary, Institutions }
 import hmda.model.fi.Institution
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
@@ -37,6 +37,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Get("/institutions/12345") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[Institution] mustBe DemoData.institutions.head
+      }
+    }
+
+    "return an institution's summary" in {
+      Get("/institutions/12345/summary") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[InstitutionSummary] mustBe DemoData.institutionSummary
       }
     }
   }

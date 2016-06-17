@@ -25,7 +25,7 @@ object HmdaApi
   override implicit val materializer = ActorMaterializer()
   override implicit val ec = system.dispatcher
 
-  override implicit val timeout = Timeout(30.seconds)
+  override implicit val timeout = Timeout(5.seconds)
 
   override val log = Logging(system, getClass)
   val config = ConfigFactory.load()

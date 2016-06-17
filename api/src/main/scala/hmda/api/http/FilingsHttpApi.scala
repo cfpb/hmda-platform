@@ -12,6 +12,7 @@ import akka.pattern.ask
 import hmda.api.model.Filings
 import hmda.api.persistence.CommonMessages._
 import hmda.api.persistence.FilingPersistence
+import hmda.api.persistence.FilingPersistence.GetFilingByPeriod
 import hmda.api.protocol.processing.FilingProtocol
 import hmda.model.fi.Filing
 
@@ -41,6 +42,22 @@ trait FilingsHttpApi extends FilingProtocol {
       }
     }
 
-  val filingsRoutes = filingsPath
+  val filingByPeriod =
+    path("institutions" / Segment / "filings" / Segment) { (fid, period) =>
+      val filingsActor = system.actorOf(FilingPersistence.props(fid), s"filings-$fid")
+      get {
+        val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
+        onComplete(fFiling) {
+          case Success(filing) =>
+            filingsActor ! Shutdown
+            complete(ToResponseMarshallable(filing))
+          case Failure(error) =>
+            filingsActor ! Shutdown
+            complete(HttpResponse(StatusCodes.InternalServerError))
+        }
+      }
+    }
+
+  val filingsRoutes = filingsPath ~ filingByPeriod
 
 }
