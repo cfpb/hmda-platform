@@ -34,7 +34,7 @@ case class LoanApplicationRegister(
    */
   def toDAT: String = {
     s"$id" +
-      padLeftWithZero(respondentId, 10) + //Parser does not parse leading zeroes
+      padRight(respondentId, 10) + //Parser does not parse leading zeroes
       s"$agencyCode" +
       padRight(loan.id, 25) +
       padRight(loan.applicationDate, 8) +
@@ -64,7 +64,7 @@ case class LoanApplicationRegister(
       padRight(applicant.coRace5, 1) +
       s"${applicant.sex}" +
       s"${applicant.coSex}" +
-      padLeftWithZero(applicant.income, 4) + //Parser does not parse leading zeroes
+      padRight(applicant.income, 4) + //Parser does not parse leading zeroes
       s"$purchaserType" +
       padRight(denial.reason1, 1) +
       padRight(denial.reason2, 1) +
