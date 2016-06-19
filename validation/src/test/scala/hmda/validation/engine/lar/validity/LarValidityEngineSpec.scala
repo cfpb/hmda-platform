@@ -54,6 +54,23 @@ class LarValidityEngineSpec extends WordSpec with MustMatchers with LarValidityE
       val lar = validLar1.copy(loan = validLoan.copy(amount = -2))
       errors(lar) must contain("V250")
     }
+
+    "fail for V255" in {
+      val lar = validLar1.copy(actionTakenType = 9)
+      errors(lar) must contain("V255")
+    }
+
+    "fail for V260" in {
+      val denial = Denial("1", "", "")
+      val lar = validLar1.copy(actionTakenType = 1, denial = denial)
+      errors(lar) must contain("V260")
+    }
+
+    "fail for V262" in {
+      val loan = validLoan.copy(applicationDate = "NA")
+      val lar = validLar1.copy(actionTakenType = 1, loan = loan)
+      errors(lar) must contain("V262")
+    }
   }
 
   def errors(lar: LoanApplicationRegister): List[String] = {
