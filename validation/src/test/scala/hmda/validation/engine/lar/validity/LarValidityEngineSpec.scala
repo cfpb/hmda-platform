@@ -26,13 +26,14 @@ class LarValidityEngineSpec extends WordSpec with MustMatchers with LarValidityE
 
     "fail validation for LAR that fails V210" in {
       val lar = validLar1.copy(loan = validLoan.copy(applicationDate = "19970309"))
-      errors(lar) mustBe IList("V210")
+      errors(lar) mustBe List("V210")
     }
   }
 
-  def errors(lar: LoanApplicationRegister) = {
+  def errors(lar: LoanApplicationRegister): List[String] = {
     checkValidity(lar) match {
-      case scalaz.Failure(x) => x.map(f => f.msg).list
+      case scalaz.Failure(x) => x.map(f => f.msg).list.toList
+      case scalaz.Success(_) => IList("no errors").toList
     }
   }
 
