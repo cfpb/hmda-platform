@@ -14,22 +14,22 @@ class Q022Spec extends PropSpec with PropertyChecks with MustMatchers with LarGe
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   property("Passes if activity year is within two years after application date") {
-    forAll(larGen, Gen.choose(0, 2)) { (lar, x) =>
-      whenever(lar.loan.applicationDate != "NA") {
-        val applicationYear = lar.loan.applicationDate.substring(0, 4).toInt
-        Q022(lar, applicationYear + x) mustBe a[Success]
-        Q022(lar, Future(applicationYear + x)).map(x => x mustBe Success())
-      }
+    forAll(larGen, Gen.choose(0, 2), dateGen) { (lar, x, date) =>
+      val newLoan = lar.loan.copy(applicationDate = date.toString)
+      val newLar = lar.copy(loan = newLoan)
+      val applicationYear = newLar.loan.applicationDate.substring(0, 4).toInt
+      Q022(newLar, applicationYear + x) mustBe Success()
+      Q022(newLar, Future(applicationYear + x)).map(x => x mustBe Success())
     }
   }
 
   property("Fails if activity year is not within two years after application date") {
-    forAll(larGen, intOutsideRange(0, 2)) { (lar, x) =>
-      whenever(lar.loan.applicationDate != "NA") {
-        val applicationYear = lar.loan.applicationDate.substring(0, 4).toInt
-        Q022(lar, applicationYear + x) mustBe a[Failure]
-        Q022(lar, Future(applicationYear + x)).map(x => x mustBe a[Failure])
-      }
+    forAll(larGen, intOutsideRange(0, 2), dateGen) { (lar, x, date) =>
+      val newLoan = lar.loan.copy(applicationDate = date.toString)
+      val newLar = lar.copy(loan = newLoan)
+      val applicationYear = newLar.loan.applicationDate.substring(0, 4).toInt
+      Q022(newLar, applicationYear + x) mustBe a[Failure]
+      Q022(newLar, Future(applicationYear + x)).map(x => x mustBe a[Failure])
     }
   }
 
