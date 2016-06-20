@@ -1,23 +1,36 @@
 package hmda.parser.fi.lar
 
-import hmda.model.fi.lar.{ Loan, Geography, Denial, Applicant }
+import hmda.model.fi.lar._
 import hmda.parser.util.FITestData
-import org.scalatest.{ FlatSpec, MustMatchers }
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class LarDatParserSpec extends FlatSpec with MustMatchers {
+class LarDatParserSpec extends PropSpec with MustMatchers with PropertyChecks with LarGenerators {
 
   import FITestData._
 
   val lars = larsDAT.map(line => LarDatParser(line))
   val firstLar = lars.head
 
-  "LAR Parser" should "parse correct number of LARs" in {
+  property("LAR Parser should parse correct number of LARs") {
     lars.size mustBe 3
   }
 
-  it should "parse basic LAR information" in {
+  property("LAR Parser should parse all generated LARs") {
+    forAll(larGen) { (lar: LoanApplicationRegister) =>
+      val parsedLar = LarDatParser(lar.toDAT)
+      val updatedApplicant = parsedLar.applicant.copy(income = parsedLar.applicant.income.replaceFirst("^0+(?!$)", ""))
+      val updatedLar = parsedLar.copy(
+        respondentId = parsedLar.respondentId.replaceFirst("^0+(?!$)", ""),
+        applicant = updatedApplicant
+      )
+      updatedLar mustBe lar
+    }
+  }
+
+  property("LAR Parser should parse basic LAR information") {
     firstLar.id mustBe 2
     firstLar.respondentId mustBe "0123456789"
     firstLar.agencyCode mustBe 9
@@ -30,7 +43,7 @@ class LarDatParserSpec extends FlatSpec with MustMatchers {
     firstLar.lienStatus mustBe 4
   }
 
-  it should "parse loan information" in {
+  property("LAR Parser should parse loan information") {
     val loan = firstLar.loan
 
     loan mustBe a[Loan]
@@ -44,7 +57,7 @@ class LarDatParserSpec extends FlatSpec with MustMatchers {
     loan.amount mustBe 10000
   }
 
-  it should "parse Geography information" in {
+  property("LAR Parser should parse Geography information") {
     val geography = firstLar.geography
 
     geography mustBe a[Geography]
@@ -55,7 +68,7 @@ class LarDatParserSpec extends FlatSpec with MustMatchers {
     geography.tract mustBe "0100.01"
   }
 
-  it should "parse Denial information" in {
+  property("LAR Parser should parse Denial information") {
     val denial = firstLar.denial
 
     denial mustBe a[Denial]
@@ -65,7 +78,7 @@ class LarDatParserSpec extends FlatSpec with MustMatchers {
     denial.reason3 mustBe "7"
   }
 
-  it should "parse Applicant information" in {
+  property("LAR Parser should parse Applicant information") {
     val applicant = firstLar.applicant
 
     applicant mustBe a[Applicant]
@@ -85,6 +98,10 @@ class LarDatParserSpec extends FlatSpec with MustMatchers {
     applicant.sex mustBe 1
     applicant.coSex mustBe 2
     applicant.income mustBe "9000"
+  }
+
+  private def padLeftWithZero(s: String, n: Int): String = {
+    String.format("%1$" + n + "s", s).replace(' ', '0')
   }
 
 }
