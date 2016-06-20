@@ -97,18 +97,18 @@
     
     ```json
     {
-      submissions: [
+      "submissions": [
         {  
-          id: 3,
-          submissionStatus: "created"
+          "id": 3,
+          "submissionStatus": "created"
         },
         {
-          id: 2,
-          submissionStatus: "created"
+          "id": 2,
+          "submissionStatus": "created"
         },
         {
-          id: 1,
-          submissionStatus: "created"
+          "id": 1,
+          "submissionStatus": "created"
         }
       ]
     }
