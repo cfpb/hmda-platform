@@ -33,6 +33,7 @@ class HmdaFileUploadSpec extends ActorSpec {
 
       probe.send(secondHmdaFileUpload, GetState)
       probe.expectMsg(HmdaFileUploadState(Map(timestamp -> 4)))
+      probe.send(secondHmdaFileUpload, Shutdown)
     }
 
     "recover with from snapshot" in {
