@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.lar.quality
 
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
@@ -7,14 +7,13 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.PredicateGeo._
 
-object V290 extends EditCheck[LoanApplicationRegister] {
-
-  override def name: String = "V290"
-
+object Q029 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.geography.msa not equalTo("NA")) {
-      lar.geography is validStateCountyMsaCombination
+    val geo = lar.geography
+    when(geo is stateCountyCombinationInMsaNotMicro) {
+      geo.msa not equalTo("NA")
     }
   }
 
+  override def name = "Q029"
 }

@@ -1,7 +1,5 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.lar.LarEditCheckSpec
 
 // this may become a trait, but for now it's in the hierarchy
