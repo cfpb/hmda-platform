@@ -34,7 +34,7 @@ case class LoanApplicationRegister(
    */
   def toDAT: String = {
     s"$id" +
-      padRight(respondentId, 10) +
+      padLeftWithZero(respondentId, 10) +
       s"$agencyCode" +
       padRight(loan.id, 25) +
       padRight(loan.applicationDate, 8) +
