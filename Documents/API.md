@@ -114,6 +114,17 @@
     }
     ```
     
+    * `POST` - Create a new submission
+    
+    Example response, with HTTP code 201:
+    
+    ```json
+    {
+        "id": 4,
+        "submissionStatus": "created"
+    }
+    ```
+    
 * `/institutions/<institution>/summary`
     * `GET` - Summary for Financial Institution, including filing information
     

@@ -11,6 +11,7 @@ object SubmissionPersistence {
   case object CreateSubmission extends Command
   case class UpdateSubmissionStatus(id: Int, status: SubmissionStatus) extends Command
   case class GetSubmissionById(id: Int) extends Command
+  case object GetLatestSubmission extends Command
 
   case class SubmissionCreated(submission: Submission) extends Event
   case class SubmissionStatusUpdated(id: Int, status: SubmissionStatus) extends Event
@@ -71,6 +72,10 @@ class SubmissionPersistence(fid: String, filingId: String) extends PersistentAct
     case GetSubmissionById(id) =>
       val submission = state.submissions.find(s => s.id == id).getOrElse(Submission())
       sender() ! submission
+
+    case GetLatestSubmission =>
+      val latest = state.submissions.headOption.getOrElse(Submission())
+      sender() ! latest
 
     case GetState =>
       sender() ! state.submissions
