@@ -89,6 +89,31 @@
     }
     ```
     
+* `/institutions/<institution>/filings/<period>/submissions`
+
+    * `GET` - List of submissions for a financial institution, per filing period
+    
+    Example response, with HTTP code 200:
+    
+    ```json
+    {
+      submissions: [
+        {  
+          id: 3,
+          submissionStatus: "created"
+        },
+        {
+          id: 2,
+          submissionStatus: "created"
+        },
+        {
+          id: 1,
+          submissionStatus: "created"
+        }
+      ]
+    }
+    ```
+    
 * `/institutions/<institution>/summary`
     * `GET` - Summary for Financial Institution, including filing information
     

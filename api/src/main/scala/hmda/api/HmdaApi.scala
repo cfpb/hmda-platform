@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.{ FilingsHttpApi, HttpApi, InstitutionsHttpApi, LarHttpApi }
+import hmda.api.http._
 import hmda.api.persistence.InstitutionPersistence._
 import hmda.api.processing.lar.SingleLarValidation._
 import hmda.api.demo.DemoData
@@ -19,16 +19,18 @@ object HmdaApi
     with HttpApi
     with LarHttpApi
     with InstitutionsHttpApi
-    with FilingsHttpApi {
+    with FilingsHttpApi
+    with SubmissionsHttpApi {
 
   override implicit val system = ActorSystem("hmda")
   override implicit val materializer = ActorMaterializer()
   override implicit val ec = system.dispatcher
 
-  override implicit val timeout = Timeout(5.seconds)
-
   override val log = Logging(system, getClass)
   val config = ConfigFactory.load()
+
+  lazy val httpTimeout = config.getInt("hmda.http.timeout")
+  override implicit val timeout = Timeout(httpTimeout.seconds)
 
   lazy val host = config.getString("hmda.http.host")
   lazy val port = config.getInt("hmda.http.port")
@@ -39,7 +41,7 @@ object HmdaApi
   createInstitutions(system)
 
   val http = Http().bindAndHandle(
-    routes ~ larRoutes ~ institutionsRoutes ~ filingsRoutes,
+    routes ~ larRoutes ~ institutionsRoutes ~ filingsRoutes ~ submissionRoutes,
     host,
     port
   )
