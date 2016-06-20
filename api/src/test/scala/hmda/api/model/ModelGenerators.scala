@@ -40,4 +40,27 @@ trait ModelGenerators {
     } yield Filing(id, fid, status)
   }
 
+  implicit def submissionStatusGen: Gen[SubmissionStatus] = {
+    Gen.oneOf(
+      Created,
+      Uploading,
+      Uploaded,
+      Parsing,
+      Parsed,
+      ValidatingSyntaxAndValidity,
+      ValidatedSyntaxAndValidity,
+      ValidatingQualityAndMacro,
+      Unverified,
+      Verified,
+      Signed
+    )
+  }
+
+  implicit def submissionGen: Gen[Submission] = {
+    for {
+      id <- Gen.choose(0, Int.MaxValue)
+      status <- submissionStatusGen
+    } yield Submission(id, status)
+  }
+
 }

@@ -3,9 +3,10 @@ package hmda.api.demo
 import akka.actor.ActorSystem
 import hmda.api.model.InstitutionSummary
 import hmda.api.persistence.CommonMessages._
-import hmda.api.persistence.FilingPersistence
+import hmda.api.persistence.{ FilingPersistence, SubmissionPersistence }
 import hmda.api.persistence.FilingPersistence.CreateFiling
 import hmda.api.persistence.InstitutionPersistence.CreateInstitution
+import hmda.api.persistence.SubmissionPersistence.CreateSubmission
 import hmda.model.fi._
 
 object DemoData {
@@ -28,10 +29,18 @@ object DemoData {
     InstitutionSummary(institution.id, institution.name, f.reverse)
   }
 
+  val newSubmissions = {
+    val s1 = Submission(1, Created)
+    val s2 = Submission(2, Created)
+    val s3 = Submission(3, Created)
+    Seq(s1, s2, s3)
+  }
+
   def loadData(system: ActorSystem): Unit = {
     Thread.sleep(500)
     loadInstitutions(system)
     loadFilings(system)
+    loadNewSubmissions(system)
   }
 
   def loadInstitutions(system: ActorSystem): Unit = {
@@ -45,6 +54,15 @@ object DemoData {
       filingActor ! CreateFiling(filing)
       Thread.sleep(100)
       filingActor ! Shutdown
+    }
+  }
+
+  def loadNewSubmissions(system: ActorSystem): Unit = {
+    newSubmissions.foreach { s =>
+      val submissionsActor = system.actorOf(SubmissionPersistence.props("12345", "2017"))
+      submissionsActor ! CreateSubmission
+      Thread.sleep(100)
+      submissionsActor ! Shutdown
     }
   }
 }

@@ -1,18 +1,19 @@
 package hmda.api.persistence
 
-import akka.actor.{ActorLogging, ActorRef, ActorSystem, Props}
-import akka.persistence.{PersistentActor, SnapshotOffer}
-import hmda.api.persistence.CommonMessages.{Command, Event}
+import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
+import akka.persistence.{ PersistentActor, SnapshotOffer }
+import hmda.api.persistence.CommonMessages.{ Command, Event, GetState }
 import hmda.api.persistence.SubmissionPersistence._
-import hmda.model.fi.{Submission, SubmissionStatus}
+import hmda.model.fi.{ Created, Submission, SubmissionStatus }
 
 object SubmissionPersistence {
 
   case object CreateSubmission extends Command
-  case class UpdateSubmissionStatus(id: String, status: SubmissionStatus) extends Command
+  case class UpdateSubmissionStatus(id: Int, status: SubmissionStatus) extends Command
+  case class GetSubmissionById(id: Int) extends Command
 
   case class SubmissionCreated(submission: Submission) extends Event
-  case class SubmissionStatusUpdated(id: String, status: SubmissionStatus) extends Event
+  case class SubmissionStatusUpdated(id: Int, status: SubmissionStatus) extends Event
 
   def props(fid: String, filingId: String): Props = Props(new SubmissionPersistence(fid, filingId))
 
@@ -35,8 +36,7 @@ object SubmissionPersistence {
 
 }
 
-//Submissions for an institution, per filing period, id should be <fid>-<filingId>-<submissionId>
-//where submissionId is an integer that is incremented every time a new submission is added
+//Submissions for an institution, per filing period
 class SubmissionPersistence(fid: String, filingId: String) extends PersistentActor with ActorLogging {
 
   var state = SubmissionState()
@@ -56,18 +56,24 @@ class SubmissionPersistence(fid: String, filingId: String) extends PersistentAct
 
   override def receiveCommand: Receive = {
     case CreateSubmission =>
-      val index = state.submissions.size
-      val newSubmission = Submission().copy(id = s"$fid-$filingId-$index")
-      persist(SubmissionCreated(newSubmission)){ e =>
+      val newSubmission = Submission().copy(id = state.submissions.size + 1, submissionStatus = Created)
+      persist(SubmissionCreated(newSubmission)) { e =>
         updateState(e)
       }
 
     case UpdateSubmissionStatus(id, status) =>
-      if (state.submissions.map(x =>x.id).contains(id)) {
-        persist(SubmissionStatusUpdated(id, status)){e =>
+      if (state.submissions.map(x => x.id).contains(id)) {
+        persist(SubmissionStatusUpdated(id, status)) { e =>
           updateState(e)
         }
       }
+
+    case GetSubmissionById(id) =>
+      val submission = state.submissions.find(s => s.id == id).getOrElse(Submission())
+      sender() ! submission
+
+    case GetState =>
+      sender() ! state.submissions
 
   }
 
