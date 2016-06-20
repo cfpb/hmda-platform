@@ -20,7 +20,13 @@ class LarDatParserSpec extends PropSpec with MustMatchers with PropertyChecks wi
 
   property("LAR Parser should parse all generated LARs") {
     forAll(larGen) { (lar: LoanApplicationRegister) =>
-      LarDatParser(lar.toDAT) mustBe lar
+      val parsedLar = LarDatParser(lar.toDAT)
+      val updatedApplicant = parsedLar.applicant.copy(income = parsedLar.applicant.income.replaceFirst("^0+(?!$)", ""))
+      val updatedLar = parsedLar.copy(
+        respondentId = parsedLar.respondentId.replaceFirst("^0+(?!$)", ""),
+        applicant = updatedApplicant
+      )
+      updatedLar mustBe lar
     }
   }
 
@@ -92,6 +98,10 @@ class LarDatParserSpec extends PropSpec with MustMatchers with PropertyChecks wi
     applicant.sex mustBe 1
     applicant.coSex mustBe 2
     applicant.income mustBe "9000"
+  }
+
+  private def padLeftWithZero(s: String, n: Int): String = {
+    String.format("%1$" + n + "s", s).replace(' ', '0')
   }
 
 }
