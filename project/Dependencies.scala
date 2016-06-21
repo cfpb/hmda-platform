@@ -18,6 +18,7 @@ object Dependencies {
   val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % Version.akka % "test"
   val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
   val akkaPersistence = "com.typesafe.akka" %% "akka-persistence" % Version.akka
+  val akkaPersistenceTest = "com.typesafe.akka" %% "akka-persistence-tck" % Version.akka % "test"
   val leveldb = "org.iq80.leveldb" % "leveldb" % Version.leveldb
   val leveldbjni = "org.fusesource.leveldbjni" % "leveldbjni-all" % Version.leveldbjni
   val akkaHttp = "com.typesafe.akka" %% "akka-http-experimental" % Version.akka
