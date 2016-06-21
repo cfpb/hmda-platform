@@ -33,7 +33,7 @@ object HMDABuild extends Build {
 
   val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
 
-  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaPersistenceTest, leveldb, leveldbjni)
+  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, leveldb, leveldbjni)
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
