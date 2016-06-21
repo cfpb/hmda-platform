@@ -3,7 +3,7 @@ package hmda.api.persistence
 import java.time.Instant
 
 import akka.testkit.TestProbe
-import hmda.api.persistence.CommonMessages.GetState
+import hmda.api.persistence.CommonMessages._
 import hmda.api.persistence.HmdaFileUpload._
 import hmda.api.processing.ActorSpec
 
