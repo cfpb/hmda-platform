@@ -1,15 +1,20 @@
 package hmda.api.persistence
 
+import java.io.File
 import java.time.Instant
 
 import akka.testkit.TestProbe
+import com.typesafe.config.ConfigFactory
 import hmda.api.persistence.CommonMessages._
+import hmda.api.persistence.HmdaFileUpload.{ AddLine, CompleteUpload, HmdaFileUploadState }
 import hmda.api.persistence.HmdaFileUpload._
 import hmda.api.processing.ActorSpec
+import org.iq80.leveldb.util.FileUtils
 
 class HmdaFileUploadSpec extends ActorSpec {
-
   import hmda.parser.util.FITestData._
+
+  val config = ConfigFactory.load()
 
   val hmdaFileUpload = createHmdaFileUpload(system, "1")
 
@@ -49,5 +54,12 @@ class HmdaFileUploadSpec extends ActorSpec {
       probe.send(fourthHmdaFileUpload, GetState)
       probe.expectMsg(HmdaFileUploadState(Map(timestamp -> 4)))
     }
+  }
+
+  val snapshotStore = new File(config.getString("akka.persistence.snapshot-store.local.dir"))
+
+  override def afterAll() {
+    FileUtils.deleteRecursively(snapshotStore)
+    super.afterAll()
   }
 }
