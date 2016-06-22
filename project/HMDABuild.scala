@@ -7,7 +7,7 @@ import spray.revolver.RevolverPlugin.autoImport.Revolver
 object BuildSettings {
   val buildOrganization = "cfpb"
   val buildVersion      = "1.0.0"
-  val buildScalaVersion = "2.11.7"
+  val buildScalaVersion = "2.11.8"
 
   val buildSettings = Defaults.coreDefaultSettings ++
     Seq(
