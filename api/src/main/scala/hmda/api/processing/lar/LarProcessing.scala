@@ -1,7 +1,7 @@
 package hmda.api.processing.lar
 
 import akka.NotUsed
-import akka.stream.scaladsl.{ FileIO, Flow, Keep, Sink }
+import akka.stream.scaladsl.{ Flow, Keep, Sink }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
 
