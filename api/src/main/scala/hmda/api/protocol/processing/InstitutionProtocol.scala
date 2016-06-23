@@ -1,10 +1,10 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ InstitutionSummary, Institutions }
+import hmda.api.model.{ InstitutionDetail, InstitutionSummary, Institutions }
 import hmda.model.fi.{ Active, Inactive, Institution, InstitutionStatus }
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
-trait InstitutionProtocol extends DefaultJsonProtocol {
+trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
   implicit object InstitutionStatusJsonFormat extends RootJsonFormat[InstitutionStatus] {
     override def write(status: InstitutionStatus): JsValue = {
       status match {
@@ -26,5 +26,6 @@ trait InstitutionProtocol extends DefaultJsonProtocol {
 
   implicit val institutionFormat = jsonFormat3(Institution.apply)
   implicit val institutionsFormat = jsonFormat1(Institutions.apply)
+  implicit val institutionDetail = jsonFormat2(InstitutionDetail.apply)
 
 }

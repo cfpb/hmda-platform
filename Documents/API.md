@@ -47,32 +47,24 @@
     
     ```json
     {
+      "institution": {
       "id": "12345",
       "name": "First Bank",
       "status": "active"
-    }
-    ```
-    
-* `/institutions/<institution>/filings`
-    * `GET` - List of filings for Financial Institution
-    
-    Example response, with HTTP code 200:
-    
-    ```json
-    {
+    },
       "filings": [
         {
-          "period": "2017",
+          "id": "2017",
           "fid": "12345",
           "status": "not-started"
         },
         {
-          "period": "2016",
+          "id": "2016",
           "fid": "12345",
           "status": "completed"
         }
       ]
-    }
+    } 
     ```
     
     
@@ -106,29 +98,6 @@
     ```
     
 * `/institutions/<institution>/filings/<period>/submissions`
-
-    * `GET` - List of submissions for a financial institution, per filing period
-    
-    Example response, with HTTP code 200:
-    
-    ```json
-    {
-      "submissions": [
-        {  
-          "id": 3,
-          "submissionStatus": "created"
-        },
-        {
-          "id": 2,
-          "submissionStatus": "created"
-        },
-        {
-          "id": 1,
-          "submissionStatus": "created"
-        }
-      ]
-    }
-    ```
     
     * `POST` - Create a new submission
     

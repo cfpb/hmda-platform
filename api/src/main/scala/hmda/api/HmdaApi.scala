@@ -18,8 +18,7 @@ object HmdaApi
     extends App
     with HttpApi
     with LarHttpApi
-    with InstitutionsHttpApi
-    with SubmissionsHttpApi {
+    with InstitutionsHttpApi {
 
   override implicit val system = ActorSystem("hmda")
   override implicit val materializer = ActorMaterializer()
@@ -40,7 +39,7 @@ object HmdaApi
   createInstitutions(system)
 
   val http = Http().bindAndHandle(
-    routes ~ larRoutes ~ institutionsRoutes ~ submissionRoutes,
+    routes ~ larRoutes ~ institutionsRoutes,
     host,
     port
   )

@@ -7,8 +7,8 @@ import akka.util.Timeout
 import hmda.api.persistence.InstitutionPersistence._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.demo.DemoData
-import hmda.api.model.{ Filings, InstitutionSummary, Institutions }
-import hmda.model.fi.Institution
+import hmda.api.model._
+import hmda.model.fi._
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
 import scala.concurrent.duration._
@@ -36,7 +36,9 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return an institution by id" in {
       Get("/institutions/12345") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Institution] mustBe DemoData.institutions.head
+        val institution = DemoData.institutions.head
+        val filings = DemoData.filings.filter(f => f.fid == institution.id).reverse
+        responseAs[InstitutionDetail] mustBe InstitutionDetail(institution, filings)
       }
     }
 
@@ -47,10 +49,18 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
-    "return a list of filings for a financial institution" in {
-      Get("/institutions/12345/filings") ~> institutionsRoutes ~> check {
+    "return a list of submissions for a financial institution" in {
+      Get("/institutions/12345/filings/2017") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Filings] mustBe Filings(DemoData.filings.filter(f => f.fid == "12345").reverse)
+        val filing = Filing("2017", "12345", NotStarted)
+        responseAs[FilingDetail] mustBe FilingDetail(filing, DemoData.newSubmissions.reverse)
+      }
+    }
+
+    "create a new submission" in {
+      Post("/institutions/12345/filings/2017/submissions") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Created
+        responseAs[Submission] mustBe Submission(DemoData.newSubmissions.size + 1, Created)
       }
     }
   }
