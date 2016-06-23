@@ -9,9 +9,10 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.util.Timeout
-import hmda.api.model.{ InstitutionSummary, Institutions }
+import hmda.api.model.{ Filings, InstitutionSummary, Institutions }
 import hmda.api.persistence.CommonMessages._
 import hmda.api.persistence.FilingPersistence
+import hmda.api.persistence.FilingPersistence.GetFilingByPeriod
 import hmda.api.persistence.InstitutionPersistence.GetInstitutionById
 import hmda.api.protocol.processing.{ FilingProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Institution }
@@ -56,6 +57,38 @@ trait InstitutionsHttpApi extends InstitutionProtocol with FilingProtocol {
       }
     }
 
+  val filingsPath =
+    path("institutions" / Segment / "filings") { fid =>
+      val filingsActor = system.actorOf(FilingPersistence.props(fid))
+      get {
+        val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
+        onComplete(fFilings) {
+          case Success(filings) =>
+            filingsActor ! Shutdown
+            complete(ToResponseMarshallable(Filings(filings)))
+          case Failure(error) =>
+            filingsActor ! Shutdown
+            complete(HttpResponse(StatusCodes.InternalServerError))
+        }
+      }
+    }
+
+  val filingByPeriodPath =
+    path("institutions" / Segment / "filings" / Segment) { (fid, period) =>
+      val filingsActor = system.actorOf(FilingPersistence.props(fid))
+      get {
+        val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
+        onComplete(fFiling) {
+          case Success(filing) =>
+            filingsActor ! Shutdown
+            complete(ToResponseMarshallable(filing))
+          case Failure(error) =>
+            filingsActor ! Shutdown
+            complete(HttpResponse(StatusCodes.InternalServerError))
+        }
+      }
+    }
+
   val institutionSummaryPath =
     path("institutions" / Segment / "summary") { fid =>
       val institutionsActor = system.actorSelection("/user/institutions")
@@ -80,5 +113,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol with FilingProtocol {
       }
     }
 
-  val institutionsRoutes = institutionsPath ~ institutionByIdPath ~ institutionSummaryPath
+  val institutionsRoutes =
+    institutionsPath ~
+      institutionByIdPath ~
+      institutionSummaryPath ~
+      filingsPath ~
+      filingByPeriodPath
 }
