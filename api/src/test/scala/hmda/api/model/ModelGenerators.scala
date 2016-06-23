@@ -63,4 +63,11 @@ trait ModelGenerators {
     } yield Submission(id, status)
   }
 
+  implicit def filingDetailGen: Gen[FilingDetail] = {
+    for {
+      filing <- filingGen
+      submissions <- Gen.listOf(submissionGen)
+    } yield FilingDetail(filing, submissions)
+  }
+
 }

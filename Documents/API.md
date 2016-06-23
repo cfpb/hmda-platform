@@ -82,11 +82,27 @@
     Example response, with HTTP code 200:
     
     ```json
-    {
-      "period": "2017",
-      "fid": "12345",
-      "status": "not-started"
-    }
+   {
+     "filing": {
+     "id": "2017",
+     "fid": "12345",
+     "status": "not-started"
+   },
+   "submissions": [
+     {
+       "id": 3,
+       "submissionStatus": "created"
+     },
+     {
+       "id": 2,
+       "submissionStatus": "created"
+     },
+     {
+       "id": 1,
+       "submissionStatus": "created"
+     }
+   ]
+   } 
     ```
     
 * `/institutions/<institution>/filings/<period>/submissions`

@@ -9,13 +9,13 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.util.Timeout
-import hmda.api.model.{ Filings, InstitutionSummary, Institutions }
+import hmda.api.model.{ FilingDetail, Filings, InstitutionSummary, Institutions }
 import hmda.api.persistence.CommonMessages._
-import hmda.api.persistence.FilingPersistence
+import hmda.api.persistence.{ FilingPersistence, SubmissionPersistence }
 import hmda.api.persistence.FilingPersistence.GetFilingByPeriod
 import hmda.api.persistence.InstitutionPersistence.GetInstitutionById
 import hmda.api.protocol.processing.{ FilingProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Filing, Institution }
+import hmda.model.fi.{ Filing, Institution, Submission }
 
 import scala.util.{ Failure, Success }
 
@@ -76,14 +76,22 @@ trait InstitutionsHttpApi extends InstitutionProtocol with FilingProtocol {
   val filingByPeriodPath =
     path("institutions" / Segment / "filings" / Segment) { (fid, period) =>
       val filingsActor = system.actorOf(FilingPersistence.props(fid))
+      val submissionActor = system.actorOf(SubmissionPersistence.props(fid, period))
       get {
+        implicit val ec = system.dispatcher
         val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
-        onComplete(fFiling) {
-          case Success(filing) =>
+        val fDetails = for {
+          filing <- fFiling
+          submissions <- (submissionActor ? GetState).mapTo[Seq[Submission]]
+        } yield FilingDetail(filing, submissions)
+        onComplete(fDetails) {
+          case Success(filingDetails) =>
             filingsActor ! Shutdown
-            complete(ToResponseMarshallable(filing))
+            submissionActor ! Shutdown
+            complete(ToResponseMarshallable(filingDetails))
           case Failure(error) =>
             filingsActor ! Shutdown
+            submissionActor ! Shutdown
             complete(HttpResponse(StatusCodes.InternalServerError))
         }
       }

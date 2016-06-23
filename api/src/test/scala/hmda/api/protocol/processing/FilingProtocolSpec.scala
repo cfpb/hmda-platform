@@ -1,6 +1,6 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ InstitutionSummary, ModelGenerators }
+import hmda.api.model.{ FilingDetail, InstitutionSummary, ModelGenerators }
 import hmda.model.fi.Filing
 import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
@@ -12,6 +12,12 @@ class FilingProtocolSpec extends PropSpec with PropertyChecks with MustMatchers 
   property("Filing must convert to and from json") {
     forAll(filingGen) { f =>
       f.toJson.convertTo[Filing] mustBe f
+    }
+  }
+
+  property("Filing detail must convert to and from json") {
+    forAll(filingDetailGen) { f =>
+      f.toJson.convertTo[FilingDetail] mustBe f
     }
   }
 
