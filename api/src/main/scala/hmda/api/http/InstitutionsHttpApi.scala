@@ -1,5 +1,8 @@
 package hmda.api.http
 
+import java.time.Instant
+
+import akka.Done
 import akka.actor.{ ActorRef, ActorSelection, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer
@@ -7,16 +10,20 @@ import akka.pattern.ask
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse, StatusCodes }
-import akka.util.Timeout
+import akka.http.scaladsl.model.Multipart.BodyPart
+import akka.http.scaladsl.model._
+import akka.stream.scaladsl.{ Framing, Sink }
+import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
 import hmda.api.persistence.CommonMessages._
-import hmda.api.persistence.{ FilingPersistence, SubmissionPersistence }
+import hmda.api.persistence.{ FilingPersistence, HmdaFileUpload, SubmissionPersistence }
 import hmda.api.persistence.FilingPersistence.GetFilingByPeriod
+import hmda.api.persistence.HmdaFileUpload.{ AddLine, _ }
 import hmda.api.persistence.InstitutionPersistence.GetInstitutionById
 import hmda.api.persistence.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
 import hmda.api.protocol.processing.{ FilingProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Institution, Submission }
+
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import spray.json._
@@ -28,6 +35,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
   val log: LoggingAdapter
 
   implicit val timeout: Timeout
+
+  val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
   val institutionsPath =
     path("institutions") {
@@ -104,6 +113,71 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
       }
     }
 
+  val uploadPath =
+    path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (fid, period, submissionId) =>
+      val uploadTimestamp = Instant.now.toEpochMilli
+      val processingActor = createHmdaFileUpload(system, submissionId)
+      fileUpload("file") {
+        case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
+          val uploadedF = byteSource
+            .via(splitLines)
+            .map(_.utf8String)
+            .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
+
+          onComplete(uploadedF) {
+            case Success(response) =>
+              processingActor ! CompleteUpload
+              processingActor ! Shutdown
+              complete {
+                "uploaded"
+              }
+            case Failure(error) =>
+              processingActor ! Shutdown
+              log.error(error.getLocalizedMessage)
+              complete {
+                HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
+              }
+          }
+      }
+
+    }
+
+  //  val uploadPath =
+  //    path("upload" / Segment) { id =>
+  //      import HmdaFileUpload._
+  //      post {
+  //        val uploadTimestamp = Instant.now.toEpochMilli
+  //        val processingActor = createHmdaFileUpload(system, id)
+  //        entity(as[Multipart.FormData]) { formData =>
+  //          val uploaded: Future[Done] = formData.parts.mapAsync(1) {
+  //            //TODO: check Content-Type type as well?
+  //            case b: BodyPart if b.filename.exists(_.endsWith(".txt")) =>
+  //              b.entity.dataBytes
+  //                .via(splitLines)
+  //                .map(_.utf8String)
+  //                .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
+  //
+  //            case _ => Future.failed(throw new Exception("File could not be uploaded"))
+  //          }.runWith(Sink.ignore)
+  //
+  //          onComplete(uploaded) {
+  //            case Success(response) =>
+  //              processingActor ! CompleteUpload
+  //              processingActor ! Shutdown
+  //              complete {
+  //                "uploaded"
+  //              }
+  //            case Failure(error) =>
+  //              processingActor ! Shutdown
+  //              log.error(error.getLocalizedMessage)
+  //              complete {
+  //                HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
+  //              }
+  //          }
+  //        }
+  //      }
+  //    }
+
   val institutionSummaryPath =
     path("institutions" / Segment / "summary") { fid =>
       val institutionsActor = system.actorSelection("/user/institutions")
@@ -149,5 +223,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
       institutionByIdPath ~
       institutionSummaryPath ~
       filingByPeriodPath ~
-      submissionPath
+      submissionPath ~
+      uploadPath
 }
