@@ -27,7 +27,7 @@ class LarQualityEngineSpec
   }
 
   property("There should be no duplicates in qualityEditsList") {
-    qualityEditsList.toSet.toList.length mustBe qualityEditsList.length
+    qualityEditsList.distinct.length mustBe qualityEditsList.length
   }
 
   property("There should be edits equal to the number of edit files - 1 (for Q022)") {
