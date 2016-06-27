@@ -7,43 +7,44 @@ import hmda.validation.rules.lar.quality._
 
 trait LarQualityEngine extends LarCommonEngine with ValidationApi {
 
+  val qualityEditsList = List(
+    Q001,
+    Q002,
+    Q003,
+    Q004,
+    Q005,
+    Q013,
+    Q014,
+    Q024,
+    Q025,
+    Q027,
+    Q029,
+    Q032,
+    Q035,
+    Q036,
+    Q037,
+    Q038,
+    Q039,
+    Q040,
+    Q044,
+    Q045,
+    Q046,
+    Q049,
+    Q051,
+    Q052,
+    Q059,
+    Q064,
+    Q066,
+    Q067,
+    Q068
+  )
+
   private def q022(lar: LoanApplicationRegister): LarValidation = {
     convertResult(lar, Q022(lar, 2017), "Q022")
   }
 
   def checkQuality(lar: LoanApplicationRegister): LarValidation = {
-    val checks = List(
-      Q001,
-      Q002,
-      Q003,
-      Q004,
-      Q005,
-      Q013,
-      Q014,
-      Q024,
-      Q025,
-      Q027,
-      Q029,
-      Q032,
-      Q035,
-      Q036,
-      Q037,
-      Q038,
-      Q039,
-      Q040,
-      Q044,
-      Q045,
-      Q046,
-      Q049,
-      Q051,
-      Q052,
-      Q049,
-      Q059,
-      Q064,
-      Q066,
-      Q067,
-      Q068
-    ).map(check(_, lar))
+    val checks = qualityEditsList.map(check(_, lar))
 
     checks :+ q022(lar)
 

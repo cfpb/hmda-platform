@@ -25,4 +25,17 @@ class LarQualityEngineSpec
       }
     }
   }
+
+  property("There should be no duplicates in qualityEditsList") {
+    qualityEditsList.distinct.length mustBe qualityEditsList.length
+  }
+
+  property("There should be edits equal to the number of edit files - 1 (for Q022)") {
+    val pathOrig = getClass.getResource("").getPath
+    val pathSplit = pathOrig.split("/").dropRight(8).mkString("/")
+    val pathFinal = pathSplit + "/src/main/scala/hmda/validation/rules/lar/quality"
+    val editFiles = Option((new File(pathFinal).list).length).getOrElse(0)
+    editFiles - 1 mustBe qualityEditsList.length
+  }
+
 }
