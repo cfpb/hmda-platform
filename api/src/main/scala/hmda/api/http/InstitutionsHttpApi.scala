@@ -138,6 +138,11 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
                 HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
               }
           }
+
+        case _ =>
+          complete {
+            HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
+          }
       }
 
     }
