@@ -147,7 +147,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
 
     }
 
-
   val institutionSummaryPath =
     path("institutions" / Segment / "summary") { fid =>
       val institutionsActor = system.actorSelection("/user/institutions")
