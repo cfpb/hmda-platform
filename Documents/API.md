@@ -110,6 +110,10 @@
     }
     ```
     
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>`
+    * `POST` - Upload HMDA data to submission
+    
+    
 * `/institutions/<institution>/summary`
     * `GET` - Summary for Financial Institution, including filing information
     
