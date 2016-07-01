@@ -8,9 +8,9 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http._
-import hmda.api.persistence.InstitutionPersistence._
 import hmda.api.processing.lar.SingleLarValidation._
-import hmda.api.demo.DemoData
+import hmda.persistence.InstitutionPersistence._
+import hmda.persistence.demo.DemoData
 
 import scala.concurrent.duration._
 

@@ -1,4 +1,4 @@
-package hmda.api.processing
+package hmda.actor.test
 
 import akka.actor.ActorSystem
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }

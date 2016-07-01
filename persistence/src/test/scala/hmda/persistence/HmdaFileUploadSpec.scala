@@ -1,18 +1,17 @@
-package hmda.api.persistence
+package hmda.persistence
 
 import java.io.File
 import java.time.Instant
 
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
-import hmda.api.persistence.CommonMessages._
-import hmda.api.persistence.HmdaFileUpload.{ AddLine, CompleteUpload, HmdaFileUploadState }
-import hmda.api.persistence.HmdaFileUpload._
-import hmda.api.processing.ActorSpec
+import hmda.actor.test.ActorSpec
+import hmda.persistence.CommonMessages._
+import hmda.persistence.HmdaFileUpload._
 import org.iq80.leveldb.util.FileUtils
 
 class HmdaFileUploadSpec extends ActorSpec {
-  import hmda.parser.util.FITestData._
+  import hmda.model.util.FITestData._
 
   val config = ConfigFactory.load()
 

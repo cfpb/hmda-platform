@@ -1,11 +1,12 @@
-package hmda.api.persistence
+package hmda.persistence
 
 import akka.testkit.TestProbe
-import hmda.api.demo.DemoData
-import hmda.api.persistence.CommonMessages.GetState
-import hmda.api.processing.ActorSpec
-import hmda.api.persistence.FilingPersistence._
+import hmda.actor.test.ActorSpec
 import hmda.model.fi.Cancelled
+import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.FilingPersistence.{ CreateFiling, GetFilingByPeriod, UpdateFilingStatus }
+import hmda.persistence.demo.DemoData
+import hmda.persistence.FilingPersistence._
 
 class FilingPersistenceSpec extends ActorSpec {
 

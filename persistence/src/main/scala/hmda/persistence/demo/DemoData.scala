@@ -1,13 +1,12 @@
-package hmda.api.demo
+package hmda.persistence.demo
 
 import akka.actor.ActorSystem
-import hmda.api.model.InstitutionSummary
-import hmda.api.persistence.CommonMessages._
-import hmda.api.persistence.{ FilingPersistence, SubmissionPersistence }
-import hmda.api.persistence.FilingPersistence.CreateFiling
-import hmda.api.persistence.InstitutionPersistence.CreateInstitution
-import hmda.api.persistence.SubmissionPersistence.CreateSubmission
 import hmda.model.fi._
+import hmda.persistence.FilingPersistence.CreateFiling
+import hmda.persistence.InstitutionPersistence.CreateInstitution
+import hmda.persistence.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.CommonMessages._
+import hmda.persistence.SubmissionPersistence.CreateSubmission
 
 object DemoData {
   val institutions = {
@@ -26,7 +25,7 @@ object DemoData {
   val institutionSummary = {
     val institution = institutions.head
     val f = filings.filter(x => x.fid == institution.id)
-    InstitutionSummary(institution.id, institution.name, f.reverse)
+    (institution.id, institution.name, f.reverse)
   }
 
   val newSubmissions = {

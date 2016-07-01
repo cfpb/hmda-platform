@@ -1,8 +1,8 @@
-package hmda.api.persistence
+package hmda.persistence
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
-import hmda.api.persistence.CommonMessages._
+import hmda.persistence.CommonMessages._
 
 object HmdaFileUpload {
   def props(id: String): Props = Props(new HmdaFileUpload(id))
@@ -58,7 +58,7 @@ class HmdaFileUpload(id: String) extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case event: Event => updateState(event)
     case SnapshotOffer(_, snapshot: HmdaFileUploadState) =>
-      log.info("Recovering from snapshot")
+      log.debug("Recovering from snapshot")
       state = snapshot
   }
 

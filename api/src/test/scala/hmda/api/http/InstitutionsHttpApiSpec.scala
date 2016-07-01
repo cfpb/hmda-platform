@@ -1,15 +1,20 @@
 package hmda.api.http
 
+import java.io.File
+
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart, StatusCodes }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import hmda.api.persistence.InstitutionPersistence._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import hmda.api.demo.DemoData
+import com.typesafe.config.ConfigFactory
 import hmda.api.model._
 import hmda.model.fi._
+import hmda.persistence.InstitutionPersistence
+import hmda.persistence.demo.DemoData
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import hmda.persistence.InstitutionPersistence._
+import org.iq80.leveldb.util.FileUtils
 
 import scala.concurrent.duration._
 
@@ -21,8 +26,15 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
   override def beforeAll(): Unit = {
     createInstitutions(system)
-
     DemoData.loadData(system)
+    super.beforeAll()
+  }
+
+  override def afterAll(): Unit = {
+    system.terminate()
+    val config = ConfigFactory.load()
+    val snapshotStore = new File(config.getString("akka.persistence.snapshot-store.local.dir"))
+    FileUtils.deleteRecursively(snapshotStore)
   }
 
   "Institutions HTTP API" must {
@@ -37,15 +49,17 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Get("/institutions/12345") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val institution = DemoData.institutions.head
-        val filings = DemoData.filings.filter(f => f.fid == institution.id).reverse
-        responseAs[InstitutionDetail] mustBe InstitutionDetail(institution, filings)
+        val filings = DemoData.filings.filter(f => f.fid == institution.id)
+        responseAs[InstitutionDetail] mustBe InstitutionDetail(institution, filings.reverse)
       }
     }
 
     "return an institution's summary" in {
       Get("/institutions/12345/summary") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[InstitutionSummary] mustBe DemoData.institutionSummary
+        val summary = DemoData.institutionSummary
+        val institutionSummary = InstitutionSummary(summary._1, summary._2, summary._3)
+        responseAs[InstitutionSummary] mustBe institutionSummary
       }
     }
 

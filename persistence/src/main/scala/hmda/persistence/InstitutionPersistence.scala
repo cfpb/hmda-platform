@@ -1,10 +1,10 @@
-package hmda.api.persistence
+package hmda.persistence
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
-import hmda.api.persistence.CommonMessages._
-import hmda.api.persistence.InstitutionPersistence._
 import hmda.model.fi.Institution
+import hmda.persistence.CommonMessages._
+import hmda.persistence.InstitutionPersistence._
 
 object InstitutionPersistence {
 
@@ -43,7 +43,7 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
   }
 
   override def preStart(): Unit = {
-    log.info(s"Institutions started at ${self.path}")
+    log.debug(s"Institutions started at ${self.path}")
   }
 
   override def persistenceId: String = "institutions"
@@ -51,7 +51,7 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case e: Event => updateState(e)
     case SnapshotOffer(_, snapshot: InstitutionsState) =>
-      log.info("Recovering from snapshot")
+      log.debug("Recovering from snapshot")
       state = snapshot
   }
 
@@ -59,7 +59,7 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
     case CreateInstitution(i) =>
       if (!state.institutions.contains(i)) {
         persist(InstitutionCreated(i)) { e =>
-          log.info(s"Persisted: $i")
+          log.debug(s"Persisted: $i")
           updateState(e)
         }
       }
@@ -67,7 +67,7 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
     case ModifyInstitution(i) =>
       if (state.institutions.map(i => i.id).contains(i.id)) {
         persist(InstitutionModified(i)) { e =>
-          log.info(s"Modified: ${i.name}")
+          log.debug(s"Modified: ${i.name}")
           updateState(e)
         }
       }

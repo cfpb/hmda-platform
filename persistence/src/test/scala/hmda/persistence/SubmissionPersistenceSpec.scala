@@ -1,11 +1,12 @@
-package hmda.api.persistence
+package hmda.persistence
 
 import akka.testkit.TestProbe
-import hmda.api.demo.DemoData
-import hmda.api.persistence.CommonMessages.GetState
-import hmda.api.processing.ActorSpec
-import hmda.api.persistence.SubmissionPersistence._
+import hmda.actor.test.ActorSpec
 import hmda.model.fi.{ Submission, Uploaded }
+import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.SubmissionPersistence.{ CreateSubmission, GetSubmissionById, UpdateSubmissionStatus }
+import hmda.persistence.demo.DemoData
+import hmda.persistence.SubmissionPersistence._
 
 class SubmissionPersistenceSpec extends ActorSpec {
 

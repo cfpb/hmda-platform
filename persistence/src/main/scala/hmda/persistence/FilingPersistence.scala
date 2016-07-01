@@ -1,10 +1,10 @@
-package hmda.api.persistence
+package hmda.persistence
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
-import hmda.api.persistence.CommonMessages._
-import hmda.api.persistence.FilingPersistence._
 import hmda.model.fi.Filing
+import hmda.persistence.CommonMessages._
+import hmda.persistence.FilingPersistence._
 
 object FilingPersistence {
 
@@ -45,7 +45,7 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
   }
 
   override def preStart(): Unit = {
-    log.info(s"Filings started at ${self.path}")
+    log.debug(s"Filings started at ${self.path}")
   }
 
   override def persistenceId: String = s"filings-$fid"
@@ -53,7 +53,7 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case e: Event => updateState(e)
     case SnapshotOffer(_, snapshot: FilingState) =>
-      log.info(s"Recovering from snapshot")
+      log.debug(s"Recovering from snapshot")
       state = snapshot
 
   }
@@ -62,7 +62,7 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
     case CreateFiling(f) =>
       if (!state.filings.contains(f)) {
         persist(FilingCreated(f)) { e =>
-          log.info(s"Persisted: $f")
+          log.debug(s"Persisted: $f")
           updateState(e)
         }
       }
@@ -70,7 +70,7 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
     case UpdateFilingStatus(modified) =>
       if (state.filings.map(x => x.id).contains(modified.id)) {
         persist(FilingStatusUpdated(modified)) { e =>
-          log.info(s"persisted: $modified")
+          log.debug(s"persisted: $modified")
           updateState(e)
         }
       }

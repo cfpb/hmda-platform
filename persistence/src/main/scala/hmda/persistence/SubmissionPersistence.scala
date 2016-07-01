@@ -1,10 +1,10 @@
-package hmda.api.persistence
+package hmda.persistence
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
-import hmda.api.persistence.CommonMessages.{ Command, Event, GetState }
-import hmda.api.persistence.SubmissionPersistence._
 import hmda.model.fi.{ Created, Submission, SubmissionStatus }
+import hmda.persistence.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.SubmissionPersistence._
 
 object SubmissionPersistence {
 
@@ -51,7 +51,7 @@ class SubmissionPersistence(fid: String, filingId: String) extends PersistentAct
   override def receiveRecover: Receive = {
     case e: Event => updateState(e)
     case SnapshotOffer(_, snapshot: SubmissionState) =>
-      log.info(s"Recovering from snapshot")
+      log.debug(s"Recovering from snapshot")
       state = snapshot
   }
 
