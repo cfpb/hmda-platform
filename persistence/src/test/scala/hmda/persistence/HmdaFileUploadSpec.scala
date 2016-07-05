@@ -57,8 +57,8 @@ class HmdaFileUploadSpec extends ActorSpec {
 
   val snapshotStore = new File(config.getString("akka.persistence.snapshot-store.local.dir"))
 
-  override def afterAll() {
+  override def beforeAll() {
     FileUtils.deleteRecursively(snapshotStore)
-    super.afterAll()
+    super.beforeAll()
   }
 }
