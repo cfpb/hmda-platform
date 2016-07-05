@@ -6,7 +6,9 @@ import scala.io.Source
 
 object CBSAMetroMicroLookup {
   val values: Seq[CBSAMetroMicro] = {
-    val lines = Source.fromFile(new File("model/src/main/resources/tl_2013_us_cbsa.csv")).getLines
+    val cbsaResource = getClass.getResourceAsStream("/tl_2013_us_cbsa.csv")
+    val lines = Source.fromInputStream(cbsaResource).getLines()
+
     lines.map { line =>
       val values = line.split('|').map(_.trim)
       val combinedCode = values(0)
