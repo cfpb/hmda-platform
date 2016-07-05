@@ -19,7 +19,8 @@ object BuildSettings {
         "-deprecation",
         "-unchecked",
         "-feature"),
-      aggregate in assembly := false
+      aggregate in assembly := false,
+      parallelExecution in Test := false
     )
 
 }
