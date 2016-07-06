@@ -1,12 +1,11 @@
 package hmda.model.census
 
-import java.io.File
+import hmda.model.ResourceUtils
 
-import scala.io.Source
-
-object CBSAMetroMicroLookup {
+object CBSAMetroMicroLookup extends ResourceUtils {
   val values: Seq[CBSAMetroMicro] = {
-    val lines = Source.fromFile(new File("model/src/main/resources/tl_2013_us_cbsa.csv")).getLines
+    val lines = resourceLines("/tl_2013_us_cbsa.csv")
+
     lines.map { line =>
       val values = line.split('|').map(_.trim)
       val combinedCode = values(0)
