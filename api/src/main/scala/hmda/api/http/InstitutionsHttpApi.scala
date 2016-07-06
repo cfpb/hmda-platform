@@ -64,8 +64,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
           val fInstitutionDetails = institutionDetails(fid, institutionsActor, filingsActor)
           onComplete(fInstitutionDetails) {
             case Success(institution) =>
+              filingsActor ! Shutdown
               complete(ToResponseMarshallable(institution))
             case Failure(error) =>
+              filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)
               complete(HttpResponse(StatusCodes.InternalServerError))
           }
