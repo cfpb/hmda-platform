@@ -1,13 +1,10 @@
 package hmda.model.census
 
-import java.io.File
+import hmda.model.ResourceUtils
 
-import scala.io.Source
-
-object CBSAMetroMicroLookup {
+object CBSAMetroMicroLookup extends ResourceUtils {
   val values: Seq[CBSAMetroMicro] = {
-    val cbsaResource = getClass.getResourceAsStream("/tl_2013_us_cbsa.csv")
-    val lines = Source.fromInputStream(cbsaResource).getLines()
+    val lines = resourceLines("/tl_2013_us_cbsa.csv")
 
     lines.map { line =>
       val values = line.split('|').map(_.trim)
