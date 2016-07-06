@@ -1,12 +1,11 @@
 package hmda.model.census
 
-import java.io.File
+import hmda.model.ResourceUtils
 
-import scala.io.Source
-
-object CBSATractLookup {
+object CBSATractLookup extends ResourceUtils {
   val values: Seq[CBSATract] = {
-    val lines = Source.fromFile(new File("model/src/main/resources/tract_to_cbsa_2013.csv")).getLines
+    val lines = resourceLines("/tract_to_cbsa_2013.csv")
+
     lines.map { line =>
       val values = line.split('|').map(_.trim)
       val name = values(0)
