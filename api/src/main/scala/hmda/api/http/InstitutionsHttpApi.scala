@@ -65,7 +65,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
           onComplete(fInstitutionDetails) {
             case Success(institution) =>
               filingsActor ! Shutdown
-              complete(ToResponseMarshallable(institution))
+              if (institution.institution.id != "")
+                complete(ToResponseMarshallable(institution))
+              else
+                complete(HttpResponse(StatusCodes.NotFound))
             case Failure(error) =>
               filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)

@@ -52,6 +52,9 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         val filings = DemoData.filings.filter(f => f.fid == institution.id)
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institution, filings.reverse)
       }
+      Get("/institutions/xxxx") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+      }
     }
 
     "return an institution's summary" in {
