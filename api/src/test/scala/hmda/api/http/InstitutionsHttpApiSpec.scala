@@ -49,7 +49,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Get("/institutions/12345") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val institution = DemoData.institutions.head
-        val filings = DemoData.filings.filter(f => f.fid == institution.id)
+        val filings = DemoData.filings.filter(f => f.institutionId == institution.id)
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institution, filings.reverse)
       }
       Get("/institutions/xxxx") ~> institutionsRoutes ~> check {

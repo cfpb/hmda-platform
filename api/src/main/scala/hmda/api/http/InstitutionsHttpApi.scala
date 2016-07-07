@@ -55,18 +55,18 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
     }
 
   val institutionByIdPath =
-    path("institutions" / Segment) { fid =>
+    path("institutions" / Segment) { institutionId =>
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/institutions")
-        val filingsActor = system.actorOf(FilingPersistence.props(fid))
+        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         get {
           implicit val ec: ExecutionContext = executor
-          val fInstitutionDetails = institutionDetails(fid, institutionsActor, filingsActor)
+          val fInstitutionDetails = institutionDetails(institutionId, institutionsActor, filingsActor)
           onComplete(fInstitutionDetails) {
-            case Success(institution) =>
+            case Success(institutionDetails) =>
               filingsActor ! Shutdown
-              if (institution.institution.id != "")
-                complete(ToResponseMarshallable(institution))
+              if (institutionDetails.institution.id != "")
+                complete(ToResponseMarshallable(institutionDetails))
               else
                 complete(HttpResponse(StatusCodes.NotFound))
             case Failure(error) =>
@@ -79,10 +79,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
     }
 
   val filingByPeriodPath =
-    path("institutions" / Segment / "filings" / Segment) { (fid, period) =>
+    path("institutions" / Segment / "filings" / Segment) { (institutionId, period) =>
       extractExecutionContext { executor =>
-        val filingsActor = system.actorOf(FilingPersistence.props(fid))
-        val submissionActor = system.actorOf(SubmissionPersistence.props(fid, period))
+        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
+        val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
         get {
           implicit val ec: ExecutionContext = executor
           val fDetails: Future[FilingDetail] = filingDetailsByPeriod(period, filingsActor, submissionActor)
@@ -91,7 +91,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
               filingsActor ! Shutdown
               submissionActor ! Shutdown
               val filing = filingDetails.filing
-              if (filing.fid == fid && filing.period == period)
+              if (filing.institutionId == institutionId && filing.period == period)
                 complete(ToResponseMarshallable(filingDetails))
               else
                 complete(HttpResponse(StatusCodes.NotFound))
@@ -105,11 +105,11 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
     }
 
   val submissionPath =
-    path("institutions" / Segment / "filings" / Segment / "submissions") { (fid, period) =>
+    path("institutions" / Segment / "filings" / Segment / "submissions") { (institutionId, period) =>
       post {
         implicit val ec = system.dispatcher
-        val filingsActor = system.actorOf(FilingPersistence.props(fid))
-        val submissionsActor = system.actorOf(SubmissionPersistence.props(fid, period))
+        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
+        val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
         val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
         onComplete(fFiling) {
           case Success(filing) =>
@@ -139,7 +139,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
     }
 
   val uploadPath =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (fid, period, submissionId) =>
+    path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
       val uploadTimestamp = Instant.now.toEpochMilli
       val processingActor = createHmdaFileUpload(system, submissionId)
       fileUpload("file") {
@@ -173,13 +173,13 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
     }
 
   val institutionSummaryPath =
-    path("institutions" / Segment / "summary") { fid =>
+    path("institutions" / Segment / "summary") { institutionId =>
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/institutions")
-        val filingsActor = system.actorOf(FilingPersistence.props(fid))
+        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         implicit val ec = executor
         get {
-          val fInstitution = (institutionsActor ? GetInstitutionById(fid)).mapTo[Institution]
+          val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
           val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
           val fSummary = for {
             institution <- fInstitution
@@ -198,8 +198,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
       }
     }
 
-  private def institutionDetails(fid: String, institutionsActor: ActorSelection, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
-    val fInstitution = (institutionsActor ? GetInstitutionById(fid)).mapTo[Institution]
+  private def institutionDetails(institutionId: String, institutionsActor: ActorSelection, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
+    val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
     for {
       institution <- fInstitution
       filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]

@@ -24,7 +24,7 @@ object DemoData {
 
   val institutionSummary = {
     val institution = institutions.head
-    val f = filings.filter(x => x.fid == institution.id)
+    val f = filings.filter(x => x.institutionId == institution.id)
     (institution.id, institution.name, f.reverse)
   }
 
@@ -49,7 +49,7 @@ object DemoData {
 
   def loadFilings(system: ActorSystem): Unit = {
     filings.foreach { filing =>
-      val filingActor = system.actorOf(FilingPersistence.props(filing.fid))
+      val filingActor = system.actorOf(FilingPersistence.props(filing.institutionId))
       filingActor ! CreateFiling(filing)
       Thread.sleep(100)
       filingActor ! Shutdown

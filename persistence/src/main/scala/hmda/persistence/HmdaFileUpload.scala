@@ -7,8 +7,8 @@ import hmda.persistence.CommonMessages._
 object HmdaFileUpload {
   def props(id: String): Props = Props(new HmdaFileUpload(id))
 
-  def createHmdaFileUpload(system: ActorSystem, id: String): ActorRef = {
-    system.actorOf(HmdaFileUpload.props(id))
+  def createHmdaFileUpload(system: ActorSystem, submissionId: String): ActorRef = {
+    system.actorOf(HmdaFileUpload.props(submissionId))
   }
 
   case class AddLine(timestamp: Long, data: String) extends Command
@@ -26,11 +26,11 @@ object HmdaFileUpload {
 
 }
 
-class HmdaFileUpload(id: String) extends PersistentActor with ActorLogging {
+class HmdaFileUpload(submissionId: String) extends PersistentActor with ActorLogging {
 
   import HmdaFileUpload._
 
-  override def persistenceId: String = s"HmdaFileUpload-$id"
+  override def persistenceId: String = s"HmdaFileUpload-$submissionId"
 
   var state = HmdaFileUploadState()
 

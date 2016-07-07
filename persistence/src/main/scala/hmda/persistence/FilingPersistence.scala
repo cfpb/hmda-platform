@@ -15,10 +15,10 @@ object FilingPersistence {
   case class FilingCreated(filing: Filing) extends Event
   case class FilingStatusUpdated(filing: Filing) extends Event
 
-  def props(fid: String): Props = Props(new FilingPersistence(fid))
+  def props(institutionId: String): Props = Props(new FilingPersistence(institutionId))
 
-  def createFilings(fid: String, system: ActorSystem): ActorRef = {
-    system.actorOf(FilingPersistence.props(fid))
+  def createFilings(institutionId: String, system: ActorSystem): ActorRef = {
+    system.actorOf(FilingPersistence.props(institutionId))
   }
 
   case class FilingState(filings: Seq[Filing] = Nil) {
@@ -35,8 +35,8 @@ object FilingPersistence {
   }
 }
 
-// Filings per Institution (fid = institution identifier)
-class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
+// Filings per Institution (institutionId = institution identifier)
+class FilingPersistence(institutionId: String) extends PersistentActor with ActorLogging {
 
   var state = FilingState()
 
@@ -48,7 +48,7 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
     log.debug(s"Filings started at ${self.path}")
   }
 
-  override def persistenceId: String = s"filings-$fid"
+  override def persistenceId: String = s"filings-$institutionId"
 
   override def receiveRecover: Receive = {
     case e: Event => updateState(e)
