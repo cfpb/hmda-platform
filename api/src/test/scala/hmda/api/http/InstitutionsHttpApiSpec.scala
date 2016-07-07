@@ -72,6 +72,12 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         val filing = Filing("2017", "12345", NotStarted)
         responseAs[FilingDetail] mustBe FilingDetail(filing, DemoData.newSubmissions.reverse)
       }
+      Get("/institutions/12345/filings/xxxx") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+      }
+      Get("/institutions/xxxxx/filings/2017") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+      }
     }
 
     "create a new submission" in {

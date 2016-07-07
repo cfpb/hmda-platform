@@ -90,7 +90,11 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
             case Success(filingDetails) =>
               filingsActor ! Shutdown
               submissionActor ! Shutdown
-              complete(ToResponseMarshallable(filingDetails))
+              val filing = filingDetails.filing
+              if (filing.fid == fid && filing.period == period)
+                complete(ToResponseMarshallable(filingDetails))
+              else
+                complete(HttpResponse(StatusCodes.NotFound))
             case Failure(error) =>
               filingsActor ! Shutdown
               submissionActor ! Shutdown
@@ -170,24 +174,26 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
 
   val institutionSummaryPath =
     path("institutions" / Segment / "summary") { fid =>
-      val institutionsActor = system.actorSelection("/user/institutions")
-      val filingsActor = system.actorOf(FilingPersistence.props(fid))
-      implicit val ec = system.dispatcher //TODO: customize ExecutionContext
-      get {
-        val fInstitution = (institutionsActor ? GetInstitutionById(fid)).mapTo[Institution]
-        val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
-        val fSummary = for {
-          institution <- fInstitution
-          filings <- fFilings
-        } yield InstitutionSummary(institution.id, institution.name, filings)
+      extractExecutionContext { executor =>
+        val institutionsActor = system.actorSelection("/user/institutions")
+        val filingsActor = system.actorOf(FilingPersistence.props(fid))
+        implicit val ec = executor
+        get {
+          val fInstitution = (institutionsActor ? GetInstitutionById(fid)).mapTo[Institution]
+          val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
+          val fSummary = for {
+            institution <- fInstitution
+            filings <- fFilings
+          } yield InstitutionSummary(institution.id, institution.name, filings)
 
-        onComplete(fSummary) {
-          case Success(summary) =>
-            filingsActor ! Shutdown
-            complete(ToResponseMarshallable(summary))
-          case Failure(error) =>
-            filingsActor ! Shutdown
-            complete(HttpResponse(StatusCodes.InternalServerError))
+          onComplete(fSummary) {
+            case Success(summary) =>
+              filingsActor ! Shutdown
+              complete(ToResponseMarshallable(summary))
+            case Failure(error) =>
+              filingsActor ! Shutdown
+              complete(HttpResponse(StatusCodes.InternalServerError))
+          }
         }
       }
     }
