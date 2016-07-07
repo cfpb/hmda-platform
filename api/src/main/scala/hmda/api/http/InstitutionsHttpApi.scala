@@ -100,17 +100,33 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
   val submissionPath =
     path("institutions" / Segment / "filings" / Segment / "submissions") { (fid, period) =>
       post {
+        implicit val ec = system.dispatcher
+        val filingsActor = system.actorOf(FilingPersistence.props(fid))
         val submissionsActor = system.actorOf(SubmissionPersistence.props(fid, period))
-        submissionsActor ! CreateSubmission
-        val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
-        onComplete(fLatest) {
-          case Success(submission) =>
-            submissionsActor ! Shutdown
-            val e = HttpEntity(ContentTypes.`application/json`, submission.toJson.toString)
-            complete(HttpResponse(StatusCodes.Created, entity = e))
+        val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
+        onComplete(fFiling) {
+          case Success(filing) =>
+            if (filing.period == period) {
+              submissionsActor ! CreateSubmission
+              val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
+              onComplete(fLatest) {
+                case Success(submission) =>
+                  submissionsActor ! Shutdown
+                  filingsActor ! Shutdown
+                  val e = HttpEntity(ContentTypes.`application/json`, submission.toJson.toString)
+                  complete(HttpResponse(StatusCodes.Created, entity = e))
+                case Failure(error) =>
+                  submissionsActor ! Shutdown
+                  complete(HttpResponse(StatusCodes.InternalServerError))
+              }
+            } else {
+              complete(HttpResponse(StatusCodes.NotFound))
+            }
           case Failure(error) =>
+            filingsActor ! Shutdown
             submissionsActor ! Shutdown
             complete(HttpResponse(StatusCodes.InternalServerError))
+
         }
       }
     }
