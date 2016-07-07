@@ -99,7 +99,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
 
   val submissionPath =
     path("institutions" / Segment / "filings" / Segment / "submissions") { (fid, period) =>
-      val submissionsActor = system.actorOf(SubmissionPersistence.props(fid, period))
       post {
         val submissionsActor = system.actorOf(SubmissionPersistence.props(fid, period))
         submissionsActor ! CreateSubmission
