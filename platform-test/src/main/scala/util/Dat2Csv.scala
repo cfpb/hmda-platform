@@ -31,8 +31,8 @@ object Dat2Csv {
       val datFile = new File(datFilePath)
       val txtFile = new File(txtFilePath)
 
-      val source = FileIO.fromFile(datFile)
-      val sink = FileIO.toFile(txtFile)
+      val source = FileIO.fromPath(datFile.toPath)
+      val sink = FileIO.toPath(txtFile.toPath)
 
       val framing = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
