@@ -28,7 +28,7 @@ class FilingPersistenceSpec extends ActorSpec {
       probe.send(filingsActor, CreateFiling(filing))
       val modified = filing.copy(status = Cancelled)
       probe.send(filingsActor, UpdateFilingStatus(modified))
-      probe.send(filingsActor, GetFilingByPeriod(filing.id))
+      probe.send(filingsActor, GetFilingByPeriod(filing.period))
       probe.expectMsg(filing.copy(status = Cancelled))
     }
   }

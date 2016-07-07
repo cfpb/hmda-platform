@@ -68,7 +68,7 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
       }
 
     case UpdateFilingStatus(modified) =>
-      if (state.filings.map(x => x.id).contains(modified.id)) {
+      if (state.filings.map(x => x.period).contains(modified.period)) {
         persist(FilingStatusUpdated(modified)) { e =>
           log.debug(s"persisted: $modified")
           updateState(e)
@@ -76,7 +76,7 @@ class FilingPersistence(fid: String) extends PersistentActor with ActorLogging {
       }
 
     case GetFilingByPeriod(period) =>
-      val filing = state.filings.find(f => f.id == period).getOrElse(Filing())
+      val filing = state.filings.find(f => f.period == period).getOrElse(Filing())
       sender() ! filing
 
     case GetState =>

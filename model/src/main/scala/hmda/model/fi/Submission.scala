@@ -27,11 +27,11 @@ case object Parsed extends SubmissionStatus {
 }
 case object ValidatingSyntaxAndValidity extends SubmissionStatus {
   override def code: Int = 6
-  override def message: String = "validating syntax and validity"
+  override def message: String = "validating syntactical and validity"
 }
 case object ValidatedSyntaxAndValidity extends SubmissionStatus {
   override def code: Int = 7
-  override def message: String = "validated syntax and validity"
+  override def message: String = "validated syntactical and validity"
 }
 case object ValidatingQualityAndMacro extends SubmissionStatus {
   override def code: Int = 8
@@ -39,15 +39,15 @@ case object ValidatingQualityAndMacro extends SubmissionStatus {
 }
 case object Unverified extends SubmissionStatus {
   override def code: Int = 9
-  override def message: String = "verification required for quality and macro"
+  override def message: String = "unverified"
 }
 case object Verified extends SubmissionStatus {
   override def code: Int = 10
-  override def message: String = "all edits have been verified"
+  override def message: String = "verified"
 }
 case object Signed extends SubmissionStatus {
   override def code: Int = 11
-  override def message: String = "submission complete"
+  override def message: String = "signed"
 }
 case class Failed(message: String) extends SubmissionStatus {
   override def code: Int = -1
