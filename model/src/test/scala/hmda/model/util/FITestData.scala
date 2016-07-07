@@ -1,4 +1,4 @@
-package hmda.parser.util
+package hmda.model.util
 
 object FITestData {
 

@@ -1,15 +1,24 @@
 package hmda.api
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.{ HttpApi, LarHttpApi }
-import hmda.api.processing.lar.SingleLarValidation
+import hmda.api.http._
+import hmda.api.processing.lar.SingleLarValidation._
+import hmda.persistence.InstitutionPersistence._
+import hmda.persistence.demo.DemoData
 
-object HmdaApi extends App with HttpApi with LarHttpApi {
+import scala.concurrent.duration._
+
+object HmdaApi
+    extends App
+    with HttpApi
+    with LarHttpApi
+    with InstitutionsHttpApi {
 
   override implicit val system = ActorSystem("hmda")
   override implicit val materializer = ActorMaterializer()
@@ -18,18 +27,28 @@ object HmdaApi extends App with HttpApi with LarHttpApi {
   override val log = Logging(system, getClass)
   val config = ConfigFactory.load()
 
+  lazy val httpTimeout = config.getInt("hmda.http.timeout")
+  override implicit val timeout = Timeout(httpTimeout.seconds)
+
   lazy val host = config.getString("hmda.http.host")
   lazy val port = config.getInt("hmda.http.port")
 
   //Start up API Actors
-  import hmda.api.processing.lar.SingleLarValidation._
-  val larValidation = createSingleLarValidator(system)
+
+  createSingleLarValidator(system)
+  createInstitutions(system)
 
   val http = Http().bindAndHandle(
-    routes ~ larRoutes,
+    routes ~ larRoutes ~ institutionsRoutes,
     host,
     port
   )
+
+  //Load demo data
+  lazy val isDemo = config.getBoolean("hmda.isDemo")
+  if (isDemo) {
+    DemoData.loadData(system)
+  }
 
   http onFailure {
     case ex: Exception =>

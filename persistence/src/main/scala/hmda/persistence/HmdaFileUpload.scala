@@ -1,22 +1,19 @@
-package hmda.api.processing
+package hmda.persistence
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
+import hmda.persistence.CommonMessages._
 
 object HmdaFileUpload {
   def props(id: String): Props = Props(new HmdaFileUpload(id))
 
-  def createHmdaFileUpload(system: ActorSystem, id: String): ActorRef = {
-    system.actorOf(HmdaFileUpload.props(id))
+  def createHmdaFileUpload(system: ActorSystem, submissionId: String): ActorRef = {
+    system.actorOf(HmdaFileUpload.props(submissionId))
   }
 
-  sealed trait Command
-  sealed trait Event
   case class AddLine(timestamp: Long, data: String) extends Command
   case object CompleteUpload extends Command
   case class LineAdded(timestamp: Long, data: String) extends Event
-  case object GetState
-  case object Shutdown
 
   // uploads is a Map of timestamp -> number of rows
   case class HmdaFileUploadState(uploads: Map[Long, Int] = Map.empty) {
@@ -29,11 +26,11 @@ object HmdaFileUpload {
 
 }
 
-class HmdaFileUpload(id: String) extends PersistentActor with ActorLogging {
+class HmdaFileUpload(submissionId: String) extends PersistentActor with ActorLogging {
 
   import HmdaFileUpload._
 
-  override def persistenceId: String = s"HmdaFileUpload-$id"
+  override def persistenceId: String = s"HmdaFileUpload-$submissionId"
 
   var state = HmdaFileUploadState()
 
@@ -61,7 +58,7 @@ class HmdaFileUpload(id: String) extends PersistentActor with ActorLogging {
   override def receiveRecover: Receive = {
     case event: Event => updateState(event)
     case SnapshotOffer(_, snapshot: HmdaFileUploadState) =>
-      log.info("Recovering from snapshot")
+      log.debug("Recovering from snapshot")
       state = snapshot
   }
 

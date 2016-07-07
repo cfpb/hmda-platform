@@ -1,7 +1,9 @@
 package hmda.api.model
 
 import java.util.Calendar
-import org.scalacheck.{ Gen, Arbitrary }
+
+import hmda.model.fi._
+import org.scalacheck.{ Arbitrary, Gen }
 
 trait ModelGenerators {
 
@@ -12,6 +14,60 @@ trait ModelGenerators {
       time = Calendar.getInstance().getTime().toString
       host = "localhost"
     } yield Status(status, service, time, host)
+  }
+
+  implicit def institutionStatusGen: Gen[InstitutionStatus] = {
+    Gen.oneOf(Active, Inactive)
+  }
+
+  implicit def institutionGen: Gen[Institution] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+      status <- institutionStatusGen
+    } yield Institution(id, name, status)
+  }
+
+  implicit def filingStatusGen: Gen[FilingStatus] = {
+    Gen.oneOf(NotStarted, InProgress, Completed, Cancelled)
+  }
+
+  implicit def filingGen: Gen[Filing] = {
+    for {
+      id <- Gen.alphaStr
+      fid <- Gen.alphaStr
+      status <- filingStatusGen
+    } yield Filing(id, fid, status)
+  }
+
+  implicit def submissionStatusGen: Gen[SubmissionStatus] = {
+    Gen.oneOf(
+      Created,
+      Uploading,
+      Uploaded,
+      Parsing,
+      Parsed,
+      ValidatingSyntaxAndValidity,
+      ValidatedSyntaxAndValidity,
+      ValidatingQualityAndMacro,
+      Unverified,
+      Verified,
+      Signed
+    )
+  }
+
+  implicit def submissionGen: Gen[Submission] = {
+    for {
+      id <- Gen.choose(0, Int.MaxValue)
+      status <- submissionStatusGen
+    } yield Submission(id, status)
+  }
+
+  implicit def filingDetailGen: Gen[FilingDetail] = {
+    for {
+      filing <- filingGen
+      submissions <- Gen.listOf(submissionGen)
+    } yield FilingDetail(filing, submissions)
   }
 
 }

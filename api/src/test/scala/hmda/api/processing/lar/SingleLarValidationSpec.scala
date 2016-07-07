@@ -3,11 +3,13 @@ package hmda.api.processing.lar
 import java.io.File
 
 import akka.testkit.TestProbe
-import hmda.api.processing.ActorSpec
+import hmda.actor.test.ActorSpec
 import hmda.api.processing.lar.SingleLarValidation.CheckAll
 import hmda.parser.fi.lar.LarCsvParser
+
 import scala.io.Source
 import hmda.api.processing.lar.SingleLarValidation._
+
 import scala.concurrent.duration._
 
 class SingleLarValidationSpec extends ActorSpec {

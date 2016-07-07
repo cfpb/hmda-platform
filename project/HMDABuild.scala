@@ -7,7 +7,7 @@ import spray.revolver.RevolverPlugin.autoImport.Revolver
 object BuildSettings {
   val buildOrganization = "cfpb"
   val buildVersion      = "1.0.0"
-  val buildScalaVersion = "2.11.7"
+  val buildScalaVersion = "2.11.8"
 
   val buildSettings = Defaults.coreDefaultSettings ++
     Seq(
@@ -19,7 +19,8 @@ object BuildSettings {
         "-deprecation",
         "-unchecked",
         "-feature"),
-      aggregate in assembly := false
+      aggregate in assembly := false,
+      parallelExecution in Test := false
     )
 
 }
@@ -33,7 +34,7 @@ object HMDABuild extends Build {
 
   val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
 
-  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, leveldb, leveldbjni)
+  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, leveldb, leveldbjni, akkaPersistenceQuery)
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
@@ -60,6 +61,7 @@ object HMDABuild extends Build {
     .aggregate(
       model,
       parser,
+      persistence,
       api,
       platformTest,
       validation)
@@ -81,13 +83,28 @@ object HMDABuild extends Build {
           libraryDependencies ++= commonDeps
         )
       )
-    .dependsOn(model)
+    .dependsOn(model % "compile->compile;test->test")
 
   lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
     .settings(
       libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps
     ).dependsOn(parser % "compile->compile;test->test")
+
+
+  lazy val persistence = (project in file("persistence"))
+      .settings(buildSettings:_*)
+    .settings(
+      Seq(
+        assemblyMergeStrategy in assembly := {
+          case "application.conf" => MergeStrategy.concat
+          case x =>
+            val oldStrategy = (assemblyMergeStrategy in assembly).value
+            oldStrategy(x)
+        },
+        libraryDependencies ++= akkaPersistenceDeps
+      )
+    ).dependsOn(model % "compile->compile;test->test")
 
 
   lazy val api = (project in file("api"))
@@ -104,9 +121,9 @@ object HMDABuild extends Build {
             val oldStrategy = (assemblyMergeStrategy in assembly).value
             oldStrategy(x)
         },
-        libraryDependencies ++= httpDeps ++ akkaPersistenceDeps
+        libraryDependencies ++= httpDeps
       )
-    ).dependsOn(parser, validation % "compile->compile;test->test")
+    ).dependsOn(parser, validation, persistence % "compile->compile;test->test")
 
 
   lazy val platformTest = (project in file("platform-test"))

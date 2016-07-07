@@ -1,7 +1,7 @@
 package hmda.parser.fi.lar
 
 import hmda.model.fi.lar._
-import hmda.parser.util.FITestData
+import hmda.model.util.FITestData
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 

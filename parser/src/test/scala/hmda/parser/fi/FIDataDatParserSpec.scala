@@ -2,8 +2,8 @@ package hmda.parser.fi
 
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.parser.util.FITestData._
-import org.scalatest.{ MustMatchers, FlatSpec }
+import hmda.model.util.FITestData._
+import org.scalatest.{ FlatSpec, MustMatchers }
 
 class FIDataDatParserSpec extends FlatSpec with MustMatchers {
 

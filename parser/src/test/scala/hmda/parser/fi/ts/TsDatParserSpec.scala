@@ -1,6 +1,6 @@
 package hmda.parser.fi.ts
 
-import hmda.parser.util.FITestData
+import hmda.model.util.FITestData
 import org.scalatest._
 
 class TsDatParserSpec extends FlatSpec with MustMatchers {
