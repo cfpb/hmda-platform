@@ -27,7 +27,7 @@ object FilingPersistence {
         case FilingCreated(f) =>
           FilingState(f +: filings)
         case FilingStatusUpdated(modified) =>
-          val x = filings.find(x => x.id == modified.id).getOrElse(Filing())
+          val x = filings.find(x => x.period == modified.period).getOrElse(Filing())
           val i = filings.indexOf(x)
           FilingState(filings.updated(i, modified))
       }

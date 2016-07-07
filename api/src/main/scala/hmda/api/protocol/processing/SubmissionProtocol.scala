@@ -9,19 +9,8 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
   implicit object SubmissionStatusJsonFormat extends RootJsonFormat[SubmissionStatus] {
     override def write(status: SubmissionStatus): JsValue = {
       status match {
-        case Created => JsString("created")
-        case Uploading => JsString("uploading")
-        case Uploaded => JsString("uploaded")
-        case Parsing => JsString("parsing")
-        case Parsed => JsString("parsed")
-        case ValidatingSyntaxAndValidity => JsString("validating syntactical and validity")
-        case ValidatedSyntaxAndValidity => JsString("validated syntactical and validity")
-        case ValidatingQualityAndMacro => JsString("validating quality and macro")
-        case Unverified => JsString("unverified")
-        case Verified => JsString("verified")
-        case Signed => JsString("signed")
         case Failed(msg) => JsString(s"failed: $msg")
-
+        case _ => JsString(status.message)
       }
     }
 
@@ -42,7 +31,7 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
           case "failed" => Failed("")
           case _ => throw new DeserializationException("Submission Status expected")
         }
-        case _ => throw new DeserializationException("Submission Status expected")
+        case _ => throw new DeserializationException("Unable to deserialize")
 
       }
     }
