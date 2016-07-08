@@ -17,14 +17,14 @@ Takes a .DAT file and converts to pipe delimited CSV (2017)
  */
 object Dat2Csv {
 
-  implicit val system: ActorSystem = ActorSystem()
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit val ec: ExecutionContext = system.dispatcher
-
   def main(args: Array[String]): Unit = {
     if (args.length != 2) {
       throw new Exception("Please provide input .DAT and output .txt files")
     } else {
+      implicit val system: ActorSystem = ActorSystem()
+      implicit val materializer: ActorMaterializer = ActorMaterializer()
+      implicit val ec: ExecutionContext = system.dispatcher
+
       val datFilePath = args(0)
       val txtFilePath = args(1)
 
