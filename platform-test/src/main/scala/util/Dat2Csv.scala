@@ -1,10 +1,10 @@
 package util
 
-import java.io.File
+import java.nio.file.Paths
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.{ ActorMaterializer, IOResult }
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import hmda.parser.fi.lar.LarDatParser
@@ -17,22 +17,19 @@ Takes a .DAT file and converts to pipe delimited CSV (2017)
  */
 object Dat2Csv {
 
-  implicit val system: ActorSystem = ActorSystem()
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit val ec: ExecutionContext = system.dispatcher
-
   def main(args: Array[String]): Unit = {
     if (args.length != 2) {
       throw new Exception("Please provide input .DAT and output .txt files")
     } else {
+      implicit val system: ActorSystem = ActorSystem()
+      implicit val materializer: ActorMaterializer = ActorMaterializer()
+      implicit val ec: ExecutionContext = system.dispatcher
+
       val datFilePath = args(0)
       val txtFilePath = args(1)
 
-      val datFile = new File(datFilePath)
-      val txtFile = new File(txtFilePath)
-
-      val source = FileIO.fromPath(datFile.toPath)
-      val sink = FileIO.toPath(txtFile.toPath)
+      val source = FileIO.fromPath(Paths.get(datFilePath))
+      val sink = FileIO.toPath(Paths.get(txtFilePath))
 
       val framing = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
@@ -54,6 +51,9 @@ object Dat2Csv {
         .map(s => ByteString(s"$s\n"))
         .runWith(sink)
 
+      convert.andThen {
+        case _ => system.terminate()
+      }
     }
   }
 
