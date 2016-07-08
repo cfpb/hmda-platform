@@ -1,10 +1,10 @@
 package util
 
-import java.io.File
+import java.nio.file.Paths
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.stream.{ ActorMaterializer, IOResult }
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import hmda.parser.fi.lar.LarDatParser
@@ -28,11 +28,8 @@ object Dat2Csv {
       val datFilePath = args(0)
       val txtFilePath = args(1)
 
-      val datFile = new File(datFilePath)
-      val txtFile = new File(txtFilePath)
-
-      val source = FileIO.fromPath(datFile.toPath)
-      val sink = FileIO.toPath(txtFile.toPath)
+      val source = FileIO.fromPath(Paths.get(datFilePath))
+      val sink = FileIO.toPath(Paths.get(txtFilePath))
 
       val framing = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
