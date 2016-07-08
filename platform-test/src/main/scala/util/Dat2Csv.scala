@@ -51,6 +51,9 @@ object Dat2Csv {
         .map(s => ByteString(s"$s\n"))
         .runWith(sink)
 
+      convert.andThen {
+        case _ => system.terminate()
+      }
     }
   }
 
