@@ -31,10 +31,9 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
       path("parse") {
         post {
           entity(as[String]) { s =>
-            val lar = LarCsvParser(s)
-            //TODO: return human readable errors when parser fails. See issue #62
-            complete {
-              ToResponseMarshallable(lar)
+            LarCsvParser(s) match {
+              case Right(lar) => complete(ToResponseMarshallable(lar))
+              case Left(error) => complete(HttpResponse(StatusCodes.UnprocessableEntity))
             }
           }
         }

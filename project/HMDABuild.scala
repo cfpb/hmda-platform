@@ -80,7 +80,7 @@ object HMDABuild extends Build {
     .settings(buildSettings: _*)
       .settings(
         Seq(
-          libraryDependencies ++= commonDeps
+          libraryDependencies ++= commonDeps ++ scalazDeps
         )
       )
     .dependsOn(model % "compile->compile;test->test")
