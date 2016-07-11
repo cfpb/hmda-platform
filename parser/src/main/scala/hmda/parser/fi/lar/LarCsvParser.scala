@@ -8,7 +8,7 @@ object LarCsvParser {
   def apply(s: String): Either[List[String], LoanApplicationRegister] = {
     val larErrors = checkLar(s)
 
-    if(larErrors.isEmpty) {
+    if (larErrors.isEmpty) {
       val values = s.split('|').map(_.trim)
       val id = values(0).toInt
       val respId = values(1)
@@ -99,8 +99,7 @@ object LarCsvParser {
         hoepaStatus,
         lienStatus
       ))
-    }
-    else {
+    } else {
       Left(larErrors)
     }
   }
@@ -131,11 +130,11 @@ object LarCsvParser {
     )
 
     if (values.length != 40 && values.length != 39) {
-      errors = errors :::  List("Incorrect number of fields: " + values.length)
+      return errors ::: List("Incorrect number of fields: " + values.length)
     }
 
     for (int <- numericFields.keys) {
-      if(Try(values(int).toInt).isFailure) {
+      if (Try(values(int).toInt).isFailure) {
         val field = numericFields(int)
         errors = errors ::: List(s"$field is not an Integer")
       }

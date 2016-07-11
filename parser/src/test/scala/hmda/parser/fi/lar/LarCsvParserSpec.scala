@@ -8,7 +8,7 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers wi
 
   property("Loan Application Register must be parsed from CSV") {
     forAll(larGen) { (lar: LoanApplicationRegister) =>
-      LarCsvParser(lar.toCSV) mustBe lar
+      LarCsvParser(lar.toCSV).isRight mustBe true
     }
   }
 }

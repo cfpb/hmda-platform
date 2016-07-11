@@ -13,8 +13,9 @@ class FIDataCsvParser extends FIDataParser[String] {
   def parseLines(lines: Iterable[String]): FIData = {
     val tsLine = lines.head
     val ts = TsCsvParser(tsLine)
-    val lars = lines.tail.map(l => LarCsvParser(l))
-    FIData(ts, lars)
+    // Only parse LARs that do not contain errors
+    val larsWithoutErrors = lines.tail.map(l => LarCsvParser(l)).filter(_.isRight).map(_.right.get)
+    FIData(ts, larsWithoutErrors)
   }
 
   override def readAll(input: String): FIData = {
