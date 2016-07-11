@@ -47,7 +47,7 @@ object PredicateCommon {
     case _ => throw new NotImplementedError("'empty' doesn't handle non-string values yet")
   }
 
-  implicit def when(condition: Result)(thenTest: => Result): Result = {
+  def when(condition: Result)(thenTest: => Result): Result = {
     condition.implies(thenTest)
   }
 
