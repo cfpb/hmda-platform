@@ -13,46 +13,47 @@ object LarCsvParser {
     val larErrors = checkLar(values.toList)
     val validation = larErrors.disjunction
     if (validation.isRight) {
-      val rSuccess = validation.toEither.right.get
-      val id = rSuccess(0)
+      val convertedValues = validation.toEither.right.get
+
+      val id = convertedValues(0)
       val respId = values(1)
-      val agencyCode = rSuccess(1)
+      val agencyCode = convertedValues(1)
       val loanId = values(3)
       val loanDate = values(4)
-      val loanType = rSuccess(2)
-      val propertyType = rSuccess(3)
-      val loanPurpose = rSuccess(4)
-      val occupancy = rSuccess(5)
-      val loanAmount = rSuccess(6)
-      val preapprovals = rSuccess(7)
-      val actionType = rSuccess(8)
-      val actionDate = rSuccess(9)
+      val loanType = convertedValues(2)
+      val propertyType = convertedValues(3)
+      val loanPurpose = convertedValues(4)
+      val occupancy = convertedValues(5)
+      val loanAmount = convertedValues(6)
+      val preapprovals = convertedValues(7)
+      val actionType = convertedValues(8)
+      val actionDate = convertedValues(9)
       val msa = values(13)
       val state = values(14)
       val county = values(15)
       val tract = values(16)
-      val appEthnicity = rSuccess(10)
-      val coAppEthnicity = rSuccess(11)
-      val appRace1 = rSuccess(12)
+      val appEthnicity = convertedValues(10)
+      val coAppEthnicity = convertedValues(11)
+      val appRace1 = convertedValues(12)
       val appRace2 = values(20)
       val appRace3 = values(21)
       val appRace4 = values(22)
       val appRace5 = values(23)
-      val coAppRace1 = rSuccess(13)
+      val coAppRace1 = convertedValues(13)
       val coAppRace2 = values(25)
       val coAppRace3 = values(26)
       val coAppRace4 = values(27)
       val coAppRace5 = values(28)
-      val appSex = rSuccess(14)
-      val coAppSex = rSuccess(15)
+      val appSex = convertedValues(14)
+      val coAppSex = convertedValues(15)
       val appIncome = values(31)
-      val purchaserType = rSuccess(16)
+      val purchaserType = convertedValues(16)
       val denial1 = values(33)
       val denial2 = values(34)
       val denial3 = values(35)
       val rateSpread = values(36)
-      val hoepaStatus = rSuccess(17)
-      val lienStatus = rSuccess(18)
+      val hoepaStatus = convertedValues(17)
+      val lienStatus = convertedValues(18)
 
       val loan =
         Loan(
@@ -111,13 +112,6 @@ object LarCsvParser {
     }
   }
 
-  def toIntorFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
-    Try(value.toInt) match {
-      case Failure(result) => s"$fieldName is not an Integer".failure.toValidationNel
-      case Success(result) => List(result).success
-    }
-  }
-
   def checkLar(fields: List[String]): ValidationNel[String, List[Int]] = {
 
     if (fields.length != 40 && fields.length != 39) {
@@ -148,6 +142,13 @@ object LarCsvParser {
       val validationList = numericFields.map { case (key, value) => toIntorFail(value, key) }
 
       validationList.reduce(_ +++ _)
+    }
+  }
+
+  def toIntorFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
+    Try(value.toInt) match {
+      case Failure(result) => s"$fieldName is not an Integer".failure.toValidationNel
+      case Success(result) => List(result).success
     }
   }
 }
