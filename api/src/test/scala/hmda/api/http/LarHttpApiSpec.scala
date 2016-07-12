@@ -47,6 +47,13 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
       }
     }
 
+    "fail to parse an valid pipe delimited LAR with too many fields and return an error" in {
+      Post("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes ~> check {
+        status mustEqual StatusCodes.UNPROCESSABLE_ENTITY
+        responseAs[List[String]].length mustBe 1
+      }
+    }
+
     "return no validation errors for a valid LAR" in {
       Post("/lar/validate", lar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
