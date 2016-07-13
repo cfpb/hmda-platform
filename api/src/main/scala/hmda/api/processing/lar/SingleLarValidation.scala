@@ -41,13 +41,10 @@ class SingleLarValidation extends Actor with ActorLogging with LarEngine {
   }
 
   private def validationErrors(lar: LoanApplicationRegister, f: LoanApplicationRegister => LarValidation): List[ValidationError] = {
-    val validation = f(lar).disjunction
-    if (validation.isRight) {
-      Nil
-    } else {
-      val lErrors = validation.toEither.left.get
-      lErrors.list.toList
+    val validation = f(lar)
+    validation match {
+      case scalaz.Success(_) => Nil
+      case scalaz.Failure(errors) => errors.list.toList
     }
   }
-
 }
