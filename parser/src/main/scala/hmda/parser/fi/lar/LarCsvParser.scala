@@ -10,10 +10,9 @@ import scala.util.{ Failure, Success, Try }
 object LarCsvParser {
   def apply(s: String): Either[List[String], LoanApplicationRegister] = {
     val values = s.split('|').map(_.trim)
-    val larErrors = checkLar(values.toList)
-    val parseResults = larErrors.disjunction
-    if (parseResults.isRight) {
-      val convertedValues = parseResults.toEither.right.get
+    val parserResults = checkLar(values.toList)
+    if (parserResults.isSuccess) {
+      val convertedValues = parserResults.toEither.right.get
 
       val id = convertedValues(0)
       val respId = values(1)
@@ -43,7 +42,7 @@ object LarCsvParser {
       val coAppRace2 = values(25)
       val coAppRace3 = values(26)
       val coAppRace4 = values(27)
-      
+
       val coAppRace5 = values(28)
       val appSex = convertedValues(14)
       val coAppSex = convertedValues(15)
@@ -108,7 +107,7 @@ object LarCsvParser {
         )
       )
     } else {
-      val lErrors = parseResults.toEither.left.get
+      val lErrors = parserResults.toEither.left.get
       Left(lErrors.list.toList)
     }
   }
