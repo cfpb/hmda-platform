@@ -11,104 +11,105 @@ object LarCsvParser {
   def apply(s: String): Either[List[String], LoanApplicationRegister] = {
     val values = s.split('|').map(_.trim)
     val parserResults = checkLar(values.toList)
-    if (parserResults.isSuccess) {
-      val convertedValues = parserResults.toEither.right.get
+    parserResults.toValidationNel match {
+      case scalaz.Success(convertedValues) => {
 
-      val id = convertedValues(0)
-      val respId = values(1)
-      val agencyCode = convertedValues(1)
-      val loanId = values(3)
-      val loanDate = values(4)
-      val loanType = convertedValues(2)
-      val propertyType = convertedValues(3)
-      val loanPurpose = convertedValues(4)
-      val occupancy = convertedValues(5)
-      val loanAmount = convertedValues(6)
-      val preapprovals = convertedValues(7)
-      val actionType = convertedValues(8)
-      val actionDate = convertedValues(9)
-      val msa = values(13)
-      val state = values(14)
-      val county = values(15)
-      val tract = values(16)
-      val appEthnicity = convertedValues(10)
-      val coAppEthnicity = convertedValues(11)
-      val appRace1 = convertedValues(12)
-      val appRace2 = values(20)
-      val appRace3 = values(21)
-      val appRace4 = values(22)
-      val appRace5 = values(23)
-      val coAppRace1 = convertedValues(13)
-      val coAppRace2 = values(25)
-      val coAppRace3 = values(26)
-      val coAppRace4 = values(27)
+        val id = convertedValues(0)
+        val respId = values(1)
+        val agencyCode = convertedValues(1)
+        val loanId = values(3)
+        val loanDate = values(4)
+        val loanType = convertedValues(2)
+        val propertyType = convertedValues(3)
+        val loanPurpose = convertedValues(4)
+        val occupancy = convertedValues(5)
+        val loanAmount = convertedValues(6)
+        val preapprovals = convertedValues(7)
+        val actionType = convertedValues(8)
+        val actionDate = convertedValues(9)
+        val msa = values(13)
+        val state = values(14)
+        val county = values(15)
+        val tract = values(16)
+        val appEthnicity = convertedValues(10)
+        val coAppEthnicity = convertedValues(11)
+        val appRace1 = convertedValues(12)
+        val appRace2 = values(20)
+        val appRace3 = values(21)
+        val appRace4 = values(22)
+        val appRace5 = values(23)
+        val coAppRace1 = convertedValues(13)
+        val coAppRace2 = values(25)
+        val coAppRace3 = values(26)
+        val coAppRace4 = values(27)
 
-      val coAppRace5 = values(28)
-      val appSex = convertedValues(14)
-      val coAppSex = convertedValues(15)
-      val appIncome = values(31)
-      val purchaserType = convertedValues(16)
-      val denial1 = values(33)
-      val denial2 = values(34)
-      val denial3 = values(35)
-      val rateSpread = values(36)
-      val hoepaStatus = convertedValues(17)
-      val lienStatus = convertedValues(18)
+        val coAppRace5 = values(28)
+        val appSex = convertedValues(14)
+        val coAppSex = convertedValues(15)
+        val appIncome = values(31)
+        val purchaserType = convertedValues(16)
+        val denial1 = values(33)
+        val denial2 = values(34)
+        val denial3 = values(35)
+        val rateSpread = values(36)
+        val hoepaStatus = convertedValues(17)
+        val lienStatus = convertedValues(18)
 
-      val loan =
-        Loan(
-          loanId,
-          loanDate,
-          loanType,
-          propertyType,
-          loanPurpose,
-          occupancy,
-          loanAmount
+        val loan =
+          Loan(
+            loanId,
+            loanDate,
+            loanType,
+            propertyType,
+            loanPurpose,
+            occupancy,
+            loanAmount
+          )
+
+        val geography = Geography(msa, state, county, tract)
+
+        val applicant =
+          Applicant(
+            appEthnicity,
+            coAppEthnicity,
+            appRace1,
+            appRace2,
+            appRace3,
+            appRace4,
+            appRace5,
+            coAppRace1,
+            coAppRace2,
+            coAppRace3,
+            coAppRace4,
+            coAppRace5,
+            appSex,
+            coAppSex,
+            appIncome
+          )
+        val denial = Denial(denial1, denial2, denial3)
+
+        Right(
+          LoanApplicationRegister(
+            id,
+            respId,
+            agencyCode,
+            loan,
+            preapprovals,
+            actionType,
+            actionDate,
+            geography,
+            applicant,
+            purchaserType,
+            denial,
+            rateSpread,
+            hoepaStatus,
+            lienStatus
+          )
         )
-
-      val geography = Geography(msa, state, county, tract)
-
-      val applicant =
-        Applicant(
-          appEthnicity,
-          coAppEthnicity,
-          appRace1,
-          appRace2,
-          appRace3,
-          appRace4,
-          appRace5,
-          coAppRace1,
-          coAppRace2,
-          coAppRace3,
-          coAppRace4,
-          coAppRace5,
-          appSex,
-          coAppSex,
-          appIncome
-        )
-      val denial = Denial(denial1, denial2, denial3)
-
-      Right(
-        LoanApplicationRegister(
-          id,
-          respId,
-          agencyCode,
-          loan,
-          preapprovals,
-          actionType,
-          actionDate,
-          geography,
-          applicant,
-          purchaserType,
-          denial,
-          rateSpread,
-          hoepaStatus,
-          lienStatus
-        )
-      )
-    } else {
-      val lErrors = parserResults.toEither.left.get
-      Left(lErrors.list.toList)
+      }
+      case scalaz.Failure(errors) => {
+        Left(errors.head.toList)
+      }
     }
   }
 
