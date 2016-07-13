@@ -47,36 +47,30 @@ object PredicateGeo {
     .map { cbsa => (cbsa.state, cbsa.county) }
     .toSet
 
-  implicit def smallCounty: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = (geo) =>
-      smallCounties.contains((geo.state, geo.county))
+  implicit def smallCounty: Predicate[Geography] = { (geo: Geography) =>
+    smallCounties.contains((geo.state, geo.county))
   }
 
-  implicit def validStateCountyCombination: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = (geo) =>
-      validStateCountyCombinationSet.contains((geo.state, geo.county))
+  implicit def validStateCountyCombination: Predicate[Geography] = { (geo: Geography) =>
+    validStateCountyCombinationSet.contains((geo.state, geo.county))
   }
 
-  implicit def validStateCountyTractCombination: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = (geo) =>
-      validStateCountyTractCombinationSet.contains((geo.state, geo.county, geo.tract))
+  implicit def validStateCountyTractCombination: Predicate[Geography] = { (geo: Geography) =>
+    validStateCountyTractCombinationSet.contains((geo.state, geo.county, geo.tract))
   }
 
-  implicit def validCompleteCombination: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = (geo) =>
-      validMsaCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract)) ||
-        validMdCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract))
+  implicit def validCompleteCombination: Predicate[Geography] = { (geo: Geography) =>
+    validMsaCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract)) ||
+      validMdCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract))
   }
 
-  implicit def validStateCountyMsaCombination: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = (geo) =>
-      validMsaCombinationSetNoTract.contains((geo.msa, geo.state, geo.county)) ||
-        validMdCombinationSetNoTract.contains((geo.msa, geo.state, geo.county))
+  implicit def validStateCountyMsaCombination: Predicate[Geography] = { (geo: Geography) =>
+    validMsaCombinationSetNoTract.contains((geo.msa, geo.state, geo.county)) ||
+      validMdCombinationSetNoTract.contains((geo.msa, geo.state, geo.county))
   }
 
-  implicit def stateCountyCombinationInMsaNotMicro: Predicate[Geography] = new Predicate[Geography] {
-    override def validate: (Geography) => Boolean = (geo) =>
-      hasMsaNotMicroSet.contains((geo.state, geo.county))
+  implicit def stateCountyCombinationInMsaNotMicro: Predicate[Geography] = { (geo: Geography) =>
+    hasMsaNotMicroSet.contains((geo.state, geo.county))
   }
 
 }

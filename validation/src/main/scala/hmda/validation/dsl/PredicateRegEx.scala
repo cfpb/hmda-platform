@@ -25,12 +25,10 @@ object PredicateRegEx {
     result.mkString("^", "", "$").r
   }
 
-  private def stringMatching(regEx: Regex): Predicate[String] = new Predicate[String] {
-    override def validate: (String) => Boolean = {
-      regEx.findFirstIn(_) match {
-        case Some(_) => true
-        case None => false
-      }
+  private def stringMatching(regEx: Regex): Predicate[String] = {
+    regEx.findFirstIn(_: String) match {
+      case Some(_) => true
+      case None => false
     }
   }
 }
