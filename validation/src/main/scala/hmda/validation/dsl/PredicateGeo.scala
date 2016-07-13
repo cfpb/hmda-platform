@@ -47,29 +47,29 @@ object PredicateGeo {
     .map { cbsa => (cbsa.state, cbsa.county) }
     .toSet
 
-  implicit def smallCounty: Predicate[Geography] = { (geo: Geography) =>
+  def smallCounty: Predicate[Geography] = { (geo: Geography) =>
     smallCounties.contains((geo.state, geo.county))
   }
 
-  implicit def validStateCountyCombination: Predicate[Geography] = { (geo: Geography) =>
+  def validStateCountyCombination: Predicate[Geography] = { (geo: Geography) =>
     validStateCountyCombinationSet.contains((geo.state, geo.county))
   }
 
-  implicit def validStateCountyTractCombination: Predicate[Geography] = { (geo: Geography) =>
+  def validStateCountyTractCombination: Predicate[Geography] = { (geo: Geography) =>
     validStateCountyTractCombinationSet.contains((geo.state, geo.county, geo.tract))
   }
 
-  implicit def validCompleteCombination: Predicate[Geography] = { (geo: Geography) =>
+  def validCompleteCombination: Predicate[Geography] = { (geo: Geography) =>
     validMsaCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract)) ||
       validMdCombinationSet.contains((geo.msa, geo.state, geo.county, geo.tract))
   }
 
-  implicit def validStateCountyMsaCombination: Predicate[Geography] = { (geo: Geography) =>
+  def validStateCountyMsaCombination: Predicate[Geography] = { (geo: Geography) =>
     validMsaCombinationSetNoTract.contains((geo.msa, geo.state, geo.county)) ||
       validMdCombinationSetNoTract.contains((geo.msa, geo.state, geo.county))
   }
 
-  implicit def stateCountyCombinationInMsaNotMicro: Predicate[Geography] = { (geo: Geography) =>
+  def stateCountyCombinationInMsaNotMicro: Predicate[Geography] = { (geo: Geography) =>
     hasMsaNotMicroSet.contains((geo.state, geo.county))
   }
 
