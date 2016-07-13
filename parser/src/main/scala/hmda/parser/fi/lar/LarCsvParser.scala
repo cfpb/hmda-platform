@@ -11,7 +11,7 @@ object LarCsvParser {
   def apply(s: String): Either[List[String], LoanApplicationRegister] = {
     val values = s.split('|').map(_.trim)
     val parserResults = checkLar(values.toList)
-    parserResults.toValidationNel match {
+    parserResults match {
       case scalaz.Success(convertedValues) => {
 
         val id = convertedValues(0)
@@ -108,7 +108,7 @@ object LarCsvParser {
         )
       }
       case scalaz.Failure(errors) => {
-        Left(errors.head.toList)
+        Left(errors.toList)
       }
     }
   }
