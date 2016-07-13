@@ -7,12 +7,14 @@ FROM java:8
 
 MAINTAINER Juan Marin Otero <juan.marin.otero@gmail.com>
 
-WORKDIR /
+WORKDIR /opt
+
+RUN mkdir -p target && chmod -R a+w target
 
 USER daemon
 
-ENTRYPOINT ["java", "-jar", "/opt/hmda.jar"]
+ENTRYPOINT ["java", "-jar", "hmda.jar"]
 
 EXPOSE 8080
 
-COPY target/scala-2.11/hmda.jar /opt/hmda.jar
+COPY target/scala-2.11/hmda.jar . 
