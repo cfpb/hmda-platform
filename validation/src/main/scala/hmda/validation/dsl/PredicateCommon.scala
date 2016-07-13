@@ -50,8 +50,4 @@ object PredicateCommon {
   def when(condition: Result)(thenTest: => Result): Result = {
     condition.implies(thenTest)
   }
-
-  implicit def func2predicate[T](f: T => Boolean): Predicate[T] = new Predicate[T] {
-    override def validate = f
-  }
 }
