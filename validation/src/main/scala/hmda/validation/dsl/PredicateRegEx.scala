@@ -4,16 +4,16 @@ import scala.language.implicitConversions
 import scala.util.matching.Regex
 
 object PredicateRegEx {
-  implicit def validCensusTractFormat: Predicate[String] = stringMatching("^\\d{4}\\.\\d{2}$".r)
+  def validCensusTractFormat: Predicate[String] = stringMatching("^\\d{4}\\.\\d{2}$".r)
 
-  implicit def validEmail: Predicate[String] =
+  def validEmail: Predicate[String] =
     stringMatching("^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$".r)
 
-  implicit def validPhoneNumber: Predicate[String] = stringMatching("^\\d{3}-\\d{3}-\\d{4}$".r)
+  def validPhoneNumber: Predicate[String] = stringMatching("^\\d{3}-\\d{3}-\\d{4}$".r)
 
-  implicit def validZipCode: Predicate[String] = stringMatching("^\\d{5}(?:-\\d{4})?$".r)
+  def validZipCode: Predicate[String] = stringMatching("^\\d{5}(?:-\\d{4})?$".r)
 
-  implicit def validTaxId: Predicate[String] = stringMatching("^\\d{2}-\\d{7}$".r)
+  def validTaxId: Predicate[String] = stringMatching("^\\d{2}-\\d{7}$".r)
 
   def numericMatching(pattern: String): Predicate[String] = stringMatching(regExFor(pattern))
 
@@ -25,12 +25,10 @@ object PredicateRegEx {
     result.mkString("^", "", "$").r
   }
 
-  private def stringMatching(regEx: Regex): Predicate[String] = new Predicate[String] {
-    override def validate: (String) => Boolean = {
-      regEx.findFirstIn(_) match {
-        case Some(_) => true
-        case None => false
-      }
+  private def stringMatching(regEx: Regex): Predicate[String] = {
+    regEx.findFirstIn(_: String) match {
+      case Some(_) => true
+      case None => false
     }
   }
 }

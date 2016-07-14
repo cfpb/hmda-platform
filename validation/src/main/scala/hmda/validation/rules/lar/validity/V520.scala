@@ -11,8 +11,8 @@ object V520 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V520"
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.lienStatus is equalTo(3)) {
-      lar.rateSpread is equalTo("NA")
+    when(lar.lienStatus is 3) {
+      lar.rateSpread is "NA"
     }
   }
 }
