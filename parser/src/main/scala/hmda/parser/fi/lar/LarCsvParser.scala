@@ -2,144 +2,154 @@ package hmda.parser.fi.lar
 
 import hmda.model.fi.lar._
 
-import scala.util.Try
+import scala.collection.immutable.ListMap
+import scalaz._
+import scalaz.Scalaz._
+import scala.util.{ Failure, Success, Try }
 
 object LarCsvParser {
   def apply(s: String): Either[List[String], LoanApplicationRegister] = {
-    val larErrors = checkLar(s)
+    val values = s.split('|').map(_.trim)
+    val parserResults = checkLar(values.toList)
+    parserResults match {
+      case scalaz.Success(convertedValues) => {
 
-    if (larErrors.isEmpty) {
-      val values = s.split('|').map(_.trim)
-      val id = values(0).toInt
-      val respId = values(1)
-      val agencyCode = values(2).toInt
-      val loanId = values(3)
-      val loanDate = values(4)
-      val loanType = values(5).toInt
-      val propertyType = values(6).toInt
-      val loanPurpose = values(7).toInt
-      val occupancy = values(8).toInt
-      val loanAmount = values(9).toInt
-      val preapprovals = values(10).toInt
-      val actionType = values(11).toInt
-      val actionDate = values(12).toInt
-      val msa = values(13)
-      val state = values(14)
-      val county = values(15)
-      val tract = values(16)
-      val appEthnicity = values(17).toInt
-      val coAppEthnicity = values(18).toInt
-      val appRace1 = values(19).toInt
-      val appRace2 = values(20)
-      val appRace3 = values(21)
-      val appRace4 = values(22)
-      val appRace5 = values(23)
-      val coAppRace1 = values(24).toInt
-      val coAppRace2 = values(25)
-      val coAppRace3 = values(26)
-      val coAppRace4 = values(27)
-      val coAppRace5 = values(28)
-      val appSex = values(29).toInt
-      val coAppSex = values(30).toInt
-      val appIncome = values(31)
-      val purchaserType = values(32).toInt
-      val denial1 = values(33)
-      val denial2 = values(34)
-      val denial3 = values(35)
-      val rateSpread = values(36)
-      val hoepaStatus = values(37).toInt
-      val lienStatus = values(38).toInt
+        val id = convertedValues(0)
+        val respId = values(1)
+        val agencyCode = convertedValues(1)
+        val loanId = values(3)
+        val loanDate = values(4)
+        val loanType = convertedValues(2)
+        val propertyType = convertedValues(3)
+        val loanPurpose = convertedValues(4)
+        val occupancy = convertedValues(5)
+        val loanAmount = convertedValues(6)
+        val preapprovals = convertedValues(7)
+        val actionType = convertedValues(8)
+        val actionDate = convertedValues(9)
+        val msa = values(13)
+        val state = values(14)
+        val county = values(15)
+        val tract = values(16)
+        val appEthnicity = convertedValues(10)
+        val coAppEthnicity = convertedValues(11)
+        val appRace1 = convertedValues(12)
+        val appRace2 = values(20)
+        val appRace3 = values(21)
+        val appRace4 = values(22)
+        val appRace5 = values(23)
+        val coAppRace1 = convertedValues(13)
+        val coAppRace2 = values(25)
+        val coAppRace3 = values(26)
+        val coAppRace4 = values(27)
 
-      val loan =
-        Loan(
-          loanId,
-          loanDate,
-          loanType,
-          propertyType,
-          loanPurpose,
-          occupancy,
-          loanAmount
+        val coAppRace5 = values(28)
+        val appSex = convertedValues(14)
+        val coAppSex = convertedValues(15)
+        val appIncome = values(31)
+        val purchaserType = convertedValues(16)
+        val denial1 = values(33)
+        val denial2 = values(34)
+        val denial3 = values(35)
+        val rateSpread = values(36)
+        val hoepaStatus = convertedValues(17)
+        val lienStatus = convertedValues(18)
+
+        val loan =
+          Loan(
+            loanId,
+            loanDate,
+            loanType,
+            propertyType,
+            loanPurpose,
+            occupancy,
+            loanAmount
+          )
+
+        val geography = Geography(msa, state, county, tract)
+
+        val applicant =
+          Applicant(
+            appEthnicity,
+            coAppEthnicity,
+            appRace1,
+            appRace2,
+            appRace3,
+            appRace4,
+            appRace5,
+            coAppRace1,
+            coAppRace2,
+            coAppRace3,
+            coAppRace4,
+            coAppRace5,
+            appSex,
+            coAppSex,
+            appIncome
+          )
+        val denial = Denial(denial1, denial2, denial3)
+
+        Right(
+          LoanApplicationRegister(
+            id,
+            respId,
+            agencyCode,
+            loan,
+            preapprovals,
+            actionType,
+            actionDate,
+            geography,
+            applicant,
+            purchaserType,
+            denial,
+            rateSpread,
+            hoepaStatus,
+            lienStatus
+          )
         )
-
-      val geography = Geography(msa, state, county, tract)
-
-      val applicant =
-        Applicant(
-          appEthnicity,
-          coAppEthnicity,
-          appRace1,
-          appRace2,
-          appRace3,
-          appRace4,
-          appRace5,
-          coAppRace1,
-          coAppRace2,
-          coAppRace3,
-          coAppRace4,
-          coAppRace5,
-          appSex,
-          coAppSex,
-          appIncome
-        )
-      val denial = Denial(denial1, denial2, denial3)
-
-      Right(LoanApplicationRegister(
-        id,
-        respId,
-        agencyCode,
-        loan,
-        preapprovals,
-        actionType,
-        actionDate,
-        geography,
-        applicant,
-        purchaserType,
-        denial,
-        rateSpread,
-        hoepaStatus,
-        lienStatus
-      ))
-    } else {
-      Left(larErrors)
+      }
+      case scalaz.Failure(errors) => {
+        Left(errors.toList)
+      }
     }
   }
 
-  def checkLar(s: String): List[String] = {
-    val values = s.split('|').map(_.trim)
-    var errors = List[String]()
-    val numericFields = Map(
-      0 -> "Record Identifier",
-      2 -> "Agency Code",
-      5 -> "Loan Type",
-      6 -> "Property Type",
-      7 -> "Loan Purpose",
-      8 -> "Owner Occupancy",
-      9 -> "Loan Amount",
-      10 -> "Preapprovals",
-      11 -> "Type of Action Taken",
-      12 -> "Date of Action",
-      17 -> "Applicant Ethnicity",
-      18 -> "Co-applicant Ethnicity",
-      19 -> "Applicant Race: 1",
-      24 -> "Co-applicant Race: 1",
-      29 -> "Applicant Sex",
-      30 -> "Co-applicant Sex",
-      32 -> "Type of Purchaser",
-      37 -> "HOEPA Status",
-      38 -> "Lien Status"
-    )
+  def checkLar(fields: List[String]): ValidationNel[String, List[Int]] = {
 
-    if (values.length != 40 && values.length != 39) {
-      return errors ::: List("Incorrect number of fields: " + values.length)
+    if (fields.length != 39) {
+      ("Incorrect number of fields. found: " + fields.length + ", expected: 39").failure.toValidationNel
+    } else {
+      val numericFields = ListMap(
+        "Record Identifier" -> fields(0),
+        "Agency Code" -> fields(2),
+        "Loan Type" -> fields(5),
+        "Property Type" -> fields(6),
+        "Loan Purpose" -> fields(7),
+        "Owner Occupancy" -> fields(8),
+        "Loan Amount" -> fields(9),
+        "Preapprovals" -> fields(10),
+        "Type of Action Taken" -> fields(11),
+        "Date of Action" -> fields(12),
+        "Applicant Ethnicity" -> fields(17),
+        "Co-applicant Ethnicity" -> fields(18),
+        "Applicant Race: 1" -> fields(19),
+        "Co-applicant Race: 1" -> fields(24),
+        "Applicant Sex" -> fields(29),
+        "Co-applicant Sex" -> fields(30),
+        "Type of Purchaser" -> fields(32),
+        "HOEPA Status" -> fields(37),
+        "Lien Status" -> fields(38)
+      )
+
+      val validationList = numericFields.map { case (key, value) => toIntorFail(value, key) }
+
+      validationList.reduce(_ +++ _)
     }
+  }
 
-    for (int <- numericFields.keys) {
-      if (Try(values(int).toInt).isFailure) {
-        val field = numericFields(int)
-        errors = errors ::: List(s"$field is not an Integer")
-      }
+  def toIntorFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
+    Try(value.toInt) match {
+      case Failure(result) => s"$fieldName is not an Integer".failure.toValidationNel
+      case Success(result) => List(result).success
     }
-
-    errors
   }
 }
