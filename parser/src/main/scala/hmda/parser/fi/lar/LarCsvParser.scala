@@ -115,8 +115,8 @@ object LarCsvParser {
 
   def checkLar(fields: List[String]): ValidationNel[String, List[Int]] = {
 
-    if (fields.length != 40 && fields.length != 39) {
-      ("Incorrect number of fields: " + fields.length).failure.toValidationNel
+    if (fields.length != 39) {
+      ("Incorrect number of fields. found: " + fields.length + ", expected: 39").failure.toValidationNel
     } else {
       val numericFields = ListMap(
         "Record Identifier" -> fields(0),

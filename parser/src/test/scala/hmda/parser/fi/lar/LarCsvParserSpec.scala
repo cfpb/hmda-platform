@@ -14,7 +14,7 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers wi
 
   property("Must return length error on too long csv") {
     forAll(larGen) { (lar: LoanApplicationRegister) =>
-      LarCsvParser(lar.toCSV + "|0|1").left.get mustBe List("Incorrect number of fields: 41")
+      LarCsvParser(lar.toCSV + "|0|1").left.get mustBe List("Incorrect number of fields. found: 41, expected: 39")
     }
   }
 
@@ -33,6 +33,6 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers wi
   val unparsableLarCsvTwoFieldsTooShort = "a|0123456789|b|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2"
 
   property("Must return only length error on too short csv") {
-    LarCsvParser(unparsableLarCsvTwoFieldsTooShort).left.get mustBe List("Incorrect number of fields: 38")
+    LarCsvParser(unparsableLarCsvTwoFieldsTooShort).left.get mustBe List("Incorrect number of fields. found: 38, expected: 39")
   }
 }
