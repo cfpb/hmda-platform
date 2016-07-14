@@ -42,14 +42,14 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
 
     "fail to parse an invalid pipe delimited LAR and return a list of errors" in {
       Post("/lar/parse", invalidLarCsv) ~> larRoutes ~> check {
-        status mustEqual StatusCodes.UNPROCESSABLE_ENTITY
+        status mustEqual StatusCodes.BAD_REQUEST
         responseAs[List[String]].length mustBe 2
       }
     }
 
     "fail to parse an valid pipe delimited LAR with too many fields and return an error" in {
       Post("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes ~> check {
-        status mustEqual StatusCodes.UNPROCESSABLE_ENTITY
+        status mustEqual StatusCodes.BAD_REQUEST
         responseAs[List[String]].length mustBe 1
       }
     }

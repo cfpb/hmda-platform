@@ -18,7 +18,9 @@ class SingleLarValidationSpec extends ActorSpec {
   val larValidation = createSingleLarValidator(system)
 
   val lines = Source.fromFile(new File("parser/src/test/resources/txt/FirstTestBankData_clean_407_2017.txt")).getLines()
-  val lars = lines.drop(1).map(l => LarCsvParser(l)).filter(_.isRight).map(_.right.get)
+  val lars = lines.drop(1).map(line => LarCsvParser(line)).collect {
+    case Right(lar) => lar
+  }
 
   "LAR Validation" must {
     "validate all lars in sample files" in {

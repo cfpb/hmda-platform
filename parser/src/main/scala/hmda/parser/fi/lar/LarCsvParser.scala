@@ -140,13 +140,13 @@ object LarCsvParser {
         "Lien Status" -> fields(38)
       )
 
-      val validationList = numericFields.map { case (key, value) => toIntorFail(value, key) }
+      val validationList = numericFields.map { case (key, value) => toIntOrFail(value, key) }
 
       validationList.reduce(_ +++ _)
     }
   }
 
-  def toIntorFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
+  def toIntOrFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
     Try(value.toInt) match {
       case Failure(result) => s"$fieldName is not an Integer".failure.toValidationNel
       case Success(result) => List(result).success

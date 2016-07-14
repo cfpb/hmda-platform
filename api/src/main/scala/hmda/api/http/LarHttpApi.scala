@@ -71,7 +71,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
 
   def errorsAsResponse(list: List[String]): HttpResponse = {
     val errorEntity = HttpEntity(ContentTypes.`application/json`, list.toJson.toString)
-    HttpResponse(StatusCodes.UnprocessableEntity, entity = errorEntity)
+    HttpResponse(StatusCodes.BadRequest, entity = errorEntity)
   }
 
   val larRoutes = parseLarRoute ~ validateLarRoute
