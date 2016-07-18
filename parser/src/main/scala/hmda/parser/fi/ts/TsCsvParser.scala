@@ -74,8 +74,8 @@ object TsCsvParser {
 
       val validationListInt = numericFields.map { case (key, value) => toIntorFail(value, key) }
       val validationListLong = toLongorFail(fields(3), "Timestamp")
-      val potato = validationListInt.reduce(_ +++ _)
-      potato +++ validationListLong
+      val validationListIntReduce = validationListInt.reduce(_ +++ _)
+      validationListIntReduce +++ validationListLong
     }
   }
 
