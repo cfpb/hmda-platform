@@ -12,9 +12,9 @@ class FIDataCsvParser extends FIDataParser[String] {
 
   def parseLines(lines: Iterable[String]): FIData = {
     val tsLine = lines.head
-    val ts = TsCsvParser(tsLine)
+    val tsWithoutErrors = TsCsvParser(tsLine).right.get
     val lars = lines.tail.map(l => LarCsvParser(l))
-    FIData(ts, lars)
+    FIData(tsWithoutErrors, lars)
   }
 
   override def readAll(input: String): FIData = {

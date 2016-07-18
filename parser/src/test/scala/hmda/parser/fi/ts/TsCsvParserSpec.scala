@@ -8,7 +8,7 @@ class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers wit
   property("Transmittal Sheet must be parsed from CSV") {
     forAll(tsGen) { (ts) =>
       whenever(ts.id == 1) {
-        TsCsvParser(ts.toCSV) mustBe ts
+        TsCsvParser(ts.toCSV).right.get mustBe ts
       }
     }
   }

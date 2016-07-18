@@ -23,7 +23,7 @@ class TsQualityEngineSpec
       val ts = line.map(l => TsCsvParser(l))
 
       ts.foreach { ts =>
-        checkQuality(ts).isSuccess mustBe true
+        checkQuality(ts.right.get).isSuccess mustBe true
       }
     }
   }
