@@ -12,7 +12,7 @@ object V338 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
 
   override def apply(lar: LoanApplicationRegister): Result = {
     when(notANaturalPerson(lar)) {
-      lar.applicant.income is equalTo("NA")
+      lar.applicant.income is "NA"
     }
   }
 
