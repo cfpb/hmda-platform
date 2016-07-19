@@ -72,21 +72,21 @@ object TsCsvParser {
         "Total Lines Entries" -> fields(6)
       )
 
-      val validationListInt = numericFields.map { case (key, value) => toIntorFail(value, key) }
-      val validationListLong = toLongorFail(fields(3), "Timestamp")
+      val validationListInt = numericFields.map { case (key, value) => toIntOrFail(value, key) }
+      val validationListLong = toLongOrFail(fields(3), "Timestamp")
       val validationListIntReduce = validationListInt.reduce(_ +++ _)
       validationListIntReduce +++ validationListLong
     }
   }
 
-  def toIntorFail(value: String, fieldName: String): ValidationNel[String, List[AnyVal]] = {
+  def toIntOrFail(value: String, fieldName: String): ValidationNel[String, List[AnyVal]] = {
     Try(value.toInt) match {
       case Failure(result) => s"$fieldName is not an Integer".failure.toValidationNel
       case Success(result) => List(result).success
     }
   }
 
-  def toLongorFail(value: String, fieldName: String): ValidationNel[String, List[AnyVal]] = {
+  def toLongOrFail(value: String, fieldName: String): ValidationNel[String, List[AnyVal]] = {
     Try(value.toLong) match {
       case Failure(result) => s"$fieldName is not a Long".failure.toValidationNel
       case Success(result) => List(result).success
