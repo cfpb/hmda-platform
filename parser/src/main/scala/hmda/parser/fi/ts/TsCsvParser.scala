@@ -79,14 +79,14 @@ object TsCsvParser {
     }
   }
 
-  def toIntOrFail(value: String, fieldName: String): ValidationNel[String, List[AnyVal]] = {
+  def toIntOrFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
     Try(value.toInt) match {
       case Failure(result) => s"$fieldName is not an Integer".failure.toValidationNel
       case Success(result) => List(result).success
     }
   }
 
-  def toLongOrFail(value: String, fieldName: String): ValidationNel[String, List[AnyVal]] = {
+  def toLongOrFail(value: String, fieldName: String): ValidationNel[String, List[Long]] = {
     Try(value.toLong) match {
       case Failure(result) => s"$fieldName is not a Long".failure.toValidationNel
       case Success(result) => List(result).success
