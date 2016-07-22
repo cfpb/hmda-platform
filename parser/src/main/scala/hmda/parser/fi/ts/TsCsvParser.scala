@@ -39,25 +39,17 @@ object TsCsvParser {
     val parent = Parent(parentName, parentAddress, parentCity, parentState, parentZip)
     val contact = Contact(contactPerson, contactPhone, contactFax, contactEmail)
 
-    val maybeTS = (
+    val maybeTS: ValidationNel[String, TransmittalSheet] = (
       id
       |@| code
       |@| timestamp
       |@| activityYear
+      |@| taxId.success
       |@| totalLines
-    ) {
-        TransmittalSheet(
-          _,
-          _,
-          _,
-          _,
-          taxId,
-          _,
-          respondent,
-          parent,
-          contact
-        )
-      }
+      |@| respondent.success
+      |@| parent.success
+      |@| contact.success
+    ) { TransmittalSheet }
 
     maybeTS.disjunction.toEither.bimap(_.toList, identity(_))
   }
