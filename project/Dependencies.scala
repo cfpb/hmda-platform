@@ -25,5 +25,6 @@ object Dependencies {
   val akkaHttpJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % Version.akka
   val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akka % "test"
   val config = "com.typesafe" % "config" % Version.config
+  val enumeratum = "com.beachape" %% "enumeratum" % Version.enumeratum
 
 }
