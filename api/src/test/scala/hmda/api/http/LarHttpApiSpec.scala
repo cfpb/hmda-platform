@@ -27,8 +27,9 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
   val larValidation = system.actorOf(SingleLarValidation.props, "larValidation")
 
   val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
+  val invalidLarCsv = "invalid|0123456789|invalid|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
 
-  val lar = LarCsvParser(larCsv)
+  val lar = LarCsvParser(larCsv).right.get // Assuming the hardcoded value will parse correctly
   val larJson = lar.toJson
 
   "LAR HTTP Service" must {
@@ -36,6 +37,20 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
       Post("/lar/parse", larCsv) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[LoanApplicationRegister] mustBe lar
+      }
+    }
+
+    "fail to parse an invalid pipe delimited LAR and return a list of errors" in {
+      Post("/lar/parse", invalidLarCsv) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.BAD_REQUEST
+        responseAs[List[String]].length mustBe 2
+      }
+    }
+
+    "fail to parse an valid pipe delimited LAR with too many fields and return an error" in {
+      Post("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes ~> check {
+        status mustEqual StatusCodes.BAD_REQUEST
+        responseAs[List[String]].length mustBe 1
       }
     }
 
