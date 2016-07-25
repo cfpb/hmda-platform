@@ -21,7 +21,7 @@ class LarQualityEngineSpec
       val lars = lines.drop(1).map(l => LarCsvParser(l))
 
       lars.foreach { lar =>
-        checkQuality(lar).isSuccess mustBe true
+        checkQuality(lar, None).isSuccess mustBe true
       }
     }
   }

@@ -4,7 +4,6 @@ import java.io.File
 
 import akka.testkit.TestProbe
 import hmda.actor.test.ActorSpec
-import hmda.api.processing.lar.SingleLarValidation.CheckAll
 import hmda.parser.fi.lar.LarCsvParser
 
 import scala.io.Source
@@ -24,11 +23,11 @@ class SingleLarValidationSpec extends ActorSpec {
   "LAR Validation" must {
     "validate all lars in sample files" in {
       lars.foreach { lar =>
-        probe.send(larValidation, CheckSyntactical(lar))
+        probe.send(larValidation, CheckSyntactical(lar, None))
         probe.expectMsg(10.seconds, Nil)
       }
       lars.foreach { lar =>
-        probe.send(larValidation, CheckValidity(lar))
+        probe.send(larValidation, CheckValidity(lar, None))
         probe.expectMsg(10.seconds, Nil)
       }
     }

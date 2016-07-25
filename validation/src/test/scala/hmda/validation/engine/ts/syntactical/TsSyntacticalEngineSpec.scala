@@ -97,7 +97,7 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
   protected def failGenTs(badTs: Gen[TransmittalSheet]): Assertion = {
     badTs.sample match {
       case Some(x) => {
-        val fValidated = checkSyntactical(x)
+        val fValidated = checkSyntactical(x, None)
         whenReady(fValidated) { validated =>
           validated.isFailure mustBe true
         }
@@ -109,7 +109,7 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
   protected def passGenTs(goodTs: Gen[TransmittalSheet]): Assertion = {
     goodTs.sample match {
       case Some(x) => {
-        val fValidated = checkSyntactical(x)
+        val fValidated = checkSyntactical(x, None)
         whenReady(fValidated) { validated =>
           validated.isSuccess mustBe true
         }

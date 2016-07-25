@@ -11,7 +11,7 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers with T
 
   property("Validates Transmittal Sheet") {
     forAll(tsGen) { ts =>
-      val fValid = validateTs(ts)
+      val fValid = validateTs(ts, None)
       fValid.map(v => v mustBe Success())
     }
   }

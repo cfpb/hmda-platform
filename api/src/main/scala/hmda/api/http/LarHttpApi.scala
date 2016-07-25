@@ -49,10 +49,10 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
             entity(as[LoanApplicationRegister]) { lar =>
               val larValidation = system.actorSelection("/user/larValidation")
               val checkMessage = checkType match {
-                case "syntactical" => CheckSyntactical(lar)
-                case "validity" => CheckValidity(lar)
-                case "quality" => CheckQuality(lar)
-                case _ => CheckAll(lar)
+                case "syntactical" => CheckSyntactical(lar, None)
+                case "validity" => CheckValidity(lar, None)
+                case "quality" => CheckQuality(lar, None)
+                case _ => CheckAll(lar, None)
               }
               onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
                 case Success(xs) =>
