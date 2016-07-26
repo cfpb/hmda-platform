@@ -21,32 +21,36 @@ case class Institution(
   def respondentId: Either[InvalidRespondentId, ExternalId] = {
 
     institutionType.depositoryType match {
-      case None => Left(InvalidRespondentId(
-        s"Institution $id has an institutionType of $institutionType, which does not have a depositoryType"
-      ))
+      case None => Left(NoDepositoryTypeForInstitutionType(id, institutionType))
       case Some(dt) =>
 
         agency.externalIdTypes.get(dt) match {
-          case None => Left(InvalidRespondentId(
-            s"Institution $id is associated with agency $agency, which does not support depositoryType '$dt'"
-          ))
+          case None => Left(UnsupportedDepositoryTypeByAgency(id, agency, dt))
           case Some(extIdType) =>
 
             extIdsByType.get(extIdType) match {
-              case None => Left(InvalidRespondentId(
-                s"Institution $id does not have an externalId of type '$extIdType'"
-              ))
+              case None => Left(RequiredExternalIdNotPresent(id, extIdType))
               case Some(extId) => Right(ExternalId(extId.id, extIdType))
             }
         }
     }
-
   }
 
 }
 
-// TODO: Consider making this a sealed trait with failure type impls
-case class InvalidRespondentId(message: String)
+
+sealed abstract class InvalidRespondentId() {
+  def message: String
+}
+case class NoDepositoryTypeForInstitutionType(institutionId: Int, institutionType: InstitutionType) extends InvalidRespondentId {
+  override def message = s"Institution $institutionId has an institutionType of $institutionType, which does not have a depositoryType"
+}
+case class UnsupportedDepositoryTypeByAgency(institutionId: Int, agency: Agency, depositoryType: DepositoryType) extends InvalidRespondentId {
+  override def message = s"Institution $institutionId is associated with agency $agency, which does not support depositoryType $depositoryType"
+}
+case class RequiredExternalIdNotPresent(institutionId: Int, externalIdType: ExternalIdType) extends InvalidRespondentId {
+  override def message = s"Institution $institutionId does not have an externalId of type $externalIdType"
+}
 
 class InstitutionRepository(institutions: Set[Institution]) {
 

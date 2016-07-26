@@ -20,11 +20,15 @@ object InstitutionType extends Enum[InstitutionType] {
 
   val values = findValues
 
-  //FIXME: None of these are officially confirmed "institution types"
   case object Bank extends InstitutionType("bank", Some(Depository))
   case object CreditUnion extends InstitutionType("credit-union", Some(Depository))
   case object SavingsAndLoan extends InstitutionType("savings-and-loan", Some(Depository))
-  case object MortgateBankingSubsidiary extends InstitutionType("mortgate-banking-subsidiary", Some(NonDepository))
+
+  // FIXME: These are temporary InstitutionType(s) used for testing.  They will be replaced
+  //        by real ones once we know what they are. :)
+  case object NonDepositInstType extends InstitutionType("test-non-depository", Some(NonDepository))
+  case object NoDepositTypeInstType extends InstitutionType("test-no-depository-type", None)
+
 
 }
 
