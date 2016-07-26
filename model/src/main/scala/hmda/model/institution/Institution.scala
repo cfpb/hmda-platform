@@ -8,6 +8,7 @@ import enumeratum.values.{ IntEnum, IntEnumEntry }
  */
 case class Institution(
     id: Int,
+    name: String,
     externalIds: Set[ExternalId],
     agency: Agency,
     institutionType: InstitutionType //,
@@ -52,15 +53,3 @@ case class RequiredExternalIdNotPresent(institutionId: Int, externalIdType: Exte
   override def message = s"Institution $institutionId does not have an externalId of type $externalIdType"
 }
 
-class InstitutionRepository(institutions: Set[Institution]) {
-
-  val instById: Map[Int, Institution] = institutions.map(i => (i.id, i)).toMap
-
-  val instByExtId: Map[ExternalId, Institution] = institutions.flatMap(i =>
-    i.externalIds.map(extId => (extId, i))).toMap
-
-  def get(id: Integer): Option[Institution] = instById.get(id)
-
-  def findByExternalId(externalId: ExternalId): Option[Institution] = instByExtId.get(externalId)
-
-}
