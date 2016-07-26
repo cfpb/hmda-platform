@@ -1,10 +1,10 @@
-package hmda.persistence
+package hmda.persistence.institutions
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
 import hmda.model.fi.{ Created, Submission, SubmissionStatus }
 import hmda.persistence.CommonMessages.{ Command, Event, GetState }
-import hmda.persistence.SubmissionPersistence._
+import hmda.persistence.institutions.SubmissionPersistence._
 
 object SubmissionPersistence {
 

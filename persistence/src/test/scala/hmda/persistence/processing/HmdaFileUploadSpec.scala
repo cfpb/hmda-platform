@@ -1,4 +1,4 @@
-package hmda.persistence
+package hmda.persistence.processing
 
 import java.io.File
 import java.time.Instant
@@ -7,7 +7,7 @@ import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.persistence.CommonMessages._
-import hmda.persistence.HmdaFileUpload._
+import hmda.persistence.processing.HmdaFileUpload._
 import org.iq80.leveldb.util.FileUtils
 
 class HmdaFileUploadSpec extends ActorSpec {
