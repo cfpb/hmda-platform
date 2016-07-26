@@ -55,15 +55,16 @@ object TsCsvParser {
   }
 
   def toIntOrFail(value: String, fieldName: String): ValidationNel[String, Int] = {
-    Try(value.toInt) match {
-      case Failure(result) => s"$fieldName is not an Integer".failure.toValidationNel
-      case Success(result) => result.success
-    }
+    convert(value.toInt, s"$fieldName is not an Integer")
   }
 
   def toLongOrFail(value: String, fieldName: String): ValidationNel[String, Long] = {
-    Try(value.toLong) match {
-      case Failure(result) => s"$fieldName is not a Long".failure.toValidationNel
+    convert(value.toLong, s"$fieldName is not a Long")
+  }
+
+  private def convert[T](x: => T, message: String): ValidationNel[String, T] = {
+    Try(x) match {
+      case Failure(result) => message.failure.toValidationNel
       case Success(result) => result.success
     }
   }
