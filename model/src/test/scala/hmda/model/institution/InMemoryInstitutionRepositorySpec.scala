@@ -1,9 +1,9 @@
 package hmda.model.institution
 
-import hmda.model.institution.Agency.{CFPB, FDIC, OCC}
-import hmda.model.institution.ExternalIdType.{FdicCertNo, FederalTaxId, OccCharterId, RssdId}
-import hmda.model.institution.InstitutionType.{Bank, SavingsAndLoan}
-import org.scalatest.{MustMatchers, WordSpec}
+import hmda.model.institution.Agency.{ CFPB, FDIC, OCC }
+import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
+import hmda.model.institution.InstitutionType.{ Bank, SavingsAndLoan }
+import org.scalatest.{ MustMatchers, WordSpec }
 
 class InMemoryInstitutionRepositorySpec extends WordSpec with MustMatchers {
 

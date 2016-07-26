@@ -42,7 +42,7 @@ class S025Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
   }
 
   property("Transmittal Sheet's agency code and respondent ID match that of a given institution") {
-    val institution = Institution(1, Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+    val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
 
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
@@ -52,7 +52,7 @@ class S025Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
   }
 
   property("Transmittal Sheet's agency code and respondent ID does NOT match that of a given institution") {
-    val institution = Institution(1, Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+    val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
 
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
@@ -62,7 +62,7 @@ class S025Spec extends PropSpec with PropertyChecks with MustMatchers with TsGen
   }
 
   property("Institution's respondent ID cannot be derived") {
-    val institution = Institution(1, Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+    val institution = Institution(1, "Test Bank", Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
 
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {

@@ -1,8 +1,8 @@
 package hmda.model.institution
 
 /**
-  * Created by keelerh on 7/26/16.
-  */
+ * Created by keelerh on 7/26/16.
+ */
 trait InstitutionRepository {
 
   def get(id: Integer): Option[Institution]
@@ -10,7 +10,7 @@ trait InstitutionRepository {
   def findByExternalId(externalId: ExternalId): Option[Institution]
 }
 
-class InMemoryInstitutionRepository(institutions: Set[Institution]) extends InstitutionRepository{
+class InMemoryInstitutionRepository(institutions: Set[Institution]) extends InstitutionRepository {
 
   val instById: Map[Int, Institution] = institutions.map(i => (i.id, i)).toMap
 

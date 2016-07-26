@@ -29,6 +29,5 @@ object InstitutionType extends Enum[InstitutionType] {
   case object NonDepositInstType extends InstitutionType("test-non-depository", Some(NonDepository))
   case object NoDepositTypeInstType extends InstitutionType("test-no-depository-type", None)
 
-
 }
 

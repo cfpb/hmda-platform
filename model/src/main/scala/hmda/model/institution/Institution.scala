@@ -39,7 +39,6 @@ case class Institution(
 
 }
 
-
 sealed abstract class InvalidRespondentId() {
   def message: String
 }
