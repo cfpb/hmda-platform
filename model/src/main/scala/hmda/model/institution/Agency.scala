@@ -1,16 +1,15 @@
 package hmda.model.institution
 
 import enumeratum.values.{ IntEnum, IntEnumEntry }
+import DepositoryType._
+import ExternalIdType._
 
 /**
- * Created by keelerh on 7/22/16.
+ * An institution's regulating federal agency.
  */
-sealed abstract class Agency(val value: Int, val name: String, val fullName: String, val externalIdTypes: Map[DepositoryType, ExternalIdType]) extends IntEnumEntry
+sealed abstract class Agency(override val value: Int, val name: String, val fullName: String, val externalIdTypes: Map[DepositoryType, ExternalIdType]) extends IntEnumEntry
 
 object Agency extends IntEnum[Agency] {
-
-  import DepositoryType._
-  import ExternalIdType._
 
   val values = findValues
 
@@ -20,5 +19,4 @@ object Agency extends IntEnum[Agency] {
   case object HUD extends Agency(7, "hud", "Housing and Urban Development", Map(NonDepository -> FederalTaxId))
   case object NCUA extends Agency(5, "ncua", "National Credit Union Administration", Map(Depository -> NcuaCharterId, NonDepository -> FederalTaxId))
   case object OCC extends Agency(1, "occ", "Office of the Comptroller of the Currency", Map(Depository -> OccCharterId, NonDepository -> FederalTaxId))
-
 }
