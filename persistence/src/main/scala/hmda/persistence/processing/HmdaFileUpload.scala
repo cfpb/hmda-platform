@@ -11,8 +11,9 @@ object HmdaFileUpload {
     system.actorOf(HmdaFileUpload.props(submissionId))
   }
 
+  case object UploadStarted extends Event
   case class AddLine(timestamp: Long, data: String) extends Command
-  case object CompleteUpload extends Command
+  case object UploadCompleted extends Event
   case class LineAdded(timestamp: Long, data: String) extends Event
 
   // uploads is a Map of timestamp -> number of rows
@@ -39,14 +40,20 @@ class HmdaFileUpload(submissionId: String) extends PersistentActor with ActorLog
   }
 
   override def receiveCommand: Receive = {
+    case UploadStarted =>
+      log.debug(s"Beging uploading for submission: $submissionId")
+      publishEvent(UploadStarted)
+
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
         log.debug(s"Persisted: ${e.data}")
         updateState(e)
-        context.system.eventStream.publish(e)
+        publishEvent(e)
       }
 
-    case CompleteUpload => saveSnapshot(state)
+    case UploadCompleted =>
+      saveSnapshot(state)
+      publishEvent(UploadCompleted)
 
     case GetState =>
       sender() ! state
@@ -60,6 +67,10 @@ class HmdaFileUpload(submissionId: String) extends PersistentActor with ActorLog
     case SnapshotOffer(_, snapshot: HmdaFileUploadState) =>
       log.debug("Recovering from snapshot")
       state = snapshot
+  }
+
+  private def publishEvent(e: Event): Unit = {
+    context.system.eventStream.publish(e)
   }
 
 }

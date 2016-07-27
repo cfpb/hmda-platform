@@ -43,7 +43,7 @@ class HmdaFileUploadSpec extends ActorSpec {
 
     "recover with from snapshot" in {
       val thirdHmdaFileUpload = createHmdaFileUpload(system, "1")
-      probe.send(thirdHmdaFileUpload, CompleteUpload)
+      probe.send(thirdHmdaFileUpload, UploadCompleted)
       probe.send(thirdHmdaFileUpload, Shutdown)
 
       Thread.sleep(500) //wait for actor messages to be processed so that the state can be saved

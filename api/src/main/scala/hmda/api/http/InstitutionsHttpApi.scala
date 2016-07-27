@@ -146,7 +146,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
 
           onComplete(uploadedF) {
             case Success(response) =>
-              processingActor ! CompleteUpload
+              processingActor ! UploadCompleted
               processingActor ! Shutdown
               complete {
                 "uploaded"
