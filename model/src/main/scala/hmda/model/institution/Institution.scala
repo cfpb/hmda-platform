@@ -1,24 +1,23 @@
 package hmda.model.institution
 
-import enumeratum._
-import enumeratum.values.{ IntEnum, IntEnumEntry }
-
 /**
- * Brainstorming how Institution could be modeled.
+ * A financial institution, geared towards requirements for filing HMDA data.
  */
 case class Institution(
     id: Int,
     name: String,
     externalIds: Set[ExternalId],
     agency: Agency,
-    institutionType: InstitutionType //,
-//    parent: Option[Institution],
-//    branches: Option[Set[Institution]]
+    institutionType: InstitutionType
 ) {
-  val extIdsByType = externalIds.map(extId => (extId.idType, extId)).toMap
 
-  // TODO: Let's figure out if this should fail on instantiation rather than on this call?
-  // TODO: Is NIC data of such high quality that these issues don't really happen?
+  val extIdsByType: Map[ExternalIdType, ExternalId] = externalIds.map(extId => (extId.idType, extId)).toMap
+
+  /**
+   * Derives the respondentId for a given Institution based on [[hmda.model.institution.Agency]] and [[hmda.model.institution.InstitutionType]],
+   * the rules for which can be found in section "1.4 - Respondent Identification Numbers for 2017 HMDA Filers" of the
+   * <a href="http://www.consumerfinance.gov/data-research/hmda/static/for-filers/2017/2017-HMDA-File-Specifications.pdf">2017 HMDA File Specifications</a>
+   */
   def respondentId: Either[InvalidRespondentId, ExternalId] = {
 
     institutionType.depositoryType match {
@@ -39,7 +38,7 @@ case class Institution(
 
 }
 
-sealed abstract class InvalidRespondentId() {
+sealed abstract class InvalidRespondentId {
   def message: String
 }
 case class NoDepositoryTypeForInstitutionType(institutionId: Int, institutionType: InstitutionType) extends InvalidRespondentId {

@@ -1,7 +1,7 @@
 package hmda.model.institution
 
 /**
- * Created by keelerh on 7/26/16.
+ * Datastore for [[hmda.model.institution.Institution]]s
  */
 trait InstitutionRepository {
 
@@ -10,6 +10,9 @@ trait InstitutionRepository {
   def findByExternalId(externalId: ExternalId): Option[Institution]
 }
 
+/**
+ * In-memory implementation of [[hmda.model.institution.InstitutionRepository]]
+ */
 class InMemoryInstitutionRepository(institutions: Set[Institution]) extends InstitutionRepository {
 
   val instById: Map[Int, Institution] = institutions.map(i => (i.id, i)).toMap

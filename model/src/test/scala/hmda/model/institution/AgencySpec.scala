@@ -1,11 +1,11 @@
 package hmda.model.institution
 
 import hmda.model.institution.Agency._
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.{ MustMatchers, WordSpec }
 
 /**
-  * Created by keelerh on 7/26/16.
-  */
+ * Created by keelerh on 7/26/16.
+ */
 class AgencySpec extends WordSpec with MustMatchers {
 
   "Agency" must {
@@ -13,10 +13,10 @@ class AgencySpec extends WordSpec with MustMatchers {
     "resolve Agency case class to the appropriate agencyId" in {
       CFPB.value mustBe 9
       FDIC.value mustBe 3
-      FRS.value  mustBe 2
-      HUD.value  mustBe 7
+      FRS.value mustBe 2
+      HUD.value mustBe 7
       NCUA.value mustBe 5
-      OCC.value  mustBe 1
+      OCC.value mustBe 1
     }
 
     "resolve agencyId to the appropriate Agency case class" in {

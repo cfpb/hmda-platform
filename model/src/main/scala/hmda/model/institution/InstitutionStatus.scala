@@ -3,7 +3,7 @@ package hmda.model.institution
 import enumeratum.{ Enum, EnumEntry }
 
 /**
- * Created by keelerh on 7/22/16.
+ * The status of a financial institution
  */
 sealed abstract class InstitutionStatus(override val entryName: String) extends EnumEntry
 

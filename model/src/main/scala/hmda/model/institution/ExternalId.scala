@@ -3,11 +3,10 @@ package hmda.model.institution
 import enumeratum.{ Enum, EnumEntry }
 
 /**
- * Created by keelerh on 7/22/16.
+ * Additional unique identifiers for a financial institution.
  */
 case class ExternalId(id: String, idType: ExternalIdType)
 
-// TODO: Consider adding a "format:Regex" arg to validate it's the correct id format
 sealed abstract class ExternalIdType(override val entryName: String) extends EnumEntry
 
 object ExternalIdType extends Enum[ExternalIdType] {
