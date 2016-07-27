@@ -54,6 +54,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
       }
     }
 
+  //done
   val institutionByIdPath =
     path("institutions" / Segment) { institutionId =>
       extractExecutionContext { executor =>
@@ -65,7 +66,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           onComplete(fInstitutionDetails) {
             case Success(institutionDetails) =>
               filingsActor ! Shutdown
-              if (institutionDetails.institution.id != "")
+              if (!institutionDetails.institution.isEmpty)
                 complete(ToResponseMarshallable(institutionDetails))
               else
                 complete(ToResponseMarshallable(ErrorResponse(404, s"Institution: $institutionId not found")))
