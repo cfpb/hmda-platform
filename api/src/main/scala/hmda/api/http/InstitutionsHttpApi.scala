@@ -20,7 +20,7 @@ import hmda.persistence.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.HmdaFileUpload.{ AddLine, _ }
 import hmda.persistence.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
-import hmda.api.protocol.processing.{ FilingProtocol, InstitutionProtocol }
+import hmda.api.protocol.processing.{ ApiErrorProtocol, FilingProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Institution, Submission }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.{ CommonMessages, FilingPersistence, SubmissionPersistence }
@@ -29,7 +29,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import spray.json._
 
-trait InstitutionsHttpApi extends InstitutionProtocol {
+trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -68,7 +68,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
               if (institutionDetails.institution.id != "")
                 complete(ToResponseMarshallable(institutionDetails))
               else
-                complete(HttpResponse(StatusCodes.NotFound))
+                complete(ToResponseMarshallable(ErrorResponse(404, s"Institution: $institutionId not found")))
             case Failure(error) =>
               filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)

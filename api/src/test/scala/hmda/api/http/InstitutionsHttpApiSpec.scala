@@ -53,7 +53,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institution, filings.reverse)
       }
       Get("/institutions/xxxx") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution: xxxx not found")
       }
     }
 
