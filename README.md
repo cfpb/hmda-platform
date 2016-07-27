@@ -101,13 +101,11 @@ java -jar target/scala-2.11/hmda.jar
 First, make sure that you have the [Docker Toolbox](https://www.docker.com/docker-toolbox) installed.
 
 If you don't have a Docker machine created, you can create one by issuing the following:
-
 ```shell
 docker-machine create --driver virtualbox dev
 ```
 
 After the machine is created, make sure that you connect your shell with the newly created machine
-
 ```shell
 $ eval "(docker-machine env dev)"
 ```
@@ -116,6 +114,20 @@ Ensure there's a compiled jar to create the Docker image with:
 ```shell
 sbt assembly
 ```
+#### To run only the API
+
+Build the docker image
+```shell
+docker build hmda-api .
+```
+
+Then, run the docker image
+```shell
+docker run -d -p "8080:8080" hmda-api
+```
+
+The API will run on `$(docker-machine ip):8080`
+
 #### To run the entire platform
 Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) directory into a sibling directory of this one. Your directory structure should look like this:
 ```shell
@@ -135,15 +147,9 @@ docker-compose up -d
 
 This will bring up all the HMDA Platform services. The first run may take several minutes.
 
-#### To run only the API
 
-```shell
-docker-compose up -d api
-```
-The HMDA Platform will be available at `<dev-ip>:8080`
-
-You can navigate to the HMDA HTTP API by
-going to the docker machine's endpoint. To find your docker machine endpoint:
+View the app by visiting your docker machine's endpoint in the browser.
+To find your docker machine endpoint:
 
 ```shell
 docker-machine ip dev
