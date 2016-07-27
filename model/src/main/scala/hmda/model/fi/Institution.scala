@@ -10,7 +10,6 @@ case class Institution(
     status: InstitutionStatus = Inactive
 ) {
   def isEmpty: Boolean = {
-    if ((id == "") && (name == "") && (status == Inactive)) true
-    else false
+    (id == "") && (name == "") && (status == Inactive)
   }
 }

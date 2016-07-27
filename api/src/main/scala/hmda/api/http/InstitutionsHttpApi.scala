@@ -188,9 +188,20 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           } yield InstitutionSummary(institution.id, institution.name, filings)
 
           onComplete(fSummary) {
-            case Success(summary) =>
-              filingsActor ! Shutdown
-              complete(ToResponseMarshallable(summary))
+            case Success(summary) => {
+              if (summary.noInstitution) {
+                filingsActor ! Shutdown
+                val errorResponse = ErrorResponse(404, s"Institution: $institutionId not found")
+                complete(ToResponseMarshallable(errorResponse))
+              } else if (summary.noFiling) {
+                filingsActor ! Shutdown
+                val errorResponse = ErrorResponse(404, s"No filings found for $institutionId")
+                complete(ToResponseMarshallable(errorResponse))
+              } else {
+                filingsActor ! Shutdown
+                complete(ToResponseMarshallable(summary))
+              }
+            }
             case Failure(error) =>
               filingsActor ! Shutdown
               complete(HttpResponse(StatusCodes.InternalServerError))
