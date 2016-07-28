@@ -43,8 +43,9 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
     path("institutions") {
       val institutionsActor = system.actorSelection("/user/institutions")
       get {
-        val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
         val requestTime = System.currentTimeMillis()
+        val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
+
         onComplete(fInstitutions) {
           case Success(institutions) =>
             log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
@@ -63,9 +64,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
         val institutionsActor = system.actorSelection("/user/institutions")
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         get {
+          val requestTime = System.currentTimeMillis()
           implicit val ec: ExecutionContext = executor
           val fInstitutionDetails = institutionDetails(institutionId, institutionsActor, filingsActor)
-          val requestTime = System.currentTimeMillis()
+
           onComplete(fInstitutionDetails) {
             case Success(institutionDetails) =>
               filingsActor ! Shutdown
@@ -90,9 +92,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
         get {
+          val requestTime = System.currentTimeMillis()
           implicit val ec: ExecutionContext = executor
           val fDetails: Future[FilingDetail] = filingDetailsByPeriod(period, filingsActor, submissionActor)
-          val requestTime = System.currentTimeMillis()
+
           onComplete(fDetails) {
             case Success(filingDetails) =>
               filingsActor ! Shutdown
@@ -116,11 +119,12 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
   val submissionPath =
     path("institutions" / Segment / "filings" / Segment / "submissions") { (institutionId, period) =>
       post {
+        val requestTime = System.currentTimeMillis()
         implicit val ec = system.dispatcher
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
         val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
-        val requestTime = System.currentTimeMillis()
+
         onComplete(fFiling) {
           case Success(filing) =>
             if (filing.period == period) {
@@ -154,6 +158,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
   val uploadPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
       val uploadTimestamp = Instant.now.toEpochMilli
+      val requestTime = System.currentTimeMillis()
       val processingActor = createHmdaFileUpload(system, submissionId)
       fileUpload("file") {
         case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
@@ -161,7 +166,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
             .via(splitLines)
             .map(_.utf8String)
             .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
-          val requestTime = System.currentTimeMillis()
+
           onComplete(uploadedF) {
             case Success(response) =>
               processingActor ! CompleteUpload
