@@ -3,17 +3,18 @@ package hmda.validation.engine.lar.syntactical
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.validation.api.ValidationApi
+import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.rules.ts.syntactical.S025
 import hmda.validation.rules.lar.syntactical._
 
 trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
 
-  private def s025(lar: LoanApplicationRegister, institution: Institution): LarValidation = {
-    convertResult(lar, S025(lar, institution), "S025")
+  private def s025(lar: LoanApplicationRegister, ctx: ValidationContext): LarValidation = {
+    convertResult(lar, S025(lar, ctx), "S025")
   }
 
-  def checkSyntactical(lar: LoanApplicationRegister, institution: Option[Institution]): LarValidation = {
+  def checkSyntactical(lar: LoanApplicationRegister, ctx: ValidationContext): LarValidation = {
     val checks = List(
       S010,
       S020,
@@ -21,7 +22,7 @@ trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
     ).map(check(_, lar))
 
     // Exclude edits requiring institution data
-    if (institution.isDefined) checks :+ s025(lar, institution.get)
+    if (ctx.institution.isDefined) checks :+ s025(lar, ctx)
 
     validateAll(checks, lar)
   }

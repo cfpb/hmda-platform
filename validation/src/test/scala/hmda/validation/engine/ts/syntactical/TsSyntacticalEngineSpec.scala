@@ -2,6 +2,7 @@ package hmda.validation.engine.ts.syntactical
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.ts.TsGenerators
+import hmda.validation.context.ValidationContext
 import hmda.validation.engine.ts.TsValidationApiSpec
 import org.scalacheck.Gen
 import org.scalatest._
@@ -9,7 +10,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.time.{ Millis, Seconds, Span }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsSyntacticalEngine with ScalaFutures with TsValidationApiSpec {
 
@@ -96,24 +97,22 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
 
   protected def failGenTs(badTs: Gen[TransmittalSheet]): Assertion = {
     badTs.sample match {
-      case Some(x) => {
-        val fValidated = checkSyntactical(x, None)
+      case Some(x) =>
+        val fValidated = checkSyntactical(x, ValidationContext(None))
         whenReady(fValidated) { validated =>
           validated.isFailure mustBe true
         }
-      }
       case None => throw new scala.Exception("Test failed")
     }
   }
 
   protected def passGenTs(goodTs: Gen[TransmittalSheet]): Assertion = {
     goodTs.sample match {
-      case Some(x) => {
-        val fValidated = checkSyntactical(x, None)
+      case Some(x) =>
+        val fValidated = checkSyntactical(x, ValidationContext(None))
         whenReady(fValidated) { validated =>
           validated.isSuccess mustBe true
         }
-      }
       case None => throw new scala.Exception("Test failed")
     }
   }

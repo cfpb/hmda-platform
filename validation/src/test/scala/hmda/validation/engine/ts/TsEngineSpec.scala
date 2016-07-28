@@ -1,9 +1,11 @@
 package hmda.validation.engine.ts
 
 import hmda.parser.fi.ts.TsGenerators
+import hmda.validation.context.{ Filing2017, ValidationContext }
 import org.scalatest.{ MustMatchers, PropSpec }
 import hmda.validation.dsl.Success
 import org.scalatest.prop.PropertyChecks
+
 import scala.concurrent.ExecutionContext
 
 class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsEngine with TsValidationApiSpec {
@@ -11,7 +13,7 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers with T
 
   property("Validates Transmittal Sheet") {
     forAll(tsGen) { ts =>
-      val fValid = validateTs(ts, None)
+      val fValid = validateTs(ts, ValidationContext(None))
       fValid.map(v => v mustBe Success())
     }
   }

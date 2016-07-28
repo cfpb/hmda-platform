@@ -1,7 +1,9 @@
 package hmda.validation.engine.lar.validity
 
 import java.io.File
+
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.io.Source
@@ -16,7 +18,7 @@ class LarValidityEngineSpec extends WordSpec with MustMatchers with LarValidityE
       }
 
       lars.foreach { lar =>
-        checkValidity(lar, None) mustBe a[scalaz.Success[_]]
+        checkValidity(lar, ValidationContext(None)) mustBe a[scalaz.Success[_]]
       }
     }
   }

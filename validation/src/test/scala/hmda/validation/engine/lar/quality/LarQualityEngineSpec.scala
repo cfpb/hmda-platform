@@ -3,6 +3,7 @@ package hmda.validation.engine.lar.quality
 import java.io.File
 
 import hmda.parser.fi.lar.{ LarCsvParser, LarGenerators }
+import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
@@ -23,8 +24,9 @@ class LarQualityEngineSpec
       }
 
       lars.foreach { lar =>
-        checkQuality(lar, None).isSuccess mustBe true
+        checkQuality(lar, ValidationContext(None)).isSuccess mustBe true
       }
     }
   }
+
 }

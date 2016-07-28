@@ -3,12 +3,13 @@ package hmda.validation.engine.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.validation.api.ValidationApi
+import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.rules.lar.validity._
 
 trait LarValidityEngine extends LarCommonEngine with ValidationApi {
 
-  def checkValidity(lar: LoanApplicationRegister, institution: Option[Institution]): LarValidation = {
+  def checkValidity(lar: LoanApplicationRegister, ctx: ValidationContext): LarValidation = {
     val checks = List(
       V210,
       V215,
