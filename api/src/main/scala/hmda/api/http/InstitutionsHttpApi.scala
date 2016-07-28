@@ -160,6 +160,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
           }
 
         case _ =>
+          processingActor ! Shutdown
           complete {
             HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
           }
