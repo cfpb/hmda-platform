@@ -9,6 +9,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http._
 import hmda.api.processing.lar.SingleLarValidation._
+import hmda.api.processing.HmdaEventProcessor._
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.demo.DemoData
 
@@ -37,6 +38,7 @@ object HmdaApi
 
   createSingleLarValidator(system)
   createInstitutions(system)
+  createHmdaEventProcessor(system)
 
   val http = Http().bindAndHandle(
     routes ~ larRoutes ~ institutionsRoutes,

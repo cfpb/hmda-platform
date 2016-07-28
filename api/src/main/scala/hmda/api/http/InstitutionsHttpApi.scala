@@ -20,6 +20,7 @@ import hmda.model.fi.{ Filing, Institution, Submission }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaRawFile._
+import hmda.api.processing.HmdaEventProcessor._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import spray.json._
@@ -134,25 +135,25 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
     }
 
   val uploadPath =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
+    path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, id) =>
       val uploadTimestamp = Instant.now.toEpochMilli
-      val processingActor = createHmdaRawFile(system, submissionId)
+      val processingActor = system.actorSelection("/user/hmda-event-processor")
+      val submissionId = s"$institutionId-$period-$id"
+      publishEvent(UploadStarted(submissionId))
       fileUpload("file") {
         case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
           val uploadedF = byteSource
             .via(splitLines)
             .map(_.utf8String)
-            .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
+            .runForeach(line => processingActor ! AddLine(uploadTimestamp, line, submissionId))
 
           onComplete(uploadedF) {
             case Success(response) =>
-              processingActor ! UploadCompleted
-              processingActor ! Shutdown
+              publishEvent(UploadCompleted(submissionId))
               complete {
                 "uploaded"
               }
             case Failure(error) =>
-              processingActor ! Shutdown
               log.error(error.getLocalizedMessage)
               complete {
                 HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
@@ -160,7 +161,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
           }
 
         case _ =>
-          processingActor ! Shutdown
           complete {
             HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
           }
@@ -208,6 +208,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
       filing <- fFiling
       submissions <- (submissionActor ? GetState).mapTo[Seq[Submission]]
     } yield FilingDetail(filing, submissions)
+  }
+
+  private def publishEvent(event: Event): Unit = {
+    system.eventStream.publish(event)
   }
 
   val institutionsRoutes =
