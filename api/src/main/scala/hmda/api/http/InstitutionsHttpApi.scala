@@ -2,31 +2,28 @@ package hmda.api.http
 
 import java.time.Instant
 
-import akka.Done
-import akka.actor.{ ActorRef, ActorSelection, ActorSystem }
+import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer
 import akka.pattern.ask
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.marshalling.{ PredefinedToEntityMarshallers, ToResponseMarshallable }
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.model.Multipart.BodyPart
 import akka.http.scaladsl.model._
-import akka.stream.scaladsl.{ Framing, Sink }
+import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
-import hmda.persistence.{ FilingPersistence, HmdaFileUpload, SubmissionPersistence }
+import hmda.persistence._
 import hmda.persistence.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.HmdaFileUpload.{ AddLine, _ }
 import hmda.persistence.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
-import hmda.api.protocol.processing.{ ApiErrorProtocol, FilingProtocol, InstitutionProtocol }
+import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi._
 import hmda.persistence.CommonMessages._
-import hmda.persistence.{ CommonMessages, FilingPersistence, SubmissionPersistence }
-import org.omg.CosNaming.NamingContextPackage.NotFound
+import hmda.persistence.{ FilingPersistence, SubmissionPersistence }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 import spray.json._
 
@@ -55,7 +52,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
       }
     }
 
-  //done
   val institutionByIdPath =
     path("institutions" / Segment) { institutionId =>
       extractExecutionContext { executor =>
@@ -135,7 +131,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
       }
     }
 
-  //do submission part
   val submissionPath =
     path("institutions" / Segment / "filings" / Segment / "submissions") { (institutionId, period) =>
       post {
@@ -145,7 +140,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
         val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[PossibleFiling]
         onComplete(fFiling) {
           case Success(filing) => filing match {
-            case Filing(_, _, _) => {
+            case Filing(_, _, _) =>
               submissionsActor ! CreateSubmission
               val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
               onComplete(fLatest) {
@@ -158,7 +153,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                   submissionsActor ! Shutdown
                   complete(HttpResponse(StatusCodes.InternalServerError))
               }
-            }
             case FilingNotFound =>
               val errorResponse = ErrorResponse(404, s"$period filing not found for $institutionId")
               complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
@@ -206,7 +200,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
 
     }
 
-  //done
   val institutionSummaryPath =
     path("institutions" / Segment / "summary") { institutionId =>
       extractExecutionContext { executor =>
@@ -246,14 +239,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
         }
       }
     }
-
-  private def filingDetailsByPeriod(period: String, filingsActor: ActorRef, submissionActor: ActorRef)(implicit ec: ExecutionContext): Future[FilingDetail] = {
-    val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
-    for {
-      filing <- fFiling
-      submissions <- (submissionActor ? GetState).mapTo[Seq[Submission]]
-    } yield FilingDetail(filing, submissions)
-  }
 
   val institutionsRoutes =
     institutionsPath ~
