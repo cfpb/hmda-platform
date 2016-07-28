@@ -4,11 +4,11 @@ import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
 import hmda.persistence.CommonMessages._
 
-object HmdaFileUpload {
-  def props(id: String): Props = Props(new HmdaFileUpload(id))
+object HmdaFileRaw {
+  def props(id: String): Props = Props(new HmdaFileRaw(id))
 
-  def createHmdaFileUpload(system: ActorSystem, submissionId: String): ActorRef = {
-    system.actorOf(HmdaFileUpload.props(submissionId))
+  def createHmdaFileRaw(system: ActorSystem, submissionId: String): ActorRef = {
+    system.actorOf(HmdaFileRaw.props(submissionId))
   }
 
   case object UploadStarted extends Event
@@ -17,23 +17,23 @@ object HmdaFileUpload {
   case class LineAdded(timestamp: Long, data: String) extends Event
 
   // uploads is a Map of timestamp -> number of rows
-  case class HmdaFileUploadState(uploads: Map[Long, Int] = Map.empty) {
-    def updated(event: Event): HmdaFileUploadState = event match {
+  case class HmdaFileRawState(uploads: Map[Long, Int] = Map.empty) {
+    def updated(event: Event): HmdaFileRawState = event match {
       case LineAdded(t, d) =>
         val updatedUploads = uploads.updated(t, uploads.getOrElse(t, 0) + 1)
-        HmdaFileUploadState(updatedUploads)
+        HmdaFileRawState(updatedUploads)
     }
   }
 
 }
 
-class HmdaFileUpload(submissionId: String) extends PersistentActor with ActorLogging {
+class HmdaFileRaw(submissionId: String) extends PersistentActor with ActorLogging {
 
-  import HmdaFileUpload._
+  import HmdaFileRaw._
 
   override def persistenceId: String = s"HmdaFileUpload-$submissionId"
 
-  var state = HmdaFileUploadState()
+  var state = HmdaFileRawState()
 
   def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -64,7 +64,7 @@ class HmdaFileUpload(submissionId: String) extends PersistentActor with ActorLog
 
   override def receiveRecover: Receive = {
     case event: Event => updateState(event)
-    case SnapshotOffer(_, snapshot: HmdaFileUploadState) =>
+    case SnapshotOffer(_, snapshot: HmdaFileRawState) =>
       log.debug("Recovering from snapshot")
       state = snapshot
   }
