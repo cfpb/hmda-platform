@@ -142,7 +142,7 @@ drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
 From `hmda-platform`'s root directory, run the following:
 
 ```shell
-docker-compose up -d
+docker-compose up -d --build
 ```
 
 This will bring up all the HMDA Platform services. The first run may take several minutes.
