@@ -8,7 +8,7 @@ import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer
 import akka.pattern.ask
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.marshalling.{ PredefinedToEntityMarshallers, ToResponseMarshallable }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Multipart.BodyPart
 import akka.http.scaladsl.model._
@@ -24,6 +24,7 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, FilingProtocol, Institut
 import hmda.model.fi.{ Filing, Institution, Submission }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.{ CommonMessages, FilingPersistence, SubmissionPersistence }
+import org.omg.CosNaming.NamingContextPackage.NotFound
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -66,10 +67,12 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           onComplete(fInstitutionDetails) {
             case Success(institutionDetails) =>
               filingsActor ! Shutdown
-              if (!institutionDetails.institution.isEmpty)
+              if (!institutionDetails.institution.isEmpty) {
                 complete(ToResponseMarshallable(institutionDetails))
-              else
-                complete(ToResponseMarshallable(ErrorResponse(404, s"Institution: $institutionId not found")))
+              } else {
+                val error = ErrorResponse(404, s"Institution: $institutionId not found")
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
+              }
             case Failure(error) =>
               filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)
@@ -173,6 +176,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
 
     }
 
+  //done
   val institutionSummaryPath =
     path("institutions" / Segment / "summary") { institutionId =>
       extractExecutionContext { executor =>
@@ -189,16 +193,14 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
 
           onComplete(fSummary) {
             case Success(summary) => {
+              filingsActor ! Shutdown
               if (summary.noInstitution) {
-                filingsActor ! Shutdown
                 val errorResponse = ErrorResponse(404, s"Institution: $institutionId not found")
-                complete(ToResponseMarshallable(errorResponse))
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else if (summary.noFiling) {
-                filingsActor ! Shutdown
                 val errorResponse = ErrorResponse(404, s"No filings found for $institutionId")
-                complete(ToResponseMarshallable(errorResponse))
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
-                filingsActor ! Shutdown
                 complete(ToResponseMarshallable(summary))
               }
             }
