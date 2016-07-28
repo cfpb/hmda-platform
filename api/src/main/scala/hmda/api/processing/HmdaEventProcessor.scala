@@ -3,7 +3,7 @@ package hmda.api.processing
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaRawFile
-import hmda.persistence.processing.HmdaRawFile.{ AddLine, LineAdded, UploadCompleted, UploadStarted }
+import hmda.persistence.processing.HmdaRawFile.{ AddLine, UploadCompleted, UploadStarted }
 
 object HmdaEventProcessor {
   def props: Props = Props(new HmdaEventProcessor)
