@@ -21,11 +21,13 @@ trait HttpApi extends HmdaApiProtocol {
   val rootPath =
     pathSingleSlash {
       get {
+        val requestTime = System.currentTimeMillis()
         complete {
           val now = Instant.now.toString
           val host = InetAddress.getLocalHost.getHostName
           val status = Status("OK", "hmda-api", now, host)
           log.debug(status.toJson.toString)
+          log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
           ToResponseMarshallable(status)
         }
       }

@@ -34,10 +34,15 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
     pathPrefix("lar") {
       path("parse") {
         post {
+          val requestTime = System.currentTimeMillis()
           entity(as[String]) { s =>
             LarCsvParser(s) match {
-              case Right(lar) => complete(ToResponseMarshallable(lar))
-              case Left(errors) => complete(errorsAsResponse(errors))
+              case Right(lar) =>
+                log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
+                complete(ToResponseMarshallable(lar))
+              case Left(errors) =>
+                log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
+                complete(errorsAsResponse(errors))
             }
           }
         }
@@ -49,6 +54,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
       path("validate") {
         parameters('check.as[String] ? "all") { (checkType) =>
           post {
+            val requestTime = System.currentTimeMillis()
             entity(as[LoanApplicationRegister]) { lar =>
               val larValidation = system.actorSelection("/user/larValidation")
               val checkMessage = checkType match {
@@ -59,8 +65,10 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
               }
               onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
                 case Success(xs) =>
+                  log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
                   complete(ToResponseMarshallable(xs))
                 case Failure(e) =>
+                  log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
                   complete(HttpResponse(StatusCodes.InternalServerError))
               }
             }
