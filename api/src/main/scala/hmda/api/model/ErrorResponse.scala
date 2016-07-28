@@ -1,7 +1,7 @@
 package hmda.api.model
 
 case class ErrorResponse(
-  code: Int,
+  httpStatus: Int,
   message: String
 )
 

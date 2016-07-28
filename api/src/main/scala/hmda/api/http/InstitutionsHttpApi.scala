@@ -13,7 +13,6 @@ import akka.http.scaladsl.model._
 import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
-import hmda.persistence._
 import hmda.persistence.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.HmdaFileUpload.{ AddLine, _ }
 import hmda.persistence.InstitutionPersistence.GetInstitutionById
