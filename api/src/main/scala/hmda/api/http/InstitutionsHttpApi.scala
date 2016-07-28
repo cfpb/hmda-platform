@@ -19,7 +19,7 @@ import hmda.api.protocol.processing.InstitutionProtocol
 import hmda.model.fi.{ Filing, Institution, Submission }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
-import hmda.persistence.processing.HmdaFileRaw._
+import hmda.persistence.processing.HmdaRawFile._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import spray.json._
@@ -136,7 +136,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
   val uploadPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
       val uploadTimestamp = Instant.now.toEpochMilli
-      val processingActor = createHmdaFileRaw(system, submissionId)
+      val processingActor = createHmdaRawFile(system, submissionId)
       fileUpload("file") {
         case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
           val uploadedF = byteSource

@@ -4,36 +4,34 @@ import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
 import hmda.persistence.CommonMessages._
 
-object HmdaFileRaw {
-  def props(id: String): Props = Props(new HmdaFileRaw(id))
+object HmdaRawFile {
+  def props(id: String): Props = Props(new HmdaRawFile(id))
 
-  def createHmdaFileRaw(system: ActorSystem, submissionId: String): ActorRef = {
-    system.actorOf(HmdaFileRaw.props(submissionId))
+  def createHmdaRawFile(system: ActorSystem, submissionId: String): ActorRef = {
+    system.actorOf(HmdaRawFile.props(submissionId))
   }
 
-  case object UploadStarted extends Event
+  case class UploadStarted() extends Event
   case class AddLine(timestamp: Long, data: String) extends Command
-  case object UploadCompleted extends Event
+  case class UploadCompleted() extends Event
   case class LineAdded(timestamp: Long, data: String) extends Event
 
-  // uploads is a Map of timestamp -> number of rows
-  case class HmdaFileRawState(uploads: Map[Long, Int] = Map.empty) {
-    def updated(event: Event): HmdaFileRawState = event match {
-      case LineAdded(t, d) =>
-        val updatedUploads = uploads.updated(t, uploads.getOrElse(t, 0) + 1)
-        HmdaFileRawState(updatedUploads)
+  case class HmdaRawFileState(size: Int = 0) {
+    def updated(event: Event): HmdaRawFileState = event match {
+      case LineAdded(_, _) =>
+        HmdaRawFileState(size + 1)
     }
   }
 
 }
 
-class HmdaFileRaw(submissionId: String) extends PersistentActor with ActorLogging {
+class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLogging {
 
-  import HmdaFileRaw._
+  import HmdaRawFile._
 
   override def persistenceId: String = s"HmdaFileUpload-$submissionId"
 
-  var state = HmdaFileRawState()
+  var state = HmdaRawFileState()
 
   def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -42,7 +40,7 @@ class HmdaFileRaw(submissionId: String) extends PersistentActor with ActorLoggin
   override def receiveCommand: Receive = {
     case UploadStarted =>
       log.debug(s"Beging uploading for submission: $submissionId")
-      publishEvent(UploadStarted)
+      publishEvent(UploadStarted())
 
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
@@ -53,7 +51,7 @@ class HmdaFileRaw(submissionId: String) extends PersistentActor with ActorLoggin
 
     case UploadCompleted =>
       saveSnapshot(state)
-      publishEvent(UploadCompleted)
+      publishEvent(UploadCompleted())
 
     case GetState =>
       sender() ! state
@@ -64,7 +62,7 @@ class HmdaFileRaw(submissionId: String) extends PersistentActor with ActorLoggin
 
   override def receiveRecover: Receive = {
     case event: Event => updateState(event)
-    case SnapshotOffer(_, snapshot: HmdaFileRawState) =>
+    case SnapshotOffer(_, snapshot: HmdaRawFileState) =>
       log.debug("Recovering from snapshot")
       state = snapshot
   }
