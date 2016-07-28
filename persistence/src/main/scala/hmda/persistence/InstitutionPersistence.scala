@@ -2,7 +2,7 @@ package hmda.persistence
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
-import hmda.model.fi.Institution
+import hmda.model.fi.{ Institution, InstitutionNotFound, PossibleInstitution }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.InstitutionPersistence._
 
@@ -73,7 +73,7 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
       }
 
     case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(x => x.id == institutionId).getOrElse(Institution())
+      val institution: PossibleInstitution = state.institutions.find(x => x.id == institutionId).getOrElse(InstitutionNotFound)
       sender() ! institution
 
     case GetState =>

@@ -1,7 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.{ InstitutionDetail, InstitutionSummary, Institutions }
-import hmda.model.fi.{ Active, Inactive, Institution, InstitutionStatus }
+import hmda.model.fi._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
 trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
@@ -20,6 +20,25 @@ trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
           case "inactive" => Inactive
         }
         case _ => throw new DeserializationException("Institution Status expected")
+      }
+    }
+  }
+
+  implicit object PossibleInstitutionJsonFormat extends RootJsonFormat[PossibleInstitution] {
+    override def write(pi: PossibleInstitution): JsValue = {
+      pi match {
+        case InstitutionNotFound => JsString("Instituion Not Found")
+        case Institution(_, _, _) => JsString(jsonFormat3(Institution.apply).toString)
+      }
+    }
+
+    override def read(json: JsValue): PossibleInstitution = {
+      json match {
+        case JsString(s) => s match {
+          case "Instituion Not Found" => InstitutionNotFound
+          case jsonFormat2 => Institution()
+        }
+        case _ => throw new DeserializationException("Institution Not Found Expected")
       }
     }
   }

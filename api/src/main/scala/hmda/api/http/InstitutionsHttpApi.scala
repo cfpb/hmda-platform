@@ -21,7 +21,7 @@ import hmda.persistence.HmdaFileUpload.{ AddLine, _ }
 import hmda.persistence.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, FilingProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Filing, Institution, Submission }
+import hmda.model.fi._
 import hmda.persistence.CommonMessages._
 import hmda.persistence.{ CommonMessages, FilingPersistence, SubmissionPersistence }
 import org.omg.CosNaming.NamingContextPackage.NotFound
@@ -63,15 +63,29 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         get {
           implicit val ec: ExecutionContext = executor
-          val fInstitutionDetails = institutionDetails(institutionId, institutionsActor, filingsActor)
-          onComplete(fInstitutionDetails) {
-            case Success(institutionDetails) =>
-              filingsActor ! Shutdown
-              if (!institutionDetails.institution.isEmpty) {
-                complete(ToResponseMarshallable(institutionDetails))
-              } else {
-                val error = ErrorResponse(404, s"Institution: $institutionId not found")
-                complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
+          val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[PossibleInstitution]
+          val filing = (filingsActor ? GetState).mapTo[Seq[Filing]]
+          onComplete(fInstitution) {
+            case Success(fInstitution) =>
+              fInstitution match {
+                case InstitutionNotFound =>
+                  val error = ErrorResponse(404, s"Institution: $institutionId not found")
+                  complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
+                case Institution(x, y, z) =>
+                  onComplete(filing) {
+                    case Success(filings) =>
+                      filingsActor ! Shutdown
+                      if (filings.isEmpty) {
+                        val error = ErrorResponse(404, s"No filings for $institutionId")
+                        complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
+                      } else {
+                        complete(ToResponseMarshallable(InstitutionDetail(Institution(x, y, z), filings)))
+                      }
+                    case Failure(error) =>
+                      filingsActor ! Shutdown
+                      log.error(error.getLocalizedMessage)
+                      complete(HttpResponse(StatusCodes.InternalServerError))
+                  }
               }
             case Failure(error) =>
               filingsActor ! Shutdown
@@ -88,17 +102,30 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
         get {
+          val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[PossibleFiling]
+          val fSubmission = (submissionActor ? GetState).mapTo[Seq[Submission]]
           implicit val ec: ExecutionContext = executor
-          val fDetails: Future[FilingDetail] = filingDetailsByPeriod(period, filingsActor, submissionActor)
-          onComplete(fDetails) {
-            case Success(filingDetails) =>
+          onComplete(fFiling) {
+            case Success(fFiling) =>
               filingsActor ! Shutdown
-              submissionActor ! Shutdown
-              val filing = filingDetails.filing
-              if (filing.institutionId == institutionId && filing.period == period)
-                complete(ToResponseMarshallable(filingDetails))
-              else
-                complete(HttpResponse(StatusCodes.NotFound))
+              fFiling match {
+                case Filing(x, y, z) =>
+                  onComplete(fSubmission) {
+                    case Success(fSubmission) =>
+                      if (fSubmission.isEmpty) {
+                        val error = ErrorResponse(404, s"No submissions for the $period filing for $institutionId")
+                        complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
+                      } else {
+                        complete(ToResponseMarshallable(FilingDetail(Filing(x, y, z), fSubmission)))
+                      }
+                    case Failure(error) =>
+                      submissionActor ! Shutdown
+                      complete(HttpResponse(StatusCodes.InternalServerError))
+                  }
+                case FilingNotFound =>
+                  val error = ErrorResponse(404, s"No $period filing for $institutionId")
+                  complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
+              }
             case Failure(error) =>
               filingsActor ! Shutdown
               submissionActor ! Shutdown
@@ -108,16 +135,17 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
       }
     }
 
+  //do submission part
   val submissionPath =
     path("institutions" / Segment / "filings" / Segment / "submissions") { (institutionId, period) =>
       post {
         implicit val ec = system.dispatcher
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-        val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
+        val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[PossibleFiling]
         onComplete(fFiling) {
-          case Success(filing) =>
-            if (filing.period == period) {
+          case Success(filing) => filing match {
+            case Filing(_, _, _) => {
               submissionsActor ! CreateSubmission
               val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
               onComplete(fLatest) {
@@ -130,9 +158,11 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                   submissionsActor ! Shutdown
                   complete(HttpResponse(StatusCodes.InternalServerError))
               }
-            } else {
-              complete(HttpResponse(StatusCodes.NotFound))
             }
+            case FilingNotFound =>
+              val errorResponse = ErrorResponse(404, s"$period filing not found for $institutionId")
+              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+          }
           case Failure(error) =>
             filingsActor ! Shutdown
             submissionsActor ! Shutdown
@@ -182,43 +212,40 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/institutions")
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
-        implicit val ec = executor
         get {
-          val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
-          val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
-          val fSummary = for {
-            institution <- fInstitution
-            filings <- fFilings
-          } yield InstitutionSummary(institution.id, institution.name, filings)
-
-          onComplete(fSummary) {
-            case Success(summary) => {
-              filingsActor ! Shutdown
-              if (summary.noInstitution) {
-                val errorResponse = ErrorResponse(404, s"Institution: $institutionId not found")
-                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-              } else if (summary.noFiling) {
-                val errorResponse = ErrorResponse(404, s"No filings found for $institutionId")
-                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-              } else {
-                complete(ToResponseMarshallable(summary))
+          implicit val ec: ExecutionContext = executor
+          val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[PossibleInstitution]
+          val filing = (filingsActor ? GetState).mapTo[Seq[Filing]]
+          onComplete(fInstitution) {
+            case Success(fInstitution) =>
+              fInstitution match {
+                case InstitutionNotFound =>
+                  val error = ErrorResponse(404, s"Institution: $institutionId not found")
+                  complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
+                case Institution(x, y, z) =>
+                  onComplete(filing) {
+                    case Success(filings) =>
+                      filingsActor ! Shutdown
+                      if (filings.isEmpty) {
+                        val error = ErrorResponse(404, s"No filings for $institutionId")
+                        complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
+                      } else {
+                        complete(ToResponseMarshallable(InstitutionSummary(x, y, filings)))
+                      }
+                    case Failure(error) =>
+                      filingsActor ! Shutdown
+                      log.error(error.getLocalizedMessage)
+                      complete(HttpResponse(StatusCodes.InternalServerError))
+                  }
               }
-            }
             case Failure(error) =>
               filingsActor ! Shutdown
+              log.error(error.getLocalizedMessage)
               complete(HttpResponse(StatusCodes.InternalServerError))
           }
         }
       }
     }
-
-  private def institutionDetails(institutionId: String, institutionsActor: ActorSelection, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
-    val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
-    for {
-      institution <- fInstitution
-      filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-    } yield InstitutionDetail(institution, filings)
-  }
 
   private def filingDetailsByPeriod(period: String, filingsActor: ActorRef, submissionActor: ActorRef)(implicit ec: ExecutionContext): Future[FilingDetail] = {
     val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
