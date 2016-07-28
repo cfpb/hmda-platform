@@ -1,7 +1,7 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
-import akka.persistence.{ PersistentActor, SnapshotOffer }
+import akka.persistence._
 import hmda.persistence.CommonMessages._
 
 object HmdaRawFile {
@@ -52,6 +52,14 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
     case UploadCompleted =>
       saveSnapshot(state)
       publishEvent(UploadCompleted())
+
+    case SaveSnapshotSuccess(metadata) =>
+      //only keep last snapshot
+      val criteria = SnapshotSelectionCriteria(maxSequenceNr = metadata.sequenceNr - 1)
+      deleteSnapshots(criteria)
+
+    case SaveSnapshotFailure(metadata, reason) =>
+      log.warning(s"Save Snapshot Failure: ${reason.getLocalizedMessage}")
 
     case GetState =>
       sender() ! state
