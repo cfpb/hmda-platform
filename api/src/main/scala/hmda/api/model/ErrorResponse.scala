@@ -4,4 +4,3 @@ case class ErrorResponse(
   httpStatus: Int,
   message: String
 )
-
