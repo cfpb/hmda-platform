@@ -53,6 +53,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
       Get("/institutions/xxxx") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxx not found", "institutions/xxxx")
       }
     }
 
@@ -73,9 +74,11 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
       Get("/institutions/12345/filings/xxxx") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 12345", "institutions/12345/filings/xxxx")
       }
       Get("/institutions/xxxxx/filings/2017") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2017 filing not found for institution xxxxx", "institutions/xxxxx/filings/2017")
       }
     }
 
@@ -89,12 +92,14 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "fail creating a new submission for a non existent institution" in {
       Post("/institutions/xxxxx/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2017 filing not found for institution xxxxx", "institutions/xxxxx/filings/2017/submissions")
       }
     }
 
     "fail creating a new submission for a non existent filing period" in {
       Post("/institutions/12345/filings/2001/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 12345", "institutions/12345/filings/2001/submissions")
       }
     }
 
@@ -117,6 +122,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       val file = multiPartFile(badContent, "sample.dat")
       Post("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", "institutions/12345/filings/2017/submissions/1")
       }
     }
 
