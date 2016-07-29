@@ -29,7 +29,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import spray.json._
 
-trait InstitutionsHttpApi extends InstitutionProtocol {
+trait InstitutionsHttpApi extends InstitutionProtocol with HmdaCustomDirectives {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -43,17 +43,16 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
     path("institutions") {
       val institutionsActor = system.actorSelection("/user/institutions")
       get {
-        val requestTime = System.currentTimeMillis()
-        val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
+        time {
+          val requestTime = System.currentTimeMillis()
+          val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
 
-        onComplete(fInstitutions) {
-          case Success(institutions) =>
-            log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-            complete(ToResponseMarshallable(Institutions(institutions)))
-          case Failure(error) =>
-            log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-            log.error(error.getLocalizedMessage)
-            complete(HttpResponse(StatusCodes.InternalServerError))
+          onComplete(fInstitutions) {
+            case Success(institutions) => complete(ToResponseMarshallable(Institutions(institutions)))
+            case Failure(error) =>
+              log.error(error.getLocalizedMessage)
+              complete(HttpResponse(StatusCodes.InternalServerError))
+          }
         }
       }
     }
@@ -64,23 +63,22 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
         val institutionsActor = system.actorSelection("/user/institutions")
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         get {
-          val requestTime = System.currentTimeMillis()
-          implicit val ec: ExecutionContext = executor
-          val fInstitutionDetails = institutionDetails(institutionId, institutionsActor, filingsActor)
+          time {
+            implicit val ec: ExecutionContext = executor
+            val fInstitutionDetails = institutionDetails(institutionId, institutionsActor, filingsActor)
 
-          onComplete(fInstitutionDetails) {
-            case Success(institutionDetails) =>
-              filingsActor ! Shutdown
-              log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-              if (institutionDetails.institution.id != "")
-                complete(ToResponseMarshallable(institutionDetails))
-              else
-                complete(HttpResponse(StatusCodes.NotFound))
-            case Failure(error) =>
-              filingsActor ! Shutdown
-              log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-              log.error(error.getLocalizedMessage)
-              complete(HttpResponse(StatusCodes.InternalServerError))
+            onComplete(fInstitutionDetails) {
+              case Success(institutionDetails) =>
+                filingsActor ! Shutdown
+                if (institutionDetails.institution.id != "")
+                  complete(ToResponseMarshallable(institutionDetails))
+                else
+                  complete(HttpResponse(StatusCodes.NotFound))
+              case Failure(error) =>
+                filingsActor ! Shutdown
+                log.error(error.getLocalizedMessage)
+                complete(HttpResponse(StatusCodes.InternalServerError))
+            }
           }
         }
       }
@@ -92,25 +90,24 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
         get {
-          val requestTime = System.currentTimeMillis()
-          implicit val ec: ExecutionContext = executor
-          val fDetails: Future[FilingDetail] = filingDetailsByPeriod(period, filingsActor, submissionActor)
+          time {
+            implicit val ec: ExecutionContext = executor
+            val fDetails: Future[FilingDetail] = filingDetailsByPeriod(period, filingsActor, submissionActor)
 
-          onComplete(fDetails) {
-            case Success(filingDetails) =>
-              filingsActor ! Shutdown
-              submissionActor ! Shutdown
-              log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-              val filing = filingDetails.filing
-              if (filing.institutionId == institutionId && filing.period == period)
-                complete(ToResponseMarshallable(filingDetails))
-              else
-                complete(HttpResponse(StatusCodes.NotFound))
-            case Failure(error) =>
-              filingsActor ! Shutdown
-              submissionActor ! Shutdown
-              log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-              complete(HttpResponse(StatusCodes.InternalServerError))
+            onComplete(fDetails) {
+              case Success(filingDetails) =>
+                filingsActor ! Shutdown
+                submissionActor ! Shutdown
+                val filing = filingDetails.filing
+                if (filing.institutionId == institutionId && filing.period == period)
+                  complete(ToResponseMarshallable(filingDetails))
+                else
+                  complete(HttpResponse(StatusCodes.NotFound))
+              case Failure(error) =>
+                filingsActor ! Shutdown
+                submissionActor ! Shutdown
+                complete(HttpResponse(StatusCodes.InternalServerError))
+            }
           }
         }
       }
@@ -119,38 +116,36 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
   val submissionPath =
     path("institutions" / Segment / "filings" / Segment / "submissions") { (institutionId, period) =>
       post {
-        val requestTime = System.currentTimeMillis()
-        implicit val ec = system.dispatcher
-        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
-        val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-        val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
+        time {
+          implicit val ec = system.dispatcher
+          val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
+          val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
+          val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
 
-        onComplete(fFiling) {
-          case Success(filing) =>
-            if (filing.period == period) {
-              submissionsActor ! CreateSubmission
-              val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
-              onComplete(fLatest) {
-                case Success(submission) =>
-                  submissionsActor ! Shutdown
-                  filingsActor ! Shutdown
-                  log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-                  val e = HttpEntity(ContentTypes.`application/json`, submission.toJson.toString)
-                  complete(HttpResponse(StatusCodes.Created, entity = e))
-                case Failure(error) =>
-                  submissionsActor ! Shutdown
-                  log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-                  complete(HttpResponse(StatusCodes.InternalServerError))
+          onComplete(fFiling) {
+            case Success(filing) =>
+              if (filing.period == period) {
+                submissionsActor ! CreateSubmission
+                val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
+                onComplete(fLatest) {
+                  case Success(submission) =>
+                    submissionsActor ! Shutdown
+                    filingsActor ! Shutdown
+                    val e = HttpEntity(ContentTypes.`application/json`, submission.toJson.toString)
+                    complete(HttpResponse(StatusCodes.Created, entity = e))
+                  case Failure(error) =>
+                    submissionsActor ! Shutdown
+                    complete(HttpResponse(StatusCodes.InternalServerError))
+                }
+              } else {
+                complete(HttpResponse(StatusCodes.NotFound))
               }
-            } else {
-              complete(HttpResponse(StatusCodes.NotFound))
-            }
-          case Failure(error) =>
-            filingsActor ! Shutdown
-            submissionsActor ! Shutdown
-            log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-            complete(HttpResponse(StatusCodes.InternalServerError))
+            case Failure(error) =>
+              filingsActor ! Shutdown
+              submissionsActor ! Shutdown
+              complete(HttpResponse(StatusCodes.InternalServerError))
 
+          }
         }
       }
     }
@@ -161,35 +156,36 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
       val requestTime = System.currentTimeMillis()
       val processingActor = createHmdaFileUpload(system, submissionId)
       fileUpload("file") {
-        case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
-          val uploadedF = byteSource
-            .via(splitLines)
-            .map(_.utf8String)
-            .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
+        time {
+          case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
+            val uploadedF = byteSource
+              .via(splitLines)
+              .map(_.utf8String)
+              .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
 
-          onComplete(uploadedF) {
-            case Success(response) =>
-              processingActor ! CompleteUpload
-              processingActor ! Shutdown
-              log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-              complete {
-                "uploaded"
-              }
-            case Failure(error) =>
-              processingActor ! Shutdown
-              log.error(error.getLocalizedMessage)
-              log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-              complete {
-                HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
-              }
-          }
+            onComplete(uploadedF) {
+              case Success(response) =>
+                processingActor ! CompleteUpload
+                processingActor ! Shutdown
+                log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
+                complete {
+                  "uploaded"
+                }
+              case Failure(error) =>
+                processingActor ! Shutdown
+                log.error(error.getLocalizedMessage)
+                log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
+                complete {
+                  HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
+                }
+            }
 
-        case _ =>
-          complete {
-            HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
-          }
+          case _ =>
+            complete {
+              HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
+            }
+        }
       }
-
     }
 
   val institutionSummaryPath =
@@ -199,23 +195,25 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         implicit val ec = executor
         get {
-          val requestTime = System.currentTimeMillis()
-          val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
-          val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
-          val fSummary = for {
-            institution <- fInstitution
-            filings <- fFilings
-          } yield InstitutionSummary(institution.id, institution.name, filings)
+          time {
+            val requestTime = System.currentTimeMillis()
+            val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
+            val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
+            val fSummary = for {
+              institution <- fInstitution
+              filings <- fFilings
+            } yield InstitutionSummary(institution.id, institution.name, filings)
 
-          onComplete(fSummary) {
-            case Success(summary) =>
-              filingsActor ! Shutdown
-              log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-              complete(ToResponseMarshallable(summary))
-            case Failure(error) =>
-              filingsActor ! Shutdown
-              log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-              complete(HttpResponse(StatusCodes.InternalServerError))
+            onComplete(fSummary) {
+              case Success(summary) =>
+                filingsActor ! Shutdown
+                log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
+                complete(ToResponseMarshallable(summary))
+              case Failure(error) =>
+                filingsActor ! Shutdown
+                log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
+                complete(HttpResponse(StatusCodes.InternalServerError))
+            }
           }
         }
       }

@@ -22,7 +22,7 @@ import scala.util.{ Failure, Success }
 
 import spray.json._
 
-trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
+trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCustomDirectives {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -34,15 +34,13 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
     pathPrefix("lar") {
       path("parse") {
         post {
-          val requestTime = System.currentTimeMillis()
-          entity(as[String]) { s =>
-            LarCsvParser(s) match {
-              case Right(lar) =>
-                log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-                complete(ToResponseMarshallable(lar))
-              case Left(errors) =>
-                log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-                complete(errorsAsResponse(errors))
+          time {
+            val requestTime = System.currentTimeMillis()
+            entity(as[String]) { s =>
+              LarCsvParser(s) match {
+                case Right(lar) => complete(ToResponseMarshallable(lar))
+                case Left(errors) => complete(errorsAsResponse(errors))
+              }
             }
           }
         }
@@ -54,22 +52,19 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
       path("validate") {
         parameters('check.as[String] ? "all") { (checkType) =>
           post {
-            val requestTime = System.currentTimeMillis()
-            entity(as[LoanApplicationRegister]) { lar =>
-              val larValidation = system.actorSelection("/user/larValidation")
-              val checkMessage = checkType match {
-                case "syntactical" => CheckSyntactical(lar)
-                case "validity" => CheckValidity(lar)
-                case "quality" => CheckQuality(lar)
-                case _ => CheckAll(lar)
-              }
-              onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
-                case Success(xs) =>
-                  log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-                  complete(ToResponseMarshallable(xs))
-                case Failure(e) =>
-                  log.debug("Elapsed time: " + (System.currentTimeMillis() - requestTime) + "ms")
-                  complete(HttpResponse(StatusCodes.InternalServerError))
+            time {
+              entity(as[LoanApplicationRegister]) { lar =>
+                val larValidation = system.actorSelection("/user/larValidation")
+                val checkMessage = checkType match {
+                  case "syntactical" => CheckSyntactical(lar)
+                  case "validity" => CheckValidity(lar)
+                  case "quality" => CheckQuality(lar)
+                  case _ => CheckAll(lar)
+                }
+                onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
+                  case Success(xs) => complete(ToResponseMarshallable(xs))
+                  case Failure(e) => complete(HttpResponse(StatusCodes.InternalServerError))
+                }
               }
             }
           }
