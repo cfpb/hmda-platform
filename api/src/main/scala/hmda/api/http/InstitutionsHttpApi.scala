@@ -135,7 +135,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                   complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
               }
             } else {
-              val errorResponse = ErrorResponse(404, s"No $period filing found for institution $institutionId", path)
+              val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
               complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
             }
           case Failure(error) =>
@@ -170,13 +170,13 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
             case Failure(error) =>
               processingActor ! Shutdown
               log.error(error.getLocalizedMessage)
-              val errorResponse = ErrorResponse(422, "Invalid File Format", path)
+              val errorResponse = ErrorResponse(400, "Invalid File Format", path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
           }
 
         case _ =>
           processingActor ! Shutdown
-          val errorResponse = ErrorResponse(422, "Invalid File Format", path)
+          val errorResponse = ErrorResponse(400, "Invalid File Format", path)
           complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
       }
 
