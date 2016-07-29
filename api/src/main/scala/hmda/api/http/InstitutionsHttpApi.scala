@@ -1,6 +1,7 @@
 package hmda.api.http
 
 import java.time.Instant
+
 import akka.actor.{ ActorRef, ActorSelection, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer
@@ -15,16 +16,17 @@ import hmda.api.model._
 import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
-import hmda.api.protocol.processing.InstitutionProtocol
+import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Institution, Submission }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaFileUpload._
+
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import spray.json._
 
-trait InstitutionsHttpApi extends InstitutionProtocol {
+trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
