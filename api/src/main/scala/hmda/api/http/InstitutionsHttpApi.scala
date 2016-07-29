@@ -13,14 +13,14 @@ import akka.http.scaladsl.model._
 import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
-import hmda.persistence.FilingPersistence.GetFilingByPeriod
-import hmda.persistence.HmdaFileUpload.{ AddLine, _ }
-import hmda.persistence.InstitutionPersistence.GetInstitutionById
-import hmda.persistence.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
+import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
+import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
+import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi._
 import hmda.persistence.CommonMessages._
-import hmda.persistence.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.processing.HmdaFileUpload._
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -192,6 +192,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           }
 
         case _ =>
+          processingActor ! Shutdown
           val errorResponse = ErrorResponse(422, "Invalid file format")
           complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
       }

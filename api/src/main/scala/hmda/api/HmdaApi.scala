@@ -9,7 +9,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http._
 import hmda.api.processing.lar.SingleLarValidation._
-import hmda.persistence.InstitutionPersistence._
+import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.demo.DemoData
 
 import scala.concurrent.duration._
