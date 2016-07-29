@@ -13,7 +13,13 @@ import org.scalatest.{ MustMatchers, WordSpec }
 
 class S025Spec extends WordSpec with MustMatchers {
 
-  "Q025 for TS" must {
+  "S025" must {
+    "be named S025" in {
+      S025.name mustBe "S025"
+    }
+  }
+
+  "S025 for TS" must {
 
     val ts = TransmittalSheet(
       1,
@@ -48,7 +54,7 @@ class S025Spec extends WordSpec with MustMatchers {
     }
   }
 
-  "Q025 for LAR" must {
+  "S025 for LAR" must {
 
     val lar = LoanApplicationRegister(
       2,
