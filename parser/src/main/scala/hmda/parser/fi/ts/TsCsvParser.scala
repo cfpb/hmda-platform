@@ -51,7 +51,7 @@ object TsCsvParser {
       |@| contact.success
     ) { TransmittalSheet }
 
-    maybeTS.disjunction.toEither.bimap(_.toList, identity(_))
+    maybeTS.leftMap(_.toList).toEither
   }
 
   def toIntOrFail(value: String, fieldName: String): ValidationNel[String, Int] = {
