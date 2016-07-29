@@ -23,118 +23,101 @@ class InstitutionSpec extends WordSpec with MustMatchers {
       val inst = Institution(1, "Test Bank", externalIds, CFPB, NoDepositTypeInstType, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isLeft mustBe true
-      val failType = expectedId.left.get
-      failType mustBe NoDepositoryTypeForInstitutionType(1, NoDepositTypeInstType)
-      failType.message mustBe s"Institution 1 has an institutionType of $NoDepositTypeInstType, which does not have a depositoryType"
+      expectedId mustBe Left(NoDepositoryTypeForInstitutionType(1, NoDepositTypeInstType))
+      expectedId.left.get.message mustBe s"Institution 1 has an institutionType of $NoDepositTypeInstType, which does not have a depositoryType"
     }
 
     "fail to resolve respondentId when a required externalId is not present" in {
       val inst = Institution(1, "Test Bank", Set(ExternalId("666666", FederalTaxId)), CFPB, Bank, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isLeft mustBe true
-      val failType = expectedId.left.get
-      failType mustBe RequiredExternalIdNotPresent(1, RssdId)
-      failType.message mustBe s"Institution 1 does not have an externalId of type $RssdId"
+      expectedId mustBe Left(RequiredExternalIdNotPresent(1, RssdId))
+      expectedId.left.get.message mustBe s"Institution 1 does not have an externalId of type $RssdId"
     }
 
     "resolve respondentId to RSSD ID when agency is CFPB and depository type is depository" in {
       val inst = Institution(1, "Test Bank", externalIds, CFPB, Bank, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("555555", RssdId)
+      expectedId mustBe Right(ExternalId("555555", RssdId))
     }
 
     "resolve respondentId to Federal Tax ID when agency is CFPB and is a non-depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, CFPB, NonDepositInstType, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("222222", FederalTaxId)
+      expectedId mustBe Right(ExternalId("222222", FederalTaxId))
     }
 
     "resolve respondentId to FDIC Certificate Number when Agency is FDIC and is a depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, FDIC, Bank, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("111111", FdicCertNo)
+      expectedId mustBe Right(ExternalId("111111", FdicCertNo))
     }
 
     "resolve respondentId to Federal Tax ID when Agency is FDIC and is a non-depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, FDIC, NonDepositInstType, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("222222", FederalTaxId)
+      expectedId mustBe Right(ExternalId("222222", FederalTaxId))
     }
 
     "resolve respondentId to RSSD ID when Agency is FRS and is a depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, FRS, Bank, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("555555", RssdId)
+      expectedId mustBe Right(ExternalId("555555", RssdId))
     }
 
     "resolve respondentId to RSSD ID when Agency is FRS and is a non-depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, FRS, NonDepositInstType, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("555555", RssdId)
+      expectedId mustBe Right(ExternalId("555555", RssdId))
     }
 
     "fail to resolve respondentId when Agency is HUD and is a depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, HUD, Bank, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isLeft mustBe true
-      val failType = expectedId.left.get
-      failType mustBe UnsupportedDepositoryTypeByAgency(1, HUD, Depository)
-      failType.message mustBe "Institution 1 is associated with agency HUD, which does not support depositoryType Depository"
+      expectedId mustBe Left(UnsupportedDepositoryTypeByAgency(1, HUD, Depository))
+      expectedId.left.get.message mustBe "Institution 1 is associated with agency HUD, which does not support depositoryType Depository"
     }
 
     "resolve respondentId to Federal Tax ID when Agency is HUD and is a non-depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, HUD, NonDepositInstType, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("222222", FederalTaxId)
+      expectedId mustBe Right(ExternalId("222222", FederalTaxId))
     }
 
     "resolve respondentId to NCUA Charter ID when Agency is NCUA and is a depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, NCUA, Bank, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("333333", NcuaCharterId)
+      expectedId mustBe Right(ExternalId("333333", NcuaCharterId))
     }
 
     "resolve respondentId to Federal Tax ID when Agency is NCUA and is a non-depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, NCUA, NonDepositInstType, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("222222", FederalTaxId)
+      expectedId mustBe Right(ExternalId("222222", FederalTaxId))
     }
 
     "resolve respondentId to OCC Charter ID when Agency is OCC and is a depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, OCC, Bank, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("444444", OccCharterId)
+      expectedId mustBe Right(ExternalId("444444", OccCharterId))
     }
 
     "resolve respondentId to Federal Tax ID when Agency is OCC and is a non-depository institution" in {
       val inst = Institution(1, "Test Bank", externalIds, OCC, NonDepositInstType, Active)
       val expectedId = inst.respondentId
 
-      expectedId.isRight mustBe true
-      expectedId.right.get mustBe ExternalId("222222", FederalTaxId)
+      expectedId mustBe Right(ExternalId("222222", FederalTaxId))
     }
   }
 
