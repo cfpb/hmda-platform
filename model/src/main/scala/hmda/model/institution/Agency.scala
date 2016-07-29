@@ -3,11 +3,17 @@ package hmda.model.institution
 import enumeratum.values.{ IntEnum, IntEnumEntry }
 import DepositoryType._
 import ExternalIdType._
+import enumeratum.EnumEntry
 
 /**
  * An institution's regulating federal agency.
  */
-sealed abstract class Agency(override val value: Int, val name: String, val fullName: String, val externalIdTypes: Map[DepositoryType, ExternalIdType]) extends IntEnumEntry
+sealed abstract class Agency(
+  override val value: Int,
+  val name: String,
+  val fullName: String,
+  val externalIdTypes: Map[DepositoryType, ExternalIdType]
+) extends IntEnumEntry
 
 object Agency extends IntEnum[Agency] {
 

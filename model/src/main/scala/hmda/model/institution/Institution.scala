@@ -8,7 +8,8 @@ case class Institution(
     name: String,
     externalIds: Set[ExternalId],
     agency: Agency,
-    institutionType: InstitutionType
+    institutionType: InstitutionType,
+    status: InstitutionStatus
 ) {
 
   val extIdsByType: Map[ExternalIdType, ExternalId] = externalIds.map(extId => (extId.idType, extId)).toMap

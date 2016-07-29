@@ -4,6 +4,7 @@ import hmda.model.fi.lar._
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId }
+import hmda.model.institution.InstitutionStatus.Active
 import hmda.model.institution.InstitutionType.Bank
 import hmda.model.institution.{ ExternalId, Institution }
 import hmda.validation.context.ValidationContext
@@ -26,21 +27,21 @@ class S025Spec extends WordSpec with MustMatchers {
     )
 
     "succeed when TS's agency code and respondent ID match the Instititution's" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+      val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
       S025(ts, ctx) mustBe Success()
     }
 
     "fail when TS's agency code and respondent ID do NOT match the Instititution's" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
       S025(ts, ctx) mustBe Failure()
     }
 
     "fail when the Institution's respondent ID cannot be derived" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
       S025(ts, ctx) mustBe Failure()
@@ -67,21 +68,21 @@ class S025Spec extends WordSpec with MustMatchers {
     )
 
     "succeed when LAR's agency code and respondent ID match the Instititution's" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+      val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
       S025(lar, ctx) mustBe Success()
     }
 
     "fail when LAR's agency code and respondent ID do NOT match the Instititution's" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
       S025(lar, ctx) mustBe Failure()
     }
 
     "fail when the Institution's respondent ID cannot be derived" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank)
+      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
       S025(lar, ctx) mustBe Failure()
