@@ -2,7 +2,7 @@ package hmda.persistence.institutions
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
-import hmda.model.fi.Filing
+import hmda.model.fi.{ Filing, FilingNotFound }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence._
 
@@ -76,7 +76,7 @@ class FilingPersistence(institutionId: String) extends PersistentActor with Acto
       }
 
     case GetFilingByPeriod(period) =>
-      val filing = state.filings.find(f => f.period == period).getOrElse(Filing())
+      val filing = state.filings.find(f => f.period == period).getOrElse(FilingNotFound)
       sender() ! filing
 
     case GetState =>

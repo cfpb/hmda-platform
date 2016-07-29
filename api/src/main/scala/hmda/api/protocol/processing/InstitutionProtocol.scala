@@ -1,7 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.{ InstitutionDetail, InstitutionSummary, Institutions }
-import hmda.model.fi.{ Active, Inactive, Institution, InstitutionStatus }
+import hmda.model.fi._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
 trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
