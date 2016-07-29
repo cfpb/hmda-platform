@@ -24,7 +24,6 @@ import hmda.persistence.{ FilingPersistence, SubmissionPersistence }
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
-import spray.json._
 
 trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
 
@@ -62,8 +61,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           val filing = (filingsActor ? GetState).mapTo[Seq[Filing]]
           onComplete(fInstitution) {
             case Success(fInstitution) =>
+              institutionsActor ! Shutdown
               fInstitution match {
                 case InstitutionNotFound =>
+                  institutionsActor ! Shutdown
                   val error = ErrorResponse(404, s"Institution: $institutionId not found")
                   complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
                 case Institution(x, y, z) =>
@@ -83,6 +84,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                   }
               }
             case Failure(error) =>
+              institutionsActor ! Shutdown
               filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)
               complete(HttpResponse(StatusCodes.InternalServerError))
@@ -107,6 +109,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                 case Filing(x, y, z) =>
                   onComplete(fSubmission) {
                     case Success(fSubmission) =>
+                      submissionActor ! Shutdown
                       if (fSubmission.isEmpty) {
                         val error = ErrorResponse(404, s"No submissions for the $period filing for $institutionId")
                         complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
@@ -140,19 +143,20 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
         onComplete(fFiling) {
           case Success(filing) => filing match {
             case Filing(_, _, _) =>
+              filingsActor ! Shutdown
               submissionsActor ! CreateSubmission
               val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
               onComplete(fLatest) {
                 case Success(submission) =>
                   submissionsActor ! Shutdown
-                  filingsActor ! Shutdown
-                  val e = HttpEntity(ContentTypes.`application/json`, submission.toJson.toString)
-                  complete(HttpResponse(StatusCodes.Created, entity = e))
+                  complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                 case Failure(error) =>
                   submissionsActor ! Shutdown
                   complete(HttpResponse(StatusCodes.InternalServerError))
               }
             case FilingNotFound =>
+              filingsActor ! Shutdown
+              submissionsActor ! Shutdown
               val errorResponse = ErrorResponse(404, s"$period filing not found for $institutionId")
               complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
           }
@@ -210,11 +214,12 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           val filing = (filingsActor ? GetState).mapTo[Seq[Filing]]
           onComplete(fInstitution) {
             case Success(fInstitution) =>
+              institutionsActor ! Shutdown
               fInstitution match {
                 case InstitutionNotFound =>
                   val error = ErrorResponse(404, s"Institution: $institutionId not found")
                   complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
-                case Institution(x, y, z) =>
+                case Institution(id, name, _) =>
                   onComplete(filing) {
                     case Success(filings) =>
                       filingsActor ! Shutdown
@@ -222,7 +227,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                         val error = ErrorResponse(404, s"No filings for $institutionId")
                         complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
                       } else {
-                        complete(ToResponseMarshallable(InstitutionSummary(x, y, filings)))
+                        complete(ToResponseMarshallable(InstitutionSummary(id, name, filings)))
                       }
                     case Failure(error) =>
                       filingsActor ! Shutdown
@@ -231,6 +236,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                   }
               }
             case Failure(error) =>
+              institutionsActor ! Shutdown
               filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)
               complete(HttpResponse(StatusCodes.InternalServerError))
