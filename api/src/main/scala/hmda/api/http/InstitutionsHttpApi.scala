@@ -61,10 +61,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           val filing = (filingsActor ? GetState).mapTo[Seq[Filing]]
           onComplete(fInstitution) {
             case Success(fInstitution) =>
-              institutionsActor ! Shutdown
               fInstitution match {
                 case InstitutionNotFound =>
-                  institutionsActor ! Shutdown
                   val error = ErrorResponse(404, s"Institution: $institutionId not found")
                   complete(ToResponseMarshallable(StatusCodes.NotFound -> error))
                 case Institution(x, y, z) =>
@@ -84,7 +82,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                   }
               }
             case Failure(error) =>
-              institutionsActor ! Shutdown
               filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)
               complete(HttpResponse(StatusCodes.InternalServerError))
@@ -190,15 +187,13 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
             case Failure(error) =>
               processingActor ! Shutdown
               log.error(error.getLocalizedMessage)
-              complete {
-                HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
-              }
+              val errorResponse = ErrorResponse(422, "Invalid file format")
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
           }
 
         case _ =>
-          complete {
-            HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
-          }
+          val errorResponse = ErrorResponse(422, "Invalid file format")
+          complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
       }
 
     }
@@ -214,7 +209,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           val filing = (filingsActor ? GetState).mapTo[Seq[Filing]]
           onComplete(fInstitution) {
             case Success(fInstitution) =>
-              institutionsActor ! Shutdown
               fInstitution match {
                 case InstitutionNotFound =>
                   val error = ErrorResponse(404, s"Institution: $institutionId not found")
@@ -236,7 +230,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
                   }
               }
             case Failure(error) =>
-              institutionsActor ! Shutdown
               filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)
               complete(HttpResponse(StatusCodes.InternalServerError))
