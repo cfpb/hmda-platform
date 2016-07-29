@@ -1,7 +1,7 @@
 package hmda.validation.engine.ts
 
 import hmda.parser.fi.ts.TsGenerators
-import hmda.validation.context.{ Filing2017, ValidationContext }
+import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
 import hmda.validation.dsl.Success
 import org.scalatest.prop.PropertyChecks
