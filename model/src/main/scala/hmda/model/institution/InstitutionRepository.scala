@@ -7,7 +7,6 @@ trait InstitutionRepository {
 
   def get(id: Integer): Option[Institution]
 
-  def findByExternalId(externalId: ExternalId): Option[Institution]
 }
 
 /**
@@ -15,12 +14,8 @@ trait InstitutionRepository {
  */
 class InMemoryInstitutionRepository(institutions: Set[Institution]) extends InstitutionRepository {
 
-  val instById: Map[Int, Institution] = institutions.map(i => (i.id, i)).toMap
-
-  val instByExtId: Map[ExternalId, Institution] = institutions.flatMap(i =>
-    i.externalIds.map(extId => (extId, i))).toMap
+  private val instById: Map[Int, Institution] = institutions.map(i => (i.id, i)).toMap
 
   override def get(id: Integer): Option[Institution] = instById.get(id)
 
-  override def findByExternalId(externalId: ExternalId): Option[Institution] = instByExtId.get(externalId)
 }

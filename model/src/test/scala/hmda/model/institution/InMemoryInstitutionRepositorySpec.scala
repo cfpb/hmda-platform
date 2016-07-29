@@ -20,19 +20,9 @@ class InMemoryInstitutionRepositorySpec extends WordSpec with MustMatchers {
       institutionRepository.get(4) mustBe None
     }
 
-    "return None if an institution is not found by ExternalId" in {
-      institutionRepository.findByExternalId(ExternalId("1234567", FederalTaxId)) mustBe None
-    }
-
     "return the correct institution when retrieved by ID" in {
       institutionRepository.get(1) mustBe Some(
         Institution(1, "Test Bank 1", Set(ExternalId("99-1234567", FederalTaxId), ExternalId("123456", RssdId)), CFPB, Bank, Active)
-      )
-    }
-
-    "return the correct institution when retrieved by ExternalId" in {
-      institutionRepository.findByExternalId(ExternalId("98-1234567", FederalTaxId)) mustBe Some(
-        Institution(2, "Test Bank 2", Set(ExternalId("98-1234567", FederalTaxId), ExternalId("9898989", FdicCertNo)), FDIC, Bank, Inactive)
       )
     }
 
