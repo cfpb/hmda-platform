@@ -36,6 +36,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
 
   val institutionsPath =
     path("institutions") {
+      val path = "institutions"
       val institutionsActor = system.actorSelection("/user/institutions")
       get {
         val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
@@ -44,13 +45,15 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
             complete(ToResponseMarshallable(Institutions(institutions)))
           case Failure(error) =>
             log.error(error.getLocalizedMessage)
-            complete(HttpResponse(StatusCodes.InternalServerError))
+            val errorResponse = ErrorResponse(500, "Internal server error", path)
+            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
         }
       }
     }
 
   val institutionByIdPath =
     path("institutions" / Segment) { institutionId =>
+      val path = s"institutions/$institutionId"
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/institutions")
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
@@ -62,12 +65,15 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
               filingsActor ! Shutdown
               if (institutionDetails.institution.id != "")
                 complete(ToResponseMarshallable(institutionDetails))
-              else
-                complete(HttpResponse(StatusCodes.NotFound))
+              else {
+                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+              }
             case Failure(error) =>
               filingsActor ! Shutdown
               log.error(error.getLocalizedMessage)
-              complete(HttpResponse(StatusCodes.InternalServerError))
+              val errorResponse = ErrorResponse(500, "Internal server error", path)
+              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
           }
         }
       }
@@ -75,6 +81,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
 
   val filingByPeriodPath =
     path("institutions" / Segment / "filings" / Segment) { (institutionId, period) =>
+      val path = s"institutions/$institutionId/filings/$period"
       extractExecutionContext { executor =>
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
@@ -88,12 +95,15 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
               val filing = filingDetails.filing
               if (filing.institutionId == institutionId && filing.period == period)
                 complete(ToResponseMarshallable(filingDetails))
-              else
-                complete(HttpResponse(StatusCodes.NotFound))
+              else {
+                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+              }
             case Failure(error) =>
               filingsActor ! Shutdown
               submissionActor ! Shutdown
-              complete(HttpResponse(StatusCodes.InternalServerError))
+              val errorResponse = ErrorResponse(500, "Internal server error", path)
+              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
           }
         }
       }
@@ -101,6 +111,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
 
   val submissionPath =
     path("institutions" / Segment / "filings" / Segment / "submissions") { (institutionId, period) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions"
       post {
         implicit val ec = system.dispatcher
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
@@ -115,19 +126,21 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
                 case Success(submission) =>
                   submissionsActor ! Shutdown
                   filingsActor ! Shutdown
-                  val e = HttpEntity(ContentTypes.`application/json`, submission.toJson.toString)
-                  complete(HttpResponse(StatusCodes.Created, entity = e))
+                  complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                 case Failure(error) =>
                   submissionsActor ! Shutdown
-                  complete(HttpResponse(StatusCodes.InternalServerError))
+                  val errorResponse = ErrorResponse(500, "Internal server error", path)
+                  complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
               }
             } else {
-              complete(HttpResponse(StatusCodes.NotFound))
+              val errorResponse = ErrorResponse(404, s"No $period filing found for institution $institutionId", path)
+              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
             }
           case Failure(error) =>
             filingsActor ! Shutdown
             submissionsActor ! Shutdown
-            complete(HttpResponse(StatusCodes.InternalServerError))
+            val errorResponse = ErrorResponse(500, "Internal server error", path)
+            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
 
         }
       }
@@ -135,6 +148,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
 
   val uploadPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
       val uploadTimestamp = Instant.now.toEpochMilli
       val processingActor = createHmdaFileUpload(system, submissionId)
       fileUpload("file") {
@@ -154,22 +168,21 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
             case Failure(error) =>
               processingActor ! Shutdown
               log.error(error.getLocalizedMessage)
-              complete {
-                HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
-              }
+              val errorResponse = ErrorResponse(422, "Invalid File Format", path)
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
           }
 
         case _ =>
           processingActor ! Shutdown
-          complete {
-            HttpResponse(StatusCodes.BadRequest, entity = "Invalid file format")
-          }
+          val errorResponse = ErrorResponse(422, "Invalid File Format", path)
+          complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
       }
 
     }
 
   val institutionSummaryPath =
     path("institutions" / Segment / "summary") { institutionId =>
+      val path = s"institutions/$institutionId/summary"
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/institutions")
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
@@ -188,7 +201,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol {
               complete(ToResponseMarshallable(summary))
             case Failure(error) =>
               filingsActor ! Shutdown
-              complete(HttpResponse(StatusCodes.InternalServerError))
+              val errorResponse = ErrorResponse(500, "Internal server error", path)
+              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
           }
         }
       }
