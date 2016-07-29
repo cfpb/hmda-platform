@@ -1,8 +1,11 @@
-# Docker compose configuration file for the HMDA Platform
-# Version: 1.0.0
-
-hmda:
-  build: .
-  ports:
-    - 8080:8080
-    - 2551:2551
+# Assumes UI repo is cloned in parent directory
+version: '2'
+services:
+  api:
+    build: .
+  ui:
+    build: ../hmda-platform-ui
+    ports:
+      - "80:80"
+    depends_on:
+      - api
