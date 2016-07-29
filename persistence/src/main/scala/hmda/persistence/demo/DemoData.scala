@@ -2,11 +2,11 @@ package hmda.persistence.demo
 
 import akka.actor.ActorSystem
 import hmda.model.fi._
-import hmda.persistence.FilingPersistence.CreateFiling
-import hmda.persistence.InstitutionPersistence.CreateInstitution
-import hmda.persistence.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.FilingPersistence.CreateFiling
+import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.CommonMessages._
-import hmda.persistence.SubmissionPersistence.CreateSubmission
+import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
+import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
 object DemoData {
   val institutions = {

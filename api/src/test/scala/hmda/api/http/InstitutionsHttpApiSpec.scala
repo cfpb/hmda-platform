@@ -10,10 +10,9 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import com.typesafe.config.ConfigFactory
 import hmda.api.model._
 import hmda.model.fi._
-import hmda.persistence.InstitutionPersistence
 import hmda.persistence.demo.DemoData
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
-import hmda.persistence.InstitutionPersistence._
+import hmda.persistence.institutions.InstitutionPersistence._
 import org.iq80.leveldb.util.FileUtils
 
 import scala.concurrent.duration._
