@@ -15,7 +15,10 @@ class S025Spec extends WordSpec with MustMatchers {
 
   "S025" must {
     "be named S025" in {
-      S025.name mustBe "S025"
+      val institution = createBank(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
+      val ctx = ValidationContext(Some(institution))
+
+      S025.inContext(ctx).name mustBe "S025"
     }
   }
 
