@@ -21,25 +21,9 @@ object S025 {
   def name = "S025" // this would go away too
 
   // TODO the necessary things to make an EditCheck[T <: HasControlId] or whatever.
-  // after that, then the next two functions could go away entirely.
+  // then soon this function could go away entirely.
   def apply(ts: TransmittalSheet, ctx: ValidationContext): Result = {
-    compare(ts.respondent.id, ts.agencyCode, ctx)
-  }
-
-  private def compare(filingRespId: String, filingAgencyCode: Int, ctx: ValidationContext): Result = {
-    ctx.institution match {
-
-      // If institution is not present, edit is always a `Success`
-      case None => Success()
-      case Some(institution) => institution.respondentId match {
-
-        // If respondentId cannot be derived, edit is always a `Failure`
-        case Left(invalid) => new Failure()
-        case Right(validRespId) => {
-          (filingRespId is equalTo(validRespId.id)) and (filingAgencyCode is equalTo(institution.agency.value))
-        }
-      }
-    }
+    new S025(ctx.institution.get).apply(ts)
   }
 
 }
