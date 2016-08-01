@@ -10,23 +10,23 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaRawFile.LineAdded
-import hmda.persistence.processing.HmdaRawFilePublisher.{ StartStreamingHmdaFile, StreamingHmdaFileCompleted }
+import hmda.persistence.processing.HmdaRawFileParser.{ StartParsingHmdaFile, ParsingHmdaFileCompleted }
 
-object HmdaRawFilePublisher {
+object HmdaRawFileParser {
 
   val name = "HmdaRawFilePublisher"
 
-  case class StartStreamingHmdaFile() extends Command
-  case class StreamingHmdaFileCompleted(submissionId: String) extends Event
+  case class StartParsingHmdaFile() extends Command
+  case class ParsingHmdaFileCompleted(submissionId: String) extends Event
 
-  def props(id: String): Props = Props(new HmdaRawFilePublisher(id))
+  def props(id: String): Props = Props(new HmdaRawFileParser(id))
 
 }
 
-class HmdaRawFilePublisher(submissionId: String) extends Actor with ActorLogging {
+class HmdaRawFileParser(submissionId: String) extends Actor with ActorLogging {
   override def receive: Receive = {
 
-    case StartStreamingHmdaFile() =>
+    case StartParsingHmdaFile() =>
       streamHmdaRawFile()
 
     case Shutdown =>
@@ -39,7 +39,7 @@ class HmdaRawFilePublisher(submissionId: String) extends Actor with ActorLogging
 
     implicit val ec = context.dispatcher
 
-    log.info(s"Streaming HMDA File for submission: $submissionId")
+    log.info(s"Parsing HMDA File for submission: $submissionId")
 
     val system = context.system
     implicit val mat = ActorMaterializer()
@@ -67,7 +67,7 @@ class HmdaRawFilePublisher(submissionId: String) extends Actor with ActorLogging
     parsedLars
       .runWith(sink)
       .andThen {
-        case _ => publisEvent(StreamingHmdaFileCompleted(submissionId))
+        case _ => publisEvent(ParsingHmdaFileCompleted(submissionId))
       }
   }
 

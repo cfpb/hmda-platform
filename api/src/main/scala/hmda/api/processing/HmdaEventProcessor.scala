@@ -4,9 +4,9 @@ import scala.concurrent.duration._
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import akka.util.Timeout
 import hmda.persistence.CommonMessages._
-import hmda.persistence.processing.{ HmdaRawFile, HmdaRawFilePublisher }
+import hmda.persistence.processing.{ HmdaRawFile, HmdaRawFileParser }
 import hmda.persistence.processing.HmdaRawFile.{ AddLine, UploadCompleted, UploadStarted }
-import hmda.persistence.processing.HmdaRawFilePublisher.{ StartStreamingHmdaFile, StreamingHmdaFileCompleted }
+import hmda.persistence.processing.HmdaRawFileParser.{ StartParsingHmdaFile, ParsingHmdaFileCompleted }
 
 object HmdaEventProcessor {
   def props: Props = Props(new HmdaEventProcessor)
@@ -42,8 +42,8 @@ class HmdaEventProcessor extends Actor with ActorLogging {
       case UploadCompleted(submissionId) =>
         fireUploadCompletedEvents(submissionId)
 
-      case StreamingHmdaFileCompleted(submissionId) =>
-        context.actorSelection(s"/user/hmda-event-processor/${HmdaRawFilePublisher.name}-$submissionId").resolveOne().map { actorRef =>
+      case ParsingHmdaFileCompleted(submissionId) =>
+        context.actorSelection(s"/user/hmda-event-processor/${HmdaRawFileParser.name}-$submissionId").resolveOne().map { actorRef =>
           actorRef ! Shutdown
         }
         log.info(s"Streaming completed")
@@ -58,8 +58,8 @@ class HmdaEventProcessor extends Actor with ActorLogging {
       actorRef ! Shutdown
     }
 
-    val hmdaFileStreaming = context.actorOf(HmdaRawFilePublisher.props(submissionId), s"${HmdaRawFilePublisher.name}-$submissionId")
-    hmdaFileStreaming ! StartStreamingHmdaFile()
+    val hmdaFileStreaming = context.actorOf(HmdaRawFileParser.props(submissionId), s"${HmdaRawFileParser.name}-$submissionId")
+    hmdaFileStreaming ! StartParsingHmdaFile()
     log.info(s"Upload completed for submission $submissionId")
   }
 
