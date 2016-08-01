@@ -4,18 +4,20 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine
+import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.syntactical.S025
 import hmda.validation.rules.lar.syntactical._
 
 trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
 
   def checkSyntactical(lar: LoanApplicationRegister, ctx: ValidationContext): LarValidation = {
-    val checks = List(
+    val checksToRun: List[EditCheck[LoanApplicationRegister]] = List(
       S010,
       S020,
       S025.inContext(ctx),
       S205
-    ).map(check(_, lar))
+    )
+    val checks = checksToRun.map(check(_, lar))
 
     validateAll(checks, lar)
   }

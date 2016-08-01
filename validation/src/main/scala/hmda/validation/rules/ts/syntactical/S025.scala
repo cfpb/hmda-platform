@@ -1,7 +1,7 @@
 package hmda.validation.rules.ts.syntactical
 
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.fi.ts.TransmittalSheet
+import hmda.model.fi.HasControlNumber
+import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax.PredicateOps
@@ -10,7 +10,7 @@ import hmda.validation.rules.EditCheck
 
 object S025 {
 
-  def inContext(ctx: ValidationContext) = {
+  def inContext[T <: HasControlNumber](ctx: ValidationContext): EditCheck[T] = {
     ctx.institution match {
       case Some(inst) => new S025(inst)
       case None => new EmptyEditCheck
@@ -19,24 +19,17 @@ object S025 {
 
   def name = "S025" // this would go away too
 
-  // TODO the necessary things to make an EditCheck[T <: HasControlId] or whatever.
-  // then soon this function could go away entirely.
-  def apply(ts: TransmittalSheet, ctx: ValidationContext): Result = {
-    new S025(ctx.institution.get).apply(ts)
+  // this function could go away entirely, or could stay for convenience.
+  def apply(input: HasControlNumber, ctx: ValidationContext): Result = {
+    S025.inContext(ctx).apply(input)
   }
 
 }
 
-class S025(institution: Institution) extends EditCheck[LoanApplicationRegister] {
+class S025[T <: HasControlNumber](institution: Institution) extends EditCheck[T] {
   def name = "S025"
 
-  def apply(ts: TransmittalSheet): Result = {
-    compare(ts.respondent.id, ts.agencyCode)
-  }
-
-  def apply(lar: LoanApplicationRegister): Result = {
-    compare(lar.respondentId, lar.agencyCode)
-  }
+  def apply(input: T): Result = compare(input.respondentId, input.agencyCode)
 
   private def compare(filingRespId: String, filingAgencyCode: Int): Result = {
     institution.respondentId match {
@@ -48,8 +41,7 @@ class S025(institution: Institution) extends EditCheck[LoanApplicationRegister] 
   }
 }
 
-class EmptyEditCheck extends EditCheck[LoanApplicationRegister] {
+class EmptyEditCheck[T] extends EditCheck[T] {
   def name = "empty"
-  def apply(lar: LoanApplicationRegister): Result = Success()
-  def apply(transmittalSheet: TransmittalSheet): Result = Success()
+  def apply(input: T): Result = Success()
 }
