@@ -1,5 +1,6 @@
 package hmda.model.fi.ts
 
+import hmda.model.fi.HasControlNumber
 import hmda.model.fi.StringPaddingUtils
 
 case class TransmittalSheet(
@@ -12,7 +13,7 @@ case class TransmittalSheet(
     respondent: Respondent,
     parent: Parent,
     contact: Contact
-) extends StringPaddingUtils{
+) extends HasControlNumber with StringPaddingUtils {
 
   def toCSV: String = {
     s"$id|${respondent.id}|$agencyCode|$timestamp|$activityYear" +
@@ -50,5 +51,8 @@ case class TransmittalSheet(
       contact.fax +
       padRight(contact.email, 66)
   }
+
+  override def respondentId: String = respondent.id
+
 }
 
