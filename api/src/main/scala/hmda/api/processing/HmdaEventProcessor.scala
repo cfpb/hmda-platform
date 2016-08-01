@@ -42,10 +42,11 @@ class HmdaEventProcessor extends Actor with ActorLogging {
       case UploadCompleted(submissionId) =>
         fireUploadCompletedEvents(submissionId)
 
-      case ParsingHmdaFileCompleted(submissionId) =>
+      case ParsingHmdaFileCompleted(count, submissionId) =>
         context.actorSelection(s"/user/hmda-event-processor/${HmdaRawFileParser.name}-$submissionId").resolveOne().map { actorRef =>
           actorRef ! Shutdown
         }
+        log.info(s"Parsed $count LARs for $submissionId")
 
       case _ => //ignore any other type of event
     }
