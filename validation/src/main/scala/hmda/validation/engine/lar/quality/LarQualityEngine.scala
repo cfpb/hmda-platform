@@ -47,8 +47,8 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q068
     ).map(check(_, lar))
 
-    checks :+ q022(lar)
+    val allChecks = checks :+ q022(lar)
 
-    validateAll(checks, lar)
+    validateAll(allChecks, lar)
   }
 }
