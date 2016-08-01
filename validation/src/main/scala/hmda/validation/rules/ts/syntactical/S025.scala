@@ -16,12 +16,6 @@ object S025 {
       case None => new EmptyEditCheck
     }
   }
-
-  // this function could go away entirely, or could stay for convenience.
-  def apply(input: HasControlNumber, ctx: ValidationContext): Result = {
-    S025.inContext(ctx).apply(input)
-  }
-
 }
 
 class S025[T <: HasControlNumber](institution: Institution) extends EditCheck[T] {
