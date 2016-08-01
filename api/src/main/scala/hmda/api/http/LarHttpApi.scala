@@ -35,7 +35,6 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       path("parse") {
         post {
           time {
-            val requestTime = System.currentTimeMillis()
             entity(as[String]) { s =>
               LarCsvParser(s) match {
                 case Right(lar) => complete(ToResponseMarshallable(lar))
