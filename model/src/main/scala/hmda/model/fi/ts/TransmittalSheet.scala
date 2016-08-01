@@ -21,10 +21,40 @@ case class TransmittalSheet(
 
   }
 
+  /**
+   * NOTE:  The DAT file format is not supported by CFPB
+   */
   def toDAT: String = {
-    //TODO: implement DAT output
-    ""
+    id +
+      padLeftWithZero(respondent.id, 10) +
+      agencyCode +
+      timestamp +
+      " " +
+      activityYear +
+      taxId +
+      padRight(totalLines.toString, 7) +
+      padRight(respondent.name, 30) +
+      padRight(respondent.address, 40) +
+      padRight(respondent.city, 25) +
+      respondent.state +
+      padRight(respondent.zipCode, 10) +
+      padRight(parent.name, 30) +
+      padRight(parent.address, 40) +
+      padRight(parent.city, 25) +
+      parent.state +
+      padRight(parent.zipCode, 10) +
+      padRight(contact.name, 30) +
+      contact.phone +
+      contact.fax +
+      padRight(contact.email, 66)
   }
 
+  private def padRight(s: String, n: Int): String = {
+    String.format("%1$-" + n + "s", s)
+  }
+
+  private def padLeftWithZero(s: String, n: Int): String = {
+    String.format("%1$" + n + "s", s).replace(' ', '0')
+  }
 }
 

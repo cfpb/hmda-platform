@@ -1,15 +1,17 @@
 package hmda.parser.fi.ts
 
+import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.util.FITestData
-import org.scalatest._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 
-class TsDatParserSpec extends FlatSpec with MustMatchers {
+class TsDatParserSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators {
 
   import FITestData._
 
   val tsData = TsDatParser(tsDAT)
 
-  "TS Parser" should "parse transmittal sheet respondent info" in {
+  property("parse transmittal sheet respondent info") {
     val respondent = tsData.respondent
     respondent.id mustBe "0011013201"
     respondent.name mustBe "SMALL BANK USA, NA"
@@ -19,18 +21,27 @@ class TsDatParserSpec extends FlatSpec with MustMatchers {
     respondent.zipCode mustBe "22102"
   }
 
-  it should "parse other info about the respondent" in {
+  property("generate proper dat format") {
+    forAll(tsGen) { (ts: TransmittalSheet) =>
+      val parsedTs = TsDatParser(ts.toDAT)
+      val updatedRespondent = parsedTs.respondent.copy(id = parsedTs.respondent.id.replaceFirst("^0+(?!$)", ""))
+      val updatedTs = parsedTs.copy(respondent = updatedRespondent)
+      updatedTs mustBe ts
+    }
+  }
+
+  property("parse other info about the respondent") {
     tsData.taxId mustBe "20-1177984"
   }
 
-  it should "parse transmittal info" in {
+  property("parse transmittal info") {
     tsData.agencyCode mustBe 9
     tsData.timestamp mustBe 201501171330L
     tsData.activityYear mustBe 2013
     tsData.totalLines mustBe 551
   }
 
-  it should "parse parent info" in {
+  property("parse parent info") {
     val parent = tsData.parent
     parent.name mustBe "BIGS USA, INC."
     parent.address mustBe "412 THIRD AVENUE"
@@ -38,7 +49,7 @@ class TsDatParserSpec extends FlatSpec with MustMatchers {
     parent.zipCode mustBe "10012"
   }
 
-  it should "parse contact info" in {
+  property("parse contact info") {
     val contact = tsData.contact
     contact.name mustBe "Bob Smith"
     contact.phone mustBe "555-555-5555"
@@ -46,7 +57,7 @@ class TsDatParserSpec extends FlatSpec with MustMatchers {
     contact.email mustBe "bob.smith@bank.com"
   }
 
-  it should "parse ok when there is no parent info" in {
+  property("parse ok when there is no parent info") {
     val tsDataNoParent = TsDatParser(tsDATNoParent)
     val parent = tsDataNoParent.parent
     parent.name mustBe ""
