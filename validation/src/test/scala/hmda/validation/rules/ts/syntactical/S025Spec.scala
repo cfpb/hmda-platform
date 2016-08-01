@@ -76,28 +76,28 @@ class S025Spec extends WordSpec with MustMatchers {
     "succeed when institution is not present in ValidationContext" in {
       val ctx = ValidationContext(None)
 
-      S025(lar, ctx) mustBe Success()
+      S025.inContext(ctx).apply(lar) mustBe Success()
     }
 
     "fail when the Institution's respondent ID cannot be derived" in {
       val institution = Institution(1, "Test Bank", Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
-      S025(lar, ctx) mustBe Failure()
+      S025.inContext(ctx).apply(lar) mustBe Failure()
     }
 
     "succeed when LAR's agency code and respondent ID match the Instititution's" in {
       val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
-      S025(lar, ctx) mustBe Success()
+      S025.inContext(ctx).apply(lar) mustBe Success()
     }
 
     "fail when LAR's agency code and respondent ID do NOT match the Instititution's" in {
       val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
-      S025(lar, ctx) mustBe Failure()
+      S025.inContext(ctx).apply(lar) mustBe Failure()
     }
   }
 
