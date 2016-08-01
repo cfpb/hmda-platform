@@ -46,7 +46,6 @@ class HmdaEventProcessor extends Actor with ActorLogging {
         context.actorSelection(s"/user/hmda-event-processor/${HmdaRawFileParser.name}-$submissionId").resolveOne().map { actorRef =>
           actorRef ! Shutdown
         }
-        log.info(s"Streaming completed")
 
       case _ => //ignore any other type of event
     }

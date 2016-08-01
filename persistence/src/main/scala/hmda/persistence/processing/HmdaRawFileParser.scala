@@ -7,10 +7,12 @@ import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaRawFile.LineAdded
-import hmda.persistence.processing.HmdaRawFileParser.{ StartParsingHmdaFile, ParsingHmdaFileCompleted }
+import hmda.persistence.processing.HmdaRawFileParser.{ ParsingHmdaFileCompleted, StartParsingHmdaFile }
 
 object HmdaRawFileParser {
 
@@ -30,6 +32,7 @@ class HmdaRawFileParser(submissionId: String) extends Actor with ActorLogging {
       streamHmdaRawFile()
 
     case Shutdown =>
+      log.info(s"Parsing completed for $submissionId")
       context stop self
 
     case _ => // ignore
@@ -58,7 +61,6 @@ class HmdaRawFileParser(submissionId: String) extends Actor with ActorLogging {
         .map {
           case l @ LineAdded(_, data, _) =>
             LarCsvParser(data)
-
         }
 
     //val sink = Sink.foreach[Event](publisEvent(_))
