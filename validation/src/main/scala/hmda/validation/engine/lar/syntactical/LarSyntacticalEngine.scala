@@ -21,10 +21,9 @@ trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
       S205
     ).map(check(_, lar))
 
-    // Exclude edits requiring institution data
-    if (ctx.institution.isDefined) checks :+ s025(lar, ctx)
+    val allChecks = checks :+ s025(lar, ctx)
 
-    validateAll(checks, lar)
+    validateAll(allChecks, lar)
   }
 
   def checkSyntacticalCollection(lars: Iterable[LoanApplicationRegister]): LarsValidation = {

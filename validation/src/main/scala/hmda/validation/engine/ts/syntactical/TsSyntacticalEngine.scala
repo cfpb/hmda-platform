@@ -46,11 +46,9 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
     val checks = List(
       s010(ts),
       s020(ts),
+      s025(ts, ctx),
       s028(ts)
     )
-
-    // Exclude edits requiring institution data
-    if (ctx.institution.isDefined) checks :+ s025(ts, ctx)
 
     val fs100 = s100(ts)
     val fs013 = s013(ts)
