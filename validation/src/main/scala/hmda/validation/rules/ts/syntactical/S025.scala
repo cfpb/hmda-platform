@@ -17,8 +17,6 @@ object S025 {
     }
   }
 
-  def name = "S025" // this would go away too
-
   // this function could go away entirely, or could stay for convenience.
   def apply(input: HasControlNumber, ctx: ValidationContext): Result = {
     S025.inContext(ctx).apply(input)
