@@ -1,12 +1,15 @@
 package hmda.persistence.processing
 
-import akka.NotUsed
+import akka.{ Done, NotUsed }
 import akka.actor.{ Actor, ActorLogging, Props }
 import akka.persistence.query.{ EventEnvelope, PersistenceQuery }
 import akka.persistence.query.journal.leveldb.scaladsl.LeveldbReadJournal
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.CommonMessages._
+import hmda.persistence.processing.HmdaRawFile.LineAdded
 import hmda.persistence.processing.HmdaRawFilePublisher.{ StartStreamingHmdaFile, StreamingHmdaFileCompleted }
 
 object HmdaRawFilePublisher {
@@ -46,11 +49,22 @@ class HmdaRawFilePublisher(submissionId: String) extends Actor with ActorLogging
     val hmdaRawFileSource: Source[EventEnvelope, NotUsed] =
       readJournal.currentEventsByPersistenceId(s"${HmdaRawFile.name}-$submissionId", 0L, Long.MaxValue)
 
-    val hmdaRawFileEvents = hmdaRawFileSource.map(_.event)
+    val hmdaRawFileEvents: Source[Event, NotUsed] =
+      hmdaRawFileSource.map(_.event.asInstanceOf[Event])
 
+    val parsedLars: Source[Either[List[String], LoanApplicationRegister], NotUsed] =
+      hmdaRawFileEvents
+        .drop(1)
+        .map {
+          case l @ LineAdded(_, data, _) =>
+            LarCsvParser(data)
+
+        }
+
+    //val sink = Sink.foreach[Event](publisEvent(_))
     val sink = Sink.foreach(println)
 
-    hmdaRawFileEvents
+    parsedLars
       .runWith(sink)
       .andThen {
         case _ => publisEvent(StreamingHmdaFileCompleted(submissionId))
