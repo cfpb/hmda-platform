@@ -9,3 +9,5 @@ services:
       - "80:80"
     depends_on:
       - api
+    volumes:
+      - ../hmda-platform-ui/dist:/usr/src/app/dist
