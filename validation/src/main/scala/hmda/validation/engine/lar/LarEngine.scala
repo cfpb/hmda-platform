@@ -21,7 +21,6 @@ trait LarEngine extends LarSyntacticalEngine with LarValidityEngine with LarQual
 
   }
 
-  // FIXME: This is not actually used anywhere!  These should really be "macro" edits!
   def validateLars(lars: Iterable[LoanApplicationRegister]): LarsValidation = {
     checkSyntacticalCollection(lars)
   }
