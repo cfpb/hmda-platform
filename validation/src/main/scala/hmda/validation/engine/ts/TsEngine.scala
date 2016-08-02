@@ -1,7 +1,6 @@
 package hmda.validation.engine.ts
 
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.ts.quality.TsQualityEngine
 import hmda.validation.engine.ts.syntactical.TsSyntacticalEngine

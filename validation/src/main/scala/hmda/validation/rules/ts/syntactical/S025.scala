@@ -2,7 +2,6 @@ package hmda.validation.rules.ts.syntactical
 
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax.PredicateOps
