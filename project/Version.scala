@@ -8,4 +8,5 @@ object Version {
   val leveldb    = "0.7"
   val leveldbjni = "1.8"
   val config     = "1.3.0"
+  val enumeratum = "1.4.5"
 }

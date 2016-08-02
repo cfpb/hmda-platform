@@ -15,11 +15,11 @@ import akka.util.Timeout
 import hmda.api.processing.lar.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.validation.context.ValidationContext
 import hmda.validation.engine.ValidationError
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
-
 import spray.json._
 
 trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
@@ -52,10 +52,10 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol {
             entity(as[LoanApplicationRegister]) { lar =>
               val larValidation = system.actorSelection("/user/larValidation")
               val checkMessage = checkType match {
-                case "syntactical" => CheckSyntactical(lar)
-                case "validity" => CheckValidity(lar)
-                case "quality" => CheckQuality(lar)
-                case _ => CheckAll(lar)
+                case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
+                case "validity" => CheckValidity(lar, ValidationContext(None))
+                case "quality" => CheckQuality(lar, ValidationContext(None))
+                case _ => CheckAll(lar, ValidationContext(None))
               }
               onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
                 case Success(xs) =>

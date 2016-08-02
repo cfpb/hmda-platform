@@ -1,6 +1,7 @@
 package hmda.validation.engine.lar.syntactical
 
 import hmda.parser.fi.lar.LarGenerators
+import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
@@ -14,7 +15,7 @@ class LarSyntacticalEngineSpec
   property("A LAR must pass syntactical checks") {
     forAll(larGen) { lar =>
       whenever(lar.id == 2) {
-        checkSyntactical(lar).isSuccess mustBe true
+        checkSyntactical(lar, ValidationContext(None)).isSuccess mustBe true
       }
     }
   }

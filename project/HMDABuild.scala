@@ -42,6 +42,8 @@ object HMDABuild extends Build {
 
   val configDeps = Seq(config)
 
+  val enumDeps = Seq(enumeratum)
+
   lazy val hmda = (project in file("."))
     .settings(buildSettings:_*)
     .settings(Revolver.settings:_*)
@@ -70,7 +72,7 @@ object HMDABuild extends Build {
     .settings(buildSettings: _*)
     .settings(
       Seq(
-        libraryDependencies ++= commonDeps
+        libraryDependencies ++= commonDeps ++ enumDeps
       )
     )
     .disablePlugins(ScoverageSbtPlugin)
