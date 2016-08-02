@@ -148,6 +148,14 @@ To find your docker machine endpoint:
 docker-machine ip dev
 ```
 
+Also, for convenience when doing development on the UI, the `docker-compose` file uses a `volumes` which mount the local directory into the `hmda-platform-ui` container. This means you can make UI changes and refresh the browser to view them.
+
+``` shell
+# while still in the hmda-platform directory
+cd ../hmda-platform-ui
+npm run watch
+```
+
 ## Contributing
 
 CFPB is developing the HMDA Platform in the open to maximize transparency and encourage third party contributions. If you want to contribute, please read and abide by the terms of the [License](LICENSE) for this project.
