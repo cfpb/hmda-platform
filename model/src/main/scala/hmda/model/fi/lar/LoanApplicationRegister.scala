@@ -1,5 +1,7 @@
 package hmda.model.fi.lar
 
+import hmda.model.fi.StringPaddingUtils
+
 case class LoanApplicationRegister(
     id: Int,
     respondentId: String,
@@ -15,7 +17,7 @@ case class LoanApplicationRegister(
     rateSpread: String,
     hoepaStatus: Int,
     lienStatus: Int
-) {
+) extends StringPaddingUtils {
   def toCSV: String = {
     s"$id|$respondentId|$agencyCode|${loan.id}|${loan.applicationDate}" +
       s"|${loan.loanType}|${loan.propertyType}|${loan.purpose}|${loan.occupancy}" +
@@ -33,62 +35,46 @@ case class LoanApplicationRegister(
    * NOTE:  The DAT file format is not supported by CFPB
    */
   def toDAT: String = {
-    s"$id" +
+    id +
       padLeftWithZero(respondentId, 10) +
-      s"$agencyCode" +
+      agencyCode +
       padRight(loan.id, 25) +
       padRight(loan.applicationDate, 8) +
-      s"${loan.loanType}" +
-      s"${loan.propertyType}" +
-      s"${loan.purpose}" +
-      s"${loan.occupancy}" +
+      loan.loanType +
+      loan.propertyType +
+      loan.purpose +
+      loan.occupancy +
       padLeftWithZero(loan.amount.toString, 5) +
-      s"$preapprovals" +
-      s"$actionTakenType" +
-      s"$actionTakenDate" +
+      preapprovals +
+      actionTakenType +
+      actionTakenDate +
       padRight(geography.msa, 5) +
-      s"${geography.state}" +
+      geography.state +
       padNumOrNa(geography.county, 3) +
       padNumOrNa(geography.tract, 7) +
-      s"${applicant.ethnicity}" +
-      s"${applicant.coEthnicity}" +
-      s"${applicant.race1}" +
+      applicant.ethnicity +
+      applicant.coEthnicity +
+      applicant.race1 +
       padRight(applicant.race2, 1) +
       padRight(applicant.race3, 1) +
       padRight(applicant.race4, 1) +
       padRight(applicant.race5, 1) +
-      s"${applicant.coRace1}" +
+      applicant.coRace1 +
       padRight(applicant.coRace2, 1) +
       padRight(applicant.coRace3, 1) +
       padRight(applicant.coRace4, 1) +
       padRight(applicant.coRace5, 1) +
-      s"${applicant.sex}" +
-      s"${applicant.coSex}" +
+      applicant.sex +
+      applicant.coSex +
       padNumOrNa(applicant.income, 4) +
-      s"$purchaserType" +
+      purchaserType +
       padRight(denial.reason1, 1) +
       padRight(denial.reason2, 1) +
       padRight(denial.reason3, 1) +
       padNumOrNa(rateSpread, 5) +
-      s"$hoepaStatus" +
-      s"$lienStatus" +
+      hoepaStatus +
+      lienStatus +
       (" " * 270)
-  }
-
-  private def padRight(s: String, n: Int): String = {
-    String.format("%1$-" + n + "s", s)
-  }
-
-  private def padLeftWithZero(s: String, n: Int): String = {
-    String.format("%1$" + n + "s", s).replace(' ', '0')
-  }
-
-  private def padNumOrNa(s: String, n: Int): String = {
-    if (s == "NA") {
-      padRight(s, n)
-    } else {
-      padLeftWithZero(s, n)
-    }
   }
 }
 
