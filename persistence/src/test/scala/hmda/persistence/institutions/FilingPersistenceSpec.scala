@@ -1,8 +1,8 @@
 package hmda.persistence.institutions
 
-import akka.testkit.TestProbe
+import akka.testkit.{ EventFilter, TestProbe }
 import hmda.actor.test.ActorSpec
-import hmda.model.fi.Cancelled
+import hmda.model.fi.{ Cancelled, Completed, Filing }
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.FilingPersistence.{ CreateFiling, GetFilingByPeriod, UpdateFilingStatus, _ }
@@ -29,6 +29,22 @@ class FilingPersistenceSpec extends ActorSpec {
       probe.send(filingsActor, UpdateFilingStatus(modified))
       probe.send(filingsActor, GetFilingByPeriod(filing.period))
       probe.expectMsg(filing.copy(status = Cancelled))
+    }
+  }
+
+  "Error logging" must {
+
+    "warn when creating a filing that already exists" in {
+      // Setup: Persist a filing
+      val f1 = Filing("2016", "12345", Completed)
+      probe.send(filingsActor, CreateFiling(f1))
+
+      //Test that warning is logged when identical filing is added
+      val f2 = Filing("2016", "12345", Completed)
+      val msg = s"Filing already exists. Could not create $f2"
+      EventFilter.warning(message = msg, occurrences = 1) intercept {
+        probe.send(filingsActor, CreateFiling(f2))
+      }
     }
   }
 }

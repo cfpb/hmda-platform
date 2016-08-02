@@ -65,6 +65,8 @@ class FilingPersistence(institutionId: String) extends PersistentActor with Acto
           log.debug(s"Persisted: $f")
           updateState(e)
         }
+      } else {
+        log.warning(s"Filing already exists. Could not create $f")
       }
 
     case UpdateFilingStatus(modified) =>
