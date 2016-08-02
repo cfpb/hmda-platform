@@ -8,7 +8,7 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax.PredicateOps
 import hmda.validation.dsl.{ Failure, Result, Success }
 
-object S025 extends { //} EditCheck[TransmittalSheet]{
+object S025 {
 
   def name = "S025"
 
