@@ -1,5 +1,7 @@
 package hmda.model.fi.ts
 
+import hmda.model.fi.StringPaddingUtils
+
 case class TransmittalSheet(
     id: Int,
     agencyCode: Int,
@@ -10,7 +12,7 @@ case class TransmittalSheet(
     respondent: Respondent,
     parent: Parent,
     contact: Contact
-) {
+) extends StringPaddingUtils{
 
   def toCSV: String = {
     s"$id|${respondent.id}|$agencyCode|$timestamp|$activityYear" +
@@ -47,14 +49,6 @@ case class TransmittalSheet(
       contact.phone +
       contact.fax +
       padRight(contact.email, 66)
-  }
-
-  private def padRight(s: String, n: Int): String = {
-    String.format("%1$-" + n + "s", s)
-  }
-
-  private def padLeftWithZero(s: String, n: Int): String = {
-    String.format("%1$" + n + "s", s).replace(' ', '0')
   }
 }
 

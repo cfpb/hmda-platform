@@ -1,5 +1,7 @@
 package hmda.model.fi.lar
 
+import hmda.model.fi.StringPaddingUtils
+
 case class LoanApplicationRegister(
     id: Int,
     respondentId: String,
@@ -15,7 +17,7 @@ case class LoanApplicationRegister(
     rateSpread: String,
     hoepaStatus: Int,
     lienStatus: Int
-) {
+) extends StringPaddingUtils {
   def toCSV: String = {
     s"$id|$respondentId|$agencyCode|${loan.id}|${loan.applicationDate}" +
       s"|${loan.loanType}|${loan.propertyType}|${loan.purpose}|${loan.occupancy}" +
@@ -73,22 +75,6 @@ case class LoanApplicationRegister(
       hoepaStatus +
       lienStatus +
       (" " * 270)
-  }
-
-  private def padRight(s: String, n: Int): String = {
-    String.format("%1$-" + n + "s", s)
-  }
-
-  private def padLeftWithZero(s: String, n: Int): String = {
-    String.format("%1$" + n + "s", s).replace(' ', '0')
-  }
-
-  private def padNumOrNa(s: String, n: Int): String = {
-    if (s == "NA") {
-      padRight(s, n)
-    } else {
-      padLeftWithZero(s, n)
-    }
   }
 }
 
