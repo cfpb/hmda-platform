@@ -11,7 +11,7 @@ import hmda.api.http._
 import hmda.api.processing.lar.SingleLarValidation._
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.demo.DemoData
-
+import hmda.api.processing.LocalHmdaEventProcessor._
 import scala.concurrent.duration._
 
 object HmdaApi
@@ -37,6 +37,7 @@ object HmdaApi
 
   createSingleLarValidator(system)
   createInstitutions(system)
+  createLocalHmdaEventProcessor(system)
 
   val http = Http().bindAndHandle(
     routes ~ larRoutes ~ institutionsRoutes,

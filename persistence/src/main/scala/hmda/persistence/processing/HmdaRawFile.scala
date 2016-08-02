@@ -44,7 +44,7 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
   override def receiveCommand: Receive = {
 
     case StartUpload =>
-      log.info("Start upload")
+      log.debug("Start upload")
       publishEvent(UploadStarted(submissionId))
 
     case cmd: AddLine =>
@@ -55,7 +55,7 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
       }
 
     case CompleteUpload =>
-      log.info("complete upload")
+      log.debug("complete upload")
       publishEvent(UploadCompleted(state.size, submissionId))
       saveSnapshot(state)
 
