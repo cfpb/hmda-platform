@@ -1,7 +1,6 @@
 package hmda.validation.engine.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.institution.Institution
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine
