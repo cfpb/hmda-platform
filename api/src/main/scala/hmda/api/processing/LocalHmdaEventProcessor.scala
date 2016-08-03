@@ -20,9 +20,10 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
   }
 
   override def receive: Receive = {
+
     case e: Event => e match {
       case UploadStarted(submissionId) =>
-        log.info(s"Upload started for submission $submissionId")
+        log.debug(s"Upload started for submission $submissionId")
 
       case UploadCompleted(size, submissionId) =>
         fireUploadCompletedEvents(size, submissionId)
@@ -33,6 +34,6 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
   }
 
   private def fireUploadCompletedEvents(size: Int, submissionId: String): Unit = {
-    log.info(s"$size lines uploaded for submission $submissionId")
+    log.debug(s"$size lines uploaded for submission $submissionId")
   }
 }
