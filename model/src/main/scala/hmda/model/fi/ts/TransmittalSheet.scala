@@ -12,7 +12,7 @@ case class TransmittalSheet(
     respondent: Respondent,
     parent: Parent,
     contact: Contact
-) extends StringPaddingUtils{
+) extends StringPaddingUtils {
 
   def toCSV: String = {
     s"$id|${respondent.id}|$agencyCode|$timestamp|$activityYear" +
