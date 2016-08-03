@@ -49,7 +49,7 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
 
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
-        log.info(s"Persisted: ${e.data}")
+        log.debug(s"Persisted: ${e.data}")
         updateState(e)
         context.system.eventStream.publish(e)
       }
