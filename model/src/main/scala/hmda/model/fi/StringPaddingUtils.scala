@@ -1,8 +1,8 @@
 package hmda.model.fi
 
 /**
-  * Created by grippinn on 8/2/16.
-  */
+ * Created by grippinn on 8/2/16.
+ */
 trait StringPaddingUtils {
   def padRight(s: String, n: Int): String = {
     String.format("%1$-" + n + "s", s)

@@ -1,8 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.{ InstitutionSummary, ModelGenerators }
-import hmda.model.fi.{ Filing, Institution, InstitutionStatus }
-import org.scalacheck.Gen
+import hmda.model.institution.{ Institution, InstitutionStatus }
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 import spray.json._

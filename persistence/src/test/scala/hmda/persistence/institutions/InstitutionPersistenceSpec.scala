@@ -26,8 +26,8 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.send(institutionsActor, CreateInstitution(institution))
       val modified = institution.copy(name = "new name")
       probe.send(institutionsActor, ModifyInstitution(modified))
-      probe.send(institutionsActor, GetInstitutionById(modified.id))
-      probe.expectMsg(modified)
+      probe.send(institutionsActor, GetInstitutionById(modified.id.toString))
+      probe.expectMsg(Some(modified))
     }
   }
 

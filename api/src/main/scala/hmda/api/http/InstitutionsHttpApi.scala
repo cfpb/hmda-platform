@@ -17,7 +17,8 @@ import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Filing, Institution, Submission }
+import hmda.model.fi.{ Filing, Submission }
+import hmda.model.institution.Institution
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaFileUpload._
@@ -195,7 +196,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol {
           val fSummary = for {
             institution <- fInstitution
             filings <- fFilings
-          } yield InstitutionSummary(institution.id, institution.name, filings)
+          } yield InstitutionSummary(institution.id.toString, institution.name, filings)
 
           onComplete(fSummary) {
             case Success(summary) =>
