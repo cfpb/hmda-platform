@@ -16,6 +16,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
         """
           | akka.loggers = ["akka.testkit.TestEventListener"]
           | akka.loglevel = DEBUG
+          | akka.stdout-loglevel = "OFF"
           | """.stripMargin
       )
     )
