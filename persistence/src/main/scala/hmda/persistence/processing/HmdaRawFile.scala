@@ -6,6 +6,9 @@ import hmda.persistence.CommonMessages._
 import hmda.persistence.LocalEventPublisher
 
 object HmdaRawFile {
+
+  val name = "HmdaRawFile"
+
   def props(id: String): Props = Props(new HmdaRawFile(id))
 
   def createHmdaRawFile(system: ActorSystem, submissionId: String): ActorRef = {
@@ -33,7 +36,7 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
 
   import HmdaRawFile._
 
-  override def persistenceId: String = s"HmdaFileUpload-$submissionId"
+  override def persistenceId: String = s"$name-$submissionId"
 
   var state = HmdaRawFileState()
 
