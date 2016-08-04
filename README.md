@@ -140,20 +140,29 @@ docker-compose up -d --build
 
 This will bring up all the HMDA Platform services. The first run may take several minutes.
 
+To build the front-end and allow "watching" for changes. For convenience when doing development on the UI, the `docker-compose` file uses a `volumes` which mount the local directory into the `hmda-platform-ui` container. This means you can make UI changes and refresh the browser to view them.
+
+``` shell
+# while still in the hmda-platform directory
+cd ../hmda-platform-ui
+npm run watch
+```
+
+If you don't need to "watch" for changes you can run:
+
+``` shell
+# while still in the hmda-platform directory
+cd ../hmda-platform-ui
+npm run build
+```
+
+This will simply build the front-end, still taking advantage of the mounted volume.
 
 View the app by visiting your docker machine's endpoint in the browser.
 To find your docker machine endpoint:
 
 ```shell
 docker-machine ip dev
-```
-
-Also, for convenience when doing development on the UI, the `docker-compose` file uses a `volumes` which mount the local directory into the `hmda-platform-ui` container. This means you can make UI changes and refresh the browser to view them.
-
-``` shell
-# while still in the hmda-platform directory
-cd ../hmda-platform-ui
-npm run watch
 ```
 
 ## Contributing
