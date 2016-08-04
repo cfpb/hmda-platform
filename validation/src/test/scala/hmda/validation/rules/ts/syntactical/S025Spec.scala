@@ -32,14 +32,14 @@ class S025Spec extends WordSpec with MustMatchers {
       Contact("Test Contact", "123-456-7890", "987-654-3210", "test@contact.org")
     )
 
-    "succeed when TS's agency code and respondent ID match the Instititution's" in {
+    "succeed when TS's agency code and respondent ID match the Institution's" in {
       val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
       S025(ts, ctx) mustBe Success()
     }
 
-    "fail when TS's agency code and respondent ID do NOT match the Instititution's" in {
+    "fail when TS's agency code and respondent ID do NOT match the Institution's" in {
       val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
@@ -86,14 +86,14 @@ class S025Spec extends WordSpec with MustMatchers {
       S025(lar, ctx) mustBe Failure()
     }
 
-    "succeed when LAR's agency code and respondent ID match the Instititution's" in {
+    "succeed when LAR's agency code and respondent ID match the Institution's" in {
       val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
       S025(lar, ctx) mustBe Success()
     }
 
-    "fail when LAR's agency code and respondent ID do NOT match the Instititution's" in {
+    "fail when LAR's agency code and respondent ID do NOT match the Institution's" in {
       val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
       val ctx = ValidationContext(Some(institution))
 
