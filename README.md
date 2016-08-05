@@ -154,6 +154,7 @@ If you don't need to "watch" for changes you can run:
 ``` shell
 # while still in the hmda-platform directory
 cd ../hmda-platform-ui
+npm install # optional, to make sure you get the dependencies
 npm run build
 ```
 
