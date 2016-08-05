@@ -145,6 +145,7 @@ To build the front-end and allow "watching" for changes. For convenience when do
 ``` shell
 # while still in the hmda-platform directory
 cd ../hmda-platform-ui
+npm install # optional, to make sure you get the dependencies
 npm run watch
 ```
 
