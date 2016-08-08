@@ -36,20 +36,7 @@ trait HttpApi extends HmdaApiProtocol {
       }
     }
 
-  val timeoutResponse = HttpResponse(
-    StatusCodes.EnhanceYourCalm,
-    entity = "Unable to serve response within time limit, please enhance your calm."
-  )
-
-  val otherName =
-    path("timeout") {
-      get {
-        val response = beSlow("slow")
-        complete(response)
-      }
-    }
-
-  val routes = rootPath ~ otherName
+  val routes = rootPath
 
   def beSlow(echo: String): Future[String] = {
     Future {
