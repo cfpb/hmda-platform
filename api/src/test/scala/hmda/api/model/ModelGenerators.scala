@@ -10,6 +10,8 @@ import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution.InstitutionType._
 import org.scalacheck.{ Arbitrary, Gen }
 
+import scalaz.Alpha.B
+
 trait ModelGenerators {
 
   implicit def statusGen: Gen[Status] = {
@@ -80,22 +82,13 @@ trait ModelGenerators {
 
   implicit def agencyGen: Gen[Agency] = {
     Gen.oneOf(
-      CFPB,
-      FDIC,
-      FRS,
-      HUD,
-      NCUA,
-      OCC
+      Agency.values
     )
   }
 
   implicit def institutionTypeGen: Gen[InstitutionType] = {
     Gen.oneOf(
-      Bank,
-      CreditUnion,
-      SavingsAndLoan,
-      NonDepositInstType,
-      NoDepositTypeInstType
+      InstitutionType.values
     )
   }
 
@@ -108,11 +101,7 @@ trait ModelGenerators {
 
   implicit def externalIdTypeGen: Gen[ExternalIdType] = {
     Gen.oneOf(
-      FdicCertNo,
-      FederalTaxId,
-      NcuaCharterId,
-      OccCharterId,
-      RssdId
+      ExternalIdType.values
     )
   }
 }

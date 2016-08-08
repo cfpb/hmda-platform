@@ -27,13 +27,8 @@ object InstitutionPersistence {
         case InstitutionCreated(i) =>
           InstitutionsState(institutions + i)
         case InstitutionModified(i) =>
-          if (institutions.exists(x => x.id == i.id)) {
-            val x = institutions.find(x => x.id == i.id).get
-            InstitutionsState((institutions - x) + i)
-          } else {
-            InstitutionsState(institutions + i)
-          }
-
+          val others = institutions.filterNot(_.id == i.id)
+          InstitutionsState(others + i)
       }
     }
   }
