@@ -67,6 +67,8 @@ class SubmissionPersistence(fid: String, filingId: String) extends PersistentAct
         persist(SubmissionStatusUpdated(id, status)) { e =>
           updateState(e)
         }
+      } else {
+        log.warning(s"Submission does not exist. Could not update submission with id $id")
       }
 
     case GetSubmissionById(id) =>
