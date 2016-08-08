@@ -17,7 +17,7 @@ class FIDataDatFileParserSpec extends AsyncFlatSpec with MustMatchers {
     val data = parser.read(lines)
     val ts = data.ts
     val lars = data.lars
-    ts.respondent.id mustBe "123456789"
+    ts.respondent.id mustBe "0123456789"
     lars.size mustBe 3
   }
 
