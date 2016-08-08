@@ -104,7 +104,7 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= akkaPersistenceDeps
       )
-    ).dependsOn(model % "compile->compile;test->test")
+    ).dependsOn(parser % "compile->compile;test->test")
 
 
   lazy val api = (project in file("api"))

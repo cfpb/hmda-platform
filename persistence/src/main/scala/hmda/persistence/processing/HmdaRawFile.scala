@@ -44,10 +44,17 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
     state = state.updated(event)
   }
 
+  override def preStart(): Unit = {
+    log.info(s"Start persisting upload for $submissionId")
+  }
+
+  override def postStop(): Unit = {
+    log.info(s"Finish persisting upload for $submissionId")
+  }
+
   override def receiveCommand: Receive = {
 
     case StartUpload =>
-      log.debug("Start upload")
       publishEvent(UploadStarted(submissionId))
 
     case cmd: AddLine =>
@@ -57,7 +64,6 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
       }
 
     case CompleteUpload =>
-      log.debug("complete upload")
       publishEvent(UploadCompleted(state.size, submissionId))
       saveSnapshot(state)
 
