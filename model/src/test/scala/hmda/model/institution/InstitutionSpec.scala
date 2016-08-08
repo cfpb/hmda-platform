@@ -121,7 +121,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
     }
 
     def createInstitution(externalIds: Set[ExternalId], agency: Agency, instType: InstitutionType): Institution = {
-      Institution(1, "Test Bank", externalIds, agency, instType, Active)
+      Institution(1, "Test Bank", externalIds, agency, instType, hasParent = true, Active)
     }
   }
 

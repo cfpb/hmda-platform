@@ -9,6 +9,7 @@ case class Institution(
     externalIds: Set[ExternalId],
     agency: Agency,
     institutionType: InstitutionType,
+    hasParent: Boolean,
     status: InstitutionStatus = InstitutionStatus.Active
 ) {
 

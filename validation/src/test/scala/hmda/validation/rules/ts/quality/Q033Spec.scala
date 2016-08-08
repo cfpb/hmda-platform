@@ -38,6 +38,6 @@ class Q033Spec extends TsEditCheckSpec {
   // TODO try switching to a test style that would make common setup/branching cases more obvious
 
   private def whenInstitutionTypeIs(instType: InstitutionType): Unit = {
-    institution = Institution(22, "some bank", Set(), Agency.CFPB, instType)
+    institution = Institution(22, "some bank", Set(), Agency.CFPB, instType, hasParent = false)
   }
 }

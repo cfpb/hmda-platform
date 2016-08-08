@@ -102,7 +102,7 @@ class S025Spec extends WordSpec with MustMatchers {
   }
 
   def createBank(externalIds: Set[ExternalId]): Institution = {
-    Institution(1, "Test Bank", externalIds, CFPB, Bank, Active)
+    Institution(1, "Test Bank", externalIds, CFPB, Bank, hasParent = true, Active)
   }
 }
 
