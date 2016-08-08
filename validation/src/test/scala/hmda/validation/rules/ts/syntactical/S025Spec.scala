@@ -23,7 +23,7 @@ class S025Spec extends WordSpec with MustMatchers {
 
     val ts = TransmittalSheet(
       1,
-      9, //CFPB,
+      CFPB.value,
       201602021453L,
       2017,
       "12-3456789",
@@ -33,21 +33,21 @@ class S025Spec extends WordSpec with MustMatchers {
     )
 
     "succeed when TS's agency code and respondent ID match the Institution's" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
+      val institution = createBank(Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution))
 
       S025(ts, ctx) mustBe Success()
     }
 
     "fail when TS's agency code and respondent ID do NOT match the Institution's" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
+      val institution = createBank(Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution))
 
       S025(ts, ctx) mustBe Failure()
     }
 
     "fail when the Institution's respondent ID cannot be derived" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
+      val institution = createBank(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution))
 
       S025(ts, ctx) mustBe Failure()
@@ -80,26 +80,29 @@ class S025Spec extends WordSpec with MustMatchers {
     }
 
     "fail when the Institution's respondent ID cannot be derived" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
+      val institution = createBank(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution))
 
       S025(lar, ctx) mustBe Failure()
     }
 
     "succeed when LAR's agency code and respondent ID match the Institution's" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
+      val institution = createBank(Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution))
 
       S025(lar, ctx) mustBe Success()
     }
 
     "fail when LAR's agency code and respondent ID do NOT match the Institution's" in {
-      val institution = Institution(1, "Test Bank", Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)), CFPB, Bank, Active)
+      val institution = createBank(Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution))
 
       S025(lar, ctx) mustBe Failure()
     }
   }
 
+  def createBank(externalIds: Set[ExternalId]): Institution = {
+    Institution(1, "Test Bank", externalIds, CFPB, Bank, Active)
+  }
 }
 
