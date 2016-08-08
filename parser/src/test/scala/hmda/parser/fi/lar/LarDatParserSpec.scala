@@ -32,7 +32,7 @@ class LarDatParserSpec extends PropSpec with MustMatchers with PropertyChecks wi
 
   property("LAR Parser should parse basic LAR information") {
     firstLar.id mustBe 2
-    firstLar.respondentId mustBe "0123456789"
+    firstLar.respondentId mustBe "123456789"
     firstLar.agencyCode mustBe 9
     firstLar.preapprovals mustBe 1
     firstLar.actionTakenType mustBe 5

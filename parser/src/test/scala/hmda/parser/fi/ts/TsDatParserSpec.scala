@@ -13,7 +13,7 @@ class TsDatParserSpec extends PropSpec with PropertyChecks with MustMatchers wit
 
   property("parse transmittal sheet respondent info") {
     val respondent = tsData.respondent
-    respondent.id mustBe "0011013201"
+    respondent.id mustBe "11013201"
     respondent.name mustBe "SMALL BANK USA, NA"
     respondent.address mustBe "1850 TYSONS BLVD., SUITE 50"
     respondent.city mustBe "MCLEAN"
