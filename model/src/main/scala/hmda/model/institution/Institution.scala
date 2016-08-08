@@ -9,10 +9,10 @@ case class Institution(
     externalIds: Set[ExternalId],
     agency: Agency,
     institutionType: InstitutionType,
-    status: InstitutionStatus
+    status: InstitutionStatus = InstitutionStatus.Active
 ) {
 
-  val extIdsByType: Map[ExternalIdType, ExternalId] = externalIds.map(extId => (extId.idType, extId)).toMap
+  private val extIdsByType: Map[ExternalIdType, ExternalId] = externalIds.map(extId => (extId.idType, extId)).toMap
 
   /**
    * Derives the respondentId for a given Institution based on [[hmda.model.institution.Agency]] and [[hmda.model.institution.InstitutionType]],
