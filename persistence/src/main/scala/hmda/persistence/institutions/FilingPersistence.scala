@@ -75,6 +75,8 @@ class FilingPersistence(institutionId: String) extends PersistentActor with Acto
           log.debug(s"persisted: $modified")
           updateState(e)
         }
+      } else {
+        log.warning(s"Period does not exist. Could not update $modified")
       }
 
     case GetFilingByPeriod(period) =>

@@ -2,10 +2,10 @@ package hmda.persistence.institutions
 
 import akka.testkit.{ EventFilter, TestProbe }
 import hmda.actor.test.ActorSpec
-import hmda.model.fi.{ Cancelled, Completed, Filing }
+import hmda.model.fi._
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
-import hmda.persistence.institutions.FilingPersistence.{ CreateFiling, GetFilingByPeriod, UpdateFilingStatus, _ }
+import hmda.persistence.institutions.FilingPersistence._
 
 class FilingPersistenceSpec extends ActorSpec {
 
@@ -46,5 +46,14 @@ class FilingPersistenceSpec extends ActorSpec {
         probe.send(filingsActor, CreateFiling(f2))
       }
     }
+
+    "warn when updating status for a nonexistent period" in {
+      val f = Filing("2006", "12345", Cancelled)
+      val msg = s"Period does not exist. Could not update $f"
+      EventFilter.warning(message = msg, occurrences = 1) intercept {
+        probe.send(filingsActor, UpdateFilingStatus(f))
+      }
+    }
   }
+
 }
