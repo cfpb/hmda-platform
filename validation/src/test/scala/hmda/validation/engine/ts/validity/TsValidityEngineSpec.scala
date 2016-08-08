@@ -14,7 +14,7 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
 
   property("Transmittal Sheet must be valid") {
     forAll(tsGen) { ts =>
-      whenever(respondentNotEmpty(ts.respondent)) {
+      whenever(respondentNotEmpty(ts.respondent) && (ts.contact.name != ts.respondent.name)) {
         checkValidity(ts).isSuccess mustBe true
       }
     }
