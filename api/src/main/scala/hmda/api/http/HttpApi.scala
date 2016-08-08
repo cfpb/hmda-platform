@@ -32,5 +32,4 @@ trait HttpApi extends HmdaApiProtocol {
     }
 
   val routes = rootPath
-
 }
