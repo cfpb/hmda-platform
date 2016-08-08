@@ -5,7 +5,7 @@ import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 object TsDatParser {
   def apply(s: String): TransmittalSheet = {
     val id = s.substring(0, 1).toInt
-    val respId = s.substring(1, 11).trim
+    val respId = s.substring(1, 11).trim.replaceFirst("^0+(?!$)", "")
     val code = s.substring(11, 12).trim.toInt
     val timestamp = s.substring(12, 24).trim.toLong
     val activityYear = s.substring(25, 29).trim.toInt

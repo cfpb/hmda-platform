@@ -5,7 +5,7 @@ import hmda.model.fi.lar._
 object LarDatParser {
   def apply(s: String): LoanApplicationRegister = {
     val id = s.substring(0, 1).trim.toInt
-    val respId = s.substring(1, 11).trim
+    val respId = s.substring(1, 11).trim.replaceFirst("^0+(?!$)", "")
     val code = s.substring(11, 12).trim.toInt
     val loanId = s.substring(12, 37).trim
     val loanDate = s.substring(37, 45).trim
@@ -35,7 +35,7 @@ object LarDatParser {
     val coAppRace5 = s.substring(92, 93).trim
     val appSex = s.substring(93, 94).trim.toInt
     val coAppSex = s.substring(94, 95).trim.toInt
-    val appIncome = s.substring(95, 99).trim
+    val appIncome = s.substring(95, 99).trim.replaceFirst("^0+(?!$)", "")
     val purchaserType = s.substring(99, 100).trim.toInt
     val denial1 = s.substring(100, 101).trim
     val denial2 = s.substring(101, 102).trim
