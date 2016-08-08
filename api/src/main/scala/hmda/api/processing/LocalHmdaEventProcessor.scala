@@ -18,8 +18,6 @@ object LocalHmdaEventProcessor {
 
 class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
-  //val hmdaRawFileQuery = context.actorOf(HmdaFileQuery.props())
-
   override def preStart(): Unit = {
     context.system.eventStream.subscribe(self, classOf[Event])
   }
@@ -34,6 +32,7 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
         fireUploadCompletedEvents(size, submissionId)
 
       case ParsingCompleted(submissionId) =>
+        fireParsingCompletedEvents(submissionId)
 
       case _ => //ignore other events
 
@@ -44,7 +43,9 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
     log.debug(s"$size lines uploaded for submission $submissionId")
     val hmdaFileParser = context.actorOf(HmdaFileParser.props(submissionId))
     hmdaFileParser ! ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId")
-    //hmdaFileParser ! Shutdown
-    //hmdaRawFileQuery ! ReadHmdaRawData(submissionId)
+  }
+
+  private def fireParsingCompletedEvents(submissionId: String): Unit = {
+    log.debug(s"Parsing completed for $submissionId")
   }
 }

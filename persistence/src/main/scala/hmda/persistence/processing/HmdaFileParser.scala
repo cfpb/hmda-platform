@@ -1,6 +1,7 @@
 package hmda.persistence.processing
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
+import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
@@ -11,9 +12,11 @@ import hmda.persistence.processing.HmdaQuery._
 
 object HmdaFileParser {
 
+  val name = "HmdaFileParser"
+
   case class ReadHmdaRawFile(submissionId: String) extends Command
-  case class ParsedLar(lar: LoanApplicationRegister) extends Event
-  case class ParsedLarErrors(errors: List[String]) extends Event
+  case class LarParsed(lar: LoanApplicationRegister) extends Event
+  case class LarParsedErrors(errors: List[String]) extends Event
 
   case class CompleteParsing(submissionId: String) extends Command
   case class ParsingCompleted(submissionId: String) extends Event
@@ -24,15 +27,30 @@ object HmdaFileParser {
     system.actorOf(HmdaFileParser.props(submissionId))
   }
 
+  case class HmdaFileParseState(size: Int = 0, parsingErrors: Seq[List[String]] = Nil) {
+    def updated(event: Event): HmdaFileParseState = event match {
+      case LarParsed(lar) =>
+        HmdaFileParseState(size + 1, parsingErrors)
+      case LarParsedErrors(errors) =>
+        HmdaFileParseState(size, parsingErrors :+ errors)
+    }
+  }
+
 }
 
-class HmdaFileParser(submissionId: String) extends Actor with ActorLogging with LocalEventPublisher {
+class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLogging with LocalEventPublisher {
 
   import HmdaFileParser._
 
   implicit val system = context.system
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
+
+  var state = HmdaFileParseState()
+
+  def updateState(event: Event): Unit = {
+    state = state.updated(event)
+  }
 
   override def preStart(): Unit = {
     log.info(s"Parsing started for $submissionId")
@@ -42,7 +60,9 @@ class HmdaFileParser(submissionId: String) extends Actor with ActorLogging with 
     log.info(s"Parsing ended for $submissionId")
   }
 
-  override def receive: Receive = {
+  override def persistenceId: String = s"$name-$submissionId"
+
+  override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId) =>
       val parsed = events(persistenceId)
@@ -50,8 +70,8 @@ class HmdaFileParser(submissionId: String) extends Actor with ActorLogging with 
         .drop(1)
         .map(line => LarCsvParser(line))
         .map {
-          case Left(errors) => ParsedLarErrors(errors)
-          case Right(lar) => ParsedLar(lar)
+          case Left(errors) => LarParsedErrors(errors)
+          case Right(lar) => LarParsed(lar)
         }
 
       parsed
@@ -61,19 +81,30 @@ class HmdaFileParser(submissionId: String) extends Actor with ActorLogging with 
             self ! Shutdown
         }
 
-    case ParsedLar(lar) =>
-      log.info(lar.toString)
+    case lp @ LarParsed(lar) =>
+      persist(lp) { e =>
+        log.info(s"Persisted: ${e.lar}")
+        updateState(e)
+      }
 
-    case ParsedLarErrors(errors) =>
-      log.info(errors.toString())
+    case err @ LarParsedErrors(errors) =>
+      persist(err) { e =>
+        log.info(s"Persisted: ${e.errors}")
+        updateState(e)
+      }
+
+    case GetState =>
+      sender() ! state
 
     case Shutdown =>
-      log.info(s"Parsing for $submissionId finished")
       publishEvent(ParsingCompleted(submissionId))
       context stop self
 
-    case _ => //ignore
-
   }
+
+  override def receiveRecover: Receive = {
+    case event: Event => updateState(event)
+  }
+
 }
 

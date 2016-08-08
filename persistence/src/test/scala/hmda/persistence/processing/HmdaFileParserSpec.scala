@@ -6,7 +6,9 @@ import java.time.Instant
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaRawFile._
 import hmda.persistence.processing.HmdaFileParser._
 import org.iq80.leveldb.util.FileUtils
@@ -24,23 +26,36 @@ class HmdaFileParserSpec extends ActorSpec {
 
   val probe = TestProbe()
 
-  val lines = fiCSV.split("\n")
   val timestamp = Instant.now.toEpochMilli
+  val lines = fiCSV.split("\n")
+  val badLines = fiCSVParseError.split("\n")
+
+  override def beforeAll() {
+    persistRawData()
+    super.beforeAll()
+  }
 
   "HMDA File Parser" must {
-    "parse raw data stored in the event journal" in {
-      probe.send(hmdaFileParser, ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId"))
-      //probe.expectMsg("hello")
-      //1 === 1
+    "persist parsed LARs" in {
+      parseLars(lines)
+      probe.send(hmdaFileParser, GetState)
+      probe.expectMsg(HmdaFileParseState(3, Nil))
+    }
+
+    "persist parsed LARs and parsing errors" in {
+      parseLars(badLines)
+      probe.send(hmdaFileParser, GetState)
+      probe.expectMsg(HmdaFileParseState(5, Seq(List("Agency Code is not an Integer"))))
+
     }
   }
 
-  val snapshotStore = new File(config.getString("akka.persistence.snapshot-store.local.dir"))
-
-  override def beforeAll() {
-    FileUtils.deleteRecursively(snapshotStore)
-    persistRawData()
-    super.beforeAll()
+  private def parseLars(xs: Array[String]): Array[Unit] = {
+    val lars = xs.drop(1).map(line => LarCsvParser(line))
+    lars.map {
+      case Right(l) => probe.send(hmdaFileParser, LarParsed(l))
+      case Left(errors) => probe.send(hmdaFileParser, LarParsedErrors(errors))
+    }
   }
 
   private def persistRawData(): Unit = {

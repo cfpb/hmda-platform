@@ -45,11 +45,11 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
   }
 
   override def preStart(): Unit = {
-    log.info(s"Start persisting upload for $submissionId")
+    log.debug(s"Uploading started for $submissionId")
   }
 
   override def postStop(): Unit = {
-    log.info(s"Finish persisting upload for $submissionId")
+    log.debug(s"Uploading finished for $submissionId")
   }
 
   override def receiveCommand: Receive = {
@@ -70,7 +70,8 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
     case GetState =>
       sender() ! state
 
-    case Shutdown => context.stop(self)
+    case Shutdown =>
+      context stop self
 
   }
 
