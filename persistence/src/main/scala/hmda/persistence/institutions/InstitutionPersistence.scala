@@ -62,6 +62,8 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
           log.debug(s"Persisted: $i")
           updateState(e)
         }
+      } else {
+        log.warning(s"Institution already exists. Could not create $i")
       }
 
     case ModifyInstitution(i) =>
@@ -70,6 +72,8 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
           log.debug(s"Modified: ${i.name}")
           updateState(e)
         }
+      } else {
+        log.warning(s"Institution does not exist. Could not update $i")
       }
 
     case GetInstitutionById(institutionId) =>
