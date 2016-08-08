@@ -1,10 +1,9 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{InstitutionDetail, InstitutionSummary, Institutions}
-import hmda.model.institution.Agency._
-import hmda.model.institution.{Agency, Institution, InstitutionStatus}
-import hmda.model.institution.InstitutionStatus.{Active, Inactive}
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
+import hmda.api.model.{ InstitutionDetail, InstitutionSummary, Institutions }
+import hmda.model.institution.{ Agency, Institution, InstitutionStatus }
+import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
+import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
 trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
   implicit object InstitutionStatusJsonFormat extends RootJsonFormat[InstitutionStatus] {
@@ -27,29 +26,35 @@ trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
   }
 
   implicit object AgencyJsonFormat extends RootJsonFormat[Agency] {
-    override def write(agency: Agency): JsValue = JsObject(Map(
+    override def write(agency: Agency): JsValue = JsObject(
       "value" -> JsNumber(agency.value),
       "name" -> JsString(agency.name),
-      "fullName" -> JsString(agency.fullName),
-      "externalIds" -> JsString("")
-    ))
+      "fullName" -> JsString(agency.fullName)
+    )
 
     override def read(json: JsValue): Agency = {
-      json match {
-        case JsString(s) => s match {
-          case "cfpb" => CFPB
-          case "fdic" => FDIC
-          case "frs" => FRS
-          case "hud" => HUD
-          case "ncua" => NCUA
-          case "occ" => OCC
-        }
+      json.asJsObject.getFields("value", "name", "fullName") match {
+        //TODO: Read in Agency value
         case _ => throw new DeserializationException("Agency expected")
       }
     }
   }
 
-  implicit val institutionFormat = jsonFormat6(Institution.apply)
+  implicit object InstitutionJsonFormat extends RootJsonFormat[Institution] {
+    override def write(institution: Institution): JsValue = JsObject(
+      "id" -> JsNumber(institution.id),
+      "name" -> JsString(institution.name),
+      "agency" -> JsString("") //TODO
+    )
+
+    override def read(json: JsValue): Institution = {
+      json.asJsObject.getFields("id", "name", "agency", "status") match {
+        //TODO: Read in Institution JSON
+        case _ => throw new DeserializationException("Institution Status expected")
+      }
+    }
+  }
+
   implicit val institutionsFormat = jsonFormat1(Institutions.apply)
   implicit val institutionDetail = jsonFormat2(InstitutionDetail.apply)
 
