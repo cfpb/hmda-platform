@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.validity
+package hmda.validation.rules.ts.validity
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
