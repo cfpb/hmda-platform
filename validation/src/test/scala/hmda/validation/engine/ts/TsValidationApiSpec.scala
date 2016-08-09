@@ -20,10 +20,4 @@ trait TsValidationApiSpec extends TsValidationApi {
    */
   override def findYearProcessed(implicit ec: ExecutionContext): Future[Int] = Future(2017)
 
-  /*
-  Returns control number (valid respondent id / agency code combination for date processed, see S025)
-  TODO: figure out what this means (???). S025 is not implemented yet
-   */
-  override def findControlNumber(implicit ec: ExecutionContext): Future[String] = Future("")
-
 }

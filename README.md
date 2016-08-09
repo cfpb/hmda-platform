@@ -8,14 +8,7 @@ Information contained in this repository should be considered provisional and a 
 
 ## Introduction
 
-The Home Mortgage Disclosure Act (HMDA) requires many financial institutions to maintain, report, and publicly disclose information about mortgages. HMDA was originally enacted by Congress in 1975 and is implemented by [Regulation C](https://www.gpo.gov/fdsys/pkg/CFR-2012-title12-vol8/xml/CFR-2012-title12-vol8-part1003.xml). The Dodd-Frank Act transferred HMDA rulemaking authority from the Federal Reserve Board to the Consumer Financial Protection Bureau (CFPB) on July 21, 2011.
-
-This regulation provides the public loan data that can be used to assist:
-* in determining whether financial institutions are serving the housing needs of their communities;
-* public officials in distributing public-sector investments so as to attract private investment to areas where it is needed;
-* and in identifying possible discriminatory lending patterns.
-
-This regulation applies to certain financial institutions, including banks, savings associations, credit unions, and other mortgage lending institutions.
+For more information on HMDA, checkout the [About HMDA page](http://www.consumerfinance.gov/data-research/hmda/learn-more) on the CFPB website.
 
 ## The HMDA Platform
 
@@ -147,6 +140,27 @@ docker-compose up -d --build
 
 This will bring up all the HMDA Platform services. The first run may take several minutes.
 
+For convenience when doing development on the UI, the `docker-compose` file uses a `volumes` which mount the local directory into the `hmda-platform-ui` container. This means you can make UI changes and refresh the browser to view them.
+
+To build the front-end and allow "watching" for changes you can run:
+
+``` shell
+# while still in the hmda-platform directory
+cd ../hmda-platform-ui
+npm install # optional, to make sure you get the dependencies
+npm run watch
+```
+
+If you don't need to "watch" for changes you can run:
+
+``` shell
+# while still in the hmda-platform directory
+cd ../hmda-platform-ui
+npm install # optional, to make sure you get the dependencies
+npm run build:docker
+```
+
+This will simply build the front-end, still taking advantage of the mounted volume.
 
 View the app by visiting your docker machine's endpoint in the browser.
 To find your docker machine endpoint:
@@ -169,4 +183,3 @@ We use GitHub issues in this repository to track features, bugs, and enhancement
 1. [TERMS](TERMS.md)
 2. [LICENSE](LICENSE)
 3. [CFPB Source Code Policy](https://github.com/cfpb/source-code-policy/)
-

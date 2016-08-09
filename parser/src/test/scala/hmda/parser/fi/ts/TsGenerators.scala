@@ -50,9 +50,9 @@ trait TsGenerators extends FIGenerators {
   implicit def respondentGen: Gen[Respondent] = {
     for {
       id <- respIdGen
-      name <- Gen.alphaStr
-      address <- Gen.alphaStr
-      city <- Gen.alphaStr
+      name <- stringOfUpToN(30, Gen.alphaNumChar)
+      address <- stringOfUpToN(40, Gen.alphaNumChar)
+      city <- stringOfUpToN(25, Gen.alphaNumChar)
       state <- stateGen
       zip <- zipGen
     } yield Respondent(id, name, address, city, state, zip)
@@ -60,9 +60,9 @@ trait TsGenerators extends FIGenerators {
 
   implicit def parentGen: Gen[Parent] = {
     for {
-      name <- Gen.alphaStr
-      address <- Gen.alphaStr
-      city <- Gen.alphaStr
+      name <- stringOfUpToN(30, Gen.alphaNumChar)
+      address <- stringOfUpToN(40, Gen.alphaNumChar)
+      city <- stringOfUpToN(25, Gen.alphaNumChar)
       state <- stateGen
       zip <- zipGen
     } yield Parent(name, address, city, state, zip)
@@ -88,7 +88,7 @@ trait TsGenerators extends FIGenerators {
 
   implicit def contactGen: Gen[Contact] = {
     for {
-      name <- Gen.alphaStr.filter(!_.isEmpty)
+      name <- stringOfUpToN(30, Gen.alphaNumChar).filter(!_.isEmpty)
       phone <- phoneGen
       fax <- phoneGen
       email <- emailGen

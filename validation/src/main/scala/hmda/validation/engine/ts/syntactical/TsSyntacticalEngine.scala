@@ -3,13 +3,12 @@ package hmda.validation.engine.ts.syntactical
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.api.ValidationApi
 import hmda.validation.api.ts.TsValidationApi
-import hmda.validation.engine.ValidationError
+import hmda.validation.context.ValidationContext
 import hmda.validation.engine.ts.TsCommonEngine
 import hmda.validation.rules.ts.syntactical._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import scalaz.Scalaz._
-import scalaz._
 
 trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValidationApi {
 
@@ -21,10 +20,9 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
     convertResult(t, S020(t), "S020")
   }
 
-  //TODO: Implement S025 validation rule
-  //  private def s025(t: TransmittalSheet): TsValidation = {
-  //
-  //  }
+  private def s025(t: TransmittalSheet, ctx: ValidationContext): TsValidation = {
+    convertResult(t, S025(t, ctx), "S025")
+  }
 
   private def s100(t: TransmittalSheet): Future[TsValidation] = {
     S100(t, findYearProcessed).map { result =>
@@ -42,11 +40,12 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
     convertResult(t, S028(t), "S028")
   }
 
-  def checkSyntactical(ts: TransmittalSheet): Future[TsValidation] = {
+  def checkSyntactical(ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
 
     val checks = List(
       s010(ts),
       s020(ts),
+      s025(ts, ctx),
       s028(ts)
     )
 
