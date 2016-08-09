@@ -53,11 +53,11 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
   }
 
   override def preStart(): Unit = {
-    log.info(s"Parsing started for $submissionId")
+    log.debug(s"Parsing started for $submissionId")
   }
 
   override def postStop(): Unit = {
-    log.info(s"Parsing ended for $submissionId")
+    log.debug(s"Parsing ended for $submissionId")
   }
 
   override def persistenceId: String = s"$name-$submissionId"
@@ -83,13 +83,13 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
 
     case lp @ LarParsed(lar) =>
       persist(lp) { e =>
-        log.info(s"Persisted: ${e.lar}")
+        log.debug(s"Persisted: ${e.lar}")
         updateState(e)
       }
 
     case err @ LarParsedErrors(errors) =>
       persist(err) { e =>
-        log.info(s"Persisted: ${e.errors}")
+        log.debug(s"Persisted: ${e.errors}")
         updateState(e)
       }
 
