@@ -20,8 +20,7 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Institution, Submission }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
-import hmda.persistence.processing.HmdaFileUpload._
-
+import hmda.persistence.processing.HmdaRawFile._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import spray.json._
@@ -160,7 +159,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
       val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
       val uploadTimestamp = Instant.now.toEpochMilli
-      val processingActor = createHmdaFileUpload(system, submissionId)
+      val processingActor = createHmdaRawFile(system, submissionId)
+      processingActor ! StartUpload
       fileUpload("file") {
         case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
           time {
