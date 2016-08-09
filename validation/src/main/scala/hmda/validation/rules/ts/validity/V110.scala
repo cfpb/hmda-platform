@@ -13,7 +13,7 @@ class V110(institution: Institution) extends EditCheck[TransmittalSheet] {
   override def name: String = "V110"
 
   override def apply(ts: TransmittalSheet): Result = {
-    when(institution.institutionType is oneOf(DependentMortgageCompany, Affiliate)) {
+    when(institution.institutionType is oneOf(MBS, Affiliate)) {
       ts.parent is completeNameAndAddress
     }
   }
