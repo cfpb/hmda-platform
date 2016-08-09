@@ -12,7 +12,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.protocol.HmdaApiProtocol
 import spray.json._
 
-trait HttpApi extends HmdaApiProtocol {
+trait HttpApi extends HmdaApiProtocol with HmdaCustomDirectives {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -21,12 +21,14 @@ trait HttpApi extends HmdaApiProtocol {
   val rootPath =
     pathSingleSlash {
       get {
-        complete {
-          val now = Instant.now.toString
-          val host = InetAddress.getLocalHost.getHostName
-          val status = Status("OK", "hmda-api", now, host)
-          log.debug(status.toJson.toString)
-          ToResponseMarshallable(status)
+        time {
+          complete {
+            val now = Instant.now.toString
+            val host = InetAddress.getLocalHost.getHostName
+            val status = Status("OK", "hmda-api", now, host)
+            log.debug(status.toJson.toString)
+            ToResponseMarshallable(status)
+          }
         }
       }
     }
