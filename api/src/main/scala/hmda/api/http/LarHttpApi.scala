@@ -3,7 +3,6 @@ package hmda.api.http
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
 import hmda.api.protocol.validation.ValidationResultProtocol

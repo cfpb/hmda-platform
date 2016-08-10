@@ -23,7 +23,6 @@ import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence 
 import hmda.persistence.processing.HmdaRawFile._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
-import spray.json._
 
 trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with HmdaCustomDirectives {
 
