@@ -7,6 +7,9 @@ import akka.event.LoggingAdapter
 trait HmdaCustomDirectives {
   val log: LoggingAdapter
 
+  def timedGet: Directive0 = get & time
+  def timedPost: Directive0 = post & time
+
   def time: Directive0 = {
     val startTime = System.currentTimeMillis()
 

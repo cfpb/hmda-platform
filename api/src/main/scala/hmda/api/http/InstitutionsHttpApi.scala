@@ -38,17 +38,15 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     path("institutions") {
       val path = "institutions"
       val institutionsActor = system.actorSelection("/user/institutions")
-      get {
-        time {
-          val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
-          onComplete(fInstitutions) {
-            case Success(institutions) =>
-              complete(ToResponseMarshallable(Institutions(institutions)))
-            case Failure(error) =>
-              log.error(error.getLocalizedMessage)
-              val errorResponse = ErrorResponse(500, "Internal server error", path)
-              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-          }
+      timedGet {
+        val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
+        onComplete(fInstitutions) {
+          case Success(institutions) =>
+            complete(ToResponseMarshallable(Institutions(institutions)))
+          case Failure(error) =>
+            log.error(error.getLocalizedMessage)
+            val errorResponse = ErrorResponse(500, "Internal server error", path)
+            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
         }
       }
     }
@@ -59,25 +57,23 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/institutions")
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
-        get {
-          time {
-            implicit val ec: ExecutionContext = executor
-            val fInstitutionDetails = institutionDetails(institutionId, institutionsActor, filingsActor)
-            onComplete(fInstitutionDetails) {
-              case Success(institutionDetails) =>
-                filingsActor ! Shutdown
-                if (institutionDetails.institution.id != "")
-                  complete(ToResponseMarshallable(institutionDetails))
-                else {
-                  val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
-                  complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-                }
-              case Failure(error) =>
-                filingsActor ! Shutdown
-                log.error(error.getLocalizedMessage)
-                val errorResponse = ErrorResponse(500, "Internal server error", path)
-                complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-            }
+        timedGet {
+          implicit val ec: ExecutionContext = executor
+          val fInstitutionDetails = institutionDetails(institutionId, institutionsActor, filingsActor)
+          onComplete(fInstitutionDetails) {
+            case Success(institutionDetails) =>
+              filingsActor ! Shutdown
+              if (institutionDetails.institution.id != "")
+                complete(ToResponseMarshallable(institutionDetails))
+              else {
+                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+              }
+            case Failure(error) =>
+              filingsActor ! Shutdown
+              log.error(error.getLocalizedMessage)
+              val errorResponse = ErrorResponse(500, "Internal server error", path)
+              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
           }
         }
       }
@@ -89,27 +85,25 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       extractExecutionContext { executor =>
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-        get {
-          time {
-            implicit val ec: ExecutionContext = executor
-            val fDetails: Future[FilingDetail] = filingDetailsByPeriod(period, filingsActor, submissionActor)
-            onComplete(fDetails) {
-              case Success(filingDetails) =>
-                filingsActor ! Shutdown
-                submissionActor ! Shutdown
-                val filing = filingDetails.filing
-                if (filing.institutionId == institutionId && filing.period == period)
-                  complete(ToResponseMarshallable(filingDetails))
-                else {
-                  val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
-                  complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-                }
-              case Failure(error) =>
-                filingsActor ! Shutdown
-                submissionActor ! Shutdown
-                val errorResponse = ErrorResponse(500, "Internal server error", path)
-                complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-            }
+        timedGet {
+          implicit val ec: ExecutionContext = executor
+          val fDetails: Future[FilingDetail] = filingDetailsByPeriod(period, filingsActor, submissionActor)
+          onComplete(fDetails) {
+            case Success(filingDetails) =>
+              filingsActor ! Shutdown
+              submissionActor ! Shutdown
+              val filing = filingDetails.filing
+              if (filing.institutionId == institutionId && filing.period == period)
+                complete(ToResponseMarshallable(filingDetails))
+              else {
+                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+              }
+            case Failure(error) =>
+              filingsActor ! Shutdown
+              submissionActor ! Shutdown
+              val errorResponse = ErrorResponse(500, "Internal server error", path)
+              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
           }
         }
       }
@@ -118,38 +112,36 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   val submissionPath =
     path("institutions" / Segment / "filings" / Segment / "submissions") { (institutionId, period) =>
       val path = s"institutions/$institutionId/filings/$period/submissions"
-      post {
-        time {
-          implicit val ec = system.dispatcher
-          val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
-          val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-          val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
-          onComplete(fFiling) {
-            case Success(filing) =>
-              if (filing.period == period) {
-                submissionsActor ! CreateSubmission
-                val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
-                onComplete(fLatest) {
-                  case Success(submission) =>
-                    submissionsActor ! Shutdown
-                    filingsActor ! Shutdown
-                    complete(ToResponseMarshallable(StatusCodes.Created -> submission))
-                  case Failure(error) =>
-                    submissionsActor ! Shutdown
-                    val errorResponse = ErrorResponse(500, "Internal server error", path)
-                    complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-                }
-              } else {
-                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
-                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+      timedPost {
+        implicit val ec = system.dispatcher
+        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
+        val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
+        val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
+        onComplete(fFiling) {
+          case Success(filing) =>
+            if (filing.period == period) {
+              submissionsActor ! CreateSubmission
+              val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
+              onComplete(fLatest) {
+                case Success(submission) =>
+                  submissionsActor ! Shutdown
+                  filingsActor ! Shutdown
+                  complete(ToResponseMarshallable(StatusCodes.Created -> submission))
+                case Failure(error) =>
+                  submissionsActor ! Shutdown
+                  val errorResponse = ErrorResponse(500, "Internal server error", path)
+                  complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
               }
-            case Failure(error) =>
-              filingsActor ! Shutdown
-              submissionsActor ! Shutdown
-              val errorResponse = ErrorResponse(500, "Internal server error", path)
-              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+            } else {
+              val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
+              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+            }
+          case Failure(error) =>
+            filingsActor ! Shutdown
+            submissionsActor ! Shutdown
+            val errorResponse = ErrorResponse(500, "Internal server error", path)
+            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
 
-          }
         }
       }
     }
