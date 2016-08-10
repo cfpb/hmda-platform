@@ -24,17 +24,6 @@ class V110Spec extends TsEditCheckSpec {
     }
   }
 
-  // TODO fix generator so that the previous test will cover this case too. (then remove this one.)
-  property("any TS, even with empty parent info, must pass for respondent of type other than MBS or Affiliate") {
-    forAll(tsGen, Gen.oneOf(InstitutionType.values)) { (ts, instType) =>
-      whenever(!applicableTypes.contains(instType)) {
-        whenInstitutionTypeIs(instType)
-        val noParentTS = ts.copy(parent = Parent("", "", "", "", ""))
-        noParentTS.mustPass
-      }
-    }
-  }
-
   property("TS must pass if parent info is populated and respondent is MBS or Affiliate") {
     forAll(tsGen, Gen.oneOf(applicableTypes.toList)) { (ts, instType) =>
       whenInstitutionTypeIs(instType)
