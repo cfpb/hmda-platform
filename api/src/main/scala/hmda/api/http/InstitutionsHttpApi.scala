@@ -158,38 +158,40 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   val uploadPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
       val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
-      val uploadTimestamp = Instant.now.toEpochMilli
-      val processingActor = createHmdaRawFile(system, submissionId)
-      processingActor ! StartUpload
-      fileUpload("file") {
-        case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
-          time {
-            val uploadedF = byteSource
-              .via(splitLines)
-              .map(_.utf8String)
-              .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
+      preventSubmissionOverwrite(institutionId, period, submissionId.toInt, path) {
+        val uploadTimestamp = Instant.now.toEpochMilli
+        val processingActor = createHmdaRawFile(system, submissionId)
+        processingActor ! StartUpload
+        fileUpload("file") {
+          case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
+            time {
+              val uploadedF = byteSource
+                .via(splitLines)
+                .map(_.utf8String)
+                .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
 
-            onComplete(uploadedF) {
-              case Success(response) =>
-                processingActor ! CompleteUpload
-                processingActor ! Shutdown
-                complete {
-                  "uploaded"
-                }
-              case Failure(error) =>
-                processingActor ! Shutdown
-                log.error(error.getLocalizedMessage)
-                val errorResponse = ErrorResponse(400, "Invalid File Format", path)
-                complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              onComplete(uploadedF) {
+                case Success(response) =>
+                  processingActor ! CompleteUpload
+                  processingActor ! Shutdown
+                  complete {
+                    "uploaded"
+                  }
+                case Failure(error) =>
+                  processingActor ! Shutdown
+                  log.error(error.getLocalizedMessage)
+                  val errorResponse = ErrorResponse(400, "Invalid File Format", path)
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              }
             }
-          }
 
-        case _ =>
-          time {
-            processingActor ! Shutdown
-            val errorResponse = ErrorResponse(400, "Invalid File Format", path)
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-          }
+          case _ =>
+            time {
+              processingActor ! Shutdown
+              val errorResponse = ErrorResponse(400, "Invalid File Format", path)
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+            }
+        }
       }
     }
 
