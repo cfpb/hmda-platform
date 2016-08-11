@@ -17,8 +17,8 @@ object DemoData {
   val externalId1 = ExternalId("externalTest1", FdicCertNo)
   val externalId2 = ExternalId("externalTest2", RssdId)
   val institutions = {
-    val i1 = Institution(12345, "First Bank", Set(externalId1), FDIC, Bank, Active)
-    val i2 = Institution(123456, "Second Bank", Set(externalId2), CFPB, CreditUnion, Inactive)
+    val i1 = Institution(12345, "First Bank", Set(externalId1), FDIC, Bank, hasParent = true, Active)
+    val i2 = Institution(123456, "Second Bank", Set(externalId2), CFPB, CreditUnion, hasParent = true, Inactive)
     Set(i1, i2)
   }
 

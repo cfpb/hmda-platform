@@ -34,8 +34,9 @@ trait ModelGenerators {
       externalIds <- Gen.listOf(externalIdGen)
       status <- institutionStatusGen
       agency <- agencyGen
+      active <- Gen.oneOf(true, false)
       institutionType <- institutionTypeGen
-    } yield Institution(id, name, externalIds.toSet, agency, institutionType, status)
+    } yield Institution(id, name, externalIds.toSet, agency, institutionType, active, status)
   }
 
   implicit def filingStatusGen: Gen[FilingStatus] = {

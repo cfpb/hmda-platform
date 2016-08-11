@@ -48,7 +48,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Get("/institutions/12345") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val institution = DemoData.institutions.head
-        val filings = DemoData.filings.filter(f => f.institutionId == institution.id)
+        val filings = DemoData.filings.filter(f => f.institutionId == institution.id.toString)
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institution, filings.reverse)
       }
       Get("/institutions/xxxx") ~> institutionsRoutes ~> check {
@@ -61,7 +61,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Get("/institutions/12345/summary") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val summary = DemoData.institutionSummary
-        val institutionSummary = InstitutionSummary(summary._1, summary._2, summary._3)
+        val institutionSummary = InstitutionSummary(summary._1.toString, summary._2, summary._3)
         responseAs[InstitutionSummary] mustBe institutionSummary
       }
     }
