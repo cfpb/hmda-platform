@@ -11,7 +11,6 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Route
-import akka.stream.actor.ActorSubscriberMessage.OnComplete
 import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
@@ -163,11 +162,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       extractExecutionContext { executor =>
         implicit val ex = executor
         val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
-        val uploadTimestamp = Instant.now.toEpochMilli
         val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-        lazy val innerRoute: Route = {
+        def innerRoute(institutionId: String, period: String, submissionId: String, path: String): Route = {
+          val uploadTimestamp = Instant.now.toEpochMilli
           val processingActor = createHmdaRawFile(system, submissionId)
-          log.debug("Upload started")
           fileUpload("file") {
             case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
               time {
@@ -199,7 +197,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               }
           }
         }
-        preventSubmissionOverwrite(submissionActor, submissionId.toInt, innerRoute, path)
+        preventSubmissionOverwrite(institutionId, period, submissionId, innerRoute, path)
       }
     }
 
@@ -247,13 +245,14 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     } yield FilingDetail(filing, submissions)
   }
 
-  private def preventSubmissionOverwrite(submissionsActor: ActorRef, submissionId: Int, route: Route, path: String)(implicit ec: ExecutionContext): Route = {
-    val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
+  private def preventSubmissionOverwrite(institutionId: String, period: String, submissionId: String, route: (String, String, String, String) => Route, path: String)(implicit ec: ExecutionContext): Route = {
+    val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
+    val submission = (submissionsActor ? GetSubmissionById(submissionId.toInt)).mapTo[Submission]
     val isCreated = submission.map(_.submissionStatus == Created)
     onComplete(submission) {
       case Success(submission) =>
         submissionsActor ! Shutdown
-        if (submission.submissionStatus == Created) route
+        if (submission.submissionStatus == Created) route(institutionId, period, submissionId, path)
         else {
           val errorResponse = ErrorResponse(400, "Submission already exists", path)
           complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))

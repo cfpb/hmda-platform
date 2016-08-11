@@ -2,12 +2,15 @@ package hmda.api.http
 
 import java.io.File
 
-import akka.event.{ LoggingAdapter, NoLogging }
+import akka.actor.ActorSystem
+import akka.event.{ Logging, LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart, StatusCodes }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.testkit.EventFilter
 import com.typesafe.config.ConfigFactory
+import hmda.api.HmdaApi._
 import hmda.api.model._
 import hmda.model.fi._
 import hmda.persistence.CommonMessages._
@@ -21,6 +24,7 @@ import org.iq80.leveldb.util.FileUtils
 import scala.concurrent.duration._
 
 class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with InstitutionsHttpApi with BeforeAndAfterAll {
+
   override val log: LoggingAdapter = NoLogging
   override implicit val timeout: Timeout = Timeout(5.seconds)
 
