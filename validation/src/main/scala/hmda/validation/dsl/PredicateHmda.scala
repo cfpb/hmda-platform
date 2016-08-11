@@ -1,6 +1,9 @@
 package hmda.validation.dsl
 
 import java.text.SimpleDateFormat
+
+import hmda.model.fi.ts.NameAndAddress
+
 import scala.language.implicitConversions
 
 object PredicateHmda {
@@ -20,4 +23,8 @@ object PredicateHmda {
       case e: Exception => false
     }
   }
+
+  def completeNameAndAddress[T <: NameAndAddress]: Predicate[T] = (info: T) =>
+    List(info.name, info.address, info.city, info.state, info.zipCode).forall(!_.isEmpty)
+
 }

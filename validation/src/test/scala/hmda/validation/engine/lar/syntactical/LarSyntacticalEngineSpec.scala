@@ -5,6 +5,8 @@ import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
+import scalaz.Success
+
 class LarSyntacticalEngineSpec
     extends PropSpec
     with PropertyChecks
@@ -15,14 +17,14 @@ class LarSyntacticalEngineSpec
   property("A LAR must pass syntactical checks") {
     forAll(larGen) { lar =>
       whenever(lar.id == 2) {
-        checkSyntactical(lar, ValidationContext(None)).isSuccess mustBe true
+        checkSyntactical(lar, ValidationContext(None)) mustBe a[Success[_]]
       }
     }
   }
 
   property("Pass syntactical checks on groups of LARs") {
     forAll(larListGen) { lars =>
-      checkSyntacticalCollection(lars).isSuccess mustBe true
+      checkSyntacticalCollection(lars) mustBe a[Success[_]]
     }
   }
 

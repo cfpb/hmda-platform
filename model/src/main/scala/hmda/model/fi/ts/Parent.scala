@@ -6,5 +6,5 @@ case class Parent(
   city: String,
   state: String,
   zipCode: String
-)
+) extends NameAndAddress
 
