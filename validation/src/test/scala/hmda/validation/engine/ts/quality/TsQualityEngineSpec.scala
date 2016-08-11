@@ -3,6 +3,7 @@ package hmda.validation.engine.ts.quality
 import java.io.File
 
 import hmda.parser.fi.ts.TsCsvParser
+import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
@@ -16,6 +17,7 @@ class TsQualityEngineSpec
     with TsQualityEngine {
 
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  private val ctx = ValidationContext(None)
 
   property("A Transmittal Sheet must pass quality checks") {
     for (x <- 1 to 5) {
@@ -23,7 +25,7 @@ class TsQualityEngineSpec
       val ts = line.map(l => TsCsvParser(l))
 
       ts.foreach { ts =>
-        checkQuality(ts.right.get).isSuccess mustBe true
+        checkQuality(ts.right.get, ctx).isSuccess mustBe true
       }
     }
   }
