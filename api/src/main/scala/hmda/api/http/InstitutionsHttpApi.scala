@@ -259,7 +259,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
 
   private def preventSubmissionOverwrite(submissionsActor: ActorRef, submissionId: Int)(implicit ec: ExecutionContext): Future[Boolean] = {
     val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
-    val isCreated = submission.map(_.submissionStatus == Created)
+    submission.map(_.submissionStatus == Created)
   }
 
   val institutionsRoutes =
