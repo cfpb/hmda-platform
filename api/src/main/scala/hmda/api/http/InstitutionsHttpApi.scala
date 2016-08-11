@@ -167,10 +167,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         implicit val ec: ExecutionContext = executor
         val isNotOverwrite = preventSubmissionOverwrite(submissionsActor, submissionId.toInt)
         onComplete(isNotOverwrite) {
-          case Failure(_) =>
-            submissionsActor ! Shutdown
-            val errorResponse = ErrorResponse(500, "Internal server error", path)
-            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
           case Success(isNotOverwrite) =>
             submissionsActor ! Shutdown
             if (isNotOverwrite) {
@@ -209,6 +205,10 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               val errorResponse = ErrorResponse(400, "Submission already exists", path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
             }
+          case Failure(_) =>
+            submissionsActor ! Shutdown
+            val errorResponse = ErrorResponse(500, "Internal server error", path)
+            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
         }
       }
     }
@@ -259,7 +259,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
 
   private def preventSubmissionOverwrite(submissionsActor: ActorRef, submissionId: Int)(implicit ec: ExecutionContext): Future[Boolean] = {
     val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
-    submission.map(_.submissionStatus == Created)
+    val isCreated = submission.map(_.submissionStatus == Created)
   }
 
   val institutionsRoutes =
