@@ -1,7 +1,8 @@
 package hmda.persistence.institutions
 
-import akka.testkit.TestProbe
+import akka.testkit.{ EventFilter, TestProbe }
 import hmda.actor.test.ActorSpec
+import hmda.model.fi.{ Active, Institution }
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, GetInstitutionById, ModifyInstitution, _ }
@@ -28,6 +29,30 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.send(institutionsActor, ModifyInstitution(modified))
       probe.send(institutionsActor, GetInstitutionById(modified.id.toString))
       probe.expectMsg(Some(modified))
+    }
+  }
+
+  "Error logging" must {
+
+    "warn when creating an institution that already exists" in {
+      // Setup: Persist an institution
+      val i1 = Institution("12345", "First Bank", Active)
+      probe.send(institutionsActor, CreateInstitution(i1))
+
+      // Attempt to add identical institution; test that warning is logged
+      val i2 = Institution("12345", "First Bank", Active)
+      val msg = s"Institution already exists. Could not create $i2"
+      EventFilter.warning(message = msg, occurrences = 1) intercept {
+        probe.send(institutionsActor, CreateInstitution(i2))
+      }
+    }
+
+    "warn when updating nonexistent institution" in {
+      val i = Institution("BogusId", "Nonsense Bank", Active)
+      val msg = s"Institution does not exist. Could not update $i"
+      EventFilter.warning(message = msg, occurrences = 1) intercept {
+        probe.send(institutionsActor, ModifyInstitution(i))
+      }
     }
   }
 

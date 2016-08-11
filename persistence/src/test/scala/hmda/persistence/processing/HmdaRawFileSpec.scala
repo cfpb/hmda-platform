@@ -7,15 +7,15 @@ import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.persistence.CommonMessages._
-import hmda.persistence.processing.HmdaFileUpload._
+import hmda.persistence.processing.HmdaRawFile._
 import org.iq80.leveldb.util.FileUtils
 
-class HmdaFileUploadSpec extends ActorSpec {
+class HmdaRawFileSpec extends ActorSpec {
   import hmda.model.util.FITestData._
 
   val config = ConfigFactory.load()
 
-  val hmdaFileUpload = createHmdaFileUpload(system, "1")
+  val hmdaFileUpload = createHmdaRawFile(system, "1")
 
   val probe = TestProbe()
 
@@ -28,30 +28,30 @@ class HmdaFileUploadSpec extends ActorSpec {
         probe.send(hmdaFileUpload, AddLine(timestamp, line.toString))
       }
       probe.send(hmdaFileUpload, GetState)
-      probe.expectMsg(HmdaFileUploadState(Map(timestamp -> 4)))
+      probe.expectMsg(HmdaRawFileState(4))
     }
 
     "recover with event" in {
       probe.send(hmdaFileUpload, Shutdown)
 
-      val secondHmdaFileUpload = createHmdaFileUpload(system, "1")
+      val secondHmdaFileUpload = createHmdaRawFile(system, "1")
 
       probe.send(secondHmdaFileUpload, GetState)
-      probe.expectMsg(HmdaFileUploadState(Map(timestamp -> 4)))
+      probe.expectMsg(HmdaRawFileState(4))
       probe.send(secondHmdaFileUpload, Shutdown)
     }
 
     "recover with from snapshot" in {
-      val thirdHmdaFileUpload = createHmdaFileUpload(system, "1")
+      val thirdHmdaFileUpload = createHmdaRawFile(system, "1")
       probe.send(thirdHmdaFileUpload, CompleteUpload)
       probe.send(thirdHmdaFileUpload, Shutdown)
 
       Thread.sleep(500) //wait for actor messages to be processed so that the state can be saved
 
-      val fourthHmdaFileUpload = createHmdaFileUpload(system, "1")
+      val fourthHmdaFileUpload = createHmdaRawFile(system, "1")
 
       probe.send(fourthHmdaFileUpload, GetState)
-      probe.expectMsg(HmdaFileUploadState(Map(timestamp -> 4)))
+      probe.expectMsg(HmdaRawFileState(4))
     }
   }
 

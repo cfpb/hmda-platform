@@ -35,7 +35,7 @@ object LarDatParser {
     val coAppRace5 = s.substring(92, 93).trim
     val appSex = s.substring(93, 94).trim.toInt
     val coAppSex = s.substring(94, 95).trim.toInt
-    val appIncome = s.substring(95, 99).trim
+    val appIncome = s.substring(95, 99).trim.replaceFirst("^0+(?!$)", "")
     val purchaserType = s.substring(99, 100).trim.toInt
     val denial1 = s.substring(100, 101).trim
     val denial2 = s.substring(101, 102).trim
