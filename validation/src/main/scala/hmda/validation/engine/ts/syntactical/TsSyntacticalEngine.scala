@@ -15,13 +15,13 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
 
   private def s100(t: TransmittalSheet): Future[TsValidation] = {
     S100(t, findYearProcessed).map { result =>
-      convertResult(t, result, "S100")
+      convertResult(t, result, "S100", t.agencyCode + t.respondent.id)
     }
   }
 
   private def s013(t: TransmittalSheet): Future[TsValidation] = {
     S013(t, findTimestamp).map { result =>
-      convertResult(t, result, "S013")
+      convertResult(t, result, "S013", t.agencyCode + t.respondent.id)
     }
   }
 
@@ -32,7 +32,7 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
       S025.inContext(ctx),
       S028
     )
-    val checks = checksToRun.map(check(_, ts))
+    val checks = checksToRun.map(check(_, ts, ts.agencyCode + ts.respondent.id))
 
     val fs100 = s100(ts)
     val fs013 = s013(ts)
