@@ -20,7 +20,7 @@ trait TsEngine extends TsSyntacticalEngine with TsValidityEngine with TsQualityE
       fs <- fSyntactical
     } yield {
       (
-        checkValidity(ts)
+        checkValidity(ts, ctx)
         |@| fs
         |@| checkQuality(ts)
       )((_, _, _) => ts)
