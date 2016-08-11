@@ -3,16 +3,18 @@ package hmda.parser.fi
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import hmda.model.institution.Agency
+
 import org.scalacheck.Gen
 
 trait FIGenerators {
 
   implicit def agencyCodeGen: Gen[Int] = {
-    Gen.oneOf(1, 2, 3, 5, 7, 9)
+    Gen.oneOf(Agency.values).map(_.value)
   }
 
   implicit def respIdGen: Gen[String] = {
-    stringOfUpToN(10, Gen.alphaChar)
+    stringOfOneToN(10, Gen.alphaChar)
   }
 
   // utility functions
@@ -22,6 +24,11 @@ trait FIGenerators {
   }
 
   def stringOfUpToN(n: Int, genOne: Gen[Char]): Gen[String] = {
+    val stringGen = Gen.listOf(genOne).map(_.mkString)
+    Gen.resize(n, stringGen)
+  }
+
+  def stringOfOneToN(n: Int, genOne: Gen[Char]): Gen[String] = {
     val stringGen = Gen.nonEmptyListOf(genOne).map(_.mkString)
     Gen.resize(n, stringGen)
   }
