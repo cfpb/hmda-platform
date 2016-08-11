@@ -10,6 +10,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.StandardRoute
 import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
@@ -43,10 +44,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         onComplete(fInstitutions) {
           case Success(institutions) =>
             complete(ToResponseMarshallable(Institutions(institutions)))
-          case Failure(error) =>
-            log.error(error.getLocalizedMessage)
-            val errorResponse = ErrorResponse(500, "Internal server error", path)
-            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+          case Failure(error) => fiveHundred(path, error)
         }
       }
     }
@@ -71,9 +69,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               }
             case Failure(error) =>
               filingsActor ! Shutdown
-              log.error(error.getLocalizedMessage)
-              val errorResponse = ErrorResponse(500, "Internal server error", path)
-              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+              fiveHundred(path, error)
           }
         }
       }
@@ -102,8 +98,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             case Failure(error) =>
               filingsActor ! Shutdown
               submissionActor ! Shutdown
-              val errorResponse = ErrorResponse(500, "Internal server error", path)
-              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+              fiveHundred(path, error)
           }
         }
       }
@@ -129,8 +124,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
                   complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                 case Failure(error) =>
                   submissionsActor ! Shutdown
-                  val errorResponse = ErrorResponse(500, "Internal server error", path)
-                  complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+                  fiveHundred(path, error)
               }
             } else {
               val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
@@ -139,9 +133,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
           case Failure(error) =>
             filingsActor ! Shutdown
             submissionsActor ! Shutdown
-            val errorResponse = ErrorResponse(500, "Internal server error", path)
-            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-
+            fiveHundred(path, error)
         }
       }
     }
@@ -205,8 +197,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               complete(ToResponseMarshallable(summary))
             case Failure(error) =>
               filingsActor ! Shutdown
-              val errorResponse = ErrorResponse(500, "Internal server error", path)
-              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+              fiveHundred(path, error)
           }
         }
       }
@@ -226,6 +217,12 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       filing <- fFiling
       submissions <- (submissionActor ? GetState).mapTo[Seq[Submission]]
     } yield FilingDetail(filing, submissions)
+  }
+
+  private def fiveHundred(path: String, error: Throwable): StandardRoute = {
+    log.error(error.getLocalizedMessage)
+    val errorResponse = ErrorResponse(500, "Internal server error", path)
+    complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
   }
 
   val institutionsRoutes =
