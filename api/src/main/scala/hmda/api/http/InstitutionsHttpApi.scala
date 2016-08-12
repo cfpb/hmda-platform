@@ -19,9 +19,11 @@ import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, G
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Submission }
 import hmda.model.institution.Institution
+import hmda.model.institution.InstitutionStatus.Active
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaRawFile._
+
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 import spray.json._
@@ -69,13 +71,14 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             onComplete(fInstitutionDetails) {
               case Success(institutionDetails) =>
                 filingsActor ! Shutdown
-                if (institutionDetails.institution.id != "")
+                if (institutionDetails.institution.name != "")
                   complete(ToResponseMarshallable(institutionDetails))
                 else {
                   val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
                   complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
                 }
               case Failure(error) =>
+                println(error)
                 filingsActor ! Shutdown
                 log.error(error.getLocalizedMessage)
                 val errorResponse = ErrorResponse(500, "Internal server error", path)
@@ -226,9 +229,9 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   private def institutionDetails(institutionId: String, institutionsActor: ActorSelection, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
     val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
     for {
-      institution <- fInstitution
+      i <- fInstitution
       filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-    } yield InstitutionDetail(InstitutionWrapper(institution.id, institution.name, institution.status), filings)
+    } yield InstitutionDetail(InstitutionWrapper(i.id, i.name, i.status), filings)
   }
 
   private def filingDetailsByPeriod(period: String, filingsActor: ActorRef, submissionActor: ActorRef)(implicit ec: ExecutionContext): Future[FilingDetail] = {
