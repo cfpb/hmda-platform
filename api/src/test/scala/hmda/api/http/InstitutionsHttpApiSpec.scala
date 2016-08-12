@@ -2,22 +2,29 @@ package hmda.api.http
 
 import java.io.File
 
-import akka.event.{ LoggingAdapter, NoLogging }
+import akka.actor.ActorSystem
+import akka.event.{ Logging, LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart, StatusCodes }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.testkit.EventFilter
 import com.typesafe.config.ConfigFactory
+import hmda.api.HmdaApi._
 import hmda.api.model._
 import hmda.model.fi._
+import hmda.persistence.CommonMessages._
 import hmda.persistence.demo.DemoData
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import org.iq80.leveldb.util.FileUtils
 
 import scala.concurrent.duration._
 
 class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with InstitutionsHttpApi with BeforeAndAfterAll {
+
   override val log: LoggingAdapter = NoLogging
   override implicit val timeout: Timeout = Timeout(5.seconds)
 
@@ -123,6 +130,19 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Post("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", "institutions/12345/filings/2017/submissions/1")
+      }
+    }
+
+    "return 400 when trying to upload to a completed submission" in {
+      val badContent = "qdemd"
+      val file = multiPartFile(badContent, "sample.txt")
+      val submissionActor = system.actorOf(SubmissionPersistence.props("12345", "2017"))
+      submissionActor ! UpdateSubmissionStatus(1, Signed)
+      submissionActor ! Shutdown
+      Thread sleep 100
+      Post("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/12345/filings/2017/submissions/1")
       }
     }
 
