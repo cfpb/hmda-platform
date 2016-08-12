@@ -78,7 +78,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
                   complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
                 }
               case Failure(error) =>
-                println(error)
                 filingsActor ! Shutdown
                 log.error(error.getLocalizedMessage)
                 val errorResponse = ErrorResponse(500, "Internal server error", path)
