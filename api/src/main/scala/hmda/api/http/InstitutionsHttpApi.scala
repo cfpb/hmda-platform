@@ -203,6 +203,11 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
+  val unauthorizedAccess = {
+    val errorResponse = ErrorResponse(403, "Unauthorized Access", "")
+    complete(ToResponseMarshallable(StatusCodes.Forbidden -> errorResponse))
+  }
+
   private def institutionDetails(institutionId: String, institutionsActor: ActorSelection, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
     val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
     for {
@@ -226,10 +231,12 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   }
 
   val institutionsRoutes =
-    institutionsPath ~
-      institutionByIdPath ~
-      institutionSummaryPath ~
-      filingByPeriodPath ~
-      submissionPath ~
-      uploadPath
+    hmdaAuthorize {
+      institutionsPath ~
+        institutionByIdPath ~
+        institutionSummaryPath ~
+        filingByPeriodPath ~
+        submissionPath ~
+        uploadPath
+    } ~ unauthorizedAccess
 }

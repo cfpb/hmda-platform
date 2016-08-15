@@ -129,6 +129,14 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
+    "reject requests without 'CFPB-HMDA-Username' header" in {
+      // Request the endpoint without including header
+      Get("/institutions") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Forbidden
+        responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+      }
+    }
+
   }
 
   private def multiPartFile(contents: String, fileName: String) = {
