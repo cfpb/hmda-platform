@@ -44,7 +44,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         onComplete(fInstitutions) {
           case Success(institutions) =>
             complete(ToResponseMarshallable(Institutions(institutions)))
-          case Failure(error) => fiveHundred(path, error)
+          case Failure(error) => completeWithInternalError(path, error)
         }
       }
     }
@@ -69,7 +69,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               }
             case Failure(error) =>
               filingsActor ! Shutdown
-              fiveHundred(path, error)
+              completeWithInternalError(path, error)
           }
         }
       }
@@ -98,7 +98,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             case Failure(error) =>
               filingsActor ! Shutdown
               submissionActor ! Shutdown
-              fiveHundred(path, error)
+              completeWithInternalError(path, error)
           }
         }
       }
@@ -124,7 +124,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
                   complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                 case Failure(error) =>
                   submissionsActor ! Shutdown
-                  fiveHundred(path, error)
+                  completeWithInternalError(path, error)
               }
             } else {
               val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
@@ -133,7 +133,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
           case Failure(error) =>
             filingsActor ! Shutdown
             submissionsActor ! Shutdown
-            fiveHundred(path, error)
+            completeWithInternalError(path, error)
         }
       }
     }
@@ -197,7 +197,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               complete(ToResponseMarshallable(summary))
             case Failure(error) =>
               filingsActor ! Shutdown
-              fiveHundred(path, error)
+              completeWithInternalError(path, error)
           }
         }
       }
@@ -219,7 +219,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     } yield FilingDetail(filing, submissions)
   }
 
-  private def fiveHundred(path: String, error: Throwable): StandardRoute = {
+  private def completeWithInternalError(path: String, error: Throwable): StandardRoute = {
     log.error(error.getLocalizedMessage)
     val errorResponse = ErrorResponse(500, "Internal server error", path)
     complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
