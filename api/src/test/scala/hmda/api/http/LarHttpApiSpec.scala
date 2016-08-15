@@ -98,8 +98,16 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
   }
 
   "reject requests without 'CFPB-HMDA-Username' header" in {
-    // Request the endpoint without including header
-    Post("/lar/parse", larCsv) ~> larRoutes ~> check {
+    // Request the endpoint without username header (but with other headers)
+    Post("/lar/parse", larCsv).addHeader(institutionsHeader) ~> larRoutes ~> check {
+      status mustBe StatusCodes.FORBIDDEN
+      responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+    }
+  }
+
+  "reject requests without 'CFPB-HMDA-Institutions' header" in {
+    // Request the endpoint without institutions header (but with other headers)
+    Post("/lar/parse", larCsv).addHeader(usernameHeader) ~> larRoutes ~> check {
       status mustBe StatusCodes.FORBIDDEN
       responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
     }

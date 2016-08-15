@@ -15,11 +15,14 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
   def timedGet: Directive0 = get & time
   def timedPost: Directive0 = post & time
 
-  def hmdaAuthorize: Directive0 = authorize(hasUsernameHeader(_))
+  def hmdaAuthorize: Directive0 =
+    authorize(ctx =>
+      hasHeader("CFPB-HMDA-Username", ctx) &&
+        hasHeader("CFPB-HMDA-Institutions", ctx))
 
-  private def hasUsernameHeader(ctx: RequestContext): Boolean = {
+  private def hasHeader(header: String, ctx: RequestContext): Boolean = {
     val keys = ctx.request.headers.map(header => header.name())
-    keys.contains("CFPB-HMDA-Username")
+    keys.contains(header)
   }
 
   val unauthorizedAccess = {

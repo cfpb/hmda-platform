@@ -130,8 +130,16 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "reject requests without 'CFPB-HMDA-Username' header" in {
-      // Request the endpoint without including header
-      Get("/institutions") ~> institutionsRoutes ~> check {
+      // Request the endpoint without username header (but with other headers)
+      Get("/institutions").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Forbidden
+        responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+      }
+    }
+
+    "reject requests without 'CFPB-HMDA-Institutions' header" in {
+      // Request the endpoint without institutions header (but with other headers)
+      Get("/institutions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Forbidden
         responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
       }
