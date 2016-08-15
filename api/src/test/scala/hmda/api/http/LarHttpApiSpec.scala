@@ -11,6 +11,7 @@ import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
+import hmda.api.model.ErrorResponse
 import hmda.api.processing.lar.SingleLarValidation
 import hmda.validation.engine.ValidationError
 import spray.json._
@@ -93,6 +94,14 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 1
       }
+    }
+  }
+
+  "reject requests without 'CFPB-HMDA-Username' header" in {
+    // Request the endpoint without including header
+    Post("/lar/parse", larCsv) ~> larRoutes ~> check {
+      status mustBe StatusCodes.FORBIDDEN
+      responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
     }
   }
 
