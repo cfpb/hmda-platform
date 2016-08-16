@@ -2,16 +2,16 @@ package hmda.persistence.demo
 
 import akka.actor.ActorSystem
 import hmda.model.fi._
-import hmda.model.institution.Agency.{CFPB, FDIC, HUD, OCC}
-import hmda.model.institution.ExternalIdType.{FdicCertNo, FederalTaxId, OccCharterId, RssdId}
-import hmda.model.institution.{ExternalId, Institution}
-import hmda.model.institution.InstitutionStatus.{Active, Inactive}
-import hmda.model.institution.InstitutionType.{Bank, CreditUnion}
+import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
+import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
+import hmda.model.institution.{ ExternalId, Institution }
+import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
+import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
-import hmda.persistence.institutions.{FilingPersistence, SubmissionPersistence}
+import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
 object DemoData {
   val externalId0 = ExternalId("externalTest0", FdicCertNo)
@@ -23,7 +23,7 @@ object DemoData {
     val i0 = Institution(0, "Bank 0", Set(externalId0), FDIC, Bank, hasParent = true, Active)
     val i1 = Institution(1, "Bank 1", Set(externalId1), CFPB, CreditUnion, hasParent = true, Active)
     val i2 = Institution(1, "Bank 2", Set(externalId2), OCC, CreditUnion, hasParent = false, Inactive)
-      val i3 = Institution(1, "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true, Active)
+    val i3 = Institution(1, "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true, Active)
     Set(i0, i1, i2, i3)
   }
 
@@ -73,7 +73,7 @@ object DemoData {
 
   def loadNewSubmissions(system: ActorSystem): Unit = {
     newSubmissions.foreach { s =>
-      val submissionsActor = system.actorOf(SubmissionPersistence.props("Bank 0", "2017"))
+      val submissionsActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
       submissionsActor ! CreateSubmission
       Thread.sleep(100)
       submissionsActor ! Shutdown
