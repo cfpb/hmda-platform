@@ -10,11 +10,14 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.util.Timeout
+import hmda.api.RequestHeaderUtils
+import hmda.api.model.ErrorResponse
 import hmda.api.processing.lar.SingleLarValidation
 import hmda.validation.engine.ValidationError
 import spray.json._
 
-class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with LarHttpApi {
+class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
+    with LarHttpApi with RequestHeaderUtils {
 
   override val log: LoggingAdapter = NoLogging
   override implicit val timeout: Timeout = Timeout(5.seconds)
@@ -34,28 +37,28 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
 
   "LAR HTTP Service" must {
     "parse a valid pipe delimited LAR and return JSON representation" in {
-      Post("/lar/parse", larCsv) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parse", larCsv) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[LoanApplicationRegister] mustBe lar
       }
     }
 
     "fail to parse an invalid pipe delimited LAR and return a list of errors" in {
-      Post("/lar/parse", invalidLarCsv) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parse", invalidLarCsv) ~> larRoutes ~> check {
         status mustEqual StatusCodes.BAD_REQUEST
         responseAs[List[String]].length mustBe 2
       }
     }
 
     "fail to parse an valid pipe delimited LAR with too many fields and return an error" in {
-      Post("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes ~> check {
         status mustEqual StatusCodes.BAD_REQUEST
         responseAs[List[String]].length mustBe 1
       }
     }
 
     "return no validation errors for a valid LAR" in {
-      Post("/lar/validate", lar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate", lar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]] mustBe Nil
       }
@@ -63,7 +66,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
 
     "return validation error for invalid LAR (S020, agency code not in valid values domain)" in {
       val badLar = lar.copy(agencyCode = 0)
-      Post("/lar/validate", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 1
       }
@@ -72,25 +75,41 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest 
     "filter syntactical, validity, or quality only for invalid LAR with all 3 kinds of errors" in {
       val badLoanType = lar.loan.copy(loanType = 0, amount = 900, propertyType = 2)
       val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 4)
-      Post("/lar/validate", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 3
       }
       //should fail S020
-      Post("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 1
       }
       //should fail V220
-      Post("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 1
       }
       //should fail Q036
-      Post("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
         responseAs[List[ValidationError]].length mustBe 1
       }
+    }
+  }
+
+  "reject requests without 'CFPB-HMDA-Username' header" in {
+    // Request the endpoint without username header (but with other headers)
+    Post("/lar/parse", larCsv).addHeader(institutionsHeader) ~> larRoutes ~> check {
+      status mustBe StatusCodes.FORBIDDEN
+      responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+    }
+  }
+
+  "reject requests without 'CFPB-HMDA-Institutions' header" in {
+    // Request the endpoint without institutions header (but with other headers)
+    Post("/lar/parse", larCsv).addHeader(usernameHeader) ~> larRoutes ~> check {
+      status mustBe StatusCodes.FORBIDDEN
+      responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
     }
   }
 

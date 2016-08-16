@@ -20,15 +20,13 @@ trait HttpApi extends HmdaApiProtocol with HmdaCustomDirectives {
 
   val rootPath =
     pathSingleSlash {
-      get {
-        time {
-          complete {
-            val now = Instant.now.toString
-            val host = InetAddress.getLocalHost.getHostName
-            val status = Status("OK", "hmda-api", now, host)
-            log.debug(status.toJson.toString)
-            ToResponseMarshallable(status)
-          }
+      timedGet {
+        complete {
+          val now = Instant.now.toString
+          val host = InetAddress.getLocalHost.getHostName
+          val status = Status("OK", "hmda-api", now, host)
+          log.debug(status.toJson.toString)
+          ToResponseMarshallable(status)
         }
       }
     }
