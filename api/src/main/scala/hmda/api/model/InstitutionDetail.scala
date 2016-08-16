@@ -1,8 +1,8 @@
 package hmda.api.model
 
-import hmda.model.fi.{ Filing, Institution }
+import hmda.model.fi.Filing
 
 case class InstitutionDetail(
-  institution: Institution,
+  institution: InstitutionWrapper,
   filings: Seq[Filing]
 )

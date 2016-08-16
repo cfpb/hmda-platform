@@ -3,7 +3,14 @@ package hmda.api.model
 import java.util.Calendar
 
 import hmda.model.fi._
+import hmda.model.institution.Agency._
+import hmda.model.institution.ExternalIdType._
+import hmda.model.institution._
+import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
+import hmda.model.institution.InstitutionType._
 import org.scalacheck.{ Arbitrary, Gen }
+
+import scalaz.Alpha.B
 
 trait ModelGenerators {
 
@@ -22,10 +29,14 @@ trait ModelGenerators {
 
   implicit def institutionGen: Gen[Institution] = {
     for {
-      id <- Gen.alphaStr
+      id <- Gen.choose(0, Int.MaxValue)
       name <- Gen.alphaStr
+      externalIds <- Gen.listOf(externalIdGen)
       status <- institutionStatusGen
-    } yield Institution(id, name, status)
+      agency <- agencyGen
+      active <- Gen.oneOf(true, false)
+      institutionType <- institutionTypeGen
+    } yield Institution(id, name, externalIds.toSet, agency, institutionType, active, status)
   }
 
   implicit def filingStatusGen: Gen[FilingStatus] = {
@@ -70,4 +81,28 @@ trait ModelGenerators {
     } yield FilingDetail(filing, submissions)
   }
 
+  implicit def agencyGen: Gen[Agency] = {
+    Gen.oneOf(
+      Agency.values
+    )
+  }
+
+  implicit def institutionTypeGen: Gen[InstitutionType] = {
+    Gen.oneOf(
+      InstitutionType.values
+    )
+  }
+
+  implicit def externalIdGen: Gen[ExternalId] = {
+    for {
+      id <- Gen.alphaStr
+      idType <- externalIdTypeGen
+    } yield ExternalId(id, idType)
+  }
+
+  implicit def externalIdTypeGen: Gen[ExternalIdType] = {
+    Gen.oneOf(
+      ExternalIdType.values
+    )
+  }
 }

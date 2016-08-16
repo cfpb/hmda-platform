@@ -1,8 +1,10 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ InstitutionDetail, InstitutionSummary, Institutions }
-import hmda.model.fi.{ Active, Inactive, Institution, InstitutionStatus }
-import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
+import hmda.api.model.{ InstitutionDetail, InstitutionSummary, InstitutionWrapper, Institutions }
+import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
+import hmda.model.institution.{ Agency, DepositoryType, Institution, InstitutionStatus }
+import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
+import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
 trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
   implicit object InstitutionStatusJsonFormat extends RootJsonFormat[InstitutionStatus] {
@@ -24,7 +26,7 @@ trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
     }
   }
 
-  implicit val institutionFormat = jsonFormat3(Institution.apply)
+  implicit val institutionWrapperFormat = jsonFormat3(InstitutionWrapper.apply)
   implicit val institutionsFormat = jsonFormat1(Institutions.apply)
   implicit val institutionDetail = jsonFormat2(InstitutionDetail.apply)
 

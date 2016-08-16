@@ -1,3 +1,3 @@
 package hmda.validation.engine
 
-case class ValidationError(msg: String)
+case class ValidationError(id: String, msg: String)
