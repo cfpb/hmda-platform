@@ -7,5 +7,5 @@ case class Respondent(
   city: String,
   state: String,
   zipCode: String
-)
+) extends NameAndAddress
 

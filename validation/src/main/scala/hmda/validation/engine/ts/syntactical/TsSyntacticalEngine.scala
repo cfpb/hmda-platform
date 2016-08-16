@@ -13,31 +13,31 @@ import scalaz.Scalaz._
 trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValidationApi {
 
   private def s010(t: TransmittalSheet): TsValidation = {
-    convertResult(t, S010(t), "S010")
+    convertResult(t, S010(t), "S010", t.agencyCode + t.respondent.id)
   }
 
   private def s020(t: TransmittalSheet): TsValidation = {
-    convertResult(t, S020(t), "S020")
+    convertResult(t, S020(t), "S020", t.agencyCode + t.respondent.id)
   }
 
   private def s025(t: TransmittalSheet, ctx: ValidationContext): TsValidation = {
-    convertResult(t, S025(t, ctx), "S025")
+    convertResult(t, S025(t, ctx), "S025", t.agencyCode + t.respondent.id)
   }
 
   private def s100(t: TransmittalSheet): Future[TsValidation] = {
     S100(t, findYearProcessed).map { result =>
-      convertResult(t, result, "S100")
+      convertResult(t, result, "S100", t.agencyCode + t.respondent.id)
     }
   }
 
   private def s013(t: TransmittalSheet): Future[TsValidation] = {
     S013(t, findTimestamp).map { result =>
-      convertResult(t, result, "S013")
+      convertResult(t, result, "S013", t.agencyCode + t.respondent.id)
     }
   }
 
   private def s028(t: TransmittalSheet): TsValidation = {
-    convertResult(t, S028(t), "S028")
+    convertResult(t, S028(t), "S028", t.agencyCode + t.respondent.id)
   }
 
   def checkSyntactical(ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {

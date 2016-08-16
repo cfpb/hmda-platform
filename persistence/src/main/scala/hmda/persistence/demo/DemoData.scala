@@ -2,6 +2,11 @@ package hmda.persistence.demo
 
 import akka.actor.ActorSystem
 import hmda.model.fi._
+import hmda.model.institution.Agency.{ CFPB, FDIC }
+import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId }
+import hmda.model.institution.{ ExternalId, Institution }
+import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
+import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.CommonMessages._
@@ -9,9 +14,11 @@ import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
 object DemoData {
+  val externalId1 = ExternalId("externalTest1", FdicCertNo)
+  val externalId2 = ExternalId("externalTest2", RssdId)
   val institutions = {
-    val i1 = Institution("12345", "First Bank", Active)
-    val i2 = Institution("123456", "Second Bank", Inactive)
+    val i1 = Institution(12345, "First Bank", Set(externalId1), FDIC, Bank, hasParent = true, Active)
+    val i2 = Institution(123456, "Second Bank", Set(externalId2), CFPB, CreditUnion, hasParent = true, Inactive)
     Set(i1, i2)
   }
 
@@ -24,7 +31,7 @@ object DemoData {
 
   val institutionSummary = {
     val institution = institutions.head
-    val f = filings.filter(x => x.institutionId == institution.id)
+    val f = filings.filter(x => x.institutionId == institution.id.toString)
     (institution.id, institution.name, f.reverse)
   }
 

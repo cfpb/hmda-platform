@@ -2,7 +2,10 @@ package hmda.persistence.institutions
 
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.{ PersistentActor, SnapshotOffer }
-import hmda.model.fi.Institution
+import hmda.model.institution.Agency.CFPB
+import hmda.model.institution.Institution
+import hmda.model.institution.InstitutionStatus.Inactive
+import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.InstitutionPersistence._
 
@@ -27,8 +30,8 @@ object InstitutionPersistence {
         case InstitutionCreated(i) =>
           InstitutionsState(institutions + i)
         case InstitutionModified(i) =>
-          val x = institutions.find(x => x.id == i.id).getOrElse(Institution())
-          InstitutionsState((institutions - x) + i)
+          val others = institutions.filterNot(_.id == i.id)
+          InstitutionsState(others + i)
       }
     }
   }
@@ -77,7 +80,7 @@ class InstitutionPersistence extends PersistentActor with ActorLogging {
       }
 
     case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(x => x.id == institutionId).getOrElse(Institution())
+      val institution = state.institutions.find(x => x.id.toString == institutionId).getOrElse(Institution(-1, "", Set(), CFPB, Bank, hasParent = false, Inactive))
       sender() ! institution
 
     case GetState =>
