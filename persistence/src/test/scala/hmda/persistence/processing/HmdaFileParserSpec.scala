@@ -25,10 +25,6 @@ class HmdaFileParserSpec extends ActorSpec {
   val lines = fiCSV.split("\n")
   val badLines = fiCSVParseError.split("\n")
 
-  override def beforeAll() {
-    super.beforeAll()
-  }
-
   "HMDA File Parser" must {
     "persist parsed LARs" in {
       parseLars(lines)
