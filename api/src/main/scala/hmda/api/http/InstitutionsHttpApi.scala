@@ -160,20 +160,20 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
 
   val uploadPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
-      val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
-      extractExecutionContext { executor =>
-        val uploadTimestamp = Instant.now.toEpochMilli
-        val processingActor = createHmdaRawFile(system, submissionId)
-        val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-        implicit val ec: ExecutionContext = executor
-        val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId.toInt)
-        onComplete(fIsSubmissionOverwrite) {
-          case Success(false) =>
-            submissionsActor ! Shutdown
-            processingActor ! StartUpload
-            fileUpload("file") {
-              case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
-                time {
+      time {
+        val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
+        extractExecutionContext { executor =>
+          val uploadTimestamp = Instant.now.toEpochMilli
+          val processingActor = createHmdaRawFile(system, submissionId)
+          val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
+          implicit val ec: ExecutionContext = executor
+          val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId.toInt)
+          onComplete(fIsSubmissionOverwrite) {
+            case Success(false) =>
+              submissionsActor ! Shutdown
+              processingActor ! StartUpload
+              fileUpload("file") {
+                case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
                   val uploadedF = byteSource
                     .via(splitLines)
                     .map(_.utf8String)
@@ -192,24 +192,21 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
                       val errorResponse = ErrorResponse(400, "Invalid File Format", path)
                       complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
                   }
-                }
-
-              case _ =>
-                time {
+                case _ =>
                   processingActor ! Shutdown
                   val errorResponse = ErrorResponse(400, "Invalid File Format", path)
                   complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-                }
-            }
-          case Success(true) =>
-            {
-              val errorResponse = ErrorResponse(400, "Submission already exists", path)
-              complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-            }
-          case Failure(_) =>
-            submissionsActor ! Shutdown
-            val errorResponse = ErrorResponse(500, "Internal server error", path)
-            complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+              }
+            case Success(true) =>
+              {
+                val errorResponse = ErrorResponse(400, "Submission already exists", path)
+                complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              }
+            case Failure(_) =>
+              submissionsActor ! Shutdown
+              val errorResponse = ErrorResponse(500, "Internal server error", path)
+              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+          }
         }
       }
     }
