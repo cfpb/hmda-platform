@@ -6,6 +6,7 @@ import akka.testkit.TestProbe
 import hmda.actor.test.ActorSpec
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.processing.SingleLarValidation._
+import hmda.validation.context.ValidationContext
 
 import scala.concurrent.duration._
 import scala.io.Source

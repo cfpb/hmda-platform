@@ -1,11 +1,11 @@
 package hmda.api.http
 
-import akka.event.{LoggingAdapter, NoLogging}
+import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.javadsl.model.StatusCodes
-import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
-import org.scalatest.{MustMatchers, WordSpec}
+import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext
