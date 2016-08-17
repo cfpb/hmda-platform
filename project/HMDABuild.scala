@@ -34,7 +34,7 @@ object HMDABuild extends Build {
 
   val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
 
-  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, leveldb, leveldbjni, akkaPersistenceQuery)
+  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery)
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
@@ -106,7 +106,7 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= akkaPersistenceDeps
       )
-    ).dependsOn(model % "compile->compile;test->test")
+    ).dependsOn(parser % "compile->compile;test->test")
 
 
   lazy val api = (project in file("api"))

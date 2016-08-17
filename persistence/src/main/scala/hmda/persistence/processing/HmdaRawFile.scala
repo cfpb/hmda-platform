@@ -6,6 +6,9 @@ import hmda.persistence.CommonMessages._
 import hmda.persistence.LocalEventPublisher
 
 object HmdaRawFile {
+
+  val name = "HmdaRawFile"
+
   def props(id: String): Props = Props(new HmdaRawFile(id))
 
   def createHmdaRawFile(system: ActorSystem, submissionId: String): ActorRef = {
@@ -33,7 +36,7 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
 
   import HmdaRawFile._
 
-  override def persistenceId: String = s"HmdaFileUpload-$submissionId"
+  override def persistenceId: String = s"$name-$submissionId"
 
   var state = HmdaRawFileState()
 
@@ -41,10 +44,17 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
     state = state.updated(event)
   }
 
+  override def preStart(): Unit = {
+    log.debug(s"Uploading started for $submissionId")
+  }
+
+  override def postStop(): Unit = {
+    log.debug(s"Uploading finished for $submissionId")
+  }
+
   override def receiveCommand: Receive = {
 
     case StartUpload =>
-      log.debug("Start upload")
       publishEvent(UploadStarted(submissionId))
 
     case cmd: AddLine =>
@@ -54,13 +64,13 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
       }
 
     case CompleteUpload =>
-      log.debug("complete upload")
       publishEvent(UploadCompleted(state.size, submissionId))
 
     case GetState =>
       sender() ! state
 
-    case Shutdown => context.stop(self)
+    case Shutdown =>
+      context stop self
   }
 
   override def receiveRecover: Receive = {
