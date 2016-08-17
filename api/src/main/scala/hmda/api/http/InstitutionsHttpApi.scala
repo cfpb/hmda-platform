@@ -231,12 +231,12 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   }
 
   val institutionsRoutes =
-    hmdaAuthorize {
-      institutionsPath ~
-        institutionByIdPath ~
-        institutionSummaryPath ~
-        filingByPeriodPath ~
-        submissionPath ~
-        uploadPath
-    } ~ unauthorizedAccess
+    //hmdaAuthorize {
+    institutionsPath ~
+      institutionByIdPath ~
+      institutionSummaryPath ~
+      filingByPeriodPath ~
+      submissionPath ~
+      uploadPath
+  //} ~ unauthorizedAccess
 }
