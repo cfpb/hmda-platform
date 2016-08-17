@@ -184,10 +184,9 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             case Success(true) =>
               val errorResponse = ErrorResponse(400, "Submission already exists", path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-            case Failure(_) =>
+            case Failure(error) =>
               submissionsActor ! Shutdown
-              val errorResponse = ErrorResponse(500, "Internal server error", path)
-              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+              completeWithInternalError(path, error)
           }
         }
       }
