@@ -26,6 +26,15 @@ trait ValidationResultProtocol extends DefaultJsonProtocol {
       }
     }
   }
+
+  implicit object ValidationErrorFormat extends RootJsonFormat[ValidationError] {
+    override def read(json: JsValue): ValidationError = ???
+
+    override def write(validationError: ValidationError): JsValue = {
+      JsString(validationError.msg)
+    }
+  }
+
   implicit val validationErrorFormat = jsonFormat3(ValidationError.apply)
   implicit val validationErrorsFormat = jsonFormat1(ValidationErrors.apply)
   implicit val singleValidationResultFormat = jsonFormat4(SingleValidationErrorResult.apply)
