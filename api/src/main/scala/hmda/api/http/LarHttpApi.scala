@@ -9,13 +9,14 @@ import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import hmda.api.model.SingleValidationErrorResult
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.processing.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.ValidationErrors
+import hmda.validation.engine._
 import spray.json._
 
 import scala.concurrent.ExecutionContext
@@ -58,7 +59,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
               }
               onComplete((larValidation ? checkMessage).mapTo[ValidationErrors]) {
                 case Success(xs) =>
-                  complete(ToResponseMarshallable(xs))
+                  complete(ToResponseMarshallable(aggregateErrors(xs)))
                 case Failure(e) =>
                   complete(HttpResponse(StatusCodes.InternalServerError))
               }
@@ -67,6 +68,24 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
         }
       }
     }
+
+  case class AggregateValidationError(validationErrorType: ValidationErrorType, edits: List[String])
+
+  def aggregateErrors(validationErrors: ValidationErrors): SingleValidationErrorResult = {
+    val errors = validationErrors.errors
+    val syntactical = errors.filter(_.errorType == Syntactical)
+    val validity = errors.filter(_.errorType == Validity)
+    val quality = errors.filter(_.errorType == Quality)
+    val macroErrors = errors.filter(_.errorType == Macro)
+
+    SingleValidationErrorResult(
+      ValidationErrors(syntactical),
+      ValidationErrors(validity),
+      ValidationErrors(quality),
+      ValidationErrors(macroErrors)
+    )
+
+  }
 
   def errorsAsResponse(list: List[String]): HttpResponse = {
     val errorEntity = HttpEntity(ContentTypes.`application/json`, list.toJson.toString)

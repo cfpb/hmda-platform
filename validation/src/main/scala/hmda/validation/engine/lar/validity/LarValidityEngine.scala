@@ -3,6 +3,7 @@ package hmda.validation.engine.lar.validity
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
+import hmda.validation.engine.Validity
 import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.rules.lar.validity._
 
@@ -74,7 +75,7 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V565,
       V570,
       V575
-    ).map(check(_, lar, lar.loan.id))
+    ).map(check(_, lar, lar.loan.id, Validity))
 
     validateAll(checks, lar)
   }
