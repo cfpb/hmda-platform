@@ -6,6 +6,7 @@ import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaRawFile._
 import hmda.persistence.processing.HmdaFileParser._
@@ -26,17 +27,36 @@ class HmdaFileParserSpec extends ActorSpec {
   val badLines = fiCSVParseError.split("\n")
 
   "HMDA File Parser" must {
+    "persist parsed TSs" in {
+      parseTs(lines)
+      probe.send(hmdaFileParser, GetState)
+      probe.expectMsg(HmdaFileParseState(1, Nil))
+    }
+
+    "persist parsed TSs and TS parsing errors" in {
+      parseTs(badLines)
+      probe.send(hmdaFileParser, GetState)
+      probe.expectMsg(HmdaFileParseState(1, Seq(List("Timestamp is not a Long"))))
+    }
+
     "persist parsed LARs" in {
       parseLars(lines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(3, Nil))
+      probe.expectMsg(HmdaFileParseState(4, Seq(List("Timestamp is not a Long"))))
     }
 
     "persist parsed LARs and parsing errors" in {
       parseLars(badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(5, Seq(List("Agency Code is not an Integer"))))
+      probe.expectMsg(HmdaFileParseState(6, Seq(List("Timestamp is not a Long"), List("Agency Code is not an Integer"))))
+    }
+  }
 
+  private def parseTs(xs: Array[String]): Array[Unit] = {
+    val lars = xs.take(1).map(line => TsCsvParser(line))
+    lars.map {
+      case Right(ts) => probe.send(hmdaFileParser, TsParsed(ts))
+      case Left(errors) => probe.send(hmdaFileParser, TsParsedErrors(errors))
     }
   }
 
