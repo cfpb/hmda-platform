@@ -11,6 +11,8 @@ import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaRawFile._
 import hmda.persistence.processing.HmdaFileParser._
 
+import scalaz.Alpha.H
+
 class HmdaFileParserSpec extends ActorSpec {
   import hmda.model.util.FITestData._
 
@@ -47,6 +49,12 @@ class HmdaFileParserSpec extends ActorSpec {
 
     "persist parsed LARs and parsing errors" in {
       parseLars(badLines)
+      probe.send(hmdaFileParser, GetState)
+      probe.expectMsg(HmdaFileParseState(6, Seq(List("Timestamp is not a Long"), List("Agency Code is not an Integer"))))
+    }
+
+    "read entire raw file" in {
+      probe.send(hmdaFileParser, ReadHmdaRawFile)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(6, Seq(List("Timestamp is not a Long"), List("Agency Code is not an Integer"))))
     }
