@@ -1,10 +1,7 @@
-package hmda.api.processing.lar
+package hmda.persistence.processing
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
+import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.context.ValidationContext
-import hmda.validation.engine.ValidationError
-import hmda.validation.engine.lar.LarEngine
 
 object SingleLarValidation {
   def props: Props = Props(new SingleLarValidation)
