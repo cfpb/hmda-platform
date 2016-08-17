@@ -2,24 +2,24 @@ package hmda.api.http
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.stream.ActorMaterializer
-import akka.http.scaladsl.server.Directives._
-import hmda.api.protocol.validation.ValidationResultProtocol
-import akka.pattern.ask
-import hmda.parser.fi.lar.LarCsvParser
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ ContentTypes, _ }
+import akka.http.scaladsl.server.Directives._
+import akka.pattern.ask
+import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.persistence.processing.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
 import hmda.api.protocol.fi.lar.LarProtocol
+import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.parser.fi.lar.LarCsvParser
+import hmda.persistence.processing.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.ValidationError
+import hmda.validation.engine.ValidationErrors
+import spray.json._
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
-import spray.json._
 
 trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCustomDirectives {
 
@@ -56,7 +56,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
                 case "quality" => CheckQuality(lar, ValidationContext(None))
                 case _ => CheckAll(lar, ValidationContext(None))
               }
-              onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
+              onComplete((larValidation ? checkMessage).mapTo[ValidationErrors]) {
                 case Success(xs) =>
                   complete(ToResponseMarshallable(xs))
                 case Failure(e) =>

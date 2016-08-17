@@ -2,20 +2,20 @@ package hmda.api.http
 
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.javadsl.model.StatusCodes
-import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.parser.fi.lar.LarCsvParser
-import org.scalatest.{ MustMatchers, WordSpec }
-
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
 import hmda.api.model.ErrorResponse
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.processing.SingleLarValidation
-import hmda.validation.engine.ValidationError
+import hmda.validation.engine.ValidationErrors
+import org.scalatest.{ MustMatchers, WordSpec }
 import spray.json._
+
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     with LarHttpApi with RequestHeaderUtils {
@@ -61,7 +61,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     "return no validation errors for a valid LAR" in {
       postWithCfpbHeaders("/lar/validate", lar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]] mustBe Nil
+        responseAs[ValidationErrors] mustBe ValidationErrors(Nil)
       }
     }
 
@@ -69,7 +69,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       val badLar = lar.copy(agencyCode = 0)
       postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[ValidationErrors].errors.length mustBe 1
       }
     }
 
@@ -78,22 +78,22 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 4)
       postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 3
+        responseAs[ValidationErrors].errors.length mustBe 3
       }
       //should fail S020
       postWithCfpbHeaders("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[ValidationErrors].errors.length mustBe 1
       }
       //should fail V220
       postWithCfpbHeaders("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[ValidationErrors].errors.length mustBe 1
       }
       //should fail Q036
       postWithCfpbHeaders("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[ValidationErrors].errors.length mustBe 1
       }
     }
   }
