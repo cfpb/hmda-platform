@@ -131,23 +131,58 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
-    "reject requests without 'CFPB-HMDA-Username' header" in {
+  }
+
+  /*
+  "Institutions API Authorization" must {
+
+    // 'CFPB-HMDA-Username' header
+    "reject requests to /institutions without 'CFPB-HMDA-Username' header" in {
       // Request the endpoint without username header (but with other headers)
       Get("/institutions").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Forbidden
         responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
       }
     }
+    "reject requests to /inst/id without 'CFPB-HMDA-Username' header" in {
+      // Request the endpoint without username header (but with other headers)
+      Get("/institutions/12345").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Forbidden
+        responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+      }
+    }
+    "reject requests to /inst/id/filings/p without 'CFPB-HMDA-Username' header" in {
+      // Request the endpoint without username header (but with other headers)
+      Get("/institutions/12345/filings/2017").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Forbidden
+        responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+      }
+    }
 
-    "reject requests without 'CFPB-HMDA-Institutions' header" in {
+    // 'CFPB-HMDA-Institutions' header
+    "reject requests to /inst without 'CFPB-HMDA-Institutions' header" in {
       // Request the endpoint without institutions header (but with other headers)
       Get("/institutions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Forbidden
         responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
       }
     }
+    "reject requests to submission creation without 'CFPB-HMDA-Institutions' header" in {
+      // Request the endpoint without institutions header (but with other headers)
+      Post("/institutions/12345/filings/2017/submissions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Forbidden
+        responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+      }
+    }
+    "reject requests to submission summary without 'CFPB-HMDA-Institutions' header" in {
+      Get("/institutions/12345/filings/2017").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Forbidden
+        responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+      }
+    }
 
   }
+  */
 
   private def multiPartFile(contents: String, fileName: String) = {
     Multipart.FormData(Multipart.FormData.BodyPart.Strict(

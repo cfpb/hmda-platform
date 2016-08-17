@@ -98,6 +98,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     }
   }
 
+  /*
   "reject requests without 'CFPB-HMDA-Username' header" in {
     // Request the endpoint without username header (but with other headers)
     Post("/lar/parse", larCsv).addHeader(institutionsHeader) ~> larRoutes ~> check {
@@ -113,5 +114,6 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
     }
   }
+  */
 
 }
