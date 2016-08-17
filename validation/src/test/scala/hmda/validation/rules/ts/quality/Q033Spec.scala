@@ -3,6 +3,7 @@ package hmda.validation.rules.ts.quality
 import hmda.model.fi.ts.{ Parent, TransmittalSheet }
 import hmda.model.institution.{ Agency, Institution, InstitutionType }
 import hmda.model.institution.InstitutionType._
+import hmda.validation.context.ValidationContext
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.TsEditCheckSpec
 import org.scalacheck.Gen
@@ -10,7 +11,7 @@ import org.scalacheck.Gen
 class Q033Spec extends TsEditCheckSpec {
 
   private var institution: Institution = _
-  override def check: EditCheck[TransmittalSheet] = new Q033(institution)
+  override def check: EditCheck[TransmittalSheet] = Q033.inContext(ValidationContext(Some(institution)))
 
   private val applicableTypes = Set(Bank, SavingsAndLoan, IndependentMortgageCompany)
   private val otherTypes = InstitutionType.values.toSet -- applicableTypes

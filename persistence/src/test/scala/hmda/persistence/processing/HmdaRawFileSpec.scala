@@ -1,6 +1,5 @@
 package hmda.persistence.processing
 
-import java.io.File
 import java.time.Instant
 
 import akka.testkit.TestProbe
@@ -8,7 +7,6 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaRawFile._
-import org.iq80.leveldb.util.FileUtils
 
 class HmdaRawFileSpec extends ActorSpec {
   import hmda.model.util.FITestData._
@@ -40,25 +38,5 @@ class HmdaRawFileSpec extends ActorSpec {
       probe.expectMsg(HmdaRawFileState(4))
       probe.send(secondHmdaFileUpload, Shutdown)
     }
-
-    "recover with from snapshot" in {
-      val thirdHmdaFileUpload = createHmdaRawFile(system, "1")
-      probe.send(thirdHmdaFileUpload, CompleteUpload)
-      probe.send(thirdHmdaFileUpload, Shutdown)
-
-      Thread.sleep(500) //wait for actor messages to be processed so that the state can be saved
-
-      val fourthHmdaFileUpload = createHmdaRawFile(system, "1")
-
-      probe.send(fourthHmdaFileUpload, GetState)
-      probe.expectMsg(HmdaRawFileState(4))
-    }
-  }
-
-  val snapshotStore = new File(config.getString("akka.persistence.snapshot-store.local.dir"))
-
-  override def beforeAll() {
-    FileUtils.deleteRecursively(snapshotStore)
-    super.beforeAll()
   }
 }

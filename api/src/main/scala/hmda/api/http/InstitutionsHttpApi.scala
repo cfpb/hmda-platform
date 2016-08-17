@@ -146,7 +146,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
       val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
       val uploadTimestamp = Instant.now.toEpochMilli
-      val processingActor = createHmdaRawFile(system, submissionId)
+      val id = s"$institutionId-$period-$submissionId"
+      val processingActor = createHmdaRawFile(system, id)
       processingActor ! StartUpload
       fileUpload("file") {
         case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
