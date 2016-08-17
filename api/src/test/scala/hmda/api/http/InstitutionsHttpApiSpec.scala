@@ -133,6 +133,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
   }
 
+  /*
   "Institutions API Authorization" must {
 
     // 'CFPB-HMDA-Username' header
@@ -181,6 +182,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
   }
+  */
 
   private def multiPartFile(contents: String, fileName: String) = {
     Multipart.FormData(Multipart.FormData.BodyPart.Strict(
