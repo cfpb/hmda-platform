@@ -65,21 +65,16 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
 
     case CompleteUpload =>
       publishEvent(UploadCompleted(state.size, submissionId))
-      saveSnapshot(state)
 
     case GetState =>
       sender() ! state
 
     case Shutdown =>
       context stop self
-
   }
 
   override def receiveRecover: Receive = {
     case event: Event => updateState(event)
-    case SnapshotOffer(_, snapshot: HmdaRawFileState) =>
-      log.debug("Recovering from snapshot")
-      state = snapshot
   }
 
   override def system: ActorSystem = context.system
