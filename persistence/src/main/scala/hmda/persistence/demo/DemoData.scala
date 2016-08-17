@@ -22,18 +22,18 @@ object DemoData {
   val institutions = {
     val i0 = Institution(0, "Bank 0", Set(externalId0), FDIC, Bank, hasParent = true, Active)
     val i1 = Institution(1, "Bank 1", Set(externalId1), CFPB, CreditUnion, hasParent = true, Active)
-    val i2 = Institution(1, "Bank 2", Set(externalId2), OCC, CreditUnion, hasParent = false, Inactive)
-    val i3 = Institution(1, "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true, Active)
+    val i2 = Institution(2, "Bank 2", Set(externalId2), OCC, CreditUnion, hasParent = false, Inactive)
+    val i3 = Institution(3, "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true, Active)
     Set(i0, i1, i2, i3)
   }
 
   val filings = {
-    val f1 = Filing("2016", "Bank 0", Completed)
-    val f2 = Filing("2017", "Bank 0", NotStarted)
-    val f3 = Filing("2017", "Bank 1", Completed)
-    val f4 = Filing("2016", "Bank 2", Completed)
-    val f5 = Filing("2016", "Bank 3", Completed)
-    val f6 = Filing("2017", "Bank 4", NotStarted)
+    val f1 = Filing("2016", "0", Completed)
+    val f2 = Filing("2017", "0", NotStarted)
+    val f3 = Filing("2017", "1", Completed)
+    val f4 = Filing("2016", "2", Completed)
+    val f5 = Filing("2016", "3", Completed)
+    val f6 = Filing("2017", "4", NotStarted)
     Seq(f1, f2, f3)
   }
 
