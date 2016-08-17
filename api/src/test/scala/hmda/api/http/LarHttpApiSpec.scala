@@ -6,7 +6,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
-import hmda.api.model.ErrorResponse
+import hmda.api.model.SingleValidationErrorResult
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.processing.SingleLarValidation
@@ -61,7 +61,13 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     "return no validation errors for a valid LAR" in {
       postWithCfpbHeaders("/lar/validate", lar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[ValidationErrors] mustBe ValidationErrors(Nil)
+        responseAs[SingleValidationErrorResult] mustBe
+          SingleValidationErrorResult(
+            ValidationErrors(Nil),
+            ValidationErrors(Nil),
+            ValidationErrors(Nil),
+            ValidationErrors(Nil)
+          )
       }
     }
 
@@ -69,7 +75,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       val badLar = lar.copy(agencyCode = 0)
       postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[ValidationErrors].errors.length mustBe 1
+        responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
     }
 
@@ -78,22 +84,25 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 4)
       postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[ValidationErrors].errors.length mustBe 3
+        responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
+        responseAs[SingleValidationErrorResult].validity.errors.length mustBe 1
+        responseAs[SingleValidationErrorResult].quality.errors.length mustBe 1
+
       }
       //should fail S020
       postWithCfpbHeaders("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[ValidationErrors].errors.length mustBe 1
+        responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
       //should fail V220
       postWithCfpbHeaders("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[ValidationErrors].errors.length mustBe 1
+        responseAs[SingleValidationErrorResult].validity.errors.length mustBe 1
       }
       //should fail Q036
       postWithCfpbHeaders("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[ValidationErrors].errors.length mustBe 1
+        responseAs[SingleValidationErrorResult].quality.errors.length mustBe 1
       }
     }
   }
