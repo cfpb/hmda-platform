@@ -1,5 +1,6 @@
 package hmda.model.fi.lar
 
+import hmda.model.fi.HasControlNumber
 import hmda.model.fi.StringPaddingUtils
 
 case class LoanApplicationRegister(
@@ -17,7 +18,7 @@ case class LoanApplicationRegister(
     rateSpread: String,
     hoepaStatus: Int,
     lienStatus: Int
-) extends StringPaddingUtils {
+) extends HasControlNumber with StringPaddingUtils {
   def toCSV: String = {
     s"$id|$respondentId|$agencyCode|${loan.id}|${loan.applicationDate}" +
       s"|${loan.loanType}|${loan.propertyType}|${loan.purpose}|${loan.occupancy}" +
