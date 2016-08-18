@@ -3,9 +3,8 @@ package hmda.api.processing
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ReadHmdaRawFile }
-import hmda.persistence.processing.HmdaFileValidator.BeginValidation
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
-import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile }
+import hmda.persistence.processing.{ HmdaFileParser, HmdaRawFile }
 //import hmda.persistence.processing.HmdaFileQuery._
 
 object LocalHmdaEventProcessor {
@@ -48,8 +47,5 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
   private def fireParsingCompletedEvents(submissionId: String): Unit = {
     log.debug(s"Parsing completed for $submissionId")
-    val larValidator = context.system.actorSelection(s"/user/larValidation")
-    val hmdaFileValidator = context.actorOf(HmdaFileValidator.props(submissionId, larValidator))
-    hmdaFileValidator ! BeginValidation
   }
 }
