@@ -34,7 +34,7 @@ object DemoData {
     val f3 = Filing("2017", "1", Completed)
     val f4 = Filing("2016", "2", Completed)
     val f5 = Filing("2016", "3", Completed)
-    val f6 = Filing("2017", "4", NotStarted)
+    val f6 = Filing("2017", "3", NotStarted)
     Seq(f1, f2, f3)
   }
 
@@ -49,25 +49,20 @@ object DemoData {
 
   val demoFilings = DemoFilings.values
 
-  val demoSubmissions = {
-    val s1 = Submission(1, Created)
-    val s2 = Submission(2, Created)
-    val s3 = Submission(3, Created)
-    Seq(s1, s2, s3)
-  }
+  val demoSubmissions = DemoSubmissions.values
 
   def loadDemoData(system: ActorSystem): Unit = {
     Thread.sleep(500)
     loadInstitutions(demoInstitutions, system)
     loadFilings(demoFilings, system)
-    loadNewSubmissions(demoSubmissions, system)
+    loadDemoSubmissions(demoSubmissions, system)
   }
 
   def loadTestData(system: ActorSystem): Unit = {
     Thread.sleep(500)
     loadInstitutions(testInstitutions, system)
     loadFilings(testFilings, system)
-    loadNewSubmissions(testSubmissions, system)
+    loadTestSubmissions(testSubmissions, system)
   }
 
   val institutionSummary = {
@@ -90,7 +85,7 @@ object DemoData {
     }
   }
 
-  def loadNewSubmissions(submissions: Seq[Submission], system: ActorSystem): Unit = {
+  def loadTestSubmissions(submissions: Seq[Submission], system: ActorSystem): Unit = {
     submissions.foreach { s =>
       val submissionsActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
       submissionsActor ! CreateSubmission
@@ -98,4 +93,17 @@ object DemoData {
       submissionsActor ! Shutdown
     }
   }
+
+  def loadDemoSubmissions(submissions: Seq[(String, String)], system: ActorSystem): Unit = {
+    submissions.foreach { s =>
+      s match {
+        case (id: String, period: String) =>
+          val submissionsActor = system.actorOf(SubmissionPersistence.props(id, period))
+          submissionsActor ! CreateSubmission
+          Thread.sleep(100)
+          submissionsActor ! Shutdown
+      }
+    }
+  }
+
 }
