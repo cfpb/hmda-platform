@@ -7,7 +7,7 @@ import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser.LarParsed
 import hmda.persistence.processing.SingleLarValidation.CheckSyntactical
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.ValidationError
+import hmda.validation.engine._
 import hmda.persistence.processing.HmdaQuery._
 
 object HmdaFileValidator {
@@ -72,7 +72,7 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
       persist(ValidationStarted) { event =>
         updateState(event)
         self ! ValidateSyntactical
-        log.debug(s"Validation started for submission $submissionId")
+        log.info(s"Validation started for submission $submissionId")
       }
 
     case ValidateSyntactical =>
@@ -81,6 +81,15 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
         .runForeach { lar =>
           larValidator ! CheckSyntactical(lar, ValidationContext(None))
         }
+
+    case validationErrors: ValidationErrors =>
+      val errors = validationErrors.errors
+      val syntacticalErrors = errors.filter(_.errorType == Syntactical)
+      syntacticalErrors.foreach(e => println(e))
+      val validityErrors = errors.filter(_.errorType == Validity)
+      validityErrors.foreach(e => println(e))
+      val qualityErrors = errors.filter(_.errorType == Quality)
+      qualityErrors.foreach(e => println(e))
 
     case Shutdown =>
       context stop self
