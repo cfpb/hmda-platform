@@ -117,7 +117,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       val file = multiPartFile(csv, "sample.txt")
 
       postWithCfpbHeaders("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
+        status mustBe StatusCodes.Accepted
         responseAs[String] mustBe "uploaded"
       }
     }
