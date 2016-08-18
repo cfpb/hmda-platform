@@ -32,13 +32,11 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   val parseLarRoute =
     pathPrefix("lar") {
       path("parse") {
-        hmdaAuthorize {
-          timedPost {
-            entity(as[String]) { s =>
-              LarCsvParser(s) match {
-                case Right(lar) => complete(ToResponseMarshallable(lar))
-                case Left(errors) => complete(errorsAsResponse(errors))
-              }
+        timedPost {
+          entity(as[String]) { s =>
+            LarCsvParser(s) match {
+              case Right(lar) => complete(ToResponseMarshallable(lar))
+              case Left(errors) => complete(errorsAsResponse(errors))
             }
           }
         }
@@ -48,23 +46,21 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   val validateLarRoute =
     pathPrefix("lar") {
       path("validate") {
-        hmdaAuthorize {
-          parameters('check.as[String] ? "all") { (checkType) =>
-            timedPost {
-              entity(as[LoanApplicationRegister]) { lar =>
-                val larValidation = system.actorSelection("/user/larValidation")
-                val checkMessage = checkType match {
-                  case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
-                  case "validity" => CheckValidity(lar, ValidationContext(None))
-                  case "quality" => CheckQuality(lar, ValidationContext(None))
-                  case _ => CheckAll(lar, ValidationContext(None))
-                }
-                onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
-                  case Success(xs) =>
-                    complete(ToResponseMarshallable(xs))
-                  case Failure(e) =>
-                    complete(HttpResponse(StatusCodes.InternalServerError))
-                }
+        parameters('check.as[String] ? "all") { (checkType) =>
+          timedPost {
+            entity(as[LoanApplicationRegister]) { lar =>
+              val larValidation = system.actorSelection("/user/larValidation")
+              val checkMessage = checkType match {
+                case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
+                case "validity" => CheckValidity(lar, ValidationContext(None))
+                case "quality" => CheckQuality(lar, ValidationContext(None))
+                case _ => CheckAll(lar, ValidationContext(None))
+              }
+              onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
+                case Success(xs) =>
+                  complete(ToResponseMarshallable(xs))
+                case Failure(e) =>
+                  complete(HttpResponse(StatusCodes.InternalServerError))
               }
             }
           }

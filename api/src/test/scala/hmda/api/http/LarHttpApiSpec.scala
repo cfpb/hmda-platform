@@ -98,16 +98,20 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
   }
 
   "LAR API Authorization and rejection handling" must {
+    // These endpoints are not protected by authorization, so they should have
+    // the same result whether or not the request contains auth headers.
 
-    "reject requests without 'CFPB-HMDA-Institutions' header" in {
+    "allow requests without 'CFPB-HMDA-Institutions' header" in {
       Post("/lar/parse", larCsv).addHeader(usernameHeader) ~> larRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+        status mustEqual StatusCodes.OK
+        responseAs[LoanApplicationRegister] mustBe lar
       }
     }
 
-    "reject requests without 'CFPB-HMDA-Username' header" in {
+    "allow requests without 'CFPB-HMDA-Username' header" in {
       Post("/lar/validate", lar).addHeader(institutionsHeader) ~> larRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+        status mustEqual StatusCodes.OK
+        responseAs[List[ValidationError]] mustBe Nil
       }
     }
 
