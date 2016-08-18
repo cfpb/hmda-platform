@@ -189,8 +189,14 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
-    "not handle routes that aren't defined in this API" in {
-      // Request the endpoint without username header (but with other headers)
+    "reject unauthorized requests to any /instititutions-based path, even nonexistent endpoints" in {
+      // Request the endpoint without a required header
+      Get("/institutions/12345/nonsense").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+
+    "not handle requests to nonexistent endpoints if the request is authorized" in {
       getWithCfpbHeaders("/lars") ~> institutionsRoutes ~> check {
         handled mustBe false
         rejections mustBe List()
