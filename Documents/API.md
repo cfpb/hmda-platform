@@ -137,3 +137,16 @@
       ]
     }
     ```
+
+## Authorization
+Each endpoint (excluding `/`) is protected by three authorization requirements.
+
+* Requests must include the `CFPB-HMDA-Username` header.
+  * Its value should be the username of the user making the request.
+* Requests must include the `CFPB-HMDA-Institutions` header.
+  * This header will contain the comma-separated list of institution IDs
+    that the user is authorized to view.
+* For requests to institution-specific paths, such as `/institutions/<institution>`
+  and `/institutions/<institution>/summary` (any endpoint in the `/institutions` namespace
+  except `/institutions`), the institution ID requested must match one of the IDs in the
+  `CFPB-HMDA-Institutions` header.
