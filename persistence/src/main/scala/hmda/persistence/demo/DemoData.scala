@@ -2,8 +2,8 @@ package hmda.persistence.demo
 
 import akka.actor.ActorSystem
 import hmda.model.fi._
-import hmda.model.institution.Agency.{ CFPB, FDIC }
-import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId }
+import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
+import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
 import hmda.model.institution.{ ExternalId, Institution }
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
@@ -17,9 +17,12 @@ object DemoData {
   val institutions = DemoInstitutions.values
 
   val filings = {
-    val f1 = Filing("2016", "12345", Completed)
-    val f2 = Filing("2017", "12345", NotStarted)
-    val f3 = Filing("2017", "123456", InProgress)
+    val f1 = Filing("2016", "0", Completed)
+    val f2 = Filing("2017", "0", NotStarted)
+    val f3 = Filing("2017", "1", Completed)
+    val f4 = Filing("2016", "2", Completed)
+    val f5 = Filing("2016", "3", Completed)
+    val f6 = Filing("2017", "4", NotStarted)
     Seq(f1, f2, f3)
   }
 
@@ -59,7 +62,7 @@ object DemoData {
 
   def loadNewSubmissions(system: ActorSystem): Unit = {
     newSubmissions.foreach { s =>
-      val submissionsActor = system.actorOf(SubmissionPersistence.props("12345", "2017"))
+      val submissionsActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
       submissionsActor ! CreateSubmission
       Thread.sleep(100)
       submissionsActor ! Shutdown

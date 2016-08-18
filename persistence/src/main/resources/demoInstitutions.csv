@@ -1,2 +1,4 @@
-12345|First Bank|externalTest1|fdic-certificate-number|fdic|bank|true|active
-123456|Second Bank|externalTest2|rssd-id|cfpb|credit-union|true|inactive
+0|Bank 0|externalTest0|fdic-certificate-number|fdic|bank|true|active
+1|Bank 1|externalTest1|rssd-id|cfpb|credit-union|true|active
+2|Bank 2|externalTest2|occ-charter-id|occ|credit-union|false|inactive
+3|Bank 3|externalTest3|federal-tax-id|hud|credit-union|true|active

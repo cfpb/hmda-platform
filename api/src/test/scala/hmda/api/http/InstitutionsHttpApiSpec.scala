@@ -11,9 +11,12 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.api.model._
 import hmda.model.fi._
+import hmda.persistence.CommonMessages._
 import hmda.persistence.demo.DemoData
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import org.iq80.leveldb.util.FileUtils
 
 import scala.concurrent.duration._
@@ -49,7 +52,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "return an institution by id" in {
-      getWithCfpbHeaders("/institutions/12345") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val institution = DemoData.institutions.head
         val institutionWrapped = InstitutionWrapper(institution.id, institution.name, institution.status)
@@ -63,7 +66,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "return an institution's summary" in {
-      getWithCfpbHeaders("/institutions/12345/summary") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/summary") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val summary = DemoData.institutionSummary
         val institutionSummary = InstitutionSummary(summary._1.toString, summary._2, summary._3)
@@ -72,14 +75,15 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "return a list of submissions for a financial institution" in {
-      getWithCfpbHeaders("/institutions/12345/filings/2017") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val filing = Filing("2017", "12345", NotStarted)
+        val filing = Filing("2017", "0", NotStarted)
         responseAs[FilingDetail] mustBe FilingDetail(filing, DemoData.newSubmissions.reverse)
       }
-      getWithCfpbHeaders("/institutions/12345/filings/xxxx") ~> institutionsRoutes ~> check {
+
+      getWithCfpbHeaders("/institutions/0/filings/xxxx") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 12345", "institutions/12345/filings/xxxx")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 0", "institutions/0/filings/xxxx")
       }
       getWithCfpbHeaders("/institutions/xxxxx/filings/2017") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
@@ -88,7 +92,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "create a new submission" in {
-      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions") ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Created
         responseAs[Submission] mustBe Submission(DemoData.newSubmissions.size + 1, Created)
       }
@@ -102,9 +106,9 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "fail creating a new submission for a non existent filing period" in {
-      postWithCfpbHeaders("/institutions/12345/filings/2001/submissions") ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2001/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 12345", "institutions/12345/filings/2001/submissions")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 0", "institutions/0/filings/2001/submissions")
       }
     }
 
@@ -116,7 +120,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
       val file = multiPartFile(csv, "sample.txt")
 
-      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[String] mustBe "uploaded"
       }
@@ -125,12 +129,24 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return 400 when trying to upload the wrong file" in {
       val badContent = "qdemd"
       val file = multiPartFile(badContent, "sample.dat")
-      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", "institutions/12345/filings/2017/submissions/1")
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", "institutions/0/filings/2017/submissions/1")
       }
     }
 
+    "return 400 when trying to upload to a completed submission" in {
+      val badContent = "qdemd"
+      val file = multiPartFile(badContent, "sample.txt")
+      val submissionActor = system.actorOf(SubmissionPersistence.props("12345", "2017"))
+      submissionActor ! UpdateSubmissionStatus(1, Signed)
+      submissionActor ! Shutdown
+      Thread sleep 100
+      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/12345/filings/2017/submissions/1")
+      }
+    }
   }
 
   /*
@@ -165,6 +181,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Get("/institutions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Forbidden
         responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+
       }
     }
     "reject requests to submission creation without 'CFPB-HMDA-Institutions' header" in {
@@ -184,12 +201,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
   }
   */
 
-  private def multiPartFile(contents: String, fileName: String) = {
-    Multipart.FormData(Multipart.FormData.BodyPart.Strict(
-      "file",
-      HttpEntity(ContentTypes.`text/plain(UTF-8)`, contents),
-      Map("filename" -> fileName)
-    ))
-  }
+  private def multiPartFile(contents: String, fileName: String) =
+    {
+      Multipart.FormData(Multipart.FormData.BodyPart.Strict(
+        "file",
+        HttpEntity(ContentTypes.`text/plain(UTF-8)`, contents),
+        Map("filename" -> fileName)
+      ))
+    }
 
 }
