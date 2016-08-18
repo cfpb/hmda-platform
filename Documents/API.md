@@ -4,9 +4,9 @@
 
 * `/`
     * `GET` - Root endpoint, with information about the HMDA Platform service. Used for health checks
-    
+
     Example response, with HTTP code 200:
-    
+
     ```json
     {
       "status": "OK",
@@ -15,14 +15,14 @@
       "host": "localhost"
     }
     ```
-    
-    
+
+
 
 * `/institutions`
     * `GET` - List of Financial Institutions
-    
-    Example response, with HTTP code 200: 
-    
+
+    Example response, with HTTP code 200:
+
     ```json
     {
       "institutions": [
@@ -42,9 +42,9 @@
 
 * `/institutions/<institution>`
     * `GET` - Details for Financial Institution
-    
-    Example response, with HTTP code 200: 
-    
+
+    Example response, with HTTP code 200:
+
     ```json
     {
       "institution": {
@@ -64,15 +64,15 @@
           "status": "completed"
         }
       ]
-    } 
+    }
     ```
-    
-    
+
+
 * `/institutions/<institution>/filings/<period>`
     * `GET` - Details for a filing
-    
+
     Example response, with HTTP code 200:
-    
+
     ```json
    {
      "filing": {
@@ -94,31 +94,31 @@
        "submissionStatus": "created"
      }
    ]
-   } 
+   }
     ```
-    
+
 * `/institutions/<institution>/filings/<period>/submissions`
-    
+
     * `POST` - Create a new submission
-    
+
     Example response, with HTTP code 201:
-    
+
     ```json
     {
         "id": 4,
         "submissionStatus": "created"
     }
     ```
-    
+
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>`
     * `POST` - Upload HMDA data to submission
-    
-    
+
+
 * `/institutions/<institution>/summary`
     * `GET` - Summary for Financial Institution, including filing information
-    
+
     Example response, with HTTP code 200:
-    
+
     ```json
     {
       "id": "12345",
