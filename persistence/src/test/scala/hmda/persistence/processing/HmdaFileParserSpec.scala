@@ -8,10 +8,7 @@ import hmda.actor.test.ActorSpec
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages.GetState
-import hmda.persistence.processing.HmdaRawFile._
 import hmda.persistence.processing.HmdaFileParser._
-
-import scalaz.Alpha.H
 
 class HmdaFileParserSpec extends ActorSpec {
   import hmda.model.util.FITestData._
@@ -61,8 +58,8 @@ class HmdaFileParserSpec extends ActorSpec {
   }
 
   private def parseTs(xs: Array[String]): Array[Unit] = {
-    val lars = xs.take(1).map(line => TsCsvParser(line))
-    lars.map {
+    val ts = xs.take(1).map(line => TsCsvParser(line))
+    ts.map {
       case Right(ts) => probe.send(hmdaFileParser, TsParsed(ts))
       case Left(errors) => probe.send(hmdaFileParser, TsParsedErrors(errors))
     }
