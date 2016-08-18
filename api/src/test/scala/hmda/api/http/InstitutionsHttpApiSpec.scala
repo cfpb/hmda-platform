@@ -46,7 +46,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return a list of existing institutions" in {
       getWithCfpbHeaders("/institutions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val institutionsWrapped = DemoData.institutions.map(i => InstitutionWrapper(i.id, i.name, i.status))
+        val institutionsWrapped = DemoData.institutions.map(i => InstitutionWrapper(i.id.toString, i.name, i.status))
         responseAs[Institutions] mustBe Institutions(institutionsWrapped)
       }
     }
@@ -55,7 +55,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       getWithCfpbHeaders("/institutions/0") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val institution = DemoData.institutions.head
-        val institutionWrapped = InstitutionWrapper(institution.id, institution.name, institution.status)
+        val institutionWrapped = InstitutionWrapper(institution.id.toString, institution.name, institution.status)
         val filings = DemoData.filings.filter(f => f.institutionId == institution.id.toString)
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institutionWrapped, filings.reverse)
       }
@@ -138,13 +138,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return 400 when trying to upload to a completed submission" in {
       val badContent = "qdemd"
       val file = multiPartFile(badContent, "sample.txt")
-      val submissionActor = system.actorOf(SubmissionPersistence.props("12345", "2017"))
+      val submissionActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
       submissionActor ! UpdateSubmissionStatus(1, Signed)
       submissionActor ! Shutdown
       Thread sleep 100
-      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/12345/filings/2017/submissions/1")
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/0/filings/2017/submissions/1")
       }
     }
   }
