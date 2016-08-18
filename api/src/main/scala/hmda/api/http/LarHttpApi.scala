@@ -73,8 +73,8 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
     HttpResponse(StatusCodes.BadRequest, entity = errorEntity)
   }
 
-  val larRoutes = hmdaAuthorize {
+  val larRoutes = //hmdaAuthorize {
     parseLarRoute ~ validateLarRoute
-  } ~ unauthorizedAccess
+  //} ~ unauthorizedAccess
 
 }
