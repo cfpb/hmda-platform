@@ -40,11 +40,11 @@ class InstitutionPersistenceSpec extends ActorSpec {
 
     "warn when creating an institution that already exists" in {
       // Setup: Persist an institution
-      val i1 = Institution(1, "Test Bank 1", Set(ExternalId("99-1234567", FederalTaxId), ExternalId("123456", RssdId)), CFPB, Bank, hasParent = true, Active)
+      val i1 = Institution(12345, "Test Bank 1", Set(ExternalId("99-1234567", FederalTaxId), ExternalId("123456", RssdId)), CFPB, Bank, hasParent = true, Active)
       probe.send(institutionsActor, CreateInstitution(i1))
 
       // Attempt to add identical institution; test that warning is logged
-      val i2 = Institution(1, "Test Bank 1", Set(ExternalId("99-1234567", FederalTaxId), ExternalId("123456", RssdId)), CFPB, Bank, hasParent = true, Active)
+      val i2 = Institution(12345, "Test Bank 1", Set(ExternalId("99-1234567", FederalTaxId), ExternalId("123456", RssdId)), CFPB, Bank, hasParent = true, Active)
       val msg = s"Institution already exists. Could not create $i2"
       EventFilter.warning(message = msg, occurrences = 1) intercept {
         probe.send(institutionsActor, CreateInstitution(i2))
@@ -52,7 +52,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
     }
 
     "warn when updating nonexistent institution" in {
-      val i = Institution(2, "Bogus bank", Set(ExternalId("99-7654321", FederalTaxId), ExternalId("654321", RssdId)), CFPB, Bank, hasParent = true, Active)
+      val i = Institution(123456, "Bogus bank", Set(ExternalId("99-7654321", FederalTaxId), ExternalId("654321", RssdId)), CFPB, Bank, hasParent = true, Active)
       val msg = s"Institution does not exist. Could not update $i"
       EventFilter.warning(message = msg, occurrences = 1) intercept {
         probe.send(institutionsActor, ModifyInstitution(i))
