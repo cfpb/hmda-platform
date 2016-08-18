@@ -58,12 +58,12 @@ All endpoints below require two headers (see "Authorization" section below for m
       "filings": [
         {
           "id": "2017",
-          "fid": "12345",
+          "institutionId": "12345",
           "status": "not-started"
         },
         {
           "id": "2016",
-          "fid": "12345",
+          "institutionId": "12345",
           "status": "completed"
         }
       ]
@@ -80,7 +80,7 @@ All endpoints below require two headers (see "Authorization" section below for m
    {
      "filing": {
      "id": "2017",
-     "fid": "12345",
+     "institutionId": "12345",
      "status": "not-started"
    },
    "submissions": [
@@ -129,12 +129,12 @@ All endpoints below require two headers (see "Authorization" section below for m
       "filings": [
         {
           "period": "2017",
-          "fid": "12345",
+          "institutionId": "12345",
           "status": "not-started"
         },
         {
           "period": "2016",
-          "fid": "12345",
+          "institutionId": "12345",
           "status": "completed"
         }
       ]
