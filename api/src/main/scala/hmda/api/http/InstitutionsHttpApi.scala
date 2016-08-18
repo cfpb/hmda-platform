@@ -16,11 +16,11 @@ import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
 import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
-import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
+import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission, GetSubmissionById }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
+import hmda.model.fi.Created
 import hmda.model.fi.{ Filing, Submission }
 import hmda.model.institution.Institution
-import hmda.model.institution.InstitutionStatus.Active
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaRawFile._
@@ -144,38 +144,49 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
 
   val uploadPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
-      val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
-      val uploadTimestamp = Instant.now.toEpochMilli
-      val id = s"$institutionId-$period-$submissionId"
-      val processingActor = createHmdaRawFile(system, id)
-      processingActor ! StartUpload
-      fileUpload("file") {
-        case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
-          time {
-            val uploadedF = byteSource
-              .via(splitLines)
-              .map(_.utf8String)
-              .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
+      time {
+        val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
+        extractExecutionContext { executor =>
+          val uploadTimestamp = Instant.now.toEpochMilli
+          val processingActor = createHmdaRawFile(system, submissionId)
+          val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
+          implicit val ec: ExecutionContext = executor
+          val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId.toInt)
+          onComplete(fIsSubmissionOverwrite) {
+            case Success(false) =>
+              submissionsActor ! Shutdown
+              processingActor ! StartUpload
+              fileUpload("file") {
+                case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
+                  val uploadedF = byteSource
+                    .via(splitLines)
+                    .map(_.utf8String)
+                    .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
 
-            onComplete(uploadedF) {
-              case Success(response) =>
-                processingActor ! CompleteUpload
-                processingActor ! Shutdown
-                complete(ToResponseMarshallable(StatusCodes.Accepted -> "uploaded"))
-              case Failure(error) =>
-                processingActor ! Shutdown
-                log.error(error.getLocalizedMessage)
-                val errorResponse = ErrorResponse(400, "Invalid File Format", path)
-                complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-            }
+                  onComplete(uploadedF) {
+                    case Success(response) =>
+                      processingActor ! CompleteUpload
+                      processingActor ! Shutdown
+                      complete(ToResponseMarshallable(StatusCodes.Accepted -> "uploaded"))
+                    case Failure(error) =>
+                      processingActor ! Shutdown
+                      log.error(error.getLocalizedMessage)
+                      val errorResponse = ErrorResponse(400, "Invalid File Format", path)
+                      complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+                  }
+                case _ =>
+                  processingActor ! Shutdown
+                  val errorResponse = ErrorResponse(400, "Invalid File Format", path)
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              }
+            case Success(true) =>
+              val errorResponse = ErrorResponse(400, "Submission already exists", path)
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+            case Failure(error) =>
+              submissionsActor ! Shutdown
+              completeWithInternalError(path, error)
           }
-
-        case _ =>
-          time {
-            processingActor ! Shutdown
-            val errorResponse = ErrorResponse(400, "Invalid File Format", path)
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-          }
+        }
       }
     }
 
@@ -222,10 +233,16 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     } yield FilingDetail(filing, submissions)
   }
 
+  private def checkSubmissionOverwrite(submissionsActor: ActorRef, submissionId: Int)(implicit ec: ExecutionContext): Future[Boolean] = {
+    val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
+    submission.map(_.submissionStatus != Created)
+  }
+
   private def completeWithInternalError(path: String, error: Throwable): StandardRoute = {
     log.error(error.getLocalizedMessage)
     val errorResponse = ErrorResponse(500, "Internal server error", path)
     complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+
   }
 
   val institutionsRoutes =

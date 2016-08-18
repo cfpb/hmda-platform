@@ -11,9 +11,12 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.api.model._
 import hmda.model.fi._
+import hmda.persistence.CommonMessages._
 import hmda.persistence.demo.DemoData
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import org.iq80.leveldb.util.FileUtils
 
 import scala.concurrent.duration._
@@ -132,6 +135,18 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
+    "return 400 when trying to upload to a completed submission" in {
+      val badContent = "qdemd"
+      val file = multiPartFile(badContent, "sample.txt")
+      val submissionActor = system.actorOf(SubmissionPersistence.props("12345", "2017"))
+      submissionActor ! UpdateSubmissionStatus(1, Signed)
+      submissionActor ! Shutdown
+      Thread sleep 100
+      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/12345/filings/2017/submissions/1")
+      }
+    }
   }
 
   /*
@@ -166,6 +181,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       Get("/institutions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Forbidden
         responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+
       }
     }
     "reject requests to submission creation without 'CFPB-HMDA-Institutions' header" in {
@@ -185,12 +201,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
   }
   */
 
-  private def multiPartFile(contents: String, fileName: String) = {
-    Multipart.FormData(Multipart.FormData.BodyPart.Strict(
-      "file",
-      HttpEntity(ContentTypes.`text/plain(UTF-8)`, contents),
-      Map("filename" -> fileName)
-    ))
-  }
+  private def multiPartFile(contents: String, fileName: String) =
+    {
+      Multipart.FormData(Multipart.FormData.BodyPart.Strict(
+        "file",
+        HttpEntity(ContentTypes.`text/plain(UTF-8)`, contents),
+        Map("filename" -> fileName)
+      ))
+    }
 
 }
