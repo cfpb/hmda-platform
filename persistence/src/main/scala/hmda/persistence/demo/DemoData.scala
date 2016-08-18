@@ -10,7 +10,7 @@ import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.CommonMessages._
-import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
+import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
 object DemoData {
@@ -55,14 +55,14 @@ object DemoData {
     Thread.sleep(500)
     loadInstitutions(demoInstitutions, system)
     loadFilings(demoFilings, system)
-    loadDemoSubmissions(demoSubmissions, system)
+    loadSubmissions(demoSubmissions, system)
   }
 
   def loadTestData(system: ActorSystem): Unit = {
     Thread.sleep(500)
     loadInstitutions(testInstitutions, system)
     loadFilings(testFilings, system)
-    loadTestSubmissions(testSubmissions, system)
+    loadSubmissions(testSubmissions.map(s => ("0", "2017", s)), system)
   }
 
   val institutionSummary = {
@@ -85,21 +85,14 @@ object DemoData {
     }
   }
 
-  def loadTestSubmissions(submissions: Seq[Submission], system: ActorSystem): Unit = {
-    submissions.foreach { s =>
-      val submissionsActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
-      submissionsActor ! CreateSubmission
-      Thread.sleep(100)
-      submissionsActor ! Shutdown
-    }
-  }
-
-  def loadDemoSubmissions(submissions: Seq[(String, String)], system: ActorSystem): Unit = {
+  def loadSubmissions(submissions: Seq[(String, String, Submission)], system: ActorSystem): Unit = {
     submissions.foreach { s =>
       s match {
-        case (id: String, period: String) =>
+        case (id: String, period: String, submission: Submission) =>
           val submissionsActor = system.actorOf(SubmissionPersistence.props(id, period))
           submissionsActor ! CreateSubmission
+          Thread.sleep(100)
+          submissionsActor ! UpdateSubmissionStatus(submission.id, submission.submissionStatus)
           Thread.sleep(100)
           submissionsActor ! Shutdown
       }
