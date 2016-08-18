@@ -1,10 +1,10 @@
 package hmda.api.model
 
-import hmda.validation.engine.ValidationErrors
+import hmda.validation.engine.ValidationErrorsSummary
 
 case class SingleValidationErrorResult(
-  syntactical: ValidationErrors,
-  validity: ValidationErrors,
-  quality: ValidationErrors,
-  `macro`: ValidationErrors
+  syntactical: ValidationErrorsSummary,
+  validity: ValidationErrorsSummary,
+  quality: ValidationErrorsSummary,
+  `macro`: ValidationErrorsSummary
 )

@@ -8,6 +8,7 @@ case object Macro extends ValidationErrorType
 
 case class ValidationError(id: String, msg: String, errorType: ValidationErrorType)
 case class ValidationErrors(errors: Seq[ValidationError])
+case class ValidationErrorsSummary(errors: Seq[String])
 object ValidationErrors {
   def empty(): ValidationErrors = ValidationErrors(Nil)
 }

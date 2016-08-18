@@ -10,7 +10,7 @@ import hmda.api.model.SingleValidationErrorResult
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.processing.SingleLarValidation
-import hmda.validation.engine.ValidationErrors
+import hmda.validation.engine.ValidationErrorsSummary
 import org.scalatest.{ MustMatchers, WordSpec }
 import spray.json._
 
@@ -63,10 +63,10 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult] mustBe
           SingleValidationErrorResult(
-            ValidationErrors(Nil),
-            ValidationErrors(Nil),
-            ValidationErrors(Nil),
-            ValidationErrors(Nil)
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil)
           )
       }
     }

@@ -71,16 +71,16 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
 
   def aggregateErrors(validationErrors: ValidationErrors): SingleValidationErrorResult = {
     val errors = validationErrors.errors
-    val syntactical = errors.filter(_.errorType == Syntactical)
-    val validity = errors.filter(_.errorType == Validity)
-    val quality = errors.filter(_.errorType == Quality)
-    val macroErrors = errors.filter(_.errorType == Macro)
+    val syntactical = errors.filter(_.errorType == Syntactical).map(e => e.msg)
+    val validity = errors.filter(_.errorType == Validity).map(e => e.msg)
+    val quality = errors.filter(_.errorType == Quality).map(e => e.msg)
+    val macroErrors = errors.filter(_.errorType == Macro).map(e => e.msg)
 
     SingleValidationErrorResult(
-      ValidationErrors(syntactical),
-      ValidationErrors(validity),
-      ValidationErrors(quality),
-      ValidationErrors(macroErrors)
+      ValidationErrorsSummary(syntactical),
+      ValidationErrorsSummary(validity),
+      ValidationErrorsSummary(quality),
+      ValidationErrorsSummary(macroErrors)
     )
 
   }
