@@ -69,8 +69,6 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       }
     }
 
-  case class AggregateValidationError(validationErrorType: ValidationErrorType, edits: List[String])
-
   def aggregateErrors(validationErrors: ValidationErrors): SingleValidationErrorResult = {
     val errors = validationErrors.errors
     val syntactical = errors.filter(_.errorType == Syntactical)
