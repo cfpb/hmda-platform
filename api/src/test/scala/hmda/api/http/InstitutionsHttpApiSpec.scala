@@ -31,7 +31,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
   override def beforeAll(): Unit = {
     createInstitutions(system)
-    DemoData.loadData(system)
+    DemoData.loadTestData(system)
     super.beforeAll()
   }
 
@@ -46,7 +46,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return a list of existing institutions" in {
       getWithCfpbHeaders("/institutions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val institutionsWrapped = DemoData.institutions.map(i => InstitutionWrapper(i.id, i.name, i.status))
+        val institutionsWrapped = DemoData.testInstitutions.map(i => InstitutionWrapper(i.id, i.name, i.status))
         responseAs[Institutions] mustBe Institutions(institutionsWrapped)
       }
     }
@@ -54,9 +54,9 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return an institution by id" in {
       getWithCfpbHeaders("/institutions/0") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val institution = DemoData.institutions.head
+        val institution = DemoData.testInstitutions.head
         val institutionWrapped = InstitutionWrapper(institution.id, institution.name, institution.status)
-        val filings = DemoData.filings.filter(f => f.institutionId == institution.id.toString)
+        val filings = DemoData.testFilings.filter(f => f.institutionId == institution.id.toString)
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institutionWrapped, filings.reverse)
       }
       getWithCfpbHeaders("/institutions/xxxx") ~> institutionsRoutes ~> check {
@@ -78,7 +78,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       getWithCfpbHeaders("/institutions/0/filings/2017") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val filing = Filing("2017", "0", NotStarted)
-        responseAs[FilingDetail] mustBe FilingDetail(filing, DemoData.newSubmissions.reverse)
+        responseAs[FilingDetail] mustBe FilingDetail(filing, DemoData.testSubmissions.reverse)
       }
 
       getWithCfpbHeaders("/institutions/0/filings/xxxx") ~> institutionsRoutes ~> check {
@@ -94,7 +94,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "create a new submission" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Created
-        responseAs[Submission] mustBe Submission(DemoData.newSubmissions.size + 1, Created)
+        responseAs[Submission] mustBe Submission(DemoData.testSubmissions.size + 1, Created)
       }
     }
 
