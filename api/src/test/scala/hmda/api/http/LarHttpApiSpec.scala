@@ -116,7 +116,6 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     }
 
     "not handle routes that aren't defined in this API" in {
-      // Request the endpoint without username header (but with other headers)
       getWithCfpbHeaders("/institutions") ~> larRoutes ~> check {
         handled mustBe false
         rejections mustBe List()
