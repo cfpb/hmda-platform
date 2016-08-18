@@ -16,6 +16,9 @@
     }
     ```
 
+All endpoints below require two headers (see "Authorization" section below for more detail):
+* `CFPB-HMDA-Username`, containing a string
+* `CFPB-HMDA-Institutions`, containing a list of integers
 
 
 * `/institutions`
