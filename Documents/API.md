@@ -16,7 +16,7 @@
     }
     ```
 
-All endpoints below require two headers (see "Authorization" section below for more detail):
+All endpoints in the `/institutions` namespace require two headers (see "Authorization" section below for more detail):
 * `CFPB-HMDA-Username`, containing a string
 * `CFPB-HMDA-Institutions`, containing a list of integers
 
@@ -142,7 +142,7 @@ All endpoints below require two headers (see "Authorization" section below for m
     ```
 
 ## Authorization
-Each endpoint (excluding `/`) is protected by three authorization requirements.
+Each endpoint that starts with `/institutions` is protected by three authorization requirements.
 
 * Requests must include the `CFPB-HMDA-Username` header.
   * Its value should be the username of the user making the request.
@@ -150,6 +150,8 @@ Each endpoint (excluding `/`) is protected by three authorization requirements.
   * This header will contain the comma-separated list of institution IDs
     that the user is authorized to view.
 * For requests to institution-specific paths, such as `/institutions/<institution>`
-  and `/institutions/<institution>/summary` (any endpoint in the `/institutions` namespace
-  except `/institutions`), the institution ID requested must match one of the IDs in the
-  `CFPB-HMDA-Institutions` header.
+  and `/institutions/<institution>/summary` (any endpoint except `/institutions`),
+  the institution ID requested must match one of the IDs in the `CFPB-HMDA-Institutions`
+  header. (As of 8/18/2016, this requirement is not yet implemented.
+  [#504](https://github.com/cfpb/hmda-platform/issues/504) describes the specifications for
+  this feature.)
