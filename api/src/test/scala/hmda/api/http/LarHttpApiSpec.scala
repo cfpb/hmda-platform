@@ -95,6 +95,28 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
         responseAs[List[ValidationError]].length mustBe 1
       }
     }
+
+    "return a parsed and validated LAR" in {
+      postWithCfpbHeaders("/lar/parseAndValidate", larCsv) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[List[ValidationError]] mustBe Nil
+      }
+    }
+
+    "return parsing errors for an invalid LAR" in {
+      postWithCfpbHeaders("/lar/parseAndValidate", invalidLarCsv) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.BAD_REQUEST
+        responseAs[List[String]].length mustBe 2
+      }
+    }
+
+    "return a list of validation errors for an invalid LAR" in {
+      val badLar = lar.copy(agencyCode = 0)
+      postWithCfpbHeaders("/lar/parseAndValidate", badLar.toCSV) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[List[ValidationError]].length mustBe 1
+      }
+    }
   }
 
   /*

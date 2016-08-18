@@ -68,13 +68,42 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       }
     }
 
+  val parseAndValidateLarRoute =
+    pathPrefix("lar") {
+      path("parseAndValidate") {
+        parameters('check.as[String] ? "all") { (checkType) =>
+          timedPost {
+            entity(as[String]) { s =>
+              LarCsvParser(s) match {
+                case Right(lar) =>
+                  val larValidation = system.actorSelection("/user/larValidation")
+                  val checkMessage = checkType match {
+                    case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
+                    case "validity" => CheckValidity(lar, ValidationContext(None))
+                    case "quality" => CheckQuality(lar, ValidationContext(None))
+                    case _ => CheckAll(lar, ValidationContext(None))
+                  }
+                  onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
+                    case Success(xs) =>
+                      complete(ToResponseMarshallable(xs))
+                    case Failure(e) =>
+                      complete(HttpResponse(StatusCodes.InternalServerError))
+                  }
+                case Left(errors) => complete(errorsAsResponse(errors))
+              }
+            }
+          }
+        }
+      }
+    }
+
   def errorsAsResponse(list: List[String]): HttpResponse = {
     val errorEntity = HttpEntity(ContentTypes.`application/json`, list.toJson.toString)
     HttpResponse(StatusCodes.BadRequest, entity = errorEntity)
   }
 
   val larRoutes = //hmdaAuthorize {
-    parseLarRoute ~ validateLarRoute
+    parseLarRoute ~ validateLarRoute ~ parseAndValidateLarRoute
   //} ~ unauthorizedAccess
 
 }
