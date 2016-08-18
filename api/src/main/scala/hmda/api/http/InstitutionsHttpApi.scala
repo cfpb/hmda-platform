@@ -161,9 +161,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               case Success(response) =>
                 processingActor ! CompleteUpload
                 processingActor ! Shutdown
-                complete {
-                  "uploaded"
-                }
+                complete(ToResponseMarshallable(StatusCodes.Accepted -> "uploaded"))
               case Failure(error) =>
                 processingActor ! Shutdown
                 log.error(error.getLocalizedMessage)
