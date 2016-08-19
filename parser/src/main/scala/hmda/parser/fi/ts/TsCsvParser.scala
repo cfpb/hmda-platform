@@ -65,7 +65,7 @@ object TsCsvParser {
   private def convert[T](x: => T, message: String): ValidationNel[String, T] = {
     Try(x) match {
       case Failure(result) => message.failure.toValidationNel
-      case Success(result) => Validation.success(result)
+      case Success(result) => result.success
     }
   }
 

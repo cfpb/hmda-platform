@@ -63,7 +63,6 @@ class HmdaFileParserSpec extends ActorSpec {
       probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "12345-2017-2"))
       Thread.sleep(2000)
       probe.send(hmdaFileParser2, GetState)
-      Thread.sleep(2000)
       probe.expectMsg(HmdaFileParseState(4, Nil))
     }
   }
