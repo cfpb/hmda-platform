@@ -79,7 +79,7 @@ object TsCsvParser {
     val t = Try(x) match {
       case Failure(result) =>
         println("failure " + message); message.failure.toValidationNel
-      case Success(result) => val x = result.success; println("success! " + x); x
+      case Success(result) => println("this is where it stops: " + result + ", " + result.getClass); val x = result.success; println("success! " + x); x
     }
     println("convert " + t)
     t
