@@ -27,7 +27,7 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
   }
 
   def checkSyntactical(ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
-    val checksToRun: List[EditCheck[TransmittalSheet]] = List(
+    val checksToRun: List[EditCheck[_ >: TransmittalSheet]] = List(
       S010,
       S020,
       S025.inContext(ctx),

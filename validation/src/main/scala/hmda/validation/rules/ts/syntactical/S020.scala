@@ -1,17 +1,17 @@
 package hmda.validation.rules.ts.syntactical
 
-import hmda.model.fi.ts.TransmittalSheet
+import hmda.model.fi.HasControlNumber
+import hmda.model.institution.Agency
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
-object S020 extends EditCheck[TransmittalSheet] {
+object S020 extends EditCheck[HasControlNumber] {
 
-  //Hardcoded for now
-  val agencyCodes: List[Int] = List(1, 2, 3, 5, 7, 9)
+  private val agencyCodes: List[Int] = Agency.values.map(_.value).toList
 
-  override def apply(ts: TransmittalSheet): Result = {
+  override def apply(ts: HasControlNumber): Result = {
     ts.agencyCode is containedIn(agencyCodes)
   }
 
