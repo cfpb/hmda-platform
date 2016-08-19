@@ -46,7 +46,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
         onComplete(fInstitutions) {
           case Success(institutions) =>
-            val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id, inst.name, inst.status))
+            val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name, inst.status))
             complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
           case Failure(error) => completeWithInternalError(path, error)
         }
@@ -222,7 +222,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     for {
       i <- fInstitution
       filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-    } yield InstitutionDetail(InstitutionWrapper(i.id, i.name, i.status), filings)
+    } yield InstitutionDetail(InstitutionWrapper(i.id.toString, i.name, i.status), filings)
   }
 
   private def filingDetailsByPeriod(period: String, filingsActor: ActorRef, submissionActor: ActorRef)(implicit ec: ExecutionContext): Future[FilingDetail] = {
