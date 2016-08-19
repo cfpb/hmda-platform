@@ -57,12 +57,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     },
       "filings": [
         {
-          "id": "2017",
+          "period": "2017",
           "institutionId": "12345",
           "status": "not-started"
         },
         {
-          "id": "2016",
+          "period": "2016",
           "institutionId": "12345",
           "status": "completed"
         }
@@ -79,7 +79,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     ```json
    {
      "filing": {
-     "id": "2017",
+     "period": "2017",
      "institutionId": "12345",
      "status": "not-started"
    },
