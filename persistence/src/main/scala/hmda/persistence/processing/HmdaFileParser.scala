@@ -57,7 +57,6 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
   var state = HmdaFileParseState()
 
   def updateState(event: Event): Unit = {
-    println("UPDATE")
     state = state.updated(event)
   }
 
@@ -75,17 +74,16 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
 
     case ReadHmdaRawFile(persistenceId) =>
       val parsedTs = events(persistenceId)
-        .map { case LineAdded(_, data) => println(data); data }
+        .map { case LineAdded(_, data) => data }
         .take(1)
         .map(line => TsCsvParser(line))
         .map {
-          case Left(errors) =>
-            println("errors"); TsParsedErrors(errors)
-          case Right(ts) => println("parsed"); TsParsed(ts)
+          case Left(errors) => TsParsedErrors(errors)
+          case Right(ts) => TsParsed(ts)
         }
 
       parsedTs
-        .runForeach(parsed => self ! parsed)
+        .runForeach(pTs => self ! pTs)
 
       val parsedLar = events(persistenceId)
         .map { case LineAdded(_, data) => data }
@@ -97,11 +95,7 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
         }
 
       parsedLar
-        .runForeach(parsed => self ! parsed)
-        .andThen {
-          case _ =>
-            self ! Shutdown
-        }
+        .runForeach(pLar => self ! pLar)
 
     case tp @ TsParsed(ts) =>
       persist(tp) { e =>

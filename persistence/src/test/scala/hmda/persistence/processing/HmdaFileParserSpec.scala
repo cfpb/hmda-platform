@@ -27,7 +27,7 @@ class HmdaFileParserSpec extends ActorSpec {
   val badLines = fiCSVParseError.split("\n")
 
   "HMDA File Parser" must {
-    /*"persist parsed TSs" in {
+    "persist parsed TSs" in {
       parseTs(lines)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(1, Nil))
@@ -49,7 +49,7 @@ class HmdaFileParserSpec extends ActorSpec {
       parseLars(badLines)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(6, Seq(List("Timestamp is not a Long"), List("Agency Code is not an Integer"))))
-    }*/
+    }
 
     "read entire raw file" in {
       val hmdaFileParser2 = createHmdaFileParser(system, "12345-2017-2")
@@ -61,8 +61,10 @@ class HmdaFileParserSpec extends ActorSpec {
       probe.expectMsg(HmdaRawFileState(4))
 
       probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "12345-2017-2"))
+      Thread.sleep(2000)
       probe.send(hmdaFileParser2, GetState)
-      probe.expectMsg(HmdaFileParseState(6, Seq(List("Timestamp is not a Long"), List("Agency Code is not an Integer"))))
+      Thread.sleep(2000)
+      probe.expectMsg(HmdaFileParseState(4, Nil))
     }
   }
 
