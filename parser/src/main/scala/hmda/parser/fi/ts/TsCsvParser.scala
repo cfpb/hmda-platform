@@ -13,7 +13,10 @@ object TsCsvParser {
       return Left(List("Incorrect number of fields. found: " + values.length + ", expected: 21"))
     }
 
+    println("here?\n" + values)
+
     val id = toIntOrFail(values(0), "Record Identifier")
+    println("do i get here?")
     val respId = values(1)
     val code = toIntOrFail(values(2), "Agency Code")
     val timestamp = toLongOrFail(values(3), "Timestamp")
@@ -35,9 +38,13 @@ object TsCsvParser {
     val contactFax = values(19)
     val contactEmail = values(20)
 
+    println("and here")
+
     val respondent = Respondent(respId, respName, respAddress, respCity, respState, respZip)
     val parent = Parent(parentName, parentAddress, parentCity, parentState, parentZip)
     val contact = Contact(contactPerson, contactPhone, contactFax, contactEmail)
+
+    println("here")
 
     val maybeTS: ValidationNel[String, TransmittalSheet] = (
       id
@@ -51,22 +58,31 @@ object TsCsvParser {
       |@| contact.success
     ) { TransmittalSheet }
 
+    println("there" + maybeTS)
+
     maybeTS.leftMap(_.toList).toEither
   }
 
   def toIntOrFail(value: String, fieldName: String): ValidationNel[String, Int] = {
-    convert(value.toInt, s"$fieldName is not an Integer")
+    println("calling toInt")
+    val c = convert(value.toInt, s"$fieldName is not an Integer")
+    println("val " + c)
+    c
   }
 
   def toLongOrFail(value: String, fieldName: String): ValidationNel[String, Long] = {
+    println("calling toLong")
     convert(value.toLong, s"$fieldName is not a Long")
   }
 
   private def convert[T](x: => T, message: String): ValidationNel[String, T] = {
-    Try(x) match {
-      case Failure(result) => message.failure.toValidationNel
-      case Success(result) => result.success
+    val t = Try(x) match {
+      case Failure(result) =>
+        println("failure " + message); message.failure.toValidationNel
+      case Success(result) => val x = result.success; println("success! " + x); x
     }
+    println("convert " + t)
+    t
   }
 
 }
