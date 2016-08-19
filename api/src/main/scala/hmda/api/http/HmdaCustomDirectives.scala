@@ -34,9 +34,8 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
       hasHeader("CFPB-HMDA-Username", ctx) &&
         hasHeader("CFPB-HMDA-Institutions", ctx))
 
-  private def hasHeader(header: String, ctx: RequestContext): Boolean = {
-    val keys = ctx.request.headers.map(header => header.name())
-    keys.contains(header)
+  private def hasHeader(headerName: String, ctx: RequestContext): Boolean = {
+    ctx.request.getHeader(headerName).isPresent
   }
 
   def time: Directive0 = {

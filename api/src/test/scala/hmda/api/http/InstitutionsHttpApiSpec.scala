@@ -2,19 +2,20 @@ package hmda.api.http
 
 import java.io.File
 
-import akka.event.{ LoggingAdapter, NoLogging }
+import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.javadsl.server.AuthorizationFailedRejection
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.headers.RawHeader
 import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.api.model._
 import hmda.model.fi._
 import hmda.persistence.CommonMessages._
 import hmda.persistence.demo.DemoData
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
@@ -200,6 +201,15 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       getWithCfpbHeaders("/lars") ~> institutionsRoutes ~> check {
         handled mustBe false
         rejections mustBe List()
+      }
+    }
+
+    "accept headers case-insensitively" in {
+      val usernameLower = RawHeader("cfpb-hmda-username", "someuser")
+      val institutionsUpper = RawHeader("CFPB-HMDA-INSTITUTIONS", "1,2,3")
+
+      Get("/institutions").addHeader(usernameLower).addHeader(institutionsUpper) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
       }
     }
 
