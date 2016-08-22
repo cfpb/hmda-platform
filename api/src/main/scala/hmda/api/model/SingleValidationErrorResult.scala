@@ -5,6 +5,5 @@ import hmda.validation.engine.ValidationErrorsSummary
 case class SingleValidationErrorResult(
   syntactical: ValidationErrorsSummary,
   validity: ValidationErrorsSummary,
-  quality: ValidationErrorsSummary,
-  `macro`: ValidationErrorsSummary
+  quality: ValidationErrorsSummary
 )

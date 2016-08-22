@@ -2,16 +2,17 @@ package hmda.api.http
 
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.javadsl.model.StatusCodes
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
-import akka.util.Timeout
-import hmda.api.RequestHeaderUtils
 import hmda.api.model.SingleValidationErrorResult
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.processing.SingleLarValidation
 import hmda.validation.engine.ValidationErrorsSummary
 import org.scalatest.{ MustMatchers, WordSpec }
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.util.Timeout
+import hmda.api.RequestHeaderUtils
+import hmda.validation.engine.ValidationError
 import spray.json._
 
 import scala.concurrent.ExecutionContext
@@ -65,7 +66,6 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
           SingleValidationErrorResult(
             ValidationErrorsSummary(Nil),
             ValidationErrorsSummary(Nil),
-            ValidationErrorsSummary(Nil),
             ValidationErrorsSummary(Nil)
           )
       }
@@ -107,22 +107,32 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     }
   }
 
-  /*
-  "reject requests without 'CFPB-HMDA-Username' header" in {
-    // Request the endpoint without username header (but with other headers)
-    Post("/lar/parse", larCsv).addHeader(institutionsHeader) ~> larRoutes ~> check {
-      status mustBe StatusCodes.FORBIDDEN
-      responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
-    }
-  }
+  "LAR API Authorization and rejection handling" must {
+    // These endpoints are not protected by authorization, so they should have
+    // the same result whether or not the request contains auth headers.
 
-  "reject requests without 'CFPB-HMDA-Institutions' header" in {
-    // Request the endpoint without institutions header (but with other headers)
-    Post("/lar/parse", larCsv).addHeader(usernameHeader) ~> larRoutes ~> check {
-      status mustBe StatusCodes.FORBIDDEN
-      responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+    "allow requests without 'CFPB-HMDA-Institutions' header" in {
+      Post("/lar/parse", larCsv).addHeader(usernameHeader) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[LoanApplicationRegister] mustBe lar
+      }
+    }
+
+    "allow requests without 'CFPB-HMDA-Username' header" in {
+      Post("/lar/validate", lar).addHeader(institutionsHeader) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[SingleValidationErrorResult].syntactical.errors mustBe Nil
+        responseAs[SingleValidationErrorResult].validity.errors mustBe Nil
+        responseAs[SingleValidationErrorResult].quality.errors mustBe Nil
+      }
+    }
+
+    "not handle routes that aren't defined in this API" in {
+      getWithCfpbHeaders("/institutions") ~> larRoutes ~> check {
+        handled mustBe false
+        rejections mustBe List()
+      }
     }
   }
-  */
 
 }

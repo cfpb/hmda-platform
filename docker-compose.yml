@@ -4,10 +4,7 @@ services:
   api:
     build: .
   ui:
-    build:
-      context: ../hmda-platform-ui
-      args:
-        dev: build:docker
+    build: ../hmda-platform-ui
     ports:
       - "80:80"
     depends_on:
