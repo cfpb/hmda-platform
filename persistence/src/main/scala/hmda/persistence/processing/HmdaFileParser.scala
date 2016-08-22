@@ -33,12 +33,10 @@ object HmdaFileParser {
 
   case class HmdaFileParseState(size: Int = 0, parsingErrors: Seq[List[String]] = Nil) {
     def updated(event: Event): HmdaFileParseState = event match {
-      case TsParsed(ts) =>
+      case TsParsed(_) | LarParsed(_) =>
         HmdaFileParseState(size + 1, parsingErrors)
       case TsParsedErrors(errors) =>
         HmdaFileParseState(size, parsingErrors :+ errors)
-      case LarParsed(lar) =>
-        HmdaFileParseState(size + 1, parsingErrors)
       case LarParsedErrors(errors) =>
         HmdaFileParseState(size, parsingErrors :+ errors)
     }
