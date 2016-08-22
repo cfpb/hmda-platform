@@ -38,7 +38,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
       probe.expectMsg(HmdaFileParseState(1, Nil))
     }
 
-    "persist parsed TSs and TS parsing errors" in {
+    "persist TS parsing errors" in {
       parseTs(badLines)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(0, Seq(List("Timestamp is not a Long"))))
