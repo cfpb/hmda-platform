@@ -2,6 +2,7 @@ package hmda.persistence.processing
 
 import java.time.Instant
 
+import akka.actor.ActorRef
 import akka.testkit.TestProbe
 import org.scalatest.BeforeAndAfterEach
 import com.typesafe.config.ConfigFactory
@@ -12,8 +13,6 @@ import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
 
-import scala.concurrent.duration._
-
 class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
   import hmda.model.util.FITestData._
 
@@ -21,46 +20,40 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
 
   val submissionId = "12345-2017-1"
 
-  val hmdaFileParser = createHmdaFileParser(system, submissionId)
+  var hmdaFileParser: ActorRef = _
   val probe = TestProbe()
 
   val timestamp = Instant.now.toEpochMilli
   val lines = fiCSV.split("\n")
   val badLines = fiCSVParseError.split("\n")
 
-  var initialSize: Int = _
-  var initalList: Seq[List[String]] = _
-
   override def beforeEach(): Unit = {
-    probe.send(hmdaFileParser, GetState)
-    val initial = probe.receiveOne(1.seconds).asInstanceOf[HmdaFileParseState]
-    initialSize = initial.size
-    initalList = initial.parsingErrors
+    hmdaFileParser = createHmdaFileParser(system, submissionId + Instant.now.toEpochMilli)
   }
 
   "HMDA File Parser" must {
     "persist parsed TSs" in {
       parseTs(lines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(initialSize + 1, initalList))
+      probe.expectMsg(HmdaFileParseState(1, Nil))
     }
 
     "persist parsed TSs and TS parsing errors" in {
       parseTs(badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(initialSize, initalList ++ Seq(List("Timestamp is not a Long"))))
+      probe.expectMsg(HmdaFileParseState(0, Seq(List("Timestamp is not a Long"))))
     }
 
     "persist parsed LARs" in {
       parseLars(lines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(initialSize + 3, initalList))
+      probe.expectMsg(HmdaFileParseState(3, Nil))
     }
 
     "persist parsed LARs and parsing errors" in {
       parseLars(badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(initialSize + 2, initalList ++ Seq(List("Agency Code is not an Integer"))))
+      probe.expectMsg(HmdaFileParseState(2, Seq(List("Agency Code is not an Integer"))))
     }
 
     "read entire raw file" in {
