@@ -3,6 +3,7 @@ package hmda.validation.engine.ts.validity
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
+import hmda.validation.engine.Validity
 import hmda.validation.engine.ts.TsCommonEngine
 import hmda.validation.rules.ts.validity._
 
@@ -24,7 +25,7 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
       V145,
       V150,
       V155
-    ).map(check(_, ts, tsId))
+    ).map(check(_, ts, tsId, Validity))
 
     validateAll(checks, ts)
   }

@@ -106,7 +106,7 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= akkaPersistenceDeps
       )
-    ).dependsOn(parser % "compile->compile;test->test")
+    ).dependsOn(validation % "compile->compile;test->test")
 
 
   lazy val api = (project in file("api"))
@@ -125,7 +125,7 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= httpDeps
       )
-    ).dependsOn(parser, validation, persistence % "compile->compile;test->test")
+    ).dependsOn(persistence % "compile->compile;test->test")
 
 
   lazy val platformTest = (project in file("platform-test"))

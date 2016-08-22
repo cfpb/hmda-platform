@@ -3,6 +3,7 @@ package hmda.validation.engine.lar.syntactical
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
+import hmda.validation.engine.Syntactical
 import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.syntactical.S025
@@ -17,7 +18,7 @@ trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
       S025.inContext(ctx),
       S205
     )
-    val checks = checksToRun.map(check(_, lar, lar.loan.id))
+    val checks = checksToRun.map(check(_, lar, lar.loan.id, Syntactical))
 
     validateAll(checks, lar)
   }
@@ -26,7 +27,7 @@ trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
     val checks = List(
       S011,
       S040
-    ).map(check(_, lars, ""))
+    ).map(check(_, lars, "", Syntactical))
 
     validateAll(checks, lars)
   }
