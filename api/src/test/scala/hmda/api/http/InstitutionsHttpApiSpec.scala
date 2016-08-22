@@ -2,18 +2,23 @@ package hmda.api.http
 
 import java.io.File
 
-import akka.event.{ LoggingAdapter, NoLogging }
+import akka.event.{LoggingAdapter, NoLogging}
+import akka.http.javadsl.server.AuthorizationFailedRejection
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.headers.RawHeader
 import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.api.model._
 import hmda.model.fi._
+import hmda.persistence.CommonMessages._
 import hmda.persistence.demo.DemoData
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import org.iq80.leveldb.util.FileUtils
 
 import scala.concurrent.duration._
@@ -43,16 +48,16 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return a list of existing institutions" in {
       getWithCfpbHeaders("/institutions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val institutionsWrapped = DemoData.institutions.map(i => InstitutionWrapper(i.id, i.name, i.status))
+        val institutionsWrapped = DemoData.institutions.map(i => InstitutionWrapper(i.id.toString, i.name, i.status))
         responseAs[Institutions] mustBe Institutions(institutionsWrapped)
       }
     }
 
     "return an institution by id" in {
-      getWithCfpbHeaders("/institutions/12345") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val institution = DemoData.institutions.head
-        val institutionWrapped = InstitutionWrapper(institution.id, institution.name, institution.status)
+        val institutionWrapped = InstitutionWrapper(institution.id.toString, institution.name, institution.status)
         val filings = DemoData.filings.filter(f => f.institutionId == institution.id.toString)
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institutionWrapped, filings.reverse)
       }
@@ -63,7 +68,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "return an institution's summary" in {
-      getWithCfpbHeaders("/institutions/12345/summary") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/summary") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val summary = DemoData.institutionSummary
         val institutionSummary = InstitutionSummary(summary._1.toString, summary._2, summary._3)
@@ -72,14 +77,15 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "return a list of submissions for a financial institution" in {
-      getWithCfpbHeaders("/institutions/12345/filings/2017") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val filing = Filing("2017", "12345", NotStarted)
+        val filing = Filing("2017", "0", NotStarted)
         responseAs[FilingDetail] mustBe FilingDetail(filing, DemoData.newSubmissions.reverse)
       }
-      getWithCfpbHeaders("/institutions/12345/filings/xxxx") ~> institutionsRoutes ~> check {
+
+      getWithCfpbHeaders("/institutions/0/filings/xxxx") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 12345", "institutions/12345/filings/xxxx")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 0", "institutions/0/filings/xxxx")
       }
       getWithCfpbHeaders("/institutions/xxxxx/filings/2017") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
@@ -88,7 +94,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "create a new submission" in {
-      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions") ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Created
         responseAs[Submission] mustBe Submission(DemoData.newSubmissions.size + 1, Created)
       }
@@ -102,9 +108,9 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "fail creating a new submission for a non existent filing period" in {
-      postWithCfpbHeaders("/institutions/12345/filings/2001/submissions") ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2001/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 12345", "institutions/12345/filings/2001/submissions")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 0", "institutions/0/filings/2001/submissions")
       }
     }
 
@@ -116,8 +122,8 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
       val file = multiPartFile(csv, "sample.txt")
 
-      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Accepted
         responseAs[String] mustBe "uploaded"
       }
     }
@@ -125,36 +131,97 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return 400 when trying to upload the wrong file" in {
       val badContent = "qdemd"
       val file = multiPartFile(badContent, "sample.dat")
-      postWithCfpbHeaders("/institutions/12345/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", "institutions/12345/filings/2017/submissions/1")
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", "institutions/0/filings/2017/submissions/1")
       }
     }
 
-    "reject requests without 'CFPB-HMDA-Username' header" in {
-      // Request the endpoint without username header (but with other headers)
+    "return 400 when trying to upload to a completed submission" in {
+      val badContent = "qdemd"
+      val file = multiPartFile(badContent, "sample.txt")
+      val submissionActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
+      submissionActor ! UpdateSubmissionStatus(1, Signed)
+      submissionActor ! Shutdown
+      Thread sleep 100
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/0/filings/2017/submissions/1")
+      }
+    }
+  }
+
+  "Institutions API Authorization and rejection handling" must {
+
+    // 'CFPB-HMDA-Username' header
+    // Request these endpoints without username header (but with other required headers)
+    "reject requests to /institutions without 'CFPB-HMDA-Username' header" in {
       Get("/institutions").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.Forbidden
-        responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+        rejection mustBe a[AuthorizationFailedRejection]
       }
     }
 
-    "reject requests without 'CFPB-HMDA-Institutions' header" in {
-      // Request the endpoint without institutions header (but with other headers)
+    "reject requests to /inst/id without 'CFPB-HMDA-Username' header" in {
+      Get("/institutions/12345").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+    "reject requests to /inst/id/filings/p without 'CFPB-HMDA-Username' header" in {
+      Get("/institutions/12345/filings/2017").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+
+    // 'CFPB-HMDA-Institutions' header
+    // Request these endpoints without institutions header (but with other required headers)
+    "reject requests to /inst without 'CFPB-HMDA-Institutions' header" in {
       Get("/institutions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.Forbidden
-        responseAs[ErrorResponse] mustBe ErrorResponse(403, "Unauthorized Access", "")
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+    "reject requests to submission creation without 'CFPB-HMDA-Institutions' header" in {
+      Post("/institutions/12345/filings/2017/submissions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+    "reject requests to submission summary without 'CFPB-HMDA-Institutions' header" in {
+      Get("/institutions/12345/filings/2017").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+
+    "reject unauthorized requests to any /instititutions-based path, even nonexistent endpoints" in {
+      // Request the endpoint without a required header
+      Get("/institutions/12345/nonsense").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+
+    "not handle requests to nonexistent endpoints if the request is authorized" in {
+      getWithCfpbHeaders("/lars") ~> institutionsRoutes ~> check {
+        handled mustBe false
+        rejections mustBe List()
+      }
+    }
+
+    "accept headers case-insensitively" in {
+      val usernameLower = RawHeader("cfpb-hmda-username", "someuser")
+      val institutionsUpper = RawHeader("CFPB-HMDA-INSTITUTIONS", "1,2,3")
+
+      Get("/institutions").addHeader(usernameLower).addHeader(institutionsUpper) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
       }
     }
 
   }
 
-  private def multiPartFile(contents: String, fileName: String) = {
-    Multipart.FormData(Multipart.FormData.BodyPart.Strict(
-      "file",
-      HttpEntity(ContentTypes.`text/plain(UTF-8)`, contents),
-      Map("filename" -> fileName)
-    ))
-  }
+  private def multiPartFile(contents: String, fileName: String) =
+    {
+      Multipart.FormData(Multipart.FormData.BodyPart.Strict(
+        "file",
+        HttpEntity(ContentTypes.`text/plain(UTF-8)`, contents),
+        Map("filename" -> fileName)
+      ))
+    }
 
 }

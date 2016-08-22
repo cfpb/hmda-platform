@@ -18,7 +18,8 @@ object HmdaApi
     extends App
     with HttpApi
     with LarHttpApi
-    with InstitutionsHttpApi {
+    with InstitutionsHttpApi
+    with HmdaCustomDirectives {
 
   override implicit val system = ActorSystem("hmda")
   override implicit val materializer = ActorMaterializer()
