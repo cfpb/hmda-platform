@@ -2,8 +2,8 @@ package hmda.persistence.processing
 
 import java.time.Instant
 
-import akka.actor.ActorRef
-import akka.testkit.TestProbe
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.testkit.{ EventFilter, TestProbe }
 import org.scalatest.BeforeAndAfterEach
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
@@ -17,6 +17,20 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
   import hmda.model.util.FITestData._
 
   val config = ConfigFactory.load()
+  override implicit lazy val system =
+    ActorSystem(
+      "test-system",
+      ConfigFactory.parseString(
+        """
+          | akka.loggers = ["akka.testkit.TestEventListener"]
+          | akka.loglevel = DEBUG
+          | akka.stdout-loglevel = "OFF"
+          | akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
+          | akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
+          | akka.persistence.snapshot-store.local.dir = "target/snapshots"
+          | """.stripMargin
+      )
+    )
 
   val submissionId = "12345-2017-1"
 
@@ -65,10 +79,10 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
       probe.send(hmdaRawFile, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
-      probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "12345-2017-2"))
-      Thread.sleep(2000)
-      probe.send(hmdaFileParser2, GetState)
-      probe.expectMsg(HmdaFileParseState(4, Nil))
+      val msg = "Parsing ended for 12345-2017-2"
+      EventFilter.debug(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
+        probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "12345-2017-2"))
+      }
     }
   }
 

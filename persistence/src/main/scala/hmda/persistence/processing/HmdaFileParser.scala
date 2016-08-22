@@ -71,6 +71,7 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
   override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId) =>
+      var finished = false
       val parsedTs = events(persistenceId)
         .map { case LineAdded(_, data) => data }
         .take(1)
@@ -82,6 +83,9 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
 
       parsedTs
         .runForeach(pTs => self ! pTs)
+        .andThen {
+          case _ => if (!finished) finished = true else self ! Shutdown
+        }
 
       val parsedLar = events(persistenceId)
         .map { case LineAdded(_, data) => data }
@@ -94,6 +98,9 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
 
       parsedLar
         .runForeach(pLar => self ! pLar)
+        .andThen {
+          case _ => if (!finished) finished = true else self ! Shutdown
+        }
 
     case tp @ TsParsed(ts) =>
       persist(tp) { e =>
