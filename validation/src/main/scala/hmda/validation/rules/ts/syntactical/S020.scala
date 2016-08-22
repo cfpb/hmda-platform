@@ -9,7 +9,7 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object S020 extends EditCheck[HasControlNumber] {
 
-  private val agencyCodes: List[Int] = Agency.values.map(_.value).toList
+  private val agencyCodes = Agency.values.map(_.value).toSet
 
   override def apply(ts: HasControlNumber): Result = {
     ts.agencyCode is containedIn(agencyCodes)
