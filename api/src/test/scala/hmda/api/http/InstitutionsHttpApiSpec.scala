@@ -93,6 +93,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
+    "find the latest institution for an institution" in {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[Submission] mustBe Submission(3, Created)
+      }
+    }
+
     "create a new submission" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Created

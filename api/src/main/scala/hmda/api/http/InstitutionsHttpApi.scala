@@ -142,6 +142,23 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
+  val submissionLatestPath =
+    path("institutions" / Segment / "filings" / Segment / "submissions" / "latest") { (institutionId, period) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions"
+      timedPost {
+        val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
+        val fSubmissions = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
+        onComplete(fSubmissions) {
+          case Success(submission) =>
+            submissionsActor ! Shutdown
+            complete(ToResponseMarshallable(submission))
+          case Failure(error) =>
+            submissionsActor ! Shutdown
+            completeWithInternalError(path, error)
+        }
+      }
+    }
+
   val uploadPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
       time {
@@ -252,6 +269,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         institutionSummaryPath ~
         filingByPeriodPath ~
         submissionPath ~
+        submissionLatestPath ~
         uploadPath
     }
 }
