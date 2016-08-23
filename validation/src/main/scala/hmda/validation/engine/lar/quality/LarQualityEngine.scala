@@ -3,13 +3,14 @@ package hmda.validation.engine.lar.quality
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
+import hmda.validation.engine.Quality
 import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.rules.lar.quality._
 
 trait LarQualityEngine extends LarCommonEngine with ValidationApi {
 
   private def q022(lar: LoanApplicationRegister): LarValidation = {
-    convertResult(lar, Q022(lar, 2017), "Q022", lar.loan.id)
+    convertResult(lar, Q022(lar, 2017), "Q022", lar.loan.id, Quality)
   }
 
   def checkQuality(lar: LoanApplicationRegister, ctx: ValidationContext): LarValidation = {
@@ -44,7 +45,7 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q066,
       Q067,
       Q068
-    ).map(check(_, lar, lar.loan.id))
+    ).map(check(_, lar, lar.loan.id, Quality))
 
     val allChecks = checks :+ q022(lar)
 

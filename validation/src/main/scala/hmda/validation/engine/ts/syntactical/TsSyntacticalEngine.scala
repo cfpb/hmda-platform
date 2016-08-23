@@ -4,6 +4,7 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.api.ValidationApi
 import hmda.validation.api.ts.TsValidationApi
 import hmda.validation.context.ValidationContext
+import hmda.validation.engine.Syntactical
 import hmda.validation.engine.ts.TsCommonEngine
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.syntactical._
@@ -15,13 +16,13 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
 
   private def s100(t: TransmittalSheet): Future[TsValidation] = {
     S100(t, findYearProcessed).map { result =>
-      convertResult(t, result, "S100", t.agencyCode + t.respondent.id)
+      convertResult(t, result, "S100", t.agencyCode + t.respondent.id, Syntactical)
     }
   }
 
   private def s013(t: TransmittalSheet): Future[TsValidation] = {
     S013(t, findTimestamp).map { result =>
-      convertResult(t, result, "S013", t.agencyCode + t.respondent.id)
+      convertResult(t, result, "S013", t.agencyCode + t.respondent.id, Syntactical)
     }
   }
 
@@ -32,7 +33,7 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
       S025.inContext(ctx),
       S028
     )
-    val checks = checksToRun.map(check(_, ts, ts.agencyCode + ts.respondent.id))
+    val checks = checksToRun.map(check(_, ts, ts.agencyCode + ts.respondent.id, Syntactical))
 
     val fs100 = s100(ts)
     val fs013 = s013(ts)
