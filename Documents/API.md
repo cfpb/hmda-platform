@@ -112,6 +112,18 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         "submissionStatus": "created"
     }
     ```
+    
+* `/institutions/<institution>/filings/<period>/submissions/latest`
+
+    * `GET` - The latest submission for some institution and period
+    
+    ```json
+    {
+           "id": 3,
+           "submissionStatus": "created"
+         }
+    ```
+
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>`
     * `POST` - Upload HMDA data to submission
