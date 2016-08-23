@@ -1,6 +1,6 @@
 package hmda.persistence.processing
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
+import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -71,7 +71,6 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
   override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId) =>
-      var finished = false
       val parsedTs = events(persistenceId)
         .map { case LineAdded(_, data) => data }
         .take(1)
@@ -83,9 +82,6 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
 
       parsedTs
         .runForeach(pTs => self ! pTs)
-        .andThen {
-          case _ => if (!finished) finished = true else self ! Shutdown
-        }
 
       val parsedLar = events(persistenceId)
         .map { case LineAdded(_, data) => data }
@@ -99,38 +95,41 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
       parsedLar
         .runForeach(pLar => self ! pLar)
         .andThen {
-          case _ => if (!finished) finished = true else self ! Shutdown
+          case _ => self ! CompleteParsing
         }
 
     case tp @ TsParsed(ts) =>
       persist(tp) { e =>
-        log.debug(s"Persisted: ${e.ts}")
+        log.info(s"Persisted: ${e.ts}")
         updateState(e)
       }
 
     case tsErr @ TsParsedErrors(errors) =>
       persist(tsErr) { e =>
-        log.debug(s"Persisted: ${e.errors}")
+        log.info(s"Persisted: ${e.errors}")
         updateState(e)
       }
 
     case lp @ LarParsed(lar) =>
       persist(lp) { e =>
-        log.debug(s"Persisted: ${e.lar}")
+        log.info(s"Persisted: ${e.lar}")
         updateState(e)
       }
 
     case larErr @ LarParsedErrors(errors) =>
       persist(larErr) { e =>
-        log.debug(s"Persisted: ${e.errors}")
+        log.info(s"Persisted: ${e.errors}")
         updateState(e)
       }
+
+    case CompleteParsing =>
+      log.info(s"Parsing completed for $submissionId")
+      publishEvent(ParsingCompleted(submissionId))
 
     case GetState =>
       sender() ! state
 
     case Shutdown =>
-      publishEvent(ParsingCompleted(submissionId))
       context stop self
 
   }

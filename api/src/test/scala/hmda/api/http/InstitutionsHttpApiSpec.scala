@@ -2,7 +2,7 @@ package hmda.api.http
 
 import java.io.File
 
-import akka.event.{LoggingAdapter, NoLogging}
+import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.javadsl.server.AuthorizationFailedRejection
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
@@ -15,7 +15,7 @@ import hmda.api.model._
 import hmda.model.fi._
 import hmda.persistence.CommonMessages._
 import hmda.persistence.demo.DemoData
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus

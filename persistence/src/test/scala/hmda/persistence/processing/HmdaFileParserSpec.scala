@@ -79,10 +79,13 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
       probe.send(hmdaRawFile, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
-      val msg = "Parsing ended for 12345-2017-2"
-      EventFilter.debug(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
+      val msg = "Parsing completed for 12345-2017-2"
+      EventFilter.info(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
         probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "12345-2017-2"))
       }
+
+      probe.send(hmdaFileParser2, GetState)
+      probe.expectMsg(HmdaFileParseState(4, Nil))
     }
   }
 
