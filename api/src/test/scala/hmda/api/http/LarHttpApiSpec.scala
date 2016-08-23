@@ -106,10 +106,15 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       }
     }
 
-    "return a parsed and validated LAR" in {
+    "return no errors when parsing and validating a valid LAR" in {
       postWithCfpbHeaders("/lar/parseAndValidate", larCsv) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]] mustBe Nil
+        responseAs[SingleValidationErrorResult] mustBe
+          SingleValidationErrorResult(
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil)
+          )
       }
     }
 
@@ -124,7 +129,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       val badLar = lar.copy(agencyCode = 0)
       postWithCfpbHeaders("/lar/parseAndValidate", badLar.toCSV) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
     }
   }
