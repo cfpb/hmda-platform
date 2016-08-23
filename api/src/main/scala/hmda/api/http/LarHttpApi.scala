@@ -2,6 +2,8 @@ package hmda.api.http
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
+import akka.http.javadsl.server.directives.RouteDirectives
+import akka.http.scaladsl
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
@@ -10,6 +12,8 @@ import akka.pattern.ask
 import hmda.parser.fi.lar.LarCsvParser
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ ContentTypes, _ }
+import akka.http.scaladsl.server
+import akka.http.scaladsl.server.StandardRoute
 import akka.util.Timeout
 import hmda.api.processing.lar.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
 import hmda.api.protocol.fi.lar.LarProtocol
@@ -49,19 +53,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
         parameters('check.as[String] ? "all") { (checkType) =>
           timedPost {
             entity(as[LoanApplicationRegister]) { lar =>
-              val larValidation = system.actorSelection("/user/larValidation")
-              val checkMessage = checkType match {
-                case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
-                case "validity" => CheckValidity(lar, ValidationContext(None))
-                case "quality" => CheckQuality(lar, ValidationContext(None))
-                case _ => CheckAll(lar, ValidationContext(None))
-              }
-              onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
-                case Success(xs) =>
-                  complete(ToResponseMarshallable(xs))
-                case Failure(e) =>
-                  complete(HttpResponse(StatusCodes.InternalServerError))
-              }
+              validateRoute(lar, checkType)
             }
           }
         }
@@ -75,20 +67,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
           timedPost {
             entity(as[String]) { s =>
               LarCsvParser(s) match {
-                case Right(lar) =>
-                  val larValidation = system.actorSelection("/user/larValidation")
-                  val checkMessage = checkType match {
-                    case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
-                    case "validity" => CheckValidity(lar, ValidationContext(None))
-                    case "quality" => CheckQuality(lar, ValidationContext(None))
-                    case _ => CheckAll(lar, ValidationContext(None))
-                  }
-                  onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
-                    case Success(xs) =>
-                      complete(ToResponseMarshallable(xs))
-                    case Failure(e) =>
-                      complete(HttpResponse(StatusCodes.InternalServerError))
-                  }
+                case Right(lar) => validateRoute(lar, checkType)
                 case Left(errors) => complete(errorsAsResponse(errors))
               }
             }
@@ -96,6 +75,22 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
         }
       }
     }
+
+  def validateRoute(lar: LoanApplicationRegister, checkType: String): scaladsl.server.Route = {
+    val larValidation = system.actorSelection("/user/larValidation")
+    val checkMessage = checkType match {
+      case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
+      case "validity" => CheckValidity(lar, ValidationContext(None))
+      case "quality" => CheckQuality(lar, ValidationContext(None))
+      case _ => CheckAll(lar, ValidationContext(None))
+    }
+    onComplete((larValidation ? checkMessage).mapTo[List[ValidationError]]) {
+      case Success(xs) =>
+        complete(ToResponseMarshallable(xs))
+      case Failure(e) =>
+        complete(HttpResponse(StatusCodes.InternalServerError))
+    }
+  }
 
   def errorsAsResponse(list: List[String]): HttpResponse = {
     val errorEntity = HttpEntity(ContentTypes.`application/json`, list.toJson.toString)
