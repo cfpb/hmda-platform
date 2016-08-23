@@ -70,17 +70,15 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
     }
 
   def aggregateErrors(validationErrors: ValidationErrors): SingleValidationErrorResult = {
-    val errors = validationErrors.errors
-    val syntactical = errors.filter(_.errorType == Syntactical).map(e => e.msg)
-    val validity = errors.filter(_.errorType == Validity).map(e => e.msg)
-    val quality = errors.filter(_.errorType == Quality).map(e => e.msg)
-    val macroErrors = errors.filter(_.errorType == Macro).map(e => e.msg)
+    val errors = validationErrors.errors.groupBy(_.errorType)
+    def allOfType(errorType: ValidationErrorType): Seq[String] = {
+      errors.getOrElse(errorType, List()).map(e => e.name)
+    }
 
     SingleValidationErrorResult(
-      ValidationErrorsSummary(syntactical),
-      ValidationErrorsSummary(validity),
-      ValidationErrorsSummary(quality),
-      ValidationErrorsSummary(macroErrors)
+      ValidationErrorsSummary(allOfType(Syntactical)),
+      ValidationErrorsSummary(allOfType(Validity)),
+      ValidationErrorsSummary(allOfType(Quality))
     )
 
   }
@@ -90,8 +88,6 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
     HttpResponse(StatusCodes.BadRequest, entity = errorEntity)
   }
 
-  val larRoutes = //hmdaAuthorize {
-    parseLarRoute ~ validateLarRoute
-  //} ~ unauthorizedAccess
+  val larRoutes = parseLarRoute ~ validateLarRoute
 
 }
