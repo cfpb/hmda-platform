@@ -3,7 +3,7 @@ package hmda.api.processing
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ReadHmdaRawFile }
-import hmda.persistence.processing.HmdaFileValidator.BeginValidation
+import hmda.persistence.processing.HmdaFileValidator.{ BeginValidation, ValidationCompleted, ValidationCompletedWitErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile }
 
@@ -34,6 +34,16 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
       case ParsingCompleted(submissionId) =>
         fireParsingCompletedEvents(submissionId)
 
+      case ValidationStarted(submissionId) =>
+        log.info(s"Validation started for $submissionId")
+
+      case ValidationCompletedWitErrors(submissionId) =>
+        println("validation completed with errors")
+        fireValidationCompletedEvents(submissionId)
+
+      case ValidationCompleted(submissionId) =>
+        fireValidationCompletedEvents(submissionId)
+
       case _ => //ignore other events
 
     }
@@ -50,5 +60,9 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
     val larValidator = context.system.actorSelection(s"/user/larValidation")
     val hmdaFileValidator = context.actorOf(HmdaFileValidator.props(submissionId, larValidator))
     hmdaFileValidator ! BeginValidation
+  }
+
+  private def fireValidationCompletedEvents(submissionId: String): Unit = {
+    log.info(s"Validation completed for submission $submissionId")
   }
 }
