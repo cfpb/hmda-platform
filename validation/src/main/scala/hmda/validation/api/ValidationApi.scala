@@ -9,7 +9,7 @@ import scalaz.Scalaz._
 
 trait ValidationApi {
 
-  def check[T](editCheck: EditCheck[_ >: T], input: T, inputId: String, errorType: ValidationErrorType): ValidationNel[ValidationError, T] = {
+  def check[T](editCheck: EditCheck[T], input: T, inputId: String, errorType: ValidationErrorType): ValidationNel[ValidationError, T] = {
     convertResult(input, editCheck(input), editCheck.name, inputId, errorType)
   }
 

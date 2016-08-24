@@ -11,7 +11,7 @@ abstract class LarEditCheckSpec extends PropSpec with PropertyChecks with MustMa
   implicit val generatorDriverConfig =
     PropertyCheckConfig(minSuccessful = 100, maxDiscarded = 500)
 
-  def check: EditCheck[_ >: LoanApplicationRegister]
+  def check: EditCheck[LoanApplicationRegister]
 
   // TODO consider trying Matcher instead of these methods
   implicit class LarChecker(lar: LoanApplicationRegister) {
