@@ -93,11 +93,20 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
-    "find the latest institution for an institution" in {
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
+    "find the latest submission for an institution" in {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[Submission] mustBe Submission(3, Created)
       }
+    }
+
+    "return not found when looking for a latest submission for non existent institution" in {
+      getWithCfpbHeaders("/institutions/12345/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+        val error = ErrorResponse(404, "No submission found for 12345 for 2017", "institutions/12345/filings/2017/submissions/latest")
+        responseAs[ErrorResponse] mustBe error
+      }
+
     }
 
     "create a new submission" in {

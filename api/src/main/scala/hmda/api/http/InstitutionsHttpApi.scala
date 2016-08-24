@@ -144,14 +144,17 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
 
   val submissionLatestPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / "latest") { (institutionId, period) =>
-      val path = s"institutions/$institutionId/filings/$period/submissions"
-      timedPost {
+      val path = s"institutions/$institutionId/filings/$period/submissions/latest"
+      timedGet {
         val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
         val fSubmissions = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
         onComplete(fSubmissions) {
           case Success(submission) =>
             submissionsActor ! Shutdown
-            complete(ToResponseMarshallable(submission))
+            if (submission.id == 0) {
+              val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", path)
+              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+            } else complete(ToResponseMarshallable(submission))
           case Failure(error) =>
             submissionsActor ! Shutdown
             completeWithInternalError(path, error)
