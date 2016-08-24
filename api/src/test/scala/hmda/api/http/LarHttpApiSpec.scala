@@ -2,19 +2,21 @@ package hmda.api.http
 
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.javadsl.model.StatusCodes
-import akka.http.javadsl.server.AuthorizationFailedRejection
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
+import hmda.api.model.SingleValidationErrorResult
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.persistence.processing.SingleLarValidation
+import hmda.validation.engine.ValidationErrorsSummary
 import org.scalatest.{ MustMatchers, WordSpec }
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
-import hmda.api.processing.lar.SingleLarValidation
 import hmda.validation.engine.ValidationError
 import spray.json._
+
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     with LarHttpApi with RequestHeaderUtils {
@@ -60,7 +62,12 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     "return no validation errors for a valid LAR" in {
       postWithCfpbHeaders("/lar/validate", lar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]] mustBe Nil
+        responseAs[SingleValidationErrorResult] mustBe
+          SingleValidationErrorResult(
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil)
+          )
       }
     }
 
@@ -68,7 +75,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       val badLar = lar.copy(agencyCode = 0)
       postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
     }
 
@@ -77,22 +84,52 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 4)
       postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 3
+        responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
+        responseAs[SingleValidationErrorResult].validity.errors.length mustBe 1
+        responseAs[SingleValidationErrorResult].quality.errors.length mustBe 1
+
       }
       //should fail S020
       postWithCfpbHeaders("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
       //should fail V220
       postWithCfpbHeaders("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[SingleValidationErrorResult].validity.errors.length mustBe 1
       }
       //should fail Q036
       postWithCfpbHeaders("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]].length mustBe 1
+        responseAs[SingleValidationErrorResult].quality.errors.length mustBe 1
+      }
+    }
+
+    "return no errors when parsing and validating a valid LAR" in {
+      postWithCfpbHeaders("/lar/parseAndValidate", larCsv) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[SingleValidationErrorResult] mustBe
+          SingleValidationErrorResult(
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil),
+            ValidationErrorsSummary(Nil)
+          )
+      }
+    }
+
+    "return parsing errors for an invalid LAR" in {
+      postWithCfpbHeaders("/lar/parseAndValidate", invalidLarCsv) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.BAD_REQUEST
+        responseAs[List[String]].length mustBe 2
+      }
+    }
+
+    "return a list of validation errors for an invalid LAR" in {
+      val badLar = lar.copy(agencyCode = 0)
+      postWithCfpbHeaders("/lar/parseAndValidate", badLar.toCSV) ~> larRoutes ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
     }
   }
@@ -111,7 +148,9 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     "allow requests without 'CFPB-HMDA-Username' header" in {
       Post("/lar/validate", lar).addHeader(institutionsHeader) ~> larRoutes ~> check {
         status mustEqual StatusCodes.OK
-        responseAs[List[ValidationError]] mustBe Nil
+        responseAs[SingleValidationErrorResult].syntactical.errors mustBe Nil
+        responseAs[SingleValidationErrorResult].validity.errors mustBe Nil
+        responseAs[SingleValidationErrorResult].quality.errors mustBe Nil
       }
     }
 

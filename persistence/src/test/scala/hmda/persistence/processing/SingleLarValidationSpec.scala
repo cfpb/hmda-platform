@@ -1,16 +1,16 @@
-package hmda.api.processing.lar
+package hmda.persistence.processing
 
 import java.io.File
 
 import akka.testkit.TestProbe
 import hmda.actor.test.ActorSpec
 import hmda.parser.fi.lar.LarCsvParser
-
-import scala.io.Source
-import hmda.api.processing.lar.SingleLarValidation._
+import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.context.ValidationContext
+import hmda.validation.engine.ValidationErrors
 
 import scala.concurrent.duration._
+import scala.io.Source
 
 class SingleLarValidationSpec extends ActorSpec {
 
@@ -27,11 +27,11 @@ class SingleLarValidationSpec extends ActorSpec {
     "validate all lars in sample files" in {
       lars.foreach { lar =>
         probe.send(larValidation, CheckSyntactical(lar, ValidationContext(None)))
-        probe.expectMsg(10.seconds, Nil)
+        probe.expectMsg(10.seconds, ValidationErrors(Nil))
       }
       lars.foreach { lar =>
         probe.send(larValidation, CheckValidity(lar, ValidationContext(None)))
-        probe.expectMsg(10.seconds, Nil)
+        probe.expectMsg(10.seconds, ValidationErrors(Nil))
       }
     }
   }
