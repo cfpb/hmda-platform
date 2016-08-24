@@ -7,7 +7,7 @@ import hmda.persistence.CommonMessages._
 import hmda.persistence.LocalEventPublisher
 import hmda.persistence.processing.HmdaFileParser.LarParsed
 import hmda.persistence.processing.HmdaQuery._
-import hmda.persistence.processing.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
+import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 
@@ -130,8 +130,11 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
           larValidator ! CheckQuality(lar, ValidationContext(None))
         }
         .andThen {
-          case _ => self ! CompleteValidation
+          case _ => larValidator ! FinishChecks
         }
+
+    case FinishChecks =>
+      self ! CompleteValidation
 
     case CompleteValidationWithErrors =>
       publishEvent(ValidationCompletedWitErrors(submissionId))

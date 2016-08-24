@@ -13,6 +13,7 @@ object SingleLarValidation {
   case class CheckSyntactical(lar: LoanApplicationRegister, ctx: ValidationContext)
   case class CheckValidity(lar: LoanApplicationRegister, ctx: ValidationContext)
   case class CheckQuality(lar: LoanApplicationRegister, ctx: ValidationContext)
+  case object FinishChecks
 
   def createSingleLarValidator(system: ActorSystem): ActorRef = {
     system.actorOf(SingleLarValidation.props, "larValidation")
@@ -36,6 +37,9 @@ class SingleLarValidation extends Actor with ActorLogging with LarEngine {
     case CheckAll(lar, ctx) =>
       log.debug(s"Checking all edits on LAR: ${lar.toCSV}")
       sender() ! validationErrors(lar, ctx, validateLar)
+
+    case FinishChecks =>
+      sender() ! FinishChecks
 
     case _ =>
       log.error(s"Unsupported message sent to ${self.path}")
