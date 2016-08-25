@@ -38,7 +38,7 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
         log.info(s"Validation started for $submissionId")
 
       case ValidationCompletedWitErrors(submissionId) =>
-        println("validation completed with errors")
+        log.info("validation completed with errors")
         fireValidationCompletedEvents(submissionId)
 
       case ValidationCompleted(submissionId) =>
