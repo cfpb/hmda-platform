@@ -26,7 +26,7 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
     case e: Event => e match {
       case UploadStarted(submissionId) =>
-        log.debug(s"Upload started for submission $submissionId")
+        log.info(s"Upload started for submission $submissionId")
 
       case UploadCompleted(size, submissionId) =>
         fireUploadCompletedEvents(size, submissionId)
@@ -50,13 +50,13 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
   }
 
   private def fireUploadCompletedEvents(size: Int, submissionId: String): Unit = {
-    log.debug(s"$size lines uploaded for submission $submissionId")
+    log.info(s"$size lines uploaded for submission $submissionId")
     val hmdaFileParser = context.actorOf(HmdaFileParser.props(submissionId))
     hmdaFileParser ! ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId")
   }
 
   private def fireParsingCompletedEvents(submissionId: String): Unit = {
-    log.debug(s"Parsing completed for $submissionId")
+    log.info(s"Parsing completed for $submissionId")
     val larValidator = context.system.actorSelection(s"/user/larValidation")
     val hmdaFileValidator = context.actorOf(HmdaFileValidator.props(submissionId, larValidator))
     hmdaFileValidator ! BeginValidation
