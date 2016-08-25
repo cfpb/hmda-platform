@@ -1,10 +1,12 @@
 package hmda.persistence.processing
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
+import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages._
 import hmda.persistence.LocalEventPublisher
 import hmda.persistence.processing.HmdaRawFile.LineAdded
@@ -15,6 +17,8 @@ object HmdaFileParser {
   val name = "HmdaFileParser"
 
   case class ReadHmdaRawFile(submissionId: String) extends Command
+  case class TsParsed(ts: TransmittalSheet) extends Event
+  case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
   case class LarParsedErrors(errors: List[String]) extends Event
 
@@ -29,8 +33,10 @@ object HmdaFileParser {
 
   case class HmdaFileParseState(size: Int = 0, parsingErrors: Seq[List[String]] = Nil) {
     def updated(event: Event): HmdaFileParseState = event match {
-      case LarParsed(lar) =>
+      case TsParsed(_) | LarParsed(_) =>
         HmdaFileParseState(size + 1, parsingErrors)
+      case TsParsedErrors(errors) =>
+        HmdaFileParseState(size, parsingErrors :+ errors)
       case LarParsedErrors(errors) =>
         HmdaFileParseState(size, parsingErrors :+ errors)
     }
@@ -65,7 +71,19 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
   override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId) =>
-      val parsed = events(persistenceId)
+      val parsedTs = events(persistenceId)
+        .map { case LineAdded(_, data) => data }
+        .take(1)
+        .map(line => TsCsvParser(line))
+        .map {
+          case Left(errors) => TsParsedErrors(errors)
+          case Right(ts) => TsParsed(ts)
+        }
+
+      parsedTs
+        .runForeach(pTs => self ! pTs)
+
+      val parsedLar = events(persistenceId)
         .map { case LineAdded(_, data) => data }
         .drop(1)
         .map(line => LarCsvParser(line))
@@ -74,30 +92,44 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
           case Right(lar) => LarParsed(lar)
         }
 
-      parsed
-        .runForeach(parsed => self ! parsed)
+      parsedLar
+        .runForeach(pLar => self ! pLar)
         .andThen {
-          case _ =>
-            self ! Shutdown
+          case _ => self ! CompleteParsing
         }
+
+    case tp @ TsParsed(ts) =>
+      persist(tp) { e =>
+        log.info(s"Persisted: ${e.ts}")
+        updateState(e)
+      }
+
+    case tsErr @ TsParsedErrors(errors) =>
+      persist(tsErr) { e =>
+        log.info(s"Persisted: ${e.errors}")
+        updateState(e)
+      }
 
     case lp @ LarParsed(lar) =>
       persist(lp) { e =>
-        log.debug(s"Persisted: ${e.lar}")
+        log.info(s"Persisted: ${e.lar}")
         updateState(e)
       }
 
-    case err @ LarParsedErrors(errors) =>
-      persist(err) { e =>
-        log.debug(s"Persisted: ${e.errors}")
+    case larErr @ LarParsedErrors(errors) =>
+      persist(larErr) { e =>
+        log.info(s"Persisted: ${e.errors}")
         updateState(e)
       }
+
+    case CompleteParsing =>
+      log.info(s"Parsing completed for $submissionId")
+      publishEvent(ParsingCompleted(submissionId))
 
     case GetState =>
       sender() ! state
 
     case Shutdown =>
-      publishEvent(ParsingCompleted(submissionId))
       context stop self
 
   }
