@@ -74,7 +74,7 @@ $ sbt
 > ~re-start
 ```
 
-Confirm that the platform is up and running by browsing to http://localhost:8080
+Confirm that the platform is up and running by browsing to http://localhost:10003
 
 3. To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
@@ -116,10 +116,10 @@ docker build hmda-api .
 
 Then, run the docker image
 ```shell
-docker run -d -p "8080:8080" hmda-api
+docker run -d -p "10003:10003" hmda-api
 ```
 
-The API will run on `$(docker-machine ip):8080`
+The API will run on `$(docker-machine ip):10003`
 
 #### To run the entire platform
 Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) directory into a sibling directory of this one. Your directory structure should look like this:

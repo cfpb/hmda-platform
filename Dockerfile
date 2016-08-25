@@ -15,6 +15,6 @@ USER daemon
 
 ENTRYPOINT ["java", "-jar", "hmda.jar"]
 
-EXPOSE 8080
+EXPOSE 10003 
 
 COPY target/scala-2.11/hmda.jar . 
