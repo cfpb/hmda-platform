@@ -20,12 +20,13 @@ object HmdaFileValidator {
   case object BeginValidation extends Command
   case class ValidationStarted(submissionId: String) extends Event
   case object CompleteSyntacticalAndValidity extends Command
+  case object CompleteQuality extends Command
   case class SyntacticalAndValidityCompleted(submissionId: String) extends Event
+  case class QualityCompleted(submissionId: String) extends Event
   case object CompleteValidation extends Command
   case object CompleteValidationWithErrors extends Command
   case class ValidationCompletedWitErrors(submissionId: String) extends Event
   case class ValidationCompleted(submissionId: String) extends Event
-  case object Validate extends Command
   case object ValidateLarSyntactical extends Command
   case object ValidateLarValidity extends Command
   case object ValidateLarQuality extends Command
@@ -33,8 +34,6 @@ object HmdaFileValidator {
   case class SyntacticalError(error: ValidationError) extends Event
   case class ValidityError(error: ValidationError) extends Event
   case class QualityError(error: ValidationError) extends Event
-  case class MacroError(error: ValidationError) extends Event
-  case class SyntacticalValidated(submissionId: String) extends Event
 
   def props(id: String, larValidator: ActorSelection): Props = Props(new HmdaFileValidator(id, larValidator))
 
@@ -46,8 +45,7 @@ object HmdaFileValidator {
       validSize: Int = 0,
       syntactical: Seq[ValidationError] = Nil,
       validity: Seq[ValidationError] = Nil,
-      quality: Seq[ValidationError] = Nil,
-      `macro`: Seq[ValidationError] = Nil
+      quality: Seq[ValidationError] = Nil
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case ValidationStarted(id) =>
@@ -55,13 +53,12 @@ object HmdaFileValidator {
       case larValidated @ LarValidated(lar) =>
         HmdaFileValidationState(validSize + 1, syntactical, validity, quality)
       case SyntacticalError(e) =>
-        HmdaFileValidationState(validSize, syntactical :+ e, validity, quality, `macro`)
+        HmdaFileValidationState(validSize, syntactical :+ e, validity, quality)
       case ValidityError(e) =>
-        HmdaFileValidationState(validSize, syntactical, validity :+ e, quality, `macro`)
+        HmdaFileValidationState(validSize, syntactical, validity :+ e, quality)
       case QualityError(e) =>
-        HmdaFileValidationState(validSize, syntactical, validity, quality :+ e, `macro`)
-      case MacroError(e) =>
-        HmdaFileValidationState(validSize, syntactical, validity, `macro` :+ e)
+        HmdaFileValidationState(validSize, syntactical, validity, quality :+ e)
+
     }
   }
 }
@@ -126,31 +123,32 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
           self ! x
         }
         .andThen {
-          case _ => self ! CompleteSyntacticalAndValidity
+          case _ =>
+            self ! CompleteSyntacticalAndValidity
+            if (state.syntactical.isEmpty && state.validity.isEmpty) {
+              self ! ValidateLarQuality
+            }
         }
 
-    //    case ValidateValidity =>
-    //      events(parserPersistenceId)
-    //        .map { case LarParsed(lar) => lar }
-    //        .runForeach { lar =>
-    //          larValidator ! CheckValidity(lar, ValidationContext(None))
-    //        }
-    //        .andThen {
-    //          case _ => self ! ValidateQuality
-    //        }
-    //
-    //    case ValidateQuality =>
-    //      events(parserPersistenceId)
-    //        .map { case LarParsed(lar) => lar }
-    //        .runForeach { lar =>
-    //          larValidator ! CheckQuality(lar, ValidationContext(None))
-    //        }
-    //        .andThen {
-    //          case _ => larValidator ! FinishChecks
-    //       }
-
-    case FinishChecks =>
-      self ! CompleteValidation
+    case ValidateLarQuality =>
+      events(parserPersistenceId)
+        .map { case LarParsed(lar) => lar }
+        .map(lar => checkQuality(lar, ValidationContext(None)).toEither)
+        .map {
+          case Right(lar) => lar
+          case Left(errors) => ValidationErrors(errors.list.toList)
+        }
+        .runForeach { x =>
+          self ! x
+        }
+        .andThen {
+          case _ =>
+            if (state.syntactical.isEmpty && state.validity.isEmpty && state.quality.isEmpty) {
+              self ! CompleteValidation
+            } else {
+              self ! CompleteValidationWithErrors
+            }
+        }
 
     case CompleteSyntacticalAndValidity =>
       publishEvent(SyntacticalAndValidityCompleted(submissionId))
@@ -162,10 +160,8 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
     case CompleteValidation =>
       if (state.syntactical.isEmpty && state.validity.isEmpty && state.quality.isEmpty) {
         publishEvent(ValidationCompleted(submissionId))
-        //self ! Shutdown
       } else {
         publishEvent(ValidationCompletedWitErrors(submissionId))
-        //self ! CompleteValidationWithErrors
       }
 
     case lar: LoanApplicationRegister =>
