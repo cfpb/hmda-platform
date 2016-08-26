@@ -3,7 +3,7 @@ package hmda.api.processing
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ReadHmdaRawFile }
-import hmda.persistence.processing.HmdaFileValidator.{ BeginValidation, ValidationCompleted, ValidationCompletedWitErrors, ValidationStarted }
+import hmda.persistence.processing.HmdaFileValidator._
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile }
 
@@ -36,6 +36,9 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
       case ValidationStarted(submissionId) =>
         log.info(s"Validation started for $submissionId")
+
+      case SyntacticalAndValidityCompleted(submissionId) =>
+        log.info(s"Submission $submissionId contains syntactical and / or validity errors")
 
       case ValidationCompletedWitErrors(submissionId) =>
         log.info("validation completed with errors")

@@ -48,8 +48,6 @@ object HmdaFileValidator {
       quality: Seq[ValidationError] = Nil
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
-      case ValidationStarted(id) =>
-        HmdaFileValidationState()
       case larValidated @ LarValidated(lar) =>
         HmdaFileValidationState(validSize + 1, syntactical, validity, quality)
       case SyntacticalError(e) =>
