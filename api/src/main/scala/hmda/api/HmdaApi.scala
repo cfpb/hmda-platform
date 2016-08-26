@@ -49,7 +49,7 @@ object HmdaApi
   //Load demo data
   lazy val isDemo = config.getBoolean("hmda.isDemo")
   if (isDemo) {
-    DemoData.loadData(system)
+    DemoData.loadDemoData(system)
   }
 
   http onFailure {

@@ -6,7 +6,6 @@ import hmda.validation.api.ts.TsValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.Syntactical
 import hmda.validation.engine.ts.TsCommonEngine
-import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.syntactical._
 
 import scala.concurrent.Future
@@ -27,7 +26,7 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi with TsValid
   }
 
   def checkSyntactical(ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
-    val checksToRun: List[EditCheck[TransmittalSheet]] = List(
+    val checksToRun = List(
       S010,
       S020,
       S025.inContext(ctx),

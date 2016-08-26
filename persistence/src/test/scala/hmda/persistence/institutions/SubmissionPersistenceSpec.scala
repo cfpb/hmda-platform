@@ -15,12 +15,12 @@ class SubmissionPersistenceSpec extends ActorSpec {
 
   "Submissions" must {
     "be created and read back" in {
-      val submissions = DemoData.newSubmissions
+      val submissions = DemoData.testSubmissions
       for (submission <- submissions) {
         probe.send(submissionsActor, CreateSubmission)
       }
       probe.send(submissionsActor, GetState)
-      probe.expectMsg(DemoData.newSubmissions.reverse)
+      probe.expectMsg(DemoData.testSubmissions.reverse)
     }
 
     "be able to modify their status" in {

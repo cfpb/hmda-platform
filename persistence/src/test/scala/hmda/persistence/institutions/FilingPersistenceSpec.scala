@@ -15,7 +15,7 @@ class FilingPersistenceSpec extends ActorSpec {
 
   "Filings" must {
     "be created and read back" in {
-      val filings = DemoData.filings
+      val filings = DemoData.testFilings
       for (filing <- filings) {
         probe.send(filingsActor, CreateFiling(filing))
       }
@@ -23,7 +23,7 @@ class FilingPersistenceSpec extends ActorSpec {
       probe.expectMsg(filings.reverse)
     }
     "be able to change their status" in {
-      val filing = DemoData.filings.head
+      val filing = DemoData.testFilings.head
       probe.send(filingsActor, CreateFiling(filing))
       val modified = filing.copy(status = Cancelled)
       probe.send(filingsActor, UpdateFilingStatus(modified))
