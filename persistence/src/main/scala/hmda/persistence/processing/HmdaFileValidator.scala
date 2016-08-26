@@ -3,6 +3,7 @@ package hmda.persistence.processing
 import akka.actor.{ ActorLogging, ActorRef, ActorSelection, ActorSystem, Props }
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.CommonMessages._
 import hmda.persistence.LocalEventPublisher
 import hmda.persistence.processing.HmdaFileParser.LarParsed
@@ -10,6 +11,7 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
+import hmda.validation.engine.lar.LarEngine
 
 object HmdaFileValidator {
 
@@ -22,9 +24,10 @@ object HmdaFileValidator {
   case class ValidationCompletedWitErrors(submissionId: String) extends Event
   case class ValidationCompleted(submissionId: String) extends Event
   case object Validate extends Command
-  case object ValidateSyntactical extends Command
+  case object ValidateLarSyntactical extends Command
   case object ValidateValidity extends Command
   case object ValidateQuality extends Command
+  case class LarValidated(lar: LoanApplicationRegister) extends Event
   case class SyntacticalError(error: ValidationError) extends Event
   case class ValidityError(error: ValidationError) extends Event
   case class QualityError(error: ValidationError) extends Event
@@ -47,6 +50,8 @@ object HmdaFileValidator {
     def updated(event: Event): HmdaFileValidationState = event match {
       case ValidationStarted(id) =>
         HmdaFileValidationState()
+      case larValidated @ LarValidated(lar) =>
+        HmdaFileValidationState(validSize + 1, syntactical, validity, quality)
       case SyntacticalError(e) =>
         HmdaFileValidationState(validSize, syntactical :+ e, validity, quality, `macro`)
       case ValidityError(e) =>
@@ -59,7 +64,7 @@ object HmdaFileValidator {
   }
 }
 
-class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) extends PersistentActor with ActorLogging with LocalEventPublisher {
+class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) extends PersistentActor with ActorLogging with LarEngine with LocalEventPublisher {
 
   import HmdaFileValidator._
 
@@ -92,46 +97,41 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
       persist(validationStarted) { event =>
         publishEvent(validationStarted)
         updateState(event)
-        self ! ValidateSyntactical
+        self ! ValidateLarSyntactical
       }
 
-    case Validate =>
+    case ValidateLarSyntactical =>
       events(parserPersistenceId)
         .map { case LarParsed(lar) => lar }
-        .runForeach { lar =>
-          //TODO: include Institution data here when it's ready
-          larValidator ! CheckAll(lar, ValidationContext(None))
+        .map(lar => checkSyntactical(lar, ValidationContext(None)).toEither)
+        .map {
+          case Right(lar) => lar
+          case Left(errors) => ValidationErrors(errors.list.toList)
+        }
+        //.map { x => log.info(x.toString); x }
+        .runForeach { x =>
+          self ! x
         }
 
-    case ValidateSyntactical =>
-      events(parserPersistenceId)
-        .map { case LarParsed(lar) => lar }
-        .runForeach { lar =>
-          larValidator ! CheckSyntactical(lar, ValidationContext(None))
-        }
-        .andThen {
-          case _ => self ! ValidateValidity
-        }
-
-    case ValidateValidity =>
-      events(parserPersistenceId)
-        .map { case LarParsed(lar) => lar }
-        .runForeach { lar =>
-          larValidator ! CheckValidity(lar, ValidationContext(None))
-        }
-        .andThen {
-          case _ => self ! ValidateQuality
-        }
-
-    case ValidateQuality =>
-      events(parserPersistenceId)
-        .map { case LarParsed(lar) => lar }
-        .runForeach { lar =>
-          larValidator ! CheckQuality(lar, ValidationContext(None))
-        }
-        .andThen {
-          case _ => larValidator ! FinishChecks
-        }
+    //    case ValidateValidity =>
+    //      events(parserPersistenceId)
+    //        .map { case LarParsed(lar) => lar }
+    //        .runForeach { lar =>
+    //          larValidator ! CheckValidity(lar, ValidationContext(None))
+    //        }
+    //        .andThen {
+    //          case _ => self ! ValidateQuality
+    //        }
+    //
+    //    case ValidateQuality =>
+    //      events(parserPersistenceId)
+    //        .map { case LarParsed(lar) => lar }
+    //        .runForeach { lar =>
+    //          larValidator ! CheckQuality(lar, ValidationContext(None))
+    //        }
+    //        .andThen {
+    //          case _ => larValidator ! FinishChecks
+    //       }
 
     case FinishChecks =>
       self ! CompleteValidation
@@ -147,6 +147,12 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
       } else {
         publishEvent(ValidationCompletedWitErrors(submissionId))
         //self ! CompleteValidationWithErrors
+      }
+
+    case lar: LoanApplicationRegister =>
+      persist(LarValidated(lar)) { e =>
+        log.info(s"Persisted: $e")
+        updateState(e)
       }
 
     case validationErrors: ValidationErrors =>
