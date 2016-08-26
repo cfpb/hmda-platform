@@ -19,14 +19,16 @@ object HmdaFileValidator {
 
   case object BeginValidation extends Command
   case class ValidationStarted(submissionId: String) extends Event
+  case object CompleteSyntacticalAndValidity extends Command
+  case class SyntacticalAndValidityCompleted(submissionId: String) extends Event
   case object CompleteValidation extends Command
   case object CompleteValidationWithErrors extends Command
   case class ValidationCompletedWitErrors(submissionId: String) extends Event
   case class ValidationCompleted(submissionId: String) extends Event
   case object Validate extends Command
   case object ValidateLarSyntactical extends Command
-  case object ValidateValidity extends Command
-  case object ValidateQuality extends Command
+  case object ValidateLarValidity extends Command
+  case object ValidateLarQuality extends Command
   case class LarValidated(lar: LoanApplicationRegister) extends Event
   case class SyntacticalError(error: ValidationError) extends Event
   case class ValidityError(error: ValidationError) extends Event
@@ -94,11 +96,8 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
 
     case BeginValidation =>
       val validationStarted = ValidationStarted(submissionId)
-      persist(validationStarted) { event =>
-        publishEvent(validationStarted)
-        updateState(event)
-        self ! ValidateLarSyntactical
-      }
+      publishEvent(validationStarted)
+      self ! ValidateLarSyntactical
 
     case ValidateLarSyntactical =>
       events(parserPersistenceId)
@@ -108,9 +107,26 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
           case Right(lar) => lar
           case Left(errors) => ValidationErrors(errors.list.toList)
         }
-        //.map { x => log.info(x.toString); x }
         .runForeach { x =>
           self ! x
+        }
+        .andThen {
+          case _ => self ! ValidateLarValidity
+        }
+
+    case ValidateLarValidity =>
+      events(parserPersistenceId)
+        .map { case LarParsed(lar) => lar }
+        .map(lar => checkValidity(lar, ValidationContext(None)).toEither)
+        .map {
+          case Right(lar) => lar
+          case Left(errors) => ValidationErrors(errors.list.toList)
+        }
+        .runForeach { x =>
+          self ! x
+        }
+        .andThen {
+          case _ => self ! CompleteSyntacticalAndValidity
         }
 
     //    case ValidateValidity =>
@@ -135,6 +151,9 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
 
     case FinishChecks =>
       self ! CompleteValidation
+
+    case CompleteSyntacticalAndValidity =>
+      publishEvent(SyntacticalAndValidityCompleted(submissionId))
 
     case CompleteValidationWithErrors =>
       publishEvent(ValidationCompletedWitErrors(submissionId))
