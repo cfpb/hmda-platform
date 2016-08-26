@@ -154,7 +154,11 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             if (submission.id == 0) {
               val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", path)
               complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-            } else complete(ToResponseMarshallable(submission))
+            } else {
+              val statusWrapper = SubmissionStatusWrapper(submission.submissionStatus.code, submission.submissionStatus.message)
+              val submissionWrapper = SubmissionWrapper(submission.id, statusWrapper)
+              complete(ToResponseMarshallable(submissionWrapper))
+            }
           case Failure(error) =>
             submissionsActor ! Shutdown
             completeWithInternalError(path, error)
