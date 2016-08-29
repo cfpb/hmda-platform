@@ -80,13 +80,11 @@ class FilingPersistence(institutionId: String) extends PersistentActor with Acto
       }
 
     case GetFilingByPeriod(period) =>
-      val filing = state.filings.find(f => f.period == period)
-      if (filing.isDefined)
-        sender() ! filing.get
-      else if (state.filings.size == 0)
+      val filing = state.filings.find(f => f.period == period).getOrElse(Filing("", institutionId, NotStarted))
+      if (state.filings.size == 0)
         sender() ! Filing()
       else
-        sender() ! Filing("", institutionId, NotStarted)
+        sender() ! filing
 
     case GetState =>
       sender() ! state.filings
