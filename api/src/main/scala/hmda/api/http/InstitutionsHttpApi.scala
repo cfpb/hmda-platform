@@ -98,8 +98,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               else if (filing.institutionId == institutionId && filing.period != period) {
                 val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-              }
-              else {
+              } else {
                 val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
@@ -134,7 +133,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
                   submissionsActor ! Shutdown
                   completeWithInternalError(path, error)
               }
-            } else if (filing.institutionId != 0) {
+            } else if (!filing.institutionId.isEmpty) {
               val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
               complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
             } else {
