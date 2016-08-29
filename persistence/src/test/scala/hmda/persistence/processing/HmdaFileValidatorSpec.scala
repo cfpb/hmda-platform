@@ -3,12 +3,13 @@ package hmda.persistence.processing
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
+import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.persistence.processing.HmdaFileValidator._
 import org.scalatest.BeforeAndAfterEach
 
-class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach {
+class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
   val config = ConfigFactory.load()
 
@@ -25,14 +26,17 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach {
   val lines = fiCSV.split("\n")
 
   override def beforeEach(): Unit = {
-    //parseLars(hmdaFileParser, probe, lines)
+    parseLars(hmdaFileParser, probe, lines)
   }
 
-  "A HMDA File" must {
-    "be validated" in {
+  "A clean HMDA File" must {
+    "be validated and persisted without errors" in {
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState())
       probe.send(hmdaFileValidator, BeginValidation)
-      //system.eventStream.subscribe(probe.ref, classOf[ValidationStarted])
-      //probe.expectMsg(ValidationStarted(submissionId))
+      Thread.sleep(300)
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(3, Nil, Nil, Nil))
     }
   }
 

@@ -8,7 +8,6 @@ import hmda.persistence.CommonMessages._
 import hmda.persistence.LocalEventPublisher
 import hmda.persistence.processing.HmdaFileParser.LarParsed
 import hmda.persistence.processing.HmdaQuery._
-import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
@@ -164,7 +163,7 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
 
     case lar: LoanApplicationRegister =>
       persist(LarValidated(lar)) { e =>
-        log.info(s"Persisted: $e")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
@@ -197,7 +196,7 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
   private def persistErrors(errors: Seq[Event]): Unit = {
     errors.foreach { error =>
       persist(error) { e =>
-        log.info(s"Persisted: ${e}")
+        log.debug(s"Persisted: ${e}")
         updateState(e)
       }
     }
