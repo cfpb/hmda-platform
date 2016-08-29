@@ -41,20 +41,20 @@ object HmdaFileValidator {
   }
 
   case class HmdaFileValidationState(
-      validSize: Int = 0,
+      lars: Set[LoanApplicationRegister] = Set.empty[LoanApplicationRegister],
       syntactical: Seq[ValidationError] = Nil,
       validity: Seq[ValidationError] = Nil,
       quality: Seq[ValidationError] = Nil
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case larValidated @ LarValidated(lar) =>
-        HmdaFileValidationState(validSize + 1, syntactical, validity, quality)
+        HmdaFileValidationState(lars + lar, syntactical, validity, quality)
       case SyntacticalError(e) =>
-        HmdaFileValidationState(validSize, syntactical :+ e, validity, quality)
+        HmdaFileValidationState(lars, syntactical :+ e, validity, quality)
       case ValidityError(e) =>
-        HmdaFileValidationState(validSize, syntactical, validity :+ e, quality)
+        HmdaFileValidationState(lars, syntactical, validity :+ e, quality)
       case QualityError(e) =>
-        HmdaFileValidationState(validSize, syntactical, validity, quality :+ e)
+        HmdaFileValidationState(lars, syntactical, validity, quality :+ e)
 
     }
   }
@@ -163,7 +163,7 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
 
     case lar: LoanApplicationRegister =>
       persist(LarValidated(lar)) { e =>
-        log.debug(s"Persisted: $e")
+        log.info(s"Persisted: $e")
         updateState(e)
       }
 
@@ -196,7 +196,7 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
   private def persistErrors(errors: Seq[Event]): Unit = {
     errors.foreach { error =>
       persist(error) { e =>
-        log.debug(s"Persisted: ${e}")
+        log.info(s"Persisted: ${e}")
         updateState(e)
       }
     }
