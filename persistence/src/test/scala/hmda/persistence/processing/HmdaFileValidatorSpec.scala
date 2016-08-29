@@ -1,20 +1,35 @@
 package hmda.persistence.processing
 
-import akka.actor.ActorRef
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
-import hmda.model.fi.lar._
-import hmda.persistence.CommonMessages.GetState
+import hmda.parser.fi.lar.LarCsvParser
+import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
 import hmda.persistence.processing.SingleLarValidation._
-import hmda.validation.engine.{ Syntactical, ValidationError }
+import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
 
 class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
   val config = ConfigFactory.load()
+
+  override implicit lazy val system =
+    ActorSystem(
+      "test-system",
+      ConfigFactory.parseString(
+        """
+          | akka.loggers = ["akka.testkit.TestEventListener"]
+          | akka.loglevel = DEBUG
+          | akka.stdout-loglevel = "OFF"
+          | akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
+          | akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
+          | akka.persistence.snapshot-store.local.dir = "target/snapshots"
+          | """.stripMargin
+      )
+    )
 
   val submissionId = "12345-2017-1"
 
@@ -28,31 +43,38 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   val lines = fiCSV.split("\n")
 
-  val invalidLars = fiCSVInvalidLars.split("\n")
-
   override def beforeEach(): Unit = {
-    hmdaFileValidator = createHmdaFileValidator(system, submissionId, larValidator)
+    hmdaFileValidator = createHmdaFileValidator(system, submissionId)
   }
 
-  "A HMDA File" must {
-    "be validated and persisted, detecting validation errors" in {
-      parseLars(hmdaFileParser, probe, invalidLars)
+  override def afterAll(): Unit = {
+    hmdaFileValidator ! Shutdown
+  }
+
+  val lars = lines.tail.map(line => LarCsvParser(line).right.get)
+  "HMDA File Validator" must {
+    "persist clean LARs" in {
+
+      lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState())
-      probe.send(hmdaFileValidator, BeginValidation)
-      Thread.sleep(500)
-      probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(
-        HmdaFileValidationState(
-          Set(
-            LoanApplicationRegister(2, "8800009923", 3, Loan("8299422144", "20170613", 1, 2, 2, 1, 5), 3, 4, 20170719, Geography("NA", "NA", "NA", "NA"), Applicant(2, 2, 3, "", "", "", "", 3, "", "", "", "", 1, 2, "37"), 0, Denial("", "", ""), "NA", 2, 1),
-            LoanApplicationRegister(2, "8800009923", 3, Loan("2185751597", "20170328", 1, 1, 2, 1, 25), 3, 3, 20170425, Geography("NA", "45", "067", "9504.00"), Applicant(2, 5, 3, "", "", "", "", 8, "", "", "", "", 2, 5, "34"), 0, Denial("", "", ""), "NA", 2, 5),
-            LoanApplicationRegister(2, "8800009923", 3, Loan("4977566612", "20170920", 1, 1, 1, 1, 46), 3, 3, 20171022, Geography("NA", "45", "067", "9505.00"), Applicant(2, 5, 3, "", "", "", "", 8, "", "", "", "", 2, 5, "23"), 0, Denial("", "", ""), "NA", 2, 1)
-          ),
-          List(ValidationError("9471480396", "S020", Syntactical)), List(), List()
-        )
-      )
+      probe.expectMsg(HmdaFileValidationState(lars.toSeq, Nil, Nil, Nil))
     }
+
+    "persist syntactical, validity and quality errors" in {
+      val e1 = ValidationError("1", "S020", Syntactical)
+      val e2 = ValidationError("1", "V120", Validity)
+      val e3 = ValidationError("1", "Q003", Quality)
+      val errors = ValidationErrors(Seq(e1, e2, e3))
+      probe.send(hmdaFileValidator, errors)
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3)
+      ))
+    }
+
   }
 
 }

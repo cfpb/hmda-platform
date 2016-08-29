@@ -1,6 +1,6 @@
 package hmda.persistence.processing
 
-import akka.actor.{ ActorLogging, ActorRef, ActorSelection, ActorSystem, Props }
+import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -24,7 +24,7 @@ object HmdaFileValidator {
   case class QualityCompleted(submissionId: String) extends Event
   case object CompleteValidation extends Command
   case object CompleteValidationWithErrors extends Command
-  case class ValidationCompletedWitErrors(submissionId: String) extends Event
+  case class ValidationCompletedWithErrors(submissionId: String) extends Event
   case class ValidationCompleted(submissionId: String) extends Event
   case object ValidateLarSyntactical extends Command
   case object ValidateLarValidity extends Command
@@ -34,21 +34,21 @@ object HmdaFileValidator {
   case class ValidityError(error: ValidationError) extends Event
   case class QualityError(error: ValidationError) extends Event
 
-  def props(id: String, larValidator: ActorSelection): Props = Props(new HmdaFileValidator(id, larValidator))
+  def props(id: String): Props = Props(new HmdaFileValidator(id))
 
-  def createHmdaFileValidator(system: ActorSystem, id: String, larValidator: ActorSelection): ActorRef = {
-    system.actorOf(HmdaFileValidator.props(id, larValidator))
+  def createHmdaFileValidator(system: ActorSystem, id: String): ActorRef = {
+    system.actorOf(HmdaFileValidator.props(id))
   }
 
   case class HmdaFileValidationState(
-      lars: Set[LoanApplicationRegister] = Set.empty[LoanApplicationRegister],
+      lars: Seq[LoanApplicationRegister] = Nil,
       syntactical: Seq[ValidationError] = Nil,
       validity: Seq[ValidationError] = Nil,
       quality: Seq[ValidationError] = Nil
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case larValidated @ LarValidated(lar) =>
-        HmdaFileValidationState(lars + lar, syntactical, validity, quality)
+        HmdaFileValidationState(lars :+ lar, syntactical, validity, quality)
       case SyntacticalError(e) =>
         HmdaFileValidationState(lars, syntactical :+ e, validity, quality)
       case ValidityError(e) =>
@@ -60,7 +60,7 @@ object HmdaFileValidator {
   }
 }
 
-class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) extends PersistentActor with ActorLogging with LarEngine with LocalEventPublisher {
+class HmdaFileValidator(submissionId: String) extends PersistentActor with ActorLogging with LarEngine with LocalEventPublisher {
 
   import HmdaFileValidator._
 
@@ -128,6 +128,7 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
         }
 
     case ValidateLarQuality =>
+      println("quality")
       events(parserPersistenceId)
         .map { case LarParsed(lar) => lar }
         .map(lar => checkQuality(lar, ValidationContext(None)).toEither)
@@ -151,14 +152,14 @@ class HmdaFileValidator(submissionId: String, larValidator: ActorSelection) exte
       publishEvent(SyntacticalAndValidityCompleted(submissionId))
 
     case CompleteValidationWithErrors =>
-      publishEvent(ValidationCompletedWitErrors(submissionId))
+      publishEvent(ValidationCompletedWithErrors(submissionId))
       self ! Shutdown
 
     case CompleteValidation =>
       if (state.syntactical.isEmpty && state.validity.isEmpty && state.quality.isEmpty) {
         publishEvent(ValidationCompleted(submissionId))
       } else {
-        publishEvent(ValidationCompletedWitErrors(submissionId))
+        publishEvent(ValidationCompletedWithErrors(submissionId))
       }
 
     case lar: LoanApplicationRegister =>

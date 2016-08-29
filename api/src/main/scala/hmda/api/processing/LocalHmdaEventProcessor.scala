@@ -40,7 +40,7 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
       case SyntacticalAndValidityCompleted(submissionId) =>
         log.debug(s"Submission $submissionId contains syntactical and / or validity errors")
 
-      case ValidationCompletedWitErrors(submissionId) =>
+      case ValidationCompletedWithErrors(submissionId) =>
         log.debug("validation completed with errors")
         fireValidationCompletedEvents(submissionId)
 
@@ -60,8 +60,7 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
   private def fireParsingCompletedEvents(submissionId: String): Unit = {
     log.debug(s"Parsing completed for $submissionId")
-    val larValidator = context.system.actorSelection(s"/user/larValidation")
-    val hmdaFileValidator = context.actorOf(HmdaFileValidator.props(submissionId, larValidator))
+    val hmdaFileValidator = context.actorOf(HmdaFileValidator.props(submissionId))
     hmdaFileValidator ! BeginValidation
   }
 
