@@ -141,11 +141,7 @@ class HmdaFileValidator(submissionId: String) extends PersistentActor with Actor
         }
         .andThen {
           case _ =>
-            if (state.syntactical.isEmpty && state.validity.isEmpty && state.quality.isEmpty) {
-              self ! CompleteValidation
-            } else {
-              self ! CompleteValidationWithErrors
-            }
+            self ! CompleteValidation
         }
 
     case CompleteSyntacticalAndValidity =>
