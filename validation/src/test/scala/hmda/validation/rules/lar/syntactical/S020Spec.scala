@@ -1,9 +1,7 @@
 package hmda.validation.rules.lar.syntactical
 
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.dsl.Success
-import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
+import hmda.validation.rules.ts.syntactical.S020
 
 class S020Spec extends LarEditCheckSpec {
   property("Loan Application Register Agency Code must = 1,2,3,5,7,9") {
@@ -14,5 +12,5 @@ class S020Spec extends LarEditCheckSpec {
     }
   }
 
-  override def check: EditCheck[LoanApplicationRegister] = S020
+  override def check = S020
 }

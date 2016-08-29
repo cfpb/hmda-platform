@@ -2,28 +2,61 @@ package hmda.persistence.processing
 
 import java.time.Instant
 
-import akka.testkit.TestProbe
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.testkit.{ EventFilter, TestProbe }
+import org.scalatest.BeforeAndAfterEach
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
+import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileParser._
+import hmda.persistence.processing.HmdaRawFile._
 
-class HmdaFileParserSpec extends ActorSpec with HmdaFileParserSpecUtils {
+class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
 
   val config = ConfigFactory.load()
+  override implicit lazy val system =
+    ActorSystem(
+      "test-system",
+      ConfigFactory.parseString(
+        """
+          | akka.loggers = ["akka.testkit.TestEventListener"]
+          | akka.loglevel = DEBUG
+          | akka.stdout-loglevel = "OFF"
+          | akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
+          | akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
+          | akka.persistence.snapshot-store.local.dir = "target/snapshots"
+          | """.stripMargin
+      )
+    )
 
   val submissionId = "12345-2017-1"
 
-  val hmdaFileParser = createHmdaFileParser(system, submissionId)
-
+  var hmdaFileParser: ActorRef = _
   val probe = TestProbe()
 
   val timestamp = Instant.now.toEpochMilli
   val lines = fiCSV.split("\n")
   val badLines = fiCSVParseError.split("\n")
 
+  override def beforeEach(): Unit = {
+    hmdaFileParser = createHmdaFileParser(system, submissionId + Instant.now.toEpochMilli)
+  }
+
   "HMDA File Parser" must {
+    "persist parsed TSs" in {
+      parseTs(lines)
+      probe.send(hmdaFileParser, GetState)
+      probe.expectMsg(HmdaFileParseState(1, Nil))
+    }
+
+    "persist TS parsing errors" in {
+      parseTs(badLines)
+      probe.send(hmdaFileParser, GetState)
+      probe.expectMsg(HmdaFileParseState(0, Seq(List("Timestamp is not a Long"))))
+    }
+
     "persist parsed LARs" in {
       parseLars(hmdaFileParser, probe, lines)
       probe.send(hmdaFileParser, GetState)
@@ -33,8 +66,33 @@ class HmdaFileParserSpec extends ActorSpec with HmdaFileParserSpecUtils {
     "persist parsed LARs and parsing errors" in {
       parseLars(hmdaFileParser, probe, badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(5, Seq(List("Agency Code is not an Integer"))))
+      probe.expectMsg(HmdaFileParseState(2, Seq(List("Agency Code is not an Integer"))))
+    }
 
+    "read entire raw file" in {
+      val hmdaFileParser2 = createHmdaFileParser(system, "12345-2017-2")
+      val hmdaRawFile = createHmdaRawFile(system, "12345-2017-2")
+      for (line <- lines) {
+        probe.send(hmdaRawFile, AddLine(timestamp, line.toString))
+      }
+      probe.send(hmdaRawFile, GetState)
+      probe.expectMsg(HmdaRawFileState(4))
+
+      val msg = "Parsing completed for 12345-2017-2"
+      EventFilter.info(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
+        probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "12345-2017-2"))
+      }
+
+      probe.send(hmdaFileParser2, GetState)
+      probe.expectMsg(HmdaFileParseState(4, Nil))
+    }
+  }
+
+  private def parseTs(xs: Array[String]): Array[Unit] = {
+    val ts = xs.take(1).map(line => TsCsvParser(line))
+    ts.map {
+      case Right(ts) => probe.send(hmdaFileParser, TsParsed(ts))
+      case Left(errors) => probe.send(hmdaFileParser, TsParsedErrors(errors))
     }
   }
 

@@ -1,7 +1,5 @@
 package hmda.validation.rules.ts.syntactical
 
-import hmda.model.fi.ts.TransmittalSheet
-import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.TsEditCheckSpec
 
 class S020Spec extends TsEditCheckSpec {
@@ -14,6 +12,6 @@ class S020Spec extends TsEditCheckSpec {
     }
   }
 
-  override def check: EditCheck[TransmittalSheet] = S020
+  override def check = S020
 
 }
