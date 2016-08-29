@@ -20,7 +20,7 @@ class Q030Spec extends LarEditCheckSpec {
     }
   }
 
-  property("must pass when property is in a small county") {
+  property("must pass when property MSA/MD, state, and county match, and tract is NA (as happens in small counties)") {
     forAll(larGen) { lar =>
       val validGeography = Geography("10100", "46", "045", "NA")
       val validLar = lar.copy(geography = validGeography)
@@ -28,14 +28,29 @@ class Q030Spec extends LarEditCheckSpec {
     }
   }
 
-  // TODO is this true? do we assume it's a small county? if so, then what's the point?
-  // if not, then how do we figure out whether reporting was in fact required for this property?
-  property("must pass when county is NA") {
-
+  ignore("must pass when property MSA/MD, state, county, and census tract match") {
+    forAll(larGen) { lar =>
+      val validGeography = Geography("17020", "06", "007", "0036.00")
+      val validLar = lar.copy(geography = validGeography)
+      validLar.mustPass
+    }
   }
 
-  property("must fail when property is in a large county and filer is a CRA reporter") {
+  property("must pass when property MSA/MD is NA, and state, county, and census tract match") {
+  }
 
+  property("must pass when property MSA/MD and tract are NA, and state and county match") {
+  }
+
+  // TODO failure cases for "populated but not matching" for each of the above. unless we can assume validity edits catch it...
+
+  property("must pass when filer is non-CRA and property geo fields are all NA") {
+  }
+
+  property("must FAIL when filer is a CRA reporter and property geo fields are all NA") {
+  }
+
+  property("must FAIL when filer is a CRA reporter and state or county is missing") {
   }
 
 }
