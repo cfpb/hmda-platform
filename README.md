@@ -105,7 +105,7 @@ $ eval "(docker-machine env dev)"
 
 Ensure there's a compiled jar to create the Docker image with:
 ```shell
-sbt assembly
+sbt clean assembly
 ```
 #### To run only the API
 
