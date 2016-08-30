@@ -38,9 +38,6 @@ class SingleLarValidation extends Actor with ActorLogging with LarEngine {
       log.debug(s"Checking all edits on LAR: ${lar.toCSV}")
       sender() ! validationErrors(lar, ctx, validateLar)
 
-    case FinishChecks =>
-      sender() ! FinishChecks
-
     case _ =>
       log.error(s"Unsupported message sent to ${self.path}")
   }
