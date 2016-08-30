@@ -24,6 +24,9 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
         }
       }
       "institution is a CRA reporter" when {
+        "all 4 geography fields are NA" must {
+          //fail -- is it worth calling this case out explicitly, even though the next one covers it?
+        }
         "state or county is NA (no matter what else is true)" must {
           //fail
         }
@@ -36,6 +39,8 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
           }
           "MSA/MD, state and county do not match" must {
             //fail
+            // I'm thinking this will include the case where state is NA, but is it better to make it separate?
+            // same question applies to the other "do not match" cases; they should probably be consistent.
           }
         }
         "tract is present" when {
