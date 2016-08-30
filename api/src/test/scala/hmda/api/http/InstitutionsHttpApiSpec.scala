@@ -62,9 +62,9 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         val filings = DemoData.testFilings.filter(f => f.institutionId == institution.id.toString)
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institutionWrapped, filings.reverse)
       }
-      getWithCfpbHeaders("/institutions/xxxx") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/xxxxx") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxx not found", "institutions/xxxx")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "institutions/xxxxx")
       }
     }
 
@@ -176,7 +176,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
   "Institutions API Authorization and rejection handling" must {
 
-    // 'CFPB-HMDA-Username' header
+    // Require 'CFPB-HMDA-Username' header
     // Request these endpoints without username header (but with other required headers)
     "reject requests to /institutions without 'CFPB-HMDA-Username' header" in {
       Get("/institutions").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
@@ -185,17 +185,17 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "reject requests to /inst/id without 'CFPB-HMDA-Username' header" in {
-      Get("/institutions/12345").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
+      Get("/institutions/0").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
         rejection mustBe a[AuthorizationFailedRejection]
       }
     }
     "reject requests to /inst/id/filings/p without 'CFPB-HMDA-Username' header" in {
-      Get("/institutions/12345/filings/2017").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
+      Get("/institutions/0/filings/2017").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
         rejection mustBe a[AuthorizationFailedRejection]
       }
     }
 
-    // 'CFPB-HMDA-Institutions' header
+    // Require 'CFPB-HMDA-Institutions' header
     // Request these endpoints without institutions header (but with other required headers)
     "reject requests to /inst without 'CFPB-HMDA-Institutions' header" in {
       Get("/institutions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
@@ -203,19 +203,19 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
     "reject requests to submission creation without 'CFPB-HMDA-Institutions' header" in {
-      Post("/institutions/12345/filings/2017/submissions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+      Post("/institutions/0/filings/2017/submissions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
         rejection mustBe a[AuthorizationFailedRejection]
       }
     }
     "reject requests to submission summary without 'CFPB-HMDA-Institutions' header" in {
-      Get("/institutions/12345/filings/2017").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+      Get("/institutions/0/filings/2017").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
         rejection mustBe a[AuthorizationFailedRejection]
       }
     }
 
     "reject unauthorized requests to any /instititutions-based path, even nonexistent endpoints" in {
       // Request the endpoint without a required header
-      Get("/institutions/12345/nonsense").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
+      Get("/institutions/0/nonsense").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
         rejection mustBe a[AuthorizationFailedRejection]
       }
     }
