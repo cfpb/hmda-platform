@@ -100,30 +100,30 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
 
     case tp @ TsParsed(ts) =>
       persist(tp) { e =>
-        log.info(s"Persisted: ${e.ts}")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
     case tsErr @ TsParsedErrors(errors) =>
       persist(tsErr) { e =>
-        log.info(s"Persisted: ${e.errors}")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
     case lp @ LarParsed(lar) =>
       persist(lp) { e =>
-        log.info(s"Persisted: ${e.lar}")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
     case larErr @ LarParsedErrors(errors) =>
       persist(larErr) { e =>
-        log.info(s"Persisted: ${e.errors}")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
     case CompleteParsing =>
-      log.info(s"Parsing completed for $submissionId")
+      log.debug(s"Parsing completed for $submissionId")
       publishEvent(ParsingCompleted(submissionId))
 
     case GetState =>

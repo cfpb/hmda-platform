@@ -19,11 +19,8 @@ object HmdaFileValidator {
   case object BeginValidation extends Command
   case class ValidationStarted(submissionId: String) extends Event
   case object CompleteSyntacticalAndValidity extends Command
-  case object CompleteQuality extends Command
   case class SyntacticalAndValidityCompleted(submissionId: String) extends Event
-  case class QualityCompleted(submissionId: String) extends Event
   case object CompleteValidation extends Command
-  case object CompleteValidationWithErrors extends Command
   case class ValidationCompletedWithErrors(submissionId: String) extends Event
   case class ValidationCompleted(submissionId: String) extends Event
   case object ValidateLarSyntactical extends Command
@@ -95,7 +92,8 @@ class HmdaFileValidator(submissionId: String) extends PersistentActor with Actor
 
     case ValidateLarSyntactical =>
       events(parserPersistenceId)
-        .map { case LarParsed(lar) => lar }
+        .filter(x => x.isInstanceOf[LarParsed])
+        .map(e => e.asInstanceOf[LarParsed].lar)
         .map(lar => checkSyntactical(lar, ValidationContext(None)).toEither)
         .map {
           case Right(lar) => lar
@@ -128,7 +126,6 @@ class HmdaFileValidator(submissionId: String) extends PersistentActor with Actor
         }
 
     case ValidateLarQuality =>
-      println("quality")
       events(parserPersistenceId)
         .map { case LarParsed(lar) => lar }
         .map(lar => checkQuality(lar, ValidationContext(None)).toEither)
@@ -146,10 +143,6 @@ class HmdaFileValidator(submissionId: String) extends PersistentActor with Actor
 
     case CompleteSyntacticalAndValidity =>
       publishEvent(SyntacticalAndValidityCompleted(submissionId))
-
-    case CompleteValidationWithErrors =>
-      publishEvent(ValidationCompletedWithErrors(submissionId))
-      self ! Shutdown
 
     case CompleteValidation =>
       if (state.syntactical.isEmpty && state.validity.isEmpty && state.quality.isEmpty) {
