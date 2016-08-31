@@ -37,9 +37,6 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
       case ValidationStarted(submissionId) =>
         log.debug(s"Validation started for $submissionId")
 
-      case SyntacticalAndValidityCompleted(submissionId) =>
-        log.debug(s"Submission $submissionId contains syntactical and / or validity errors")
-
       case ValidationCompletedWithErrors(submissionId) =>
         log.debug(s"validation completed with errors for submission $submissionId")
         fireValidationCompletedEvents(submissionId)

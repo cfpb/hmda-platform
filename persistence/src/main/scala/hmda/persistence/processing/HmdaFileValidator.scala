@@ -3,6 +3,7 @@ package hmda.persistence.processing
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Sink
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.CommonMessages._
 import hmda.persistence.LocalEventPublisher
@@ -18,14 +19,9 @@ object HmdaFileValidator {
 
   case object BeginValidation extends Command
   case class ValidationStarted(submissionId: String) extends Event
-  case object CompleteSyntacticalAndValidity extends Command
-  case class SyntacticalAndValidityCompleted(submissionId: String) extends Event
   case object CompleteValidation extends Command
   case class ValidationCompletedWithErrors(submissionId: String) extends Event
   case class ValidationCompleted(submissionId: String) extends Event
-  case object ValidateLarSyntactical extends Command
-  case object ValidateLarValidity extends Command
-  case object ValidateLarQuality extends Command
   case class LarValidated(lar: LoanApplicationRegister) extends Event
   case class SyntacticalError(error: ValidationError) extends Event
   case class ValidityError(error: ValidationError) extends Event
@@ -86,70 +82,18 @@ class HmdaFileValidator(submissionId: String) extends PersistentActor with Actor
   override def receiveCommand: Receive = {
 
     case BeginValidation =>
+      val ctx = ValidationContext(None)
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
-      self ! ValidateLarSyntactical
-
-    case ValidateLarSyntactical =>
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
-        .map(lar => checkSyntactical(lar, ValidationContext(None)).toEither)
+        .map(lar => validateLar(lar, ctx).toEither)
         .map {
-          case Right(lar) => lar
+          case Right(l) => l
           case Left(errors) => ValidationErrors(errors.list.toList)
         }
-        .runForeach { x =>
-          self ! x
-        }
-        .andThen {
-          case _ => self ! ValidateLarValidity
-        }
-
-    case ValidateLarValidity =>
-      events(parserPersistenceId)
-        .map { case LarParsed(lar) => lar }
-        .map(lar => checkValidity(lar, ValidationContext(None)).toEither)
-        .map {
-          case Right(lar) => lar
-          case Left(errors) => ValidationErrors(errors.list.toList)
-        }
-        .runForeach { x =>
-          self ! x
-        }
-        .andThen {
-          case _ =>
-            self ! CompleteSyntacticalAndValidity
-            if (state.syntactical.isEmpty && state.validity.isEmpty) {
-              self ! ValidateLarQuality
-            }
-        }
-
-    case ValidateLarQuality =>
-      events(parserPersistenceId)
-        .map { case LarParsed(lar) => lar }
-        .map(lar => checkQuality(lar, ValidationContext(None)).toEither)
-        .map {
-          case Right(lar) => lar
-          case Left(errors) => ValidationErrors(errors.list.toList)
-        }
-        .runForeach { x =>
-          self ! x
-        }
-        .andThen {
-          case _ =>
-            self ! CompleteValidation
-        }
-
-    case CompleteSyntacticalAndValidity =>
-      publishEvent(SyntacticalAndValidityCompleted(submissionId))
-
-    case CompleteValidation =>
-      if (state.syntactical.isEmpty && state.validity.isEmpty && state.quality.isEmpty) {
-        publishEvent(ValidationCompleted(submissionId))
-      } else {
-        publishEvent(ValidationCompletedWithErrors(submissionId))
-      }
+        .runWith(Sink.actorRef(self, CompleteValidation))
 
     case lar: LoanApplicationRegister =>
       persist(LarValidated(lar)) { e =>
@@ -170,6 +114,13 @@ class HmdaFileValidator(submissionId: String) extends PersistentActor with Actor
       val qualityErrors = errorsOfType(errors, Quality)
         .map(e => QualityError(e))
       persistErrors(qualityErrors)
+
+    case CompleteValidation =>
+      if (state.syntactical.isEmpty && state.validity.isEmpty && state.quality.isEmpty) {
+        publishEvent(ValidationCompleted(submissionId))
+      } else {
+        publishEvent(ValidationCompletedWithErrors(submissionId))
+      }
 
     case GetState =>
       sender() ! state
