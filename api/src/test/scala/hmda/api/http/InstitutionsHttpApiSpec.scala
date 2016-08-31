@@ -89,7 +89,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
       getWithCfpbHeaders("/institutions/xxxxx/filings/2017") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2017 filing not found for institution xxxxx", "institutions/xxxxx/filings/2017")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "institutions/xxxxx/filings/2017")
       }
     }
 
@@ -103,7 +103,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "fail creating a new submission for a non existent institution" in {
       postWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2017 filing not found for institution xxxxx", "institutions/xxxxx/filings/2017/submissions")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "institutions/xxxxx/filings/2017/submissions")
       }
     }
 
