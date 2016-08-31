@@ -2,7 +2,7 @@ package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.persistence.CommonMessages._
-import hmda.persistence.LocalEventPublisher
+import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 
 object HmdaRawFile {
 
@@ -31,7 +31,7 @@ object HmdaRawFile {
 
 }
 
-class HmdaRawFile(submissionId: String) extends HmdaPersistentActor(submissionId) with LocalEventPublisher {
+class HmdaRawFile(submissionId: String) extends HmdaPersistentActor with LocalEventPublisher {
 
   import HmdaRawFile._
 

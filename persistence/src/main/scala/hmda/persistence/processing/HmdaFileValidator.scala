@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.stream.scaladsl.Sink
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.CommonMessages._
-import hmda.persistence.LocalEventPublisher
+import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.persistence.processing.HmdaFileParser.LarParsed
 import hmda.persistence.processing.HmdaQuery._
 import hmda.validation.context.ValidationContext
@@ -51,7 +51,7 @@ object HmdaFileValidator {
   }
 }
 
-class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor(submissionId) with LarEngine with LocalEventPublisher {
+class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with LarEngine with LocalEventPublisher {
 
   import HmdaFileValidator._
 

@@ -1,9 +1,9 @@
 package hmda.persistence.institutions
 
-import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
-import akka.persistence.{ PersistentActor, SnapshotOffer }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.{ Filing, NotStarted }
 import hmda.persistence.CommonMessages._
+import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.FilingPersistence._
 
 object FilingPersistence {
@@ -36,7 +36,7 @@ object FilingPersistence {
 }
 
 // Filings per Institution (institutionId = institution identifier)
-class FilingPersistence(institutionId: String) extends PersistentActor with ActorLogging {
+class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
   var state = FilingState()
 
@@ -44,19 +44,7 @@ class FilingPersistence(institutionId: String) extends PersistentActor with Acto
     state = state.updated(e)
   }
 
-  override def preStart(): Unit = {
-    log.debug(s"Filings started at ${self.path}")
-  }
-
   override def persistenceId: String = s"filings-$institutionId"
-
-  override def receiveRecover: Receive = {
-    case e: Event => updateState(e)
-    case SnapshotOffer(_, snapshot: FilingState) =>
-      log.debug(s"Recovering from snapshot")
-      state = snapshot
-
-  }
 
   override def receiveCommand: Receive = {
     case CreateFiling(f) =>

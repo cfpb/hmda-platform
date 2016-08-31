@@ -1,11 +1,11 @@
-package hmda.persistence.processing
+package hmda.persistence
 
 import akka.actor.ActorLogging
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
 import hmda.persistence.CommonMessages.Event
 
-abstract class HmdaPersistentActor(submissionId: String) extends PersistentActor with ActorLogging {
+abstract class HmdaPersistentActor extends PersistentActor with ActorLogging {
 
   implicit val system = context.system
   implicit val ec = system.dispatcher

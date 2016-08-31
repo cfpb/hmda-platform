@@ -1,9 +1,9 @@
 package hmda.persistence.institutions
 
-import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
-import akka.persistence.{ PersistentActor, SnapshotOffer }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.{ Created, Submission, SubmissionStatus }
 import hmda.persistence.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.SubmissionPersistence._
 
 object SubmissionPersistence {
@@ -38,7 +38,7 @@ object SubmissionPersistence {
 }
 
 //Submissions for an institution, per filing period
-class SubmissionPersistence(fid: String, filingId: String) extends PersistentActor with ActorLogging {
+class SubmissionPersistence(fid: String, filingId: String) extends HmdaPersistentActor {
 
   var state = SubmissionState()
 
@@ -47,13 +47,6 @@ class SubmissionPersistence(fid: String, filingId: String) extends PersistentAct
   }
 
   override def persistenceId: String = s"submissions-$fid-$filingId"
-
-  override def receiveRecover: Receive = {
-    case e: Event => updateState(e)
-    case SnapshotOffer(_, snapshot: SubmissionState) =>
-      log.debug(s"Recovering from snapshot")
-      state = snapshot
-  }
 
   override def receiveCommand: Receive = {
     case CreateSubmission =>
