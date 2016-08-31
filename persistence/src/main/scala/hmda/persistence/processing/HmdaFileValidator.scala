@@ -1,8 +1,6 @@
 package hmda.persistence.processing
 
-import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
-import akka.persistence.PersistentActor
-import akka.stream.ActorMaterializer
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.CommonMessages._
 import hmda.persistence.LocalEventPublisher
@@ -57,13 +55,9 @@ object HmdaFileValidator {
   }
 }
 
-class HmdaFileValidator(submissionId: String) extends PersistentActor with ActorLogging with LarEngine with LocalEventPublisher {
+class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor(submissionId) with LarEngine with LocalEventPublisher {
 
   import HmdaFileValidator._
-
-  implicit val system = context.system
-  implicit val ec = system.dispatcher
-  implicit val materializer = ActorMaterializer()
 
   val parserPersistenceId = s"${HmdaFileParser.name}-$submissionId"
 
@@ -71,14 +65,6 @@ class HmdaFileValidator(submissionId: String) extends PersistentActor with Actor
 
   def updateState(event: Event): Unit = {
     state = state.updated(event)
-  }
-
-  override def preStart(): Unit = {
-    log.debug(s"Validation started for $submissionId")
-  }
-
-  override def postStop(): Unit = {
-    log.debug(s"Validation ended for $submissionId")
   }
 
   override def persistenceId: String = s"$name-$submissionId"
@@ -177,10 +163,6 @@ class HmdaFileValidator(submissionId: String) extends PersistentActor with Actor
     case Shutdown =>
       context stop self
 
-  }
-
-  override def receiveRecover: Receive = {
-    case event: Event => updateState(event)
   }
 
   private def persistErrors(errors: Seq[Event]): Unit = {
