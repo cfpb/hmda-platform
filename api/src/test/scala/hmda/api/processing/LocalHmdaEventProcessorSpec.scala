@@ -7,7 +7,7 @@ import hmda.actor.test.ActorSpec
 import hmda.api.processing.LocalHmdaEventProcessor._
 import hmda.persistence.CommonMessages.Event
 import hmda.persistence.processing.HmdaFileParser.ParsingCompleted
-import hmda.persistence.processing.HmdaFileValidator.{ SyntacticalAndValidityCompleted, ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
+import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 
 class LocalHmdaEventProcessorSpec extends ActorSpec {
@@ -55,11 +55,6 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     "process validation started message from event stream" in {
       val msg = s"Validation started for $submissionId"
       checkEventStreamMessage(msg, ValidationStarted(submissionId))
-    }
-
-    "process syntactical and validity completed message from event stream" in {
-      val msg = s"Submission $submissionId contains syntactical and / or validity errors"
-      checkEventStreamMessage(msg, SyntacticalAndValidityCompleted(submissionId))
     }
 
     "process validation completed with errors from event stream" in {
