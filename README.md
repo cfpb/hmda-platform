@@ -79,7 +79,7 @@ Confirm that the platform is up and running by browsing to http://localhost:8080
 3. To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
 ```shell
-> assembly
+> clean assembly
 ```
 
 This task will create a `fat jar`, which can be executed directly on any JDK8 compliant JVM:
@@ -105,7 +105,7 @@ $ eval "(docker-machine env dev)"
 
 Ensure there's a compiled jar to create the Docker image with:
 ```shell
-sbt assembly
+sbt clean assembly
 ```
 #### To run only the API
 
