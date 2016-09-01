@@ -111,7 +111,7 @@ sbt clean assembly
 
 Build the docker image
 ```shell
-docker build hmda-api .
+docker build -t hmda-api .
 ```
 
 Then, run the docker image
