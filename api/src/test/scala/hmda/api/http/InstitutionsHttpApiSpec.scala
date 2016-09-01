@@ -165,6 +165,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/0/filings/2017/submissions/1")
       }
     }
+
+    "return 405 when trying to POST to the /latest endpoint" in {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.MethodNotAllowed
+        responseAs[ErrorResponse] mustBe ErrorResponse(405, "Method not allowed", "institutions/0/filings/2017/submissions/latest")
+      }
+    }
   }
 
   "Institutions API Authorization and rejection handling" must {
