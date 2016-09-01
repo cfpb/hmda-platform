@@ -7,13 +7,12 @@ import akka.testkit.{ EventFilter, TestProbe }
 import org.scalatest.BeforeAndAfterEach
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
-import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
 
-class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
+class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
 
   val config = ConfigFactory.load()
@@ -59,13 +58,13 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
     }
 
     "persist parsed LARs" in {
-      parseLars(lines)
+      parseLars(hmdaFileParser, probe, lines)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(3, Nil))
     }
 
     "persist parsed LARs and parsing errors" in {
-      parseLars(badLines)
+      parseLars(hmdaFileParser, probe, badLines)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(2, Seq(List("Agency Code is not an Integer"))))
     }
@@ -80,7 +79,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
       probe.expectMsg(HmdaRawFileState(4))
 
       val msg = "Parsing completed for 12345-2017-2"
-      EventFilter.info(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
+      EventFilter.debug(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
         probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "12345-2017-2"))
       }
 
@@ -94,14 +93,6 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach {
     ts.map {
       case Right(ts) => probe.send(hmdaFileParser, TsParsed(ts))
       case Left(errors) => probe.send(hmdaFileParser, TsParsedErrors(errors))
-    }
-  }
-
-  private def parseLars(xs: Array[String]): Array[Unit] = {
-    val lars = xs.drop(1).map(line => LarCsvParser(line))
-    lars.map {
-      case Right(l) => probe.send(hmdaFileParser, LarParsed(l))
-      case Left(errors) => probe.send(hmdaFileParser, LarParsedErrors(errors))
     }
   }
 

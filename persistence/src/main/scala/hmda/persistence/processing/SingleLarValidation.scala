@@ -13,6 +13,7 @@ object SingleLarValidation {
   case class CheckSyntactical(lar: LoanApplicationRegister, ctx: ValidationContext)
   case class CheckValidity(lar: LoanApplicationRegister, ctx: ValidationContext)
   case class CheckQuality(lar: LoanApplicationRegister, ctx: ValidationContext)
+  case object FinishChecks
 
   def createSingleLarValidator(system: ActorSystem): ActorRef = {
     system.actorOf(SingleLarValidation.props, "larValidation")
