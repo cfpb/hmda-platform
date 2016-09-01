@@ -22,6 +22,14 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
         "all 4 geography fields are NA" must {
           //pass
         }
+        "county is present and small" when {
+          "tract is NA" must {
+            // pass
+          }
+          "tract is present (and matches)" must {
+            // fail
+          }
+        }
       }
       "institution is a CRA reporter" when {
         "all 4 geography fields are NA" must {
@@ -29,6 +37,14 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
         }
         "state or county is NA (no matter what else is true)" must {
           //fail
+        }
+        "county is present and small" when {
+          "tract is NA" must {
+            // pass
+          }
+          "tract is present (and matches)" must {
+            // pass
+          }
         }
       }
 
@@ -41,6 +57,9 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
             //fail
             // I'm thinking this will include the case where state is NA, but is it better to make it separate?
             // same question applies to the other "do not match" cases; they should probably be consistent.
+          }
+          "county is large" must {
+            // fail
           }
         }
         "tract is present" when {
@@ -62,6 +81,9 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
           "state and county do not match" must {
             //fail
           }
+          "county is large" must {
+            // fail
+          }
         }
         "tract is present" when {
           "state, county, and tract match" must {
@@ -71,6 +93,15 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
             //fail
           }
         }
+      }
+
+      // these cases must fail no matter what else is true; that said, we may end up having to test specific values,
+      // as otherwise the test would pass (Q030 would fail) for the wrong reason (other value mismatches).
+      "state is present but county is NA" must {
+        // fail
+      }
+      "county is present but state is NA" must {
+        // fail
       }
 
     }
