@@ -59,7 +59,7 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with L
 
   var state = HmdaFileValidationState()
 
-  def updateState(event: Event): Unit = {
+  override def updateState(event: Event): Unit = {
     state = state.updated(event)
   }
 

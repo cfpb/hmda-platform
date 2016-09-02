@@ -40,7 +40,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
   var state = FilingState()
 
-  def updateState(e: Event): Unit = {
+  override def updateState(e: Event): Unit = {
     state = state.updated(e)
   }
 

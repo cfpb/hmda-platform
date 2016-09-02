@@ -41,7 +41,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
 
   var state = InstitutionsState()
 
-  def updateState(event: Event): Unit = {
+  override def updateState(event: Event): Unit = {
     state = state.updated(event)
   }
 

@@ -42,7 +42,7 @@ class SubmissionPersistence(fid: String, filingId: String) extends HmdaPersisten
 
   var state = SubmissionState()
 
-  def updateState(e: Event): Unit = {
+  override def updateState(e: Event): Unit = {
     state = state.updated(e)
   }
 

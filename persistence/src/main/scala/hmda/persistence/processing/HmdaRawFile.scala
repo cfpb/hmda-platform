@@ -39,7 +39,7 @@ class HmdaRawFile(submissionId: String) extends HmdaPersistentActor with LocalEv
 
   var state = HmdaRawFileState()
 
-  def updateState(event: Event): Unit = {
+  override def updateState(event: Event): Unit = {
     state = state.updated(event)
   }
 
