@@ -1,11 +1,11 @@
 package hmda.api.processing
 
-import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
+import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import hmda.persistence.CommonMessages._
-import hmda.persistence.processing.HmdaFileParser.{ParsingCompleted, ParsingStarted, ReadHmdaRawFile}
+import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted, ReadHmdaRawFile }
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.persistence.processing.HmdaRawFile.{UploadCompleted, UploadStarted}
-import hmda.persistence.processing.{HmdaFileParser, HmdaFileValidator, HmdaRawFile}
+import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
+import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile }
 
 object LocalHmdaEventProcessor {
   def props(): Props = Props(new LocalHmdaEventProcessor)

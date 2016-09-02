@@ -1,14 +1,14 @@
 package hmda.api.processing
 
 import akka.actor.ActorSystem
-import akka.testkit.{EventFilter, TestProbe}
+import akka.testkit.{ EventFilter, TestProbe }
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.api.processing.LocalHmdaEventProcessor._
 import hmda.persistence.CommonMessages.Event
-import hmda.persistence.processing.HmdaFileParser.{ParsingCompleted, ParsingStarted}
-import hmda.persistence.processing.HmdaFileValidator.{ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted}
-import hmda.persistence.processing.HmdaRawFile.{UploadCompleted, UploadStarted}
+import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted }
+import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
+import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 
 class LocalHmdaEventProcessorSpec extends ActorSpec {
 

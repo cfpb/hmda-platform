@@ -16,7 +16,9 @@ In order to track the status of a filing for a financial institution, the follow
 * `7`: `Validating`. Submitted data is being run through the validation engine that checks for [Edit Checks]()
 * `8`: `ValidatedWithErrors`. There are validation errors in the provided information. Depending on the type of error (syntactical and / or validity) a new submission might be necessary
 * `9`: `Validated`. Information submitted is valid and can be `Signed`
-* `10`: `Signed`. The financial institution has certified that the data is correct. This finishes the HMDA filing process
+* `10`: `IRSGenerated`. The IRS report has been generated
+* `11`: `IRSVerified`. The IRS report has been verified by the financial institution.
+* `12`: `Signed`. The financial institution has certified that the data is correct. This finishes the HMDA filing process
 * `-1`: `Failed`. An error occurred in the process of submitting data, the submission needs to be performed again
 
 
