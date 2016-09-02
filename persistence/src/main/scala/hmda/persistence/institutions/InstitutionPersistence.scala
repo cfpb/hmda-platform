@@ -1,12 +1,12 @@
 package hmda.persistence.institutions
 
-import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
-import akka.persistence.{ PersistentActor, SnapshotOffer }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionStatus.Inactive
 import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.CommonMessages._
+import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.InstitutionPersistence._
 
 object InstitutionPersistence {
@@ -37,26 +37,15 @@ object InstitutionPersistence {
   }
 }
 
-class InstitutionPersistence extends PersistentActor with ActorLogging {
+class InstitutionPersistence extends HmdaPersistentActor {
 
   var state = InstitutionsState()
 
-  def updateState(event: Event): Unit = {
+  override def updateState(event: Event): Unit = {
     state = state.updated(event)
   }
 
-  override def preStart(): Unit = {
-    log.debug(s"Institutions started at ${self.path}")
-  }
-
   override def persistenceId: String = "institutions"
-
-  override def receiveRecover: Receive = {
-    case e: Event => updateState(e)
-    case SnapshotOffer(_, snapshot: InstitutionsState) =>
-      log.debug("Recovering from snapshot")
-      state = snapshot
-  }
 
   override def receiveCommand: Receive = {
     case CreateInstitution(i) =>

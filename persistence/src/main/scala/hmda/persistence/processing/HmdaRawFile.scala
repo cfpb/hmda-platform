@@ -1,9 +1,8 @@
 package hmda.persistence.processing
 
-import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
-import akka.persistence.{ PersistentActor, SnapshotOffer }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.persistence.CommonMessages._
-import hmda.persistence.LocalEventPublisher
+import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 
 object HmdaRawFile {
 
@@ -32,7 +31,7 @@ object HmdaRawFile {
 
 }
 
-class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLogging with LocalEventPublisher {
+class HmdaRawFile(submissionId: String) extends HmdaPersistentActor with LocalEventPublisher {
 
   import HmdaRawFile._
 
@@ -40,16 +39,8 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
 
   var state = HmdaRawFileState()
 
-  def updateState(event: Event): Unit = {
+  override def updateState(event: Event): Unit = {
     state = state.updated(event)
-  }
-
-  override def preStart(): Unit = {
-    log.debug(s"Uploading started for $submissionId")
-  }
-
-  override def postStop(): Unit = {
-    log.debug(s"Uploading finished for $submissionId")
   }
 
   override def receiveCommand: Receive = {
@@ -73,9 +64,4 @@ class HmdaRawFile(submissionId: String) extends PersistentActor with ActorLoggin
       context stop self
   }
 
-  override def receiveRecover: Receive = {
-    case event: Event => updateState(event)
-  }
-
-  override def system: ActorSystem = context.system
 }
