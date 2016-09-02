@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.quality
 
-import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.{ Geography, LoanApplicationRegister }
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.PredicateCommon._
@@ -14,8 +14,9 @@ class Q030 private (institution: Institution) extends EditCheck[LoanApplicationR
 
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.actionTakenType is containedIn(1 to 6)) {
-      // this is a placeholder; there will be more logic here
-      lar.geography is smallCounty
+      when(lar.geography is Geography("NA", "NA", "NA", "NA")) {
+        institution.cra is false
+      }
     }
   }
 }

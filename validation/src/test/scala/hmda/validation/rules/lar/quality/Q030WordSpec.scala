@@ -1,17 +1,27 @@
 package hmda.validation.rules.lar.quality
 
+import hmda.model.fi.lar.Geography
+import hmda.model.institution.{ Agency, Institution, InstitutionType }
 import hmda.parser.fi.lar.LarGenerators
+import hmda.validation.context.ValidationContext
+import hmda.validation.dsl.{ Failure, Success }
 import org.scalacheck.Gen
-import org.scalatest.WordSpec
+import org.scalatest.{ MustMatchers, WordSpec }
 import org.scalatest.prop.PropertyChecks
 
-class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
+import scala.language.implicitConversions
+
+class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with MustMatchers {
 
   "Q030" when {
     "action taken type is 7 or 8 (preapproval)" must {
       val actionTaken = Gen.oneOf(7, 8)
       "pass" in {
-        //pass
+        val fi = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true)
+        forAll(larGen, actionTaken) { (lar, action) =>
+          val newLar = lar.copy(actionTakenType = action)
+          Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Success]
+        }
       }
     }
 
@@ -19,8 +29,15 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
       val actionTaken = Gen.oneOf(1 to 6)
 
       "institution is NOT a CRA reporter" when {
+        val fi = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = false)
         "all 4 geography fields are NA" must {
-          //pass
+          val geo = Geography("NA", "NA", "NA", "NA")
+          "pass" in {
+            forAll(larGen, actionTaken) { (lar, action) =>
+              val newLar = lar.copy(actionTakenType = action, geography = geo)
+              Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Success]
+            }
+          }
         }
         "county is present and small" when {
           "tract is NA" must {
@@ -32,8 +49,15 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators {
         }
       }
       "institution is a CRA reporter" when {
+        val fi = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true)
         "all 4 geography fields are NA" must {
-          //fail -- is it worth calling this case out explicitly, even though the next one covers it?
+          val geo = Geography("NA", "NA", "NA", "NA")
+          "fail" in {
+            forAll(larGen, actionTaken) { (lar, action) =>
+              val newLar = lar.copy(actionTakenType = action, geography = geo)
+              Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Failure]
+            }
+          }
         }
         "state or county is NA (no matter what else is true)" must {
           //fail

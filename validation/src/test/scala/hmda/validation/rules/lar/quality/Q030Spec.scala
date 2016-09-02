@@ -5,7 +5,6 @@ import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
-import org.scalatest.WordSpecLike
 
 class Q030Spec extends LarEditCheckSpec {
 
@@ -28,7 +27,7 @@ class Q030Spec extends LarEditCheckSpec {
     }
   }
 
-  ignore("must pass when property MSA/MD, state, county, and census tract match") {
+  property("must pass when property MSA/MD, state, county, and census tract match") {
     forAll(larGen) { lar =>
       val validGeography = Geography("17020", "06", "007", "0036.00")
       val validLar = lar.copy(geography = validGeography)
