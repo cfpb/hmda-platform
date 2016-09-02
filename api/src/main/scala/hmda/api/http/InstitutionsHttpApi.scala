@@ -148,6 +148,34 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
+  val submissionLatestPath =
+    path("institutions" / Segment / "filings" / Segment / "submissions" / "latest") { (institutionId, period) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions/latest"
+      timedGet {
+        val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
+        val fSubmissions = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
+        onComplete(fSubmissions) {
+          case Success(submission) =>
+            submissionsActor ! Shutdown
+            if (submission.id == 0) {
+              val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", path)
+              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+            } else {
+              val statusWrapper = SubmissionStatusWrapper(submission.submissionStatus.code, submission.submissionStatus.message)
+              val submissionWrapper = SubmissionWrapper(submission.id, statusWrapper)
+              complete(ToResponseMarshallable(submissionWrapper))
+            }
+          case Failure(error) =>
+            submissionsActor ! Shutdown
+            completeWithInternalError(path, error)
+        }
+      } ~
+        timedPost {
+          val errorResponse = ErrorResponse(405, "Method not allowed", path)
+          complete(ToResponseMarshallable(StatusCodes.MethodNotAllowed -> errorResponse))
+        }
+    }
+
   val uploadPath =
     path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
       time {
@@ -258,6 +286,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         institutionSummaryPath ~
         filingByPeriodPath ~
         submissionPath ~
+        submissionLatestPath ~
         uploadPath
     }
 }
