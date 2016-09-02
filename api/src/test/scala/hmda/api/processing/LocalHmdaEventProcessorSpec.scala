@@ -5,7 +5,9 @@ import akka.testkit.{ EventFilter, TestProbe }
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.api.processing.LocalHmdaEventProcessor._
+import hmda.persistence.CommonMessages.Event
 import hmda.persistence.processing.HmdaFileParser.ParsingCompleted
+import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 
 class LocalHmdaEventProcessorSpec extends ActorSpec {
@@ -21,6 +23,8 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
           | akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
           | akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
           | akka.persistence.snapshot-store.local.dir = "target/snapshots"
+          | akka.log.dead-letters = off
+          | akka.log-dead-letters-during-shutdown = off
           | """.stripMargin
       )
     )
@@ -31,27 +35,43 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
 
   "Event processor" must {
     val submissionId = "12345-2017-1"
-    val actorSource = eventProcessor.path.toString
+
     "process upload start message from event stream" in {
       val msg = s"Upload started for submission $submissionId"
-      EventFilter.debug(msg, source = actorSource, occurrences = 1) intercept {
-        system.eventStream.publish(UploadStarted(submissionId))
-      }
+      checkEventStreamMessage(msg, UploadStarted(submissionId))
     }
+
     "process upload completed message from event stream" in {
       val size = 10
       val msg = s"$size lines uploaded for submission $submissionId"
-      EventFilter.debug(msg, source = actorSource, occurrences = 1) intercept {
-        system.eventStream.publish(UploadCompleted(size, submissionId))
-      }
+      checkEventStreamMessage(msg, UploadCompleted(size, submissionId))
     }
 
     "process parse completed message from event stream" in {
       val msg = s"Parsing completed for $submissionId"
-      EventFilter.debug(msg, source = actorSource, occurrences = 1) intercept {
-        system.eventStream.publish(ParsingCompleted(submissionId))
-      }
+      checkEventStreamMessage(msg, ParsingCompleted(submissionId))
+    }
+
+    "process validation started message from event stream" in {
+      val msg = s"Validation started for $submissionId"
+      checkEventStreamMessage(msg, ValidationStarted(submissionId))
+    }
+
+    "process validation completed with errors from event stream" in {
+      val msg = s"validation completed with errors for submission $submissionId"
+      checkEventStreamMessage(msg, ValidationCompletedWithErrors(submissionId))
+    }
+
+    "process validation completed from event stream" in {
+      val msg = s"validation completed for submission $submissionId"
+      checkEventStreamMessage(msg, ValidationCompleted(submissionId))
     }
   }
 
+  private def checkEventStreamMessage(msg: String, event: Event): Unit = {
+    val actorSource = eventProcessor.path.toString
+    EventFilter.debug(msg, source = actorSource) intercept {
+      system.eventStream.publish(event)
+    }
+  }
 }

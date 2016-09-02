@@ -169,7 +169,11 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             submissionsActor ! Shutdown
             completeWithInternalError(path, error)
         }
-      }
+      } ~
+        timedPost {
+          val errorResponse = ErrorResponse(405, "Method not allowed", path)
+          complete(ToResponseMarshallable(StatusCodes.MethodNotAllowed -> errorResponse))
+        }
     }
 
   val uploadPath =
