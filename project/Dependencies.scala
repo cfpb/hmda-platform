@@ -6,7 +6,7 @@ object Dependencies {
    "Local Maven Repo"  at "file://" + Path.userHome.absolutePath + "/.m2/repository",
     "Typesafe Repo"     at "http://repo.typesafe.com/typesafe/releases/",
     "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases",
-    Resolver.bintrayRepo("mfglabs", "maven")    
+    Resolver.bintrayRepo("dnvriend", "maven")
   )
 
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % "test"
@@ -21,6 +21,7 @@ object Dependencies {
   val leveldb = "org.iq80.leveldb" % "leveldb" % Version.leveldb
   val leveldbjni = "org.fusesource.leveldbjni" % "leveldbjni-all" % Version.leveldbjni
   val akkaPersistenceQuery = "com.typesafe.akka" %% "akka-persistence-query-experimental" % Version.akka
+  val inMemoryPersistence = "com.github.dnvriend" %% "akka-persistence-inmemory" % Version.inMemoryPersistence % "test"
   val akkaHttp = "com.typesafe.akka" %% "akka-http-experimental" % Version.akka
   val akkaHttpJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % Version.akka
   val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akka % "test"
