@@ -1,16 +1,14 @@
 package hmda.persistence.processing
 
-import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
-import akka.persistence.PersistentActor
-import akka.stream.ActorMaterializer
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages._
-import hmda.persistence.LocalEventPublisher
-import hmda.persistence.processing.HmdaRawFile.LineAdded
+import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.persistence.processing.HmdaQuery._
+import hmda.persistence.processing.HmdaRawFile.LineAdded
 
 object HmdaFileParser {
 
@@ -44,26 +42,14 @@ object HmdaFileParser {
 
 }
 
-class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLogging with LocalEventPublisher {
+class HmdaFileParser(submissionId: String) extends HmdaPersistentActor with LocalEventPublisher {
 
   import HmdaFileParser._
 
-  implicit val system = context.system
-  implicit val ec = system.dispatcher
-  implicit val materializer = ActorMaterializer()
-
   var state = HmdaFileParseState()
 
-  def updateState(event: Event): Unit = {
+  override def updateState(event: Event): Unit = {
     state = state.updated(event)
-  }
-
-  override def preStart(): Unit = {
-    log.debug(s"Parsing started for $submissionId")
-  }
-
-  override def postStop(): Unit = {
-    log.debug(s"Parsing ended for $submissionId")
   }
 
   override def persistenceId: String = s"$name-$submissionId"
@@ -132,10 +118,6 @@ class HmdaFileParser(submissionId: String) extends PersistentActor with ActorLog
     case Shutdown =>
       context stop self
 
-  }
-
-  override def receiveRecover: Receive = {
-    case event: Event => updateState(event)
   }
 
 }
