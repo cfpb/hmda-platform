@@ -12,7 +12,7 @@ In order to track the status of a filing for a financial institution, the follow
 * `3`: `Uploaded`. Data has finished uploading, is stored in the `HMDA Platform` and is ready to be checked
 * `4`: `Parsing`. The submitted information is being checked for parsing errors according to the [HMDA File Specification]().
 * `5`: `Parsed`. Filed data is conformant and is ready to be validated by the rule engine
-* `6`: `Validating`. Submitted data is being run through the validation engine that checks for Edit Checks
+* `6`: `Validating`. Submitted data is being run through the validation engine that checks for [Edit Checks]()
 * `7`: `Validated`. Information submitted is valid and can be `Signed`
 * `8`: `ValidatedWithErrors`. There are validation errors in the provided information. Depending on the type of error (syntactical and / or validity) a new submission might be necessary
 * `9`: `Signed`. The financial institution has certified that the data is correct. This finishes the HMDA filing process
