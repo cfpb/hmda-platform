@@ -16,12 +16,16 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
     RejectionHandler.newBuilder()
       .handle {
         case AuthorizationFailedRejection =>
-          val errorResponse = ErrorResponse(403, "Unauthorized Access", "")
-          complete(ToResponseMarshallable(StatusCodes.Forbidden -> errorResponse))
+          extractUri { uri =>
+            val errorResponse = ErrorResponse(403, "Unauthorized Access", uri.toString)
+            complete(ToResponseMarshallable(StatusCodes.Forbidden -> errorResponse))
+          }
       }
       .handleNotFound {
-        val errorResponse = ErrorResponse(404, "Not Found", "")
-        complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+        extractUri { uri =>
+          val errorResponse = ErrorResponse(404, "Not Found", uri.toString)
+          complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+        }
       }
       .result()
 
