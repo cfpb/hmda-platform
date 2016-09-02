@@ -9,6 +9,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.server.MethodRejection
 import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.api.model._
@@ -168,8 +169,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
     "return 405 when trying to POST to the /latest endpoint" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.MethodNotAllowed
-        responseAs[ErrorResponse] mustBe ErrorResponse(405, "Method not allowed", "institutions/0/filings/2017/submissions/latest")
+        rejection mustBe a[MethodRejection]
       }
     }
   }
