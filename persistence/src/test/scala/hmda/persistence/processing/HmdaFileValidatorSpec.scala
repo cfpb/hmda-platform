@@ -24,9 +24,9 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
           | akka.loggers = ["akka.testkit.TestEventListener"]
           | akka.loglevel = DEBUG
           | akka.stdout-loglevel = "OFF"
-          | akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
-          | akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
-          | akka.persistence.snapshot-store.local.dir = "target/snapshots"
+          | akka.persistence.journal.plugin = "inmemory-journal"
+          | akka.persistence.query.journal.id = "inmemory-read-journal"
+          | akka.persistence.snapshot-store.plugin = "inmemory-snapshot-store"
           | """.stripMargin
       )
     )
