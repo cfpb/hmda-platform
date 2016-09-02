@@ -173,15 +173,15 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     }
 
   val uploadPath =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / Segment) { (institutionId, period, submissionId) =>
+    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (institutionId, period, submissionId) =>
       time {
         val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
         extractExecutionContext { executor =>
           val uploadTimestamp = Instant.now.toEpochMilli
-          val processingActor = createHmdaRawFile(system, submissionId)
+          val processingActor = createHmdaRawFile(system, submissionId.toString)
           val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
           implicit val ec: ExecutionContext = executor
-          val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId.toInt)
+          val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId)
           onComplete(fIsSubmissionOverwrite) {
             case Success(false) =>
               submissionsActor ! Shutdown
