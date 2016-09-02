@@ -1,9 +1,9 @@
 ## Submission status
 
-Every submission will store a `submissionStatus` object with the following structure:
+Every submission will store a `SubmissionStatus` object with the following structure:
 
-* code: Integer
-* message: String
+* `code`: `Integer`
+* `message`: `String`
 
 In order to track the status of a filing for a financial institution, the following states are captured by the backend:
 
