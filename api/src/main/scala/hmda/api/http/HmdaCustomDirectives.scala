@@ -1,8 +1,7 @@
 package hmda.api.http
 
-import akka.http.scaladsl.server.{ AuthorizationFailedRejection, Directive0, RequestContext }
+import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.RejectionHandler
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
@@ -29,13 +28,14 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
   def timedGet: Directive0 = get & time
   def timedPost: Directive0 = post & time
 
-  def hmdaAuthorize: Directive0 =
+  def headerAuthorize: Directive0 =
     authorize(ctx =>
       hasHeader("CFPB-HMDA-Username", ctx) &&
         hasHeader("CFPB-HMDA-Institutions", ctx))
 
-  private def hasHeader(headerName: String, ctx: RequestContext): Boolean = {
-    ctx.request.getHeader(headerName).isPresent
+  def institutionAuthorize(institutionId: String): Directive0 = {
+    authorize(ctx => institutionIdsFromHeader(ctx).contains(institutionId))
+    // should this check be case insensitive?
   }
 
   def time: Directive0 = {
@@ -48,6 +48,15 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
       response
     }
 
+  }
+
+  private def hasHeader(headerName: String, ctx: RequestContext): Boolean = {
+    ctx.request.getHeader(headerName).isPresent
+  }
+
+  private def institutionIdsFromHeader(ctx: RequestContext): List[String] = {
+    val header = ctx.request.getHeader("CFPB-HMDA-Institutions").get()
+    header.value().split(",").map(_.trim).toList
   }
 
 }

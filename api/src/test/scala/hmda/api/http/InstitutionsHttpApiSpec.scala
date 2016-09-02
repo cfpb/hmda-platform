@@ -102,9 +102,9 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     }
 
     "return not found when looking for a latest submission for non existent institution" in {
-      getWithCfpbHeaders("/institutions/12345/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        val error = ErrorResponse(404, "No submission found for 12345 for 2017", "institutions/12345/filings/2017/submissions/latest")
+        val error = ErrorResponse(404, "No submission found for xxxxx for 2017", "institutions/xxxxx/filings/2017/submissions/latest")
         responseAs[ErrorResponse] mustBe error
       }
 
@@ -183,7 +183,6 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         rejection mustBe a[AuthorizationFailedRejection]
       }
     }
-
     "reject requests to /inst/id without 'CFPB-HMDA-Username' header" in {
       Get("/institutions/0").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
         rejection mustBe a[AuthorizationFailedRejection]
@@ -213,20 +212,43 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
-    "reject unauthorized requests to any /instititutions-based path, even nonexistent endpoints" in {
+    // 'CFPB-HMDA-Institutions' header must match requested institution
+    // Request these endpoints with all required headers, but request an institutionId that
+    //   is not included in RequestHeaderUtils institutionsHeader
+    "reject requests to /filings/period when institutionId in path is not included in 'CFPB-HMDA-Institutions' header" in {
+      getWithCfpbHeaders("/institutions/1345/filings/2017") ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+    "reject requests to /summary when institutionId in path is not included in 'CFPB-HMDA-Institutions' header" in {
+      getWithCfpbHeaders("/institutions/1235/summary") ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+    "reject requests to /upload when institutionId in path is not included in 'CFPB-HMDA-Institutions' header" in {
+      val csv = "1|0123456789|9|201301171330|2013|99-9999999|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St       XXXXXXXXXXXXXXXXXXXXX|Sacramento         XXXXXX|CA|99999-9999|MIKES SMALL INC    XXXXXXXXXXX|1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX|San Francisco      XXXXXX|CA|99999-1234|Mrs. Krabappel     XXXXXXXXXXX|916-999-9999|999-753-9999|krabappel@gmail.comXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
+        "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
+        "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
+      val file = multiPartFile(csv, "unauthorized_sample.txt")
+
+      postWithCfpbHeaders("/institutions/1245/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+        rejection mustBe a[AuthorizationFailedRejection]
+      }
+    }
+
+    // Other auth
+    "reject unauthorized requests to any /institutions-based path, even nonexistent endpoints" in {
       // Request the endpoint without a required header
       Get("/institutions/0/nonsense").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
         rejection mustBe a[AuthorizationFailedRejection]
       }
     }
-
     "not handle requests to nonexistent endpoints if the request is authorized" in {
       getWithCfpbHeaders("/lars") ~> institutionsRoutes ~> check {
-        handled mustBe false
+        handled mustBe false // will be a 404
         rejections mustBe List()
       }
     }
-
     "accept headers case-insensitively" in {
       val usernameLower = RawHeader("cfpb-hmda-username", "someuser")
       val institutionsUpper = RawHeader("CFPB-HMDA-INSTITUTIONS", "1,2,3")
