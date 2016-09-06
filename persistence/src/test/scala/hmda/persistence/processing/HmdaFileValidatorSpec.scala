@@ -5,6 +5,7 @@ import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
@@ -51,13 +52,15 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     hmdaFileValidator ! Shutdown
   }
 
+  val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
   "HMDA File Validator" must {
     "persist clean LARs" in {
 
+      probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(lars.toSeq, Nil, Nil, Nil))
+      probe.expectMsg(HmdaFileValidationState(ts, lars.toSeq, Nil, Nil, Nil))
     }
 
     "persist syntactical, validity and quality errors" in {
@@ -68,6 +71,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, errors)
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
+        ts,
         lars,
         Seq(e1),
         Seq(e2),
