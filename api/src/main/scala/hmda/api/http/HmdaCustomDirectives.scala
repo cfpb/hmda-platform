@@ -38,8 +38,10 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
         hasHeader("CFPB-HMDA-Institutions", ctx))
 
   def institutionAuthorize(institutionId: String): Directive0 = {
-    authorize(ctx => institutionIdsFromHeader(ctx).contains(institutionId))
-    // should this check be case insensitive?
+    authorize { ctx =>
+      institutionIdsFromHeader(ctx).map(_.toLowerCase)
+        .contains(institutionId.toLowerCase)
+    }
   }
 
   def time: Directive0 = {

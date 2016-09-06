@@ -235,6 +235,17 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         rejection mustBe a[AuthorizationFailedRejection]
       }
     }
+    "matches 'CFPB-HMDA-Institutions' header case insensitively" in {
+      val institutionLower = "bank1"
+      val institutionUpper = "BANK1"
+      val instHeader = RawHeader("CFPB-HMDA-Institutions", institutionUpper)
+
+      Get(s"/institutions/$institutionLower/summary")
+        .addHeader(usernameHeader)
+        .addHeader(instHeader) ~> institutionsRoutes ~> check {
+          status mustBe StatusCodes.OK
+        }
+    }
 
     // Other auth
     "reject unauthorized requests to any /institutions-based path, even nonexistent endpoints" in {
