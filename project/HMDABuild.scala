@@ -95,8 +95,9 @@ object HMDABuild extends Build {
 
 
   lazy val persistence = (project in file("persistence"))
-      .settings(buildSettings:_*)
+    .settings(buildSettings:_*)
     .settings(
+      resolvers += Resolver.jcenterRepo,
       Seq(
         assemblyMergeStrategy in assembly := {
           case "application.conf" => MergeStrategy.concat
