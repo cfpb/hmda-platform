@@ -53,11 +53,12 @@ trait ModelGenerators {
       Uploaded,
       Parsing,
       Parsed,
-      ValidatingSyntaxAndValidity,
-      ValidatedSyntaxAndValidity,
-      ValidatingQualityAndMacro,
-      Unverified,
-      Verified,
+      ParsedWithErrors,
+      Validating,
+      ValidatedWithErrors,
+      Validated,
+      IRSGenerated,
+      IRSVerified,
       Signed
     )
   }
