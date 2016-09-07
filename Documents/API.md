@@ -167,6 +167,4 @@ Each endpoint that starts with `/institutions` is protected by three authorizati
 * For requests to institution-specific paths, such as `/institutions/<institution>`
   and `/institutions/<institution>/summary` (any endpoint except `/institutions`),
   the institution ID requested must match one of the IDs in the `CFPB-HMDA-Institutions`
-  header. (As of 8/18/2016, this requirement is not yet implemented.
-  [#504](https://github.com/cfpb/hmda-platform/issues/504) describes the specifications for
-  this feature.)
+  header.
