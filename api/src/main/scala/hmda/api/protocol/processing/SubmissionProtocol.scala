@@ -37,6 +37,7 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
     }
   }
 
+  implicit val submissionIdFormat = jsonFormat3(SubmissionId.apply)
   implicit val submissionFormat = jsonFormat2(Submission.apply)
   implicit val submissionsFormat = jsonFormat1(Submissions.apply)
   implicit val submissionStatusWrapperFormat = jsonFormat2(SubmissionStatusWrapper.apply)

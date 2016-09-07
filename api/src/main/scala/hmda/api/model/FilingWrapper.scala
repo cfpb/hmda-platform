@@ -1,7 +1,7 @@
 package hmda.api.model
 
 case class SubmissionWrapper(
-  id: Int,
+  id: String,
   status: SubmissionStatusWrapper
 )
 

@@ -97,7 +97,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "find the latest submission for an institution" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[SubmissionWrapper] mustBe SubmissionWrapper(3, SubmissionStatusWrapper(1, "created"))
+        responseAs[SubmissionWrapper] mustBe SubmissionWrapper("0-2017-3", SubmissionStatusWrapper(1, "created"))
       }
     }
 
@@ -113,7 +113,8 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "create a new submission" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Created
-        responseAs[Submission] mustBe Submission(DemoData.testSubmissions.size + 1, Created)
+        val id = DemoData.testSubmissions.size + 1
+        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", id), Created)
       }
     }
 
@@ -156,9 +157,11 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
     "return 400 when trying to upload to a completed submission" in {
       val badContent = "qdemd"
+      val institutionId = "0"
+      val period = "2017"
       val file = multiPartFile(badContent, "sample.txt")
-      val submissionActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
-      submissionActor ! UpdateSubmissionStatus(1, Signed)
+      val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
+      submissionActor ! UpdateSubmissionStatus(SubmissionId(institutionId, period, 1), Signed)
       submissionActor ! Shutdown
       Thread sleep 100
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
