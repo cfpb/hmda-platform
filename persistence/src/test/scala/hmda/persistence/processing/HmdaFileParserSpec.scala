@@ -20,14 +20,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     ActorSystem(
       "test-system",
       ConfigFactory.parseString(
-        """
-          | akka.loggers = ["akka.testkit.TestEventListener"]
-          | akka.loglevel = DEBUG
-          | akka.stdout-loglevel = "OFF"
-          | akka.persistence.journal.plugin = "inmemory-journal"
-          | akka.persistence.query.journal.id = "inmemory-read-journal"
-          | akka.persistence.snapshot-store.plugin = "inmemory-snapshot-store"
-          | """.stripMargin
+        TestConfigOverride.config
       )
     )
 
