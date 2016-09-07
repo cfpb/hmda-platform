@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.api.processing.LocalHmdaEventProcessor._
 import hmda.persistence.CommonMessages.Event
-import hmda.persistence.processing.HmdaFileParser.ParsingCompleted
+import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 
@@ -45,6 +45,11 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
       val size = 10
       val msg = s"$size lines uploaded for submission $submissionId"
       checkEventStreamMessage(msg, UploadCompleted(size, submissionId))
+    }
+
+    "process parse started message from event stream" in {
+      val msg = s"Parsing started for submission $submissionId"
+      checkEventStreamMessage(msg, ParsingStarted(submissionId))
     }
 
     "process parse completed message from event stream" in {

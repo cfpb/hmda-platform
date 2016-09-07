@@ -2,7 +2,7 @@ package hmda.api.processing
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import hmda.persistence.CommonMessages._
-import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ReadHmdaRawFile }
+import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted, ReadHmdaRawFile }
 import hmda.persistence.processing.HmdaFileValidator._
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile }
@@ -31,6 +31,9 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
       case UploadCompleted(size, submissionId) =>
         fireUploadCompletedEvents(size, submissionId)
 
+      case ParsingStarted(submissionId) =>
+        fireParsingStartedEvents(submissionId)
+
       case ParsingCompleted(submissionId) =>
         fireParsingCompletedEvents(submissionId)
 
@@ -53,6 +56,10 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
     log.debug(s"$size lines uploaded for submission $submissionId")
     val hmdaFileParser = context.actorOf(HmdaFileParser.props(submissionId))
     hmdaFileParser ! ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId")
+  }
+
+  private def fireParsingStartedEvents(submissionId: String): Unit = {
+    log.debug(s"Parsing started for submission $submissionId")
   }
 
   private def fireParsingCompletedEvents(submissionId: String): Unit = {
