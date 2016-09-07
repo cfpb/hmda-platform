@@ -1,6 +1,7 @@
 package hmda.api.processing
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
+import hmda.model.fi.SubmissionId
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted, ReadHmdaRawFile }
 import hmda.persistence.processing.HmdaFileValidator._
@@ -26,7 +27,7 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
     case e: Event => e match {
       case UploadStarted(submissionId) =>
-        log.debug(s"Upload started for submission $submissionId")
+        fireUploadStartedEvents(submissionId)
 
       case UploadCompleted(size, submissionId) =>
         fireUploadCompletedEvents(size, submissionId)
@@ -52,23 +53,27 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
     }
   }
 
-  private def fireUploadCompletedEvents(size: Int, submissionId: String): Unit = {
-    log.debug(s"$size lines uploaded for submission $submissionId")
-    val hmdaFileParser = context.actorOf(HmdaFileParser.props(submissionId))
-    hmdaFileParser ! ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId")
+  private def fireUploadStartedEvents(submissionId: SubmissionId): Unit = {
+    log.debug(s"Upload started for submission $submissionId")
   }
 
-  private def fireParsingStartedEvents(submissionId: String): Unit = {
+  private def fireUploadCompletedEvents(size: Int, submissionId: SubmissionId): Unit = {
+    log.debug(s"$size lines uploaded for submission $submissionId")
+    val hmdaFileParser = context.actorOf(HmdaFileParser.props(submissionId))
+    hmdaFileParser ! ReadHmdaRawFile(s"${HmdaRawFile.name}-${submissionId.toString}")
+  }
+
+  private def fireParsingStartedEvents(submissionId: SubmissionId): Unit = {
     log.debug(s"Parsing started for submission $submissionId")
   }
 
-  private def fireParsingCompletedEvents(submissionId: String): Unit = {
+  private def fireParsingCompletedEvents(submissionId: SubmissionId): Unit = {
     log.debug(s"Parsing completed for $submissionId")
     val hmdaFileValidator = context.actorOf(HmdaFileValidator.props(submissionId))
     hmdaFileValidator ! BeginValidation
   }
 
-  private def fireValidationCompletedEvents(submissionId: String): Unit = {
+  private def fireValidationCompletedEvents(submissionId: SubmissionId): Unit = {
     log.debug(s"Validation completed for submission $submissionId")
   }
 }

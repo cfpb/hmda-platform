@@ -7,6 +7,7 @@ import akka.testkit.{ EventFilter, TestProbe }
 import org.scalatest.BeforeAndAfterEach
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
+import hmda.model.fi.SubmissionId
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileParser._
@@ -31,7 +32,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       )
     )
 
-  val submissionId = "12345-2017-1"
+  val submissionId = SubmissionId("0", "2017", 1)
 
   var hmdaFileParser: ActorRef = _
   val probe = TestProbe()
@@ -41,7 +42,8 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
   val badLines = fiCSVParseError.split("\n")
 
   override def beforeEach(): Unit = {
-    hmdaFileParser = createHmdaFileParser(system, submissionId + Instant.now.toEpochMilli)
+    val id = submissionId.sequenceNumber + Instant.now.toEpochMilli.toInt
+    hmdaFileParser = createHmdaFileParser(system, submissionId.copy(sequenceNumber = id))
   }
 
   "HMDA File Parser" must {
@@ -70,17 +72,19 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     }
 
     "read entire raw file" in {
-      val hmdaFileParser2 = createHmdaFileParser(system, "12345-2017-2")
-      val hmdaRawFile = createHmdaRawFile(system, "12345-2017-2")
+      val id = 2
+      val submissionId2 = submissionId.copy(sequenceNumber = id)
+      val hmdaFileParser2 = createHmdaFileParser(system, submissionId2)
+      val hmdaRawFile = createHmdaRawFile(system, submissionId2)
       for (line <- lines) {
         probe.send(hmdaRawFile, AddLine(timestamp, line.toString))
       }
       probe.send(hmdaRawFile, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
-      val msg = "Parsing completed for 12345-2017-2"
+      val msg = "Parsing completed for 0-2017-2"
       EventFilter.debug(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
-        probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "12345-2017-2"))
+        probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "0-2017-2"))
       }
 
       probe.send(hmdaFileParser2, GetState)

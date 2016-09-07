@@ -178,7 +178,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         val path = s"institutions/$institutionId/filings/$period/submissions/$id"
         extractExecutionContext { executor =>
           val uploadTimestamp = Instant.now.toEpochMilli
-          val processingActor = createHmdaRawFile(system, id.toString)
+          val processingActor = createHmdaRawFile(system, submissionId)
           val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
           implicit val ec: ExecutionContext = executor
           val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId)

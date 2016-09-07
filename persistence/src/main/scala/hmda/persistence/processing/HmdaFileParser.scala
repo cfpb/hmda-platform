@@ -1,6 +1,7 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.LarCsvParser
@@ -14,19 +15,19 @@ object HmdaFileParser {
 
   val name = "HmdaFileParser"
 
-  case class ReadHmdaRawFile(submissionId: String) extends Command
+  case class ReadHmdaRawFile(persistenceId: String) extends Command
   case class TsParsed(ts: TransmittalSheet) extends Event
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
   case class LarParsedErrors(errors: List[String]) extends Event
 
-  case class CompleteParsing(submissionId: String) extends Command
-  case class ParsingStarted(submissionId: String) extends Event
-  case class ParsingCompleted(submissionId: String) extends Event
+  case class CompleteParsing(submissionId: SubmissionId) extends Command
+  case class ParsingStarted(submissionId: SubmissionId) extends Event
+  case class ParsingCompleted(submissionId: SubmissionId) extends Event
 
-  def props(id: String): Props = Props(new HmdaFileParser(id))
+  def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 
-  def createHmdaFileParser(system: ActorSystem, submissionId: String): ActorRef = {
+  def createHmdaFileParser(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
     system.actorOf(HmdaFileParser.props(submissionId))
   }
 
@@ -43,7 +44,7 @@ object HmdaFileParser {
 
 }
 
-class HmdaFileParser(submissionId: String) extends HmdaPersistentActor with LocalEventPublisher {
+class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor with LocalEventPublisher {
 
   import HmdaFileParser._
 
@@ -111,7 +112,7 @@ class HmdaFileParser(submissionId: String) extends HmdaPersistentActor with Loca
       }
 
     case CompleteParsing =>
-      log.debug(s"Parsing completed for $submissionId")
+      log.debug(s"Parsing completed for ${submissionId.toString}")
       publishEvent(ParsingCompleted(submissionId))
 
     case GetState =>
