@@ -15,6 +15,7 @@ trait TsEngine extends TsSyntacticalEngine with TsValidityEngine with TsQualityE
   def validateTs(ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
 
     val fSyntactical = checkSyntactical(ts, ctx)
+    println("\n\nVALIDATING\n\n")
 
     for {
       fs <- fSyntactical

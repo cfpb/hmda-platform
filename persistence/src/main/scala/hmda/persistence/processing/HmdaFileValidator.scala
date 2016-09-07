@@ -38,7 +38,7 @@ object HmdaFileValidator {
   }
 
   case class HmdaFileValidationState(
-      ts: TransmittalSheet = Nil.asInstanceOf[TransmittalSheet],
+      ts: Seq[TransmittalSheet] = Nil,
       lars: Seq[LoanApplicationRegister] = Nil,
       syntactical: Seq[ValidationError] = Nil,
       validity: Seq[ValidationError] = Nil,
@@ -46,7 +46,7 @@ object HmdaFileValidator {
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) =>
-        HmdaFileValidationState(newTs, lars, syntactical, validity, quality)
+        HmdaFileValidationState(ts :+ newTs, lars, syntactical, validity, quality)
       case larValidated @ LarValidated(lar) =>
         HmdaFileValidationState(ts, lars :+ lar, syntactical, validity, quality)
       case SyntacticalError(e) =>
@@ -107,6 +107,7 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with T
         .runWith(Sink.actorRef(self, CompleteValidation))
 
     case ts: TransmittalSheet =>
+      log.info("\n\nTS PARSED YAY\n\n")
       persist(TsValidated(ts)) { e =>
         log.info(s"Persisted: $e")
         updateState(e)

@@ -52,7 +52,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     hmdaFileValidator ! Shutdown
   }
 
-  val ts = TsCsvParser(lines(0)).right.get
+  val ts = Seq(TsCsvParser(lines(0)).right.get)
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
   "HMDA File Validator" must {
     "persist clean LARs" in {
