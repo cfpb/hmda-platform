@@ -62,7 +62,14 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
           }
         }
         "state or county is NA (no matter what else is true)" must {
-          //fail
+          "fail" in {
+            forAll(larGen, actionTaken) { (lar, action) =>
+              whenever(lar.geography.state == "NA" || lar.geography.county == "NA") {
+                val newLar = lar.copy(actionTakenType = action)
+                Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Failure]
+              }
+            }
+          }
         }
         "county is present and small" when {
           "tract is NA" must {
