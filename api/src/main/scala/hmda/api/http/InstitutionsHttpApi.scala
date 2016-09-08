@@ -52,8 +52,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
-  val institutionByIdPath =
-    path("institutions" / Segment) { institutionId =>
+  def institutionByIdPath(institutionId: String) =
+    pathEnd {
       val path = s"institutions/$institutionId"
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/institutions")
@@ -78,8 +78,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
-  val filingByPeriodPath =
-    path("institutions" / Segment / "filings" / Segment) { (institutionId, period) =>
+  def filingByPeriodPath(institutionId: String) =
+    path("filings" / Segment) { period =>
       val path = s"institutions/$institutionId/filings/$period"
       extractExecutionContext { executor =>
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
@@ -110,8 +110,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
-  val submissionPath =
-    path("institutions" / Segment / "filings" / Segment / "submissions") { (institutionId, period) =>
+  def submissionPath(institutionId: String) =
+    path("filings" / Segment / "submissions") { period =>
       val path = s"institutions/$institutionId/filings/$period/submissions"
       timedPost {
         implicit val ec = system.dispatcher
@@ -147,8 +147,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
-  val submissionLatestPath =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / "latest") { (institutionId, period) =>
+  def submissionLatestPath(institutionId: String) =
+    path("filings" / Segment / "submissions" / "latest") { period =>
       val path = s"institutions/$institutionId/filings/$period/submissions/latest"
       timedGet {
         val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
@@ -171,8 +171,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
-  val uploadPath =
-    path("institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) { (institutionId, period, id) =>
+  def uploadPath(institutionId: String) =
+    path("filings" / Segment / "submissions" / IntNumber) { (period, id) =>
       time {
         val submissionId = SubmissionId(institutionId, period, id)
         val path = s"institutions/$institutionId/filings/$period/submissions/$id"
@@ -220,8 +220,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
-  val institutionSummaryPath =
-    path("institutions" / Segment / "summary") { institutionId =>
+  def institutionSummaryPath(institutionId: String) =
+    path("summary") {
       val path = s"institutions/$institutionId/summary"
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/institutions")
@@ -276,13 +276,17 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   }
 
   val institutionsRoutes =
-    hmdaAuthorize {
+    headerAuthorize {
       institutionsPath ~
-        institutionByIdPath ~
-        institutionSummaryPath ~
-        filingByPeriodPath ~
-        submissionPath ~
-        submissionLatestPath ~
-        uploadPath
+        pathPrefix("institutions" / Segment) { instId =>
+          institutionAuthorize(instId) {
+            institutionByIdPath(instId) ~
+              institutionSummaryPath(instId) ~
+              filingByPeriodPath(instId) ~
+              submissionPath(instId) ~
+              submissionLatestPath(instId) ~
+              uploadPath(instId)
+          }
+        }
     }
 }
