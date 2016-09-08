@@ -83,7 +83,7 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with L
 
     case lar: LoanApplicationRegister =>
       persist(LarValidated(lar)) { e =>
-        log.info(s"Persisted: $e")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
@@ -119,7 +119,7 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with L
   private def persistErrors(errors: Seq[Event]): Unit = {
     errors.foreach { error =>
       persist(error) { e =>
-        log.info(s"Persisted: ${e}")
+        log.debug(s"Persisted: ${e}")
         updateState(e)
       }
     }
