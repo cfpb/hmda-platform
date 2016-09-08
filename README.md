@@ -157,7 +157,7 @@ If you don't need to "watch" for changes you can run:
 # while still in the hmda-platform directory
 cd ../hmda-platform-ui
 npm install # optional, to make sure you get the dependencies
-npm run build:docker
+npm run build
 ```
 
 This will simply build the front-end, still taking advantage of the mounted volume.
