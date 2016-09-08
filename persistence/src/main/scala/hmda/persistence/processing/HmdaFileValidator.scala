@@ -83,18 +83,12 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with T
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
         .map(e => e.asInstanceOf[TsParsed].ts)
-        .map(ts => validateTs(ts, ctx))
+        .map(ts => validateTs(ts, ctx).toEither)
         .map {
-          v =>
-            v.foreach(tsVal => {
-              val tsEither = tsVal.toEither
-              if (tsEither.isRight) {
-                self ! tsEither.right.get
-              } else {
-                self ! tsEither.left.get
-              }
-            })
+          case Right(ts) => ts
+          case Left(errors) => ValidationErrors(errors.list.toList)
         }
+        .runWith(Sink.actorRef(self, NotUsed))
 
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[LarParsed])
@@ -160,14 +154,4 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with T
   private def errorsOfType(errors: Seq[ValidationError], errorType: ValidationErrorType): Seq[ValidationError] = {
     errors.filter(_.errorType == errorType)
   }
-
-  /*
-    Gets latest timestamp from database (see S013)
-     */
-  override def findTimestamp(implicit ec: ExecutionContext): Future[Long] = Future(20170808)
-
-  /*
-  Returns year to be processed (see S100)
-   */
-  override def findYearProcessed(implicit ec: ExecutionContext): Future[Int] = Future(2017)
 }

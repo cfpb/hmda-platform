@@ -12,20 +12,11 @@ import scala.concurrent.Future
 
 trait TsEngine extends TsSyntacticalEngine with TsValidityEngine with TsQualityEngine {
 
-  def validateTs(ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
-
-    val fSyntactical = checkSyntactical(ts, ctx)
-    println("\n\nVALIDATING\n\n")
-
-    for {
-      fs <- fSyntactical
-    } yield {
-      (
-        checkValidity(ts, ctx)
-        |@| fs
-        |@| checkQuality(ts, ctx)
-      )((_, _, _) => ts)
-    }
+  def validateTs(ts: TransmittalSheet, ctx: ValidationContext): TsValidation = {
+    (
+      checkValidity(ts, ctx)
+      |@| checkSyntactical(ts, ctx)
+      |@| checkQuality(ts, ctx)
+    )((_, _, _) => ts)
   }
-
 }

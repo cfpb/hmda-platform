@@ -3,18 +3,17 @@ package hmda.validation.engine.ts
 import hmda.parser.fi.ts.TsGenerators
 import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
-import hmda.validation.dsl.Success
 import org.scalatest.prop.PropertyChecks
 
 import scala.concurrent.ExecutionContext
+import scalaz.Success
 
-class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsEngine with TsValidationApiSpec {
+class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsEngine {
   override implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   property("Validates Transmittal Sheet") {
     forAll(tsGen) { ts =>
-      val fValid = validateTs(ts, ValidationContext(None))
-      fValid.map(v => v mustBe Success())
+      validateTs(ts, ValidationContext(None)) mustBe a[Success]
     }
   }
 
