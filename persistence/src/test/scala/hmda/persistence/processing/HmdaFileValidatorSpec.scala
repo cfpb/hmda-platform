@@ -21,14 +21,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     ActorSystem(
       "test-system",
       ConfigFactory.parseString(
-        """
-          | akka.loggers = ["akka.testkit.TestEventListener"]
-          | akka.loglevel = DEBUG
-          | akka.stdout-loglevel = "OFF"
-          | akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
-          | akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
-          | akka.persistence.snapshot-store.local.dir = "target/snapshots"
-          | """.stripMargin
+        TestConfigOverride.config
       )
     )
 
@@ -77,6 +70,22 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3)
       ))
+    }
+
+    "read parsed lars and validate them" in {
+      lars.foreach(lar => probe.send(hmdaFileParser, LarParsed(lar)))
+      val hmdaFileValidator2 = createHmdaFileValidator(system, submissionId)
+      probe.send(hmdaFileParser, GetState)
+      probe.expectMsg(HmdaFileParseState(3, Nil))
+      probe.send(hmdaFileValidator2, BeginValidation)
+      probe.send(hmdaFileValidator2, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        lars,
+        List(ValidationError("1", "S020", Syntactical)),
+        List(ValidationError("1", "V120", Validity)),
+        List(ValidationError("1", "Q003", Quality))
+      ))
+
     }
 
   }

@@ -21,6 +21,7 @@ object HmdaFileParser {
   case class LarParsedErrors(errors: List[String]) extends Event
 
   case class CompleteParsing(submissionId: String) extends Command
+  case class ParsingStarted(submissionId: String) extends Event
   case class ParsingCompleted(submissionId: String) extends Event
 
   def props(id: String): Props = Props(new HmdaFileParser(id))
@@ -57,6 +58,7 @@ class HmdaFileParser(submissionId: String) extends HmdaPersistentActor with Loca
   override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId) =>
+      publishEvent(ParsingStarted(submissionId))
       val parsedTs = events(persistenceId)
         .map { case LineAdded(_, data) => data }
         .take(1)

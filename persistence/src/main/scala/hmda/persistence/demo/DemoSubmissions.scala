@@ -32,12 +32,13 @@ object DemoSubmissions extends ResourceUtils {
       case "uploading" => Uploading
       case "uploaded" => Uploaded
       case "parsing" => Parsing
+      case "parsed-with-errors" => ParsedWithErrors
       case "parsed" => Parsed
-      case "validating-syntax-and-validity" => ValidatingSyntaxAndValidity
-      case "validated-syntax-and-validity" => ValidatedSyntaxAndValidity
-      case "validating-quality-and-macro" => ValidatingQualityAndMacro
-      case "unverified" => Unverified
-      case "verified" => Verified
+      case "validating" => Validating
+      case "validated-with-errors" => ValidatedWithErrors
+      case "validated" => Validated
+      case "irs-generated" => IRSGenerated
+      case "irs-vefified" => IRSVerified
       case "signed" => Signed
       case "failed" => Failed("")
     }
