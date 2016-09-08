@@ -23,7 +23,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
       val inst = createInstitution(externalIds, CFPB, NoDepositTypeInstType)
       val expectedId = inst.respondentId
 
-      expectedId mustBe Left(NoDepositoryTypeForInstitutionType(1, NoDepositTypeInstType))
+      expectedId mustBe Left(NoDepositoryTypeForInstitutionType("1", NoDepositTypeInstType))
       expectedId.left.get.message mustBe s"Institution 1 has an institutionType of $NoDepositTypeInstType, which does not have a depositoryType"
     }
 
@@ -31,7 +31,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
       val inst = createInstitution(Set(ExternalId("666666", FederalTaxId)), CFPB, Bank)
       val expectedId = inst.respondentId
 
-      expectedId mustBe Left(RequiredExternalIdNotPresent(1, RssdId))
+      expectedId mustBe Left(RequiredExternalIdNotPresent("1", RssdId))
       expectedId.left.get.message mustBe s"Institution 1 does not have an externalId of type $RssdId"
     }
 
@@ -81,7 +81,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
       val inst = createInstitution(externalIds, HUD, Bank)
       val expectedId = inst.respondentId
 
-      expectedId mustBe Left(UnsupportedDepositoryTypeByAgency(1, HUD, Depository))
+      expectedId mustBe Left(UnsupportedDepositoryTypeByAgency("1", HUD, Depository))
       expectedId.left.get.message mustBe "Institution 1 is associated with agency HUD, which does not support depositoryType Depository"
     }
 
@@ -121,7 +121,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
     }
 
     def createInstitution(externalIds: Set[ExternalId], agency: Agency, instType: InstitutionType): Institution = {
-      Institution(1, "Test Bank", externalIds, agency, instType, hasParent = true, Active)
+      Institution("1", "Test Bank", externalIds, agency, instType, hasParent = true, Active)
     }
   }
 

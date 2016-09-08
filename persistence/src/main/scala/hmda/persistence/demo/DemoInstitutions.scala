@@ -10,7 +10,7 @@ object DemoInstitutions extends ResourceUtils {
 
     lines.map { line =>
       val values = line.split('|').map(_.trim)
-      val id = values(0).toInt
+      val id = values(0)
       val name = values(1)
       val externalId = values(2)
       val externalIdType = toExternalIdType(values(3))
