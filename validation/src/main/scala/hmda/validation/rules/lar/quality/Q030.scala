@@ -14,17 +14,18 @@ class Q030 private (institution: Institution) extends EditCheck[LoanApplicationR
 
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.actionTakenType is containedIn(1 to 6)) {
-      when(lar.geography is Geography("NA", "NA", "NA", "NA")) {
+      val geo: Geography = lar.geography
+      when(geo is Geography("NA", "NA", "NA", "NA")) {
         institution.cra is false
       } and
-        when(lar.geography.state is "NA") {
-          lar.geography.county is "NA"
+        when(geo.state is "NA") {
+          geo.county is "NA"
         } and
-        when(lar.geography.county is "NA") {
-          lar.geography.state is "NA"
+        when(geo.county is "NA") {
+          geo.state is "NA"
         } and
         when(institution.cra is true) {
-          (lar.geography.state not "NA") and (lar.geography.county not "NA")
+          (geo.state not "NA") and (geo.county not "NA")
         }
     }
   }

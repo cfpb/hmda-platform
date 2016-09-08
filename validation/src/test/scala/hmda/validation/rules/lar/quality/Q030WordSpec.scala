@@ -29,14 +29,18 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
 
     "action taken is 1-6" when {
       val actionTaken = Gen.oneOf(1 to 6)
+      val larGen = for {
+        lar <- super.larGen
+        action <- actionTaken
+      } yield lar.copy(actionTakenType = action)
 
       "institution is NOT a CRA reporter" when {
         val fi = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = false)
         "all 4 geography fields are NA" must {
           val geo = Geography("NA", "NA", "NA", "NA")
           "pass" in {
-            forAll(larGen, actionTaken) { (lar, action) =>
-              val newLar = lar.copy(actionTakenType = action, geography = geo)
+            forAll(larGen) { (lar) =>
+              val newLar = lar.copy(geography = geo)
               Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Success]
             }
           }
@@ -55,18 +59,17 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
         "all 4 geography fields are NA" must {
           val geo = Geography("NA", "NA", "NA", "NA")
           "fail" in {
-            forAll(larGen, actionTaken) { (lar, action) =>
-              val newLar = lar.copy(actionTakenType = action, geography = geo)
+            forAll(larGen) { (lar) =>
+              val newLar = lar.copy(geography = geo)
               Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Failure]
             }
           }
         }
         "state or county is NA (no matter what else is true)" must {
           "fail" in {
-            forAll(larGen, actionTaken) { (lar, action) =>
+            forAll(larGen) { (lar) =>
               whenever(lar.geography.state == "NA" || lar.geography.county == "NA") {
-                val newLar = lar.copy(actionTakenType = action)
-                Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Failure]
+                Q030.inContext(ValidationContext(Some(fi))).apply(lar) mustBe a[Failure]
               }
             }
           }
