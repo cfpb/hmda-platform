@@ -5,8 +5,9 @@ import akka.testkit.{ EventFilter, TestProbe }
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.api.processing.LocalHmdaEventProcessor._
-import hmda.model.fi.SubmissionId
-import hmda.persistence.CommonMessages.Event
+import hmda.model.fi.{ Created, Submission, SubmissionId, Uploading }
+import hmda.persistence.CommonMessages.{ Event, GetState }
+import hmda.persistence.institutions.SubmissionPersistence._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
@@ -40,6 +41,14 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     "process upload start message from event stream" in {
       val msg = s"Upload started for submission ${submissionId.toString}"
       checkEventStreamMessage(msg, UploadStarted(submissionId))
+      val submissions = createSubmissions(submissionId.institutionId, submissionId.period, system)
+      probe.send(submissions, CreateSubmission)
+      probe.send(submissions, GetState)
+      probe.expectMsg(List(Submission(submissionId, Created)))
+      probe.send(eventProcessor, UpdateSubmissionStatus(submissionId, Uploading))
+      //val submissions2 = createSubmissions(submissionId.institutionId, submissionId.period, system)
+      //probe.send(submissions2, GetState)
+      //probe.expectMsg(List(Submission(submissionId, Uploading)))
     }
 
     "process upload completed message from event stream" in {

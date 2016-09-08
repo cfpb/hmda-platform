@@ -59,6 +59,7 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
     case UpdateSubmissionStatus(id, status) =>
       if (state.submissions.map(x => x.submissionId).contains(id)) {
         persist(SubmissionStatusUpdated(id, status)) { e =>
+          log.info(s"Updated submission ${id.toString} status to $status")
           updateState(e)
         }
       } else {
