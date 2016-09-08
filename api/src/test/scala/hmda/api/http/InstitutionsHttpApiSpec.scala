@@ -14,6 +14,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.api.model._
 import hmda.model.fi._
+import hmda.model.institution.Institution
 import hmda.persistence.CommonMessages._
 import hmda.persistence.demo.DemoData
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
@@ -46,12 +47,18 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
   }
 
   "Institutions HTTP API" must {
-    "return a list of existing institutions" in {
-      getWithCfpbHeaders("/institutions") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
-        val institutionsWrapped = DemoData.testInstitutions.map(i => InstitutionWrapper(i.id.toString, i.name, i.status))
-        responseAs[Institutions] mustBe Institutions(institutionsWrapped)
-      }
+    "return a list of institutions matching the 'CFPB-HMDA-Institutions' header" in {
+      val i1 = DemoData.testInstitutions.find(i => i.id == 1).get
+      val i2 = DemoData.testInstitutions.find(i => i.id == 2).get
+      val institutions: Set[Institution] = Set(i1, i2)
+      val institutionsWrapped = institutions.map(i => InstitutionWrapper(i.id.toString, i.name, i.status))
+
+      Get("/institutions")
+        .addHeader(usernameHeader)
+        .addHeader(RawHeader("CFPB-HMDA-Institutions", "1,2")) ~> institutionsRoutes ~> check {
+          status mustBe StatusCodes.OK
+          responseAs[Institutions] mustBe Institutions(institutionsWrapped)
+        }
     }
 
     "return an institution by id" in {
