@@ -75,7 +75,6 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with L
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
         .map(lar => validateLar(lar, ctx).toEither)
-        .map { e => println(e); e }
         .map {
           case Right(l) => l
           case Left(errors) => ValidationErrors(errors.list.toList)
