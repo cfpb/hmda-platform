@@ -72,14 +72,16 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       ))
     }
 
-    "read parsed lars and validate them" in {
+    "read parsed data and validate it" in {
+      probe.send(hmdaFileParser, TsParsed(ts))
       lars.foreach(lar => probe.send(hmdaFileParser, LarParsed(lar)))
       val hmdaFileValidator2 = createHmdaFileValidator(system, submissionId)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(3, Nil))
+      probe.expectMsg(HmdaFileParseState(4, Nil))
       probe.send(hmdaFileValidator2, BeginValidation)
       probe.send(hmdaFileValidator2, GetState)
       probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
         lars,
         List(ValidationError("1", "S020", Syntactical)),
         List(ValidationError("1", "V120", Validity)),
