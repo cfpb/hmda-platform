@@ -34,7 +34,7 @@ object HMDABuild extends Build {
 
   val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
 
-  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery)
+  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence)
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
@@ -95,8 +95,9 @@ object HMDABuild extends Build {
 
 
   lazy val persistence = (project in file("persistence"))
-      .settings(buildSettings:_*)
+    .settings(buildSettings:_*)
     .settings(
+      resolvers += Resolver.jcenterRepo,
       Seq(
         assemblyMergeStrategy in assembly := {
           case "application.conf" => MergeStrategy.concat
