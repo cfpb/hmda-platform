@@ -30,6 +30,6 @@ trait RequestHeaderUtils extends RequestBuilding {
   }
 
   val usernameHeader = new HmdaUsernameHeader("banker11")
-  val institutionsHeader = new HmdaInstitutionsHeader(List("12345"))
+  val institutionsHeader = new HmdaInstitutionsHeader(List("0", "xxxxx"))
 
 }

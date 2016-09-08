@@ -1,6 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.model.fi._
+import hmda.model.fi.SubmissionStatusMessage._
 import hmda.api.model.{ SubmissionStatusWrapper, SubmissionWrapper, Submissions }
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
@@ -17,17 +18,18 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
     override def read(json: JsValue): SubmissionStatus = {
       json match {
         case JsString(s) => s match {
-          case "created" => Created
-          case "uploading" => Uploading
-          case "uploaded" => Uploaded
-          case "parsing" => Parsing
-          case "parsed" => Parsed
-          case "validating syntactical and validity" => ValidatingSyntaxAndValidity
-          case "validated syntactical and validity" => ValidatedSyntaxAndValidity
-          case "validating quality and macro" => ValidatingQualityAndMacro
-          case "unverified" => Unverified
-          case "verified" => Verified
-          case "signed" => Signed
+          case `createdMsg` => Created
+          case `uploadingMsg` => Uploading
+          case `uploadedMsg` => Uploaded
+          case `parsingMsg` => Parsing
+          case `parsedMsg` => Parsed
+          case `parsedWithErrorsMsg` => ParsedWithErrors
+          case `validatingMsg` => Validating
+          case `validatedWithErrorsMsg` => ValidatedWithErrors
+          case `validatedMsg` => Validated
+          case `iRSGeneratedMsg` => IRSGenerated
+          case `iRSVerifiedMsg` => IRSVerified
+          case `signedMsg` => Signed
           case "failed" => Failed("")
           case _ => throw new DeserializationException("Submission Status expected")
         }
