@@ -5,7 +5,9 @@ import akka.testkit.{ EventFilter, TestProbe }
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.api.processing.LocalHmdaEventProcessor._
-import hmda.persistence.CommonMessages.Event
+import hmda.model.fi.{ Created, Submission, SubmissionId, Uploading }
+import hmda.persistence.CommonMessages.{ Event, GetState }
+import hmda.persistence.institutions.SubmissionPersistence._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
@@ -34,41 +36,49 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
   val eventProcessor = createLocalHmdaEventProcessor(system)
 
   "Event processor" must {
-    val submissionId = "12345-2017-1"
+    val submissionId = SubmissionId("0", "2017", 1)
 
     "process upload start message from event stream" in {
-      val msg = s"Upload started for submission $submissionId"
+      val msg = s"Upload started for submission ${submissionId.toString}"
       checkEventStreamMessage(msg, UploadStarted(submissionId))
+      val submissions = createSubmissions(submissionId.institutionId, submissionId.period, system)
+      probe.send(submissions, CreateSubmission)
+      probe.send(submissions, GetState)
+      probe.expectMsg(List(Submission(submissionId, Created)))
+      probe.send(eventProcessor, UpdateSubmissionStatus(submissionId, Uploading))
+      //val submissions2 = createSubmissions(submissionId.institutionId, submissionId.period, system)
+      //probe.send(submissions2, GetState)
+      //probe.expectMsg(List(Submission(submissionId, Uploading)))
     }
 
     "process upload completed message from event stream" in {
       val size = 10
-      val msg = s"$size lines uploaded for submission $submissionId"
+      val msg = s"$size lines uploaded for submission ${submissionId.toString}"
       checkEventStreamMessage(msg, UploadCompleted(size, submissionId))
     }
 
     "process parse started message from event stream" in {
-      val msg = s"Parsing started for submission $submissionId"
+      val msg = s"Parsing started for submission ${submissionId.toString}"
       checkEventStreamMessage(msg, ParsingStarted(submissionId))
     }
 
     "process parse completed message from event stream" in {
-      val msg = s"Parsing completed for $submissionId"
+      val msg = s"Parsing completed for ${submissionId.toString}"
       checkEventStreamMessage(msg, ParsingCompleted(submissionId))
     }
 
     "process validation started message from event stream" in {
-      val msg = s"Validation started for $submissionId"
+      val msg = s"Validation started for ${submissionId.toString}"
       checkEventStreamMessage(msg, ValidationStarted(submissionId))
     }
 
     "process validation completed with errors from event stream" in {
-      val msg = s"validation completed with errors for submission $submissionId"
+      val msg = s"validation completed with errors for submission ${submissionId.toString}"
       checkEventStreamMessage(msg, ValidationCompletedWithErrors(submissionId))
     }
 
     "process validation completed from event stream" in {
-      val msg = s"validation completed for submission $submissionId"
+      val msg = s"validation completed for submission ${submissionId.toString}"
       checkEventStreamMessage(msg, ValidationCompleted(submissionId))
     }
   }

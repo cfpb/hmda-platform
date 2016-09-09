@@ -39,9 +39,9 @@ object DemoData {
   }
 
   val testSubmissions = {
-    val s1 = Submission(1, Created)
-    val s2 = Submission(2, Created)
-    val s3 = Submission(3, Created)
+    val s1 = Submission(SubmissionId("0", "2017", 1), Created)
+    val s2 = Submission(SubmissionId("0", "2017", 2), Created)
+    val s3 = Submission(SubmissionId("0", "2017", 3), Created)
     Seq(s1, s2, s3)
   }
 
@@ -92,7 +92,7 @@ object DemoData {
           val submissionsActor = system.actorOf(SubmissionPersistence.props(id, period))
           submissionsActor ! CreateSubmission
           Thread.sleep(100)
-          submissionsActor ! UpdateSubmissionStatus(submission.id, submission.submissionStatus)
+          submissionsActor ! UpdateSubmissionStatus(submission.submissionId, submission.submissionStatus)
           Thread.sleep(100)
           submissionsActor ! Shutdown
       }

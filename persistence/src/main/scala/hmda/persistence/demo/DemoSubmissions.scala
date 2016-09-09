@@ -12,14 +12,15 @@ object DemoSubmissions extends ResourceUtils {
       val values = line.split('|').map(_.trim)
       val institutionId = values(0)
       val period = values(1)
-      val number = values(2).toInt
+      val seqNo = values(2).toInt
+      val id = SubmissionId(institutionId, period, seqNo)
       val status = toSubmissionStatus(values(3))
 
       (
         institutionId,
         period,
         Submission(
-          number,
+          id,
           status
         )
       )

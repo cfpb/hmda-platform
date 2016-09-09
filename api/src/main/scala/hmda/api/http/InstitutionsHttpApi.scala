@@ -18,8 +18,7 @@ import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission, GetSubmissionById }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
-import hmda.model.fi.Created
-import hmda.model.fi.{ Filing, Submission }
+import hmda.model.fi.{ Created, Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
@@ -157,12 +156,12 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         onComplete(fSubmissions) {
           case Success(submission) =>
             submissionsActor ! Shutdown
-            if (submission.id == 0) {
+            if (submission.submissionId.sequenceNumber == 0) {
               val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", path)
               complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
             } else {
               val statusWrapper = SubmissionStatusWrapper(submission.submissionStatus.code, submission.submissionStatus.message)
-              val submissionWrapper = SubmissionWrapper(submission.id, statusWrapper)
+              val submissionWrapper = SubmissionWrapper(submission.submissionId.toString, statusWrapper)
               complete(ToResponseMarshallable(submissionWrapper))
             }
           case Failure(error) =>
@@ -173,12 +172,13 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     }
 
   def uploadPath(institutionId: String) =
-    path("filings" / Segment / "submissions" / IntNumber) { (period, submissionId) =>
+    path("filings" / Segment / "submissions" / IntNumber) { (period, id) =>
       time {
-        val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId"
+        val submissionId = SubmissionId(institutionId, period, id)
+        val path = s"institutions/$institutionId/filings/$period/submissions/$id"
         extractExecutionContext { executor =>
           val uploadTimestamp = Instant.now.toEpochMilli
-          val processingActor = createHmdaRawFile(system, submissionId.toString)
+          val processingActor = createHmdaRawFile(system, submissionId)
           val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
           implicit val ec: ExecutionContext = executor
           val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId)
@@ -187,7 +187,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               submissionsActor ! Shutdown
               processingActor ! StartUpload
               fileUpload("file") {
-                case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
+                case (metadata, byteSource) if metadata.fileName.endsWith(".txt") =>
                   val uploadedF = byteSource
                     .via(splitLines)
                     .map(_.utf8String)
@@ -263,7 +263,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     } yield FilingDetail(filing, submissions)
   }
 
-  private def checkSubmissionOverwrite(submissionsActor: ActorRef, submissionId: Int)(implicit ec: ExecutionContext): Future[Boolean] = {
+  private def checkSubmissionOverwrite(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Boolean] = {
     val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
     submission.map(_.submissionStatus != Created)
   }

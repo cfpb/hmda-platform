@@ -5,6 +5,7 @@ import java.time.Instant
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
+import hmda.model.fi.SubmissionId
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaRawFile._
 
@@ -13,7 +14,9 @@ class HmdaRawFileSpec extends ActorSpec {
 
   val config = ConfigFactory.load()
 
-  val hmdaFileUpload = createHmdaRawFile(system, "1")
+  val submissionId = SubmissionId("0", "2017", 1)
+
+  val hmdaFileUpload = createHmdaRawFile(system, submissionId)
 
   val probe = TestProbe()
 
@@ -32,7 +35,7 @@ class HmdaRawFileSpec extends ActorSpec {
     "recover with event" in {
       probe.send(hmdaFileUpload, Shutdown)
 
-      val secondHmdaFileUpload = createHmdaRawFile(system, "1")
+      val secondHmdaFileUpload = createHmdaRawFile(system, submissionId)
 
       probe.send(secondHmdaFileUpload, GetState)
       probe.expectMsg(HmdaRawFileState(4))

@@ -3,14 +3,9 @@ package hmda.api.model
 import java.util.Calendar
 
 import hmda.model.fi._
-import hmda.model.institution.Agency._
-import hmda.model.institution.ExternalIdType._
-import hmda.model.institution._
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
-import hmda.model.institution.InstitutionType._
-import org.scalacheck.{ Arbitrary, Gen }
-
-import scalaz.Alpha.B
+import hmda.model.institution._
+import org.scalacheck.Gen
 
 trait ModelGenerators {
 
@@ -68,9 +63,17 @@ trait ModelGenerators {
     )
   }
 
+  implicit def submissionIdGen: Gen[SubmissionId] = {
+    for {
+      institutionId <- Gen.alphaStr
+      period <- Gen.alphaStr
+      seqNo <- Gen.choose(0, Int.MaxValue)
+    } yield SubmissionId(institutionId, period, seqNo)
+  }
+
   implicit def submissionGen: Gen[Submission] = {
     for {
-      id <- Gen.choose(0, Int.MaxValue)
+      id <- submissionIdGen
       status <- submissionStatusGen
     } yield Submission(id, status)
   }

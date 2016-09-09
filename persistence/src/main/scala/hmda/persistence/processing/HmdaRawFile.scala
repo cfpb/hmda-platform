@@ -1,6 +1,7 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import hmda.model.fi.SubmissionId
 import hmda.persistence.CommonMessages._
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 
@@ -8,9 +9,9 @@ object HmdaRawFile {
 
   val name = "HmdaRawFile"
 
-  def props(id: String): Props = Props(new HmdaRawFile(id))
+  def props(id: SubmissionId): Props = Props(new HmdaRawFile(id))
 
-  def createHmdaRawFile(system: ActorSystem, submissionId: String): ActorRef = {
+  def createHmdaRawFile(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
     system.actorOf(HmdaRawFile.props(submissionId))
   }
 
@@ -18,9 +19,9 @@ object HmdaRawFile {
   case class AddLine(timestamp: Long, data: String) extends Command
   case object CompleteUpload extends Command
 
-  case class UploadStarted(submissionId: String) extends Event
+  case class UploadStarted(submissionId: SubmissionId) extends Event
   case class LineAdded(timestamp: Long, data: String) extends Event
-  case class UploadCompleted(size: Int, submissionId: String) extends Event
+  case class UploadCompleted(size: Int, submissionId: SubmissionId) extends Event
 
   case class HmdaRawFileState(size: Int = 0) {
     def updated(event: Event): HmdaRawFileState = event match {
@@ -31,7 +32,7 @@ object HmdaRawFile {
 
 }
 
-class HmdaRawFile(submissionId: String) extends HmdaPersistentActor with LocalEventPublisher {
+class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with LocalEventPublisher {
 
   import HmdaRawFile._
 

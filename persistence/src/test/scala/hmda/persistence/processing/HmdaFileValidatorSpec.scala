@@ -4,6 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
+import hmda.model.fi.SubmissionId
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser._
@@ -24,7 +25,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       )
     )
 
-  val submissionId = "12345-2017-1"
+  val submissionId = SubmissionId("0", "2017", 1)
 
   val larValidator = system.actorSelection(createSingleLarValidator(system).path)
 
