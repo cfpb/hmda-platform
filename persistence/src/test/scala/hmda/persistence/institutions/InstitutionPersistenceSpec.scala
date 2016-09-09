@@ -2,8 +2,8 @@ package hmda.persistence.institutions
 
 import akka.testkit.{ EventFilter, TestProbe }
 import hmda.actor.test.ActorSpec
-import hmda.model.institution.Agency.CFPB
-import hmda.model.institution.ExternalIdType.{ FederalTaxId, RssdId }
+import hmda.model.institution.Agency.{ CFPB, FDIC }
+import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId }
 import hmda.model.institution.{ ExternalId, Institution }
 import hmda.model.institution.InstitutionStatus.Active
 import hmda.model.institution.InstitutionType.Bank
@@ -34,6 +34,24 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.send(institutionsActor, GetInstitutionById(modified.id.toString))
       probe.expectMsg(modified)
     }
+
+    "return a set of institutions matching a list of ids" in {
+      // Setup: Persist demo institutions
+      val i1 = Institution(71, "CFPBank", Set(ExternalId("99-1234567", FederalTaxId)), CFPB, Bank, hasParent = true, Active)
+      val i2 = Institution(72, "FRBank", Set(ExternalId("654321", RssdId)), CFPB, Bank, hasParent = true, Active)
+      val i3 = Institution(73, "MLBank", Set(ExternalId("externalTest0", FdicCertNo)), FDIC, Bank, hasParent = true, Active)
+      for (institution <- List(i1, i2, i3)) {
+        probe.send(institutionsActor, CreateInstitution(institution))
+      }
+
+      // Request some of the existing institutions
+      probe.send(institutionsActor, GetInstitutionsById(List("71", "73")))
+      probe.expectMsg(Set(i3, i1))
+    }
+    "return an empty set when requesting nonexistent institutions" in {
+      probe.send(institutionsActor, GetInstitutionsById(List("a", "b")))
+      probe.expectMsg(Set())
+    }
   }
 
   "Error logging" must {
@@ -44,7 +62,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.send(institutionsActor, CreateInstitution(i1))
 
       // Attempt to add identical institution; test that warning is logged
-      val i2 = Institution(12345, "Test Bank 1", Set(ExternalId("99-1234567", FederalTaxId), ExternalId("123456", RssdId)), CFPB, Bank, hasParent = true, Active)
+      val i2 = i1.copy()
       val msg = s"Institution already exists. Could not create $i2"
       EventFilter.warning(message = msg, occurrences = 1) intercept {
         probe.send(institutionsActor, CreateInstitution(i2))

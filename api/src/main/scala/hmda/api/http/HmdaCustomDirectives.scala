@@ -44,6 +44,11 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
     }
   }
 
+  def institutionIdsFromHeader(ctx: RequestContext): List[String] = {
+    val header = ctx.request.getHeader("CFPB-HMDA-Institutions").get()
+    header.value().split(",").map(_.trim).toList
+  }
+
   def time: Directive0 = {
     val startTime = System.currentTimeMillis()
 
@@ -58,11 +63,6 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
 
   private def hasHeader(headerName: String, ctx: RequestContext): Boolean = {
     ctx.request.getHeader(headerName).isPresent
-  }
-
-  private def institutionIdsFromHeader(ctx: RequestContext): List[String] = {
-    val header = ctx.request.getHeader("CFPB-HMDA-Institutions").get()
-    header.value().split(",").map(_.trim).toList
   }
 
 }

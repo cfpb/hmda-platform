@@ -15,7 +15,7 @@ import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
 import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
-import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
+import hmda.persistence.institutions.InstitutionPersistence.{ GetInstitutionById, GetInstitutionsById }
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission, GetSubmissionById }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.Created
@@ -43,12 +43,15 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       val path = "institutions"
       val institutionsActor = system.actorSelection("/user/institutions")
       timedGet {
-        val fInstitutions = (institutionsActor ? GetState).mapTo[Set[Institution]]
-        onComplete(fInstitutions) {
-          case Success(institutions) =>
-            val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name, inst.status))
-            complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
-          case Failure(error) => completeWithInternalError(path, error)
+        extractRequestContext { ctx =>
+          val ids = institutionIdsFromHeader(ctx)
+          val fInstitutions = (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
+          onComplete(fInstitutions) {
+            case Success(institutions) =>
+              val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name, inst.status))
+              complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
+            case Failure(error) => completeWithInternalError(path, error)
+          }
         }
       }
     }
