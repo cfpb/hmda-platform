@@ -113,7 +113,8 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "create a new submission" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Created
-        responseAs[Submission] mustBe Submission(DemoData.testSubmissions.size + 1, Created)
+        val seqNr = DemoData.testSubmissions.size + 1
+        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", seqNr), Created)
       }
     }
 
@@ -158,7 +159,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       val badContent = "qdemd"
       val file = multiPartFile(badContent, "sample.txt")
       val submissionActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
-      submissionActor ! UpdateSubmissionStatus(1, Signed)
+      submissionActor ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
       submissionActor ! Shutdown
       Thread sleep 100
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {

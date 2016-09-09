@@ -9,7 +9,7 @@ import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, G
 
 class SubmissionPersistenceSpec extends ActorSpec {
 
-  val submissionsActor = createSubmissions("12345", "2017", system)
+  val submissionsActor = createSubmissions("0", "2017", system)
 
   val probe = TestProbe()
 
@@ -25,16 +25,16 @@ class SubmissionPersistenceSpec extends ActorSpec {
 
     "be able to modify their status" in {
       val newStatus = Uploaded
-      val id = 1
-      probe.send(submissionsActor, UpdateSubmissionStatus(1, newStatus))
-      probe.send(submissionsActor, GetSubmissionById(1))
-      probe.expectMsg(Submission(1, Uploaded))
+      val id = SubmissionId("0", "2017", 1)
+      probe.send(submissionsActor, UpdateSubmissionStatus(id, newStatus))
+      probe.send(submissionsActor, GetSubmissionById(id))
+      probe.expectMsg(Submission(id, Uploaded))
     }
   }
 
   "Error logging" must {
     "warn when updating nonexistent submission" in {
-      val id = 777
+      val id = SubmissionId("0", "2017", 777)
       val msg = s"Submission does not exist. Could not update submission with id $id"
       EventFilter.warning(message = msg, occurrences = 1) intercept {
         probe.send(submissionsActor, UpdateSubmissionStatus(id, Created))

@@ -14,12 +14,13 @@ object DemoSubmissions extends ResourceUtils {
       val period = values(1)
       val number = values(2).toInt
       val status = toSubmissionStatus(values(3))
+      val id = SubmissionId(institutionId, period, number)
 
       (
         institutionId,
         period,
         Submission(
-          number,
+          id,
           status
         )
       )

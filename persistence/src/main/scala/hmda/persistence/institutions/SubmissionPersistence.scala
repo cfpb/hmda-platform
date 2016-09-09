@@ -1,7 +1,7 @@
 package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.fi.{ Created, Submission, SubmissionStatus }
+import hmda.model.fi.{ Created, Submission, SubmissionId, SubmissionStatus }
 import hmda.persistence.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.SubmissionPersistence._
@@ -9,17 +9,17 @@ import hmda.persistence.institutions.SubmissionPersistence._
 object SubmissionPersistence {
 
   case object CreateSubmission extends Command
-  case class UpdateSubmissionStatus(id: Int, status: SubmissionStatus) extends Command
-  case class GetSubmissionById(id: Int) extends Command
+  case class UpdateSubmissionStatus(id: SubmissionId, status: SubmissionStatus) extends Command
+  case class GetSubmissionById(id: SubmissionId) extends Command
   case object GetLatestSubmission extends Command
 
   case class SubmissionCreated(submission: Submission) extends Event
-  case class SubmissionStatusUpdated(id: Int, status: SubmissionStatus) extends Event
+  case class SubmissionStatusUpdated(id: SubmissionId, status: SubmissionStatus) extends Event
 
-  def props(fid: String, filingId: String): Props = Props(new SubmissionPersistence(fid, filingId))
+  def props(institutionId: String, period: String): Props = Props(new SubmissionPersistence(institutionId, period))
 
-  def createSubmissions(fid: String, filingId: String, system: ActorSystem): ActorRef = {
-    system.actorOf(SubmissionPersistence.props(fid, filingId))
+  def createSubmissions(institutionId: String, period: String, system: ActorSystem): ActorRef = {
+    system.actorOf(SubmissionPersistence.props(institutionId, period))
   }
 
   case class SubmissionState(submissions: Seq[Submission] = Nil) {
@@ -38,7 +38,7 @@ object SubmissionPersistence {
 }
 
 //Submissions for an institution, per filing period
-class SubmissionPersistence(fid: String, filingId: String) extends HmdaPersistentActor {
+class SubmissionPersistence(institutionId: String, period: String) extends HmdaPersistentActor {
 
   var state = SubmissionState()
 
@@ -46,11 +46,13 @@ class SubmissionPersistence(fid: String, filingId: String) extends HmdaPersisten
     state = state.updated(e)
   }
 
-  override def persistenceId: String = s"submissions-$fid-$filingId"
+  override def persistenceId: String = s"submissions-$institutionId-$period"
 
   override def receiveCommand: Receive = {
     case CreateSubmission =>
-      val newSubmission = Submission().copy(id = state.submissions.size + 1, submissionStatus = Created)
+      val seqNr = state.submissions.size + 1
+      val submissionId = SubmissionId(institutionId, period, seqNr)
+      val newSubmission = Submission(submissionId, Created)
       persist(SubmissionCreated(newSubmission)) { e =>
         updateState(e)
       }

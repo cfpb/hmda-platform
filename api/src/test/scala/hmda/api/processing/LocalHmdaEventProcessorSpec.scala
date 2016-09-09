@@ -5,6 +5,7 @@ import akka.testkit.{ EventFilter, TestProbe }
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.api.processing.LocalHmdaEventProcessor._
+import hmda.model.fi.SubmissionId
 import hmda.persistence.CommonMessages.Event
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
@@ -34,7 +35,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
   val eventProcessor = createLocalHmdaEventProcessor(system)
 
   "Event processor" must {
-    val submissionId = "12345-2017-1"
+    val submissionId = SubmissionId("0", "2017", 1)
 
     "process upload start message from event stream" in {
       val msg = s"Upload started for submission $submissionId"
