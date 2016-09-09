@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.quality
 
-import hmda.model.fi.lar.Geography
+import hmda.model.fi.lar.{ Geography, LoanApplicationRegister }
 import hmda.model.institution.{ Agency, Institution, InstitutionType }
 import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.context.ValidationContext
@@ -23,10 +23,9 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
     "action taken type is 7 or 8 (preapproval)" must {
       val actionTaken = Gen.oneOf(7, 8)
       "pass" in {
-        forAll(craOrNot) { fi =>
+        forAll(craOrNot) { implicit fi =>
           forAll(larGen, actionTaken) { (lar, action) =>
-            val newLar = lar.copy(actionTakenType = action)
-            Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Success]
+            lar.copy(actionTakenType = action).mustPass
           }
         }
       }
@@ -40,14 +39,11 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
       } yield lar.copy(actionTakenType = action)
 
       "institution is NOT a CRA reporter" when {
-        val fi = nonCraFI
+        implicit val fi = nonCraFI
         "all 4 geography fields are NA" must {
           val geo = Geography("NA", "NA", "NA", "NA")
           "pass" in {
-            forAll(larGen) { (lar) =>
-              val newLar = lar.copy(geography = geo)
-              Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Success]
-            }
+            geo.mustPass
           }
         }
         "county is present and small" when {
@@ -60,21 +56,18 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
         }
       }
       "institution is a CRA reporter" when {
-        val fi = craFI
+        implicit val fi = craFI
         "all 4 geography fields are NA" must {
           val geo = Geography("NA", "NA", "NA", "NA")
           "fail" in {
-            forAll(larGen) { (lar) =>
-              val newLar = lar.copy(geography = geo)
-              Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Failure]
-            }
+            geo.mustFail
           }
         }
         "state or county is NA (no matter what else is true)" must {
           "fail" in {
             forAll(larGen) { (lar) =>
               whenever(lar.geography.state == "NA" || lar.geography.county == "NA") {
-                Q030.inContext(ValidationContext(Some(fi))).apply(lar) mustBe a[Failure]
+                lar.mustFail
               }
             }
           }
@@ -171,12 +164,21 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
 
       def mustFail(implicit geo: Geography, fi: Institution): Unit = {
         forAll(larGen, actionTaken) { (lar, action) =>
-          val newLar = lar.copy(actionTakenType = action, geography = geo)
-          Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Failure]
+          lar.copy(actionTakenType = action, geography = geo).mustFail
         }
       }
 
+      implicit class GeoChecker(geo: Geography) {
+        def mustFail(implicit fi: Institution) = forAll(larGen) { lar => lar.copy(geography = geo).mustFail }
+        def mustPass(implicit fi: Institution) = forAll(larGen) { lar => lar.copy(geography = geo).mustPass }
+      }
     }
+  }
+
+  implicit class LarChecker(lar: LoanApplicationRegister) {
+    def mustFail(implicit fi: Institution) = check(lar, fi) mustBe a[Failure]
+    def mustPass(implicit fi: Institution) = check(lar, fi) mustBe a[Success]
+    def check(lar: LoanApplicationRegister, fi: Institution) = Q030.inContext(ValidationContext(Some(fi))).apply(lar)
   }
 
 }
