@@ -6,8 +6,8 @@ import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalacheck.Gen
-import org.scalatest.{ MustMatchers, WordSpec }
-import org.scalatest.prop.PropertyChecks
+import org.scalatest.{ Assertion, MustMatchers, WordSpec }
+import org.scalatest.prop.{ PropertyChecks, TableFor1 }
 
 import scala.language.implicitConversions
 
@@ -38,6 +38,11 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
         action <- actionTaken
       } yield lar.copy(actionTakenType = action)
 
+      val smallCountyInMSA: Geography = Geography("10100", "46", "045", "9621.00")
+      val smallCountyOutsideMSA: Geography = Geography("NA", "47", "109", "9307.00")
+      val largeCountyInMSA = Geography("13820", "01", "117", "0304.08")
+      val largeCountyOutsideMSA = Geography("NA", "27", "097", "7804.00")
+
       "institution is NOT a CRA reporter" when {
         implicit val fi = nonCraFI
         "all 4 geography fields are NA" must {
@@ -48,10 +53,16 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
         }
         "county is present and small" when {
           "tract is NA" must {
-            // pass
+            "pass" in {
+              smallCountyInMSA.withoutTract.mustPass
+              smallCountyOutsideMSA.withoutTract.mustPass
+            }
           }
           "tract is present (and matches)" must {
-            // fail
+            "fail" in {
+              smallCountyInMSA.mustFail
+              smallCountyOutsideMSA.mustFail
+            }
           }
         }
       }
@@ -74,10 +85,16 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
         }
         "county is present and small" when {
           "tract is NA" must {
-            // pass
+            "pass" in {
+              smallCountyInMSA.withoutTract.mustPass
+              smallCountyOutsideMSA.withoutTract.mustPass
+            }
           }
           "tract is present (and matches)" must {
-            // pass
+            "pass" in {
+              smallCountyInMSA.mustPass
+              smallCountyOutsideMSA.mustPass
+            }
           }
         }
       }
@@ -85,20 +102,24 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
       "property MSA/MD is present" when {
         "tract is NA" when {
           "MSA/MD, state and county match" must {
-            //pass
+            "pass" in {
+              smallCountyInMSA.withoutTract.mustPass(craOrNot)
+            }
           }
           "MSA/MD, state and county do not match" must {
             //fail
-            // I'm thinking this will include the case where state is NA, but is it better to make it separate?
-            // same question applies to the other "do not match" cases; they should probably be consistent.
           }
           "county is large" must {
-            // fail
+            "fail" in {
+              largeCountyInMSA.withoutTract.mustFail(craOrNot)
+            }
           }
         }
         "tract is present" when {
           "MSA/MD, state, county, and tract match" must {
-            //pass
+            "pass" in {
+              largeCountyInMSA.mustPass(craOrNot)
+            }
           }
           "MSA/MD, state, county, and tract do not match" must {
             //fail
@@ -110,18 +131,24 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
         val msa = "NA"
         "tract is NA" when {
           "state and county match" must {
-            //pass
+            "pass" in {
+              smallCountyOutsideMSA.withoutTract.mustPass(craOrNot)
+            }
           }
           "state and county do not match" must {
             //fail
           }
           "county is large" must {
-            // fail
+            "fail" in {
+              largeCountyOutsideMSA.withoutTract.mustFail(craOrNot)
+            }
           }
         }
         "tract is present" when {
           "state, county, and tract match" must {
-            //pass
+            "pass" in {
+              largeCountyOutsideMSA.mustPass(craOrNot)
+            }
           }
           "state, county, and tract do not match" must {
             //fail
@@ -130,7 +157,6 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
       }
 
       {
-        // these cases use specific values because the edit would otherwise fail for other reasons (value mismatches).
         val msaOrNot = Gen.oneOf(MSA("13820"), MSA("NA"))
         val tractOrNot = Gen.oneOf(Tract("0304.08"), Tract("NA"))
 
@@ -171,6 +197,9 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
       implicit class GeoChecker(geo: Geography) {
         def mustFail(implicit fi: Institution) = forAll(larGen) { lar => lar.copy(geography = geo).mustFail }
         def mustPass(implicit fi: Institution) = forAll(larGen) { lar => lar.copy(geography = geo).mustPass }
+        def withoutTract = geo.copy(tract = "NA")
+        def mustFail(fiGen: TableFor1[Institution]): Assertion = forAll(fiGen) { fi => geo.mustFail(fi) }
+        def mustPass(fiGen: TableFor1[Institution]): Assertion = forAll(fiGen) { fi => geo.mustPass(fi) }
       }
     }
   }
