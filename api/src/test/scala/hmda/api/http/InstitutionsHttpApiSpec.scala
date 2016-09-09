@@ -48,8 +48,8 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
   "Institutions HTTP API" must {
     "return a list of institutions matching the 'CFPB-HMDA-Institutions' header" in {
-      val i1 = DemoData.testInstitutions.find(i => i.id == 1).get
-      val i2 = DemoData.testInstitutions.find(i => i.id == 2).get
+      val i1 = DemoData.testInstitutions.find(i => i.id == "1").get
+      val i2 = DemoData.testInstitutions.find(i => i.id == "2").get
       val institutions: Set[Institution] = Set(i1, i2)
       val institutionsWrapped = institutions.map(i => InstitutionWrapper(i.id.toString, i.name, i.status))
 

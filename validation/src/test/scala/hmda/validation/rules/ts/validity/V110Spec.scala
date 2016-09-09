@@ -75,6 +75,6 @@ class V110Spec extends TsEditCheckSpec {
 
   private def whenInstitutionTypeIs(instType: InstitutionType): Unit = {
     // note: the hasParent boolean is not used in this edit. it's false here, which is not realistic for all types.
-    institution = Institution(22, "some bank", Set(), Agency.CFPB, instType, hasParent = false)
+    institution = Institution("22", "some bank", Set(), Agency.CFPB, instType, hasParent = false)
   }
 }

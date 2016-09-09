@@ -5,7 +5,7 @@ package hmda.model.institution
  */
 trait InstitutionRepository {
 
-  def get(id: Integer): Option[Institution]
+  def get(id: String): Option[Institution]
 
 }
 
@@ -14,8 +14,8 @@ trait InstitutionRepository {
  */
 class InMemoryInstitutionRepository(institutions: Set[Institution]) extends InstitutionRepository {
 
-  private val instById: Map[Int, Institution] = institutions.map(i => (i.id, i)).toMap
+  private val instById: Map[String, Institution] = institutions.map(i => (i.id, i)).toMap
 
-  override def get(id: Integer): Option[Institution] = instById.get(id)
+  override def get(id: String): Option[Institution] = instById.get(id)
 
 }

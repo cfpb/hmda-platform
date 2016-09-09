@@ -21,10 +21,10 @@ object DemoData {
   val externalId3 = ExternalId("externalTest3", FederalTaxId)
 
   val testInstitutions = {
-    val i0 = Institution(0, "Bank 0", Set(externalId0), FDIC, Bank, hasParent = true, Active)
-    val i1 = Institution(1, "Bank 1", Set(externalId1), CFPB, CreditUnion, hasParent = true, Active)
-    val i2 = Institution(2, "Bank 2", Set(externalId2), OCC, CreditUnion, hasParent = false, Inactive)
-    val i3 = Institution(3, "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true, Active)
+    val i0 = Institution("0", "Bank 0", Set(externalId0), FDIC, Bank, hasParent = true, Active)
+    val i1 = Institution("1", "Bank 1", Set(externalId1), CFPB, CreditUnion, hasParent = true, Active)
+    val i2 = Institution("2", "Bank 2", Set(externalId2), OCC, CreditUnion, hasParent = false, Inactive)
+    val i3 = Institution("3", "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true, Active)
     Set(i0, i1, i2, i3)
   }
 
