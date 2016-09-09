@@ -15,14 +15,19 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
 
   import Q030WordSpec._
 
+  val craFI = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true)
+  val nonCraFI = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = false)
+  val craOrNot = Table("CRA", craFI, nonCraFI)
+
   "Q030" when {
     "action taken type is 7 or 8 (preapproval)" must {
       val actionTaken = Gen.oneOf(7, 8)
       "pass" in {
-        val fi = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true) // TODO cra can be true or false
-        forAll(larGen, actionTaken) { (lar, action) =>
-          val newLar = lar.copy(actionTakenType = action)
-          Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Success]
+        forAll(craOrNot) { fi =>
+          forAll(larGen, actionTaken) { (lar, action) =>
+            val newLar = lar.copy(actionTakenType = action)
+            Q030.inContext(ValidationContext(Some(fi))).apply(newLar) mustBe a[Success]
+          }
         }
       }
     }
@@ -35,7 +40,7 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
       } yield lar.copy(actionTakenType = action)
 
       "institution is NOT a CRA reporter" when {
-        val fi = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = false)
+        val fi = nonCraFI
         "all 4 geography fields are NA" must {
           val geo = Geography("NA", "NA", "NA", "NA")
           "pass" in {
@@ -55,7 +60,7 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
         }
       }
       "institution is a CRA reporter" when {
-        val fi = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true)
+        val fi = craFI
         "all 4 geography fields are NA" must {
           val geo = Geography("NA", "NA", "NA", "NA")
           "fail" in {
@@ -132,19 +137,19 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
       }
 
       {
-        // these cases must fail no matter what else is true; that said, we may end up having to test specific values,
-        // as otherwise the test would pass (Q030 would fail) for the wrong reason (other value mismatches).
-        implicit val fi = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true) // TODO cra can be true or false
+        // these cases use specific values because the edit would otherwise fail for other reasons (value mismatches).
         val msaOrNot = Gen.oneOf(MSA("13820"), MSA("NA"))
         val tractOrNot = Gen.oneOf(Tract("0304.08"), Tract("NA"))
 
         "state is present but county is NA" must {
           implicit val alabama = State("01")
           implicit val countyNA = County("NA")
-          "fail" in {
-            forAll(msaOrNot) { implicit msa =>
-              forAll(tractOrNot) { implicit tract =>
-                mustFail
+          forAll(craOrNot) { implicit fi: Institution =>
+            s"fail when CRA is ${fi.cra}" in {
+              forAll(msaOrNot) { implicit msa =>
+                forAll(tractOrNot) { implicit tract =>
+                  mustFail
+                }
               }
             }
           }
@@ -152,10 +157,12 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
         "county is present but state is NA" must {
           implicit val stateNA = State("NA")
           implicit val jeffersonCounty = County("117")
-          "fail" in {
-            forAll(msaOrNot) { implicit msa =>
-              forAll(tractOrNot) { implicit tract =>
-                mustFail
+          forAll(craOrNot) { implicit fi: Institution =>
+            s"fail when CRA is ${fi.cra}" in {
+              forAll(msaOrNot) { implicit msa =>
+                forAll(tractOrNot) { implicit tract =>
+                  mustFail
+                }
               }
             }
           }
