@@ -13,8 +13,6 @@ import scala.language.implicitConversions
 
 class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with MustMatchers {
 
-  import Q030WordSpec._
-
   val craFI = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true)
   val nonCraFI = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = false)
   val craOrNot = Table("CRA", craFI, nonCraFI)
@@ -168,31 +166,23 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
       }
 
       {
-        val msaOrNot = Gen.oneOf(MSA("13820"), MSA("NA"))
-        val tractOrNot = Gen.oneOf(Tract("0304.08"), Tract("NA"))
+        val msaOrNot = Gen.oneOf("13820", "NA")
+        val tractOrNot = Gen.oneOf("0304.08", "NA")
 
         "state is present but county is NA" must {
-          implicit val alabama = State("01")
-          implicit val countyNA = County("NA")
           forAll(craOrNot) { implicit fi: Institution =>
             s"fail when CRA is ${fi.cra}" in {
-              forAll(msaOrNot) { implicit msa =>
-                forAll(tractOrNot) { implicit tract =>
-                  mustFail
-                }
+              forAll(msaOrNot, tractOrNot) { (msa, tract) =>
+                Geography(msa, "01", "NA", tract).mustFail
               }
             }
           }
         }
         "county is present but state is NA" must {
-          implicit val stateNA = State("NA")
-          implicit val jeffersonCounty = County("117")
           forAll(craOrNot) { implicit fi: Institution =>
             s"fail when CRA is ${fi.cra}" in {
-              forAll(msaOrNot) { implicit msa =>
-                forAll(tractOrNot) { implicit tract =>
-                  mustFail
-                }
+              forAll(msaOrNot, tractOrNot) { (msa, tract) =>
+                Geography(msa, "NA", "117", tract).mustFail
               }
             }
           }
@@ -222,20 +212,3 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
   }
 
 }
-
-object Q030WordSpec {
-
-  implicit def msaToString(msa: MSA): String = msa.value
-  implicit def stateToString(msa: State): String = msa.value
-  implicit def countyToString(msa: County): String = msa.value
-  implicit def tractToString(msa: Tract): String = msa.value
-
-  implicit def geography(implicit msa: MSA, state: State, county: County, tract: Tract): Geography = {
-    Geography(msa, state, county, tract)
-  }
-}
-
-case class MSA(value: String) {}
-case class State(value: String) {}
-case class County(value: String) {}
-case class Tract(value: String) {}
