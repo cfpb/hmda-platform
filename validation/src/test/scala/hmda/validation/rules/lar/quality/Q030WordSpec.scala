@@ -42,6 +42,9 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
       val smallCountyOutsideMSA: Geography = Geography("NA", "47", "109", "9307.00")
       val largeCountyInMSA = Geography("13820", "01", "117", "0304.08")
       val largeCountyOutsideMSA = Geography("NA", "27", "097", "7804.00")
+      val someOtherMSA = "48300"
+      val someOtherState = "55"
+      val someOtherTract = "7424.02"
 
       "institution is NOT a CRA reporter" when {
         implicit val fi = nonCraFI
@@ -107,7 +110,9 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
             }
           }
           "MSA/MD, state and county do not match" must {
-            //fail
+            "fail" in {
+              smallCountyInMSA.withoutTract.copy(msa = someOtherMSA).mustFail(craOrNot)
+            }
           }
           "county is large" must {
             "fail" in {
@@ -122,13 +127,14 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
             }
           }
           "MSA/MD, state, county, and tract do not match" must {
-            //fail
+            "fail" in {
+              smallCountyInMSA.copy(tract = someOtherTract).mustFail(craOrNot)
+            }
           }
         }
       }
 
       "property MSA/MD is NA" when {
-        val msa = "NA"
         "tract is NA" when {
           "state and county match" must {
             "pass" in {
@@ -136,7 +142,9 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
             }
           }
           "state and county do not match" must {
-            //fail
+            "fail" in {
+              smallCountyOutsideMSA.withoutTract.copy(state = someOtherState).mustFail(craOrNot)
+            }
           }
           "county is large" must {
             "fail" in {
@@ -151,7 +159,10 @@ class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with 
             }
           }
           "state, county, and tract do not match" must {
-            //fail
+            "fail" in {
+              smallCountyOutsideMSA.copy(state = someOtherState).mustFail(craOrNot)
+              smallCountyOutsideMSA.copy(tract = someOtherTract).mustFail(craOrNot)
+            }
           }
         }
       }

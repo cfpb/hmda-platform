@@ -34,6 +34,17 @@ class Q030 private (institution: Institution) extends EditCheck[LoanApplicationR
         } and
         when(geo.tract is "NA") {
           (geo is smallCounty) or (geo.county is "NA")
+        } and
+        when(geo.msa not "NA") {
+          (geo is validStateCountyMsaCombination) and
+            when(geo.tract not "NA") {
+              geo is validCompleteCombination
+            }
+        } and
+        when(geo.msa is "NA") {
+          when(geo.tract not "NA") {
+            geo is validStateCountyTractCombination
+          }
         }
     }
   }
