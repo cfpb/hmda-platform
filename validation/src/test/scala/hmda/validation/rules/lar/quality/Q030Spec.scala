@@ -11,7 +11,7 @@ import org.scalatest.prop.{ PropertyChecks, TableFor1 }
 
 import scala.language.implicitConversions
 
-class Q030WordSpec extends WordSpec with PropertyChecks with LarGenerators with MustMatchers {
+class Q030Spec extends WordSpec with PropertyChecks with LarGenerators with MustMatchers {
 
   val craFI = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true)
   val nonCraFI = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = false)
