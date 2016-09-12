@@ -24,7 +24,7 @@ class LarQualityEngineSpec
       }
 
       lars.foreach { lar =>
-        checkQuality(lar, ValidationContext(None)).isSuccess mustBe true
+        checkQuality(lar, ValidationContext(None, None)).isSuccess mustBe true
       }
     }
   }

@@ -82,7 +82,7 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
   protected def failGenTs(badTs: Gen[TransmittalSheet]): Assertion = {
     badTs.sample match {
       case Some(x) =>
-        checkSyntactical(x, ValidationContext(None)) mustBe a[Failure[_]]
+        checkSyntactical(x, ValidationContext(None, None)) mustBe a[Failure[_]]
       case None => throw new scala.Exception("Test failed")
     }
   }
@@ -90,7 +90,7 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
   protected def passGenTs(goodTs: Gen[TransmittalSheet]): Assertion = {
     goodTs.sample match {
       case Some(x) =>
-        checkSyntactical(x, ValidationContext(None)) mustBe a[Success[_]]
+        checkSyntactical(x, ValidationContext(None, None)) mustBe a[Success[_]]
       case None => throw new scala.Exception("Test failed")
     }
   }

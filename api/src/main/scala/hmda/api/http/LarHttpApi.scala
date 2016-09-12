@@ -83,10 +83,10 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   def validateRoute(lar: LoanApplicationRegister, checkType: String): scaladsl.server.Route = {
     val larValidation = system.actorSelection("/user/larValidation")
     val checkMessage = checkType match {
-      case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
-      case "validity" => CheckValidity(lar, ValidationContext(None))
-      case "quality" => CheckQuality(lar, ValidationContext(None))
-      case _ => CheckAll(lar, ValidationContext(None))
+      case "syntactical" => CheckSyntactical(lar, ValidationContext(None, None))
+      case "validity" => CheckValidity(lar, ValidationContext(None, None))
+      case "quality" => CheckQuality(lar, ValidationContext(None, None))
+      case _ => CheckAll(lar, ValidationContext(None, None))
     }
     onComplete((larValidation ? checkMessage).mapTo[ValidationErrors]) {
       case Success(xs) =>

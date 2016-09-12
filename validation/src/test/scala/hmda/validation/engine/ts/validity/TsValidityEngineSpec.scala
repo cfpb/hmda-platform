@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 
 class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsValidityEngine with ScalaFutures with ValidityUtils {
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-  private val ctx = ValidationContext(None)
+  private val ctx = ValidationContext(None, None)
 
   property("Transmittal Sheet must be valid") {
     forAll(tsGen) { ts =>
@@ -38,7 +38,7 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
     forAll(tsGen) { ts =>
       val someMBS = Some(Institution("1", "Test MBS", Set(), CFPB, MBS, hasParent = true))
       val badTs = ts.copy(parent = Parent("", "", "", "", ""))
-      checkValidity(badTs, ValidationContext(someMBS)).isFailure mustBe true
+      checkValidity(badTs, ValidationContext(someMBS, None)).isFailure mustBe true
     }
   }
 

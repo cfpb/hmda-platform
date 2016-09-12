@@ -12,7 +12,7 @@ class V110Spec extends TsEditCheckSpec {
 
   private var institution: Institution = _
 
-  override def check: EditCheck[TransmittalSheet] = V110.inContext(ValidationContext(Some(institution)))
+  override def check: EditCheck[TransmittalSheet] = V110.inContext(ValidationContext(Some(institution), None))
 
   private val applicableTypes: Set[InstitutionType] = Set(MBS, Affiliate)
 

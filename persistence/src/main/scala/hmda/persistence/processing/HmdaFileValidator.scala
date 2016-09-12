@@ -75,7 +75,7 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with T
   override def receiveCommand: Receive = {
 
     case BeginValidation =>
-      val ctx = ValidationContext(None)
+      val ctx = ValidationContext(None, None)
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
       events(parserPersistenceId)

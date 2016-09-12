@@ -2,4 +2,4 @@ package hmda.validation.context
 
 import hmda.model.institution.Institution
 
-case class ValidationContext(institution: Option[Institution])
+case class ValidationContext(institution: Option[Institution], activityYear: Option[Int])
