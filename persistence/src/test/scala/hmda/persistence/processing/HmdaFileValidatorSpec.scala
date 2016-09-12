@@ -5,6 +5,7 @@ import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
@@ -44,13 +45,15 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     hmdaFileValidator ! Shutdown
   }
 
+  val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
   "HMDA File Validator" must {
     "persist clean LARs" in {
 
+      probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(lars.toSeq, Nil, Nil, Nil))
+      probe.expectMsg(HmdaFileValidationState(Some(ts), lars.toSeq, Nil, Nil, Nil))
     }
 
     "persist syntactical, validity and quality errors" in {
@@ -61,6 +64,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, errors)
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
         lars,
         Seq(e1),
         Seq(e2),
@@ -68,14 +72,16 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       ))
     }
 
-    "read parsed lars and validate them" in {
+    "read parsed data and validate it" in {
+      probe.send(hmdaFileParser, TsParsed(ts))
       lars.foreach(lar => probe.send(hmdaFileParser, LarParsed(lar)))
       val hmdaFileValidator2 = createHmdaFileValidator(system, submissionId)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(3, Nil))
+      probe.expectMsg(HmdaFileParseState(4, Nil))
       probe.send(hmdaFileValidator2, BeginValidation)
       probe.send(hmdaFileValidator2, GetState)
       probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
         lars,
         List(ValidationError("1", "S020", Syntactical)),
         List(ValidationError("1", "V120", Validity)),

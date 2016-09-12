@@ -3,7 +3,6 @@ package hmda.validation.engine.ts.syntactical
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.ts.TsGenerators
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.ts.TsValidationApiSpec
 import org.scalacheck.Gen
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
@@ -11,8 +10,9 @@ import org.scalatest.prop.PropertyChecks
 import org.scalatest.time.{ Millis, Seconds, Span }
 
 import scala.concurrent.ExecutionContext
+import scalaz.{ Failure, Success }
 
-class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsSyntacticalEngine with ScalaFutures with TsValidationApiSpec {
+class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators with TsSyntacticalEngine with ScalaFutures {
 
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -36,15 +36,6 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
       whenever(ts.id == 1) {
         val testTs = ts.copy(activityYear = 2017)
         passGenTs(testTs)
-      }
-    }
-  }
-
-  property("Transmittal Sheet fails S100 (Activity Year)") {
-    forAll(tsGen) { ts =>
-      whenever(ts.id == 1) {
-        val testTs = ts.copy(activityYear = 2019)
-        failGenTs(testTs)
       }
     }
   }
@@ -75,13 +66,6 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
     }
   }
 
-  property("Transmittal Sheet fails S013 (Timestamp)") {
-    forAll(tsGen) { ts =>
-      val badTs = ts.copy(timestamp = 1)
-      failGenTs(badTs)
-    }
-  }
-
   property("Transmittal Sheet fails S028 (Timestamp Format)") {
     forAll(tsGen) { ts =>
       whenever(ts.id == 1) {
@@ -98,10 +82,7 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
   protected def failGenTs(badTs: Gen[TransmittalSheet]): Assertion = {
     badTs.sample match {
       case Some(x) =>
-        val fValidated = checkSyntactical(x, ValidationContext(None))
-        whenReady(fValidated) { validated =>
-          validated.isFailure mustBe true
-        }
+        checkSyntactical(x, ValidationContext(None)) mustBe a[Failure[_]]
       case None => throw new scala.Exception("Test failed")
     }
   }
@@ -109,10 +90,7 @@ class TsSyntacticalEngineSpec extends PropSpec with PropertyChecks with MustMatc
   protected def passGenTs(goodTs: Gen[TransmittalSheet]): Assertion = {
     goodTs.sample match {
       case Some(x) =>
-        val fValidated = checkSyntactical(x, ValidationContext(None))
-        whenReady(fValidated) { validated =>
-          validated.isSuccess mustBe true
-        }
+        checkSyntactical(x, ValidationContext(None)) mustBe a[Success[_]]
       case None => throw new scala.Exception("Test failed")
     }
   }

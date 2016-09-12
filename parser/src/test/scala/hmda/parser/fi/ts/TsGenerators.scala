@@ -50,9 +50,9 @@ trait TsGenerators extends FIGenerators {
   implicit def respondentGen: Gen[Respondent] = {
     for {
       id <- respIdGen
-      name <- stringOfUpToN(30, Gen.alphaNumChar)
-      address <- stringOfUpToN(40, Gen.alphaNumChar)
-      city <- stringOfUpToN(25, Gen.alphaNumChar)
+      name <- stringOfOneToN(30, Gen.alphaNumChar)
+      address <- stringOfOneToN(40, Gen.alphaNumChar)
+      city <- stringOfOneToN(25, Gen.alphaNumChar)
       state <- stateGen
       zip <- zipGen
     } yield Respondent(id, name, address, city, state, zip)
