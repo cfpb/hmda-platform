@@ -7,6 +7,9 @@ import hmda.validation.engine.ValidationErrors
 import hmda.validation.engine.lar.LarEngine
 
 object SingleLarValidation {
+
+  val name = "SingleLarValidation"
+
   def props: Props = Props(new SingleLarValidation)
 
   case class CheckAll(lar: LoanApplicationRegister, ctx: ValidationContext)

@@ -8,6 +8,8 @@ import hmda.persistence.institutions.FilingPersistence._
 
 object FilingPersistence {
 
+  val name = "Filings"
+
   case class CreateFiling(filing: Filing) extends Command
   case class UpdateFilingStatus(filing: Filing) extends Command
   case class GetFilingByPeriod(period: String) extends Command

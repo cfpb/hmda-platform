@@ -11,6 +11,8 @@ import hmda.persistence.institutions.InstitutionPersistence._
 
 object InstitutionPersistence {
 
+  val name = "Institutions"
+
   case class CreateInstitution(i: Institution) extends Command
   case class ModifyInstitution(i: Institution) extends Command
   case class GetInstitutionById(institutionId: String) extends Command
