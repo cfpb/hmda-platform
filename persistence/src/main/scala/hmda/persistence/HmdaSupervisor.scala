@@ -1,6 +1,6 @@
 package hmda.persistence
 
-import akka.actor.{ ActorRef, Props, Terminated }
+import akka.actor.{ ActorRef, ActorSystem, Props, Terminated }
 import hmda.api.processing.LocalHmdaEventProcessor
 import hmda.model.fi.SubmissionId
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
@@ -13,6 +13,10 @@ object HmdaSupervisor {
   case class FindProcessingActor(id: String, submissionId: SubmissionId)
 
   def props(): Props = Props(new HmdaSupervisor)
+
+  def createSupervisor(system: ActorSystem): ActorRef = {
+    system.actorOf(HmdaSupervisor.props(), "supervisor")
+  }
 }
 
 class HmdaSupervisor extends HmdaActor {

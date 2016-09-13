@@ -10,7 +10,6 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http._
 import hmda.api.processing.LocalHmdaEventProcessor
-import hmda.api.processing.LocalHmdaEventProcessor._
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.HmdaSupervisor.FindActorByName
 import hmda.persistence.demo.DemoData
@@ -42,7 +41,7 @@ object HmdaApi
 
   //Start up API Actors
 
-  val supervisor = system.actorOf(HmdaSupervisor.props())
+  val supervisor = HmdaSupervisor.createSupervisor(system)
 
   (supervisor ? FindActorByName(SingleLarValidation.name))
     .mapTo[ActorRef]
