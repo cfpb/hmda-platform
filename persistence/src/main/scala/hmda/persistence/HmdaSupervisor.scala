@@ -51,8 +51,9 @@ class HmdaSupervisor extends HmdaActor {
 
   private def createActorById(name: String, id: String): ActorRef = name match {
     case FilingPersistence.name =>
-      val actor = context.actorOf(FilingPersistence.props(id))
-      supervise(actor, s"$name-$id")
+      val filingsId = s"$name-$id"
+      val actor = context.actorOf(FilingPersistence.props(id), s"${FilingPersistence.name}-$id")
+      supervise(actor, filingsId)
   }
 
   private def createProcessingActor(name: String, submissionId: SubmissionId): ActorRef = name match {
