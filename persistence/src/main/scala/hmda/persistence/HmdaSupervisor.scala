@@ -1,9 +1,9 @@
 package hmda.persistence
 
-import akka.actor.{ActorRef, Props, Terminated}
+import akka.actor.{ ActorRef, Props, Terminated }
 import hmda.model.fi.SubmissionId
-import hmda.persistence.institutions.{FilingPersistence, InstitutionPersistence}
-import hmda.persistence.processing.{HmdaFileParser, HmdaFileValidator, HmdaRawFile, SingleLarValidation}
+import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
+import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile, SingleLarValidation }
 
 object HmdaSupervisor {
 
@@ -24,11 +24,10 @@ class HmdaSupervisor extends HmdaActor {
       sender() ! findActorByName(name)
 
     case FindActorById(name, id) =>
-      sender () ! findActorById(name, id)
+      sender() ! findActorById(name, id)
 
     case FindPersistentActor(name, submissionId) =>
       sender() ! findProcessingActor(name, submissionId)
-
 
     case Terminated(ref) =>
       log.debug(s"actor ${ref.path} terminated")
@@ -43,14 +42,14 @@ class HmdaSupervisor extends HmdaActor {
 
   private def createActor(name: String): ActorRef = name match {
     case id @ SingleLarValidation.name =>
-      val actor = context.actorOf(SingleLarValidation.props)
+      val actor = context.actorOf(SingleLarValidation.props, "larValidation")
       supervise(actor, id)
     case id @ InstitutionPersistence.name =>
       val actor = context.actorOf(InstitutionPersistence.props)
       supervise(actor, id)
   }
 
-  private def createActorById(name:String, id: String): ActorRef = name match {
+  private def createActorById(name: String, id: String): ActorRef = name match {
     case FilingPersistence.name =>
       val actor = context.actorOf(FilingPersistence.props(id))
       supervise(actor, s"$name-$id")
@@ -68,14 +67,9 @@ class HmdaSupervisor extends HmdaActor {
       supervise(actor, id)
   }
 
-
-
-  private def supervise(actorRef:ActorRef, id: String): ActorRef = {
+  private def supervise(actorRef: ActorRef, id: String): ActorRef = {
     hmdaPersistentActors += id -> actorRef
     actorRef
   }
-
-
-
 
 }
