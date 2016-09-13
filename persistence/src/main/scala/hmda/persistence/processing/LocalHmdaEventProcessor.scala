@@ -9,6 +9,9 @@ import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted 
 import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile }
 
 object LocalHmdaEventProcessor {
+
+  val name = "HmdaEventProcessor"
+
   def props(): Props = Props(new LocalHmdaEventProcessor)
 
   def createLocalHmdaEventProcessor(system: ActorSystem): ActorRef = {

@@ -1,18 +1,22 @@
 package hmda.api
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
+import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http._
-import hmda.persistence.processing.SingleLarValidation._
-import hmda.persistence.institutions.InstitutionPersistence._
-import hmda.persistence.demo.DemoData
+import hmda.api.processing.LocalHmdaEventProcessor
 import hmda.api.processing.LocalHmdaEventProcessor._
 import hmda.persistence.HmdaSupervisor
+import hmda.persistence.HmdaSupervisor.FindActorByName
+import hmda.persistence.demo.DemoData
+import hmda.persistence.institutions.InstitutionPersistence
+import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.processing.SingleLarValidation
 
 import scala.concurrent.duration._
 
@@ -38,11 +42,27 @@ object HmdaApi
 
   //Start up API Actors
 
-  system.actorOf(HmdaSupervisor.props())
+  val supervisor = system.actorOf(HmdaSupervisor.props())
 
-  createSingleLarValidator(system)
+  (supervisor ? FindActorByName(SingleLarValidation.name))
+    .mapTo[ActorRef]
+    .map { actor =>
+      log.info(s"Started validator at ${actor.path}")
+    }
+
+  (supervisor ? FindActorByName(LocalHmdaEventProcessor.name))
+    .mapTo[ActorRef]
+    .map { actor =>
+      log.info(s"Started event processor at ${actor.path}")
+    }
+
+  (supervisor ? FindActorByName(InstitutionPersistence.name))
+    .mapTo[ActorRef]
+    .map { actor =>
+      log.info(s"Started institutions at ${actor.path}")
+    }
+
   createInstitutions(system)
-  createLocalHmdaEventProcessor(system)
 
   val http = Http().bindAndHandle(
     routes ~ larRoutes ~ institutionsRoutes,

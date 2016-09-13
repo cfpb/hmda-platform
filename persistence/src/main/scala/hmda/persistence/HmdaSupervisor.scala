@@ -1,6 +1,7 @@
 package hmda.persistence
 
 import akka.actor.{ ActorRef, Props, Terminated }
+import hmda.api.processing.LocalHmdaEventProcessor
 import hmda.model.fi.SubmissionId
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile, SingleLarValidation }
@@ -46,7 +47,10 @@ class HmdaSupervisor extends HmdaActor {
       val actor = context.actorOf(SingleLarValidation.props, "larValidation")
       supervise(actor, id)
     case id @ InstitutionPersistence.name =>
-      val actor = context.actorOf(InstitutionPersistence.props)
+      val actor = context.actorOf(InstitutionPersistence.props, "institutions")
+      supervise(actor, id)
+    case id @ LocalHmdaEventProcessor.name =>
+      val actor = context.actorOf(LocalHmdaEventProcessor.props(), "event-processor")
       supervise(actor, id)
   }
 
