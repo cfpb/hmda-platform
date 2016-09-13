@@ -36,7 +36,7 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
 
   property("Transmittal Sheet fails V110 (Parent info)") {
     forAll(tsGen) { ts =>
-      val someMBS = Some(Institution(1, "Test MBS", Set(), CFPB, MBS, hasParent = true))
+      val someMBS = Some(Institution("1", "Test MBS", Set(), CFPB, MBS, hasParent = true))
       val badTs = ts.copy(parent = Parent("", "", "", "", ""))
       checkValidity(badTs, ValidationContext(someMBS)).isFailure mustBe true
     }

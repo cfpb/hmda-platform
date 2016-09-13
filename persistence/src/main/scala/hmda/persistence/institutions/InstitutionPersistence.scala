@@ -14,6 +14,7 @@ object InstitutionPersistence {
   case class CreateInstitution(i: Institution) extends Command
   case class ModifyInstitution(i: Institution) extends Command
   case class GetInstitutionById(institutionId: String) extends Command
+  case class GetInstitutionsById(ids: List[String]) extends Command
 
   case class InstitutionCreated(i: Institution) extends Event
   case class InstitutionModified(i: Institution) extends Event
@@ -69,8 +70,12 @@ class InstitutionPersistence extends HmdaPersistentActor {
       }
 
     case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(x => x.id.toString == institutionId).getOrElse(Institution(-1, "", Set(), CFPB, Bank, hasParent = false, Inactive))
+      val institution = state.institutions.find(x => x.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, Inactive))
       sender() ! institution
+
+    case GetInstitutionsById(ids) =>
+      val institutions = state.institutions.filter(i => ids.contains(i.id.toString))
+      sender() ! institutions
 
     case GetState =>
       sender() ! state.institutions

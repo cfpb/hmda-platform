@@ -4,7 +4,7 @@ package hmda.model.institution
  * A financial institution, geared towards requirements for filing HMDA data.
  */
 case class Institution(
-    id: Int,
+    id: String,
     name: String,
     externalIds: Set[ExternalId],
     agency: Agency,
@@ -43,13 +43,13 @@ case class Institution(
 sealed abstract class InvalidRespondentId {
   def message: String
 }
-case class NoDepositoryTypeForInstitutionType(institutionId: Int, institutionType: InstitutionType) extends InvalidRespondentId {
+case class NoDepositoryTypeForInstitutionType(institutionId: String, institutionType: InstitutionType) extends InvalidRespondentId {
   override def message = s"Institution $institutionId has an institutionType of $institutionType, which does not have a depositoryType"
 }
-case class UnsupportedDepositoryTypeByAgency(institutionId: Int, agency: Agency, depositoryType: DepositoryType) extends InvalidRespondentId {
+case class UnsupportedDepositoryTypeByAgency(institutionId: String, agency: Agency, depositoryType: DepositoryType) extends InvalidRespondentId {
   override def message = s"Institution $institutionId is associated with agency $agency, which does not support depositoryType $depositoryType"
 }
-case class RequiredExternalIdNotPresent(institutionId: Int, externalIdType: ExternalIdType) extends InvalidRespondentId {
+case class RequiredExternalIdNotPresent(institutionId: String, externalIdType: ExternalIdType) extends InvalidRespondentId {
   override def message = s"Institution $institutionId does not have an externalId of type $externalIdType"
 }
 

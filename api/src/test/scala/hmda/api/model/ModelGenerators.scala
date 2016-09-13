@@ -29,7 +29,7 @@ trait ModelGenerators {
 
   implicit def institutionGen: Gen[Institution] = {
     for {
-      id <- Gen.choose(0, Int.MaxValue)
+      id <- Gen.alphaStr
       name <- Gen.alphaStr
       externalIds <- Gen.listOf(externalIdGen)
       status <- institutionStatusGen

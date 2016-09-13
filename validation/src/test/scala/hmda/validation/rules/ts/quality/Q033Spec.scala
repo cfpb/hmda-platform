@@ -50,6 +50,6 @@ class Q033Spec extends TsEditCheckSpec {
   }
 
   private def whenInstitution(instType: InstitutionType, hasParent: Boolean): Unit = {
-    institution = Institution(22, "some bank", Set(), Agency.CFPB, instType, hasParent)
+    institution = Institution("22", "some bank", Set(), Agency.CFPB, instType, hasParent)
   }
 }

@@ -1,16 +1,19 @@
 package hmda.persistence.processing
 
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.stream.scaladsl.Sink
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
-import hmda.persistence.processing.HmdaFileParser.LarParsed
+import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
+import hmda.validation.engine.ts.TsEngine
 
 object HmdaFileValidator {
 
@@ -21,6 +24,7 @@ object HmdaFileValidator {
   case object CompleteValidation extends Command
   case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
   case class ValidationCompleted(submissionId: SubmissionId) extends Event
+  case class TsValidated(ts: TransmittalSheet) extends Event
   case class LarValidated(lar: LoanApplicationRegister) extends Event
   case class SyntacticalError(error: ValidationError) extends Event
   case class ValidityError(error: ValidationError) extends Event
@@ -33,26 +37,29 @@ object HmdaFileValidator {
   }
 
   case class HmdaFileValidationState(
+      ts: Option[TransmittalSheet] = None,
       lars: Seq[LoanApplicationRegister] = Nil,
       syntactical: Seq[ValidationError] = Nil,
       validity: Seq[ValidationError] = Nil,
       quality: Seq[ValidationError] = Nil
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
+      case tsValidated @ TsValidated(newTs) =>
+        HmdaFileValidationState(Some(newTs), lars, syntactical, validity, quality)
       case larValidated @ LarValidated(lar) =>
-        HmdaFileValidationState(lars :+ lar, syntactical, validity, quality)
+        HmdaFileValidationState(ts, lars :+ lar, syntactical, validity, quality)
       case SyntacticalError(e) =>
-        HmdaFileValidationState(lars, syntactical :+ e, validity, quality)
+        HmdaFileValidationState(ts, lars, syntactical :+ e, validity, quality)
       case ValidityError(e) =>
-        HmdaFileValidationState(lars, syntactical, validity :+ e, quality)
+        HmdaFileValidationState(ts, lars, syntactical, validity :+ e, quality)
       case QualityError(e) =>
-        HmdaFileValidationState(lars, syntactical, validity, quality :+ e)
+        HmdaFileValidationState(ts, lars, syntactical, validity, quality :+ e)
 
     }
   }
 }
 
-class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor with LarEngine with LocalEventPublisher {
+class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor with TsEngine with LarEngine with LocalEventPublisher {
 
   import HmdaFileValidator._
 
@@ -73,6 +80,16 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
       events(parserPersistenceId)
+        .filter(x => x.isInstanceOf[TsParsed])
+        .map(e => e.asInstanceOf[TsParsed].ts)
+        .map(ts => validateTs(ts, ctx).toEither)
+        .map {
+          case Right(ts) => ts
+          case Left(errors) => ValidationErrors(errors.list.toList)
+        }
+        .runWith(Sink.actorRef(self, NotUsed))
+
+      events(parserPersistenceId)
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
         .map(lar => validateLar(lar, ctx).toEither)
@@ -81,6 +98,12 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
           case Left(errors) => ValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, CompleteValidation))
+
+    case ts: TransmittalSheet =>
+      persist(TsValidated(ts)) { e =>
+        log.debug(s"Persisted: $e")
+        updateState(e)
+      }
 
     case lar: LoanApplicationRegister =>
       persist(LarValidated(lar)) { e =>
@@ -129,5 +152,4 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
   private def errorsOfType(errors: Seq[ValidationError], errorType: ValidationErrorType): Seq[ValidationError] = {
     errors.filter(_.errorType == errorType)
   }
-
 }
