@@ -40,7 +40,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   val institutionsPath =
     path("institutions") {
       val path = "institutions"
-      val institutionsActor = system.actorSelection("/user/institutions")
+      val institutionsActor = system.actorSelection("/user/supervisor/institutions")
       timedGet {
         extractRequestContext { ctx =>
           val ids = institutionIdsFromHeader(ctx)
@@ -59,7 +59,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     pathEnd {
       val path = s"institutions/$institutionId"
       extractExecutionContext { executor =>
-        val institutionsActor = system.actorSelection("/user/institutions")
+        val institutionsActor = system.actorSelection("/user/supervisor/institutions")
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         timedGet {
           implicit val ec: ExecutionContext = executor
@@ -227,7 +227,7 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     path("summary") {
       val path = s"institutions/$institutionId/summary"
       extractExecutionContext { executor =>
-        val institutionsActor = system.actorSelection("/user/institutions")
+        val institutionsActor = system.actorSelection("/user/supervisor/institutions")
         val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         implicit val ec = executor
         get {

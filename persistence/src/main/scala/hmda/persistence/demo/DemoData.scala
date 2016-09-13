@@ -74,7 +74,7 @@ object DemoData {
   }
 
   def loadInstitutions(institutions: Set[Institution], system: ActorSystem): Unit = {
-    val institutionsActor = system.actorSelection("/user/institutions")
+    val institutionsActor = system.actorSelection("/user/supervisor/institutions")
     institutions.foreach(i => institutionsActor ! CreateInstitution(i))
   }
 
