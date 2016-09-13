@@ -1,7 +1,6 @@
-package hmda.persistence.processing
+package hmda.persistence
 
-import akka.actor.Actor.Receive
-import akka.actor.{ ActorRef, Props, Terminated }
+import akka.actor.{ActorRef, Props, Terminated}
 
 object HmdaSupervisor {
   sealed trait ActorId {

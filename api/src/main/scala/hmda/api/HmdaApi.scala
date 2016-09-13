@@ -12,7 +12,7 @@ import hmda.persistence.processing.SingleLarValidation._
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.demo.DemoData
 import hmda.api.processing.LocalHmdaEventProcessor._
-import hmda.persistence.processing.HmdaSupervisor
+import hmda.persistence.HmdaSupervisor
 
 import scala.concurrent.duration._
 
