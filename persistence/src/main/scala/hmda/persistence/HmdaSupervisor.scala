@@ -7,9 +7,10 @@ import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawF
 
 object HmdaSupervisor {
 
-  case class FindPersistentActor(id: String, submissionId: SubmissionId)
   case class FindActorByName(name: String)
   case class FindActorById(name: String, id: String)
+  case class FindProcessingActor(id: String, submissionId: SubmissionId)
+
   def props(): Props = Props(new HmdaSupervisor)
 }
 
@@ -26,7 +27,7 @@ class HmdaSupervisor extends HmdaActor {
     case FindActorById(name, id) =>
       sender() ! findActorById(name, id)
 
-    case FindPersistentActor(name, submissionId) =>
+    case FindProcessingActor(name, submissionId) =>
       sender() ! findProcessingActor(name, submissionId)
 
     case Terminated(ref) =>
@@ -58,7 +59,7 @@ class HmdaSupervisor extends HmdaActor {
 
   private def createProcessingActor(name: String, submissionId: SubmissionId): ActorRef = name match {
     case id @ HmdaRawFile.name =>
-      val actor = context.actorOf(HmdaRawFile.props(submissionId))
+      val actor = context.actorOf(HmdaRawFile.props(submissionId), s"${HmdaRawFile.name}-${submissionId.toString}")
       supervise(actor, id)
     case id @ HmdaFileParser.name =>
       val actor = context.actorOf(HmdaFileParser.props(submissionId))
