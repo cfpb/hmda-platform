@@ -3,7 +3,6 @@ package hmda.persistence
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
 import hmda.persistence.CommonMessages.Event
-import hmda.persistence.processing.HmdaActor
 
 abstract class HmdaPersistentActor extends PersistentActor with HmdaActor {
 
