@@ -12,6 +12,8 @@ import hmda.persistence.processing.SingleLarValidation._
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.demo.DemoData
 import hmda.api.processing.LocalHmdaEventProcessor._
+import hmda.persistence.processing.HmdaSupervisor
+
 import scala.concurrent.duration._
 
 object HmdaApi
@@ -35,6 +37,8 @@ object HmdaApi
   lazy val port = config.getInt("hmda.http.port")
 
   //Start up API Actors
+
+  system.actorOf(HmdaSupervisor.props())
 
   createSingleLarValidator(system)
   createInstitutions(system)
