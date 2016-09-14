@@ -59,6 +59,14 @@ class HmdaSupervisorSpec extends WordSpec with MustMatchers {
 
     }
 
+    "shutdown ActorSystem" in {
+      Thread.sleep(2000)
+      system.terminate()
+      system.whenTerminated.map { isTerminated =>
+        isTerminated mustBe true
+      }
+    }
+
   }
 
 }
