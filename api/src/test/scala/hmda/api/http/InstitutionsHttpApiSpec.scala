@@ -10,6 +10,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.MethodRejection
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
+import akka.http.scaladsl.server.{ MethodRejection, Route }
 import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.api.model._
@@ -189,39 +190,41 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
 
   "Institutions API Authorization and rejection handling" must {
 
+    val sealedRoute = Route.seal(institutionsRoutes)
+
     // Require 'CFPB-HMDA-Username' header
     // Request these endpoints without username header (but with other required headers)
     "reject requests to /institutions without 'CFPB-HMDA-Username' header" in {
-      Get("/institutions").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      Get("/institutions").addHeader(institutionsHeader) ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
     "reject requests to /inst/id without 'CFPB-HMDA-Username' header" in {
-      Get("/institutions/0").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      Get("/institutions/0").addHeader(institutionsHeader) ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
     "reject requests to /inst/id/filings/p without 'CFPB-HMDA-Username' header" in {
-      Get("/institutions/0/filings/2017").addHeader(institutionsHeader) ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      Get("/institutions/0/filings/2017").addHeader(institutionsHeader) ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
 
     // Require 'CFPB-HMDA-Institutions' header
     // Request these endpoints without institutions header (but with other required headers)
     "reject requests to /inst without 'CFPB-HMDA-Institutions' header" in {
-      Get("/institutions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      Get("/institutions").addHeader(usernameHeader) ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
     "reject requests to submission creation without 'CFPB-HMDA-Institutions' header" in {
-      Post("/institutions/0/filings/2017/submissions").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      Post("/institutions/0/filings/2017/submissions").addHeader(usernameHeader) ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
     "reject requests to submission summary without 'CFPB-HMDA-Institutions' header" in {
-      Get("/institutions/0/filings/2017").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      Get("/institutions/0/filings/2017").addHeader(usernameHeader) ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
 
@@ -229,13 +232,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     // Request these endpoints with all required headers, but request an institutionId that
     //   is not included in RequestHeaderUtils institutionsHeader
     "reject requests to /filings/period when institutionId in path is not included in 'CFPB-HMDA-Institutions' header" in {
-      getWithCfpbHeaders("/institutions/1345/filings/2017") ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      getWithCfpbHeaders("/institutions/1345/filings/2017") ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
     "reject requests to /summary when institutionId in path is not included in 'CFPB-HMDA-Institutions' header" in {
-      getWithCfpbHeaders("/institutions/1235/summary") ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      getWithCfpbHeaders("/institutions/1235/summary") ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
     "reject requests to /upload when institutionId in path is not included in 'CFPB-HMDA-Institutions' header" in {
@@ -244,8 +247,8 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
       val file = multiPartFile(csv, "unauthorized_sample.txt")
 
-      postWithCfpbHeaders("/institutions/1245/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      postWithCfpbHeaders("/institutions/1245/filings/2017/submissions/1", file) ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
     "matches 'CFPB-HMDA-Institutions' header case insensitively" in {
@@ -263,14 +266,13 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     // Other auth
     "reject unauthorized requests to any /institutions-based path, even nonexistent endpoints" in {
       // Request the endpoint without a required header
-      Get("/institutions/0/nonsense").addHeader(usernameHeader) ~> institutionsRoutes ~> check {
-        rejection mustBe a[AuthorizationFailedRejection]
+      Get("/institutions/0/nonsense").addHeader(usernameHeader) ~> sealedRoute ~> check {
+        status mustBe StatusCodes.Forbidden
       }
     }
     "not handle requests to nonexistent endpoints if the request is authorized" in {
-      getWithCfpbHeaders("/lars") ~> institutionsRoutes ~> check {
-        handled mustBe false // will be a 404
-        rejections mustBe List()
+      getWithCfpbHeaders("/lars") ~> sealedRoute ~> check {
+        status mustBe StatusCodes.NotFound
       }
     }
     "accept headers case-insensitively" in {
