@@ -9,10 +9,11 @@ import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccChar
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.model.institution.{ ExternalId, Institution }
-import hmda.persistence.HmdaSupervisor.{ FindActorById, FindProcessingActor }
+import hmda.persistence.CommonMessages._
+import hmda.persistence.HmdaSupervisor.FindActorById
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
-import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
+import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
 import scala.concurrent.duration._
@@ -98,20 +99,15 @@ object DemoData {
   }
 
   def loadSubmissions(submissions: Seq[(String, String, Submission)], system: ActorSystem): Unit = {
-    val supervisor = system.actorSelection("/user/supervisor")
-    var i = 0
     submissions.foreach { s =>
-      implicit val ec = system.dispatcher
-      i += 1
       s match {
         case (id: String, period: String, submission: Submission) =>
-          val submissionId = SubmissionId(id, period, i)
-          val fSubmissionsActor = (supervisor ? FindProcessingActor(SubmissionPersistence.name, submissionId)).mapTo[ActorRef]
-          for {
-            f <- fSubmissionsActor
-          } yield {
-            f ! CreateSubmission
-          }
+          val submissionsActor = system.actorOf(SubmissionPersistence.props(id, period))
+          submissionsActor ! CreateSubmission
+          Thread.sleep(100)
+          submissionsActor ! UpdateSubmissionStatus(submission.id, submission.submissionStatus)
+          Thread.sleep(100)
+          submissionsActor ! Shutdown
       }
     }
   }
