@@ -12,7 +12,7 @@ import hmda.model.institution.{ ExternalId, Institution }
 import hmda.persistence.HmdaSupervisor.{ FindActorById, FindProcessingActor }
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
-import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
+import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
 import scala.concurrent.duration._
@@ -98,21 +98,19 @@ object DemoData {
   }
 
   def loadSubmissions(submissions: Seq[(String, String, Submission)], system: ActorSystem): Unit = {
+    val supervisor = system.actorSelection("/user/supervisor")
     var i = 0
     submissions.foreach { s =>
       implicit val ec = system.dispatcher
       i += 1
       s match {
         case (id: String, period: String, submission: Submission) =>
-          val supervisor = system.actorSelection("/user/supervisor")
           val submissionId = SubmissionId(id, period, i)
           val fSubmissionsActor = (supervisor ? FindProcessingActor(SubmissionPersistence.name, submissionId)).mapTo[ActorRef]
           for {
             f <- fSubmissionsActor
           } yield {
             f ! CreateSubmission
-            Thread.sleep(100)
-            f ! UpdateSubmissionStatus(submissionId, submission.submissionStatus)
           }
       }
     }
