@@ -3,7 +3,7 @@ package hmda.persistence
 import akka.actor.{ ActorRef, ActorSystem, Props, Terminated }
 import hmda.api.processing.LocalHmdaEventProcessor
 import hmda.model.fi.SubmissionId
-import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
+import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
 import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile, SingleLarValidation }
 
 object HmdaSupervisor {
@@ -75,6 +75,10 @@ class HmdaSupervisor extends HmdaActor {
     case id @ HmdaFileValidator.name =>
       val actor = context.actorOf(HmdaFileValidator.props(submissionId))
       supervise(actor, id)
+    case id @ SubmissionPersistence.name =>
+      val actorId = s"${SubmissionPersistence.name}-${submissionId.toString}"
+      val actor = context.actorOf(SubmissionPersistence.props(submissionId.institutionId, submissionId.period), actorId)
+      supervise(actor, actorId)
   }
 
   private def supervise(actorRef: ActorRef, id: String): ActorRef = {

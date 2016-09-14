@@ -8,6 +8,8 @@ import hmda.persistence.institutions.SubmissionPersistence._
 
 object SubmissionPersistence {
 
+  val name = "Submissions"
+
   case object CreateSubmission extends Command
   case class UpdateSubmissionStatus(id: SubmissionId, status: SubmissionStatus) extends Command
   case class GetSubmissionById(id: SubmissionId) extends Command

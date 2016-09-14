@@ -3,19 +3,19 @@ package hmda.persistence.demo
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern.ask
 import akka.util.Timeout
-import scala.concurrent.duration._
 import hmda.model.fi._
 import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
-import hmda.model.institution.{ ExternalId, Institution }
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
+import hmda.model.institution.{ ExternalId, Institution }
+import hmda.persistence.HmdaSupervisor.{ FindActorById, FindProcessingActor }
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
-import hmda.persistence.CommonMessages._
-import hmda.persistence.HmdaSupervisor.FindActorById
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+
+import scala.concurrent.duration._
 
 object DemoData {
 
@@ -63,7 +63,7 @@ object DemoData {
     Thread.sleep(500)
     loadInstitutions(demoInstitutions, system)
     loadFilings(demoFilings, system)
-    //loadSubmissions(demoSubmissions, system)
+    loadSubmissions(demoSubmissions, system)
   }
 
   def loadTestData(system: ActorSystem): Unit = {
@@ -98,15 +98,22 @@ object DemoData {
   }
 
   def loadSubmissions(submissions: Seq[(String, String, Submission)], system: ActorSystem): Unit = {
+    var i = 0
     submissions.foreach { s =>
+      implicit val ec = system.dispatcher
+      i += 1
       s match {
         case (id: String, period: String, submission: Submission) =>
-          val submissionsActor = system.actorOf(SubmissionPersistence.props(id, period))
-          submissionsActor ! CreateSubmission
-          Thread.sleep(100)
-          submissionsActor ! UpdateSubmissionStatus(submission.id, submission.submissionStatus)
-          Thread.sleep(100)
-          submissionsActor ! Shutdown
+          val supervisor = system.actorSelection("/user/supervisor")
+          val submissionId = SubmissionId(id, period, i)
+          val fSubmissionsActor = (supervisor ? FindProcessingActor(SubmissionPersistence.name, submissionId)).mapTo[ActorRef]
+          for {
+            f <- fSubmissionsActor
+          } yield {
+            f ! CreateSubmission
+            Thread.sleep(100)
+            f ! UpdateSubmissionStatus(submissionId, submission.submissionStatus)
+          }
       }
     }
   }
