@@ -78,7 +78,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
   override def receiveCommand: Receive = {
 
     case BeginValidation =>
-      val ctx = ValidationContext(None, getFilingPeriod(submissionId))
+      val ctx = ValidationContext(None, Try(Some(submissionId.period.toInt)).getOrElse(None))
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
       events(parserPersistenceId)
@@ -140,11 +140,6 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
     case Shutdown =>
       context stop self
 
-  }
-
-  private def getFilingPeriod(id: String): Option[Int] = {
-    val yearString = id.split("-")(1)
-    Try(Some(yearString.toInt)).getOrElse(None)
   }
 
   private def persistErrors(errors: Seq[Event]): Unit = {
