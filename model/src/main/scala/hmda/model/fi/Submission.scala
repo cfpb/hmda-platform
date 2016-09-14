@@ -59,4 +59,8 @@ case class Failed(message: String) extends SubmissionStatus {
   override def code: Int = -1
 }
 
-case class Submission(id: Int = 0, submissionStatus: SubmissionStatus = Created)
+case class SubmissionId(institutionId: String = "", period: String = "", sequenceNumber: Int = 0) {
+  override def toString: String = s"$institutionId-$period-$sequenceNumber"
+}
+
+case class Submission(id: SubmissionId = SubmissionId(), submissionStatus: SubmissionStatus = Created)

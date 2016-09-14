@@ -3,6 +3,7 @@ package hmda.persistence.processing
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.stream.scaladsl.Sink
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
@@ -21,19 +22,19 @@ object HmdaFileValidator {
   val name = "HmdaFileValidator"
 
   case object BeginValidation extends Command
-  case class ValidationStarted(submissionId: String) extends Event
+  case class ValidationStarted(submissionId: SubmissionId) extends Event
   case object CompleteValidation extends Command
-  case class ValidationCompletedWithErrors(submissionId: String) extends Event
-  case class ValidationCompleted(submissionId: String) extends Event
+  case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
+  case class ValidationCompleted(submissionId: SubmissionId) extends Event
   case class TsValidated(ts: TransmittalSheet) extends Event
   case class LarValidated(lar: LoanApplicationRegister) extends Event
   case class SyntacticalError(error: ValidationError) extends Event
   case class ValidityError(error: ValidationError) extends Event
   case class QualityError(error: ValidationError) extends Event
 
-  def props(id: String): Props = Props(new HmdaFileValidator(id))
+  def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
-  def createHmdaFileValidator(system: ActorSystem, id: String): ActorRef = {
+  def createHmdaFileValidator(system: ActorSystem, id: SubmissionId): ActorRef = {
     system.actorOf(HmdaFileValidator.props(id))
   }
 
@@ -60,7 +61,7 @@ object HmdaFileValidator {
   }
 }
 
-class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with TsEngine with LarEngine with LocalEventPublisher {
+class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor with TsEngine with LarEngine with LocalEventPublisher {
 
   import HmdaFileValidator._
 
@@ -102,7 +103,7 @@ class HmdaFileValidator(submissionId: String) extends HmdaPersistentActor with T
 
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
-        log.info(s"Persisted: $e")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
