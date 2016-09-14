@@ -30,7 +30,7 @@ class HmdaSupervisor extends HmdaActor {
       sender() ! findActorByName(name)
 
     case FindFilings(name, id) =>
-      sender() ! findActorById(name, id)
+      sender() ! findFilings(name, id)
 
     case FindProcessingActor(name, submissionId) =>
       sender() ! findProcessingActor(name, submissionId)
@@ -42,7 +42,7 @@ class HmdaSupervisor extends HmdaActor {
 
   private def findActorByName(name: String): ActorRef = hmdaPersistentActors.getOrElse(name, createActor(name))
 
-  private def findActorById(name: String, id: String): ActorRef = hmdaPersistentActors.getOrElse(s"$name-$id", createActorById(name, id))
+  private def findFilings(name: String, id: String): ActorRef = hmdaPersistentActors.getOrElse(s"$name-$id", createFilings(name, id))
 
   private def findProcessingActor(name: String, submissionId: SubmissionId): ActorRef = hmdaPersistentActors.getOrElse(name, createProcessingActor(name, submissionId))
 
@@ -58,7 +58,7 @@ class HmdaSupervisor extends HmdaActor {
       supervise(actor, id)
   }
 
-  private def createActorById(name: String, id: String): ActorRef = name match {
+  private def createFilings(name: String, id: String): ActorRef = name match {
     case FilingPersistence.name =>
       val filingsId = s"$name-$id"
       val actor = context.actorOf(FilingPersistence.props(id), s"${FilingPersistence.name}-$id")
