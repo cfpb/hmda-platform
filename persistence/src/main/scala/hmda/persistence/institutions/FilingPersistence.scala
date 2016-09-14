@@ -8,7 +8,7 @@ import hmda.persistence.institutions.FilingPersistence._
 
 object FilingPersistence {
 
-  val name = "Filings"
+  val name = "filings"
 
   case class CreateFiling(filing: Filing) extends Command
   case class UpdateFilingStatus(filing: Filing) extends Command
@@ -46,7 +46,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
     state = state.updated(e)
   }
 
-  override def persistenceId: String = s"filings-$institutionId"
+  override def persistenceId: String = s"$name-$institutionId"
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
     case CreateFiling(f) =>

@@ -8,7 +8,7 @@ import hmda.validation.engine.lar.LarEngine
 
 object SingleLarValidation {
 
-  val name = "SingleLarValidation"
+  val name = "larValidation"
 
   def props: Props = Props(new SingleLarValidation)
 
@@ -19,7 +19,7 @@ object SingleLarValidation {
   case object FinishChecks
 
   def createSingleLarValidator(system: ActorSystem): ActorRef = {
-    system.actorOf(SingleLarValidation.props, "larValidation")
+    system.actorOf(SingleLarValidation.props, s"$name")
   }
 
 }

@@ -70,7 +70,8 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         val institution = DemoData.testInstitutions.head
         val institutionWrapped = InstitutionWrapper(institution.id.toString, institution.name, institution.status)
         val filings = DemoData.testFilings.filter(f => f.institutionId == institution.id.toString)
-        responseAs[InstitutionDetail] mustBe InstitutionDetail(institutionWrapped, filings.reverse)
+        responseAs[InstitutionDetail].institution mustBe institutionWrapped
+        responseAs[InstitutionDetail].filings.contains(filings.head) mustBe true
       }
       getWithCfpbHeaders("/institutions/xxxxx") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
@@ -83,7 +84,8 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         status mustBe StatusCodes.OK
         val summary = DemoData.institutionSummary
         val institutionSummary = InstitutionSummary(summary._1.toString, summary._2, summary._3)
-        responseAs[InstitutionSummary] mustBe institutionSummary
+        responseAs[InstitutionSummary].id mustBe institutionSummary.id
+        responseAs[InstitutionSummary].filings.contains(institutionSummary.filings.head) mustBe true
       }
     }
 

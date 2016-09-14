@@ -10,7 +10,7 @@ import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.model.institution.{ ExternalId, Institution }
 import hmda.persistence.CommonMessages._
-import hmda.persistence.HmdaSupervisor.FindActorById
+import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
@@ -89,7 +89,7 @@ object DemoData {
     implicit val ec = system.dispatcher
     filings.foreach { filing =>
       val supervisor = system.actorSelection("/user/supervisor")
-      val fFilingActor = (supervisor ? FindActorById(FilingPersistence.name, filing.institutionId)).mapTo[ActorRef]
+      val fFilingActor = (supervisor ? FindFilings(FilingPersistence.name, filing.institutionId)).mapTo[ActorRef]
       for {
         f <- fFilingActor
       } yield {

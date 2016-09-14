@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern.ask
 import akka.util.Timeout
 import hmda.model.fi.SubmissionId
-import hmda.persistence.HmdaSupervisor.{ FindActorById, FindActorByName, FindProcessingActor }
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindActorByName, FindProcessingActor }
 import hmda.persistence.institutions.FilingPersistence
 import hmda.persistence.processing.{ HmdaRawFile, SingleLarValidation }
 import org.scalatest.{ MustMatchers, WordSpec }
@@ -36,12 +36,12 @@ class HmdaSupervisorSpec extends WordSpec with MustMatchers {
 
     "find or create actor by id" in {
       val institutionId = "0"
-      val path = s"akka://default/user/supervisor/Filings-$institutionId"
-      val filingsF = (supervisor ? FindActorById(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+      val path = s"akka://default/user/supervisor/filings-$institutionId"
+      val filingsF = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
       val filings = Await.result(filingsF, timeout)
       filings.path.toString mustBe path
 
-      val filings2F = (supervisor ? FindActorById(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+      val filings2F = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
       val filings2 = Await.result(filings2F, timeout)
       filings2.path.toString mustBe path
     }

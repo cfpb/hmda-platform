@@ -10,7 +10,7 @@ import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawF
 
 object LocalHmdaEventProcessor {
 
-  val name = "HmdaEventProcessor"
+  val name = "eventProcessor"
 
   def props(): Props = Props(new LocalHmdaEventProcessor)
 
