@@ -79,6 +79,7 @@ class HmdaSupervisor extends HmdaActor {
 
   private def supervise(actorRef: ActorRef, id: String): ActorRef = {
     hmdaPersistentActors += id -> actorRef
+    context watch actorRef
     actorRef
   }
 

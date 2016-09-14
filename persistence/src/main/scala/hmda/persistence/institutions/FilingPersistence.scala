@@ -48,7 +48,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
   override def persistenceId: String = s"filings-$institutionId"
 
-  override def receiveCommand: Receive = {
+  override def receiveCommand: Receive = super.receiveCommand orElse {
     case CreateFiling(f) =>
       if (!state.filings.contains(f)) {
         persist(FilingCreated(f)) { e =>
@@ -78,9 +78,6 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
     case GetState =>
       sender() ! state.filings
-
-    case Shutdown =>
-      context stop self
 
   }
 }
