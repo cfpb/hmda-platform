@@ -1,6 +1,9 @@
 package hmda.persistence.demo
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.pattern.ask
+import akka.util.Timeout
+import scala.concurrent.duration._
 import hmda.model.fi._
 import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
@@ -10,6 +13,7 @@ import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.CommonMessages._
+import hmda.persistence.HmdaSupervisor.FindActorById
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
@@ -53,11 +57,13 @@ object DemoData {
 
   val demoSubmissions = DemoSubmissions.values
 
+  implicit val timeout = Timeout(5.seconds)
+
   def loadDemoData(system: ActorSystem): Unit = {
     Thread.sleep(500)
     loadInstitutions(demoInstitutions, system)
     loadFilings(demoFilings, system)
-    loadSubmissions(demoSubmissions, system)
+    //loadSubmissions(demoSubmissions, system)
   }
 
   def loadTestData(system: ActorSystem): Unit = {
@@ -79,11 +85,15 @@ object DemoData {
   }
 
   def loadFilings(filings: Seq[Filing], system: ActorSystem): Unit = {
+    implicit val ec = system.dispatcher
     filings.foreach { filing =>
-      val filingActor = system.actorOf(FilingPersistence.props(filing.institutionId))
-      filingActor ! CreateFiling(filing)
-      Thread.sleep(100)
-      filingActor ! Shutdown
+      val supervisor = system.actorSelection("/user/supervisor")
+      val fFilingActor = (supervisor ? FindActorById(FilingPersistence.name, filing.institutionId)).mapTo[ActorRef]
+      for {
+        f <- fFilingActor
+      } yield {
+        f ! CreateFiling(filing)
+      }
     }
   }
 

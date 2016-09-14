@@ -48,7 +48,7 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
 
   override def persistenceId: String = s"submissions-$institutionId-$period"
 
-  override def receiveCommand: Receive = {
+  override def receiveCommand: Receive = super.receiveCommand orElse {
     case CreateSubmission =>
       val seqNr = state.submissions.size + 1
       val submissionId = SubmissionId(institutionId, period, seqNr)
