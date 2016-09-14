@@ -21,6 +21,7 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Created, Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.CommonMessages._
+import hmda.persistence.HmdaSupervisor.FindActorById
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaRawFile._
 
@@ -60,13 +61,17 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       val path = s"institutions/$institutionId"
       extractExecutionContext { executor =>
         val institutionsActor = system.actorSelection("/user/supervisor/institutions")
-        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
         timedGet {
           implicit val ec: ExecutionContext = executor
-          val fInstitutionDetails = institutionDetails(institutionId, institutionsActor, filingsActor)
+          val supervisor = system.actorSelection("/user/supervisor")
+          val fFilingsActor = (supervisor ? FindActorById(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+          val fInstitutionDetails = for {
+            f <- fFilingsActor
+            d <- institutionDetails(institutionId, institutionsActor, f)
+          } yield d
+
           onComplete(fInstitutionDetails) {
             case Success(institutionDetails) =>
-              filingsActor ! Shutdown
               if (institutionDetails.institution.name != "")
                 complete(ToResponseMarshallable(institutionDetails))
               else {
@@ -74,7 +79,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
             case Failure(error) =>
-              filingsActor ! Shutdown
               completeWithInternalError(path, error)
           }
         }
