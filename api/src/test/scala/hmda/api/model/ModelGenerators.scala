@@ -68,9 +68,17 @@ trait ModelGenerators {
     )
   }
 
+  implicit def submissionIdGen: Gen[SubmissionId] = {
+    for {
+      institutionId <- Gen.alphaStr
+      period <- Gen.alphaStr
+      seqNr <- Gen.choose(0, Int.MaxValue)
+    } yield SubmissionId(institutionId, period, seqNr)
+  }
+
   implicit def submissionGen: Gen[Submission] = {
     for {
-      id <- Gen.choose(0, Int.MaxValue)
+      id <- submissionIdGen
       status <- submissionStatusGen
     } yield Submission(id, status)
   }
