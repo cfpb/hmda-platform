@@ -21,7 +21,7 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Created, Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.CommonMessages._
-import hmda.persistence.HmdaSupervisor.FindFilings
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaRawFile._
 
@@ -89,15 +89,20 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     path("filings" / Segment) { period =>
       val path = s"institutions/$institutionId/filings/$period"
       extractExecutionContext { executor =>
-        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
-        val submissionActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
         timedGet {
           implicit val ec: ExecutionContext = executor
-          val fDetails: Future[FilingDetail] = filingDetailsByPeriod(period, filingsActor, submissionActor)
+          val supervisor = system.actorSelection("/user/supervisor")
+          val fFilings = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+          val fSubmissions = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
+
+          val fDetails = for {
+            f <- fFilings
+            s <- fSubmissions
+            d <- filingDetailsByPeriod(period, f, s)
+          } yield d
+
           onComplete(fDetails) {
             case Success(filingDetails) =>
-              filingsActor ! Shutdown
-              submissionActor ! Shutdown
               val filing = filingDetails.filing
               if (filing.institutionId == institutionId && filing.period == period)
                 complete(ToResponseMarshallable(filingDetails))
@@ -109,8 +114,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
             case Failure(error) =>
-              filingsActor ! Shutdown
-              submissionActor ! Shutdown
               completeWithInternalError(path, error)
           }
         }

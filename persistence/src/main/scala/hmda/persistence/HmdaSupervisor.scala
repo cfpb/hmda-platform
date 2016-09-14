@@ -10,6 +10,7 @@ object HmdaSupervisor {
 
   case class FindActorByName(name: String)
   case class FindFilings(name: String, institutionId: String)
+  case class FindSubmissions(name: String, institutionId: String, period: String)
   case class FindProcessingActor(name: String, submissionId: SubmissionId)
 
   def props(): Props = Props(new HmdaSupervisor)
@@ -32,6 +33,9 @@ class HmdaSupervisor extends HmdaActor {
     case FindFilings(name, id) =>
       sender() ! findFilings(name, id)
 
+    case FindSubmissions(name, institutionId, period) =>
+      sender() ! findSubmissions(name, institutionId, period)
+
     case FindProcessingActor(name, submissionId) =>
       sender() ! findProcessingActor(name, submissionId)
 
@@ -43,6 +47,8 @@ class HmdaSupervisor extends HmdaActor {
   private def findActorByName(name: String): ActorRef = hmdaPersistentActors.getOrElse(name, createActor(name))
 
   private def findFilings(name: String, id: String): ActorRef = hmdaPersistentActors.getOrElse(s"$name-$id", createFilings(name, id))
+
+  private def findSubmissions(name: String, institutionId: String, period: String): ActorRef = hmdaPersistentActors.getOrElse(name, createSubmissions(name, institutionId, period))
 
   private def findProcessingActor(name: String, submissionId: SubmissionId): ActorRef = hmdaPersistentActors.getOrElse(name, createProcessingActor(name, submissionId))
 
@@ -58,11 +64,16 @@ class HmdaSupervisor extends HmdaActor {
       supervise(actor, id)
   }
 
-  private def createFilings(name: String, id: String): ActorRef = name match {
-    case FilingPersistence.name =>
-      val filingsId = s"$name-$id"
-      val actor = context.actorOf(FilingPersistence.props(id), s"${FilingPersistence.name}-$id")
-      supervise(actor, filingsId)
+  private def createFilings(name: String, id: String): ActorRef = {
+    val filingsId = s"$name-$id"
+    val actor = context.actorOf(FilingPersistence.props(id), filingsId)
+    supervise(actor, filingsId)
+  }
+
+  private def createSubmissions(name: String, institutionId: String, period: String): ActorRef = {
+    val sId = s"$name-$institutionId-$period"
+    val actor = context.actorOf(SubmissionPersistence.props(institutionId, period), sId)
+    supervise(actor, sId)
   }
 
   private def createProcessingActor(name: String, submissionId: SubmissionId): ActorRef = name match {
@@ -75,10 +86,6 @@ class HmdaSupervisor extends HmdaActor {
     case id @ HmdaFileValidator.name =>
       val actor = context.actorOf(HmdaFileValidator.props(submissionId))
       supervise(actor, id)
-    case id @ SubmissionPersistence.name =>
-      val actorId = s"${SubmissionPersistence.name}-${submissionId.toString}"
-      val actor = context.actorOf(SubmissionPersistence.props(submissionId.institutionId, submissionId.period), actorId)
-      supervise(actor, actorId)
   }
 
   private def supervise(actorRef: ActorRef, id: String): ActorRef = {
