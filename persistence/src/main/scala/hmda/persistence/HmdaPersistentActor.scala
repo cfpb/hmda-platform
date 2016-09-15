@@ -19,7 +19,7 @@ abstract class HmdaPersistentActor extends PersistentActor with HmdaActor {
 
   override def preStart(): Unit = {
     super.preStart()
-    context.setReceiveTimeout(Duration.create(5, TimeUnit.SECONDS))
+    context.setReceiveTimeout(Duration.create(1, TimeUnit.MINUTES))
   }
 
   override def receiveCommand: Receive = {

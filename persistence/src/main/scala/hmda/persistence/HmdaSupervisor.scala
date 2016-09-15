@@ -31,6 +31,7 @@ class HmdaSupervisor extends HmdaActor {
       sender() ! findActorByName(name)
 
     case FindFilings(name, id) =>
+      println(hmdaPersistentActors)
       sender() ! findFilings(name, id)
 
     case FindSubmissions(name, institutionId, period) =>
@@ -44,13 +45,17 @@ class HmdaSupervisor extends HmdaActor {
       hmdaPersistentActors = hmdaPersistentActors.filterNot { case (_, value) => value == ref }
   }
 
-  private def findActorByName(name: String): ActorRef = hmdaPersistentActors.getOrElse(name, createActor(name))
+  private def findActorByName(name: String): ActorRef =
+    hmdaPersistentActors.getOrElse(name, createActor(name))
 
-  private def findFilings(name: String, id: String): ActorRef = hmdaPersistentActors.getOrElse(s"$name-$id", createFilings(name, id))
+  private def findFilings(name: String, id: String): ActorRef =
+    hmdaPersistentActors.getOrElse(s"$name-$id", createFilings(name, id))
 
-  private def findSubmissions(name: String, institutionId: String, period: String): ActorRef = hmdaPersistentActors.getOrElse(name, createSubmissions(name, institutionId, period))
+  private def findSubmissions(name: String, institutionId: String, period: String): ActorRef =
+    hmdaPersistentActors.getOrElse(s"$name-$institutionId-$period", createSubmissions(name, institutionId, period))
 
-  private def findProcessingActor(name: String, submissionId: SubmissionId): ActorRef = hmdaPersistentActors.getOrElse(name, createProcessingActor(name, submissionId))
+  private def findProcessingActor(name: String, submissionId: SubmissionId): ActorRef =
+    hmdaPersistentActors.getOrElse(name, createProcessingActor(name, submissionId))
 
   private def createActor(name: String): ActorRef = name match {
     case id @ SingleLarValidation.name =>
