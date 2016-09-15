@@ -31,7 +31,6 @@ class HmdaSupervisor extends HmdaActor {
       sender() ! findActorByName(name)
 
     case FindFilings(name, id) =>
-      println(hmdaPersistentActors)
       sender() ! findFilings(name, id)
 
     case FindSubmissions(name, institutionId, period) =>
