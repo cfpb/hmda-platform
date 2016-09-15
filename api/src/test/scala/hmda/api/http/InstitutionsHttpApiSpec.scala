@@ -70,8 +70,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         val institution = DemoData.testInstitutions.head
         val institutionWrapped = InstitutionWrapper(institution.id.toString, institution.name, institution.status)
         val filings = DemoData.testFilings.filter(f => f.institutionId == institution.id.toString)
-        responseAs[InstitutionDetail].institution mustBe institutionWrapped
-        responseAs[InstitutionDetail].filings.contains(filings.head) mustBe true
+        responseAs[InstitutionDetail] mustBe InstitutionDetail(institutionWrapped, filings.reverse)
       }
       getWithCfpbHeaders("/institutions/xxxxx") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
@@ -84,8 +83,7 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         status mustBe StatusCodes.OK
         val summary = DemoData.institutionSummary
         val institutionSummary = InstitutionSummary(summary._1.toString, summary._2, summary._3)
-        responseAs[InstitutionSummary].id mustBe institutionSummary.id
-        responseAs[InstitutionSummary].filings.contains(institutionSummary.filings.head) mustBe true
+        responseAs[InstitutionSummary] mustBe institutionSummary
       }
     }
 
@@ -170,10 +168,6 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return 400 when trying to upload to a completed submission" in {
       val badContent = "qdemd"
       val file = multiPartFile(badContent, "sample.txt")
-      //val submissionActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
-      //submissionActor ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
-      //submissionActor ! Shutdown
-
       val supervisor = system.actorSelection("/user/supervisor")
       val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, "0", "2017")).mapTo[ActorRef]
 
