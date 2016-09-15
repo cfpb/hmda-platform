@@ -123,36 +123,40 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   def submissionPath(institutionId: String) =
     path("filings" / Segment / "submissions") { period =>
       val path = s"institutions/$institutionId/filings/$period/submissions"
-      timedPost {
-        implicit val ec = system.dispatcher
-        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
-        val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-        val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
-        onComplete(fFiling) {
-          case Success(filing) =>
-            if (filing.period == period) {
-              submissionsActor ! CreateSubmission
-              val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
-              onComplete(fLatest) {
-                case Success(submission) =>
-                  submissionsActor ! Shutdown
-                  filingsActor ! Shutdown
-                  complete(ToResponseMarshallable(StatusCodes.Created -> submission))
-                case Failure(error) =>
-                  submissionsActor ! Shutdown
-                  completeWithInternalError(path, error)
+      extractExecutionContext { executor =>
+        timedPost {
+          implicit val ec: ExecutionContext = executor
+          val supervisor = system.actorSelection("/user/supervisor")
+          val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+          val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
+
+          val fFiling = for {
+            f <- fFilingsActor
+            s <- fSubmissionsActor
+            d <- (f ? GetFilingByPeriod(period)).mapTo[Filing]
+          } yield (s, d)
+
+          onComplete(fFiling) {
+            case Success((submissionsActor, filing)) =>
+              if (filing.period == period) {
+                submissionsActor ! CreateSubmission
+                val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
+                onComplete(fLatest) {
+                  case Success(submission) =>
+                    complete(ToResponseMarshallable(StatusCodes.Created -> submission))
+                  case Failure(error) =>
+                    completeWithInternalError(path, error)
+                }
+              } else if (!filing.institutionId.isEmpty) {
+                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+              } else {
+                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
-            } else if (!filing.institutionId.isEmpty) {
-              val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
-              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-            } else {
-              val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
-              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-            }
-          case Failure(error) =>
-            filingsActor ! Shutdown
-            submissionsActor ! Shutdown
-            completeWithInternalError(path, error)
+            case Failure(error) =>
+              completeWithInternalError(path, error)
+          }
         }
       }
     }
