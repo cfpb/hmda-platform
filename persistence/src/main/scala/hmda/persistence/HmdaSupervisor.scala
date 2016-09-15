@@ -54,7 +54,7 @@ class HmdaSupervisor extends HmdaActor {
     hmdaPersistentActors.getOrElse(s"$name-$institutionId-$period", createSubmissions(name, institutionId, period))
 
   private def findProcessingActor(name: String, submissionId: SubmissionId): ActorRef =
-    hmdaPersistentActors.getOrElse(name, createProcessingActor(name, submissionId))
+    hmdaPersistentActors.getOrElse(s"$name-${submissionId.toString}", createProcessingActor(name, submissionId))
 
   private def createActor(name: String): ActorRef = name match {
     case id @ SingleLarValidation.name =>
@@ -82,14 +82,17 @@ class HmdaSupervisor extends HmdaActor {
 
   private def createProcessingActor(name: String, submissionId: SubmissionId): ActorRef = name match {
     case id @ HmdaRawFile.name =>
-      val actor = context.actorOf(HmdaRawFile.props(submissionId), s"${HmdaRawFile.name}-${submissionId.toString}")
-      supervise(actor, id)
+      val actorId = s"$id-${submissionId.toString}"
+      val actor = context.actorOf(HmdaRawFile.props(submissionId), actorId)
+      supervise(actor, actorId)
     case id @ HmdaFileParser.name =>
-      val actor = context.actorOf(HmdaFileParser.props(submissionId))
-      supervise(actor, id)
+      val actorId = s"$id-${submissionId.toString}"
+      val actor = context.actorOf(HmdaFileParser.props(submissionId), actorId)
+      supervise(actor, actorId)
     case id @ HmdaFileValidator.name =>
-      val actor = context.actorOf(HmdaFileValidator.props(submissionId))
-      supervise(actor, id)
+      val actorId = s"$id-${submissionId.toString}"
+      val actor = context.actorOf(HmdaFileValidator.props(submissionId), actorId)
+      supervise(actor, actorId)
   }
 
   private def supervise(actorRef: ActorRef, id: String): ActorRef = {
