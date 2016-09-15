@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit
 import akka.actor.ReceiveTimeout
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
 import hmda.persistence.CommonMessages.{ Event, Shutdown }
 
 import scala.concurrent.duration.Duration
@@ -19,7 +20,9 @@ abstract class HmdaPersistentActor extends PersistentActor with HmdaActor {
 
   override def preStart(): Unit = {
     super.preStart()
-    context.setReceiveTimeout(Duration.create(1, TimeUnit.MINUTES))
+    val config = ConfigFactory.load()
+    val timeout = config.getInt("hmda.persistent-actor-timeout")
+    context.setReceiveTimeout(Duration.create(timeout, TimeUnit.SECONDS))
   }
 
   override def receiveCommand: Receive = {
