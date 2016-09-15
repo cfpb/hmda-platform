@@ -164,23 +164,30 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   def submissionLatestPath(institutionId: String) =
     path("filings" / Segment / "submissions" / "latest") { period =>
       val path = s"institutions/$institutionId/filings/$period/submissions/latest"
-      timedGet {
-        val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-        val fSubmissions = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
-        onComplete(fSubmissions) {
-          case Success(submission) =>
-            submissionsActor ! Shutdown
-            if (submission.id.sequenceNumber == 0) {
-              val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", path)
-              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-            } else {
-              val statusWrapper = SubmissionStatusWrapper(submission.submissionStatus.code, submission.submissionStatus.message)
-              val submissionWrapper = SubmissionWrapper(submission.id.sequenceNumber, statusWrapper)
-              complete(ToResponseMarshallable(submissionWrapper))
-            }
-          case Failure(error) =>
-            submissionsActor ! Shutdown
-            completeWithInternalError(path, error)
+      extractExecutionContext { executor =>
+        timedGet {
+          implicit val ec: ExecutionContext = executor
+          val supervisor = system.actorSelection("/user/supervisor")
+          val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
+
+          val fSubmissions = for {
+            s <- fSubmissionsActor
+            xs <- (s ? GetLatestSubmission).mapTo[Submission]
+          } yield xs
+
+          onComplete(fSubmissions) {
+            case Success(submission) =>
+              if (submission.id.sequenceNumber == 0) {
+                val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", path)
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+              } else {
+                val statusWrapper = SubmissionStatusWrapper(submission.submissionStatus.code, submission.submissionStatus.message)
+                val submissionWrapper = SubmissionWrapper(submission.id.sequenceNumber, statusWrapper)
+                complete(ToResponseMarshallable(submissionWrapper))
+              }
+            case Failure(error) =>
+              completeWithInternalError(path, error)
+          }
         }
       }
     }
