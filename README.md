@@ -140,7 +140,7 @@ docker-compose up -d --build
 
 This will bring up all the HMDA Platform services. The first run may take several minutes.
 
-For convenience when doing development on the UI, the `docker-compose` file uses a `volumes` which mount the local directory into the `hmda-platform-ui` container. This means you can make UI changes and refresh the browser to view them.
+For convenience when doing development on both the UI and the API, the `docker-compose` file uses a `volumes` which mounts the local directory into the `hmda-platform-ui` container and the `hmda.jar` into `hmda-platform` container. This means you can make changes to either the UI or API and view them without needing to rebuild their respective containers.
 
 To build the front-end and allow "watching" for changes you can run:
 
@@ -161,6 +161,15 @@ npm run build
 ```
 
 This will simply build the front-end, still taking advantage of the mounted volume.
+
+In order to view changes in the API you need to rebuild the jar and then restart the container:
+
+``` shell
+# while still in the hmda-platform directory
+sbt clean assembly
+docker-compose stop
+docker-compose up
+```
 
 View the app by visiting your docker machine's endpoint in the browser.
 To find your docker machine endpoint:
