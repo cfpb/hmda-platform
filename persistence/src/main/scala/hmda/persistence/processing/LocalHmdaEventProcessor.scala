@@ -1,12 +1,18 @@
 package hmda.api.processing
 
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
+import akka.pattern.ask
+import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
 import hmda.persistence.CommonMessages._
+import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted, ReadHmdaRawFile }
 import hmda.persistence.processing.HmdaFileValidator._
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile }
+
+import scala.concurrent.duration._
 
 object LocalHmdaEventProcessor {
 
@@ -21,6 +27,13 @@ object LocalHmdaEventProcessor {
 }
 
 class LocalHmdaEventProcessor extends Actor with ActorLogging {
+
+  val supervisor = context.parent
+
+  val config = ConfigFactory.load()
+  val actorTimeout = config.getInt("hmda.actor-lookup-timeout")
+  implicit val timeout = Timeout(actorTimeout.seconds)
+  implicit val ec = context.dispatcher
 
   override def preStart(): Unit = {
     context.system.eventStream.subscribe(self, classOf[Event])
@@ -58,8 +71,12 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
   private def fireUploadCompletedEvents(size: Int, submissionId: SubmissionId): Unit = {
     log.debug(s"$size lines uploaded for submission $submissionId")
-    val hmdaFileParser = context.actorOf(HmdaFileParser.props(submissionId))
-    hmdaFileParser ! ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId")
+    val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionId)).mapTo[ActorRef]
+    for {
+      h <- fHmdaFileParser
+    } yield {
+      h ! ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId")
+    }
   }
 
   private def fireParsingStartedEvents(submissionId: SubmissionId): Unit = {
@@ -68,8 +85,12 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
   private def fireParsingCompletedEvents(submissionId: SubmissionId): Unit = {
     log.debug(s"Parsing completed for $submissionId")
-    val hmdaFileValidator = context.actorOf(HmdaFileValidator.props(submissionId))
-    hmdaFileValidator ! BeginValidation
+    val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+    for {
+      h <- fHmdaFileValidator
+    } yield {
+      h ! BeginValidation
+    }
   }
 
   private def fireValidationCompletedEvents(submissionId: SubmissionId): Unit = {
