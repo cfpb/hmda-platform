@@ -245,23 +245,23 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     path("summary") {
       val path = s"institutions/$institutionId/summary"
       extractExecutionContext { executor =>
-        val institutionsActor = system.actorSelection("/user/supervisor/institutions")
-        val filingsActor = system.actorOf(FilingPersistence.props(institutionId))
-        implicit val ec = executor
-        get {
+        timedGet {
+          implicit val ec: ExecutionContext = executor
+          val institutionsActor = system.actorSelection("/user/supervisor/institutions")
+          val supervisor = system.actorSelection("/user/supervisor")
+          val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
           val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
-          val fFilings = (filingsActor ? GetState).mapTo[Seq[Filing]]
+
           val fSummary = for {
+            filingsActor <- fFilingsActor
             institution <- fInstitution
-            filings <- fFilings
+            filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
           } yield InstitutionSummary(institution.id.toString, institution.name, filings)
 
           onComplete(fSummary) {
             case Success(summary) =>
-              filingsActor ! Shutdown
               complete(ToResponseMarshallable(summary))
             case Failure(error) =>
-              filingsActor ! Shutdown
               completeWithInternalError(path, error)
           }
         }
