@@ -201,10 +201,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         extractExecutionContext { executor =>
           implicit val ec: ExecutionContext = executor
           val uploadTimestamp = Instant.now.toEpochMilli
-
-          //val processingActor = createHmdaRawFile(system, submissionId)
-          //val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-
           val supervisor = system.actorSelection("/user/supervisor")
           val fProcessingActor = (supervisor ? FindProcessingActor(HmdaRawFile.name, submissionId)).mapTo[ActorRef]
           val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
@@ -215,18 +211,15 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             fIsSubmissionOverwrite <- checkSubmissionOverwrite(s, submissionId)
           } yield (fIsSubmissionOverwrite, p)
 
-          //val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId)
 
           onComplete(fUploadSubmission) {
             case Success((false, processingActor)) =>
-              //submissionsActor ! Shutdown
               processingActor ! StartUpload
               uploadFile(processingActor, uploadTimestamp, path)
             case Success((true, _)) =>
               val errorResponse = ErrorResponse(400, "Submission already exists", path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
             case Failure(error) =>
-              //submissionsActor ! Shutdown
               completeWithInternalError(path, error)
           }
         }
