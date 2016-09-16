@@ -191,9 +191,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           }
         ]
       },
-      "validity": {..},
-      "quality": {...},
-      "macro": {...}
+      "validity": {},
+      "quality": {},
+      "macro": {}
     }
     ```
 
