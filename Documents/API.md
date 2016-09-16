@@ -43,6 +43,30 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
+* `/institutions/<institution>/summary`
+    * `GET` - Summary for Financial Institution, including filing information
+
+    Example response, with HTTP code 200:
+
+    ```json
+    {
+      "id": "12345",
+      "name": "First Bank",
+      "filings": [
+        {
+          "period": "2017",
+          "institutionId": "12345",
+          "status": "not-started"
+        },
+        {
+          "period": "2016",
+          "institutionId": "12345",
+          "status": "completed"
+        }
+      ]
+    }
+    ```
+
 * `/institutions/<institution>`
     * `GET` - Details for Financial Institution
 
@@ -132,29 +156,48 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     * `POST` - Upload HMDA data to submission
 
 
-* `/institutions/<institution>/summary`
-    * `GET` - Summary for Financial Institution, including filing information
-
-    Example response, with HTTP code 200:
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits`
+    * `GET`  - List of all edits for a given submission, grouped by edit type
 
     ```json
     {
-      "id": "12345",
-      "name": "First Bank",
-      "filings": [
-        {
-          "period": "2017",
-          "institutionId": "12345",
-          "status": "not-started"
-        },
-        {
-          "period": "2016",
-          "institutionId": "12345",
-          "status": "completed"
-        }
-      ]
+      "syntactical": {
+      "type": "syntactical",
+        "edits": [
+          {
+            "edit": "S025",
+            "lars": [
+              {
+                "lar": {"loanId": "s1"}
+              },
+              {
+                "lar": {"loanId": "s2"}
+              },
+              {
+                "lar": {"loanId": "s3"}
+              }
+            ]
+          },
+          {
+            "edit": "S010",
+            "lars": [
+              {
+                "lar": {"loanId": "s4"}
+              },
+              {
+                "lar": {"loanId": "s5"}
+              }
+            ]
+          }
+        ]
+      },
+      "validity": {..},
+      "quality": {...},
+      "macro": {...}
     }
     ```
+
+
 
 ## Authorization
 Each endpoint that starts with `/institutions` is protected by three authorization requirements.
