@@ -8,6 +8,7 @@ import hmda.model.institution.ExternalIdType._
 import hmda.model.institution._
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution.InstitutionType._
+import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 import org.scalacheck.{ Arbitrary, Gen }
 
 import scalaz.Alpha.B
@@ -115,4 +116,33 @@ trait ModelGenerators {
       ExternalIdType.values
     )
   }
+
+  implicit def errorResponseGen: Gen[ErrorResponse] = {
+    for {
+      status <- Gen.oneOf(200, 201, 400, 500)
+      message <- Gen.alphaStr
+      path <- Gen.alphaStr
+    } yield ErrorResponse(status, message, path)
+  }
+
+  implicit def larEditResultGen: Gen[LarEditResult] = {
+    for {
+      loanId <- Gen.alphaStr
+    } yield LarEditResult(loanId)
+  }
+
+  implicit def editResultGen: Gen[EditResult] = {
+    for {
+      edit <- Gen.alphaStr
+      lars <- Gen.listOf(larEditResultGen)
+    } yield EditResult(edit, lars)
+  }
+
+  implicit def editResultsGen: Gen[EditResults] = {
+    for {
+      editType <- Gen.oneOf(Syntactical, Validity, Quality, Macro)
+      edits <- Gen.listOf(editResultGen)
+    } yield EditResults(editType, edits)
+  }
+
 }

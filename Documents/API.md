@@ -140,6 +140,8 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 * `/institutions/<institution>/filings/<period>/submissions/latest`
 
     * `GET` - The latest submission for some institution and period
+
+     Example response, with HTTP code 200:
     
     ```json
     {
@@ -158,6 +160,8 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits`
     * `GET`  - List of all edits for a given submission, grouped by edit type
+
+    Example response, with HTTP code 200:
 
     ```json
     {
