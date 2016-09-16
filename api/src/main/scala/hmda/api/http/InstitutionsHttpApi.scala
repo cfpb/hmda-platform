@@ -94,6 +94,33 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
+  def institutionSummaryPath(institutionId: String) =
+    path("summary") {
+      val path = s"institutions/$institutionId/summary"
+      extractExecutionContext { executor =>
+        timedGet {
+          implicit val ec: ExecutionContext = executor
+          val supervisor = system.actorSelection("/user/supervisor")
+          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+          val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+
+          val fSummary = for {
+            institutionsActor <- fInstitutionsActor
+            filingsActor <- fFilingsActor
+            institution <- (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
+            filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
+          } yield InstitutionSummary(institution.id.toString, institution.name, filings)
+
+          onComplete(fSummary) {
+            case Success(summary) =>
+              complete(ToResponseMarshallable(summary))
+            case Failure(error) =>
+              completeWithInternalError(path, error)
+          }
+        }
+      }
+    }
+
   def filingByPeriodPath(institutionId: String) =
     path("filings" / Segment) { period =>
       val path = s"institutions/$institutionId/filings/$period"
@@ -226,33 +253,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             case Success((true, _)) =>
               val errorResponse = ErrorResponse(400, "Submission already exists", path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-            case Failure(error) =>
-              completeWithInternalError(path, error)
-          }
-        }
-      }
-    }
-
-  def institutionSummaryPath(institutionId: String) =
-    path("summary") {
-      val path = s"institutions/$institutionId/summary"
-      extractExecutionContext { executor =>
-        timedGet {
-          implicit val ec: ExecutionContext = executor
-          val institutionsActor = system.actorSelection("/user/supervisor/institutions")
-          val supervisor = system.actorSelection("/user/supervisor")
-          val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
-          val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
-
-          val fSummary = for {
-            filingsActor <- fFilingsActor
-            institution <- fInstitution
-            filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-          } yield InstitutionSummary(institution.id.toString, institution.name, filings)
-
-          onComplete(fSummary) {
-            case Success(summary) =>
-              complete(ToResponseMarshallable(summary))
             case Failure(error) =>
               completeWithInternalError(path, error)
           }
