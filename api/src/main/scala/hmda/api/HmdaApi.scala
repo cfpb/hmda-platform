@@ -9,13 +9,12 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http._
-import hmda.api.processing.LocalHmdaEventProcessor
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.HmdaSupervisor.FindActorByName
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence._
-import hmda.persistence.processing.SingleLarValidation
+import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
 
 import scala.concurrent.duration._
 

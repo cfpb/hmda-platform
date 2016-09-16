@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.testkit.{ EventFilter, TestProbe }
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
-import hmda.api.processing.LocalHmdaEventProcessor._
+import hmda.persistence.processing.LocalHmdaEventProcessor._
 import hmda.model.fi.SubmissionId
 import hmda.persistence.CommonMessages.Event
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted }
