@@ -17,7 +17,7 @@ class LarSyntacticalEngineSpec
   property("A LAR must pass syntactical checks") {
     forAll(larGen) { lar =>
       whenever(lar.id == 2) {
-        checkSyntactical(lar, ValidationContext(None)) mustBe a[Success[_]]
+        checkSyntactical(lar, ValidationContext(None, None)) mustBe a[Success[_]]
       }
     }
   }

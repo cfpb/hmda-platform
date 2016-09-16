@@ -13,7 +13,7 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers with T
 
   property("Validates Transmittal Sheet") {
     forAll(tsGen) { ts =>
-      validateTs(ts, ValidationContext(None)) mustBe a[Success[_]]
+      validateTs(ts, ValidationContext(None, None)) mustBe a[Success[_]]
     }
   }
 
