@@ -180,6 +180,12 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         rejection mustBe a[MethodRejection]
       }
     }
+
+    "return list of validation errors by error type" in {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+    }
   }
 
   "Institutions API Authorization and rejection handling" must {

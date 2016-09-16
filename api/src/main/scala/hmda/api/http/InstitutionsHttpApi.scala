@@ -250,6 +250,11 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
       }
     }
 
+  def submissionEditsPath(institutionId: String) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits") { (period, seqNr) =>
+      complete("edits")
+    }
+
   private def institutionDetails(institutionId: String, institutionsActor: ActorSelection, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
     val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
     for {
@@ -275,8 +280,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     log.error(error.getLocalizedMessage)
     val errorResponse = ErrorResponse(500, "Internal server error", path)
     complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-
   }
+
 
   val institutionsRoutes =
     headerAuthorize {
@@ -288,7 +293,8 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
               filingByPeriodPath(instId) ~
               submissionPath(instId) ~
               submissionLatestPath(instId) ~
-              uploadPath(instId)
+              uploadPath(instId) ~
+              submissionEditsPath(instId)
           }
         }
     }
