@@ -1,12 +1,7 @@
 package hmda.validation.rules.ts.syntactical
 
-import hmda.model.fi.lar._
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.model.institution.Agency.CFPB
-import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId }
-import hmda.model.institution.InstitutionStatus.Active
-import hmda.model.institution.InstitutionType.Bank
-import hmda.model.institution.{ ExternalId, Institution }
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalatest.{ MustMatchers, WordSpec }
@@ -44,6 +39,12 @@ class S100Spec extends WordSpec with MustMatchers {
       val ctx = ValidationContext(None, Some(2018))
 
       S100.inContext(ctx)(ts) mustBe Failure()
+    }
+
+    "succeed when there is no filing year" in {
+      val ctx = ValidationContext(None, None)
+
+      S100.inContext(ctx)(ts) mustBe Success()
     }
   }
 }

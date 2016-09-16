@@ -208,7 +208,7 @@ class Q030Spec extends WordSpec with PropertyChecks with LarGenerators with Must
   implicit class LarChecker(lar: LoanApplicationRegister) {
     def mustFail(implicit fi: Institution) = check(lar, fi) mustBe a[Failure]
     def mustPass(implicit fi: Institution) = check(lar, fi) mustBe a[Success]
-    def check(lar: LoanApplicationRegister, fi: Institution) = Q030.inContext(ValidationContext(Some(fi))).apply(lar)
+    def check(lar: LoanApplicationRegister, fi: Institution) = Q030.inContext(ValidationContext(Some(fi), None)).apply(lar)
   }
 
 }
