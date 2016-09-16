@@ -17,7 +17,8 @@ object DemoInstitutions extends ResourceUtils {
       val agency = toAgency(values(4))
       val institution = toInstitutionType(values(5))
       val parent = values(6).toBoolean
-      val status = toStatus(values(7))
+      val cra = values(7).toBoolean
+      val status = toStatus(values(8))
 
       Institution(
         id,
@@ -26,6 +27,7 @@ object DemoInstitutions extends ResourceUtils {
         agency,
         institution,
         parent,
+        cra,
         status
       )
     }.toSet
