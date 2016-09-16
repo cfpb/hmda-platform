@@ -3,6 +3,8 @@ version: '2'
 services:
   api:
     build: .
+    volumes:
+    - ./target/scala-2.11/hmda.jar:/opt/hmda.jar
   ui:
     build: ../hmda-platform-ui
     ports:

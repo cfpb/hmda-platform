@@ -72,7 +72,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
       }
 
     case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(x => x.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, Inactive))
+      val institution = state.institutions.find(x => x.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, status = Inactive))
       sender() ! institution
 
     case GetInstitutionsById(ids) =>
