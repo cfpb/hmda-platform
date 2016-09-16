@@ -61,8 +61,6 @@ object HmdaApi
       log.info(s"Started institutions at ${actor.path}")
     }
 
-  createInstitutions(system)
-
   val http = Http().bindAndHandle(
     routes ~ larRoutes ~ institutionsRoutes,
     host,
