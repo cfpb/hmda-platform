@@ -44,6 +44,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   override def afterAll(): Unit = {
     hmdaFileValidator ! Shutdown
+    system.terminate()
   }
 
   val ts = TsCsvParser(lines(0)).right.get
