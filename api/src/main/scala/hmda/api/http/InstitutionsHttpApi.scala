@@ -18,11 +18,11 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Created, Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.CommonMessages._
-import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
+import hmda.persistence.HmdaSupervisor.{ FindActorByName, FindFilings, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.InstitutionPersistence.{ GetInstitutionById, GetInstitutionsById }
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission, GetSubmissionById }
-import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaRawFile
 import hmda.persistence.processing.HmdaRawFile._
 
@@ -42,16 +42,23 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
   val institutionsPath =
     path("institutions") {
       val path = "institutions"
-      val institutionsActor = system.actorSelection("/user/supervisor/institutions")
       timedGet {
         extractRequestContext { ctx =>
-          val ids = institutionIdsFromHeader(ctx)
-          val fInstitutions = (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
-          onComplete(fInstitutions) {
-            case Success(institutions) =>
-              val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name, inst.status))
-              complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
-            case Failure(error) => completeWithInternalError(path, error)
+          extractExecutionContext { executor =>
+            implicit val ec: ExecutionContext = executor
+            val ids = institutionIdsFromHeader(ctx)
+            val supervisor = system.actorSelection("/user/supervisor")
+            val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+            val fInstitutions = for {
+              institutionsActor <- fInstitutionsActor
+              institutions <- (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
+            } yield institutions
+            onComplete(fInstitutions) {
+              case Success(institutions) =>
+                val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name, inst.status))
+                complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
+              case Failure(error) => completeWithInternalError(path, error)
+            }
           }
         }
       }
@@ -61,14 +68,15 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     pathEnd {
       val path = s"institutions/$institutionId"
       extractExecutionContext { executor =>
-        val institutionsActor = system.actorSelection("/user/supervisor/institutions")
         timedGet {
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
+          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
           val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
           val fInstitutionDetails = for {
+            i <- fInstitutionsActor
             f <- fFilingsActor
-            d <- institutionDetails(institutionId, institutionsActor, f)
+            d <- institutionDetails(institutionId, i, f)
           } yield d
 
           onComplete(fInstitutionDetails) {
@@ -79,6 +87,33 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
                 val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
+            case Failure(error) =>
+              completeWithInternalError(path, error)
+          }
+        }
+      }
+    }
+
+  def institutionSummaryPath(institutionId: String) =
+    path("summary") {
+      val path = s"institutions/$institutionId/summary"
+      extractExecutionContext { executor =>
+        timedGet {
+          implicit val ec: ExecutionContext = executor
+          val supervisor = system.actorSelection("/user/supervisor")
+          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+          val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+
+          val fSummary = for {
+            institutionsActor <- fInstitutionsActor
+            filingsActor <- fFilingsActor
+            institution <- (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
+            filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
+          } yield InstitutionSummary(institution.id.toString, institution.name, filings)
+
+          onComplete(fSummary) {
+            case Success(summary) =>
+              complete(ToResponseMarshallable(summary))
             case Failure(error) =>
               completeWithInternalError(path, error)
           }
@@ -201,10 +236,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         extractExecutionContext { executor =>
           implicit val ec: ExecutionContext = executor
           val uploadTimestamp = Instant.now.toEpochMilli
-
-          //val processingActor = createHmdaRawFile(system, submissionId)
-          //val submissionsActor = system.actorOf(SubmissionPersistence.props(institutionId, period))
-
           val supervisor = system.actorSelection("/user/supervisor")
           val fProcessingActor = (supervisor ? FindProcessingActor(HmdaRawFile.name, submissionId)).mapTo[ActorRef]
           val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
@@ -215,52 +246,21 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
             fIsSubmissionOverwrite <- checkSubmissionOverwrite(s, submissionId)
           } yield (fIsSubmissionOverwrite, p)
 
-          //val fIsSubmissionOverwrite = checkSubmissionOverwrite(submissionsActor, submissionId)
-
           onComplete(fUploadSubmission) {
             case Success((false, processingActor)) =>
-              //submissionsActor ! Shutdown
               processingActor ! StartUpload
               uploadFile(processingActor, uploadTimestamp, path)
             case Success((true, _)) =>
               val errorResponse = ErrorResponse(400, "Submission already exists", path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
             case Failure(error) =>
-              //submissionsActor ! Shutdown
               completeWithInternalError(path, error)
           }
         }
       }
     }
 
-  def institutionSummaryPath(institutionId: String) =
-    path("summary") {
-      val path = s"institutions/$institutionId/summary"
-      extractExecutionContext { executor =>
-        timedGet {
-          implicit val ec: ExecutionContext = executor
-          val institutionsActor = system.actorSelection("/user/supervisor/institutions")
-          val supervisor = system.actorSelection("/user/supervisor")
-          val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
-          val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
-
-          val fSummary = for {
-            filingsActor <- fFilingsActor
-            institution <- fInstitution
-            filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-          } yield InstitutionSummary(institution.id.toString, institution.name, filings)
-
-          onComplete(fSummary) {
-            case Success(summary) =>
-              complete(ToResponseMarshallable(summary))
-            case Failure(error) =>
-              completeWithInternalError(path, error)
-          }
-        }
-      }
-    }
-
-  private def institutionDetails(institutionId: String, institutionsActor: ActorSelection, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
+  private def institutionDetails(institutionId: String, institutionsActor: ActorRef, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
     val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
     for {
       i <- fInstitution
