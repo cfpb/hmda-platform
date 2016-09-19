@@ -26,11 +26,11 @@ class SingleLarValidationSpec extends ActorSpec {
   "LAR Validation" must {
     "validate all lars in sample files" in {
       lars.foreach { lar =>
-        probe.send(larValidation, CheckSyntactical(lar, ValidationContext(None)))
+        probe.send(larValidation, CheckSyntactical(lar, ValidationContext(None, None)))
         probe.expectMsg(10.seconds, ValidationErrors(Nil))
       }
       lars.foreach { lar =>
-        probe.send(larValidation, CheckValidity(lar, ValidationContext(None)))
+        probe.send(larValidation, CheckValidity(lar, ValidationContext(None, None)))
         probe.expectMsg(10.seconds, ValidationErrors(Nil))
       }
     }

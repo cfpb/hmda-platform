@@ -15,6 +15,8 @@ import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
 
+import scala.util.Try
+
 object HmdaFileValidator {
 
   val name = "HmdaFileValidator"
@@ -76,7 +78,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
   override def receiveCommand: Receive = {
 
     case BeginValidation =>
-      val ctx = ValidationContext(None)
+      val ctx = ValidationContext(None, Try(Some(submissionId.period.toInt)).getOrElse(None))
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
       events(parserPersistenceId)

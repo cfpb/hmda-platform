@@ -16,7 +16,8 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi {
       S010,
       S020,
       S025.inContext(ctx),
-      S028
+      S028,
+      S100.inContext(ctx)
     )
     val checks = checksToRun.map(check(_, ts, ts.agencyCode + ts.respondent.id, Syntactical))
 

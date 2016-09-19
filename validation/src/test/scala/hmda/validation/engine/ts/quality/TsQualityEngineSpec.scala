@@ -17,7 +17,7 @@ class TsQualityEngineSpec
     with TsQualityEngine {
 
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
-  private val ctx = ValidationContext(None)
+  private val ctx = ValidationContext(None, None)
 
   property("A Transmittal Sheet must pass quality checks") {
     for (x <- 1 to 5) {
