@@ -7,7 +7,7 @@ import enumeratum.{ Enum, EnumEntry }
  */
 case class ExternalId(id: String, idType: ExternalIdType)
 
-sealed abstract class ExternalIdType(override val entryName: String) extends EnumEntry
+sealed abstract class ExternalIdType(override val entryName: String) extends EnumEntry with Serializable
 
 object ExternalIdType extends Enum[ExternalIdType] {
 
