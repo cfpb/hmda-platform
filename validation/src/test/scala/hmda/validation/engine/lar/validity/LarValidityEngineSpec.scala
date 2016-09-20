@@ -18,7 +18,7 @@ class LarValidityEngineSpec extends WordSpec with MustMatchers with LarValidityE
       }
 
       lars.foreach { lar =>
-        checkValidity(lar, ValidationContext(None)).isSuccess mustBe true
+        checkValidity(lar, ValidationContext(None, None)).isSuccess mustBe true
       }
     }
   }

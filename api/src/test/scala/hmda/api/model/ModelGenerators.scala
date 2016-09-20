@@ -1,17 +1,12 @@
 package hmda.api.model
 
 import java.util.Calendar
-
 import hmda.model.fi._
-import hmda.model.institution.Agency._
-import hmda.model.institution.ExternalIdType._
-import hmda.model.institution._
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
-import hmda.model.institution.InstitutionType._
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
-import org.scalacheck.{ Arbitrary, Gen }
-
-import scalaz.Alpha.B
+import hmda.model.institution._
+import hmda.validation.engine._
+import org.scalacheck.Gen
 
 trait ModelGenerators {
 
@@ -140,9 +135,21 @@ trait ModelGenerators {
 
   implicit def editResultsGen: Gen[EditResults] = {
     for {
-      editType <- Gen.oneOf(Syntactical, Validity, Quality, Macro)
       edits <- Gen.listOf(editResultGen)
-    } yield EditResults(editType, edits)
+    } yield EditResults(edits)
   }
 
+  implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
+    Gen.oneOf(
+      List(Syntactical, Validity, Quality, Macro)
+    )
+  }
+
+  implicit def validationErrorGen: Gen[ValidationError] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+      errorType <- validationErrorTypeGen
+    } yield ValidationError(id, name, errorType)
+  }
 }

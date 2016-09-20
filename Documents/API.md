@@ -166,7 +166,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     ```json
     {
       "syntactical": {
-      "type": "syntactical",
         "edits": [
           {
             "edit": "S025",

@@ -2,18 +2,12 @@ package hmda.api.http
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http.javadsl.server.directives.RouteDirectives
 import akka.http.scaladsl
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ ContentTypes, _ }
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
-import hmda.parser.fi.lar.LarCsvParser
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.model.{ ContentTypes, _ }
-import akka.http.scaladsl.server
-import akka.http.scaladsl.server.StandardRoute
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.model.SingleValidationErrorResult
@@ -82,11 +76,12 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
 
   def validateRoute(lar: LoanApplicationRegister, checkType: String): scaladsl.server.Route = {
     val larValidation = system.actorSelection("/user/larValidation")
+    val vContext = ValidationContext(None, None)
     val checkMessage = checkType match {
-      case "syntactical" => CheckSyntactical(lar, ValidationContext(None))
-      case "validity" => CheckValidity(lar, ValidationContext(None))
-      case "quality" => CheckQuality(lar, ValidationContext(None))
-      case _ => CheckAll(lar, ValidationContext(None))
+      case "syntactical" => CheckSyntactical(lar, vContext)
+      case "validity" => CheckValidity(lar, vContext)
+      case "quality" => CheckQuality(lar, vContext)
+      case _ => CheckAll(lar, vContext)
     }
     onComplete((larValidation ? checkMessage).mapTo[ValidationErrors]) {
       case Success(xs) =>

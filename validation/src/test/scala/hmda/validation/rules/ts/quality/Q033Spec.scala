@@ -11,7 +11,7 @@ import org.scalacheck.Gen
 class Q033Spec extends TsEditCheckSpec {
 
   private var institution: Institution = _
-  override def check: EditCheck[TransmittalSheet] = Q033.inContext(ValidationContext(Some(institution)))
+  override def check: EditCheck[TransmittalSheet] = Q033.inContext(ValidationContext(Some(institution), None))
 
   private val applicableTypes = Set(Bank, SavingsAndLoan, IndependentMortgageCompany)
   private val otherTypes = InstitutionType.values.toSet -- applicableTypes

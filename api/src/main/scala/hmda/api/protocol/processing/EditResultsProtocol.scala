@@ -31,5 +31,5 @@ trait EditResultsProtocol extends DefaultJsonProtocol {
 
   implicit val larEditResultFormat = jsonFormat1(LarEditResult.apply)
   implicit val editResultFormat = jsonFormat2(EditResult.apply)
-  implicit val editResultsFormat = jsonFormat2(EditResults.apply)
+  implicit val editResultsFormat = jsonFormat1(EditResults.apply)
 }

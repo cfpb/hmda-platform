@@ -2,26 +2,27 @@ package hmda.api.http
 
 import java.io.File
 
+import akka.actor.ActorRef
 import akka.event.{ LoggingAdapter, NoLogging }
-import akka.http.javadsl.server.AuthorizationFailedRejection
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.util.Timeout
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.{ MethodRejection, Route }
+import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.pattern.ask
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.api.model._
 import hmda.model.fi._
 import hmda.model.institution.Institution
-import hmda.persistence.CommonMessages._
+import hmda.persistence.HmdaSupervisor
+import hmda.persistence.HmdaSupervisor.{ FindActorByName, FindSubmissions }
 import hmda.persistence.demo.DemoData
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
-import hmda.persistence.institutions.InstitutionPersistence._
-import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
+import hmda.persistence.institutions.{ InstitutionPersistence, SubmissionPersistence }
 import org.iq80.leveldb.util.FileUtils
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
 import scala.concurrent.duration._
 
@@ -34,7 +35,9 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
   val ec = system.dispatcher
 
   override def beforeAll(): Unit = {
-    createInstitutions(system)
+    val supervisor = HmdaSupervisor.createSupervisor(system)
+    supervisor ! FindActorByName(InstitutionPersistence.name)
+    //createInstitutions(system)
     DemoData.loadTestData(system)
     super.beforeAll()
   }
@@ -165,9 +168,15 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
     "return 400 when trying to upload to a completed submission" in {
       val badContent = "qdemd"
       val file = multiPartFile(badContent, "sample.txt")
-      val submissionActor = system.actorOf(SubmissionPersistence.props("0", "2017"))
-      submissionActor ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
-      submissionActor ! Shutdown
+      val supervisor = system.actorSelection("/user/supervisor")
+      val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, "0", "2017")).mapTo[ActorRef]
+
+      for {
+        s <- fSubmissionsActor
+      } yield {
+        s ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
+      }
+
       Thread sleep 100
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest

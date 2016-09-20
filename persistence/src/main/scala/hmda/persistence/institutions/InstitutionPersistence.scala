@@ -11,6 +11,8 @@ import hmda.persistence.institutions.InstitutionPersistence._
 
 object InstitutionPersistence {
 
+  val name = "institutions"
+
   case class CreateInstitution(i: Institution) extends Command
   case class ModifyInstitution(i: Institution) extends Command
   case class GetInstitutionById(institutionId: String) extends Command
@@ -46,7 +48,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
     state = state.updated(event)
   }
 
-  override def persistenceId: String = "institutions"
+  override def persistenceId: String = s"$name"
 
   override def receiveCommand: Receive = {
     case CreateInstitution(i) =>

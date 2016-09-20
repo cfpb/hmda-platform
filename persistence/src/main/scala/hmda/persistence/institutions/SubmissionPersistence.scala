@@ -8,6 +8,8 @@ import hmda.persistence.institutions.SubmissionPersistence._
 
 object SubmissionPersistence {
 
+  val name = "submissions"
+
   case object CreateSubmission extends Command
   case class UpdateSubmissionStatus(id: SubmissionId, status: SubmissionStatus) extends Command
   case class GetSubmissionById(id: SubmissionId) extends Command
@@ -48,7 +50,7 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
 
   override def persistenceId: String = s"submissions-$institutionId-$period"
 
-  override def receiveCommand: Receive = {
+  override def receiveCommand: Receive = super.receiveCommand orElse {
     case CreateSubmission =>
       val seqNr = state.submissions.size + 1
       val submissionId = SubmissionId(institutionId, period, seqNr)
