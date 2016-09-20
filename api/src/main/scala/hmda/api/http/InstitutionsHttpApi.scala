@@ -2,7 +2,7 @@ package hmda.api.http
 
 import java.time.Instant
 
-import akka.actor.{ ActorRef, ActorSelection, ActorSystem }
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
@@ -14,7 +14,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model._
-import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
+import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Created, Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.CommonMessages._
@@ -23,13 +23,19 @@ import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.InstitutionPersistence.{ GetInstitutionById, GetInstitutionsById }
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission, GetSubmissionById }
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
-import hmda.persistence.processing.HmdaRawFile
+import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.persistence.processing.HmdaRawFile._
+import hmda.persistence.processing.{ HmdaFileValidator, HmdaRawFile }
+import hmda.validation.engine.{ ValidationError, ValidationErrorType }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with HmdaCustomDirectives {
+trait InstitutionsHttpApi
+    extends InstitutionProtocol
+    with ApiErrorProtocol
+    with EditResultsProtocol
+    with HmdaCustomDirectives {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -262,7 +268,33 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
 
   def submissionEditsPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber / "edits") { (period, seqNr) =>
-      complete("edits")
+      val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr/edits"
+      val submissionId = SubmissionId(institutionId, period, seqNr)
+      extractExecutionContext { executor =>
+        implicit val ec: ExecutionContext = executor
+        val supervisor = system.actorSelection("/user/supervisor")
+        val fActor = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+
+        val fEditChecks = for {
+          a <- fActor
+          f <- (a ? GetState).mapTo[HmdaFileValidationState]
+        } yield f
+
+        val fSummaryEdits = fEditChecks.map { editChecks =>
+          val syntactical = validationErrorsToEditResults(editChecks.syntactical)
+          val validity = validationErrorsToEditResults(editChecks.validity)
+          val quality = validationErrorsToEditResults(editChecks.quality)
+          SummaryEditResults(syntactical, validity, quality, EditResults.empty)
+        }
+
+        onComplete(fSummaryEdits) {
+          case Success(edits) =>
+            complete(ToResponseMarshallable(edits))
+          case Failure(error) =>
+            completeWithInternalError(path, error)
+        }
+      }
+
     }
 
   private def institutionDetails(institutionId: String, institutionsActor: ActorRef, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
@@ -316,6 +348,22 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
         val errorResponse = ErrorResponse(400, "Invalid File Format", path)
         complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
     }
+  }
+
+  private def validationErrorsToEditResults(errors: Seq[ValidationError]): EditResults = {
+    val errorsByType: Map[ValidationErrorType, Seq[ValidationError]] = errors.groupBy(_.errorType)
+    val editValues: Map[ValidationErrorType, Map[String, Seq[ValidationError]]] =
+      errorsByType.mapValues(x => x.groupBy(_.name))
+
+    val larEditResults: Map[ValidationErrorType, Map[String, Seq[LarEditResult]]] =
+      editValues.mapValues(x => x.mapValues(y => y.map(_.errorId).map(x => LarEditResult(x))))
+
+    val editResultSeq: Seq[EditResult] = larEditResults.toSeq.map { x =>
+      EditResult(x._2.keys.head, x._2.values.flatten.toSeq)
+    }
+
+    EditResults(editResultSeq)
+
   }
 
   val institutionsRoutes =

@@ -152,4 +152,14 @@ trait ModelGenerators {
       errorType <- validationErrorTypeGen
     } yield ValidationError(id, name, errorType)
   }
+
+  implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {
+    for {
+      s <- editResultsGen
+      v <- editResultsGen
+      q <- editResultsGen
+      m <- editResultsGen
+    } yield SummaryEditResults(s, v, q, m)
+  }
+
 }
