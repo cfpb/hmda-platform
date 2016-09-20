@@ -281,13 +281,6 @@ trait InstitutionsHttpApi extends InstitutionProtocol with ApiErrorProtocol with
     submission.map(_.submissionStatus != Created)
   }
 
-  private def completeWithInternalError(path: String, error: Throwable): StandardRoute = {
-    log.error(error.getLocalizedMessage)
-    val errorResponse = ErrorResponse(500, "Internal server error", path)
-    complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-
-  }
-
   private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: String): Route = {
     fileUpload("file") {
       case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
