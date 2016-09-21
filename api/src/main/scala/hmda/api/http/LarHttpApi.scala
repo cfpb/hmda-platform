@@ -89,12 +89,12 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       case "quality" => CheckQuality(lar, vContext)
       case _ => CheckAll(lar, vContext)
     }
-    val validationErrors = for {
+    val fValidationErrors = for {
       larValidation <- fLarValidation
       ve <- (larValidation ? checkMessage).mapTo[ValidationErrors]
     } yield ve
 
-    onComplete(validationErrors) {
+    onComplete(fValidationErrors) {
       case Success(validationErrors) =>
         complete(ToResponseMarshallable(aggregateErrors(validationErrors)))
       case Failure(error) =>
