@@ -9,10 +9,9 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
-import hmda.persistence.processing.LocalHmdaEventProcessor._
 import hmda.model.fi._
 import hmda.persistence.CommonMessages.{ Event, GetState }
-import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted }
+import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingCompletedWithErrors, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 import hmda.persistence.HmdaSupervisor._
@@ -85,6 +84,11 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     "process parse completed message from event stream" in {
       val msg = s"Parsing completed for $submissionId"
       checkEventStreamMessage(msg, ParsingCompleted(submissionId))
+    }
+
+    "process 'parsingCompletedWithErrors' message from event stream" in {
+      val msg = s"Parsing completed with errors for submission $submissionId"
+      checkEventStreamMessage(msg, ParsingCompletedWithErrors(submissionId))
     }
 
     "process validation started message from event stream" in {

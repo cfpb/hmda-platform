@@ -25,6 +25,7 @@ object HmdaFileParser {
   case class CompleteParsingWithErrors(submissionId: SubmissionId) extends Command
   case class ParsingStarted(submissionId: SubmissionId) extends Event
   case class ParsingCompleted(submissionId: SubmissionId) extends Event
+  case class ParsingCompletedWithErrors(submissionId: SubmissionId) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 
@@ -125,6 +126,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
 
     case CompleteParsingWithErrors =>
       log.debug(s"Parsing completed for $submissionId, errors found")
+      publishEvent(ParsingCompletedWithErrors(submissionId))
 
     case GetState =>
       sender() ! state
