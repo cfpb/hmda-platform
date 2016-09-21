@@ -22,6 +22,7 @@ object HmdaFileParser {
   case class LarParsedErrors(errors: List[String]) extends Event
 
   case class CompleteParsing(submissionId: SubmissionId) extends Command
+  case class CompleteParsingWithErrors(submissionId: SubmissionId) extends Command
   case class ParsingStarted(submissionId: SubmissionId) extends Event
   case class ParsingCompleted(submissionId: SubmissionId) extends Event
 
@@ -60,12 +61,16 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
 
     case ReadHmdaRawFile(persistenceId) =>
       publishEvent(ParsingStarted(submissionId))
+      var encounteredParsingErrors: Boolean = false
+
       val parsedTs = events(persistenceId)
         .map { case LineAdded(_, data) => data }
         .take(1)
         .map(line => TsCsvParser(line))
         .map {
-          case Left(errors) => TsParsedErrors(errors)
+          case Left(errors) =>
+            encounteredParsingErrors = true
+            TsParsedErrors(errors)
           case Right(ts) => TsParsed(ts)
         }
 
@@ -77,14 +82,17 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
         .drop(1)
         .map(line => LarCsvParser(line))
         .map {
-          case Left(errors) => LarParsedErrors(errors)
+          case Left(errors) =>
+            encounteredParsingErrors = true
+            LarParsedErrors(errors)
           case Right(lar) => LarParsed(lar)
         }
 
       parsedLar
         .runForeach(pLar => self ! pLar)
         .andThen {
-          case _ => self ! CompleteParsing
+          case _ if encounteredParsingErrors => self ! CompleteParsingWithErrors
+          case _ if !encounteredParsingErrors => self ! CompleteParsing
         }
 
     case tp @ TsParsed(ts) =>
@@ -114,6 +122,9 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
     case CompleteParsing =>
       log.debug(s"Parsing completed for $submissionId")
       publishEvent(ParsingCompleted(submissionId))
+
+    case CompleteParsingWithErrors =>
+      log.debug(s"Parsing completed for $submissionId, errors found")
 
     case GetState =>
       sender() ! state

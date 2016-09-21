@@ -83,6 +83,26 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       probe.send(hmdaFileParser2, GetState)
       probe.expectMsg(HmdaFileParseState(4, Nil))
     }
+
+    "send 'ParsedWithErrors' when TS parsing fails" in {
+      val submissionId3 = SubmissionId("0", "2017", 3)
+      val parserActor = createHmdaFileParser(system, submissionId3)
+      val rawFileActor = createHmdaRawFile(system, submissionId3)
+
+      // setup: persist raw lines
+      for (line <- badLines) {
+        probe.send(rawFileActor, AddLine(timestamp, line))
+      }
+      probe.send(rawFileActor, GetState)
+      probe.expectMsg(HmdaRawFileState(4))
+
+      // test: parse those lines, expect "ParsedWithErrors" message
+      val msg = s"Parsing completed for $submissionId3, errors found"
+      EventFilter.debug(msg, source = parserActor.path.toString, occurrences = 1) intercept {
+        probe.send(parserActor, ReadHmdaRawFile(s"HmdaRawFile-$submissionId3"))
+      }
+    }
+
   }
 
   private def parseTs(xs: Array[String]): Array[Unit] = {
