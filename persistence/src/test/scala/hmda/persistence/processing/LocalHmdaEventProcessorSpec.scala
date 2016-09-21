@@ -99,7 +99,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
 
     "process validation completed from event stream" in {
       Thread.sleep(300)
-      val msg = s"validation completed for submission $submissionId"
+      val msg = s"Validation completed for submission $submissionId"
       checkEventStreamMessage(msg, ValidationCompleted(submissionId))
       checkSubmissionStatus(Validated)
     }
@@ -120,7 +120,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
 
   private def checkEventStreamMessage(msg: String, event: Event): Unit = {
     val actorSource = eventProcessor.path.toString
-    EventFilter.debug(msg, source = actorSource) intercept {
+    EventFilter.debug(msg, source = actorSource, occurrences = 1) intercept {
       system.eventStream.publish(event)
     }
   }
