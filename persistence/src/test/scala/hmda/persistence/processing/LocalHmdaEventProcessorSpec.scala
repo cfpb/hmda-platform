@@ -89,6 +89,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     "process 'parsingCompletedWithErrors' message from event stream" in {
       val msg = s"Parsing completed with errors for submission $submissionId"
       checkEventStreamMessage(msg, ParsingCompletedWithErrors(submissionId))
+      checkSubmissionStatus(ParsedWithErrors)
     }
 
     "process validation started message from event stream" in {

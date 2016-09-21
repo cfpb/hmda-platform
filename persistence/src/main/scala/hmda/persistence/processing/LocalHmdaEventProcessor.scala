@@ -106,6 +106,7 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
   private def parsingCompletedWithErrorsEvents(submissionId: SubmissionId): Unit = {
     log.debug(s"Parsing completed with errors for submission $submissionId")
+    updateStatus(submissionId, ParsedWithErrors)
   }
 
   private def validationStartedEvents(submissionId: SubmissionId): Unit = {
