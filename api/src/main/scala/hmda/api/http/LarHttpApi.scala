@@ -98,7 +98,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       case Success(validationErrors) =>
         complete(ToResponseMarshallable(aggregateErrors(validationErrors)))
       case Failure(error) =>
-        completeWithInternalError("lar/parseAndValidate", error)
+        completeWithInternalError(path, error)
 
     }
   }
