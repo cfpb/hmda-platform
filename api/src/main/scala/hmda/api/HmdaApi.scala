@@ -8,8 +8,7 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.api.http._
-import hmda.api.http.institutions.InstitutionsHttpApi
+import hmda.api.http.{ InstitutionsHttpApi, _ }
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.HmdaSupervisor.FindActorByName
 import hmda.persistence.demo.DemoData
