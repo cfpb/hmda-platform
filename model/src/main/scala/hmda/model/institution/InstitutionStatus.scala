@@ -5,7 +5,7 @@ import enumeratum.{ Enum, EnumEntry }
 /**
  * The status of a financial institution
  */
-sealed abstract class InstitutionStatus(override val entryName: String) extends EnumEntry
+sealed abstract class InstitutionStatus(override val entryName: String) extends EnumEntry with Serializable
 
 object InstitutionStatus extends Enum[InstitutionStatus] {
 

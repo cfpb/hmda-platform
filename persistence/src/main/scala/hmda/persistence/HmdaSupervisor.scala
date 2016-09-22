@@ -1,10 +1,9 @@
 package hmda.persistence
 
 import akka.actor.{ ActorRef, ActorSystem, Props, Terminated }
-import hmda.api.processing.LocalHmdaEventProcessor
 import hmda.model.fi.SubmissionId
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
-import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile, SingleLarValidation }
+import hmda.persistence.processing._
 
 object HmdaSupervisor {
 

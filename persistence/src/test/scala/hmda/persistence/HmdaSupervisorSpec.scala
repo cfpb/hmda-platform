@@ -3,11 +3,10 @@ package hmda.persistence
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern.ask
 import akka.util.Timeout
-import hmda.api.processing.LocalHmdaEventProcessor
 import hmda.model.fi.SubmissionId
 import hmda.persistence.HmdaSupervisor.{ FindActorByName, FindFilings, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
-import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator, HmdaRawFile, SingleLarValidation }
+import hmda.persistence.processing._
 import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.Await
