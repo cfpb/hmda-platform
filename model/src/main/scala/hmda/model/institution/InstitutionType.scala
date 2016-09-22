@@ -19,7 +19,7 @@ object DepositoryType extends Enum[DepositoryType] {
 /**
  * The type of financial institution
  */
-sealed abstract class InstitutionType(override val entryName: String, val depositoryType: Option[DepositoryType]) extends EnumEntry
+sealed abstract class InstitutionType(override val entryName: String, val depositoryType: Option[DepositoryType]) extends EnumEntry with Serializable
 
 object InstitutionType extends Enum[InstitutionType] {
 
