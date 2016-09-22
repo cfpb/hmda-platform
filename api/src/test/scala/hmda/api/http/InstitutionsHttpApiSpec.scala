@@ -13,6 +13,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
+import hmda.api.http.institutions.InstitutionsHttpApi
 import hmda.api.model._
 import hmda.model.fi._
 import hmda.model.institution.Institution
