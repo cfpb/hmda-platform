@@ -177,7 +177,6 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
         s ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
       }
 
-      Thread sleep 100
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/0/filings/2017/submissions/1")

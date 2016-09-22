@@ -98,24 +98,20 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     }
 
     "process validation completed from event stream" in {
-      Thread.sleep(300)
       val msg = s"validation completed for submission $submissionId"
       checkEventStreamMessage(msg, ValidationCompleted(submissionId))
       checkSubmissionStatus(Validated)
     }
   }
 
-  def checkSubmissionStatus(status: SubmissionStatus): Assertion = {
-    //TODO: find a way to avoid having to sleep here
-    Thread.sleep(500)
+  def checkSubmissionStatus(status: SubmissionStatus): Future[Future[Assertion]] = {
     val fSubmissions = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
-    val fSubmissionStatus = for {
-      a <- fSubmissions
-      b <- (a ? GetState).mapTo[Seq[Submission]]
-    } yield b.head.submissionStatus
-
-    val submissionStatus = Await.result(fSubmissionStatus, duration)
-    submissionStatus mustBe status
+    fSubmissions.map { subActor =>
+      val fSubmissionSeq = (subActor ? GetState).mapTo[Seq[Submission]]
+      fSubmissionSeq.map { subList =>
+        subList.head.submissionStatus mustBe status
+      }
+    }
   }
 
   private def checkEventStreamMessage(msg: String, event: Event): Unit = {
