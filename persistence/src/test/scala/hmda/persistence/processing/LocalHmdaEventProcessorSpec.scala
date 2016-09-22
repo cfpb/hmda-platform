@@ -105,7 +105,6 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     }
 
     "process validation completed from event stream" in {
-      Thread.sleep(300)
       val msg = s"Validation completed for submission $submissionId"
       checkEventStreamMessage(msg, ValidationCompleted(submissionId))
       checkSubmissionStatus(Validated)
