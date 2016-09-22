@@ -26,7 +26,6 @@ import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.persistence.processing.HmdaRawFile._
 import hmda.persistence.processing.{ HmdaFileValidator, HmdaRawFile }
-import hmda.validation.engine.{ ValidationError, ValidationErrorType }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -35,7 +34,8 @@ trait InstitutionsHttpApi
     extends InstitutionProtocol
     with ApiErrorProtocol
     with EditResultsProtocol
-    with HmdaCustomDirectives {
+    with HmdaCustomDirectives
+    with ValidationErrorConverter {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -275,16 +275,14 @@ trait InstitutionsHttpApi
         val supervisor = system.actorSelection("/user/supervisor")
         val fActor = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
-        val fEditChecks = for {
+        val fValidation = for {
           a <- fActor
           f <- (a ? GetState).mapTo[HmdaFileValidationState]
         } yield f
 
-        val fSummaryEdits = fEditChecks.map { editChecks =>
-          val syntactical = validationErrorsToEditResults(editChecks.syntactical)
-          val validity = validationErrorsToEditResults(editChecks.validity)
-          val quality = validationErrorsToEditResults(editChecks.quality)
-          SummaryEditResults(syntactical, validity, quality, EditResults.empty)
+        val fSummaryEdits = fValidation.map { validation =>
+          val editChecks = validation.syntactical ++ validation.validity ++ validation.quality ++ validation.`macro`
+          validationErrorsToEditResults(editChecks)
         }
 
         onComplete(fSummaryEdits) {
@@ -348,22 +346,6 @@ trait InstitutionsHttpApi
         val errorResponse = ErrorResponse(400, "Invalid File Format", path)
         complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
     }
-  }
-
-  private def validationErrorsToEditResults(errors: Seq[ValidationError]): EditResults = {
-    val errorsByType: Map[ValidationErrorType, Seq[ValidationError]] = errors.groupBy(_.errorType)
-    val editValues: Map[ValidationErrorType, Map[String, Seq[ValidationError]]] =
-      errorsByType.mapValues(x => x.groupBy(_.name))
-
-    val larEditResults: Map[ValidationErrorType, Map[String, Seq[LarEditResult]]] =
-      editValues.mapValues(x => x.mapValues(y => y.map(_.errorId).map(x => LarEditResult(x))))
-
-    val editResultSeq: Seq[EditResult] = larEditResults.toSeq.map { x =>
-      EditResult(x._2.keys.head, x._2.values.flatten.toSeq)
-    }
-
-    EditResults(editResultSeq)
-
   }
 
   val institutionsRoutes =
