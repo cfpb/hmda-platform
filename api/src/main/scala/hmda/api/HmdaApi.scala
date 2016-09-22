@@ -13,7 +13,6 @@ import hmda.persistence.HmdaSupervisor
 import hmda.persistence.HmdaSupervisor.FindActorByName
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
 
 import scala.concurrent.duration._
