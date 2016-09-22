@@ -13,7 +13,7 @@ sealed abstract class Agency(
   val name: String,
   val fullName: String,
   val externalIdTypes: Map[DepositoryType, ExternalIdType]
-) extends IntEnumEntry
+) extends IntEnumEntry with Serializable
 
 object Agency extends IntEnum[Agency] {
 

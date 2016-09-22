@@ -65,4 +65,10 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
     ctx.request.getHeader(headerName).isPresent
   }
 
+  def completeWithInternalError(path: String, error: Throwable): StandardRoute = {
+    log.error(error.getLocalizedMessage)
+    val errorResponse = ErrorResponse(500, "Internal server error", path)
+    complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+  }
+
 }
