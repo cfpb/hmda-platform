@@ -51,6 +51,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
   import HmdaFileParser._
 
   var state = HmdaFileParseState()
+  var encounteredParsingErrors: Boolean = false
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -62,7 +63,6 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
 
     case ReadHmdaRawFile(persistenceId) =>
       publishEvent(ParsingStarted(submissionId))
-      var encounteredParsingErrors: Boolean = false
 
       val parsedTs = events(persistenceId)
         .map { case LineAdded(_, data) => data }
