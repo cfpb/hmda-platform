@@ -8,12 +8,7 @@ import akka.util.Timeout
 
 import scala.concurrent.duration._
 
-class InstitutionsHttpApiSpec extends InstitutionSpec {
-
-  override val log: LoggingAdapter = NoLogging
-  override implicit val timeout: Timeout = Timeout(5.seconds)
-
-  val ec = system.dispatcher
+class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
 
   "Institutions API Authorization and rejection handling" must {
 

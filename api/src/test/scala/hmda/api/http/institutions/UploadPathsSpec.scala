@@ -1,11 +1,9 @@
 package hmda.api.http.institutions
 
 import akka.actor.ActorRef
-import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ StatusCodes }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.util.Timeout
-import hmda.api.http.{ InstitutionSpec }
+import hmda.api.http.{ InstitutionHttpApiSpec }
 import hmda.api.model.ErrorResponse
 import hmda.model.fi.{ Signed, SubmissionId }
 import hmda.persistence.HmdaSupervisor.FindSubmissions
@@ -13,14 +11,7 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import akka.pattern.ask
 
-import scala.concurrent.duration._
-
-class UploadPathsSpec extends InstitutionSpec with UploadPaths {
-
-  override val log: LoggingAdapter = NoLogging
-  override implicit val timeout: Timeout = Timeout(5.seconds)
-
-  val ec = system.dispatcher
+class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
 
   "Upload Paths" must {
 
