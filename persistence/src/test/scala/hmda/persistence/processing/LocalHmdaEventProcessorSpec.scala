@@ -49,7 +49,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
   val fEventProcessor = (supervisor ? FindActorByName(LocalHmdaEventProcessor.name)).mapTo[ActorRef]
   val eventProcessor = Await.result(fEventProcessor, duration)
 
-  val submissionId = SubmissionId("0", "2017", 1)
+  val submissionId = SubmissionId("testEvents1", "2017", 1)
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -71,6 +71,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     }
 
     "process upload completed message from event stream" in {
+      val submissionId = SubmissionId("testUploadComp", "2017", 1)
       val size = 10
       val msg = s"$size lines uploaded for submission $submissionId"
       checkEventStreamMessage(msg, UploadCompleted(size, submissionId))
@@ -82,6 +83,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     }
 
     "process parse completed message from event stream" in {
+      val submissionId = SubmissionId("testParseComp", "2017", 1)
       val msg = s"Parsing completed for $submissionId"
       checkEventStreamMessage(msg, ParsingCompleted(submissionId))
     }
