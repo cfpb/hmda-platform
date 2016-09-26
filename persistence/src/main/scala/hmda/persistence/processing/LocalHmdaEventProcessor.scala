@@ -9,7 +9,7 @@ import hmda.persistence.CommonMessages._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
-import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingStarted, ReadHmdaRawFile }
+import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
 
@@ -51,6 +51,9 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
 
       case ParsingStarted(submissionId) =>
         parsingStartedEvents(submissionId)
+
+      case ParsingCompletedWithErrors(submissionId) =>
+        parsingCompletedWithErrorsEvents(submissionId)
 
       case ParsingCompleted(submissionId) =>
         parsingCompletedEvents(submissionId)
@@ -99,6 +102,11 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
       h ! BeginValidation
     }
     updateStatus(submissionId, Parsed)
+  }
+
+  private def parsingCompletedWithErrorsEvents(submissionId: SubmissionId): Unit = {
+    log.debug(s"Parsing completed with errors for submission $submissionId")
+    updateStatus(submissionId, ParsedWithErrors)
   }
 
   private def validationStartedEvents(submissionId: SubmissionId): Unit = {
