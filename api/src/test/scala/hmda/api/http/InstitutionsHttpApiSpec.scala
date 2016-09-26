@@ -37,7 +37,6 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
   override def beforeAll(): Unit = {
     val supervisor = HmdaSupervisor.createSupervisor(system)
     supervisor ! FindActorByName(InstitutionPersistence.name)
-    //createInstitutions(system)
     DemoData.loadTestData(system)
     super.beforeAll()
   }
@@ -190,11 +189,6 @@ class InstitutionsHttpApiSpec extends WordSpec with MustMatchers with ScalatestR
       }
     }
 
-    "return list of validation errors by error type" in {
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
-      }
-    }
   }
 
   "Institutions API Authorization and rejection handling" must {

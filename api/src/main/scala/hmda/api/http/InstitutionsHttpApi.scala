@@ -1,6 +1,5 @@
 package hmda.api.http
 
-import akka.actor.{ ActorRef, ActorSystem }
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.server.Directives._
