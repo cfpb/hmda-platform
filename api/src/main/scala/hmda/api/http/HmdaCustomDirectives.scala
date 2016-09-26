@@ -61,14 +61,15 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
 
   }
 
-  private def hasHeader(headerName: String, ctx: RequestContext): Boolean = {
-    ctx.request.getHeader(headerName).isPresent
-  }
-
   def completeWithInternalError(path: String, error: Throwable): StandardRoute = {
     log.error(error.getLocalizedMessage)
     val errorResponse = ErrorResponse(500, "Internal server error", path)
     complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+
+  }
+
+  private def hasHeader(headerName: String, ctx: RequestContext): Boolean = {
+    ctx.request.getHeader(headerName).isPresent
   }
 
 }

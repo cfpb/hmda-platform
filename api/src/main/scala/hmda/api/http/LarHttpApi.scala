@@ -1,15 +1,15 @@
 package hmda.api.http
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
-import akka.http.scaladsl
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ ContentTypes, _ }
 import akka.http.scaladsl.server.Directives._
-import akka.pattern.ask
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import akka.pattern.ask
 import hmda.api.model.SingleValidationErrorResult
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.api.protocol.validation.ValidationResultProtocol
@@ -19,6 +19,8 @@ import hmda.persistence.processing.SingleLarValidation.{ CheckAll, CheckQuality,
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import spray.json._
+import hmda.persistence.HmdaSupervisor._
+import hmda.persistence.processing.SingleLarValidation
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -48,10 +50,11 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   val validateLarRoute =
     pathPrefix("lar") {
       path("validate") {
+        val path = "lar/validate"
         parameters('check.as[String] ? "all") { (checkType) =>
           timedPost {
             entity(as[LoanApplicationRegister]) { lar =>
-              validateRoute(lar, checkType)
+              validateRoute(lar, checkType, path)
             }
           }
         }
@@ -61,11 +64,12 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   val parseAndValidateLarRoute =
     pathPrefix("lar") {
       path("parseAndValidate") {
+        val path = "lar/parseAndValidate"
         parameters('check.as[String] ? "all") { (checkType) =>
           timedPost {
             entity(as[String]) { s =>
               LarCsvParser(s) match {
-                case Right(lar) => validateRoute(lar, checkType)
+                case Right(lar) => validateRoute(lar, checkType, path)
                 case Left(errors) => complete(errorsAsResponse(errors))
               }
             }
@@ -74,8 +78,9 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       }
     }
 
-  def validateRoute(lar: LoanApplicationRegister, checkType: String): scaladsl.server.Route = {
-    val larValidation = system.actorSelection("/user/larValidation")
+  def validateRoute(lar: LoanApplicationRegister, checkType: String, path: String) = {
+    val supervisor = system.actorSelection("/user/supervisor")
+    val fLarValidation = (supervisor ? FindActorByName(SingleLarValidation.name)).mapTo[ActorRef]
     val vContext = ValidationContext(None, None)
     val checkMessage = checkType match {
       case "syntactical" => CheckSyntactical(lar, vContext)
@@ -83,11 +88,17 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       case "quality" => CheckQuality(lar, vContext)
       case _ => CheckAll(lar, vContext)
     }
-    onComplete((larValidation ? checkMessage).mapTo[ValidationErrors]) {
-      case Success(xs) =>
-        complete(ToResponseMarshallable(aggregateErrors(xs)))
-      case Failure(e) =>
-        complete(HttpResponse(StatusCodes.InternalServerError))
+    val fValidationErrors = for {
+      larValidation <- fLarValidation
+      ve <- (larValidation ? checkMessage).mapTo[ValidationErrors]
+    } yield ve
+
+    onComplete(fValidationErrors) {
+      case Success(validationErrors) =>
+        complete(ToResponseMarshallable(aggregateErrors(validationErrors)))
+      case Failure(error) =>
+        completeWithInternalError(path, error)
+
     }
   }
 
