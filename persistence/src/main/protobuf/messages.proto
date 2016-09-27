@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package hmda.persistence;
+
+message SubmissionIdMessage {
+    string institutionId = 1;
+    string period = 2;
+    int32 sequenceNumber = 3;
+}
+
+message UploadStartedMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message LineAddedMessage {
+    int64 timestamp = 1;
+    string data = 2;
+}
+
+message UploadCompletedMessage {
+    int32 size = 1;
+    SubmissionIdMessage submissionId = 2;
+}
