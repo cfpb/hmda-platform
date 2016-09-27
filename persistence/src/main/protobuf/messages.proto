@@ -2,22 +2,28 @@ syntax = "proto3";
 
 package hmda.persistence;
 
-message SubmissionIdMessage {
-    string institutionId = 1;
-    string period = 2;
-    int32 sequenceNumber = 3;
-}
-
-message UploadStartedMessage {
-    SubmissionIdMessage submissionId = 1;
-}
+import "model.proto";
 
 message LineAddedMessage {
     int64 timestamp = 1;
     string data = 2;
 }
 
-message UploadCompletedMessage {
-    int32 size = 1;
-    SubmissionIdMessage submissionId = 2;
+message TsParsedMessage {
+    hmda.fi.TransmittalSheetMessage ts = 1;
 }
+
+message TsParsedErrorsMessage {
+    repeated string errors = 1;
+}
+
+message LarParsedMessage {
+    hmda.fi.LoanApplicationRegisterMessage lar = 1;
+}
+
+message LarParsedErrorsMessage {
+    repeated string errors = 1;
+}
+
+
+

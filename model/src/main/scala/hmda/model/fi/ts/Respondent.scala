@@ -9,3 +9,9 @@ case class Respondent(
   zipCode: String
 ) extends NameAndAddress
 
+object Respondent {
+  def apply(): Respondent = {
+    Respondent("", "", "", "", "", "")
+  }
+}
+

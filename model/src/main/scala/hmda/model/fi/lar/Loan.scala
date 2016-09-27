@@ -10,3 +10,9 @@ case class Loan(
   amount: Int
 )
 
+object Loan {
+  def apply(): Loan = {
+    Loan("", "", 0, 0, 0, 0, 0)
+  }
+}
+
