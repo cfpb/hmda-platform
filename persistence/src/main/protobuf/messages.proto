@@ -3,6 +3,7 @@ syntax = "proto3";
 package hmda.persistence;
 
 import "model.proto";
+import "institutions.proto";
 
 message LineAddedMessage {
     int64 timestamp = 1;
@@ -24,6 +25,28 @@ message LarParsedMessage {
 message LarParsedErrorsMessage {
     repeated string errors = 1;
 }
+
+message ValidationStartedMessage {
+    hmda.SubmissionIdMessage submissionId = 1;
+}
+
+message ValidationCompletedWithErrorsMessage {
+    hmda.SubmissionIdMessage submissionId = 1;
+}
+
+message ValidationCompletedMessage {
+    hmda.SubmissionIdMessage submissionId = 1;
+}
+
+message TsValidated {
+    hmda.fi.TransmittalSheetMessage ts = 1;
+}
+
+message LarValidated {
+    hmda.fi.LoanApplicationRegisterMessage lar = 1;
+}
+
+
 
 
 

@@ -95,3 +95,29 @@ message LoanApplicationRegisterMessage {
     int32 hoepaStatus = 13;
     int32 lienStatus = 14;
 }
+
+enum ValidationErrorTypeMessage {
+    SYNTACTICAL = 0;
+    VALIDITY = 1;
+    QUALITY = 2;
+    MACRO = 3;
+}
+
+message ValidationErrorMessage {
+    string errorID = 1;
+    string name = 2;
+    ValidationErrorTypeMessage validationErrorType = 3;
+}
+
+message SyntacticalErrorMessage {
+    ValidationErrorMessage error = 1;
+}
+
+message ValidityErrorMessage {
+    ValidationErrorMessage error = 2;
+}
+
+message QualityErrorMessage {
+    ValidationErrorMessage error = 3;
+}
+

@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+package hmda;
+
+message SubmissionIdMessage {
+    string institutionId = 1;
+    string period = 2;
+    int32 sequenceNumber = 3;
+}
