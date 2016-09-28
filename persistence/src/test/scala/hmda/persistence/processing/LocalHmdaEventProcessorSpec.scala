@@ -1,24 +1,23 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem }
-import akka.testkit.{ EventFilter, TestProbe }
 import akka.pattern.ask
+import akka.testkit.{ EventFilter, TestProbe }
 import akka.util.Timeout
-
-import scala.concurrent._
-import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi._
 import hmda.persistence.CommonMessages.{ Event, GetState }
+import hmda.persistence.HmdaSupervisor._
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingCompletedWithErrors, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
-import hmda.persistence.HmdaSupervisor._
-import hmda.persistence.institutions.SubmissionPersistence
-import hmda.persistence.processing.LocalHmdaEventProcessor
-import hmda.persistence.institutions.SubmissionPersistence._
 import org.scalatest.Assertion
+
+import scala.concurrent._
+import scala.concurrent.duration._
 
 class LocalHmdaEventProcessorSpec extends ActorSpec {
 
