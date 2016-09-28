@@ -32,13 +32,39 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
 
+  // lar/parse
   val parseLarRoute =
-    pathPrefix("lar") {
-      path("parse") {
+    path("parse") {
+      timedPost { uri =>
+        entity(as[String]) { s =>
+          LarCsvParser(s) match {
+            case Right(lar) => complete(ToResponseMarshallable(lar))
+            case Left(errors) => complete(errorsAsResponse(errors))
+          }
+        }
+      }
+    }
+
+  // lar/validate
+  val validateLarRoute =
+    path("validate") {
+      parameters('check.as[String] ? "all") { (checkType) =>
+        timedPost { uri =>
+          entity(as[LoanApplicationRegister]) { lar =>
+            validateRoute(lar, checkType, uri)
+          }
+        }
+      }
+    }
+
+  // lar/parseAndValidate
+  val parseAndValidateLarRoute =
+    path("parseAndValidate") {
+      parameters('check.as[String] ? "all") { (checkType) =>
         timedPost { uri =>
           entity(as[String]) { s =>
             LarCsvParser(s) match {
-              case Right(lar) => complete(ToResponseMarshallable(lar))
+              case Right(lar) => validateRoute(lar, checkType, uri)
               case Left(errors) => complete(errorsAsResponse(errors))
             }
           }
@@ -46,38 +72,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       }
     }
 
-  val validateLarRoute =
-    pathPrefix("lar") {
-      path("validate") {
-        val path = "lar/validate"
-        parameters('check.as[String] ? "all") { (checkType) =>
-          timedPost { uri =>
-            entity(as[LoanApplicationRegister]) { lar =>
-              validateRoute(lar, checkType, path)
-            }
-          }
-        }
-      }
-    }
-
-  val parseAndValidateLarRoute =
-    pathPrefix("lar") {
-      path("parseAndValidate") {
-        val path = "lar/parseAndValidate"
-        parameters('check.as[String] ? "all") { (checkType) =>
-          timedPost { uri =>
-            entity(as[String]) { s =>
-              LarCsvParser(s) match {
-                case Right(lar) => validateRoute(lar, checkType, path)
-                case Left(errors) => complete(errorsAsResponse(errors))
-              }
-            }
-          }
-        }
-      }
-    }
-
-  def validateRoute(lar: LoanApplicationRegister, checkType: String, path: String) = {
+  def validateRoute(lar: LoanApplicationRegister, checkType: String, uri: Uri) = {
     val supervisor = system.actorSelection("/user/supervisor")
     val fLarValidation = (supervisor ? FindActorByName(SingleLarValidation.name)).mapTo[ActorRef]
     val vContext = ValidationContext(None, None)
@@ -96,7 +91,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       case Success(validationErrors) =>
         complete(ToResponseMarshallable(aggregateErrors(validationErrors)))
       case Failure(error) =>
-        completeWithInternalError(path, error)
+        completeWithInternalError(uri, error)
 
     }
   }
@@ -119,6 +114,9 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
     HttpResponse(StatusCodes.BadRequest, entity = errorEntity)
   }
 
-  val larRoutes = parseLarRoute ~ validateLarRoute ~ parseAndValidateLarRoute
+  val larRoutes =
+    pathPrefix("lar") {
+      parseLarRoute ~ validateLarRoute ~ parseAndValidateLarRoute
+    }
 
 }
