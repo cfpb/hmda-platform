@@ -20,9 +20,6 @@ import hmda.validation.engine.{ Syntactical, ValidationError, ValidationErrors, 
 
 class SubmissionPathsSpec extends InstitutionHttpApiSpec {
 
-  override val log: LoggingAdapter = NoLogging
-  override implicit val timeout: Timeout = Timeout(5.seconds)
-
   val supervisor = system.actorSelection("/user/supervisor")
 
   override def beforeAll(): Unit = {
