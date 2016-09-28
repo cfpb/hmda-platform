@@ -36,10 +36,10 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
 
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>
   def uploadPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber) { (period, seqNr) =>
-      time {
-        val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr"
+      timedPost { uri =>
         val submissionId = SubmissionId(institutionId, period, seqNr)
         extractExecutionContext { executor =>
           implicit val ec: ExecutionContext = executor
