@@ -1,5 +1,6 @@
 package hmda.api.http.institutions
 
+import scala.concurrent.duration._
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -10,6 +11,8 @@ import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.{ GetSubmissionById, UpdateSubmissionStatus }
 import akka.pattern.ask
+
+import scala.concurrent.Await
 
 class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
 
@@ -48,15 +51,13 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
         s <- fSubmissionsActor
       } yield {
         s ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
-        for {
-          t <- (s ? GetSubmissionById(SubmissionId("0", "2017", 1))).mapTo[Submission]
-        } yield {
-          t.submissionStatus.code mustBe 12
 
-          postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
-            status mustBe StatusCodes.BadRequest
-            responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/0/filings/2017/submissions/1")
-          }
+        val submission = Await.result((s ? GetSubmissionById(SubmissionId("0", "2017", 1))).mapTo[Submission], 5.seconds)
+        submission.submissionStatus.code mustBe 12
+
+        postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+          status mustBe StatusCodes.BadRequest
+          responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/0/filings/2017/submissions/1")
         }
       }
     }
