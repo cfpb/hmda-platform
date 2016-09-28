@@ -35,7 +35,7 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
     "return not found when looking for a latest submission for non existent institution" in {
       getWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        val error = ErrorResponse(404, "No submission found for xxxxx for 2017", "institutions/xxxxx/filings/2017/submissions/latest")
+        val error = ErrorResponse(404, "No submission found for xxxxx for 2017", "/institutions/xxxxx/filings/2017/submissions/latest")
         responseAs[ErrorResponse] mustBe error
       }
 
@@ -52,14 +52,14 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
     "fail creating a new submission for a non existent institution" in {
       postWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "institutions/xxxxx/filings/2017/submissions")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "/institutions/xxxxx/filings/2017/submissions")
       }
     }
 
     "fail creating a new submission for a non existent filing period" in {
       postWithCfpbHeaders("/institutions/0/filings/2001/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 0", "institutions/0/filings/2001/submissions")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 0", "/institutions/0/filings/2001/submissions")
       }
     }
   }

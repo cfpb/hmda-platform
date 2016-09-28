@@ -35,7 +35,7 @@ class InstitutionsPathsSpec extends InstitutionHttpApiSpec {
       }
       getWithCfpbHeaders("/institutions/xxxxx") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "institutions/xxxxx")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "/institutions/xxxxx")
       }
     }
 

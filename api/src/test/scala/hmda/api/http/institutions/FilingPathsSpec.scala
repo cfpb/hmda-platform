@@ -18,11 +18,11 @@ class FilingPathsSpec extends InstitutionHttpApiSpec with FilingPaths {
 
     getWithCfpbHeaders("/institutions/0/filings/xxxx") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 0", "institutions/0/filings/xxxx")
+      responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 0", "/institutions/0/filings/xxxx")
     }
     getWithCfpbHeaders("/institutions/xxxxx/filings/2017") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "institutions/xxxxx/filings/2017")
+      responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "/institutions/xxxxx/filings/2017")
     }
   }
 }

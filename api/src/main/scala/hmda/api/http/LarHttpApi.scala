@@ -35,7 +35,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   val parseLarRoute =
     pathPrefix("lar") {
       path("parse") {
-        timedPost {
+        timedPost { uri =>
           entity(as[String]) { s =>
             LarCsvParser(s) match {
               case Right(lar) => complete(ToResponseMarshallable(lar))
@@ -51,7 +51,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       path("validate") {
         val path = "lar/validate"
         parameters('check.as[String] ? "all") { (checkType) =>
-          timedPost {
+          timedPost { uri =>
             entity(as[LoanApplicationRegister]) { lar =>
               validateRoute(lar, checkType, path)
             }
@@ -65,7 +65,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       path("parseAndValidate") {
         val path = "lar/parseAndValidate"
         parameters('check.as[String] ? "all") { (checkType) =>
-          timedPost {
+          timedPost { uri =>
             entity(as[String]) { s =>
               LarCsvParser(s) match {
                 case Right(lar) => validateRoute(lar, checkType, path)

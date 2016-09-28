@@ -29,10 +29,10 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
 
   val log: LoggingAdapter
 
+  // institutions
   val institutionsPath =
     path("institutions") {
-      val path = "institutions"
-      timedGet {
+      timedGet { uri =>
         extractRequestContext { ctx =>
           extractExecutionContext { executor =>
             implicit val ec: ExecutionContext = executor
@@ -47,18 +47,18 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
               case Success(institutions) =>
                 val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name, inst.status))
                 complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
-              case Failure(error) => completeWithInternalError(path, error)
+              case Failure(error) => completeWithInternalError(uri.path.toString, error)
             }
           }
         }
       }
     }
 
+  // institutions/<institutionId>
   def institutionByIdPath(institutionId: String) =
     pathEnd {
-      val path = s"institutions/$institutionId"
       extractExecutionContext { executor =>
-        timedGet {
+        timedGet { uri =>
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
           val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
@@ -74,21 +74,21 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
               if (institutionDetails.institution.name != "")
                 complete(ToResponseMarshallable(institutionDetails))
               else {
-                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
+                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path.toString)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
             case Failure(error) =>
-              completeWithInternalError(path, error)
+              completeWithInternalError(uri.path.toString, error)
           }
         }
       }
     }
 
+  // institutions/<institutionId>/summary
   def institutionSummaryPath(institutionId: String) =
     path("summary") {
-      val path = s"institutions/$institutionId/summary"
       extractExecutionContext { executor =>
-        timedGet {
+        timedGet { uri =>
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
           val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
@@ -105,7 +105,7 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
             case Success(summary) =>
               complete(ToResponseMarshallable(summary))
             case Failure(error) =>
-              completeWithInternalError(path, error)
+              completeWithInternalError(uri.path.toString, error)
           }
         }
       }
