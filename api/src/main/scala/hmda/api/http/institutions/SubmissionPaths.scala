@@ -63,17 +63,17 @@ trait SubmissionPaths
                   case Success(submission) =>
                     complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                   case Failure(error) =>
-                    completeWithInternalError(uri.path.toString, error)
+                    completeWithInternalError(uri, error)
                 }
               } else if (!filing.institutionId.isEmpty) {
-                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", uri.path.toString)
+                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
-                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path.toString)
+                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
             case Failure(error) =>
-              completeWithInternalError(uri.path.toString, error)
+              completeWithInternalError(uri, error)
           }
         }
       }
@@ -96,7 +96,7 @@ trait SubmissionPaths
           onComplete(fSubmissions) {
             case Success(submission) =>
               if (submission.id.sequenceNumber == 0) {
-                val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", uri.path.toString)
+                val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
                 val statusWrapper = SubmissionStatusWrapper(submission.submissionStatus.code, submission.submissionStatus.message)
@@ -104,7 +104,7 @@ trait SubmissionPaths
                 complete(ToResponseMarshallable(submissionWrapper))
               }
             case Failure(error) =>
-              completeWithInternalError(uri.path.toString, error)
+              completeWithInternalError(uri, error)
           }
         }
       }

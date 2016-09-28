@@ -4,6 +4,7 @@ import scala.concurrent.duration._
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.Uri.Path
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.ErrorResponse
 import hmda.model.fi.{ Signed, Submission, SubmissionId }
@@ -33,17 +34,15 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
     }
 
     "return 400 when trying to upload the wrong file" in {
-      val badContent = "qdemd"
-      val file = multiPartFile(badContent, "sample.dat")
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+      val file = multiPartFile("bad file content", "sample.dat")
+      val path = Path("/institutions/0/filings/2017/submissions/1")
+      postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", "institutions/0/filings/2017/submissions/1")
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", path)
       }
     }
 
     "return 400 when trying to upload to a completed submission" in {
-      val badContent = "qdemd"
-      val file = multiPartFile(badContent, "sample.txt")
       val supervisor = system.actorSelection("/user/supervisor")
       val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, "0", "2017")).mapTo[ActorRef]
 
@@ -51,13 +50,14 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
         s <- fSubmissionsActor
       } yield {
         s ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
-
         val submission = Await.result((s ? GetSubmissionById(SubmissionId("0", "2017", 1))).mapTo[Submission], 5.seconds)
         submission.submissionStatus mustBe Signed
 
-        postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+        val file = multiPartFile("bad file content", "sample.txt")
+        val path = Path("/institutions/0/filings/2017/submissions/1")
+        postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
           status mustBe StatusCodes.BadRequest
-          responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", "institutions/0/filings/2017/submissions/1")
+          responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission already exists", path)
         }
       }
     }

@@ -50,14 +50,14 @@ trait FilingPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
               if (filing.institutionId == institutionId && filing.period == period)
                 complete(ToResponseMarshallable(filingDetails))
               else if (filing.institutionId == institutionId && filing.period != period) {
-                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", uri.path.toString)
+                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
-                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path.toString)
+                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
             case Failure(error) =>
-              completeWithInternalError(uri.path.toString, error)
+              completeWithInternalError(uri, error)
           }
         }
       }

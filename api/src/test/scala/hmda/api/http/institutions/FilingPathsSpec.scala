@@ -2,7 +2,8 @@ package hmda.api.http.institutions
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
-import hmda.api.http.{ InstitutionHttpApiSpec }
+import akka.http.scaladsl.model.Uri.Path
+import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ ErrorResponse, FilingDetail }
 import hmda.model.fi.{ Filing, NotStarted }
 import hmda.persistence.demo.DemoData
@@ -16,13 +17,17 @@ class FilingPathsSpec extends InstitutionHttpApiSpec with FilingPaths {
       responseAs[FilingDetail] mustBe FilingDetail(filing, DemoData.testSubmissions.reverse)
     }
 
-    getWithCfpbHeaders("/institutions/0/filings/xxxx") ~> institutionsRoutes ~> check {
+    val path1 = Path("/institutions/0/filings/xxxx")
+    println(s"path1 = $path1")
+    getWithCfpbHeaders(path1.toString) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 0", "/institutions/0/filings/xxxx")
+      responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 0", path1)
     }
-    getWithCfpbHeaders("/institutions/xxxxx/filings/2017") ~> institutionsRoutes ~> check {
+
+    val path2 = Path("/institutions/xxxxx/filings/2017")
+    getWithCfpbHeaders(path2.toString) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "/institutions/xxxxx/filings/2017")
+      responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", path2)
     }
   }
 }
