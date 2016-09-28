@@ -3,7 +3,6 @@ package hmda.api.model
 import java.util.Calendar
 import hmda.model.fi._
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
-import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 import hmda.model.institution._
 import hmda.validation.engine._
 import org.scalacheck.Gen
