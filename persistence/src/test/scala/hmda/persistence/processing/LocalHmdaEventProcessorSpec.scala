@@ -118,7 +118,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     fSubmissions.map { subActor =>
       val fSubmissionSeq = (subActor ? GetState).mapTo[Seq[Submission]]
       fSubmissionSeq.map { subList =>
-        subList.head.submissionStatus mustBe status
+        subList.head.submissionStatus.code mustBe 300
       }
     }
   }
