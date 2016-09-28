@@ -1,6 +1,6 @@
 package hmda.api.http
 
-import hmda.api.model.{ EditResult, EditResults, LarEditResult, SummaryEditResults }
+import hmda.api.model._
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.util.FITestData._
 import hmda.parser.fi.lar.LarCsvParser
@@ -26,8 +26,8 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
         validationErrorsToEditResults(errors, Macro)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
-      val s020 = EditResult("S020", Seq(LarEditResult("8299422144"), LarEditResult("2185751599")))
-      val s010 = EditResult("S010", Seq(LarEditResult("2185751599")))
+      val s020 = EditResult("S020", Seq(LarEditResult(LarId("8299422144")), LarEditResult(LarId("2185751599"))))
+      val s010 = EditResult("S010", Seq(LarEditResult(LarId("2185751599"))))
       summaryEditResults.syntactical.edits.head mustBe s020
       summaryEditResults.syntactical.edits.tail.contains(s010) mustBe true
       summaryEditResults.validity.edits.size mustBe 3

@@ -1,22 +1,19 @@
 package hmda.api.http.institutions
 
 import akka.actor.ActorRef
-import akka.event.{ LoggingAdapter, NoLogging }
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.MethodRejection
-import akka.util.Timeout
 import akka.pattern.ask
-import scala.concurrent.Future
-import scala.concurrent.duration._
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model._
 import hmda.model.fi._
-import hmda.persistence.HmdaSupervisor
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.demo.DemoData
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.validation.engine.{ Syntactical, ValidationError, ValidationErrors, Validity }
+
+import scala.concurrent.Future
 
 class SubmissionPathsSpec extends InstitutionHttpApiSpec {
 
@@ -77,14 +74,14 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
     val expectedSummary = SummaryEditResults(
       EditResults(
         List(
-          EditResult("S020", List(LarEditResult("loan1"))),
-          EditResult("S010", List(LarEditResult("loan1")))
+          EditResult("S020", List(LarEditResult(LarId("loan1")))),
+          EditResult("S010", List(LarEditResult(LarId("loan1"))))
         )
       ),
       EditResults(
         List(
-          EditResult("V285", List(LarEditResult("loan2"), LarEditResult("loan3"))),
-          EditResult("V280", List(LarEditResult("loan1")))
+          EditResult("V285", List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
+          EditResult("V280", List(LarEditResult(LarId("loan1"))))
         )
       ),
       EditResults(List()),

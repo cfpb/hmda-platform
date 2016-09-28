@@ -123,7 +123,7 @@ trait ModelGenerators {
   implicit def larEditResultGen: Gen[LarEditResult] = {
     for {
       loanId <- Gen.alphaStr
-    } yield LarEditResult(loanId)
+    } yield LarEditResult(LarId(loanId))
   }
 
   implicit def editResultGen: Gen[EditResult] = {

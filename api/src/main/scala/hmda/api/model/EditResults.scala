@@ -1,6 +1,7 @@
 package hmda.api.model
 
-case class LarEditResult(loanId: String)
+case class LarId(loanId: String)
+case class LarEditResult(lar: LarId)
 case class EditResult(edit: String, lars: Seq[LarEditResult])
 case class EditResults(edits: Seq[EditResult])
 case object EditResults {

@@ -1,6 +1,6 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ EditResult, EditResults, LarEditResult, SummaryEditResults }
+import hmda.api.model._
 import hmda.validation.engine._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
@@ -29,6 +29,7 @@ trait EditResultsProtocol extends DefaultJsonProtocol {
     }
   }
 
+  implicit val larIdFormat = jsonFormat1(LarId.apply)
   implicit val larEditResultFormat = jsonFormat1(LarEditResult.apply)
   implicit val editResultFormat = jsonFormat2(EditResult.apply)
   implicit val editResultsFormat = jsonFormat1(EditResults.apply)
