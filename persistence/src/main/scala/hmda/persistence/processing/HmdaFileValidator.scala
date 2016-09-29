@@ -7,9 +7,8 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
-import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
-import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
 import hmda.persistence.processing.HmdaQuery._
+import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
@@ -83,7 +82,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
       allEvents(parserPersistenceId)
-        .map { case TsParsed(ts) => ts }
+        .map { case Some(ts) => ts.asInstanceOf[TransmittalSheet] }
         .map(ts => validateTs(ts, ctx).toEither)
         .map {
           case Right(ts) => ts
@@ -92,7 +91,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .runWith(Sink.actorRef(self, NotUsed))
 
       allEvents(parserPersistenceId)
-        .map { case LarParsed(lar) => lar }
+        .map { case Some(lar) => lar.asInstanceOf[LoanApplicationRegister] }
         .map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l
@@ -102,13 +101,13 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
-        log.debug(s"Persisted: $e")
+        log.info(s"Persisted: $e")
         updateState(e)
       }
 
     case lar: LoanApplicationRegister =>
       persist(LarValidated(lar)) { e =>
-        log.debug(s"Persisted: $e")
+        log.info(s"Persisted: $e")
         updateState(e)
       }
 

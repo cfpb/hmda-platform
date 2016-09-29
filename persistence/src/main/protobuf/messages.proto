@@ -26,23 +26,11 @@ message LarParsedErrorsMessage {
     repeated string errors = 1;
 }
 
-message ValidationStartedMessage {
-    hmda.SubmissionIdMessage submissionId = 1;
-}
-
-message ValidationCompletedWithErrorsMessage {
-    hmda.SubmissionIdMessage submissionId = 1;
-}
-
-message ValidationCompletedMessage {
-    hmda.SubmissionIdMessage submissionId = 1;
-}
-
-message TsValidated {
+message TsValidatedMessage {
     hmda.fi.TransmittalSheetMessage ts = 1;
 }
 
-message LarValidated {
+message LarValidatedMessage {
     hmda.fi.LoanApplicationRegisterMessage lar = 1;
 }
 

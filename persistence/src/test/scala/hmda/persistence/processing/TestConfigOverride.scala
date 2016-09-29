@@ -13,16 +13,20 @@ object TestConfigOverride {
       | akka.actor {
       |  serializers {
       |      hmdaRawFile = "hmda.persistence.processing.serialization.HmdaRawFileProtobufSerializer"
-      |      hmdaParserFile = "hmda.persistence.processing.serialization.HmdaFileParserProtobufSerializer"
-      |    }
+      |      hmdaFileParser = "hmda.persistence.processing.serialization.HmdaFileParserProtobufSerializer"
+      |      hmdaFileValidator = "hmda.persistence.processing.serialization.HmdaFileValidatorProtobufSerializer"
+      |  }
       |
-      |    serialization-bindings {
-      |      "hmda.persistence.processing.HmdaRawFile$LineAdded" = hmdaRawFile
-      |      "hmda.persistence.processing.HmdaFileParser$TsParsed" = hmdaParserFile
-      |      "hmda.persistence.processing.HmdaFileParser$TsParsedErrors" = hmdaParserFile
-      |      "hmda.persistence.processing.HmdaFileParser$LarParsed" = hmdaParserFile
-      |      "hmda.persistence.processing.HmdaFileParser$LarParsedErrors" = hmdaParserFile
-      |    }
+      |  serialization-bindings {
+      |    "hmda.persistence.processing.HmdaRawFile$LineAdded" = hmdaRawFile
+      |    "hmda.persistence.processing.HmdaFileParser$TsParsed" = hmdaFileParser
+      |    "hmda.persistence.processing.HmdaFileParser$TsParsedErrors" = hmdaFileParser
+      |    "hmda.persistence.processing.HmdaFileParser$LarParsed" = hmdaFileParser
+      |    "hmda.persistence.processing.HmdaFileParser$LarParsedErrors" = hmdaFileParser
+      |    "hmda.persistence.processing.HmdaFileValidator$TsValidated" = hmdaFileValidator
+      |    "hmda.persistence.processing.HmdaFileValidator$LarValidated" = hmdaFileValidator
+      |    "hmda.validation.engine.ValidationError" = hmdaFileValidator
+      |  }
       |}
     """.stripMargin
 

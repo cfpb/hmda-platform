@@ -2,6 +2,7 @@ package hmda.persistence.processing.serialization
 
 import akka.serialization.SerializerWithStringManifest
 import hmda.persistence.processing.HmdaFileValidator.{ LarValidated, TsValidated }
+import hmda.persistence.messages.{ LarValidatedMessage, TsValidatedMessage }
 import hmda.validation.engine.ValidationError
 
 class HmdaFileValidatorProtobufSerializer
@@ -17,7 +18,28 @@ class HmdaFileValidatorProtobufSerializer
   final val LarValidatedManifest = classOf[LarValidated].getName
   final val ValidationErrorManifest = classOf[ValidationError].getName
 
-  override def toBinary(o: AnyRef): Array[Byte] = ???
+  override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef = manifest match {
+    case TsValidatedManifest =>
+      val tsValidatedMessage = TsValidatedMessage.parseFrom(bytes)
+      for {
+        t <- tsValidatedMessage.ts
+        ts = messageToTransmittalSheet(t)
+      } yield ts
 
-  override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef = ???
+    case LarValidatedManifest =>
+      val larValidatedMessage = LarValidatedMessage.parseFrom(bytes)
+      for {
+        l <- larValidatedMessage.lar
+        lar = messageToLoanApplicationRegister(l)
+      } yield lar
+  }
+
+  override def toBinary(o: AnyRef): Array[Byte] = o match {
+    case TsValidated(ts) =>
+      TsValidatedMessage(transmittalSheetToMessage(ts)).toByteArray
+
+    case LarValidated(lar) =>
+      LarValidatedMessage(loanApplicationRegisterToMessage(lar)).toByteArray
+  }
+
 }

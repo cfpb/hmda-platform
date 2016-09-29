@@ -51,7 +51,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
   "HMDA File Validator" must {
     "persist clean LARs" in {
-
       probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, GetState)
@@ -63,6 +62,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       val e2 = ValidationError("1", "V120", Validity)
       val e3 = ValidationError("1", "Q003", Quality)
       val errors = ValidationErrors(Seq(e1, e2, e3))
+      probe.send(hmdaFileValidator, ts)
+      lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, errors)
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
