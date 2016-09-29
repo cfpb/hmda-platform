@@ -63,7 +63,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
     case ReadHmdaRawFile(persistenceId) =>
       publishEvent(ParsingStarted(submissionId))
       val parsedTs = allEvents(persistenceId)
-       .map { case LineAdded(_, data) => data }
+        .map { case LineAdded(_, data) => data }
         .take(1)
         .map(line => TsCsvParser(line))
         .map {
