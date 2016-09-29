@@ -16,9 +16,6 @@ class HmdaRawFileProtobufSerializer extends SerializerWithStringManifest {
       val lineAddedMessage = LineAddedMessage.parseFrom(bytes)
       LineAdded(lineAddedMessage.timestamp, lineAddedMessage.data)
 
-    case msg: AnyRef =>
-      println(msg.toString)
-      msg
 
   }
 
