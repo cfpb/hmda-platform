@@ -18,11 +18,10 @@ object HmdaQuery {
   val journalId = config.getString("akka.persistence.query.journal.id")
 
   def readJournal(system: ActorSystem) = {
-    println(s"$journalId")
     PersistenceQuery(system).readJournalFor[RJ](journalId)
   }
 
-  def events(persistenceId: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[Event, NotUsed] =
+  def allEvents(persistenceId: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[Event, NotUsed] =
     readJournal(system).currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
       .map(_.event.asInstanceOf[Event])
 

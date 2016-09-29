@@ -81,9 +81,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       val ctx = ValidationContext(None, Try(Some(submissionId.period.toInt)).getOrElse(None))
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
-      events(parserPersistenceId)
-        .filter(x => x.isInstanceOf[TsParsed])
-        .map(e => e.asInstanceOf[TsParsed].ts)
+      allEvents(parserPersistenceId)
+        .map { case TsParsed(ts) => ts }
         .map(ts => validateTs(ts, ctx).toEither)
         .map {
           case Right(ts) => ts
@@ -91,9 +90,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
-      events(parserPersistenceId)
-        .filter(x => x.isInstanceOf[LarParsed])
-        .map(e => e.asInstanceOf[LarParsed].lar)
+      allEvents(parserPersistenceId)
+        .map { case LarParsed(lar) => lar }
         .map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l

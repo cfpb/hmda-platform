@@ -2,6 +2,7 @@ package hmda.persistence.processing
 
 import java.time.Instant
 
+import akka.actor.ActorSystem
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
@@ -13,6 +14,14 @@ class HmdaRawFileSpec extends ActorSpec {
   import hmda.model.util.FITestData._
 
   val config = ConfigFactory.load()
+
+  override implicit lazy val system =
+    ActorSystem(
+      "test-system",
+      ConfigFactory.parseString(
+        TestConfigOverride.config
+      )
+    )
 
   val submissionId = SubmissionId("0", "2017", 1)
 

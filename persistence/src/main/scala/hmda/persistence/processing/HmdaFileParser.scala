@@ -60,7 +60,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
 
     case ReadHmdaRawFile(persistenceId) =>
       publishEvent(ParsingStarted(submissionId))
-      val parsedTs = events(persistenceId)
+      val parsedTs = allEvents(persistenceId)
         .map { case LineAdded(_, data) => data }
         .take(1)
         .map(line => TsCsvParser(line))
@@ -72,7 +72,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
       parsedTs
         .runForeach(pTs => self ! pTs)
 
-      val parsedLar = events(persistenceId)
+      val parsedLar = allEvents(persistenceId)
         .map { case LineAdded(_, data) => data }
         .drop(1)
         .map(line => LarCsvParser(line))

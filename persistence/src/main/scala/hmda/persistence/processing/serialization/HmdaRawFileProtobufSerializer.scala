@@ -16,7 +16,6 @@ class HmdaRawFileProtobufSerializer extends SerializerWithStringManifest {
       val lineAddedMessage = LineAddedMessage.parseFrom(bytes)
       LineAdded(lineAddedMessage.timestamp, lineAddedMessage.data)
 
-
   }
 
   override def toBinary(o: AnyRef): Array[Byte] = o match {

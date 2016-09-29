@@ -1,7 +1,7 @@
 package hmda.persistence.processing.serialization
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.persistence.processing.HmdaFileValidator.{LarValidated, TsValidated}
+import hmda.persistence.processing.HmdaFileValidator.{ LarValidated, TsValidated }
 import hmda.validation.engine.ValidationError
 
 class HmdaFileValidatorProtobufSerializer
