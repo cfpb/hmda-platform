@@ -43,7 +43,8 @@ object HmdaFileValidator {
       lars: Seq[LoanApplicationRegister] = Nil,
       syntactical: Seq[ValidationError] = Nil,
       validity: Seq[ValidationError] = Nil,
-      quality: Seq[ValidationError] = Nil
+      quality: Seq[ValidationError] = Nil,
+      `macro`: Seq[ValidationError] = Nil
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) =>

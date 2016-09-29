@@ -11,8 +11,8 @@ import hmda.model.institution.{ ExternalId, Institution }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
-import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
+import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
 import scala.concurrent.duration._
 

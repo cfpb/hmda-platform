@@ -1,7 +1,6 @@
 package hmda.api.model
 
 import java.util.Calendar
-
 import hmda.model.fi._
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution._
@@ -112,6 +111,33 @@ trait ModelGenerators {
     )
   }
 
+  implicit def errorResponseGen: Gen[ErrorResponse] = {
+    for {
+      status <- Gen.oneOf(200, 201, 400, 500)
+      message <- Gen.alphaStr
+      path <- Gen.alphaStr
+    } yield ErrorResponse(status, message, path)
+  }
+
+  implicit def larEditResultGen: Gen[LarEditResult] = {
+    for {
+      loanId <- Gen.alphaStr
+    } yield LarEditResult(LarId(loanId))
+  }
+
+  implicit def editResultGen: Gen[EditResult] = {
+    for {
+      edit <- Gen.alphaStr
+      lars <- Gen.listOf(larEditResultGen)
+    } yield EditResult(edit, lars)
+  }
+
+  implicit def editResultsGen: Gen[EditResults] = {
+    for {
+      edits <- Gen.listOf(editResultGen)
+    } yield EditResults(edits)
+  }
+
   implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
     Gen.oneOf(
       List(Syntactical, Validity, Quality, Macro)
@@ -125,4 +151,14 @@ trait ModelGenerators {
       errorType <- validationErrorTypeGen
     } yield ValidationError(id, name, errorType)
   }
+
+  implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {
+    for {
+      s <- editResultsGen
+      v <- editResultsGen
+      q <- editResultsGen
+      m <- editResultsGen
+    } yield SummaryEditResults(s, v, q, m)
+  }
+
 }

@@ -9,19 +9,29 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.HmdaCustomDirectives
-import hmda.api.model.{ ErrorResponse, SubmissionStatusWrapper, SubmissionWrapper }
-import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Filing, Submission }
-import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
+import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
+import hmda.api.model._
+import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
+import hmda.model.fi.{ Filing, Submission, SubmissionId }
+import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.processing.HmdaFileValidator
+import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
+import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
-trait SubmissionPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCustomDirectives {
+trait SubmissionPaths
+    extends InstitutionProtocol
+    with ApiErrorProtocol
+    with EditResultsProtocol
+    with HmdaCustomDirectives
+    with ValidationErrorConverter {
+
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
@@ -98,5 +108,37 @@ trait SubmissionPaths extends InstitutionProtocol with ApiErrorProtocol with Hmd
           }
         }
       }
+    }
+
+  def submissionEditsPath(institutionId: String) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits") { (period, seqNr) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr/edits"
+      val submissionId = SubmissionId(institutionId, period, seqNr)
+      extractExecutionContext { executor =>
+        implicit val ec: ExecutionContext = executor
+        val supervisor = system.actorSelection("/user/supervisor")
+        val fActor = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+
+        val fEditChecks = for {
+          a <- fActor
+          f <- (a ? GetState).mapTo[HmdaFileValidationState]
+        } yield f
+
+        val fSummaryEdits = fEditChecks.map { editChecks =>
+          val s = validationErrorsToEditResults(editChecks.syntactical, Syntactical)
+          val v = validationErrorsToEditResults(editChecks.validity, Validity)
+          val q = validationErrorsToEditResults(editChecks.quality, Quality)
+          val m = validationErrorsToEditResults(editChecks.`macro`, Macro)
+          SummaryEditResults(s, v, q, m)
+        }
+
+        onComplete(fSummaryEdits) {
+          case Success(edits) =>
+            complete(ToResponseMarshallable(edits))
+          case Failure(error) =>
+            completeWithInternalError(path, error)
+        }
+      }
+
     }
 }

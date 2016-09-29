@@ -33,7 +33,8 @@ trait InstitutionsHttpApi
               filingByPeriodPath(instId) ~
               submissionPath(instId) ~
               submissionLatestPath(instId) ~
-              uploadPath(instId)
+              uploadPath(instId) ~
+              submissionEditsPath(instId)
           }
         }
     }
