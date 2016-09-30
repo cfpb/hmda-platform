@@ -141,4 +141,43 @@ trait SubmissionPaths
       }
 
     }
+
+  def submissionSingleEditPath(institutionId: String) =
+    path("filings" / Segment / "submissions" / IntNumber / Segment) { (period, submissionId, editType) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId/$editType"
+      extractExecutionContext { executor =>
+        implicit val ec: ExecutionContext = executor
+        val supervisor = system.actorSelection("/user/supervisor")
+        val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, SubmissionId(institutionId, period, submissionId))).mapTo[ActorRef]
+
+        val fValidationState = for {
+          s <- fHmdaFileValidator
+          xs <- (s ? GetState).mapTo[HmdaFileValidationState]
+        } yield xs
+
+        val fSingleEdits = fValidationState.map { editChecks =>
+          editType match {
+            case "syntactical" =>
+              val s = validationErrorsToEditResults(editChecks.syntactical, Syntactical)
+              SummaryEditResults(s, EditResults.empty, EditResults.empty, EditResults.empty)
+            case "validity" =>
+              val v = validationErrorsToEditResults(editChecks.validity, Validity)
+              SummaryEditResults(EditResults.empty, v, EditResults.empty, EditResults.empty)
+            case "quality" =>
+              val q = validationErrorsToEditResults(editChecks.quality, Quality)
+              SummaryEditResults(EditResults.empty, EditResults.empty, q, EditResults.empty)
+            case "macro" =>
+              val m = validationErrorsToEditResults(editChecks.`macro`, Macro)
+              SummaryEditResults(EditResults.empty, EditResults.empty, EditResults.empty, m)
+          }
+        }
+
+        onComplete(fSingleEdits) {
+          case Success(edits) =>
+            complete(ToResponseMarshallable(edits))
+          case Failure(error) =>
+            completeWithInternalError(path, error)
+        }
+      }
+    }
 }
