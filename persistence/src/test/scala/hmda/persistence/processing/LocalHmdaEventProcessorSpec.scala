@@ -62,32 +62,32 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
 
   "Event processor" must {
 
-    "process upload start message from event stream" in {
+    "process UploadStarted message from event stream" in {
       val msg = s"Upload started for submission $submissionId"
       val status = UploadStarted(submissionId)
       checkEventStreamMessage(msg, status)
       checkSubmissionStatus(Uploading)
     }
 
-    "process upload completed message from event stream" in {
+    "process UploadCompleted message from event stream" in {
       val submissionId = SubmissionId("testUploadComp", "2017", 1)
       val size = 10
       val msg = s"$size lines uploaded for submission $submissionId"
       checkEventStreamMessage(msg, UploadCompleted(size, submissionId))
     }
 
-    "process parse started message from event stream" in {
+    "process ParsingStarted message from event stream" in {
       val msg = s"Parsing started for submission $submissionId"
       checkEventStreamMessage(msg, ParsingStarted(submissionId))
     }
 
-    "process parse completed message from event stream" in {
+    "process ParsingCompleted message from event stream" in {
       val submissionId = SubmissionId("testParseComp", "2017", 1)
       val msg = s"Parsing completed for $submissionId"
       checkEventStreamMessage(msg, ParsingCompleted(submissionId))
     }
 
-    "process 'parsingCompletedWithErrors' message from event stream" in {
+    "process ParsingCompletedWithErrors message from event stream" in {
       val msg = s"Parsing completed with errors for submission $submissionId"
       checkEventStreamMessage(msg, ParsingCompletedWithErrors(submissionId))
       //checkSubmissionStatus(ParsedWithErrors)
@@ -95,17 +95,17 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
       //   and we can add checkSubmissionStatus to all specs in this file
     }
 
-    "process validation started message from event stream" in {
+    "process ValidationStarted message from event stream" in {
       val msg = s"Validation started for $submissionId"
       checkEventStreamMessage(msg, ValidationStarted(submissionId))
     }
 
-    "process validation completed with errors from event stream" in {
+    "process ValidationCompletedWithErrors from event stream" in {
       val msg = s"validation completed with errors for submission $submissionId"
       checkEventStreamMessage(msg, ValidationCompletedWithErrors(submissionId))
     }
 
-    "process validation completed from event stream" in {
+    "process ValidationCompleted from event stream" in {
       val msg = s"Validation completed for submission $submissionId"
       checkEventStreamMessage(msg, ValidationCompleted(submissionId))
       checkSubmissionStatus(Validated)
