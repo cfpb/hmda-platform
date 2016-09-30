@@ -84,8 +84,8 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
           EditResult("V280", List(LarEditResult(LarId("loan1"))))
         )
       ),
-      EditResults(List()),
-      EditResults(List())
+      EditResults.empty,
+      EditResults.empty
     )
 
     postWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
