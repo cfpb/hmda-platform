@@ -1,24 +1,23 @@
-package hmda.api.processing
+package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem }
-import akka.testkit.{ EventFilter, TestProbe }
 import akka.pattern.ask
+import akka.testkit.{ EventFilter, TestProbe }
 import akka.util.Timeout
-
-import scala.concurrent._
-import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi._
 import hmda.persistence.CommonMessages.{ Event, GetState }
+import hmda.persistence.HmdaSupervisor._
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingCompletedWithErrors, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
-import hmda.persistence.HmdaSupervisor._
-import hmda.persistence.institutions.SubmissionPersistence
-import hmda.persistence.processing.LocalHmdaEventProcessor
-import hmda.persistence.institutions.SubmissionPersistence._
 import org.scalatest.Assertion
+
+import scala.concurrent._
+import scala.concurrent.duration._
 
 class LocalHmdaEventProcessorSpec extends ActorSpec {
 
@@ -114,16 +113,10 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
   }
 
   def checkSubmissionStatus(status: SubmissionStatus): Assertion = {
-    //TODO: find a way to avoid having to sleep here
-    Thread.sleep(500)
     val fSubmissions = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
-    val fSubmissionStatus = for {
-      a <- fSubmissions
-      b <- (a ? GetState).mapTo[Seq[Submission]]
-    } yield b.head.submissionStatus
-
-    val submissionStatus = Await.result(fSubmissionStatus, duration)
-    submissionStatus mustBe status
+    val subActor = Await.result(fSubmissions, 5.seconds)
+    val submissionSeq = Await.result((subActor ? GetState).mapTo[Seq[Submission]], 5.seconds)
+    submissionSeq.head.submissionStatus mustBe status
   }
 
   private def checkEventStreamMessage(msg: String, event: Event): Unit = {
