@@ -2,7 +2,6 @@ package hmda.api.http
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
-
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ ContentTypes, _ }
 import akka.http.scaladsl.server.Directives._

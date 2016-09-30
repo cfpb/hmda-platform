@@ -1,6 +1,6 @@
 package hmda.api.http
 
-import hmda.api.model.{ EditResult, EditResults, LarEditResult }
+import hmda.api.model.{ EditResult, EditResults, LarEditResult, LarId }
 import hmda.validation.engine._
 
 trait ValidationErrorConverter {
@@ -12,7 +12,7 @@ trait ValidationErrorConverter {
       errorsByType.mapValues(x => x.groupBy(_.name))
 
     val larEditResults: Map[ValidationErrorType, Map[String, Seq[LarEditResult]]] =
-      editValues.mapValues(x => x.mapValues(y => y.map(_.errorId).map(z => LarEditResult(z))))
+      editValues.mapValues(x => x.mapValues(y => y.map(_.errorId).map(z => LarEditResult(LarId(z)))))
 
     val mapResults = larEditResults.getOrElse(validationErrorType, Map.empty[String, Seq[LarEditResult]])
     EditResults(

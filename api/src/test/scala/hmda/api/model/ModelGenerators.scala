@@ -3,7 +3,6 @@ package hmda.api.model
 import java.util.Calendar
 import hmda.model.fi._
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
-import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 import hmda.model.institution._
 import hmda.validation.engine._
 import org.scalacheck.Gen
@@ -123,7 +122,7 @@ trait ModelGenerators {
   implicit def larEditResultGen: Gen[LarEditResult] = {
     for {
       loanId <- Gen.alphaStr
-    } yield LarEditResult(loanId)
+    } yield LarEditResult(LarId(loanId))
   }
 
   implicit def editResultGen: Gen[EditResult] = {
