@@ -79,6 +79,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     "process ParsingStarted message from event stream" in {
       val msg = s"Parsing started for submission $submissionId"
       checkEventStreamMessage(msg, ParsingStarted(submissionId))
+      checkSubmissionStatus(Parsing)
     }
 
     "process ParsingCompleted message from event stream" in {
@@ -90,19 +91,19 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     "process ParsingCompletedWithErrors message from event stream" in {
       val msg = s"Parsing completed with errors for submission $submissionId"
       checkEventStreamMessage(msg, ParsingCompletedWithErrors(submissionId))
-      //checkSubmissionStatus(ParsedWithErrors)
-      // TODO: improve checkSubmissionStatus so that this test passes consistently
-      //   and we can add checkSubmissionStatus to all specs in this file
+      checkSubmissionStatus(ParsedWithErrors)
     }
 
     "process ValidationStarted message from event stream" in {
       val msg = s"Validation started for $submissionId"
       checkEventStreamMessage(msg, ValidationStarted(submissionId))
+      checkSubmissionStatus(Validating)
     }
 
     "process ValidationCompletedWithErrors from event stream" in {
       val msg = s"validation completed with errors for submission $submissionId"
       checkEventStreamMessage(msg, ValidationCompletedWithErrors(submissionId))
+      checkSubmissionStatus(ValidatedWithErrors)
     }
 
     "process ValidationCompleted from event stream" in {
