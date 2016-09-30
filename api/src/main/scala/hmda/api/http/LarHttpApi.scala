@@ -6,12 +6,10 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ ContentTypes, _ }
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.model.{ ContentTypes, _ }
-import akka.http.scaladsl.server.StandardRoute
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.pattern.ask
-import hmda.api.model.{ ErrorResponse, SingleValidationErrorResult }
+import hmda.api.model.SingleValidationErrorResult
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister

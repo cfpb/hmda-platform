@@ -3,7 +3,6 @@ package hmda.persistence.processing
 import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSystem, Props }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.ValidationErrors
 import hmda.validation.engine.lar.LarEngine
 
 object SingleLarValidation {
@@ -45,11 +44,4 @@ class SingleLarValidation extends Actor with ActorLogging with LarEngine {
       log.error(s"Unsupported message sent to ${self.path}")
   }
 
-  private def validationErrors(lar: LoanApplicationRegister, ctx: ValidationContext, f: (LoanApplicationRegister, ValidationContext) => LarValidation): ValidationErrors = {
-    val validation = f(lar, ctx)
-    validation match {
-      case scalaz.Success(_) => ValidationErrors(Nil)
-      case scalaz.Failure(errors) => ValidationErrors(errors.list.toList)
-    }
-  }
 }
