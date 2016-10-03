@@ -35,12 +35,20 @@ message LarValidatedMessage {
 }
 
 
+message InstitutionCreatedMessage {
+    hmda.model.InstitutionMessage institution = 1;
+}
+
+message InstitutionModifiedMessage {
+    hmda.model.InstitutionMessage institution = 2;
+}
+
 message FilingCreatedMessage {
-    FilingMessage filing = 1;
+    hmda.model.FilingMessage filing = 1;
 }
 
 message FilingStatusUpdatedMessage {
-    FilingMessage filing = 1;
+    hmda.model.FilingMessage filing = 1;
 }
 
 

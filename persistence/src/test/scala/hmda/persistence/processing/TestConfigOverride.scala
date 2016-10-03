@@ -12,12 +12,15 @@ object TestConfigOverride {
       | akka.persistence.snapshot-store.plugin = "inmemory-snapshot-store"
       | akka.actor {
       |  serializers {
+      |      institution = "hmda.persistence.institutions.serialization.InstitutionPersistenceProtobufSerializer"
       |      filing = "hmda.persistence.institutions.serialization.FilingPersistenceProtobufSerializer"
       |      hmdaRawFile = "hmda.persistence.processing.serialization.HmdaRawFileProtobufSerializer"
       |      hmdaFileParser = "hmda.persistence.processing.serialization.HmdaFileParserProtobufSerializer"
       |  }
       |
       |  serialization-bindings {
+      |    "hmda.persistence.institutions.InstitutionPersistence$InstitutionCreated" = institution
+      |    "hmda.persistence.institutions.InstitutionPersistence$InstitutionModified" = institution
       |    "hmda.persistence.institutions.FilingPersistence$FilingCreated" = filing
       |    "hmda.persistence.institutions.FilingPersistence$FilingStatusUpdated" = filing
       |    "hmda.persistence.processing.HmdaRawFile$LineAdded" = hmdaRawFile

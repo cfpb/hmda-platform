@@ -1,6 +1,56 @@
 syntax = "proto3";
 
-package hmda;
+package hmda.model;
+
+message InstitutionMessage {
+    string id = 1;
+    string name = 2;
+    repeated ExternalIdMessage externalId = 3;
+    AgencyMessage agency = 4;
+    InstitutionTypeMessage institutionType = 5;
+    bool hasParent = 6;
+    bool cra = 7;
+    InstitutionStatusMessage status = 8;
+}
+
+message ExternalIdMessage {
+    string id = 1;
+    ExternalIdTypeMessage idType = 2;
+}
+
+enum ExternalIdTypeMessage {
+    FDIC_CERT_NO = 0;
+    FEDERAL_TAX_ID = 1;
+    NCUA_CHARTER_ID = 2;
+    OCC_CHARTER_ID = 3;
+    RSS_ID = 4;
+}
+
+enum AgencyMessage {
+    CFPB = 0;
+    FDIC = 1;
+    FRS = 2;
+    HUD = 3;
+    NCUA = 4;
+    OCC = 5;
+}
+
+enum InstitutionTypeMessage {
+    BANK = 0;
+    CREDIT_UNION = 1;
+    SAVINGS_AND_LOAN = 2;
+    INDEPENDENT_MORTGAGE_COMPANY = 3;
+    MBS = 4;
+    AFFILIATE = 5;
+    // The following are temporary. See hmda.model.institution.InstitutionType
+    NON_DEPOSIT_INST_TYPE = 6;
+    NO_DEPOSIT_TYPE_INST_TYPE = 7;
+}
+
+enum InstitutionStatusMessage {
+    ACTIVE = 0;
+    INACTIVE = 1;
+}
 
 enum FilingStatusMessage {
     NOT_STARTED = 0;
@@ -14,7 +64,6 @@ message FilingMessage {
     string institutionId = 2;
     FilingStatusMessage status = 3;
 }
-
 
 
 message SubmissionIdMessage {
