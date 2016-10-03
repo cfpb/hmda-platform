@@ -99,8 +99,8 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
       EditResults.empty,
       EditResults(
         List(
-          EditResult("V285", List(LarEditResult("loan2"), LarEditResult("loan3"))),
-          EditResult("V280", List(LarEditResult("loan1")))
+          EditResult("V285", List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
+          EditResult("V280", List(LarEditResult(LarId("loan1"))))
         )
       ),
       EditResults.empty,
