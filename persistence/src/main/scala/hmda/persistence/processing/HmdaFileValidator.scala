@@ -7,6 +7,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
+import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.validation.context.ValidationContext
@@ -82,7 +83,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
       allEvents(parserPersistenceId)
-        .map { case Some(ts) => ts.asInstanceOf[TransmittalSheet] }
+        .map { case TsParsed(ts) => ts }
         .map(ts => validateTs(ts, ctx).toEither)
         .map {
           case Right(ts) => ts
@@ -91,7 +92,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .runWith(Sink.actorRef(self, NotUsed))
 
       allEvents(parserPersistenceId)
-        .map { case Some(lar) => lar.asInstanceOf[LoanApplicationRegister] }
+        .map { case LarParsed(lar) => lar }
         .map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l

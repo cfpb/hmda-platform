@@ -14,7 +14,6 @@ object TestConfigOverride {
       |  serializers {
       |      hmdaRawFile = "hmda.persistence.processing.serialization.HmdaRawFileProtobufSerializer"
       |      hmdaFileParser = "hmda.persistence.processing.serialization.HmdaFileParserProtobufSerializer"
-      |      hmdaFileValidator = "hmda.persistence.processing.serialization.HmdaFileValidatorProtobufSerializer"
       |  }
       |
       |  serialization-bindings {
@@ -23,9 +22,6 @@ object TestConfigOverride {
       |    "hmda.persistence.processing.HmdaFileParser$TsParsedErrors" = hmdaFileParser
       |    "hmda.persistence.processing.HmdaFileParser$LarParsed" = hmdaFileParser
       |    "hmda.persistence.processing.HmdaFileParser$LarParsedErrors" = hmdaFileParser
-      |    "hmda.persistence.processing.HmdaFileValidator$TsValidated" = hmdaFileValidator
-      |    "hmda.persistence.processing.HmdaFileValidator$LarValidated" = hmdaFileValidator
-      |    "hmda.validation.engine.ValidationError" = hmdaFileValidator
       |  }
       |}
     """.stripMargin
