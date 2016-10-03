@@ -158,17 +158,13 @@ trait SubmissionPaths
         val fSingleEdits = fValidationState.map { editChecks =>
           editType match {
             case "syntactical" =>
-              val s = validationErrorsToEditResults(editChecks.syntactical, Syntactical)
-              SummaryEditResults(s, EditResults.empty, EditResults.empty, EditResults.empty)
+              validationErrorsToEditResults(editChecks.syntactical, Syntactical)
             case "validity" =>
-              val v = validationErrorsToEditResults(editChecks.validity, Validity)
-              SummaryEditResults(EditResults.empty, v, EditResults.empty, EditResults.empty)
+              validationErrorsToEditResults(editChecks.validity, Validity)
             case "quality" =>
-              val q = validationErrorsToEditResults(editChecks.quality, Quality)
-              SummaryEditResults(EditResults.empty, EditResults.empty, q, EditResults.empty)
+              validationErrorsToEditResults(editChecks.quality, Quality)
             case "macro" =>
-              val m = validationErrorsToEditResults(editChecks.`macro`, Macro)
-              SummaryEditResults(EditResults.empty, EditResults.empty, EditResults.empty, m)
+              validationErrorsToEditResults(editChecks.`macro`, Macro)
           }
         }
 

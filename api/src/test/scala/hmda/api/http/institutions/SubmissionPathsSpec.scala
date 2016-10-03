@@ -95,21 +95,17 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
   }
 
   "return a list of validation errors for a single type" in {
-    val expectedSummary = SummaryEditResults(
-      EditResults.empty,
+    val expectedEdits =
       EditResults(
         List(
           EditResult("V285", List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
           EditResult("V280", List(LarEditResult(LarId("loan1"))))
         )
-      ),
-      EditResults.empty,
-      EditResults.empty
-    )
+      )
 
     postWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/validity") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[SummaryEditResults] mustBe expectedSummary
+      responseAs[EditResults] mustBe expectedEdits
     }
   }
 
