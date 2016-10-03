@@ -35,6 +35,14 @@ message LarValidatedMessage {
 }
 
 
+message FilingCreatedMessage {
+    FilingMessage filing = 1;
+}
+
+message FilingStatusUpdatedMessage {
+    FilingMessage filing = 1;
+}
+
 
 
 
