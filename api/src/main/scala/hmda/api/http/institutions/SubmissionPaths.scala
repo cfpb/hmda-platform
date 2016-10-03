@@ -143,8 +143,8 @@ trait SubmissionPaths
     }
 
   def submissionSingleEditPath(institutionId: String) =
-    path("filings" / Segment / "submissions" / IntNumber / Segment) { (period, submissionId, editType) =>
-      val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId/$editType"
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, submissionId, editType) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId/edits/$editType"
       extractExecutionContext { executor =>
         implicit val ec: ExecutionContext = executor
         val supervisor = system.actorSelection("/user/supervisor")

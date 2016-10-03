@@ -200,7 +200,37 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
+    * `GET`  - List of edits of a specific type, for a given submission
 
+    Example response, with HTTP code 200:
+
+```json
+{
+  "edits": [
+    {
+      "edit": "V555",
+      "lars": [
+        {
+          "lar": {
+            "loanId": "4977566612"
+          }
+        }
+      ]
+    },
+    {
+      "edit": "V550",
+      "lars": [
+        {
+          "lar": {
+            "loanId": "4977566612"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
 
 ## Authorization
 Each endpoint that starts with `/institutions` is protected by three authorization requirements.
