@@ -52,22 +52,5 @@ enum InstitutionStatusMessage {
     INACTIVE = 1;
 }
 
-enum FilingStatusMessage {
-    NOT_STARTED = 0;
-    IN_PROGRESS = 1;
-    COMPLETED = 2;
-    CANCELLED = 3;
-}
-
-message FilingMessage {
-    string period = 1;
-    string institutionId = 2;
-    FilingStatusMessage status = 3;
-}
 
 
-message SubmissionIdMessage {
-    string institutionId = 1;
-    string period = 2;
-    int32 sequenceNumber = 3;
-}

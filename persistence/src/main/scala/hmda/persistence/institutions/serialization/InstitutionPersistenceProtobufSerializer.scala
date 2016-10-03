@@ -3,7 +3,7 @@ package hmda.persistence.institutions.serialization
 import akka.serialization.SerializerWithStringManifest
 import hmda.persistence.institutions.InstitutionPersistence.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.messages.{ InstitutionCreatedMessage, InstitutionModifiedMessage }
-import hmda.persistence.institutions.serialization.InstitutionsConverter._
+import hmda.persistence.institutions.serialization.InstitutionConverter._
 
 class InstitutionPersistenceProtobufSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 8002

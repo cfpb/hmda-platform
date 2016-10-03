@@ -3,7 +3,8 @@ syntax = "proto3";
 package hmda.persistence;
 
 import "model.proto";
-import "institutions.proto";
+import "institution.proto";
+import "filing.proto";
 
 message LineAddedMessage {
     int64 timestamp = 1;

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package hmda.model;
+
+message SubmissionStatusMessage {
+    int32 code = 1;
+    string message = 2;
+}
+
+message SubmissionIdMessage {
+    string institutionId = 1;
+    string period = 2;
+    int32 sequenceNumber = 3;
+}
+
+message Submission {
+    SubmissionIdMessage submissionId = 1;
+    SubmissionStatusMessage submissionStatus = 2;
+}

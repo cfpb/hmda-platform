@@ -1,16 +1,13 @@
 package hmda.persistence.institutions.serialization
 
-import hmda.model.fi._
 import hmda.model.institution.Agency._
 import hmda.model.institution.ExternalIdType._
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution.InstitutionType._
 import hmda.model.institution._
-import hmda.model.institutions._
-
 import scala.language.implicitConversions
 
-object InstitutionsConverter {
+object InstitutionConverter {
 
   implicit def messageToInstitution(m: Option[InstitutionMessage]): Institution = {
     m.map { i =>
@@ -122,33 +119,6 @@ object InstitutionsConverter {
       cra,
       status
     ))
-  }
-
-  implicit def messageToFilingCreated(m: Option[FilingMessage]): Filing = {
-    m.map { f =>
-      val id = f.institutionId
-      val period = f.period
-      val filingStatus = f.status.value match {
-        case 0 => NotStarted
-        case 1 => InProgress
-        case 2 => Completed
-        case 3 => Cancelled
-      }
-      Filing(period, id, filingStatus)
-    }.getOrElse(Filing())
-  }
-
-  implicit def filingToMessage(filing: Filing): Option[FilingMessage] = {
-    val period = filing.period
-    val institutionId = filing.institutionId
-    val status = filing.status match {
-      case NotStarted => FilingStatusMessage.NOT_STARTED
-      case InProgress => FilingStatusMessage.IN_PROGRESS
-      case Completed => FilingStatusMessage.COMPLETED
-      case Cancelled => FilingStatusMessage.CANCELLED
-    }
-    val message = FilingMessage(period, institutionId, status)
-    Some(message)
   }
 
 }

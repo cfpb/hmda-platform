@@ -3,7 +3,7 @@ package hmda.persistence.institutions.serialization
 import akka.serialization.SerializerWithStringManifest
 import hmda.persistence.institutions.FilingPersistence.{ FilingCreated, FilingStatusUpdated }
 import hmda.persistence.messages.{ FilingCreatedMessage, FilingStatusUpdatedMessage }
-import hmda.persistence.institutions.serialization.InstitutionsConverter._
+import hmda.persistence.institutions.serialization.FilingConverter._
 
 class FilingPersistenceProtobufSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 8001
