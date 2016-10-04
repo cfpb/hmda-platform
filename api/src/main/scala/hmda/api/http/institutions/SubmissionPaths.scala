@@ -139,12 +139,12 @@ trait SubmissionPaths
     }
 
   def submissionSingleEditPath(institutionId: String) =
-    path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, submissionId, editType) =>
-      val path = s"institutions/$institutionId/filings/$period/submissions/$submissionId/edits/$editType"
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr/edits/$editType"
       extractExecutionContext { executor =>
         timedGet {
           implicit val ec: ExecutionContext = executor
-          val fValidationState = getValidationState(institutionId, period, submissionId)
+          val fValidationState = getValidationState(institutionId, period, seqNr)
 
           val fSingleEdits = fValidationState.map { editChecks =>
             editType match {
@@ -169,9 +169,9 @@ trait SubmissionPaths
       }
     }
 
-  private def getValidationState(institutionId: String, period: String, submissionId: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
+  private def getValidationState(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
     val supervisor = system.actorSelection("/user/supervisor")
-    val submissionID = SubmissionId(institutionId, period, submissionId)
+    val submissionID = SubmissionId(institutionId, period, seqNr)
     val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionID)).mapTo[ActorRef]
 
     for {
