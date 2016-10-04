@@ -2,7 +2,8 @@ syntax = "proto3";
 
 package hmda.persistence;
 
-import "model.proto";
+import "ts.proto";
+import "lar.proto";
 import "institution.proto";
 import "filing.proto";
 import "submission.proto";

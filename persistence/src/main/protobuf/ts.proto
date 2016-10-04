@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package hmda.fi;
+
+message TransmittalSheetMessage {
+    int32 id = 1;
+    string respondentId = 2;
+    int32 agencyCode = 3;
+    int64 timestamp = 4;
+    int32 activityYear = 5;
+    string taxId = 6;
+    int32 totalLines = 7;
+    string respondentName = 8;
+    string respondentAddress = 9;
+    string respondentCity = 10;
+    string respondentState = 11;
+    string respondentZipCode = 12;
+    string parentName = 13;
+    string parentAddress = 14;
+    string parentCity = 15;
+    string parentState = 16;
+    string parentZipCode = 17;
+    string contactName = 18;
+    string contactPhone = 19;
+    string contactFax = 20;
+    string contactEmail = 21;
+}
