@@ -59,7 +59,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
               processingActor ! StartUpload
               uploadFile(processingActor, uploadTimestamp, path)
             case Success((true, _)) =>
-              val errorResponse = ErrorResponse(404, s"Submission $seqNr not available for upload", path)
+              val errorResponse = ErrorResponse(400, s"Submission $seqNr not available for upload", path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
             case Failure(error) =>
               completeWithInternalError(path, error)

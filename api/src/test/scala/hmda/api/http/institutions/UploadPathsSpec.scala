@@ -43,7 +43,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
     "return a 404 when trying to upload to a non-existant submission" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/987654321", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Submission 987654321 not available for upload", "institutions/0/filings/2017/submissions/987654321")
+        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission 987654321 not available for upload", "institutions/0/filings/2017/submissions/987654321")
       }
     }
 
@@ -61,7 +61,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
 
         postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
           status mustBe StatusCodes.BadRequest
-          responseAs[ErrorResponse] mustBe ErrorResponse(404, "Submission 1 not available for upload", "institutions/0/filings/2017/submissions/1")
+          responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission 1 not available for upload", "institutions/0/filings/2017/submissions/1")
         }
       }
     }
