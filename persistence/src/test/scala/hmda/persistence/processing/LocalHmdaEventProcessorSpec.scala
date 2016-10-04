@@ -113,7 +113,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     }
   }
 
-  def checkSubmissionStatus(status: SubmissionStatus): Assertion = {
+  private def checkSubmissionStatus(status: SubmissionStatus): Assertion = {
     val fSubmissions = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
     val subActor = Await.result(fSubmissions, 5.seconds)
     val submissionSeq = Await.result((subActor ? GetState).mapTo[Seq[Submission]], 5.seconds)
