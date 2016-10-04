@@ -40,14 +40,14 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
       }
     }
 
-    "return a 404 when trying to upload to a non-existant submission" in {
+    "return a 400 when trying to upload to a non-existant submission" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/987654321", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission 987654321 not available for upload", "institutions/0/filings/2017/submissions/987654321")
       }
     }
 
-    "return 404 when trying to upload to a completed submission" in {
+    "return 400 when trying to upload to a completed submission" in {
       val supervisor = system.actorSelection("/user/supervisor")
       val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, "0", "2017")).mapTo[ActorRef]
 
