@@ -4,7 +4,6 @@ package hmda.model;
 
 message SubmissionStatusMessage {
     int32 code = 1;
-    string message = 2;
 }
 
 message SubmissionIdMessage {
@@ -13,7 +12,7 @@ message SubmissionIdMessage {
     int32 sequenceNumber = 3;
 }
 
-message Submission {
+message SubmissionMessage {
     SubmissionIdMessage submissionId = 1;
     SubmissionStatusMessage submissionStatus = 2;
 }

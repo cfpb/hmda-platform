@@ -5,6 +5,7 @@ package hmda.persistence;
 import "model.proto";
 import "institution.proto";
 import "filing.proto";
+import "submission.proto";
 
 message LineAddedMessage {
     int64 timestamp = 1;
@@ -50,6 +51,15 @@ message FilingCreatedMessage {
 
 message FilingStatusUpdatedMessage {
     hmda.model.FilingMessage filing = 1;
+}
+
+message SubmissionCreatedMessage {
+    hmda.model.SubmissionMessage submission = 1;
+}
+
+message SubmissionStatusUpdatedMessage {
+    hmda.model.SubmissionIdMessage submissionId = 1;
+    hmda.model.SubmissionStatusMessage status = 2;
 }
 
 

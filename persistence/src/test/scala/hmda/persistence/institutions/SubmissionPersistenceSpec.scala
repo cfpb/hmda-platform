@@ -1,13 +1,25 @@
 package hmda.persistence.institutions
 
+import akka.actor.ActorSystem
 import akka.testkit.{ EventFilter, TestProbe }
+import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi._
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetSubmissionById, UpdateSubmissionStatus, _ }
+import hmda.persistence.processing.TestConfigOverride
 
 class SubmissionPersistenceSpec extends ActorSpec {
+
+  val config = ConfigFactory.load()
+  override implicit lazy val system =
+    ActorSystem(
+      "test-system",
+      ConfigFactory.parseString(
+        TestConfigOverride.config
+      )
+    )
 
   val submissionsActor = createSubmissions("0", "2017", system)
 
