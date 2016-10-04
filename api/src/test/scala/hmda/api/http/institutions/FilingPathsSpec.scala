@@ -18,7 +18,6 @@ class FilingPathsSpec extends InstitutionHttpApiSpec with FilingPaths {
     }
 
     val path1 = Path("/institutions/0/filings/xxxx")
-    println(s"path1 = $path1")
     getWithCfpbHeaders(path1.toString) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 0", path1)
