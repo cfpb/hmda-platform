@@ -15,8 +15,9 @@ class SubmissionPersistenceProtobufSerializer extends SerializerWithStringManife
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef = manifest match {
     case SubmissionCreatedManifest =>
-      val submissionCreatedMessage = SubmissionMessage.parseFrom(bytes)
-      SubmissionCreated(Some(submissionCreatedMessage))
+      val submissionCreatedMessage = SubmissionCreatedMessage.parseFrom(bytes)
+      val submission = submissionCreatedMessage.submission
+      SubmissionCreated(submission)
 
     case SubmissionStatusUpdatedManifest =>
       val submissionStatusUpdatedMessage = SubmissionMessage.parseFrom(bytes)
