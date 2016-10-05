@@ -88,7 +88,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(ts => validateTs(ts, ctx).toEither)
         .map {
           case Right(ts) => ts
-          case Left(errors) => ValidationErrors(errors.list.toList)
+          case Left(errors) => TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
@@ -98,7 +98,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l
-          case Left(errors) => ValidationErrors(errors.list.toList)
+          case Left(errors) => LarValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, CompleteValidation))
 
