@@ -52,15 +52,15 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
           val fUploadSubmission = for {
             p <- fProcessingActor
             s <- fSubmissionsActor
-            fIsSubmissionOverwrite <- checkSubmissionOverwrite(s, submissionId)
-          } yield (fIsSubmissionOverwrite, p)
+            fIsSubmissionCreated <- checkSubmissionIsCreated(s, submissionId)
+          } yield (fIsSubmissionCreated, p)
 
           onComplete(fUploadSubmission) {
-            case Success((false, processingActor)) =>
+            case Success((true, processingActor)) =>
               processingActor ! StartUpload
               uploadFile(processingActor, uploadTimestamp, uri.path)
-            case Success((true, _)) =>
-              val errorResponse = ErrorResponse(400, "Submission already exists", uri.path)
+            case Success((false, _)) =>
+              val errorResponse = ErrorResponse(400, s"Submission $seqNr not available for upload", uri.path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
             case Failure(error) =>
               completeWithInternalError(uri, error)
@@ -69,9 +69,9 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
       }
     }
 
-  private def checkSubmissionOverwrite(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Boolean] = {
+  private def checkSubmissionIsCreated(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Boolean] = {
     val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
-    submission.map(_.submissionStatus != Created)
+    submission.map(_.submissionStatus == Created)
   }
 
   private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path): Route = {

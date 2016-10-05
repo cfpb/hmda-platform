@@ -20,7 +20,8 @@ object BuildSettings {
         "-unchecked",
         "-feature"),
       aggregate in assembly := false,
-      parallelExecution in Test := false
+      parallelExecution in Test := false,
+      testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oC")
     )
 
 }
