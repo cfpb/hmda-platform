@@ -22,7 +22,7 @@ import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 trait SubmissionPaths
@@ -115,30 +115,68 @@ trait SubmissionPaths
       val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr/edits"
       val submissionId = SubmissionId(institutionId, period, seqNr)
       extractExecutionContext { executor =>
-        implicit val ec: ExecutionContext = executor
-        val supervisor = system.actorSelection("/user/supervisor")
-        val fActor = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+        timedGet {
+          implicit val ec: ExecutionContext = executor
+          val fEditChecks = getValidationState(institutionId, period, seqNr)
 
-        val fEditChecks = for {
-          a <- fActor
-          f <- (a ? GetState).mapTo[HmdaFileValidationState]
-        } yield f
+          val fSummaryEdits = fEditChecks.map { editChecks =>
+            val s = validationErrorsToEditResults(editChecks.syntactical, Syntactical)
+            val v = validationErrorsToEditResults(editChecks.validity, Validity)
+            val q = validationErrorsToEditResults(editChecks.quality, Quality)
+            val m = validationErrorsToEditResults(editChecks.`macro`, Macro)
+            SummaryEditResults(s, v, q, m)
+          }
 
-        val fSummaryEdits = fEditChecks.map { editChecks =>
-          val s = validationErrorsToEditResults(editChecks.syntactical, Syntactical)
-          val v = validationErrorsToEditResults(editChecks.validity, Validity)
-          val q = validationErrorsToEditResults(editChecks.quality, Quality)
-          val m = validationErrorsToEditResults(editChecks.`macro`, Macro)
-          SummaryEditResults(s, v, q, m)
-        }
-
-        onComplete(fSummaryEdits) {
-          case Success(edits) =>
-            complete(ToResponseMarshallable(edits))
-          case Failure(error) =>
-            completeWithInternalError(path, error)
+          onComplete(fSummaryEdits) {
+            case Success(edits) =>
+              complete(ToResponseMarshallable(edits))
+            case Failure(error) =>
+              completeWithInternalError(path, error)
+          }
         }
       }
 
     }
+
+  def submissionSingleEditPath(institutionId: String) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>
+      val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr/edits/$editType"
+      extractExecutionContext { executor =>
+        timedGet {
+          implicit val ec: ExecutionContext = executor
+          val fValidationState = getValidationState(institutionId, period, seqNr)
+
+          val fSingleEdits = fValidationState.map { editChecks =>
+            editType match {
+              case "syntactical" =>
+                validationErrorsToEditResults(editChecks.syntactical, Syntactical)
+              case "validity" =>
+                validationErrorsToEditResults(editChecks.validity, Validity)
+              case "quality" =>
+                validationErrorsToEditResults(editChecks.quality, Quality)
+              case "macro" =>
+                validationErrorsToEditResults(editChecks.`macro`, Macro)
+            }
+          }
+
+          onComplete(fSingleEdits) {
+            case Success(edits) =>
+              complete(ToResponseMarshallable(edits))
+            case Failure(error) =>
+              completeWithInternalError(path, error)
+          }
+        }
+      }
+    }
+
+  private def getValidationState(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
+    val supervisor = system.actorSelection("/user/supervisor")
+    val submissionID = SubmissionId(institutionId, period, seqNr)
+    val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionID)).mapTo[ActorRef]
+
+    for {
+      s <- fHmdaFileValidator
+      xs <- (s ? GetState).mapTo[HmdaFileValidationState]
+    } yield xs
+  }
 }

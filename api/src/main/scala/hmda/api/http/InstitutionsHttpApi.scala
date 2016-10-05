@@ -34,7 +34,8 @@ trait InstitutionsHttpApi
               submissionPath(instId) ~
               submissionLatestPath(instId) ~
               uploadPath(instId) ~
-              submissionEditsPath(instId)
+              submissionEditsPath(instId) ~
+              submissionSingleEditPath(instId)
           }
         }
     }
