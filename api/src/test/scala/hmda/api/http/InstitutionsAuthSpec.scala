@@ -1,8 +1,22 @@
 package hmda.api.http
 
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.pattern.ask
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
+import hmda.model.institution.Agency.FDIC
+import hmda.model.institution.ExternalIdType.RssdId
+import hmda.model.institution.{ ExternalId, Institution }
+import hmda.model.institution.InstitutionStatus.Active
+import hmda.model.institution.InstitutionType.Bank
+import hmda.persistence.HmdaSupervisor
+import hmda.persistence.HmdaSupervisor.FindActorByName
+import hmda.persistence.institutions.InstitutionPersistence
+import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
+
+import scala.concurrent.Future
 
 class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
 
@@ -64,9 +78,20 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
         status mustBe StatusCodes.Forbidden
       }
     }
+
     "matches 'CFPB-HMDA-Institutions' header case insensitively" in {
-      val institutionLower = "1"
-      val institutionUpper = "1"
+      val caseInsensitiveBank = Institution("abc", "Bank abc", Set(ExternalId("externalTest1", RssdId)), FDIC, Bank, hasParent = true, status = Active)
+      val supervisor = system.actorSelection("/user/supervisor")
+      val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+
+      val fInstitutions: Future[Unit] = for {
+        h <- fInstitutionsActor
+      } yield {
+        h ! CreateInstitution(caseInsensitiveBank)
+      }
+
+      val institutionLower = "abc"
+      val institutionUpper = "ABC"
       val instHeader = RawHeader("CFPB-HMDA-Institutions", institutionUpper)
 
       Get(s"/institutions/$institutionLower")
