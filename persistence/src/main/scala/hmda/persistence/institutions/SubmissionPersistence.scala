@@ -1,7 +1,7 @@
 package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.fi.{ Created, Submission, SubmissionId, SubmissionStatus }
+import hmda.model.fi._
 import hmda.persistence.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.SubmissionPersistence._
@@ -69,11 +69,11 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
       }
 
     case GetSubmissionById(id) =>
-      val submission = state.submissions.find(s => s.id == id).getOrElse(Submission())
+      val submission = state.submissions.find(s => s.id == id).getOrElse(Submission(SubmissionId(), Failed("No submission found")))
       sender() ! submission
 
     case GetLatestSubmission =>
-      val latest = state.submissions.headOption.getOrElse(Submission())
+      val latest = state.submissions.headOption.getOrElse(Submission(SubmissionId(), Failed("No submission found")))
       sender() ! latest
 
     case GetState =>
