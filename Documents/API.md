@@ -43,7 +43,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-
 * `/institutions/<institution>`
     * `GET` - Details for Financial Institution
 
@@ -60,12 +59,18 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
           "period": "2017",
           "institutionId": "12345",
-          "status": "not-started"
+          "status": {
+            "code": 1,
+            "message": "not-started"
+          }
         },
         {
           "period": "2016",
           "institutionId": "12345",
-          "status": "completed"
+          "status": {
+            "code": 3,
+            "message": "completed"
+          }
         }
       ]
     }
@@ -82,7 +87,10 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
      "filing": {
      "period": "2017",
      "institutionId": "12345",
-     "status": "not-started"
+     "status": {
+       "code": 1,
+       "message": "not-started"
+     }
    },
    "submissions": [
      {
