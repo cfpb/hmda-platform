@@ -101,7 +101,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
      },
      {
        "id": 1,
-       "submissionStatus": "created"
        "status": {
          "code": 1,
          "message": "created"
