@@ -28,11 +28,11 @@ trait FilingPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
 
   implicit val timeout: Timeout
 
+  // institutions/<institutionId>/filings/<period>
   def filingByPeriodPath(institutionId: String) =
     path("filings" / Segment) { period =>
-      val path = s"institutions/$institutionId/filings/$period"
       extractExecutionContext { executor =>
-        timedGet {
+        timedGet { uri =>
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
           val fFilings = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
@@ -50,14 +50,14 @@ trait FilingPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
               if (filing.institutionId == institutionId && filing.period == period)
                 complete(ToResponseMarshallable(filingDetails))
               else if (filing.institutionId == institutionId && filing.period != period) {
-                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
+                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
-                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
+                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
             case Failure(error) =>
-              completeWithInternalError(path, error)
+              completeWithInternalError(uri, error)
           }
         }
       }

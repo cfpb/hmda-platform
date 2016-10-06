@@ -43,36 +43,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-* `/institutions/<institution>/summary`
-    * `GET` - Summary for Financial Institution, including filing information
-
-    Example response, with HTTP code 200:
-
-    ```json
-    {
-      "id": "12345",
-      "name": "First Bank",
-      "filings": [
-        {
-          "period": "2017",
-          "institutionId": "12345",
-          "status": {
-            "code": 1,
-            "message": "not-started"
-          }
-        },
-        {
-          "period": "2016",
-          "institutionId": "12345",
-          "status": {
-            "code": 3,
-            "message": "completed"
-          }
-        }
-      ]
-    }
-    ```
-
 * `/institutions/<institution>`
     * `GET` - Details for Financial Institution
 

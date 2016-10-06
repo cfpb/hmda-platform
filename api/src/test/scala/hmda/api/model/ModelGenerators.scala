@@ -1,6 +1,7 @@
 package hmda.api.model
 
 import java.util.Calendar
+import akka.http.scaladsl.model.Uri.Path
 import hmda.model.fi._
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution._
@@ -116,7 +117,7 @@ trait ModelGenerators {
       status <- Gen.oneOf(200, 201, 400, 500)
       message <- Gen.alphaStr
       path <- Gen.alphaStr
-    } yield ErrorResponse(status, message, path)
+    } yield ErrorResponse(status, message, Path(path))
   }
 
   implicit def larEditResultGen: Gen[LarEditResult] = {

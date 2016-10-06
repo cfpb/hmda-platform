@@ -38,11 +38,11 @@ trait SubmissionPaths
 
   implicit val timeout: Timeout
 
+  // institutions/<institutionId>/filings/<period>/submissions
   def submissionPath(institutionId: String) =
     path("filings" / Segment / "submissions") { period =>
-      val path = s"institutions/$institutionId/filings/$period/submissions"
       extractExecutionContext { executor =>
-        timedPost {
+        timedPost { uri =>
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
           val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
@@ -63,27 +63,27 @@ trait SubmissionPaths
                   case Success(submission) =>
                     complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                   case Failure(error) =>
-                    completeWithInternalError(path, error)
+                    completeWithInternalError(uri, error)
                 }
               } else if (!filing.institutionId.isEmpty) {
-                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", path)
+                val errorResponse = ErrorResponse(404, s"$period filing not found for institution $institutionId", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
-                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", path)
+                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               }
             case Failure(error) =>
-              completeWithInternalError(path, error)
+              completeWithInternalError(uri, error)
           }
         }
       }
     }
 
+  // institutions/<institutionId>/filings/<period>/submissions/latest
   def submissionLatestPath(institutionId: String) =
     path("filings" / Segment / "submissions" / "latest") { period =>
-      val path = s"institutions/$institutionId/filings/$period/submissions/latest"
       extractExecutionContext { executor =>
-        timedGet {
+        timedGet { uri =>
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
           val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
@@ -96,7 +96,7 @@ trait SubmissionPaths
           onComplete(fSubmissions) {
             case Success(submission) =>
               if (submission.id.sequenceNumber == 0) {
-                val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", path)
+                val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
                 val statusWrapper = SubmissionStatusWrapper(submission.submissionStatus.code, submission.submissionStatus.message)
@@ -104,18 +104,17 @@ trait SubmissionPaths
                 complete(ToResponseMarshallable(submissionWrapper))
               }
             case Failure(error) =>
-              completeWithInternalError(path, error)
+              completeWithInternalError(uri, error)
           }
         }
       }
     }
 
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits
   def submissionEditsPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber / "edits") { (period, seqNr) =>
-      val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr/edits"
-      val submissionId = SubmissionId(institutionId, period, seqNr)
       extractExecutionContext { executor =>
-        timedGet {
+        timedGet { uri =>
           implicit val ec: ExecutionContext = executor
           val fEditChecks = getValidationState(institutionId, period, seqNr)
 
@@ -131,18 +130,18 @@ trait SubmissionPaths
             case Success(edits) =>
               complete(ToResponseMarshallable(edits))
             case Failure(error) =>
-              completeWithInternalError(path, error)
+              completeWithInternalError(uri, error)
           }
         }
       }
 
     }
 
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/<editType>
   def submissionSingleEditPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>
-      val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr/edits/$editType"
       extractExecutionContext { executor =>
-        timedGet {
+        timedGet { uri =>
           implicit val ec: ExecutionContext = executor
           val fValidationState = getValidationState(institutionId, period, seqNr)
 
@@ -163,7 +162,7 @@ trait SubmissionPaths
             case Success(edits) =>
               complete(ToResponseMarshallable(edits))
             case Failure(error) =>
-              completeWithInternalError(path, error)
+              completeWithInternalError(uri, error)
           }
         }
       }
