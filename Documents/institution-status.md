@@ -7,7 +7,6 @@ Every filing will store a `InstitutionStatus` object with the following structur
 For example:
 
 ```json
-{
       "institution": {
       "id": "12345",
       "name": "First Bank",
