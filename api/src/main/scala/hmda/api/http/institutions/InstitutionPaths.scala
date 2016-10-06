@@ -84,33 +84,6 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
       }
     }
 
-  def institutionSummaryPath(institutionId: String) =
-    path("summary") {
-      val path = s"institutions/$institutionId/summary"
-      extractExecutionContext { executor =>
-        timedGet {
-          implicit val ec: ExecutionContext = executor
-          val supervisor = system.actorSelection("/user/supervisor")
-          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-          val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
-
-          val fSummary = for {
-            institutionsActor <- fInstitutionsActor
-            filingsActor <- fFilingsActor
-            institution <- (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
-            filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-          } yield InstitutionSummary(institution.id.toString, institution.name, filings)
-
-          onComplete(fSummary) {
-            case Success(summary) =>
-              complete(ToResponseMarshallable(summary))
-            case Failure(error) =>
-              completeWithInternalError(path, error)
-          }
-        }
-      }
-    }
-
   private def institutionDetails(institutionId: String, institutionsActor: ActorRef, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
     val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
     for {
