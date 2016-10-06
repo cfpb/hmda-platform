@@ -88,14 +88,14 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
      {
        "id": 3,
        "status": {
-         "code": 1
+         "code": 1,
          "message": "created"
        }
      },
      {
        "id": 2,
        "status": {
-         "code": 1
+         "code": 1,
          "message": "created"
        }
      },
@@ -103,7 +103,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
        "id": 1,
        "submissionStatus": "created"
        "status": {
-         "code": 1
+         "code": 1,
          "message": "created"
        }
      }
@@ -121,7 +121,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     {
         "id": 4,
         "status": {
-          "code": 1
+          "code": 1,
           "message": "created"
         }
     }
