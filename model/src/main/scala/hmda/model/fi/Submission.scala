@@ -23,13 +23,13 @@ case object Parsing extends SubmissionStatus {
   override def code: Int = 4
   override def message: String = parsingMsg
 }
-case object Parsed extends SubmissionStatus {
-  override def code: Int = 5
-  override def message: String = parsedMsg
-}
 case object ParsedWithErrors extends SubmissionStatus {
-  override def code: Int = 6
+  override def code: Int = 5
   override def message: String = parsedWithErrorsMsg
+}
+case object Parsed extends SubmissionStatus {
+  override def code: Int = 6
+  override def message: String = parsedMsg
 }
 case object Validating extends SubmissionStatus {
   override def code: Int = 7
