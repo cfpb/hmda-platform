@@ -112,14 +112,14 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
        "id": 3,
        "status": {
          "code": 1
-         "message: "created"
+         "message": "created"
        }
      },
      {
        "id": 2,
        "status": {
          "code": 1
-         "message: "created"
+         "message": "created"
        }
      },
      {
@@ -127,7 +127,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
        "submissionStatus": "created"
        "status": {
          "code": 1
-         "message: "created"
+         "message": "created"
        }
      }
    ]
@@ -145,7 +145,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         "id": 4,
         "status": {
           "code": 1
-          "message: "created"
+          "message": "created"
         }
     }
     ```
