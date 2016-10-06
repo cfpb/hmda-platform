@@ -55,7 +55,7 @@ case object Signed extends SubmissionStatus {
   override def code: Int = 12
   override def message: String = signedMsg
 }
-case class Failed(override val message: String) extends SubmissionStatus {
+case class Failed(message: String) extends SubmissionStatus {
   override def code: Int = -1
 }
 
