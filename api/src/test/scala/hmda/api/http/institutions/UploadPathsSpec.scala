@@ -57,7 +57,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
         s ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
 
         val submission = Await.result((s ? GetSubmissionById(SubmissionId("0", "2017", 1))).mapTo[Submission], 5.seconds)
-        submission.submissionStatus mustBe Signed
+        submission.status mustBe Signed
 
         postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
           status mustBe StatusCodes.BadRequest

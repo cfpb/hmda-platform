@@ -110,15 +110,25 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
    "submissions": [
      {
        "id": 3,
-       "submissionStatus": "created"
+       "status": {
+         "code": 1
+         "message: "created"
+       }
      },
      {
        "id": 2,
-       "submissionStatus": "created"
+       "status": {
+         "code": 1
+         "message: "created"
+       }
      },
      {
        "id": 1,
        "submissionStatus": "created"
+       "status": {
+         "code": 1
+         "message: "created"
+       }
      }
    ]
    }
@@ -133,7 +143,10 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     ```json
     {
         "id": 4,
-        "submissionStatus": "created"
+        "status": {
+          "code": 1
+          "message: "created"
+        }
     }
     ```
     

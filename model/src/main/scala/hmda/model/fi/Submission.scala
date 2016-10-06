@@ -55,7 +55,7 @@ case object Signed extends SubmissionStatus {
   override def code: Int = 12
   override def message: String = signedMsg
 }
-case class Failed(message: String) extends SubmissionStatus {
+case class Failed(override val message: String) extends SubmissionStatus {
   override def code: Int = -1
 }
 
@@ -63,4 +63,4 @@ case class SubmissionId(institutionId: String = "", period: String = "", sequenc
   override def toString: String = s"$institutionId-$period-$sequenceNumber"
 }
 
-case class Submission(id: SubmissionId = SubmissionId(), submissionStatus: SubmissionStatus = Created)
+case class Submission(id: SubmissionId = SubmissionId(), status: SubmissionStatus = Created)
