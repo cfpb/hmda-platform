@@ -40,15 +40,6 @@ class InstitutionsPathsSpec extends InstitutionHttpApiSpec {
         responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", path)
       }
     }
-
-    "return an institution's summary" in {
-      getWithCfpbHeaders("/institutions/0/summary") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
-        val summary = DemoData.institutionSummary
-        val institutionSummary = InstitutionSummary(summary._1.toString, summary._2, summary._3)
-        responseAs[InstitutionSummary] mustBe institutionSummary
-      }
-    }
   }
 
 }
