@@ -20,7 +20,7 @@ trait HttpApi extends HmdaApiProtocol with HmdaCustomDirectives {
 
   val rootPath =
     pathSingleSlash {
-      timedGet {
+      timedGet { uri =>
         complete {
           val now = Instant.now.toString
           val host = InetAddress.getLocalHost.getHostName
