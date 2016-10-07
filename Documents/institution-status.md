@@ -7,11 +7,11 @@ Every filing will store a `InstitutionStatus` object with the following structur
 For example:
 
 ```json
-      "institution": {
-      "id": "12345",
-      "name": "First Bank",
-      "status": "active"
-    }
+"institution": {
+    "id": "12345",
+    "name": "First Bank",
+    "status": "active"
+}
 ```
 
 In order to track the status of a financial institution, the following states are captured by the backend:
