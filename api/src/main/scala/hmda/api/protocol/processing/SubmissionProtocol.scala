@@ -3,20 +3,20 @@ package hmda.api.protocol.processing
 import hmda.model.fi._
 import hmda.model.fi.SubmissionStatusMessage._
 import hmda.api.model.{ SubmissionStatusWrapper, SubmissionWrapper, Submissions }
-import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
+import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
 trait SubmissionProtocol extends DefaultJsonProtocol {
 
   implicit object SubmissionStatusJsonFormat extends RootJsonFormat[SubmissionStatus] {
     override def write(status: SubmissionStatus): JsValue = {
-      status match {
-        case Failed(msg) => JsString(s"failed: $msg")
-        case _ => JsString(status.message)
-      }
+      JsObject(
+        "code" -> JsNumber(status.code),
+        "message" -> JsString(status.message)
+      )
     }
 
     override def read(json: JsValue): SubmissionStatus = {
-      json match {
+      json.asJsObject.getFields("message").head match {
         case JsString(s) => s match {
           case `createdMsg` => Created
           case `uploadingMsg` => Uploading

@@ -99,7 +99,7 @@ trait SubmissionPaths
                 val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
-                val statusWrapper = SubmissionStatusWrapper(submission.submissionStatus.code, submission.submissionStatus.message)
+                val statusWrapper = SubmissionStatusWrapper(submission.status.code, submission.status.message)
                 val submissionWrapper = SubmissionWrapper(submission.id.sequenceNumber, statusWrapper)
                 complete(ToResponseMarshallable(submissionWrapper))
               }

@@ -71,7 +71,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
 
   private def checkSubmissionIsCreated(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Boolean] = {
     val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
-    submission.map(_.submissionStatus == Created)
+    submission.map(_.status == Created)
   }
 
   private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path): Route = {
