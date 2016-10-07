@@ -8,8 +8,10 @@ case object Macro extends ValidationErrorType
 
 // errorID = Loan ID (LAR) or Agency Code + Respondent ID (TS)
 case class ValidationError(errorId: String, name: String, errorType: ValidationErrorType)
-case class ValidationErrors(errors: Seq[ValidationError])
-case class TsValidationErrors() extends ValidationErrors(errors = Nil)
-case class LarValidationErrors() extends ValidationErrors(errors = Nil)
+abstract class ValidationErrors {
+  def errors: Seq[ValidationError]
+}
+case class TsValidationErrors(errors: Seq[ValidationError]) extends ValidationErrors
+case class LarValidationErrors(errors: Seq[ValidationError]) extends ValidationErrors
 case class ValidationErrorsSummary(errors: Seq[String])
 
