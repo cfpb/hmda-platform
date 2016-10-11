@@ -1,6 +1,6 @@
 ## Institution status
 
-Every filing will store a `InstitutionStatus` object with the following structure:
+Every institution will store a `InstitutionStatus` object with the following structure:
 
 * `status`: `String`
 
