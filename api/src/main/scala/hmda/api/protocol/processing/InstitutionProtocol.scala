@@ -1,6 +1,6 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ InstitutionDetail, InstitutionSummary, InstitutionWrapper, Institutions }
+import hmda.api.model.{ InstitutionDetail, InstitutionWrapper, Institutions }
 import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
 import hmda.model.institution.{ Agency, DepositoryType, Institution, InstitutionStatus }
 import hmda.model.institution.InstitutionStatus.{ Active, Inactive }

@@ -1,6 +1,6 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ InstitutionSummary, InstitutionWrapper, ModelGenerators }
+import hmda.api.model.{ InstitutionWrapper, ModelGenerators }
 import hmda.model.institution.{ Institution, InstitutionStatus }
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }

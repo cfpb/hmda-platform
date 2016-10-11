@@ -4,7 +4,7 @@ import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.Directives._
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{ StatusCodes, Uri }
 import hmda.api.model.ErrorResponse
 import hmda.api.protocol.processing.ApiErrorProtocol
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -17,20 +17,20 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
       .handle {
         case AuthorizationFailedRejection =>
           extractUri { uri =>
-            val errorResponse = ErrorResponse(403, "Unauthorized Access", uri.path.toString)
+            val errorResponse = ErrorResponse(403, "Unauthorized Access", uri.path)
             complete(ToResponseMarshallable(StatusCodes.Forbidden -> errorResponse))
           }
       }
       .handleNotFound {
         extractUri { uri =>
-          val errorResponse = ErrorResponse(404, "Not Found", uri.path.toString)
+          val errorResponse = ErrorResponse(404, "Not Found", uri.path)
           complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
         }
       }
       .result()
 
-  def timedGet: Directive0 = get & time
-  def timedPost: Directive0 = post & time
+  def timedGet = get & time & extractUri
+  def timedPost = post & time & extractUri
 
   def headerAuthorize: Directive0 =
     authorize(ctx =>
@@ -61,9 +61,9 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
 
   }
 
-  def completeWithInternalError(path: String, error: Throwable): StandardRoute = {
+  def completeWithInternalError(uri: Uri, error: Throwable): StandardRoute = {
     log.error(error.getLocalizedMessage)
-    val errorResponse = ErrorResponse(500, "Internal server error", path)
+    val errorResponse = ErrorResponse(500, "Internal server error", uri.path)
     complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
 
   }

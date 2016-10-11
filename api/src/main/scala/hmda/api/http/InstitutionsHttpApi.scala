@@ -29,7 +29,6 @@ trait InstitutionsHttpApi
         pathPrefix("institutions" / Segment) { instId =>
           institutionAuthorize(instId) {
             institutionByIdPath(instId) ~
-              institutionSummaryPath(instId) ~
               filingByPeriodPath(instId) ~
               submissionPath(instId) ~
               submissionLatestPath(instId) ~

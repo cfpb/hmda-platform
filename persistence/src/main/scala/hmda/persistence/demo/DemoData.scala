@@ -99,7 +99,7 @@ object DemoData {
           val submissionsActor = system.actorOf(SubmissionPersistence.props(id, period))
           submissionsActor ! CreateSubmission
           Thread.sleep(100)
-          submissionsActor ! UpdateSubmissionStatus(submission.id, submission.submissionStatus)
+          submissionsActor ! UpdateSubmissionStatus(submission.id, submission.status)
           Thread.sleep(100)
           submissionsActor ! Shutdown
       }
