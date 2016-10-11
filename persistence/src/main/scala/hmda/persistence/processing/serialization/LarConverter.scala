@@ -7,6 +7,29 @@ import scala.language.implicitConversions
 
 object LarConverter {
 
+  implicit def optionMessageToLoanApplicationRegister(o: Option[LoanApplicationRegisterMessage]): LoanApplicationRegister = {
+    o.map { m =>
+      messageToLoanApplicationRegister(m)
+    }.getOrElse(
+      LoanApplicationRegister(
+        0,
+        "",
+        0,
+        Loan(),
+        0,
+        0,
+        0,
+        Geography(),
+        Applicant(),
+        0,
+        Denial(),
+        "",
+        0,
+        0
+      )
+    )
+  }
+
   implicit def messageToLoanApplicationRegister(m: LoanApplicationRegisterMessage): LoanApplicationRegister = {
     val id = m.id
     val respondentId = m.respondentId

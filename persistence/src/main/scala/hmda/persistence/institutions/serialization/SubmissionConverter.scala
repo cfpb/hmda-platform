@@ -50,7 +50,7 @@ object SubmissionConverter {
     val period = submission.id.period
     val seqNr = submission.id.sequenceNumber
     val submissionId = SubmissionIdMessage(institutionId, period, seqNr)
-    val status = SubmissionStatusMessage(submission.submissionStatus.code)
+    val status = SubmissionStatusMessage(submission.status.code)
     Some(
       SubmissionMessage(Some(submissionId), Some(status))
     )

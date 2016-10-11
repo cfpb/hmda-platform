@@ -21,14 +21,14 @@ class HmdaFileParserProtobufSerializer extends SerializerWithStringManifest {
 
   override def fromBinary(bytes: Array[Byte], manifest: String): AnyRef = manifest match {
     case TsParsedManifest =>
-      TsParsedMessage.parseFrom(bytes).ts.asInstanceOf[TransmittalSheet]
+      TsParsedMessage.parseFrom(bytes)
 
     case TsParsedErrorsManifest =>
       val tsParsedErrorsMessage = TsParsedErrorsMessage.parseFrom(bytes)
       TsParsedErrors(tsParsedErrorsMessage.errors.toList)
 
     case LarParsedManifest =>
-      LarParsedMessage.parseFrom(bytes).lar.asInstanceOf[LoanApplicationRegister]
+      LarParsedMessage.parseFrom(bytes)
 
     case LarParsedErrorsManifest =>
       val larParsedErrorsMessage = LarParsedErrorsMessage.parseFrom(bytes)

@@ -6,6 +6,24 @@ import scala.language.implicitConversions
 
 object TsConverter {
 
+  implicit def optionMessageToTransmittalSheet(o: Option[TransmittalSheetMessage]): TransmittalSheet = {
+    o.map { m =>
+      messageToTransmittalSheet(m)
+    }.getOrElse(
+      TransmittalSheet(
+        0,
+        0,
+        0L,
+        0,
+        "",
+        0,
+        Respondent(),
+        Parent(),
+        Contact()
+      )
+    )
+  }
+
   implicit def messageToTransmittalSheet(m: TransmittalSheetMessage): TransmittalSheet = {
     val id = m.id
     val respondentId = m.respondentId

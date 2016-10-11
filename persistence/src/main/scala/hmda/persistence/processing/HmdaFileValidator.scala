@@ -7,14 +7,15 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
-import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
+import hmda.persistence.messages.{ LarParsedMessage, TsParsedMessage }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
-
+import hmda.persistence.processing.serialization.TsConverter._
+import hmda.persistence.processing.serialization.LarConverter._
 import scala.util.Try
 
 object HmdaFileValidator {
@@ -83,7 +84,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
       allEvents(parserPersistenceId)
-        .map { case TsParsed(ts) => ts }
+        .map { case tsParsed: TsParsedMessage => tsParsed.ts }
         .map(ts => validateTs(ts, ctx).toEither)
         .map {
           case Right(ts) => ts
@@ -92,7 +93,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .runWith(Sink.actorRef(self, NotUsed))
 
       allEvents(parserPersistenceId)
-        .map { case LarParsed(lar) => lar }
+        .map { case larParsed: LarParsedMessage => larParsed.lar }
         .map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l
