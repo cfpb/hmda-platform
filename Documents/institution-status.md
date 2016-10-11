@@ -16,5 +16,5 @@ For example:
 
 In order to track the status of a financial institution, the following states are captured by the backend:
 
-* `1`: `Active` - The institution is on the 2017 Panel
-* `2`: `Inactive` - The institution is not on the 2017 Panel
+* `1`: `active` - The institution is on the 2017 Panel
+* `2`: `inactive` - The institution is not on the 2017 Panel
