@@ -32,7 +32,7 @@ object SubmissionPersistence {
         case SubmissionStatusUpdated(id, status) =>
           val x = submissions.find(x => x.id == id).getOrElse(Submission())
           val i = submissions.indexOf(x)
-          SubmissionState(submissions.updated(i, x.copy(submissionStatus = status)))
+          SubmissionState(submissions.updated(i, x.copy(status = status)))
       }
     }
   }

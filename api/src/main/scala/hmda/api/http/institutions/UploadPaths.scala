@@ -9,6 +9,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.Uri.Path
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
@@ -36,10 +37,10 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
 
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>
   def uploadPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber) { (period, seqNr) =>
-      time {
-        val path = s"institutions/$institutionId/filings/$period/submissions/$seqNr"
+      timedPost { uri =>
         val submissionId = SubmissionId(institutionId, period, seqNr)
         extractExecutionContext { executor =>
           implicit val ec: ExecutionContext = executor
@@ -57,12 +58,12 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
           onComplete(fUploadSubmission) {
             case Success((true, processingActor)) =>
               processingActor ! StartUpload
-              uploadFile(processingActor, uploadTimestamp, path)
+              uploadFile(processingActor, uploadTimestamp, uri.path)
             case Success((false, _)) =>
-              val errorResponse = ErrorResponse(400, s"Submission $seqNr not available for upload", path)
+              val errorResponse = ErrorResponse(400, s"Submission $seqNr not available for upload", uri.path)
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
             case Failure(error) =>
-              completeWithInternalError(path, error)
+              completeWithInternalError(uri, error)
           }
         }
       }
@@ -70,10 +71,10 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
 
   private def checkSubmissionIsCreated(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Boolean] = {
     val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
-    submission.map(_.submissionStatus == Created)
+    submission.map(_.status == Created)
   }
 
-  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: String): Route = {
+  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path): Route = {
     fileUpload("file") {
       case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
         val uploadedF = byteSource
