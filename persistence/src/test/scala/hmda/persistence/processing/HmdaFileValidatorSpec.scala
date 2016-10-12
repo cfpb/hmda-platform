@@ -1,7 +1,7 @@
 package hmda.persistence.processing
 
-import akka.actor.{ActorRef, ActorSystem}
-import akka.testkit.{EventFilter, TestProbe}
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.testkit.{ EventFilter, TestProbe }
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
