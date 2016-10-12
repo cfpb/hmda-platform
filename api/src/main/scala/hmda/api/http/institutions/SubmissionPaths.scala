@@ -119,10 +119,10 @@ trait SubmissionPaths
           val fEditChecks = getValidationState(institutionId, period, seqNr)
 
           val fSummaryEdits = fEditChecks.map { editChecks =>
-            val s = validationErrorsToEditResults(editChecks.syntactical, Syntactical)
-            val v = validationErrorsToEditResults(editChecks.validity, Validity)
-            val q = validationErrorsToEditResults(editChecks.quality, Quality)
-            val m = validationErrorsToEditResults(editChecks.`macro`, Macro)
+            val s = validationErrorsToEditResults(editChecks.larSyntactical ++ editChecks.tsSyntactical, Syntactical)
+            val v = validationErrorsToEditResults(editChecks.larValidity ++ editChecks.tsValidity, Validity)
+            val q = validationErrorsToEditResults(editChecks.larQuality ++ editChecks.tsQuality, Quality)
+            val m = validationErrorsToEditResults(editChecks.larMacro ++ editChecks.tsMacro, Macro)
             SummaryEditResults(s, v, q, m)
           }
 
@@ -148,13 +148,13 @@ trait SubmissionPaths
           val fSingleEdits = fValidationState.map { editChecks =>
             editType match {
               case "syntactical" =>
-                validationErrorsToEditResults(editChecks.syntactical, Syntactical)
+                validationErrorsToEditResults(editChecks.larSyntactical ++ editChecks.tsSyntactical, Syntactical)
               case "validity" =>
-                validationErrorsToEditResults(editChecks.validity, Validity)
+                validationErrorsToEditResults(editChecks.larValidity ++ editChecks.tsValidity, Validity)
               case "quality" =>
-                validationErrorsToEditResults(editChecks.quality, Quality)
+                validationErrorsToEditResults(editChecks.larQuality ++ editChecks.tsQuality, Quality)
               case "macro" =>
-                validationErrorsToEditResults(editChecks.`macro`, Macro)
+                validationErrorsToEditResults(editChecks.larMacro ++ editChecks.tsMacro, Macro)
             }
           }
 
