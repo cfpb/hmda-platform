@@ -17,17 +17,17 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val ctx = ValidationContext(None, Some(2017))
       val errors = badLars.flatMap(lar => validationErrors(lar, ctx, validateLar).errors)
       val syntacticalEditResults =
-        validationErrorsToEditResults(errors, Syntactical)
+        validationErrorsToEditResults(Nil, errors, Syntactical)
       val validityEditResults =
-        validationErrorsToEditResults(errors, Validity)
+        validationErrorsToEditResults(Nil, errors, Validity)
       val qualityEditResults =
-        validationErrorsToEditResults(errors, Quality)
+        validationErrorsToEditResults(Nil, errors, Quality)
       val macroEditResults =
-        validationErrorsToEditResults(errors, Macro)
+        validationErrorsToEditResults(Nil, errors, Macro)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
-      val s020 = EditResult("S020", Seq(LarEditResult(LarId("8299422144")), LarEditResult(LarId("2185751599"))))
-      val s010 = EditResult("S010", Seq(LarEditResult(LarId("2185751599"))))
+      val s020 = EditResult("S020", ts = false, Seq(LarEditResult(LarId("8299422144")), LarEditResult(LarId("2185751599"))))
+      val s010 = EditResult("S010", ts = false, Seq(LarEditResult(LarId("2185751599"))))
       summaryEditResults.syntactical.edits.head mustBe s020
       summaryEditResults.syntactical.edits.tail.contains(s010) mustBe true
       summaryEditResults.validity.edits.size mustBe 3
