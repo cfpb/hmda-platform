@@ -1,6 +1,6 @@
 package hmda.model.fi
 
-import SubmissionStatusMessage._
+import SubmissionStatusMessages._
 
 sealed trait SubmissionStatus {
   def code: Int

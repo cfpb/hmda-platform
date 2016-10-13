@@ -5,3 +5,9 @@ case class Denial(
   reason2: String,
   reason3: String
 )
+
+object Denial {
+  def apply(): Denial = {
+    Denial("", "", "")
+  }
+}

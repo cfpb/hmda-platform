@@ -8,3 +8,9 @@ case class Parent(
   zipCode: String
 ) extends NameAndAddress
 
+object Parent {
+  def apply(): Parent = {
+    Parent("", "", "", "", "")
+  }
+}
+

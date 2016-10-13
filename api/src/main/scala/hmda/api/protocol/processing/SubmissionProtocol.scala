@@ -1,7 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.model.fi._
-import hmda.model.fi.SubmissionStatusMessage._
+import hmda.model.fi.SubmissionStatusMessages._
 import hmda.api.model.{ SubmissionStatusWrapper, SubmissionWrapper, Submissions }
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 

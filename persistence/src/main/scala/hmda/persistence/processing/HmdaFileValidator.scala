@@ -7,14 +7,15 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
-import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
-import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
+import hmda.persistence.messages.{ LarParsedMessage, TsParsedMessage }
 import hmda.persistence.processing.HmdaQuery._
+import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
-
+import hmda.persistence.processing.serialization.TsConverter._
+import hmda.persistence.processing.serialization.LarConverter._
 import scala.util.Try
 
 object HmdaFileValidator {
@@ -82,9 +83,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       val ctx = ValidationContext(None, Try(Some(submissionId.period.toInt)).getOrElse(None))
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
-      events(parserPersistenceId)
-        .filter(x => x.isInstanceOf[TsParsed])
-        .map(e => e.asInstanceOf[TsParsed].ts)
+      allEvents(parserPersistenceId)
+        .map { case tsParsed: TsParsedMessage => tsParsed.ts }
         .map(ts => validateTs(ts, ctx).toEither)
         .map {
           case Right(ts) => ts
@@ -92,9 +92,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
-      events(parserPersistenceId)
-        .filter(x => x.isInstanceOf[LarParsed])
-        .map(e => e.asInstanceOf[LarParsed].lar)
+      allEvents(parserPersistenceId)
+        .map { case larParsed: LarParsedMessage => larParsed.lar }
         .map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l
@@ -104,13 +103,13 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
-        log.debug(s"Persisted: $e")
+        log.info(s"Persisted: $e")
         updateState(e)
       }
 
     case lar: LoanApplicationRegister =>
       persist(LarValidated(lar)) { e =>
-        log.debug(s"Persisted: $e")
+        log.info(s"Persisted: $e")
         updateState(e)
       }
 

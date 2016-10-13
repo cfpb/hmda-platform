@@ -1,4 +1,5 @@
 import sbt._
+import com.trueaccord.scalapb.{ScalaPbPlugin => PB}
 
 object Dependencies {
 
@@ -17,6 +18,8 @@ object Dependencies {
   val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % Version.akka % "test"
   val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
   val akkaPersistence = "com.typesafe.akka" %% "akka-persistence" % Version.akka
+  val akkaRemote = "com.typesafe.akka" %% "akka-remote" % Version.akka
+  val scalaPB = "com.trueaccord.scalapb" %% "scalapb-runtime"  % Version.scalapb % PB.protobufConfig
   val leveldb = "org.iq80.leveldb" % "leveldb" % Version.leveldb
   val leveldbjni = "org.fusesource.leveldbjni" % "leveldbjni-all" % Version.leveldbjni
   val akkaPersistenceQuery = "com.typesafe.akka" %% "akka-persistence-query-experimental" % Version.akka

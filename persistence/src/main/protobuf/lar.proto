@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package hmda.fi;
+
+message LoanApplicationRegisterMessage {
+    int32 id = 1;
+    string respondentId = 2;
+    int32 agencyCode = 3;
+    string loanId = 4;
+    string applicationDate = 5;
+    int32 loanType = 6;
+    int32 propertyType = 7;
+    int32 loanPurpose = 8;
+    int32 occupancy = 9;
+    int32 loanAmount = 10;
+    int32 preapprovals = 11;
+    int32 actionTakenType = 12;
+    int32 actionTakenDate = 13;
+    string msa = 14;
+    string state = 15;
+    string county = 16;
+    string tract = 17;
+    int32 ethnicity = 18;
+    int32 coEthnicity = 19;
+    int32 race1 = 20;
+    string race2 = 21;
+    string race3 = 22;
+    string race4 = 23;
+    string race5 = 24;
+    int32 coRace1 = 25;
+    string coRace2 = 26;
+    string coRace3 = 27;
+    string coRace4 = 28;
+    string coRace5 = 29;
+    int32 sex = 30;
+    int32 coSex = 31;
+    string income = 32;
+    int32 purchaserType = 33;
+    string reason1 = 34;
+    string reason2 = 35;
+    string reason3 = 36;
+    string rateSpread = 37;
+    int32 hoepaStatus = 38;
+    int32 lienStatus = 39;
+}

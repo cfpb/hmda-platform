@@ -6,3 +6,9 @@ case class Contact(
   fax: String,
   email: String
 )
+
+object Contact {
+  def apply(): Contact = {
+    Contact("", "", "", "")
+  }
+}

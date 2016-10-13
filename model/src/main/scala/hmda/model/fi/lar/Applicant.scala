@@ -18,3 +18,9 @@ case class Applicant(
   income: String
 )
 
+object Applicant {
+  def apply(): Applicant = {
+    Applicant(0, 0, 0, "", "", "", "", 0, "", "", "", "", 0, 0, "")
+  }
+}
+

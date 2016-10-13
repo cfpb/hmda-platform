@@ -1,6 +1,6 @@
 package hmda.model.fi
 
-object SubmissionStatusMessage {
+object SubmissionStatusMessages {
   val createdMsg = "created"
   val uploadingMsg = "uploading"
   val uploadedMsg = "uploaded"

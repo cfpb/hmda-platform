@@ -7,7 +7,6 @@ import akka.persistence.query.scaladsl._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
-import hmda.persistence.CommonMessages._
 
 object HmdaQuery {
 
@@ -18,13 +17,13 @@ object HmdaQuery {
   val journalId = config.getString("akka.persistence.query.journal.id")
 
   def readJournal(system: ActorSystem) = {
-    println(s"$journalId")
     PersistenceQuery(system).readJournalFor[RJ](journalId)
   }
 
-  def events(persistenceId: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[Event, NotUsed] =
-    readJournal(system).currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
-      .map(_.event.asInstanceOf[Event])
+  def allEvents(persistenceId: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[Any, NotUsed] =
+    readJournal(system)
+      .currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
+      .map(_.event)
 
 }
 

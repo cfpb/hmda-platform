@@ -1,13 +1,24 @@
 package hmda.persistence.institutions
 
+import akka.actor.ActorSystem
 import akka.testkit.{ EventFilter, TestProbe }
+import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi._
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.FilingPersistence._
+import hmda.persistence.processing.TestConfigOverride
 
 class FilingPersistenceSpec extends ActorSpec {
+
+  override implicit lazy val system =
+    ActorSystem(
+      "test-system",
+      ConfigFactory.parseString(
+        TestConfigOverride.config
+      )
+    )
 
   val filingsActor = createFilings("12345", system)
 

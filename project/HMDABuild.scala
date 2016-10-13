@@ -1,8 +1,9 @@
-import sbt._
 import sbt.Keys._
+import sbt._
 import sbtassembly.AssemblyPlugin.autoImport._
 import scoverage.ScoverageSbtPlugin
 import spray.revolver.RevolverPlugin.autoImport.Revolver
+import com.trueaccord.scalapb.{ScalaPbPlugin => PB}
 
 object BuildSettings {
   val buildOrganization = "cfpb"
@@ -24,18 +25,19 @@ object BuildSettings {
       testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oC")
     )
 
+
 }
 
 
 object HMDABuild extends Build {
-  import Dependencies._
   import BuildSettings._
+  import Dependencies._
 
   val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
   val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
 
-  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence)
+  val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaRemote, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence)
 
   val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
@@ -97,6 +99,7 @@ object HMDABuild extends Build {
 
   lazy val persistence = (project in file("persistence"))
     .settings(buildSettings:_*)
+    .settings(PB.protobufSettings)
     .settings(
       resolvers += Resolver.jcenterRepo,
       Seq(
@@ -106,7 +109,12 @@ object HMDABuild extends Build {
             val oldStrategy = (assemblyMergeStrategy in assembly).value
             oldStrategy(x)
         },
-        libraryDependencies ++= akkaPersistenceDeps
+        libraryDependencies ++= akkaPersistenceDeps,
+        scalaSource in PB.protobufConfig <<= (sourceManaged in Compile),
+        PB.javaConversions in PB.protobufConfig := true,
+        PB.runProtoc in PB.protobufConfig := (args =>
+          com.github.os72.protocjar.Protoc.runProtoc("-v300" +: args.toArray)),
+        version in PB.protobufConfig := "3.0.0-beta-3"
       )
     ).dependsOn(validation % "compile->compile;test->test")
 

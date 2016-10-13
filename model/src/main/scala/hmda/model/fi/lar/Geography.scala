@@ -6,3 +6,9 @@ case class Geography(
   county: String,
   tract: String
 )
+
+object Geography {
+  def apply(): Geography = {
+    Geography("", "", "", "")
+  }
+}
