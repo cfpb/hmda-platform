@@ -11,8 +11,8 @@ trait ValidationErrorConverter {
     val editValues: Map[ValidationErrorType, Map[String, Seq[ValidationError]]] =
       errorsByType.mapValues(x => x.groupBy(_.name))
 
-    val tsNamedErrors: Seq[String] = tsErrors.map(_.errorId)
-    val tsUniqueErrors: Seq[String] = tsNamedErrors.diff(larErrors.map(_.errorId))
+    val tsNamedErrors: Seq[String] = tsErrors.map(_.name)
+    val tsUniqueErrors: Seq[String] = tsNamedErrors.diff(larErrors.map(_.name))
     val tsEditResults: Seq[EditResult] = tsUniqueErrors.map(x => EditResult(x, ts = true, Nil))
 
     val larEditResults: Map[ValidationErrorType, Map[String, Seq[LarEditResult]]] =
