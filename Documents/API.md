@@ -126,11 +126,15 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
     ```json
     {
-        "id": 4,
-        "status": {
-          "code": 1,
-          "message": "created"
-        }
+      "id": {
+        "institutionId": "0",
+        "period": "2016",
+        "sequenceNumber": 1
+      },
+      "status": {
+        "code": 1,
+        "message": "created"
+      }
     }
     ```
     
