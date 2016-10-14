@@ -97,33 +97,33 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         "id": {
           "institutionId": "12345",
           "period": "2017",
-          "sequenceNumber": 1,
-          "status": {
-            "code": 1,
-            "message": "created"
-          }
+          "sequenceNumber": 1
+        },
+        "status": {
+          "code": 1,
+          "message": "created"
         }
       },
       {
         "id": {
           "institutionId": "12345",
           "period": "2017",
-          "sequenceNumber": 2,
-          "status": {
-            "code": 1,
-            "message": "created"
-          }
+          "sequenceNumber": 2
+        },
+        "status": {
+          "code": 1,
+          "message": "created"
         }
       },
       {
         "id": {
           "institutionId": "12345",
           "period": "2017",
-          "sequenceNumber": 3,
-          "status": {
-            "code": 1,
-            "message": "created"
-          }
+          "sequenceNumber": 3
+        },
+        "status": {
+          "code": 1,
+          "message": "created"
         }
       }
      ]
