@@ -12,7 +12,7 @@ import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.demo.DemoData
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.validation.engine.{ Syntactical, ValidationError, ValidationErrors, Validity }
+import hmda.validation.engine._
 
 import scala.concurrent.Future
 
@@ -126,7 +126,7 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
     val v1 = ValidationError("loan1", "V280", Validity)
     val v2 = ValidationError("loan2", "V285", Validity)
     val v3 = ValidationError("loan3", "V285", Validity)
-    val validationErrors = ValidationErrors(Seq(s1, s2, v1, v2, v3))
+    val validationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3))
 
     val fValidate: Future[Unit] = for {
       h <- fHmdaValidator
