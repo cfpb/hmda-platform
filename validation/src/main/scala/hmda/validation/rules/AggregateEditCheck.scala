@@ -7,7 +7,7 @@ import akka.stream.scaladsl.{ Sink, Source }
 import hmda.validation.dsl.Result
 import scala.concurrent.{ ExecutionContext, Future }
 
-abstract class SummaryEditCheck[A <: Source[T, NotUsed], T] {
+abstract class AggregateEditCheck[A <: Source[T, NotUsed], T] {
 
   implicit val system: ActorSystem = ActorSystem("macro-edits-system")
 

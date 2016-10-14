@@ -2,13 +2,13 @@ package hmda.validation.rules.lar.`macro`
 
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
-import hmda.validation.rules.SummaryEditCheck
+import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import scala.concurrent.Future
 
-object Q007 extends SummaryEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
+object Q007 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
   override def name = "Q007"
 

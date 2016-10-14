@@ -2,7 +2,7 @@ package hmda.validation.rules.lar.`macro`
 
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.validation.rules.SummaryEditCheck
+import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
 class Q007Spec extends MacroSpec {
@@ -19,5 +19,5 @@ class Q007Spec extends MacroSpec {
 
   }
 
-  override def check: SummaryEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q007
+  override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q007
 }
