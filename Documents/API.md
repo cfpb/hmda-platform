@@ -78,45 +78,57 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
 
 * `/institutions/<institution>/filings/<period>`
-    * `GET` - Details for a filing
+  * `GET` - Details for a filing
 
-    Example response, with HTTP code 200:
+  Example response, with HTTP code 200:
 
-    ```json
-   {
-     "filing": {
-     "period": "2017",
-     "institutionId": "12345",
-     "status": {
-       "code": 1,
-       "message": "not-started"
-     }
-   },
-   "submissions": [
-     {
-       "id": 3,
-       "status": {
-         "code": 1,
-         "message": "created"
-       }
-     },
-     {
-       "id": 2,
-       "status": {
-         "code": 1,
-         "message": "created"
-       }
-     },
-     {
-       "id": 1,
-       "status": {
-         "code": 1,
-         "message": "created"
-       }
-     }
-   ]
-   }
-    ```
+  ```json
+  {
+    "filing": {
+      "period": "2017",
+      "institutionId": "12345",
+      "status": {
+        "code": 1,
+        "message": "not-started"
+      }
+    },
+    "submissions": [
+      {
+        "id": {
+          "institutionId": "12345",
+          "period": "2017",
+          "sequenceNumber": 1,
+          "status": {
+            "code": 1,
+            "message": "created"
+          }
+        }
+      },
+      {
+        "id": {
+          "institutionId": "12345",
+          "period": "2017",
+          "sequenceNumber": 2,
+          "status": {
+            "code": 1,
+            "message": "created"
+          }
+        }
+      },
+      {
+        "id": {
+          "institutionId": "12345",
+          "period": "2017",
+          "sequenceNumber": 3,
+          "status": {
+            "code": 1,
+            "message": "created"
+          }
+        }
+      }
+     ]
+  }
+  ```
 
 * `/institutions/<institution>/filings/<period>/submissions`
 
@@ -137,13 +149,13 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       }
     }
     ```
-    
+
 * `/institutions/<institution>/filings/<period>/submissions/latest`
 
     * `GET` - The latest submission for some institution and period
 
      Example response, with HTTP code 200:
-    
+
     ```json
     {
       "id": 3,
