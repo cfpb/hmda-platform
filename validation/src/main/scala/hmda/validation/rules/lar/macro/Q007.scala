@@ -25,7 +25,6 @@ object Q007 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
       a <- approvedButNotAccepted
       t <- total
     } yield {
-      println(s"$a is less than ${t * multiplier}")
       a is lessThanOrEqual(t * multiplier)
     }
 
