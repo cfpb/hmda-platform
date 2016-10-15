@@ -3,19 +3,18 @@ package hmda.validation.rules.lar
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.AggregateEditCheck
-import org.scalatest.prop.PropertyChecks
-import org.scalatest.{ MustMatchers, PropSpec }
+import org.scalatest._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
-abstract class SummaryEditCheckSpec extends PropSpec with PropertyChecks with MustMatchers {
+import scala.concurrent.Future
 
-  import scala.concurrent.ExecutionContext.Implicits.global
+abstract class SummaryEditCheckSpec extends AsyncWordSpec with MustMatchers {
 
   def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister]
 
   implicit class SummaryChecker(input: LoanApplicationRegisterSource) {
-    def mustFail = check(input).map(x => x mustBe a[Failure])
-    def mustPass = check(input).map(x => x mustBe a[Success])
+    def mustFail: Future[Assertion] = check(input).map(x => x mustBe a[Failure])
+    def mustPass: Future[Assertion] = check(input).map(x => x mustBe a[Success])
   }
 
 }

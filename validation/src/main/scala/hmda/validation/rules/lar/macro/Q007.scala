@@ -18,12 +18,15 @@ object Q007 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
     val total = count(lars)
 
+    //TODO: make multiplier configurable
+    val multiplier = 0.15
+
     for {
       a <- approvedButNotAccepted
       t <- total
     } yield {
-      //TODO: make multiplier configurable
-      a is lessThanOrEqual(t * 0.15)
+      println(s"$a is less than ${t * multiplier}")
+      a is lessThanOrEqual(t * multiplier)
     }
 
   }
