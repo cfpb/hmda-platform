@@ -17,6 +17,7 @@ import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
+import scala.concurrent.Future
 import scala.util.Try
 
 object HmdaFileValidator {
