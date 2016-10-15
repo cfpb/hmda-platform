@@ -2,7 +2,8 @@ package hmda.persistence.processing
 
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.stream.scaladsl.Sink
+import akka.pattern.pipe
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
@@ -15,6 +16,7 @@ import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
 
+import scala.concurrent.Future
 import scala.util.Try
 
 object HmdaFileValidator {
@@ -104,15 +106,26 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
-      events(parserPersistenceId)
+      val larSource: Source[LoanApplicationRegister, NotUsed] = events(parserPersistenceId)
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
-        .map(lar => validateLar(lar, ctx).toEither)
+
+      larSource.map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l
           case Left(errors) => LarValidationErrors(errors.list.toList)
         }
-        .runWith(Sink.actorRef(self, CompleteValidation))
+        .runWith(Sink.actorRef(self, NotUsed))
+
+      val fMacro = checkMacro(larSource)
+        .mapTo[LarSourceValidation]
+        .map(larSourceValidation => larSourceValidation.toEither)
+        .map {
+          case Right(_) => CompleteValidation
+          case Left(errors) => errors
+        }
+
+      fMacro pipeTo self
 
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
