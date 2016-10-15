@@ -21,7 +21,7 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
 
   }
 
-  def checkAggregate(
+  private def checkAggregate(
     editCheck: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister],
     input: LoanApplicationRegisterSource,
     inputId: String,
