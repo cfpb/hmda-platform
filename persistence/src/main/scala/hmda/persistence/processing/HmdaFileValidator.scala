@@ -2,6 +2,7 @@ package hmda.persistence.processing
 
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.pattern.pipe
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -177,6 +178,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(e => LarMacroError(e))
       persistErrors(macroErrors)
       
+    case CompleteMacroValidation(e) =>
+      self ! LarValidationErrors(e.errors)
+      self ! CompleteValidation
+
     case CompleteMacroValidation(e) =>
       self ! LarValidationErrors(e.errors)
       self ! CompleteValidation
