@@ -36,6 +36,7 @@ object HmdaFileValidator {
   case class LarSyntacticalError(error: ValidationError) extends Event
   case class LarValidityError(error: ValidationError) extends Event
   case class LarQualityError(error: ValidationError) extends Event
+  case class LarMacroError(error: ValidationError) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
@@ -72,6 +73,8 @@ object HmdaFileValidator {
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity :+ e, larQuality, larMacro)
       case LarQualityError(e) =>
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality :+ e, larMacro)
+      case LarMacroError(e) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro :+ e)
     }
   }
 }
@@ -167,6 +170,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       val qualityErrors = errorsOfType(errors, Quality)
         .map(e => LarQualityError(e))
       persistErrors(qualityErrors)
+
+      val macroErrors = errorsOfType(errors, Macro)
+        .map(e => LarMacroError(e))
+      persistErrors(macroErrors)
 
     case CompleteValidation =>
       if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty

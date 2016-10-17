@@ -59,11 +59,12 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsg(HmdaFileValidationState(Some(ts), lars.toSeq, Nil, Nil, Nil))
     }
 
-    "persist syntactical, validity and quality errors" in {
+    "persist validation errors" in {
       val e1 = ValidationError("1", "S999", Syntactical)
       val e2 = ValidationError("1", "V999", Validity)
       val e3 = ValidationError("1", "Q999", Quality)
-      val larErrors = LarValidationErrors(Seq(e1, e2, e3))
+      val e4 = ValidationError("1", "Q007", Macro)
+      val larErrors = LarValidationErrors(Seq(e1, e2, e3, e4))
       val tsErrors = TsValidationErrors(Seq(e1, e2, e3))
       probe.send(hmdaFileValidator, larErrors)
       probe.send(hmdaFileValidator, tsErrors)
@@ -77,7 +78,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Nil,
         Seq(e1),
         Seq(e2),
-        Seq(e3)
+        Seq(e3),
+        Seq(e4)
       ))
     }
 
