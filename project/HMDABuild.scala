@@ -91,7 +91,7 @@ object HMDABuild extends Build {
   lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
     .settings(
-      libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akka, akkaTestkit)
+      libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
     ).dependsOn(parser % "compile->compile;test->test")
 
 
