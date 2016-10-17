@@ -2,21 +2,20 @@ package hmda.persistence.processing
 
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.pattern.pipe
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
-import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
 import hmda.persistence.processing.HmdaQuery._
+import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
+import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
-import scala.concurrent.Future
 import scala.util.Try
 
 object HmdaFileValidator {
@@ -25,6 +24,7 @@ object HmdaFileValidator {
 
   case object BeginValidation extends Command
   case class ValidationStarted(submissionId: SubmissionId) extends Event
+  case class ValidateMacro(source: LoanApplicationRegisterSource) extends Command
   case object CompleteValidation extends Command
   case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
   case class ValidationCompleted(submissionId: SubmissionId) extends Event
@@ -115,17 +115,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
           case Right(l) => l
           case Left(errors) => LarValidationErrors(errors.list.toList)
         }
-        .runWith(Sink.actorRef(self, NotUsed))
-
-      val fMacro = checkMacro(larSource)
-        .mapTo[LarSourceValidation]
-        .map(larSourceValidation => larSourceValidation.toEither)
-        .map {
-          case Right(_) => CompleteValidation
-          case Left(errors) => errors
-        }
-
-      fMacro pipeTo self
+        .runWith(Sink.actorRef(self, ValidateMacro(larSource)))
 
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
@@ -138,6 +128,17 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         log.debug(s"Persisted: $e")
         updateState(e)
       }
+
+    case ValidateMacro(larSource) =>
+      log.info("Quality Validation completed")
+      checkMacro(larSource)
+        .mapTo[LarSourceValidation]
+        .map(larSourceValidation => larSourceValidation.toEither)
+        .map {
+          case Right(source) => CompleteValidation
+          case Left(errors) => errors
+        }
+        .map(x => self ! x)
 
     case tsErrors: TsValidationErrors =>
       val errors = tsErrors.errors
