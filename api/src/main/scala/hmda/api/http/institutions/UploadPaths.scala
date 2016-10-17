@@ -57,7 +57,6 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
 
           onComplete(fUploadSubmission) {
             case Success((true, processingActor)) =>
-              processingActor ! StartUpload
               uploadFile(processingActor, uploadTimestamp, uri.path)
             case Success((false, _)) =>
               val errorResponse = ErrorResponse(400, s"Submission $seqNr not available for upload", uri.path)
@@ -77,6 +76,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
   private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path): Route = {
     fileUpload("file") {
       case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
+        processingActor ! StartUpload
         val uploadedF = byteSource
           .via(splitLines)
           .map(_.utf8String)
