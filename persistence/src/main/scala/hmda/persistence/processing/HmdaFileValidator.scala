@@ -2,7 +2,6 @@ package hmda.persistence.processing
 
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.pattern.pipe
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -17,7 +16,6 @@ import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
-import scala.concurrent.Future
 import scala.util.Try
 
 object HmdaFileValidator {
