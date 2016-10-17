@@ -105,7 +105,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Nil,
         List(ValidationError("8299422144", "S020", Syntactical), ValidationError("2185751599", "S010", Syntactical), ValidationError("2185751599", "S020", Syntactical)),
         List(ValidationError("4977566612", "V550", Validity), ValidationError("4977566612", "V555", Validity), ValidationError("4977566612", "V560", Validity)),
-        Nil
+        Nil,
+        List(ValidationError("", "Q008", Macro))
       ))
 
     }

@@ -2,6 +2,7 @@ package hmda.persistence.processing
 
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.pattern.pipe
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -25,6 +26,7 @@ object HmdaFileValidator {
   case object BeginValidation extends Command
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource) extends Command
+  case class CompleteMacroValidation(errors: LarValidationErrors) extends Command
   case object CompleteValidation extends Command
   case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
   case class ValidationCompleted(submissionId: SubmissionId) extends Event
@@ -134,14 +136,15 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ValidateMacro(larSource) =>
       log.info("Quality Validation completed")
-      checkMacro(larSource)
+      val fMacro = checkMacro(larSource)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
         .map {
           case Right(source) => CompleteValidation
-          case Left(errors) => errors
+          case Left(errors) => CompleteMacroValidation(LarValidationErrors(errors.list.toList))
         }
-        .map(x => self ! x)
+
+      fMacro pipeTo self
 
     case tsErrors: TsValidationErrors =>
       val errors = tsErrors.errors
@@ -175,8 +178,12 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(e => LarMacroError(e))
       persistErrors(macroErrors)
 
+    case CompleteMacroValidation(e) =>
+      self ! LarValidationErrors(e.errors)
+      self ! CompleteValidation
+
     case CompleteValidation =>
-      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty
+      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty && state.larMacro.isEmpty
         && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
         log.debug(s"Validation completed for $submissionId")
         publishEvent(ValidationCompleted(submissionId))
