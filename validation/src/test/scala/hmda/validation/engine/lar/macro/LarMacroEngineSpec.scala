@@ -1,16 +1,19 @@
 package hmda.validation.engine.lar.`macro`
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.validation.rules.lar.`macro`.MacroTestData
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
-import scala.concurrent.ExecutionContext
 import scala.language.postfixOps
 import scalaz.{ Failure, Success }
 
 class LarMacroEngineSpec extends AsyncWordSpec with MustMatchers with LarMacroEngine {
 
-  override val executionContext: ExecutionContext = ec
+  implicit val system = ActorSystem("macro-edits-test")
+  implicit val materializer = ActorMaterializer()
+  implicit val ec = system.dispatcher
 
   val lars = MacroTestData.lars
   val larSource = Source.fromIterator(() => lars.toIterator)
