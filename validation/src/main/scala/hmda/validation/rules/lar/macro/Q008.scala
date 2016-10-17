@@ -2,6 +2,7 @@ package hmda.validation.rules.lar.`macro`
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
@@ -13,6 +14,9 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 object Q008 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
+  val config = ConfigFactory.load()
+  val multiplier = config.getInt("hmda.validation.macro.Q008.numOfLarsMultiplier")
+
   override def name = "Q008"
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, mat: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
@@ -21,9 +25,6 @@ object Q008 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
       count(lars.filter(lar => lar.actionTakenType == 4))
 
     val total = count(lars)
-
-    //TODO: make multiplier configurable
-    val multiplier = 0.30
 
     for {
       a <- applicationWithdrawn
