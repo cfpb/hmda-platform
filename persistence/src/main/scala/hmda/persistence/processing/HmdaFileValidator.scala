@@ -28,9 +28,12 @@ object HmdaFileValidator {
   case class ValidationCompleted(submissionId: SubmissionId) extends Event
   case class TsValidated(ts: TransmittalSheet) extends Event
   case class LarValidated(lar: LoanApplicationRegister) extends Event
-  case class SyntacticalError(error: ValidationError) extends Event
-  case class ValidityError(error: ValidationError) extends Event
-  case class QualityError(error: ValidationError) extends Event
+  case class TsSyntacticalError(error: ValidationError) extends Event
+  case class TsValidityError(error: ValidationError) extends Event
+  case class TsQualityError(error: ValidationError) extends Event
+  case class LarSyntacticalError(error: ValidationError) extends Event
+  case class LarValidityError(error: ValidationError) extends Event
+  case class LarQualityError(error: ValidationError) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
@@ -41,23 +44,32 @@ object HmdaFileValidator {
   case class HmdaFileValidationState(
       ts: Option[TransmittalSheet] = None,
       lars: Seq[LoanApplicationRegister] = Nil,
-      syntactical: Seq[ValidationError] = Nil,
-      validity: Seq[ValidationError] = Nil,
-      quality: Seq[ValidationError] = Nil,
-      `macro`: Seq[ValidationError] = Nil
+      tsSyntactical: Seq[ValidationError] = Nil,
+      tsValidity: Seq[ValidationError] = Nil,
+      tsQuality: Seq[ValidationError] = Nil,
+      tsMacro: Seq[ValidationError] = Nil,
+      larSyntactical: Seq[ValidationError] = Nil,
+      larValidity: Seq[ValidationError] = Nil,
+      larQuality: Seq[ValidationError] = Nil,
+      larMacro: Seq[ValidationError] = Nil
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) =>
-        HmdaFileValidationState(Some(newTs), lars, syntactical, validity, quality)
+        HmdaFileValidationState(Some(newTs), lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
       case larValidated @ LarValidated(lar) =>
-        HmdaFileValidationState(ts, lars :+ lar, syntactical, validity, quality)
-      case SyntacticalError(e) =>
-        HmdaFileValidationState(ts, lars, syntactical :+ e, validity, quality)
-      case ValidityError(e) =>
-        HmdaFileValidationState(ts, lars, syntactical, validity :+ e, quality)
-      case QualityError(e) =>
-        HmdaFileValidationState(ts, lars, syntactical, validity, quality :+ e)
-
+        HmdaFileValidationState(ts, lars :+ lar, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+      case TsSyntacticalError(e) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical :+ e, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+      case TsValidityError(e) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity :+ e, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+      case TsQualityError(e) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality :+ e, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+      case LarSyntacticalError(e) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical :+ e, larValidity, larQuality, larMacro)
+      case LarValidityError(e) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity :+ e, larQuality, larMacro)
+      case LarQualityError(e) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality :+ e, larMacro)
     }
   }
 }
@@ -88,7 +100,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(ts => validateTs(ts, ctx).toEither)
         .map {
           case Right(ts) => ts
-          case Left(errors) => ValidationErrors(errors.list.toList)
+          case Left(errors) => TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
@@ -98,7 +110,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l
-          case Left(errors) => ValidationErrors(errors.list.toList)
+          case Left(errors) => LarValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, CompleteValidation))
 
@@ -114,24 +126,41 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         updateState(e)
       }
 
-    case validationErrors: ValidationErrors =>
-      val errors = validationErrors.errors
+    case tsErrors: TsValidationErrors =>
+      val errors = tsErrors.errors
       val syntacticalErrors = errorsOfType(errors, Syntactical)
-        .map(e => SyntacticalError(e))
+        .map(e => TsSyntacticalError(e))
       persistErrors(syntacticalErrors)
 
       val validityErrors = errorsOfType(errors, Validity)
-        .map(e => ValidityError(e))
+        .map(e => TsValidityError(e))
       persistErrors(validityErrors)
 
       val qualityErrors = errorsOfType(errors, Quality)
-        .map(e => QualityError(e))
+        .map(e => TsQualityError(e))
+      persistErrors(qualityErrors)
+
+    case larErrors: LarValidationErrors =>
+      val errors = larErrors.errors
+      val syntacticalErrors = errorsOfType(errors, Syntactical)
+        .map(e => LarSyntacticalError(e))
+      persistErrors(syntacticalErrors)
+
+      val validityErrors = errorsOfType(errors, Validity)
+        .map(e => LarValidityError(e))
+      persistErrors(validityErrors)
+
+      val qualityErrors = errorsOfType(errors, Quality)
+        .map(e => LarQualityError(e))
       persistErrors(qualityErrors)
 
     case CompleteValidation =>
-      if (state.syntactical.isEmpty && state.validity.isEmpty && state.quality.isEmpty) {
+      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty
+        && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
+        log.debug(s"Validation completed for $submissionId")
         publishEvent(ValidationCompleted(submissionId))
       } else {
+        log.debug(s"Validation completed for $submissionId, errors found")
         publishEvent(ValidationCompletedWithErrors(submissionId))
       }
 

@@ -63,4 +63,4 @@ case class SubmissionId(institutionId: String = "", period: String = "", sequenc
   override def toString: String = s"$institutionId-$period-$sequenceNumber"
 }
 
-case class Submission(id: SubmissionId = SubmissionId(), submissionStatus: SubmissionStatus = Created)
+case class Submission(id: SubmissionId = SubmissionId(), status: SubmissionStatus = Created)

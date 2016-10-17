@@ -2,12 +2,12 @@ package hmda.api.protocol.processing
 
 import hmda.api.model.{ FilingDetail, Filings }
 import hmda.model.fi._
-import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
+import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
 trait FilingProtocol extends DefaultJsonProtocol with SubmissionProtocol {
   implicit object FilingStatusJsonFormat extends RootJsonFormat[FilingStatus] {
     override def read(json: JsValue): FilingStatus = {
-      json match {
+      json.asJsObject.getFields("message").head match {
         case JsString(s) => s match {
           case "not-started" => NotStarted
           case "in-progress" => InProgress
@@ -19,12 +19,10 @@ trait FilingProtocol extends DefaultJsonProtocol with SubmissionProtocol {
     }
 
     override def write(status: FilingStatus): JsValue = {
-      status match {
-        case NotStarted => JsString("not-started")
-        case InProgress => JsString("in-progress")
-        case Completed => JsString("completed")
-        case Cancelled => JsString("cancelled")
-      }
+      JsObject(
+        "code" -> JsNumber(status.code),
+        "message" -> JsString(status.message)
+      )
     }
   }
 

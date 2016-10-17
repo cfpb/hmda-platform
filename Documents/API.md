@@ -43,7 +43,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-
 * `/institutions/<institution>`
     * `GET` - Details for Financial Institution
 
@@ -60,12 +59,18 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
           "period": "2017",
           "institutionId": "12345",
-          "status": "not-started"
+          "status": {
+            "code": 1,
+            "message": "not-started"
+          }
         },
         {
           "period": "2016",
           "institutionId": "12345",
-          "status": "completed"
+          "status": {
+            "code": 3,
+            "message": "completed"
+          }
         }
       ]
     }
@@ -82,20 +87,32 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
      "filing": {
      "period": "2017",
      "institutionId": "12345",
-     "status": "not-started"
+     "status": {
+       "code": 1,
+       "message": "not-started"
+     }
    },
    "submissions": [
      {
        "id": 3,
-       "submissionStatus": "created"
+       "status": {
+         "code": 1,
+         "message": "created"
+       }
      },
      {
        "id": 2,
-       "submissionStatus": "created"
+       "status": {
+         "code": 1,
+         "message": "created"
+       }
      },
      {
        "id": 1,
-       "submissionStatus": "created"
+       "status": {
+         "code": 1,
+         "message": "created"
+       }
      }
    ]
    }
@@ -109,8 +126,15 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
     ```json
     {
-        "id": 4,
-        "submissionStatus": "created"
+      "id": {
+        "institutionId": "0",
+        "period": "2016",
+        "sequenceNumber": 1
+      },
+      "status": {
+        "code": 1,
+        "message": "created"
+      }
     }
     ```
     

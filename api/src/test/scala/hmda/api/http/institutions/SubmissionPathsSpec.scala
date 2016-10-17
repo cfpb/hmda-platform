@@ -3,6 +3,7 @@ package hmda.api.http.institutions
 import akka.actor.ActorRef
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.server.MethodRejection
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
@@ -11,7 +12,7 @@ import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.demo.DemoData
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.validation.engine.{ Syntactical, ValidationError, ValidationErrors, Validity }
+import hmda.validation.engine._
 
 import scala.concurrent.Future
 
@@ -33,9 +34,10 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
     }
 
     "return not found when looking for a latest submission for non existent institution" in {
-      getWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
+      val path = Path("/institutions/xxxxx/filings/2017/submissions/latest")
+      getWithCfpbHeaders(path.toString) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        val error = ErrorResponse(404, "No submission found for xxxxx for 2017", "institutions/xxxxx/filings/2017/submissions/latest")
+        val error = ErrorResponse(404, "No submission found for xxxxx for 2017", path)
         responseAs[ErrorResponse] mustBe error
       }
 
@@ -50,16 +52,18 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
     }
 
     "fail creating a new submission for a non existent institution" in {
-      postWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions") ~> institutionsRoutes ~> check {
+      val path: Path = Path("/institutions/xxxxx/filings/2017/submissions")
+      postWithCfpbHeaders(path.toString) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", "institutions/xxxxx/filings/2017/submissions")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", path)
       }
     }
 
     "fail creating a new submission for a non existent filing period" in {
-      postWithCfpbHeaders("/institutions/0/filings/2001/submissions") ~> institutionsRoutes ~> check {
+      val path = Path("/institutions/0/filings/2001/submissions")
+      postWithCfpbHeaders(path.toString) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 0", "institutions/0/filings/2001/submissions")
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 0", path)
       }
     }
   }
@@ -122,7 +126,7 @@ class SubmissionPathsSpec extends InstitutionHttpApiSpec {
     val v1 = ValidationError("loan1", "V280", Validity)
     val v2 = ValidationError("loan2", "V285", Validity)
     val v3 = ValidationError("loan3", "V285", Validity)
-    val validationErrors = ValidationErrors(Seq(s1, s2, v1, v2, v3))
+    val validationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3))
 
     val fValidate: Future[Unit] = for {
       h <- fHmdaValidator
