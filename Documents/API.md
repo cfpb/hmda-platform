@@ -233,6 +233,104 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 }
 ```
 
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
+    * `GET`  - Institution Register Summary
+
+    Example response, with HTTP code 200:
+
+```json
+{
+  "msas": [
+    {
+      "id": "123",
+      "name": "MSA 123",
+      "totalLARS": 4,
+      "totalAmount": 123,
+      "conv": 4,
+      "FHA": 0,
+      "VA": 0,
+      "FSA": 0,
+      "1to4Family": 4,
+      "MFD": 0,
+      "multiFamily": 0,
+      "homePurchase": 0,
+      "homeImprovement": 0,
+      "refinance": 4
+    },
+    {
+      "id": "456",
+      "name": "MSA 456",
+      "totalLARS": 5,
+      "totalAmount": 456,
+      "conv": 5,
+      "FHA": 0,
+      "VA": 0,
+      "FSA": 0,
+      "1to4Family": 5,
+      "MFD": 0,
+      "multiFamily": 0,
+      "homePurchase": 0,
+      "homeImprovement": 0,
+      "refinance": 5
+    }
+  ],
+  "timestamp": null,
+  "receipt": null
+}
+```
+
+   * `POST`  - Verify the IRS
+   Example response, with HTTP code 200:
+```
+{
+  "timestamp": 1476809530772,
+  "receipt": asd0f987134asdlfasdflk
+}
+```
+
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`
+    * `GET`  - Returns a receipt
+    Example response, with HTTP code 200:
+```
+{
+  "timestamp": 1476809530772,
+  "receipt": asd0f987134asdlfasdflk
+}
+```
+
+   * `POST`  - Sign the submission
+    Example response, with HTTP code 200:
+```
+{
+  "timestamp": 1476809530772,
+  "receipt": asd0f987134asdlfasdflk
+}
+```
+
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`
+    * `GET`  - Returns a submission summary
+    Example response, with HTTP code 200:
+```
+{
+  "respondent": {
+    "name": "Bank",
+    "id": "1234567890",
+    "taxId": "0987654321",
+    "agency": "CFPB",
+    "contact": {
+      "name": "Your Name",
+      "phone": "123-456-7890",
+      "email": "your.name@bank.com"
+    }
+  },
+  "file": {
+    "name": "lar.dat",
+    "year": "2016",
+    "totalLARS": 25
+  }
+}
+```
+
 ## Authorization
 Each endpoint that starts with `/institutions` is protected by three authorization requirements.
 
