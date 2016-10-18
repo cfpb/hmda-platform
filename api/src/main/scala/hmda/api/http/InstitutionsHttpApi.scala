@@ -5,7 +5,7 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.institutions.submissions.{ SubmissionBasePaths, SubmissionEditPaths, SubmissionIrsPaths }
+import hmda.api.http.institutions.submissions._
 import hmda.api.http.institutions.{ FilingPaths, InstitutionPaths, UploadPaths }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 
@@ -16,6 +16,8 @@ trait InstitutionsHttpApi
     with SubmissionBasePaths
     with SubmissionEditPaths
     with SubmissionIrsPaths
+    with SubmissionSignPaths
+    with SubmissionSummaryPaths
     with UploadPaths
     with ApiErrorProtocol
     with HmdaCustomDirectives {
@@ -38,7 +40,9 @@ trait InstitutionsHttpApi
               uploadPath(instId) ~
               submissionEditsPath(instId) ~
               submissionSingleEditPath(instId) ~
-              irsPath(instId)
+              submissionIrsPath(instId) ~
+              submissionSignPath(instId) ~
+              submissionSummaryPath(instId)
           }
         }
     }
