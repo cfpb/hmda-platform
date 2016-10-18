@@ -4,7 +4,6 @@ import hmda.model.fi.lar._
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId }
-import hmda.model.institution.InstitutionStatus.Active
 import hmda.model.institution.InstitutionType.Bank
 import hmda.model.institution.{ ExternalId, Institution }
 import hmda.validation.context.ValidationContext

@@ -1,10 +1,8 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.{ InstitutionDetail, InstitutionWrapper, Institutions }
-import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
-import hmda.model.institution.{ Agency, DepositoryType, Institution, InstitutionStatus }
-import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
-import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
+import hmda.model.institution.{ InstitutionStatus, Active, Inactive }
+import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
 trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
   implicit object InstitutionStatusJsonFormat extends RootJsonFormat[InstitutionStatus] {

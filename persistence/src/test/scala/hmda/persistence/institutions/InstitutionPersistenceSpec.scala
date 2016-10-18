@@ -5,7 +5,7 @@ import hmda.actor.test.ActorSpec
 import hmda.model.institution.Agency.{ CFPB, FDIC }
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId }
 import hmda.model.institution.{ ExternalId, Institution }
-import hmda.model.institution.InstitutionStatus.Active
+import hmda.model.institution.Active
 import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
