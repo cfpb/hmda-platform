@@ -1,0 +1,18 @@
+{
+  "respondent": {
+    "name": "Bank",
+    "id": "1234567890",
+    "taxId": "0987654321",
+    "agency": "CFPB",
+    "contact": {
+      "name": "Your Name",
+      "phone": "123-456-7890",
+      "email": "your.name@bank.com"
+    }
+  },
+  "file": {
+    "name": "lar.dat",
+    "year": "2016",
+    "totalLARS": 25
+  }
+}
