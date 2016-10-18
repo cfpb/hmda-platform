@@ -1,5 +1,7 @@
 package hmda.api.http.institutions.submissions
 
+import java.io.File
+
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse, StatusCodes }
@@ -11,6 +13,7 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, Ins
 
 import scala.concurrent.ExecutionContext
 import scala.io.Source
+import scala.util.Try
 
 trait SubmissionSummaryPaths
     extends InstitutionProtocol
@@ -34,8 +37,11 @@ trait SubmissionSummaryPaths
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
 
-          val irsJson = Source.fromFile("src/main/scala/hmda/api/http/institutions/submissions/tempJson/summary.json").getLines.mkString
-          val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, irsJson))
+          val partialPath = "src/main/scala/hmda/api/http/institutions/submissions/tempJson/summary.json"
+          val source = Try(Source.fromFile(new File(partialPath))).getOrElse(Source.fromFile(new File("api/" + partialPath)))
+
+          val summaryJson = source.getLines.mkString
+          val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, summaryJson))
 
           complete(response)
         }

@@ -6,29 +6,30 @@ import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.Receipt
 import spray.json.{ JsBoolean, JsObject }
 
-class SubmissionIrsPathsSpec extends InstitutionHttpApiSpec {
+class SubmissionSignPathsSpec extends InstitutionHttpApiSpec {
   val supervisor = system.actorSelection("/user/supervisor")
 
-  "Submission Irs Paths" must {
+  "Submission Sign Paths" must {
     "return a 200" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
+        responseAs[Receipt] mustBe Receipt.empty
       }
     }
 
     "return a filled receipt" in {
-      val verified = JsObject("verified" -> JsBoolean(true))
+      val signed = JsObject("signed" -> JsBoolean(true))
 
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs", verified) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signed) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[Receipt].receipt mustBe "receiptHash"
       }
     }
 
     "return an empty receipt" in {
-      val verified = JsObject("verified" -> JsBoolean(false))
+      val signed = JsObject("signed" -> JsBoolean(false))
 
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs", verified) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signed) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[Receipt] mustBe Receipt.empty
       }

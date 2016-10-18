@@ -12,9 +12,11 @@ import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
 import spray.json.{ JsBoolean, JsFalse, JsObject, JsTrue }
+import java.io.File
 
 import scala.concurrent.ExecutionContext
 import scala.io.Source
+import scala.util.Try
 
 trait SubmissionIrsPaths
     extends InstitutionProtocol
@@ -38,7 +40,10 @@ trait SubmissionIrsPaths
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
 
-          val irsJson = Source.fromFile("src/main/scala/hmda/api/http/institutions/submissions/tempJson/irs.json").getLines.mkString
+          val partialPath = "src/main/scala/hmda/api/http/institutions/submissions/tempJson/irs.json"
+          val source = Try(Source.fromFile(new File(partialPath))).getOrElse(Source.fromFile(new File("api/" + partialPath)))
+
+          val irsJson = source.getLines.mkString
           val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, irsJson))
 
           complete(response)
