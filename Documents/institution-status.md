@@ -2,7 +2,12 @@
 
 Every institution will store a `InstitutionStatus` object with the following structure:
 
-* `status`: `String`
+```
+"status": {
+    "code": Int,
+    "message": String
+}
+```
 
 For example:
 
