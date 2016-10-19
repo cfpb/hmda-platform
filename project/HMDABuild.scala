@@ -1,8 +1,9 @@
-import sbt._
 import sbt.Keys._
+import sbt._
 import sbtassembly.AssemblyPlugin.autoImport._
 import scoverage.ScoverageSbtPlugin
 import spray.revolver.RevolverPlugin.autoImport.Revolver
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 object BuildSettings {
   val buildOrganization = "cfpb"
@@ -28,8 +29,8 @@ object BuildSettings {
 
 
 object HMDABuild extends Build {
-  import Dependencies._
   import BuildSettings._
+  import Dependencies._
 
   val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
@@ -62,21 +63,35 @@ object HMDABuild extends Build {
       )
     ).dependsOn(api)
     .aggregate(
-      model,
+      modelJVM,
+      modelJS,
       parser,
       persistence,
       api,
       platformTest,
       validation)
 
-  lazy val model = (project in file("model"))
+  lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
-    .settings(
+    .jvmSettings(
       Seq(
-        libraryDependencies ++= commonDeps ++ enumDeps
+        libraryDependencies ++= commonDeps ++ enumDeps ++ Seq(
+          "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
+        )
+      )
+    )
+    .jsSettings(
+      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
+      libraryDependencies ++= Seq(
+        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
+        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test",
+        "com.beachape" %%% "enumeratum" % Version.enumeratum
       )
     )
     .disablePlugins(ScoverageSbtPlugin)
+
+  lazy val modelJVM = model.jvm
+  lazy val modelJS = model.js
 
 
   lazy val parser = (project in file("parser"))
@@ -86,7 +101,7 @@ object HMDABuild extends Build {
           libraryDependencies ++= commonDeps ++ scalazDeps
         )
       )
-    .dependsOn(model % "compile->compile;test->test")
+    .dependsOn(modelJVM % "compile->compile;test->test")
 
   lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
