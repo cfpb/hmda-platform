@@ -43,10 +43,10 @@ trait SubmissionEditPaths
           val fEditChecks = getValidationState(institutionId, period, seqNr)
 
           val fSummaryEdits = fEditChecks.map { editChecks =>
-            val s = validationErrorsToEditResults(editChecks.larSyntactical ++ editChecks.tsSyntactical, Syntactical)
-            val v = validationErrorsToEditResults(editChecks.larValidity ++ editChecks.tsValidity, Validity)
-            val q = validationErrorsToEditResults(editChecks.larQuality ++ editChecks.tsQuality, Quality)
-            val m = validationErrorsToEditResults(editChecks.larMacro ++ editChecks.tsMacro, Macro)
+            val s = validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+            val v = validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+            val q = validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+            val m = validationErrorsToEditResults(editChecks.tsMacro, editChecks.larMacro, Macro)
             SummaryEditResults(s, v, q, m)
           }
 
@@ -72,13 +72,13 @@ trait SubmissionEditPaths
           val fSingleEdits = fValidationState.map { editChecks =>
             editType match {
               case "syntactical" =>
-                validationErrorsToEditResults(editChecks.larSyntactical ++ editChecks.tsSyntactical, Syntactical)
+                validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
               case "validity" =>
-                validationErrorsToEditResults(editChecks.larValidity ++ editChecks.tsValidity, Validity)
+                validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
               case "quality" =>
-                validationErrorsToEditResults(editChecks.larQuality ++ editChecks.tsQuality, Quality)
+                validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
               case "macro" =>
-                validationErrorsToEditResults(editChecks.larMacro ++ editChecks.tsMacro, Macro)
+                validationErrorsToEditResults(editChecks.tsMacro, editChecks.larMacro, Macro)
             }
           }
 

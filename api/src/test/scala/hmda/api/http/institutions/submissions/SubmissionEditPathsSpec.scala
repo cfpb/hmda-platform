@@ -29,14 +29,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedSummary = SummaryEditResults(
       EditResults(
         List(
-          EditResult("S020", List(LarEditResult(LarId("loan1")))),
-          EditResult("S010", List(LarEditResult(LarId("loan1"))))
+          EditResult("S020", ts = true, List(LarEditResult(LarId("loan1")))),
+          EditResult("S010", ts = false, List(LarEditResult(LarId("loan1"))))
         )
       ),
       EditResults(
         List(
-          EditResult("V285", List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
-          EditResult("V280", List(LarEditResult(LarId("loan1"))))
+          EditResult("V285", ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
+          EditResult("V280", ts = false, List(LarEditResult(LarId("loan1"))))
         )
       ),
       EditResults.empty,
@@ -53,8 +53,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedEdits =
       EditResults(
         List(
-          EditResult("V285", List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
-          EditResult("V280", List(LarEditResult(LarId("loan1"))))
+          EditResult("V285", ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
+          EditResult("V280", ts = false, List(LarEditResult(LarId("loan1"))))
         )
       )
 
@@ -77,12 +77,15 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val v1 = ValidationError("loan1", "V280", Validity)
     val v2 = ValidationError("loan2", "V285", Validity)
     val v3 = ValidationError("loan3", "V285", Validity)
-    val validationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3))
+    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3))
+
+    val tsValidationErrors = TsValidationErrors(Seq(s2))
 
     val fValidate: Future[Unit] = for {
       h <- fHmdaValidator
     } yield {
-      h ! validationErrors
+      h ! larValidationErrors
+      h ! tsValidationErrors
     }
 
   }
