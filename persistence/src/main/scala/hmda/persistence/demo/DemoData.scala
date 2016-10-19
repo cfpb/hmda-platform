@@ -5,7 +5,7 @@ import akka.util.Timeout
 import hmda.model.fi._
 import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
-import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
+import hmda.model.institution.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.model.institution.{ ExternalId, Institution }
 import hmda.persistence.CommonMessages._
