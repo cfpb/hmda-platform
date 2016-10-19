@@ -182,6 +182,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         "edits": [
           {
             "edit": "S025",
+            "ts": true,
             "lars": [
               {
                 "lar": {"loanId": "s1"}
@@ -196,6 +197,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           },
           {
             "edit": "S010",
+            "ts": false,
             "lars": [
               {
                 "lar": {"loanId": "s4"}
@@ -223,6 +225,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
   "edits": [
     {
       "edit": "V555",
+      "ts": false,
       "lars": [
         {
           "lar": {
@@ -233,6 +236,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     },
     {
       "edit": "V550",
+      "ts": false,
       "lars": [
         {
           "lar": {
