@@ -10,7 +10,10 @@ For example:
 "institution": {
     "id": "12345",
     "name": "First Bank",
-    "status": "active"
+    "status": {
+        "code": 1,
+        "message": "active"
+    }
 }
 ```
 
