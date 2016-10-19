@@ -13,4 +13,22 @@ class SubmissionProtocolSpec extends PropSpec with PropertyChecks with MustMatch
       s.toJson.convertTo[Submission] mustBe s
     }
   }
+
+  property("Submission JSON must be correct format") {
+    forAll(submissionGen) { s =>
+      s.toJson mustBe
+        JsObject(
+          ("id", JsObject(
+            ("institutionId", JsString(s.id.institutionId)),
+            ("period", JsString(s.id.period)),
+            ("sequenceNumber", JsNumber(s.id.sequenceNumber))
+          )),
+          ("status", JsObject(
+            ("code", JsNumber(s.status.code)),
+            ("message", JsString(s.status.message))
+          ))
+        )
+    }
+  }
+
 }
