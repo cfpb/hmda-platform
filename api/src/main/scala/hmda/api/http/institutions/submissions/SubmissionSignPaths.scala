@@ -29,6 +29,7 @@ trait SubmissionSignPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign
+  // NOTE:  This is currently a mocked, static endpoint
   def submissionSignPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber / "sign") { (period, submissionId) =>
       extractExecutionContext { executor =>

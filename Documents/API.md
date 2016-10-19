@@ -250,6 +250,8 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
+*NOTE:*  This is a mocked, static endpoint.
+
     * `GET`  - Institution Register Summary
 
     Example response, with HTTP code 200:
@@ -296,6 +298,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 
    * `POST`  - Verify the IRS
+       Example body:
+```
+{
+ "verified": true
+}
+```
    Example response, with HTTP code 200:
 ```
 {
@@ -305,6 +313,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`
+*NOTE:*  This is a mocked, static endpoint.
     * `GET`  - Returns a receipt
     Example response, with HTTP code 200:
 ```
@@ -315,6 +324,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 
    * `POST`  - Sign the submission
+    Example body:
+```
+{
+  "signed": true
+}
+```
     Example response, with HTTP code 200:
 ```
 {
@@ -324,6 +339,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`
+*NOTE:*  This is a mocked, static endpoint.
     * `GET`  - Returns a submission summary
     Example response, with HTTP code 200:
 ```

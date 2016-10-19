@@ -33,6 +33,7 @@ trait SubmissionIrsPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs
+  // NOTE:  This is currently a mocked, static endpoint
   def submissionIrsPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, submissionId) =>
       extractExecutionContext { executor =>
