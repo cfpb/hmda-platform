@@ -129,8 +129,9 @@ trait ModelGenerators {
   implicit def editResultGen: Gen[EditResult] = {
     for {
       edit <- Gen.alphaStr
+      ts <- Gen.oneOf(true, false)
       lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, lars)
+    } yield EditResult(edit, ts, lars)
   }
 
   implicit def editResultsGen: Gen[EditResults] = {
