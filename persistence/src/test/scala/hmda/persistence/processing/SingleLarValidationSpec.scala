@@ -7,7 +7,7 @@ import hmda.actor.test.ActorSpec
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.{ LarValidationErrors, ValidationErrors }
+import hmda.validation.engine.LarValidationErrors
 
 import scala.concurrent.duration._
 import scala.io.Source
@@ -18,7 +18,7 @@ class SingleLarValidationSpec extends ActorSpec {
 
   val larValidation = createSingleLarValidator(system)
 
-  val lines = Source.fromFile(new File("parser/src/test/resources/txt/FirstTestBankData_clean_407_2017.txt")).getLines()
+  val lines = Source.fromFile(new File("parser/jvm/src/test/resources/txt/FirstTestBankData_clean_407_2017.txt")).getLines()
   val lars = lines.drop(1).map(line => LarCsvParser(line)).collect {
     case Right(lar) => lar
   }
