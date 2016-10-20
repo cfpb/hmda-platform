@@ -1,17 +1,20 @@
 package hmda.model.institution
 
-import enumeratum.{ Enum, EnumEntry }
+import InstitutionStatusMessage._
 
 /**
  * The status of a financial institution
  */
-sealed abstract class InstitutionStatus(override val entryName: String) extends EnumEntry with Serializable
+sealed trait InstitutionStatus {
+  def code: Int
+  def message: String
+}
 
-object InstitutionStatus extends Enum[InstitutionStatus] {
-
-  val values = findValues
-
-  case object Active extends InstitutionStatus("active")
-  case object Inactive extends InstitutionStatus("inactive")
-
+case object Active extends InstitutionStatus {
+  override def code: Int = 1
+  override def message: String = activeMsg
+}
+case object Inactive extends InstitutionStatus {
+  override def code: Int = 2
+  override def message: String = inactiveMsg
 }

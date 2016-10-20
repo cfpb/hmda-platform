@@ -46,7 +46,10 @@ object DemoInstitutions extends ResourceUtils {
   }
 
   def toStatus(text: String): InstitutionStatus = {
-    InstitutionStatus.values.filter(status => status.entryName == text).head
+    text match {
+      case "active" => Active
+      case "inactive" => Inactive
+    }
   }
 
 }

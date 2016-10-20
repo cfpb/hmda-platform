@@ -2,7 +2,12 @@
 
 Every institution will store a `InstitutionStatus` object with the following structure:
 
-* `status`: `String`
+```
+"status": {
+    "code": Int,
+    "message": String
+}
+```
 
 For example:
 
@@ -10,7 +15,10 @@ For example:
 "institution": {
     "id": "12345",
     "name": "First Bank",
-    "status": "active"
+    "status": {
+        "code": 1,
+        "message": "active"
+    }
 }
 ```
 
