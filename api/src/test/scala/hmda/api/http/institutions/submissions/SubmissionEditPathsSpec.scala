@@ -25,55 +25,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     loadValidationErrors()
   }
 
-  "Submission Paths" must {
-    "find the latest submission for an institution" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
-        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", 3), Created)
-      }
-    }
-
-    "return not found when looking for a latest submission for non existent institution" in {
-      val path = Path("/institutions/xxxxx/filings/2017/submissions/latest")
-      getWithCfpbHeaders(path.toString) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.NotFound
-        val error = ErrorResponse(404, "No submission found for xxxxx for 2017", path)
-        responseAs[ErrorResponse] mustBe error
-      }
-
-    }
-
-    "create a new submission" in {
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.Created
-        val seqNr = DemoData.testSubmissions.size + 1
-        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", seqNr), Created)
-      }
-    }
-
-    "fail creating a new submission for a non existent institution" in {
-      val path: Path = Path("/institutions/xxxxx/filings/2017/submissions")
-      postWithCfpbHeaders(path.toString) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", path)
-      }
-    }
-
-    "fail creating a new submission for a non existent filing period" in {
-      val path = Path("/institutions/0/filings/2001/submissions")
-      postWithCfpbHeaders(path.toString) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 0", path)
-      }
-    }
-  }
-
-  "return 405 when trying to POST to the /latest endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
-      rejection mustBe a[MethodRejection]
-    }
-  }
-
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
       EditResults(
