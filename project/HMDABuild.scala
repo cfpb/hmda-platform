@@ -107,7 +107,7 @@ object HMDABuild extends Build {
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test",
         "org.scalaz" %%% "scalaz-core" % Version.scalaz
       )
-    )
+    ).disablePlugins(ScoverageSbtPlugin)
     .dependsOn(model % "compile->compile;test->test")
 
   lazy val parserJVM = parser.jvm
