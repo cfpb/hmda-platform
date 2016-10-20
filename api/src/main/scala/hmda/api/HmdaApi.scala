@@ -18,8 +18,7 @@ import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidatio
 import scala.concurrent.duration._
 
 object HmdaApi
-    extends App
-    with HttpApi
+    extends HttpApi
     with LarHttpApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
@@ -37,43 +36,46 @@ object HmdaApi
   lazy val host = config.getString("hmda.http.host")
   lazy val port = config.getInt("hmda.http.port")
 
-  //Start up API Actors
+  def main(args: Array[String]): Unit = {
 
-  val supervisor = HmdaSupervisor.createSupervisor(system)
+    //Start up API Actors
 
-  (supervisor ? FindActorByName(SingleLarValidation.name))
-    .mapTo[ActorRef]
-    .map { actor =>
-      log.info(s"Started validator at ${actor.path}")
+    val supervisor = HmdaSupervisor.createSupervisor(system)
+
+    (supervisor ? FindActorByName(SingleLarValidation.name))
+      .mapTo[ActorRef]
+      .map { actor =>
+        log.info(s"Started validator at ${actor.path}")
+      }
+
+    (supervisor ? FindActorByName(LocalHmdaEventProcessor.name))
+      .mapTo[ActorRef]
+      .map { actor =>
+        log.info(s"Started event processor at ${actor.path}")
+      }
+
+    (supervisor ? FindActorByName(InstitutionPersistence.name))
+      .mapTo[ActorRef]
+      .map { actor =>
+        log.info(s"Started institutions at ${actor.path}")
+      }
+
+    val http = Http().bindAndHandle(
+      routes ~ larRoutes ~ institutionsRoutes,
+      host,
+      port
+    )
+
+    //Load demo data
+    lazy val isDemo = config.getBoolean("hmda.isDemo")
+    if (isDemo) {
+      DemoData.loadDemoData(system)
     }
 
-  (supervisor ? FindActorByName(LocalHmdaEventProcessor.name))
-    .mapTo[ActorRef]
-    .map { actor =>
-      log.info(s"Started event processor at ${actor.path}")
+    http onFailure {
+      case ex: Exception =>
+        log.error(ex, "Failed to bind to {}:{}", host, port)
     }
-
-  (supervisor ? FindActorByName(InstitutionPersistence.name))
-    .mapTo[ActorRef]
-    .map { actor =>
-      log.info(s"Started institutions at ${actor.path}")
-    }
-
-  val http = Http().bindAndHandle(
-    routes ~ larRoutes ~ institutionsRoutes,
-    host,
-    port
-  )
-
-  //Load demo data
-  lazy val isDemo = config.getBoolean("hmda.isDemo")
-  if (isDemo) {
-    DemoData.loadDemoData(system)
-  }
-
-  http onFailure {
-    case ex: Exception =>
-      log.error(ex, "Failed to bind to {}:{}", host, port)
   }
 
 }
