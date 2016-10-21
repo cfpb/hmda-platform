@@ -25,16 +25,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
     ActorSystem(
       "test-system",
       ConfigFactory.parseString(
-        """
-          | akka.loggers = ["akka.testkit.TestEventListener"]
-          | akka.loglevel = DEBUG
-          | akka.stdout-loglevel = "OFF"
-          | akka.persistence.journal.plugin = "akka.persistence.journal.inmem"
-          | akka.persistence.snapshot-store.plugin = "akka.persistence.snapshot-store.local"
-          | akka.persistence.snapshot-store.local.dir = "target/snapshots"
-          | akka.log.dead-letters = off
-          | akka.log-dead-letters-during-shutdown = off
-          | """.stripMargin
+        TestConfigOverride.config
       )
     )
 
