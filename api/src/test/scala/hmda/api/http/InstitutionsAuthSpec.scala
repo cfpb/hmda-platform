@@ -9,7 +9,7 @@ import akka.stream.ActorMaterializer
 import hmda.model.institution.Agency.FDIC
 import hmda.model.institution.ExternalIdType.RssdId
 import hmda.model.institution.{ ExternalId, Institution }
-import hmda.model.institution.InstitutionStatus.Active
+import hmda.model.institution.Active
 import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.HmdaSupervisor.FindActorByName

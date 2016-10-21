@@ -3,7 +3,6 @@ package hmda.model.institution
 import hmda.model.institution.Agency._
 import hmda.model.institution.DepositoryType.Depository
 import hmda.model.institution.ExternalIdType._
-import hmda.model.institution.InstitutionStatus.Active
 import hmda.model.institution.InstitutionType._
 import org.scalatest.{ MustMatchers, WordSpec }
 

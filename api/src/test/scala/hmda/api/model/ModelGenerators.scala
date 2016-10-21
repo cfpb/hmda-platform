@@ -3,7 +3,6 @@ package hmda.api.model
 import java.util.Calendar
 import akka.http.scaladsl.model.Uri.Path
 import hmda.model.fi._
-import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution._
 import hmda.validation.engine._
 import org.scalacheck.Gen
@@ -129,8 +128,9 @@ trait ModelGenerators {
   implicit def editResultGen: Gen[EditResult] = {
     for {
       edit <- Gen.alphaStr
+      ts <- Gen.oneOf(true, false)
       lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, lars)
+    } yield EditResult(edit, ts, lars)
   }
 
   implicit def editResultsGen: Gen[EditResults] = {

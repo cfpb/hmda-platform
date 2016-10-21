@@ -32,12 +32,18 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
           "id": "12345",
           "name": "First Bank",
-          "status": "active"
+          "status": {
+            "code": 1,
+            "message": "active"
+          }
         },
         {
           "id": "123456",
           "name": "Second Bank",
-          "status": "inactive"
+          "status": {
+            "code": 0,
+            "message": "inactive"
+          }
         }
       ]
     }
@@ -53,7 +59,10 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "institution": {
       "id": "12345",
       "name": "First Bank",
-      "status": "active"
+      "status": {
+        "code": 0,
+        "message": "inactive"
+      }
     },
       "filings": [
         {
@@ -78,45 +87,57 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
 
 * `/institutions/<institution>/filings/<period>`
-    * `GET` - Details for a filing
+  * `GET` - Details for a filing
 
-    Example response, with HTTP code 200:
+  Example response, with HTTP code 200:
 
-    ```json
-   {
-     "filing": {
-     "period": "2017",
-     "institutionId": "12345",
-     "status": {
-       "code": 1,
-       "message": "not-started"
-     }
-   },
-   "submissions": [
-     {
-       "id": 3,
-       "status": {
-         "code": 1,
-         "message": "created"
-       }
-     },
-     {
-       "id": 2,
-       "status": {
-         "code": 1,
-         "message": "created"
-       }
-     },
-     {
-       "id": 1,
-       "status": {
-         "code": 1,
-         "message": "created"
-       }
-     }
-   ]
-   }
-    ```
+  ```json
+  {
+    "filing": {
+      "period": "2017",
+      "institutionId": "12345",
+      "status": {
+        "code": 1,
+        "message": "not-started"
+      }
+    },
+    "submissions": [
+      {
+        "id": {
+          "institutionId": "12345",
+          "period": "2017",
+          "sequenceNumber": 1
+        },
+        "status": {
+          "code": 1,
+          "message": "created"
+        }
+      },
+      {
+        "id": {
+          "institutionId": "12345",
+          "period": "2017",
+          "sequenceNumber": 2
+        },
+        "status": {
+          "code": 1,
+          "message": "created"
+        }
+      },
+      {
+        "id": {
+          "institutionId": "12345",
+          "period": "2017",
+          "sequenceNumber": 3
+        },
+        "status": {
+          "code": 1,
+          "message": "created"
+        }
+      }
+     ]
+  }
+  ```
 
 * `/institutions/<institution>/filings/<period>/submissions`
 
@@ -137,13 +158,13 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       }
     }
     ```
-    
+
 * `/institutions/<institution>/filings/<period>/submissions/latest`
 
     * `GET` - The latest submission for some institution and period
 
      Example response, with HTTP code 200:
-    
+
     ```json
     {
       "id": 3,
@@ -170,6 +191,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         "edits": [
           {
             "edit": "S025",
+            "ts": true,
             "lars": [
               {
                 "lar": {"loanId": "s1"}
@@ -184,6 +206,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           },
           {
             "edit": "S010",
+            "ts": false,
             "lars": [
               {
                 "lar": {"loanId": "s4"}
@@ -211,6 +234,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
   "edits": [
     {
       "edit": "V555",
+      "ts": false,
       "lars": [
         {
           "lar": {
@@ -221,6 +245,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     },
     {
       "edit": "V550",
+      "ts": false,
       "lars": [
         {
           "lar": {
@@ -230,6 +255,120 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       ]
     }
   ]
+}
+```
+
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
+*NOTE:*  This is a mocked, static endpoint.
+
+    * `GET`  - Institution Register Summary
+
+    Example response, with HTTP code 200:
+
+```json
+{
+  "msas": [
+    {
+      "id": "123",
+      "name": "MSA 123",
+      "totalLARS": 4,
+      "totalAmount": 123,
+      "conv": 4,
+      "FHA": 0,
+      "VA": 0,
+      "FSA": 0,
+      "1to4Family": 4,
+      "MFD": 0,
+      "multiFamily": 0,
+      "homePurchase": 0,
+      "homeImprovement": 0,
+      "refinance": 4
+    },
+    {
+      "id": "456",
+      "name": "MSA 456",
+      "totalLARS": 5,
+      "totalAmount": 456,
+      "conv": 5,
+      "FHA": 0,
+      "VA": 0,
+      "FSA": 0,
+      "1to4Family": 5,
+      "MFD": 0,
+      "multiFamily": 0,
+      "homePurchase": 0,
+      "homeImprovement": 0,
+      "refinance": 5
+    }
+  ],
+  "timestamp": null,
+  "receipt": null
+}
+```
+
+   * `POST`  - Verify the IRS
+       Example body:
+```
+{
+ "verified": true
+}
+```
+   Example response, with HTTP code 200:
+```
+{
+  "timestamp": 1476809530772,
+  "receipt": asd0f987134asdlfasdflk
+}
+```
+
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`
+*NOTE:*  This is a mocked, static endpoint.
+    * `GET`  - Returns a receipt
+    Example response, with HTTP code 200:
+```
+{
+  "timestamp": 1476809530772,
+  "receipt": asd0f987134asdlfasdflk
+}
+```
+
+   * `POST`  - Sign the submission
+    Example body:
+```
+{
+  "signed": true
+}
+```
+    Example response, with HTTP code 200:
+```
+{
+  "timestamp": 1476809530772,
+  "receipt": asd0f987134asdlfasdflk
+}
+```
+
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`
+*NOTE:*  This is a mocked, static endpoint.
+    * `GET`  - Returns a submission summary
+    Example response, with HTTP code 200:
+```
+{
+  "respondent": {
+    "name": "Bank",
+    "id": "1234567890",
+    "taxId": "0987654321",
+    "agency": "CFPB",
+    "contact": {
+      "name": "Your Name",
+      "phone": "123-456-7890",
+      "email": "your.name@bank.com"
+    }
+  },
+  "file": {
+    "name": "lar.dat",
+    "year": "2016",
+    "totalLARS": 25
+  }
 }
 ```
 

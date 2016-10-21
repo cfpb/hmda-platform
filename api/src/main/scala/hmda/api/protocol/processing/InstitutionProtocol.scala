@@ -1,29 +1,31 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.{ InstitutionDetail, InstitutionWrapper, Institutions }
-import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
-import hmda.model.institution.{ Agency, DepositoryType, Institution, InstitutionStatus }
-import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
+import hmda.model.institution.{ Active, Inactive, InstitutionStatus }
+import hmda.model.institution.InstitutionStatusMessage._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
 trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
   implicit object InstitutionStatusJsonFormat extends RootJsonFormat[InstitutionStatus] {
+
     override def write(status: InstitutionStatus): JsValue = {
-      status match {
-        case Active => JsString("active")
-        case Inactive => JsString("inactive")
-      }
+      JsObject(
+        ("code", JsNumber(status.code)),
+        ("message", JsString(status.message))
+      )
     }
 
     override def read(json: JsValue): InstitutionStatus = {
-      json match {
+      json.asJsObject.getFields("message").head match {
         case JsString(s) => s match {
-          case "active" => Active
-          case "inactive" => Inactive
+          case `activeMsg` => Active
+          case `inactiveMsg` => Inactive
+          case _ => throw new DeserializationException("Institution Status expected")
         }
-        case _ => throw new DeserializationException("Institution Status expected")
+        case _ => throw new DeserializationException("Unable to deserialize")
       }
     }
+
   }
 
   implicit val institutionWrapperFormat = jsonFormat3(InstitutionWrapper.apply)

@@ -2,7 +2,7 @@ package hmda.api.protocol.processing
 
 import hmda.model.fi._
 import hmda.model.fi.SubmissionStatusMessage._
-import hmda.api.model.{ SubmissionStatusWrapper, SubmissionWrapper, Submissions }
+import hmda.api.model.{ Receipt, SubmissionStatusWrapper, SubmissionWrapper, Submissions }
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
 trait SubmissionProtocol extends DefaultJsonProtocol {
@@ -44,5 +44,5 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
   implicit val submissionsFormat = jsonFormat1(Submissions.apply)
   implicit val submissionStatusWrapperFormat = jsonFormat2(SubmissionStatusWrapper.apply)
   implicit val submissionWrapperFormat = jsonFormat2(SubmissionWrapper.apply)
-
+  implicit val receiptFormat = jsonFormat2(Receipt.apply)
 }
