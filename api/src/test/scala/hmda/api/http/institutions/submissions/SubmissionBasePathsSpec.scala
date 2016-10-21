@@ -17,7 +17,7 @@ class SubmissionBasePathsSpec extends InstitutionHttpApiSpec {
     "find the latest submission for an institution" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[SubmissionWrapper] mustBe SubmissionWrapper(3, SubmissionStatusWrapper(1, "created"))
+        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", 3), Created)
       }
     }
 
@@ -54,11 +54,12 @@ class SubmissionBasePathsSpec extends InstitutionHttpApiSpec {
         responseAs[ErrorResponse] mustBe ErrorResponse(404, "2001 filing not found for institution 0", path)
       }
     }
-  }
 
-  "return 405 when trying to POST to the /latest endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
-      rejection mustBe a[MethodRejection]
+    "return 405 when trying to POST to the /latest endpoint" in {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
+        rejection mustBe a[MethodRejection]
+      }
     }
   }
+
 }

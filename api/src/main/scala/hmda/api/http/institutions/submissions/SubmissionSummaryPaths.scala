@@ -38,10 +38,8 @@ trait SubmissionSummaryPaths
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
 
-          val partialPath = "src/main/scala/hmda/api/http/institutions/submissions/tempJson/summary.json"
-          val source = Try(Source.fromFile(new File(partialPath))).getOrElse(Source.fromFile(new File("api/" + partialPath)))
-
-          val summaryJson = source.getLines.mkString
+          //To avoid having to deal with relative paths on different systems
+          val summaryJson = "{\n  \"respondent\": {\n    \"name\": \"Bank\",\n    \"id\": \"1234567890\",\n    \"taxId\": \"0987654321\",\n    \"agency\": \"CFPB\",\n    \"contact\": {\n      \"name\": \"Your Name\",\n      \"phone\": \"123-456-7890\",\n      \"email\": \"your.name@bank.com\"\n    }\n  },\n  \"file\": {\n    \"name\": \"lar.dat\",\n    \"year\": \"2016\",\n    \"totalLARS\": 25\n  }\n}"
           val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, summaryJson))
 
           complete(response)
