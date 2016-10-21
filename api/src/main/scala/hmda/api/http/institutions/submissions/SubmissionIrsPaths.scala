@@ -41,10 +41,8 @@ trait SubmissionIrsPaths
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
 
-          val partialPath = "src/main/scala/hmda/api/http/institutions/submissions/tempJson/irs.json"
-          val source = Try(Source.fromFile(new File(partialPath))).getOrElse(Source.fromFile(new File("api/" + partialPath)))
-
-          val irsJson = source.getLines.mkString
+          //To avoid having to deal with relative paths on different systems
+          val irsJson = "{\n  \"msas\": [\n    {\n      \"id\": \"123\",\n      \"name\": \"MSA 123\",\n      \"totalLARS\": 4,\n      \"totalAmount\": 123,\n      \"conv\": 4,\n      \"FHA\": 0,\n      \"VA\": 0,\n      \"FSA\": 0,\n      \"1to4Family\": 4,\n      \"MFD\": 0,\n      \"multiFamily\": 0,\n      \"homePurchase\": 0,\n      \"homeImprovement\": 0,\n      \"refinance\": 4\n    },\n    {\n      \"id\": \"456\",\n      \"name\": \"MSA 456\",\n      \"totalLARS\": 5,\n      \"totalAmount\": 456,\n      \"conv\": 5,\n      \"FHA\": 0,\n      \"VA\": 0,\n      \"FSA\": 0,\n      \"1to4Family\": 5,\n      \"MFD\": 0,\n      \"multiFamily\": 0,\n      \"homePurchase\": 0,\n      \"homeImprovement\": 0,\n      \"refinance\": 5\n    }\n  ],\n  \"timestamp\": 0,\n  \"receipt\": \"\"\n}"
           val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, irsJson))
 
           complete(response)
