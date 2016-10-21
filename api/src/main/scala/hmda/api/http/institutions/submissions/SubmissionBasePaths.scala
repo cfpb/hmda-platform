@@ -99,9 +99,7 @@ trait SubmissionBasePaths
                 val errorResponse = ErrorResponse(404, s"No submission found for $institutionId for $period", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
               } else {
-                val statusWrapper = SubmissionStatusWrapper(submission.status.code, submission.status.message)
-                val submissionWrapper = SubmissionWrapper(submission.id.sequenceNumber, statusWrapper)
-                complete(ToResponseMarshallable(submissionWrapper))
+                complete(ToResponseMarshallable(submission))
               }
             case Failure(error) =>
               completeWithInternalError(uri, error)
