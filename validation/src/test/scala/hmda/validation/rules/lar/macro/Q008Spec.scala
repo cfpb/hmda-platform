@@ -9,23 +9,34 @@ import org.scalacheck.Gen
 class Q008Spec extends MacroSpec {
 
   val config = ConfigFactory.load()
-  val multiplier = config.getDouble("hmda.validation.macro.Q008.numOfLarsMultiplier") * 100
+  val multiplier = config.getDouble("hmda.validation.macro.Q008.numOfLarsMultiplier")
 
-  val multiplierGen: Gen[Int] = Gen.choose(1, multiplier.toInt)
+  val testLars = lar100ListGen.sample.getOrElse(Nil)
+  val sampleSize = testLars.size
 
-  property("be valid if withdrawn <= 0.30 * total") {
-    larSource.mustPass
+  property(s"be valid if withdrawn < $multiplier * total") {
+    val numOfGoodLars = (sampleSize * multiplier).toInt - 1
+    val newLarSource = newSource(numOfGoodLars)
+    newLarSource.mustPass
   }
 
-  property("be invalid if withdrawn > 0.30 * total") {
-    forAll(multiplierGen) { multiplier =>
-      val badLar = lars.head.copy(actionTakenType = 4)
-      val badLars = Array.fill(multiplier)(badLar)
-      val goodLars = Array.fill(100 - multiplier)(lars.head)
-      val newLars = badLars ++ goodLars
-      val newLarSource = Source.fromIterator(() => newLars.toIterator)
-      newLarSource.mustFail
-    }
+  property(s"be valid if withdrawn = $multiplier * total") {
+    val numOfGoodLars = (sampleSize * multiplier).toInt
+    val newLarSource = newSource(numOfGoodLars)
+    newLarSource.mustPass
+  }
+
+  property(s"be invalid if withdrawn > $multiplier * total") {
+    val numOfGoodLars = (sampleSize * multiplier).toInt + 1
+    val newLarSource = newSource(numOfGoodLars)
+    newLarSource.mustFail
+  }
+
+  private def newSource(numOfGoodLars: Int) = {
+    val goodLars = testLars.map(lar => lar.copy(actionTakenType = 4)).take(numOfGoodLars)
+    val badLars = testLars.map(lar => lar.copy(actionTakenType = 2)).drop(numOfGoodLars)
+    val newLars = goodLars ::: badLars
+    Source.fromIterator(() => newLars.toIterator)
   }
 
   override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q008

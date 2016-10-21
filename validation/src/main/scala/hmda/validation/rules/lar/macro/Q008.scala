@@ -15,7 +15,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 object Q008 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
   val config = ConfigFactory.load()
-  val multiplier = config.getInt("hmda.validation.macro.Q008.numOfLarsMultiplier")
+  val multiplier = config.getDouble("hmda.validation.macro.Q008.numOfLarsMultiplier")
 
   override def name = "Q008"
 
@@ -30,7 +30,7 @@ object Q008 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
       a <- applicationWithdrawn
       t <- total
     } yield {
-      a is lessThanOrEqual(t * multiplier)
+      a.toDouble is lessThanOrEqual(t * multiplier)
     }
 
   }
