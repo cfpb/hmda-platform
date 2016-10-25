@@ -33,7 +33,7 @@ object HMDABuild extends Build {
 
   val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
+  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream, akkaTestkit)
 
   val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence)
 
@@ -91,7 +91,7 @@ object HMDABuild extends Build {
   lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
     .settings(
-      libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps
+      libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
     ).dependsOn(parser % "compile->compile;test->test")
 
 
