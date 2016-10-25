@@ -1,10 +1,8 @@
 package hmda.validation.rules.lar.`macro`
-import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
-import org.scalacheck.Gen
 
 class Q008Spec extends MacroSpec {
 
@@ -16,27 +14,20 @@ class Q008Spec extends MacroSpec {
 
   property(s"be valid if withdrawn < $multiplier * total") {
     val numOfGoodLars = (sampleSize * multiplier).toInt - 1
-    val newLarSource = newSource(numOfGoodLars)
+    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 4, 2)
     newLarSource.mustPass
   }
 
   property(s"be valid if withdrawn = $multiplier * total") {
     val numOfGoodLars = (sampleSize * multiplier).toInt
-    val newLarSource = newSource(numOfGoodLars)
+    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 4, 2)
     newLarSource.mustPass
   }
 
   property(s"be invalid if withdrawn > $multiplier * total") {
     val numOfGoodLars = (sampleSize * multiplier).toInt + 1
-    val newLarSource = newSource(numOfGoodLars)
+    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 4, 2)
     newLarSource.mustFail
-  }
-
-  private def newSource(numOfGoodLars: Int) = {
-    val goodLars = testLars.map(lar => lar.copy(actionTakenType = 4)).take(numOfGoodLars)
-    val badLars = testLars.map(lar => lar.copy(actionTakenType = 2)).drop(numOfGoodLars)
-    val newLars = goodLars ::: badLars
-    Source.fromIterator(() => newLars.toIterator)
   }
 
   override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q008

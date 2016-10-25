@@ -1,6 +1,5 @@
 package hmda.validation.rules.lar.`macro`
 
-import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.AggregateEditCheck
@@ -16,27 +15,20 @@ class Q007Spec extends MacroSpec {
 
   property(s"be valid if not accepted < $multiplier * total") {
     val numOfGoodLars = (sampleSize * multiplier).toInt - 1
-    val newLarSource = newSource(numOfGoodLars)
+    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 2, 4)
     newLarSource.mustPass
   }
 
   property(s"be valid if not accepted = $multiplier * total") {
     val numOfGoodLars = (sampleSize * multiplier).toInt
-    val newLarSource = newSource(numOfGoodLars)
+    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 2, 4)
     newLarSource.mustPass
   }
 
   property(s"be invalid if not accepted > $multiplier * total") {
     val numOfGoodLars = (sampleSize * multiplier).toInt + 1
-    val newLarSource = newSource(numOfGoodLars)
+    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 2, 4)
     newLarSource.mustFail
-  }
-
-  private def newSource(numOfGoodLars: Int) = {
-    val goodLars = testLars.map(lar => lar.copy(actionTakenType = 2)).take(numOfGoodLars)
-    val badLars = testLars.map(lar => lar.copy(actionTakenType = 4)).drop(numOfGoodLars)
-    val newLars = goodLars ::: badLars
-    Source.fromIterator(() => newLars.toIterator)
   }
 
   override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q007
