@@ -8,18 +8,7 @@ import hmda.validation.dsl.Result
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-abstract class AggregateEditCheck[A <: Source[T, NotUsed], T] {
-
-  def count(input: Source[T, NotUsed])(implicit materializer: ActorMaterializer): Future[Double] = {
-    input.runWith(sinkCount)
-  }
-
-  private def sinkCount(): Sink[T, Future[Double]] = {
-    Sink.fold[Double, T](0) { (acc, _) =>
-      val total = acc + 1
-      total.toDouble
-    }
-  }
+abstract class AggregateEditCheck[A <: Source[T, NotUsed], T] extends SourceUtils {
 
   def name: String
 
