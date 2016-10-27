@@ -13,6 +13,8 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 abstract class HttpApi extends HmdaActor {
 
+  val name: String
+
   val host: String
   val port: Int
 
@@ -30,7 +32,7 @@ abstract class HttpApi extends HmdaActor {
   }
 
   private def handleServerBinding(address: InetSocketAddress) = {
-    log.info(s"HMDA API started on {}", address)
+    log.info(s"$name started on {}", address)
     context.become(Actor.emptyBehavior)
   }
 

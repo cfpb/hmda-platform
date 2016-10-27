@@ -19,21 +19,24 @@ import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidatio
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
-object HmdaApi {
-  case object StartHttpApi
-  def props(): Props = Props(new HmdaApi)
+object HmdaFilingApi {
+  case object StartFilingApi
+  def props(): Props = Props(new HmdaFilingApi)
 }
 
-class HmdaApi
+class HmdaFilingApi
     extends HttpApi
     with BaseHttpApi
     with LarHttpApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
 
-  import HmdaApi._
+  import HmdaFilingApi._
 
   val config = ConfigFactory.load()
+
+  override val name = "hmda-filing-api"
+
   lazy val httpTimeout = config.getInt("hmda.http.timeout")
   implicit val timeout = Timeout(httpTimeout.seconds)
 
@@ -45,7 +48,7 @@ class HmdaApi
   implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val paths: Route = routes ~ larRoutes ~ institutionsRoutes
+  val paths: Route = routes(s"$name") ~ larRoutes ~ institutionsRoutes
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
@@ -54,38 +57,5 @@ class HmdaApi
   )
 
   http pipeTo self
-
-  override def receive: Receive = super.receive orElse {
-    case StartHttpApi => handleHttpApiStartup()
-  }
-
-  private def handleHttpApiStartup() = {
-
-    val supervisor = system.actorSelection("/user/supervisor")
-
-    (supervisor ? FindActorByName(SingleLarValidation.name))
-      .mapTo[ActorRef]
-      .map { actor =>
-        log.info(s"Started validator at ${actor.path}")
-      }
-
-    (supervisor ? FindActorByName(LocalHmdaEventProcessor.name))
-      .mapTo[ActorRef]
-      .map { actor =>
-        log.info(s"Started event processor at ${actor.path}")
-      }
-
-    (supervisor ? FindActorByName(InstitutionPersistence.name))
-      .mapTo[ActorRef]
-      .map { actor =>
-        log.info(s"Started institutions at ${actor.path}")
-      }
-
-    //Load demo data
-    lazy val isDemo = config.getBoolean("hmda.isDemo")
-    if (isDemo) {
-      DemoData.loadDemoData(system)
-    }
-  }
 
 }
