@@ -1,39 +1,19 @@
 package hmda.api
 
-import akka.actor.ActorSystem
-import akka.event.{ Logging, LoggingAdapter }
-import akka.http.scaladsl.Http
-import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
-import hmda.api.http.admin.InstitutionAdminHttpApi
+import akka.actor._
+import hmda.api.HmdaApi._
+import hmda.persistence.HmdaSupervisor._
 
-import scala.concurrent.ExecutionContext
-
-object HmdaPlatform extends InstitutionAdminHttpApi {
-
-  val config = ConfigFactory.load()
-  lazy val adminHost = config.getString("hmda.http.adminHost")
-  lazy val adminPort = config.getInt("hmda.http.adminPort")
+object HmdaPlatform {
 
   def main(args: Array[String]): Unit = {
-    HmdaApi.main(Array.empty)
-    new HmdaAdminApi(HmdaApi.system).main(Array.empty)
 
-    val http = Http().bindAndHandle(
-      institutionAdminPath,
-      adminHost,
-      adminPort
-    )
+    val system = ActorSystem("hmda")
+    createSupervisor(system)
 
-    http onFailure {
-      case ex: Exception =>
-        log.error(ex, "Failed to bind to {}:{}", adminHost, adminPort)
-    }
+    val api = system.actorOf(HmdaApi.props(), "hmda-api")
+    api ! StartHttpApi
 
   }
 
-  override implicit val system: ActorSystem = ActorSystem("hmda")
-  override implicit val materializer: ActorMaterializer = ActorMaterializer()
-  implicit val ec: ExecutionContext = system.dispatcher
-  override val log: LoggingAdapter = Logging(system, getClass)
 }
