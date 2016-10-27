@@ -3,7 +3,6 @@ package hmda.api.model
 import java.util.Calendar
 import akka.http.scaladsl.model.Uri.Path
 import hmda.model.fi._
-import hmda.model.institution.InstitutionStatus.{ Active, Inactive }
 import hmda.model.institution._
 import hmda.validation.engine._
 import org.scalacheck.Gen
