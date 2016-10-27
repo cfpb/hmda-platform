@@ -52,7 +52,7 @@ object HMDABuild extends Build {
     .settings(
       Seq(
         assemblyJarName in assembly := {s"${name.value}.jar"},
-        mainClass in assembly := Some("hmda.api.HmdaApi"),
+        mainClass in assembly := Some("hmda.api.HmdaPlatform"),
         assemblyMergeStrategy in assembly := {
           case "application.conf" => MergeStrategy.concat
           case "JS_DEPENDENCIES" => MergeStrategy.concat
