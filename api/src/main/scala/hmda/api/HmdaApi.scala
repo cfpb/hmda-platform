@@ -1,24 +1,23 @@
 package hmda.api
 
-import java.net.InetSocketAddress
-
-import akka.actor.{ Actor, ActorRef, ActorSystem, Props, Status }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.pattern.{ ask, pipe }
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.{ HmdaCustomDirectives, HttpApi, InstitutionsHttpApi, LarHttpApi }
+import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, LarHttpApi }
 import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaApi {
   case object StartHttpApi
@@ -26,8 +25,8 @@ object HmdaApi {
 }
 
 class HmdaApi
-    extends Actor
-    with HttpApi
+    extends HttpApi
+    with BaseHttpApi
     with LarHttpApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
@@ -36,44 +35,31 @@ class HmdaApi
 
   val config = ConfigFactory.load()
   lazy val httpTimeout = config.getInt("hmda.http.timeout")
-  override implicit val timeout = Timeout(httpTimeout.seconds)
+  implicit val timeout = Timeout(httpTimeout.seconds)
 
-  lazy val host = config.getString("hmda.http.host")
-  lazy val port = config.getInt("hmda.http.port")
+  override lazy val host = config.getString("hmda.http.host")
+  override lazy val port = config.getInt("hmda.http.port")
 
-  override implicit val system: ActorSystem = context.system
+  implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
-  implicit val ec = context.dispatcher
 
-  val http: Future[ServerBinding] = Http(system).bindAndHandle(
-    routes ~ larRoutes ~ institutionsRoutes,
+  val paths: Route = routes ~ larRoutes ~ institutionsRoutes
+
+  override val http: Future[ServerBinding] = Http(system).bindAndHandle(
+    paths,
     host,
     port
   )
 
   http pipeTo self
 
-  override def receive: Receive = {
-    case Http.ServerBinding(s) => handleServerBinding(s)
-    case Status.Failure(e) => handleBindFailure(e)
+  override def receive: Receive = super.receive orElse {
     case StartHttpApi => handleHttpApiStartup()
-
-  }
-
-  private def handleServerBinding(address: InetSocketAddress) = {
-    log.info(s"HMDA API started on {}", address)
-    context.become(Actor.emptyBehavior)
-  }
-
-  private def handleBindFailure(error: Throwable) = {
-    log.error(error, s"Failed to bind to $host:$port")
-    context stop self
   }
 
   private def handleHttpApiStartup() = {
-
-    log.info("Start API")
 
     val supervisor = system.actorSelection("/user/supervisor")
 

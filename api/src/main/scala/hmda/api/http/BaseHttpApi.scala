@@ -12,7 +12,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.protocol.HmdaApiProtocol
 import spray.json._
 
-trait HttpApi extends HmdaApiProtocol with HmdaCustomDirectives {
+trait BaseHttpApi extends HmdaApiProtocol with HmdaCustomDirectives {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
