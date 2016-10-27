@@ -29,7 +29,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
       )
     )
 
-  val duration = 5.seconds
+  val duration = 10.seconds
   implicit val timeout = Timeout(duration)
   implicit val ec = system.dispatcher
 
