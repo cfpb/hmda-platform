@@ -8,7 +8,7 @@ import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.ExecutionContext
 
-class HttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with BaseHttpApi {
+class BaseHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with BaseHttpApi {
   override val log: LoggingAdapter = NoLogging
   val ec: ExecutionContext = system.dispatcher
 
