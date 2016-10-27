@@ -155,5 +155,15 @@ object HMDABuild extends Build {
     .disablePlugins(ScoverageSbtPlugin)
     .dependsOn(parser)
 
+  lazy val tractToCbsa = (project in file("tract-to-cbsa"))
+    .settings(buildSettings: _*)
+    .settings(Revolver.settings:_*)
+    .settings(
+      Seq(
+        libraryDependencies ++= commonDeps
+      )
+    )
+    .dependsOn(modelJVM % "compile->compile;test->test")
+
 
 }
