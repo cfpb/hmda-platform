@@ -6,8 +6,8 @@ import hmda.model.institution.Institution
 import hmda.model.institution.Inactive
 import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.model.HmdaPersistentActor
 
 object InstitutionPersistence {
 

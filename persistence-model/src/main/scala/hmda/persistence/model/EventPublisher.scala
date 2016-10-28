@@ -1,4 +1,4 @@
-package hmda.persistence
+package hmda.persistence.model
 
 import hmda.persistence.messages.CommonMessages.Event
 

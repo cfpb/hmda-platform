@@ -7,7 +7,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
+import hmda.persistence.model.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.validation.context.ValidationContext
