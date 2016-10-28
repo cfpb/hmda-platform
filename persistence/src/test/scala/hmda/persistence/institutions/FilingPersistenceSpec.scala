@@ -1,11 +1,11 @@
 package hmda.persistence.institutions
 
 import akka.testkit.{ EventFilter, TestProbe }
-import hmda.actor.test.ActorSpec
 import hmda.model.fi._
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.FilingPersistence._
+import hmda.persistence.model.ActorSpec
 
 class FilingPersistenceSpec extends ActorSpec {
 

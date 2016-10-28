@@ -3,11 +3,11 @@ package hmda.persistence.processing
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.testkit.{ EventFilter, TestProbe }
 import com.typesafe.config.ConfigFactory
-import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
 import hmda.persistence.processing.SingleLarValidation._

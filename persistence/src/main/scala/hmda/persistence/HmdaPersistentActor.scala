@@ -7,6 +7,7 @@ import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.messages.CommonMessages.{ Event, Shutdown }
+import hmda.persistence.model.HmdaActor
 
 import scala.concurrent.duration.Duration
 

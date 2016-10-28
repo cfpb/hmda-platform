@@ -129,7 +129,7 @@ object HMDABuild extends Build {
         libraryDependencies ++= akkaPersistenceDeps
       )
     )
-    .dependsOn(persistenceModel)
+    .dependsOn(persistenceModel % "compile->compile;test->test")
     .dependsOn(validation % "compile->compile;test->test")
 
 
