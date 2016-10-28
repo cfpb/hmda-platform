@@ -1,19 +1,59 @@
 package hmda.api.http.admin
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.pattern.ask
 import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Directives._
+import hmda.api.http.HmdaCustomDirectives
+import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
+import hmda.model.institution.Institution
+import hmda.persistence.HmdaSupervisor.FindActorByName
+import hmda.persistence.institutions.InstitutionPersistence
+import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, GetInstitutionById }
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.util.Timeout
+import hmda.api.model.admin.WriteInstitution
+import hmda.api.protocol.admin.WriteInstitutionProtocol
+import scala.concurrent.ExecutionContext
+import scala.util.{ Failure, Success }
 
-trait InstitutionAdminHttpApi {
+trait InstitutionAdminHttpApi
+    extends WriteInstitutionProtocol
+    with ApiErrorProtocol
+    with HmdaCustomDirectives {
+
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
+  implicit val timeout: Timeout
+
   val log: LoggingAdapter
 
-  val institutionAdminRootPath =
-    pathSingleSlash {
-      complete("OK")
+  val institutionsWritePath =
+    path("institutions") {
+      timedPost { uri =>
+        entity(as[Institution]) { institution =>
+          extractExecutionContext { executor =>
+            implicit val ec: ExecutionContext = executor
+            val supervisor = system.actorSelection("/user/supervisor")
+            val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+            val fCreated = for {
+              a <- fInstitutionsActor
+              c <- a ? CreateInstitution(institution)
+              i <- (a ? GetInstitutionById(institution.id)).mapTo[Institution]
+            } yield i
+
+            onComplete(fCreated) {
+              case Success(i) =>
+                complete(ToResponseMarshallable(WriteInstitution(true, i.id)))
+              case Failure(error) => completeWithInternalError(uri, error)
+
+            }
+          }
+        }
+      }
     }
 
-  val institutionAdminPath = institutionAdminRootPath
+  val institutionAdminPath = institutionsWritePath
 }

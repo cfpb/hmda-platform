@@ -8,22 +8,23 @@ import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.BaseHttpApi
 import hmda.api.http.admin.InstitutionAdminHttpApi
-
+import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaAdminApi {
-  case object StartAdminApi
   def props(): Props = Props(new HmdaAdminApi)
 }
 
 class HmdaAdminApi extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi {
 
-  import HmdaAdminApi._
-
   val config = ConfigFactory.load()
+
+  lazy val httpTimeout = config.getInt("hmda.http.timeout")
+  override implicit val timeout = Timeout(httpTimeout.seconds)
 
   override val name = "hmda-admin-api"
 
@@ -44,9 +45,4 @@ class HmdaAdminApi extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi
   )
 
   http pipeTo self
-
-  override def receive: Receive = super.receive orElse {
-    case StartAdminApi =>
-  }
-
 }
