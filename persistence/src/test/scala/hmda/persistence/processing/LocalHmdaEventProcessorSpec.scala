@@ -29,7 +29,7 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
       )
     )
 
-  val duration = 5.seconds
+  val duration = 10.seconds
   implicit val timeout = Timeout(duration)
   implicit val ec = system.dispatcher
 
@@ -106,8 +106,8 @@ class LocalHmdaEventProcessorSpec extends ActorSpec {
 
   private def checkSubmissionStatus(status: SubmissionStatus): Assertion = {
     val fSubmissions = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
-    val subActor = Await.result(fSubmissions, 5.seconds)
-    val submissionSeq = Await.result((subActor ? GetState).mapTo[Seq[Submission]], 5.seconds)
+    val subActor = Await.result(fSubmissions, duration)
+    val submissionSeq = Await.result((subActor ? GetState).mapTo[Seq[Submission]], duration)
     submissionSeq.head.status mustBe status
   }
 
