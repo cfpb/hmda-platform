@@ -1,6 +1,5 @@
 package hmda.api.protocol.admin
 
-import hmda.api.model.admin.WriteInstitution
 import hmda.api.protocol.processing.InstitutionProtocol
 import hmda.model.institution.Agency._
 import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
@@ -138,5 +137,4 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
   }
 
   implicit val externalIdFormat = jsonFormat2(ExternalId.apply)
-  implicit val writeInstitutionFormat = jsonFormat2(WriteInstitution.apply)
 }
