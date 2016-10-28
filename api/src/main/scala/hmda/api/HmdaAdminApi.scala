@@ -36,7 +36,7 @@ class HmdaAdminApi extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val paths: Route = routes(s"$name") ~ institutionAdminPath
+  override val paths: Route = routes(s"$name") ~ institutionAdminRoutes
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
