@@ -31,7 +31,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
       val institution = DemoData.testInstitutions.head
       val modified = institution.copy(name = "new name")
       probe.send(institutionsActor, ModifyInstitution(modified))
-      probe.expectMsg(modified)
+      probe.expectMsg(Some(modified))
     }
 
     "return a set of institutions matching a list of ids" in {
@@ -75,6 +75,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
         val msg = s"Institution does not exist. Could not update $i"
         EventFilter.warning(message = msg, occurrences = 1) intercept {
           probe.send(institutionsActor, ModifyInstitution(i))
+          probe.expectMsg(None)
         }
       }
     }
