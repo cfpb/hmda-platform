@@ -132,6 +132,14 @@ object HMDABuild extends Build {
     .dependsOn(persistenceModel % "compile->compile;test->test")
     .dependsOn(validation % "compile->compile;test->test")
 
+  lazy val query = (project in file("query"))
+    .settings(buildSettings:_*)
+    .settings(
+      libraryDependencies ++= akkaPersistenceDeps
+    )
+    .dependsOn(modelJVM % "compile->compile;test->test")
+    .dependsOn(persistenceModel % "compile->compile;test->test")
+
 
   lazy val api = (project in file("api"))
     .settings(buildSettings: _*)
