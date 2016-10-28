@@ -2,7 +2,7 @@ package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi._
-import hmda.persistence.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.SubmissionPersistence._
 

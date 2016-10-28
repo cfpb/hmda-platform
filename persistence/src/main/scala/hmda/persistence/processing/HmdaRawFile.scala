@@ -2,7 +2,7 @@ package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 
 object HmdaRawFile {

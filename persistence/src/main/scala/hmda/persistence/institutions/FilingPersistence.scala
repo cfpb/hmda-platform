@@ -2,7 +2,7 @@ package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.{ Filing, NotStarted }
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.FilingPersistence._
 

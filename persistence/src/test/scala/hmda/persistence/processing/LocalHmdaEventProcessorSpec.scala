@@ -7,7 +7,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi._
-import hmda.persistence.CommonMessages.{ Event, GetState }
+import hmda.persistence.messages.CommonMessages.{ Event, GetState }
 import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence._

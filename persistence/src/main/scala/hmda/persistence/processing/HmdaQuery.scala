@@ -7,7 +7,7 @@ import akka.persistence.query.scaladsl._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 
 object HmdaQuery {
 

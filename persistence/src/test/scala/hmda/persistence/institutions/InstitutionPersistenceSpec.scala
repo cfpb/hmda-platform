@@ -7,7 +7,7 @@ import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId 
 import hmda.model.institution.{ ExternalId, Institution }
 import hmda.model.institution.Active
 import hmda.model.institution.InstitutionType.Bank
-import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, GetInstitutionById, ModifyInstitution, _ }
 

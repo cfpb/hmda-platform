@@ -1,6 +1,6 @@
 package hmda.persistence
 
-import hmda.persistence.CommonMessages.Event
+import hmda.persistence.messages.CommonMessages.Event
 
 trait EventPublisher {
   def publishEvent(e: Event): Unit

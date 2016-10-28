@@ -7,7 +7,7 @@ import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
 import hmda.persistence.processing.SingleLarValidation._

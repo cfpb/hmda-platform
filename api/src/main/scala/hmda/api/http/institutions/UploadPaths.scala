@@ -18,7 +18,7 @@ import hmda.api.http.HmdaCustomDirectives
 import hmda.api.model.ErrorResponse
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Created, Submission, SubmissionId }
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById

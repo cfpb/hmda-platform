@@ -5,7 +5,7 @@ import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
 import hmda.model.institution.Inactive
 import hmda.model.institution.InstitutionType.Bank
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.InstitutionPersistence._
 

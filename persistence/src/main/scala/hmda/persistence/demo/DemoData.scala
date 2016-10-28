@@ -8,7 +8,7 @@ import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccChar
 import hmda.model.institution.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.model.institution.{ ExternalId, Institution }
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }

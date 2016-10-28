@@ -6,7 +6,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.HmdaRawFile.LineAdded

@@ -6,7 +6,7 @@ import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.processing.HmdaRawFile._
 
 class HmdaRawFileSpec extends ActorSpec {

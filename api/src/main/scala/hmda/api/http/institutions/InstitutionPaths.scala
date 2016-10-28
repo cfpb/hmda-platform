@@ -14,7 +14,7 @@ import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.Filing
 import hmda.model.institution.Institution
-import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.{ FindActorByName, FindFilings }
 import hmda.persistence.institutions.InstitutionPersistence.{ GetInstitutionById, GetInstitutionsById }
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }

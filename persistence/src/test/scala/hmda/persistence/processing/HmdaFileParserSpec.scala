@@ -9,7 +9,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
 import hmda.parser.fi.ts.TsCsvParser
-import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
 

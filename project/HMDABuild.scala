@@ -109,6 +109,11 @@ object HMDABuild extends Build {
       libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
     ).dependsOn(parser % "compile->compile;test->test")
 
+  lazy val persistenceModel = (project in file("persistence-model"))
+    .settings(buildSettings:_*)
+    .settings(
+      libraryDependencies ++= akkaPersistenceDeps
+    )
 
   lazy val persistence = (project in file("persistence"))
     .settings(buildSettings:_*)
@@ -123,7 +128,9 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= akkaPersistenceDeps
       )
-    ).dependsOn(validation % "compile->compile;test->test")
+    )
+    .dependsOn(persistenceModel)
+    .dependsOn(validation % "compile->compile;test->test")
 
 
   lazy val api = (project in file("api"))

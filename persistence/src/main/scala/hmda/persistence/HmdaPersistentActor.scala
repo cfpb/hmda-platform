@@ -6,7 +6,7 @@ import akka.actor.ReceiveTimeout
 import akka.persistence.PersistentActor
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.persistence.CommonMessages.{ Event, Shutdown }
+import hmda.persistence.messages.CommonMessages.{ Event, Shutdown }
 
 import scala.concurrent.duration.Duration
 
