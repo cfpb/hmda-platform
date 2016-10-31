@@ -2,25 +2,23 @@ package model
 
 import hmda.model.ResourceUtils
 
-object CbsaLookup extends ResourceUtils {
+object CbsaLookup extends ResourceUtils with CbsaResourceUtils {
   val values: Seq[Cbsa] = {
-    val lines = resourceLines("/state.csv")
-
-    lines.map { line =>
+    val lines = resourceLinesIso("/jul_2015_cbsa.csv")
+    lines.slice(3, -4).map { line =>
       val values = line.split(',').map(_.trim)
-      val cbsaCode 			= values(0)
-      val metroDivCode 	= values(1)
-      val csaCode 			= values(2)
-      val cbsaTitle			= values(3)
-      val metroOrMicro 	= values(4)
-      val metroDivTitle 	= values(5)
-      val csaTitle			= values(6)
-      val countyName		= values(7)
-      val stateName			= values(8)
-      val stateFips			= values(9)
-      val countyFips		= values(10)
-      val centralOutlying	= values(11)
-
+      val cbsaCode = values(0)
+      val metroDivCode = values(1)
+      val csaCode = values(2)
+      val cbsaTitle = values(3)
+      val metroOrMicro = values(4)
+      val metroDivTitle = values(5)
+      val csaTitle = values(6)
+      val countyName = values(7)
+      val stateName = values(8)
+      val stateFips = values(9)
+      val countyFips = values(10)
+      val centralOutlying = values(11)
       Cbsa(
         cbsaCode,
         metroDivCode,
@@ -33,9 +31,9 @@ object CbsaLookup extends ResourceUtils {
 }
 
 case class Cbsa(
-                  cbsa: String,
-                  metroDiv: String,
-                  cbsaTitle: String,
-                  metroDivTitle: String,
-                  key: String
-                )
+  cbsa: String = "",
+  metroDiv: String = "",
+  cbsaTitle: String = "",
+  metroDivTitle: String = "",
+  key: String = ""
+)

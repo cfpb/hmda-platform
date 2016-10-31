@@ -2,12 +2,12 @@ package model
 
 import hmda.model.ResourceUtils
 
-object StateAbrvLookup extends ResourceUtils {
+object StateAbrvLookup extends ResourceUtils with CbsaResourceUtils {
   val values: Seq[StateAbrv] = {
-    val lines = resourceLines("/state.csv")
+    val lines = resourceLinesIso("/state.csv")
 
-    lines.map { line =>
-      val values = line.split(',').map(_.trim)
+    lines.drop(1).map { line =>
+      val values = line.split('|').map(_.trim)
       val stateFips = values(0)
       val stateAbrv = values(1)
       val stateName = values(2)
@@ -23,7 +23,7 @@ object StateAbrvLookup extends ResourceUtils {
 }
 
 case class StateAbrv(
-                  state: String,
-                  stateAbrv: String,
-                  stateName: String
-                )
+  state: String = "",
+  stateAbrv: String = "",
+  stateName: String = ""
+)
