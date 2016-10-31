@@ -4,9 +4,9 @@ import hmda.model.ResourceUtils
 
 object StatesPopLookup extends ResourceUtils with CbsaResourceUtils {
   val values: Seq[Population] = {
-    val lines = resourceLines("/2000-2010_pop_estimates.csv")
+    val lines = resourceLinesIso("/2000-2010_pop_estimates.csv")
 
-    lines.map { line =>
+    lines.drop(1).map { line =>
       val values = line.split(',').map(_.trim)
       val sumlev = values(0)
       val region = values(1)
@@ -16,23 +16,21 @@ object StatesPopLookup extends ResourceUtils with CbsaResourceUtils {
       val stateName = values(5)
       val cityname = values(6)
       val popBase2000 = values(7).toInt
-      val popEst2000 = values(8).toInt
-      val popEst2001 = values(8).toInt
-      val popEst2002 = values(8).toInt
-      val popEst2003 = values(8).toInt
-      val popEst2004 = values(8).toInt
-      val popEst2005 = values(8).toInt
-      val popEst2006 = values(8).toInt
-      val popEst2007 = values(8).toInt
-      val popEst2008 = values(8).toInt
-      val popEst2009 = values(8).toInt
-      val popEst2010 = values(8).toInt
+      val popEst2000 = values(9).toInt
+      val popEst2001 = values(10).toInt
+      val popEst2002 = values(11).toInt
+      val popEst2003 = values(12).toInt
+      val popEst2004 = values(13).toInt
+      val popEst2005 = values(14).toInt
+      val popEst2006 = values(15).toInt
+      val popEst2007 = values(16).toInt
+      val popEst2008 = values(17).toInt
+      val popEst2009 = values(18).toInt
+      val popEst2010 = values(19).toInt
 
-
-
-      Population(
+      StatesPopulation(
         stateFips + countyFips,
-          smallCountyChecker(popBase2000)
+        smallCountyChecker(popBase2000)
       )
     }.toSeq
   }

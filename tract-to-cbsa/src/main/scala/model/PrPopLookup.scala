@@ -3,10 +3,10 @@ package model
 import hmda.model.ResourceUtils
 
 object PrPopLookup extends ResourceUtils with CbsaResourceUtils {
-  val values: Seq[Population] = {
+  val values: Seq[PrPopulation] = {
     val lines = resourceLines("/PRM-EST00INT-AGESEX-5YR.csv")
 
-    lines.map { line =>
+    lines.drop(1).map { line =>
       val values = line.split(',').map(_.trim)
       val sumlev = values(0)
       val countyFips = values(1)
@@ -26,10 +26,12 @@ object PrPopLookup extends ResourceUtils with CbsaResourceUtils {
       val popEst2009 = values(15).toInt
       val popEst2010 = values(16).toInt
 
-      Population(
+      PrPopulation(
         "72" + countyFips,
-          smallCountyChecker(popBase2000)
+        smallCountyChecker(popBase2000),
+        sex,
+        ageGrp
       )
-    }.toSeq
+    }.filter(pop => pop.sex == "0" && pop.ageGroup == "0").toSeq
   }
 }

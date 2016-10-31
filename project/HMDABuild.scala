@@ -160,6 +160,7 @@ object HMDABuild extends Build {
     .settings(Revolver.settings:_*)
     .settings(
       Seq(
+        mainClass in assembly := Some("TractToCbsa"),
         libraryDependencies ++= commonDeps
       )
     )
