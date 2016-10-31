@@ -28,9 +28,8 @@ object TractToCbsa extends App {
       tract.tractDec
     ).mkString("|")
   }.mkString("\r\n")
-  println("Output")
 
-  val file = new File("tract_to_cbsa.txt")
+  val file = new File("model/jvm/src/main/resources/tract_to_cbsa.txt")
   val bw = new BufferedWriter(new FileWriter(file))
   bw.write(output)
   bw.close()

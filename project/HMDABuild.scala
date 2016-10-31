@@ -163,7 +163,6 @@ object HMDABuild extends Build {
         libraryDependencies ++= commonDeps
       )
     )
-    .dependsOn(modelJVM % "compile->compile;test->test")
 
 
 }
