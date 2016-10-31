@@ -1,11 +1,37 @@
-Unstaged changes after reset:
-M	.gitignore
-M	model/jvm/src/main/scala/hmda/model/ResourceUtils.scala
-M	project/HMDABuild.scala
-M	tract-to-cbsa/src/main/resources/PRM-EST00INT-AGESEX-5YR.csv
-M	tract-to-cbsa/src/main/scala/model/CbsaLookup.scala
-M	tract-to-cbsa/src/main/scala/model/PrPopLookup.scala
-M	tract-to-cbsa/src/main/scala/model/StateAbrvLookup.scala
-M	tract-to-cbsa/src/main/scala/model/StatesPopLookup.scala
-M	tract-to-cbsa/src/main/scala/model/TractLookup.scala
-D	tract-to-cbsa/src/main/scala/model/TractsLookup.scala
+package model
+
+// The file contains a list of all census tracts and what county and state they are in
+// site: https://www.census.gov/geo/maps-data/data/relationship.html
+// file: http://www2.census.gov/geo/docs/maps-data/data/rel/trf_txt/us2010trf.txt
+
+object TractLookup extends CbsaResourceUtils {
+  val values: Set[Tract] = {
+    val lines = resourceLinesIso("/us2010trf.txt")
+
+    lines.map { line =>
+      val values = line.split(',').map(_.trim)
+      val countyFips2000 = values(0)
+      val tractFips2000 = values(1)
+      val stateFips2010 = values(9)
+      val countyFips2010 = values(10)
+      val tractFips2010 = values(11)
+
+      Tract(
+        stateFips2010,
+        countyFips2010,
+        tractFips2010,
+        tractFips2010.slice(0, 4) + "." + tractFips2010.slice(4, 6),
+        stateFips2010 + countyFips2000
+      )
+    }.toSet
+  }
+}
+
+case class Tract(
+  state: String = "",
+  county: String = "",
+  tract: String = "",
+  tractDec: String = "",
+  key: String = ""
+)
+
