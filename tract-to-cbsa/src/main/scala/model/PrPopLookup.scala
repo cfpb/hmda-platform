@@ -1,10 +1,12 @@
 package model
 
-import hmda.model.ResourceUtils
+// This file contains data on the population of MUNICIPIOs in Peurto Rico
+// site: http://www.census.gov/popest/data/intercensal/puerto_rico/pr2010.html
+// file path: http://www.census.gov/popest/data/intercensal/puerto_rico/files/PRM-EST00INT-AGESEX-5YR.csv
 
-object PrPopLookup extends ResourceUtils with CbsaResourceUtils {
+object PrPopLookup extends CbsaResourceUtils {
   val values: Seq[PrPopulation] = {
-    val lines = resourceLines("/PRM-EST00INT-AGESEX-5YR.csv")
+    val lines = resourceLinesIso("/PRM-EST00INT-AGESEX-5YR.csv")
 
     lines.drop(1).map { line =>
       val values = line.split(',').map(_.trim)

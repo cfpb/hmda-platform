@@ -2,7 +2,11 @@ package model
 
 import hmda.model.ResourceUtils
 
-object StatesPopLookup extends ResourceUtils with CbsaResourceUtils {
+// This file contains data on the population of counties in the states
+// site: http://www.census.gov/popest/data/intercensal/county/county2010.html
+// file path: http://www.census.gov/popest/data/intercensal/county/files/CO-EST00INT-TOT.csv
+
+object StatesPopLookup extends CbsaResourceUtils {
   val values: Seq[Population] = {
     val lines = resourceLinesIso("/2000-2010_pop_estimates.csv")
 
