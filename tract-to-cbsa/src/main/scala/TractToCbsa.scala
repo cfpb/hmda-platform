@@ -11,7 +11,7 @@ object TractToCbsa extends App {
   val stateAbrvs = StateAbrvLookup.values
 
   val output = tracts.map { tract =>
-    val state = stateAbrvs.find(state => state.stateName == tract.state).getOrElse(StateAbrv())
+    val state = stateAbrvs.find(state => state.state == tract.state).getOrElse(StateAbrv())
     val cbsa = cbsas.find(cbsa => cbsa.key == tract.key).getOrElse(Cbsa())
     val pop = pops.find(pop => pop.key == tract.key).getOrElse(StatesPopulation())
     List(

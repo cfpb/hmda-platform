@@ -157,7 +157,6 @@ object HMDABuild extends Build {
 
   lazy val tractToCbsa = (project in file("tract-to-cbsa"))
     .settings(buildSettings: _*)
-    .settings(Revolver.settings:_*)
     .settings(
       Seq(
         mainClass in assembly := Some("TractToCbsa"),

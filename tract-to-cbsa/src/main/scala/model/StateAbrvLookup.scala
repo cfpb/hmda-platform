@@ -1,8 +1,10 @@
 package model
 
-import hmda.model.ResourceUtils
+// This file contains a linking of state fips codes and state abbreviations
+// site: https://www.census.gov/geo/reference/ansi_statetables.html
+// file: http://www2.census.gov/geo/docs/reference/state.txt
 
-object StateAbrvLookup extends ResourceUtils with CbsaResourceUtils {
+object StateAbrvLookup extends CbsaResourceUtils {
   val values: Seq[StateAbrv] = {
     val lines = resourceLinesIso("/state.csv")
 
