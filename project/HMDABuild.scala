@@ -114,6 +114,7 @@ object HMDABuild extends Build {
     .settings(
       libraryDependencies ++= akkaPersistenceDeps
     )
+    .dependsOn(modelJVM % "compile->compile;test->test")
 
   lazy val persistence = (project in file("persistence"))
     .settings(buildSettings:_*)

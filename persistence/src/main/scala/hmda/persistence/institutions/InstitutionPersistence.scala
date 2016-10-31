@@ -7,6 +7,7 @@ import hmda.model.institution.Inactive
 import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.HmdaPersistentActor
 
 object InstitutionPersistence {
@@ -17,9 +18,6 @@ object InstitutionPersistence {
   case class ModifyInstitution(i: Institution) extends Command
   case class GetInstitutionById(institutionId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
-
-  case class InstitutionCreated(i: Institution) extends Event
-  case class InstitutionModified(i: Institution) extends Event
 
   def props: Props = Props(new InstitutionPersistence)
 
