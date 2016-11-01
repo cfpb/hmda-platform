@@ -15,7 +15,6 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.http.HmdaCustomDirectives
-import hmda.api.model.ErrorResponse
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.model.fi.{ Created, Submission, SubmissionId, Uploaded, Failed }
 import hmda.persistence.CommonMessages._

@@ -67,7 +67,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
         val path = Path("/institutions/0/filings/2017/submissions/1")
         postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
           status mustBe StatusCodes.BadRequest
-          SubmissionStatusJsonFormat.read(entityAs[JsValue]) mustBe ("Submission 1 not available for upload")
+          SubmissionStatusJsonFormat.read(entityAs[JsValue]) mustBe Failed("Submission 1 not available for upload")
         }
       }
     }
