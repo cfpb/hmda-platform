@@ -1,6 +1,6 @@
-package hmda.query
+package hmda.query.institutions
 
-import akka.actor.Props
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
@@ -22,6 +22,11 @@ object InstitutionQuery {
   case object StreamCompleted
 
   def props(): Props = Props(new InstitutionQuery)
+
+  def createInstitutionQuery(system: ActorSystem): ActorRef = {
+    system.actorOf(InstitutionQuery.props(), "query-institutions")
+  }
+
 }
 
 class InstitutionQuery extends HmdaPersistentActor {

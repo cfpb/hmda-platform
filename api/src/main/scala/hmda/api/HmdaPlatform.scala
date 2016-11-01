@@ -11,8 +11,8 @@ import hmda.query.HmdaQuerySupervisor._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
-import hmda.query.InstitutionQuery
+import hmda.persistence.processing.{LocalHmdaEventProcessor, SingleLarValidation}
+import hmda.query.institutions.InstitutionQuery
 
 import scala.concurrent.ExecutionContext
 

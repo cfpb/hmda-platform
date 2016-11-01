@@ -1,6 +1,6 @@
 package hmda.api.http.institutions
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.{ActorRef, ActorSystem}
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
@@ -11,18 +11,18 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.model._
-import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
+import hmda.api.protocol.processing.{ApiErrorProtocol, InstitutionProtocol}
 import hmda.model.fi.Filing
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.InstitutionQuery
-import hmda.query.InstitutionQuery.{ GetInstitutionById, GetInstitutionsById }
+import hmda.query.InstitutionQuery.{GetInstitutionById, GetInstitutionsById}
+import hmda.query.institutions.InstitutionQuery
 
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCustomDirectives {
   implicit val system: ActorSystem

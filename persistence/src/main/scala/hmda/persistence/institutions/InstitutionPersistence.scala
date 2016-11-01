@@ -1,12 +1,9 @@
 package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
-import hmda.model.institution.Inactive
-import hmda.model.institution.InstitutionType.Bank
-import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.HmdaPersistentActor
 
@@ -16,8 +13,6 @@ object InstitutionPersistence {
 
   case class CreateInstitution(i: Institution) extends Command
   case class ModifyInstitution(i: Institution) extends Command
-  case class GetInstitutionById(institutionId: String) extends Command
-  case class GetInstitutionsById(ids: List[String]) extends Command
 
   def props: Props = Props(new InstitutionPersistence)
 
@@ -71,14 +66,6 @@ class InstitutionPersistence extends HmdaPersistentActor {
         sender() ! None
         log.warning(s"Institution does not exist. Could not update $i")
       }
-
-    case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(x => x.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, status = Inactive))
-      sender() ! institution
-
-    case GetInstitutionsById(ids) =>
-      val institutions = state.institutions.filter(i => ids.contains(i.id.toString))
-      sender() ! institutions
 
     case GetState =>
       sender() ! state.institutions
