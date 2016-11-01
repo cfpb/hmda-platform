@@ -66,7 +66,7 @@ class InstitutionQuery extends HmdaPersistentActor {
   def recoveryCompleted(): Unit = {
     implicit val materializer = ActorMaterializer()
     eventsWithSequenceNumber("institutions", offset + 1, Long.MaxValue)
-      .map { e => println(e); e }
+      .map { e => log.info(e.toString); e }
       .runWith(Sink.actorRef(self, StreamCompleted))
   }
 
