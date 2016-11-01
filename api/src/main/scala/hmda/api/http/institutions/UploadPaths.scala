@@ -17,7 +17,7 @@ import akka.util.{ ByteString, Timeout }
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.model.ErrorResponse
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
-import hmda.model.fi.{ Created, Submission, SubmissionId, Uploaded }
+import hmda.model.fi.{ Created, Submission, SubmissionId, Uploaded, Failed }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
@@ -59,8 +59,8 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
             case Success((true, processingActor)) =>
               uploadFile(processingActor, uploadTimestamp, uri.path)
             case Success((false, _)) =>
-              val errorResponse = ErrorResponse(400, s"Submission $seqNr not available for upload", uri.path)
-              complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              val errorResponse = Failed(s"Submission $seqNr not available for upload")
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> SubmissionStatusJsonFormat.write(errorResponse)))
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
@@ -90,13 +90,13 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           case Failure(error) =>
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)
-            val errorResponse = ErrorResponse(400, "Invalid File Format", path)
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+            val errorResponse = Failed("Invalid File Format")
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> SubmissionStatusJsonFormat.write(errorResponse)))
         }
       case _ =>
         processingActor ! Shutdown
-        val errorResponse = ErrorResponse(400, "Invalid File Format", path)
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+        val errorResponse = Failed("Invalid File Format")
+        complete(ToResponseMarshallable(StatusCodes.BadRequest -> SubmissionStatusJsonFormat.write(errorResponse)))
     }
   }
 }

@@ -16,21 +16,23 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
     }
 
     override def read(json: JsValue): SubmissionStatus = {
-      json.asJsObject.getFields("message").head match {
-        case JsString(s) => s match {
-          case `createdMsg` => Created
-          case `uploadingMsg` => Uploading
-          case `uploadedMsg` => Uploaded
-          case `parsingMsg` => Parsing
-          case `parsedMsg` => Parsed
-          case `parsedWithErrorsMsg` => ParsedWithErrors
-          case `validatingMsg` => Validating
-          case `validatedWithErrorsMsg` => ValidatedWithErrors
-          case `validatedMsg` => Validated
-          case `iRSGeneratedMsg` => IRSGenerated
-          case `iRSVerifiedMsg` => IRSVerified
-          case `signedMsg` => Signed
-          case "failed" => Failed("")
+      json.asJsObject.getFields("code").head match {
+        case JsNumber(s) => s.toInt match {
+          case 1 => Created
+          case 2 => Uploading
+          case 3 => Uploaded
+          case 4 => Parsing
+          case 5 => Parsed
+          case 6 => ParsedWithErrors
+          case 7 => Validating
+          case 8 => ValidatedWithErrors
+          case 9 => Validated
+          case 10 => IRSGenerated
+          case 11 => IRSVerified
+          case 12 => Signed
+          case -1 =>
+            val message = json.asJsObject.getFields("message").head.toString()
+            Failed(message.substring(1, message.length - 1))
           case _ => throw new DeserializationException("Submission Status expected")
         }
         case _ => throw new DeserializationException("Unable to deserialize")

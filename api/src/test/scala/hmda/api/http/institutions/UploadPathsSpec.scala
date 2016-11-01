@@ -12,10 +12,12 @@ import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.{ GetSubmissionById, UpdateSubmissionStatus }
 import akka.pattern.ask
+import hmda.api.protocol.processing.SubmissionProtocol
+import spray.json.JsValue
 
 import scala.concurrent.Await
 
-class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
+class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol with UploadPaths {
   val csv = "1|0123456789|9|201301171330|2013|99-9999999|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St       XXXXXXXXXXXXXXXXXXXXX|Sacramento         XXXXXX|CA|99999-9999|MIKES SMALL INC    XXXXXXXXXXX|1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX|San Francisco      XXXXXX|CA|99999-1234|Mrs. Krabappel     XXXXXXXXXXX|916-999-9999|999-753-9999|krabappel@gmail.comXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
     "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
     "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
@@ -38,7 +40,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
       val path = Path("/institutions/0/filings/2017/submissions/1")
       postWithCfpbHeaders(path.toString, badFile) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Invalid File Format", path)
+        SubmissionStatusJsonFormat.read(entityAs[JsValue]) mustBe Failed("Invalid File Format")
       }
     }
 
@@ -46,7 +48,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
       val path = "/institutions/0/filings/2017/submissions/987654321"
       postWithCfpbHeaders(path, file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission 987654321 not available for upload", Path(path))
+        SubmissionStatusJsonFormat.read(entityAs[JsValue]) mustBe Failed("Submission 987654321 not available for upload")
       }
     }
 
@@ -65,7 +67,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
         val path = Path("/institutions/0/filings/2017/submissions/1")
         postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
           status mustBe StatusCodes.BadRequest
-          responseAs[ErrorResponse] mustBe ErrorResponse(400, "Submission 1 not available for upload", path)
+          SubmissionStatusJsonFormat.read(entityAs[JsValue]) mustBe ("Submission 1 not available for upload")
         }
       }
     }
