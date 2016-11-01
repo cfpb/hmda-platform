@@ -11,6 +11,7 @@ import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence._
 import hmda.persistence.model.ActorSpec
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingCompletedWithErrors, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }

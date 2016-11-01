@@ -1,21 +1,27 @@
 package hmda.query
 
-import akka.persistence.{RecoveryCompleted, SnapshotOffer}
+import akka.actor.Props
+import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.InstitutionType.Bank
-import hmda.model.institution.{Inactive, Institution}
-import hmda.persistence.messages.CommonMessages.{Command, Event, GetState, Shutdown}
+import hmda.model.institution.{ Inactive, Institution }
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shutdown }
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 
 object InstitutionQuery {
+
+  val name = "institutions-query"
+
   case class GetInstitutionById(institutionId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
   case class LastProcessedEventOffset(seqNr: Long)
   case object StreamCompleted
+
+  def props(): Props = Props(new InstitutionQuery)
 }
 
 class InstitutionQuery extends HmdaPersistentActor {
@@ -25,7 +31,7 @@ class InstitutionQuery extends HmdaPersistentActor {
   var inMemoryInstitutions = Set.empty[Institution]
   var offset = 0L
 
-  override def persistenceId: String = "institutions-query"
+  override def persistenceId: String = name
 
   override def receiveRecover: Receive = {
     case SnapshotOffer(_, LastProcessedEventOffset(seqNr)) => offset = seqNr
@@ -60,15 +66,12 @@ class InstitutionQuery extends HmdaPersistentActor {
   def recoveryCompleted(): Unit = {
     implicit val materializer = ActorMaterializer()
     eventsWithSequenceNumber("institutions", offset + 1, Long.MaxValue)
-        .map{ e => println(e);e}
+      .map { e => println(e); e }
       .runWith(Sink.actorRef(self, StreamCompleted))
   }
 
   override def updateState(event: Event): Unit = {
 
   }
-
-
-
 
 }

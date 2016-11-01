@@ -15,9 +15,10 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.Filing
 import hmda.model.institution.Institution
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.HmdaSupervisor.{ FindActorByName, FindFilings }
+import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.InstitutionPersistence.{ GetInstitutionById, GetInstitutionsById }
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }

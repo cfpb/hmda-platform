@@ -12,9 +12,9 @@ import hmda.model.institution.{ ExternalId, Institution }
 import hmda.model.institution.Active
 import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.HmdaSupervisor
-import hmda.persistence.HmdaSupervisor.FindActorByName
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.Future
 
