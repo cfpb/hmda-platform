@@ -12,6 +12,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.MalformedRequestContentRejection
 import hmda.api.http.BaseHttpApi
 import hmda.model.institution.Institution
+import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
 import spray.json._
 

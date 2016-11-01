@@ -33,26 +33,6 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.expectMsg(Some(modified))
     }
 
-    //    "return a set of institutions matching a list of ids" in {
-    //      // Setup: Persist demo institutions
-    //      val i1 = Institution("71", "CFPBank", Set(ExternalId("99-1234567", FederalTaxId)), CFPB, Bank, hasParent = true, status = Active)
-    //      val i2 = Institution("72", "FRBank", Set(ExternalId("654321", RssdId)), CFPB, Bank, hasParent = true, status = Active)
-    //      val i3 = Institution("73", "MLBank", Set(ExternalId("externalTest0", FdicCertNo)), FDIC, Bank, hasParent = true, status = Active)
-    //      for (institution <- List(i1, i2, i3)) {
-    //        probe.send(institutionsActor, CreateInstitution(institution))
-    //        probe.expectMsg(institution)
-    //      }
-    //
-    //      // Request some of the existing institutions
-    //      probe.send(institutionsActor, GetInstitutionsById(List("71", "73")))
-    //      probe.expectMsg(Set(i3, i1))
-    //    }
-    //
-    //    "return an empty set when requesting nonexistent institutions" in {
-    //      probe.send(institutionsActor, GetInstitutionsById(List("a", "b")))
-    //      probe.expectMsg(Set())
-    //    }
-
     "Error logging" must {
 
       "warn when creating an institution that already exists" in {

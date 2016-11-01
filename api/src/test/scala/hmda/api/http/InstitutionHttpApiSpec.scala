@@ -2,8 +2,8 @@ package hmda.api.http
 
 import java.io.File
 
-import akka.event.{LoggingAdapter, NoLogging}
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, Multipart}
+import akka.event.{ LoggingAdapter, NoLogging }
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
@@ -15,7 +15,7 @@ import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.HmdaQuerySupervisor
 import hmda.query.institutions.InstitutionQuery
 import org.iq80.leveldb.util.FileUtils
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
 import scala.concurrent.duration._
 

@@ -57,12 +57,10 @@ class InstitutionQuery extends HmdaPersistentActor {
         case InstitutionCreated(i) =>
           saveSnapshot(LastProcessedEventOffset(seqNr))
           inMemoryInstitutions += i
-          println(inMemoryInstitutions)
         case InstitutionModified(i) =>
           saveSnapshot(LastProcessedEventOffset(seqNr))
           val others = inMemoryInstitutions.filterNot(_.id == i.id)
           inMemoryInstitutions = others + i
-          println(inMemoryInstitutions)
         case _ => //do nothing
 
       }
@@ -77,7 +75,7 @@ class InstitutionQuery extends HmdaPersistentActor {
   def recoveryCompleted(): Unit = {
     implicit val materializer = ActorMaterializer()
     eventsWithSequenceNumber("institutions", offset + 1, Long.MaxValue)
-      .map { e => log.info(e.toString); e }
+      .map { e => log.debug(e.toString); e }
       .runWith(Sink.actorRef(self, StreamCompleted))
   }
 
