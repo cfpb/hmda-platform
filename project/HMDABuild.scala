@@ -155,5 +155,14 @@ object HMDABuild extends Build {
     .disablePlugins(ScoverageSbtPlugin)
     .dependsOn(parser)
 
+  lazy val tractToCbsa = (project in file("tract-to-cbsa"))
+    .settings(buildSettings: _*)
+    .settings(
+      Seq(
+        mainClass in assembly := Some("TractToCbsa"),
+        libraryDependencies ++= commonDeps
+      )
+    )
+
 
 }
