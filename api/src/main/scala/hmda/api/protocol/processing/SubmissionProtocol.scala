@@ -22,8 +22,8 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
           case 2 => Uploading
           case 3 => Uploaded
           case 4 => Parsing
-          case 5 => Parsed
-          case 6 => ParsedWithErrors
+          case 5 => ParsedWithErrors
+          case 6 => Parsed
           case 7 => Validating
           case 8 => ValidatedWithErrors
           case 9 => Validated
