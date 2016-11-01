@@ -54,6 +54,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
         persist(InstitutionCreated(i)) { e =>
           log.debug(s"Persisted: $i")
           updateState(e)
+          sender() ! e.i
         }
       } else {
         log.warning(s"Institution already exists. Could not create $i")
@@ -64,8 +65,10 @@ class InstitutionPersistence extends HmdaPersistentActor {
         persist(InstitutionModified(i)) { e =>
           log.debug(s"Modified: ${i.name}")
           updateState(e)
+          sender() ! Some(e.i)
         }
       } else {
+        sender() ! None
         log.warning(s"Institution does not exist. Could not update $i")
       }
 
