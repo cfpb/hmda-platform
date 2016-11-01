@@ -177,10 +177,6 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       val macroErrors = errorsOfType(errors, Macro)
         .map(e => LarMacroError(e))
       persistErrors(macroErrors)
-      
-    case CompleteMacroValidation(e) =>
-      self ! LarValidationErrors(e.errors)
-      self ! CompleteValidation
 
     case CompleteMacroValidation(e) =>
       self ! LarValidationErrors(e.errors)
