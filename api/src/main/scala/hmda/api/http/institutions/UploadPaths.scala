@@ -16,8 +16,8 @@ import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.model.ErrorResponse
-import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Created, Submission, SubmissionId }
+import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
+import hmda.model.fi.{ Created, Submission, SubmissionId, Uploaded }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
@@ -28,7 +28,7 @@ import hmda.persistence.processing.HmdaRawFile.{ AddLine, CompleteUpload, StartU
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCustomDirectives {
+trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with SubmissionProtocol with HmdaCustomDirectives {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
@@ -86,7 +86,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
           case Success(response) =>
             processingActor ! CompleteUpload
             processingActor ! Shutdown
-            complete(ToResponseMarshallable(StatusCodes.Accepted -> "uploaded"))
+            complete(ToResponseMarshallable(StatusCodes.Accepted -> SubmissionStatusJsonFormat.write(Uploaded)))
           case Failure(error) =>
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)

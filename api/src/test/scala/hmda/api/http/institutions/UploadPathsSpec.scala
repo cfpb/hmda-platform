@@ -7,7 +7,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.ErrorResponse
-import hmda.model.fi.{ Signed, Submission, SubmissionId }
+import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.{ GetSubmissionById, UpdateSubmissionStatus }
@@ -30,7 +30,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with UploadPaths {
     "return proper response when uploading a HMDA file" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Accepted
-        responseAs[String] mustBe "uploaded"
+        responseAs[SubmissionStatus] mustBe Uploaded
       }
     }
 
