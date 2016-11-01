@@ -1,8 +1,6 @@
 package hmda.query
 
 import akka.actor.{ ActorRef, ActorSystem }
-
-import scala.concurrent.duration._
 import akka.pattern.ask
 import akka.util.Timeout
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
@@ -10,6 +8,7 @@ import hmda.query.institutions.InstitutionQuery
 import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.Await
+import scala.concurrent.duration._
 
 class HmdaQuerySupervisorSpec extends WordSpec with MustMatchers {
 
