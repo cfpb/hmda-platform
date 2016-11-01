@@ -158,7 +158,9 @@ object HMDABuild extends Build {
         },
         libraryDependencies ++= httpDeps
       )
-    ).dependsOn(persistence % "compile->compile;test->test")
+    )
+    .dependsOn(query % "compile->compile;test->test")
+    .dependsOn(persistence % "compile->compile;test->test")
 
 
   lazy val platformTest = (project in file("platform-test"))
