@@ -47,19 +47,25 @@ class InstitutionQuery extends HmdaPersistentActor {
       val institutions = inMemoryInstitutions.filter(i => ids.contains(i.id.toString))
       sender() ! institutions
 
+    case EventWithSeqNr(seqNr, event) =>
+      event match {
+        case InstitutionCreated(i) =>
+          saveSnapshot(LastProcessedEventOffset(seqNr))
+          inMemoryInstitutions += i
+          println(inMemoryInstitutions)
+        case InstitutionModified(i) =>
+          saveSnapshot(LastProcessedEventOffset(seqNr))
+          val others = inMemoryInstitutions.filterNot(_.id == i.id)
+          inMemoryInstitutions = others + i
+          println(inMemoryInstitutions)
+        case _ => //do nothing
+
+      }
+
     case GetState =>
       sender() ! inMemoryInstitutions
 
     case Shutdown => context stop self
-
-    case (seqNr: Long, InstitutionCreated(i)) =>
-      saveSnapshot(LastProcessedEventOffset(seqNr))
-      inMemoryInstitutions += i
-
-    case (seqNr: Long, InstitutionModified(i)) =>
-      saveSnapshot(LastProcessedEventOffset(seqNr))
-      val others = inMemoryInstitutions.filterNot(_.id == i.id)
-      inMemoryInstitutions = others + i
 
   }
 

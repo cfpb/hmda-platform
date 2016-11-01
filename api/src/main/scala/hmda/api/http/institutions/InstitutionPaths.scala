@@ -2,10 +2,10 @@ package hmda.api.http.institutions
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
@@ -14,11 +14,12 @@ import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.Filing
 import hmda.model.institution.Institution
-import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindFilings
-import hmda.persistence.institutions.InstitutionPersistence.{ GetInstitutionById, GetInstitutionsById }
-import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
+import hmda.persistence.institutions.FilingPersistence
+import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.query.InstitutionQuery
+import hmda.query.InstitutionQuery.{ GetInstitutionById, GetInstitutionsById }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -38,8 +39,8 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
           extractExecutionContext { executor =>
             implicit val ec: ExecutionContext = executor
             val ids = institutionIdsFromHeader(ctx)
-            val supervisor = system.actorSelection("/user/supervisor")
-            val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+            val supervisor = system.actorSelection("/user/query-supervisor")
+            val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionQuery.name)).mapTo[ActorRef]
             val fInstitutions = for {
               institutionsActor <- fInstitutionsActor
               institutions <- (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
@@ -62,7 +63,8 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
         timedGet { uri =>
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
-          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+          val querySupervisor = system.actorSelection("/user/query-supervisor")
+          val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionQuery.name)).mapTo[ActorRef]
           val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
           val fInstitutionDetails = for {
             i <- fInstitutionsActor

@@ -12,6 +12,7 @@ import hmda.persistence.HmdaSupervisor
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.query.{ HmdaQuerySupervisor, InstitutionQuery }
 import org.iq80.leveldb.util.FileUtils
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
@@ -28,6 +29,8 @@ trait InstitutionHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAf
   override def beforeAll(): Unit = {
     val supervisor = HmdaSupervisor.createSupervisor(system)
     supervisor ! FindActorByName(InstitutionPersistence.name)
+    val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
+    querySupervisor ! FindActorByName(InstitutionQuery.name)
     DemoData.loadTestData(system)
     super.beforeAll()
   }
