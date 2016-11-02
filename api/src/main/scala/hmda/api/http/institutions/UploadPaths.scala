@@ -15,9 +15,8 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.http.HmdaCustomDirectives
-import hmda.api.model.ErrorResponse
-import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Created, Submission, SubmissionId }
+import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
+import hmda.model.fi.{ Created, Submission, SubmissionId, Uploaded, Failed }
 import hmda.persistence.CommonMessages._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
@@ -28,7 +27,7 @@ import hmda.persistence.processing.HmdaRawFile.{ AddLine, CompleteUpload, StartU
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCustomDirectives {
+trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with SubmissionProtocol with HmdaCustomDirectives {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
@@ -57,10 +56,10 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
 
           onComplete(fUploadSubmission) {
             case Success((true, processingActor)) =>
-              uploadFile(processingActor, uploadTimestamp, uri.path)
+              uploadFile(processingActor, uploadTimestamp, uri.path, submissionId)
             case Success((false, _)) =>
-              val errorResponse = ErrorResponse(400, s"Submission $seqNr not available for upload", uri.path)
-              complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              val errorResponse = Failed(s"Submission $seqNr not available for upload")
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse)))
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
@@ -73,7 +72,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
     submission.map(_.status == Created)
   }
 
-  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path): Route = {
+  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, id: SubmissionId): Route = {
     fileUpload("file") {
       case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
         processingActor ! StartUpload
@@ -86,17 +85,17 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
           case Success(response) =>
             processingActor ! CompleteUpload
             processingActor ! Shutdown
-            complete(ToResponseMarshallable(StatusCodes.Accepted -> "uploaded"))
+            complete(ToResponseMarshallable(StatusCodes.Accepted -> Submission(id, Uploaded)))
           case Failure(error) =>
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)
-            val errorResponse = ErrorResponse(400, "Invalid File Format", path)
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+            val errorResponse = Failed("Invalid File Format")
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse)))
         }
       case _ =>
         processingActor ! Shutdown
-        val errorResponse = ErrorResponse(400, "Invalid File Format", path)
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+        val errorResponse = Failed("Invalid File Format")
+        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse)))
     }
   }
 }
