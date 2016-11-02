@@ -34,7 +34,7 @@ object HMDABuild extends Build {
 
   val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream)
+  val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream, akkaTestkit)
 
   val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence)
 

@@ -2,18 +2,20 @@ package hmda.persistence.processing
 
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.stream.scaladsl.Sink
+import akka.pattern.pipe
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
-import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
 import hmda.persistence.processing.HmdaQuery._
+import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
+import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
 import scala.util.Try
 
@@ -23,6 +25,8 @@ object HmdaFileValidator {
 
   case object BeginValidation extends Command
   case class ValidationStarted(submissionId: SubmissionId) extends Event
+  case class ValidateMacro(source: LoanApplicationRegisterSource) extends Command
+  case class CompleteMacroValidation(errors: LarValidationErrors) extends Command
   case object CompleteValidation extends Command
   case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
   case class ValidationCompleted(submissionId: SubmissionId) extends Event
@@ -34,6 +38,7 @@ object HmdaFileValidator {
   case class LarSyntacticalError(error: ValidationError) extends Event
   case class LarValidityError(error: ValidationError) extends Event
   case class LarQualityError(error: ValidationError) extends Event
+  case class LarMacroError(error: ValidationError) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
@@ -70,6 +75,8 @@ object HmdaFileValidator {
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity :+ e, larQuality, larMacro)
       case LarQualityError(e) =>
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality :+ e, larMacro)
+      case LarMacroError(e) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro :+ e)
     }
   }
 }
@@ -104,15 +111,16 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
-      events(parserPersistenceId)
+      val larSource: Source[LoanApplicationRegister, NotUsed] = events(parserPersistenceId)
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
-        .map(lar => validateLar(lar, ctx).toEither)
+
+      larSource.map(lar => validateLar(lar, ctx).toEither)
         .map {
           case Right(l) => l
           case Left(errors) => LarValidationErrors(errors.list.toList)
         }
-        .runWith(Sink.actorRef(self, CompleteValidation))
+        .runWith(Sink.actorRef(self, ValidateMacro(larSource)))
 
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
@@ -125,6 +133,18 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         log.debug(s"Persisted: $e")
         updateState(e)
       }
+
+    case ValidateMacro(larSource) =>
+      log.info("Quality Validation completed")
+      val fMacro = checkMacro(larSource)
+        .mapTo[LarSourceValidation]
+        .map(larSourceValidation => larSourceValidation.toEither)
+        .map {
+          case Right(source) => CompleteValidation
+          case Left(errors) => CompleteMacroValidation(LarValidationErrors(errors.list.toList))
+        }
+
+      fMacro pipeTo self
 
     case tsErrors: TsValidationErrors =>
       val errors = tsErrors.errors
@@ -154,8 +174,16 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(e => LarQualityError(e))
       persistErrors(qualityErrors)
 
+      val macroErrors = errorsOfType(errors, Macro)
+        .map(e => LarMacroError(e))
+      persistErrors(macroErrors)
+
+    case CompleteMacroValidation(e) =>
+      self ! LarValidationErrors(e.errors)
+      self ! CompleteValidation
+
     case CompleteValidation =>
-      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty
+      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty && state.larMacro.isEmpty
         && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
         log.debug(s"Validation completed for $submissionId")
         publishEvent(ValidationCompleted(submissionId))
