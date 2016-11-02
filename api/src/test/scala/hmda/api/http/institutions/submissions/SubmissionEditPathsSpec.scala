@@ -62,6 +62,11 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
       status mustBe StatusCodes.OK
       responseAs[EditResults] mustBe expectedEdits
     }
+
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[MacroResults] mustBe MacroResults.empty
+    }
   }
 
   private def loadValidationErrors(): Unit = {

@@ -69,18 +69,6 @@ trait SubmissionEditPaths
           implicit val ec: ExecutionContext = executor
           val fValidationState = getValidationState(institutionId, period, seqNr)
 
-          if (editType.equals("macro")) {
-            val fMacroEdits = fValidationState.map { editChecks =>
-              validationErrorsToMacroResults(editChecks.larMacro)
-            }
-            onComplete(fMacroEdits) {
-              case Success(edits) =>
-                complete(ToResponseMarshallable(edits))
-              case Failure(error) =>
-                completeWithInternalError(uri, error)
-            }
-          }
-
           val fSingleEdits = fValidationState.map { editChecks =>
             editType match {
               case "syntactical" =>
@@ -89,15 +77,20 @@ trait SubmissionEditPaths
                 validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
               case "quality" =>
                 validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+              case "macro" =>
+                validationErrorsToMacroResults(editChecks.larMacro)
             }
           }
 
           onComplete(fSingleEdits) {
-            case Success(edits) =>
+            case Success(edits: MacroResults) =>
+              complete(ToResponseMarshallable(edits))
+            case Success(edits: EditResults) =>
               complete(ToResponseMarshallable(edits))
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
+
         }
       }
     }
