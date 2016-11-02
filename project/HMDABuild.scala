@@ -67,7 +67,8 @@ object HMDABuild extends Build {
     .aggregate(
       modelJVM,
       modelJS,
-      parser,
+      parserJVM,
+      parserJS,
       persistence,
       api,
       platformTest,
@@ -97,20 +98,29 @@ object HMDABuild extends Build {
   lazy val modelJS = model.js
 
 
-  lazy val parser = (project in file("parser"))
+  lazy val parser = (crossProject in file("parser"))
     .settings(buildSettings: _*)
-      .settings(
-        Seq(
-          libraryDependencies ++= commonDeps ++ scalazDeps
-        )
+    .jvmSettings(
+        libraryDependencies ++= commonDeps ++ scalazDeps
+    )
+    .jsSettings(
+      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
+      libraryDependencies ++= Seq(
+        "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
+        "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test",
+        "org.scalaz" %%% "scalaz-core" % Version.scalaz
       )
-    .dependsOn(modelJVM % "compile->compile;test->test")
+    ).disablePlugins(ScoverageSbtPlugin)
+    .dependsOn(model % "compile->compile;test->test")
+
+  lazy val parserJVM = parser.jvm
+  lazy val parserJS = parser.js
 
   lazy val validation = (project in file("validation"))
     .settings(buildSettings: _*)
     .settings(
       libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
-    ).dependsOn(parser % "compile->compile;test->test")
+    ).dependsOn(parserJVM % "compile->compile;test->test")
 
 
   lazy val persistence = (project in file("persistence"))
@@ -156,7 +166,7 @@ object HMDABuild extends Build {
       )
     )
     .disablePlugins(ScoverageSbtPlugin)
-    .dependsOn(parser)
+    .dependsOn(parserJVM)
 
   lazy val tractToCbsa = (project in file("tract-to-cbsa"))
     .settings(buildSettings: _*)

@@ -5,8 +5,6 @@ import hmda.model.util.FITestData
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 
-import scala.concurrent.{ ExecutionContext, Future }
-
 class LarDatParserSpec extends PropSpec with MustMatchers with PropertyChecks with LarGenerators {
 
   import FITestData._
