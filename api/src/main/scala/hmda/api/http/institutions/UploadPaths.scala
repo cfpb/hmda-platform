@@ -56,10 +56,10 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
 
           onComplete(fUploadSubmission) {
             case Success((true, processingActor)) =>
-              uploadFile(processingActor, uploadTimestamp, uri.path)
+              uploadFile(processingActor, uploadTimestamp, uri.path, submissionId)
             case Success((false, _)) =>
               val errorResponse = Failed(s"Submission $seqNr not available for upload")
-              complete(ToResponseMarshallable(StatusCodes.BadRequest -> SubmissionStatusJsonFormat.write(errorResponse)))
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse)))
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
@@ -72,7 +72,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
     submission.map(_.status == Created)
   }
 
-  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path): Route = {
+  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, id: SubmissionId): Route = {
     fileUpload("file") {
       case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
         processingActor ! StartUpload
@@ -85,17 +85,17 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           case Success(response) =>
             processingActor ! CompleteUpload
             processingActor ! Shutdown
-            complete(ToResponseMarshallable(StatusCodes.Accepted -> SubmissionStatusJsonFormat.write(Uploaded)))
+            complete(ToResponseMarshallable(StatusCodes.Accepted -> Submission(id, Uploaded)))
           case Failure(error) =>
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)
             val errorResponse = Failed("Invalid File Format")
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> SubmissionStatusJsonFormat.write(errorResponse)))
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse)))
         }
       case _ =>
         processingActor ! Shutdown
         val errorResponse = Failed("Invalid File Format")
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> SubmissionStatusJsonFormat.write(errorResponse)))
+        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse)))
     }
   }
 }
