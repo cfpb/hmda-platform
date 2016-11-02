@@ -10,6 +10,11 @@ object DateGenerators {
 
     for {
       randomDate <- Gen.choose(beginDate.getTime(), endDate.getTime())
-    } yield new js.Date(randomDate).getTime().toInt
+    } yield format(randomDate)
+  }
+
+  private def format(time: Double): Int = {
+    val date = new js.Date(time)
+    date.toISOString().slice(0, 10).replace("-", "").toInt
   }
 }

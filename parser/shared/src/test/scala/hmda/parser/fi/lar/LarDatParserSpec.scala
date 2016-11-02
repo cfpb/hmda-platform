@@ -16,18 +16,17 @@ class LarDatParserSpec extends PropSpec with MustMatchers with PropertyChecks wi
     lars.size mustBe 3
   }
 
-  //LarDatParser fails with Scala.js
-  //  property("LAR Parser should parse all generated LARs") {
-  //    forAll(larGen) { (lar: LoanApplicationRegister) =>
-  //      val parsedLar = LarDatParser(lar.toDAT)
-  //      val updatedApplicant = parsedLar.applicant.copy(income = parsedLar.applicant.income.replaceFirst("^0+(?!$)", ""))
-  //      val updatedLar = parsedLar.copy(
-  //        respondentId = parsedLar.respondentId.replaceFirst("^0+(?!$)", ""),
-  //        applicant = updatedApplicant
-  //      )
-  //      updatedLar mustBe lar
-  //    }
-  //  }
+  property("LAR Parser should parse all generated LARs") {
+    forAll(larGen) { (lar: LoanApplicationRegister) =>
+      val parsedLar = LarDatParser(lar.toDAT)
+      val updatedApplicant = parsedLar.applicant.copy(income = parsedLar.applicant.income.replaceFirst("^0+(?!$)", ""))
+      val updatedLar = parsedLar.copy(
+        respondentId = parsedLar.respondentId.replaceFirst("^0+(?!$)", ""),
+        applicant = updatedApplicant
+      )
+      updatedLar mustBe lar
+    }
+  }
 
   property("LAR Parser should parse basic LAR information") {
     firstLar.id mustBe 2
