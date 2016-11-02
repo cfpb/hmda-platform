@@ -59,7 +59,7 @@ This API is for internal use only. The following endpoints are available
       "id": "2",
       "status": {
         "code": 1,
-        "message": "inactive"
+        "message": "active"
       },
       "hasParent": false,
       "institutionType": "bank"
