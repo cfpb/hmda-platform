@@ -71,7 +71,8 @@ object HMDABuild extends Build {
       persistence,
       api,
       platformTest,
-      validation)
+      validation,
+      tractToCbsa)
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
