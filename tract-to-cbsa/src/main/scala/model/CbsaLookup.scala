@@ -1,5 +1,7 @@
 package model
 
+import com.github.tototoshi.csv.CSVParser.parse
+
 // This is 2015 data as 2017 data is not yet published
 // This file contains information about metro and micropolitan statisical areas
 // site: http://www.census.gov/population/metro/data/def.html
@@ -8,8 +10,8 @@ package model
 object CbsaLookup extends CbsaResourceUtils {
   val values: Seq[Cbsa] = {
     val lines = resourceLinesIso("/jul_2015_cbsa.csv")
-    lines.slice(3, -4).map { line =>
-      val values = line.split(',').map(_.trim)
+    lines.map { line =>
+      val values = parse(line, '\\', ',', '"').getOrElse(List())
       val cbsaCode = values(0)
       val metroDivCode = values(1)
       val csaCode = values(2)
@@ -29,8 +31,8 @@ object CbsaLookup extends CbsaResourceUtils {
         metroDivTitle,
         stateFips + countyFips
       )
-    }.toSeq
-  }
+    }
+  }.toSeq
 }
 
 case class Cbsa(

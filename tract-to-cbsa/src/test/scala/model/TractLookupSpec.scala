@@ -4,7 +4,7 @@ import org.scalatest.{ MustMatchers, WordSpec }
 
 class TractLookupSpec extends WordSpec with MustMatchers {
 
-  "State Abrv Lookup" must {
+  "Tract Lookup" must {
 
     "have properly lengthed values" in {
       val lookup = TractLookup.values

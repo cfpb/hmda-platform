@@ -1,11 +1,17 @@
 package model
 
+import com.github.tototoshi.csv.CSVReader
+
 import scala.io.{ BufferedSource, Source }
 
 trait CbsaResourceUtils {
 
   def smallCountyChecker(population: Int) = {
-    if (population < 3000) "1" else "0"
+    if (population < 30000) "1" else "0"
+  }
+
+  def leftPad(characters: Int, input: String): String = {
+    ("0" * characters + input).takeRight(characters)
   }
 
   def resourceIso(filename: String): BufferedSource = {
@@ -15,6 +21,10 @@ trait CbsaResourceUtils {
 
   def resourceLinesIso(filename: String): Iterator[String] = {
     resourceIso(filename).getLines()
+  }
+
+  def csvLines(filename: String): List[List[String]] = {
+    CSVReader.open(resourceIso(filename)).all()
   }
 
 }

@@ -46,6 +46,8 @@ object HMDABuild extends Build {
 
   val enumDeps = Seq(enumeratum)
 
+  val csvDeps = Seq(scalaCsv)
+
   lazy val hmda = (project in file("."))
     .settings(buildSettings:_*)
     .settings(Revolver.settings:_*)
@@ -160,7 +162,7 @@ object HMDABuild extends Build {
     .settings(
       Seq(
         mainClass in assembly := Some("TractToCbsa"),
-        libraryDependencies ++= commonDeps
+        libraryDependencies ++= commonDeps ++ csvDeps
       )
     )
 

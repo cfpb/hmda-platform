@@ -13,7 +13,7 @@ object StateAbrvLookup extends CbsaResourceUtils {
       val stateFips = values(0)
       val stateAbrv = values(1)
       val stateName = values(2)
-      val stereEns = values(3)
+      val stateEns = values(3)
 
       StateAbrv(
         stateFips,

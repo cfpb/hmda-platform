@@ -6,15 +6,13 @@ package model
 
 object StatesPopLookup extends CbsaResourceUtils {
   val values: Seq[Population] = {
-    val lines = resourceLinesIso("/2000-2010_pop_estimates.csv")
-
-    lines.drop(1).map { line =>
-      val values = line.split(',').map(_.trim)
+    val lines = csvLines("/2000-2010_pop_estimates.csv")
+    lines.drop(1).map { values =>
       val sumlev = values(0)
       val region = values(1)
       val division = values(2)
-      val stateFips = values(3)
-      val countyFips = values(4)
+      val stateFips = leftPad(2, values(3))
+      val countyFips = leftPad(3, values(4))
       val stateName = values(5)
       val cityname = values(6)
       val popBase2000 = values(7).toInt
@@ -34,6 +32,6 @@ object StatesPopLookup extends CbsaResourceUtils {
         stateFips + countyFips,
         smallCountyChecker(popBase2000)
       )
-    }.toSeq
+    }
   }
 }

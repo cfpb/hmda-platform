@@ -6,12 +6,11 @@ package model
 
 object PrPopLookup extends CbsaResourceUtils {
   val values: Seq[PrPopulation] = {
-    val lines = resourceLinesIso("/PRM-EST00INT-AGESEX-5YR.csv")
+    val lines = csvLines("/PRM-EST00INT-AGESEX-5YR.csv")
 
-    lines.drop(1).map { line =>
-      val values = line.split(',').map(_.trim)
+    lines.drop(1).map { values =>
       val sumlev = values(0)
-      val countyFips = values(1)
+      val countyFips = leftPad(3, values(1))
       val municipioName = values(2)
       val sex = values(3)
       val ageGrp = values(4)
@@ -34,6 +33,6 @@ object PrPopLookup extends CbsaResourceUtils {
         sex,
         ageGrp
       )
-    }.filter(pop => pop.sex == "0" && pop.ageGroup == "0").toSeq
+    }.filter(pop => pop.sex == "0" && pop.ageGroup == "0")
   }
 }
