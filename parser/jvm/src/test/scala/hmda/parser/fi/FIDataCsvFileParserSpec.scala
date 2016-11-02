@@ -1,18 +1,15 @@
 package hmda.parser.fi
 
+import hmda.model.ResourceUtils
 import hmda.model.fi.FIData
 import org.scalatest.{ FlatSpec, MustMatchers }
-import scala.io.Source
 
-class FIDataCsvFileParserSpec extends FlatSpec with MustMatchers {
+class FIDataCsvFileParserSpec extends FlatSpec with MustMatchers with ResourceUtils {
 
   "A CSV submission file" must "parse correctly" in {
-    val filePath = "parser/src/test/resources/txt/FirstTestBankData_clean_407_2017.txt"
-    val file = Source.fromFile(filePath)
-    val lines = file.getLines().toIterable
-
+    val lines = resourceLines("/txt/FirstTestBankData_clean_407_2017.txt")
     val parser = new FIDataCsvParser
-    val fiData: FIData = parser.read(lines)
+    val fiData: FIData = parser.read(lines.toIterable)
 
     fiData.ts.id mustBe 1
     fiData.ts.respondent.name mustBe "FIRST TEST BANK"

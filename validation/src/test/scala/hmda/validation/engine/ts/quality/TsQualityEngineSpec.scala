@@ -21,7 +21,7 @@ class TsQualityEngineSpec
 
   property("A Transmittal Sheet must pass quality checks") {
     for (x <- 1 to 5) {
-      val line = Source.fromFile(new File("parser/src/test/resources/txt/QualityMacroPasses_Test" + x + ".txt")).getLines().take(1)
+      val line = Source.fromFile(new File("parser/jvm/src/test/resources/txt/QualityMacroPasses_Test" + x + ".txt")).getLines().take(1)
       val ts = line.map(l => TsCsvParser(l))
 
       ts.foreach { ts =>
