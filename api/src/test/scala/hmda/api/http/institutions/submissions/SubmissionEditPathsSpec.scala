@@ -40,7 +40,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
         )
       ),
       EditResults.empty,
-      EditResults.empty
+      MacroResults.empty
     )
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {

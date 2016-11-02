@@ -29,7 +29,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val qualityEditResults =
         validationErrorsToEditResults(tsErrors, larErrors, Quality)
       val macroEditResults =
-        validationErrorsToEditResults(tsErrors, larErrors, Macro)
+        validationErrorsToMacroResults(larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
       val s020 = EditResult("S020", ts = true, Seq(LarEditResult(LarId("8299422144")), LarEditResult(LarId("2185751599"))))
@@ -38,7 +38,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       summaryEditResults.syntactical.edits.tail.contains(s010) mustBe true
       summaryEditResults.validity.edits.size mustBe 3
       summaryEditResults.quality mustBe EditResults(Nil)
-      summaryEditResults.`macro` mustBe EditResults(Nil)
+      summaryEditResults.`macro` mustBe MacroResults(Nil)
 
     }
   }

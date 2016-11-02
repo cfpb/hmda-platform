@@ -7,5 +7,9 @@ case class EditResults(edits: Seq[EditResult])
 case object EditResults {
   def empty: EditResults = EditResults(Nil)
 }
-case class SummaryEditResults(syntactical: EditResults, validity: EditResults, quality: EditResults, `macro`: EditResults)
+case class MacroResults(edits: Seq[String])
+case object MacroResults {
+  def empty: MacroResults = MacroResults(Nil)
+}
+case class SummaryEditResults(syntactical: EditResults, validity: EditResults, quality: EditResults, `macro`: MacroResults)
 

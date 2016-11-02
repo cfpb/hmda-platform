@@ -141,7 +141,7 @@ trait ModelGenerators {
 
   implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
     Gen.oneOf(
-      List(Syntactical, Validity, Quality, Macro)
+      List(Syntactical, Validity, Quality)
     )
   }
 
@@ -158,8 +158,8 @@ trait ModelGenerators {
       s <- editResultsGen
       v <- editResultsGen
       q <- editResultsGen
-      m <- editResultsGen
-    } yield SummaryEditResults(s, v, q, m)
+      m <- Gen.listOf(Gen.alphaStr)
+    } yield SummaryEditResults(s, v, q, MacroResults(m))
   }
 
 }

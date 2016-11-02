@@ -1,6 +1,6 @@
 package hmda.api.http
 
-import hmda.api.model.{ EditResult, EditResults, LarEditResult, LarId }
+import hmda.api.model._
 import hmda.validation.engine._
 
 trait ValidationErrorConverter {
@@ -28,4 +28,8 @@ trait ValidationErrorConverter {
 
   }
 
+  def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
+    val macroValidationErrors: Seq[ValidationError] = errors.filter(_.errorType == Macro)
+    MacroResults(macroValidationErrors.map(_.name))
+  }
 }
