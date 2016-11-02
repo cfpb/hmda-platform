@@ -37,7 +37,7 @@ class InstitutionsSpec extends AsyncWordSpec with MustMatchers with BeforeAndAft
     }
 
     "insert new institution" in {
-      val i = getInstitution()
+      val i = createInstitution()
       val fInsert = db.run(institutions += i)
 
       fInsert.map { x =>
@@ -50,7 +50,7 @@ class InstitutionsSpec extends AsyncWordSpec with MustMatchers with BeforeAndAft
     db.run(institutions.schema.create)
   }
 
-  private def getInstitution() = {
+  private def createInstitution() = {
     institutionQueryGen.sample.get
   }
 
