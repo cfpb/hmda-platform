@@ -8,7 +8,7 @@ import scala.util.{ Failure, Success, Try }
 
 object TsCsvParser {
   def apply(s: String): Either[List[String], TransmittalSheet] = {
-    val values = s.trim.split('|').map(_.trim).toList
+    val values = (s + " ").split('|').map(_.trim).toList
     if (values.length != 21) {
       return Left(List("Incorrect number of fields. found: " + values.length + ", expected: 21"))
     }
