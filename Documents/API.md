@@ -91,53 +91,53 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
   Example response, with HTTP code 200:
 
-      ```json
-      {
-        "filing": {
-          "period": "2017",
-          "institutionId": "12345",
-          "status": {
-            "code": 1,
-            "message": "not-started"
-          }
-        },
-        "submissions": [
-          {
-            "id": {
-              "institutionId": "12345",
-              "period": "2017",
-              "sequenceNumber": 1
-            },
-            "status": {
-              "code": 1,
-              "message": "created"
-            }
-          },
-          {
-            "id": {
-              "institutionId": "12345",
-              "period": "2017",
-              "sequenceNumber": 2
-            },
-            "status": {
-              "code": 1,
-              "message": "created"
-            }
-          },
-          {
-            "id": {
-              "institutionId": "12345",
-              "period": "2017",
-              "sequenceNumber": 3
-            },
-            "status": {
-              "code": 1,
-              "message": "created"
-            }
-          }
-         ]
-      }
-      ```
+```json
+{
+"filing": {
+  "period": "2017",
+  "institutionId": "12345",
+  "status": {
+    "code": 1,
+    "message": "not-started"
+  }
+},
+"submissions": [
+  {
+    "id": {
+      "institutionId": "12345",
+      "period": "2017",
+      "sequenceNumber": 1
+    },
+    "status": {
+      "code": 1,
+      "message": "created"
+    }
+  },
+  {
+    "id": {
+      "institutionId": "12345",
+      "period": "2017",
+      "sequenceNumber": 2
+    },
+    "status": {
+      "code": 1,
+      "message": "created"
+    }
+  },
+  {
+    "id": {
+      "institutionId": "12345",
+      "period": "2017",
+      "sequenceNumber": 3
+    },
+    "status": {
+      "code": 1,
+      "message": "created"
+    }
+  }
+ ]
+}
+```
 
 * `/institutions/<institution>/filings/<period>/submissions`
 
