@@ -4,7 +4,7 @@ import hmda.model.ResourceUtils
 
 object CBSATractLookup extends ResourceUtils {
   val values: Seq[CBSATract] = {
-    val lines = resourceLines("/tract_to_cbsa_2013.csv")
+    val lines = resourceLines("/tract_to_cbsa_2015.txt")
 
     lines.map { line =>
       val values = line.split('|').map(_.trim)
