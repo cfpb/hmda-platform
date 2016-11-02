@@ -9,7 +9,7 @@ import scala.util.{ Failure, Success, Try }
 
 object LarCsvParser {
   def apply(s: String): Either[List[String], LoanApplicationRegister] = {
-    val values = s.trim.split('|').map(_.trim)
+    val values = (s + " ").split('|').map(_.trim)
     val parserResults = checkLar(values.toList)
     parserResults match {
       case scalaz.Success(convertedValues) => {

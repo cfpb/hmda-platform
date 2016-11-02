@@ -1,7 +1,7 @@
 package hmda.parser.fi.lar
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import org.scalatest.{ PropSpec, MustMatchers }
+import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
 class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
@@ -9,6 +9,12 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers wi
   property("Loan Application Register must be parsed from CSV") {
     forAll(larGen) { (lar: LoanApplicationRegister) =>
       LarCsvParser(lar.toCSV).isRight mustBe true
+    }
+  }
+
+  property("Must recognize blank fields at the end of lar") {
+    forAll(larGen) { (lar) =>
+      LarCsvParser(lar.toCSV + "|").left.get mustBe List("Incorrect number of fields. found: 40, expected: 39")
     }
   }
 
