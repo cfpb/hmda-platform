@@ -22,7 +22,7 @@ class InstitutionsSpec extends AsyncWordSpec with MustMatchers with BeforeAndAft
     db.close()
   }
 
-  "Institutions Query" must {
+  "Institutions" must {
     "create schema" in {
       val fTables = for {
         s <- createSchema()

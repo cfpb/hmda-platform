@@ -25,7 +25,7 @@ class InstitutionProjectionSpec extends ActorSpec {
     institutionQuery ! EventWithSeqNr(3, InstitutionCreated(i3))
   }
 
-  "Institutions Query" must {
+  "Institutions Projection" must {
     "return institution by id" in {
       probe.send(institutionQuery, GetInstitutionById(i1.id))
       probe.expectMsg(i1)
