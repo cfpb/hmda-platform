@@ -52,7 +52,6 @@ class InstitutionsSpec extends AsyncWordSpec with MustMatchers with BeforeAndAft
 
   private def getInstitution() = {
     institutionQueryGen.sample.get
-    //    db.run(institutions += i)
   }
 
 }
