@@ -1,4 +1,4 @@
-package hmda.query.institutions
+package hmda.query.projections.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
@@ -12,7 +12,7 @@ import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 
-object InstitutionQuery {
+object InstitutionProjection {
 
   val name = "institutions-query"
 
@@ -21,17 +21,17 @@ object InstitutionQuery {
   case class LastProcessedEventOffset(seqNr: Long)
   case object StreamCompleted
 
-  def props(): Props = Props(new InstitutionQuery)
+  def props(): Props = Props(new InstitutionProjection)
 
   def createInstitutionQuery(system: ActorSystem): ActorRef = {
-    system.actorOf(InstitutionQuery.props(), "query-institutions")
+    system.actorOf(InstitutionProjection.props(), "query-institutions")
   }
 
 }
 
-class InstitutionQuery extends HmdaPersistentActor {
+class InstitutionProjection extends HmdaPersistentActor {
 
-  import InstitutionQuery._
+  import InstitutionProjection._
 
   var inMemoryInstitutions = Set.empty[Institution]
   var offset = 0L

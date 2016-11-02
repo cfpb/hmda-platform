@@ -1,4 +1,4 @@
-package hmda.query.institutions
+package hmda.query.projections.institutions
 
 import akka.testkit.TestProbe
 import hmda.model.institution.InstitutionGenerators
@@ -6,9 +6,9 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
-import hmda.query.institutions.InstitutionQuery._
+import InstitutionProjection._
 
-class InstitutionQuerySpec extends ActorSpec {
+class InstitutionProjectionSpec extends ActorSpec {
 
   val i1 = InstitutionGenerators.institutionGen.sample.get
   val i2 = InstitutionGenerators.institutionGen.sample.get

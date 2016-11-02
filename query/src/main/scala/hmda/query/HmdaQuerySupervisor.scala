@@ -2,7 +2,7 @@ package hmda.query
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.persistence.model.HmdaSupervisorActor
-import hmda.query.institutions.InstitutionQuery
+import hmda.query.projections.institutions.InstitutionProjection
 
 object HmdaQuerySupervisor {
   case class FindQueryActorByName(name: String)
@@ -17,9 +17,9 @@ object HmdaQuerySupervisor {
 class HmdaQuerySupervisor extends HmdaSupervisorActor {
 
   override protected def createActor(name: String): ActorRef = name match {
-    case id @ InstitutionQuery.name =>
+    case id @ InstitutionProjection.name =>
       println(name)
-      val actor = context.actorOf(InstitutionQuery.props, id)
+      val actor = context.actorOf(InstitutionProjection.props, id)
       supervise(actor, id)
   }
 

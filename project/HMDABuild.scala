@@ -46,6 +46,8 @@ object HMDABuild extends Build {
 
   val enumDeps = Seq(enumeratum)
 
+  val slickDeps = Seq(slick, hikariCP, h2)
+
   lazy val hmda = (project in file("."))
     .settings(buildSettings:_*)
     .settings(Revolver.settings:_*)
@@ -136,7 +138,7 @@ object HMDABuild extends Build {
   lazy val query = (project in file("query"))
     .settings(buildSettings:_*)
     .settings(
-      libraryDependencies ++= akkaPersistenceDeps
+      libraryDependencies ++= akkaPersistenceDeps ++ slickDeps
     )
     .dependsOn(modelJVM % "compile->compile;test->test")
     .dependsOn(persistenceModel % "compile->compile;test->test")
