@@ -1,9 +1,9 @@
 package hmda.query.projections.institutions
 
 import akka.actor.Props
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{InstitutionCreated, InstitutionEvent, InstitutionModified}
 import hmda.persistence.model.HmdaActor
-import hmda.query.sql.institutions.Institutions
+import hmda.query.dao.institutions.Institutions
 import slick.lifted.TableQuery
 
 object InstitutionDBProjection {

@@ -1,7 +1,6 @@
 package hmda.query.dao.institutions
 
-import hmda.query.sql.institutions.Institutions
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
+import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, MustMatchers}
 import slick.driver.H2Driver
 import slick.driver.H2Driver.api._
 import slick.jdbc.meta.MTable

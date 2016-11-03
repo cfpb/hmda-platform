@@ -1,4 +1,4 @@
-package hmda.query.sql.institutions
+package hmda.query.dao.institutions
 
 import hmda.query.model.institutions.InstitutionQuery
 import slick.driver.H2Driver.api._
