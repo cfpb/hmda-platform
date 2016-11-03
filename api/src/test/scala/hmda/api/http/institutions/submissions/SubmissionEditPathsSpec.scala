@@ -40,7 +40,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
         )
       ),
       EditResults.empty,
-      MacroResults.empty
+      MacroResults(List("Q007"))
     )
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
@@ -65,7 +65,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[MacroResults] mustBe MacroResults.empty
+      responseAs[MacroResults] mustBe MacroResults(List("Q007"))
     }
   }
 
@@ -82,7 +82,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val v1 = ValidationError("loan1", "V280", Validity)
     val v2 = ValidationError("loan2", "V285", Validity)
     val v3 = ValidationError("loan3", "V285", Validity)
-    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3))
+    val m1 = ValidationError("", "Q007", Macro)
+    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
 
     val tsValidationErrors = TsValidationErrors(Seq(s2))
 
