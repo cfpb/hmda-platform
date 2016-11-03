@@ -20,7 +20,6 @@ object HmdaQuery {
   val journalId = config.getString("akka.persistence.query.journal.id")
 
   def readJournal(system: ActorSystem) = {
-    println(s"$journalId")
     PersistenceQuery(system).readJournalFor[RJ](journalId)
   }
 
