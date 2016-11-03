@@ -27,14 +27,14 @@ object InstitutionView {
     system.actorOf(InstitutionView.props(), "institutions-view")
   }
 
-  case class InstitutionProjectionState(institutions: Set[Institution] = Set.empty[Institution], seqNr: Long = 0L) {
-    def updated(event: Event): InstitutionProjectionState = {
+  case class InstitutionViewState(institutions: Set[Institution] = Set.empty[Institution], seqNr: Long = 0L) {
+    def updated(event: Event): InstitutionViewState = {
       event match {
         case InstitutionCreated(i) =>
-          InstitutionProjectionState(institutions + i, seqNr)
+          InstitutionViewState(institutions + i, seqNr)
         case InstitutionModified(i) =>
           val others = institutions.filterNot(_.id == i.id)
-          InstitutionProjectionState(others + i, seqNr)
+          InstitutionViewState(others + i, seqNr)
       }
     }
   }
@@ -45,7 +45,7 @@ class InstitutionView extends HmdaPersistentActor {
 
   import InstitutionView._
 
-  var state = InstitutionProjectionState()
+  var state = InstitutionViewState()
 
   var counter = 0
 
@@ -54,7 +54,7 @@ class InstitutionView extends HmdaPersistentActor {
   override def persistenceId: String = name
 
   override def receiveRecover: Receive = {
-    case SnapshotOffer(_, s: InstitutionProjectionState) => state = s
+    case SnapshotOffer(_, s: InstitutionViewState) => state = s
     case RecoveryCompleted => recoveryCompleted()
   }
 

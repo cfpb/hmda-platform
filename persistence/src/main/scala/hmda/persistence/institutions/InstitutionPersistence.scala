@@ -20,14 +20,14 @@ object InstitutionPersistence {
     system.actorOf(InstitutionPersistence.props, "institutions")
   }
 
-  case class InstitutionsState(institutions: Set[Institution] = Set.empty[Institution]) {
-    def updated(event: Event): InstitutionsState = {
+  case class InstitutionPersistenceState(institutionIds: Set[String] = Set.empty[String]) {
+    def updated(event: Event): InstitutionPersistenceState = {
       event match {
         case InstitutionCreated(i) =>
-          InstitutionsState(institutions + i)
+          InstitutionPersistenceState(institutionIds + i.id)
         case InstitutionModified(i) =>
-          val others = institutions.filterNot(_.id == i.id)
-          InstitutionsState(others + i)
+          InstitutionPersistenceState(institutionIds)
+
       }
     }
   }
@@ -35,7 +35,7 @@ object InstitutionPersistence {
 
 class InstitutionPersistence extends HmdaPersistentActor {
 
-  var state = InstitutionsState()
+  var state = InstitutionPersistenceState()
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -45,7 +45,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = {
     case CreateInstitution(i) =>
-      if (!state.institutions.contains(i)) {
+      if (!state.institutionIds.contains(i.id)) {
         persist(InstitutionCreated(i)) { e =>
           log.debug(s"Persisted: $i")
           updateState(e)
@@ -56,7 +56,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
       }
 
     case ModifyInstitution(i) =>
-      if (state.institutions.map(i => i.id).contains(i.id)) {
+      if (state.institutionIds.contains(i.id)) {
         persist(InstitutionModified(i)) { e =>
           log.debug(s"Modified: ${i.name}")
           updateState(e)
@@ -68,7 +68,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
       }
 
     case GetState =>
-      sender() ! state.institutions
+      sender() ! state.institutionIds
 
     case Shutdown => context stop self
   }
