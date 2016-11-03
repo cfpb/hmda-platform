@@ -13,6 +13,7 @@ object InstitutionQueryGenerators {
       institutionType <- Gen.alphaStr
       parent <- Gen.oneOf(true, false)
       status <- Gen.oneOf(1, 2)
+      filingPeriod <- Gen.choose(2017, 2020)
     } yield InstitutionQuery(
       id,
       name,
@@ -20,7 +21,8 @@ object InstitutionQueryGenerators {
       agency,
       institutionType,
       parent,
-      status
+      status,
+      filingPeriod
     )
   }
 }

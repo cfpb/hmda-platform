@@ -12,6 +12,7 @@ class Institutions(tag: Tag) extends Table[InstitutionQuery](tag, "institutions"
   def institutionType = column[String]("type")
   def hasParent = column[Boolean]("parent")
   def status = column[Int]("status")
+  def filingPeriod = column[Int]("period")
 
-  override def * = (id, name, cra, agency, institutionType, hasParent, status) <> (InstitutionQuery.tupled, InstitutionQuery.unapply)
+  override def * = (id, name, cra, agency, institutionType, hasParent, status, filingPeriod) <> (InstitutionQuery.tupled, InstitutionQuery.unapply)
 }
