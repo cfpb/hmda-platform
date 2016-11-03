@@ -18,8 +18,8 @@ import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.projections.institutions.InstitutionProjection
-import hmda.query.projections.institutions.InstitutionProjection.{ GetInstitutionById, GetInstitutionsById }
+import hmda.query.projections.institutions.InstitutionView
+import hmda.query.projections.institutions.InstitutionView.{ GetInstitutionById, GetInstitutionsById }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -40,7 +40,7 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
             implicit val ec: ExecutionContext = executor
             val ids = institutionIdsFromHeader(ctx)
             val supervisor = system.actorSelection("/user/query-supervisor")
-            val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionProjection.name)).mapTo[ActorRef]
+            val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
             val fInstitutions = for {
               institutionsActor <- fInstitutionsActor
               institutions <- (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
@@ -64,7 +64,7 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
           val querySupervisor = system.actorSelection("/user/query-supervisor")
-          val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionProjection.name)).mapTo[ActorRef]
+          val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
           val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
           val fInstitutionDetails = for {
             i <- fInstitutionsActor

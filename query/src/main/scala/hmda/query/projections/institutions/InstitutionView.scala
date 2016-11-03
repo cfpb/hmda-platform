@@ -12,49 +12,49 @@ import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 
-object InstitutionProjection {
+object InstitutionView {
 
-  val name = "institutions-query"
+  val name = "institutions-view"
 
   case class GetInstitutionById(institutionId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
   case class LastProcessedEventOffset(seqNr: Long)
   case object StreamCompleted
 
-  def props(): Props = Props(new InstitutionProjection)
+  def props(): Props = Props(new InstitutionView)
 
   def createInstitutionQuery(system: ActorSystem): ActorRef = {
-    system.actorOf(InstitutionProjection.props(), "query-institutions")
+    system.actorOf(InstitutionView.props(), "institutions-view")
   }
 
-  case class InstitutionState(institutions: Set[Institution] = Set.empty[Institution], seqNr: Long = 0L) {
-    def updated(event: Event): InstitutionState = {
+  case class InstitutionProjectionState(institutions: Set[Institution] = Set.empty[Institution], seqNr: Long = 0L) {
+    def updated(event: Event): InstitutionProjectionState = {
       event match {
         case InstitutionCreated(i) =>
-          InstitutionState(institutions + i, seqNr)
+          InstitutionProjectionState(institutions + i, seqNr)
         case InstitutionModified(i) =>
           val others = institutions.filterNot(_.id == i.id)
-          InstitutionState(others + i, seqNr)
+          InstitutionProjectionState(others + i, seqNr)
       }
     }
   }
 
 }
 
-class InstitutionProjection extends HmdaPersistentActor {
+class InstitutionView extends HmdaPersistentActor {
 
-  import InstitutionProjection._
+  import InstitutionView._
 
-  var state = InstitutionState()
+  var state = InstitutionProjectionState()
 
   var counter = 0
 
-  val queryProjector = context.actorOf(InstitutionQueryProjector.props)
+  val queryProjector = context.actorOf(InstitutionDBProjection.props)
 
   override def persistenceId: String = name
 
   override def receiveRecover: Receive = {
-    case SnapshotOffer(_, s: InstitutionState) => state = s
+    case SnapshotOffer(_, s: InstitutionProjectionState) => state = s
     case RecoveryCompleted => recoveryCompleted()
   }
 
@@ -91,7 +91,6 @@ class InstitutionProjection extends HmdaPersistentActor {
   def recoveryCompleted(): Unit = {
     implicit val materializer = ActorMaterializer()
     eventsWithSequenceNumber("institutions", state.seqNr + 1, Long.MaxValue)
-      .map { e => log.debug(e.toString); e }
       .runWith(Sink.actorRef(self, StreamCompleted))
   }
 

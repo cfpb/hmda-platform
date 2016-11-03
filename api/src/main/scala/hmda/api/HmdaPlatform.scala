@@ -12,7 +12,7 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
-import hmda.query.projections.institutions.InstitutionProjection
+import hmda.query.projections.institutions.InstitutionView
 
 import scala.concurrent.ExecutionContext
 
@@ -61,7 +61,7 @@ object HmdaPlatform {
     }
 
     // Start query Actors
-    (querySupervisor ? FindActorByName(InstitutionProjection.name))
+    (querySupervisor ? FindActorByName(InstitutionView.name))
       .mapTo[ActorRef]
 
   }

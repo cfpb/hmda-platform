@@ -6,11 +6,11 @@ import hmda.persistence.model.HmdaActor
 import hmda.query.sql.institutions.Institutions
 import slick.lifted.TableQuery
 
-object InstitutionQueryProjector {
-  def props(): Props = Props(new InstitutionQueryProjector)
+object InstitutionDBProjection {
+  def props(): Props = Props(new InstitutionDBProjection)
 }
 
-class InstitutionQueryProjector extends HmdaActor {
+class InstitutionDBProjection extends HmdaActor {
 
   val institutions = TableQuery[Institutions]
 

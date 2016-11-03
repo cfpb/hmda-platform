@@ -13,7 +13,7 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.HmdaQuerySupervisor
-import hmda.query.projections.institutions.InstitutionProjection
+import hmda.query.projections.institutions.InstitutionView
 import org.iq80.leveldb.util.FileUtils
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
@@ -31,7 +31,7 @@ trait InstitutionHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAf
     val supervisor = HmdaSupervisor.createSupervisor(system)
     supervisor ! FindActorByName(InstitutionPersistence.name)
     val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
-    querySupervisor ! FindActorByName(InstitutionProjection.name)
+    querySupervisor ! FindActorByName(InstitutionView.name)
     DemoData.loadTestData(system)
     super.beforeAll()
   }
