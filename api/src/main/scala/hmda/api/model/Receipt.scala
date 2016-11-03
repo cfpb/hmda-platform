@@ -1,6 +1,5 @@
 package hmda.api.model
 
-case class Receipt(timestamp: Long, receipt: String)
-case object Receipt {
-  def empty: Receipt = Receipt(0L, "")
-}
+import hmda.model.fi.SubmissionStatus
+
+case class Receipt(timestamp: Long, receipt: String, status: SubmissionStatus)
