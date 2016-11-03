@@ -27,46 +27,62 @@ object InstitutionProjection {
     system.actorOf(InstitutionProjection.props(), "query-institutions")
   }
 
+  case class InstitutionState(institutions: Set[Institution] = Set.empty[Institution], seqNr: Long = 0L) {
+    def updated(event: Event): InstitutionState = {
+      event match {
+        case InstitutionCreated(i) =>
+          InstitutionState(institutions + i, seqNr)
+        case InstitutionModified(i) =>
+          val others = institutions.filterNot(_.id == i.id)
+          InstitutionState(others + i, seqNr)
+      }
+    }
+  }
+
 }
 
 class InstitutionProjection extends HmdaPersistentActor {
 
   import InstitutionProjection._
 
-  var inMemoryInstitutions = Set.empty[Institution]
-  var offset = 0L
+  var state = InstitutionState()
+
+  var counter = 0
+
+  val queryProjector = context.actorOf(InstitutionQueryProjector.props)
 
   override def persistenceId: String = name
 
   override def receiveRecover: Receive = {
-    case SnapshotOffer(_, LastProcessedEventOffset(seqNr)) => offset = seqNr
+    case SnapshotOffer(_, s: InstitutionState) => state = s
     case RecoveryCompleted => recoveryCompleted()
   }
 
   override def receiveCommand: Receive = {
     case GetInstitutionById(institutionId) =>
-      val institution = inMemoryInstitutions.find(i => i.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, status = Inactive))
+      val institution = state.institutions.find(i => i.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, status = Inactive))
       sender() ! institution
 
     case GetInstitutionsById(ids) =>
-      val institutions = inMemoryInstitutions.filter(i => ids.contains(i.id.toString))
+      val institutions = state.institutions.filter(i => ids.contains(i.id.toString))
       sender() ! institutions
 
     case EventWithSeqNr(seqNr, event) =>
+      if (counter >= 100) {
+        counter = 0
+        saveSnapshot(state)
+      }
       event match {
         case InstitutionCreated(i) =>
-          saveSnapshot(LastProcessedEventOffset(seqNr))
-          inMemoryInstitutions += i
+          updateState(event)
         case InstitutionModified(i) =>
-          saveSnapshot(LastProcessedEventOffset(seqNr))
-          val others = inMemoryInstitutions.filterNot(_.id == i.id)
-          inMemoryInstitutions = others + i
+          updateState(event)
         case _ => //do nothing
 
       }
 
     case GetState =>
-      sender() ! inMemoryInstitutions
+      sender() ! state.institutions
 
     case Shutdown => context stop self
 
@@ -74,13 +90,14 @@ class InstitutionProjection extends HmdaPersistentActor {
 
   def recoveryCompleted(): Unit = {
     implicit val materializer = ActorMaterializer()
-    eventsWithSequenceNumber("institutions", offset + 1, Long.MaxValue)
+    eventsWithSequenceNumber("institutions", state.seqNr + 1, Long.MaxValue)
       .map { e => log.debug(e.toString); e }
       .runWith(Sink.actorRef(self, StreamCompleted))
   }
 
   override def updateState(event: Event): Unit = {
-
+    state = state.updated(event)
+    queryProjector ! event
   }
 
 }

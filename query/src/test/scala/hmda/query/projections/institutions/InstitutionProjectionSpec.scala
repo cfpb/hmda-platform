@@ -3,16 +3,17 @@ package hmda.query.projections.institutions
 import akka.testkit.TestProbe
 import hmda.model.institution.InstitutionGenerators
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
-import InstitutionProjection._
+import hmda.query.projections.institutions.InstitutionProjection._
 
 class InstitutionProjectionSpec extends ActorSpec {
 
   val i1 = InstitutionGenerators.institutionGen.sample.get
   val i2 = InstitutionGenerators.institutionGen.sample.get
   val i3 = InstitutionGenerators.institutionGen.sample.get
+  val i4 = i3.copy(cra = true)
 
   val institutionQuery = createInstitutionQuery(system)
 
@@ -23,12 +24,17 @@ class InstitutionProjectionSpec extends ActorSpec {
     institutionQuery ! EventWithSeqNr(1, InstitutionCreated(i1))
     institutionQuery ! EventWithSeqNr(2, InstitutionCreated(i2))
     institutionQuery ! EventWithSeqNr(3, InstitutionCreated(i3))
+    institutionQuery ! EventWithSeqNr(4, InstitutionModified(i4))
   }
 
   "Institutions Projection" must {
     "return institution by id" in {
       probe.send(institutionQuery, GetInstitutionById(i1.id))
       probe.expectMsg(i1)
+    }
+    "return modified institution" in {
+      probe.send(institutionQuery, GetInstitutionById(i3.id))
+      probe.expectMsg(i4)
     }
     "return a set of institutions matching a list of ids" in {
       probe.send(institutionQuery, GetInstitutionsById(List(i1.id, i2.id)))
@@ -40,7 +46,7 @@ class InstitutionProjectionSpec extends ActorSpec {
     }
     "return full list of institutions" in {
       probe.send(institutionQuery, GetState)
-      probe.expectMsg(Set(i1, i2, i3))
+      probe.expectMsg(Set(i1, i2, i4))
     }
   }
 
