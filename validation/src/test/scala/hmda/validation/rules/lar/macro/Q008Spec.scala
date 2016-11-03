@@ -15,20 +15,20 @@ class Q008Spec extends MacroSpec {
   def invalidLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 4)
 
   property(s"be valid if withdrawn < $multiplier * total") {
-    val numOfGoodLars = (sampleSize * (1.0 - multiplier)).toInt + 1
-    val validLarSource = newLarSource(testLars, numOfGoodLars, validLar(_), invalidLar(_))
+    val numOfRelevantLars = (sampleSize * (1.0 - multiplier)).toInt + 1
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, validLar(_), invalidLar(_))
     validLarSource.mustPass
   }
 
   property(s"be valid if withdrawn = $multiplier * total") {
-    val numOfGoodLars = (sampleSize * (1.0 - multiplier)).toInt
-    val validLarSource = newLarSource(testLars, numOfGoodLars, validLar(_), invalidLar(_))
+    val numOfRelevantLars = (sampleSize * (1.0 - multiplier)).toInt
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, validLar(_), invalidLar(_))
     validLarSource.mustPass
   }
 
   property(s"be invalid if withdrawn > $multiplier * total") {
-    val numOfGoodLars = (sampleSize * (1.0 - multiplier)).toInt - 1
-    val invalidLarSource = newLarSource(testLars, numOfGoodLars, validLar(_), invalidLar(_))
+    val numOfRelevantLars = (sampleSize * (1.0 - multiplier)).toInt - 1
+    val invalidLarSource = newLarSource(testLars, numOfRelevantLars, validLar(_), invalidLar(_))
     invalidLarSource.mustFail
   }
 
