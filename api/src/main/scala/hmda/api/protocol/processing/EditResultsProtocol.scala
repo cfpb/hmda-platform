@@ -8,6 +8,6 @@ trait EditResultsProtocol extends DefaultJsonProtocol {
   implicit val larEditResultFormat = jsonFormat1(LarEditResult.apply)
   implicit val editResultFormat = jsonFormat3(EditResult.apply)
   implicit val editResultsFormat = jsonFormat1(EditResults.apply)
+  implicit val macroResultsFormat = jsonFormat1(MacroResults.apply)
   implicit val summaryEditResultsFormat = jsonFormat4(SummaryEditResults.apply)
-
 }

@@ -52,7 +52,6 @@ object HmdaFileValidator {
       tsSyntactical: Seq[ValidationError] = Nil,
       tsValidity: Seq[ValidationError] = Nil,
       tsQuality: Seq[ValidationError] = Nil,
-      tsMacro: Seq[ValidationError] = Nil,
       larSyntactical: Seq[ValidationError] = Nil,
       larValidity: Seq[ValidationError] = Nil,
       larQuality: Seq[ValidationError] = Nil,
@@ -60,23 +59,23 @@ object HmdaFileValidator {
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) =>
-        HmdaFileValidationState(Some(newTs), lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+        HmdaFileValidationState(Some(newTs), lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, larMacro)
       case larValidated @ LarValidated(lar) =>
-        HmdaFileValidationState(ts, lars :+ lar, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+        HmdaFileValidationState(ts, lars :+ lar, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, larMacro)
       case TsSyntacticalError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical :+ e, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+        HmdaFileValidationState(ts, lars, tsSyntactical :+ e, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, larMacro)
       case TsValidityError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity :+ e, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity :+ e, tsQuality, larSyntactical, larValidity, larQuality, larMacro)
       case TsQualityError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality :+ e, tsMacro, larSyntactical, larValidity, larQuality, larMacro)
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality :+ e, larSyntactical, larValidity, larQuality, larMacro)
       case LarSyntacticalError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical :+ e, larValidity, larQuality, larMacro)
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical :+ e, larValidity, larQuality, larMacro)
       case LarValidityError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity :+ e, larQuality, larMacro)
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity :+ e, larQuality, larMacro)
       case LarQualityError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality :+ e, larMacro)
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality :+ e, larMacro)
       case LarMacroError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, tsMacro, larSyntactical, larValidity, larQuality, larMacro :+ e)
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, larMacro :+ e)
     }
   }
 }
