@@ -1,4 +1,4 @@
-package model
+package hmda.census.model
 
 // The file contains a list of all census tracts and what county and state they are in
 // site: https://www.census.gov/geo/maps-data/data/relationship.html

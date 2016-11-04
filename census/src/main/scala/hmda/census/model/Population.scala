@@ -1,4 +1,4 @@
-package model
+package hmda.census.model
 
 abstract class Population {
   def key: String = ""

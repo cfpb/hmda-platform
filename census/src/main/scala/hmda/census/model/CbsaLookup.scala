@@ -1,4 +1,4 @@
-package model
+package hmda.census.model
 
 import com.github.tototoshi.csv.CSVParser.parse
 

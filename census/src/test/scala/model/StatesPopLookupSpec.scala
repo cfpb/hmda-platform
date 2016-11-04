@@ -1,5 +1,6 @@
 package model
 
+import hmda.census.model.{ StatesPopLookup, StatesPopulation }
 import org.scalatest.{ MustMatchers, WordSpec }
 
 class StatesPopLookupSpec extends WordSpec with MustMatchers {

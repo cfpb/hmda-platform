@@ -1,4 +1,4 @@
-package model
+package hmda.census.model
 
 // This file contains data on the population of counties in the states
 // site: http://www.census.gov/popest/data/intercensal/county/county2010.html

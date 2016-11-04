@@ -1,6 +1,6 @@
-package model
+package hmda.census.model
 
-// This file contains data on the population of MUNICIPIOs in Peurto Rico
+// This file contains data on the population of MUNICIPIOs in Puerto Rico
 // site: http://www.census.gov/popest/data/intercensal/puerto_rico/pr2010.html
 // file path: http://www.census.gov/popest/data/intercensal/puerto_rico/files/PRM-EST00INT-AGESEX-5YR.csv
 

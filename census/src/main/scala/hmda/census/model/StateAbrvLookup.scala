@@ -1,4 +1,4 @@
-package model
+package hmda.census.model
 
 // This file contains a linking of state fips codes and state abbreviations
 // site: https://www.census.gov/geo/reference/ansi_statetables.html

@@ -1,5 +1,6 @@
 package model
 
+import hmda.census.model.{ StateAbrv, StateAbrvLookup }
 import org.scalatest.{ MustMatchers, WordSpec }
 
 class StateAbrvLookupSpec extends WordSpec with MustMatchers {

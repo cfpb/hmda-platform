@@ -1,5 +1,6 @@
 package model
 
+import hmda.census.model.{ Cbsa, CbsaLookup }
 import org.scalatest.{ MustMatchers, WordSpec }
 
 class CbsaLookupSpec extends WordSpec with MustMatchers {

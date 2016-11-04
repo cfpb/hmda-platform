@@ -1,5 +1,6 @@
 package model
 
+import hmda.census.model.TractLookup
 import org.scalatest.{ MustMatchers, WordSpec }
 
 class TractLookupSpec extends WordSpec with MustMatchers {
