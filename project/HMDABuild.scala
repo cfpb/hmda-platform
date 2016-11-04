@@ -175,7 +175,7 @@ object HMDABuild extends Build {
         mainClass in assembly := Some("TractToCbsa"),
         libraryDependencies ++= commonDeps ++ csvDeps
       )
-    )
+    ).dependsOn(modelJVM % "compile->compile;test->test")
 
 
 }

@@ -6,7 +6,7 @@ package hmda.census.model
 
 object StateAbrvLookup extends CbsaResourceUtils {
   val values: Seq[StateAbrv] = {
-    val lines = resourceLinesIso("/state.csv")
+    val lines = resourceLines("/state.csv", "ISO-8859-1")
 
     lines.drop(1).map { line =>
       val values = line.split('|').map(_.trim)
