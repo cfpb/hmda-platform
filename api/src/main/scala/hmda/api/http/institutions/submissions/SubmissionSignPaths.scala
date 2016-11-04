@@ -10,6 +10,7 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
+import hmda.model.fi.{ IRSVerified, Signed }
 import spray.json.{ JsBoolean, JsFalse, JsObject, JsTrue }
 
 import scala.concurrent.ExecutionContext
@@ -37,14 +38,14 @@ trait SubmissionSignPaths
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
 
-          complete(ToResponseMarshallable(Receipt.empty))
+          complete(ToResponseMarshallable(Receipt(0L, "", IRSVerified)))
         } ~
           timedPost { uri =>
             entity(as[JsObject]) { json =>
               val verified = json.fields("signed").asInstanceOf[JsBoolean]
               verified match {
-                case JsTrue => complete(ToResponseMarshallable(Receipt(System.currentTimeMillis(), "receiptHash")))
-                case JsFalse => complete(ToResponseMarshallable(Receipt.empty))
+                case JsTrue => complete(ToResponseMarshallable(Receipt(System.currentTimeMillis(), "receiptHash", Signed)))
+                case JsFalse => complete(ToResponseMarshallable(Receipt(0L, "", IRSVerified)))
               }
             }
           }

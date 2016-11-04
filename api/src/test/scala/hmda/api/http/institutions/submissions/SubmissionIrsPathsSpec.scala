@@ -4,6 +4,7 @@ import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.Receipt
+import hmda.model.fi.IRSGenerated
 import spray.json.{ JsBoolean, JsObject }
 
 class SubmissionIrsPathsSpec extends InstitutionHttpApiSpec {
@@ -30,7 +31,7 @@ class SubmissionIrsPathsSpec extends InstitutionHttpApiSpec {
 
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs", verified) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Receipt] mustBe Receipt.empty
+        responseAs[Receipt].status mustBe IRSGenerated
       }
     }
   }
