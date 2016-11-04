@@ -73,7 +73,7 @@ object HMDABuild extends Build {
       api,
       platformTest,
       validation,
-      tractToCbsa)
+      census)
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
@@ -168,7 +168,7 @@ object HMDABuild extends Build {
     .disablePlugins(ScoverageSbtPlugin)
     .dependsOn(parserJVM)
 
-  lazy val tractToCbsa = (project in file("tract-to-cbsa"))
+  lazy val census = (project in file("census"))
     .settings(buildSettings: _*)
     .settings(
       Seq(
