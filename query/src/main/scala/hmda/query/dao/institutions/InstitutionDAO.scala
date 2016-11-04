@@ -27,8 +27,8 @@ trait InstitutionDAO { profile: JdbcProfile =>
     institutions.schema.create
   }
 
-  def save(i: InstitutionQuery): DBIO[Int] = {
-    institutions += i
+  def insertOrUpdate(i: InstitutionQuery): DBIO[Int] = {
+    institutions.insertOrUpdate(i)
   }
 
   def get(id: String): DBIO[Option[InstitutionQuery]] = {
