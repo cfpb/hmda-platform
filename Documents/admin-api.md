@@ -43,7 +43,7 @@ This API is for internal use only. The following endpoints are available
     Response is the same object inserted, with code 201
     
     
-    * `PUT` - Modifies existing financial institution
+    * `PUT` - Modifies existing financial institution. Can modify any field except `id` (used for finding the institution to be updated)
     
     Accepts data in `json` format. For example: 
     
