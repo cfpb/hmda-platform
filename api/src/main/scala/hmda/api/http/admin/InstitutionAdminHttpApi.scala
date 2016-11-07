@@ -41,12 +41,16 @@ trait InstitutionAdminHttpApi
             val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
             val fCreated = for {
               a <- fInstitutionsActor
-              i <- (a ? CreateInstitution(institution)).mapTo[Institution]
+              i <- (a ? CreateInstitution(institution)).mapTo[Option[Institution]]
             } yield i
 
             onComplete(fCreated) {
-              case Success(i) =>
-                complete(ToResponseMarshallable(StatusCodes.Created -> i))
+              case Success(maybeCreated) =>
+                maybeCreated match {
+                  case Some(i) => complete(ToResponseMarshallable(StatusCodes.Created -> i))
+                  case None => complete(ToResponseMarshallable(StatusCodes.Conflict))
+                }
+
               case Failure(error) => completeWithInternalError(uri, error)
 
             }
