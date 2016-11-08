@@ -1,11 +1,12 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ InstitutionDetail, InstitutionWrapper, Institutions }
+import hmda.api.model._
 import hmda.model.institution.{ Active, Inactive, InstitutionStatus }
 import hmda.model.institution.InstitutionStatusMessage._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
 trait InstitutionProtocol extends DefaultJsonProtocol with FilingProtocol {
+
   implicit object InstitutionStatusJsonFormat extends RootJsonFormat[InstitutionStatus] {
 
     override def write(status: InstitutionStatus): JsValue = {
