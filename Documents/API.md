@@ -10,7 +10,7 @@
     ```json
     {
       "status": "OK",
-      "service": "hmda-api",
+      "service": "hmda-filing-api",
       "time": "2016-06-17T13:54:10.725Z",
       "host": "localhost"
     }

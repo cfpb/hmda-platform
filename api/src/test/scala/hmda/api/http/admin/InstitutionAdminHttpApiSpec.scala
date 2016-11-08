@@ -64,6 +64,14 @@ class InstitutionAdminHttpApiSpec
         rejection mustBe a[MalformedRequestContentRejection]
       }
     }
+    "return conflict when trying to upload existing entity" in {
+      val id = newInstitution.id
+      val jsonRequest = ByteString(newInstitution.toJson.toString)
+      val postRequest = createRequest(jsonRequest, HttpMethods.POST)
+      postRequest ~> institutionAdminRoutes ~> check {
+        status mustBe StatusCodes.Conflict
+      }
+    }
     "modify existing institution" in {
       val updatedInstitution = newInstitution.copy(cra = true, name = "new name")
       val jsonRequest = ByteString(updatedInstitution.toJson.toString)

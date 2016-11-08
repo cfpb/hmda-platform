@@ -13,12 +13,15 @@ import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
 import hmda.query.projections.institutions.InstitutionView
+import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
 
 object HmdaPlatform {
 
   val config = ConfigFactory.load()
+
+  val log = LoggerFactory.getLogger("hmda")
 
   def main(args: Array[String]): Unit = {
 
@@ -39,19 +42,19 @@ object HmdaPlatform {
     (supervisor ? FindActorByName(SingleLarValidation.name))
       .mapTo[ActorRef]
       .map { actor =>
-        //log.info(s"Started validator at ${actor.path}")
+        log.info(s"Started validator at ${actor.path}")
       }
 
     (supervisor ? FindActorByName(LocalHmdaEventProcessor.name))
       .mapTo[ActorRef]
       .map { actor =>
-        //log.info(s"Started event processor at ${actor.path}")
+        log.info(s"Started event processor at ${actor.path}")
       }
 
     (supervisor ? FindActorByName(InstitutionPersistence.name))
       .mapTo[ActorRef]
       .map { actor =>
-        //log.info(s"Started institutions at ${actor.path}")
+        log.info(s"Started institutions at ${actor.path}")
       }
 
     //Load demo data
