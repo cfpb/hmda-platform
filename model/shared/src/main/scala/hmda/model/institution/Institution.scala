@@ -39,9 +39,7 @@ case class Institution(
 sealed abstract class InvalidRespondentId {
   def message: String
 }
-case class NoDepositoryTypeForInstitutionType(institutionId: String, institutionType: InstitutionType) extends InvalidRespondentId {
-  override def message = s"Institution $institutionId has an institutionType of $institutionType, which does not have a depositoryType"
-}
+
 case class UnsupportedDepositoryTypeByAgency(institutionId: String, agency: Agency, depositoryType: DepositoryType) extends InvalidRespondentId {
   override def message = s"Institution $institutionId is associated with agency $agency, which does not support depositoryType $depositoryType"
 }
