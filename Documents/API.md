@@ -255,7 +255,10 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       },
       "validity": {},
       "quality": {},
-      "macro": {}
+      "macro": [
+          "Q007",
+          "Q008"
+      ]
     }
     ```
 
@@ -336,8 +339,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "refinance": 5
     }
   ],
-  "timestamp": null,
-  "receipt": null
+  "timestamp": 0,
+  "receipt": "",
+  "status": {
+       "code": 10,
+       "message": "IRS report generated"
+     }
 }
 ```
 
@@ -352,7 +359,11 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 {
   "timestamp": 1476809530772,
-  "receipt": asd0f987134asdlfasdflk
+  "receipt": asd0f987134asdlfasdflk,
+  "status": {
+      "code": 11,
+      "message": "IRS report verified"
+    }
 }
 ```
 
@@ -363,7 +374,11 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 {
   "timestamp": 1476809530772,
-  "receipt": asd0f987134asdlfasdflk
+  "receipt": asd0f987134asdlfasdflk,
+  "status": {
+      "code": 11,
+      "message": "IRS report verified"
+    }
 }
 ```
 
@@ -378,7 +393,11 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 {
   "timestamp": 1476809530772,
-  "receipt": asd0f987134asdlfasdflk
+  "receipt": asd0f987134asdlfasdflk,
+  "status": {
+      "code": 12,
+      "message": "signed"
+    }
 }
 ```
 

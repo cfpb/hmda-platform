@@ -75,7 +75,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
-        Nil,
         Seq(e1),
         Seq(e2),
         Seq(e3),
@@ -99,7 +98,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
         List(lars(1)),
-        Nil,
         Nil,
         Nil,
         Nil,

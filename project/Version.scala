@@ -13,4 +13,5 @@ object Version {
   val slick      = "3.1.1"
   val hikariCP   = "2.4.7"
   val h2         = "1.4.193"
+  val scalaCsv = "1.3.3"
 }

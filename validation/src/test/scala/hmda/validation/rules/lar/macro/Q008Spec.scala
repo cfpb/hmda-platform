@@ -11,23 +11,25 @@ class Q008Spec extends MacroSpec {
 
   val testLars = lar100ListGen.sample.getOrElse(Nil)
   val sampleSize = testLars.size
+  def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 2)
+  def relevantLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 4)
 
   property(s"be valid if withdrawn < $multiplier * total") {
-    val numOfGoodLars = (sampleSize * multiplier).toInt - 1
-    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 4, 2)
-    newLarSource.mustPass
+    val numOfRelevantLars = (sampleSize * multiplier).toInt - 1
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar)
+    validLarSource.mustPass
   }
 
   property(s"be valid if withdrawn = $multiplier * total") {
-    val numOfGoodLars = (sampleSize * multiplier).toInt
-    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 4, 2)
-    newLarSource.mustPass
+    val numOfRelevantLars = (sampleSize * multiplier).toInt
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar)
+    validLarSource.mustPass
   }
 
   property(s"be invalid if withdrawn > $multiplier * total") {
-    val numOfGoodLars = (sampleSize * multiplier).toInt + 1
-    val newLarSource = newActionTakenTypeSource(testLars, numOfGoodLars, 4, 2)
-    newLarSource.mustFail
+    val numOfRelevantLars = (sampleSize * multiplier).toInt + 1
+    val invalidLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar)
+    invalidLarSource.mustFail
   }
 
   override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q008

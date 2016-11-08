@@ -56,20 +56,17 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
     "return 400 when trying to upload to a completed submission" in {
       val supervisor = system.actorSelection("/user/supervisor")
       val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, "0", "2017")).mapTo[ActorRef]
+      val submissionsActor = Await.result(fSubmissionsActor, 5.seconds)
+      submissionsActor ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
+      val submission = Await.result((submissionsActor ? GetSubmissionById(SubmissionId("0", "2017", 1))).mapTo[Submission], 5.seconds)
 
-      for {
-        s <- fSubmissionsActor
-      } yield {
-        s ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
-        val submission = Await.result((s ? GetSubmissionById(SubmissionId("0", "2017", 1))).mapTo[Submission], 5.seconds)
-        submission.status mustBe Signed
+      submission.status mustBe Signed
 
-        val file = multiPartFile("bad file content", "sample.txt")
-        val path = Path("/institutions/0/filings/2017/submissions/1")
-        postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
-          status mustBe StatusCodes.BadRequest
-          responseAs[Submission] mustBe Submission(id, Failed("Submission 1 not available for upload"))
-        }
+      val file = multiPartFile("bad file content", "sample.txt")
+      val path = Path("/institutions/0/filings/2017/submissions/1")
+      postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        responseAs[Submission] mustBe Submission(id, Failed("Submission 1 not available for upload"))
       }
     }
   }

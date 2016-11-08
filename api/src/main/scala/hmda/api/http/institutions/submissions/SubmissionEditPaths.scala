@@ -46,7 +46,7 @@ trait SubmissionEditPaths
             val s = validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
             val v = validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
             val q = validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-            val m = validationErrorsToEditResults(editChecks.tsMacro, editChecks.larMacro, Macro)
+            val m = validationErrorsToMacroResults(editChecks.larMacro)
             SummaryEditResults(s, v, q, m)
           }
 
@@ -78,16 +78,19 @@ trait SubmissionEditPaths
               case "quality" =>
                 validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
               case "macro" =>
-                validationErrorsToEditResults(editChecks.tsMacro, editChecks.larMacro, Macro)
+                validationErrorsToMacroResults(editChecks.larMacro)
             }
           }
 
           onComplete(fSingleEdits) {
-            case Success(edits) =>
+            case Success(edits: MacroResults) =>
+              complete(ToResponseMarshallable(edits))
+            case Success(edits: EditResults) =>
               complete(ToResponseMarshallable(edits))
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
+
         }
       }
     }
