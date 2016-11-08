@@ -129,7 +129,7 @@ object HMDABuild extends Build {
     .settings(buildSettings:_*)
     .settings(
       libraryDependencies ++= akkaPersistenceDeps
-    )
+    ).disablePlugins(ScoverageSbtPlugin)
     .dependsOn(modelJVM % "compile->compile;test->test")
 
   lazy val persistence = (project in file("persistence"))
