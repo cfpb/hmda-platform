@@ -69,6 +69,44 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     }
   }
 
+  "Edits endpoint: return 404 for nonexistent institution" in {
+    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.NotFound
+      responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
+    }
+  }
+  "Edits endpoint: return 404 for nonexistent filing period" in {
+    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.NotFound
+      responseAs[ErrorResponse].message mustBe "Filing Period 1980 not found"
+    }
+  }
+  "Edits endpoint: return 404 for nonexistent submission" in {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.NotFound
+      responseAs[ErrorResponse].message mustBe "Submission 0 not found"
+    }
+  }
+
+  "Edit Type endpoint: return 404 for nonexistent institution" in {
+    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.NotFound
+      responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
+    }
+  }
+  "Edit Type endpoint: return 404 for nonexistent filing period" in {
+    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits/quality") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.NotFound
+      responseAs[ErrorResponse].message mustBe "Filing Period 1980 not found"
+    }
+  }
+  "Edit Type endpoint: return 404 for nonexistent submission" in {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.NotFound
+      responseAs[ErrorResponse].message mustBe "Submission 0 not found"
+    }
+  }
+
   private def loadValidationErrors(): Unit = {
     val supervisor = system.actorSelection("/user/supervisor")
     val id = "0"
