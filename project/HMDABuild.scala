@@ -131,9 +131,9 @@ object HMDABuild extends Build {
     .settings(Revolver.settings:_*)
     .settings(
       Seq(
-        scoverage.ScoverageKeys.coverageExcludedPackages := "hmda.api.HmdaApi",
+        scoverage.ScoverageKeys.coverageExcludedPackages := "hmda.api.HmdaFilingApi;hmda.api.HmdaAdminApi",
         assemblyJarName in assembly := {s"${name.value}.jar"},
-        mainClass in assembly := Some("hmda.api.HmdaApi"),
+        mainClass in assembly := Some("hmda.api.HmdaFilingApi"),
         assemblyMergeStrategy in assembly := {
           case "application.conf" => MergeStrategy.concat
           case x =>

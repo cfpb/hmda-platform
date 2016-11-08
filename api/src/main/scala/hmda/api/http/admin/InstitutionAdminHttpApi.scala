@@ -33,32 +33,29 @@ trait InstitutionAdminHttpApi
 
   val institutionsWritePath =
     path("institutions") {
-      timedPost { uri =>
+      extractExecutionContext { executor =>
         entity(as[Institution]) { institution =>
-          extractExecutionContext { executor =>
-            implicit val ec: ExecutionContext = executor
-            val supervisor = system.actorSelection("/user/supervisor")
-            val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+          implicit val ec: ExecutionContext = executor
+          val supervisor = system.actorSelection("/user/supervisor")
+          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+          timedPost { uri =>
             val fCreated = for {
               a <- fInstitutionsActor
-              i <- (a ? CreateInstitution(institution)).mapTo[Institution]
+              i <- (a ? CreateInstitution(institution)).mapTo[Option[Institution]]
             } yield i
 
             onComplete(fCreated) {
-              case Success(i) =>
-                complete(ToResponseMarshallable(StatusCodes.Created -> i))
+              case Success(maybeCreated) =>
+                maybeCreated match {
+                  case Some(i) => complete(ToResponseMarshallable(StatusCodes.Created -> i))
+                  case None => complete(ToResponseMarshallable(StatusCodes.Conflict))
+                }
               case Failure(error) => completeWithInternalError(uri, error)
 
             }
-          }
-        }
-      } ~
-        timedPut { uri =>
-          entity(as[Institution]) { institution =>
-            extractExecutionContext { executor =>
-              implicit val ec: ExecutionContext = executor
-              val supervisor = system.actorSelection("/user/supervisor")
-              val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+
+          } ~
+            timedPut { uri =>
               val fModified = for {
                 a <- fInstitutionsActor
                 m <- (a ? ModifyInstitution(institution)).mapTo[Option[Institution]]
@@ -70,12 +67,11 @@ trait InstitutionAdminHttpApi
                     case Some(i) => complete(ToResponseMarshallable(StatusCodes.Accepted -> i))
                     case None => complete(ToResponseMarshallable(StatusCodes.NotFound))
                   }
-
                 case Failure(error) => completeWithInternalError(uri, error)
               }
             }
-          }
         }
+      }
     }
 
   val institutionAdminRoutes = institutionsWritePath

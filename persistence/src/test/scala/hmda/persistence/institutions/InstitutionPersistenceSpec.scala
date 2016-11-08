@@ -22,7 +22,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
       val institutions = DemoData.testInstitutions
       for (institution <- institutions) {
         probe.send(institutionsActor, CreateInstitution(institution))
-        probe.expectMsg(institution)
+        probe.expectMsg(Some(institution))
       }
       probe.send(institutionsActor, GetState)
       probe.expectMsg(institutions)
@@ -41,7 +41,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
       val i3 = Institution("73", "MLBank", Set(ExternalId("externalTest0", FdicCertNo)), FDIC, Bank, hasParent = true, status = Active)
       for (institution <- List(i1, i2, i3)) {
         probe.send(institutionsActor, CreateInstitution(institution))
-        probe.expectMsg(institution)
+        probe.expectMsg(Some(institution))
       }
 
       // Request some of the existing institutions
@@ -60,7 +60,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
         // Setup: Persist an institution
         val i1 = Institution("12345", "Test Bank 1", Set(ExternalId("99-1234567", FederalTaxId), ExternalId("123456", RssdId)), CFPB, Bank, hasParent = true, status = Active)
         probe.send(institutionsActor, CreateInstitution(i1))
-        probe.expectMsg(i1)
+        probe.expectMsg(Some(i1))
 
         // Attempt to add identical institution; test that warning is logged
         val i2 = i1.copy()
