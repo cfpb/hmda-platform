@@ -31,6 +31,10 @@ trait InstitutionDAO { profile: JdbcProfile =>
     institutions.insertOrUpdate(i)
   }
 
+  def update(i: InstitutionQuery): DBIO[Int] = {
+    institutions.update(i)
+  }
+
   def get(id: String): DBIO[Option[InstitutionQuery]] = {
     (for (i <- institutions if i.id === id) yield i.value).result.headOption
   }

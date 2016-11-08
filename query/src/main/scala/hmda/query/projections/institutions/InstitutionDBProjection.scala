@@ -1,6 +1,6 @@
 package hmda.query.projections.institutions
 
-import akka.actor.Props
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
 import hmda.persistence.model.HmdaActor
@@ -14,7 +14,13 @@ import scala.concurrent.ExecutionContext
 
 object InstitutionDBProjection {
   case class InstitutionInserted(n: Int)
+  case class InstitutionUpdated(n: Int)
   def props(): Props = Props(new InstitutionDBProjection)
+
+  def createInstitutionDBProjection(system: ActorSystem): ActorRef = {
+    system.actorOf(InstitutionDBProjection.props())
+  }
+
 }
 
 class InstitutionDBProjection extends HmdaActor with InstitutionDAO with H2Driver {
@@ -38,11 +44,16 @@ class InstitutionDBProjection extends HmdaActor with InstitutionDAO with H2Drive
       case InstitutionModified(i) =>
         val query = toInstitutionQuery(i)
         log.info(s"Modified: $query")
+        db.run(update(query))
+          .map(x => InstitutionUpdated(x)) pipeTo self
 
     }
 
     case InstitutionInserted(size) =>
-      println(s"Inserted: $size")
+      log.debug(s"Inserted: $size")
+
+    case InstitutionUpdated(size) =>
+      log.debug(s"Updated: $size")
   }
 
 }
