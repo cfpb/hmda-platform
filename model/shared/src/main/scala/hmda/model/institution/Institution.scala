@@ -23,18 +23,13 @@ case class Institution(
    */
   def respondentId: Either[InvalidRespondentId, ExternalId] = {
 
-    institutionType.depositoryType match {
-      case None => Left(NoDepositoryTypeForInstitutionType(id, institutionType))
-      case Some(dt) =>
+    agency.externalIdTypes.get(institutionType.depositoryType) match {
+      case None => Left(UnsupportedDepositoryTypeByAgency(id, agency, institutionType.depositoryType))
+      case Some(extIdType) =>
 
-        agency.externalIdTypes.get(dt) match {
-          case None => Left(UnsupportedDepositoryTypeByAgency(id, agency, dt))
-          case Some(extIdType) =>
-
-            extIdsByType.get(extIdType) match {
-              case None => Left(RequiredExternalIdNotPresent(id, extIdType))
-              case Some(extId) => Right(ExternalId(extId.id, extIdType))
-            }
+        extIdsByType.get(extIdType) match {
+          case None => Left(RequiredExternalIdNotPresent(id, extIdType))
+          case Some(extId) => Right(ExternalId(extId.id, extIdType))
         }
     }
   }

@@ -18,14 +18,6 @@ class InstitutionSpec extends WordSpec with MustMatchers {
       ExternalId("555555", RssdId)
     )
 
-    "fail to resolve respondentId when institution type does not have a depository type" in {
-      val inst = createInstitution(externalIds, CFPB, NoDepositTypeInstType)
-      val expectedId = inst.respondentId
-
-      expectedId mustBe Left(NoDepositoryTypeForInstitutionType("1", NoDepositTypeInstType))
-      expectedId.left.get.message mustBe s"Institution 1 has an institutionType of $NoDepositTypeInstType, which does not have a depositoryType"
-    }
-
     "fail to resolve respondentId when a required externalId is not present" in {
       val inst = createInstitution(Set(ExternalId("666666", FederalTaxId)), CFPB, Bank)
       val expectedId = inst.respondentId
