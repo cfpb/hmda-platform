@@ -71,6 +71,7 @@ object HMDABuild extends Build {
       parserJS,
       persistence,
       api,
+      query,
       platformTest,
       validation)
 
