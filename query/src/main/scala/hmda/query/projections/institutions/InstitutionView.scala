@@ -77,8 +77,6 @@ class InstitutionView extends HmdaPersistentActor {
           updateState(event)
         case InstitutionModified(i) =>
           updateState(event)
-        case _ => //do nothing
-
       }
 
     case GetState =>
@@ -96,6 +94,7 @@ class InstitutionView extends HmdaPersistentActor {
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
+    counter += 1
     queryProjector ! event
   }
 
