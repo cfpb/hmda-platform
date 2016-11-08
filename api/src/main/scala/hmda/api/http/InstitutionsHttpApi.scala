@@ -29,21 +29,23 @@ trait InstitutionsHttpApi
   implicit val timeout: Timeout
 
   val institutionsRoutes =
-    headerAuthorize {
-      institutionsPath ~
-        pathPrefix("institutions" / Segment) { instId =>
-          institutionAuthorize(instId) {
-            institutionByIdPath(instId) ~
-              filingByPeriodPath(instId) ~
-              submissionPath(instId) ~
-              submissionLatestPath(instId) ~
-              uploadPath(instId) ~
-              submissionEditsPath(instId) ~
-              submissionSingleEditPath(instId) ~
-              submissionIrsPath(instId) ~
-              submissionSignPath(instId) ~
-              submissionSummaryPath(instId)
+    encodeResponse {
+      headerAuthorize {
+        institutionsPath ~
+          pathPrefix("institutions" / Segment) { instId =>
+            institutionAuthorize(instId) {
+              institutionByIdPath(instId) ~
+                filingByPeriodPath(instId) ~
+                submissionPath(instId) ~
+                submissionLatestPath(instId) ~
+                uploadPath(instId) ~
+                submissionEditsPath(instId) ~
+                submissionSingleEditPath(instId) ~
+                submissionIrsPath(instId) ~
+                submissionSignPath(instId) ~
+                submissionSummaryPath(instId)
+            }
           }
-        }
+      }
     }
 }
