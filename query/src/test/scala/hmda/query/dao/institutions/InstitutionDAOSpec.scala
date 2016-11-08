@@ -24,6 +24,7 @@ class InstitutionDAOSpec extends AsyncWordSpec with MustMatchers with BeforeAndA
   "Institutions" must {
 
     val i = createInstitution()
+    val modified = i.copy(cra = true)
 
     "create schema" in {
       val fTables = for {
@@ -37,19 +38,29 @@ class InstitutionDAOSpec extends AsyncWordSpec with MustMatchers with BeforeAndA
     }
 
     "save new institution" in {
-      val fInsert = db.run(save(i))
+      val fInsert = db.run(insertOrUpdate(i))
 
       fInsert.map { x =>
         x mustBe 1
       }
     }
 
-    "get saved institution" in {
+    "modify institution" in {
+      val fModified = db.run(insertOrUpdate(modified))
+
+      fModified.map { x =>
+        x mustBe 1
+      }
+    }
+
+    "get modified institution" in {
       val fInst = for {
-        i <- db.run(get(i.id))
+        i <- db.run(get(modified.id))
       } yield i
 
-      fInst.map { x => x.get mustBe i }
+      fInst.map { x =>
+        x.get mustBe modified
+      }
 
     }
   }

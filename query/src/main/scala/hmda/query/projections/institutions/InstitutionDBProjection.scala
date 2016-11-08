@@ -1,25 +1,48 @@
 package hmda.query.projections.institutions
 
 import akka.actor.Props
+import akka.pattern.pipe
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
 import hmda.persistence.model.HmdaActor
-import hmda.query.dao.institutions.Institutions
+import hmda.query.dao.institutions.{ InstitutionDAO, Institutions }
 import slick.lifted.TableQuery
+import hmda.query.dao.institutions.InstitutionConverter._
+import slick.driver.H2Driver
+import slick.driver.H2Driver.api._
+
+import scala.concurrent.ExecutionContext
 
 object InstitutionDBProjection {
+  case class InstitutionInserted(n: Int)
   def props(): Props = Props(new InstitutionDBProjection)
 }
 
-class InstitutionDBProjection extends HmdaActor {
+class InstitutionDBProjection extends HmdaActor with InstitutionDAO with H2Driver {
+
+  import InstitutionDBProjection._
 
   val institutions = TableQuery[Institutions]
+
+  val db: Database = Database.forConfig("h2mem")
+
+  implicit val ec: ExecutionContext = context.dispatcher
 
   override def receive: Receive = {
     case event: InstitutionEvent => event match {
       case InstitutionCreated(i) =>
-        log.debug(s"Created: $i")
+        val query = toInstitutionQuery(i)
+        log.debug(s"Created: $query")
+        db.run(insertOrUpdate(query))
+          .map(x => InstitutionInserted(x)) pipeTo self
+
       case InstitutionModified(i) =>
-        log.debug(s"Modified: $i")
+        val query = toInstitutionQuery(i)
+        log.info(s"Modified: $query")
+
     }
+
+    case InstitutionInserted(size) =>
+      println(s"Inserted: $size")
   }
+
 }
