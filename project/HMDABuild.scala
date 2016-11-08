@@ -88,14 +88,13 @@ object HMDABuild extends Build {
       )
     )
     .jsSettings(
-      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
+      scoverage.ScoverageKeys.coverageEnabled := false,
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test",
         "com.beachape" %%% "enumeratum" % Version.enumeratum
       )
     )
-    .disablePlugins(ScoverageSbtPlugin)
 
   lazy val modelJVM = model.jvm
   lazy val modelJS = model.js
@@ -107,13 +106,13 @@ object HMDABuild extends Build {
         libraryDependencies ++= commonDeps ++ scalazDeps
     )
     .jsSettings(
-      scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
+      scoverage.ScoverageKeys.coverageEnabled := false,
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
         "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test",
         "org.scalaz" %%% "scalaz-core" % Version.scalaz
       )
-    ).disablePlugins(ScoverageSbtPlugin)
+    )
     .dependsOn(model % "compile->compile;test->test")
 
   lazy val parserJVM = parser.jvm
