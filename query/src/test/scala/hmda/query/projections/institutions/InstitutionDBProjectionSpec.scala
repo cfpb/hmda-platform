@@ -31,8 +31,6 @@ class InstitutionDBProjectionSpec extends AsyncActorSpec with InstitutionDAO wit
   val i3 = InstitutionGenerators.institutionGen.sample.get
   val i4 = i3.copy(cra = true)
 
-  //val dbProjection = createInstitutionDBProjection(system)
-
   implicit val ec = system.dispatcher
 
   "Institution DB Projection" must {
