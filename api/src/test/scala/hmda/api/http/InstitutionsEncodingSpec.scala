@@ -1,6 +1,6 @@
 package hmda.api.http
 
-import akka.http.scaladsl.model.headers.{ HttpEncoding, HttpEncodings, `Accept-Encoding` }
+import akka.http.scaladsl.model.headers.{ HttpEncoding, `Accept-Encoding` }
 import akka.http.scaladsl.model.headers.HttpEncodings._
 import org.scalacheck.Gen
 
