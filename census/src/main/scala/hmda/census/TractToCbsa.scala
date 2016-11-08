@@ -20,9 +20,10 @@ object TractToCbsa extends App {
   val bw = new BufferedWriter(new FileWriter(file))
   try {
     bw.write(output)
-    bw.close()
   } catch {
-    case _: Throwable => bw.close()
+    case _: Throwable => println("failed to write to file")
+  } finally {
+    bw.close()
   }
 
   def makeLine(tract: Tract, stateAbrvs: Seq[StateAbrv], cbsas: Seq[Cbsa], pops: Seq[Population]): String = {
