@@ -10,4 +10,5 @@ object Version {
   val config     = "1.3.0"
   val enumeratum = "1.4.5"
   val inMemoryPersistence = "1.3.7"
+  val scalaCsv = "1.3.3"
 }

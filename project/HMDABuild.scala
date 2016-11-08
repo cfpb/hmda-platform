@@ -46,6 +46,8 @@ object HMDABuild extends Build {
 
   val enumDeps = Seq(enumeratum)
 
+  val csvDeps = Seq(scalaCsv)
+
   lazy val hmda = (project in file("."))
     .settings(buildSettings:_*)
     .settings(Revolver.settings:_*)
@@ -70,7 +72,8 @@ object HMDABuild extends Build {
       persistence,
       api,
       platformTest,
-      validation)
+      validation,
+      census)
 
   lazy val model = (crossProject in file("model"))
     .settings(buildSettings: _*)
@@ -164,6 +167,15 @@ object HMDABuild extends Build {
     )
     .disablePlugins(ScoverageSbtPlugin)
     .dependsOn(parserJVM)
+
+  lazy val census = (project in file("census"))
+    .settings(buildSettings: _*)
+    .settings(
+      Seq(
+        mainClass in assembly := Some("TractToCbsa"),
+        libraryDependencies ++= commonDeps ++ csvDeps
+      )
+    ).dependsOn(modelJVM % "compile->compile;test->test")
 
 
 }
