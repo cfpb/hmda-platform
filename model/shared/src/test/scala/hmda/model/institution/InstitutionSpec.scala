@@ -1,7 +1,7 @@
 package hmda.model.institution
 
 import hmda.model.institution.Agency._
-import hmda.model.institution.DepositoryType.Depository
+import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
 import hmda.model.institution.ExternalIdType._
 import hmda.model.institution.InstitutionType._
 import org.scalatest.{ MustMatchers, WordSpec }
@@ -34,7 +34,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
     }
 
     "resolve respondentId to Federal Tax ID when agency is CFPB and is a non-depository institution" in {
-      val inst = createInstitution(externalIds, CFPB, NonDepositInstType)
+      val inst = createInstitution(externalIds, CFPB, IndependentMortgageCompany)
       val expectedId = inst.respondentId
 
       expectedId mustBe Right(ExternalId("222222", FederalTaxId))
@@ -48,7 +48,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
     }
 
     "resolve respondentId to Federal Tax ID when Agency is FDIC and is a non-depository institution" in {
-      val inst = createInstitution(externalIds, FDIC, NonDepositInstType)
+      val inst = createInstitution(externalIds, FDIC, IndependentMortgageCompany)
       val expectedId = inst.respondentId
 
       expectedId mustBe Right(ExternalId("222222", FederalTaxId))
@@ -62,7 +62,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
     }
 
     "resolve respondentId to RSSD ID when Agency is FRS and is a non-depository institution" in {
-      val inst = createInstitution(externalIds, FRS, NonDepositInstType)
+      val inst = createInstitution(externalIds, FRS, IndependentMortgageCompany)
       val expectedId = inst.respondentId
 
       expectedId mustBe Right(ExternalId("555555", RssdId))
@@ -77,7 +77,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
     }
 
     "resolve respondentId to Federal Tax ID when Agency is HUD and is a non-depository institution" in {
-      val inst = createInstitution(externalIds, HUD, NonDepositInstType)
+      val inst = createInstitution(externalIds, HUD, IndependentMortgageCompany)
       val expectedId = inst.respondentId
 
       expectedId mustBe Right(ExternalId("222222", FederalTaxId))
@@ -91,7 +91,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
     }
 
     "resolve respondentId to Federal Tax ID when Agency is NCUA and is a non-depository institution" in {
-      val inst = createInstitution(externalIds, NCUA, NonDepositInstType)
+      val inst = createInstitution(externalIds, NCUA, IndependentMortgageCompany)
       val expectedId = inst.respondentId
 
       expectedId mustBe Right(ExternalId("222222", FederalTaxId))
@@ -105,7 +105,7 @@ class InstitutionSpec extends WordSpec with MustMatchers {
     }
 
     "resolve respondentId to Federal Tax ID when Agency is OCC and is a non-depository institution" in {
-      val inst = createInstitution(externalIds, OCC, NonDepositInstType)
+      val inst = createInstitution(externalIds, OCC, IndependentMortgageCompany)
       val expectedId = inst.respondentId
 
       expectedId mustBe Right(ExternalId("222222", FederalTaxId))

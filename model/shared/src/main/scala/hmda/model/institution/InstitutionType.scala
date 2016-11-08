@@ -37,7 +37,4 @@ object InstitutionType extends Enum[InstitutionType] {
   case object MBS extends InstitutionType("mortgage-banking-subsidiary", NonDepository)
   case object Affiliate extends InstitutionType("affiliate", NonDepository)
 
-  // FIXME: These are temporary InstitutionType(s) used for testing.  They will be replaced
-  //        by real ones once we know what they are. :)
-  case object NonDepositInstType extends InstitutionType("test-non-depository", NonDepository)
 }
