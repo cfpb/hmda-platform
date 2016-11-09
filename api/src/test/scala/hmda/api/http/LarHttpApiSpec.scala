@@ -6,14 +6,15 @@ import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import hmda.api.model.SingleValidationErrorResult
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
-import hmda.persistence.processing.SingleLarValidation
 import hmda.validation.engine.ValidationErrorsSummary
 import org.scalatest.{ MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.headers.HttpEncodings._
+import akka.http.scaladsl.model.headers.HttpEncodings
+import akka.http.scaladsl.model.headers.`Accept-Encoding`
 import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
 import hmda.persistence.HmdaSupervisor
-import hmda.validation.engine.ValidationError
 import spray.json._
 
 import scala.concurrent.ExecutionContext
@@ -159,6 +160,21 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       getWithCfpbHeaders("/institutions") ~> larRoutes ~> check {
         handled mustBe false
         rejections mustBe List()
+      }
+    }
+
+  }
+
+  "Endpoint Response Encoding" must {
+    "use requested encoding" in {
+      Post("/lar/parse", larCsv).addHeader(`Accept-Encoding`(deflate)) ~> larRoutes ~> check {
+        response.encoding mustBe HttpEncodings.deflate
+      }
+    }
+
+    "use 'identity' when no encoding is requested" in {
+      Post("/lar/validate", lar) ~> larRoutes ~> check {
+        response.encoding mustBe HttpEncodings.identity
       }
     }
   }

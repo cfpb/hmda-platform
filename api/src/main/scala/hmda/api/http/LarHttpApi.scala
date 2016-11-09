@@ -115,8 +115,10 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   }
 
   val larRoutes =
-    pathPrefix("lar") {
-      parseLarRoute ~ validateLarRoute ~ parseAndValidateLarRoute
+    encodeResponse {
+      pathPrefix("lar") {
+        parseLarRoute ~ validateLarRoute ~ parseAndValidateLarRoute
+      }
     }
 
 }

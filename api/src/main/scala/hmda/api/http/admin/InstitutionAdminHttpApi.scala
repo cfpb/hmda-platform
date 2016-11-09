@@ -74,5 +74,5 @@ trait InstitutionAdminHttpApi
       }
     }
 
-  val institutionAdminRoutes = institutionsWritePath
+  val institutionAdminRoutes = encodeResponse { institutionsWritePath }
 }

@@ -31,5 +31,5 @@ trait BaseHttpApi extends HmdaApiProtocol with HmdaCustomDirectives {
       }
     }
 
-  def routes(apiName: String) = rootPath(apiName)
+  def routes(apiName: String) = encodeResponse { rootPath(apiName) }
 }
