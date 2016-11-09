@@ -41,9 +41,9 @@ object DemoData {
   val testSubmissions = {
     val institutionId = "0"
     val period = "2017"
-    val s1 = Submission(SubmissionId(institutionId, period, 1), Created)
-    val s2 = Submission(SubmissionId(institutionId, period, 2), Created)
-    val s3 = Submission(SubmissionId(institutionId, period, 3), Created)
+    val s1 = Submission(SubmissionId(institutionId, period, 1), Created, 0L, 0L)
+    val s2 = Submission(SubmissionId(institutionId, period, 2), Created, 0L, 0L)
+    val s3 = Submission(SubmissionId(institutionId, period, 3), Created, 0L, 0L)
     Seq(s1, s2, s3)
   }
 

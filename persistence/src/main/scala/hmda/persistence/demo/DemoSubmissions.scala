@@ -15,13 +15,17 @@ object DemoSubmissions extends ResourceUtils {
       val number = values(2).toInt
       val status = toSubmissionStatus(values(3))
       val id = SubmissionId(institutionId, period, number)
+      val start = values(4).toLong
+      val end = values(5).toLong
 
       (
         institutionId,
         period,
         Submission(
           id,
-          status
+          status,
+          start,
+          end
         )
       )
     }.toSeq

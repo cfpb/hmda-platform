@@ -28,7 +28,7 @@ class SubmissionPersistenceSpec extends ActorSpec {
       val id = SubmissionId("0", "2017", 1)
       probe.send(submissionsActor, UpdateSubmissionStatus(id, newStatus))
       probe.send(submissionsActor, GetSubmissionById(id))
-      probe.expectMsg(Submission(id, Uploaded))
+      probe.expectMsg(Submission(id, Uploaded, 0L, 0L))
     }
   }
 

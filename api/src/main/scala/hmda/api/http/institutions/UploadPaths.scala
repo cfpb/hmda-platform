@@ -59,7 +59,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
               uploadFile(processingActor, uploadTimestamp, uri.path, submissionId)
             case Success((false, _)) =>
               val errorResponse = Failed(s"Submission $seqNr not available for upload")
-              complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse)))
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse, 0L, 0L)))
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
@@ -85,17 +85,17 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           case Success(response) =>
             processingActor ! CompleteUpload
             processingActor ! Shutdown
-            complete(ToResponseMarshallable(StatusCodes.Accepted -> Submission(id, Uploaded)))
+            complete(ToResponseMarshallable(StatusCodes.Accepted -> Submission(id, Uploaded, System.currentTimeMillis(), 0L)))
           case Failure(error) =>
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)
             val errorResponse = Failed("Invalid File Format")
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse)))
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse, 0L, 0L)))
         }
       case _ =>
         processingActor ! Shutdown
         val errorResponse = Failed("Invalid File Format")
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse)))
+        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse, 0L, 0L)))
     }
   }
 }

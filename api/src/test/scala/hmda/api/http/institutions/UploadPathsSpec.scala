@@ -33,7 +33,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
     "return proper response when uploading a HMDA file" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Accepted
-        responseAs[Submission] mustBe Submission(id, Uploaded)
+        responseAs[Submission].status mustBe Uploaded
       }
     }
 
@@ -41,7 +41,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
       val path = Path("/institutions/0/filings/2017/submissions/1")
       postWithCfpbHeaders(path.toString, badFile) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[Submission] mustBe Submission(id, Failed("Invalid File Format"))
+        responseAs[Submission] mustBe Submission(id, Failed("Invalid File Format"), 0L, 0L)
       }
     }
 
@@ -49,7 +49,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
       val path = "/institutions/0/filings/2017/submissions/987654321"
       postWithCfpbHeaders(path, file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", 987654321), Failed("Submission 987654321 not available for upload"))
+        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", 987654321), Failed("Submission 987654321 not available for upload"), 0L, 0L)
       }
     }
 
@@ -66,7 +66,7 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
       val path = Path("/institutions/0/filings/2017/submissions/1")
       postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[Submission] mustBe Submission(id, Failed("Submission 1 not available for upload"))
+        responseAs[Submission] mustBe Submission(id, Failed("Submission 1 not available for upload"), 0L, 0L)
       }
     }
   }
