@@ -90,3 +90,4 @@ project/plugins/project/
 scalastyle-config.xml
 .idea/
 projectFilesBackup/
+.ensime

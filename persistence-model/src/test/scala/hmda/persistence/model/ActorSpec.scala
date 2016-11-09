@@ -1,4 +1,4 @@
-package hmda.actor.test
+package hmda.persistence.model
 
 import akka.actor.ActorSystem
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }

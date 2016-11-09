@@ -10,5 +10,8 @@ object Version {
   val config     = "1.3.0"
   val enumeratum = "1.4.5"
   val inMemoryPersistence = "1.3.7"
+  val slick      = "3.1.1"
+  val hikariCP   = "2.4.7"
+  val h2         = "1.4.193"
   val scalaCsv = "1.3.3"
 }

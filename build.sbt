@@ -18,6 +18,8 @@ val configDeps = Seq(typesafeConfig)
 
 val enumDeps = Seq(enumeratum)
 
+val slickDeps = Seq(slick, hikariCP, h2)
+
 val csvDeps = Seq(scalaCsv)
 
 lazy val hmda = (project in file("."))
@@ -41,8 +43,10 @@ lazy val hmda = (project in file("."))
     modelJS,
     parserJVM,
     parserJS,
+    persistenceModel,
     persistence,
     api,
+    query,
     platformTest,
     validation,
     census)
@@ -57,14 +61,13 @@ lazy val model = (crossProject in file("model"))
     )
   )
   .jsSettings(
-    scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
+    scoverage.ScoverageKeys.coverageEnabled := false,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
       "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test",
       "com.beachape" %%% "enumeratum" % Version.enumeratum
     )
   )
-  .disablePlugins(ScoverageSbtPlugin)
 
 lazy val modelJVM = model.jvm
 lazy val modelJS = model.js
@@ -76,13 +79,13 @@ lazy val parser = (crossProject in file("parser"))
     libraryDependencies ++= commonDeps ++ scalazDeps
   )
   .jsSettings(
-    scoverage.ScoverageKeys.coverageExcludedPackages := "\\*",
+    scoverage.ScoverageKeys.coverageEnabled := false,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
       "org.scalacheck" %%% "scalacheck" % Version.scalaCheck % "test",
       "org.scalaz" %%% "scalaz-core" % Version.scalaz
     )
-  ).disablePlugins(ScoverageSbtPlugin)
+  )
   .dependsOn(model % "compile->compile;test->test")
 
 lazy val parserJVM = parser.jvm
@@ -94,6 +97,12 @@ lazy val validation = (project in file("validation"))
     libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
   ).dependsOn(parserJVM % "compile->compile;test->test")
 
+lazy val persistenceModel = (project in file("persistence-model"))
+  .settings(hmdaBuildSettings:_*)
+  .settings(
+    libraryDependencies ++= akkaPersistenceDeps
+  ).disablePlugins(ScoverageSbtPlugin)
+  .dependsOn(modelJVM % "compile->compile;test->test")
 
 lazy val persistence = (project in file("persistence"))
   .settings(hmdaBuildSettings:_*)
@@ -108,8 +117,17 @@ lazy val persistence = (project in file("persistence"))
       },
       libraryDependencies ++= akkaPersistenceDeps
     )
-  ).dependsOn(validation % "compile->compile;test->test")
+  )
+  .dependsOn(persistenceModel % "compile->compile;test->test")
+  .dependsOn(validation % "compile->compile;test->test")
 
+lazy val query = (project in file("query"))
+  .settings(hmdaBuildSettings:_*)
+  .settings(
+    libraryDependencies ++= akkaPersistenceDeps ++ slickDeps
+  )
+  .dependsOn(modelJVM % "compile->compile;test->test")
+  .dependsOn(persistenceModel % "compile->compile;test->test")
 
 lazy val api = (project in file("api"))
   .settings(hmdaBuildSettings: _*)
@@ -127,7 +145,9 @@ lazy val api = (project in file("api"))
       },
       libraryDependencies ++= httpDeps
     )
-  ).dependsOn(persistence % "compile->compile;test->test")
+  )
+  .dependsOn(query % "compile->compile;test->test")
+  .dependsOn(persistence % "compile->compile;test->test")
 
 
 lazy val platformTest = (project in file("platform-test"))
