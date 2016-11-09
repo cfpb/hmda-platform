@@ -24,7 +24,7 @@ object Dependencies {
   val akkaHttp = "com.typesafe.akka" %% "akka-http-experimental" % Version.akka
   val akkaHttpJson = "com.typesafe.akka" %% "akka-http-spray-json-experimental" % Version.akka
   val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akka % "test"
-  val config = "com.typesafe" % "config" % Version.config
+  val typesafeConfig = "com.typesafe" % "config" % Version.config
   val enumeratum = "com.beachape" %% "enumeratum" % Version.enumeratum
   val scalaCsv = "com.github.tototoshi" %% "scala-csv" % Version.scalaCsv
 
