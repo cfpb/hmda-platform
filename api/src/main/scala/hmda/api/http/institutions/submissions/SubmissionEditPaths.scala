@@ -87,6 +87,8 @@ trait SubmissionEditPaths
               complete(ToResponseMarshallable(edits))
             case Success(edits: EditResults) =>
               complete(ToResponseMarshallable(edits))
+            case Success(_) =>
+              completeWithInternalError(uri, new IllegalStateException)
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
