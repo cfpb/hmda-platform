@@ -1,7 +1,9 @@
 package hmda.api.http
 
-import akka.event.{ LoggingAdapter, NoLogging }
+import akka.event.{ NoLogging, LoggingAdapter }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.headers.{ HttpEncodings, `Accept-Encoding` }
+import akka.http.scaladsl.model.headers.HttpEncodings._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import hmda.api.model.Status
 import org.scalatest.{ MustMatchers, WordSpec }
@@ -18,6 +20,12 @@ class BaseHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
       Get() ~> routes("hmda-filing-api") ~> check {
         responseAs[Status].status mustBe "OK"
         responseAs[Status].service mustBe "hmda-filing-api"
+      }
+    }
+
+    "use requested encoding for root path" in {
+      Get().addHeader(`Accept-Encoding`(gzip)) ~> routes("hmda-filing-api") ~> check {
+        response.encoding mustBe HttpEncodings.gzip
       }
     }
 

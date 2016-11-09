@@ -1,10 +1,10 @@
 package hmda.api.http.admin
 
 import akka.event.{ LoggingAdapter, NoLogging }
+import akka.http.scaladsl.model.headers.{ HttpEncodings, `Accept-Encoding` }
+import akka.http.scaladsl.model.headers.HttpEncodings._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit._
-
-import scala.concurrent.duration._
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model.{ ModelGenerators, Status }
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
@@ -13,6 +13,8 @@ import akka.http.scaladsl.server.MalformedRequestContentRejection
 import hmda.api.http.BaseHttpApi
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor
+
+import scala.concurrent.duration._
 import spray.json._
 
 class InstitutionAdminHttpApiSpec
@@ -46,6 +48,12 @@ class InstitutionAdminHttpApiSpec
         responseAs[Status].service mustBe "hmda-admin-api"
       }
     }
+    "use requested encoding for root path" in {
+      Get().addHeader(`Accept-Encoding`(gzip)) ~> routes("hmda-admin-api") ~> check {
+        response.encoding mustBe HttpEncodings.gzip
+      }
+    }
+
     "create a new institution" in {
       val id = newInstitution.id
       val jsonRequest = ByteString(newInstitution.toJson.toString)
@@ -53,6 +61,13 @@ class InstitutionAdminHttpApiSpec
       postRequest ~> institutionAdminRoutes ~> check {
         status mustBe StatusCodes.Created
         responseAs[Institution] mustBe newInstitution
+      }
+    }
+    "use requested encoding for institution create/update path" in {
+      val jsonRequest = ByteString(institutionGen.sample.get.toJson.toString)
+      val postRequest = createRequest(jsonRequest, HttpMethods.POST)
+      postRequest.addHeader(`Accept-Encoding`(deflate)) ~> institutionAdminRoutes ~> check {
+        response.encoding mustBe HttpEncodings.deflate
       }
     }
     "return error when trying to upload bad entity" in {
