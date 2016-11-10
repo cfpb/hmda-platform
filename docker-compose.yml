@@ -3,6 +3,8 @@ version: '2'
 services:
   api:
     build: .
+    ports:
+      - '9090:8080'
     volumes:
     - ./target/scala-2.11/hmda.jar:/opt/hmda.jar
   ui:
@@ -11,5 +13,58 @@ services:
       - "80:80"
     depends_on:
       - api
+      - auth_proxy
+      - keycloak
     volumes:
       - ../hmda-platform-ui/dist:/usr/src/app/dist
+
+  keycloak:
+    build: ../hmda-platform-auth/keycloak
+    ports:
+      - '8080:8080'
+      - '8443:8443'
+    environment:
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+    volumes:
+      - '../hmda-platform-auth/keycloak/themes/hmda:/opt/jboss/keycloak/themes/hmda'
+    #  - './keycloak/import:/opt/jboss/import'
+
+    # Set action to "export" to dump Keycloak realm data
+    command: >
+      -Dkeycloak.migration.action=import
+      -Dkeycloak.migration.provider=dir
+      -Dkeycloak.migration.dir=/opt/jboss/import/
+      -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
+      -Dkeycloak.migration.usersExportStrategy=SKIP
+      -b 0.0.0.0
+    links:
+      - mail_dev
+
+  auth_proxy:
+    build: ../hmda-platform-auth/auth-proxy
+    ports:
+      - '4480:80'
+      - '4443:443'   # Apache w/ mod_auth_openidc
+    environment:
+      OIDC_METADATA_URI: https://keycloak:8443/auth/realms/hmda/.well-known/openid-configuration
+      OIDC_JWKS_URI: https://keycloak:8443/auth/realms/hmda/protocol/openid-connect/certs
+      OIDC_CLIENT_ID: api
+      OIDC_REDIRECT_URI: https://192.168.99.100:8443
+      CRYPTO_PASSPHRASE: abcdefghijklmnopqrstuvwxyz
+      VALIDATE_SSL: "Off"
+      CLAIM_HEADER_PREFIX: CFPB-HMDA-
+      REMOTE_USER_CLAIM: preferred_username
+      REMOTE_USER_HEADER: CFPB-HMDA-Username
+      UPSTREAM_API_URI: http://api:8080/
+      API_PATH_PREFIX: /hmda/
+    links:
+      - api
+      - keycloak
+    volumes:
+      - '../hmda-platform-auth/auth-proxy/000-default.conf:/etc/apache2/sites-available/000-default.conf'
+
+  mail_dev:
+    image: djfarrelly/maildev:0.14.0
+    ports:
+      - '1080:80'
