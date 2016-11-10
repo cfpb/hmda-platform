@@ -8,6 +8,7 @@ import org.scalatest.BeforeAndAfterEach
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
+import hmda.parser.fi.lar.LarParsingError
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileParser._
@@ -44,25 +45,25 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     "persist parsed TSs" in {
       parseTs(lines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(1, Nil))
+      probe.expectMsg(HmdaFileParseState(1, Nil, Nil))
     }
 
     "persist TS parsing errors" in {
       parseTs(badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(0, Seq(List("Timestamp is not a Long"))))
+      probe.expectMsg(HmdaFileParseState(0, Seq(List("Timestamp is not a Long")), Nil))
     }
 
     "persist parsed LARs" in {
       parseLars(hmdaFileParser, probe, lines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(3, Nil))
+      probe.expectMsg(HmdaFileParseState(3, Nil, Nil))
     }
 
     "persist parsed LARs and parsing errors" in {
       parseLars(hmdaFileParser, probe, badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(2, Seq(List("Agency Code is not an Integer"))))
+      probe.expectMsg(HmdaFileParseState(2, Nil, Seq(LarParsingError(0, List("Agency Code is not an Integer")))))
     }
 
     "read entire raw file" in {

@@ -14,6 +14,7 @@ trait InstitutionsHttpApi
     with InstitutionPaths
     with FilingPaths
     with SubmissionBasePaths
+    with SubmissionParseErrorsPaths
     with SubmissionEditPaths
     with SubmissionIrsPaths
     with SubmissionSignPaths
@@ -40,6 +41,7 @@ trait InstitutionsHttpApi
                 submissionLatestPath(instId) ~
                 uploadPath(instId) ~
                 submissionEditsPath(instId) ~
+                submissionParseErrorsPath(instId) ~
                 submissionSingleEditPath(instId) ~
                 submissionIrsPath(instId) ~
                 submissionSignPath(instId) ~

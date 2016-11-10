@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.parser.fi.lar.LarCsvParser
+import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages._
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
@@ -19,7 +19,7 @@ object HmdaFileParser {
   case class TsParsed(ts: TransmittalSheet) extends Event
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
-  case class LarParsedErrors(errors: List[String]) extends Event
+  case class LarParsedErrors(errors: LarParsingError) extends Event
 
   case class CompleteParsing(submissionId: SubmissionId) extends Command
   case class CompleteParsingWithErrors(submissionId: SubmissionId) extends Command
@@ -33,14 +33,14 @@ object HmdaFileParser {
     system.actorOf(HmdaFileParser.props(submissionId))
   }
 
-  case class HmdaFileParseState(size: Int = 0, parsingErrors: Seq[List[String]] = Nil) {
+  case class HmdaFileParseState(size: Int = 0, tsParsingErrors: Seq[List[String]] = Nil, larParsingErrors: Seq[LarParsingError] = Nil) {
     def updated(event: Event): HmdaFileParseState = event match {
       case TsParsed(_) | LarParsed(_) =>
-        HmdaFileParseState(size + 1, parsingErrors)
+        HmdaFileParseState(size + 1, tsParsingErrors, larParsingErrors)
       case TsParsedErrors(errors) =>
-        HmdaFileParseState(size, parsingErrors :+ errors)
+        HmdaFileParseState(size, tsParsingErrors :+ errors, larParsingErrors)
       case LarParsedErrors(errors) =>
-        HmdaFileParseState(size, parsingErrors :+ errors)
+        HmdaFileParseState(size, tsParsingErrors, larParsingErrors :+ errors)
     }
   }
 
@@ -49,6 +49,7 @@ object HmdaFileParser {
 class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor with LocalEventPublisher {
 
   import HmdaFileParser._
+  import hmda.persistence.processing.TraversableUtil._
 
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
@@ -81,7 +82,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
       val parsedLar = events(persistenceId)
         .map { case LineAdded(_, data) => data }
         .drop(1)
-        .map(line => LarCsvParser(line))
+        .map(doIndexed((i, line) => LarCsvParser(line, i)))
         .map {
           case Left(errors) =>
             encounteredParsingErrors = true
