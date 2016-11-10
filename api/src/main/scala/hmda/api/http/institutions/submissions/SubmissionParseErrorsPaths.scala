@@ -37,7 +37,7 @@ trait SubmissionParseErrorsPaths
 
   implicit val timeout: Timeout
 
-  // institutions/<institutionId>/filings/<period>/submissions
+  // institutions/<institutionId>/filings/<period>/submissions/<id>/parseErrors
   def submissionParseErrorsPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber / "parseErrors") { (period, seqNr) =>
       extractExecutionContext { executor =>
