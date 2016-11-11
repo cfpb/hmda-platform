@@ -19,7 +19,7 @@ object DepositoryType extends Enum[DepositoryType] {
 /**
  * The type of financial institution
  */
-sealed abstract class InstitutionType(override val entryName: String, val depositoryType: Option[DepositoryType]) extends EnumEntry with Serializable
+sealed abstract class InstitutionType(override val entryName: String, val depositoryType: DepositoryType) extends EnumEntry with Serializable
 
 object InstitutionType extends Enum[InstitutionType] {
 
@@ -27,18 +27,14 @@ object InstitutionType extends Enum[InstitutionType] {
 
   val values = findValues
 
-  case object Bank extends InstitutionType("bank", Some(Depository))
-  case object CreditUnion extends InstitutionType("credit-union", Some(Depository))
-  case object SavingsAndLoan extends InstitutionType("savings-and-loan", Some(Depository))
+  case object Bank extends InstitutionType("bank", Depository)
+  case object CreditUnion extends InstitutionType("credit-union", Depository)
+  case object SavingsAndLoan extends InstitutionType("savings-and-loan", Depository)
 
-  case object IndependentMortgageCompany extends InstitutionType("independent-mortgage-company", Some(NonDepository))
+  case object IndependentMortgageCompany extends InstitutionType("independent-mortgage-company", NonDepository)
 
   // an FI with either of these two types will generally have a parent, but the code does not enforce that constraint.
-  case object MBS extends InstitutionType("mortgage-banking-subsidiary", Some(NonDepository))
-  case object Affiliate extends InstitutionType("affiliate", Some(NonDepository))
+  case object MBS extends InstitutionType("mortgage-banking-subsidiary", NonDepository)
+  case object Affiliate extends InstitutionType("affiliate", NonDepository)
 
-  // FIXME: These are temporary InstitutionType(s) used for testing.  They will be replaced
-  //        by real ones once we know what they are. :)
-  case object NonDepositInstType extends InstitutionType("test-non-depository", Some(NonDepository))
-  case object NoDepositTypeInstType extends InstitutionType("test-no-depository-type", None)
 }
