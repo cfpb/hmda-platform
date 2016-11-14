@@ -6,6 +6,10 @@ import org.scalacheck.Gen
 
 trait LarGenerators extends FIGenerators {
 
+  def larNGen(n: Int): Gen[List[LoanApplicationRegister]] = {
+    Gen.listOfN(n, larGen)
+  }
+
   implicit def lar100ListGen: Gen[List[LoanApplicationRegister]] = {
     Gen.listOfN(100, larGen)
   }
