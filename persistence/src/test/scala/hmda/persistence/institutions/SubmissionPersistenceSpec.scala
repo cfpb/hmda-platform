@@ -6,6 +6,8 @@ import hmda.model.fi._
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetSubmissionById, UpdateSubmissionStatus, _ }
+import org.scalatest.Matchers
+
 import scala.concurrent.duration._
 
 class SubmissionPersistenceSpec extends ActorSpec {
@@ -33,6 +35,16 @@ class SubmissionPersistenceSpec extends ActorSpec {
 
       val submission = probe.receiveOne(5.seconds)
       submission.asInstanceOf[Submission].status mustBe Uploaded
+    }
+
+    "have a Signed submission update the end time" in {
+      val newStatus = Signed
+      val id = SubmissionId("0", "2017", 1)
+      probe.send(submissionsActor, UpdateSubmissionStatus(id, newStatus))
+      probe.send(submissionsActor, GetSubmissionById(id))
+
+      val submission = probe.receiveOne(5.seconds)
+      submission.asInstanceOf[Submission].end must not be 0L
     }
   }
 
