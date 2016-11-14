@@ -15,7 +15,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 object Q058 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
   val config = ConfigFactory.load()
-  val preapprovalCount = config.getDouble("hmda.validation.macro.Q058.numOfPreapprovalsRequested")
+  val preapprovalCount = config.getInt("hmda.validation.macro.Q058.numOfPreapprovalsRequested")
 
   override def name = "Q058"
 
@@ -31,8 +31,8 @@ object Q058 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
       r <- preapprovalRequested
       d <- preapprovalDenied
     } yield {
-      when(r.toDouble is greaterThanOrEqual(preapprovalCount)) {
-        d.toDouble is greaterThan(0)
+      when(r is greaterThanOrEqual(preapprovalCount)) {
+        d is greaterThan(0)
       }
     }
 
