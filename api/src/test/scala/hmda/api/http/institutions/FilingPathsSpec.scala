@@ -14,7 +14,9 @@ class FilingPathsSpec extends InstitutionHttpApiSpec with FilingPaths {
     getWithCfpbHeaders("/institutions/0/filings/2017") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
       val filing = Filing("2017", "0", NotStarted, 0L, 0L)
-      responseAs[FilingDetail] mustBe FilingDetail(filing, DemoData.testSubmissions.reverse)
+      val detail = responseAs[FilingDetail]
+      detail.filing mustBe filing
+      detail.submissions.length mustBe 3
     }
 
     val path1 = Path("/institutions/0/filings/xxxx")

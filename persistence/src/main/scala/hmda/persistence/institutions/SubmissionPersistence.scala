@@ -54,7 +54,7 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
     case CreateSubmission =>
       val seqNr = state.submissions.size + 1
       val submissionId = SubmissionId(institutionId, period, seqNr)
-      val newSubmission = Submission(submissionId, Created, 0L, 0L)
+      val newSubmission = Submission(submissionId, Created, System.currentTimeMillis(), 0L)
       persist(SubmissionCreated(newSubmission)) { e =>
         updateState(e)
       }

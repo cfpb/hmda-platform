@@ -6,6 +6,7 @@ import hmda.model.fi._
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetSubmissionById, UpdateSubmissionStatus, _ }
+import scala.concurrent.duration._
 
 class SubmissionPersistenceSpec extends ActorSpec {
 
@@ -20,7 +21,8 @@ class SubmissionPersistenceSpec extends ActorSpec {
         probe.send(submissionsActor, CreateSubmission)
       }
       probe.send(submissionsActor, GetState)
-      probe.expectMsg(DemoData.testSubmissions.reverse)
+      val submissionState = probe.receiveOne(5.seconds)
+      submissionState.asInstanceOf[Seq[Submission]].length mustBe 3
     }
 
     "be able to modify their status" in {
@@ -28,7 +30,9 @@ class SubmissionPersistenceSpec extends ActorSpec {
       val id = SubmissionId("0", "2017", 1)
       probe.send(submissionsActor, UpdateSubmissionStatus(id, newStatus))
       probe.send(submissionsActor, GetSubmissionById(id))
-      probe.expectMsg(Submission(id, Uploaded, 0L, 0L))
+
+      val submission = probe.receiveOne(5.seconds)
+      submission.asInstanceOf[Submission].status mustBe Uploaded
     }
   }
 
