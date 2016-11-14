@@ -1,6 +1,7 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.stream.scaladsl.Source
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
@@ -49,7 +50,6 @@ object HmdaFileParser {
 class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor with LocalEventPublisher {
 
   import HmdaFileParser._
-  import hmda.persistence.processing.TraversableUtil._
 
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
@@ -82,7 +82,8 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
       val parsedLar = events(persistenceId)
         .map { case LineAdded(_, data) => data }
         .drop(1)
-        .map(doIndexed((i, line) => LarCsvParser(line, i)))
+        .zip(Source.fromIterator(() => Iterator.from(2)))
+        .map { case (lar, index) => LarCsvParser(lar, index) }
         .map {
           case Left(errors) =>
             encounteredParsingErrors = true
