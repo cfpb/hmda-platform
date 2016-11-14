@@ -151,7 +151,7 @@ object HMDABuild extends Build {
   lazy val query = (project in file("query"))
     .settings(buildSettings:_*)
     .settings(
-      libraryDependencies ++= akkaPersistenceDeps ++ slickDeps
+      libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
     )
     .dependsOn(modelJVM % "compile->compile;test->test")
     .dependsOn(persistenceModel % "compile->compile;test->test")

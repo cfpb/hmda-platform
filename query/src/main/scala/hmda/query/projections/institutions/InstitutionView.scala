@@ -11,6 +11,7 @@ import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shut
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
+import com.typesafe.config.ConfigFactory
 
 object InstitutionView {
 
@@ -51,6 +52,9 @@ class InstitutionView extends HmdaPersistentActor {
 
   val queryProjector = context.actorOf(InstitutionDBProjection.props)
 
+  val config = ConfigFactory.load()
+  val snapshotCounter = config.getInt("hmda.journal.snapshot.counter")
+
   override def persistenceId: String = name
 
   override def receiveRecover: Receive = {
@@ -68,7 +72,7 @@ class InstitutionView extends HmdaPersistentActor {
       sender() ! institutions
 
     case EventWithSeqNr(seqNr, event) =>
-      if (counter >= 100) {
+      if (counter >= snapshotCounter) {
         counter = 0
         saveSnapshot(state)
       }
