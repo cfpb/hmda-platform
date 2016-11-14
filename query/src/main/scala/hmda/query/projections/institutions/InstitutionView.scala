@@ -31,10 +31,10 @@ object InstitutionView {
     def updated(event: Event): InstitutionViewState = {
       event match {
         case InstitutionCreated(i) =>
-          InstitutionViewState(institutions + i, seqNr)
+          InstitutionViewState(institutions + i, seqNr + 1)
         case InstitutionModified(i) =>
           val others = institutions.filterNot(_.id == i.id)
-          InstitutionViewState(others + i, seqNr)
+          InstitutionViewState(others + i, seqNr + 1)
       }
     }
   }
