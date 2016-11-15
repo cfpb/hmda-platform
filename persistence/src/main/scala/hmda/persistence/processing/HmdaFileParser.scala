@@ -10,6 +10,7 @@ import hmda.persistence.CommonMessages._
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.HmdaRawFile.LineAdded
+import hmda.persistence.processing.ProcessingMessages._
 
 object HmdaFileParser {
 
@@ -20,12 +21,6 @@ object HmdaFileParser {
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
   case class LarParsedErrors(errors: List[String]) extends Event
-
-  case class CompleteParsing(submissionId: SubmissionId) extends Command
-  case class CompleteParsingWithErrors(submissionId: SubmissionId) extends Command
-  case class ParsingStarted(submissionId: SubmissionId) extends Event
-  case class ParsingCompleted(submissionId: SubmissionId) extends Event
-  case class ParsingCompletedWithErrors(submissionId: SubmissionId) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 

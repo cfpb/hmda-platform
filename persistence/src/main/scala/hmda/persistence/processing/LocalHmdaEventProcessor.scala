@@ -11,7 +11,7 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.persistence.processing.ProcessingMessages.{ UploadCompleted, UploadStarted }
+import hmda.persistence.processing.ProcessingMessages._
 
 import scala.concurrent.duration._
 
