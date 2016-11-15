@@ -47,13 +47,16 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
       log.info(s"Completed upload for submission: ${id.toString}")
       uploaded = size
       val persistenceId = s"${HmdaRawFile.name}-$submissionId"
+      submissionFSM ! StartParsing
       submissionParser ! ReadHmdaRawFile(persistenceId, self)
 
-    case StartParsing =>
-      submissionFSM ! StartParsing
+    case ParsingCompleted(sId) =>
+      log.info(s"Completed parsing for submission: ${sId.toString}")
+      submissionFSM ! CompleteParsing
 
-    case ParsingStarted(id) =>
-      log.info(s"Parsing started for submission: $id")
+    case ParsingCompletedWithErrors(sId) =>
+      log.info(s"Completed parsing with errors for submission: ${sId.toString}")
+      submissionFSM ! CompleteParsingWithErrors
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM

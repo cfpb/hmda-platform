@@ -45,13 +45,14 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with L
 
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
-        log.debug(s"Persisted: ${e.data}")
+        log.info(s"Persisted: ${e.data}")
         updateState(e)
       }
 
     case CompleteUpload =>
-      val completed = UploadCompleted(state.size, submissionId)
-      sender() ! completed
+      persist(UploadCompleted(state.size, submissionId)) { e =>
+        sender() ! e
+      }
 
     case GetState =>
       sender() ! state
