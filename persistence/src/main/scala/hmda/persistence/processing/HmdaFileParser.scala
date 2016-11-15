@@ -16,7 +16,7 @@ object HmdaFileParser {
 
   val name = "HmdaFileParser"
 
-  case class ReadHmdaRawFile(persistenceId: String) extends Command
+  case class ReadHmdaRawFile(persistenceId: String, replyTo: ActorRef) extends Command
   case class TsParsed(ts: TransmittalSheet) extends Event
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
@@ -41,7 +41,7 @@ object HmdaFileParser {
 
 }
 
-class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor with LocalEventPublisher {
+class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   import HmdaFileParser._
 
@@ -56,8 +56,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
 
   override def receiveCommand: Receive = {
 
-    case ReadHmdaRawFile(persistenceId) =>
-      publishEvent(ParsingStarted(submissionId))
+    case ReadHmdaRawFile(persistenceId, replyTo: ActorRef) =>
 
       val parsedTs = events(persistenceId)
         .map { case LineAdded(_, data) => data }
@@ -87,8 +86,8 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
       parsedLar
         .runForeach(pLar => self ! pLar)
         .andThen {
-          case _ if encounteredParsingErrors => self ! CompleteParsingWithErrors
-          case _ if !encounteredParsingErrors => self ! CompleteParsing
+          case _ if encounteredParsingErrors => replyTo ! ParsingCompletedWithErrors(submissionId)
+          case _ if !encounteredParsingErrors => replyTo ! ParsingCompleted(submissionId)
         }
 
     case tp @ TsParsed(ts) =>
@@ -114,14 +113,6 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
         log.debug(s"Persisted: $e")
         updateState(e)
       }
-
-    case CompleteParsing =>
-      log.debug(s"Parsing completed for $submissionId")
-      publishEvent(ParsingCompleted(submissionId))
-
-    case CompleteParsingWithErrors =>
-      log.debug(s"Parsing completed for $submissionId, errors found")
-      publishEvent(ParsingCompletedWithErrors(submissionId))
 
     case GetState =>
       sender() ! state

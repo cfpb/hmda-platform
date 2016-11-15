@@ -83,7 +83,7 @@ class LocalHmdaEventProcessor extends Actor with ActorLogging {
     for {
       h <- fHmdaFileParser
     } yield {
-      h ! ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId")
+      h ! ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId", self)
     }
     updateStatus(submissionId, Uploaded)
   }

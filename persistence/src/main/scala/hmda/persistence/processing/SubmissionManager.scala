@@ -4,8 +4,9 @@ import akka.actor.{ ActorRef, Props }
 import hmda.model.fi.SubmissionId
 import hmda.persistence.CommonMessages.Command
 import hmda.persistence.HmdaActor
+import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaRawFile.AddLine
-import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload, UploadCompleted }
+import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.Create
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 
@@ -45,6 +46,14 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
     case UploadCompleted(size, submissionId) =>
       log.info(s"Completed upload for submission: ${id.toString}")
       uploaded = size
+      val persistenceId = s"${HmdaRawFile.name}-$submissionId"
+      submissionParser ! ReadHmdaRawFile(persistenceId, self)
+
+    case StartParsing =>
+      submissionFSM ! StartParsing
+
+    case ParsingStarted(id) =>
+      log.info(s"Parsing started for submission: $id")
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM

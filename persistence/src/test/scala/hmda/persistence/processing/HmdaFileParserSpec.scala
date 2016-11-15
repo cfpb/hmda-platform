@@ -12,6 +12,7 @@ import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
+import hmda.persistence.processing.ProcessingMessages.{ ParsingCompleted, ParsingCompletedWithErrors }
 
 class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
@@ -75,10 +76,8 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       probe.send(hmdaRawFile, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
-      val msg = "Parsing completed for 0-2017-2"
-      EventFilter.debug(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
-        probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "0-2017-2"))
-      }
+      probe.send(hmdaFileParser2, ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId2", probe.testActor))
+      probe.expectMsg(ParsingCompleted(submissionId2))
 
       probe.send(hmdaFileParser2, GetState)
       probe.expectMsg(HmdaFileParseState(4, Nil))
@@ -96,11 +95,9 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       probe.send(rawFileActor, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
-      // test: parse those lines, expect "ParsedWithErrors" message
-      val msg = s"Parsing completed for $submissionId3, errors found"
-      EventFilter.debug(msg, source = parserActor.path.toString, occurrences = 1) intercept {
-        probe.send(parserActor, ReadHmdaRawFile(s"HmdaRawFile-$submissionId3"))
-      }
+      probe.send(parserActor, ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId3", probe.testActor))
+      probe.expectMsg(ParsingCompletedWithErrors(submissionId3))
+
     }
 
   }

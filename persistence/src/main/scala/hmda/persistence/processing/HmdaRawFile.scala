@@ -43,9 +43,6 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with L
 
   override def receiveCommand: Receive = {
 
-    case StartUpload =>
-      publishEvent(UploadStarted(submissionId))
-
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
         log.debug(s"Persisted: ${e.data}")
@@ -54,7 +51,6 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with L
 
     case CompleteUpload =>
       val completed = UploadCompleted(state.size, submissionId)
-      publishEvent(completed)
       sender() ! completed
 
     case GetState =>
