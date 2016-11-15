@@ -56,7 +56,9 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with L
       }
 
     case CompleteUpload =>
-      publishEvent(UploadCompleted(state.size, submissionId))
+      val completed = UploadCompleted(state.size, submissionId)
+      publishEvent(completed)
+      sender() ! completed
 
     case GetState =>
       sender() ! state

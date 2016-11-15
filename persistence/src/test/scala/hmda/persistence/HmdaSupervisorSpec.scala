@@ -97,6 +97,11 @@ class HmdaSupervisorSpec extends WordSpec with MustMatchers {
       val validateFile2 = Await.result(validateFile2F, timeout)
       validateFile2.path.toString mustBe validatePath
 
+      val submissionManagerPath = s"akka://default/user/supervisor/SubmissionManager-0-2017-0"
+      val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
+      val submissionManager = Await.result(submissionManagerF, timeout)
+      submissionManager.path.toString mustBe submissionManagerPath
+
     }
 
     "terminate ActorSystem" in {

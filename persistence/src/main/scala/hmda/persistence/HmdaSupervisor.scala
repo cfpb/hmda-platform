@@ -92,6 +92,10 @@ class HmdaSupervisor extends HmdaActor {
       val actorId = s"$id-${submissionId.toString}"
       val actor = context.actorOf(HmdaFileValidator.props(submissionId), actorId)
       supervise(actor, actorId)
+    case id @ SubmissionManager.name =>
+      val actorId = s"$id-${submissionId.toString}"
+      val actor = context.actorOf(SubmissionManager.props(submissionId), actorId)
+      supervise(actor, actorId)
   }
 
   private def supervise(actorRef: ActorRef, id: String): ActorRef = {
