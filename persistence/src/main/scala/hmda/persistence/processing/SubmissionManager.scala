@@ -35,7 +35,6 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
       submissionFSM ! StartUpload
 
     case m @ AddLine(timestamp, data) =>
-      println(data)
       submissionUpload ! m
 
     case CompleteUpload =>
@@ -46,7 +45,6 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
     case UploadCompleted(size, submissionId) =>
       log.info(s"Completed upload for submission: ${id.toString}")
       uploaded = size
-      println(uploaded)
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM
