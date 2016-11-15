@@ -6,7 +6,7 @@ import akka.persistence.fsm.PersistentFSM.FSMState
 import hmda.model.fi.SubmissionStatusMessage._
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.CommonMessages._
-import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload }
+import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
 
 import scala.reflect._
@@ -29,6 +29,7 @@ object SubmissionFSM {
 
   case class SubmissionParsing(s: Submission) extends SubmissionEvent
   case class SubmissionParsed(s: Submission) extends SubmissionEvent
+  case class SubmissionParsedWithErrors(s: Submission) extends SubmissionEvent
 
   //Submission States
   sealed trait SubmissionFSMState extends FSMState
@@ -125,6 +126,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
     case SubmissionUploaded(s) => currentData.update(s)
     case SubmissionParsing(s) => currentData.update(s)
     case SubmissionParsed(s) => currentData.update(s)
+    case SubmissionParsedWithErrors(s) => currentData.update(s)
 
   }
 
@@ -149,18 +151,35 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Uploaded) {
+    case Event(StartParsing, _) =>
+      goto(Parsing) applying SubmissionParsing(Submission(submissionId, hmda.model.fi.Parsing))
+  }
+
+  when(Parsing) {
+    case Event(CompleteParsing, _) =>
+      goto(Parsed) applying SubmissionParsed(Submission(submissionId, hmda.model.fi.Parsed))
+    case Event(CompleteParsingWithErrors, _) =>
+      goto(ParsedWithErrors) applying SubmissionParsedWithErrors(Submission(submissionId, hmda.model.fi.ParsedWithErrors))
     case Event(GetState, data) =>
       stay replying data
   }
 
-  //when(Parsing) {
-  //  case Event(GetState, data) =>
-  //    stay replying data
-  //}
+  when(Parsed) {
+    case Event(GetState, data) =>
+      stay replying data
+  }
+
+  when(ParsedWithErrors) {
+    case Event(GetState, data) =>
+      stay replying data
+  }
 
   whenUnhandled {
     case Event(GetState, data) =>
       stay replying data
+    case Event(e, d) =>
+      log.warning("received unhandled request {} in state {}/{}", e, stateName, d)
+      stay
   }
 
 }

@@ -8,6 +8,7 @@ object ProcessingMessages {
   //Commands
   case object StartUpload extends Command
   case object CompleteUpload extends Command
+  case object StartParsing extends Command
   case object CompleteParsing extends Command
   case object CompleteParsingWithErrors extends Command
   case class UploadStarted(submissionId: SubmissionId) extends Event
