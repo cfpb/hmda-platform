@@ -9,11 +9,14 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.RequestHeaderUtils
 import hmda.persistence.HmdaSupervisor
-import hmda.persistence.HmdaSupervisor.FindActorByName
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.query.HmdaQuerySupervisor
+import hmda.query.projections.institutions.InstitutionView
 import org.iq80.leveldb.util.FileUtils
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+
 import scala.concurrent.duration._
 
 trait InstitutionHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
@@ -27,6 +30,8 @@ trait InstitutionHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAf
   override def beforeAll(): Unit = {
     val supervisor = HmdaSupervisor.createSupervisor(system)
     supervisor ! FindActorByName(InstitutionPersistence.name)
+    val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
+    querySupervisor ! FindActorByName(InstitutionView.name)
     DemoData.loadTestData(system)
     super.beforeAll()
   }
