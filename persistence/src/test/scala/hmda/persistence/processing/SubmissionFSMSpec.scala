@@ -5,6 +5,7 @@ import akka.testkit.TestProbe
 import hmda.actor.test.ActorSpec
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload }
 import hmda.persistence.processing.SubmissionFSM._
 
 class SubmissionFSMSpec extends ActorSpec {

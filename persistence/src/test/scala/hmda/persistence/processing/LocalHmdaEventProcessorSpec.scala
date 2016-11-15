@@ -13,7 +13,7 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence._
 import hmda.persistence.processing.HmdaFileParser.{ ParsingCompleted, ParsingCompletedWithErrors, ParsingStarted }
 import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
-import hmda.persistence.processing.HmdaRawFile.{ UploadCompleted, UploadStarted }
+import hmda.persistence.processing.ProcessingMessages.{ UploadCompleted, UploadStarted }
 import org.scalatest.Assertion
 
 import scala.concurrent._

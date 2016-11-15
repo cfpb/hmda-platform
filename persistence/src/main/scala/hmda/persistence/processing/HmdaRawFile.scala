@@ -3,6 +3,7 @@ package hmda.persistence.processing
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
 import hmda.persistence.CommonMessages._
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload, UploadCompleted, UploadStarted }
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 
 object HmdaRawFile {
@@ -15,13 +16,9 @@ object HmdaRawFile {
     system.actorOf(HmdaRawFile.props(submissionId))
   }
 
-  case object StartUpload extends Command
   case class AddLine(timestamp: Long, data: String) extends Command
-  case object CompleteUpload extends Command
 
-  case class UploadStarted(submissionId: SubmissionId) extends Event
   case class LineAdded(timestamp: Long, data: String) extends Event
-  case class UploadCompleted(size: Int, submissionId: SubmissionId) extends Event
 
   case class HmdaRawFileState(size: Int = 0) {
     def updated(event: Event): HmdaRawFileState = event match {

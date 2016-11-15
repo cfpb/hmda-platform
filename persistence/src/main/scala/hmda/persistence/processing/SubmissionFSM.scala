@@ -6,6 +6,7 @@ import akka.persistence.fsm.PersistentFSM.FSMState
 import hmda.model.fi.SubmissionStatusMessage._
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.CommonMessages._
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload }
 import hmda.persistence.processing.SubmissionFSM._
 
 import scala.reflect._
@@ -20,8 +21,6 @@ object SubmissionFSM {
 
   //Commands
   case object Create extends Command
-  case object StartUpload extends Command
-  case object CompleteUpload extends Command
 
   //Domain Events (persisted)
   case class SubmissionCreated(s: Submission) extends SubmissionEvent
