@@ -139,10 +139,17 @@ trait ModelGenerators {
     } yield EditResults(edits)
   }
 
+  implicit def justificationGen: Gen[Justification] = {
+    for {
+      value <- Gen.alphaStr
+      selected <- Gen.oneOf(true, false)
+    } yield Justification(value, selected)
+  }
+
   implicit def macroResultGen: Gen[MacroResult] = {
     for {
       id <- Gen.alphaStr
-      justification <- Gen.alphaStr
+      justification <- Gen.listOf(justificationGen)
     } yield MacroResult(id, justification)
   }
 
