@@ -139,6 +139,13 @@ trait ModelGenerators {
     } yield EditResults(edits)
   }
 
+  implicit def macroResultGen: Gen[MacroResult] = {
+    for {
+      id <- Gen.alphaStr
+      justification <- Gen.alphaStr
+    } yield MacroResult(id, justification)
+  }
+
   implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
     Gen.oneOf(
       List(Syntactical, Validity, Quality)
@@ -158,7 +165,7 @@ trait ModelGenerators {
       s <- editResultsGen
       v <- editResultsGen
       q <- editResultsGen
-      m <- Gen.listOf(Gen.alphaStr)
+      m <- Gen.listOf(macroResultGen)
     } yield SummaryEditResults(s, v, q, MacroResults(m))
   }
 
