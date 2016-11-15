@@ -122,7 +122,7 @@ docker run -d -p "8080:8080" hmda-api
 The API will run on `$(docker-machine ip):8080`
 
 #### To run the entire platform
-Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) directory into a sibling directory of this one. Your directory structure should look like this:
+Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) repo and the [HMDA Platform Auth](https://github.com/cfpb/hmda-platform-auth) repo into sibling directories of this one. Your directory structure should look like this:
 ```shell
 ~/dev/hmda-project$ ls -la
 total 16
@@ -130,6 +130,7 @@ drwxr-xr-x   6 lortone  staff   204B Jul 25 17:44 ./
 drwxr-xr-x   9 lortone  staff   306B Jul 25 17:50 ../
 drwxr-xr-x  22 lortone  staff   748B Jul 27 16:28 hmda-platform/
 drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
+drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
 ```
 
 From `hmda-platform`'s root directory, run the following:
@@ -140,7 +141,7 @@ docker-compose up -d --build
 
 This will bring up all the HMDA Platform services. The first run may take several minutes.
 
-For convenience when doing development on both the UI and the API, the `docker-compose` file uses a `volumes` which mounts the local directory into the `hmda-platform-ui` container and the `hmda.jar` into `hmda-platform` container. This means you can make changes to either the UI or API and view them without needing to rebuild their respective containers.
+For convenience when doing development on the UI, Auth setup, and API, the `docker-compose` file uses a `volumes` which mounts the ui's `dist/` directory into the `hmda-platform-ui` container, the `hmda.jar` into `hmda-platform` container, the `hmda` themes directory in the auth repo into the `keycloak` container, and the auth-proxy's `000-default.conf` file into the `auth_proxy` container. This means you can make changes to the UI, Auth, or API and (in most cases) view them without needing to rebuild their respective containers.
 
 To build the front-end and allow "watching" for changes you can run:
 
