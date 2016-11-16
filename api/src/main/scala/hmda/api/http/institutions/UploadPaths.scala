@@ -51,7 +51,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           val fUploadSubmission = for {
             p <- fProcessingActor
             s <- fSubmissionsActor
-            fSubmission <- checkSubmissionIsCreated(s, submissionId)
+            fSubmission <- (s ? GetSubmissionById(submissionId)).mapTo[Submission]
           } yield (fSubmission, fSubmission.status == Created, p)
 
           onComplete(fUploadSubmission) {
@@ -67,13 +67,9 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
       }
     }
 
-  private def checkSubmissionIsCreated(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Submission] = {
-    (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
-  }
-
   private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, submission: Submission): Route = {
     fileUpload("file") {
-      case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
+      case (metadata, byteSource) if metadata.fileName.endsWith(".txt") =>
         processingActor ! StartUpload
         val uploadedF = byteSource
           .via(splitLines)
