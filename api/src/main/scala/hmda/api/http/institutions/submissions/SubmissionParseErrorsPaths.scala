@@ -4,25 +4,18 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
-import hmda.api.model._
+import hmda.api.http.HmdaCustomDirectives
 import hmda.api.protocol.fi.lar.LarProtocol
-import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Filing, Submission, SubmissionId }
+import hmda.model.fi.SubmissionId
 import hmda.parser.fi.lar.ParsingErrorSummary
-import hmda.persistence.CommonMessages.GetState
-import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
-import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
-import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
-import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileParser.HmdaFileParseState
-import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator }
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
+import hmda.persistence.processing.HmdaFileParser
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }

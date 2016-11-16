@@ -2,13 +2,14 @@ package hmda.persistence.demo
 
 import akka.actor.ActorSystem
 import akka.util.Timeout
+import akka.pattern.ask
 import hmda.model.fi._
 import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
 import hmda.model.institution.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.model.institution.{ ExternalId, Institution }
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
@@ -80,7 +81,7 @@ object DemoData {
 
   def loadInstitutions(institutions: Set[Institution], system: ActorSystem): Unit = {
     val institutionsActor = system.actorSelection("/user/supervisor/institutions")
-    institutions.foreach(i => institutionsActor ! CreateInstitution(i))
+    institutions.foreach(i => institutionsActor ? CreateInstitution(i))
   }
 
   def loadFilings(filings: Seq[Filing], system: ActorSystem): Unit = {

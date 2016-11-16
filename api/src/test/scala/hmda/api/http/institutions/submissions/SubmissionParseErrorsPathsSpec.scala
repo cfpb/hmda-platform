@@ -5,13 +5,12 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern.ask
 import akka.http.scaladsl.model.StatusCodes
 import akka.util.Timeout
-import hmda.actor.test.ActorSpec
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.model.fi._
 import hmda.parser.fi.lar.{ LarParsingError, ParsingErrorSummary }
-import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor
-import hmda.persistence.HmdaSupervisor.{ FindActorByName, FindProcessingActor }
+import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.processing.HmdaFileParser

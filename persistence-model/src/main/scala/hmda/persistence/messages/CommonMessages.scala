@@ -1,4 +1,4 @@
-package hmda.persistence
+package hmda.persistence.messages
 
 object CommonMessages {
   trait Command
