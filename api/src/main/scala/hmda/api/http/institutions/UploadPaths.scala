@@ -51,13 +51,13 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           val fUploadSubmission = for {
             p <- fProcessingActor
             s <- fSubmissionsActor
-            fIsSubmissionCreated <- checkSubmissionIsCreated(s, submissionId)
-          } yield (fIsSubmissionCreated, p)
+            fSubmission <- checkSubmissionIsCreated(s, submissionId)
+          } yield (fSubmission, fSubmission.status == Created, p)
 
           onComplete(fUploadSubmission) {
-            case Success((true, processingActor)) =>
-              uploadFile(processingActor, uploadTimestamp, uri.path, submissionId)
-            case Success((false, _)) =>
+            case Success((submission, true, processingActor)) =>
+              uploadFile(processingActor, uploadTimestamp, uri.path, submission)
+            case Success((submission, false, _)) =>
               val errorResponse = Failed(s"Submission $seqNr not available for upload")
               complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse, 0L, 0L)))
             case Failure(error) =>
@@ -67,12 +67,11 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
       }
     }
 
-  private def checkSubmissionIsCreated(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Boolean] = {
-    val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
-    submission.map(_.status == Created)
+  private def checkSubmissionIsCreated(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Submission] = {
+    (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
   }
 
-  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, id: SubmissionId): Route = {
+  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, submission: Submission): Route = {
     fileUpload("file") {
       case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
         processingActor ! StartUpload
@@ -85,17 +84,17 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           case Success(response) =>
             processingActor ! CompleteUpload
             processingActor ! Shutdown
-            complete(ToResponseMarshallable(StatusCodes.Accepted -> Submission(id, Uploaded, System.currentTimeMillis(), 0L)))
+            complete(ToResponseMarshallable(StatusCodes.Accepted -> submission.copy(status = Uploaded)))
           case Failure(error) =>
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)
             val errorResponse = Failed("Invalid File Format")
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse, 0L, 0L)))
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse, 0L, 0L)))
         }
       case _ =>
         processingActor ! Shutdown
         val errorResponse = Failed("Invalid File Format")
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse, 0L, 0L)))
+        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse, 0L, 0L)))
     }
   }
 }

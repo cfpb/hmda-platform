@@ -33,7 +33,9 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
     "return proper response when uploading a HMDA file" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Accepted
-        responseAs[Submission].status mustBe Uploaded
+        val submission = responseAs[Submission]
+        submission.status mustBe Uploaded
+        submission.start must be < System.currentTimeMillis()
       }
     }
 
