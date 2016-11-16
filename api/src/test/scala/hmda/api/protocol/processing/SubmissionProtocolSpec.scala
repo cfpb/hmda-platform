@@ -26,7 +26,9 @@ class SubmissionProtocolSpec extends PropSpec with PropertyChecks with MustMatch
           ("status", JsObject(
             ("code", JsNumber(s.status.code)),
             ("message", JsString(s.status.message))
-          ))
+          )),
+          ("start", JsNumber(s.start)),
+          ("end", JsNumber(s.end))
         )
     }
   }

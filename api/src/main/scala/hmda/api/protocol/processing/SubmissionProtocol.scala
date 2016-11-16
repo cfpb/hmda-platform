@@ -42,7 +42,7 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
   }
 
   implicit val submissionIdProtocol = jsonFormat3(SubmissionId.apply)
-  implicit val submissionFormat = jsonFormat2(Submission.apply)
+  implicit val submissionFormat = jsonFormat4(Submission.apply)
   implicit val submissionsFormat = jsonFormat1(Submissions.apply)
   implicit val receiptFormat = jsonFormat3(Receipt.apply)
 }

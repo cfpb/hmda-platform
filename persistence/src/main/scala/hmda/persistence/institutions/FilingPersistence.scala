@@ -70,7 +70,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
       }
 
     case GetFilingByPeriod(period) =>
-      val filing = state.filings.find(f => f.period == period).getOrElse(Filing("", institutionId, NotStarted))
+      val filing = state.filings.find(f => f.period == period).getOrElse(Filing("", institutionId, NotStarted, 0L, 0L))
       if (state.filings.size == 0)
         sender() ! Filing()
       else

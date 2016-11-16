@@ -17,7 +17,7 @@ class SubmissionBasePathsSpec extends InstitutionHttpApiSpec {
     "find the latest submission for an institution" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", 3), Created)
+        responseAs[Submission].status mustBe Created
       }
     }
 
@@ -35,7 +35,7 @@ class SubmissionBasePathsSpec extends InstitutionHttpApiSpec {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Created
         val seqNr = DemoData.testSubmissions.size + 1
-        responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", seqNr), Created)
+        responseAs[Submission].status mustBe Created
       }
     }
 

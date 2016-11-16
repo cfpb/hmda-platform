@@ -71,7 +71,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           "status": {
             "code": 1,
             "message": "not-started"
-          }
+          },
+          "start": 0,
+          "end": 0
         },
         {
           "period": "2016",
@@ -79,7 +81,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           "status": {
             "code": 3,
             "message": "completed"
-          }
+          },
+          "start": 1483287071000,
+          "end": 1514736671000
         }
       ]
     }
@@ -99,7 +103,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
   "status": {
     "code": 1,
     "message": "not-started"
-  }
+  },
+  "start": 0,
+  "end": 0
 },
 "submissions": [
   {
@@ -111,7 +117,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     "status": {
       "code": 1,
       "message": "created"
-    }
+    },
+    "start": 1483287071000,
+    "end": 0
   },
   {
     "id": {
@@ -122,7 +130,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     "status": {
       "code": 1,
       "message": "created"
-    }
+    },
+    "start": 1483287071000,
+    "end": 0
   },
   {
     "id": {
@@ -133,7 +143,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     "status": {
       "code": 1,
       "message": "created"
-    }
+    },
+    "start": 1483287071000,
+    "end": 0
   }
  ]
 }
@@ -155,7 +167,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "status": {
         "code": 1,
         "message": "created"
-      }
+      },
+      "start": 1483287071000,
+      "end": 0
     }
     ```
 
@@ -175,7 +189,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "status": {
         "code": 1,
         "message": "created"
-      }
+      },
+      "start": 1483287071000,
+      "end": 1514736671000
     }
     ```
 
