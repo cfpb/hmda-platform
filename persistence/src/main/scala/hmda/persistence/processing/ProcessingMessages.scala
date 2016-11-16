@@ -1,7 +1,7 @@
 package hmda.persistence.processing
 
 import hmda.model.fi.SubmissionId
-import hmda.persistence.CommonMessages.{ Command, Event }
+import hmda.persistence.messages.CommonMessages.{ Command, Event }
 
 object ProcessingMessages {
 

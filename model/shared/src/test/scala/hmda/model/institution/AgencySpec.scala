@@ -3,9 +3,6 @@ package hmda.model.institution
 import hmda.model.institution.Agency._
 import org.scalatest.{ MustMatchers, WordSpec }
 
-/**
- * Created by keelerh on 7/26/16.
- */
 class AgencySpec extends WordSpec with MustMatchers {
 
   "Agency" must {

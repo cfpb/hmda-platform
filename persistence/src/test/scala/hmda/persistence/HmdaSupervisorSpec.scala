@@ -4,8 +4,9 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern.ask
 import akka.util.Timeout
 import hmda.model.fi.SubmissionId
-import hmda.persistence.HmdaSupervisor.{ FindActorByName, FindFilings, FindProcessingActor, FindSubmissions }
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing._
 import org.scalatest.{ MustMatchers, WordSpec }
 

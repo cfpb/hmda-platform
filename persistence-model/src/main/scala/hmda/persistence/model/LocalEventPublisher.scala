@@ -1,6 +1,7 @@
-package hmda.persistence
+package hmda.persistence.model
+
 import akka.actor.ActorSystem
-import hmda.persistence.CommonMessages.Event
+import hmda.persistence.messages.CommonMessages.Event
 
 trait LocalEventPublisher extends EventPublisher {
 

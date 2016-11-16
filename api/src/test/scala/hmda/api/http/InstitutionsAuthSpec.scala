@@ -1,20 +1,17 @@
 package hmda.api.http
 
-import akka.actor.{ ActorRef, ActorSystem }
-import akka.pattern.ask
+import akka.actor.ActorRef
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
-import akka.stream.ActorMaterializer
+import akka.pattern.ask
 import hmda.model.institution.Agency.FDIC
 import hmda.model.institution.ExternalIdType.RssdId
-import hmda.model.institution.{ ExternalId, Institution }
-import hmda.model.institution.Active
 import hmda.model.institution.InstitutionType.Bank
-import hmda.persistence.HmdaSupervisor
-import hmda.persistence.HmdaSupervisor.FindActorByName
+import hmda.model.institution.{ Active, ExternalId, Institution }
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.Future
 
@@ -79,9 +76,10 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
       }
     }
 
-    "matches 'CFPB-HMDA-Institutions' header case insensitively" in {
+    "match 'CFPB-HMDA-Institutions' header case insensitively" in {
       val caseInsensitiveBank = Institution("abc", "Bank abc", Set(ExternalId("externalTest1", RssdId)), FDIC, Bank, hasParent = true, status = Active)
       val supervisor = system.actorSelection("/user/supervisor")
+      val querySupervisor = system.actorSelection("/user/query-supervisor")
       val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
 
       val fInstitutions: Future[Unit] = for {
@@ -94,11 +92,13 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
       val institutionUpper = "ABC"
       val instHeader = RawHeader("CFPB-HMDA-Institutions", institutionUpper)
 
-      Get(s"/institutions/$institutionLower")
-        .addHeader(usernameHeader)
-        .addHeader(instHeader) ~> institutionsRoutes ~> check {
-          status mustBe StatusCodes.OK
-        }
+      fInstitutions.map { i =>
+        Get(s"/institutions/$institutionLower")
+          .addHeader(usernameHeader)
+          .addHeader(instHeader) ~> institutionsRoutes ~> check {
+            status mustBe StatusCodes.OK
+          }
+      }
     }
 
     // Other auth
