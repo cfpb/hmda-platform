@@ -2,24 +2,24 @@ package hmda.api.http
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ ContentTypes, _ }
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import akka.pattern.ask
 import hmda.api.model.SingleValidationErrorResult
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.persistence.processing.SingleLarValidation
 import hmda.persistence.processing.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import spray.json._
-import hmda.persistence.HmdaSupervisor._
-import hmda.persistence.processing.SingleLarValidation
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -115,8 +115,10 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   }
 
   val larRoutes =
-    pathPrefix("lar") {
-      parseLarRoute ~ validateLarRoute ~ parseAndValidateLarRoute
+    encodeResponse {
+      pathPrefix("lar") {
+        parseLarRoute ~ validateLarRoute ~ parseAndValidateLarRoute
+      }
     }
 
 }

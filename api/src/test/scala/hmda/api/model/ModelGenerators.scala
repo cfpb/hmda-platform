@@ -3,7 +3,6 @@ package hmda.api.model
 import java.util.Calendar
 import akka.http.scaladsl.model.Uri.Path
 import hmda.model.fi._
-import hmda.model.institution._
 import hmda.validation.engine._
 import org.scalacheck.Gen
 
@@ -16,23 +15,6 @@ trait ModelGenerators {
       time = Calendar.getInstance().getTime().toString
       host = "localhost"
     } yield Status(status, service, time, host)
-  }
-
-  implicit def institutionStatusGen: Gen[InstitutionStatus] = {
-    Gen.oneOf(Active, Inactive)
-  }
-
-  implicit def institutionGen: Gen[Institution] = {
-    for {
-      id <- Gen.alphaStr
-      name <- Gen.alphaStr
-      externalIds <- Gen.listOf(externalIdGen)
-      status <- institutionStatusGen
-      agency <- agencyGen
-      active <- Gen.oneOf(true, false)
-      cra <- Gen.oneOf(true, false)
-      institutionType <- institutionTypeGen
-    } yield Institution(id, name, externalIds.toSet, agency, institutionType, active, cra, status)
   }
 
   implicit def filingStatusGen: Gen[FilingStatus] = {
@@ -90,31 +72,6 @@ trait ModelGenerators {
     } yield FilingDetail(filing, submissions)
   }
 
-  implicit def agencyGen: Gen[Agency] = {
-    Gen.oneOf(
-      Agency.values
-    )
-  }
-
-  implicit def institutionTypeGen: Gen[InstitutionType] = {
-    Gen.oneOf(
-      InstitutionType.values
-    )
-  }
-
-  implicit def externalIdGen: Gen[ExternalId] = {
-    for {
-      id <- Gen.alphaStr
-      idType <- externalIdTypeGen
-    } yield ExternalId(id, idType)
-  }
-
-  implicit def externalIdTypeGen: Gen[ExternalIdType] = {
-    Gen.oneOf(
-      ExternalIdType.values
-    )
-  }
-
   implicit def errorResponseGen: Gen[ErrorResponse] = {
     for {
       status <- Gen.oneOf(200, 201, 400, 500)
@@ -143,6 +100,20 @@ trait ModelGenerators {
     } yield EditResults(edits)
   }
 
+  implicit def justificationGen: Gen[Justification] = {
+    for {
+      value <- Gen.alphaStr
+      selected <- Gen.oneOf(true, false)
+    } yield Justification(value, selected)
+  }
+
+  implicit def macroResultGen: Gen[MacroResult] = {
+    for {
+      id <- Gen.alphaStr
+      justification <- Gen.listOf(justificationGen)
+    } yield MacroResult(id, justification)
+  }
+
   implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
     Gen.oneOf(
       List(Syntactical, Validity, Quality)
@@ -162,7 +133,7 @@ trait ModelGenerators {
       s <- editResultsGen
       v <- editResultsGen
       q <- editResultsGen
-      m <- Gen.listOf(Gen.alphaStr)
+      m <- Gen.listOf(macroResultGen)
     } yield SummaryEditResults(s, v, q, MacroResults(m))
   }
 

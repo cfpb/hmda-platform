@@ -272,8 +272,23 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "validity": {},
       "quality": {},
       "macro": [
-          "Q007",
-          "Q008"
+        {
+            "edits": [
+                {
+                   "edit": "q007",
+                   "justifications": [
+                     {
+                       "value": "don't worry",
+                       "selected": false
+                     },
+                     {
+                       "value": "be happy",
+                       "selected": false
+                     }
+                   ]
+                }
+            ]
+        }
       ]
     }
     ```
