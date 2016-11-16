@@ -45,7 +45,7 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with L
 
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
-        log.info(s"Persisted: ${e.data}")
+        log.debug(s"Persisted: ${e.data}")
         updateState(e)
       }
 

@@ -13,7 +13,7 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
-import hmda.persistence.processing.ProcessingMessages.{ ParsingCompleted, ParsingCompletedWithErrors }
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, ParsingCompleted, ParsingCompletedWithErrors, UploadCompleted }
 
 class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
@@ -74,6 +74,10 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       for (line <- lines) {
         probe.send(hmdaRawFile, AddLine(timestamp, line.toString))
       }
+
+      probe.send(hmdaRawFile, CompleteUpload)
+      probe.expectMsg(UploadCompleted(4, submissionId2))
+
       probe.send(hmdaRawFile, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
@@ -93,6 +97,10 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       for (line <- badLines) {
         probe.send(rawFileActor, AddLine(timestamp, line))
       }
+
+      probe.send(rawFileActor, CompleteUpload)
+      probe.expectMsg(UploadCompleted(4, submissionId3))
+
       probe.send(rawFileActor, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
