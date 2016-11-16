@@ -51,7 +51,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     "persist TS parsing errors" in {
       parseTs(badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(0, Seq(List("Timestamp is not a Long")), Nil))
+      probe.expectMsg(HmdaFileParseState(0, Seq("Timestamp is not a Long"), Nil))
     }
 
     "persist parsed LARs" in {
@@ -106,10 +106,10 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
 
   }
 
-  private def parseTs(xs: Array[String]): Array[Unit] = {
+  private def parseTs(xs: Array[String]): Unit = {
     val ts = xs.take(1).map(line => TsCsvParser(line))
-    ts.map {
-      case Right(ts) => probe.send(hmdaFileParser, TsParsed(ts))
+    ts.foreach {
+      case Right(parsedTs) => probe.send(hmdaFileParser, TsParsed(parsedTs))
       case Left(errors) => probe.send(hmdaFileParser, TsParsedErrors(errors))
     }
   }

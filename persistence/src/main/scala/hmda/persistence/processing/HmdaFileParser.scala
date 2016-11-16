@@ -34,12 +34,12 @@ object HmdaFileParser {
     system.actorOf(HmdaFileParser.props(submissionId))
   }
 
-  case class HmdaFileParseState(size: Int = 0, tsParsingErrors: Seq[List[String]] = Nil, larParsingErrors: Seq[LarParsingError] = Nil) {
+  case class HmdaFileParseState(size: Int = 0, tsParsingErrors: Seq[String] = Nil, larParsingErrors: Seq[LarParsingError] = Nil) {
     def updated(event: Event): HmdaFileParseState = event match {
       case TsParsed(_) | LarParsed(_) =>
         HmdaFileParseState(size + 1, tsParsingErrors, larParsingErrors)
       case TsParsedErrors(errors) =>
-        HmdaFileParseState(size, tsParsingErrors :+ errors, larParsingErrors)
+        HmdaFileParseState(size, tsParsingErrors ++ errors, larParsingErrors)
       case LarParsedErrors(errors) =>
         HmdaFileParseState(size, tsParsingErrors, larParsingErrors :+ errors)
     }
