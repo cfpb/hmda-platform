@@ -1,10 +1,11 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.stream.scaladsl.Source
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.parser.fi.lar.LarCsvParser
+import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.{ HmdaPersistentActor, LocalEventPublisher }
@@ -20,7 +21,7 @@ object HmdaFileParser {
   case class TsParsed(ts: TransmittalSheet) extends Event
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
-  case class LarParsedErrors(errors: List[String]) extends Event
+  case class LarParsedErrors(errors: LarParsingError) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 
@@ -28,14 +29,14 @@ object HmdaFileParser {
     system.actorOf(HmdaFileParser.props(submissionId))
   }
 
-  case class HmdaFileParseState(size: Int = 0, parsingErrors: Seq[List[String]] = Nil) {
+  case class HmdaFileParseState(size: Int = 0, tsParsingErrors: Seq[String] = Nil, larParsingErrors: Seq[LarParsingError] = Nil) {
     def updated(event: Event): HmdaFileParseState = event match {
       case TsParsed(_) | LarParsed(_) =>
-        HmdaFileParseState(size + 1, parsingErrors)
+        HmdaFileParseState(size + 1, tsParsingErrors, larParsingErrors)
       case TsParsedErrors(errors) =>
-        HmdaFileParseState(size, parsingErrors :+ errors)
+        HmdaFileParseState(size, tsParsingErrors ++ errors, larParsingErrors)
       case LarParsedErrors(errors) =>
-        HmdaFileParseState(size, parsingErrors :+ errors)
+        HmdaFileParseState(size, tsParsingErrors, larParsingErrors :+ errors)
     }
   }
 
@@ -75,7 +76,8 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
       val parsedLar = events(persistenceId)
         .map { case LineAdded(_, data) => data }
         .drop(1)
-        .map(line => LarCsvParser(line))
+        .zip(Source.fromIterator(() => Iterator.from(2)))
+        .map { case (lar, index) => LarCsvParser(lar, index) }
         .map {
           case Left(errors) =>
             encounteredParsingErrors = true
