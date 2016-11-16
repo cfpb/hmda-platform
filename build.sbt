@@ -124,7 +124,7 @@ lazy val persistence = (project in file("persistence"))
 lazy val query = (project in file("query"))
   .settings(hmdaBuildSettings:_*)
   .settings(
-    libraryDependencies ++= akkaPersistenceDeps ++ slickDeps
+    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
   .dependsOn(persistenceModel % "compile->compile;test->test")

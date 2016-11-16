@@ -18,7 +18,6 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
 
   override protected def createActor(name: String): ActorRef = name match {
     case id @ InstitutionView.name =>
-      println(name)
       val actor = context.actorOf(InstitutionView.props, id)
       supervise(actor, id)
   }

@@ -11,6 +11,7 @@ import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shut
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
+import com.typesafe.config.ConfigFactory
 
 object InstitutionView {
 
@@ -31,10 +32,10 @@ object InstitutionView {
     def updated(event: Event): InstitutionViewState = {
       event match {
         case InstitutionCreated(i) =>
-          InstitutionViewState(institutions + i, seqNr)
+          InstitutionViewState(institutions + i, seqNr + 1)
         case InstitutionModified(i) =>
           val others = institutions.filterNot(_.id == i.id)
-          InstitutionViewState(others + i, seqNr)
+          InstitutionViewState(others + i, seqNr + 1)
       }
     }
   }
@@ -50,6 +51,9 @@ class InstitutionView extends HmdaPersistentActor {
   var counter = 0
 
   val queryProjector = context.actorOf(InstitutionDBProjection.props)
+
+  val config = ConfigFactory.load()
+  val snapshotCounter = config.getInt("hmda.journal.snapshot.counter")
 
   override def persistenceId: String = name
 
@@ -68,7 +72,7 @@ class InstitutionView extends HmdaPersistentActor {
       sender() ! institutions
 
     case EventWithSeqNr(seqNr, event) =>
-      if (counter >= 100) {
+      if (counter >= snapshotCounter) {
         counter = 0
         saveSnapshot(state)
       }
