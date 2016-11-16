@@ -11,7 +11,7 @@ class Q055Spec extends MacroSpec {
 
   val testLars = lar100ListGen.sample.getOrElse(Nil)
   val sampleSize = testLars.size
-  def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 2)
+  def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(rateSpread = "NA")
   def relevantLar(lar: LoanApplicationRegister) = {
     lar.copy(actionTakenType = 1).copy(hoepaStatus = 1).copy(rateSpread = "5")
   }
