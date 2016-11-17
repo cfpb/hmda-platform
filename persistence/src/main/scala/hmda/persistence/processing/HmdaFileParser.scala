@@ -1,7 +1,7 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
@@ -18,6 +18,7 @@ object HmdaFileParser {
   val name = "HmdaFileParser"
 
   case class ReadHmdaRawFile(persistenceId: String, replyTo: ActorRef) extends Command
+  case class FinishParsing(replyTo: ActorRef) extends Command
   case class TsParsed(ts: TransmittalSheet) extends Event
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
@@ -86,11 +87,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         }
 
       parsedLar
-        .runForeach(pLar => self ! pLar)
-        .andThen {
-          case _ if encounteredParsingErrors => replyTo ! ParsingCompletedWithErrors(submissionId)
-          case _ if !encounteredParsingErrors => replyTo ! ParsingCompleted(submissionId)
-        }
+        .runWith(Sink.actorRef(self, FinishParsing(replyTo)))
 
     case tp @ TsParsed(ts) =>
       persist(tp) { e =>
@@ -115,6 +112,12 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         log.debug(s"Persisted: $e")
         updateState(e)
       }
+
+    case FinishParsing(replyTo) =>
+      if (encounteredParsingErrors)
+        replyTo ! ParsingCompletedWithErrors(submissionId)
+      else
+        replyTo ! ParsingCompleted(submissionId)
 
     case GetState =>
       sender() ! state
