@@ -43,19 +43,14 @@ class InstitutionPersistenceSpec extends ActorSpec {
 
         // Attempt to add identical institution; test that warning is logged
         val i2 = i1.copy()
-        val msg = s"Institution already exists. Could not create $i2"
-        EventFilter.warning(message = msg, occurrences = 1) intercept {
-          probe.send(institutionsActor, CreateInstitution(i2))
-        }
+        probe.send(institutionsActor, CreateInstitution(i2))
+        probe.expectMsg(None)
       }
 
       "warn when updating nonexistent institution" in {
         val i = Institution("123456", "Bogus bank", Set(ExternalId("99-7654321", FederalTaxId), ExternalId("654321", RssdId)), CFPB, Bank, hasParent = true, status = Active)
-        val msg = s"Institution does not exist. Could not update $i"
-        EventFilter.warning(message = msg, occurrences = 1) intercept {
-          probe.send(institutionsActor, ModifyInstitution(i))
-          probe.expectMsg(None)
-        }
+        probe.send(institutionsActor, ModifyInstitution(i))
+        probe.expectMsg(None)
       }
     }
   }

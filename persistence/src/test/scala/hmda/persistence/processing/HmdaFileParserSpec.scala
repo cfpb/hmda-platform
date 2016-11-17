@@ -19,13 +19,6 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
   import hmda.model.util.FITestData._
 
   val config = ConfigFactory.load()
-  override implicit lazy val system =
-    ActorSystem(
-      "test-system",
-      ConfigFactory.parseString(
-        TestConfigOverride.config
-      )
-    )
 
   val submissionId = SubmissionId("0", "2017", 1)
 

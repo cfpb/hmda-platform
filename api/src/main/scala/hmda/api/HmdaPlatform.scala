@@ -11,7 +11,7 @@ import hmda.query.HmdaQuerySupervisor._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
+import hmda.persistence.processing.SingleLarValidation
 import hmda.query.projections.institutions.InstitutionView
 import org.slf4j.LoggerFactory
 
@@ -43,12 +43,6 @@ object HmdaPlatform {
       .mapTo[ActorRef]
       .map { actor =>
         log.info(s"Started validator at ${actor.path}")
-      }
-
-    (supervisor ? FindActorByName(LocalHmdaEventProcessor.name))
-      .mapTo[ActorRef]
-      .map { actor =>
-        log.info(s"Started event processor at ${actor.path}")
       }
 
     (supervisor ? FindActorByName(InstitutionPersistence.name))
