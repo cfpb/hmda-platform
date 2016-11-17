@@ -1,15 +1,23 @@
 package hmda.persistence.processing
 
 import akka.actor._
+import akka.pattern.ask
 import akka.persistence.fsm.PersistentFSM
 import akka.persistence.fsm.PersistentFSM.FSMState
+import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionStatusMessage._
-import hmda.model.fi.{ Submission, SubmissionId }
+import hmda.model.fi.{ Submission, SubmissionId, SubmissionStatus }
+import hmda.persistence.HmdaSupervisor.FindSubmissions
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.processing.HmdaFileValidator.CompleteValidation
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
 
+import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.reflect._
 
 object SubmissionFSM {
@@ -122,6 +130,18 @@ object SubmissionFSM {
 
 class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag: ClassTag[SubmissionEvent]) extends PersistentFSM[SubmissionFSMState, SubmissionData, SubmissionEvent] {
 
+  val config = ConfigFactory.load()
+  val actorTimeout = config.getInt("hmda.actor-lookup-timeout")
+  implicit val timeout = Timeout(actorTimeout.seconds)
+  implicit val ec = context.dispatcher
+
+  val institutionId = submissionId.institutionId
+  val period = submissionId.period
+
+  val supervisor = context.actorSelection(s"/user/supervisor")
+  val submissionPersistenceF = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period))
+    .mapTo[ActorRef]
+
   override def persistenceId: String = submissionId.toString
 
   override def applyEvent(event: SubmissionEvent, currentData: SubmissionData): SubmissionData = event match {
@@ -146,43 +166,68 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
 
   when(Created) {
     case Event(StartUpload, _) =>
-      goto(Uploading) applying SubmissionUploading(Submission(submissionId, hmda.model.fi.Uploading))
+      val status = hmda.model.fi.Uploading
+      updateStatus(status)
+      goto(Uploading) applying SubmissionUploading(Submission(submissionId, status))
 
   }
 
   when(Uploading) {
     case Event(CompleteUpload, _) =>
-      goto(Uploaded) applying SubmissionUploaded(Submission(submissionId, hmda.model.fi.Uploaded))
-
+      val status = hmda.model.fi.Uploaded
+      updateStatus(status)
+      goto(Uploaded) applying SubmissionUploaded(Submission(submissionId, status))
+    case Event(_, data) =>
+      stay replying data
   }
 
   when(Uploaded) {
     case Event(StartParsing, _) =>
-      goto(Parsing) applying SubmissionParsing(Submission(submissionId, hmda.model.fi.Parsing))
+      val status = hmda.model.fi.Parsing
+      updateStatus(status)
+      goto(Parsing) applying SubmissionParsing(Submission(submissionId, status))
+    case Event(_, data) =>
+      stay replying data
   }
 
   when(Parsing) {
     case Event(CompleteParsing, _) =>
-      goto(Parsed) applying SubmissionParsed(Submission(submissionId, hmda.model.fi.Parsed))
+      val status = hmda.model.fi.Parsed
+      updateStatus(status)
+      goto(Parsed) applying SubmissionParsed(Submission(submissionId, status))
     case Event(CompleteParsingWithErrors, _) =>
-      goto(ParsedWithErrors) applying SubmissionParsedWithErrors(Submission(submissionId, hmda.model.fi.ParsedWithErrors))
+      val status = hmda.model.fi.ParsedWithErrors
+      updateStatus(status)
+      goto(ParsedWithErrors) applying SubmissionParsedWithErrors(Submission(submissionId, status))
+    case Event(_, data) =>
+      stay replying data
   }
 
   when(Parsed) {
     case Event(BeginValidation(_), _) =>
-      goto(Validating) applying SubmissionValidating(Submission(submissionId, hmda.model.fi.Validating))
+      val status = hmda.model.fi.Validating
+      updateStatus(status)
+      goto(Validating) applying SubmissionValidating(Submission(submissionId, status))
+    case Event(_, data) =>
+      stay replying data
   }
 
   when(ParsedWithErrors) {
-    case Event(GetState, data) =>
+    case Event(_, data) =>
       stay replying data
   }
 
   when(Validating) {
     case Event(CompleteValidation(_), _) =>
-      goto(Validated) applying SubmissionValidated(Submission(submissionId, hmda.model.fi.Validated))
+      val status = hmda.model.fi.Validated
+      updateStatus(status)
+      goto(Validated) applying SubmissionValidated(Submission(submissionId, status))
     case Event(CompleteValidationWithErrors, _) =>
-      goto(ValidatedWithErrors) applying SubmissionValidatedWithErrors(Submission(submissionId, hmda.model.fi.ValidatedWithErrors))
+      val status = hmda.model.fi.ValidatedWithErrors
+      updateStatus(status)
+      goto(ValidatedWithErrors) applying SubmissionValidatedWithErrors(Submission(submissionId, status))
+    case Event(_, data) =>
+      stay replying data
   }
 
   when(Validated) {
@@ -193,6 +238,8 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   when(ValidatedWithErrors) {
     case Event(GetState, data) =>
       stay replying data
+    case Event(_, data) =>
+      stay replying data
   }
 
   whenUnhandled {
@@ -201,6 +248,10 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
     case Event(e, d) =>
       log.warning("received unhandled request {} in state {}/{}", e, stateName, d)
       stay
+  }
+
+  private def updateStatus(status: SubmissionStatus): Future[Unit] = {
+    submissionPersistenceF.map(actorRef => actorRef ! UpdateSubmissionStatus(submissionId, status))
   }
 
 }

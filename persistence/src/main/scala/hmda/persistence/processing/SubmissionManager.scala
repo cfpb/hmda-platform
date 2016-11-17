@@ -1,8 +1,11 @@
 package hmda.persistence.processing
 
-import akka.actor.{ ActorRef, Props }
+import java.util.concurrent.TimeUnit
+
+import akka.actor.{ ActorRef, Props, ReceiveTimeout }
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
-import hmda.persistence.messages.CommonMessages.Command
+import hmda.persistence.messages.CommonMessages.{ Command, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaFileValidator.{ CompleteValidation, ValidationStarted }
@@ -10,6 +13,8 @@ import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.Create
 import hmda.persistence.processing.SubmissionManager.GetActorRef
+
+import scala.concurrent.duration.Duration
 
 object SubmissionManager {
 
@@ -28,6 +33,13 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
   val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator.props(id))
 
   var uploaded: Int = 0
+
+  override def preStart(): Unit = {
+    super.preStart()
+    val config = ConfigFactory.load()
+    val timeout = config.getInt("hmda.persistent-actor-timeout")
+    context.setReceiveTimeout(Duration.create(timeout, TimeUnit.SECONDS))
+  }
 
   override def receive: Receive = {
 
@@ -78,6 +90,12 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
       case HmdaFileParser.name => sender() ! submissionParser
       case HmdaFileValidator.name => sender() ! submissionValidator
     }
+
+    case ReceiveTimeout =>
+      self ! Shutdown
+
+    case Shutdown =>
+      context stop self
 
   }
 
