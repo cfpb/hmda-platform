@@ -30,6 +30,7 @@ object SubmissionFSM {
   case class SubmissionParsing(s: Submission) extends SubmissionEvent
   case class SubmissionParsed(s: Submission) extends SubmissionEvent
   case class SubmissionParsedWithErrors(s: Submission) extends SubmissionEvent
+  case class SubmissionValidating(s: Submission) extends SubmissionEvent
 
   //Submission States
   sealed trait SubmissionFSMState extends FSMState
@@ -127,6 +128,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
     case SubmissionParsing(s) => currentData.update(s)
     case SubmissionParsed(s) => currentData.update(s)
     case SubmissionParsedWithErrors(s) => currentData.update(s)
+    case SubmissionValidating(s) => currentData.update(s)
 
   }
 
@@ -165,11 +167,18 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Parsed) {
+    case Event(BeginValidation(_), _) =>
+      goto(Validating) applying SubmissionValidating(Submission(submissionId, hmda.model.fi.Validating))
     case Event(GetState, data) =>
       stay replying data
   }
 
   when(ParsedWithErrors) {
+    case Event(GetState, data) =>
+      stay replying data
+  }
+
+  when(Validating) {
     case Event(GetState, data) =>
       stay replying data
   }
