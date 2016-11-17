@@ -40,12 +40,12 @@ class Q056Spec extends MacroSpec {
           val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
           lar.copy(loan = relevantLoan)
         })
-      val validLarSource = newLarSource(lars, 1, relevantLar, irrelevantLar)
+      val validLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
   }
 
-  property(s"be invalid if more than $conventionalCount conventional loans and denials = $denialMultiplier * total") {
+  property(s"be valid if more than $conventionalCount conventional loans and denials = $denialMultiplier * total") {
     forAll(relevantAmount) { (x) =>
       val numOfRelevantLars = (x * denialMultiplier).toInt
       val lars = larNGen(x).sample.getOrElse(Nil)
@@ -53,8 +53,8 @@ class Q056Spec extends MacroSpec {
           val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
           lar.copy(loan = relevantLoan)
         })
-      val invalidLarSource = newLarSource(lars, 0, relevantLar, irrelevantLar)
-      invalidLarSource.mustFail
+      val invalidLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
+      invalidLarSource.mustPass
     }
   }
 
@@ -66,7 +66,7 @@ class Q056Spec extends MacroSpec {
           val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
           lar.copy(loan = relevantLoan)
         })
-      val invalidLarSource = newLarSource(lars, 0, relevantLar, irrelevantLar)
+      val invalidLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
       invalidLarSource.mustFail
     }
   }
