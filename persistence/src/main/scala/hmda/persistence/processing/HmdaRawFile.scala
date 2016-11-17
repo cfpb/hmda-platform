@@ -29,7 +29,7 @@ object HmdaRawFile {
 
 }
 
-class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with LocalEventPublisher {
+class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   import HmdaRawFile._
 
