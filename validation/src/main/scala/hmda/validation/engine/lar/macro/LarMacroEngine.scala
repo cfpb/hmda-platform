@@ -5,12 +5,12 @@ import akka.stream.ActorMaterializer
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.engine.lar.LarCommonEngine
-import hmda.validation.engine.{ Macro, ValidationErrorType }
+import hmda.validation.engine.{Macro, ValidationErrorType}
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
-import hmda.validation.rules.lar.`macro`.{ Q007, Q008, Q047 }
+import hmda.validation.rules.lar.`macro`.{Q007, Q008, Q047, Q056}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 trait LarMacroEngine extends LarCommonEngine with ValidationApi {
 
@@ -19,7 +19,8 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
       List(
         Q007,
         Q008,
-        Q047
+        Q047,
+        Q056
       ).map(checkAggregate(_, larSource, "", Macro))
     )
       .map(checks => validateAll(checks, larSource))
