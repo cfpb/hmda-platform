@@ -5,12 +5,13 @@ import akka.pattern.ask
 import akka.testkit.{ EventFilter, TestProbe }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.actor.test.ActorSpec
 import hmda.model.fi._
-import hmda.persistence.CommonMessages.{ Event, GetState }
+import hmda.persistence.messages.CommonMessages.{ Event, GetState }
 import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence._
+import hmda.persistence.model.ActorSpec
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
 import hmda.persistence.processing.ProcessingMessages._
 import org.scalatest.Assertion

@@ -2,9 +2,9 @@ package hmda.persistence.processing
 
 import akka.actor.ActorRef
 import akka.testkit.TestProbe
-import hmda.actor.test.ActorSpec
 import hmda.model.fi.{ Submission, SubmissionId }
-import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.ProcessingMessages.{ CompleteParsing, CompleteUpload, StartParsing, StartUpload }
 import hmda.persistence.processing.SubmissionFSM._
 

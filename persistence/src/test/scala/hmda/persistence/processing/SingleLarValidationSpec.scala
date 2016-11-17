@@ -3,12 +3,11 @@ package hmda.persistence.processing
 import java.io.File
 
 import akka.testkit.TestProbe
-import hmda.actor.test.ActorSpec
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.LarValidationErrors
-
 import scala.concurrent.duration._
 import scala.io.Source
 

@@ -2,9 +2,9 @@ package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
-import hmda.persistence.CommonMessages._
-import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload, UploadCompleted, UploadStarted }
-import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, UploadCompleted }
+import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.model.{ HmdaPersistentActor, LocalEventPublisher }
 
 object HmdaRawFile {
 

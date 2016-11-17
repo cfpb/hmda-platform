@@ -13,7 +13,7 @@ import hmda.api.http.HmdaCustomDirectives
 import hmda.api.model.{ ErrorResponse, FilingDetail }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Submission }
-import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
 import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }

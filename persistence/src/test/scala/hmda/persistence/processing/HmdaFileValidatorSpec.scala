@@ -3,11 +3,11 @@ package hmda.persistence.processing
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
-import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
 import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, ValidationCompletedWithErrors }
@@ -91,6 +91,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsg(HmdaFileParseState(5, Nil))
 
       probe.send(hmdaFileValidator2, BeginValidation(probe.testActor))
+      probe.expectMsg(ValidationStarted(submissionId2))
       probe.expectMsg(ValidationCompletedWithErrors(submissionId2))
 
       probe.send(hmdaFileValidator2, GetState)

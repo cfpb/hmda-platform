@@ -3,7 +3,7 @@ package hmda.api.http
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ ContentTypes, _ }
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
@@ -14,12 +14,11 @@ import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.persistence.processing.SingleLarValidation
 import hmda.persistence.processing.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
-import spray.json._
-import hmda.persistence.HmdaSupervisor._
-import hmda.persistence.processing.SingleLarValidation
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -39,7 +38,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
         entity(as[String]) { s =>
           LarCsvParser(s) match {
             case Right(lar) => complete(ToResponseMarshallable(lar))
-            case Left(errors) => complete(errorsAsResponse(errors))
+            case Left(errors) => complete(ToResponseMarshallable(StatusCodes.BadRequest -> errors))
           }
         }
       }
@@ -65,7 +64,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
           entity(as[String]) { s =>
             LarCsvParser(s) match {
               case Right(lar) => validateRoute(lar, checkType, uri)
-              case Left(errors) => complete(errorsAsResponse(errors))
+              case Left(errors) => complete(ToResponseMarshallable(StatusCodes.BadRequest -> errors))
             }
           }
         }
@@ -107,11 +106,6 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       ValidationErrorsSummary(allOfType(Validity)),
       ValidationErrorsSummary(allOfType(Quality))
     )
-  }
-
-  def errorsAsResponse(list: List[String]): HttpResponse = {
-    val errorEntity = HttpEntity(ContentTypes.`application/json`, list.toJson.toString)
-    HttpResponse(StatusCodes.BadRequest, entity = errorEntity)
   }
 
   val larRoutes =

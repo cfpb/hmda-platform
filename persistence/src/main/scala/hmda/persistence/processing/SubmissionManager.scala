@@ -2,8 +2,8 @@ package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, Props }
 import hmda.model.fi.SubmissionId
-import hmda.persistence.CommonMessages.Command
-import hmda.persistence.HmdaActor
+import hmda.persistence.messages.CommonMessages.Command
+import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._

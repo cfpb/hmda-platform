@@ -15,9 +15,9 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
 import akka.util.{ ByteString, Timeout }
 import hmda.api.http.HmdaCustomDirectives
+import hmda.persistence.messages.CommonMessages._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
-import hmda.model.fi._
-import hmda.persistence.CommonMessages._
+import hmda.model.fi.{ Created, Submission, SubmissionId, Uploaded, Failed }
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
@@ -52,15 +52,15 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           val fUploadSubmission = for {
             p <- fProcessingActor
             s <- fSubmissionsActor
-            fIsSubmissionCreated <- checkSubmissionIsCreated(s, submissionId)
-          } yield (fIsSubmissionCreated, p)
+            fSubmission <- (s ? GetSubmissionById(submissionId)).mapTo[Submission]
+          } yield (fSubmission, fSubmission.status == Created, p)
 
           onComplete(fUploadSubmission) {
-            case Success((true, processingActor)) =>
-              uploadFile(processingActor, uploadTimestamp, uri.path, submissionId)
-            case Success((false, _)) =>
+            case Success((submission, true, processingActor)) =>
+              uploadFile(processingActor, uploadTimestamp, uri.path, submission)
+            case Success((submission, false, _)) =>
               val errorResponse = Failed(s"Submission $seqNr not available for upload")
-              complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse)))
+              complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse, 0L, 0L)))
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
@@ -68,14 +68,9 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
       }
     }
 
-  private def checkSubmissionIsCreated(submissionsActor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Boolean] = {
-    val submission = (submissionsActor ? GetSubmissionById(submissionId)).mapTo[Submission]
-    submission.map(_.status == Created)
-  }
-
-  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, id: SubmissionId): Route = {
+  private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, submission: Submission): Route = {
     fileUpload("file") {
-      case (metadata, byteSource) if (metadata.fileName.endsWith(".txt")) =>
+      case (metadata, byteSource) if metadata.fileName.endsWith(".txt") =>
         processingActor ! StartUpload
         val uploadedF = byteSource
           .via(splitLines)
@@ -85,17 +80,17 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
         onComplete(uploadedF) {
           case Success(response) =>
             processingActor ! CompleteUpload
-            complete(ToResponseMarshallable(StatusCodes.Accepted -> Submission(id, Uploaded)))
+            complete(ToResponseMarshallable(StatusCodes.Accepted -> submission.copy(status = Uploaded)))
           case Failure(error) =>
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)
             val errorResponse = Failed("Invalid File Format")
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse)))
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse, 0L, 0L)))
         }
       case _ =>
         processingActor ! Shutdown
         val errorResponse = Failed("Invalid File Format")
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(id, errorResponse)))
+        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse, 0L, 0L)))
     }
   }
 }

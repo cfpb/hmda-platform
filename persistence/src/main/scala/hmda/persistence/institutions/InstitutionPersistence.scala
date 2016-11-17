@@ -1,13 +1,11 @@
 package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
-import hmda.model.institution.Inactive
-import hmda.model.institution.InstitutionType.Bank
-import hmda.persistence.CommonMessages._
-import hmda.persistence.HmdaPersistentActor
 import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
+import hmda.persistence.model.HmdaPersistentActor
 
 object InstitutionPersistence {
 
@@ -15,11 +13,6 @@ object InstitutionPersistence {
 
   case class CreateInstitution(i: Institution) extends Command
   case class ModifyInstitution(i: Institution) extends Command
-  case class GetInstitutionById(institutionId: String) extends Command
-  case class GetInstitutionsById(ids: List[String]) extends Command
-
-  case class InstitutionCreated(i: Institution) extends Event
-  case class InstitutionModified(i: Institution) extends Event
 
   def props: Props = Props(new InstitutionPersistence)
 
@@ -27,14 +20,14 @@ object InstitutionPersistence {
     system.actorOf(InstitutionPersistence.props, "institutions")
   }
 
-  case class InstitutionsState(institutions: Set[Institution] = Set.empty[Institution]) {
-    def updated(event: Event): InstitutionsState = {
+  case class InstitutionPersistenceState(institutionIds: Set[String] = Set.empty[String]) {
+    def updated(event: Event): InstitutionPersistenceState = {
       event match {
         case InstitutionCreated(i) =>
-          InstitutionsState(institutions + i)
+          InstitutionPersistenceState(institutionIds + i.id)
         case InstitutionModified(i) =>
-          val others = institutions.filterNot(_.id == i.id)
-          InstitutionsState(others + i)
+          InstitutionPersistenceState(institutionIds)
+
       }
     }
   }
@@ -42,7 +35,7 @@ object InstitutionPersistence {
 
 class InstitutionPersistence extends HmdaPersistentActor {
 
-  var state = InstitutionsState()
+  var state = InstitutionPersistenceState()
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -52,7 +45,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = {
     case CreateInstitution(i) =>
-      if (!state.institutions.contains(i)) {
+      if (!state.institutionIds.contains(i.id)) {
         persist(InstitutionCreated(i)) { e =>
           log.debug(s"Persisted: $i")
           updateState(e)
@@ -64,7 +57,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
       }
 
     case ModifyInstitution(i) =>
-      if (state.institutions.map(i => i.id).contains(i.id)) {
+      if (state.institutionIds.contains(i.id)) {
         persist(InstitutionModified(i)) { e =>
           log.debug(s"Modified: ${i.name}")
           updateState(e)
@@ -75,16 +68,8 @@ class InstitutionPersistence extends HmdaPersistentActor {
         log.warning(s"Institution does not exist. Could not update $i")
       }
 
-    case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(x => x.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, status = Inactive))
-      sender() ! institution
-
-    case GetInstitutionsById(ids) =>
-      val institutions = state.institutions.filter(i => ids.contains(i.id.toString))
-      sender() ! institutions
-
     case GetState =>
-      sender() ! state.institutions
+      sender() ! state.institutionIds
 
     case Shutdown => context stop self
   }

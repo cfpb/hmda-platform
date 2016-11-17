@@ -7,17 +7,16 @@ import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
-import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, ValidationCompleted, ValidationCompletedWithErrors }
-import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
-
+import hmda.persistence.processing.HmdaQuery._
 import scala.util.Try
 
 object HmdaFileValidator {
@@ -78,7 +77,7 @@ object HmdaFileValidator {
   }
 }
 
-class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor with TsEngine with LarEngine with LocalEventPublisher {
+class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor with TsEngine with LarEngine {
 
   import HmdaFileValidator._
 
@@ -97,7 +96,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
     case BeginValidation(replyTo) =>
       val ctx = ValidationContext(None, Try(Some(submissionId.period.toInt)).getOrElse(None))
       val validationStarted = ValidationStarted(submissionId)
-      publishEvent(validationStarted)
+      sender() ! validationStarted
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
         .map(e => e.asInstanceOf[TsParsed].ts)
@@ -184,11 +183,9 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
         log.info(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(submissionId)
-        //publishEvent(ValidationCompleted(submissionId))
       } else {
         log.info(s"Validation completed for $submissionId, errors found")
         replyTo ! ValidationCompletedWithErrors(submissionId)
-        //publishEvent(ValidationCompletedWithErrors(submissionId))
       }
 
     case GetState =>

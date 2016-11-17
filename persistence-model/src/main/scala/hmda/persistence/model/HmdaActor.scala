@@ -1,4 +1,4 @@
-package hmda.persistence
+package hmda.persistence.model
 
 import akka.actor.{ Actor, ActorLogging }
 

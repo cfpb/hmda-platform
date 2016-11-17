@@ -71,7 +71,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           "status": {
             "code": 1,
             "message": "not-started"
-          }
+          },
+          "start": 0,
+          "end": 0
         },
         {
           "period": "2016",
@@ -79,7 +81,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           "status": {
             "code": 3,
             "message": "completed"
-          }
+          },
+          "start": 1483287071000,
+          "end": 1514736671000
         }
       ]
     }
@@ -99,7 +103,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
   "status": {
     "code": 1,
     "message": "not-started"
-  }
+  },
+  "start": 0,
+  "end": 0
 },
 "submissions": [
   {
@@ -111,7 +117,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     "status": {
       "code": 1,
       "message": "created"
-    }
+    },
+    "start": 1483287071000,
+    "end": 0
   },
   {
     "id": {
@@ -122,7 +130,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     "status": {
       "code": 1,
       "message": "created"
-    }
+    },
+    "start": 1483287071000,
+    "end": 0
   },
   {
     "id": {
@@ -133,7 +143,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     "status": {
       "code": 1,
       "message": "created"
-    }
+    },
+    "start": 1483287071000,
+    "end": 0
   }
  ]
 }
@@ -155,7 +167,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "status": {
         "code": 1,
         "message": "created"
-      }
+      },
+      "start": 1483287071000,
+      "end": 0
     }
     ```
 
@@ -175,7 +189,9 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "status": {
         "code": 1,
         "message": "created"
-      }
+      },
+      "start": 1483287071000,
+      "end": 1514736671000
     }
     ```
 
@@ -256,8 +272,23 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "validity": {},
       "quality": {},
       "macro": [
-          "Q007",
-          "Q008"
+        {
+            "edits": [
+                {
+                   "edit": "q007",
+                   "justifications": [
+                     {
+                       "value": "don't worry",
+                       "selected": false
+                     },
+                     {
+                       "value": "be happy",
+                       "selected": false
+                     }
+                   ]
+                }
+            ]
+        }
       ]
     }
     ```
@@ -425,6 +456,44 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
   }
 }
 ```
+
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`
+
+    * `GET` - Returns all parsing errors for a submission
+
+    Example response, with HTTP code 201:
+
+    ```json
+    {
+      "transmittalSheetErrors": [
+        "Record Identifier is not an Integer",
+        "Agency Code is not an Integer"
+      ],
+      "larErrors": [
+        {
+          "lineNumber": 2,
+          "errorMessages": [
+            "Incorrect number of fields. found: 32, expected: 39"
+          ]
+        },
+        {
+          "lineNumber": 4,
+          "errorMessages": [
+            "Record Identifier is not an Integer"
+          ]
+        },
+        {
+          "lineNumber": 11,
+          "errorMessages": [
+            "Loan Type is not an Integer",
+            "Property Type is not an Integer",
+            "Loan Purpose is not an Integer",
+            "Owner Occupancy is not an Integer"
+          ]
+        }
+      ]
+    }
+    ```
 
 ## Authorization
 Each endpoint that starts with `/institutions` is protected by three authorization requirements.

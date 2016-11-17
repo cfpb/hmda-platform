@@ -2,9 +2,9 @@ package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi._
-import hmda.persistence.CommonMessages.{ Command, Event, GetState }
-import hmda.persistence.HmdaPersistentActor
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.institutions.SubmissionPersistence._
+import hmda.persistence.model.HmdaPersistentActor
 
 object SubmissionPersistence {
 
@@ -32,7 +32,11 @@ object SubmissionPersistence {
         case SubmissionStatusUpdated(id, status) =>
           val x = submissions.find(x => x.id == id).getOrElse(Submission())
           val i = submissions.indexOf(x)
-          SubmissionState(submissions.updated(i, x.copy(status = status)))
+          if (status == Signed) {
+            SubmissionState(submissions.updated(i, x.copy(status = status, end = System.currentTimeMillis())))
+          } else {
+            SubmissionState(submissions.updated(i, x.copy(status = status)))
+          }
       }
     }
   }
@@ -54,7 +58,7 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
     case CreateSubmission =>
       val seqNr = state.submissions.size + 1
       val submissionId = SubmissionId(institutionId, period, seqNr)
-      val newSubmission = Submission(submissionId, Created)
+      val newSubmission = Submission(submissionId, Created, System.currentTimeMillis(), 0L)
       persist(SubmissionCreated(newSubmission)) { e =>
         updateState(e)
       }
@@ -69,11 +73,11 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
       }
 
     case GetSubmissionById(id) =>
-      val submission = state.submissions.find(s => s.id == id).getOrElse(Submission(SubmissionId(), Failed("No submission found")))
+      val submission = state.submissions.find(s => s.id == id).getOrElse(Submission(SubmissionId(), Failed("No submission found"), 0L, 0L))
       sender() ! submission
 
     case GetLatestSubmission =>
-      val latest = state.submissions.headOption.getOrElse(Submission(SubmissionId(), Failed("No submission found")))
+      val latest = state.submissions.headOption.getOrElse(Submission(SubmissionId(), Failed("No submission found"), 0L, 0L))
       sender() ! latest
 
     case GetState =>

@@ -1,6 +1,7 @@
 package hmda.api.protocol.admin
 
 import hmda.api.model.ModelGenerators
+import hmda.model.institution.InstitutionGenerators._
 import hmda.model.institution.Institution
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks

@@ -5,7 +5,7 @@ import akka.persistence.fsm.PersistentFSM
 import akka.persistence.fsm.PersistentFSM.FSMState
 import hmda.model.fi.SubmissionStatusMessage._
 import hmda.model.fi.{ Submission, SubmissionId }
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
 
