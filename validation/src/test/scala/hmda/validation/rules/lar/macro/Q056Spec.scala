@@ -20,13 +20,15 @@ class Q056Spec extends MacroSpec {
   val irrelevantAmount: Gen[Int] = Gen.chooseNum(1, conventionalCount - 1)
   val relevantAmount: Gen[Int] = Gen.chooseNum(conventionalCount, 10000)
 
+  def makeLarsRelevant(lar: LoanApplicationRegister) = {
+    val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
+    lar.copy(loan = relevantLoan)
+  }
+
   property(s"be valid if fewer than $conventionalCount conventional loans") {
     forAll(irrelevantAmount) { (x) =>
       val lars = larNGen(x).sample.getOrElse(Nil)
-        .map(lar => {
-          val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
-          lar.copy(loan = relevantLoan)
-        })
+        .map(lar => makeLarsRelevant(lar))
       val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
@@ -36,10 +38,7 @@ class Q056Spec extends MacroSpec {
     forAll(relevantAmount) { (x) =>
       val numOfRelevantLars = (x * denialMultiplier).toInt - 1
       val lars = larNGen(x).sample.getOrElse(Nil)
-        .map(lar => {
-          val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
-          lar.copy(loan = relevantLoan)
-        })
+        .map(lar => makeLarsRelevant(lar))
       val validLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
@@ -49,10 +48,7 @@ class Q056Spec extends MacroSpec {
     forAll(relevantAmount) { (x) =>
       val numOfRelevantLars = (x * denialMultiplier).toInt
       val lars = larNGen(x).sample.getOrElse(Nil)
-        .map(lar => {
-          val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
-          lar.copy(loan = relevantLoan)
-        })
+        .map(lar => makeLarsRelevant(lar))
       val invalidLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
       invalidLarSource.mustPass
     }
@@ -62,10 +58,7 @@ class Q056Spec extends MacroSpec {
     forAll(relevantAmount) { (x) =>
       val numOfRelevantLars = (x * denialMultiplier).toInt + 1
       val lars = larNGen(x).sample.getOrElse(Nil)
-        .map(lar => {
-          val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
-          lar.copy(loan = relevantLoan)
-        })
+        .map(lar => makeLarsRelevant(lar))
       val invalidLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
       invalidLarSource.mustFail
     }
