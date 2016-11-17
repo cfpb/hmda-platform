@@ -6,6 +6,7 @@ import akka.persistence.fsm.PersistentFSM.FSMState
 import hmda.model.fi.SubmissionStatusMessage._
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.processing.HmdaFileValidator.CompleteValidation
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
 
@@ -31,6 +32,8 @@ object SubmissionFSM {
   case class SubmissionParsed(s: Submission) extends SubmissionEvent
   case class SubmissionParsedWithErrors(s: Submission) extends SubmissionEvent
   case class SubmissionValidating(s: Submission) extends SubmissionEvent
+  case class SubmissionValidated(s: Submission) extends SubmissionEvent
+  case class SubmissionValidatedWithErrors(s: Submission) extends SubmissionEvent
 
   //Submission States
   sealed trait SubmissionFSMState extends FSMState
@@ -129,7 +132,8 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
     case SubmissionParsed(s) => currentData.update(s)
     case SubmissionParsedWithErrors(s) => currentData.update(s)
     case SubmissionValidating(s) => currentData.update(s)
-
+    case SubmissionValidated(s) => currentData.update(s)
+    case SubmissionValidatedWithErrors(s) => currentData.update(s)
   }
 
   startWith(Idle, EmptySubmissionData)
@@ -162,15 +166,11 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       goto(Parsed) applying SubmissionParsed(Submission(submissionId, hmda.model.fi.Parsed))
     case Event(CompleteParsingWithErrors, _) =>
       goto(ParsedWithErrors) applying SubmissionParsedWithErrors(Submission(submissionId, hmda.model.fi.ParsedWithErrors))
-    case Event(GetState, data) =>
-      stay replying data
   }
 
   when(Parsed) {
     case Event(BeginValidation(_), _) =>
       goto(Validating) applying SubmissionValidating(Submission(submissionId, hmda.model.fi.Validating))
-    case Event(GetState, data) =>
-      stay replying data
   }
 
   when(ParsedWithErrors) {
@@ -179,6 +179,11 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Validating) {
+    case Event(CompleteValidation(_), _) =>
+      goto(Validated) applying SubmissionValidated(Submission(submissionId, hmda.model.fi.Validated))
+  }
+
+  when(Validated) {
     case Event(GetState, data) =>
       stay replying data
   }

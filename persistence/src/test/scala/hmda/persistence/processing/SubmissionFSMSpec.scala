@@ -5,6 +5,7 @@ import akka.testkit.TestProbe
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
+import hmda.persistence.processing.HmdaFileValidator.CompleteValidation
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
 
@@ -42,6 +43,10 @@ class SubmissionFSMSpec extends ActorSpec {
       probe.send(fsm, GetState)
       probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Validating)))
 
+      probe.send(fsm, CompleteValidation(probe.testActor))
+      probe.send(fsm, GetState)
+      probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Validated)))
+
       system stop fsm
 
     }
@@ -49,7 +54,7 @@ class SubmissionFSMSpec extends ActorSpec {
       val fsm = actorRef()
 
       probe.send(fsm, GetState)
-      probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Validating)))
+      probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Validated)))
     }
   }
 

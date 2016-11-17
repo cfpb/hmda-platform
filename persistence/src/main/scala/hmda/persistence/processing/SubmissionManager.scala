@@ -5,7 +5,7 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.Command
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
-import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
+import hmda.persistence.processing.HmdaFileValidator.{ CompleteValidation, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.Create
@@ -63,6 +63,10 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
     case ValidationStarted(sId) =>
       log.info(s"Validation started for submission: ${sId.toString}")
       submissionFSM ! BeginValidation(self)
+
+    case ValidationCompleted(sId) =>
+      log.info(s"Validation completed for submission: ${sId.toString}")
+      submissionFSM ! CompleteValidation(self)
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM
