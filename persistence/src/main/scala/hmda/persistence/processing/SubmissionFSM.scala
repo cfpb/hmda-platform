@@ -181,9 +181,16 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   when(Validating) {
     case Event(CompleteValidation(_), _) =>
       goto(Validated) applying SubmissionValidated(Submission(submissionId, hmda.model.fi.Validated))
+    case Event(CompleteValidationWithErrors, _) =>
+      goto(ValidatedWithErrors) applying SubmissionValidatedWithErrors(Submission(submissionId, hmda.model.fi.ValidatedWithErrors))
   }
 
   when(Validated) {
+    case Event(GetState, data) =>
+      stay replying data
+  }
+
+  when(ValidatedWithErrors) {
     case Event(GetState, data) =>
       stay replying data
   }

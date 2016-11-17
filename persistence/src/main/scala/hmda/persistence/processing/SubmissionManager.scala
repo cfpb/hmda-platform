@@ -68,6 +68,10 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
       log.info(s"Validation completed for submission: ${sId.toString}")
       submissionFSM ! CompleteValidation(self)
 
+    case ValidationCompletedWithErrors(sId) =>
+      log.info(s"Validation completed with errors for submission: ${sId.toString}")
+      submissionFSM ! CompleteValidationWithErrors
+
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM
       case HmdaRawFile.name => sender() ! submissionUpload

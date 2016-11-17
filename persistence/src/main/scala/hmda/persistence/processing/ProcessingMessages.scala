@@ -13,6 +13,7 @@ object ProcessingMessages {
   case object CompleteParsing extends Command
   case object CompleteParsingWithErrors extends Command
   case class BeginValidation(replyTo: ActorRef) extends Command
+  case object CompleteValidationWithErrors extends Command
 
   //Events
   case class UploadStarted(submissionId: SubmissionId) extends Event
