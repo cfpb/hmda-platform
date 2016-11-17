@@ -2,19 +2,21 @@ package hmda.persistence.processing
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{ ActorRef, Props, ReceiveTimeout }
+import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
+import akka.pattern.{ ask, pipe }
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.SubmissionId
-import hmda.persistence.messages.CommonMessages.{ Command, Shutdown }
+import hmda.model.fi.{ Submission, SubmissionId }
+import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaFileValidator.{ CompleteValidation, ValidationStarted }
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
-import hmda.persistence.processing.SubmissionFSM.Create
+import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 
 object SubmissionManager {
 
@@ -22,10 +24,19 @@ object SubmissionManager {
 
   case class GetActorRef(name: String) extends Command
 
-  def props(id: SubmissionId): Props = Props(new SubmissionManager(id))
+  def props(submissionId: SubmissionId): Props = Props(new SubmissionManager(submissionId))
+
+  def createSubmissionManager(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
+    system.actorOf(SubmissionManager.props(submissionId))
+  }
 }
 
 class SubmissionManager(id: SubmissionId) extends HmdaActor {
+
+  val config = ConfigFactory.load()
+  val duration = config.getInt("hmda.actor-lookup-timeout").seconds
+  implicit val timeout = Timeout(duration)
+  implicit val ec = context.dispatcher
 
   val submissionFSM: ActorRef = context.actorOf(SubmissionFSM.props(id))
   val submissionUpload: ActorRef = context.actorOf(HmdaRawFile.props(id))
@@ -90,6 +101,14 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
       case HmdaFileParser.name => sender() ! submissionParser
       case HmdaFileValidator.name => sender() ! submissionValidator
     }
+
+    case GetState =>
+      val client = sender()
+      (submissionFSM ? GetState)
+        .mapTo[SubmissionData]
+        .map { data =>
+          client ! data.get().getOrElse(Submission()).status
+        }
 
     case ReceiveTimeout =>
       self ! Shutdown

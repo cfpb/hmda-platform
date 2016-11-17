@@ -106,18 +106,21 @@ object SubmissionFSM {
     def add(s: Submission): SubmissionData
     def update(s: Submission): SubmissionData
     def empty(): SubmissionData
+    def get(): Option[Submission]
   }
 
   case class NonEmptySubmissionData(submission: Submission) extends SubmissionData {
     override def add(s: Submission) = this
     override def update(s: Submission) = NonEmptySubmissionData(s)
     override def empty() = EmptySubmissionData
+    override def get() = Some(submission)
   }
 
   case object EmptySubmissionData extends SubmissionData {
     override def add(s: Submission) = NonEmptySubmissionData(s)
     override def update(s: Submission) = this
     override def empty() = this
+    override def get() = None
   }
 
   def props(id: SubmissionId): Props = Props(new SubmissionFSM(id))
