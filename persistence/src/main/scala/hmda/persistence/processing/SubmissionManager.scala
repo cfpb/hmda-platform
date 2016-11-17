@@ -53,6 +53,7 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
     case ParsingCompleted(sId) =>
       log.info(s"Completed parsing for submission: ${sId.toString}")
       submissionFSM ! CompleteParsing
+      submissionValidator ! BeginValidation(self)
 
     case ParsingCompletedWithErrors(sId) =>
       log.info(s"Completed parsing with errors for submission: ${sId.toString}")

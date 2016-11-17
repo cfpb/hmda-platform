@@ -11,7 +11,7 @@ import hmda.persistence.CommonMessages.{ Event, GetState }
 import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence._
-import hmda.persistence.processing.HmdaFileValidator.{ ValidationCompleted, ValidationCompletedWithErrors, ValidationStarted }
+import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
 import hmda.persistence.processing.ProcessingMessages._
 import org.scalatest.Assertion
 

@@ -1,7 +1,7 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem }
-import akka.testkit.{ EventFilter, TestProbe }
+import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
@@ -10,6 +10,7 @@ import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
+import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, ValidationCompletedWithErrors }
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
@@ -89,10 +90,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(5, Nil))
 
-      val msg = s"Validation completed for $submissionId2, errors found"
-      EventFilter.debug(msg, source = hmdaFileValidator2.path.toString, occurrences = 1) intercept {
-        probe.send(hmdaFileValidator2, BeginValidation)
-      }
+      probe.send(hmdaFileValidator2, BeginValidation(probe.testActor))
+      probe.expectMsg(ValidationCompletedWithErrors(submissionId2))
 
       probe.send(hmdaFileValidator2, GetState)
       probe.expectMsg(HmdaFileValidationState(

@@ -10,6 +10,7 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.CommonMessages._
 import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
 import hmda.persistence.processing.HmdaQuery._
+import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, ValidationCompleted, ValidationCompletedWithErrors }
 import hmda.persistence.{ HmdaPersistentActor, LocalEventPublisher }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
@@ -23,13 +24,10 @@ object HmdaFileValidator {
 
   val name = "HmdaFileValidator"
 
-  case object BeginValidation extends Command
   case class ValidationStarted(submissionId: SubmissionId) extends Event
-  case class ValidateMacro(source: LoanApplicationRegisterSource) extends Command
-  case class CompleteMacroValidation(errors: LarValidationErrors) extends Command
-  case object CompleteValidation extends Command
-  case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
-  case class ValidationCompleted(submissionId: SubmissionId) extends Event
+  case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
+  case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
+  case class CompleteValidation(replyTo: ActorRef) extends Command
   case class TsValidated(ts: TransmittalSheet) extends Event
   case class LarValidated(lar: LoanApplicationRegister) extends Event
   case class TsSyntacticalError(error: ValidationError) extends Event
@@ -96,7 +94,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   override def receiveCommand: Receive = {
 
-    case BeginValidation =>
+    case BeginValidation(replyTo) =>
       val ctx = ValidationContext(None, Try(Some(submissionId.period.toInt)).getOrElse(None))
       val validationStarted = ValidationStarted(submissionId)
       publishEvent(validationStarted)
@@ -119,7 +117,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
           case Right(l) => l
           case Left(errors) => LarValidationErrors(errors.list.toList)
         }
-        .runWith(Sink.actorRef(self, ValidateMacro(larSource)))
+        .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
 
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
@@ -133,14 +131,14 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         updateState(e)
       }
 
-    case ValidateMacro(larSource) =>
+    case ValidateMacro(larSource, replyTo) =>
       log.info("Quality Validation completed")
       val fMacro = checkMacro(larSource)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
         .map {
-          case Right(source) => CompleteValidation
-          case Left(errors) => CompleteMacroValidation(LarValidationErrors(errors.list.toList))
+          case Right(source) => CompleteValidation(replyTo)
+          case Left(errors) => CompleteMacroValidation(LarValidationErrors(errors.list.toList), replyTo)
         }
 
       fMacro pipeTo self
@@ -177,18 +175,20 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(e => LarMacroError(e))
       persistErrors(macroErrors)
 
-    case CompleteMacroValidation(e) =>
+    case CompleteMacroValidation(e, replyTo) =>
       self ! LarValidationErrors(e.errors)
-      self ! CompleteValidation
+      self ! CompleteValidation(replyTo)
 
-    case CompleteValidation =>
+    case CompleteValidation(replyTo) =>
       if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty && state.larMacro.isEmpty
         && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
-        log.debug(s"Validation completed for $submissionId")
-        publishEvent(ValidationCompleted(submissionId))
+        log.info(s"Validation completed for $submissionId")
+        replyTo ! ValidationCompleted(submissionId)
+        //publishEvent(ValidationCompleted(submissionId))
       } else {
-        log.debug(s"Validation completed for $submissionId, errors found")
-        publishEvent(ValidationCompletedWithErrors(submissionId))
+        log.info(s"Validation completed for $submissionId, errors found")
+        replyTo ! ValidationCompletedWithErrors(submissionId)
+        //publishEvent(ValidationCompletedWithErrors(submissionId))
       }
 
     case GetState =>
