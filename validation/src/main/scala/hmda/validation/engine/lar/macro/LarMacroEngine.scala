@@ -8,7 +8,7 @@ import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.engine.{ Macro, ValidationErrorType }
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
-import hmda.validation.rules.lar.`macro`.{ Q007, Q008, Q047 }
+import hmda.validation.rules.lar.`macro`._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -19,7 +19,9 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
       List(
         Q007,
         Q008,
-        Q047
+        Q047,
+        Q080,
+        Q081
       ).map(checkAggregate(_, larSource, "", Macro))
     )
       .map(checks => validateAll(checks, larSource))
