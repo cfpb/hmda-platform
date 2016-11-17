@@ -21,6 +21,8 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
         Q008,
         Q047,
         Q055,
+        Q057,
+        Q058,
         Q061
       ).map(checkAggregate(_, larSource, "", Macro))
     )

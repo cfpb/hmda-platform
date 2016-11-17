@@ -6,10 +6,11 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.testkit.{ EventFilter, TestProbe }
 import org.scalatest.BeforeAndAfterEach
 import com.typesafe.config.ConfigFactory
-import hmda.actor.test.ActorSpec
 import hmda.model.fi.SubmissionId
+import hmda.parser.fi.lar.LarParsingError
 import hmda.parser.fi.ts.TsCsvParser
-import hmda.persistence.CommonMessages.GetState
+import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
 
@@ -44,25 +45,25 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     "persist parsed TSs" in {
       parseTs(lines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(1, Nil))
+      probe.expectMsg(HmdaFileParseState(1, Nil, Nil))
     }
 
     "persist TS parsing errors" in {
       parseTs(badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(0, Seq(List("Timestamp is not a Long"))))
+      probe.expectMsg(HmdaFileParseState(0, Seq("Timestamp is not a Long"), Nil))
     }
 
     "persist parsed LARs" in {
       parseLars(hmdaFileParser, probe, lines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(3, Nil))
+      probe.expectMsg(HmdaFileParseState(3, Nil, Nil))
     }
 
     "persist parsed LARs and parsing errors" in {
       parseLars(hmdaFileParser, probe, badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(2, Seq(List("Agency Code is not an Integer"))))
+      probe.expectMsg(HmdaFileParseState(2, Nil, Seq(LarParsingError(0, List("Agency Code is not an Integer")))))
     }
 
     "read entire raw file" in {
@@ -105,10 +106,10 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
 
   }
 
-  private def parseTs(xs: Array[String]): Array[Unit] = {
+  private def parseTs(xs: Array[String]): Unit = {
     val ts = xs.take(1).map(line => TsCsvParser(line))
-    ts.map {
-      case Right(ts) => probe.send(hmdaFileParser, TsParsed(ts))
+    ts.foreach {
+      case Right(parsedTs) => probe.send(hmdaFileParser, TsParsed(parsedTs))
       case Left(errors) => probe.send(hmdaFileParser, TsParsedErrors(errors))
     }
   }

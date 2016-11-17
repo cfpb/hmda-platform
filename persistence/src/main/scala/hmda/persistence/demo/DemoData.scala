@@ -9,7 +9,7 @@ import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccChar
 import hmda.model.institution.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.model.institution.{ ExternalId, Institution }
-import hmda.persistence.CommonMessages._
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
@@ -33,21 +33,18 @@ object DemoData {
   }
 
   val testFilings = {
-    val f1 = Filing("2016", "0", Completed)
-    val f2 = Filing("2017", "0", NotStarted)
-    val f3 = Filing("2017", "1", Completed)
-    val f4 = Filing("2016", "2", Completed)
-    val f5 = Filing("2016", "3", Completed)
-    val f6 = Filing("2017", "3", NotStarted)
+    val f1 = Filing("2016", "0", Completed, 1483287071000L, 1514736671000L)
+    val f2 = Filing("2017", "0", NotStarted, 0L, 0L)
+    val f3 = Filing("2017", "1", Completed, 1483287071000L, 1514736671000L)
     Seq(f1, f2, f3)
   }
 
   val testSubmissions = {
     val institutionId = "0"
     val period = "2017"
-    val s1 = Submission(SubmissionId(institutionId, period, 1), Created)
-    val s2 = Submission(SubmissionId(institutionId, period, 2), Created)
-    val s3 = Submission(SubmissionId(institutionId, period, 3), Created)
+    val s1 = Submission(SubmissionId(institutionId, period, 1), Created, 0L, 0L)
+    val s2 = Submission(SubmissionId(institutionId, period, 2), Created, 0L, 0L)
+    val s3 = Submission(SubmissionId(institutionId, period, 3), Created, 0L, 0L)
     Seq(s1, s2, s3)
   }
 

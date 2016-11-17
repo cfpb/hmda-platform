@@ -8,7 +8,11 @@ import scalaz.Scalaz._
 import scala.util.{ Failure, Success, Try }
 
 object LarCsvParser {
-  def apply(s: String): Either[List[String], LoanApplicationRegister] = {
+  def apply(s: String): Either[LarParsingError, LoanApplicationRegister] = {
+    apply(s, 0)
+  }
+
+  def apply(s: String, i: Int): Either[LarParsingError, LoanApplicationRegister] = {
     val values = (s + " ").split('|').map(_.trim)
     val parserResults = checkLar(values.toList)
     parserResults match {
@@ -108,7 +112,7 @@ object LarCsvParser {
         )
       }
       case scalaz.Failure(errors) => {
-        Left(errors.toList)
+        Left(LarParsingError(i, errors.toList))
       }
     }
   }

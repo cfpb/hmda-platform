@@ -2,9 +2,9 @@ package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.{ Filing, NotStarted }
-import hmda.persistence.CommonMessages._
-import hmda.persistence.HmdaPersistentActor
+import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence._
+import hmda.persistence.model.HmdaPersistentActor
 
 object FilingPersistence {
 
@@ -70,7 +70,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
       }
 
     case GetFilingByPeriod(period) =>
-      val filing = state.filings.find(f => f.period == period).getOrElse(Filing("", institutionId, NotStarted))
+      val filing = state.filings.find(f => f.period == period).getOrElse(Filing("", institutionId, NotStarted, 0L, 0L))
       if (state.filings.size == 0)
         sender() ! Filing()
       else

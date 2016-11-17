@@ -7,9 +7,12 @@ import akka.util.Timeout
 import scala.concurrent.duration._
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.HmdaSupervisor._
+import hmda.query.HmdaQuerySupervisor._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
+import hmda.query.projections.institutions.InstitutionView
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
@@ -24,14 +27,15 @@ object HmdaPlatform {
 
     val system = ActorSystem("hmda")
     val supervisor = createSupervisor(system)
+    val querySupervisor = createQuerySupervisor(system)
     implicit val ec = system.dispatcher
 
-    startActors(system, supervisor)
+    startActors(system, supervisor, querySupervisor)
     startApi(system)
 
   }
 
-  private def startActors(system: ActorSystem, supervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
+  private def startActors(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
     lazy val actorTimeout = config.getInt("hmda.actor.timeout")
     implicit val timeout = Timeout(actorTimeout.seconds)
 
@@ -58,6 +62,11 @@ object HmdaPlatform {
     if (isDemo) {
       DemoData.loadDemoData(system)
     }
+
+    // Start query Actors
+    (querySupervisor ? FindActorByName(InstitutionView.name))
+      .mapTo[ActorRef]
+
   }
 
   private def startApi(system: ActorSystem): Unit = {
