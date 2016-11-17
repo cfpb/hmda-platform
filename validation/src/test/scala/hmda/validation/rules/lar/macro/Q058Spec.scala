@@ -17,7 +17,7 @@ class Q058Spec extends MacroSpec {
   val relevantAmount: Gen[Int] = Gen.chooseNum(preapprovalCount, 10000)
 
   property(s"be valid if fewer than $preapprovalCount preapproval requests") {
-    forAll(irrelevantAmount) { (x: Int) =>
+    forAll(irrelevantAmount) { (x) =>
       val lars = larNGen(x).sample.getOrElse(Nil)
         .map(lar => lar.copy(preapprovals = 1))
       val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
@@ -26,7 +26,7 @@ class Q058Spec extends MacroSpec {
   }
 
   property(s"be valid if more than $preapprovalCount preapproval requests and one denial") {
-    forAll(relevantAmount) { (x: Int) =>
+    forAll(relevantAmount) { (x) =>
       val lars = larNGen(x).sample.getOrElse(Nil)
         .map(lar => lar.copy(preapprovals = 1))
       val validLarSource = newLarSource(lars, 1, relevantLar, irrelevantLar)
@@ -35,7 +35,7 @@ class Q058Spec extends MacroSpec {
   }
 
   property(s"be invalid if more than $preapprovalCount preapproval requests and no denials") {
-    forAll(relevantAmount) { (x: Int) =>
+    forAll(relevantAmount) { (x) =>
       val lars = larNGen(x).sample.getOrElse(Nil)
         .map(lar => lar.copy(preapprovals = 1))
       val invalidLarSource = newLarSource(lars, 0, relevantLar, irrelevantLar)

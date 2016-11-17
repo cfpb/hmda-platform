@@ -17,7 +17,7 @@ class Q057Spec extends MacroSpec {
   val relevantAmount: Gen[Int] = Gen.chooseNum(larCount, 10000)
 
   property(s"be valid if fewer than $larCount lars") {
-    forAll(irrelevantAmount) { (x: Int) =>
+    forAll(irrelevantAmount) { (x) =>
       val lars = larNGen(x).sample.getOrElse(Nil)
       val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
       validLarSource.mustPass
@@ -25,7 +25,7 @@ class Q057Spec extends MacroSpec {
   }
 
   property(s"be valid if more than $larCount lars and one denial") {
-    forAll(relevantAmount) { (x: Int) =>
+    forAll(relevantAmount) { (x) =>
       val lars = larNGen(x).sample.getOrElse(Nil)
       val validLarSource = newLarSource(lars, 1, relevantLar, irrelevantLar)
       validLarSource.mustPass
@@ -33,7 +33,7 @@ class Q057Spec extends MacroSpec {
   }
 
   property(s"be invalid if more than $larCount lars and no denials") {
-    forAll(relevantAmount) { (x: Int) =>
+    forAll(relevantAmount) { (x) =>
       val lars = larNGen(x).sample.getOrElse(Nil)
       val invalidLarSource = newLarSource(lars, 0, relevantLar, irrelevantLar)
       invalidLarSource.mustFail
