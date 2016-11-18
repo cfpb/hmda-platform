@@ -25,7 +25,7 @@ object Q055 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
       count(lars.filter(lar => lar.hoepaStatus == 1 && lar.actionTakenType == 1 && lar.rateSpread != "NA")
         .filter(lar => lar.rateSpread.toInt >= 5))
 
-    val total = count(lars)
+    val total = count(lars.filter(lar => lar.actionTakenType == 1))
 
     for {
       h <- hoepaLoans

@@ -9,7 +9,7 @@ class Q061Spec extends MacroSpec {
   val config = ConfigFactory.load()
   val multiplier = config.getDouble("hmda.validation.macro.Q061.numOfLarsMultiplier")
 
-  val testLars = lar100ListGen.sample.getOrElse(Nil)
+  val testLars = lar100ListGen.sample.getOrElse(Nil).map(lar => lar.copy(actionTakenType = 1))
   val sampleSize = testLars.size
   def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(rateSpread = "NA")
   def relevantLar(lar: LoanApplicationRegister) = {
