@@ -12,18 +12,11 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Filing, Submission, SubmissionId }
-import hmda.model.institution.Institution
+import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
-import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
-import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
-import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
-import hmda.query.projections.institutions.InstitutionView
-import hmda.query.projections.institutions.InstitutionView.GetInstitutionById
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -34,6 +27,7 @@ trait SubmissionEditPaths
     with ApiErrorProtocol
     with EditResultsProtocol
     with HmdaCustomDirectives
+    with RequestVerificationUtils
     with ValidationErrorConverter {
 
   implicit val system: ActorSystem
@@ -125,38 +119,6 @@ trait SubmissionEditPaths
       s <- fHmdaFileValidator
       xs <- (s ? GetState).mapTo[HmdaFileValidationState]
     } yield xs
-  }
-
-  /*
-     If the request is legal (i.e. the institution, period, and filing exist), return None.
-     If any of the parameters is not valid, return Some(message), where the message describes the issue.
-   */
-  def verifyRequest(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
-    val submissionId = SubmissionId(institutionId, period, seqNr)
-
-    val supervisor = system.actorSelection("/user/supervisor")
-    val querySupervisor = system.actorSelection("/user/query-supervisor")
-
-    val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-    val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
-    val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
-
-    for {
-      ia <- fInstitutionsActor
-      i <- (ia ? GetInstitutionById(institutionId)).mapTo[Institution]
-      fa <- fFilingsActor
-      f <- (fa ? GetFilingByPeriod(period)).mapTo[Filing]
-      sa <- fSubmissionsActor
-      s <- (sa ? GetSubmissionById(submissionId)).mapTo[Submission]
-      msg <- getErrorMessage(i, f, s, institutionId, period, submissionId)
-    } yield msg
-  }
-
-  private def getErrorMessage(i: Institution, f: Filing, s: Submission, iid: String, p: String, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Option[String]] = Future {
-    if (s.id == sid) None
-    else if (f.period == p) Some(s"Submission ${sid.sequenceNumber} not found for $p filing")
-    else if (i.id == iid) Some(s"$p filing not found for institution $iid")
-    else Some(s"Institution $iid not found")
   }
 
 }
