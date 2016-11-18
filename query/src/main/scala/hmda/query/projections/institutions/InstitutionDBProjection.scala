@@ -4,8 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
 import hmda.persistence.model.HmdaActor
-import hmda.query.dao.institutions.{ InstitutionDAO, Institutions }
-import slick.lifted.TableQuery
+import hmda.query.dao.institutions.InstitutionRepository
 import hmda.query.dao.institutions.InstitutionConverter._
 import slick.driver.H2Driver
 import slick.driver.H2Driver.api._
@@ -23,11 +22,11 @@ object InstitutionDBProjection {
 
 }
 
-class InstitutionDBProjection extends HmdaActor with InstitutionDAO with H2Driver {
+class InstitutionDBProjection extends HmdaActor with InstitutionRepository with H2Driver {
 
   import InstitutionDBProjection._
 
-  val institutions = TableQuery[Institutions]
+  val repository = new InstitutionBaseRepository
 
   val db: Database = Database.forConfig("h2mem")
 
@@ -38,13 +37,13 @@ class InstitutionDBProjection extends HmdaActor with InstitutionDAO with H2Drive
       case InstitutionCreated(i) =>
         val query = toInstitutionQuery(i)
         log.debug(s"Created: $query")
-        db.run(insertOrUpdate(query))
+        repository.save(query)
           .map(x => InstitutionInserted(x)) pipeTo self
 
       case InstitutionModified(i) =>
         val query = toInstitutionQuery(i)
         log.info(s"Modified: $query")
-        db.run(update(query))
+        repository.update(query)
           .map(x => InstitutionUpdated(x)) pipeTo self
 
     }

@@ -1,34 +1,29 @@
 package hmda.query.dao.institutions
 
+import hmda.query.model.institutions.InstitutionEntity
+import hmda.query.model.institutions.InstitutionQueryGenerators._
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import slick.driver.H2Driver
 import slick.driver.H2Driver.api._
 import slick.jdbc.meta.MTable
-import hmda.query.model.institutions.InstitutionQueryGenerators._
 
-class InstitutionDAOSpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll with InstitutionDAO with H2Driver {
-
-  var db: Database = _
-  val institutions = TableQuery[Institutions]
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    db = Database.forConfig("h2mem")
-  }
+class InstitutionRepositorySpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll with InstitutionRepository with H2Driver {
+  override val db: api.Database = Database.forConfig("h2mem")
 
   override def afterAll(): Unit = {
     super.afterAll()
     db.close()
   }
 
-  "Institutions" must {
+  val repository = new InstitutionBaseRepository
 
+  "Institution Repository" must {
     val i = createInstitution()
     val modified = i.copy(cra = true)
 
     "create schema" in {
       val fTables = for {
-        s <- db.run(createSchema())
+        s <- repository.createSchema()
         tables <- db.run(MTable.getTables)
       } yield tables
 
@@ -38,35 +33,35 @@ class InstitutionDAOSpec extends AsyncWordSpec with MustMatchers with BeforeAndA
     }
 
     "save new institution" in {
-      val fInsert = db.run(insertOrUpdate(i))
+      val fInsert = repository.save(i)
 
       fInsert.map { x =>
         x mustBe 1
       }
     }
 
-    "modify institution" in {
-      val fModified = db.run(insertOrUpdate(modified))
+    "find modified institution" in {
+      val fModified = repository.update(modified)
 
       fModified.map { x =>
         x mustBe 1
       }
-    }
 
-    "get modified institution" in {
-      val fInst = for {
-        i <- db.run(get(modified.id))
-      } yield i
+      val fCra = for {
+        m <- repository.find(modified.id).mapTo[Option[InstitutionEntity]]
+      } yield {
+        m.getOrElse(InstitutionEntity()).cra
+      }
 
-      fInst.map { x =>
-        x.get mustBe modified
+      fCra.flatMap { x =>
+        x mustBe true
       }
 
     }
+
   }
 
   private def createInstitution() = {
     institutionQueryGen.sample.get
   }
-
 }
