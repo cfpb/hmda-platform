@@ -27,11 +27,32 @@ abstract class MacroSpec extends SummaryEditCheckSpec with BeforeAndAfterAll wit
     system.terminate()
   }
 
-  protected def newLarSource(lars: List[LoanApplicationRegister], numOfRelevantLars: Int, relevantDef: LoanApplicationRegister => LoanApplicationRegister, irrelevantDef: LoanApplicationRegister => LoanApplicationRegister) = {
-    val relevantLars = lars.map(lar => relevantDef(lar)).take(numOfRelevantLars)
-    val irrelevantLars = lars.map(lar => irrelevantDef(lar)).drop(numOfRelevantLars)
+  protected def newLarSource(
+    lars: List[LoanApplicationRegister],
+    numOfRelevantLars: Int,
+    relevantDef: LoanApplicationRegister => LoanApplicationRegister,
+    irrelevantDef: LoanApplicationRegister => LoanApplicationRegister,
+    relevantChange: LoanApplicationRegister => LoanApplicationRegister = lar => lar,
+    irrelevantChange: LoanApplicationRegister => LoanApplicationRegister = lar => lar
+  ) = {
+    val relevantLars = lars
+      .map(lar => relevantDef(lar))
+      .map(lar => relevantChange(lar))
+      .take(numOfRelevantLars)
+    val irrelevantLars = lars
+      .map(lar => irrelevantDef(lar))
+      .map(lar => irrelevantChange(lar))
+      .drop(numOfRelevantLars)
     val newLars = relevantLars ::: irrelevantLars
     Source.fromIterator(() => newLars.toIterator)
   }
 
+  protected def setRelevantAmount(base: Int, numOfRelevantLars: Int, numOfLars: Int, findAmount: (LoanApplicationRegister, Int) => LoanApplicationRegister, relevantMultiplier: Double)(lar: LoanApplicationRegister): LoanApplicationRegister = {
+    val amount = ((numOfLars.toDouble / numOfRelevantLars.toDouble) * base * relevantMultiplier).toInt
+    findAmount(lar, amount)
+  }
+
+  protected def setIrrelevantAmount(base: Int, findAmount: (LoanApplicationRegister, Int) => LoanApplicationRegister)(lar: LoanApplicationRegister): LoanApplicationRegister = {
+    findAmount(lar, base)
+  }
 }
