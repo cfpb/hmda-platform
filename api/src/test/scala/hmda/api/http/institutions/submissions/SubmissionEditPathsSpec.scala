@@ -3,14 +3,11 @@ package hmda.api.http.institutions.submissions
 import akka.actor.ActorRef
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.server.MethodRejection
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model._
 import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
-import hmda.persistence.demo.DemoData
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.validation.engine._
 
@@ -78,32 +75,13 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   "Edits endpoint: return 404 for nonexistent filing period" in {
     getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Filing Period 1980 not found"
+      responseAs[ErrorResponse].message mustBe "1980 filing not found for institution 0"
     }
   }
   "Edits endpoint: return 404 for nonexistent submission" in {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Submission 0 not found"
-    }
-  }
-
-  "Edit Type endpoint: return 404 for nonexistent institution" in {
-    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
-    }
-  }
-  "Edit Type endpoint: return 404 for nonexistent filing period" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits/quality") ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Filing Period 1980 not found"
-    }
-  }
-  "Edit Type endpoint: return 404 for nonexistent submission" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Submission 0 not found"
+      responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing"
     }
   }
 
