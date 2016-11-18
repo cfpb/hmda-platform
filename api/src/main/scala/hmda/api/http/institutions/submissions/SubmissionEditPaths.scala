@@ -80,32 +80,38 @@ trait SubmissionEditPaths
       extractExecutionContext { executor =>
         timedGet { uri =>
           implicit val ec: ExecutionContext = executor
-          val fValidationState = getValidationState(institutionId, period, seqNr)
 
-          val fSingleEdits = fValidationState.map { editChecks =>
-            editType match {
-              case "syntactical" =>
-                validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-              case "validity" =>
-                validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-              case "quality" =>
-                validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-              case "macro" =>
-                validationErrorsToMacroResults(editChecks.larMacro)
-            }
+          onComplete(verifyRequest(institutionId, period, seqNr)) {
+            case Success(Some(message)) =>
+              val errorResponse = ErrorResponse(404, message, uri.path)
+              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+
+            case Success(None) =>
+              val fValidationState = getValidationState(institutionId, period, seqNr)
+
+              val fSingleEdits = fValidationState.map { editChecks =>
+                editType match {
+                  case "syntactical" =>
+                    validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+                  case "validity" =>
+                    validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+                  case "quality" =>
+                    validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+                  case "macro" =>
+                    validationErrorsToMacroResults(editChecks.larMacro)
+                }
+              }
+
+              onComplete(fSingleEdits) {
+                case Success(edits: MacroResults) => complete(ToResponseMarshallable(edits))
+                case Success(edits: EditResults) => complete(ToResponseMarshallable(edits))
+                case Success(_) => completeWithInternalError(uri, new IllegalStateException)
+                case Failure(error) => completeWithInternalError(uri, error)
+              }
+
+            case Failure(error) => completeWithInternalError(uri, error)
+
           }
-
-          onComplete(fSingleEdits) {
-            case Success(edits: MacroResults) =>
-              complete(ToResponseMarshallable(edits))
-            case Success(edits: EditResults) =>
-              complete(ToResponseMarshallable(edits))
-            case Success(_) =>
-              completeWithInternalError(uri, new IllegalStateException)
-            case Failure(error) =>
-              completeWithInternalError(uri, error)
-          }
-
         }
       }
     }
@@ -121,13 +127,10 @@ trait SubmissionEditPaths
     } yield xs
   }
 
-  private def getErrorMessage(i: Institution, f: Filing, s: Submission, iid: String, p: String, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Option[String]] = Future {
-    if (s.id == sid) None
-    else if (f.period == p) Some(s"Submission ${sid.sequenceNumber} not found for $p filing")
-    else if (i.id == iid) Some(s"$p filing not found for institution $iid")
-    else Some(s"Institution $iid not found")
-  }
-
+  /*
+     If the request is legal (i.e. the institution, period, and filing exist), return None.
+     If any of the parameters is not valid, return Some(message), where the message describes the issue.
+   */
   def verifyRequest(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
     val submissionId = SubmissionId(institutionId, period, seqNr)
 
@@ -147,6 +150,13 @@ trait SubmissionEditPaths
       s <- (sa ? GetSubmissionById(submissionId)).mapTo[Submission]
       msg <- getErrorMessage(i, f, s, institutionId, period, submissionId)
     } yield msg
+  }
+
+  private def getErrorMessage(i: Institution, f: Filing, s: Submission, iid: String, p: String, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Option[String]] = Future {
+    if (s.id == sid) None
+    else if (f.period == p) Some(s"Submission ${sid.sequenceNumber} not found for $p filing")
+    else if (i.id == iid) Some(s"$p filing not found for institution $iid")
+    else Some(s"Institution $iid not found")
   }
 
 }
