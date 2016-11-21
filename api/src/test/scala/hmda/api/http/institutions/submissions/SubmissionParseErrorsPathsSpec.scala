@@ -6,6 +6,7 @@ import akka.pattern.ask
 import akka.http.scaladsl.model.StatusCodes
 import akka.util.Timeout
 import hmda.api.http.InstitutionHttpApiSpec
+import hmda.api.model.ErrorResponse
 import hmda.model.fi._
 import hmda.parser.fi.lar.{ LarParsingError, ParsingErrorSummary }
 import hmda.persistence.messages.CommonMessages.GetState
@@ -45,6 +46,25 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[ParsingErrorSummary] mustBe ParsingErrorSummary(List(), List(LarParsingError(10, List("test", "ing"))))
+      }
+    }
+
+    "Return 404 for nonexistent institution" in {
+      getWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
+      }
+    }
+    "Return 404 for nonexistent filing period" in {
+      getWithCfpbHeaders("/institutions/0/filings/1980/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse].message mustBe "1980 filing not found for institution 0"
+      }
+    }
+    "Return 404 for nonexistent submission" in {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/parseErrors") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing"
       }
     }
   }
