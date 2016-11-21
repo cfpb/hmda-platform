@@ -7,7 +7,7 @@ import hmda.parser.fi.lar.LarCsvParser
 object MacroTestData {
 
   val lars: Array[LoanApplicationRegister] = {
-    fiCSV.split("\n")
+    macroPasses.split("\n")
       .tail.map(line => LarCsvParser(line))
       .filter(x => x.isRight)
       .map(x => x.right.get)
