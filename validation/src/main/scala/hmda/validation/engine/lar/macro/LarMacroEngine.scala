@@ -20,6 +20,7 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
         Q007,
         Q008,
         Q010,
+        Q023,
         Q047,
         Q055,
         Q057,
