@@ -4,7 +4,6 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
@@ -14,7 +13,7 @@ import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
+import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
@@ -43,26 +42,21 @@ trait SubmissionEditPaths
         timedGet { uri =>
           implicit val ec: ExecutionContext = executor
 
-          onComplete(verifyRequest(institutionId, period, seqNr)) {
-            case Success(Some(message)) =>
-              val errorResponse = ErrorResponse(404, message, uri.path)
-              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-            case Success(None) =>
-              val fEditChecks = getValidationState(institutionId, period, seqNr)
+          completeVerified(institutionId, period, seqNr, uri) {
+            val fEditChecks = getValidationState(institutionId, period, seqNr)
 
-              val fSummaryEdits = fEditChecks.map { editChecks =>
-                val s = validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-                val v = validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-                val q = validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-                val m = validationErrorsToMacroResults(editChecks.larMacro)
-                SummaryEditResults(s, v, q, m)
-              }
+            val fSummaryEdits = fEditChecks.map { editChecks =>
+              val s = validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+              val v = validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+              val q = validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+              val m = validationErrorsToMacroResults(editChecks.larMacro)
+              SummaryEditResults(s, v, q, m)
+            }
 
-              onComplete(fSummaryEdits) {
-                case Success(edits) => complete(ToResponseMarshallable(edits))
-                case Failure(error) => completeWithInternalError(uri, error)
-              }
-            case Failure(error) => completeWithInternalError(uri, error)
+            onComplete(fSummaryEdits) {
+              case Success(edits) => complete(ToResponseMarshallable(edits))
+              case Failure(error) => completeWithInternalError(uri, error)
+            }
           }
         }
       }
@@ -75,36 +69,28 @@ trait SubmissionEditPaths
         timedGet { uri =>
           implicit val ec: ExecutionContext = executor
 
-          onComplete(verifyRequest(institutionId, period, seqNr)) {
-            case Success(Some(message)) =>
-              val errorResponse = ErrorResponse(404, message, uri.path)
-              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+          completeVerified(institutionId, period, seqNr, uri) {
+            val fValidationState = getValidationState(institutionId, period, seqNr)
 
-            case Success(None) =>
-              val fValidationState = getValidationState(institutionId, period, seqNr)
-
-              val fSingleEdits = fValidationState.map { editChecks =>
-                editType match {
-                  case "syntactical" =>
-                    validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-                  case "validity" =>
-                    validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-                  case "quality" =>
-                    validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-                  case "macro" =>
-                    validationErrorsToMacroResults(editChecks.larMacro)
-                }
+            val fSingleEdits = fValidationState.map { editChecks =>
+              editType match {
+                case "syntactical" =>
+                  validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+                case "validity" =>
+                  validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+                case "quality" =>
+                  validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+                case "macro" =>
+                  validationErrorsToMacroResults(editChecks.larMacro)
               }
+            }
 
-              onComplete(fSingleEdits) {
-                case Success(edits: MacroResults) => complete(ToResponseMarshallable(edits))
-                case Success(edits: EditResults) => complete(ToResponseMarshallable(edits))
-                case Success(_) => completeWithInternalError(uri, new IllegalStateException)
-                case Failure(error) => completeWithInternalError(uri, error)
-              }
-
-            case Failure(error) => completeWithInternalError(uri, error)
-
+            onComplete(fSingleEdits) {
+              case Success(edits: MacroResults) => complete(ToResponseMarshallable(edits))
+              case Success(edits: EditResults) => complete(ToResponseMarshallable(edits))
+              case Success(_) => completeWithInternalError(uri, new IllegalStateException)
+              case Failure(error) => completeWithInternalError(uri, error)
+            }
           }
         }
       }

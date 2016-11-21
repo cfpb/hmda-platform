@@ -1,8 +1,15 @@
 package hmda.api.http.institutions.submissions
 
 import akka.actor.{ ActorRef, ActorSystem }
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.{ StatusCodes, Uri }
+import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
+import hmda.api.http.HmdaCustomDirectives
+import hmda.api.model.ErrorResponse
 import hmda.model.fi.{ Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
@@ -14,17 +21,32 @@ import hmda.query.projections.institutions.InstitutionView
 import hmda.query.projections.institutions.InstitutionView.GetInstitutionById
 
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
-trait RequestVerificationUtils {
+trait RequestVerificationUtils extends HmdaCustomDirectives {
 
   implicit val system: ActorSystem
   implicit val timeout: Timeout
 
   /*
+     If the institution, filing, and submission exist, complete the request.
+     If any one does not exist, respond with 404 error, including an appropriate message.
+   */
+  def completeVerified(institutionId: String, period: String, seqNr: Int, uri: Uri)(completeRequest: Route)(implicit ec: ExecutionContext): Route = {
+    onComplete(verifyRequest(institutionId, period, seqNr)) {
+      case Success(None) => completeRequest
+      case Success(Some(message)) =>
+        val errorResponse = ErrorResponse(404, message, uri.path)
+        complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+      case Failure(error) => completeWithInternalError(uri, error)
+    }
+  }
+
+  /*
      If the request is legal (i.e. the institution, period, and filing exist), return None.
      If any of the objects does not exist, return Some(message), where message describes the issue.
    */
-  def verifyRequest(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
+  private def verifyRequest(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
     val submissionId = SubmissionId(institutionId, period, seqNr)
 
     val supervisor = system.actorSelection("/user/supervisor")
