@@ -11,12 +11,13 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
+import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
-import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
+import hmda.persistence.processing.HmdaFileValidator.{ HmdaFileValidationState, LarErrorVerified, VerifyLarError }
+import hmda.validation.engine._
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -25,6 +26,7 @@ trait SubmissionEditPaths
     extends InstitutionProtocol
     with ApiErrorProtocol
     with EditResultsProtocol
+    with ValidationResultProtocol
     with HmdaCustomDirectives
     with ValidationErrorConverter {
 
@@ -94,6 +96,34 @@ trait SubmissionEditPaths
           }
 
         }
+      }
+    }
+
+  // institutions/<institutionId>/filings/<period>/submissions/seqNr/edits/<editId>
+  def submissionVerifyEdit(institutionId: String) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editId) =>
+      extractExecutionContext { executor =>
+        entity(as[VerifyLarError]) { e =>
+          timedPut { uri =>
+            implicit val ec: ExecutionContext = executor
+            val supervisor = system.actorSelection("/user/supervisor")
+            val submissionId = SubmissionId(institutionId, period, seqNr)
+            val hmdaFileValidatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+
+            val fVerified = for {
+              a <- hmdaFileValidatorF
+              v <- (a ? e).mapTo[LarErrorVerified]
+              vr = VerifyLarErrorResponse(v.error.errorId, v.error.name, true)
+            } yield vr
+
+            onComplete(fVerified) {
+              case Success(v) => complete(ToResponseMarshallable(v))
+              case Failure(error) => completeWithInternalError(uri, error)
+            }
+
+          }
+        }
+
       }
     }
 

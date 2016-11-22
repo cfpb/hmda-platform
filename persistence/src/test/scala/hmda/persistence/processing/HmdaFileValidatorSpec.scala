@@ -123,7 +123,9 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       ))
 
       probe.send(hmdaFileValidator3, VerifyLarError(e2, "reasons"))
+      probe.expectMsg(LarErrorVerified(e2, "reasons"))
       probe.send(hmdaFileValidator3, VerifyLarError(e3, "reasons"))
+      probe.expectMsg(LarErrorVerified(e3, "reasons"))
       probe.send(hmdaFileValidator3, GetState)
       probe.expectMsg(HmdaFileValidationState(
         None,

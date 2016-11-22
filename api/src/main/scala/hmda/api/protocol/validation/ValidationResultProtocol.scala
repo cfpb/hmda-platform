@@ -1,6 +1,6 @@
 package hmda.api.protocol.validation
 
-import hmda.api.model.SingleValidationErrorResult
+import hmda.api.model.{ SingleValidationErrorResult, VerifyLarErrorResponse }
 import hmda.persistence.processing.HmdaFileValidator.VerifyLarError
 import hmda.validation.engine._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
@@ -34,5 +34,6 @@ trait ValidationResultProtocol extends DefaultJsonProtocol {
   implicit val validationErrorsSummaryFormat = jsonFormat1(ValidationErrorsSummary.apply)
   implicit val singleValidationResultFormat = jsonFormat3(SingleValidationErrorResult.apply)
   implicit val verifyLarErrorFormat = jsonFormat2(VerifyLarError.apply)
+  implicit val larErrorVerifiedResponseFormat = jsonFormat3(VerifyLarErrorResponse.apply)
 
 }

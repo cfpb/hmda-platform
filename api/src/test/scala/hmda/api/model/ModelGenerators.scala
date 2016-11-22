@@ -146,4 +146,12 @@ trait ModelGenerators {
     } yield VerifyLarError(e, d)
   }
 
+  implicit val verifyLarErrorResponseGen: Gen[VerifyLarErrorResponse] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+      isVerified <- Gen.oneOf(true, false)
+    } yield VerifyLarErrorResponse(id, name, isVerified)
+  }
+
 }

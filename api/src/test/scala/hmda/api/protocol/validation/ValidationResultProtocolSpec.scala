@@ -1,6 +1,6 @@
 package hmda.api.protocol.validation
 
-import hmda.api.model.ModelGenerators
+import hmda.api.model.{ ModelGenerators, VerifyLarErrorResponse }
 import hmda.persistence.processing.HmdaFileValidator.VerifyLarError
 import hmda.validation.engine.ValidationError
 import org.scalatest.{ MustMatchers, PropSpec }
@@ -18,6 +18,12 @@ class ValidationResultProtocolSpec extends PropSpec with PropertyChecks with Mus
   property("verify lar error must convert to and from json") {
     forAll(verifyLarErrorGen) { e =>
       e.toJson.convertTo[VerifyLarError] mustBe e
+    }
+  }
+
+  property("verify lar error response must convert to and from json") {
+    forAll(verifyLarErrorResponseGen) { v =>
+      v.toJson.convertTo[VerifyLarErrorResponse] mustBe v
     }
   }
 

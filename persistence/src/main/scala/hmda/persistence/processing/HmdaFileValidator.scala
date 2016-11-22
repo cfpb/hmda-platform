@@ -198,6 +198,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
     case VerifyLarError(error, details) =>
       persist(LarErrorVerified(error, details)) { e =>
         updateState(e)
+        sender() ! e
       }
 
     case GetState =>
