@@ -11,10 +11,13 @@ class Q056Spec extends MacroSpec {
   val conventionalCount = config.getInt("hmda.validation.macro.Q056.numOfConventionalHomePurchaseLoans")
   val denialMultiplier = config.getDouble("hmda.validation.macro.Q056.deniedConventionalHomePurchaseLoansMultiplier")
 
-  def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 2)
+  def irrelevantLar(lar: LoanApplicationRegister) = {
+    val relevantLoan = lar.loan.copy(purpose = 1, loanType = 1)
+    lar.copy(actionTakenType = 2, loan = relevantLoan)
+  }
   def relevantLar(lar: LoanApplicationRegister) = {
-    val relevantLoan = lar.loan.copy(purpose = 1).copy(loanType = 1)
-    lar.copy(actionTakenType = 3).copy(loan = relevantLoan)
+    val relevantLoan = lar.loan.copy(purpose = 1, loanType = 1)
+    lar.copy(actionTakenType = 3, loan = relevantLoan)
   }
 
   val irrelevantAmount: Gen[Int] = Gen.chooseNum(1, conventionalCount - 1)
@@ -28,7 +31,6 @@ class Q056Spec extends MacroSpec {
   property(s"be valid if fewer than $conventionalCount conventional loans") {
     forAll(irrelevantAmount) { (x) =>
       val lars = larNGen(x).sample.getOrElse(Nil)
-        .map(lar => makeLarsRelevant(lar))
       val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
@@ -38,7 +40,6 @@ class Q056Spec extends MacroSpec {
     forAll(relevantAmount) { (x) =>
       val numOfRelevantLars = (x * denialMultiplier).toInt - 1
       val lars = larNGen(x).sample.getOrElse(Nil)
-        .map(lar => makeLarsRelevant(lar))
       val validLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
@@ -48,7 +49,6 @@ class Q056Spec extends MacroSpec {
     forAll(relevantAmount) { (x) =>
       val numOfRelevantLars = (x * denialMultiplier).toInt
       val lars = larNGen(x).sample.getOrElse(Nil)
-        .map(lar => makeLarsRelevant(lar))
       val invalidLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
       invalidLarSource.mustPass
     }
@@ -58,7 +58,6 @@ class Q056Spec extends MacroSpec {
     forAll(relevantAmount) { (x) =>
       val numOfRelevantLars = (x * denialMultiplier).toInt + 1
       val lars = larNGen(x).sample.getOrElse(Nil)
-        .map(lar => makeLarsRelevant(lar))
       val invalidLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
       invalidLarSource.mustFail
     }
