@@ -15,11 +15,11 @@ class Q016Spec extends MacroSpec {
   val sampleSize = testLars.size
   val sampleSizeTarget = (testLars.size * multiplier).toInt
   def underCap(lar: LoanApplicationRegister) = {
-    val underCapLoan = lar.loan.copy(amount = 9)
+    val underCapLoan = lar.loan.copy(amount = incomeCap - 1)
     lar.copy(loan = underCapLoan)
   }
   def overCap(lar: LoanApplicationRegister) = {
-    val overCapLoan = lar.loan.copy(amount = 11)
+    val overCapLoan = lar.loan.copy(amount = incomeCap + 1)
     lar.copy(loan = overCapLoan)
   }
 
