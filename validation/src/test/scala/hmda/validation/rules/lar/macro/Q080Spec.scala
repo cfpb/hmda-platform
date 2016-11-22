@@ -5,9 +5,8 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
-class Q080Spec extends MacroSpec {
+class Q080Spec extends SimplifiedMacroSpec {
 
-  val config = ConfigFactory.load()
   val multiplier = config.getDouble("hmda.validation.macro.Q080.numOfLarsMultiplier")
 
   val testLars = lar100ListGen.sample.getOrElse(Nil)
@@ -17,25 +16,9 @@ class Q080Spec extends MacroSpec {
     val applicant = lar.applicant.copy(ethnicity = 3)
     lar.copy(actionTakenType = 1, loan = loan, applicant = applicant)
   }
-  def deniedLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 4)
+  def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 4)
 
-  property(s"be valid if relevant lars < $multiplier * approved or denied lars") {
-    val numOfRelevantLars = sampleSizeTarget - 1
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, deniedLar)
-    validLarSource.mustPass
-  }
-
-  property(s"be valid if relevant lars = $multiplier * approved or denied lars") {
-    val numOfRelevantLars = sampleSizeTarget
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, deniedLar)
-    validLarSource.mustPass
-  }
-
-  property(s"be invalid if relevant lars > $multiplier * approved or denied lars") {
-    val numOfRelevantLars = sampleSizeTarget + 1
-    val invalidLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, deniedLar)
-    invalidLarSource.mustFail
-  }
+  simplifiedPropertyTests("no ethnicity", multiplier, relevantLar, irrelevantLar)
 
   override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q080
 }

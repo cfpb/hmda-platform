@@ -7,7 +7,6 @@ import org.scalacheck.Gen
 
 class Q058Spec extends MacroSpec {
 
-  val config = ConfigFactory.load()
   val preapprovalCount = config.getInt("hmda.validation.macro.Q058.numOfPreapprovalsRequested")
 
   def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 2)
