@@ -131,7 +131,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       }
 
     case ValidateMacro(larSource, replyTo) =>
-      log.info("Quality Validation completed")
+      log.debug("Quality Validation completed")
       val fMacro = checkMacro(larSource)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
@@ -181,10 +181,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
     case CompleteValidation(replyTo) =>
       if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty && state.larMacro.isEmpty
         && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
-        log.info(s"Validation completed for $submissionId")
+        log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(submissionId)
       } else {
-        log.info(s"Validation completed for $submissionId, errors found")
+        log.debug(s"Validation completed for $submissionId, errors found")
         replyTo ! ValidationCompletedWithErrors(submissionId)
       }
 
