@@ -45,7 +45,8 @@ trait InstitutionsHttpApi
                 submissionSingleEditPath(instId) ~
                 submissionIrsPath(instId) ~
                 submissionSignPath(instId) ~
-                submissionSummaryPath(instId)
+                submissionSummaryPath(instId) ~
+                submissionVerifyEdit(instId)
             }
           }
       }

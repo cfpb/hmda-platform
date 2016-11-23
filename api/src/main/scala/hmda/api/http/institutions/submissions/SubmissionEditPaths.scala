@@ -104,6 +104,7 @@ trait SubmissionEditPaths
     path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editId) =>
       extractExecutionContext { executor =>
         entity(as[VerifyLarError]) { e =>
+          require(editId == e.error.name)
           timedPut { uri =>
             implicit val ec: ExecutionContext = executor
             val supervisor = system.actorSelection("/user/supervisor")
