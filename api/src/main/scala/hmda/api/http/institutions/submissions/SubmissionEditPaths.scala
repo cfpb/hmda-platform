@@ -113,7 +113,7 @@ trait SubmissionEditPaths
             val fVerified = for {
               a <- hmdaFileValidatorF
               v <- (a ? e).mapTo[LarErrorVerified]
-              vr = VerifyLarErrorResponse(v.error.errorId, v.error.name, true)
+              vr = VerifyLarErrorResponse(v.error.errorId, v.error.name)
             } yield vr
 
             onComplete(fVerified) {

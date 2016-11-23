@@ -34,6 +34,6 @@ trait ValidationResultProtocol extends DefaultJsonProtocol {
   implicit val validationErrorsSummaryFormat = jsonFormat1(ValidationErrorsSummary.apply)
   implicit val singleValidationResultFormat = jsonFormat3(SingleValidationErrorResult.apply)
   implicit val verifyLarErrorFormat = jsonFormat2(VerifyLarError.apply)
-  implicit val larErrorVerifiedResponseFormat = jsonFormat3(VerifyLarErrorResponse.apply)
+  implicit val larErrorVerifiedResponseFormat = jsonFormat2(VerifyLarErrorResponse.apply)
 
 }

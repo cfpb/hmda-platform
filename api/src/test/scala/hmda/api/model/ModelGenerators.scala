@@ -150,8 +150,7 @@ trait ModelGenerators {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-      isVerified <- Gen.oneOf(true, false)
-    } yield VerifyLarErrorResponse(id, name, isVerified)
+    } yield VerifyLarErrorResponse(id, name)
   }
 
 }
