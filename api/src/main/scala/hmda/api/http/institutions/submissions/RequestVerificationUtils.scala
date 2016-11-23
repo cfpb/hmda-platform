@@ -68,10 +68,13 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
   }
 
   private def getErrorMessage(i: Institution, f: Filing, s: Submission, iid: String, p: String, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Option[String]] = Future {
+    val submissionFound: Boolean = s.id == sid
+    val filingFound: Boolean = f.period == p
+    val institutionFound: Boolean = i.id == iid
 
-    if (s.id == sid) None
-    else if (f.period == p) Some(s"Submission ${sid.sequenceNumber} not found for $p filing")
-    else if (i.id == iid) Some(s"$p filing not found for institution $iid")
+    if (submissionFound && filingFound && institutionFound) None
+    else if (filingFound && institutionFound) Some(s"Submission ${sid.sequenceNumber} not found for $p filing")
+    else if (institutionFound) Some(s"$p filing not found for institution $iid")
     else Some(s"Institution $iid not found")
   }
 
