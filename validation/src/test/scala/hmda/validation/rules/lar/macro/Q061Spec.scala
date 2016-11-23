@@ -4,7 +4,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
-class Q061Spec extends SimplifiedMacroSpec {
+class Q061Spec extends lessThanOrEqualToPropertyMacroSpec {
 
   override val multiplier = config.getDouble("hmda.validation.macro.Q061.numOfLarsMultiplier")
 
@@ -13,7 +13,7 @@ class Q061Spec extends SimplifiedMacroSpec {
     lar.copy(actionTakenType = 1).copy(hoepaStatus = 1).copy(rateSpread = "5").copy(lienStatus = 1).copy(actionTakenType = 1)
   }
 
-  simplifiedPropertyTests("first lien hoepa loans", multiplier, relevantLar, irrelevantLar)
+  lessThanOrEqualToPropertyTests("first lien hoepa loans", multiplier, relevantLar, irrelevantLar)
 
   override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q061
 }

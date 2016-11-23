@@ -3,14 +3,14 @@ package hmda.validation.rules.lar.`macro`
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 
-trait SimplifiedMacroSpec extends MacroSpec {
+trait lessThanOrEqualToPropertyMacroSpec extends MacroSpec {
 
   def multiplier: Double
 
   def relevantLar(lar: LoanApplicationRegister): LoanApplicationRegister
   def irrelevantLar(lar: LoanApplicationRegister): LoanApplicationRegister
 
-  protected def simplifiedPropertyTests(name: String, multiplier: Double, relevantLar: LoanApplicationRegister => LoanApplicationRegister, irrelevantLar: LoanApplicationRegister => LoanApplicationRegister): Unit = {
+  protected def lessThanOrEqualToPropertyTests(name: String, multiplier: Double, relevantLar: LoanApplicationRegister => LoanApplicationRegister, irrelevantLar: LoanApplicationRegister => LoanApplicationRegister): Unit = {
     val testLars = lar100ListGen.sample.getOrElse(Nil)
     val sampleSize = testLars.length
     val targetSize = (sampleSize * multiplier).toInt
