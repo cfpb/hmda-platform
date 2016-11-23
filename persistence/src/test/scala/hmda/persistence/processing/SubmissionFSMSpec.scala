@@ -5,7 +5,6 @@ import akka.testkit.TestProbe
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
-import hmda.persistence.processing.HmdaFileValidator.CompleteValidation
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
 

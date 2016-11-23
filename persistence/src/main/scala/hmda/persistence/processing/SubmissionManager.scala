@@ -3,14 +3,14 @@ package hmda.persistence.processing
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
-import akka.pattern.{ ask, pipe }
+import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
-import hmda.persistence.processing.HmdaFileValidator.{ CompleteValidation, ValidationStarted }
+import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }

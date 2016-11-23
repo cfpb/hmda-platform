@@ -12,7 +12,6 @@ import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
-import hmda.persistence.processing.HmdaFileValidator.CompleteValidation
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
 
