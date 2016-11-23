@@ -7,6 +7,7 @@ services:
       - '9090:8080'
     volumes:
     - ./target/scala-2.11/hmda.jar:/opt/hmda.jar
+
   ui:
     build: ../hmda-platform-ui
     ports:
@@ -26,9 +27,17 @@ services:
     environment:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: admin
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password 
+      POSTGRES_SERVER: keycloak_db
+      POSTGRES_PORT: 5432
+      # Must use the external address since it is used both in frontend and backend.
+      INSTITUTION_SEARCH_URI: https://192.168.99.100:9443
+      INSTITUTION_SEARCH_VALIDATE_SSL: "OFF"
     volumes:
       - '../hmda-platform-auth/keycloak/themes/hmda:/opt/jboss/keycloak/themes/hmda'
-    #  - './keycloak/import:/opt/jboss/import'
+    #  - '../hmda-platform-auth/keycloak/import:/opt/jboss/import'
 
     # Set action to "export" to dump Keycloak realm data
     command: >
@@ -40,6 +49,20 @@ services:
       -b 0.0.0.0
     links:
       - mail_dev
+      - keycloak_db
+      - institution_search
+
+  keycloak_db:
+    image: postgres:9.6.1
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+
+  institution_search:
+    build: ../hmda-platform-auth/institution-search
+    ports:
+      - 9443:5000
 
   auth_proxy:
     build: ../hmda-platform-auth/auth-proxy
