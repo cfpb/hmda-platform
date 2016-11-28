@@ -1,6 +1,6 @@
 package hmda.api.http.institutions.submissions
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.{ ActorRef, ActorSelection, ActorSystem }
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
@@ -47,13 +47,12 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
      If any of the objects does not exist, return Some(message), where message describes the issue.
    */
   private def verifyRequest(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
-
     val submissionId = SubmissionId(institutionId, period, seqNr)
 
     for {
-      i <- fInstitution(institutionId)
-      f <- fFiling(institutionId, period)
-      s <- fSubmission(institutionId, period, submissionId)
+      i <- fInstitution(submissionId)
+      f <- fFiling(submissionId)
+      s <- fSubmission(submissionId)
       msg <- getErrorMessage(i, f, s, institutionId, period, submissionId)
     } yield msg
   }
@@ -69,22 +68,22 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
     else Some(s"Institution $iid not found")
   }
 
-  private def fInstitution(institutionId: String)(implicit ec: ExecutionContext): Future[Institution] = {
+  private def fInstitution(sid: SubmissionId)(implicit ec: ExecutionContext): Future[Institution] = {
     val querySupervisor = system.actorSelection("/user/query-supervisor")
     val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-    fInstitutionsActor.flatMap(ia => ia ? GetInstitutionById(institutionId)).mapTo[Institution]
+    fInstitutionsActor.flatMap(ia => ia ? GetInstitutionById(sid.institutionId)).mapTo[Institution]
   }
 
-  private def fFiling(institutionId: String, period: String)(implicit ec: ExecutionContext): Future[Filing] = {
-    val supervisor = system.actorSelection("/user/supervisor")
-    val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
-    fFilingsActor.flatMap(fa => fa ? GetFilingByPeriod(period)).mapTo[Filing]
+  private def fFiling(sid: SubmissionId)(implicit ec: ExecutionContext): Future[Filing] = {
+    val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, sid.institutionId)).mapTo[ActorRef]
+    fFilingsActor.flatMap(fa => fa ? GetFilingByPeriod(sid.period)).mapTo[Filing]
   }
 
-  private def fSubmission(institutionId: String, period: String, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Submission] = {
-    val supervisor = system.actorSelection("/user/supervisor")
-    val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
-    fSubmissionsActor.flatMap(sa => sa ? GetSubmissionById(submissionId)).mapTo[Submission]
+  private def fSubmission(sid: SubmissionId)(implicit ec: ExecutionContext): Future[Submission] = {
+    val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, sid.institutionId, sid.period)).mapTo[ActorRef]
+    fSubmissionsActor.flatMap(sa => sa ? GetSubmissionById(sid)).mapTo[Submission]
   }
+
+  private def supervisor: ActorSelection = system.actorSelection("/user/supervisor")
 
 }
