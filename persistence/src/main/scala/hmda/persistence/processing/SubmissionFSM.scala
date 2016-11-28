@@ -23,6 +23,8 @@ object SubmissionFSM {
 
   val name = "SubmissionFSM"
 
+  val failedMsg = "Submission status update failed"
+
   trait SubmissionEvent extends Event
 
   trait SubmissionState
@@ -41,6 +43,7 @@ object SubmissionFSM {
   case class SubmissionValidating(s: Submission) extends SubmissionEvent
   case class SubmissionValidated(s: Submission) extends SubmissionEvent
   case class SubmissionValidatedWithErrors(s: Submission) extends SubmissionEvent
+  case class SubmissionFailed(s: Submission) extends SubmissionEvent
 
   //Submission States
   sealed trait SubmissionFSMState extends FSMState
@@ -156,6 +159,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
     case SubmissionValidating(s) => currentData.update(s)
     case SubmissionValidated(s) => currentData.update(s)
     case SubmissionValidatedWithErrors(s) => currentData.update(s)
+    case SubmissionFailed(s) => currentData.update(s)
   }
 
   startWith(Idle, EmptySubmissionData)
@@ -163,7 +167,6 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   when(Idle) {
     case Event(Create, _) =>
       goto(Created) applying SubmissionCreated(Submission(submissionId, hmda.model.fi.Created))
-
   }
 
   when(Created) {
@@ -171,7 +174,6 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Uploading
       updateStatus(status)
       goto(Uploading) applying SubmissionUploading(Submission(submissionId, status))
-
   }
 
   when(Uploading) {
@@ -179,8 +181,6 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Uploaded
       updateStatus(status)
       goto(Uploaded) applying SubmissionUploaded(Submission(submissionId, status))
-    case Event(_, data) =>
-      stay replying data
   }
 
   when(Uploaded) {
@@ -188,8 +188,6 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Parsing
       updateStatus(status)
       goto(Parsing) applying SubmissionParsing(Submission(submissionId, status))
-    case Event(_, data) =>
-      stay replying data
   }
 
   when(Parsing) {
@@ -201,8 +199,6 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.ParsedWithErrors
       updateStatus(status)
       goto(ParsedWithErrors) applying SubmissionParsedWithErrors(Submission(submissionId, status))
-    case Event(_, data) =>
-      stay replying data
   }
 
   when(Parsed) {
@@ -210,8 +206,6 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Validating
       updateStatus(status)
       goto(Validating) applying SubmissionValidating(Submission(submissionId, status))
-    case Event(_, data) =>
-      stay replying data
   }
 
   when(ParsedWithErrors) {
@@ -228,8 +222,6 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.ValidatedWithErrors
       updateStatus(status)
       goto(ValidatedWithErrors) applying SubmissionValidatedWithErrors(Submission(submissionId, status))
-    case Event(_, data) =>
-      stay replying data
   }
 
   when(Validated) {
@@ -240,11 +232,18 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   when(ValidatedWithErrors) {
     case Event(GetState, data) =>
       stay replying data
-    case Event(_, data) =>
+  }
+
+  when(Failed(failedMsg)) {
+    case Event(GetState, data) =>
       stay replying data
   }
 
   whenUnhandled {
+    case Event(Some(_), data) =>
+      stay replying data
+    case Event(None, _) =>
+      goto(Failed(failedMsg)) applying SubmissionFailed(Submission(submissionId, hmda.model.fi.Failed(failedMsg)))
     case Event(GetState, data) =>
       stay replying data
     case Event(e, d) =>

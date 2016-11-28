@@ -55,6 +55,14 @@ class SubmissionFSMSpec extends ActorSpec {
       probe.send(fsm, GetState)
       probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Validated)))
     }
+
+    "fail a submission" in {
+      val fsm = actorRef()
+
+      probe.send(fsm, None)
+      probe.send(fsm, GetState)
+      probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Failed(SubmissionFSM.failedMsg))))
+    }
   }
 
   private def actorRef(): ActorRef = createSubmissionFSM(system, submissionId)
