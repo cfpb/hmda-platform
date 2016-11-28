@@ -61,15 +61,18 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
       val newSubmission = Submission(submissionId, Created, System.currentTimeMillis(), 0L)
       persist(SubmissionCreated(newSubmission)) { e =>
         updateState(e)
+        sender() ! Some(newSubmission)
       }
 
     case UpdateSubmissionStatus(id, status) =>
       if (state.submissions.map(x => x.id).contains(id)) {
         persist(SubmissionStatusUpdated(id, status)) { e =>
           updateState(e)
+          sender() ! Some(Submission(id, status))
         }
       } else {
         log.warning(s"Submission does not exist. Could not update submission with id $id")
+        sender() ! None
       }
 
     case GetSubmissionById(id) =>

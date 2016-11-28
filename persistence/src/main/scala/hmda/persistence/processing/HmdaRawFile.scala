@@ -2,6 +2,7 @@ package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, UploadCompleted }
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.{ HmdaPersistentActor, LocalEventPublisher }
 
@@ -15,13 +16,9 @@ object HmdaRawFile {
     system.actorOf(HmdaRawFile.props(submissionId))
   }
 
-  case object StartUpload extends Command
   case class AddLine(timestamp: Long, data: String) extends Command
-  case object CompleteUpload extends Command
 
-  case class UploadStarted(submissionId: SubmissionId) extends Event
   case class LineAdded(timestamp: Long, data: String) extends Event
-  case class UploadCompleted(size: Int, submissionId: SubmissionId) extends Event
 
   case class HmdaRawFileState(size: Int = 0) {
     def updated(event: Event): HmdaRawFileState = event match {
@@ -32,7 +29,7 @@ object HmdaRawFile {
 
 }
 
-class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with LocalEventPublisher {
+class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   import HmdaRawFile._
 
@@ -46,9 +43,6 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with L
 
   override def receiveCommand: Receive = {
 
-    case StartUpload =>
-      publishEvent(UploadStarted(submissionId))
-
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
         log.debug(s"Persisted: ${e.data}")
@@ -56,7 +50,7 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor with L
       }
 
     case CompleteUpload =>
-      publishEvent(UploadCompleted(state.size, submissionId))
+      sender() ! UploadCompleted(state.size, submissionId)
 
     case GetState =>
       sender() ! state

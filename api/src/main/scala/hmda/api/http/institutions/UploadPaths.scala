@@ -5,11 +5,11 @@ import java.time.Instant
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.model.Uri.Path
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
@@ -21,8 +21,9 @@ import hmda.model.fi.{ Created, Submission, SubmissionId, Uploaded, Failed }
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.processing.HmdaRawFile
-import hmda.persistence.processing.HmdaRawFile.{ AddLine, CompleteUpload, StartUpload }
+import hmda.persistence.processing.HmdaRawFile.AddLine
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload }
+import hmda.persistence.processing.SubmissionManager
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -45,7 +46,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           implicit val ec: ExecutionContext = executor
           val uploadTimestamp = Instant.now.toEpochMilli
           val supervisor = system.actorSelection("/user/supervisor")
-          val fProcessingActor = (supervisor ? FindProcessingActor(HmdaRawFile.name, submissionId)).mapTo[ActorRef]
+          val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
           val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
 
           val fUploadSubmission = for {
@@ -79,7 +80,6 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
         onComplete(uploadedF) {
           case Success(response) =>
             processingActor ! CompleteUpload
-            processingActor ! Shutdown
             complete(ToResponseMarshallable(StatusCodes.Accepted -> submission.copy(status = Uploaded)))
           case Failure(error) =>
             processingActor ! Shutdown

@@ -1,32 +1,28 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.model.{ HmdaPersistentActor, LocalEventPublisher }
+import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.HmdaRawFile.LineAdded
+import hmda.persistence.processing.ProcessingMessages._
 
 object HmdaFileParser {
 
   val name = "HmdaFileParser"
 
-  case class ReadHmdaRawFile(persistenceId: String) extends Command
+  case class ReadHmdaRawFile(persistenceId: String, replyTo: ActorRef) extends Command
+  case class FinishParsing(replyTo: ActorRef) extends Command
   case class TsParsed(ts: TransmittalSheet) extends Event
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
   case class LarParsedErrors(errors: LarParsingError) extends Event
-
-  case class CompleteParsing(submissionId: SubmissionId) extends Command
-  case class CompleteParsingWithErrors(submissionId: SubmissionId) extends Command
-  case class ParsingStarted(submissionId: SubmissionId) extends Event
-  case class ParsingCompleted(submissionId: SubmissionId) extends Event
-  case class ParsingCompletedWithErrors(submissionId: SubmissionId) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 
@@ -47,7 +43,7 @@ object HmdaFileParser {
 
 }
 
-class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor with LocalEventPublisher {
+class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   import HmdaFileParser._
 
@@ -62,8 +58,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
 
   override def receiveCommand: Receive = {
 
-    case ReadHmdaRawFile(persistenceId) =>
-      publishEvent(ParsingStarted(submissionId))
+    case ReadHmdaRawFile(persistenceId, replyTo: ActorRef) =>
 
       val parsedTs = events(persistenceId)
         .map { case LineAdded(_, data) => data }
@@ -92,11 +87,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
         }
 
       parsedLar
-        .runForeach(pLar => self ! pLar)
-        .andThen {
-          case _ if encounteredParsingErrors => self ! CompleteParsingWithErrors
-          case _ if !encounteredParsingErrors => self ! CompleteParsing
-        }
+        .runWith(Sink.actorRef(self, FinishParsing(replyTo)))
 
     case tp @ TsParsed(ts) =>
       persist(tp) { e =>
@@ -122,13 +113,11 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor wit
         updateState(e)
       }
 
-    case CompleteParsing =>
-      log.debug(s"Parsing completed for $submissionId")
-      publishEvent(ParsingCompleted(submissionId))
-
-    case CompleteParsingWithErrors =>
-      log.debug(s"Parsing completed for $submissionId, errors found")
-      publishEvent(ParsingCompletedWithErrors(submissionId))
+    case FinishParsing(replyTo) =>
+      if (encounteredParsingErrors)
+        replyTo ! ParsingCompletedWithErrors(submissionId)
+      else
+        replyTo ! ParsingCompleted(submissionId)
 
     case GetState =>
       sender() ! state
