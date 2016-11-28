@@ -37,6 +37,10 @@ trait HmdaRepository {
       query.schema.create
     }
 
+    def deleteSchemaQuery() = {
+      query.schema.drop
+    }
+
     def findByIdQuery(id: String) = {
       query.filter(_.id === id)
     }
@@ -68,6 +72,10 @@ trait HmdaRepository {
 
     def createSchema() = {
       db.run(createSchemaQuery())
+    }
+
+    def dropSchema() = {
+      db.run(deleteSchemaQuery())
     }
 
     def find(id: String) = {

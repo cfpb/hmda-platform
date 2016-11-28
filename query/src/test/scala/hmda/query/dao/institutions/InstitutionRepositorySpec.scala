@@ -23,6 +23,7 @@ class InstitutionRepositorySpec extends AsyncWordSpec with MustMatchers with Bef
 
     "create schema" in {
       val fTables = for {
+        d <- repository.dropSchema()
         s <- repository.createSchema()
         tables <- db.run(MTable.getTables)
       } yield tables
