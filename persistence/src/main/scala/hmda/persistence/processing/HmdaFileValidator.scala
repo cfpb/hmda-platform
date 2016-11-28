@@ -10,13 +10,14 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
-import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, ValidationCompleted, ValidationCompletedWithErrors }
+import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
+
 import scala.util.Try
 
 object HmdaFileValidator {
@@ -26,7 +27,6 @@ object HmdaFileValidator {
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
-  case class CompleteValidation(replyTo: ActorRef) extends Command
   case class TsValidated(ts: TransmittalSheet) extends Event
   case class LarValidated(lar: LoanApplicationRegister) extends Event
   case class TsSyntacticalError(error: ValidationError) extends Event
@@ -131,7 +131,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       }
 
     case ValidateMacro(larSource, replyTo) =>
-      log.info("Quality Validation completed")
+      log.debug("Quality Validation completed")
       val fMacro = checkMacro(larSource)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
@@ -181,10 +181,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
     case CompleteValidation(replyTo) =>
       if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty && state.larMacro.isEmpty
         && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
-        log.info(s"Validation completed for $submissionId")
+        log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(submissionId)
       } else {
-        log.info(s"Validation completed for $submissionId, errors found")
+        log.debug(s"Validation completed for $submissionId, errors found")
         replyTo ! ValidationCompletedWithErrors(submissionId)
       }
 

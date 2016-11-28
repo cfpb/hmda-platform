@@ -122,7 +122,7 @@ docker run -d -p "8080:8080" hmda-api
 The API will run on `$(docker-machine ip):8080`
 
 #### To run the entire platform
-Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) directory into a sibling directory of this one. Your directory structure should look like this:
+Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) repo and the [HMDA Platform Auth](https://github.com/cfpb/hmda-platform-auth) repo into sibling directories of this one. Your directory structure should look like this:
 ```shell
 ~/dev/hmda-project$ ls -la
 total 16
@@ -130,52 +130,67 @@ drwxr-xr-x   6 lortone  staff   204B Jul 25 17:44 ./
 drwxr-xr-x   9 lortone  staff   306B Jul 25 17:50 ../
 drwxr-xr-x  22 lortone  staff   748B Jul 27 16:28 hmda-platform/
 drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
+drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
 ```
 
 From `hmda-platform`'s root directory, run the following:
 
 ```shell
-docker-compose up -d --build
+sbt clean assembly
+docker-compose up
 ```
 
 This will bring up all the HMDA Platform services. The first run may take several minutes.
 
-For convenience when doing development on both the UI and the API, the `docker-compose` file uses a `volumes` which mounts the local directory into the `hmda-platform-ui` container and the `hmda.jar` into `hmda-platform` container. This means you can make changes to either the UI or API and view them without needing to rebuild their respective containers.
+For convenience when doing development on the UI, Auth setup, and API, the `docker-compose` file uses a `volumes` which mounts the ui's `dist/` directory into the `hmda-platform-ui` container, the `hmda.jar` into `hmda-platform` container, the `hmda` themes directory in the auth repo into the `keycloak` container, and the auth-proxy's `000-default.conf` file into the `auth_proxy` container. This means you can make changes to the UI, Auth, or API and (in most cases) view them without needing to rebuild their respective containers.
 
-To build the front-end and allow "watching" for changes you can run:
+A consequence of the mounted volume for `hmda-platform-ui` requires building the front-end:
 
-``` shell
+```shell
+# requires node 6+
 # while still in the hmda-platform directory
 cd ../hmda-platform-ui
-npm install # optional, to make sure you get the dependencies
-npm run watch
-```
-
-If you don't need to "watch" for changes you can run:
-
-``` shell
-# while still in the hmda-platform directory
-cd ../hmda-platform-ui
-npm install # optional, to make sure you get the dependencies
+npm install
 npm run build
 ```
 
-This will simply build the front-end, still taking advantage of the mounted volume.
+Next, find your docker machine's endpoint.
+
+```shell
+# Typically defaults to 192.168.99.100, which will be used in the following examples
+docker-machine ip dev
+```
+
+Then, visit the following URLS and click advanced -> proceed. This will bypass self-signed cert errors from your browser when running the app.
+
+```shell
+https://192.168.99.100:8443/
+https://192.168.99.100:4443/
+```
+
+Visit the app at `http://192.168.99.100` and click "Register" when redirected to the keycloak login screen
+
+Confirm your signup via MailDev by visiting http://192.168.99.100:1080, opening the email, and clicking the verifying link
+
+You can now interact with the app/begin uploading files, etc.
+
 
 In order to view changes in the API you need to rebuild the jar and then restart the container:
 
-``` shell
+```shell
 # while still in the hmda-platform directory
 sbt clean assembly
 docker-compose stop
 docker-compose up
 ```
 
-View the app by visiting your docker machine's endpoint in the browser.
-To find your docker machine endpoint:
+To allow continued rebuilding of the front-end, you can run the following:
 
 ```shell
-docker-machine ip dev
+# requires node 6+
+# from the hmda-platform-ui directory
+npm install #if not already installed
+npm run watch
 ```
 
 ## Contributing
