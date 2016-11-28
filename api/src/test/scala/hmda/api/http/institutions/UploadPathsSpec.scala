@@ -40,10 +40,10 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
     }
 
     "return 400 when trying to upload the wrong file" in {
-      val path = Path("/institutions/0/filings/2017/submissions/1")
-      postWithCfpbHeaders(path.toString, badFile) ~> institutionsRoutes ~> check {
+      val id2 = SubmissionId("0", "2017", 2)
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", badFile) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[Submission] mustBe Submission(id, Failed("Invalid File Format"), 0L, 0L)
+        responseAs[Submission] mustBe Submission(id2, Failed("Invalid File Format"), 0L, 0L)
       }
     }
 
