@@ -47,22 +47,13 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
      If any of the objects does not exist, return Some(message), where message describes the issue.
    */
   private def verifyRequest(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
+
     val submissionId = SubmissionId(institutionId, period, seqNr)
 
-    val supervisor = system.actorSelection("/user/supervisor")
-    val querySupervisor = system.actorSelection("/user/query-supervisor")
-
-    val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-    val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
-    val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
-
     for {
-      ia <- fInstitutionsActor
-      i <- (ia ? GetInstitutionById(institutionId)).mapTo[Institution]
-      fa <- fFilingsActor
-      f <- (fa ? GetFilingByPeriod(period)).mapTo[Filing]
-      sa <- fSubmissionsActor
-      s <- (sa ? GetSubmissionById(submissionId)).mapTo[Submission]
+      i <- fInstitution(institutionId)
+      f <- fFiling(institutionId, period)
+      s <- fSubmission(institutionId, period, submissionId)
       msg <- getErrorMessage(i, f, s, institutionId, period, submissionId)
     } yield msg
   }
@@ -76,6 +67,24 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
     else if (filingFound && institutionFound) Some(s"Submission ${sid.sequenceNumber} not found for $p filing")
     else if (institutionFound) Some(s"$p filing not found for institution $iid")
     else Some(s"Institution $iid not found")
+  }
+
+  private def fInstitution(institutionId: String)(implicit ec: ExecutionContext): Future[Institution] = {
+    val querySupervisor = system.actorSelection("/user/query-supervisor")
+    val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+    fInstitutionsActor.flatMap(ia => ia ? GetInstitutionById(institutionId)).mapTo[Institution]
+  }
+
+  private def fFiling(institutionId: String, period: String)(implicit ec: ExecutionContext): Future[Filing] = {
+    val supervisor = system.actorSelection("/user/supervisor")
+    val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+    fFilingsActor.flatMap(fa => fa ? GetFilingByPeriod(period)).mapTo[Filing]
+  }
+
+  private def fSubmission(institutionId: String, period: String, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[Submission] = {
+    val supervisor = system.actorSelection("/user/supervisor")
+    val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
+    fSubmissionsActor.flatMap(sa => sa ? GetSubmissionById(submissionId)).mapTo[Submission]
   }
 
 }
