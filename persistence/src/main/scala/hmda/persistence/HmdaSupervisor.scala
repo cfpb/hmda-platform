@@ -55,9 +55,7 @@ class HmdaSupervisor extends HmdaSupervisorActor {
     case id @ InstitutionPersistence.name =>
       val actor = context.actorOf(InstitutionPersistence.props, id)
       supervise(actor, id)
-    case id @ LocalHmdaEventProcessor.name =>
-      val actor = context.actorOf(LocalHmdaEventProcessor.props(), id)
-      supervise(actor, id)
+
   }
 
   private def createFilings(name: String, id: String): ActorRef = {
@@ -84,6 +82,10 @@ class HmdaSupervisor extends HmdaSupervisorActor {
     case id @ HmdaFileValidator.name =>
       val actorId = s"$id-${submissionId.toString}"
       val actor = context.actorOf(HmdaFileValidator.props(submissionId), actorId)
+      supervise(actor, actorId)
+    case id @ SubmissionManager.name =>
+      val actorId = s"$id-${submissionId.toString}"
+      val actor = context.actorOf(SubmissionManager.props(submissionId), actorId)
       supervise(actor, actorId)
   }
 

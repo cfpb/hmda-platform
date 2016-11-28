@@ -11,16 +11,10 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, LarHttpApi }
-import hmda.persistence.HmdaSupervisor._
-import hmda.persistence.demo.DemoData
-import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.processing.{ LocalHmdaEventProcessor, SingleLarValidation }
-
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaFilingApi {
-  case object StartFilingApi
   def props(): Props = Props(new HmdaFilingApi)
 }
 
@@ -30,8 +24,6 @@ class HmdaFilingApi
     with LarHttpApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
-
-  import HmdaFilingApi._
 
   val config = ConfigFactory.load()
 

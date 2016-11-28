@@ -13,18 +13,12 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, ParsingCompleted, ParsingCompletedWithErrors, UploadCompleted }
 
 class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
 
   val config = ConfigFactory.load()
-  override implicit lazy val system =
-    ActorSystem(
-      "test-system",
-      ConfigFactory.parseString(
-        TestConfigOverride.config
-      )
-    )
 
   val submissionId = SubmissionId("0", "2017", 1)
 
@@ -73,13 +67,15 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       for (line <- lines) {
         probe.send(hmdaRawFile, AddLine(timestamp, line.toString))
       }
+
+      probe.send(hmdaRawFile, CompleteUpload)
+      probe.expectMsg(UploadCompleted(4, submissionId2))
+
       probe.send(hmdaRawFile, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
-      val msg = "Parsing completed for 0-2017-2"
-      EventFilter.debug(msg, source = hmdaFileParser2.path.toString, occurrences = 1) intercept {
-        probe.send(hmdaFileParser2, ReadHmdaRawFile("HmdaRawFile-" + "0-2017-2"))
-      }
+      probe.send(hmdaFileParser2, ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId2", probe.testActor))
+      probe.expectMsg(ParsingCompleted(submissionId2))
 
       probe.send(hmdaFileParser2, GetState)
       probe.expectMsg(HmdaFileParseState(4, Nil))
@@ -94,14 +90,16 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       for (line <- badLines) {
         probe.send(rawFileActor, AddLine(timestamp, line))
       }
+
+      probe.send(rawFileActor, CompleteUpload)
+      probe.expectMsg(UploadCompleted(4, submissionId3))
+
       probe.send(rawFileActor, GetState)
       probe.expectMsg(HmdaRawFileState(4))
 
-      // test: parse those lines, expect "ParsedWithErrors" message
-      val msg = s"Parsing completed for $submissionId3, errors found"
-      EventFilter.debug(msg, source = parserActor.path.toString, occurrences = 1) intercept {
-        probe.send(parserActor, ReadHmdaRawFile(s"HmdaRawFile-$submissionId3"))
-      }
+      probe.send(parserActor, ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId3", probe.testActor))
+      probe.expectMsg(ParsingCompletedWithErrors(submissionId3))
+
     }
 
   }

@@ -1,7 +1,7 @@
 package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem }
-import akka.testkit.{ EventFilter, TestProbe }
+import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
 import hmda.parser.fi.lar.LarCsvParser
@@ -10,6 +10,7 @@ import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
+import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, ValidationCompletedWithErrors }
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
@@ -17,14 +18,6 @@ import org.scalatest.BeforeAndAfterEach
 class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
   val config = ConfigFactory.load()
-
-  override implicit lazy val system =
-    ActorSystem(
-      "test-system",
-      ConfigFactory.parseString(
-        TestConfigOverride.config
-      )
-    )
 
   val submissionId1 = SubmissionId("0", "2017", 1)
   val submissionId2 = SubmissionId("0", "2017", 2)
@@ -89,10 +82,9 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(5, Nil))
 
-      val msg = s"Validation completed for $submissionId2, errors found"
-      EventFilter.debug(msg, source = hmdaFileValidator2.path.toString, occurrences = 1) intercept {
-        probe.send(hmdaFileValidator2, BeginValidation)
-      }
+      probe.send(hmdaFileValidator2, BeginValidation(probe.testActor))
+      probe.expectMsg(ValidationStarted(submissionId2))
+      probe.expectMsg(ValidationCompletedWithErrors(submissionId2))
 
       probe.send(hmdaFileValidator2, GetState)
       probe.expectMsg(HmdaFileValidationState(
@@ -104,7 +96,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         List(ValidationError("8299422144", "S020", Syntactical), ValidationError("2185751599", "S010", Syntactical), ValidationError("2185751599", "S020", Syntactical)),
         List(ValidationError("4977566612", "V550", Validity), ValidationError("4977566612", "V555", Validity), ValidationError("4977566612", "V560", Validity)),
         Nil,
-        List(ValidationError("", "Q008", Macro), ValidationError("", "Q010", Macro), ValidationError("", "Q016", Macro))
+        List(ValidationError("", "Q008", Macro), ValidationError("", "Q010", Macro), ValidationError("", "Q016", Macro), ValidationError("", "Q023", Macro))
       ))
 
     }
