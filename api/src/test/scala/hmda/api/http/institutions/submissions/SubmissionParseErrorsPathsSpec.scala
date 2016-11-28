@@ -51,6 +51,11 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
       }
+      // Return same error if other url parameters are also wrong
+      getWithCfpbHeaders("/institutions/xxxxx/filings/1980/submissions/0/parseErrors") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
+      }
     }
     "Return 404 for nonexistent filing period" in {
       getWithCfpbHeaders("/institutions/0/filings/1980/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
