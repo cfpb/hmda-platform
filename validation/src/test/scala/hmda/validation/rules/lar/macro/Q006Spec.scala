@@ -1,0 +1,61 @@
+package hmda.validation.rules.lar.`macro`
+
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.validation.rules.AggregateEditCheck
+import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
+import org.scalacheck.Gen
+
+class Q006Spec extends MacroSpec {
+
+  val numOfOriginatedHomePurchaseLoans = config.getInt("hmda.validation.macro.Q006.numOfOriginatedHomePurchaseLoans")
+  val multiplier = config.getDouble("hmda.validation.macro.Q006.numOfLarsMultiplier")
+
+  def irrelevantLar(lar: LoanApplicationRegister) = {
+    val irrelevantLoan = lar.loan.copy(purpose = 1)
+    lar.copy(actionTakenType = 2, loan = irrelevantLoan)
+  }
+  def relevantLar(lar: LoanApplicationRegister) = {
+    val relevantLoan = lar.loan.copy(purpose = 1)
+    lar.copy(actionTakenType = 1, loan = relevantLoan)
+  }
+
+  val irrelevantAmount: Gen[Int] = Gen.chooseNum(1, numOfOriginatedHomePurchaseLoans)
+  val relevantAmount: Gen[Int] = Gen.chooseNum(numOfOriginatedHomePurchaseLoans + 1, 10000)
+
+  property(s"be valid if fewer than $numOfOriginatedHomePurchaseLoans originated loans") {
+    forAll(irrelevantAmount) { (x) =>
+      val lars = larNGen(x).sample.getOrElse(Nil)
+      val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
+      validLarSource.mustPass
+    }
+  }
+
+  property(s"be valid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated < $multiplier * total") {
+    forAll(relevantAmount) { (x) =>
+      val numOfLars = (x / multiplier).toInt + 1
+      val lars = larNGen(numOfLars).sample.getOrElse(Nil)
+      val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
+      validLarSource.mustPass
+    }
+  }
+
+  property(s"be valid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated = $multiplier * total") {
+    forAll(relevantAmount) { (x) =>
+      val numOfLars = math.ceil(x / multiplier).toInt
+      val lars = larNGen(numOfLars).sample.getOrElse(Nil)
+      val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
+      validLarSource.mustPass
+    }
+  }
+
+  property(s"be invalid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated > $multiplier * total") {
+    forAll(relevantAmount) { (x) =>
+      val numOfLars = (x / multiplier).toInt - 1
+      val lars = larNGen(numOfLars).sample.getOrElse(Nil)
+      val invalidLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
+      invalidLarSource.mustFail
+    }
+  }
+
+  override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q006
+}

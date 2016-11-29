@@ -17,6 +17,7 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
   def checkMacro(larSource: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[LarSourceValidation] = {
     Future.sequence(
       List(
+        Q006,
         Q007,
         Q008,
         Q009,
@@ -24,6 +25,7 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
         Q016,
         Q023,
         Q047,
+        Q048,
         Q055,
         Q056,
         Q057,
