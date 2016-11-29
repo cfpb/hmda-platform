@@ -7,7 +7,6 @@ import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterS
 
 class Q016Spec extends MacroSpec {
 
-  val config = ConfigFactory.load()
   val multiplier = config.getDouble("hmda.validation.macro.Q016.numOfLarsMultiplier")
   val incomeCap = config.getInt("hmda.validation.macro.Q016.incomeCap")
 
