@@ -3,7 +3,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
-class Q008Spec extends lessThanOrEqualToPropertyMacroSpec {
+class Q008Spec extends LessThanOrEqualToPropertyMacroSpec {
 
   override val multiplier = config.getDouble("hmda.validation.macro.Q008.numOfLarsMultiplier")
 
