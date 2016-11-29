@@ -20,6 +20,7 @@ class SubmissionPersistenceSpec extends ActorSpec {
       val submissions = DemoData.testSubmissions
       for (submission <- submissions) {
         probe.send(submissionsActor, CreateSubmission)
+        probe.expectMsgType[Some[Submission]]
       }
       probe.send(submissionsActor, GetState)
       val submissionState = probe.receiveOne(5.seconds)
@@ -30,6 +31,7 @@ class SubmissionPersistenceSpec extends ActorSpec {
       val newStatus = Uploaded
       val id = SubmissionId("0", "2017", 1)
       probe.send(submissionsActor, UpdateSubmissionStatus(id, newStatus))
+      probe.expectMsg(Some(Submission(id, newStatus)))
       probe.send(submissionsActor, GetSubmissionById(id))
 
       val submission = probe.receiveOne(5.seconds)
@@ -40,20 +42,16 @@ class SubmissionPersistenceSpec extends ActorSpec {
       val newStatus = Signed
       val id = SubmissionId("0", "2017", 1)
       probe.send(submissionsActor, UpdateSubmissionStatus(id, newStatus))
+      probe.expectMsg(Some(Submission(id, newStatus)))
       probe.send(submissionsActor, GetSubmissionById(id))
 
       val submission = probe.receiveOne(5.seconds)
       submission.asInstanceOf[Submission].end must not be 0L
     }
-  }
-
-  "Error logging" must {
-    "warn when updating nonexistent submission" in {
+    "return None when updating nonexistent submission" in {
       val id = SubmissionId("0", "2017", 777)
-      val msg = s"Submission does not exist. Could not update submission with id $id"
-      EventFilter.warning(message = msg, occurrences = 1) intercept {
-        probe.send(submissionsActor, UpdateSubmissionStatus(id, Created))
-      }
+      probe.send(submissionsActor, UpdateSubmissionStatus(id, Created))
+      probe.expectMsg(None)
     }
   }
 

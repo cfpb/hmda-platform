@@ -34,14 +34,6 @@ class HmdaSupervisorSpec extends WordSpec with MustMatchers {
       val validator2 = Await.result(validator2F, timeout)
       validator2.path.toString mustBe path
 
-      val eventProcessorPath = "akka://default/user/supervisor/eventProcessor"
-      val processorF = (supervisor ? FindActorByName(LocalHmdaEventProcessor.name)).mapTo[ActorRef]
-      val processor = Await.result(processorF, timeout)
-      processor.path.toString mustBe eventProcessorPath
-
-      val processor2F = (supervisor ? FindActorByName(LocalHmdaEventProcessor.name)).mapTo[ActorRef]
-      val processor2 = Await.result(processor2F, timeout)
-      processor2.path.toString mustBe eventProcessorPath
     }
 
     "find or create filings actor" in {
@@ -97,6 +89,11 @@ class HmdaSupervisorSpec extends WordSpec with MustMatchers {
       val validateFile2F = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
       val validateFile2 = Await.result(validateFile2F, timeout)
       validateFile2.path.toString mustBe validatePath
+
+      val submissionManagerPath = s"akka://default/user/supervisor/SubmissionManager-0-2017-0"
+      val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
+      val submissionManager = Await.result(submissionManagerF, timeout)
+      submissionManager.path.toString mustBe submissionManagerPath
 
     }
 
