@@ -6,8 +6,7 @@ import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
 class Q023Spec extends MacroSpec {
-
-  val config = ConfigFactory.load()
+  
   val multiplier = config.getDouble("hmda.validation.macro.Q023.numOfLarsMultiplier")
 
   val testLars = lar100ListGen.sample.getOrElse(Nil)
