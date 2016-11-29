@@ -58,7 +58,7 @@ class Q015Spec extends MacroSpec {
     validLarSource.mustPass
   }
 
-  property(s"be valid if multifamily = $larsMultiplier * total and dollar amount multifamily = $larsAmountMultiplier") {
+  property(s"be invalid if multifamily = $larsMultiplier * total and dollar amount multifamily = $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt
     val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier)(_)
     val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
@@ -66,7 +66,7 @@ class Q015Spec extends MacroSpec {
     validLarSource.mustFail
   }
 
-  property(s"be valid if multifamily = $larsMultiplier * total and dollar amount multifamily > $larsAmountMultiplier") {
+  property(s"be invalid if multifamily = $larsMultiplier * total and dollar amount multifamily > $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt
     val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier + .01)(_)
     val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
@@ -82,7 +82,7 @@ class Q015Spec extends MacroSpec {
     validLarSource.mustPass
   }
 
-  property(s"be valid if multifamily > $larsMultiplier * total and dollar amount multifamily = $larsAmountMultiplier") {
+  property(s"be invalid if multifamily > $larsMultiplier * total and dollar amount multifamily = $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt + 1
     val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier)(_)
     val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
@@ -90,7 +90,7 @@ class Q015Spec extends MacroSpec {
     validLarSource.mustFail
   }
 
-  property(s"be valid if multifamily > $larsMultiplier * total and dollar amount multifamily > $larsAmountMultiplier") {
+  property(s"be invalid if multifamily > $larsMultiplier * total and dollar amount multifamily > $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt + 1
     val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier + .01)(_)
     val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
