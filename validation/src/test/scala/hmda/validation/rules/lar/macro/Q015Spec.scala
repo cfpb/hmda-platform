@@ -13,88 +13,90 @@ class Q015Spec extends MacroSpec {
 
   val testLars = lar100ListGen.sample.getOrElse(Nil)
   val sampleSize = testLars.size
-  def irrelevantLar(lar: LoanApplicationRegister) = {
+  def irrelevantLar(setDollarAmount: LoanApplicationRegister => LoanApplicationRegister)(lar: LoanApplicationRegister) = {
     val irrelevantLoan = lar.loan.copy(propertyType = 4)
-    lar.copy(loan = irrelevantLoan)
+    val intermediateLar = lar.copy(loan = irrelevantLoan)
+    setDollarAmount(intermediateLar)
   }
-  def relevantLar(lar: LoanApplicationRegister) = {
+  def relevantLar(setDollarAmount: LoanApplicationRegister => LoanApplicationRegister)(lar: LoanApplicationRegister) = {
     val relevantLoan = lar.loan.copy(propertyType = 3)
-    lar.copy(loan = relevantLoan)
+    val intermediate = lar.copy(loan = relevantLoan)
+    setDollarAmount(intermediate)
   }
-  def findAmount(lar: LoanApplicationRegister, int: Int) = {
+  def setLoanAmount(lar: LoanApplicationRegister, int: Int) = {
     val relevantLoan = lar.loan.copy(amount = int)
     lar.copy(loan = relevantLoan)
   }
 
   property(s"be valid if multifamily < $larsMultiplier * total and dollar amount multifamily < $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt - 1
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier - .01)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier - .01)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustPass
   }
 
   property(s"be valid if multifamily < $larsMultiplier * total and dollar amount multifamily = $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt - 1
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustPass
   }
 
   property(s"be valid if multifamily < $larsMultiplier * total and dollar amount multifamily > $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt - 1
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier + .01)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier + .01)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustPass
   }
 
   property(s"be valid if multifamily = $larsMultiplier * total and dollar amount multifamily < $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier - .01)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier - .01)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustPass
   }
 
   property(s"be invalid if multifamily = $larsMultiplier * total and dollar amount multifamily = $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustFail
   }
 
   property(s"be invalid if multifamily = $larsMultiplier * total and dollar amount multifamily > $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier + .01)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier + .01)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustFail
   }
 
   property(s"be valid if multifamily > $larsMultiplier * total and dollar amount multifamily < $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt + 1
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier - .01)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier - .01)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustPass
   }
 
   property(s"be invalid if multifamily > $larsMultiplier * total and dollar amount multifamily = $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt + 1
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustFail
   }
 
   property(s"be invalid if multifamily > $larsMultiplier * total and dollar amount multifamily > $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt + 1
-    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, findAmount, larsAmountMultiplier + .01)(_)
-    val settingIrrelevantAmount = setIrrelevantAmount(100, findAmount)(_)
-    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar, irrelevantLar, settingRelevantAmount, settingIrrelevantAmount)
+    val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier + .01)(_)
+    val settingIrrelevantAmount = setIrrelevantAmount(100, setLoanAmount)(_)
+    val validLarSource = newLarSource(testLars, numOfRelevantLars, relevantLar(settingRelevantAmount), irrelevantLar(settingIrrelevantAmount))
     validLarSource.mustFail
   }
 
