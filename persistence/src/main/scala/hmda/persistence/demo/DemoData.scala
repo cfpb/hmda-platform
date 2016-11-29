@@ -84,7 +84,7 @@ object DemoData {
   def loadFilings(filings: Seq[Filing], system: ActorSystem): Unit = {
     filings.foreach { filing =>
       val filingActor = system.actorOf(FilingPersistence.props(filing.institutionId))
-      filingActor ! CreateFiling(filing)
+      filingActor ? CreateFiling(filing)
       Thread.sleep(100)
       filingActor ! Shutdown
     }
@@ -95,9 +95,9 @@ object DemoData {
       s match {
         case (id: String, period: String, submission: Submission) =>
           val submissionsActor = system.actorOf(SubmissionPersistence.props(id, period))
-          submissionsActor ! CreateSubmission
+          submissionsActor ? CreateSubmission
           Thread.sleep(100)
-          submissionsActor ! UpdateSubmissionStatus(submission.id, submission.status)
+          submissionsActor ? UpdateSubmissionStatus(submission.id, submission.status)
           Thread.sleep(100)
           submissionsActor ! Shutdown
       }
