@@ -28,6 +28,15 @@ class Q015Spec extends MacroSpec {
     lar.copy(loan = relevantLoan)
   }
 
+  def setRelevantAmount(base: Int, numOfRelevantLars: Int, numOfLars: Int, setLarValue: (LoanApplicationRegister, Int) => LoanApplicationRegister, relevantMultiplier: Double)(lar: LoanApplicationRegister): LoanApplicationRegister = {
+    val amount = ((numOfLars.toDouble / numOfRelevantLars.toDouble) * base * relevantMultiplier).toInt
+    setLarValue(lar, amount)
+  }
+
+  def setIrrelevantAmount(base: Int, setLarAmount: (LoanApplicationRegister, Int) => LoanApplicationRegister)(lar: LoanApplicationRegister): LoanApplicationRegister = {
+    setLarAmount(lar, base)
+  }
+
   property(s"be valid if multifamily < $larsMultiplier * total and dollar amount multifamily < $larsAmountMultiplier") {
     val numOfRelevantLars = (sampleSize * larsMultiplier).toInt - 1
     val settingRelevantAmount = setRelevantAmount(100, numOfRelevantLars, sampleSize, setLoanAmount, larsAmountMultiplier - .01)(_)

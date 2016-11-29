@@ -43,12 +43,4 @@ abstract class MacroSpec extends SummaryEditCheckSpec with BeforeAndAfterAll wit
     Source.fromIterator(() => newLars.toIterator)
   }
 
-  protected def setRelevantAmount(base: Int, numOfRelevantLars: Int, numOfLars: Int, setLarValue: (LoanApplicationRegister, Int) => LoanApplicationRegister, relevantMultiplier: Double)(lar: LoanApplicationRegister): LoanApplicationRegister = {
-    val amount = ((numOfLars.toDouble / numOfRelevantLars.toDouble) * base * relevantMultiplier).toInt
-    setLarValue(lar, amount)
-  }
-
-  protected def setIrrelevantAmount(base: Int, setLarAmount: (LoanApplicationRegister, Int) => LoanApplicationRegister)(lar: LoanApplicationRegister): LoanApplicationRegister = {
-    setLarAmount(lar, base)
-  }
 }
