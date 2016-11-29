@@ -14,13 +14,6 @@ class SubmissionBasePathsSpec extends InstitutionHttpApiSpec {
   val supervisor = system.actorSelection("/user/supervisor")
 
   "Submission Paths" must {
-    "find the latest submission for an institution" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
-        responseAs[Submission].status mustBe Created
-      }
-    }
-
     "return not found when looking for a latest submission for non existent institution" in {
       val path = Path("/institutions/xxxxx/filings/2017/submissions/latest")
       getWithCfpbHeaders(path.toString) ~> institutionsRoutes ~> check {
@@ -34,7 +27,13 @@ class SubmissionBasePathsSpec extends InstitutionHttpApiSpec {
     "create a new submission" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Created
-        val seqNr = DemoData.testSubmissions.size + 1
+        responseAs[Submission].status mustBe Created
+      }
+    }
+
+    "find the latest submission for an institution" in {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
         responseAs[Submission].status mustBe Created
       }
     }

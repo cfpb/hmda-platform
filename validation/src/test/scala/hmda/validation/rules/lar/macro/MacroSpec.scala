@@ -3,6 +3,7 @@ package hmda.validation.rules.lar.`macro`
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.rules.lar.SummaryEditCheckSpec
@@ -16,6 +17,8 @@ abstract class MacroSpec extends SummaryEditCheckSpec with BeforeAndAfterAll wit
   implicit val system: ActorSystem = ActorSystem("macro-edits-test")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val ec: ExecutionContext = system.dispatcher
+
+  val config = ConfigFactory.load()
 
   val lars = MacroTestData.lars
 

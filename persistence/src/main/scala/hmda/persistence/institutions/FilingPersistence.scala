@@ -54,8 +54,10 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
         persist(FilingCreated(f)) { e =>
           log.debug(s"Persisted: $f")
           updateState(e)
+          sender() ! Some(f)
         }
       } else {
+        sender() ! None
         log.warning(s"Filing already exists. Could not create $f")
       }
 
@@ -64,8 +66,10 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
         persist(FilingStatusUpdated(modified)) { e =>
           log.debug(s"persisted: $modified")
           updateState(e)
+          sender() ! Some(modified)
         }
       } else {
+        sender() ! None
         log.warning(s"Period does not exist. Could not update $modified")
       }
 

@@ -7,7 +7,6 @@ import org.scalacheck.Gen
 
 class Q031Spec extends MacroSpec {
 
-  val config = ConfigFactory.load()
   val larCount = config.getInt("hmda.validation.macro.Q031.numOfLars")
   val multifamilyCount = config.getInt("hmda.validation.macro.Q031.numOfMultifamily")
 
