@@ -30,9 +30,18 @@ abstract class MacroSpec extends SummaryEditCheckSpec with BeforeAndAfterAll wit
     system.terminate()
   }
 
-  protected def newLarSource(lars: List[LoanApplicationRegister], numOfRelevantLars: Int, relevantDef: LoanApplicationRegister => LoanApplicationRegister, irrelevantDef: LoanApplicationRegister => LoanApplicationRegister) = {
-    val relevantLars = lars.map(lar => relevantDef(lar)).take(numOfRelevantLars)
-    val irrelevantLars = lars.map(lar => irrelevantDef(lar)).drop(numOfRelevantLars)
+  protected def newLarSource(
+    lars: List[LoanApplicationRegister],
+    numOfRelevantLars: Int,
+    relevantDef: LoanApplicationRegister => LoanApplicationRegister,
+    irrelevantDef: LoanApplicationRegister => LoanApplicationRegister
+  ) = {
+    val relevantLars = lars
+      .map(lar => relevantDef(lar))
+      .take(numOfRelevantLars)
+    val irrelevantLars = lars
+      .map(lar => irrelevantDef(lar))
+      .drop(numOfRelevantLars)
     val newLars = relevantLars ::: irrelevantLars
     Source.fromIterator(() => newLars.toIterator)
   }
