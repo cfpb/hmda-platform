@@ -7,7 +7,6 @@ import org.scalacheck.Gen
 
 class Q056Spec extends MacroSpec {
 
-  val config = ConfigFactory.load()
   val conventionalCount = config.getInt("hmda.validation.macro.Q056.numOfConventionalHomePurchaseLoans")
   val denialMultiplier = config.getDouble("hmda.validation.macro.Q056.deniedConventionalHomePurchaseLoansMultiplier")
 

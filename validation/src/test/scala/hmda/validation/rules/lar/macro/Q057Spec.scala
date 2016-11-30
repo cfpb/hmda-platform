@@ -7,7 +7,6 @@ import org.scalacheck.Gen
 
 class Q057Spec extends MacroSpec {
 
-  val config = ConfigFactory.load()
   val larCount = config.getInt("hmda.validation.macro.Q057.numOfLoanApplications")
 
   def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(actionTakenType = 2)

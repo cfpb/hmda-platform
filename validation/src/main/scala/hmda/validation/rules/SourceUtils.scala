@@ -11,9 +11,20 @@ trait SourceUtils {
     input.runWith(sinkCount)
   }
 
+  def sum[T](input: Source[T, NotUsed], summation: T => Int)(implicit materializer: ActorMaterializer): Future[Int] = {
+    input.runWith(sinkSum(summation))
+  }
+
   private def sinkCount[T]: Sink[T, Future[Int]] = {
     Sink.fold[Int, T](0) { (acc, _) =>
       val total = acc + 1
+      total
+    }
+  }
+
+  private def sinkSum[T](summation: T => Int): Sink[T, Future[Int]] = {
+    Sink.fold[Int, T](0) { (acc, lar) =>
+      val total = acc + summation(lar)
       total
     }
   }
