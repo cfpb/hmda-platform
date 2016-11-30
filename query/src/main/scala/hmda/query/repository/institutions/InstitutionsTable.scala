@@ -1,11 +1,11 @@
-package hmda.query.dao.institutions
+package hmda.query.repository.institutions
 
+import hmda.query.Db
 import hmda.query.model.institutions.InstitutionQuery
-import slick.driver.JdbcProfile
 
-trait InstitutionDAO { profile: JdbcProfile =>
+trait InstitutionsTable { this: Db =>
 
-  import profile.api._
+  import config.driver.api._
 
   protected class Institutions(tag: Tag) extends Table[InstitutionQuery](tag, "institutions") {
 
@@ -21,22 +21,6 @@ trait InstitutionDAO { profile: JdbcProfile =>
     override def * = (id, name, cra, agency, institutionType, hasParent, status, filingPeriod) <> (InstitutionQuery.tupled, InstitutionQuery.unapply)
   }
 
-  private val institutions = TableQuery[Institutions]
+  protected val institutions = TableQuery[Institutions]
 
-  def createSchema(): DBIO[Unit] = {
-    institutions.schema.create
-  }
-
-  def insertOrUpdate(i: InstitutionQuery): DBIO[Int] = {
-    institutions.insertOrUpdate(i)
-  }
-
-  def update(i: InstitutionQuery): DBIO[Int] = {
-    institutions.update(i)
-  }
-
-  def get(id: String): DBIO[Option[InstitutionQuery]] = {
-    (for (i <- institutions if i.id === id) yield i.value).result.headOption
-  }
 }
-
