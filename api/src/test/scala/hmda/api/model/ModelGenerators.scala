@@ -1,8 +1,10 @@
 package hmda.api.model
 
 import java.util.Calendar
+
 import akka.http.scaladsl.model.Uri.Path
 import hmda.model.fi._
+import hmda.persistence.processing.HmdaFileValidator.VerifyLarError
 import hmda.validation.engine._
 import org.scalacheck.Gen
 
@@ -135,6 +137,20 @@ trait ModelGenerators {
       q <- editResultsGen
       m <- Gen.listOf(macroResultGen)
     } yield SummaryEditResults(s, v, q, MacroResults(m))
+  }
+
+  implicit def verifyLarErrorGen: Gen[VerifyLarError] = {
+    for {
+      e <- validationErrorGen
+      d <- Gen.alphaStr
+    } yield VerifyLarError(e, d)
+  }
+
+  implicit val verifyLarErrorResponseGen: Gen[VerifyLarErrorResponse] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+    } yield VerifyLarErrorResponse(id, name)
   }
 
 }

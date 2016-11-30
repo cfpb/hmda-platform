@@ -327,6 +327,31 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 }
 ```
 
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<editId>/verify`
+    * `PUT` - Returns error verified
+    
+    Example body sent to this endpoint as `JSON`:
+    
+```json
+{
+	"error": {
+		"errorId": "",
+		"name": "Q032",
+		"errorType": "macro"
+	},
+	"details": "reasons for verification"
+}
+```
+
+    Example response, with HTTP code 200:
+    
+```json
+{
+  "errorId": "",
+  "errorName": "Q032"
+}
+```
+
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
 *NOTE:*  This is a mocked, static endpoint.
 
