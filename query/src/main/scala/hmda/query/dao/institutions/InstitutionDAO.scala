@@ -7,7 +7,7 @@ trait InstitutionDAO { profile: JdbcProfile =>
 
   import profile.api._
 
-  private class Institutions(tag: Tag) extends Table[InstitutionQuery](tag, "institutions") {
+  protected class Institutions(tag: Tag) extends Table[InstitutionQuery](tag, "institutions") {
 
     def id = column[String]("id", O.PrimaryKey)
     def name = column[String]("name")

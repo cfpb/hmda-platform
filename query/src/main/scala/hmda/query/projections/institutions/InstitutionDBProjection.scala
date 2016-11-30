@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
 import hmda.persistence.model.HmdaActor
-import hmda.query.dao.institutions.{ InstitutionDAO, Institutions }
+import hmda.query.dao.institutions.InstitutionDAO
 import slick.lifted.TableQuery
 import hmda.query.dao.institutions.InstitutionConverter._
 import slick.driver.H2Driver
