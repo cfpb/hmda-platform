@@ -27,6 +27,7 @@ object HmdaFileValidator {
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
+  case class VerifyLarError(error: ValidationError, details: String) extends Command
   case class TsValidated(ts: TransmittalSheet) extends Event
   case class LarValidated(lar: LoanApplicationRegister) extends Event
   case class TsSyntacticalError(error: ValidationError) extends Event
@@ -36,6 +37,7 @@ object HmdaFileValidator {
   case class LarValidityError(error: ValidationError) extends Event
   case class LarQualityError(error: ValidationError) extends Event
   case class LarMacroError(error: ValidationError) extends Event
+  case class LarErrorVerified(error: ValidationError, details: String) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
@@ -73,6 +75,11 @@ object HmdaFileValidator {
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality :+ e, larMacro)
       case LarMacroError(e) =>
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, larMacro :+ e)
+      case LarErrorVerified(e, details) => e.errorType match {
+        case Quality => HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality.filterNot(x => x == e), larMacro)
+        case Macro => HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, larMacro.filterNot(x => x == e))
+        case _ => this
+      }
     }
   }
 }
@@ -186,6 +193,12 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       } else {
         log.debug(s"Validation completed for $submissionId, errors found")
         replyTo ! ValidationCompletedWithErrors(submissionId)
+      }
+
+    case VerifyLarError(error, details) =>
+      persist(LarErrorVerified(error, details)) { e =>
+        updateState(e)
+        sender() ! e
       }
 
     case GetState =>
