@@ -27,6 +27,16 @@ class SourceUtilsSpec extends AsyncWordSpec with MustMatchers with BeforeAndAfte
       count(s3).map(total => total mustBe 3)
     }
 
+    "sum the elements in a Source" in {
+      def itself(int: Int) = int
+      val s5 = Source.fromIterator(() => l5.toIterator)
+      val s4 = Source.fromIterator(() => l4.toIterator)
+      val s3 = Source.fromIterator(() => l3.toIterator)
+      sum(s5, itself).map(total => total mustBe 15)
+      sum(s4, itself).map(total => total mustBe 10)
+      sum(s3, itself).map(total => total mustBe 6)
+    }
+
   }
 
   override def afterAll(): Unit = {
