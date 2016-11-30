@@ -166,6 +166,7 @@ Then, visit the following URLS and click advanced -> proceed. This will bypass s
 ```shell
 https://192.168.99.100:8443/
 https://192.168.99.100:4443/
+https://192.168.99.100:9443/
 ```
 
 Visit the app at `http://192.168.99.100` and click "Register" when redirected to the keycloak login screen
