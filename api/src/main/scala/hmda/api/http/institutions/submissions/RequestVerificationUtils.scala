@@ -49,10 +49,14 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
   private def verifyRequest(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
     val submissionId = SubmissionId(institutionId, period, seqNr)
 
+    val inst = fInstitution(submissionId)
+    val fil = fFiling(submissionId)
+    val sub = fSubmission(submissionId)
+
     for {
-      i <- fInstitution(submissionId)
-      f <- fFiling(submissionId)
-      s <- fSubmission(submissionId)
+      i <- inst
+      f <- fil
+      s <- sub
       msg <- getErrorMessage(i, f, s, institutionId, period, submissionId)
     } yield msg
   }
