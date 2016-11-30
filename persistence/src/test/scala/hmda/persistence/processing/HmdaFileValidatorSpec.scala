@@ -101,6 +101,46 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
     }
 
+    "verify quality and macro edits" in {
+      val submissionId3 = SubmissionId("0", "2017", 3)
+      val hmdaFileValidator3 = createHmdaFileValidator(system, submissionId3)
+      val e1 = ValidationError("12345", "S100", Syntactical)
+      val e2 = ValidationError("12345", "Q001", Quality)
+      val e3 = ValidationError("12345", "Q007", Macro)
+      val errors = LarValidationErrors(Seq(e1, e2, e3))
+      probe.send(hmdaFileValidator3, errors)
+      probe.send(hmdaFileValidator3, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        None,
+        Nil,
+        Nil,
+        Nil,
+        Nil,
+        Seq(e1),
+        Nil,
+        Seq(e2),
+        Seq(e3)
+      ))
+
+      probe.send(hmdaFileValidator3, VerifyLarError(e2, "reasons"))
+      probe.expectMsg(LarErrorVerified(e2, "reasons"))
+      probe.send(hmdaFileValidator3, VerifyLarError(e3, "reasons"))
+      probe.expectMsg(LarErrorVerified(e3, "reasons"))
+      probe.send(hmdaFileValidator3, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        None,
+        Nil,
+        Nil,
+        Nil,
+        Nil,
+        Seq(e1),
+        Nil,
+        Nil,
+        Nil
+      ))
+
+    }
+
   }
 
 }

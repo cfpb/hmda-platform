@@ -12,6 +12,7 @@ import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.demo.DemoData
 import hmda.persistence.processing.HmdaFileValidator
+import hmda.persistence.processing.HmdaFileValidator.VerifyLarError
 import hmda.validation.engine._
 
 import scala.concurrent.Future
@@ -66,6 +67,25 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
       responseAs[MacroResults] mustBe MacroResults(List(MacroResult("Q007", List())))
+    }
+  }
+
+  "verify quality/macro edits" in {
+    val validationError = ValidationError("", "Q007", Macro)
+    val verifyError = VerifyLarError(validationError, "reasons")
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[MacroResults] mustBe MacroResults(List(MacroResult("Q007", List())))
+    }
+
+    putWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/Q007/verify", verifyError) ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[VerifyLarErrorResponse] mustBe VerifyLarErrorResponse("", "Q007")
+    }
+
+    getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[MacroResults] mustBe MacroResults(Nil)
     }
   }
 

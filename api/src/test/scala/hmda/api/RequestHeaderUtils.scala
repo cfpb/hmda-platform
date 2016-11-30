@@ -29,6 +29,12 @@ trait RequestHeaderUtils extends RequestBuilding {
       .addHeader(institutionsHeader)
   }
 
+  def putWithCfpbHeaders[T](path: String, content: T)(implicit m: ToEntityMarshaller[T], ec: ExecutionContext) = {
+    new RequestBuilder(PUT).apply(path, content)
+      .addHeader(usernameHeader)
+      .addHeader(institutionsHeader)
+  }
+
   val usernameHeader = new HmdaUsernameHeader("banker11")
   val institutionsHeader = new HmdaInstitutionsHeader(List("0", "xxxxx"))
 
