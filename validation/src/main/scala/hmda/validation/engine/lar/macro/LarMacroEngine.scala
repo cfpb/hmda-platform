@@ -11,7 +11,6 @@ import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterS
 import hmda.validation.rules.lar.`macro`._
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scalaz.Alpha.Q
 
 trait LarMacroEngine extends LarCommonEngine with ValidationApi {
 
