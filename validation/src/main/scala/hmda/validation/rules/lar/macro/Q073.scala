@@ -1,0 +1,49 @@
+package hmda.validation.rules.lar.`macro`
+
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.dsl.Result
+import hmda.validation.rules.AggregateEditCheck
+import hmda.validation.rules.lar.`macro`.MacroEditTypes._
+
+import scala.concurrent.{ ExecutionContext, Future }
+
+object Q073 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
+
+  val config = ConfigFactory.load()
+  val count = config.getInt("hmda.validation.macro.Q073.numOfLoanApplications")
+  val multiplier = config.getDouble("hmda.validation.macro.Q073.numOfLarsMultiplier")
+
+  override def name = "Q073"
+
+  override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
+
+    val purchaserType =
+      count(lars.filter(lar =>
+        lar.loan.purpose == 1
+          && Seq(1, 6).contains(lar.actionTakenType)
+          && Seq(1, 2).contains(lar.loan.propertyType)
+          && Seq(2, 3).contains(lar.loan.loanType)))
+
+    val sold =
+      count(lars.filter(lar =>
+        lar.loan.purpose == 1
+          && lar.actionTakenType == 6
+          && Seq(1, 2).contains(lar.loan.propertyType)
+          && Seq(2, 3).contains(lar.loan.loanType)))
+
+    for {
+      r <- purchaserType
+      d <- sold
+    } yield {
+      when(r is greaterThanOrEqual(count)) {
+        d.toDouble is greaterThan(r * multiplier)
+      }
+    }
+
+  }
+}
