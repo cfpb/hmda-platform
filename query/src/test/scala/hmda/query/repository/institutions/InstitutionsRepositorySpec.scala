@@ -9,7 +9,7 @@ import scala.concurrent.duration._
 
 class InstitutionsRepositorySpec extends AsyncWordSpec with DbConfiguration with MustMatchers with BeforeAndAfterEach {
 
-  val timeout = 500.milliseconds
+  val timeout = 5.seconds
   val institutions = new InstitutionsRepository(config)
 
   import InstitutionConverter._
