@@ -32,7 +32,8 @@ object Q073 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
     val sold =
       count(lars.filter(lar =>
         lar.loan.purpose == 1
-          && lar.actionTakenType == 6
+          && lar.purchaserType != 0
+          && Seq(1, 6).contains(lar.actionTakenType)
           && Seq(1, 2).contains(lar.loan.propertyType)
           && Seq(2, 3).contains(lar.loan.loanType)))
 
