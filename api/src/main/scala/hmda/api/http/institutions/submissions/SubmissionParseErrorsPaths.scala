@@ -22,6 +22,7 @@ import scala.util.{ Failure, Success }
 
 trait SubmissionParseErrorsPaths
     extends LarProtocol
+    with RequestVerificationUtils
     with HmdaCustomDirectives {
 
   implicit val system: ActorSystem
@@ -37,20 +38,23 @@ trait SubmissionParseErrorsPaths
         timedGet { uri =>
           implicit val ec: ExecutionContext = executor
           val supervisor = system.actorSelection("/user/supervisor")
-          val submissionID = SubmissionId(institutionId, period, seqNr)
-          val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]
 
-          val fHmdaFileParseState = for {
-            s <- fHmdaFileParser
-            xs <- (s ? GetState).mapTo[HmdaFileParseState]
-          } yield xs
+          completeVerified(institutionId, period, seqNr, uri) {
+            val submissionID = SubmissionId(institutionId, period, seqNr)
+            val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]
 
-          onComplete(fHmdaFileParseState) {
-            case Success(state) =>
-              val summary = ParsingErrorSummary(state.tsParsingErrors, state.larParsingErrors)
-              complete(ToResponseMarshallable(summary))
-            case Failure(errors) =>
-              completeWithInternalError(uri, errors)
+            val fHmdaFileParseState = for {
+              s <- fHmdaFileParser
+              xs <- (s ? GetState).mapTo[HmdaFileParseState]
+            } yield xs
+
+            onComplete(fHmdaFileParseState) {
+              case Success(state) =>
+                val summary = ParsingErrorSummary(state.tsParsingErrors, state.larParsingErrors)
+                complete(ToResponseMarshallable(summary))
+              case Failure(errors) =>
+                completeWithInternalError(uri, errors)
+            }
           }
         }
       }

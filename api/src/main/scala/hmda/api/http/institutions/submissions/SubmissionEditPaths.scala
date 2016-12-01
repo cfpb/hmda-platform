@@ -26,6 +26,7 @@ trait SubmissionEditPaths
     with ApiErrorProtocol
     with EditResultsProtocol
     with HmdaCustomDirectives
+    with RequestVerificationUtils
     with ValidationErrorConverter {
 
   implicit val system: ActorSystem
@@ -40,25 +41,25 @@ trait SubmissionEditPaths
       extractExecutionContext { executor =>
         timedGet { uri =>
           implicit val ec: ExecutionContext = executor
-          val fEditChecks = getValidationState(institutionId, period, seqNr)
 
-          val fSummaryEdits = fEditChecks.map { editChecks =>
-            val s = validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-            val v = validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-            val q = validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-            val m = validationErrorsToMacroResults(editChecks.larMacro)
-            SummaryEditResults(s, v, q, m)
-          }
+          completeVerified(institutionId, period, seqNr, uri) {
+            val fEditChecks = getValidationState(institutionId, period, seqNr)
 
-          onComplete(fSummaryEdits) {
-            case Success(edits) =>
-              complete(ToResponseMarshallable(edits))
-            case Failure(error) =>
-              completeWithInternalError(uri, error)
+            val fSummaryEdits = fEditChecks.map { editChecks =>
+              val s = validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+              val v = validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+              val q = validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+              val m = validationErrorsToMacroResults(editChecks.larMacro)
+              SummaryEditResults(s, v, q, m)
+            }
+
+            onComplete(fSummaryEdits) {
+              case Success(edits) => complete(ToResponseMarshallable(edits))
+              case Failure(error) => completeWithInternalError(uri, error)
+            }
           }
         }
       }
-
     }
 
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/<editType>
@@ -67,32 +68,30 @@ trait SubmissionEditPaths
       extractExecutionContext { executor =>
         timedGet { uri =>
           implicit val ec: ExecutionContext = executor
-          val fValidationState = getValidationState(institutionId, period, seqNr)
 
-          val fSingleEdits = fValidationState.map { editChecks =>
-            editType match {
-              case "syntactical" =>
-                validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-              case "validity" =>
-                validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-              case "quality" =>
-                validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-              case "macro" =>
-                validationErrorsToMacroResults(editChecks.larMacro)
+          completeVerified(institutionId, period, seqNr, uri) {
+            val fValidationState = getValidationState(institutionId, period, seqNr)
+
+            val fSingleEdits = fValidationState.map { editChecks =>
+              editType match {
+                case "syntactical" =>
+                  validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+                case "validity" =>
+                  validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+                case "quality" =>
+                  validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+                case "macro" =>
+                  validationErrorsToMacroResults(editChecks.larMacro)
+              }
+            }
+
+            onComplete(fSingleEdits) {
+              case Success(edits: MacroResults) => complete(ToResponseMarshallable(edits))
+              case Success(edits: EditResults) => complete(ToResponseMarshallable(edits))
+              case Success(_) => completeWithInternalError(uri, new IllegalStateException)
+              case Failure(error) => completeWithInternalError(uri, error)
             }
           }
-
-          onComplete(fSingleEdits) {
-            case Success(edits: MacroResults) =>
-              complete(ToResponseMarshallable(edits))
-            case Success(edits: EditResults) =>
-              complete(ToResponseMarshallable(edits))
-            case Success(_) =>
-              completeWithInternalError(uri, new IllegalStateException)
-            case Failure(error) =>
-              completeWithInternalError(uri, error)
-          }
-
         }
       }
     }
@@ -107,4 +106,5 @@ trait SubmissionEditPaths
       xs <- (s ? GetState).mapTo[HmdaFileValidationState]
     } yield xs
   }
+
 }

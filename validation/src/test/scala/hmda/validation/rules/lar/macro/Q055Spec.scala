@@ -8,9 +8,9 @@ class Q055Spec extends LessThanOrEqualToPropertyMacroSpec {
 
   override val multiplier = config.getDouble("hmda.validation.macro.Q055.numOfLarsMultiplier")
 
-  override def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(rateSpread = "NA").copy(actionTakenType = 1)
+  override def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(rateSpread = "NA", actionTakenType = 1)
   override def relevantLar(lar: LoanApplicationRegister) = {
-    lar.copy(actionTakenType = 1).copy(hoepaStatus = 1).copy(rateSpread = "5").copy(actionTakenType = 1)
+    lar.copy(actionTakenType = 1, hoepaStatus = 1, rateSpread = "5")
   }
 
   lessThanOrEqualToPropertyTests("hoepa loans", multiplier, relevantLar, irrelevantLar)
