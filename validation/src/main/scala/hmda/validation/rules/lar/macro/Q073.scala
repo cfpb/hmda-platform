@@ -21,21 +21,15 @@ object Q073 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
   override def name = "Q073"
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
+    val applicableLoans = lars.filter(lar =>
+      lar.loan.purpose == 1
+        && Seq(1, 6).contains(lar.actionTakenType)
+        && Seq(1, 2).contains(lar.loan.propertyType)
+        && Seq(2, 3).contains(lar.loan.loanType))
 
-    val purchaserType =
-      count(lars.filter(lar =>
-        lar.loan.purpose == 1
-          && Seq(1, 6).contains(lar.actionTakenType)
-          && Seq(1, 2).contains(lar.loan.propertyType)
-          && Seq(2, 3).contains(lar.loan.loanType)))
+    val purchaserType = count(applicableLoans)
 
-    val sold =
-      count(lars.filter(lar =>
-        lar.loan.purpose == 1
-          && lar.purchaserType != 0
-          && Seq(1, 6).contains(lar.actionTakenType)
-          && Seq(1, 2).contains(lar.loan.propertyType)
-          && Seq(2, 3).contains(lar.loan.loanType)))
+    val sold = count(applicableLoans.filter(lar => lar.purchaserType != 0))
 
     for {
       r <- purchaserType
