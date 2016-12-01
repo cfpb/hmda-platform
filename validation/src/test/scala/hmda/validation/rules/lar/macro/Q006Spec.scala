@@ -23,36 +23,36 @@ class Q006Spec extends MacroSpec {
   val relevantAmount: Gen[Int] = Gen.chooseNum(numOfOriginatedHomePurchaseLoans + 1, 10000)
 
   property(s"be valid if fewer than $numOfOriginatedHomePurchaseLoans originated loans") {
-    forAll(irrelevantAmount) { (x) =>
-      val lars = larNGen(x).sample.getOrElse(Nil)
-      val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
+    forAll(irrelevantAmount) { (totalLar) =>
+      val lars = larNGen(totalLar).sample.getOrElse(Nil)
+      val validLarSource = newLarSource(lars, totalLar, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
   }
 
   property(s"be valid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated < $multiplier * total") {
-    forAll(relevantAmount) { (x) =>
-      val numOfLars = (x / multiplier).toInt + 1
+    forAll(relevantAmount) { (totalLar) =>
+      val numOfLars = (totalLar / multiplier).toInt + 1
       val lars = larNGen(numOfLars).sample.getOrElse(Nil)
-      val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
+      val validLarSource = newLarSource(lars, totalLar, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
   }
 
   property(s"be valid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated = $multiplier * total") {
-    forAll(relevantAmount) { (x) =>
-      val numOfLars = math.ceil(x / multiplier).toInt
+    forAll(relevantAmount) { (totalLar) =>
+      val numOfLars = math.ceil(totalLar / multiplier).toInt
       val lars = larNGen(numOfLars).sample.getOrElse(Nil)
-      val validLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
+      val validLarSource = newLarSource(lars, totalLar, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
   }
 
   property(s"be invalid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated > $multiplier * total") {
-    forAll(relevantAmount) { (x) =>
-      val numOfLars = (x / multiplier).toInt - 1
+    forAll(relevantAmount) { (totalLar) =>
+      val numOfLars = (totalLar / multiplier).toInt - 1
       val lars = larNGen(numOfLars).sample.getOrElse(Nil)
-      val invalidLarSource = newLarSource(lars, x, relevantLar, irrelevantLar)
+      val invalidLarSource = newLarSource(lars, totalLar, relevantLar, irrelevantLar)
       invalidLarSource.mustFail
     }
   }
