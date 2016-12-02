@@ -60,13 +60,13 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     "Return 404 for nonexistent filing period" in {
       getWithCfpbHeaders("/institutions/0/filings/1980/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse].message mustBe "1980 filing not found for institution 0"
+        responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
       }
     }
     "Return 404 for nonexistent submission" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/parseErrors") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.NotFound
-        responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing"
+        responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
       }
     }
   }

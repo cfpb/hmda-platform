@@ -67,8 +67,8 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
     val institutionFound: Boolean = i.id == iid
 
     if (submissionFound && filingFound && institutionFound) None
-    else if (filingFound && institutionFound) Some(s"Submission ${sid.sequenceNumber} not found for $p filing")
-    else if (institutionFound) Some(s"$p filing not found for institution $iid")
+    else if (filingFound && institutionFound) Some(s"Submission ${sid.sequenceNumber} not found for $p filing period")
+    else if (institutionFound) Some(s"$p filing period not found for institution $iid")
     else Some(s"Institution $iid not found")
   }
 
