@@ -12,6 +12,8 @@ import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import com.typesafe.config.ConfigFactory
+import hmda.query.DbConfiguration
+import hmda.query.repository.institutions.InstitutionsRepository
 
 object InstitutionView {
 
@@ -42,7 +44,7 @@ object InstitutionView {
 
 }
 
-class InstitutionView extends HmdaPersistentActor {
+class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   import InstitutionView._
 
@@ -50,10 +52,12 @@ class InstitutionView extends HmdaPersistentActor {
 
   var counter = 0
 
-  val queryProjector = context.actorOf(InstitutionDBProjection.props)
+  val repository = new InstitutionsRepository(config)
 
-  val config = ConfigFactory.load()
-  val snapshotCounter = config.getInt("hmda.journal.snapshot.counter")
+  val queryProjector = context.actorOf(InstitutionDBProjection.props(repository))
+
+  val conf = ConfigFactory.load()
+  val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
 
   override def persistenceId: String = name
 
