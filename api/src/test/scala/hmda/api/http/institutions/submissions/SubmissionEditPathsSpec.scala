@@ -75,13 +75,13 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   "Edits endpoint: return 404 for nonexistent filing period" in {
     getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "1980 filing not found for institution 0"
+      responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
     }
   }
   "Edits endpoint: return 404 for nonexistent submission" in {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing"
+      responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
     }
   }
 
@@ -94,13 +94,13 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   "Edit Type endpoint: return 404 for nonexistent filing period" in {
     getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits/quality") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "1980 filing not found for institution 0"
+      responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
     }
   }
   "Edit Type endpoint: return 404 for nonexistent submission" in {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing"
+      responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
     }
   }
 
