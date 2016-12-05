@@ -4,7 +4,7 @@ import org.scalacheck.Gen
 
 object InstitutionQueryGenerators {
 
-  implicit def institutionQueryGen: Gen[InstitutionQuery] = {
+  implicit def institutionQueryGen: Gen[InstitutionEntity] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
@@ -14,7 +14,7 @@ object InstitutionQueryGenerators {
       parent <- Gen.oneOf(true, false)
       status <- Gen.oneOf(1, 2)
       filingPeriod <- Gen.choose(2017, 2020)
-    } yield InstitutionQuery(
+    } yield InstitutionEntity(
       id,
       name,
       cra,
