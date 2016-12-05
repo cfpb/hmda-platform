@@ -10,6 +10,8 @@ object V347 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V347"
 
+  override def description = ""
+
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.purchaserType is containedIn(1 to 9)) {
       lar.actionTakenType is oneOf(1, 6)

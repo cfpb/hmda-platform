@@ -12,7 +12,7 @@ trait ModelGenerators {
     for {
       status <- Gen.oneOf("OK", "SERVICE_UNAVAILABLE")
       service = "hmda-api"
-      time = Calendar.getInstance().getTime().toString
+      time = Calendar.getInstance().getTime.toString
       host = "localhost"
     } yield Status(status, service, time, host)
   }
@@ -89,9 +89,10 @@ trait ModelGenerators {
   implicit def editResultGen: Gen[EditResult] = {
     for {
       edit <- Gen.alphaStr
+      description <- Gen.alphaStr
       ts <- Gen.oneOf(true, false)
       lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, ts, lars)
+    } yield EditResult(edit, description, ts, lars)
   }
 
   implicit def editResultsGen: Gen[EditResults] = {
@@ -124,8 +125,9 @@ trait ModelGenerators {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
+      description <- Gen.alphaStr
       errorType <- validationErrorTypeGen
-    } yield ValidationError(id, name, errorType)
+    } yield ValidationError(id, ValidationErrorMetaData(name, description), errorType)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {

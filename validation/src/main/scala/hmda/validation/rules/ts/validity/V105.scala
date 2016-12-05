@@ -16,4 +16,6 @@ object V105 extends EditCheck[TransmittalSheet] {
   }
 
   override def name: String = "V105"
+
+  override def description = ""
 }

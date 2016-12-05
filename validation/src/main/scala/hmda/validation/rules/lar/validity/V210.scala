@@ -21,4 +21,6 @@ object V210 extends EditCheck[LoanApplicationRegister] {
   }
 
   override def name = "V210"
+
+  override def description = ""
 }

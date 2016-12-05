@@ -19,4 +19,6 @@ object Q014 extends EditCheck[LoanApplicationRegister] {
       income.toInt is lessThan(maxIncome)
     }
   }
+
+  override def description = ""
 }

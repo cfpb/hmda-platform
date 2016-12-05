@@ -12,6 +12,8 @@ import hmda.validation.rules.{ EditCheck, IfInstitutionPresentIn }
 class Q030 private (institution: Institution) extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q030"
 
+  override def description = ""
+
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.actionTakenType is containedIn(1 to 6)) {
       val geo: Geography = lar.geography

@@ -19,4 +19,6 @@ object Q068 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
         (app.coSex not equalTo(4))
     }
   }
+
+  override def description = ""
 }

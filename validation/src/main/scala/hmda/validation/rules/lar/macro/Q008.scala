@@ -19,6 +19,8 @@ object Q008 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def name = "Q008"
 
+  override def description = ""
+
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, mat: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 
     val applicationWithdrawn =

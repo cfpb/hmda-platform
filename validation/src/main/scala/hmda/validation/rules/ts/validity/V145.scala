@@ -9,6 +9,8 @@ import hmda.validation.dsl.PredicateSyntax._
 object V145 extends EditCheck[TransmittalSheet] {
   override def name: String = "V145"
 
+  override def description = ""
+
   override def apply(ts: TransmittalSheet): Result = {
     ts.respondent.zipCode is validZipCode
   }

@@ -16,4 +16,6 @@ object Q029 extends EditCheck[LoanApplicationRegister] {
   }
 
   override def name = "Q029"
+
+  override def description = ""
 }

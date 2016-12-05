@@ -14,4 +14,6 @@ object S011 extends EditCheck[Iterable[LoanApplicationRegister]] {
 
   override def name = "S011"
 
+  override def description = ""
+
 }
