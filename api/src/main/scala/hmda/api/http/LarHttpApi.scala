@@ -9,9 +9,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.pattern.ask
-import hmda.api.model.SingleValidationErrorResult
+import hmda.api.model.{ SingleValidationErrorResult, SummaryEditResults }
 import hmda.api.protocol.fi.lar.LarProtocol
-import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
@@ -19,11 +18,12 @@ import hmda.persistence.processing.SingleLarValidation
 import hmda.persistence.processing.SingleLarValidation.{ CheckAll, CheckQuality, CheckSyntactical, CheckValidity }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
+import hmda.api.protocol.processing.EditResultsProtocol
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
-trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCustomDirectives {
+trait LarHttpApi extends LarProtocol with HmdaCustomDirectives with ValidationErrorConverter with EditResultsProtocol {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -95,16 +95,17 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
     }
   }
 
-  def aggregateErrors(validationErrors: ValidationErrors): SingleValidationErrorResult = {
+  def aggregateErrors(validationErrors: ValidationErrors): SummaryEditResults = {
     val errors = validationErrors.errors.groupBy(_.errorType)
-    def allOfType(errorType: ValidationErrorType): Seq[String] = {
-      errors.getOrElse(errorType, List()).map(e => e.metaData.name)
+    def allOfType(errorType: ValidationErrorType): Seq[ValidationError] = {
+      errors.getOrElse(errorType, List())
     }
 
-    SingleValidationErrorResult(
-      ValidationErrorsSummary(allOfType(Syntactical)),
-      ValidationErrorsSummary(allOfType(Validity)),
-      ValidationErrorsSummary(allOfType(Quality))
+    SummaryEditResults(
+      validationErrorsToEditResults(Seq.empty, allOfType(Syntactical), Syntactical),
+      validationErrorsToEditResults(Seq.empty, allOfType(Validity), Validity),
+      validationErrorsToEditResults(Seq.empty, allOfType(Quality), Quality),
+      validationErrorsToMacroResults(Seq.empty)
     )
   }
 
