@@ -1,5 +1,6 @@
 package hmda.validation.rules.ts.validity
 
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
@@ -21,4 +22,8 @@ object V125 extends EditCheck[TransmittalSheet] {
   override def name: String = "V125"
 
   override def description = ""
+
+  override def fields(lar: TransmittalSheet) = Map(
+    noField -> ""
+  )
 }

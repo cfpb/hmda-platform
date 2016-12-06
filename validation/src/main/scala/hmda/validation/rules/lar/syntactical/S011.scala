@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.syntactical
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
@@ -15,5 +16,9 @@ object S011 extends EditCheck[Iterable[LoanApplicationRegister]] {
   override def name = "S011"
 
   override def description = ""
+
+  override def fields(lars: Iterable[LoanApplicationRegister]) = Map(
+    noField -> ""
+  )
 
 }

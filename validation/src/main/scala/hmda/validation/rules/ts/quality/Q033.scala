@@ -1,5 +1,6 @@
 package hmda.validation.rules.ts.quality
 
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionType._
@@ -14,6 +15,10 @@ class Q033 private (respondent: Institution) extends EditCheck[TransmittalSheet]
   override def name: String = "Q033"
 
   override def description = ""
+
+  override def fields(lar: TransmittalSheet) = Map(
+    noField -> ""
+  )
 
   override def apply(ts: TransmittalSheet): Result = {
     when((respondent.institutionType is oneOf(Bank, SavingsAndLoan, IndependentMortgageCompany))

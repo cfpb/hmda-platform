@@ -1,25 +1,13 @@
 package hmda.model.fi.lar.fields
 
-case object Msa extends LarField {
-  override def name = "Metropolitan Statistical Area / Metropolitan Division"
+import hmda.model.fi.RecordField
 
-  override def description = ""
-}
+object LarGeographyFields {
+  val msa = RecordField("Metropolitan Statistical Area / Metropolitan Division", "")
 
-case object State extends LarField {
-  override def name = "State Code"
+  val state = RecordField("State Code", "")
 
-  override def description = ""
-}
+  val county = RecordField("County Code", "")
 
-case object County extends LarField {
-  override def name = "County Code"
-
-  override def description = ""
-}
-
-case object Tract extends LarField {
-  override def name = "Census Tract"
-
-  override def description = ""
+  val tract = RecordField("Census Tract", "")
 }

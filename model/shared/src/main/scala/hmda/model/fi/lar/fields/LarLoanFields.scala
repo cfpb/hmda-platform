@@ -1,43 +1,20 @@
 package hmda.model.fi.lar.fields
 
-case object Id extends LarField {
-  override def name = "Loan/Application Number"
+import hmda.model.fi.RecordField
 
-  override def description = ""
-}
+object LarLoanFields {
 
-case object ApplicationDate extends LarField {
-  override def name = "Date Application Received"
+  val id = RecordField("Loan/Application Number", "")
 
-  override def description = ""
-}
+  val applicationDate = RecordField("Date Application Received", "")
 
-case object LoanType extends LarField {
-  override def name = "Loan Type"
+  val loanType = RecordField("Loan Type", "")
 
-  override def description = ""
-}
+  val propertyType = RecordField("Property Type", "")
 
-case object PropertyType extends LarField {
-  override def name = "Property Type"
+  val purpose = RecordField("Loan Purpose", "")
 
-  override def description = ""
-}
+  val occupancy = RecordField("Owner Occupancy", "")
 
-case object Purpose extends LarField {
-  override def name = "Loan Purpose"
-
-  override def description = ""
-}
-
-case object Occupancy extends LarField {
-  override def name = "Owner Occupancy"
-
-  override def description = ""
-}
-
-case object Amount extends LarField {
-  override def name = "Loan Amount"
-
-  override def description = ""
+  val amount = RecordField("Loan Amount", "")
 }

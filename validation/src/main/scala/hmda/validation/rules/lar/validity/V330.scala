@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.{ Failure, Result }
 import hmda.validation.rules.EditCheck
 
@@ -19,5 +20,9 @@ object V330 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V330"
 
   override def description = ""
+
+  override def fields(lar: LoanApplicationRegister) = Map(
+    noField -> ""
+  )
 
 }

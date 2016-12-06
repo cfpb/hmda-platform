@@ -1,91 +1,37 @@
 package hmda.model.fi.lar.fields
 
-case object Ethnicity extends LarField {
-  override def name = "Applicant Ethnicity"
+import hmda.model.fi.RecordField
 
-  override def description = ""
-}
+object LarApplicantFields {
 
-case object CoEthnicity extends LarField {
-  override def name = "Co-applicant Ethnicity"
+  val ethnicity = RecordField("Applicant Ethnicity", "")
 
-  override def description = ""
-}
+  val coEthnicity = RecordField("Co-applicant Ethnicity", "")
 
-case object Race1 extends LarField {
-  override def name = "Applicant Race: 1"
+  val race1 = RecordField("Applicant Race: 1", "")
 
-  override def description = ""
-}
+  val race2 = RecordField("Applicant Race: 2", "")
 
-case object Race2 extends LarField {
-  override def name = "Applicant Race: 2"
+  val race3 = RecordField("Applicant Race: 3", "")
 
-  override def description = ""
-}
+  val race4 = RecordField("Applicant Race: 4", "")
 
-case object Race3 extends LarField {
-  override def name = "Applicant Race: 3"
+  val race5 = RecordField("Applicant Race: 5", "")
 
-  override def description = ""
-}
+  val coRace1 = RecordField("Co-applicant Race: 1", "")
 
-case object Race4 extends LarField {
-  override def name = "Applicant Race: 4"
+  val coRace2 = RecordField("Co-applicant Race: 2", "")
 
-  override def description = ""
-}
+  val coRace3 = RecordField("Co-applicant Race: 3", "")
 
-case object Race5 extends LarField {
-  override def name = "Applicant Race: 5"
+  val coRace4 = RecordField("Co-applicant Race: 4", "")
 
-  override def description = ""
-}
+  val coRace5 = RecordField("Co-applicant Race: 5", "")
 
-case object CoRace1 extends LarField {
-  override def name = "Co-applicant Race: 1"
+  val sex = RecordField("Applicant Sex", "")
 
-  override def description = ""
-}
+  val coSex = RecordField("Co-applicant Sex", "")
 
-case object CoRace2 extends LarField {
-  override def name = "Co-applicant Race: 2"
+  val income = RecordField("Applicant Income", "")
 
-  override def description = ""
-}
-
-case object CoRace3 extends LarField {
-  override def name = "Co-applicant Race: 3"
-
-  override def description = ""
-}
-
-case object CoRace4 extends LarField {
-  override def name = "Co-applicant Race: 4"
-
-  override def description = ""
-}
-
-case object CoRace5 extends LarField {
-  override def name = "Co-applicant Race: 5"
-
-  override def description = ""
-}
-
-case object Sex extends LarField {
-  override def name = "Applicant Sex"
-
-  override def description = ""
-}
-
-case object CoSex extends LarField {
-  override def name = "Co-applicant Sex"
-
-  override def description = ""
-}
-
-case object Income extends LarField {
-  override def name = "Applicant Income"
-
-  override def description = ""
 }
