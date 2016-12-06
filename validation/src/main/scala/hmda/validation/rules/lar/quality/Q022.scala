@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.quality
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.Result
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
@@ -34,4 +35,8 @@ object Q022 {
   def name = "Q022"
 
   def description = ""
+
+  def fields(lar: LoanApplicationRegister) = Map(
+    noField -> ""
+  )
 }

@@ -1,6 +1,7 @@
 package hmda.validation.rules.ts.syntactical
 
 import hmda.model.fi.HasControlNumber
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
@@ -19,6 +20,10 @@ class S100 private (year: Int) extends EditCheck[TransmittalSheet] {
   def name = "S100"
 
   override def description = ""
+
+  override def fields(lar: TransmittalSheet) = Map(
+    noField -> ""
+  )
 
   def apply(input: TransmittalSheet): Result = input.activityYear is equalTo(year)
 }
