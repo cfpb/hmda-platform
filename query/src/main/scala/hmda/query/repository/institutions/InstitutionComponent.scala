@@ -1,14 +1,13 @@
 package hmda.query.repository.institutions
 
-import hmda.query.Db
+import hmda.query.{ Db, DbConfiguration }
 import hmda.query.model.institutions.InstitutionQuery
+import hmda.query.repository.Repository
 
-trait InstitutionsTable { this: Db =>
-
+trait InstitutionComponent extends DbConfiguration {
   import config.driver.api._
 
-  protected class Institutions(tag: Tag) extends Table[InstitutionQuery](tag, "institutions") {
-
+  class InstitutionsTable(tag: Tag) extends Table[InstitutionQuery](tag, "institutions") {
     def id = column[String]("id", O.PrimaryKey)
     def name = column[String]("name")
     def cra = column[Boolean]("cra")
@@ -21,6 +20,12 @@ trait InstitutionsTable { this: Db =>
     override def * = (id, name, cra, agency, institutionType, hasParent, status, filingPeriod) <> (InstitutionQuery.tupled, InstitutionQuery.unapply)
   }
 
-  protected val institutions = TableQuery[Institutions]
+  class InstitutionRepository extends Repository[InstitutionsTable, String] with DbConfiguration {
+    val table = TableQuery[InstitutionsTable]
+    def getId(table: InstitutionsTable) = table.id
+
+    def createSchema() = db.run(table.schema.create)
+    def dropSchema() = db.run(table.schema.drop)
+  }
 
 }

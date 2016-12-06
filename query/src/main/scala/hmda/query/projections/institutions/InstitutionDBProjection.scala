@@ -4,22 +4,25 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
 import hmda.persistence.model.HmdaActor
-import hmda.query.repository.institutions.InstitutionsRepository
+import hmda.query.repository.institutions.InstitutionComponent
 
 import scala.concurrent.ExecutionContext
 
-object InstitutionDBProjection {
+object InstitutionDBProjection extends InstitutionComponent {
+
+  val repository = new InstitutionRepository
+
   case class InstitutionInserted(n: Int)
   case class InstitutionUpdated(n: Int)
-  def props(repository: InstitutionsRepository): Props = Props(new InstitutionDBProjection(repository))
+  def props(): Props = Props(new InstitutionDBProjection())
 
-  def createInstitutionDBProjection(system: ActorSystem, repository: InstitutionsRepository): ActorRef = {
-    system.actorOf(InstitutionDBProjection.props(repository))
+  def createInstitutionDBProjection(system: ActorSystem): ActorRef = {
+    system.actorOf(InstitutionDBProjection.props())
   }
 
 }
 
-class InstitutionDBProjection(repository: InstitutionsRepository) extends HmdaActor {
+class InstitutionDBProjection extends HmdaActor {
 
   implicit val ec: ExecutionContext = context.dispatcher
 

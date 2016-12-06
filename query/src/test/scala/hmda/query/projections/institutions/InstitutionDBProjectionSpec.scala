@@ -6,14 +6,11 @@ import hmda.persistence.model.ActorSpec
 import hmda.query.projections.institutions.InstitutionDBProjection._
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.query.DbConfiguration
-import hmda.query.repository.institutions.InstitutionsRepository
 import org.scalatest.BeforeAndAfterEach
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
 class InstitutionDBProjectionSpec extends ActorSpec with DbConfiguration with BeforeAndAfterEach {
-
-  val repository = new InstitutionsRepository(config)
 
   implicit val timeout = 5.seconds
 
@@ -30,7 +27,7 @@ class InstitutionDBProjectionSpec extends ActorSpec with DbConfiguration with Be
   val probe = TestProbe()
 
   "Institution database projection" must {
-    val projection = createInstitutionDBProjection(system, repository)
+    val projection = createInstitutionDBProjection(system)
     "Insert records" in {
       val i = InstitutionGenerators.institutionGen.sample.get
       probe.send(projection, InstitutionCreated(i))
