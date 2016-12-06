@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.Result
@@ -20,6 +21,8 @@ object Q063 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
   override def name: String = "Q063"
 
   override def description = ""
+
+  override def fields(lars: LoanApplicationRegisterSource) = Map(noField -> "")
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
     val freddieHoepaLoans =

@@ -243,6 +243,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           {
             "edit": "S025",
             "description": "Description of S025",
+            "fields": [
+                      {
+                        "name": "None",
+                        "description": "None"
+                      }
+                    ],
             "ts": true,
             "lars": [
               {
@@ -259,6 +265,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           {
             "edit": "S010",
             "description": "Description of S010",
+            "fields": [
+                      {
+                        "name": "None",
+                        "description": "None"
+                      }
+                    ],
             "ts": false,
             "lars": [
               {
@@ -308,6 +320,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "edit": "V555",
       "description: "Description of V555",
       "ts": false,
+      "fields": [
+                {
+                  "name": "None",
+                  "description": "None"
+                }
+              ],
       "lars": [
         {
           "lar": {
@@ -320,6 +338,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "edit": "V550",
       "description: "Description of V550",
       "ts": false,
+      "fields": [
+                {
+                  "name": "None",
+                  "description": "None"
+                }
+              ],
       "lars": [
         {
           "lar": {

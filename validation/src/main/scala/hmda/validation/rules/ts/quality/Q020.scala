@@ -1,5 +1,6 @@
 package hmda.validation.rules.ts.quality
 
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
@@ -15,4 +16,8 @@ object Q020 extends EditCheck[TransmittalSheet] {
   override def name: String = "Q020"
 
   override def description = ""
+
+  override def fields(lar: TransmittalSheet) = Map(
+    noField -> ""
+  )
 }

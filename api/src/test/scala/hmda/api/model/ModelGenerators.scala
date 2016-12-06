@@ -5,6 +5,11 @@ import akka.http.scaladsl.model.Uri.Path
 import hmda.model.fi._
 import hmda.validation.engine._
 import org.scalacheck.Gen
+import hmda.model.fi.lar.fields.LarTopLevelFields._
+import hmda.model.fi.lar.fields.LarApplicantFields._
+import hmda.model.fi.lar.fields.LarDenialFields._
+import hmda.model.fi.lar.fields.LarGeographyFields._
+import hmda.model.fi.lar.fields.LarLoanFields._
 
 trait ModelGenerators {
 
@@ -45,6 +50,50 @@ trait ModelGenerators {
       IRSGenerated,
       IRSVerified,
       Signed
+    )
+  }
+
+  implicit def fieldGen: Gen[RecordField] = {
+    Gen.oneOf(
+      noField,
+      respondentId,
+      agencyCode,
+      preaprovals,
+      actionTakenType,
+      actionTakenDate,
+      purchaserType,
+      rateSpread,
+      heopaStatus,
+      lienStatus,
+      ethnicity,
+      coEthnicity,
+      race1,
+      race2,
+      race3,
+      race4,
+      race5,
+      coRace1,
+      coRace2,
+      coRace3,
+      coRace4,
+      coRace5,
+      sex,
+      coSex,
+      income,
+      reason1,
+      reason2,
+      reason3,
+      msa,
+      state,
+      county,
+      tract,
+      id,
+      applicationDate,
+      loanType,
+      propertyType,
+      purpose,
+      occupancy,
+      amount
     )
   }
 
@@ -90,9 +139,10 @@ trait ModelGenerators {
     for {
       edit <- Gen.alphaStr
       description <- Gen.alphaStr
+      fields <- fieldGen
       ts <- Gen.oneOf(true, false)
       lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, description, ts, lars)
+    } yield EditResult(edit, description, List(fields), ts, lars)
   }
 
   implicit def editResultsGen: Gen[EditResults] = {
@@ -125,9 +175,11 @@ trait ModelGenerators {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
+      field <- fieldGen
+      fieldDescription <- Gen.alphaStr
       description <- Gen.alphaStr
       errorType <- validationErrorTypeGen
-    } yield ValidationError(id, ValidationErrorMetaData(name, description), errorType)
+    } yield ValidationError(id, ValidationErrorMetaData(name, description, Map(field -> fieldDescription)), errorType)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {
