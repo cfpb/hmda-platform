@@ -5,7 +5,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.api.model._
+import hmda.api.model.{ LarEditResult, _ }
 import hmda.model.fi._
 import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
@@ -27,14 +27,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedSummary = SummaryEditResults(
       EditResults(
         List(
-          EditResult("S010", "", List(noField), ts = false, Seq(LarEditResult("loan1", List(LarEditField("None", ""))))),
-          EditResult("S020", "", List(noField), ts = true, Seq(LarEditResult("loan1", List(LarEditField("None", "")))))
+          EditResult("S010", "", List(noField), Seq(LarEditResult("loan1", List(LarEditField("None", ""))))),
+          EditResult("S020", "", List(noField), Seq(LarEditResult("loan1", List(LarEditField("None", ""))), LarEditResult("Transmittal Sheet", List(LarEditField("None", "")))))
         )
       ),
       EditResults(
         List(
-          EditResult("V285", "", List(noField), ts = false, Seq(LarEditResult("loan2", List(LarEditField("None", ""))), LarEditResult("loan3", List(LarEditField("None", ""))))),
-          EditResult("V280", "", List(noField), ts = false, Seq(LarEditResult("loan1", List(LarEditField("None", "")))))
+          EditResult("V285", "", List(noField), Seq(LarEditResult("loan2", List(LarEditField("None", ""))), LarEditResult("loan3", List(LarEditField("None", ""))))),
+          EditResult("V280", "", List(noField), Seq(LarEditResult("loan1", List(LarEditField("None", "")))))
         )
       ),
       EditResults.empty,
@@ -51,8 +51,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedEdits =
       EditResults(
         List(
-          EditResult("V285", "", List(noField), ts = false, Seq(LarEditResult("loan2", List(LarEditField("None", ""))), LarEditResult("loan3", List(LarEditField("None", ""))))),
-          EditResult("V280", "", List(noField), ts = false, Seq(LarEditResult("loan1", List(LarEditField("None", "")))))
+          EditResult("V285", "", List(noField), Seq(LarEditResult("loan2", List(LarEditField("None", ""))), LarEditResult("loan3", List(LarEditField("None", ""))))),
+          EditResult("V280", "", List(noField), Seq(LarEditResult("loan1", List(LarEditField("None", "")))))
         )
       )
 

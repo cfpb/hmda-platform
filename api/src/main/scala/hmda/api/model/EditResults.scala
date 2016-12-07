@@ -4,7 +4,7 @@ import hmda.model.fi.RecordField
 
 case class LarEditField(name: String, value: String)
 case class LarEditResult(larId: String, fields: List[LarEditField])
-case class EditResult(edit: String, description: String, fields: List[RecordField], ts: Boolean, lars: Seq[LarEditResult])
+case class EditResult(edit: String, description: String, fields: List[RecordField], lars: Seq[LarEditResult])
 case class EditResults(edits: Seq[EditResult])
 case object EditResults {
   def empty: EditResults = EditResults(Nil)
