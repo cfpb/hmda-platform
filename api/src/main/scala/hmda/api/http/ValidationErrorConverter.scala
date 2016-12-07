@@ -16,7 +16,7 @@ trait ValidationErrorConverter {
     val tsEditResults: Seq[EditResult] = tsUniqueErrors.map(x => EditResult(x.name, x.description, x.fields.toList.map(y => y._1), ts = true, Nil))
 
     val larEditResults: Map[ValidationErrorType, Map[ValidationErrorMetaData, Seq[LarEditResult]]] =
-      editValues.mapValues(x => x.mapValues(y => y.map(_.errorId).map(z => LarEditResult(LarId(z)))))
+      editValues.mapValues(x => x.mapValues(y => y.map(z => LarEditResult(z.errorId, z.metaData.fields.map(a => LarEditField(a._1.name, a._2)).toList))))
 
     val mapResults = larEditResults.getOrElse(validationErrorType, Map.empty[ValidationErrorMetaData, Seq[LarEditResult]])
     EditResults(

@@ -6,8 +6,8 @@ import spray.json.DefaultJsonProtocol
 
 trait EditResultsProtocol extends DefaultJsonProtocol {
   implicit val larFieldFormat = jsonFormat2(RecordField.apply)
-  implicit val larIdFormat = jsonFormat1(LarId.apply)
-  implicit val larEditResultFormat = jsonFormat1(LarEditResult.apply)
+  implicit val larEditFieldFormat = jsonFormat2(LarEditField.apply)
+  implicit val larEditResultFormat = jsonFormat2(LarEditResult.apply)
   implicit val editResultFormat = jsonFormat5(EditResult.apply)
   implicit val editResultsFormat = jsonFormat1(EditResults.apply)
   implicit val justificationFormat = jsonFormat2(Justification.apply)
