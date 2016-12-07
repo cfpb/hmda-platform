@@ -40,5 +40,18 @@ class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with Inst
         case None => fail
       }
     }
+    "delete record" in {
+      val i = InstitutionGenerators.institutionGen.sample.get
+      repository.insertOrUpdate(i).map(x => x mustBe 1)
+      repository.findById(i.id).map {
+        case Some(x) => succeed
+        case None => fail
+      }
+      repository.deleteById(i.id).map(x => x mustBe 1)
+      repository.findById(i.id).map {
+        case Some(x) => fail
+        case None => succeed
+      }
+    }
   }
 }

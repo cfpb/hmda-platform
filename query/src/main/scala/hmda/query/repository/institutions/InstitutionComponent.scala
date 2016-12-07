@@ -26,6 +26,7 @@ trait InstitutionComponent extends DbConfiguration {
 
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
+    def deleteById(id: String) = db.run(filterById(id).delete)
   }
 
 }
