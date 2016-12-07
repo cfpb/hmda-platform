@@ -6,7 +6,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.InstitutionType.Bank
-import hmda.model.institution.{ Inactive, Institution }
+import hmda.model.institution.Institution
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shutdown }
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
@@ -68,7 +68,7 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   override def receiveCommand: Receive = {
     case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(i => i.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, status = Inactive))
+      val institution = state.institutions.find(i => i.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false))
       sender() ! institution
 
     case GetInstitutionsById(ids) =>

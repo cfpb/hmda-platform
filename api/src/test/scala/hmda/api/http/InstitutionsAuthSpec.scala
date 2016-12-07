@@ -8,7 +8,7 @@ import akka.pattern.ask
 import hmda.model.institution.Agency.FDIC
 import hmda.model.institution.ExternalIdType.RssdId
 import hmda.model.institution.InstitutionType.Bank
-import hmda.model.institution.{ Active, ExternalId, Institution }
+import hmda.model.institution.{ ExternalId, Institution }
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
@@ -77,7 +77,7 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
     }
 
     "match 'CFPB-HMDA-Institutions' header case insensitively" in {
-      val caseInsensitiveBank = Institution("abc", "Bank abc", Set(ExternalId("externalTest1", RssdId)), FDIC, Bank, hasParent = true, status = Active)
+      val caseInsensitiveBank = Institution("abc", "Bank abc", Set(ExternalId("externalTest1", RssdId)), FDIC, Bank, hasParent = true)
       val supervisor = system.actorSelection("/user/supervisor")
       val querySupervisor = system.actorSelection("/user/query-supervisor")
       val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]

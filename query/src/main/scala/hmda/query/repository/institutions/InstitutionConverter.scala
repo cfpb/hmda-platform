@@ -18,7 +18,6 @@ object InstitutionConverter {
       i.agency.value,
       i.institutionType.entryName,
       i.hasParent,
-      i.status.code,
       year
     )
   }

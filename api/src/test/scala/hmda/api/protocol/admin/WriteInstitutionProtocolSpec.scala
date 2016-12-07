@@ -29,10 +29,6 @@ class WriteInstitutionProtocolSpec extends PropSpec with PropertyChecks with Mus
               ("idType", JsString(x.idType.entryName))
             )
           }.toVector)),
-          ("status", JsObject(
-            ("code", JsNumber(i.status.code)),
-            ("message", JsString(i.status.message))
-          )),
           ("hasParent", JsBoolean(i.hasParent)),
           ("institutionType", JsString(i.institutionType.entryName))
         )
