@@ -27,14 +27,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedSummary = SummaryEditResults(
       EditResults(
         List(
-          EditResult("S010", "", List(noField), ts = false, List(LarEditResult(LarId("loan1")))),
-          EditResult("S020", "", List(noField), ts = true, List(LarEditResult(LarId("loan1"))))
+          EditResult("S010", "", List(noField), ts = false, Seq(LarEditResult("loan1", List(LarEditField("None", ""))))),
+          EditResult("S020", "", List(noField), ts = true, Seq(LarEditResult("loan1", List(LarEditField("None", "")))))
         )
       ),
       EditResults(
         List(
-          EditResult("V285", "", List(noField), ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
-          EditResult("V280", "", List(noField), ts = false, List(LarEditResult(LarId("loan1"))))
+          EditResult("V285", "", List(noField), ts = false, Seq(LarEditResult("loan2", List(LarEditField("None", ""))), LarEditResult("loan3", List(LarEditField("None", ""))))),
+          EditResult("V280", "", List(noField), ts = false, Seq(LarEditResult("loan1", List(LarEditField("None", "")))))
         )
       ),
       EditResults.empty,
@@ -51,8 +51,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedEdits =
       EditResults(
         List(
-          EditResult("V285", "", List(noField), ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
-          EditResult("V280", "", List(noField), ts = false, List(LarEditResult(LarId("loan1"))))
+          EditResult("V285", "", List(noField), ts = false, Seq(LarEditResult("loan2", List(LarEditField("None", ""))), LarEditResult("loan3", List(LarEditField("None", ""))))),
+          EditResult("V280", "", List(noField), ts = false, Seq(LarEditResult("loan1", List(LarEditField("None", "")))))
         )
       )
 

@@ -129,10 +129,18 @@ trait ModelGenerators {
     } yield ErrorResponse(status, message, Path(path))
   }
 
+  implicit def larEditFieldGen: Gen[LarEditField] = {
+    for {
+      fieldName <- Gen.alphaStr
+      value <- Gen.alphaStr
+    } yield LarEditField(fieldName, value)
+  }
+
   implicit def larEditResultGen: Gen[LarEditResult] = {
     for {
       loanId <- Gen.alphaStr
-    } yield LarEditResult(LarId(loanId))
+      larEditField <- Gen.listOf(larEditFieldGen)
+    } yield LarEditResult(loanId, larEditField)
   }
 
   implicit def editResultGen: Gen[EditResult] = {
