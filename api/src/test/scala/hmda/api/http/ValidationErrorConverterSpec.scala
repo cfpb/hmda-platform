@@ -13,6 +13,8 @@ import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
 import org.scalatest.{ MustMatchers, WordSpec }
 
+import scala.collection.mutable
+
 class ValidationErrorConverterSpec extends WordSpec with MustMatchers with ValidationErrorConverter with LarEngine {
 
   "Validation errors" must {
@@ -33,8 +35,8 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
         validationErrorsToMacroResults(larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
-      val s020 = EditResult("S020", "", List(noField), ts = true, Seq(LarEditResult("8299422144", List(LarEditField("None", ""))), LarEditResult("2185751599", List(LarEditField("None", "")))))
-      val s010 = EditResult("S010", "", List(noField), ts = false, Seq(LarEditResult("2185751599", List(LarEditField("None", "")))))
+      val s020 = EditResult("S020", "", List(noField), Seq(LarEditResult("8299422144", List(LarEditField("None", ""))), LarEditResult("2185751599", List(LarEditField("None", ""))), LarEditResult("Transmittal Sheet", List(LarEditField("None", "")))))
+      val s010 = EditResult("S010", "", List(noField), Seq(LarEditResult("2185751599", List(LarEditField("None", "")))))
       summaryEditResults.syntactical.edits.head mustBe s010
       summaryEditResults.syntactical.edits.tail.contains(s020) mustBe true
       summaryEditResults.validity.edits.size mustBe 3

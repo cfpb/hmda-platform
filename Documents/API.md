@@ -249,17 +249,34 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
                         "description": "None"
                       }
                     ],
-            "ts": true,
             "lars": [
+               {
+                "larId": "Transmittal Sheet",
+                "fields": [
+                  {
+                    "name": "None",
+                    "value": ""
+                  }
+                ]
+               },
               {
-                "lar": {"loanId": "s1"}
-              },
-              {
-                "lar": {"loanId": "s2"}
-              },
-              {
-                "lar": {"loanId": "s3"}
-              }
+                          "larId": "ABCDE12345ABCDE12345ABCDE",
+                          "fields": [
+                            {
+                              "name": "None",
+                              "value": ""
+                            }
+                          ]
+                        },
+                        {
+                          "larId": "ABCDE12345ABCDE12345ABCDE",
+                          "fields": [
+                            {
+                              "name": "None",
+                              "value": ""
+                            }
+                          ]
+                        }
             ]
           },
           {
@@ -274,11 +291,23 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             "ts": false,
             "lars": [
               {
-                "lar": {"loanId": "s4"}
-              },
-              {
-                "lar": {"loanId": "s5"}
-              }
+                          "larId": "ABCDE12345ABCDE12345ABCDE",
+                          "fields": [
+                            {
+                              "name": "None",
+                              "value": ""
+                            }
+                          ]
+                        },
+                        {
+                          "larId": "ABCDE12345ABCDE12345ABCDE",
+                          "fields": [
+                            {
+                              "name": "None",
+                              "value": ""
+                            }
+                          ]
+                        }
             ]
           }
         ]
@@ -328,10 +357,14 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
               ],
       "lars": [
         {
-          "lar": {
-            "loanId": "4977566612"
-          }
-        }
+                     "larId": "ABCDE12345ABCDE12345ABCDE",
+                     "fields": [
+                       {
+                         "name": "None",
+                         "value": ""
+                       }
+                     ]
+                   }
       ]
     },
     {
@@ -346,9 +379,17 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
               ],
       "lars": [
         {
-          "lar": {
-            "loanId": "4977566612"
-          }
+          "lar": [
+            {
+                        "larId": "ABCDE12345ABCDE12345ABCDE",
+                        "fields": [
+                          {
+                            "name": "None",
+                            "value": ""
+                          }
+                        ]
+                      }
+          ]
         }
       ]
     }
