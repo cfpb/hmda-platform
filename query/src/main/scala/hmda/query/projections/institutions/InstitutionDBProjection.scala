@@ -4,13 +4,14 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
 import hmda.persistence.model.HmdaActor
+import hmda.query.DbConfiguration
 import hmda.query.repository.institutions.InstitutionComponent
 
 import scala.concurrent.ExecutionContext
 
-object InstitutionDBProjection extends InstitutionComponent {
+object InstitutionDBProjection extends InstitutionComponent with DbConfiguration {
 
-  val repository = new InstitutionRepository
+  val repository = new InstitutionRepository(config)
 
   case class InstitutionInserted(n: Int)
   case class InstitutionUpdated(n: Int)
