@@ -33,9 +33,9 @@ object DemoData {
   }
 
   val testFilings = {
-    val f1 = Filing("2016", "0", Completed, 1483287071000L, 1514736671000L)
-    val f2 = Filing("2017", "0", NotStarted, 0L, 0L)
-    val f3 = Filing("2017", "1", Completed, 1483287071000L, 1514736671000L)
+    val f1 = Filing("2016", "0", Completed, true, 1483287071000L, 1514736671000L)
+    val f2 = Filing("2017", "0", NotStarted, true, 0L, 0L)
+    val f3 = Filing("2017", "1", Completed, false, 1483287071000L, 1514736671000L)
     Seq(f1, f2, f3)
   }
 

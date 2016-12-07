@@ -33,17 +33,17 @@ class FilingPersistenceSpec extends ActorSpec {
     }
 
     "return None when persisting a filing that already exists" in {
-      val f1 = Filing("2016", "12345", Completed, 1483287071000L, 1514736671000L)
+      val f1 = Filing("2016", "12345", Completed, true, 1483287071000L, 1514736671000L)
       probe.send(filingsActor, CreateFiling(f1))
       probe.expectMsg(Some(f1))
 
-      val f2 = Filing("2016", "12345", Completed, 1483287071000L, 1514736671000L)
+      val f2 = Filing("2016", "12345", Completed, true, 1483287071000L, 1514736671000L)
       probe.send(filingsActor, CreateFiling(f2))
       probe.expectMsg(None)
     }
 
     "return None for nonexistent period" in {
-      val f = Filing("2006", "12345", Cancelled, 1483287071000L, 1514736671000L)
+      val f = Filing("2006", "12345", Cancelled, false, 1483287071000L, 1514736671000L)
       probe.send(filingsActor, UpdateFilingStatus(f))
       probe.expectMsg(None)
     }
