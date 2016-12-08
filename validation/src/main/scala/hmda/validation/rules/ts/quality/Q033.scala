@@ -13,8 +13,6 @@ import hmda.validation.rules.{ EditCheck, IfInstitutionPresentIn }
 class Q033 private (respondent: Institution) extends EditCheck[TransmittalSheet] {
   override def name: String = "Q033"
 
-  override def description = ""
-
   override def apply(ts: TransmittalSheet): Result = {
     when((respondent.institutionType is oneOf(Bank, SavingsAndLoan, IndependentMortgageCompany))
       and (respondent.hasParent is true)) {

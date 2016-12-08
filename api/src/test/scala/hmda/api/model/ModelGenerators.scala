@@ -125,9 +125,8 @@ trait ModelGenerators {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-      description <- Gen.alphaStr
       errorType <- validationErrorTypeGen
-    } yield ValidationError(id, ValidationErrorMetaData(name, description), errorType)
+    } yield ValidationError(id, ValidationErrorMetaData(name), errorType)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {

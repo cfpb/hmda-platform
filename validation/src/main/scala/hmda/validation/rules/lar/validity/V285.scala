@@ -15,8 +15,6 @@ object V285 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V285"
 
-  override def description = ""
-
   override def apply(input: LoanApplicationRegister): Result = {
     val state = input.geography.state
 

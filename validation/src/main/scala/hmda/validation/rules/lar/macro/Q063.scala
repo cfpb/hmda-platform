@@ -19,8 +19,6 @@ object Q063 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def name: String = "Q063"
 
-  override def description = ""
-
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
     val freddieHoepaLoans =
       count(lars.filter(

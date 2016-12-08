@@ -11,8 +11,6 @@ object V290 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V290"
 
-  override def description = ""
-
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.geography.msa not equalTo("NA")) {
       lar.geography is validStateCountyMsaCombination

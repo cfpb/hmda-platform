@@ -10,7 +10,7 @@ import hmda.validation.rules.lar.quality._
 trait LarQualityEngine extends LarCommonEngine with ValidationApi {
 
   private def q022(lar: LoanApplicationRegister): LarValidation = {
-    convertResult(lar, Q022(lar, 2017), "Q022", lar.loan.id, Quality, Q022.description)
+    convertResult(lar, Q022(lar, 2017), "Q022", lar.loan.id, Quality)
   }
 
   def checkQuality(lar: LoanApplicationRegister, ctx: ValidationContext): LarValidation = {

@@ -19,6 +19,4 @@ object Q067 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
     }
   }
 
-  override def description = ""
-
 }

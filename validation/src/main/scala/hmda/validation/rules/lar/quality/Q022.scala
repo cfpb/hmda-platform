@@ -32,6 +32,4 @@ object Q022 {
   }
 
   def name = "Q022"
-
-  def description = ""
 }

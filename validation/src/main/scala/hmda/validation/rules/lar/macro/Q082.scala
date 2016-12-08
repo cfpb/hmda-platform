@@ -19,8 +19,6 @@ object Q082 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def name = "Q082"
 
-  override def description = ""
-
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 
     val relevantLars =

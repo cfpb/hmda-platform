@@ -11,8 +11,6 @@ object V295 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V295"
 
-  override def description = ""
-
   override def apply(input: LoanApplicationRegister): Result = {
 
     val msa = input.geography.msa

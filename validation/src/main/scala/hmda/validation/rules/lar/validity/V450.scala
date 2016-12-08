@@ -10,8 +10,6 @@ object V450 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V450"
 
-  override def description = ""
-
   override def apply(lar: LoanApplicationRegister): Result = {
     lar.applicant.ethnicity is containedIn(1 to 4)
   }

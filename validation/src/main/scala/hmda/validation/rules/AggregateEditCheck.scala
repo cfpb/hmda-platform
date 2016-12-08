@@ -12,8 +12,6 @@ abstract class AggregateEditCheck[A <: Source[T, NotUsed], T] extends SourceUtil
 
   def name: String
 
-  def description: String
-
   def apply(input: A)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result]
 
 }

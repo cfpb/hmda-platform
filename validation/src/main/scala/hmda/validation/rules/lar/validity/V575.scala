@@ -10,8 +10,6 @@ object V575 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V575"
 
-  override def description = ""
-
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.lienStatus is equalTo(2)) {
       lar.rateSpread is equalTo("NA") or (lar.rateSpread is numericallyBetween("3.50", "99.99"))

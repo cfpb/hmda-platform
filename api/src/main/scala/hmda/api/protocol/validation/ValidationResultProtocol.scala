@@ -27,7 +27,7 @@ trait ValidationResultProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val validationErrorMetaDataFormat = jsonFormat2(ValidationErrorMetaData.apply)
+  implicit val validationErrorMetaDataFormat = jsonFormat1(ValidationErrorMetaData.apply)
   implicit val validationErrorFormat = jsonFormat3(ValidationError.apply)
   implicit val larValidationErrorsFormat = jsonFormat1(LarValidationErrors.apply)
   implicit val tsValidationErrorsFormat = jsonFormat1(TsValidationErrors.apply)

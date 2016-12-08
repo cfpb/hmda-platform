@@ -17,6 +17,4 @@ object S020 extends EditCheck[HasControlNumber] {
 
   override def name: String = "S020"
 
-  override def description = ""
-
 }
