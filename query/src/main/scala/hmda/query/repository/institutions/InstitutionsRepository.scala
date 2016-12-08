@@ -2,14 +2,14 @@ package hmda.query.repository.institutions
 
 import hmda.query.Db
 import hmda.query.model.institutions.InstitutionQuery
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
 
 class InstitutionsRepository(val config: DatabaseConfig[JdbcProfile]) extends Db with InstitutionsTable {
 
-  import config.driver.api._
+  import config.profile.api._
 
   def createSchema(): Future[Unit] = {
     db.run(institutions.schema.create)
