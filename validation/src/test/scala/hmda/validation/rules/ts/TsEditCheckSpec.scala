@@ -9,7 +9,7 @@ import org.scalatest.{ MustMatchers, PropSpec }
 
 abstract class TsEditCheckSpec extends PropSpec with PropertyChecks with MustMatchers with TsGenerators {
   implicit val generatorDriverConfig =
-    PropertyCheckConfig(minSuccessful = 100, maxDiscarded = 500)
+    PropertyCheckConfiguration(minSuccessful = 100, maxDiscardedFactor = 5.0)
 
   def check: EditCheck[TransmittalSheet]
 
