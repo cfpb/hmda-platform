@@ -290,7 +290,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             "edits": [
                 {
                    "edit": "Q007",
-                   "description: "Description of Q007",
+                   "description": "Description of Q007",
                    "justifications": [
                      {
                        "value": "don't worry",
@@ -318,7 +318,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
   "edits": [
     {
       "edit": "V555",
-      "description: "Description of V555",
+      "description": "Description of V555",
       "ts": false,
       "fields": [
                 {
