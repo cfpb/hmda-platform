@@ -68,6 +68,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
           "period": "2017",
           "institutionId": "12345",
+          "filingRequired": true,
           "status": {
             "code": 1,
             "message": "not-started"
@@ -78,6 +79,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
           "period": "2016",
           "institutionId": "12345",
+          "filingRequired": false,
           "status": {
             "code": 3,
             "message": "completed"
@@ -100,6 +102,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 "filing": {
   "period": "2017",
   "institutionId": "12345",
+  "filingRequired": true,
   "status": {
     "code": 1,
     "message": "not-started"
