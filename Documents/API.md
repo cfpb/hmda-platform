@@ -336,7 +336,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     },
     {
       "edit": "V550",
-      "description: "Description of V550",
+      "description": "Description of V550",
       "ts": false,
       "fields": [
                 {
