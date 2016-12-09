@@ -19,8 +19,6 @@ object S100 {
 class S100 private (year: Int) extends EditCheck[TransmittalSheet] {
   def name = "S100"
 
-  override def description = ""
-
   override def fields(lar: TransmittalSheet) = Map(
     noField -> ""
   )

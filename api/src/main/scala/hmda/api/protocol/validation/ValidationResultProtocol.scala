@@ -1,6 +1,7 @@
 package hmda.api.protocol.validation
 
 import hmda.api.model.SingleValidationErrorResult
+import hmda.model.fi.RecordField
 import hmda.validation.engine._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
@@ -27,6 +28,7 @@ trait ValidationResultProtocol extends DefaultJsonProtocol {
     }
   }
 
+  implicit val recordFieldFormat = jsonFormat2(RecordField.apply)
   implicit val validationErrorMetaDataFormat = jsonFormat2(ValidationErrorMetaData.apply)
   implicit val validationErrorFormat = jsonFormat3(ValidationError.apply)
   implicit val larValidationErrorsFormat = jsonFormat1(LarValidationErrors.apply)

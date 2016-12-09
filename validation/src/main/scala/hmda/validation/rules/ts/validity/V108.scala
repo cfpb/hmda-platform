@@ -10,8 +10,6 @@ import hmda.validation.dsl.PredicateSyntax._
 object V108 extends EditCheck[TransmittalSheet] {
   override def name: String = "V108"
 
-  override def description = ""
-
   override def fields(lar: TransmittalSheet) = Map(
     noField -> ""
   )

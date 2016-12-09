@@ -19,8 +19,6 @@ object S025 {
 class S025 private (institution: Institution) extends EditCheck[HasControlNumber] {
   def name = "S025"
 
-  override def description = ""
-
   def apply(input: HasControlNumber): Result = compare(input.respondentId, input.agencyCode)
 
   override def fields(lar: HasControlNumber) = Map(

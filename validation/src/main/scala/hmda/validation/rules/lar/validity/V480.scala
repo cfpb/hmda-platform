@@ -10,8 +10,6 @@ import hmda.validation.dsl.PredicateSyntax._
 object V480 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V480"
 
-  override def description = ""
-
   override def fields(lar: LoanApplicationRegister) = Map(
     noField -> ""
   )

@@ -177,9 +177,8 @@ trait ModelGenerators {
       name <- Gen.alphaStr
       field <- fieldGen
       fieldDescription <- Gen.alphaStr
-      description <- Gen.alphaStr
       errorType <- validationErrorTypeGen
-    } yield ValidationError(id, ValidationErrorMetaData(name, description, Map(field -> fieldDescription)), errorType)
+    } yield ValidationError(id, ValidationErrorMetaData(name, Map(field -> fieldDescription)), errorType)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {

@@ -15,9 +15,8 @@ object Q020 extends EditCheck[TransmittalSheet] {
 
   override def name: String = "Q020"
 
-  override def description = ""
-
   override def fields(lar: TransmittalSheet) = Map(
     noField -> ""
   )
+
 }

@@ -20,8 +20,6 @@ object Q067 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
     }
   }
 
-  override def description = ""
-
   override def fields(lar: LoanApplicationRegister) = Map(
     noField -> ""
   )

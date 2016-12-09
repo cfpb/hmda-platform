@@ -21,8 +21,6 @@ object Q006 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def name = "Q006"
 
-  override def description = ""
-
   override def fields(lars: LoanApplicationRegisterSource) = Map(noField -> "")
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {

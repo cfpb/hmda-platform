@@ -15,8 +15,6 @@ object V325 extends EditCheck[LoanApplicationRegister] {
 
   override def name = "V325"
 
-  override def description = ""
-
   override def fields(lar: LoanApplicationRegister) = Map(
     noField -> ""
   )

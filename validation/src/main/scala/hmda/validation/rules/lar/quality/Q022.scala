@@ -34,9 +34,8 @@ object Q022 {
 
   def name = "Q022"
 
-  def description = ""
-
   def fields(lar: LoanApplicationRegister) = Map(
     noField -> ""
   )
+
 }

@@ -13,8 +13,6 @@ import hmda.validation.rules.{ EditCheck, IfInstitutionPresentIn }
 class Q030 private (institution: Institution) extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q030"
 
-  override def description = ""
-
   override def fields(lar: LoanApplicationRegister) = Map(
     noField -> ""
   )

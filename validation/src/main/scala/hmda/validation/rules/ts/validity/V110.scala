@@ -14,8 +14,6 @@ import hmda.validation.rules.{ EditCheck, IfInstitutionPresentIn }
 class V110 private (institution: Institution) extends EditCheck[TransmittalSheet] {
   override def name: String = "V110"
 
-  override def description = ""
-
   override def fields(lar: TransmittalSheet) = Map(
     noField -> ""
   )
