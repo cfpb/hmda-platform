@@ -10,12 +10,6 @@ trait ValidationErrorConverter {
 
   def validationErrorsToEditResults(tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError], validationErrorType: ValidationErrorType) = {
 
-    def findEditDescription(editName: String): String = {
-      editDescriptions.find(x => x.editNumber == editName)
-        .map(_.editDescription)
-        .getOrElse("")
-    }
-
     val errorsByType: Map[ValidationErrorType, Seq[ValidationError]] = larErrors.groupBy(_.errorType)
 
     val editValues: Map[ValidationErrorType, Map[ValidationErrorMetaData, Seq[ValidationError]]] =
@@ -36,6 +30,12 @@ trait ValidationErrorConverter {
         .union(tsEditResults)
     )
 
+  }
+
+  private def findEditDescription(editName: String): String = {
+    editDescriptions.find(x => x.editNumber == editName)
+      .map(_.editDescription)
+      .getOrElse("")
   }
 
   def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
