@@ -18,8 +18,6 @@ object EditMetaDataLookup extends ResourceUtils {
       val userFriendlyEditDescription = values(6)
 
       EditMetaData(
-        category,
-        editType,
         fieldNames,
         editNumber,
         editDescription,
@@ -32,8 +30,6 @@ object EditMetaDataLookup extends ResourceUtils {
 }
 
 case class EditMetaData(
-  category: String,
-  editType: String,
   fieldNames: String,
   editNumber: String,
   editDescription: String,
