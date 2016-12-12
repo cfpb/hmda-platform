@@ -22,18 +22,27 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     loadValidationErrors()
   }
 
+  val s020Description = "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code."
+  val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
+  val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
+  val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
+  val s020 = EditResult("S020", s020Description, ts = true, List(LarEditResult(LarId("loan1"))))
+  val s010 = EditResult("S010", s010Description, ts = false, List(LarEditResult(LarId("loan1"))))
+  val v280 = EditResult("V280", v280Description, ts = false, List(LarEditResult(LarId("loan1"))))
+  val v285 = EditResult("V285", v285Description, ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3"))))
+
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
       EditResults(
         List(
-          EditResult("S020", "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.", ts = true, List(LarEditResult(LarId("loan1")))),
-          EditResult("S010", "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).", ts = false, List(LarEditResult(LarId("loan1"))))
-        )
+          s020,
+          s010
+           )
       ),
       EditResults(
         List(
-          EditResult("V280", "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA.", ts = false, List(LarEditResult(LarId("loan1")))),
-          EditResult("V285", "State must = a valid FIPS code or (NA where MSA/MD = NA).", ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3"))))
+          v280,
+          v285
         )
       ),
       EditResults.empty,
@@ -50,9 +59,9 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedEdits =
       EditResults(
         List(
-          EditResult("V280", "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA.", ts = false, List(LarEditResult(LarId("loan1")))),
-          EditResult("V285", "State must = a valid FIPS code or (NA where MSA/MD = NA).", ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3"))))
-        )
+          v280,
+          v285
+          )
       )
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes ~> check {
