@@ -13,10 +13,6 @@ object V300 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V300"
 
-  override def fields(lar: LoanApplicationRegister) = Map(
-    noField -> ""
-  )
-
   override def apply(lar: LoanApplicationRegister): Result = {
 
     val msa = lar.geography.msa

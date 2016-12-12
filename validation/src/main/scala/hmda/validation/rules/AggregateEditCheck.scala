@@ -13,8 +13,6 @@ abstract class AggregateEditCheck[A <: Source[T, NotUsed], T] extends SourceUtil
 
   def name: String
 
-  def fields(input: A): Map[RecordField, String]
-
   def apply(input: A)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result]
 
 }

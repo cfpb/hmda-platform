@@ -59,7 +59,7 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
     for {
       result <- fResult
     } yield {
-      convertResult(input, result, editCheck.name, inputId, errorType, editCheck.fields(input))
+      convertResult(input, result, editCheck.name, inputId, errorType)
     }
   }
 

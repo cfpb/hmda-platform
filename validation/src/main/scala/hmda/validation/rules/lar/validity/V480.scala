@@ -10,10 +10,6 @@ import hmda.validation.dsl.PredicateSyntax._
 object V480 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V480"
 
-  override def fields(lar: LoanApplicationRegister) = Map(
-    noField -> ""
-  )
-
   override def apply(lar: LoanApplicationRegister): Result = {
     val appl: Applicant = lar.applicant
     val raceFields: List[String] = List(appl.race1.toString, appl.race2, appl.race3, appl.race4, appl.race5)

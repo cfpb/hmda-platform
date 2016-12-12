@@ -20,8 +20,6 @@ object Q010 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def name = "Q010"
 
-  override def fields(lars: LoanApplicationRegisterSource) = Map(noField -> "")
-
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 
     val originated = count(lars.filter(lar => lar.actionTakenType == 1))

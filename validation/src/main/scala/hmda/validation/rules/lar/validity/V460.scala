@@ -11,10 +11,6 @@ object V460 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V460"
 
-  override def fields(lar: LoanApplicationRegister) = Map(
-    noField -> ""
-  )
-
   override def apply(lar: LoanApplicationRegister): Result = {
     lar.applicant.coEthnicity is containedIn(1 to 5)
   }

@@ -139,7 +139,7 @@ trait ModelGenerators {
     for {
       edit <- Gen.alphaStr
       description <- Gen.alphaStr
-      fields <- fieldGen
+      fields <- Gen.alphaStr
       ts <- Gen.oneOf(true, false)
       lars <- Gen.listOf(larEditResultGen)
     } yield EditResult(edit, description, List(fields), ts, lars)
@@ -178,7 +178,7 @@ trait ModelGenerators {
       field <- fieldGen
       fieldDescription <- Gen.alphaStr
       errorType <- validationErrorTypeGen
-    } yield ValidationError(id, ValidationErrorMetaData(name, Map(field -> fieldDescription)), errorType)
+    } yield ValidationError(id, ValidationErrorMetaData(name), errorType)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {

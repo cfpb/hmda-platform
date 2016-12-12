@@ -54,10 +54,10 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     }
 
     "persist validation errors" in {
-      val e1 = ValidationError("1", ValidationErrorMetaData("S999", Map(noField -> "")), Syntactical)
-      val e2 = ValidationError("1", ValidationErrorMetaData("V999", Map(noField -> "")), Validity)
-      val e3 = ValidationError("1", ValidationErrorMetaData("Q999", Map(noField -> "")), Quality)
-      val e4 = ValidationError("1", ValidationErrorMetaData("Q007", Map(noField -> "")), Macro)
+      val e1 = ValidationError("1", ValidationErrorMetaData("S999"), Syntactical)
+      val e2 = ValidationError("1", ValidationErrorMetaData("V999"), Validity)
+      val e3 = ValidationError("1", ValidationErrorMetaData("Q999"), Quality)
+      val e4 = ValidationError("1", ValidationErrorMetaData("Q007"), Macro)
       val larErrors = LarValidationErrors(Seq(e1, e2, e3, e4))
       val tsErrors = TsValidationErrors(Seq(e1, e2, e3))
       probe.send(hmdaFileValidator, larErrors)
@@ -94,10 +94,10 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Nil,
         Nil,
         Nil,
-        List(ValidationError("8299422144", ValidationErrorMetaData("S020", Map(noField -> "")), Syntactical), ValidationError("2185751599", ValidationErrorMetaData("S010", Map(noField -> "")), Syntactical), ValidationError("2185751599", ValidationErrorMetaData("S020", Map(noField -> "")), Syntactical)),
-        List(ValidationError("4977566612", ValidationErrorMetaData("V550", Map(noField -> "")), Validity), ValidationError("4977566612", ValidationErrorMetaData("V555", Map(noField -> "")), Validity), ValidationError("4977566612", ValidationErrorMetaData("V560", Map(noField -> "")), Validity)),
+        List(ValidationError("8299422144", ValidationErrorMetaData("S020"), Syntactical), ValidationError("2185751599", ValidationErrorMetaData("S010"), Syntactical), ValidationError("2185751599", ValidationErrorMetaData("S020"), Syntactical)),
+        List(ValidationError("4977566612", ValidationErrorMetaData("V550"), Validity), ValidationError("4977566612", ValidationErrorMetaData("V555"), Validity), ValidationError("4977566612", ValidationErrorMetaData("V560"), Validity)),
         Nil,
-        List(ValidationError("", ValidationErrorMetaData("Q008", Map(noField -> "")), Macro), ValidationError("", ValidationErrorMetaData("Q010", Map(noField -> "")), Macro), ValidationError("", ValidationErrorMetaData("Q016", Map(noField -> "")), Macro), ValidationError("", ValidationErrorMetaData("Q023", Map(noField -> "")), Macro))
+        List(ValidationError("", ValidationErrorMetaData("Q008"), Macro), ValidationError("", ValidationErrorMetaData("Q010"), Macro), ValidationError("", ValidationErrorMetaData("Q016"), Macro), ValidationError("", ValidationErrorMetaData("Q023"), Macro))
       ))
 
     }

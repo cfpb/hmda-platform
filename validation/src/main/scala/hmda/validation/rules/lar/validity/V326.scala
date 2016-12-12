@@ -10,10 +10,6 @@ import hmda.validation.dsl.PredicateSyntax._
 object V326 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V326"
 
-  override def fields(lar: LoanApplicationRegister) = Map(
-    noField -> ""
-  )
-
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.applicant.coSex is equalTo(5)) {
       (lar.applicant.coRace1 is equalTo(8)) and

@@ -20,8 +20,6 @@ object Q048 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def name = "Q048"
 
-  override def fields(lars: LoanApplicationRegisterSource) = Map(noField -> "")
-
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 
     val incompletePreapprovalRequest =

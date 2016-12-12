@@ -11,10 +11,6 @@ object V520 extends EditCheck[LoanApplicationRegister] {
 
   override def name: String = "V520"
 
-  override def fields(lar: LoanApplicationRegister) = Map(
-    noField -> ""
-  )
-
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.lienStatus is 3) {
       lar.rateSpread is "NA"

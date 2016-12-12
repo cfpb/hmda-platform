@@ -15,8 +15,4 @@ object S011 extends EditCheck[Iterable[LoanApplicationRegister]] {
 
   override def name = "S011"
 
-  override def fields(lars: Iterable[LoanApplicationRegister]) = Map(
-    noField -> ""
-  )
-
 }

@@ -19,8 +19,4 @@ object V535 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
 
   override def name = "V535"
 
-  override def fields(lar: LoanApplicationRegister) = Map(
-    noField -> ""
-  )
-
 }

@@ -21,10 +21,6 @@ class S025 private (institution: Institution) extends EditCheck[HasControlNumber
 
   def apply(input: HasControlNumber): Result = compare(input.respondentId, input.agencyCode)
 
-  override def fields(lar: HasControlNumber) = Map(
-    noField -> ""
-  )
-
   private def compare(filingRespId: String, filingAgencyCode: Int): Result = {
     institution.respondentId match {
       case Left(invalid) => Failure()

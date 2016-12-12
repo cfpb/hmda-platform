@@ -11,10 +11,6 @@ import hmda.validation.rules.lar.ApplicantUtils
 object V338 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
   override def name: String = "V338"
 
-  override def fields(lar: LoanApplicationRegister) = Map(
-    noField -> ""
-  )
-
   override def apply(lar: LoanApplicationRegister): Result = {
     when(notANaturalPerson(lar)) {
       lar.applicant.income is "NA"

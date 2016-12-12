@@ -27,14 +27,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedSummary = SummaryEditResults(
       EditResults(
         List(
-          EditResult("S010", "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).", List(noField), ts = false, List(LarEditResult(LarId("loan1")))),
-          EditResult("S020", "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.", List(noField), ts = true, List(LarEditResult(LarId("loan1"))))
+          EditResult("S010", "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).", List("Record Identifier"), ts = false, List(LarEditResult(LarId("loan1")))),
+          EditResult("S020", "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.", List("Agency Code"), ts = true, List(LarEditResult(LarId("loan1"))))
         )
       ),
       EditResults(
         List(
-          EditResult("V285", "State must = a valid FIPS code or (NA where MSA/MD = NA).", List(noField), ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
-          EditResult("V280", "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA.", List(noField), ts = false, List(LarEditResult(LarId("loan1"))))
+          EditResult("V285", "State must = a valid FIPS code or (NA where MSA/MD = NA).", List("State Code"), ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
+          EditResult("V280", "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA.", List("MSA/MD Number"), ts = false, List(LarEditResult(LarId("loan1"))))
         )
       ),
       EditResults.empty,
@@ -51,8 +51,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedEdits =
       EditResults(
         List(
-          EditResult("V285", "State must = a valid FIPS code or (NA where MSA/MD = NA).", List(noField), ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
-          EditResult("V280", "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA.", List(noField), ts = false, List(LarEditResult(LarId("loan1"))))
+          EditResult("V285", "State must = a valid FIPS code or (NA where MSA/MD = NA).", List("State Code"), ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
+          EditResult("V280", "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA.", List("MSA/MD Number"), ts = false, List(LarEditResult(LarId("loan1"))))
         )
       )
 
@@ -113,12 +113,12 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val submissionId = SubmissionId(id, period, seqNr)
     val fHmdaValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
-    val s1 = ValidationError("loan1", ValidationErrorMetaData("S010", Map(noField -> "")), Syntactical)
-    val s2 = ValidationError("loan1", ValidationErrorMetaData("S020", Map(noField -> "")), Syntactical)
-    val v1 = ValidationError("loan1", ValidationErrorMetaData("V280", Map(noField -> "")), Validity)
-    val v2 = ValidationError("loan2", ValidationErrorMetaData("V285", Map(noField -> "")), Validity)
-    val v3 = ValidationError("loan3", ValidationErrorMetaData("V285", Map(noField -> "")), Validity)
-    val m1 = ValidationError("", ValidationErrorMetaData("Q007", Map(noField -> "")), Macro)
+    val s1 = ValidationError("loan1", ValidationErrorMetaData("S010"), Syntactical)
+    val s2 = ValidationError("loan1", ValidationErrorMetaData("S020"), Syntactical)
+    val v1 = ValidationError("loan1", ValidationErrorMetaData("V280"), Validity)
+    val v2 = ValidationError("loan2", ValidationErrorMetaData("V285"), Validity)
+    val v3 = ValidationError("loan3", ValidationErrorMetaData("V285"), Validity)
+    val m1 = ValidationError("", ValidationErrorMetaData("Q007"), Macro)
     val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
 
     val tsValidationErrors = TsValidationErrors(Seq(s2))
