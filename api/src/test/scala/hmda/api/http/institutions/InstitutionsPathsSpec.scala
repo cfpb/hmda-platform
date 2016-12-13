@@ -16,7 +16,7 @@ class InstitutionsPathsSpec extends InstitutionHttpApiSpec {
       val i1 = DemoData.testInstitutions.find(i => i.id == "1").get
       val i2 = DemoData.testInstitutions.find(i => i.id == "2").get
       val institutions: Set[Institution] = Set(i1, i2)
-      val institutionsWrapped = institutions.map(i => InstitutionWrapper(i.id.toString, i.name, i.status))
+      val institutionsWrapped = institutions.map(i => InstitutionWrapper(i.id.toString, i.name))
 
       Get("/institutions")
         .addHeader(usernameHeader)
@@ -30,7 +30,7 @@ class InstitutionsPathsSpec extends InstitutionHttpApiSpec {
       getWithCfpbHeaders("/institutions/0") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val institution = DemoData.testInstitutions.head
-        val institutionWrapped = InstitutionWrapper(institution.id.toString, institution.name, institution.status)
+        val institutionWrapped = InstitutionWrapper(institution.id.toString, institution.name)
         val filings = DemoData.testFilings.filter(f => f.institutionId == institution.id.toString)
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institutionWrapped, filings.reverse)
       }

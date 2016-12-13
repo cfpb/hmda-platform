@@ -21,4 +21,11 @@ case object Cancelled extends FilingStatus {
   override def message: String = "cancelled"
 }
 
-case class Filing(period: String = "", institutionId: String = "", status: FilingStatus = NotStarted, start: Long = 0L, end: Long = 0l)
+case class Filing(
+  period: String = "",
+  institutionId: String = "",
+  status: FilingStatus = NotStarted,
+  filingRequired: Boolean = false,
+  start: Long = 0L,
+  end: Long = 0l
+)

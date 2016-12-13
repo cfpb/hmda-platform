@@ -92,8 +92,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
         "agency" -> obj.agency.toJson,
         "institutionType" -> obj.institutionType.toJson,
         "hasParent" -> JsBoolean(obj.hasParent),
-        "cra" -> JsBoolean(obj.cra),
-        "status" -> obj.status.toJson
+        "cra" -> JsBoolean(obj.cra)
       )
     }
 
@@ -104,10 +103,9 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
       "agency",
       "institutionType",
       "hasParent",
-      "cra",
-      "status"
+      "cra"
     ) match {
-        case Seq(id, name, externalIds, agency, institutionType, hasParent, cra, status) =>
+        case Seq(id, name, externalIds, agency, institutionType, hasParent, cra) =>
           Institution(
             id.convertTo[String],
             name.convertTo[String],
@@ -115,8 +113,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
             agency.convertTo[Agency],
             institutionType.convertTo[InstitutionType],
             hasParent.convertTo[Boolean],
-            cra.convertTo[Boolean],
-            status.convertTo[InstitutionStatus]
+            cra.convertTo[Boolean]
           )
       }
 

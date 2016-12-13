@@ -26,9 +26,10 @@ trait ModelGenerators {
       id <- Gen.alphaStr
       fid <- Gen.alphaStr
       status <- filingStatusGen
+      filingRequired <- Gen.oneOf(true, false)
       start <- Gen.choose(1483287071000L, 1514736671000L)
       end <- Gen.choose(1483287071000L, 1514736671000L)
-    } yield Filing(id, fid, status, start, end)
+    } yield Filing(id, fid, status, filingRequired, start, end)
   }
 
   implicit def submissionStatusGen: Gen[SubmissionStatus] = {

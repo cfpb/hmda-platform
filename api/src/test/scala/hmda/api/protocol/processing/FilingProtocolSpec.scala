@@ -21,4 +21,21 @@ class FilingProtocolSpec extends PropSpec with PropertyChecks with MustMatchers 
     }
   }
 
+  property("A Filing must convert to JSON wrapper") {
+    forAll(filingGen) { f =>
+      f.toJson mustBe
+        JsObject(
+          ("institutionId", JsString(f.institutionId)),
+          ("filingRequired", JsBoolean(f.filingRequired)),
+          ("period", JsString(f.period)),
+          ("status", JsObject(
+            ("code", JsNumber(f.status.code)),
+            ("message", JsString(f.status.message))
+          )),
+          ("start", JsNumber(f.start)),
+          ("end", JsNumber(f.end))
+        )
+    }
+  }
+
 }
