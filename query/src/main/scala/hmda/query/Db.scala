@@ -1,7 +1,7 @@
 package hmda.query
 
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
 trait Db {
   val config: DatabaseConfig[JdbcProfile]

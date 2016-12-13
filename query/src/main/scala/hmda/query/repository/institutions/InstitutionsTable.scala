@@ -5,7 +5,7 @@ import hmda.query.model.institutions.InstitutionQuery
 
 trait InstitutionsTable { this: Db =>
 
-  import config.driver.api._
+  import config.profile.api._
 
   protected class Institutions(tag: Tag) extends Table[InstitutionQuery](tag, "institutions") {
 

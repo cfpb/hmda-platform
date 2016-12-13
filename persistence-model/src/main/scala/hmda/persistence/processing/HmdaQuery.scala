@@ -11,7 +11,7 @@ import hmda.persistence.messages.CommonMessages._
 
 object HmdaQuery {
 
-  type RJ = ReadJournal with AllPersistenceIdsQuery with CurrentPersistenceIdsQuery with EventsByPersistenceIdQuery with CurrentEventsByPersistenceIdQuery with EventsByTagQuery with CurrentEventsByTagQuery
+  type RJ = ReadJournal with AllPersistenceIdsQuery with CurrentPersistenceIdsQuery with EventsByPersistenceIdQuery with CurrentEventsByPersistenceIdQuery with EventsByTagQuery2 with CurrentEventsByTagQuery2
 
   case class EventWithSeqNr(seqNr: Long, event: Event)
 
@@ -23,18 +23,15 @@ object HmdaQuery {
     PersistenceQuery(system).readJournalFor[RJ](journalId)
   }
 
-  def events(persistenceId: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[Event, NotUsed] =
+  def events(persistenceId: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[Event, NotUsed] = {
     readJournal(system).currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
-      .map {
-        case EventEnvelope(_, _, _, event: Event) => event
-      }
+      .map(_.event.asInstanceOf[Event])
+  }
 
   def eventsWithSequenceNumber(persistenceId: String, fromSequenceNr: Long, toSequenceNr: Long)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[EventWithSeqNr, NotUsed] = {
     readJournal(system)
       .eventsByPersistenceId(persistenceId, fromSequenceNr, toSequenceNr)
-      .map {
-        case EventEnvelope(_, _, seqNo, event: Event) => EventWithSeqNr(seqNo, event)
-      }
+      .map(x => EventWithSeqNr(x.sequenceNr, x.event.asInstanceOf[Event]))
   }
 
 }
