@@ -3,11 +3,11 @@ package hmda.query.repository.institutions
 import hmda.query.{ Db, DbConfiguration }
 import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.Repository
-import slick.backend.DatabaseConfig
-import slick.driver.JdbcProfile
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
 trait InstitutionComponent { this: DbConfiguration =>
-  import config.driver.api._
+  import config.profile.api._
 
   class InstitutionsTable(tag: Tag) extends Table[InstitutionQuery](tag, "institutions") {
     def id = column[String]("id", O.PrimaryKey)
@@ -16,10 +16,9 @@ trait InstitutionComponent { this: DbConfiguration =>
     def agency = column[Int]("agency")
     def institutionType = column[String]("type")
     def hasParent = column[Boolean]("parent")
-    def status = column[Int]("status")
     def filingPeriod = column[Int]("period")
 
-    override def * = (id, name, cra, agency, institutionType, hasParent, status, filingPeriod) <> (InstitutionQuery.tupled, InstitutionQuery.unapply)
+    override def * = (id, name, cra, agency, institutionType, hasParent, filingPeriod) <> (InstitutionQuery.tupled, InstitutionQuery.unapply)
   }
 
   class InstitutionRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[InstitutionsTable, String] {

@@ -5,7 +5,7 @@ import slick.ast.BaseTypedType
 import slick.lifted.AbstractTable
 
 abstract class Repository[T <: AbstractTable[_], I: BaseTypedType] extends Db {
-  import config.driver.api._
+  import config.profile.api._
 
   type Id = I
   def table: TableQuery[T]

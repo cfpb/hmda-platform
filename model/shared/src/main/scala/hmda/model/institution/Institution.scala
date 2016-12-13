@@ -10,7 +10,7 @@ case class Institution(
     agency: Agency,
     institutionType: InstitutionType,
     hasParent: Boolean,
-    cra: Boolean = false  // TODO do we have this info when creating the institution? if so, then don't default here.
+    cra: Boolean = false // TODO do we have this info when creating the institution? if so, then don't default here.
 ) extends Serializable {
 
   private val extIdsByType: Map[ExternalIdType, ExternalId] = externalIds.map(extId => (extId.idType, extId)).toMap
