@@ -6,7 +6,6 @@ import akka.pattern.ask
 import hmda.model.fi._
 import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
-import hmda.model.institution.{ Active, Inactive }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
 import hmda.model.institution.{ ExternalId, Institution }
 import hmda.persistence.messages.CommonMessages._
@@ -25,10 +24,10 @@ object DemoData {
   val externalId3 = ExternalId("externalTest3", FederalTaxId)
 
   val testInstitutions = {
-    val i0 = Institution("0", "Bank 0", Set(externalId0), FDIC, Bank, hasParent = true, status = Active)
-    val i1 = Institution("1", "Bank 1", Set(externalId1), CFPB, CreditUnion, hasParent = true, status = Active)
-    val i2 = Institution("2", "Bank 2", Set(externalId2), OCC, CreditUnion, hasParent = false, status = Inactive)
-    val i3 = Institution("3", "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true, status = Active)
+    val i0 = Institution("0", "Bank 0", Set(externalId0), FDIC, Bank, hasParent = true)
+    val i1 = Institution("1", "Bank 1", Set(externalId1), CFPB, CreditUnion, hasParent = true)
+    val i2 = Institution("2", "Bank 2", Set(externalId2), OCC, CreditUnion, hasParent = false)
+    val i3 = Institution("3", "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true)
     Set(i0, i1, i2, i3)
   }
 

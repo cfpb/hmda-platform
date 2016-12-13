@@ -32,18 +32,10 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
           "id": "12345",
           "name": "First Bank",
-          "status": {
-            "code": 1,
-            "message": "active"
-          }
         },
         {
           "id": "123456",
           "name": "Second Bank",
-          "status": {
-            "code": 0,
-            "message": "inactive"
-          }
         }
       ]
     }
@@ -59,10 +51,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "institution": {
       "id": "12345",
       "name": "First Bank",
-      "status": {
-        "code": 0,
-        "message": "inactive"
-      }
     },
       "filings": [
         {
