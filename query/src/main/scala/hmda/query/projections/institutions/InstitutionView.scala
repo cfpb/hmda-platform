@@ -13,7 +13,6 @@ import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import com.typesafe.config.ConfigFactory
 import hmda.query.DbConfiguration
-import hmda.query.repository.institutions.InstitutionsRepository
 
 object InstitutionView {
 
@@ -52,9 +51,7 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   var counter = 0
 
-  val repository = new InstitutionsRepository(config)
-
-  val queryProjector = context.actorOf(InstitutionDBProjection.props(repository))
+  val queryProjector = context.actorOf(InstitutionDBProjection.props())
 
   val conf = ConfigFactory.load()
   val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
