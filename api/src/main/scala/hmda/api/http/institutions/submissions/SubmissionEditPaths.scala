@@ -40,22 +40,29 @@ trait SubmissionEditPaths
     path("filings" / Segment / "submissions" / IntNumber / "edits") { (period, seqNr) =>
       extractExecutionContext { executor =>
         timedGet { uri =>
-          implicit val ec: ExecutionContext = executor
+          parameters("format".?) { format =>
+            implicit val ec: ExecutionContext = executor
 
-          completeVerified(institutionId, period, seqNr, uri) {
-            val fEditChecks = getValidationState(institutionId, period, seqNr)
+            completeVerified(institutionId, period, seqNr, uri) {
+              val fEditChecks = getValidationState(institutionId, period, seqNr)
 
-            val fSummaryEdits = fEditChecks.map { editChecks =>
-              val s = validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-              val v = validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-              val q = validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-              val m = validationErrorsToMacroResults(editChecks.larMacro)
-              SummaryEditResults(s, v, q, m)
-            }
+              val fSummaryEdits = fEditChecks.map { editChecks =>
+                val s = validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+                val v = validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+                val q = validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+                val m = validationErrorsToMacroResults(editChecks.larMacro)
+                SummaryEditResults(s, v, q, m)
+              }
 
-            onComplete(fSummaryEdits) {
-              case Success(edits) => complete(ToResponseMarshallable(edits))
-              case Failure(error) => completeWithInternalError(uri, error)
+              onComplete(fSummaryEdits) {
+                case Success(edits) =>
+                  if (format.contains("csv")) {
+                    complete(edits.toCsv)
+                  } else {
+                    complete(ToResponseMarshallable(edits))
+                  }
+                case Failure(error) => completeWithInternalError(uri, error)
+              }
             }
           }
         }

@@ -46,6 +46,13 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     }
   }
 
+  /*"Return summary edits in CSV format" in {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits?format=csv") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[String] mustBe ""
+    }
+  }*/
+
   "return a list of validation errors for a single type" in {
     val expectedEdits =
       EditResults(
