@@ -151,6 +151,13 @@ trait ModelGenerators {
     } yield MacroEditJustification(id, value, verified, text)
   }
 
+  implicit val macroEditJustificationWithNameGen: Gen[MacroEditJustificationWithName] = {
+    for {
+      edit <- Gen.alphaStr
+      justification <- macroEditJustificationGen
+    } yield MacroEditJustificationWithName(edit, justification)
+  }
+
   implicit val macroValidationErrorGen: Gen[MacroValidationError] = {
     for {
       id <- Gen.alphaStr
