@@ -2,7 +2,6 @@ package hmda.validation.rules.lar.quality
 
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.Result
@@ -21,5 +20,4 @@ object Q040 extends EditCheck[LoanApplicationRegister] {
   }
 
   override def name = "Q040"
-
 }

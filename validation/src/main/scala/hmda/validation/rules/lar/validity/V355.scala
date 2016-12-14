@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
@@ -23,5 +22,4 @@ object V355 extends EditCheck[LoanApplicationRegister] {
   }
 
   override def name: String = "V355"
-
 }

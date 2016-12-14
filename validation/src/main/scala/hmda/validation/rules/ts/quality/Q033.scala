@@ -1,6 +1,5 @@
 package hmda.validation.rules.ts.quality
 
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionType._

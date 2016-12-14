@@ -2,7 +2,6 @@ package hmda.api.http
 
 import hmda.api.model._
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.util.FITestData._
 import hmda.parser.fi.lar.LarCsvParser

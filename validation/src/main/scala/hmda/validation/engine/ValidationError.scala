@@ -1,7 +1,5 @@
 package hmda.validation.engine
 
-import hmda.model.fi.RecordField
-
 sealed trait ValidationErrorType
 case object Syntactical extends ValidationErrorType
 case object Validity extends ValidationErrorType

@@ -9,7 +9,6 @@ import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 
 import scala.concurrent.{ ExecutionContext, Future }
 

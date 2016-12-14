@@ -1,8 +1,6 @@
 package hmda.validation.rules.ts.syntactical
 
 import hmda.model.fi.HasControlNumber
-import hmda.model.fi.lar.fields.LarTopLevelFields._
-import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Agency
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
@@ -18,5 +16,4 @@ object S020 extends EditCheck[HasControlNumber] {
   }
 
   override def name: String = "S020"
-
 }

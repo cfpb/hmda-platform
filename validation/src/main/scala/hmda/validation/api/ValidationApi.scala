@@ -1,6 +1,5 @@
 package hmda.validation.api
 
-import hmda.model.fi.RecordField
 import hmda.validation.dsl.{ Failure, Result, Success }
 import hmda.validation.engine.{ ValidationError, ValidationErrorType }
 import hmda.validation.rules.EditCheck

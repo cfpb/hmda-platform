@@ -1,6 +1,5 @@
 package hmda.validation.rules.lar.quality
 
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.lar.{ Geography, LoanApplicationRegister }
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext

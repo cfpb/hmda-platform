@@ -1,8 +1,6 @@
 package hmda.validation.rules.ts.syntactical
 
 import hmda.model.fi.HasControlNumber
-import hmda.model.fi.lar.fields.LarTopLevelFields._
-import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.PredicateCommon._

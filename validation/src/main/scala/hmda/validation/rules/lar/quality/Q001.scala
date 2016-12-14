@@ -1,7 +1,5 @@
 package hmda.validation.rules.lar.quality
 
-import hmda.model.fi.lar.fields.LarLoanFields._
-import hmda.model.fi.lar.fields.LarApplicantFields._
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
@@ -30,5 +28,4 @@ object Q001 extends EditCheck[LoanApplicationRegister] {
   }
 
   override def name = "Q001"
-
 }

@@ -14,7 +14,6 @@ import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, Validat
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 
 class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._

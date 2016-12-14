@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.syntactical
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.{ Failure, Result, Success }
 import hmda.validation.rules.EditCheck
 
@@ -18,5 +17,4 @@ object S040 extends EditCheck[Iterable[LoanApplicationRegister]] {
   }
 
   override def name = "S040"
-
 }

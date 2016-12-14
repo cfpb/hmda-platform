@@ -1,7 +1,6 @@
 package hmda.api.protocol.validation
 
 import hmda.api.model.SingleValidationErrorResult
-import hmda.model.fi.RecordField
 import hmda.validation.engine._
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 

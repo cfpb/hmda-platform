@@ -1,6 +1,5 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.lar.{ Applicant, LoanApplicationRegister }
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
