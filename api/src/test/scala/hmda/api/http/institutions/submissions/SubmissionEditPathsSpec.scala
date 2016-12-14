@@ -104,6 +104,28 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     }
   }
 
+  "Justify macro edits" in {
+    val justification = MacroEditJustification(1, "Other", true, Some("text"))
+    val justifyEdit = MacroEditJustificationWithName("Q007", justification)
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", justifyEdit) ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+    }
+  }
+
+  "Edit Type endpoint: return 405 when posting justification to syntactical endpoint" in {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.MethodNotAllowed
+      responseAs[ErrorResponse].message mustBe "Method not allowed"
+    }
+  }
+
+  "Edit Type endpoint: return 405 when posting justification to validity endpoint" in {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.MethodNotAllowed
+      responseAs[ErrorResponse].message mustBe "Method not allowed"
+    }
+  }
+
   private def loadValidationErrors(): Unit = {
     val supervisor = system.actorSelection("/user/supervisor")
     val id = "0"

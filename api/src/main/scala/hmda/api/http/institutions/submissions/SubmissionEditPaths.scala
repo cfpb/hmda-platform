@@ -66,9 +66,8 @@ trait SubmissionEditPaths
   def submissionSingleEditPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>
       extractExecutionContext { executor =>
+        implicit val ec: ExecutionContext = executor
         timedGet { uri =>
-          implicit val ec: ExecutionContext = executor
-
           completeVerified(institutionId, period, seqNr, uri) {
             val fValidationState = getValidationState(institutionId, period, seqNr)
 
@@ -91,6 +90,16 @@ trait SubmissionEditPaths
               case Success(_) => completeWithInternalError(uri, new IllegalStateException)
               case Failure(error) => completeWithInternalError(uri, error)
             }
+          }
+        } ~ timedPost { uri =>
+          if (editType == "macro") {
+            entity(as[MacroEditJustificationWithName]) { justifyEdit =>
+              completeVerified(institutionId, period, seqNr, uri) {
+                complete("OK")
+              }
+            }
+          } else {
+            completeWithMethodNotAllowed(uri)
           }
         }
       }
