@@ -81,11 +81,11 @@ object DemoData {
   }
 
   def loadFilings(filings: Seq[Filing], system: ActorSystem): Unit = {
-    filings.foreach { filing =>
-      val filingActor = system.actorOf(FilingPersistence.props(filing.institutionId))
-      filingActor ? CreateFiling(filing)
-      Thread.sleep(100)
-      filingActor ! Shutdown
+    filings.groupBy(_.institutionId).foreach {
+      case (instId: String, filings: Seq[Filing]) =>
+        val filingActor = system.actorOf(FilingPersistence.props(instId))
+        filings.foreach { filing => filingActor ? CreateFiling(filing) }
+        filingActor ! Shutdown
     }
   }
 
