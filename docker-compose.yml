@@ -6,7 +6,7 @@ services:
     ports:
       - '9090:8080'
     volumes:
-    - ./target/scala-2.11/hmda.jar:/opt/hmda.jar
+    - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
 
   ui:
     build: ../hmda-platform-ui
@@ -29,7 +29,7 @@ services:
       KEYCLOAK_PASSWORD: admin
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password 
+      POSTGRES_PASSWORD: password
       POSTGRES_SERVER: keycloak_db
       POSTGRES_PORT: 5432
       # Must use the external address since it is used both in frontend and backend.
