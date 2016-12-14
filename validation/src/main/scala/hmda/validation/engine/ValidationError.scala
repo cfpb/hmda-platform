@@ -23,7 +23,7 @@ case class QualityValidationError(errorId: String, name: String) extends Validat
   override def errorType: ValidationErrorType = Quality
 }
 
-case class MacroEditJustification(id: Int, value: String, verified: Boolean, text: Option[String])
+case class MacroEditJustification(id: Int = 1, value: String = "", verified: Boolean = false, text: Option[String] = None)
 
 case class MacroValidationError(name: String, justifications: Seq[MacroEditJustification]) extends ValidationError {
   override def errorId: String = ""

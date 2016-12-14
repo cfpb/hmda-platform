@@ -28,8 +28,17 @@ trait ValidationErrorConverter {
 
   }
 
+  //def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
+  //  val macroValidationErrors: Seq[ValidationError] = errors.filter(_.errorType == Macro)
+  //  MacroResults(macroValidationErrors.map(x => MacroResult(x.name, x.asInstanceOf[MacroValidationError].justifications)))
+  //}
   def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
-    val macroValidationErrors: Seq[ValidationError] = errors.filter(_.errorType == Macro)
-    MacroResults(macroValidationErrors.map(x => MacroResult(x.name, x.asInstanceOf[MacroValidationError].justifications)))
+    val macroValidationErrors: Seq[ValidationError] = errors.filter(_.errorType == Macro).asInstanceOf[Seq[MacroValidationError]]
+    val macroEditNames = macroValidationErrors.map(x => x.name)
+    val macroJustifications = MacroEditJustificationLookup().justifications
+      .filter(x => macroEditNames.contains(x.edit))
+      .map(x => x.justification)
+    MacroResults(macroValidationErrors.map(x => MacroResult(x.name, macroJustifications)))
   }
+
 }
