@@ -109,6 +109,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val justifyEdit = MacroEditJustificationWithName("Q007", justification)
     postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", justifyEdit) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
+      responseAs[MacroEditJustification] mustBe justification
     }
   }
 

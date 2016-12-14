@@ -15,7 +15,7 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
+import hmda.persistence.processing.HmdaFileValidator.{ HmdaFileValidationState, JustifyMacroEdit, MacroEditJustified }
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -95,7 +95,18 @@ trait SubmissionEditPaths
           if (editType == "macro") {
             entity(as[MacroEditJustificationWithName]) { justifyEdit =>
               completeVerified(institutionId, period, seqNr, uri) {
-                complete("OK")
+                val supervisor = system.actorSelection("/user/supervisor")
+                val submissionId = SubmissionId(institutionId, period, seqNr)
+                val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+                val fResponse = for {
+                  a <- fHmdaFileValidator
+                  j <- (a ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
+                } yield j
+
+                onComplete(fResponse) {
+                  case Success(r) => complete(ToResponseMarshallable(r.justification))
+                  case Failure(e) => completeWithInternalError(uri, e)
+                }
               }
             }
           } else {
