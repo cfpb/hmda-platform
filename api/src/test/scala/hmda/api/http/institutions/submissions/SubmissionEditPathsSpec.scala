@@ -112,12 +112,12 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val submissionId = SubmissionId(id, period, seqNr)
     val fHmdaValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
-    val s1 = ValidationError("loan1", "S010", Syntactical)
-    val s2 = ValidationError("loan1", "S020", Syntactical)
-    val v1 = ValidationError("loan1", "V280", Validity)
-    val v2 = ValidationError("loan2", "V285", Validity)
-    val v3 = ValidationError("loan3", "V285", Validity)
-    val m1 = ValidationError("", "Q007", Macro)
+    val s1 = SyntacticalValidationError("loan1", "S010")
+    val s2 = SyntacticalValidationError("loan1", "S020")
+    val v1 = ValidityValidationError("loan1", "V280")
+    val v2 = ValidityValidationError("loan2", "V285")
+    val v3 = ValidityValidationError("loan3", "V285")
+    val m1 = MacroValidationError("Q007", Nil)
     val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
 
     val tsValidationErrors = TsValidationErrors(Seq(s2))

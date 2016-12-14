@@ -121,12 +121,41 @@ trait ModelGenerators {
     )
   }
 
-  implicit def validationErrorGen: Gen[ValidationError] = {
+  implicit val syntacticalValidationErrorGen: Gen[SyntacticalValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-      errorType <- validationErrorTypeGen
-    } yield ValidationError(id, name, errorType)
+    } yield SyntacticalValidationError(id, name)
+  }
+
+  implicit val validityValidationErrorGen: Gen[ValidityValidationError] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+    } yield ValidityValidationError(id, name)
+  }
+
+  implicit val qualityValidationErrorGen: Gen[QualityValidationError] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+    } yield QualityValidationError(id, name)
+  }
+
+  implicit val macroEditJustificationGen: Gen[MacroEditJustification] = {
+    for {
+      id <- Gen.choose(Int.MinValue, Int.MaxValue)
+      value <- Gen.alphaStr
+      verified <- Gen.oneOf(true, false)
+      text <- Gen.option(Gen.alphaStr)
+    } yield MacroEditJustification(id, value, verified, text)
+  }
+
+  implicit val macroValidationErrorGen: Gen[MacroValidationError] = {
+    for {
+      id <- Gen.alphaStr
+      justifications <- Gen.listOf(macroEditJustificationGen)
+    } yield MacroValidationError(id, justifications)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {

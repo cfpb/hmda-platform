@@ -53,10 +53,10 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     }
 
     "persist validation errors" in {
-      val e1 = ValidationError("1", "S999", Syntactical)
-      val e2 = ValidationError("1", "V999", Validity)
-      val e3 = ValidationError("1", "Q999", Quality)
-      val e4 = ValidationError("1", "Q007", Macro)
+      val e1 = SyntacticalValidationError("1", "S999")
+      val e2 = ValidityValidationError("1", "V999")
+      val e3 = QualityValidationError("1", "Q999")
+      val e4 = MacroValidationError("Q007", Nil)
       val larErrors = LarValidationErrors(Seq(e1, e2, e3, e4))
       val tsErrors = TsValidationErrors(Seq(e1, e2, e3))
       probe.send(hmdaFileValidator, larErrors)
@@ -93,10 +93,23 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Nil,
         Nil,
         Nil,
-        List(ValidationError("8299422144", "S020", Syntactical), ValidationError("2185751599", "S010", Syntactical), ValidationError("2185751599", "S020", Syntactical)),
-        List(ValidationError("4977566612", "V550", Validity), ValidationError("4977566612", "V555", Validity), ValidationError("4977566612", "V560", Validity)),
+        List(
+          SyntacticalValidationError("8299422144", "S020"),
+          SyntacticalValidationError("2185751599", "S010"),
+          SyntacticalValidationError("2185751599", "S020")
+        ),
+        List(
+          ValidityValidationError("4977566612", "V550"),
+          ValidityValidationError("4977566612", "V555"),
+          ValidityValidationError("4977566612", "V560")
+        ),
         Nil,
-        List(ValidationError("", "Q008", Macro), ValidationError("", "Q010", Macro), ValidationError("", "Q016", Macro), ValidationError("", "Q023", Macro))
+        List(
+          MacroValidationError("Q008", Nil),
+          MacroValidationError("Q010", Nil),
+          MacroValidationError("Q016", Nil),
+          MacroValidationError("Q023", Nil)
+        )
       ))
 
     }
