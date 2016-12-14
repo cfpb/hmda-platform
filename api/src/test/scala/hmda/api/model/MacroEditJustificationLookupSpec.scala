@@ -24,5 +24,38 @@ class MacroEditJustificationLookupSpec extends WordSpec with MustMatchers {
       updated.justifications.size mustBe 3
       updated.justifications.contains(MacroEditJustificationWithName("Q007", justification)) mustBe true
     }
+    "Look up list of justifications for a single edit and update it with a new list of justifications" in {
+      val macroEditJustifications = Seq(
+        MacroEditJustification(
+          id = 1,
+          value = "There were a large number of applications, but few loans were closed",
+          verified = true
+        ),
+        MacroEditJustification(
+          id = 3,
+          value = "Loan activity for this filing year consisted mainly of purchased loans.",
+          verified = true
+        )
+      )
+      MacroEditJustificationLookup.updateJustifications("Q007", macroEditJustifications) mustBe
+        Seq(
+          MacroEditJustification(
+            id = 1,
+            value = "There were a large number of applications, but few loans were closed",
+            verified = true
+          ),
+          MacroEditJustification(
+            id = 2,
+            value = "There were a large number of applications, but few loans were closed",
+            verified = false
+          ),
+          MacroEditJustification(
+            id = 3,
+            value = "Loan activity for this filing year consisted mainly of purchased loans.",
+            verified = true
+          )
+        )
+
+    }
   }
 }

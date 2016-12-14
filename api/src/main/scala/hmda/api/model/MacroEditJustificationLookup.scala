@@ -15,6 +15,20 @@ object MacroEditJustificationLookup extends ResourceUtils {
     }.toSeq
     MacroEditJustificationLookup(justifications)
   }
+
+  def updateJustifications(editName: String, update: Seq[MacroEditJustification]): Seq[MacroEditJustification] = {
+    val original = apply().justifications.filter(x => x.edit == editName)
+    val originalIndexes: Seq[Int] = original.map(x => x.justification.id)
+    val updatedIndexes: Seq[Int] = update.map(x => x.id)
+    val indexesInBoth: Seq[Int] = originalIndexes intersect updatedIndexes
+    val indexesLeft: Seq[Int] = originalIndexes diff indexesInBoth
+    val originalLeft: Seq[MacroEditJustification] = original
+      .filter(x => indexesLeft.contains(x.justification.id))
+      .map(x => x.justification)
+    val merge = update ++ originalLeft
+    merge.sortBy(_.id)
+  }
+
 }
 
 case class MacroEditJustificationLookup(justifications: Seq[MacroEditJustificationWithName]) {
