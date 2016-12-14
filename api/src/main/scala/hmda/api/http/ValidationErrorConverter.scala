@@ -10,42 +10,42 @@ trait ValidationErrorConverter {
 
   def validationErrorsToEditResults(tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError], validationErrorType: ValidationErrorType) = {
 
-    def findEditDescription(editName: String): String = {
-      editDescriptions.find(x => x.editNumber == editName)
-        .map(_.editDescription)
-        .getOrElse("")
-    }
-
-    def findEditFields(editName: String): List[String] = {
-      editDescriptions.find(x => x.editNumber == editName)
-        .map(_.fieldNames.split(",").toList)
-        .getOrElse(List(""))
-    }
-
     val errorsByType: Map[ValidationErrorType, Seq[ValidationError]] = larErrors.groupBy(_.errorType)
 
-    val editValues: Map[ValidationErrorType, Map[ValidationErrorMetaData, Seq[ValidationError]]] =
-      errorsByType.mapValues(x => x.groupBy(y => y.metaData))
+    val editValues: Map[ValidationErrorType, Map[String, Seq[ValidationError]]] =
+      errorsByType.mapValues(x => x.groupBy(y => y.ruleName))
 
-    val tsNamedErrors: Seq[ValidationErrorMetaData] = tsErrors.map(_.metaData)
-    val tsUniqueErrors: Seq[ValidationErrorMetaData] = tsNamedErrors.diff(larErrors.map(_.metaData))
-    val tsEditResults: Seq[EditResult] = tsUniqueErrors.map(x => EditResult(x.name, findEditDescription(x.name), findEditFields(x.name), ts = true, Nil))
+    val tsNamedErrors: Seq[String] = tsErrors.map(_.ruleName)
+    val tsUniqueErrors: Seq[String] = tsNamedErrors.diff(larErrors.map(_.ruleName))
+    val tsEditResults: Seq[EditResult] = tsUniqueErrors.map(x => EditResult(x, findEditDescription(x), findEditFields(x), ts = true, Nil))
 
-    val larEditResults: Map[ValidationErrorType, Map[ValidationErrorMetaData, Seq[LarEditResult]]] =
+    val larEditResults: Map[ValidationErrorType, Map[String, Seq[LarEditResult]]] =
       editValues.mapValues(x => x.mapValues(y => y.map(_.errorId).map(z => LarEditResult(LarId(z)))))
 
-    val mapResults = larEditResults.getOrElse(validationErrorType, Map.empty[ValidationErrorMetaData, Seq[LarEditResult]])
+    val mapResults = larEditResults.getOrElse(validationErrorType, Map.empty[String, Seq[LarEditResult]])
     EditResults(
       mapResults
         .toList
-        .map(x => EditResult(x._1.name, findEditDescription(x._1.name), findEditFields(x._1.name), tsNamedErrors.contains(x._1), x._2))
+        .map(x => EditResult(x._1, findEditDescription(x._1), findEditFields(x._1), tsNamedErrors.contains(x._1), x._2))
         .union(tsEditResults)
     )
 
   }
 
+  private def findEditDescription(editName: String): String = {
+    editDescriptions.find(x => x.editNumber == editName)
+      .map(_.editDescription)
+      .getOrElse("")
+  }
+
+  private def findEditFields(editName: String): List[String] = {
+    editDescriptions.find(x => x.editNumber == editName)
+      .map(_.fieldNames.split(",").toList)
+      .getOrElse(List(""))
+  }
+
   def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
     val macroValidationErrors: Seq[ValidationError] = errors.filter(_.errorType == Macro)
-    MacroResults(macroValidationErrors.map(x => MacroResult(x.metaData.name, List())))
+    MacroResults(macroValidationErrors.map(x => MacroResult(x.ruleName, List())))
   }
 }
