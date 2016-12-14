@@ -20,7 +20,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val ctx = ValidationContext(None, Some(2017))
       val larErrors = badLars.flatMap(lar => validationErrors(lar, ctx, validateLar).errors)
 
-      val tsErrors = Seq(ValidationError("8299422144", ValidationErrorMetaData("S020"), Syntactical))
+      val tsErrors = Seq(ValidationError("8299422144", "S020", Syntactical))
 
       val syntacticalEditResults =
         validationErrorsToEditResults(tsErrors, larErrors, Syntactical)

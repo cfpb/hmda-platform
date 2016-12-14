@@ -1,7 +1,7 @@
 package hmda.validation.api
 
 import hmda.validation.dsl.{ Failure, Result, Success }
-import hmda.validation.engine.{ ValidationError, ValidationErrorMetaData, ValidationErrorType }
+import hmda.validation.engine.{ ValidationError, ValidationErrorType }
 import hmda.validation.rules.EditCheck
 
 import scalaz._
@@ -16,7 +16,7 @@ trait ValidationApi {
   def convertResult[T](input: T, result: Result, ruleName: String, inputId: String, errorType: ValidationErrorType): ValidationNel[ValidationError, T] = {
     result match {
       case Success() => input.success
-      case Failure() => ValidationError(inputId, ValidationErrorMetaData(ruleName), errorType).failure.toValidationNel
+      case Failure() => ValidationError(inputId, ruleName, errorType).failure.toValidationNel
     }
   }
 

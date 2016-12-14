@@ -37,12 +37,12 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
         List(
           s020,
           s010
-           )
+        )
       ),
       EditResults(
         List(
-          v280,
-          v285
+          v285,
+          v280
         )
       ),
       EditResults.empty,
@@ -59,9 +59,9 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedEdits =
       EditResults(
         List(
-          v280,
-          v285
-          )
+          v285,
+          v280
+        )
       )
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes ~> check {
@@ -121,12 +121,12 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val submissionId = SubmissionId(id, period, seqNr)
     val fHmdaValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
-    val s1 = ValidationError("loan1", ValidationErrorMetaData("S010"), Syntactical)
-    val s2 = ValidationError("loan1", ValidationErrorMetaData("S020"), Syntactical)
-    val v1 = ValidationError("loan1", ValidationErrorMetaData("V280"), Validity)
-    val v2 = ValidationError("loan2", ValidationErrorMetaData("V285"), Validity)
-    val v3 = ValidationError("loan3", ValidationErrorMetaData("V285"), Validity)
-    val m1 = ValidationError("", ValidationErrorMetaData("Q007"), Macro)
+    val s1 = ValidationError("loan1", "S010", Syntactical)
+    val s2 = ValidationError("loan1", "S020", Syntactical)
+    val v1 = ValidationError("loan1", "V280", Validity)
+    val v2 = ValidationError("loan2", "V285", Validity)
+    val v3 = ValidationError("loan3", "V285", Validity)
+    val m1 = ValidationError("", "Q007", Macro)
     val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
 
     val tsValidationErrors = TsValidationErrors(Seq(s2))
