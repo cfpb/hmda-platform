@@ -101,20 +101,6 @@ trait ModelGenerators {
     } yield EditResults(edits)
   }
 
-  implicit def justificationGen: Gen[Justification] = {
-    for {
-      value <- Gen.alphaStr
-      selected <- Gen.oneOf(true, false)
-    } yield Justification(value, selected)
-  }
-
-  implicit def macroResultGen: Gen[MacroResult] = {
-    for {
-      id <- Gen.alphaStr
-      justification <- Gen.listOf(justificationGen)
-    } yield MacroResult(id, justification)
-  }
-
   implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
     Gen.oneOf(
       List(Syntactical, Validity, Quality)
@@ -163,6 +149,13 @@ trait ModelGenerators {
       id <- Gen.alphaStr
       justifications <- Gen.listOf(macroEditJustificationGen)
     } yield MacroValidationError(id, justifications)
+  }
+
+  implicit def macroResultGen: Gen[MacroResult] = {
+    for {
+      id <- Gen.alphaStr
+      justification <- Gen.listOf(macroEditJustificationGen)
+    } yield MacroResult(id, justification)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {

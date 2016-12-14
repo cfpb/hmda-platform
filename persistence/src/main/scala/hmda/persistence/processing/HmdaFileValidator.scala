@@ -83,7 +83,6 @@ object HmdaFileValidator {
             val newElem = MacroValidationError(v.name, justifications)
             val index = larMacro.indexOf(v)
             val macroUpdated = larMacro.updated(index, newElem)
-            println(macroUpdated)
             HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, macroUpdated)
           case None => this
         }
