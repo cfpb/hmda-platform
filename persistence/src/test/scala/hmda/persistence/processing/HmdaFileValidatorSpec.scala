@@ -41,11 +41,15 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     system.terminate()
   }
 
+  val e1 = SyntacticalValidationError("1", "S999")
+  val e2 = ValidityValidationError("1", "V999")
+  val e3 = QualityValidationError("1", "Q999")
+  val e4 = MacroValidationError("Q007", Nil)
+
   val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
   "HMDA File Validator" must {
     "persist LARs and TS" in {
-
       probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, GetState)
@@ -53,10 +57,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     }
 
     "persist validation errors" in {
-      val e1 = SyntacticalValidationError("1", "S999")
-      val e2 = ValidityValidationError("1", "V999")
-      val e3 = QualityValidationError("1", "Q999")
-      val e4 = MacroValidationError("Q007", Nil)
       val larErrors = LarValidationErrors(Seq(e1, e2, e3, e4))
       val tsErrors = TsValidationErrors(Seq(e1, e2, e3))
       probe.send(hmdaFileValidator, larErrors)
@@ -111,9 +111,39 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
           MacroValidationError("Q023", Nil)
         )
       ))
-
     }
 
+    "veify macro edits" in {
+      val j = MacroEditJustification(1, "Other", true, Some("text written by user"))
+      val justifications = Seq(j)
+      val e5 = e4.copy(justifications = justifications)
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Vector(e4)
+      ))
+      probe.send(hmdaFileValidator, JustifyMacroEdit("Q007", j))
+      probe.expectMsg(MacroEditJustified("Q007", j))
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Vector(e5)
+      ))
+    }
   }
 
 }
