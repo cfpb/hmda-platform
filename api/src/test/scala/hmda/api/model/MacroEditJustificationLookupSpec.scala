@@ -18,7 +18,6 @@ class MacroEditJustificationLookupSpec extends WordSpec with MustMatchers {
         value = "There were a large number of applications, but few loans were closed",
         verified = true
       )
-      val lookup = MacroEditJustificationLookup()
       val updated = MacroEditJustificationLookup.updateJustifications("Q007", Seq(justification))
       updated.size mustBe 3
       updated.contains(justification) mustBe true
@@ -53,7 +52,7 @@ class MacroEditJustificationLookupSpec extends WordSpec with MustMatchers {
             value = "Loan activity for this filing year consisted mainly of purchased loans.",
             verified = true
           )
-        )
+        ).toSet
 
     }
   }

@@ -155,7 +155,7 @@ trait ModelGenerators {
     for {
       id <- Gen.alphaStr
       justification <- Gen.listOf(macroEditJustificationGen)
-    } yield MacroResult(id, justification)
+    } yield MacroResult(id, justification.toSet)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {

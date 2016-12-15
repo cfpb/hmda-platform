@@ -318,6 +318,54 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 }
 ```
 
+    * `POST` - Provides verification for macro edits
+
+    Example payload, in `JSON` format:
+
+```json
+{
+  "edit": "Q023",
+  "justification": {
+  "id": 1,
+  "value": "Most of the loan activity are in areas outside of an MSA/MD",
+  "verified": true
+  }
+}
+```
+    Example response, with HTTP code 200:
+
+```json
+{
+  "edits": [
+    {
+      "edit": "Q023",
+      "justifications": [
+        {
+          "id": 1,
+          "value": "Most of the loan activity are in areas outside of an MSA/MD",
+          "verified": true
+        },
+        {
+          "id": 2,
+          "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
+          "verified": false
+        },
+        {
+          "id": 3,
+          "value": "Acquired or merged with an entity whose loan activity are outside of an MSA/MD.",
+          "verified": false
+        },
+        {
+          "id": 4,
+          "value": "Purchased loans are located in areas outside of an MSA/MD.",
+          "verified": false
+        }
+      ]
+    }
+  ]
+}
+```
+
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
 *NOTE:*  This is a mocked, static endpoint.
 
