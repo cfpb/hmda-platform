@@ -56,7 +56,7 @@ trait SubmissionEditPaths
 
               onComplete(fSummaryEdits) {
                 case Success(edits) =>
-                  if (format.contains("csv")) {
+                  if (format.getOrElse("") == "csv") {
                     complete(edits.toCsv)
                   } else {
                     complete(ToResponseMarshallable(edits))
@@ -74,29 +74,41 @@ trait SubmissionEditPaths
     path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>
       extractExecutionContext { executor =>
         timedGet { uri =>
-          implicit val ec: ExecutionContext = executor
+          parameters("format".?) { format =>
+            implicit val ec: ExecutionContext = executor
 
-          completeVerified(institutionId, period, seqNr, uri) {
-            val fValidationState = getValidationState(institutionId, period, seqNr)
+            completeVerified(institutionId, period, seqNr, uri) {
+              val fValidationState = getValidationState(institutionId, period, seqNr)
 
-            val fSingleEdits = fValidationState.map { editChecks =>
-              editType match {
-                case "syntactical" =>
-                  validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-                case "validity" =>
-                  validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-                case "quality" =>
-                  validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-                case "macro" =>
-                  validationErrorsToMacroResults(editChecks.larMacro)
+              val fSingleEdits = fValidationState.map { editChecks =>
+                editType match {
+                  case "syntactical" =>
+                    validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+                  case "validity" =>
+                    validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+                  case "quality" =>
+                    validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+                  case "macro" =>
+                    validationErrorsToMacroResults(editChecks.larMacro)
+                }
               }
-            }
 
-            onComplete(fSingleEdits) {
-              case Success(edits: MacroResults) => complete(ToResponseMarshallable(edits))
-              case Success(edits: EditResults) => complete(ToResponseMarshallable(edits))
-              case Success(_) => completeWithInternalError(uri, new IllegalStateException)
-              case Failure(error) => completeWithInternalError(uri, error)
+              onComplete(fSingleEdits) {
+                case Success(edits: MacroResults) =>
+                  if (format.getOrElse("") == "csv") {
+                    complete("editType, editId\n" + edits.toCsv)
+                  } else {
+                    complete(ToResponseMarshallable(edits))
+                  }
+                case Success(edits: EditResults) =>
+                  if (format.getOrElse("") == "csv") {
+                    complete("editType, editId, loanId\n" + edits.toCsv(editType))
+                  } else {
+                    complete(ToResponseMarshallable(edits))
+                  }
+                case Success(_) => completeWithInternalError(uri, new IllegalStateException)
+                case Failure(error) => completeWithInternalError(uri, error)
+              }
             }
           }
         }
