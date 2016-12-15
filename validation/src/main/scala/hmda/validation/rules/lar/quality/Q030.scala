@@ -1,5 +1,6 @@
 package hmda.validation.rules.lar.quality
 
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.model.fi.lar.{ Geography, LoanApplicationRegister }
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
@@ -11,6 +12,12 @@ import hmda.validation.rules.{ EditCheck, IfInstitutionPresentIn }
 
 class Q030 private (institution: Institution) extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q030"
+
+  override def description = ""
+
+  override def fields(lar: LoanApplicationRegister) = Map(
+    noField -> ""
+  )
 
   override def apply(lar: LoanApplicationRegister): Result = {
     when(lar.actionTakenType is containedIn(1 to 6)) {

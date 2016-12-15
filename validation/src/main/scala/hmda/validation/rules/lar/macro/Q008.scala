@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.Result
@@ -18,6 +19,10 @@ object Q008 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
   val multiplier = config.getDouble("hmda.validation.macro.Q008.numOfLarsMultiplier")
 
   override def name = "Q008"
+
+  override def description = ""
+
+  override def fields(lars: LoanApplicationRegisterSource) = Map(noField -> "")
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, mat: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 

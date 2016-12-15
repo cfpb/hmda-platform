@@ -2,6 +2,7 @@ package hmda.validation.rules.lar.validity
 
 import hmda.model.census.CBSATractLookup
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
@@ -14,6 +15,12 @@ object V285 extends EditCheck[LoanApplicationRegister] {
   val stateCodes = cbsaTracts.map(c => c.state).toSet
 
   override def name: String = "V285"
+
+  override def description = ""
+
+  override def fields(lar: LoanApplicationRegister) = Map(
+    noField -> ""
+  )
 
   override def apply(input: LoanApplicationRegister): Result = {
     val state = input.geography.state

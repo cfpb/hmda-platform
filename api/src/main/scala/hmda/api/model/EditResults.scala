@@ -1,8 +1,10 @@
 package hmda.api.model
 
-case class LarId(loanId: String)
-case class LarEditResult(lar: LarId)
-case class EditResult(edit: String, ts: Boolean, lars: Seq[LarEditResult])
+import hmda.model.fi.RecordField
+
+case class LarEditField(name: String, value: String)
+case class LarEditResult(larId: String, fields: List[LarEditField])
+case class EditResult(edit: String, description: String, fields: List[RecordField], lars: Seq[LarEditResult])
 case class EditResults(edits: Seq[EditResult])
 case object EditResults {
   def empty: EditResults = EditResults(Nil)

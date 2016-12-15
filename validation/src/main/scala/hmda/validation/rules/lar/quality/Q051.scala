@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.quality
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.Result
@@ -15,4 +16,10 @@ object Q051 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
   }
 
   override def name = "Q051"
+
+  override def description = ""
+
+  override def fields(lar: LoanApplicationRegister) = Map(
+    noField -> ""
+  )
 }

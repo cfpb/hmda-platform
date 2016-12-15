@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.quality
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
@@ -19,4 +20,10 @@ object Q068 extends EditCheck[LoanApplicationRegister] with ApplicantUtils {
         (app.coSex not equalTo(4))
     }
   }
+
+  override def description = ""
+
+  override def fields(lar: LoanApplicationRegister) = Map(
+    noField -> ""
+  )
 }

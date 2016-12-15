@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 import hmda.validation.dsl.Result
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.dsl.PredicateCommon._
@@ -18,6 +19,10 @@ object Q057 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
   val larCount = config.getInt("hmda.validation.macro.Q057.numOfLoanApplications")
 
   override def name = "Q057"
+
+  override def description = ""
+
+  override def fields(lars: LoanApplicationRegisterSource) = Map(noField -> "")
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 

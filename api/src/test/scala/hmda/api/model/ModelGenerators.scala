@@ -5,6 +5,11 @@ import akka.http.scaladsl.model.Uri.Path
 import hmda.model.fi._
 import hmda.validation.engine._
 import org.scalacheck.Gen
+import hmda.model.fi.lar.fields.LarTopLevelFields._
+import hmda.model.fi.lar.fields.LarApplicantFields._
+import hmda.model.fi.lar.fields.LarDenialFields._
+import hmda.model.fi.lar.fields.LarGeographyFields._
+import hmda.model.fi.lar.fields.LarLoanFields._
 
 trait ModelGenerators {
 
@@ -12,7 +17,7 @@ trait ModelGenerators {
     for {
       status <- Gen.oneOf("OK", "SERVICE_UNAVAILABLE")
       service = "hmda-api"
-      time = Calendar.getInstance().getTime().toString
+      time = Calendar.getInstance().getTime.toString
       host = "localhost"
     } yield Status(status, service, time, host)
   }
@@ -49,6 +54,50 @@ trait ModelGenerators {
     )
   }
 
+  implicit def fieldGen: Gen[RecordField] = {
+    Gen.oneOf(
+      noField,
+      respondentId,
+      agencyCode,
+      preaprovals,
+      actionTakenType,
+      actionTakenDate,
+      purchaserType,
+      rateSpread,
+      heopaStatus,
+      lienStatus,
+      ethnicity,
+      coEthnicity,
+      race1,
+      race2,
+      race3,
+      race4,
+      race5,
+      coRace1,
+      coRace2,
+      coRace3,
+      coRace4,
+      coRace5,
+      sex,
+      coSex,
+      income,
+      reason1,
+      reason2,
+      reason3,
+      msa,
+      state,
+      county,
+      tract,
+      id,
+      applicationDate,
+      loanType,
+      propertyType,
+      purpose,
+      occupancy,
+      amount
+    )
+  }
+
   implicit def submissionIdGen: Gen[SubmissionId] = {
     for {
       institutionId <- Gen.alphaStr
@@ -81,18 +130,27 @@ trait ModelGenerators {
     } yield ErrorResponse(status, message, Path(path))
   }
 
+  implicit def larEditFieldGen: Gen[LarEditField] = {
+    for {
+      fieldName <- Gen.alphaStr
+      value <- Gen.alphaStr
+    } yield LarEditField(fieldName, value)
+  }
+
   implicit def larEditResultGen: Gen[LarEditResult] = {
     for {
       loanId <- Gen.alphaStr
-    } yield LarEditResult(LarId(loanId))
+      larEditField <- Gen.listOf(larEditFieldGen)
+    } yield LarEditResult(loanId, larEditField)
   }
 
   implicit def editResultGen: Gen[EditResult] = {
     for {
       edit <- Gen.alphaStr
-      ts <- Gen.oneOf(true, false)
+      description <- Gen.alphaStr
+      fields <- fieldGen
       lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, ts, lars)
+    } yield EditResult(edit, description, List(fields), lars)
   }
 
   implicit def editResultsGen: Gen[EditResults] = {
@@ -125,8 +183,11 @@ trait ModelGenerators {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
+      field <- fieldGen
+      fieldDescription <- Gen.alphaStr
+      description <- Gen.alphaStr
       errorType <- validationErrorTypeGen
-    } yield ValidationError(id, name, errorType)
+    } yield ValidationError(id, ValidationErrorMetaData(name, description, Map(field -> fieldDescription)), errorType)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {
