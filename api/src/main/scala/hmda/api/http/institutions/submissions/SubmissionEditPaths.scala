@@ -4,6 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
@@ -70,26 +71,7 @@ trait SubmissionEditPaths
         timedGet { uri =>
           completeVerified(institutionId, period, seqNr, uri) {
             val fValidationState = getValidationState(institutionId, period, seqNr)
-
-            val fSingleEdits = fValidationState.map { editChecks =>
-              editType match {
-                case "syntactical" =>
-                  validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-                case "validity" =>
-                  validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-                case "quality" =>
-                  validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-                case "macro" =>
-                  validationErrorsToMacroResults(editChecks.larMacro)
-              }
-            }
-
-            onComplete(fSingleEdits) {
-              case Success(edits: MacroResults) => complete(ToResponseMarshallable(edits))
-              case Success(edits: EditResults) => complete(ToResponseMarshallable(edits))
-              case Success(_) => completeWithInternalError(uri, new IllegalStateException)
-              case Failure(error) => completeWithInternalError(uri, error)
-            }
+            completeValidationState(editType, fValidationState, uri)
           }
         } ~ timedPost { uri =>
           if (editType == "macro") {
@@ -98,15 +80,12 @@ trait SubmissionEditPaths
                 val supervisor = system.actorSelection("/user/supervisor")
                 val submissionId = SubmissionId(institutionId, period, seqNr)
                 val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
-                val fResponse = for {
+                val fValidationState = for {
                   a <- fHmdaFileValidator
                   j <- (a ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
-                } yield j
-
-                onComplete(fResponse) {
-                  case Success(r) => complete(ToResponseMarshallable(r.justification))
-                  case Failure(e) => completeWithInternalError(uri, e)
-                }
+                  state <- getValidationState(institutionId, period, seqNr)
+                } yield state
+                completeValidationState(editType, fValidationState, uri)
               }
             }
           } else {
@@ -115,6 +94,28 @@ trait SubmissionEditPaths
         }
       }
     }
+
+  private def completeValidationState(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri)(implicit ec: ExecutionContext) = {
+    val fSingleEdits = fValidationState.map { editChecks =>
+      editType match {
+        case "syntactical" =>
+          validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+        case "validity" =>
+          validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+        case "quality" =>
+          validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+        case "macro" =>
+          validationErrorsToMacroResults(editChecks.larMacro)
+      }
+    }
+
+    onComplete(fSingleEdits) {
+      case Success(edits: MacroResults) => complete(ToResponseMarshallable(edits))
+      case Success(edits: EditResults) => complete(ToResponseMarshallable(edits))
+      case Success(_) => completeWithInternalError(uri, new IllegalStateException)
+      case Failure(error) => completeWithInternalError(uri, error)
+    }
+  }
 
   private def getValidationState(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
     val supervisor = system.actorSelection("/user/supervisor")

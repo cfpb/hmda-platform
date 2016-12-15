@@ -110,11 +110,13 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   }
 
   "Justify macro edits" in {
-    val justification = MacroEditJustification(1, "Other", true, Some("text"))
+    val justification = MacroEditJustificationLookup.getJustifications("Q007").head.copy(verified = true)
     val justifyEdit = MacroEditJustificationWithName("Q007", justification)
     postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", justifyEdit) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[MacroEditJustification] mustBe justification
+      val macroResults = responseAs[MacroResults].edits.head
+      macroResults.justifications.head.verified mustBe true
+      macroResults.justifications.tail.map(x => x.verified mustBe false)
     }
   }
 
