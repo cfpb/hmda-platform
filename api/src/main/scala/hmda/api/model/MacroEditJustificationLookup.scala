@@ -29,20 +29,11 @@ object MacroEditJustificationLookup extends ResourceUtils {
     merge.sortBy(_.id)
   }
 
-}
-
-case class MacroEditJustificationLookup(justifications: Seq[MacroEditJustificationWithName]) {
-  def update(justificationWithName: MacroEditJustificationWithName): MacroEditJustificationLookup = {
-    val name = justificationWithName.edit
-    val id = justificationWithName.justification.id
-    val maybeFound = justifications.find(
-      x => x.edit == name && x.justification.id == id
-    )
-    val index = justifications.indexOf(maybeFound.getOrElse(MacroEditJustification()))
-    val updateAndFiltered = justifications
-      .updated(index, justificationWithName)
-      .filter(x => x.edit == justificationWithName.edit)
-    MacroEditJustificationLookup(updateAndFiltered)
+  def getJustifications(editName: String): Seq[MacroEditJustification] = {
+    val filtered = apply().justifications.filter(x => x.edit == editName)
+    filtered.map(x => x.justification)
   }
 
 }
+
+case class MacroEditJustificationLookup(justifications: Seq[MacroEditJustificationWithName])

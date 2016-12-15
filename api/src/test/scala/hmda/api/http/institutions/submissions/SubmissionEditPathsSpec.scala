@@ -37,7 +37,12 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
         )
       ),
       EditResults.empty,
-      MacroResults(List(MacroResult("Q007", List())))
+      MacroResults(List(
+        MacroResult(
+          "Q007",
+          MacroEditJustificationLookup.getJustifications("Q007")
+        )
+      ))
     )
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
@@ -62,7 +67,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[MacroResults] mustBe MacroResults(List(MacroResult("Q007", List())))
+      responseAs[MacroResults] mustBe MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
     }
   }
 

@@ -19,10 +19,9 @@ class MacroEditJustificationLookupSpec extends WordSpec with MustMatchers {
         verified = true
       )
       val lookup = MacroEditJustificationLookup()
-      val justificationWithName = MacroEditJustificationWithName("Q007", justification)
-      val updated = lookup.update(justificationWithName)
-      updated.justifications.size mustBe 3
-      updated.justifications.contains(MacroEditJustificationWithName("Q007", justification)) mustBe true
+      val updated = MacroEditJustificationLookup.updateJustifications("Q007", Seq(justification))
+      updated.size mustBe 3
+      updated.contains(justification) mustBe true
     }
     "Look up list of justifications for a single edit and update it with a new list of justifications" in {
       val macroEditJustifications = Seq(
