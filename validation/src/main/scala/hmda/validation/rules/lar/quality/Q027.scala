@@ -15,5 +15,4 @@ object Q027 extends EditCheck[LoanApplicationRegister] {
       lar.applicant.income not equalTo("NA")
     }
   }
-
 }

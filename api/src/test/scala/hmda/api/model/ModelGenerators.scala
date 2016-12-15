@@ -12,7 +12,7 @@ trait ModelGenerators {
     for {
       status <- Gen.oneOf("OK", "SERVICE_UNAVAILABLE")
       service = "hmda-api"
-      time = Calendar.getInstance().getTime.toString
+      time = Calendar.getInstance.getTime.toString
       host = "localhost"
     } yield Status(status, service, time, host)
   }
