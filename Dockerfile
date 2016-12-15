@@ -17,4 +17,4 @@ ENTRYPOINT ["java", "-jar", "hmda.jar"]
 
 EXPOSE 8080
 
-COPY target/scala-2.11/hmda.jar . 
+COPY target/scala-2.12/hmda.jar . 
