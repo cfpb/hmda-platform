@@ -26,7 +26,7 @@ trait FilingProtocol extends DefaultJsonProtocol with SubmissionProtocol {
     }
   }
 
-  implicit val filingFormat = jsonFormat5(Filing.apply)
+  implicit val filingFormat = jsonFormat6(Filing.apply)
   implicit val filingsFormat = jsonFormat1(Filings.apply)
   implicit val filingDetailFormat = jsonFormat2(FilingDetail.apply)
 }

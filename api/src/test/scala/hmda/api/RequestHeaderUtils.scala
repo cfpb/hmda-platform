@@ -17,7 +17,7 @@ trait RequestHeaderUtils extends RequestBuilding {
       .addHeader(institutionsHeader)
   }
 
-  def postWithCfpbHeaders[T](path: String, content: T)(implicit m: ToEntityMarshaller[T], ec: ExecutionContext) = {
+  def postWithCfpbHeaders[T](path: String, content: T)(implicit m: ToEntityMarshaller[T]) = {
     new RequestBuilder(POST).apply(path, content)
       .addHeader(usernameHeader)
       .addHeader(institutionsHeader)
