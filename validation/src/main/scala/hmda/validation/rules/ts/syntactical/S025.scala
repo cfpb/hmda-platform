@@ -1,6 +1,8 @@
 package hmda.validation.rules.ts.syntactical
 
 import hmda.model.fi.HasControlNumber
+import hmda.model.fi.lar.fields.LarTopLevelFields._
+import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.PredicateCommon._
@@ -17,7 +19,13 @@ object S025 {
 class S025 private (institution: Institution) extends EditCheck[HasControlNumber] {
   def name = "S025"
 
+  override def description = ""
+
   def apply(input: HasControlNumber): Result = compare(input.respondentId, input.agencyCode)
+
+  override def fields(lar: HasControlNumber) = Map(
+    noField -> ""
+  )
 
   private def compare(filingRespId: String, filingAgencyCode: Int): Result = {
     institution.respondentId match {

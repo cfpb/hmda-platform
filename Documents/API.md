@@ -233,29 +233,72 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         "edits": [
           {
             "edit": "S025",
-            "ts": true,
+            "description": "Description of S025",
+            "fields": [
+                      {
+                        "name": "None",
+                        "description": "None"
+                      }
+                    ],
             "lars": [
+               {
+                "larId": "Transmittal Sheet",
+                "fields": [
+                  {
+                    "name": "None",
+                    "value": ""
+                  }
+                ]
+               },
               {
-                "lar": {"loanId": "s1"}
-              },
-              {
-                "lar": {"loanId": "s2"}
-              },
-              {
-                "lar": {"loanId": "s3"}
-              }
+                          "larId": "ABCDE12345ABCDE12345ABCDE",
+                          "fields": [
+                            {
+                              "name": "None",
+                              "value": ""
+                            }
+                          ]
+                        },
+                        {
+                          "larId": "ABCDE12345ABCDE12345ABCDE",
+                          "fields": [
+                            {
+                              "name": "None",
+                              "value": ""
+                            }
+                          ]
+                        }
             ]
           },
           {
             "edit": "S010",
+            "description": "Description of S010",
+            "fields": [
+                      {
+                        "name": "None",
+                        "description": "None"
+                      }
+                    ],
             "ts": false,
             "lars": [
               {
-                "lar": {"loanId": "s4"}
-              },
-              {
-                "lar": {"loanId": "s5"}
-              }
+                          "larId": "ABCDE12345ABCDE12345ABCDE",
+                          "fields": [
+                            {
+                              "name": "None",
+                              "value": ""
+                            }
+                          ]
+                        },
+                        {
+                          "larId": "ABCDE12345ABCDE12345ABCDE",
+                          "fields": [
+                            {
+                              "name": "None",
+                              "value": ""
+                            }
+                          ]
+                        }
             ]
           }
         ]
@@ -266,7 +309,8 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
             "edits": [
                 {
-                   "edit": "q007",
+                   "edit": "Q007",
+                   "description: "Description of Q007",
                    "justifications": [
                      {
                        "value": "don't worry",
@@ -294,23 +338,49 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
   "edits": [
     {
       "edit": "V555",
+      "description: "Description of V555",
       "ts": false,
+      "fields": [
+                {
+                  "name": "None",
+                  "description": "None"
+                }
+              ],
       "lars": [
         {
-          "lar": {
-            "loanId": "4977566612"
-          }
-        }
+                     "larId": "ABCDE12345ABCDE12345ABCDE",
+                     "fields": [
+                       {
+                         "name": "None",
+                         "value": ""
+                       }
+                     ]
+                   }
       ]
     },
     {
       "edit": "V550",
+      "description: "Description of V550",
       "ts": false,
+      "fields": [
+                {
+                  "name": "None",
+                  "description": "None"
+                }
+              ],
       "lars": [
         {
-          "lar": {
-            "loanId": "4977566612"
-          }
+          "lar": [
+            {
+                        "larId": "ABCDE12345ABCDE12345ABCDE",
+                        "fields": [
+                          {
+                            "name": "None",
+                            "value": ""
+                          }
+                        ]
+                      }
+          ]
         }
       ]
     }

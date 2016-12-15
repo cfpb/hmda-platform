@@ -1,6 +1,7 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.model.fi.lar.{ LoanApplicationRegister, Loan }
+import hmda.model.fi.lar.fields.LarTopLevelFields._
+import hmda.model.fi.lar.{ Loan, LoanApplicationRegister }
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
@@ -15,4 +16,10 @@ object V220 extends EditCheck[LoanApplicationRegister] {
   }
 
   override def name = "V220"
+
+  override def description = ""
+
+  override def fields(lar: LoanApplicationRegister) = Map(
+    noField -> ""
+  )
 }

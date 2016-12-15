@@ -9,6 +9,7 @@ import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
+import hmda.model.fi.lar.fields.LarTopLevelFields._
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -19,6 +20,10 @@ object Q006 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
   val numOfOriginatedHomePurchaseLoans = config.getInt("hmda.validation.macro.Q006.numOfOriginatedHomePurchaseLoans")
 
   override def name = "Q006"
+
+  override def description = ""
+
+  override def fields(lars: LoanApplicationRegisterSource) = Map(noField -> "")
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 
