@@ -98,7 +98,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   def aggregateErrors(validationErrors: ValidationErrors): SingleValidationErrorResult = {
     val errors = validationErrors.errors.groupBy(_.errorType)
     def allOfType(errorType: ValidationErrorType): Seq[String] = {
-      errors.getOrElse(errorType, List()).map(e => e.name)
+      errors.getOrElse(errorType, List()).map(e => e.ruleName)
     }
 
     SingleValidationErrorResult(
