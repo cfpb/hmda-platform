@@ -91,9 +91,10 @@ trait ModelGenerators {
     for {
       edit <- Gen.alphaStr
       description <- Gen.alphaStr
+      fields <- Gen.alphaStr
       ts <- Gen.oneOf(true, false)
       lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, description, ts, lars)
+    } yield EditResult(edit, description, List(fields), ts, lars)
   }
 
   implicit def editResultsGen: Gen[EditResults] = {
