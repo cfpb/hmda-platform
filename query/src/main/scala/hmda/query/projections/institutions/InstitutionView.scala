@@ -6,12 +6,13 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.InstitutionType.Bank
-import hmda.model.institution.{ Inactive, Institution }
+import hmda.model.institution.Institution
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shutdown }
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import com.typesafe.config.ConfigFactory
+import hmda.query.DbConfiguration
 
 object InstitutionView {
 
@@ -42,7 +43,7 @@ object InstitutionView {
 
 }
 
-class InstitutionView extends HmdaPersistentActor {
+class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   import InstitutionView._
 
@@ -50,10 +51,10 @@ class InstitutionView extends HmdaPersistentActor {
 
   var counter = 0
 
-  val queryProjector = context.actorOf(InstitutionDBProjection.props)
+  val queryProjector = context.actorOf(InstitutionDBProjection.props())
 
-  val config = ConfigFactory.load()
-  val snapshotCounter = config.getInt("hmda.journal.snapshot.counter")
+  val conf = ConfigFactory.load()
+  val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
 
   override def persistenceId: String = name
 
@@ -64,7 +65,7 @@ class InstitutionView extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = {
     case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(i => i.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false, status = Inactive))
+      val institution = state.institutions.find(i => i.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false))
       sender() ! institution
 
     case GetInstitutionsById(ids) =>

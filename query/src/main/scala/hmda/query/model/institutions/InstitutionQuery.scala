@@ -7,6 +7,5 @@ case class InstitutionQuery(
   agency: Int,
   institutionType: String,
   parent: Boolean,
-  status: Int,
   filingPeriod: Int
 )

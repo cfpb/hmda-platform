@@ -6,7 +6,7 @@ services:
     ports:
       - '9090:8080'
     volumes:
-    - ./target/scala-2.11/hmda.jar:/opt/hmda.jar
+    - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
 
   ui:
     build: ../hmda-platform-ui
@@ -29,13 +29,14 @@ services:
       KEYCLOAK_PASSWORD: admin
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password 
+      POSTGRES_PASSWORD: password
       POSTGRES_SERVER: keycloak_db
       POSTGRES_PORT: 5432
       # Must use the external address since it is used both in frontend and backend.
       INSTITUTION_SEARCH_URI: https://192.168.99.100:9443
       INSTITUTION_SEARCH_VALIDATE_SSL: "OFF"
       REDIRECT_URIS: '[ "http://192.168.99.100/oidc-callback", "http://192.168.99.100/silent_renew.html" ]'
+      SUPPORT_EMAIL: 'support@localhost.localdomain'
     volumes:
       - '../hmda-platform-auth/keycloak/themes/hmda:/opt/jboss/keycloak/themes/hmda'
     #  - '../hmda-platform-auth/keycloak/import:/opt/jboss/import'

@@ -13,13 +13,15 @@ object DemoFilings extends ResourceUtils {
       val period = values(0)
       val institutionId = values(1)
       val filingStatus = toFilingStatus(values(2))
-      val start = values(3).toLong
-      val end = values(4).toLong
+      val filingRequired = values(3).toBoolean
+      val start = values(4).toLong
+      val end = values(5).toLong
 
       Filing(
         period,
         institutionId,
         filingStatus,
+        filingRequired,
         start,
         end
       )

@@ -18,7 +18,6 @@ object DemoInstitutions extends ResourceUtils {
       val institution = toInstitutionType(values(5))
       val parent = values(6).toBoolean
       val cra = values(7).toBoolean
-      val status = toStatus(values(8))
 
       Institution(
         id,
@@ -27,8 +26,7 @@ object DemoInstitutions extends ResourceUtils {
         agency,
         institution,
         parent,
-        cra,
-        status
+        cra
       )
     }.toSet
   }
@@ -43,13 +41,6 @@ object DemoInstitutions extends ResourceUtils {
 
   def toAgency(text: String): Agency = {
     Agency.values.filter(agency => agency.name == text).head
-  }
-
-  def toStatus(text: String): InstitutionStatus = {
-    text match {
-      case "active" => Active
-      case "inactive" => Inactive
-    }
   }
 
 }

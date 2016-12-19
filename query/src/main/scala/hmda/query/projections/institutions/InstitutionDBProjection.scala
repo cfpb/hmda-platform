@@ -4,18 +4,18 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
 import hmda.persistence.model.HmdaActor
-import hmda.query.dao.institutions.{ InstitutionDAO, Institutions }
-import slick.lifted.TableQuery
-import hmda.query.dao.institutions.InstitutionConverter._
-import slick.driver.H2Driver
-import slick.driver.H2Driver.api._
+import hmda.query.DbConfiguration
+import hmda.query.repository.institutions.InstitutionComponent
 
 import scala.concurrent.ExecutionContext
 
-object InstitutionDBProjection {
+object InstitutionDBProjection extends InstitutionComponent with DbConfiguration {
+
+  val repository = new InstitutionRepository(config)
+
   case class InstitutionInserted(n: Int)
   case class InstitutionUpdated(n: Int)
-  def props(): Props = Props(new InstitutionDBProjection)
+  def props(): Props = Props(new InstitutionDBProjection())
 
   def createInstitutionDBProjection(system: ActorSystem): ActorRef = {
     system.actorOf(InstitutionDBProjection.props())
@@ -23,37 +23,28 @@ object InstitutionDBProjection {
 
 }
 
-class InstitutionDBProjection extends HmdaActor with InstitutionDAO with H2Driver {
-
-  import InstitutionDBProjection._
-
-  val institutions = TableQuery[Institutions]
-
-  val db: Database = Database.forConfig("h2mem")
+class InstitutionDBProjection extends HmdaActor {
 
   implicit val ec: ExecutionContext = context.dispatcher
+
+  import hmda.query.repository.institutions.InstitutionConverter._
+  import hmda.query.projections.institutions.InstitutionDBProjection._
 
   override def receive: Receive = {
     case event: InstitutionEvent => event match {
       case InstitutionCreated(i) =>
         val query = toInstitutionQuery(i)
         log.debug(s"Created: $query")
-        db.run(insertOrUpdate(query))
-          .map(x => InstitutionInserted(x)) pipeTo self
+        repository.insertOrUpdate(query)
+          .map(x => InstitutionInserted(x)) pipeTo sender()
 
       case InstitutionModified(i) =>
         val query = toInstitutionQuery(i)
         log.info(s"Modified: $query")
-        db.run(update(query))
-          .map(x => InstitutionUpdated(x)) pipeTo self
-
+        repository.update(query)
+          .map(x => InstitutionUpdated(x)) pipeTo sender()
     }
 
-    case InstitutionInserted(size) =>
-      log.debug(s"Inserted: $size")
-
-    case InstitutionUpdated(size) =>
-      log.debug(s"Updated: $size")
   }
 
 }
