@@ -4,7 +4,7 @@ import hmda.validation.engine.MacroEditJustification
 
 case class LarId(loanId: String)
 case class LarEditResult(lar: LarId)
-case class EditResult(edit: String, ts: Boolean, lars: Seq[LarEditResult])
+case class EditResult(edit: String, description: String, ts: Boolean, lars: Seq[LarEditResult])
 case class EditResults(edits: Seq[EditResult])
 case object EditResults {
   def empty: EditResults = EditResults(Nil)

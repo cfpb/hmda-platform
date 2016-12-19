@@ -76,11 +76,11 @@ object HmdaFileValidator {
       case LarMacroError(e) =>
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, larMacro :+ e)
       case MacroEditJustified(e, j) =>
-        val elem = larMacro.find(x => x.name == e)
+        val elem = larMacro.find(x => x.ruleName == e)
         elem match {
           case Some(v) =>
             val justifications = v.asInstanceOf[MacroValidationError].justifications :+ j
-            val newElem = MacroValidationError(v.name, justifications)
+            val newElem = MacroValidationError(v.ruleName, justifications)
             val index = larMacro.indexOf(v)
             val macroUpdated = larMacro.updated(index, newElem)
             HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, macroUpdated)

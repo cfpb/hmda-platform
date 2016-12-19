@@ -32,8 +32,8 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
         validationErrorsToMacroResults(larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
-      val s020 = EditResult("S020", ts = true, Seq(LarEditResult(LarId("8299422144")), LarEditResult(LarId("2185751599"))))
-      val s010 = EditResult("S010", ts = false, Seq(LarEditResult(LarId("2185751599"))))
+      val s020 = EditResult("S020", "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.", ts = true, Seq(LarEditResult(LarId("8299422144")), LarEditResult(LarId("2185751599"))))
+      val s010 = EditResult("S010", "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).", ts = false, Seq(LarEditResult(LarId("2185751599"))))
       summaryEditResults.syntactical.edits.head mustBe s020
       summaryEditResults.syntactical.edits.tail.contains(s010) mustBe true
       summaryEditResults.validity.edits.size mustBe 3

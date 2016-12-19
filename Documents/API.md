@@ -233,6 +233,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         "edits": [
           {
             "edit": "S025",
+            "description": "Description of S025",
             "ts": true,
             "lars": [
               {
@@ -248,6 +249,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           },
           {
             "edit": "S010",
+            "description": "Description of S010",
             "ts": false,
             "lars": [
               {
@@ -266,7 +268,8 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
             "edits": [
                 {
-                   "edit": "q007",
+                   "edit": "Q007",
+                   "description": "Description of Q007",
                    "justifications": [
                      {
                        "value": "don't worry",
@@ -291,7 +294,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
     ```json
     {
-      "edits": [
         {
           "edit": "V555",
           "ts": false,
@@ -336,7 +338,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
     ```json
     {
-      "edits": [
         {
           "edit": "Q023",
           "justifications": [
