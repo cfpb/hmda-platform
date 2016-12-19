@@ -32,8 +32,8 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
         validationErrorsToMacroResults(larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
-      val s020 = EditResult("S020", ts = true, Seq(LarEditResult(LarId("8299422144")), LarEditResult(LarId("2185751599"))))
-      val s010 = EditResult("S010", ts = false, Seq(LarEditResult(LarId("2185751599"))))
+      val s020 = EditResult("S020", Seq(LarEditResult(LarId("8299422144")), LarEditResult(LarId("2185751599")), LarEditResult(LarId("Transmittal Sheet"))))
+      val s010 = EditResult("S010", Seq(LarEditResult(LarId("2185751599"))))
       summaryEditResults.syntactical.edits.head mustBe s020
       summaryEditResults.syntactical.edits.tail.contains(s010) mustBe true
       summaryEditResults.validity.edits.size mustBe 3
