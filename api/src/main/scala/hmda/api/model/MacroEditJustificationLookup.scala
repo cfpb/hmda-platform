@@ -16,6 +16,10 @@ object MacroEditJustificationLookup extends ResourceUtils {
     MacroEditJustificationLookup(justifications)
   }
 
+  /*
+  Updates the original justifications configured in macroEditConfigurations.txt with an updated list of configurations,
+   filtered for a specific edit
+   */
   def updateJustifications(editName: String, update: Seq[MacroEditJustification]): Set[MacroEditJustification] = {
     val original = apply().justifications.filter(x => x.edit == editName)
     val originalIndexes: Seq[Int] = original.map(x => x.justification.id)
