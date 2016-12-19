@@ -127,6 +127,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
       macroResults.justifications.head.verified mustBe true
       macroResults.justifications.tail.map(x => x.verified mustBe false)
     }
+    val justification2 = MacroEditJustificationLookup.getJustifications("Q007").head.copy(verified = false)
+    val justifyEdit2 = MacroEditJustificationWithName("Q007", justification2)
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", justifyEdit2) ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val macroResults = responseAs[MacroResults].edits.head
+      macroResults.justifications.head.verified mustBe false
+      macroResults.justifications.tail.map(x => x.verified mustBe false)
+    }
   }
 
   "Edit Type endpoint: return 405 when posting justification to syntactical endpoint" in {
