@@ -1,18 +1,20 @@
-package hmda.query.projections.institutions
+package hmda.query.view.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
+import com.typesafe.config.ConfigFactory
 import hmda.model.institution.Agency.CFPB
-import hmda.model.institution.InstitutionType.Bank
 import hmda.model.institution.Institution
+import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shutdown }
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
-import com.typesafe.config.ConfigFactory
 import hmda.query.DbConfiguration
+import hmda.query.model.ViewMessages.StreamCompleted
+import hmda.query.projections.institutions.InstitutionDBProjection
 
 object InstitutionView {
 
@@ -21,7 +23,6 @@ object InstitutionView {
   case class GetInstitutionById(institutionId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
   case class LastProcessedEventOffset(seqNr: Long)
-  case object StreamCompleted
 
   def props(): Props = Props(new InstitutionView)
 

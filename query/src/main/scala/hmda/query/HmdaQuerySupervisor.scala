@@ -2,7 +2,7 @@ package hmda.query
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.persistence.model.HmdaSupervisorActor
-import hmda.query.projections.institutions.InstitutionView
+import hmda.query.view.institutions.InstitutionView
 
 object HmdaQuerySupervisor {
   case class FindQueryActorByName(name: String)

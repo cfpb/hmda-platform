@@ -6,7 +6,7 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
-import hmda.query.projections.institutions.InstitutionView._
+import hmda.query.view.institutions.InstitutionView._
 
 class InstitutionViewSpec extends ActorSpec {
 
