@@ -5,6 +5,7 @@ import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
+
 import com.typesafe.config.ConfigFactory
 
 object Q005 extends EditCheck[LoanApplicationRegister] {

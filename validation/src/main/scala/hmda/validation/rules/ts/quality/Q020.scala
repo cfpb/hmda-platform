@@ -13,5 +13,4 @@ object Q020 extends EditCheck[TransmittalSheet] {
   }
 
   override def name: String = "Q020"
-
 }
