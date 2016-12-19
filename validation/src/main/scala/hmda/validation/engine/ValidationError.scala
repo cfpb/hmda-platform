@@ -29,6 +29,14 @@ case class MacroValidationError(ruleName: String, justifications: Seq[MacroEditJ
   override def errorId: String = ""
   override def errorType: ValidationErrorType = Macro
 }
+object MacroValidationError {
+  def updateJustifications(larMacro: Seq[ValidationError], j: MacroEditJustification, v: ValidationError): Seq[MacroValidationError] = {
+    val justifications = v.asInstanceOf[MacroValidationError].justifications :+ j
+    val newElem = MacroValidationError(v.ruleName, justifications)
+    val index = larMacro.indexOf(v)
+    larMacro.updated(index, newElem).asInstanceOf[Seq[MacroValidationError]]
+  }
+}
 
 abstract class ValidationErrors {
   def errors: Seq[ValidationError]

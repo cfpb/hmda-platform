@@ -36,7 +36,7 @@ class MacroEditJustificationLookupSpec extends WordSpec with MustMatchers {
         )
       )
       MacroEditJustificationLookup.updateJustifications("Q007", macroEditJustifications) mustBe
-        Seq(
+        Set(
           MacroEditJustification(
             id = 1,
             value = "There were a large number of applications, but few loans were closed",
@@ -52,7 +52,7 @@ class MacroEditJustificationLookupSpec extends WordSpec with MustMatchers {
             value = "Loan activity for this filing year consisted mainly of purchased loans.",
             verified = true
           )
-        ).toSet
+        )
 
     }
   }

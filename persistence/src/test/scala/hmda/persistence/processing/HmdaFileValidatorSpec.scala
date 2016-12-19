@@ -113,7 +113,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       ))
     }
 
-    "veify macro edits" in {
+    "verify macro edits" in {
       val j = MacroEditJustification(1, "Other", true, Some("text written by user"))
       val justifications = Seq(j)
       val e5 = e4.copy(justifications = justifications)

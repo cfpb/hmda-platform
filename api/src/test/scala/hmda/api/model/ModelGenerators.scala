@@ -108,28 +108,28 @@ trait ModelGenerators {
     )
   }
 
-  implicit val syntacticalValidationErrorGen: Gen[SyntacticalValidationError] = {
+  implicit def syntacticalValidationErrorGen: Gen[SyntacticalValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
     } yield SyntacticalValidationError(id, name)
   }
 
-  implicit val validityValidationErrorGen: Gen[ValidityValidationError] = {
+  implicit def validityValidationErrorGen: Gen[ValidityValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
     } yield ValidityValidationError(id, name)
   }
 
-  implicit val qualityValidationErrorGen: Gen[QualityValidationError] = {
+  implicit def qualityValidationErrorGen: Gen[QualityValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
     } yield QualityValidationError(id, name)
   }
 
-  implicit val macroEditJustificationGen: Gen[MacroEditJustification] = {
+  implicit def macroEditJustificationGen: Gen[MacroEditJustification] = {
     for {
       id <- Gen.choose(Int.MinValue, Int.MaxValue)
       value <- Gen.alphaStr
@@ -138,14 +138,14 @@ trait ModelGenerators {
     } yield MacroEditJustification(id, value, verified, text)
   }
 
-  implicit val macroEditJustificationWithNameGen: Gen[MacroEditJustificationWithName] = {
+  implicit def macroEditJustificationWithNameGen: Gen[MacroEditJustificationWithName] = {
     for {
       edit <- Gen.alphaStr
       justification <- macroEditJustificationGen
     } yield MacroEditJustificationWithName(edit, justification)
   }
 
-  implicit val macroValidationErrorGen: Gen[MacroValidationError] = {
+  implicit def macroValidationErrorGen: Gen[MacroValidationError] = {
     for {
       id <- Gen.alphaStr
       justifications <- Gen.listOf(macroEditJustificationGen)
