@@ -1,7 +1,6 @@
-package hmda.parser.fi.lar
+package hmda.model.fi.lar
 
-import hmda.model.fi.lar._
-import hmda.parser.fi.FIGenerators
+import hmda.model.fi.FIGenerators
 import org.scalacheck.Gen
 
 trait LarGenerators extends FIGenerators {

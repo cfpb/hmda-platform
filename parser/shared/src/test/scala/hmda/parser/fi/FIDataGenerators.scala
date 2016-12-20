@@ -1,8 +1,8 @@
 package hmda.parser.fi
 
 import hmda.model.fi.FIData
-import hmda.parser.fi.lar.LarGenerators
-import hmda.parser.fi.ts.TsGenerators
+import hmda.model.fi.lar.LarGenerators
+import hmda.model.fi.ts.TsGenerators
 import org.scalacheck.Gen
 
 trait FIDataGenerators extends TsGenerators with LarGenerators {

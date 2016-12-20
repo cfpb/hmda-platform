@@ -1,7 +1,8 @@
-package hmda.parser.fi
+package hmda.date.util
 
 import org.scalacheck.Gen
-import scalajs.js
+
+import scala.scalajs.js
 
 object DateGenerators {
   def randomDate: Gen[Int] = {
