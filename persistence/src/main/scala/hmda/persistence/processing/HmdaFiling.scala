@@ -6,13 +6,13 @@ import akka.stream.scaladsl.Sink
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.persistence.processing.HmdaFileValidator.LarValidated
 import hmda.persistence.processing.HmdaQuery._
 
 object HmdaFiling {
 
-  val name = "hmda-filing"
+  val name = "HmdaFiling"
 
   case class SaveLars(submissionId: SubmissionId) extends Command
   case class AddLar(lar: LoanApplicationRegister) extends Command

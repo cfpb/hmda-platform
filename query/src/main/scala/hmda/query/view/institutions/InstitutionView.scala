@@ -26,7 +26,7 @@ object InstitutionView {
 
   def props(): Props = Props(new InstitutionView)
 
-  def createInstitutionQuery(system: ActorSystem): ActorRef = {
+  def createInstitutionView(system: ActorSystem): ActorRef = {
     system.actorOf(InstitutionView.props(), "institutions-view")
   }
 

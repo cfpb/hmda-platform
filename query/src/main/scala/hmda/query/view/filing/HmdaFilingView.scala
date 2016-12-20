@@ -1,33 +1,46 @@
 package hmda.query.view.filing
 
-import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
+import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.persistence.{RecoveryCompleted, SnapshotOffer}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.messages.CommonMessages.Event
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.query.model.ViewMessages.StreamCompleted
+import hmda.query.projections.filing.FilingDBProjection
 
-object FilingView {
-  val name = "filing-view"
+object HmdaFilingView {
+  val name = "HmdaFilingView"
 
-  trait FilingEvent extends Event
+  def props(period: String): Props = Props(new HmdaFilingView(period))
+
+  def createHmdaFilingView(system: ActorSystem, period: String): ActorRef = {
+    system.actorOf(HmdaFilingView.props(period), s"$name-$period")
+  }
 
   case class FilingViewState(size: Long = 0, seqNr: Long = 0L) {
-    def updated(event: Event): FilingViewState = ???
+    def updated(event: Event): FilingViewState = event match {
+      case LarValidated(_) =>
+        FilingViewState(size + 1, seqNr + 1)
+      case _ => this
+    }
   }
 }
 
-class FilingView(period: String) extends HmdaPersistentActor {
+class HmdaFilingView(period: String) extends HmdaPersistentActor {
 
-  import FilingView._
+  import HmdaFilingView._
 
   override def persistenceId: String = s"$name-$period"
 
   var state = FilingViewState()
 
   var counter = 0
+
+  val queryProjector = context.actorOf(FilingDBProjection.props(period))
 
   val conf = ConfigFactory.load()
   val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
@@ -43,8 +56,9 @@ class FilingView(period: String) extends HmdaPersistentActor {
   }
 
   def recoveryCompleted(): Unit = {
+    val hmdaFilingId = s"HmdaFiling-$period"
     implicit val materializer = ActorMaterializer()
-    eventsWithSequenceNumber("filing", state.seqNr + 1, Long.MaxValue)
+    eventsWithSequenceNumber(hmdaFilingId, state.seqNr + 1, Long.MaxValue)
       .runWith(Sink.actorRef(self, StreamCompleted))
   }
 

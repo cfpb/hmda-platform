@@ -37,7 +37,7 @@ class HmdaSupervisorSpec extends WordSpec with MustMatchers {
     }
 
     "fing or create HMDA filing actor" in {
-      val path = "akka://default/user/supervisor/hmda-filing-2017"
+      val path = "akka://default/user/supervisor/HmdaFiling-2017"
       val hmdaFilingF = (supervisor ? FindHmdaFiling("2017")).mapTo[ActorRef]
       val hmdaFiling = Await.result(hmdaFilingF, timeout)
       hmdaFiling.path.toString mustBe path
