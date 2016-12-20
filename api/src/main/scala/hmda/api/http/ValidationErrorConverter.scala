@@ -1,7 +1,7 @@
 package hmda.api.http
 
 import hmda.api.model._
-import hmda.model.edits.{ EditMetaData, EditMetaDataLookup }
+import hmda.model.edits.EditMetaDataLookup
 import hmda.validation.engine._
 
 trait ValidationErrorConverter {
@@ -39,7 +39,8 @@ trait ValidationErrorConverter {
   }
 
   def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
-    val macroValidationErrors: Seq[ValidationError] = errors.filter(_.errorType == Macro)
-    MacroResults(macroValidationErrors.map(x => MacroResult(x.ruleName, List())))
+    val macroValidationErrors: Seq[MacroValidationError] = errors.filter(_.errorType == Macro).asInstanceOf[Seq[MacroValidationError]]
+    MacroResults(macroValidationErrors.map(x => MacroResult(x.ruleName, MacroEditJustificationLookup.updateJustifications(x.ruleName, x.justifications))))
   }
+
 }
