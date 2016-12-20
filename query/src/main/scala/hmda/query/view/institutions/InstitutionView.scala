@@ -59,10 +59,6 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   override def persistenceId: String = name
 
-  override def receiveRecover: Receive = {
-    case SnapshotOffer(_, s: InstitutionViewState) => state = s
-    case RecoveryCompleted => recoveryCompleted()
-  }
 
   override def receiveCommand: Receive = {
     case GetInstitutionById(institutionId) =>
@@ -88,6 +84,11 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
     case GetState =>
       sender() ! state.institutions
 
+  }
+
+  override def receiveRecover: Receive = {
+    case SnapshotOffer(_, s: InstitutionViewState) => state = s
+    case RecoveryCompleted => recoveryCompleted()
   }
 
   def recoveryCompleted(): Unit = {

@@ -45,10 +45,6 @@ class HmdaFilingView(period: String) extends HmdaPersistentActor {
   val conf = ConfigFactory.load()
   val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
 
-  override def updateState(event: Event): Unit = {
-    state = state.updated(event)
-    counter += 1
-  }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
     case EventWithSeqNr(seqNr, event) =>
@@ -75,6 +71,12 @@ class HmdaFilingView(period: String) extends HmdaPersistentActor {
     implicit val materializer = ActorMaterializer()
     eventsWithSequenceNumber(hmdaFilingId, state.seqNr + 1, Long.MaxValue)
       .runWith(Sink.actorRef(self, StreamCompleted))
+  }
+
+  override def updateState(event: Event): Unit = {
+    state = state.updated(event)
+    counter += 1
+    queryProjector ! event
   }
 
 }
