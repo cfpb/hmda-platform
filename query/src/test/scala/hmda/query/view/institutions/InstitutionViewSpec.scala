@@ -3,7 +3,7 @@ package hmda.query.view.institutions
 import akka.testkit.TestProbe
 import hmda.model.institution.InstitutionGenerators
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{InstitutionCreated, InstitutionModified}
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
 import hmda.query.view.institutions.InstitutionView._

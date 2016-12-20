@@ -1,7 +1,7 @@
 package hmda.query.view.filing
 
-import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.persistence.{RecoveryCompleted, SnapshotOffer}
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.typesafe.config.ConfigFactory
