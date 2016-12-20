@@ -27,7 +27,7 @@ class InstitutionViewSpec extends ActorSpec {
     institutionQuery ! EventWithSeqNr(4, InstitutionModified(i4))
   }
 
-  "Institutions Projection" must {
+  "Institutions View" must {
     "return institution by id" in {
       probe.send(institutionQuery, GetInstitutionById(i1.id))
       probe.expectMsg(i1)
@@ -48,10 +48,6 @@ class InstitutionViewSpec extends ActorSpec {
       probe.send(institutionQuery, GetState)
       probe.expectMsg(Set(i1, i2, i4))
     }
-  }
-
-  override def afterAll(): Unit = {
-    super.afterAll()
   }
 
 }

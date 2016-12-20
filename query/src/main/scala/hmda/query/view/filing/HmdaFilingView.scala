@@ -5,7 +5,7 @@ import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import com.typesafe.config.ConfigFactory
-import hmda.persistence.messages.CommonMessages.Event
+import hmda.persistence.messages.CommonMessages.{ Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
@@ -23,7 +23,7 @@ object HmdaFilingView {
 
   case class FilingViewState(size: Long = 0, seqNr: Long = 0L) {
     def updated(event: Event): FilingViewState = event match {
-      case LarValidated(_) =>
+      case LarValidated(lar) =>
         FilingViewState(size + 1, seqNr + 1)
       case _ => this
     }
@@ -48,6 +48,21 @@ class HmdaFilingView(period: String) extends HmdaPersistentActor {
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
     counter += 1
+  }
+
+  override def receiveCommand: Receive = super.receiveCommand orElse {
+    case EventWithSeqNr(seqNr, event) =>
+      if (counter >= snapshotCounter) {
+        counter = 0
+        saveSnapshot(state)
+      }
+      event match {
+        case LarValidated(_) =>
+          updateState(event)
+      }
+
+    case GetState =>
+      sender() ! state
   }
 
   override def receiveRecover: Receive = {

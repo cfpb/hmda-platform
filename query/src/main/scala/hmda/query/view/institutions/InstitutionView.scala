@@ -79,16 +79,14 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
         saveSnapshot(state)
       }
       event match {
-        case InstitutionCreated(i) =>
+        case InstitutionCreated(_) =>
           updateState(event)
-        case InstitutionModified(i) =>
+        case InstitutionModified(_) =>
           updateState(event)
       }
 
     case GetState =>
       sender() ! state.institutions
-
-    case Shutdown => context stop self
 
   }
 
