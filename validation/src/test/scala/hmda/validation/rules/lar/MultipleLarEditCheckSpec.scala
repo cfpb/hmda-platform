@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar
 
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.parser.fi.lar.LarGenerators
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import org.scalatest.prop.PropertyChecks

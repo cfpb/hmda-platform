@@ -1,5 +1,6 @@
 package hmda.parser.fi.ts
 
+import hmda.model.fi.ts.TsGenerators
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 

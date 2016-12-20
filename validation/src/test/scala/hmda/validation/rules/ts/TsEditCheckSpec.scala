@@ -1,7 +1,6 @@
 package hmda.validation.rules.ts
 
-import hmda.model.fi.ts.TransmittalSheet
-import hmda.parser.fi.ts.TsGenerators
+import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.EditCheck
 import org.scalatest.prop.PropertyChecks

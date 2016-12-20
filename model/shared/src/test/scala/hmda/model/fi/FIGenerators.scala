@@ -1,7 +1,8 @@
-package hmda.parser.fi
+package hmda.model.fi
 
 import hmda.model.institution.Agency
 import org.scalacheck.Gen
+import hmda.date.util.DateGenerators
 
 trait FIGenerators {
 

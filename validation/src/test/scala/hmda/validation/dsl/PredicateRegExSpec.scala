@@ -1,7 +1,7 @@
 package hmda.validation.dsl
 
-import hmda.parser.fi.lar.LarGenerators
-import hmda.parser.fi.ts.TsGenerators
+import hmda.model.fi.lar.LarGenerators
+import hmda.model.fi.ts.TsGenerators
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import hmda.validation.dsl.PredicateRegEx._

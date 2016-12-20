@@ -1,4 +1,4 @@
-package hmda.parser.fi
+package hmda.date.util
 
 import java.text.SimpleDateFormat
 import java.util.Date
