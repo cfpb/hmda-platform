@@ -5,7 +5,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.api.model._
+import hmda.api.model.{ EditResult, _ }
 import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
@@ -22,18 +22,27 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     loadValidationErrors()
   }
 
+  val s020Description = "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code."
+  val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
+  val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
+  val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
+  val s020 = EditResult("S020", s020Description, ts = true, List(LarEditResult(LarId("loan1"))))
+  val s010 = EditResult("S010", s010Description, ts = false, List(LarEditResult(LarId("loan1"))))
+  val v280 = EditResult("V280", v280Description, ts = false, List(LarEditResult(LarId("loan1"))))
+  val v285 = EditResult("V285", v285Description, ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3"))))
+
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
       EditResults(
         List(
-          EditResult("S020", ts = true, List(LarEditResult(LarId("loan1")))),
-          EditResult("S010", ts = false, List(LarEditResult(LarId("loan1"))))
+          s020,
+          s010
         )
       ),
       EditResults(
         List(
-          EditResult("V285", ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
-          EditResult("V280", ts = false, List(LarEditResult(LarId("loan1"))))
+          v285,
+          v280
         )
       ),
       EditResults.empty,
@@ -50,8 +59,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val expectedEdits =
       EditResults(
         List(
-          EditResult("V285", ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3")))),
-          EditResult("V280", ts = false, List(LarEditResult(LarId("loan1"))))
+          v285,
+          v280
         )
       )
 

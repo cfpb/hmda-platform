@@ -7,7 +7,7 @@ case object Quality extends ValidationErrorType
 case object Macro extends ValidationErrorType
 
 // errorID = Loan ID (LAR) or Agency Code + Respondent ID (TS)
-case class ValidationError(errorId: String, name: String, errorType: ValidationErrorType)
+case class ValidationError(errorId: String, ruleName: String, errorType: ValidationErrorType)
 abstract class ValidationErrors {
   def errors: Seq[ValidationError]
 }
