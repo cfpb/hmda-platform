@@ -59,7 +59,6 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   override def persistenceId: String = name
 
-
   override def receiveCommand: Receive = {
     case GetInstitutionById(institutionId) =>
       val institution = state.institutions.find(i => i.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false))

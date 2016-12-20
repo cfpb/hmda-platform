@@ -23,7 +23,7 @@ object HmdaFilingView {
 
   case class FilingViewState(size: Long = 0, seqNr: Long = 0L) {
     def updated(event: Event): FilingViewState = event match {
-      case LarValidated(lar) =>
+      case LarValidated(_) =>
         FilingViewState(size + 1, seqNr + 1)
       case _ => this
     }
@@ -44,7 +44,6 @@ class HmdaFilingView(period: String) extends HmdaPersistentActor {
 
   val conf = ConfigFactory.load()
   val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
-
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
     case EventWithSeqNr(seqNr, event) =>
