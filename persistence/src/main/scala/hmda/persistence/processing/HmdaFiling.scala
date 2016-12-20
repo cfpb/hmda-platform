@@ -1,18 +1,22 @@
 package hmda.persistence.processing
 
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.stream.scaladsl.Sink
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.model.HmdaPersistentActor
+import hmda.persistence.processing.HmdaFileValidator.LarValidated
+import hmda.persistence.processing.HmdaQuery._
 
 object HmdaFiling {
 
   val name = "hmda-filing"
 
+  case class SaveLars(submissionId: SubmissionId) extends Command
   case class AddLar(lar: LoanApplicationRegister) extends Command
-  //case class UpdateLar(lar: LoanApplicationRegister) extends Command
   case class LarAdded(lar: LoanApplicationRegister) extends Event
-  //case class LarUpdated(lar: LoanApplicationRegister) extends Event
 
   case class HmdaFilingState(size: Long = 0L) {
     def updated(event: Event): HmdaFilingState = {
@@ -40,15 +44,18 @@ class HmdaFiling(filingPeriod: String) extends HmdaPersistentActor {
   override def persistenceId: String = s"$name-$filingPeriod"
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
+
+    case SaveLars(sId) =>
+      val validatorPersistenceId = s"HmdaFileValidator-${sId.toString}"
+      events(validatorPersistenceId)
+        .filter(x => x.isInstanceOf[LarValidated])
+        .map(e => e.asInstanceOf[LarValidated].lar)
+        .runWith(Sink.actorRef(self, NotUsed))
+
     case AddLar(lar) =>
       persist(LarAdded(lar)) { e =>
         updateState(e)
-        sender() ! LarAdded(lar)
       }
-    //case UpdateLar(lar) =>
-    //  persist(LarUpdated(lar)) { e =>
-    //    updateState(e)
-    //  }
 
     case GetState =>
       sender() ! state
