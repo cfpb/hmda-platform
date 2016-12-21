@@ -1,10 +1,9 @@
 package hmda.validation.engine.ts.validity
 
-import hmda.model.fi.ts.{ Contact, Parent, Respondent }
+import hmda.model.fi.ts.{ Contact, Parent, Respondent, TsGenerators }
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionType.MBS
-import hmda.parser.fi.ts.TsGenerators
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.ts.validity.ValidityUtils
 import org.scalatest.concurrent.ScalaFutures

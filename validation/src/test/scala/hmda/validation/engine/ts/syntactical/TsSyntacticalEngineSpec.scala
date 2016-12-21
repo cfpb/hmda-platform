@@ -1,7 +1,6 @@
 package hmda.validation.engine.ts.syntactical
 
-import hmda.model.fi.ts.TransmittalSheet
-import hmda.parser.fi.ts.TsGenerators
+import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.validation.context.ValidationContext
 import org.scalacheck.Gen
 import org.scalatest._
