@@ -56,8 +56,9 @@ trait FilingComponent { this: DbConfiguration =>
     def denialReason1 = column[String]("denial_reason1")
     def denialReason2 = column[String]("denial_reason2")
     def denialReason3 = column[String]("denial_reason3")
+    def period = column[String]("period")
 
-    type LarQueryHList = String :: String :: Int :: Int :: Int :: Int :: Int :: String :: Int :: Int :: String :: String :: Int :: Int :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: String :: String :: String :: String :: Int :: Int :: String :: String :: String :: String :: HNil
+    type LarQueryHList = String :: String :: Int :: Int :: Int :: Int :: Int :: String :: Int :: Int :: String :: String :: Int :: Int :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: String :: String :: String :: String :: Int :: Int :: String :: String :: String :: String :: String :: HNil
 
     def createLarQuery(data: LarQueryHList): LoanApplicationRegisterQuery = data match {
       case id ::
@@ -99,6 +100,7 @@ trait FilingComponent { this: DbConfiguration =>
         denialReason1 ::
         denialReason2 ::
         denialReason3 ::
+        period ::
         HNil =>
         LoanApplicationRegisterQuery(
           id,
@@ -139,7 +141,8 @@ trait FilingComponent { this: DbConfiguration =>
           income,
           denialReason1,
           denialReason2,
-          denialReason3
+          denialReason3,
+          period
         )
     }
 
@@ -183,7 +186,8 @@ trait FilingComponent { this: DbConfiguration =>
         income,
         denialReason1,
         denialReason2,
-        denialReason3
+        denialReason3,
+        period
         ) =>
         Some(
           id ::
@@ -225,6 +229,7 @@ trait FilingComponent { this: DbConfiguration =>
             denialReason1 ::
             denialReason2 ::
             denialReason3 ::
+            period ::
             HNil
         )
     }
@@ -269,6 +274,7 @@ trait FilingComponent { this: DbConfiguration =>
       denialReason1 ::
       denialReason2 ::
       denialReason3 ::
+      period ::
       HNil
     ) <> (createLarQuery, extractLarQuery)
 

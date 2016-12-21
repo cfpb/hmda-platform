@@ -22,7 +22,6 @@ object InstitutionView {
 
   case class GetInstitutionById(institutionId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
-  case class LastProcessedEventOffset(seqNr: Long)
 
   def props(): Props = Props(new InstitutionView)
 

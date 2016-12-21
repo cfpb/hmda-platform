@@ -10,7 +10,7 @@ import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.Lar
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.query.model.ViewMessages.StreamCompleted
-import hmda.query.projections.filing.FilingDBProjection
+import hmda.query.projections.filing.HmdaFilingDBProjection
 
 object HmdaFilingView {
   val name = "HmdaFilingView"
@@ -40,7 +40,7 @@ class HmdaFilingView(period: String) extends HmdaPersistentActor {
 
   var counter = 0
 
-  val queryProjector = context.actorOf(FilingDBProjection.props(period))
+  val queryProjector = context.actorOf(HmdaFilingDBProjection.props(period))
 
   val conf = ConfigFactory.load()
   val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")

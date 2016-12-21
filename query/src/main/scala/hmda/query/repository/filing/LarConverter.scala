@@ -46,7 +46,8 @@ object LarConverter {
       lar.applicant.income,
       lar.denial.reason1,
       lar.denial.reason2,
-      lar.denial.reason3
+      lar.denial.reason3,
+      ""
     )
   }
 }

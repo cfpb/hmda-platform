@@ -11,19 +11,19 @@ import hmda.persistence.model.{ HmdaActor, HmdaPersistentActor }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.query.model.ViewMessages.StreamCompleted
 
-object FilingDBProjection {
+object HmdaFilingDBProjection {
 
   val name = "filing-projection"
 
   case class LastProcessedEventOffset(seqNr: Long)
 
-  def props(period: String): Props = Props(new FilingDBProjection(period))
+  def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
 
   case class FilingDBProjectionState(size: Int = 0, seqNr: Long = 0L) {
     def updated(event: Event): FilingDBProjectionState = ???
   }
 }
 
-class FilingDBProjection(period: String) extends HmdaActor {
+class HmdaFilingDBProjection(period: String) extends HmdaActor {
   override def receive: Receive = ???
 }
