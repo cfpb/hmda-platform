@@ -18,6 +18,10 @@ services:
       - keycloak
     volumes:
       - ../hmda-platform-ui/dist:/usr/src/app/dist
+    environment:
+      APP_URL: http://192.168.99.100
+      HMDA_API: https://192.168.99.100:4443/hmda
+      KEYCLOAK_URL: https://192.168.99.100:8443/auth/realms/hmda
 
   keycloak:
     build: ../hmda-platform-auth/keycloak
