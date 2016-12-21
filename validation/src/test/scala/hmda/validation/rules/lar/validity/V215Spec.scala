@@ -1,7 +1,7 @@
 package hmda.validation.rules.lar.validity
 
+import hmda.model.fi.FIGenerators
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.parser.fi.FIGenerators
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 

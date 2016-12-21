@@ -2,7 +2,8 @@ package hmda.validation.engine.lar.quality
 
 import java.io.File
 
-import hmda.parser.fi.lar.{ LarCsvParser, LarGenerators }
+import hmda.model.fi.lar.LarGenerators
+import hmda.parser.fi.lar.LarCsvParser
 import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks

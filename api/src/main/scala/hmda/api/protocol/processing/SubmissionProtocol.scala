@@ -1,11 +1,11 @@
 package hmda.api.protocol.processing
 
 import hmda.model.fi._
-import hmda.model.fi.SubmissionStatusMessage._
-import hmda.api.model.{ Receipt, Submissions }
-import spray.json.{ DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
+import hmda.api.model.{ MacroEditJustificationWithName, Receipt, Submissions }
+import hmda.api.protocol.validation.ValidationResultProtocol
+import spray.json.{ DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
-trait SubmissionProtocol extends DefaultJsonProtocol {
+trait SubmissionProtocol extends ValidationResultProtocol {
 
   implicit object SubmissionStatusJsonFormat extends RootJsonFormat[SubmissionStatus] {
     override def write(status: SubmissionStatus): JsValue = {
@@ -45,4 +45,5 @@ trait SubmissionProtocol extends DefaultJsonProtocol {
   implicit val submissionFormat = jsonFormat4(Submission.apply)
   implicit val submissionsFormat = jsonFormat1(Submissions.apply)
   implicit val receiptFormat = jsonFormat3(Receipt.apply)
+  implicit val macroJustifyFormat = jsonFormat2(MacroEditJustificationWithName.apply)
 }

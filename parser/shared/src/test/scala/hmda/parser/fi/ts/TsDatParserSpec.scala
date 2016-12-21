@@ -1,6 +1,6 @@
 package hmda.parser.fi.ts
 
-import hmda.model.fi.ts.TransmittalSheet
+import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.model.util.FITestData
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }

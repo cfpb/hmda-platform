@@ -4,8 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.parser.fi.lar.LarGenerators
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.validation.rules.lar.SummaryEditCheckSpec
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import org.scalatest.BeforeAndAfterAll

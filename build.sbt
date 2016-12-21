@@ -55,7 +55,7 @@ lazy val model = (crossProject in file("model"))
   .settings(hmdaBuildSettings: _*)
   .jvmSettings(
     Seq(
-      libraryDependencies ++= commonDeps ++ enumDeps ++ Seq(
+      libraryDependencies ++= commonDeps ++ enumDeps ++ csvDeps ++ Seq(
         "org.scala-js" %% "scalajs-stubs" % scalaJSVersion % "provided"
       )
     )

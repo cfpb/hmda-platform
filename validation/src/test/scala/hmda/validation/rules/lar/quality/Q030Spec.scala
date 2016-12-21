@@ -1,8 +1,7 @@
 package hmda.validation.rules.lar.quality
 
-import hmda.model.fi.lar.{ Geography, LoanApplicationRegister }
+import hmda.model.fi.lar.{ Geography, LarGenerators, LoanApplicationRegister }
 import hmda.model.institution.{ Agency, Institution, InstitutionType }
-import hmda.parser.fi.lar.LarGenerators
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalacheck.Gen
