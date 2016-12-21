@@ -43,4 +43,25 @@ trait ValidationErrorConverter {
     MacroResults(macroValidationErrors.map(x => MacroResult(x.ruleName, MacroEditJustificationLookup.updateJustifications(x.ruleName, x.justifications))))
   }
 
+  def validationErrorsToRowResults(tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError], macroErrors: Seq[ValidationError]): RowResults = {
+    val tsEdits: Seq[RowEditDetail] = tsErrors.map(rowDetail)
+    val tsRowResults: Seq[RowResult] =
+      if (tsEdits.isEmpty) Seq()
+      else Seq(RowResult("Transmittal Sheet", tsEdits))
+
+    val larFailuresByRow: Map[String, Seq[ValidationError]] = larErrors.groupBy(_.errorId)
+    val larRowResults: Seq[RowResult] = larFailuresByRow.map {
+      case (rowId: String, errors: Seq[ValidationError]) => RowResult(rowId, errors.map(rowDetail))
+    }.toSeq
+
+    val macroResults = validationErrorsToMacroResults(macroErrors)
+
+    RowResults(tsRowResults ++ larRowResults, macroResults)
+  }
+
+  private def rowDetail(err: ValidationError): RowEditDetail = {
+    val name = err.ruleName
+    RowEditDetail(name, findEditDescription(name))
+  }
+
 }
