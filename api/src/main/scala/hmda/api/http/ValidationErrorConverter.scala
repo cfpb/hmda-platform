@@ -18,7 +18,7 @@ trait ValidationErrorConverter {
     val tsUnique = tsPartition._1
     val tsDup = tsPartition._2
 
-    val tsUniqueRenamed = tsUnique.map(x => x.lars.map(y => y.copy(LarId("Transmittal Sheet"))))
+    val tsUniqueRenamed = tsUnique.map(x => x.copy(lars = x.lars.map(y => y.copy(lar = LarId("Transmittal Sheet")))))
 
     EditResults(larEdits.map(x => {
       val tsOption = tsDup.find(y => x.edit == y.edit)
@@ -26,7 +26,7 @@ trait ValidationErrorConverter {
         case Some(_) => x.copy(lars = x.lars :+ LarEditResult(LarId("Transmittal Sheet")))
         case None => x
       }
-    }) ++ tsUnique)
+    }) ++ tsUniqueRenamed)
 
   }
 
