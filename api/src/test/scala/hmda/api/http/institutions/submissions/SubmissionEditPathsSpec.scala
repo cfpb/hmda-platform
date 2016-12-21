@@ -34,25 +34,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
 
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
-      EditResults(
-        List(
-          s020,
-          s010
-        )
-      ),
-      EditResults(
-        List(
-          v285,
-          v280
-        )
-      ),
+      EditResults(List(s020, s010)),
+      EditResults(List(v285, v280)),
       EditResults.empty,
-      MacroResults(List(
-        MacroResult(
-          "Q007",
-          MacroEditJustificationLookup.getJustifications("Q007")
-        )
-      ))
+      MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
     )
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
@@ -71,13 +56,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   }
 
   "return a list of validation errors for a single type" in {
-    val expectedEdits =
-      EditResults(
-        List(
-          v285,
-          v280
-        )
-      )
+    val expectedEdits = EditResults(List(v285, v280))
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
