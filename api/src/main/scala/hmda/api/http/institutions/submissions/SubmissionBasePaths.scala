@@ -12,10 +12,10 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Filing, Submission, SubmissionId }
+import hmda.model.fi.{ Filing, NotStarted, Submission, SubmissionId }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
-import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
+import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetLatestSubmission }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaFileValidator
@@ -52,15 +52,16 @@ trait SubmissionBasePaths
             f <- fFilingsActor
             s <- fSubmissionsActor
             d <- (f ? GetFilingByPeriod(period)).mapTo[Filing]
-          } yield (s, d)
+          } yield (f, s, d)
 
           onComplete(fFiling) {
-            case Success((submissionsActor, filing)) =>
+            case Success((filingActor, submissionsActor, filing)) =>
               if (filing.period == period) {
                 submissionsActor ! CreateSubmission
                 val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
                 onComplete(fLatest) {
                   case Success(submission) =>
+                    filingActor ! UpdateFilingStatus(filing.copy(status = NotStarted))
                     complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                   case Failure(error) =>
                     completeWithInternalError(uri, error)

@@ -64,6 +64,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
     case UpdateFilingStatus(modified) =>
       if (state.filings.map(x => x.period).contains(modified.period)) {
         persist(FilingStatusUpdated(modified)) { e =>
+          //log.warning(s"***PERSISTED***: $modified")
           log.debug(s"persisted: $modified")
           updateState(e)
           sender() ! Some(modified)

@@ -6,7 +6,9 @@ import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.{ Submission, SubmissionId }
+import hmda.model.fi.{ Filing, InProgress, Submission, SubmissionId }
+import hmda.persistence.institutions.FilingPersistence
+import hmda.persistence.institutions.FilingPersistence.UpdateFilingStatus
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
@@ -16,6 +18,7 @@ import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object SubmissionManager {
@@ -42,14 +45,17 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
   val submissionUpload: ActorRef = context.actorOf(HmdaRawFile.props(id))
   val submissionParser: ActorRef = context.actorOf(HmdaFileParser.props(id))
   val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator.props(id))
+  val filingPersistence: ActorRef = context.actorOf(FilingPersistence.props(id.institutionId))
 
   var uploaded: Int = 0
+  var filing: Filing = new Filing()
 
   override def preStart(): Unit = {
     super.preStart()
-    val config = ConfigFactory.load()
-    val timeout = config.getInt("hmda.persistent-actor-timeout")
-    context.setReceiveTimeout(Duration.create(timeout, TimeUnit.SECONDS))
+    context.setReceiveTimeout(duration)
+
+    val filings = Await.result(filingPersistence ? GetState, duration).asInstanceOf[Seq[Filing]]
+    filing = filings.filter(s => s.period == id.period).head
   }
 
   override def receive: Receive = {
@@ -58,6 +64,10 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
       log.info(s"Start upload for submission: ${id.toString}")
       submissionFSM ! Create
       submissionFSM ! StartUpload
+      if (filing.status != InProgress) {
+        val result = Await.result(filingPersistence ? UpdateFilingStatus(filing.copy(status = InProgress)), duration).asInstanceOf[Some[Filing]]
+        //log.warning("*****RESULT*******    " + result.get.status)
+      }
 
     case m @ AddLine(timestamp, data) =>
       submissionUpload ! m
