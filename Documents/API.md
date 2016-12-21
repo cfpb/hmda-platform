@@ -391,7 +391,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
 *NOTE:*  This is a mocked, static endpoint.
 
