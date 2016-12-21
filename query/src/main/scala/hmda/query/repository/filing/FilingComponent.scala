@@ -1,21 +1,29 @@
 package hmda.query.repository.filing
 
-import hmda.model.fi.lar.{ Denial, Loan, Geography, Applicant }
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.Repository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+import slick.collection.heterogeneous._
+import slick.collection.heterogeneous.syntax._
 
 trait FilingComponent { this: DbConfiguration =>
   import config.profile.api._
 
   class LarTable(tag: Tag) extends Table[LoanApplicationRegisterQuery](tag, "lars") {
     def id = column[String]("id", O.PrimaryKey)
+
     def respondentId = column[String]("respondent_id")
     def agencyCode = column[Int]("agency_code")
+    def preapprovals = column[Int]("preapprovals")
+    def actionTakenType = column[Int]("action_taken_type")
+    def actionTakenDate = column[Int]("action_taken_date")
+    def purchaserType = column[Int]("purchaser_type")
+    def rateSpread = column[String]("rate_spread")
+    def hoepaStatus = column[Int]("hoepa_status")
+    def lienStatus = column[Int]("lien_status")
 
-    def loan = (loanId, applicationDate, loanType, propertyType, purpose, occupancy, amount)
     def loanId = column[String]("loan_id")
     def applicationDate = column[String]("application_date")
     def loanType = column[Int]("loan_type")
@@ -24,19 +32,13 @@ trait FilingComponent { this: DbConfiguration =>
     def occupancy = column[Int]("occupancy")
     def amount = column[Int]("amount")
 
-    def preapprovals = column[Int]("preapprovals")
-    def actionTakenType = column[Int]("action_taken_type")
-    def actionTakenDate = column[Int]("action_taken_date")
-
-    def geography = (msa, state, county, tract)
     def msa = column[String]("msa")
     def state = column[String]("state")
     def county = column[String]("county")
     def tract = column[String]("tract")
 
-    def applicant = (ethnicity, coEthnicity, race1, race2, race3, race4, race5, coRace1, coRace2, coRace3, coRace4, coRace5, sex, coSex, income)
     def ethnicity = column[Int]("ethnicity")
-    def coEthnicity = column[Int]("co-ethnicity")
+    def coEthnicity = column[Int]("co_ethnicity")
     def race1 = column[Int]("race1")
     def race2 = column[String]("race2")
     def race3 = column[String]("race3")
@@ -51,76 +53,225 @@ trait FilingComponent { this: DbConfiguration =>
     def coSex = column[Int]("co_sex")
     def income = column[String]("income")
 
-    def purchaserType = column[Int]("purchaser_type")
-
-    def denial = (denialReason1, denialReason2, denialReason3)
     def denialReason1 = column[String]("denial_reason1")
     def denialReason2 = column[String]("denial_reason2")
     def denialReason3 = column[String]("denial_reason3")
 
-    def rateSpread = column[String]("rate_spread")
-    def hoepaStatus = column[Int]("hoepa_status")
-    def lienStatus = column[Int]("lien_status")
+    type LarQueryHList = String :: String :: Int :: Int :: Int :: Int :: Int :: String :: Int :: Int :: String :: String :: Int :: Int :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: String :: String :: String :: String :: Int :: Int :: String :: String :: String :: String :: HNil
 
-    //val standaloneFieldsProjection = standaloneFields <> (standaloneFields.tupled, standaloneFields.unapply)
-    val loanProjection = loan <> (Loan.tupled, Loan.unapply)
-    val geographyProjection = geography <> (Geography.tupled, Geography.unapply)
-    val applicantProjection = applicant <> (Applicant.tupled, Applicant.unapply)
-    val denialProjection = denial <> (Denial.tupled, Denial.unapply)
-
-    override def * = (
-      id,
-      respondentId,
-      agencyCode,
-      loanProjection,
-      preapprovals,
-      actionTakenType,
-      actionTakenDate,
-      geographyProjection,
-      applicantProjection,
-      purchaserType,
-      denialProjection,
-      rateSpread,
-      hoepaStatus,
-      lienStatus
-    ).shaped <> (
-        //Map from tuple to case class
-        {
-          case (id, respondentId, agencyCode, loan, preapprovals, actionTakenType, actionTakenDate, geography, applicant, purchaserType, denial, rateSpread, hoepaStatus, lienStatus) => LoanApplicationRegisterQuery(
-            id,
-            respondentId,
-            agencyCode,
-            loan,
-            preapprovals,
-            actionTakenType,
-            actionTakenDate,
-            geography,
-            applicant,
-            purchaserType,
-            denial,
-            rateSpread,
-            hoepaStatus,
-            lienStatus
-          )
-        },
-        //Map from case class to tuple
-        (lar: LoanApplicationRegisterQuery) => Some(
-          lar.id,
-          lar.respondentId,
-          lar.agencyCode,
-          lar.loan,
+    def createLarQuery(data: LarQueryHList): LoanApplicationRegisterQuery = data match {
+      case id ::
+        respondentId ::
+        agencyCode ::
+        preapprovals ::
+        actionTakenType ::
+        actionTakenDate ::
+        purchaserType ::
+        rateSpread ::
+        hoepaStatus ::
+        lienStatus ::
+        loanId ::
+        applicationDate ::
+        loanType ::
+        propertyType ::
+        purpose ::
+        occupancy ::
+        amount ::
+        msa ::
+        state ::
+        county ::
+        tract ::
+        ethnicity ::
+        coEthnicity ::
+        race1 ::
+        race2 ::
+        race3 ::
+        race4 ::
+        race5 ::
+        coRace1 ::
+        coRace2 ::
+        coRace3 ::
+        coRace4 ::
+        coRace5 ::
+        sex ::
+        coSex ::
+        income ::
+        denialReason1 ::
+        denialReason2 ::
+        denialReason3 ::
+        HNil =>
+        LoanApplicationRegisterQuery(
+          id,
+          respondentId,
+          agencyCode,
           preapprovals,
           actionTakenType,
           actionTakenDate,
-          lar.geography,
-          lar.applicant,
           purchaserType,
-          lar.denial,
           rateSpread,
           hoepaStatus,
-          lienStatus
+          lienStatus,
+          loanId,
+          applicationDate,
+          loanType,
+          propertyType,
+          purpose,
+          occupancy,
+          amount,
+          msa,
+          state,
+          county,
+          tract,
+          ethnicity,
+          coEthnicity,
+          race1,
+          race2,
+          race3,
+          race4,
+          race5,
+          coRace1,
+          coRace2,
+          coRace3,
+          coRace4,
+          coRace5,
+          sex,
+          coSex,
+          income,
+          denialReason1,
+          denialReason2,
+          denialReason3
         )
-      )
+    }
+
+    def extractLarQuery(data: LoanApplicationRegisterQuery): Option[LarQueryHList] = data match {
+      case LoanApplicationRegisterQuery(
+        id,
+        respondentId,
+        agencyCode,
+        preapprovals,
+        actionTakenType,
+        actionTakenDate,
+        purchaserType,
+        rateSpread,
+        hoepaStatus,
+        lienStatus,
+        loanId,
+        applicationDate,
+        loanType,
+        propertyType,
+        purpose,
+        occupancy,
+        amount,
+        msa,
+        state,
+        county,
+        tract,
+        ethnicity,
+        coEthnicity,
+        race1,
+        race2,
+        race3,
+        race4,
+        race5,
+        coRace1,
+        coRace2,
+        coRace3,
+        coRace4,
+        coRace5,
+        sex,
+        coSex,
+        income,
+        denialReason1,
+        denialReason2,
+        denialReason3
+        ) =>
+        Some(
+          id ::
+            respondentId ::
+            agencyCode ::
+            preapprovals ::
+            actionTakenType ::
+            actionTakenDate ::
+            purchaserType ::
+            rateSpread ::
+            hoepaStatus ::
+            lienStatus ::
+            loanId ::
+            applicationDate ::
+            loanType ::
+            propertyType ::
+            purpose ::
+            occupancy ::
+            amount ::
+            msa ::
+            state ::
+            county ::
+            tract ::
+            ethnicity ::
+            coEthnicity ::
+            race1 ::
+            race2 ::
+            race3 ::
+            race4 ::
+            race5 ::
+            coRace1 ::
+            coRace2 ::
+            coRace3 ::
+            coRace4 ::
+            coRace5 ::
+            sex ::
+            coSex ::
+            income ::
+            denialReason1 ::
+            denialReason2 ::
+            denialReason3 ::
+            HNil
+        )
+    }
+
+    def * = (
+      id ::
+      respondentId ::
+      agencyCode ::
+      preapprovals ::
+      actionTakenType ::
+      actionTakenDate ::
+      purchaserType ::
+      rateSpread ::
+      hoepaStatus ::
+      lienStatus ::
+      loanId ::
+      applicationDate ::
+      loanType ::
+      propertyType ::
+      purpose ::
+      occupancy ::
+      amount ::
+      msa ::
+      state ::
+      county ::
+      tract ::
+      ethnicity ::
+      coEthnicity ::
+      race1 ::
+      race2 ::
+      race3 ::
+      race4 ::
+      race5 ::
+      coRace1 ::
+      coRace2 ::
+      coRace3 ::
+      coRace4 ::
+      coRace5 ::
+      sex ::
+      coSex ::
+      income ::
+      denialReason1 ::
+      denialReason2 ::
+      denialReason3 ::
+      HNil
+    ) <> (createLarQuery, extractLarQuery)
+
   }
 
   class LarRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTable, String] {
