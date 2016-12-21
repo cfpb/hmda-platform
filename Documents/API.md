@@ -223,10 +223,13 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     ```
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits`
-    * `GET`  - List of all edits for a given submission, grouped by edit type
+    * `GET`  - List of all edits for a given submission
+       * By default, results are grouped by edit type, then by named edit.
+       * Use `sortBy=row` as a query parameter to group by the row in the submitted file.
 
     Example response, with HTTP code 200:
 
+    Default Sorting:
     ```json
     {
       "syntactical": {
@@ -268,17 +271,18 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         {
             "edits": [
                 {
-                   "edit": "Q007",
-                   "description": "Description of Q007",
-                   "justifications": [
-                     {
-                       "value": "don't worry",
-                       "selected": false
-                     },
-                     {
-                       "value": "be happy",
-                       "selected": false
-                     }
+                    "edit": "Q023",
+                    "justifications": [
+                        {
+                            "id": 1,
+                            "value": "Most of the loan activity are in areas outside of an MSA/MD",
+                            "verified": true
+                        },
+                        {
+                            "id": 2,
+                            "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
+                            "verified": false
+                        },
                    ]
                 }
             ]
@@ -300,6 +304,86 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     macro, Q007
     ```
 
+
+    Sorted by Row:
+    ```json
+    {
+      "rows": [
+        {
+          "rowId": "Transmittal Sheet",
+          "edits": [
+            {
+              "editId": "S020",
+              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+              "fields": {
+                "Agency Code": 4
+              }
+            }
+          ]
+        },
+        {
+          "rowId": "8299422144",
+          "edits": [
+            {
+              "editId": "S020",
+              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+              "fields": {
+                "Agency Code": 11
+              }
+            }
+          ]
+        },
+        {
+          "rowId": "4977566612",
+          "edits": [
+            {
+              "editId": "V550",
+              "description": "Lien status must = 1, 2, 3, or 4.",
+              "fields": {
+                "Lien Status": 0
+              }
+            },
+            {
+              "editId": "V555",
+              "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
+              "fields": {
+                "Loan Purpose": 1,
+                "Lien Status": 0
+              }
+            },
+            {
+              "editId": "V560",
+              "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
+              "fields": {
+                "Action Taken Type": 3,
+                "Lien Status": 0
+              }
+            }
+          ]
+        }
+      ],
+      "macroResults": {
+            "edits": [
+                {
+                    "edit": "Q023",
+                    "justifications": [
+                        {
+                            "id": 1,
+                            "value": "Most of the loan activity are in areas outside of an MSA/MD",
+                            "verified": true
+                        },
+                        {
+                            "id": 2,
+                            "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
+                            "verified": false
+                        },
+                   ]
+                }
+            ]
+        }
+
+    }
+    ```
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
     * `GET`  - List of edits of a specific type, for a given submission
