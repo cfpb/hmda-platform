@@ -12,8 +12,6 @@ import hmda.persistence.processing.HmdaFileValidator
 import hmda.validation.engine._
 import org.scalatest.words.MatcherWords
 
-import scala.concurrent.Future
-
 class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
 
   val supervisor = system.actorSelection("/user/supervisor")
@@ -52,6 +50,33 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
       responseAs[String] must include("editType, editId, loanId")
       responseAs[String] must include("syntactical, S020, Transmittal Sheet")
       responseAs[String] must include("validity, V285, loan2")
+    }
+  }
+
+  "Sort edits by row with sortBy parameter" in {
+    val loan1Result =
+      RowResult("loan1", Seq(
+        RowEditDetail("S010", s010Description),
+        RowEditDetail("S020", s020Description),
+        RowEditDetail("V280", v280Description)
+      ))
+
+    val expectedRows =
+      Seq(
+        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description))),
+        loan1Result,
+        RowResult("loan2", Seq(RowEditDetail("V285", v285Description))),
+        RowResult("loan3", Seq(RowEditDetail("V285", v285Description)))
+      )
+
+    val expectedMacros =
+      MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
+
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits?sortBy=row") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val rowResponse = responseAs[RowResults]
+      rowResponse.rows.toSet mustBe expectedRows.toSet
+      rowResponse.macroResults mustBe expectedMacros
     }
   }
 
@@ -166,7 +191,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
 
     val tsValidationErrors = TsValidationErrors(Seq(s2))
 
-    val fValidate: Future[Unit] = for {
+    for {
       h <- fHmdaValidator
     } yield {
       h ! larValidationErrors
