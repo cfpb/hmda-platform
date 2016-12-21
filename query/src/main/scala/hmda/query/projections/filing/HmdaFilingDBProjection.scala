@@ -1,29 +1,44 @@
 package hmda.query.projections.filing
 
-import akka.actor.Actor.Receive
-import akka.actor.Props
-import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
-import com.typesafe.config.ConfigFactory
-import hmda.persistence.messages.CommonMessages.Event
-import hmda.persistence.model.{ HmdaActor, HmdaPersistentActor }
-import hmda.persistence.processing.HmdaQuery._
-import hmda.query.model.ViewMessages.StreamCompleted
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.pattern.pipe
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ HmdaValidatorEvent, LarValidated }
+import hmda.persistence.model.HmdaActor
+import hmda.query.DbConfiguration
+import hmda.query.model.filing.LoanApplicationRegisterQuery
+import hmda.query.repository.filing.FilingComponent
 
-object HmdaFilingDBProjection {
+import scala.concurrent.ExecutionContext
 
-  val name = "filing-projection"
+object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
 
-  case class LastProcessedEventOffset(seqNr: Long)
+  val repository = new LarRepository(config)
 
+  case class LarInserted(n: Int)
   def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
 
-  case class FilingDBProjectionState(size: Int = 0, seqNr: Long = 0L) {
-    def updated(event: Event): FilingDBProjectionState = ???
+  def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
+    system.actorOf(HmdaFilingDBProjection.props(period))
   }
+
 }
 
-class HmdaFilingDBProjection(period: String) extends HmdaActor {
-  override def receive: Receive = ???
+class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
+
+  implicit val ec: ExecutionContext = context.dispatcher
+
+  import HmdaFilingDBProjection._
+  import hmda.query.repository.filing.LarConverter._
+
+  override def receive: Receive = {
+    case event: HmdaValidatorEvent => event match {
+      case LarValidated(lar) =>
+        val larQuery = implicitly[LoanApplicationRegisterQuery](lar)
+        larQuery.copy(period = filingPeriod)
+        log.info(s"Inserted: ${larQuery.toString}")
+        repository.insertOrUpdate(larQuery)
+          .map(x => LarInserted(x)) pipeTo sender()
+    }
+
+  }
 }

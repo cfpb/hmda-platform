@@ -5,7 +5,7 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.messages.CommonMessages.Event
 
 object CommonHmdaValidatorEvents {
-
-  case class TsValidated(ts: TransmittalSheet) extends Event
-  case class LarValidated(lar: LoanApplicationRegister) extends Event
+  trait HmdaValidatorEvent extends Event
+  case class TsValidated(ts: TransmittalSheet) extends HmdaValidatorEvent
+  case class LarValidated(lar: LoanApplicationRegister) extends HmdaValidatorEvent
 }
