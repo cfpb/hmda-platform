@@ -66,7 +66,11 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
     log.error(error.getLocalizedMessage)
     val errorResponse = ErrorResponse(500, "Internal server error", uri.path)
     complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+  }
 
+  def completeWithMethodNotAllowed(uri: Uri): StandardRoute = {
+    val errorResponse = ErrorResponse(405, "Method not allowed", uri.path)
+    complete(ToResponseMarshallable(StatusCodes.MethodNotAllowed -> errorResponse))
   }
 
   private def hasHeader(headerName: String, ctx: RequestContext): Boolean = {

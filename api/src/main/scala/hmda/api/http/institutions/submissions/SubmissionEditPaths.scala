@@ -4,6 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
@@ -15,7 +16,7 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
+import hmda.persistence.processing.HmdaFileValidator.{ HmdaFileValidationState, JustifyMacroEdit, MacroEditJustified }
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -73,47 +74,69 @@ trait SubmissionEditPaths
   def submissionSingleEditPath(institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>
       extractExecutionContext { executor =>
+        implicit val ec: ExecutionContext = executor
         timedGet { uri =>
           parameters("format".?) { format =>
             implicit val ec: ExecutionContext = executor
 
             completeVerified(institutionId, period, seqNr, uri) {
               val fValidationState = getValidationState(institutionId, period, seqNr)
-
-              val fSingleEdits = fValidationState.map { editChecks =>
-                editType match {
-                  case "syntactical" =>
-                    validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-                  case "validity" =>
-                    validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
-                  case "quality" =>
-                    validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
-                  case "macro" =>
-                    validationErrorsToMacroResults(editChecks.larMacro)
-                }
-              }
-
-              onComplete(fSingleEdits) {
-                case Success(edits: MacroResults) =>
-                  if (format.getOrElse("") == "csv") {
-                    complete("editType, editId\n" + edits.toCsv)
-                  } else {
-                    complete(ToResponseMarshallable(edits))
-                  }
-                case Success(edits: EditResults) =>
-                  if (format.getOrElse("") == "csv") {
-                    complete("editType, editId, loanId\n" + edits.toCsv(editType))
-                  } else {
-                    complete(ToResponseMarshallable(edits))
-                  }
-                case Success(_) => completeWithInternalError(uri, new IllegalStateException)
-                case Failure(error) => completeWithInternalError(uri, error)
+              completeValidationState(editType, fValidationState, uri, format.getOrElse(""))
+            }
+          }
+        } ~ timedPost { uri =>
+          if (editType == "macro") {
+            entity(as[MacroEditJustificationWithName]) { justifyEdit =>
+              completeVerified(institutionId, period, seqNr, uri) {
+                val supervisor = system.actorSelection("/user/supervisor")
+                val submissionId = SubmissionId(institutionId, period, seqNr)
+                val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+                val fValidationState = for {
+                  a <- fHmdaFileValidator
+                  j <- (a ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
+                  state <- getValidationState(institutionId, period, seqNr)
+                } yield state
+                completeValidationState(editType, fValidationState, uri, "")
               }
             }
+          } else {
+            completeWithMethodNotAllowed(uri)
           }
         }
       }
     }
+
+  private def completeValidationState(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri, format: String)(implicit ec: ExecutionContext) = {
+    val fSingleEdits = fValidationState.map { editChecks =>
+      editType match {
+        case "syntactical" =>
+          validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+        case "validity" =>
+          validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+        case "quality" =>
+          validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+        case "macro" =>
+          validationErrorsToMacroResults(editChecks.larMacro)
+      }
+    }
+
+    onComplete(fSingleEdits) {
+      case Success(edits: MacroResults) =>
+        if (format == "csv") {
+          complete("editType, editId\n" + edits.toCsv)
+        } else {
+          complete(ToResponseMarshallable(edits))
+        }
+      case Success(edits: EditResults) =>
+        if (format == "csv") {
+          complete("editType, editId, loanId\n" + edits.toCsv(editType))
+        } else {
+          complete(ToResponseMarshallable(edits))
+        }
+      case Success(_) => completeWithInternalError(uri, new IllegalStateException)
+      case Failure(error) => completeWithInternalError(uri, error)
+    }
+  }
 
   private def getValidationState(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
     val supervisor = system.actorSelection("/user/supervisor")
