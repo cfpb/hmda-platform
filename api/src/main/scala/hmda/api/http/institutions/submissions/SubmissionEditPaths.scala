@@ -57,11 +57,8 @@ trait SubmissionEditPaths
 
               onComplete(fSummaryEdits) {
                 case Success(edits) =>
-                  if (format.getOrElse("") == "csv") {
-                    complete(edits.toCsv)
-                  } else {
-                    complete(ToResponseMarshallable(edits))
-                  }
+                  if (format.getOrElse("") == "csv") complete(edits.toCsv)
+                  else complete(ToResponseMarshallable(edits))
                 case Failure(error) => completeWithInternalError(uri, error)
               }
             }
@@ -122,17 +119,11 @@ trait SubmissionEditPaths
 
     onComplete(fSingleEdits) {
       case Success(edits: MacroResults) =>
-        if (format == "csv") {
-          complete("editType, editId\n" + edits.toCsv)
-        } else {
-          complete(ToResponseMarshallable(edits))
-        }
+        if (format == "csv") complete("editType, editId\n" + edits.toCsv)
+        else complete(ToResponseMarshallable(edits))
       case Success(edits: EditResults) =>
-        if (format == "csv") {
-          complete("editType, editId, loanId\n" + edits.toCsv(editType))
-        } else {
-          complete(ToResponseMarshallable(edits))
-        }
+        if (format == "csv") complete("editType, editId, loanId\n" + edits.toCsv(editType))
+        else complete(ToResponseMarshallable(edits))
       case Success(_) => completeWithInternalError(uri, new IllegalStateException)
       case Failure(error) => completeWithInternalError(uri, error)
     }

@@ -7,11 +7,8 @@ case class LarEditResult(lar: LarId)
 case class EditResult(edit: String, description: String, ts: Boolean, lars: Seq[LarEditResult]) {
   def toCsv(editType: String) = {
     val larCsv = lars.map(l => Seq(editType, edit, l.lar.loanId).mkString("", ", ", "\n")).mkString
-    if (ts) {
-      editType + ", " + edit + ", " + "Transmittal Sheet\n" + larCsv
-    } else {
-      larCsv
-    }
+    if (ts) editType + ", " + edit + ", " + "Transmittal Sheet\n" + larCsv
+    else larCsv
   }
 }
 case class EditResults(edits: Seq[EditResult]) {
