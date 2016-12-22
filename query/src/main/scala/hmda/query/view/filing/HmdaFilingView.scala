@@ -52,7 +52,8 @@ class HmdaFilingView(period: String) extends HmdaPersistentActor {
         saveSnapshot(state)
       }
       event match {
-        case LarValidated(_) =>
+        case LarValidated(lar) =>
+          log.info(s"Reading LAR: $lar")
           updateState(event)
       }
 

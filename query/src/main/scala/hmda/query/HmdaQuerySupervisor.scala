@@ -32,7 +32,7 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
 
   protected def findHmdaFilingView(view: FindHmdaFilingView): ActorRef = {
     val period = view.period
-    val actor = context.actorOf(HmdaFilingView.props(period))
+    val actor = context.actorOf(HmdaFilingView.props(period), s"HmdaFilingView-$period")
     supervise(actor, s"${HmdaFilingView.name}-$period")
   }
 

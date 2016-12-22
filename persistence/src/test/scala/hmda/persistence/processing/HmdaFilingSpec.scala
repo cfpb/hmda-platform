@@ -4,6 +4,7 @@ import akka.testkit.TestProbe
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LarGenerators
 import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFiling._
 import hmda.persistence.processing.HmdaFileValidator._
@@ -21,7 +22,7 @@ class HmdaFilingSpec extends ActorSpec with LarGenerators {
   "HMDA Filing" must {
     "Store 10 lars" in {
       for (lar <- lars10) {
-        probe.send(hmdaFiling, AddLar(lar))
+        probe.send(hmdaFiling, LarValidated(lar))
       }
       probe.send(hmdaFiling, GetState)
       probe.expectMsg(HmdaFilingState(10))

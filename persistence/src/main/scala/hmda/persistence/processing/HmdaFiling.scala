@@ -49,11 +49,12 @@ class HmdaFiling(filingPeriod: String) extends HmdaPersistentActor {
       val validatorPersistenceId = s"HmdaFileValidator-${sId.toString}"
       events(validatorPersistenceId)
         .filter(x => x.isInstanceOf[LarValidated])
-        .map(e => e.asInstanceOf[LarValidated].lar)
+        .map(e => e.asInstanceOf[LarValidated])
         .runWith(Sink.actorRef(self, NotUsed))
 
-    case AddLar(lar) =>
-      persist(LarAdded(lar)) { e =>
+    case LarValidated(lar) =>
+      persist(LarValidated(lar)) { e =>
+        log.info(s"Persisted: $e")
         updateState(e)
       }
 
