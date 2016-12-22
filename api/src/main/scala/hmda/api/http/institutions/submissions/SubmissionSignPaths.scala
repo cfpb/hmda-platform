@@ -53,21 +53,24 @@ trait SubmissionSignPaths
               val hmdaFilingF = (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
               val hmdaFilingViewF = (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
 
-              val filingF = for {
-                filing <- hmdaFilingF
-                filingView <- hmdaFilingViewF
-              } yield filing
+              verified match {
+                case JsTrue =>
+                  val filingF = for {
+                    filing <- hmdaFilingF
+                    filingView <- hmdaFilingViewF
+                  } yield filing
 
-              onComplete(filingF) {
-                case Success(filing) =>
-                  val submissionId = SubmissionId(institutionId, period, id)
-                  filing ! SaveLars(submissionId)
-                  verified match {
-                    case JsTrue => complete(ToResponseMarshallable(Receipt(System.currentTimeMillis(), "receiptHash", Signed)))
-                    case JsFalse => complete(ToResponseMarshallable(Receipt(0L, "", IRSVerified)))
+                  onComplete(filingF) {
+                    case Success(filing) =>
+                      val submissionId = SubmissionId(institutionId, period, id)
+                      filing ! SaveLars(submissionId)
+                      complete(ToResponseMarshallable(Receipt(System.currentTimeMillis(), "receiptHash", Signed)))
+                    case Failure(error) =>
+                      completeWithInternalError(uri, error)
                   }
-                case Failure(error) =>
-                  completeWithInternalError(uri, error)
+
+                case JsFalse =>
+                  complete(ToResponseMarshallable(Receipt(0l, "", IRSVerified)))
               }
 
             }
