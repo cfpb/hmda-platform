@@ -73,8 +73,8 @@ services:
   auth_proxy:
     build: ../hmda-platform-auth/auth-proxy
     ports:
-      - '4480:80'
-      - '4443:443'   # Apache w/ mod_auth_openidc
+      - '4480:8080'
+      - '4443:8443'   # Apache w/ mod_auth_openidc
     environment:
       OIDC_METADATA_URI: https://keycloak:8443/auth/realms/hmda/.well-known/openid-configuration
       OIDC_JWKS_URI: https://keycloak:8443/auth/realms/hmda/protocol/openid-connect/certs
