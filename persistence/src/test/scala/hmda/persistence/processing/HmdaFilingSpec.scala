@@ -2,7 +2,7 @@ package hmda.persistence.processing
 
 import akka.testkit.TestProbe
 import hmda.model.fi.SubmissionId
-import hmda.parser.fi.lar.LarGenerators
+import hmda.model.fi.lar.LarGenerators
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFiling._
