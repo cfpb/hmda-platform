@@ -87,11 +87,10 @@ services:
       REMOTE_USER_HEADER: CFPB-HMDA-Username
       UPSTREAM_API_URI: http://api:8080/
       API_PATH_PREFIX: /hmda/
+      LOG_LEVEL: info
     links:
       - api
       - keycloak
-    volumes:
-      - '../hmda-platform-auth/auth-proxy/000-default.conf:/etc/apache2/sites-available/000-default.conf'
 
   mail_dev:
     image: djfarrelly/maildev:0.14.0
