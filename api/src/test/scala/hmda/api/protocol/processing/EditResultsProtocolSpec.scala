@@ -58,7 +58,7 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
     val rows = RowResults(Seq(rowResult), macros)
     val expectedRowsJson = JsObject(
       ("rows", JsArray(expectedRowJson)),
-      ("macroResults", JsObject(
+      ("macro", JsObject(
         ("edits", JsArray(expectedMacroJson))
       ))
     )

@@ -362,7 +362,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           ]
         }
       ],
-      "macroResults": {
+      "macro": {
             "edits": [
                 {
                     "edit": "Q023",

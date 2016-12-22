@@ -76,7 +76,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
       status mustBe StatusCodes.OK
       val rowResponse = responseAs[RowResults]
       rowResponse.rows.toSet mustBe expectedRows.toSet
-      rowResponse.macroResults mustBe expectedMacros
+      rowResponse.`macro` mustBe expectedMacros
     }
   }
 

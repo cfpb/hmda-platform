@@ -50,7 +50,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val results: RowResults = validationErrorsToRowResults(tsErrors, larErrors, macroErrors)
       results.rows.size mustBe 4
       results.rows.contains(tsResults) mustBe true
-      results.macroResults.edits.contains(macros) mustBe true
+      results.`macro`.edits.contains(macros) mustBe true
 
       val larRow = results.rows.find(_.rowId == "4977566612").get
       larRow.edits.size mustBe 3

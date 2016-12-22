@@ -22,7 +22,7 @@ case object EditResults {
 
 // For a single row, all of the edits that it failed
 case class RowResult(rowId: String, edits: Seq[RowEditDetail])
-case class RowResults(rows: Seq[RowResult], macroResults: MacroResults)
+case class RowResults(rows: Seq[RowResult], `macro`: MacroResults)
 case class RowEditDetail(editId: String, description: String)
 
 case class MacroResult(edit: String, justifications: Set[MacroEditJustification])
