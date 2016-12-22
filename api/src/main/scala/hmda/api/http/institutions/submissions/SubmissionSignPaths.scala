@@ -12,8 +12,9 @@ import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.model.fi.{ IRSVerified, Signed, SubmissionId }
-import hmda.persistence.HmdaSupervisor.FindHmdaFiling
+import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor }
 import hmda.persistence.processing.HmdaFiling.SaveLars
+import hmda.persistence.processing.SubmissionManager
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 import spray.json.{ JsBoolean, JsFalse, JsObject, JsTrue }
 
@@ -50,20 +51,21 @@ trait SubmissionSignPaths
               val supervisor = system.actorSelection("/user/supervisor")
               val querySupervisor = system.actorSelection("/user/query-supervisor")
 
-              val hmdaFilingF = (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
+              val submissionId = SubmissionId(institutionId, period, id)
+
               val hmdaFilingViewF = (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
+              val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
 
               verified match {
                 case JsTrue =>
-                  val filingF = for {
-                    filing <- hmdaFilingF
+                  val managerF = for {
                     filingView <- hmdaFilingViewF
-                  } yield filing
+                    manager <- fProcessingActor
+                  } yield manager
 
-                  onComplete(filingF) {
-                    case Success(filing) =>
-                      val submissionId = SubmissionId(institutionId, period, id)
-                      filing ! SaveLars(submissionId)
+                  onComplete(managerF) {
+                    case Success(manager) =>
+                      manager ! hmda.persistence.processing.ProcessingMessages.Signed(submissionId)
                       complete(ToResponseMarshallable(Receipt(System.currentTimeMillis(), "receiptHash", Signed)))
                     case Failure(error) =>
                       completeWithInternalError(uri, error)
