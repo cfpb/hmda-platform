@@ -85,7 +85,6 @@ object DemoData {
       case (instId: String, filings: Seq[Filing]) =>
         val filingActor = system.actorOf(FilingPersistence.props(instId))
         filings.foreach { filing => filingActor ? CreateFiling(filing) }
-        Thread.sleep(100)
         filingActor ! Shutdown
     }
   }
