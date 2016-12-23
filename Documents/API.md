@@ -286,6 +286,20 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       ]
     }
     ```
+    * `GET`  - List of all edits for a given submission, grouped by edit type with `format=csv` parameter
+
+    Example response, with HTTP code 200:
+    ```
+    editType, editId, loanId
+    syntactical, S025, Transmittal Sheet
+    syntactical, S025, s1
+    syntactical, S025, s2
+    syntactical, S025, s3
+    syntactical, S010, s4
+    syntactical, S010, s5
+    macro, Q007
+    ```
+
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
     * `GET`  - List of edits of a specific type, for a given submission
@@ -294,6 +308,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
     ```json
     {
+      "edits": [
         {
           "edit": "V555",
           "ts": false,
@@ -318,6 +333,14 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         }
       ]
     }
+    ```
+    * `GET`  - List of edits of a specific type, for a given submission with `format=csv` parameter
+
+    Example response, with HTTP code 200:
+    ```
+    editType, editId, loanId
+    validity, V555, 4977566612
+    validity, V550, 4977566612
     ```
 
     * `POST` - Provides verification for macro edits
