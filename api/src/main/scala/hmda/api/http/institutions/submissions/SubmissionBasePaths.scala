@@ -22,7 +22,8 @@ import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ Await, ExecutionContext }
+import scala.concurrent.duration._
 import scala.util.{ Failure, Success }
 
 trait SubmissionBasePaths
@@ -61,7 +62,10 @@ trait SubmissionBasePaths
                 val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
                 onComplete(fLatest) {
                   case Success(submission) =>
-                    filingActor ! UpdateFilingStatus(filing.copy(status = NotStarted))
+                    if (filing.status != NotStarted) {
+                      val result = Await.result(filingActor ? UpdateFilingStatus(filing.copy(status = NotStarted)), 5.seconds)
+                      log.warning("********CREATED******** " + result)
+                    }
                     complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                   case Failure(error) =>
                     completeWithInternalError(uri, error)

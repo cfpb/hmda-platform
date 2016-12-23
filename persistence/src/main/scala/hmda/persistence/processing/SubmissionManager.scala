@@ -65,8 +65,8 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
       submissionFSM ! Create
       submissionFSM ! StartUpload
       if (filing.status != InProgress) {
-        val result = Await.result(filingPersistence ? UpdateFilingStatus(filing.copy(status = InProgress)), duration).asInstanceOf[Some[Filing]]
-        //log.warning("*****RESULT*******    " + result.get.status)
+        val result = Await.result(filingPersistence ? UpdateFilingStatus(filing.copy(status = InProgress, start = System.currentTimeMillis)), duration).asInstanceOf[Some[Filing]]
+        log.warning("*****RESULT*******    " + result.get)
       }
 
     case m @ AddLine(timestamp, data) =>
