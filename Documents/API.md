@@ -236,19 +236,13 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
             "rows": [
               {
-                "row": {
-                  "rowId": "Transmittal Sheet"
-                }
+                "row": { "rowId": "Transmittal Sheet" }
               },
               {
-                "row": {
-                  "rowId": "8299422144"
-                }
+                "row": { "rowId": "8299422144" }
               },
               {
-                "row": {
-                  "rowId": "2185751599"
-                }
+                "row": { "rowId": "2185751599" }
               }
             ]
           },
@@ -257,9 +251,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
             "rows": [
               {
-                "row": {
-                  "rowId": "2185751599"
-                }
+                "row": { "rowId": "2185751599" }
               }
             ]
           }
@@ -272,9 +264,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
             "rows": [
               {
-                "row": {
-                  "rowId": "4977566612"
-                }
+                "row": { "rowId": "4977566612" }
               }
             ]
           }
