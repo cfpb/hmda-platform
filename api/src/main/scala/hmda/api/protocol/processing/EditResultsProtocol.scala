@@ -6,7 +6,7 @@ import spray.json.DefaultJsonProtocol
 
 trait EditResultsProtocol extends ValidationResultProtocol {
   implicit val larIdFormat = jsonFormat1(RowId.apply)
-  implicit val larEditResultFormat = jsonFormat1(editResultRow.apply)
+  implicit val larEditResultFormat = jsonFormat1(EditResultRow.apply)
   implicit val editResultFormat = jsonFormat3(EditResult.apply)
   implicit val editResultsFormat = jsonFormat1(EditResults.apply)
   implicit val macroResultFormat = jsonFormat2(MacroResult.apply)

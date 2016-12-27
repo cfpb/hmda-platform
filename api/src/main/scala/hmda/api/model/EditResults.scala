@@ -3,8 +3,8 @@ package hmda.api.model
 import hmda.validation.engine.MacroEditJustification
 
 case class RowId(rowId: String)
-case class editResultRow(row: RowId)
-case class EditResult(edit: String, description: String, rows: Seq[editResultRow]) {
+case class EditResultRow(row: RowId)
+case class EditResult(edit: String, description: String, rows: Seq[EditResultRow]) {
   def toCsv(editType: String) = {
     rows.map(r => Seq(editType, edit, r.row.rowId).mkString("", ", ", "\n")).mkString
   }

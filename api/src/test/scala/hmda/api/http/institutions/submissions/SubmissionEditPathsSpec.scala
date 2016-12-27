@@ -27,10 +27,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
   val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
   val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
-  val s020 = EditResult("S020", s020Description, List(editResultRow(RowId("Transmittal Sheet")), editResultRow(RowId("loan1"))))
-  val s010 = EditResult("S010", s010Description, List(editResultRow(RowId("loan1"))))
-  val v280 = EditResult("V280", v280Description, List(editResultRow(RowId("loan1"))))
-  val v285 = EditResult("V285", v285Description, List(editResultRow(RowId("loan2")), editResultRow(RowId("loan3"))))
+  val s020 = EditResult("S020", s020Description, List(EditResultRow(RowId("Transmittal Sheet")), EditResultRow(RowId("loan1"))))
+  val s010 = EditResult("S010", s010Description, List(EditResultRow(RowId("loan1"))))
+  val v280 = EditResult("V280", v280Description, List(EditResultRow(RowId("loan1"))))
+  val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2")), EditResultRow(RowId("loan3"))))
 
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
