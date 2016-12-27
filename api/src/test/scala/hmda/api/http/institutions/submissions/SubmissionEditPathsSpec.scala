@@ -10,6 +10,7 @@ import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.validation.engine._
+import org.scalatest.words.MatcherWords
 
 import scala.concurrent.Future
 
@@ -60,6 +61,15 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     }
   }
 
+  "Return summary edits in CSV format" in {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits?format=csv") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[String] must include("editType, editId, loanId")
+      responseAs[String] must include("syntactical, S020, Transmittal Sheet")
+      responseAs[String] must include("validity, V285, loan2")
+    }
+  }
+
   "return a list of validation errors for a single type" in {
     val expectedEdits =
       EditResults(
@@ -77,6 +87,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
       responseAs[MacroResults] mustBe MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
+    }
+  }
+
+  "Return single type edits in CSV format" in {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro?format=csv") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[String] must include("editType, editId")
+      responseAs[String] must include("macro, Q007")
     }
   }
 
