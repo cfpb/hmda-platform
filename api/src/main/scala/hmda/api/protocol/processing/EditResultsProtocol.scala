@@ -5,8 +5,8 @@ import hmda.api.protocol.validation.ValidationResultProtocol
 import spray.json.DefaultJsonProtocol
 
 trait EditResultsProtocol extends ValidationResultProtocol {
-  implicit val larIdFormat = jsonFormat1(LarId.apply)
-  implicit val larEditResultFormat = jsonFormat1(LarEditResult.apply)
+  implicit val larIdFormat = jsonFormat1(RowId.apply)
+  implicit val larEditResultFormat = jsonFormat1(editResultRow.apply)
   implicit val editResultFormat = jsonFormat3(EditResult.apply)
   implicit val editResultsFormat = jsonFormat1(EditResults.apply)
   implicit val macroResultFormat = jsonFormat2(MacroResult.apply)

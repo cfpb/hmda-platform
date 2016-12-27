@@ -2,9 +2,9 @@ package hmda.api.model
 
 import hmda.validation.engine.MacroEditJustification
 
-case class LarId(rowId: String)
-case class LarEditResult(lar: LarId)
-case class EditResult(edit: String, description: String, lars: Seq[LarEditResult])
+case class RowId(rowId: String)
+case class editResultRow(row: RowId)
+case class EditResult(edit: String, description: String, rows: Seq[editResultRow])
 case class EditResults(edits: Seq[EditResult])
 case object EditResults {
   def empty: EditResults = EditResults(Nil)

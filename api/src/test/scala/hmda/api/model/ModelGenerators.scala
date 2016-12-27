@@ -81,10 +81,10 @@ trait ModelGenerators {
     } yield ErrorResponse(status, message, Path(path))
   }
 
-  implicit def larEditResultGen: Gen[LarEditResult] = {
+  implicit def larEditResultGen: Gen[editResultRow] = {
     for {
       loanId <- Gen.alphaStr
-    } yield LarEditResult(LarId(loanId))
+    } yield editResultRow(RowId(loanId))
   }
 
   implicit def editResultGen: Gen[EditResult] = {
