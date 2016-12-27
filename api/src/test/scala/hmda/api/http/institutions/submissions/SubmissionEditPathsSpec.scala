@@ -26,7 +26,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
   val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
   val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
-  val s020 = EditResult("S020", s020Description, List(LarEditResult(LarId("loan1")), LarEditResult(LarId("Transmittal Sheet"))))
+  val s020 = EditResult("S020", s020Description, List(LarEditResult(LarId("Transmittal Sheet")), LarEditResult(LarId("loan1"))))
   val s010 = EditResult("S010", s010Description, List(LarEditResult(LarId("loan1"))))
   val v280 = EditResult("V280", v280Description, List(LarEditResult(LarId("loan1"))))
   val v285 = EditResult("V285", v285Description, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3"))))

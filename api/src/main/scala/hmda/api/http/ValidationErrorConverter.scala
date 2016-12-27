@@ -9,21 +9,21 @@ trait ValidationErrorConverter {
   val editDescriptions = EditMetaDataLookup.values
 
   def validationErrorsToEditResults(tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError], validationErrorType: ValidationErrorType): EditResults = {
-    val tsErrId: String = tsErrors.head.errorId
-
     val allErrorsOfThisType: Seq[ValidationError] = (tsErrors ++ larErrors).filter(_.errorType == validationErrorType)
+
     val errsByEdit: Map[String, Seq[ValidationError]] = allErrorsOfThisType.groupBy(_.ruleName)
-    val someEditResults: Seq[EditResult] = errsByEdit.map {
+
+    val editResults: Seq[EditResult] = errsByEdit.map {
       case (editName: String, errs: Seq[ValidationError]) =>
         val description = findEditDescription(editName)
         val rowIds = errs.map { e =>
-          if (e.errorId == tsErrId) LarEditResult(LarId("Transmittal Sheet"))
+          if (e.ts) LarEditResult(LarId("Transmittal Sheet"))
           else LarEditResult(LarId(e.errorId))
         }
         EditResult(editName, description, rowIds)
     }.toSeq
 
-    EditResults(someEditResults)
+    EditResults(editResults)
   }
 
   private def findEditDescription(editName: String): String = {
