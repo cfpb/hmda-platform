@@ -111,21 +111,24 @@ trait ModelGenerators {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-    } yield SyntacticalValidationError(id, name)
+      ts <- Gen.oneOf(true, false)
+    } yield SyntacticalValidationError(id, name, ts)
   }
 
   implicit def validityValidationErrorGen: Gen[ValidityValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-    } yield ValidityValidationError(id, name)
+      ts <- Gen.oneOf(true, false)
+    } yield ValidityValidationError(id, name, ts)
   }
 
   implicit def qualityValidationErrorGen: Gen[QualityValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-    } yield QualityValidationError(id, name)
+      ts <- Gen.oneOf(true, false)
+    } yield QualityValidationError(id, name, ts)
   }
 
   implicit def macroEditJustificationGen: Gen[MacroEditJustification] = {

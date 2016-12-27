@@ -11,21 +11,23 @@ trait ValidationError {
   def errorId: String
   def ruleName: String
   def errorType: ValidationErrorType
+  def ts: Boolean
 }
 
-case class SyntacticalValidationError(errorId: String, ruleName: String) extends ValidationError {
+case class SyntacticalValidationError(errorId: String, ruleName: String, ts: Boolean) extends ValidationError {
   override def errorType: ValidationErrorType = Syntactical
 }
-case class ValidityValidationError(errorId: String, ruleName: String) extends ValidationError {
+case class ValidityValidationError(errorId: String, ruleName: String, ts: Boolean) extends ValidationError {
   override def errorType: ValidationErrorType = Validity
 }
-case class QualityValidationError(errorId: String, ruleName: String) extends ValidationError {
+case class QualityValidationError(errorId: String, ruleName: String, ts: Boolean) extends ValidationError {
   override def errorType: ValidationErrorType = Quality
 }
 
 case class MacroEditJustification(id: Int = 1, value: String = "", verified: Boolean = false, text: Option[String] = None)
 
 case class MacroValidationError(ruleName: String, justifications: Seq[MacroEditJustification]) extends ValidationError {
+  override def ts: Boolean = false
   override def errorId: String = ""
   override def errorType: ValidationErrorType = Macro
 }

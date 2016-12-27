@@ -25,7 +25,7 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
       V145,
       V150,
       V155
-    ).map(check(_, ts, tsId, Validity))
+    ).map(check(_, ts, tsId, Validity, true))
 
     validateAll(checks, ts)
   }

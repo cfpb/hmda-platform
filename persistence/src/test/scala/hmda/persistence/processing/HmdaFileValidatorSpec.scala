@@ -41,9 +41,9 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     system.terminate()
   }
 
-  val e1 = SyntacticalValidationError("1", "S999")
-  val e2 = ValidityValidationError("1", "V999")
-  val e3 = QualityValidationError("1", "Q999")
+  val e1 = SyntacticalValidationError("1", "S999", false)
+  val e2 = ValidityValidationError("1", "V999", true)
+  val e3 = QualityValidationError("1", "Q999", false)
   val e4 = MacroValidationError("Q007", Nil)
 
   val ts = TsCsvParser(lines(0)).right.get
@@ -94,14 +94,14 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Nil,
         Nil,
         List(
-          SyntacticalValidationError("8299422144", "S020"),
-          SyntacticalValidationError("2185751599", "S010"),
-          SyntacticalValidationError("2185751599", "S020")
+          SyntacticalValidationError("8299422144", "S020", false),
+          SyntacticalValidationError("2185751599", "S010", false),
+          SyntacticalValidationError("2185751599", "S020", false)
         ),
         List(
-          ValidityValidationError("4977566612", "V550"),
-          ValidityValidationError("4977566612", "V555"),
-          ValidityValidationError("4977566612", "V560")
+          ValidityValidationError("4977566612", "V550", false),
+          ValidityValidationError("4977566612", "V555", false),
+          ValidityValidationError("4977566612", "V560", false)
         ),
         Nil,
         List(
