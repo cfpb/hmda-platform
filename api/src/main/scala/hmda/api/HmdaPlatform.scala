@@ -12,7 +12,7 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionView
+import hmda.query.view.institutions.InstitutionView
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext

@@ -12,8 +12,8 @@ import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
-import hmda.persistence.processing.ProcessingMessages._
-import hmda.persistence.processing.SubmissionFSM._
+import hmda.persistence.processing.ProcessingMessages.{ Sign, _ }
+import hmda.persistence.processing.SubmissionFSM.{ Signed, _ }
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -43,6 +43,7 @@ object SubmissionFSM {
   case class SubmissionValidating(s: Submission) extends SubmissionEvent
   case class SubmissionValidated(s: Submission) extends SubmissionEvent
   case class SubmissionValidatedWithErrors(s: Submission) extends SubmissionEvent
+  case class SubmissionSigned(s: Submission) extends SubmissionEvent
   case class SubmissionFailed(s: Submission) extends SubmissionEvent
 
   //Submission States
@@ -159,6 +160,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
     case SubmissionValidating(s) => currentData.update(s)
     case SubmissionValidated(s) => currentData.update(s)
     case SubmissionValidatedWithErrors(s) => currentData.update(s)
+    case SubmissionSigned(s) => currentData.update(s)
     case SubmissionFailed(s) => currentData.update(s)
   }
 
@@ -225,11 +227,18 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Validated) {
+    case Event(Sign, data) =>
+      val status = hmda.model.fi.Signed
+      updateStatus(status)
+      goto(Signed) applying SubmissionSigned(Submission(submissionId, status))
+  }
+
+  when(ValidatedWithErrors) {
     case Event(GetState, data) =>
       stay replying data
   }
 
-  when(ValidatedWithErrors) {
+  when(Signed) {
     case Event(GetState, data) =>
       stay replying data
   }

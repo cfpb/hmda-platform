@@ -13,7 +13,7 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.HmdaQuerySupervisor
-import hmda.query.projections.institutions.InstitutionView
+import hmda.query.view.institutions.InstitutionView
 import org.iq80.leveldb.util.FileUtils
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 

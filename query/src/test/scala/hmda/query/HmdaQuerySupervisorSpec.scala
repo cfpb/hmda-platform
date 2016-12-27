@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern.ask
 import akka.util.Timeout
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.projections.institutions.InstitutionView
+import hmda.query.view.institutions.InstitutionView
 import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.Await

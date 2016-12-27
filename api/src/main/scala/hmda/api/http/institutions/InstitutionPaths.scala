@@ -18,8 +18,8 @@ import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.projections.institutions.InstitutionView
-import hmda.query.projections.institutions.InstitutionView.{ GetInstitutionById, GetInstitutionsById }
+import hmda.query.view.institutions.InstitutionView
+import hmda.query.view.institutions.InstitutionView.{ GetInstitutionById, GetInstitutionsById }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }

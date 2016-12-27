@@ -7,10 +7,12 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.{ Submission, SubmissionId }
+import hmda.persistence.HmdaSupervisor.FindHmdaFiling
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
+import hmda.persistence.processing.HmdaFiling.SaveLars
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
@@ -31,17 +33,21 @@ object SubmissionManager {
   }
 }
 
-class SubmissionManager(id: SubmissionId) extends HmdaActor {
+class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
 
   val config = ConfigFactory.load()
   val duration = config.getInt("hmda.actor-lookup-timeout").seconds
   implicit val timeout = Timeout(duration)
   implicit val ec = context.dispatcher
 
-  val submissionFSM: ActorRef = context.actorOf(SubmissionFSM.props(id))
-  val submissionUpload: ActorRef = context.actorOf(HmdaRawFile.props(id))
-  val submissionParser: ActorRef = context.actorOf(HmdaFileParser.props(id))
-  val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator.props(id))
+  val period = submissionId.period
+  val supervisor = context.parent
+  val hmdaFilingF = (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
+
+  val submissionFSM: ActorRef = context.actorOf(SubmissionFSM.props(submissionId))
+  val submissionUpload: ActorRef = context.actorOf(HmdaRawFile.props(submissionId))
+  val submissionParser: ActorRef = context.actorOf(HmdaFileParser.props(submissionId))
+  val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator.props(submissionId))
 
   var uploaded: Int = 0
 
@@ -55,22 +61,22 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
   override def receive: Receive = {
 
     case StartUpload =>
-      log.info(s"Start upload for submission: ${id.toString}")
+      log.info(s"Start upload for submission: ${submissionId.toString}")
       submissionFSM ! Create
       submissionFSM ! StartUpload
 
-    case m @ AddLine(timestamp, data) =>
+    case m @ AddLine(_, _) =>
       submissionUpload ! m
 
     case CompleteUpload =>
-      log.info(s"Finish upload for submission: ${id.toString}")
+      log.info(s"Finish upload for submission: ${submissionId.toString}")
       submissionUpload ! CompleteUpload
       submissionFSM ! CompleteUpload
 
-    case UploadCompleted(size, submissionId) =>
-      log.info(s"Completed upload for submission: ${id.toString}")
+    case UploadCompleted(size, sId) =>
+      log.info(s"Completed upload for submission: ${sId.toString}")
       uploaded = size
-      val persistenceId = s"${HmdaRawFile.name}-$submissionId"
+      val persistenceId = s"${HmdaRawFile.name}-$sId"
       submissionFSM ! StartParsing
       submissionParser ! ReadHmdaRawFile(persistenceId, self)
 
@@ -94,6 +100,11 @@ class SubmissionManager(id: SubmissionId) extends HmdaActor {
     case ValidationCompletedWithErrors(sId) =>
       log.info(s"Validation completed with errors for submission: ${sId.toString}")
       submissionFSM ! CompleteValidationWithErrors
+
+    case Signed(sId) =>
+      log.info(s"Submission signed: ${sId.toString}")
+      submissionFSM ! Sign
+      hmdaFilingF.map(actorRef => actorRef ! SaveLars(sId))
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM
