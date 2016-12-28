@@ -434,8 +434,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "refinance": 5
     }
   ],
-  "timestamp": 0,
-  "receipt": "",
   "status": {
        "code": 10,
        "message": "IRS report generated"
@@ -443,24 +441,6 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 }
 ```
 
-   * `POST`  - Verify the IRS
-       Example body:
-```
-{
- "verified": true
-}
-```
-   Example response, with HTTP code 200:
-```
-{
-  "timestamp": 1476809530772,
-  "receipt": asd0f987134asdlfasdflk,
-  "status": {
-      "code": 11,
-      "message": "IRS report verified"
-    }
-}
-```
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`
 *NOTE:*  This is a mocked, static endpoint.
