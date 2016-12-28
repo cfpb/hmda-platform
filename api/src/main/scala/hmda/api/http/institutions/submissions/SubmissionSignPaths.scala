@@ -11,9 +11,8 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
-import hmda.model.fi.{ IRSVerified, Signed, SubmissionId }
-import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor }
-import hmda.persistence.processing.HmdaFiling.SaveLars
+import hmda.model.fi.{ IRSGenerated, Signed, SubmissionId }
+import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.SubmissionManager
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 import spray.json.{ JsBoolean, JsFalse, JsObject, JsTrue }
@@ -42,7 +41,7 @@ trait SubmissionSignPaths
       extractExecutionContext { executor =>
         implicit val ec: ExecutionContext = executor
         timedGet { uri =>
-          complete(ToResponseMarshallable(Receipt(0L, "", IRSVerified)))
+          complete(ToResponseMarshallable(Receipt(0L, "", IRSGenerated)))
         } ~
           timedPost { uri =>
             entity(as[JsObject]) { json =>
@@ -72,7 +71,7 @@ trait SubmissionSignPaths
                   }
 
                 case JsFalse =>
-                  complete(ToResponseMarshallable(Receipt(0l, "", IRSVerified)))
+                  complete(ToResponseMarshallable(Receipt(0l, "", IRSGenerated)))
               }
 
             }

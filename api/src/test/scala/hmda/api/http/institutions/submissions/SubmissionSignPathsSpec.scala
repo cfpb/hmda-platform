@@ -4,7 +4,7 @@ import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.Receipt
-import hmda.model.fi.IRSVerified
+import hmda.model.fi.IRSGenerated
 import spray.json.{ JsBoolean, JsObject }
 
 class SubmissionSignPathsSpec extends InstitutionHttpApiSpec {
@@ -14,7 +14,7 @@ class SubmissionSignPathsSpec extends InstitutionHttpApiSpec {
     "return a 200" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Receipt].status mustBe IRSVerified
+        responseAs[Receipt].status mustBe IRSGenerated
       }
     }
 
@@ -32,7 +32,7 @@ class SubmissionSignPathsSpec extends InstitutionHttpApiSpec {
 
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signed) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Receipt].status mustBe IRSVerified
+        responseAs[Receipt].status mustBe IRSGenerated
       }
     }
   }
