@@ -16,23 +16,5 @@ class SubmissionIrsPathsSpec extends InstitutionHttpApiSpec {
         status mustBe StatusCodes.OK
       }
     }
-
-    "return a filled receipt" in {
-      val verified = JsObject("verified" -> JsBoolean(true))
-
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs", verified) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
-        responseAs[Receipt].receipt mustBe "receiptHash"
-      }
-    }
-
-    "return an empty receipt" in {
-      val verified = JsObject("verified" -> JsBoolean(false))
-
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs", verified) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
-        responseAs[Receipt].status mustBe IRSGenerated
-      }
-    }
   }
 }

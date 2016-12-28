@@ -48,16 +48,7 @@ trait SubmissionIrsPaths
           val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, irsJson))
 
           complete(response)
-        } ~
-          timedPost { uri =>
-            entity(as[JsObject]) { json =>
-              val verified = json.fields("verified").asInstanceOf[JsBoolean]
-              verified match {
-                case JsTrue => complete(ToResponseMarshallable(Receipt(System.currentTimeMillis(), "receiptHash", IRSVerified)))
-                case JsFalse => complete(ToResponseMarshallable(Receipt(0L, "", IRSGenerated)))
-              }
-            }
-          }
+        }
       }
     }
 }
