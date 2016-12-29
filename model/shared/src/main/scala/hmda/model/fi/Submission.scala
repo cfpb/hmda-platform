@@ -48,7 +48,7 @@ case object IRSGenerated extends SubmissionStatus {
   override def message: String = iRSGeneratedMsg
 }
 case object Signed extends SubmissionStatus {
-  override def code: Int = 12
+  override def code: Int = 11
   override def message: String = signedMsg
 }
 case class Failed(message: String) extends SubmissionStatus {
