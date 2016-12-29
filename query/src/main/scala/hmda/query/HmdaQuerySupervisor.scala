@@ -2,10 +2,12 @@ package hmda.query
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.persistence.model.HmdaSupervisorActor
-import hmda.query.projections.institutions.InstitutionView
+import hmda.query.view.filing.HmdaFilingView
+import hmda.query.view.institutions.InstitutionView
 
 object HmdaQuerySupervisor {
-  case class FindQueryActorByName(name: String)
+
+  case class FindHmdaFilingView(period: String)
 
   def props(): Props = Props(new HmdaQuerySupervisor)
 
@@ -15,11 +17,27 @@ object HmdaQuerySupervisor {
 }
 
 class HmdaQuerySupervisor extends HmdaSupervisorActor {
+  import HmdaQuerySupervisor._
+
+  override def receive: Receive = super.receive orElse {
+    case m @ FindHmdaFilingView(period) =>
+      sender() ! findHmdaFilingView(m)
+  }
 
   override protected def createActor(name: String): ActorRef = name match {
     case id @ InstitutionView.name =>
       val actor = context.actorOf(InstitutionView.props, id)
       supervise(actor, id)
+  }
+
+  private def findHmdaFilingView(view: FindHmdaFilingView): ActorRef = {
+    actors.getOrElse(s"HmdaFilingView-${view.period}", createHmdaFilingView(view))
+  }
+
+  private def createHmdaFilingView(view: FindHmdaFilingView): ActorRef = {
+    val period = view.period
+    val actor = context.actorOf(HmdaFilingView.props(period), s"HmdaFilingView-$period")
+    supervise(actor, s"${HmdaFilingView.name}-$period")
   }
 
 }

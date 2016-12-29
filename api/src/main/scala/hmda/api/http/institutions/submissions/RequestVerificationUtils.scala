@@ -17,8 +17,8 @@ import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.projections.institutions.InstitutionView
-import hmda.query.projections.institutions.InstitutionView.GetInstitutionById
+import hmda.query.view.institutions.InstitutionView
+import hmda.query.view.institutions.InstitutionView.GetInstitutionById
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
