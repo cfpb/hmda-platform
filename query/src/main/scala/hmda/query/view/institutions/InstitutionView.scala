@@ -35,7 +35,7 @@ object InstitutionView {
         case InstitutionCreated(i) =>
           InstitutionViewState(institutions + i, seqNr + 1)
         case InstitutionModified(i) =>
-          val others = institutions.filterNot(_.id == i.id)
+          val others = institutions.filterNot(_.respondentId == i.respondentId)
           InstitutionViewState(others + i, seqNr + 1)
       }
     }
@@ -60,11 +60,11 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   override def receiveCommand: Receive = {
     case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(i => i.id.toString == institutionId).getOrElse(Institution("", "", Set(), CFPB, Bank, hasParent = false))
+      val institution = state.institutions.find(i => i.id == institutionId).getOrElse(Nil)
       sender() ! institution
 
     case GetInstitutionsById(ids) =>
-      val institutions = state.institutions.filter(i => ids.contains(i.id.toString))
+      val institutions = state.institutions.filter(i => ids.contains(i.id))
       sender() ! institutions
 
     case EventWithSeqNr(seqNr, event) =>
