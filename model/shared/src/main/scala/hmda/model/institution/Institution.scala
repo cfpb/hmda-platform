@@ -18,7 +18,7 @@ case class Institution(
     respondentState: String,
     respondentCity: String,
     respondentFipsStateNumber: String,
-    hmdaFilerFlag: Int,
+    hmdaFilerFlag: Boolean,
     parentRespondentId: String,
     parentIdRssd: Int,
     parentName: String,

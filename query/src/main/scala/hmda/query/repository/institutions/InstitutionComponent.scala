@@ -29,7 +29,7 @@ trait InstitutionComponent { this: DbConfiguration =>
     def respondentCity = column[String]("respondent_city")
     def respondentFips = column[String]("respondent_fips")
 
-    def hmdaFiler = column[Int]("hmda_filer")
+    def hmdaFiler = column[Boolean]("hmda_filer")
 
     def parentRespondentId = column[String]("parent_respondent_id")
     def parentIdRssd = column[Int]("parent_id_rssd")
@@ -46,7 +46,7 @@ trait InstitutionComponent { this: DbConfiguration =>
     def topHolderState = column[String]("top_holder_state")
     def topHolderCountry = column[String]("top_holder_country")
 
-    type InstitutionQueryHList = String :: Int :: Int :: Int :: String :: String :: Boolean :: String :: String :: String :: String :: String :: String :: String :: Int :: String :: Int :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: HNil
+    type InstitutionQueryHList = String :: Int :: Int :: Int :: String :: String :: Boolean :: String :: String :: String :: String :: String :: String :: String :: Boolean :: String :: Int :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: HNil
 
     def createInstitutionQuery(data: InstitutionQueryHList): InstitutionQuery = data match {
       case id ::
@@ -137,69 +137,69 @@ trait InstitutionComponent { this: DbConfiguration =>
         topHolderCity,
         topHolderState,
         topHolderCountry
-      ) =>
-      Some(
-        id ::
-        agency ::
-        filingPeriod ::
-        activityYear ::
-        respondentId ::
-        institutionType ::
-        cra ::
-        emailDomain2015 ::
-        emailDomain2014 ::
-        emailDomain2013 ::
-        respondentName ::
-        respondentState ::
-        respondentCity ::
-        respondentFips ::
-        hmdaFiler ::
-        parentRespondentId ::
-        parentIdRssd ::
-        parentName ::
-        parentCity ::
-        parentState ::
-        assets ::
-        otherLenderCodes ::
-        topHolderIdRssd ::
-        topHolderName ::
-        topHolderCity ::
-        topHolderState ::
-        topHolderCountry ::
-        HNil
-      )
+        ) =>
+        Some(
+          id ::
+            agency ::
+            filingPeriod ::
+            activityYear ::
+            respondentId ::
+            institutionType ::
+            cra ::
+            emailDomain2015 ::
+            emailDomain2014 ::
+            emailDomain2013 ::
+            respondentName ::
+            respondentState ::
+            respondentCity ::
+            respondentFips ::
+            hmdaFiler ::
+            parentRespondentId ::
+            parentIdRssd ::
+            parentName ::
+            parentCity ::
+            parentState ::
+            assets ::
+            otherLenderCodes ::
+            topHolderIdRssd ::
+            topHolderName ::
+            topHolderCity ::
+            topHolderState ::
+            topHolderCountry ::
+            HNil
+        )
     }
 
     override def * = (
-        id ::
-        agency ::
-        filingPeriod ::
-        activityYear ::
-        respondentId ::
-        institutionType ::
-        cra ::
-        emailDomain2015 ::
-        emailDomain2014 ::
-        emailDomain2013 ::
-        respondentName ::
-        respondentState ::
-        respondentCity ::
-        respondentFips ::
-        hmdaFiler ::
-        parentRespondentId ::
-        parentIdRssd ::
-        parentName ::
-        parentCity ::
-        parentState ::
-        assets ::
-        otherLenderCodes ::
-        topHolderIdRssd ::
-        topHolderName ::
-        topHolderCity ::
-        topHolderState ::
-        topHolderCountry ::
-        HNil
-      ) <> (createInstitutionQuery, extractInstitutionQuery)
+      id ::
+      agency ::
+      filingPeriod ::
+      activityYear ::
+      respondentId ::
+      institutionType ::
+      cra ::
+      emailDomain2015 ::
+      emailDomain2014 ::
+      emailDomain2013 ::
+      respondentName ::
+      respondentState ::
+      respondentCity ::
+      respondentFips ::
+      hmdaFiler ::
+      parentRespondentId ::
+      parentIdRssd ::
+      parentName ::
+      parentCity ::
+      parentState ::
+      assets ::
+      otherLenderCodes ::
+      topHolderIdRssd ::
+      topHolderName ::
+      topHolderCity ::
+      topHolderState ::
+      topHolderCountry ::
+      HNil
+    ) <> (createInstitutionQuery, extractInstitutionQuery)
   }
 
   class InstitutionRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[InstitutionsTable, String] {
