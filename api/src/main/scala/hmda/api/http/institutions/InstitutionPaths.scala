@@ -92,6 +92,6 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
     for {
       i <- fInstitution
       filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-    } yield InstitutionDetail(InstitutionWrapper(i.id.toString, i.name), filings)
+    } yield InstitutionDetail(InstitutionWrapper(i.id, i.respondentName), filings)
   }
 }
