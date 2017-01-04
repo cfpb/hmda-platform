@@ -235,59 +235,71 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       "syntactical": {
         "edits": [
           {
-            "edit": "S025",
-            "description": "Description of S025",
-            "ts": true,
-            "lars": [
+            "edit": "S020",
+            "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+            "rows": [
               {
-                "lar": {"loanId": "s1"}
+                "row": { "rowId": "Transmittal Sheet" }
               },
               {
-                "lar": {"loanId": "s2"}
+                "row": { "rowId": "8299422144" }
               },
               {
-                "lar": {"loanId": "s3"}
+                "row": { "rowId": "2185751599" }
               }
             ]
           },
           {
             "edit": "S010",
-            "description": "Description of S010",
-            "ts": false,
-            "lars": [
+            "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
+            "rows": [
               {
-                "lar": {"loanId": "s4"}
-              },
-              {
-                "lar": {"loanId": "s5"}
+                "row": { "rowId": "2185751599" }
               }
             ]
           }
         ]
       },
-      "validity": {},
-      "quality": {},
-      "macro": [
-        {
-            "edits": [
-                {
-                    "edit": "Q023",
-                    "justifications": [
-                        {
-                            "id": 1,
-                            "value": "Most of the loan activity are in areas outside of an MSA/MD",
-                            "verified": true
-                        },
-                        {
-                            "id": 2,
-                            "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
-                            "verified": false
-                        },
-                   ]
-                }
+      "validity": {
+        "edits": [
+          {
+            "edit": "V555",
+            "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
+            "rows": [
+              {
+                "row": { "rowId": "4977566612" }
+              }
             ]
-        }
-      ]
+          }
+        ]
+      },
+      "quality": {
+        "edits": []
+      },
+      "macro": {
+        "edits": [
+          {
+            "edit": "Q008",
+            "justifications": [
+              {
+                "id": 1,
+                "value": "Applicants decided not to proceed with the loan.",
+                "verified": false
+              },
+              {
+                "id": 2,
+                "value": "There were a large number of applications, but few loans were closed",
+                "verified": false
+              },
+              {
+                "id": 3,
+                "value": "Loan activity for this filing year consisted mainly of purchased loans.",
+                "verified": false
+              }
+            ]
+          }
+        ]
+      }
     }
     ```
     * `GET`  - List of all edits for a given submission, grouped by edit type with `format=csv` parameter

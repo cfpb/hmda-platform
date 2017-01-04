@@ -81,19 +81,18 @@ trait ModelGenerators {
     } yield ErrorResponse(status, message, Path(path))
   }
 
-  implicit def larEditResultGen: Gen[LarEditResult] = {
+  implicit def larEditResultGen: Gen[EditResultRow] = {
     for {
       loanId <- Gen.alphaStr
-    } yield LarEditResult(LarId(loanId))
+    } yield EditResultRow(RowId(loanId))
   }
 
   implicit def editResultGen: Gen[EditResult] = {
     for {
       edit <- Gen.alphaStr
       description <- Gen.alphaStr
-      ts <- Gen.oneOf(true, false)
       lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, description, ts, lars)
+    } yield EditResult(edit, description, lars)
   }
 
   implicit def editResultsGen: Gen[EditResults] = {
@@ -112,21 +111,24 @@ trait ModelGenerators {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-    } yield SyntacticalValidationError(id, name)
+      ts <- Gen.oneOf(true, false)
+    } yield SyntacticalValidationError(id, name, ts)
   }
 
   implicit def validityValidationErrorGen: Gen[ValidityValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-    } yield ValidityValidationError(id, name)
+      ts <- Gen.oneOf(true, false)
+    } yield ValidityValidationError(id, name, ts)
   }
 
   implicit def qualityValidationErrorGen: Gen[QualityValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-    } yield QualityValidationError(id, name)
+      ts <- Gen.oneOf(true, false)
+    } yield QualityValidationError(id, name, ts)
   }
 
   implicit def macroEditJustificationGen: Gen[MacroEditJustification] = {

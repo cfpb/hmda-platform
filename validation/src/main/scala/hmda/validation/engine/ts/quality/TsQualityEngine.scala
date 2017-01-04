@@ -14,7 +14,7 @@ trait TsQualityEngine extends TsCommonEngine with ValidationApi {
     val checks = List(
       Q020,
       Q033.inContext(ctx)
-    ).map(check(_, ts, tsId, Quality))
+    ).map(check(_, ts, tsId, Quality, true))
 
     validateAll(checks, ts)
   }

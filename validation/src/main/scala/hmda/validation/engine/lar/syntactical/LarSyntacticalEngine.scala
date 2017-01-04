@@ -18,7 +18,7 @@ trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
       S205,
       S270.inContext(ctx)
     )
-    val checks = checksToRun.map(check(_, lar, lar.loan.id, Syntactical))
+    val checks = checksToRun.map(check(_, lar, lar.loan.id, Syntactical, false))
 
     validateAll(checks, lar)
   }
@@ -27,7 +27,7 @@ trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
     val checks = List(
       S011,
       S040
-    ).map(check(_, lars, "", Syntactical))
+    ).map(check(_, lars, "", Syntactical, false))
 
     validateAll(checks, lars)
   }

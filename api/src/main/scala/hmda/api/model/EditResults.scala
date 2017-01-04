@@ -2,15 +2,13 @@ package hmda.api.model
 
 import hmda.validation.engine.MacroEditJustification
 
-case class LarId(loanId: String)
-case class LarEditResult(lar: LarId)
+case class RowId(rowId: String)
+case class EditResultRow(row: RowId)
 
 // For an individual edit, all of the rows that failed it
-case class EditResult(edit: String, description: String, ts: Boolean, lars: Seq[LarEditResult]) {
+case class EditResult(edit: String, description: String, rows: Seq[EditResultRow]) {
   def toCsv(editType: String) = {
-    val larCsv = lars.map(l => Seq(editType, edit, l.lar.loanId).mkString("", ", ", "\n")).mkString
-    if (ts) editType + ", " + edit + ", " + "Transmittal Sheet\n" + larCsv
-    else larCsv
+    rows.map(r => Seq(editType, edit, r.row.rowId).mkString("", ", ", "\n")).mkString
   }
 }
 case class EditResults(edits: Seq[EditResult]) {

@@ -25,10 +25,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
   val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
   val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
-  val s020 = EditResult("S020", s020Description, ts = true, List(LarEditResult(LarId("loan1"))))
-  val s010 = EditResult("S010", s010Description, ts = false, List(LarEditResult(LarId("loan1"))))
-  val v280 = EditResult("V280", v280Description, ts = false, List(LarEditResult(LarId("loan1"))))
-  val v285 = EditResult("V285", v285Description, ts = false, List(LarEditResult(LarId("loan2")), LarEditResult(LarId("loan3"))))
+  val s020 = EditResult("S020", s020Description, List(EditResultRow(RowId("Transmittal Sheet")), EditResultRow(RowId("loan1"))))
+  val s010 = EditResult("S010", s010Description, List(EditResultRow(RowId("loan1"))))
+  val v280 = EditResult("V280", v280Description, List(EditResultRow(RowId("loan1"))))
+  val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2")), EditResultRow(RowId("loan3"))))
 
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
@@ -181,15 +181,15 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val submissionId = SubmissionId(id, period, seqNr)
     val fHmdaValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
-    val s1 = SyntacticalValidationError("loan1", "S010")
-    val s2 = SyntacticalValidationError("loan1", "S020")
-    val v1 = ValidityValidationError("loan1", "V280")
-    val v2 = ValidityValidationError("loan2", "V285")
-    val v3 = ValidityValidationError("loan3", "V285")
+    val s1 = SyntacticalValidationError("loan1", "S010", false)
+    val s2 = SyntacticalValidationError("loan1", "S020", false)
+    val v1 = ValidityValidationError("loan1", "V280", false)
+    val v2 = ValidityValidationError("loan2", "V285", false)
+    val v3 = ValidityValidationError("loan3", "V285", false)
     val m1 = MacroValidationError("Q007", Nil)
     val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
 
-    val tsValidationErrors = TsValidationErrors(Seq(s2))
+    val tsValidationErrors = TsValidationErrors(Seq(s2.copy(ts = true)))
 
     for {
       h <- fHmdaValidator
