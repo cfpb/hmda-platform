@@ -89,7 +89,7 @@ object InstitutionParser {
     }
   }
 
-  private def convertIntToInstitutionType(i: Int): InstitutionType = {
+  private def convertIntToInstituotionType(i: Int): InstitutionType = {
     if (Set(1, 2, 3, 7).contains(i)) {
       Bank
     } else if (Set(4, 5).contains(i)) {
