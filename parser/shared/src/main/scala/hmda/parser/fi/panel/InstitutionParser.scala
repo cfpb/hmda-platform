@@ -1,10 +1,10 @@
 package hmda.parser.fi.panel
 
 import hmda.model.institution.Agency._
-import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
+import hmda.model.institution.DepositoryType.{Depository, NonDepository}
 import hmda.model.institution.ExternalIdType._
 import hmda.model.institution.InstitutionType._
-import hmda.model.institution.{ Agency, ExternalId, Institution, InstitutionType }
+import hmda.model.institution._
 
 object InstitutionParser {
   def apply(s: String): Institution = {
@@ -19,26 +19,13 @@ object InstitutionParser {
       institutionType,
       stringToBoolean(values(4)),
       getExternalIdSet(values),
-      values(10),
-      values(11),
-      values(12),
-      values(13),
-      values(14),
-      values(15),
-      values(16),
+      EmailDomains(values(10), values(11), values(12)),
+      Respondent(values(13), values(14), values(15), values(16)),
       stringToBoolean(values(17)),
-      values(18),
-      values(19).toInt,
-      values(20),
-      values(21),
-      values(22),
+      Parent(values(18), values(19).toInt, values(20), values(21), values(22)),
       values(23).toInt,
       values(24).toInt,
-      values(25).toInt,
-      values(26),
-      values(27),
-      values(28),
-      values(29)
+      TopHolder(values(25).toInt, values(26), values(27), values(28), values(29))
     )
   }
 

@@ -11,49 +11,19 @@ case class Institution(
     institutionType: InstitutionType,
     cra: Boolean,
     externalIds: Set[ExternalId],
-    emailDomain2015: String,
-    emailDomain2014: String,
-    emailDomain2013: String,
-    respondentName: String,
-    respondentState: String,
-    respondentCity: String,
-    respondentFipsStateNumber: String,
+    emailDomains: EmailDomains,
+    respondent: Respondent,
     hmdaFilerFlag: Boolean,
-    parentRespondentId: String,
-    parentIdRssd: Int,
-    parentName: String,
-    parentCity: String,
-    parentState: String,
+    parent: Parent,
     assets: Int,
     otherLenderCode: Int,
-    topHolderIdRssd: Int,
-    topHolderName: String,
-    topHolderCity: String,
-    topHolderState: String,
-    topHolderCountry: String
-) extends Serializable {
+    topHolder: TopHolder
+)
 
-  //private val extIdsByType: Map[ExternalIdType, ExternalId] = externalIds.map(extId => (extId.idType, extId)).toMap
-
-  /**
-   * Derives the respondentId for a given Institution based on [[hmda.model.institution.Agency]] and [[hmda.model.institution.InstitutionType]],
-   * the rules for which can be found in section "1.4 - Respondent Identification Numbers for 2017 HMDA Filers" of the
-   * <a href="http://www.consumerfinance.gov/data-research/hmda/static/for-filers/2017/2017-HMDA-File-Specifications.pdf">2017 HMDA File Specifications</a>
-   */
-  /*def respondentId: Either[InvalidRespondentId, ExternalId] = {
-
-    agency.externalIdTypes.get(institutionType.depositoryType) match {
-      case None => Left(UnsupportedDepositoryTypeByAgency(respondentId, agency, institutionType.depositoryType))
-      case Some(extIdType) =>
-
-        extIdsByType.get(extIdType) match {
-          case None => Left(RequiredExternalIdNotPresent(respondentId, extIdType))
-          case Some(extId) => Right(ExternalId(extId.id, extIdType))
-        }
-    }
-  }*/
-
-}
+case class EmailDomains(email2015: String, email2014: String, email2013: String)
+case class Respondent(name: String, state: String, city: String, fipsStateNumber: String)
+case class Parent(respondentId: String, idRssd: Int, name: String, city: String, state: String)
+case class TopHolder(idRssd: Int, name: String, city: String, state: String, country: String)
 
 sealed abstract class InvalidRespondentId {
   def message: String
