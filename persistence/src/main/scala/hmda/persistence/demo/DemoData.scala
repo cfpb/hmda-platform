@@ -4,15 +4,15 @@ import akka.actor.ActorSystem
 import akka.util.Timeout
 import akka.pattern.ask
 import hmda.model.fi._
-import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
-import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
-import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
-import hmda.model.institution.{ ExternalId, Institution }
+import hmda.model.institution.Agency.{CFPB, FDIC, HUD, OCC}
+import hmda.model.institution.ExternalIdType.{FdicCertNo, FederalTaxId, OccCharterId, RssdId}
+import hmda.model.institution.InstitutionType.{Bank, CreditUnion}
+import hmda.model.institution._
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
-import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, UpdateSubmissionStatus }
-import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.SubmissionPersistence.{CreateSubmission, UpdateSubmissionStatus}
+import hmda.persistence.institutions.{FilingPersistence, SubmissionPersistence}
 
 import scala.concurrent.duration._
 
@@ -23,11 +23,15 @@ object DemoData {
   val externalId2 = ExternalId("externalTest2", OccCharterId)
   val externalId3 = ExternalId("externalTest3", FederalTaxId)
 
+  val parent = Parent("", 0, "", "", "")
+  val topHolder = TopHolder(0, "", "", "", "")
+  val emailDomains = EmailDomains("", "", "")
+
   val testInstitutions = {
-    val i0 = Institution("0", FDIC, 2017, externalId0, Bank, cra = false, Set(externalId0), "", "", "", "Bank 0", "", "", "", hmdaFilerFlag = true, "", 0, "", "", "", 0, 0, 0, "", "", "", "")
-    val i1 = Institution("1", CFPB, 2017, externalId1, CreditUnion, cra = false, Set(externalId1), "", "", "", "Bank 1", "", "", "", hmdaFilerFlag = true, "", 0, "", "", "", 0, 0, 0, "", "", "", "")
-    val i2 = Institution("2", OCC, 2017, externalId2, CreditUnion, cra = false, Set(externalId2), "", "", "", "Bank 2", "", "", "", hmdaFilerFlag = true, "", 0, "", "", "", 0, 0, 0, "", "", "", "")
-    val i3 = Institution("3", HUD, 2017, externalId3, CreditUnion, cra = false, Set(externalId3), "", "", "", "Bank 3", "", "", "", hmdaFilerFlag = true, "", 0, "", "", "", 0, 0, 0, "", "", "", "")
+    val i0 = Institution("0", FDIC, 2017, Bank, cra = false, Set(externalId0), emailDomains, Respondent(externalId0, "Bank 0", "", "", ""), hmdaFilerFlag = true, parent, 0, 0, topHolder)
+    val i1 = Institution("1", CFPB, 2017, CreditUnion, cra = false, Set(externalId1), emailDomains, Respondent(externalId1, "Bank 1", "", "", ""), hmdaFilerFlag = true, parent, 0, 0, topHolder)
+    val i2 = Institution("2", OCC, 2017, CreditUnion, cra = false, Set(externalId2), emailDomains, Respondent(externalId2, "Bank 2", "", "", ""), hmdaFilerFlag = true, parent, 0, 0, topHolder)
+    val i3 = Institution("3", HUD, 2017, CreditUnion, cra = false, Set(externalId3), emailDomains, Respondent(externalId3, "Bank 3", "", "", ""), hmdaFilerFlag = true, parent, 0, 0, topHolder)
     Set(i0, i1, i2, i3)
   }
 
@@ -72,7 +76,7 @@ object DemoData {
   val institutionSummary = {
     val institution = testInstitutions.head
     val f = testFilings.filter(x => x.institutionId == institution.id.toString)
-    (institution.id, institution.respondentName, f.reverse)
+    (institution.id, institution.respondent.name, f.reverse)
   }
 
   def loadInstitutions(institutions: Set[Institution], system: ActorSystem): Unit = {

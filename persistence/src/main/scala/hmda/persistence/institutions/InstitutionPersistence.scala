@@ -59,7 +59,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
     case ModifyInstitution(i) =>
       if (state.institutionIds.contains(i.id)) {
         persist(InstitutionModified(i)) { e =>
-          log.debug(s"Modified: ${i.respondentName}")
+          log.debug(s"Modified: ${i.respondent.name}")
           updateState(e)
           sender() ! Some(e.i)
         }

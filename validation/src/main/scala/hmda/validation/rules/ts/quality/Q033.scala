@@ -15,7 +15,7 @@ class Q033 private (respondent: Institution) extends EditCheck[TransmittalSheet]
 
   override def apply(ts: TransmittalSheet): Result = {
     when((respondent.institutionType is oneOf(Bank, SavingsAndLoan, IndependentMortgageCompany))
-      and (respondent.parentName not "")) {
+      and (respondent.parent.name not "")) {
       ts.parent is completeNameAndAddress
     }
   }
