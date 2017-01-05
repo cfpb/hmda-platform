@@ -11,6 +11,7 @@ import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.validation.engine._
 import org.scalatest.words.MatcherWords
+import spray.json.{ JsBoolean, JsNumber, JsObject }
 
 class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
 
@@ -29,6 +30,11 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   val s010 = EditResult("S010", s010Description, List(EditResultRow(RowId("loan1"))))
   val v280 = EditResult("V280", v280Description, List(EditResultRow(RowId("loan1"))))
   val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2")), EditResultRow(RowId("loan3"))))
+
+  val fields = JsObject(
+    ("Thing One", JsNumber(3)),
+    ("Thing Two", JsBoolean(false))
+  )
 
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
@@ -56,17 +62,17 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   "Sort edits by row with sortBy parameter" in {
     val loan1Result =
       RowResult("loan1", Seq(
-        RowEditDetail("S010", s010Description),
-        RowEditDetail("S020", s020Description),
-        RowEditDetail("V280", v280Description)
+        RowEditDetail("S010", s010Description, fields),
+        RowEditDetail("S020", s020Description, fields),
+        RowEditDetail("V280", v280Description, fields)
       ))
 
     val expectedRows =
       Seq(
-        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description))),
+        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, fields))),
         loan1Result,
-        RowResult("loan2", Seq(RowEditDetail("V285", v285Description))),
-        RowResult("loan3", Seq(RowEditDetail("V285", v285Description)))
+        RowResult("loan2", Seq(RowEditDetail("V285", v285Description, fields))),
+        RowResult("loan3", Seq(RowEditDetail("V285", v285Description, fields)))
       )
 
     val expectedMacros =

@@ -3,6 +3,9 @@ package hmda.api.http
 import hmda.api.model._
 import hmda.model.edits.EditMetaDataLookup
 import hmda.validation.engine._
+import spray.json.{ JsBoolean, JsNumber, JsObject }
+
+import scala.util.parsing.json.JSONObject
 
 trait ValidationErrorConverter {
 
@@ -55,7 +58,11 @@ trait ValidationErrorConverter {
 
   private def rowDetail(err: ValidationError): RowEditDetail = {
     val name = err.ruleName
-    RowEditDetail(name, findEditDescription(name))
+    val fields = JsObject(
+      ("Thing One", JsNumber(3)),
+      ("Thing Two", JsBoolean(false))
+    )
+    RowEditDetail(name, findEditDescription(name), fields)
   }
 
 }

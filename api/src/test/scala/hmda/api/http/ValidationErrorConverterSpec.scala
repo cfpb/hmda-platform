@@ -8,6 +8,7 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import org.scalatest.{ MustMatchers, WordSpec }
+import spray.json.{ JsBoolean, JsNumber, JsObject }
 
 class ValidationErrorConverterSpec extends WordSpec with MustMatchers with ValidationErrorConverter with LarEngine {
 
@@ -51,7 +52,14 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     }
 
     "sort failures by row" in {
-      val tsResults = RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Desc), RowEditDetail("S100", s100Desc)))
+      val fields = JsObject(
+        ("Thing One", JsNumber(3)),
+        ("Thing Two", JsBoolean(false))
+      )
+      val tsResults = RowResult(
+        "Transmittal Sheet",
+        Seq(RowEditDetail("S020", s020Desc, fields), RowEditDetail("S100", s100Desc, fields))
+      )
       val macros = MacroResult("Q047", Set(MacroEditJustification(1, "There were many requests for preapprovals, but the applicant did not proceed with the loan.", false)))
 
       val results: RowResults = validationErrorsToRowResults(tsErrors, larErrors, macroErrors)

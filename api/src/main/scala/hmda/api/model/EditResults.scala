@@ -1,6 +1,7 @@
 package hmda.api.model
 
 import hmda.validation.engine.MacroEditJustification
+import spray.json.JsObject
 
 case class RowId(rowId: String)
 case class EditResultRow(row: RowId)
@@ -21,7 +22,7 @@ case object EditResults {
 // For a single row, all of the edits that it failed
 case class RowResult(rowId: String, edits: Seq[RowEditDetail])
 case class RowResults(rows: Seq[RowResult], `macro`: MacroResults)
-case class RowEditDetail(editId: String, description: String)
+case class RowEditDetail(editId: String, description: String, fields: JsObject)
 
 case class MacroResult(edit: String, justifications: Set[MacroEditJustification])
 case class MacroResults(edits: Seq[MacroResult]) {
