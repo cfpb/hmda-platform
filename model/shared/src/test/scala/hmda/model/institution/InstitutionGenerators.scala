@@ -33,12 +33,14 @@ object InstitutionGenerators {
       topHolderCity <- Gen.alphaStr
       topHolderState <- Gen.alphaStr
       topHolderCountry <- Gen.alphaStr
-    } yield Institution(id, agency, activityYear, respondentId, institutionType, cra = cra,
-      externalIds.toSet, emailDomain2015, emailDomain2014, emailDomain2013, respondentName,
-      respondentState, respondentCity, respondentFipsStateNumber, hmdaFilerFlag = hmdaFilerFlag,
-      parentRespondentId, parentIdRssd.toInt, parentName, parentCity, parentState, assets.toInt,
-      otherLenderCode.toInt, topHolderIdRssd.toInt, topHolderName, topHolderCity, topHolderState,
-      topHolderCountry)
+    } yield Institution(id, agency, activityYear, institutionType, cra = cra, externalIds.toSet,
+      EmailDomains(emailDomain2015, emailDomain2014, emailDomain2013),
+      Respondent(respondentId, respondentName, respondentState, respondentCity, respondentFipsStateNumber),
+      hmdaFilerFlag = hmdaFilerFlag,
+      Parent(parentRespondentId, parentIdRssd.toInt, parentName, parentCity, parentState),
+      assets.toInt,
+      otherLenderCode.toInt,
+      TopHolder(topHolderIdRssd.toInt, topHolderName, topHolderCity, topHolderState, topHolderCountry))
   }
 
   implicit def agencyGen: Gen[Agency] = {

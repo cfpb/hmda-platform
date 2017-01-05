@@ -11,16 +11,16 @@ object InstitutionParser {
     val values = (s + " ").split('|').map(_.trim)
     val agency = convertStringToAgency(values(2))
     val institutionType = convertIntToInstitutionType(values(3).toInt)
+    val respondentId = convertStringToExternalId(values(1), institutionType, agency)
     Institution(
       "0", //How do we determine internal id?
       agency,
       values(0).toInt,
-      convertStringToExternalId(values(1), institutionType, agency),
       institutionType,
       stringToBoolean(values(4)),
       getExternalIdSet(values),
       EmailDomains(values(10), values(11), values(12)),
-      Respondent(values(13), values(14), values(15), values(16)),
+      Respondent(respondentId, values(13), values(14), values(15), values(16)),
       stringToBoolean(values(17)),
       Parent(values(18), values(19).toInt, values(20), values(21), values(22)),
       values(23).toInt,
