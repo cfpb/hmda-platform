@@ -18,7 +18,7 @@ val configDeps = Seq(typesafeConfig)
 
 val enumDeps = Seq(enumeratum)
 
-val slickDeps = Seq(slick, hikariCP, h2)
+val slickDeps = Seq(slick, slickHikariCP, h2, postgres)
 
 val csvDeps = Seq(scalaCsv)
 

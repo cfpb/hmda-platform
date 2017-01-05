@@ -28,6 +28,11 @@ class InstitutionDBProjectionSpec extends ActorSpec with DbConfiguration with Be
 
   "Institution database projection" must {
     val projection = createInstitutionDBProjection(system)
+    "create schema" in {
+      Await.result(repository.dropSchema(), timeout)
+      probe.send(projection, CreateSchema)
+      probe.expectMsg(InstitutionSchemaCreated())
+    }
     "Insert records" in {
       val i = InstitutionGenerators.institutionGen.sample.get
       probe.send(projection, InstitutionCreated(i))

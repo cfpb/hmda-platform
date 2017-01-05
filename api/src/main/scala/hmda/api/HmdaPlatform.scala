@@ -12,7 +12,10 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
+import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
 import hmda.query.view.institutions.InstitutionView
+import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
+import hmda.query.view.institutions.InstitutionView.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
@@ -51,15 +54,24 @@ object HmdaPlatform {
         log.info(s"Started institutions at ${actor.path}")
       }
 
+    // Start query Actors
+    val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
+      .mapTo[ActorRef]
+
     //Load demo data
     lazy val isDemo = config.getBoolean("hmda.isDemo")
     if (isDemo) {
-      DemoData.loadDemoData(system)
-    }
+      val createdF = for {
+        i <- institutionViewF
+        q <- (i ? GetProjectionActorRef).mapTo[ActorRef]
+        s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
+      } yield s
 
-    // Start query Actors
-    (querySupervisor ? FindActorByName(InstitutionView.name))
-      .mapTo[ActorRef]
+      createdF.map { x =>
+        log.info(x.toString)
+        DemoData.loadDemoData(system)
+      }
+    }
 
   }
 

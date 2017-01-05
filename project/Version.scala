@@ -12,7 +12,8 @@ object Version {
   val enumeratum = "1.5.2"
   val inMemoryPersistence = "1.3.14"
   val slick      = "3.2.0-M2"
-  val hikariCP   = "2.4.7"
+  val hikariCP   = "2.5.1"
   val h2         = "1.4.193"
+  val postgresql = "9.4.1212.jre7"
   val scalaCsv = "1.3.4"
 }
