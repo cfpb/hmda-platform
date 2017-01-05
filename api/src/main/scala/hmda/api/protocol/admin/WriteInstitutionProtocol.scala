@@ -89,30 +89,16 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
         "id" -> JsString(obj.id),
         "agency" -> obj.agency.toJson,
         "activityYear" -> JsNumber(obj.activityYear),
-        "respondentId" -> obj.respondentId.toJson,
         "institutionType" -> obj.institutionType.toJson,
         "cra" -> JsBoolean(obj.cra),
         "externalIds" -> JsArray(obj.externalIds.map(e => e.toJson).toVector),
-        "emailDomain2015" -> JsString(obj.emailDomain2015),
-        "emailDomain2014" -> JsString(obj.emailDomain2014),
-        "emailDomain2013" -> JsString(obj.emailDomain2013),
-        "respondentName" -> JsString(obj.respondentName),
-        "respondentState" -> JsString(obj.respondentState),
-        "respondentCity" -> JsString(obj.respondentCity),
-        "respondentFipsStateNumber" -> JsString(obj.respondentFipsStateNumber),
+        "emailDomains" -> obj.emailDomains.toJson,
+        "respondent" -> obj.respondent.toJson,
         "hmdaFilerFlag" -> JsBoolean(obj.hmdaFilerFlag),
-        "parentRespondentId" -> JsString(obj.parentRespondentId),
-        "parentIdRssd" -> JsNumber(obj.parentIdRssd),
-        "parentName" -> JsString(obj.parentName),
-        "parentCity" -> JsString(obj.parentCity),
-        "parentState" -> JsString(obj.parentState),
+        "parent" -> obj.parent.toJson  ,
         "assets" -> JsNumber(obj.assets),
         "otherLenderCode" -> JsNumber(obj.otherLenderCode),
-        "topHolderIdRssd" -> JsNumber(obj.topHolderIdRssd),
-        "topHolderName" -> JsString(obj.topHolderName),
-        "topHolderCity" -> JsString(obj.topHolderCity),
-        "topHolderState" -> JsString(obj.topHolderState),
-        "topHolderCountry" -> JsString(obj.topHolderCountry)
+        "topHolder" -> obj.topHolder.toJson
       )
     }
 
@@ -120,67 +106,41 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
       "id",
       "agency",
       "activityYear",
-      "respondentId",
       "institutionType",
       "cra",
       "externalIds",
-      "emailDomain2015",
-      "emailDomain2014",
-      "emailDomain2013",
-      "respondentName",
-      "respondentState",
-      "respondentCity",
-      "respondentFipsStateNumber",
+      "emailDomains",
+      "respondent",
       "hmdaFilerFlag",
-      "parentRespondentId",
-      "parentIdRssd",
-      "parentName",
-      "parentCity",
-      "parentState",
+      "parent",
       "assets",
       "otherLenderCode",
-      "topHolderIdRssd",
-      "topHolderName",
-      "topHolderCity",
-      "topHolderState",
-      "topHolderCountry"
+      "topHolder"
     ) match {
-        case Seq(id, agency, activityYear, respondentId, institutionType, cra, externalIds, emailDomain2015,
-          emailDomain2014, emailDomain2013, respondentName, respondentState, respondentCity, respondentFipsStateNumber,
-          hmdaFilerFlag, parentRespondentId, parentIdRssd, parentName, parentCity, parentState, assets,
-          otherLenderCode, topHolderIdRssd, topHolderName, topHolderCity, topHolderState, topHolderCountry) =>
+        case Seq(id, agency, activityYear, institutionType, cra, externalIds, emailDomains, respondent, hmdaFilerFlag, parent, assets, otherLenderCode, topHolder) =>
           Institution(
             id.convertTo[String],
             agency.convertTo[Agency],
             activityYear.convertTo[Int],
-            respondentId.convertTo[ExternalId],
             institutionType.convertTo[InstitutionType],
             cra.convertTo[Boolean],
             externalIds.convertTo[Set[ExternalId]],
-            emailDomain2015.convertTo[String],
-            emailDomain2014.convertTo[String],
-            emailDomain2013.convertTo[String],
-            respondentName.convertTo[String],
-            respondentState.convertTo[String],
-            respondentCity.convertTo[String],
-            respondentFipsStateNumber.convertTo[String],
+            emailDomains.convertTo[EmailDomains],
+            respondent.convertTo[Respondent],
             hmdaFilerFlag.convertTo[Boolean],
-            parentRespondentId.convertTo[String],
-            parentIdRssd.convertTo[Int],
-            parentName.convertTo[String],
-            parentCity.convertTo[String],
-            parentState.convertTo[String],
+            parent.convertTo[Parent],
             assets.convertTo[Int],
             otherLenderCode.convertTo[Int],
-            topHolderIdRssd.convertTo[Int],
-            topHolderName.convertTo[String],
-            topHolderCity.convertTo[String],
-            topHolderState.convertTo[String],
-            topHolderCountry.convertTo[String]
+            topHolder.convertTo[TopHolder]
           )
       }
 
   }
 
   implicit val externalIdFormat = jsonFormat2(ExternalId.apply)
+  implicit val emailDomainsFormat = jsonFormat3(EmailDomains.apply)
+  implicit val respondentFormat = jsonFormat5(Respondent.apply)
+  implicit val parentFormat = jsonFormat5(Parent.apply)
+  implicit val topHolderFormat = jsonFormat5(TopHolder.apply)
+
 }
