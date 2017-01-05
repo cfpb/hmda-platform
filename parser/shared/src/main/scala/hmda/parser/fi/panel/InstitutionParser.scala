@@ -1,7 +1,7 @@
 package hmda.parser.fi.panel
 
 import hmda.model.institution.Agency._
-import hmda.model.institution.DepositoryType.{Depository, NonDepository}
+import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
 import hmda.model.institution.ExternalIdType._
 import hmda.model.institution.InstitutionType._
 import hmda.model.institution._

@@ -95,7 +95,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
         "emailDomains" -> obj.emailDomains.toJson,
         "respondent" -> obj.respondent.toJson,
         "hmdaFilerFlag" -> JsBoolean(obj.hmdaFilerFlag),
-        "parent" -> obj.parent.toJson  ,
+        "parent" -> obj.parent.toJson,
         "assets" -> JsNumber(obj.assets),
         "otherLenderCode" -> JsNumber(obj.otherLenderCode),
         "topHolder" -> obj.topHolder.toJson

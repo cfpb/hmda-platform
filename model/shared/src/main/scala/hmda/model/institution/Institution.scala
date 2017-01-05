@@ -4,19 +4,19 @@ package hmda.model.institution
  * A financial institution, geared towards requirements for filing HMDA data.
  */
 case class Institution(
-    id: String,
-    agency: Agency,
-    activityYear: Int,
-    institutionType: InstitutionType,
-    cra: Boolean,
-    externalIds: Set[ExternalId],
-    emailDomains: EmailDomains,
-    respondent: Respondent,
-    hmdaFilerFlag: Boolean,
-    parent: Parent,
-    assets: Int,
-    otherLenderCode: Int,
-    topHolder: TopHolder
+  id: String,
+  agency: Agency,
+  activityYear: Int,
+  institutionType: InstitutionType,
+  cra: Boolean,
+  externalIds: Set[ExternalId],
+  emailDomains: EmailDomains,
+  respondent: Respondent,
+  hmdaFilerFlag: Boolean,
+  parent: Parent,
+  assets: Int,
+  otherLenderCode: Int,
+  topHolder: TopHolder
 )
 
 case class EmailDomains(email2015: String, email2014: String, email2013: String)
