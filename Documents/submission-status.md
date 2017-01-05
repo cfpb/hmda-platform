@@ -29,6 +29,5 @@ In order to track the status of a filing for a financial institution, the follow
 * `8`: `validated with errors` - The validation process is complete but there are edits (errors) in the provided data. These edits could consist of any combination of syntactical, validity, quality, and macro edits. If syntactical or validity edits exist a resubmission of the data is required. If quality or macro edits exist they will need verification before moving to the next state.
 * `9`: `validated` - The validation process is complete and the data submitted passes all syntactical and validity edits and all quality and macro edits, if they existed, have been verified. The data is now considered valid and the IRS report can be generated.
 * `10`: `IRS report generated` - The IRS report has been generated.
-* `11`: `IRS report verified` - The IRS report has been verified by the financial institution and the submission can be signed.
-* `12`: `signed` - The financial institution has certified that the data is correct. This completes the HMDA filing process.
+* `11`: `signed` - The financial institution has certified that the data is correct. This completes the HMDA filing process.
 * `-1`: `Failed` - An error occurred in the process of submitting data, the submission needs to be performed again.

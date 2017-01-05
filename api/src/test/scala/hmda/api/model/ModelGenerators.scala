@@ -44,7 +44,6 @@ trait ModelGenerators {
       ValidatedWithErrors,
       Validated,
       IRSGenerated,
-      IRSVerified,
       Signed
     )
   }
