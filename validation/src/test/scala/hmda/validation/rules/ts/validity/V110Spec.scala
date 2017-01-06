@@ -1,8 +1,10 @@
 package hmda.validation.rules.ts.validity
 
 import hmda.model.fi.ts.{ Parent, TransmittalSheet }
+import hmda.model.institution.Agency.CFPB
+import hmda.model.institution.ExternalIdType.UndeterminedExternalId
 import hmda.model.institution.InstitutionType._
-import hmda.model.institution.{ Agency, Institution, InstitutionType }
+import hmda.model.institution.{ TopHolder, _ }
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.TsEditCheckSpec
@@ -74,7 +76,10 @@ class V110Spec extends TsEditCheckSpec {
   }
 
   private def whenInstitutionTypeIs(instType: InstitutionType): Unit = {
-    // note: the hasParent boolean is not used in this edit. it's false here, which is not realistic for all types.
-    institution = Institution("22", "some bank", Set(), Agency.CFPB, instType, hasParent = false)
+    val emails = EmailDomains("", "", "")
+    val respondent = hmda.model.institution.Respondent(ExternalId("1", UndeterminedExternalId), "test bank", "", "", "")
+    val parent = hmda.model.institution.Parent("123", 123, "test parent", "", "")
+    val topHolder = TopHolder(-1, "", "", "", "")
+    Institution("1", CFPB, 2017, instType, cra = true, Set(), emails, respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder)
   }
 }

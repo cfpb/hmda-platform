@@ -3,9 +3,9 @@ package hmda.validation.rules.ts.syntactical
 import hmda.model.fi.lar._
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.model.institution.Agency.CFPB
-import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId }
+import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId, UndeterminedExternalId }
 import hmda.model.institution.InstitutionType.Bank
-import hmda.model.institution.{ ExternalId, Institution }
+import hmda.model.institution.{ EmailDomains, ExternalId, Institution, TopHolder }
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalatest.{ MustMatchers, WordSpec }
@@ -14,7 +14,7 @@ class S025Spec extends WordSpec with MustMatchers {
 
   "S025" must {
     "be named S025" in {
-      val institution = createBank(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
+      val institution = createInstitution(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution), None)
 
       S025.inContext(ctx).name mustBe "S025"
@@ -35,21 +35,21 @@ class S025Spec extends WordSpec with MustMatchers {
     )
 
     "succeed when TS's agency code and respondent ID match the Institution's" in {
-      val institution = createBank(Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)))
+      val institution = createInstitution(Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution), None)
 
       S025.inContext(ctx)(ts) mustBe Success()
     }
 
     "fail when TS's agency code and respondent ID do NOT match the Institution's" in {
-      val institution = createBank(Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)))
+      val institution = createInstitution(Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution), None)
 
       S025.inContext(ctx)(ts) mustBe Failure()
     }
 
     "fail when the Institution's respondent ID cannot be derived" in {
-      val institution = createBank(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
+      val institution = createInstitution(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution), None)
 
       S025.inContext(ctx)(ts) mustBe Failure()
@@ -82,29 +82,33 @@ class S025Spec extends WordSpec with MustMatchers {
     }
 
     "fail when the Institution's respondent ID cannot be derived" in {
-      val institution = createBank(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
+      val institution = createInstitution(Set(ExternalId("111111", FdicCertNo), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution), None)
 
       S025.inContext(ctx).apply(lar) mustBe Failure()
     }
 
     "succeed when LAR's agency code and respondent ID match the Institution's" in {
-      val institution = createBank(Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)))
+      val institution = createInstitution(Set(ExternalId("999999", RssdId), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution), None)
 
       S025.inContext(ctx).apply(lar) mustBe Success()
     }
 
     "fail when LAR's agency code and respondent ID do NOT match the Institution's" in {
-      val institution = createBank(Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)))
+      val institution = createInstitution(Set(ExternalId("111111", RssdId), ExternalId("9876543-21", FederalTaxId)))
       val ctx = ValidationContext(Some(institution), None)
 
       S025.inContext(ctx).apply(lar) mustBe Failure()
     }
   }
 
-  def createBank(externalIds: Set[ExternalId]): Institution = {
-    Institution("1", "Test Bank", externalIds, CFPB, Bank, hasParent = true)
+  def createInstitution(externalIds: Set[ExternalId]): Institution = {
+    val emails = EmailDomains("", "", "")
+    val respondent = hmda.model.institution.Respondent(ExternalId("1", UndeterminedExternalId), "test bank", "", "", "")
+    val parent = hmda.model.institution.Parent("123", 123, "test parent", "", "")
+    val topHolder = TopHolder(-1, "", "", "", "")
+    Institution("1", CFPB, 2017, Bank, cra = true, externalIds, emails, respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder)
   }
 }
 
