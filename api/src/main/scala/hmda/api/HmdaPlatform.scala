@@ -61,13 +61,13 @@ object HmdaPlatform {
     //Load demo data
     lazy val isDemo = config.getBoolean("hmda.isDemo")
     if (isDemo) {
-      val createdF = for {
+      val institutionCreatedF = for {
         i <- institutionViewF
         q <- (i ? GetProjectionActorRef).mapTo[ActorRef]
         s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
       } yield s
 
-      createdF.map { x =>
+      institutionCreatedF.map { x =>
         log.info(x.toString)
         DemoData.loadDemoData(system)
       }
