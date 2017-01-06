@@ -15,7 +15,7 @@ import hmda.persistence.processing.SingleLarValidation
 import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
 import hmda.query.view.institutions.InstitutionView
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
-import hmda.query.view.institutions.InstitutionView.GetProjectionActorRef
+import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.ExecutionContext
