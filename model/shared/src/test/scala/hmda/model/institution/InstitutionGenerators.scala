@@ -22,13 +22,13 @@ object InstitutionGenerators {
       respondentFipsStateNumber <- Gen.alphaStr
       hmdaFilerFlag <- Gen.oneOf(true, false)
       parentRespondentId <- Gen.alphaStr
-      parentIdRssd <- Gen.numStr
+      parentIdRssd <- Gen.choose(0, 100)
       parentName <- Gen.alphaStr
       parentCity <- Gen.alphaStr
       parentState <- Gen.alphaStr
-      assets <- Gen.numStr
-      otherLenderCode <- Gen.numStr
-      topHolderIdRssd <- Gen.numStr
+      assets <- Gen.choose(0, 100)
+      otherLenderCode <- Gen.choose(0, 100)
+      topHolderIdRssd <- Gen.choose(0, 100)
       topHolderName <- Gen.alphaStr
       topHolderCity <- Gen.alphaStr
       topHolderState <- Gen.alphaStr
@@ -37,10 +37,10 @@ object InstitutionGenerators {
       EmailDomains(emailDomain2015, emailDomain2014, emailDomain2013),
       Respondent(respondentId, respondentName, respondentState, respondentCity, respondentFipsStateNumber),
       hmdaFilerFlag = hmdaFilerFlag,
-      Parent(parentRespondentId, parentIdRssd.toInt, parentName, parentCity, parentState),
-      assets.toInt,
-      otherLenderCode.toInt,
-      TopHolder(topHolderIdRssd.toInt, topHolderName, topHolderCity, topHolderState, topHolderCountry))
+      Parent(parentRespondentId, parentIdRssd, parentName, parentCity, parentState),
+      assets,
+      otherLenderCode,
+      TopHolder(topHolderIdRssd, topHolderName, topHolderCity, topHolderState, topHolderCountry))
   }
 
   implicit def agencyGen: Gen[Agency] = {
