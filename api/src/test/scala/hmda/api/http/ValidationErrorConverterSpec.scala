@@ -52,20 +52,17 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     }
 
     "sort failures by row" in {
-      val fields = JsObject(
-        ("Thing One", JsNumber(3)),
-        ("Thing Two", JsBoolean(false))
-      )
-      val tsResults = RowResult(
-        "Transmittal Sheet",
-        Seq(RowEditDetail("S020", s020Desc, fields), RowEditDetail("S100", s100Desc, fields))
-      )
       val macros = MacroResult("Q047", Set(MacroEditJustification(1, "There were many requests for preapprovals, but the applicant did not proceed with the loan.", false)))
 
       val results: RowResults = validationErrorsToRowResults(tsErrors, larErrors, macroErrors)
       results.rows.size mustBe 4
-      results.rows.head mustBe tsResults
       results.`macro`.edits.contains(macros) mustBe true
+
+      val tsRow = results.rows.head
+      tsRow.rowId mustBe "Transmittal Sheet"
+      tsRow.edits.size mustBe 2
+      tsRow.edits.head.editId mustBe "S020"
+      tsRow.edits.head.description mustBe s020Desc
 
       val larRow = results.rows.find(_.rowId == "4977566612").get
       larRow.edits.size mustBe 3

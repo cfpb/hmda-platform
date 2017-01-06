@@ -3,9 +3,7 @@ package hmda.api.http
 import hmda.api.model._
 import hmda.model.edits.EditMetaDataLookup
 import hmda.validation.engine._
-import spray.json.{ JsBoolean, JsNumber, JsObject }
-
-import scala.util.parsing.json.JSONObject
+import spray.json.{ JsNumber, JsObject, JsValue }
 
 trait ValidationErrorConverter {
 
@@ -65,14 +63,12 @@ trait ValidationErrorConverter {
   }
 
   private def relevantFields(err: ValidationError): JsObject = {
-    val fieldNames: String = editDescriptions.find(e => e.editNumber == err.ruleName)
-      .map(_.fieldNames).getOrElse("")
+    val fieldNames: Seq[String] = editDescriptions.find(e => e.editNumber == err.ruleName)
+      .map(_.fieldNames).getOrElse(Seq())
 
+    val jsVals: Seq[(String, JsValue)] = fieldNames.map(n => (n, JsNumber(1)))
 
-    JsObject(
-      ("Thing One", JsNumber(3)),
-      ("Thing Two", JsBoolean(false))
-    )
+    JsObject(jsVals: _*)
   }
 
 }

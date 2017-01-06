@@ -10,7 +10,6 @@ import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.validation.engine._
-import org.scalatest.words.MatcherWords
 import spray.json.{ JsBoolean, JsNumber, JsObject }
 
 class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
@@ -30,6 +29,12 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   val s010 = EditResult("S010", s010Description, List(EditResultRow(RowId("loan1"))))
   val v280 = EditResult("V280", v280Description, List(EditResultRow(RowId("loan1"))))
   val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2")), EditResultRow(RowId("loan3"))))
+  val s010FieldsL1 = JsObject(("Record Identifier", JsNumber(1)))
+  val s020FieldsL1 = JsObject(("Agency Code", JsNumber(1)))
+  val v280FieldsL1 = JsObject(("MSA/MD Number", JsNumber(1)))
+  val s020FieldsTs = JsObject(("Agency Code", JsNumber(1)))
+  val v285FieldsL2 = JsObject(("State Code", JsNumber(1)))
+  val v285FieldsL3 = JsObject(("State Code", JsNumber(1)))
 
   val fields = JsObject(
     ("Thing One", JsNumber(3)),
@@ -62,17 +67,17 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   "Sort edits by row with sortBy parameter" in {
     val loan1Result =
       RowResult("loan1", Seq(
-        RowEditDetail("S010", s010Description, fields),
-        RowEditDetail("S020", s020Description, fields),
-        RowEditDetail("V280", v280Description, fields)
+        RowEditDetail("S010", s010Description, s010FieldsL1),
+        RowEditDetail("S020", s020Description, s020FieldsL1),
+        RowEditDetail("V280", v280Description, v280FieldsL1)
       ))
 
     val expectedRows =
       Seq(
-        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, fields))),
+        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, s020FieldsTs))),
         loan1Result,
-        RowResult("loan2", Seq(RowEditDetail("V285", v285Description, fields))),
-        RowResult("loan3", Seq(RowEditDetail("V285", v285Description, fields)))
+        RowResult("loan2", Seq(RowEditDetail("V285", v285Description, v285FieldsL2))),
+        RowResult("loan3", Seq(RowEditDetail("V285", v285Description, v285FieldsL3)))
       )
 
     val expectedMacros =

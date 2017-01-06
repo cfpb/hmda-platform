@@ -11,7 +11,7 @@ object EditMetaDataLookup extends ResourceUtils {
       val values = parse(line, '\\', ',', '"').getOrElse(List())
       val category = values(0)
       val editType = values(1)
-      val fieldNames = values(2)
+      val fieldNames: Seq[String] = values(2).split(";")
       val editNumber = values(3)
       val editDescription = values(4)
       val explanation = values(5)
@@ -30,7 +30,7 @@ object EditMetaDataLookup extends ResourceUtils {
 }
 
 case class EditMetaData(
-  fieldNames: String,
+  fieldNames: Seq[String],
   editNumber: String,
   editDescription: String,
   explanation: String,
