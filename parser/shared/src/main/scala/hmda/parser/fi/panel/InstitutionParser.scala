@@ -10,7 +10,7 @@ object InstitutionParser {
   def apply(s: String): Institution = {
     val values = (s + " ").split('|').map(_.trim)
     val agency = convertStringToAgency(values(2))
-    val institutionType = convertIntToInstitutionType(values(3).toInt)
+    val institutionType = convertStringToInstitutionType(values(3))
     val respondentId = convertStringToExternalId(values(1), institutionType, agency)
     Institution(
       "0", //How do we determine internal id?
@@ -44,6 +44,7 @@ object InstitutionParser {
       case "7" => HUD
       case "5" => NCUA
       case "1" => OCC
+      case _ => UndeterminedAgency
     }
   }
 
@@ -60,35 +61,40 @@ object InstitutionParser {
   private def convertStringToExternalId(s: String, i: InstitutionType, a: Agency): ExternalId = {
     i.depositoryType match {
       case Depository =>
-        (a: @unchecked) match {
+        a match {
           case OCC => ExternalId(s, OccCharterId)
           case NCUA => ExternalId(s, NcuaCharterId)
           case FDIC => ExternalId(s, FdicCertNo)
           case FRS => ExternalId(s, RssdId)
           case CFPB => ExternalId(s, RssdId)
+          case _ => ExternalId(s, UndeterminedExternalId)
         }
       case NonDepository =>
         a match {
           case FRS => ExternalId(s, RssdId)
           case HUD => ExternalId(s, FederalTaxId) //Special cases here, but may not be necessary to fix
+          case UndeterminedAgency => ExternalId(s, UndeterminedExternalId)
           case _ => ExternalId(s, FederalTaxId)
         }
+      case _ => ExternalId(s, UndeterminedExternalId)
     }
   }
 
-  private def convertIntToInstitutionType(i: Int): InstitutionType = {
-    if (Set(1, 2, 3, 7).contains(i)) {
+  private def convertStringToInstitutionType(i: String): InstitutionType = {
+    if (Set("1", "2", "3", "7").contains(i)) {
       Bank
-    } else if (Set(4, 5).contains(i)) {
+    } else if (Set("4", "5").contains(i)) {
       SavingsAndLoan
-    } else if (i == 6) {
+    } else if (i == "6") {
       CreditUnion
-    } else if (i == 8) {
+    } else if (i == "8") {
       Affiliate
-    } else if (i == 14) {
+    } else if (i == "14") {
       IndependentMortgageCompany
-    } else {
+    } else if (Set("9", "10", "11", "12", "13", "15", "16", "17").contains(i)) {
       MBS
+    } else {
+      UndeterminedInstitutionType
     }
   }
 }
