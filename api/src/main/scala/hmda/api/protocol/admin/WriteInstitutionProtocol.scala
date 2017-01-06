@@ -20,6 +20,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
       case JsString(HUD.name) => HUD
       case JsString(NCUA.name) => NCUA
       case JsString(OCC.name) => OCC
+      case JsString(UndeterminedAgency.name) => UndeterminedAgency
       case _ => throw DeserializationException("Unable to deserialize")
     }
 
@@ -84,6 +85,12 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
 
   implicit object InstitutionJsonFormat extends RootJsonFormat[Institution] {
 
+    implicit val externalIdFormat = jsonFormat2(ExternalId.apply)
+    implicit val emailDomainsFormat = jsonFormat3(EmailDomains.apply)
+    implicit val respondentFormat = jsonFormat5(Respondent.apply)
+    implicit val parentFormat = jsonFormat5(Parent.apply)
+    implicit val topHolderFormat = jsonFormat5(TopHolder.apply)
+
     override def write(obj: Institution): JsValue = {
       JsObject(
         "id" -> JsString(obj.id),
@@ -134,13 +141,5 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
             topHolder.convertTo[TopHolder]
           )
       }
-
   }
-
-  implicit val externalIdFormat = jsonFormat2(ExternalId.apply)
-  implicit val emailDomainsFormat = jsonFormat3(EmailDomains.apply)
-  implicit val respondentFormat = jsonFormat5(Respondent.apply)
-  implicit val parentFormat = jsonFormat5(Parent.apply)
-  implicit val topHolderFormat = jsonFormat5(TopHolder.apply)
-
 }
