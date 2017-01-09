@@ -28,8 +28,7 @@ trait SubmissionProtocol extends ValidationResultProtocol {
           case 8 => ValidatedWithErrors
           case 9 => Validated
           case 10 => IRSGenerated
-          case 11 => IRSVerified
-          case 12 => Signed
+          case 11 => Signed
           case -1 =>
             val message = json.asJsObject.getFields("message").head.toString()
             Failed(message.substring(1, message.length - 1))

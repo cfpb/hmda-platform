@@ -75,7 +75,7 @@ trait LarValidityEngine extends LarCommonEngine with ValidationApi {
       V565,
       V570,
       V575
-    ).map(check(_, lar, lar.loan.id, Validity))
+    ).map(check(_, lar, lar.loan.id, Validity, false))
 
     validateAll(checks, lar)
   }
