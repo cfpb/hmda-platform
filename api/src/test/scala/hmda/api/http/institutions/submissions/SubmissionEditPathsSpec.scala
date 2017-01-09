@@ -31,10 +31,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2")), EditResultRow(RowId("loan3"))))
   val s010FieldsL1 = JsObject(("Record Identifier", JsNumber(1)))
   val s020FieldsL1 = JsObject(("Agency Code", JsNumber(1)))
-  val v280FieldsL1 = JsObject(("MSA/MD Number", JsNumber(1)))
+  val v280FieldsL1 = JsObject(("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
   val s020FieldsTs = JsObject(("Agency Code", JsNumber(1)))
-  val v285FieldsL2 = JsObject(("State Code", JsNumber(1)))
-  val v285FieldsL3 = JsObject(("State Code", JsNumber(1)))
+  val v285FieldsL2 = JsObject(("State Code", JsNumber(1)), ("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
+  val v285FieldsL3 = JsObject(("State Code", JsNumber(1)), ("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
 
   val fields = JsObject(
     ("Thing One", JsNumber(3)),
@@ -65,20 +65,15 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   }
 
   "Sort edits by row with sortBy parameter" in {
+    val tsS020 = RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, s020FieldsTs)))
     val loan1Result =
       RowResult("loan1", Seq(
         RowEditDetail("S010", s010Description, s010FieldsL1),
         RowEditDetail("S020", s020Description, s020FieldsL1),
         RowEditDetail("V280", v280Description, v280FieldsL1)
       ))
-
-    val expectedRows =
-      Seq(
-        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, s020FieldsTs))),
-        loan1Result,
-        RowResult("loan2", Seq(RowEditDetail("V285", v285Description, v285FieldsL2))),
-        RowResult("loan3", Seq(RowEditDetail("V285", v285Description, v285FieldsL3)))
-      )
+    val loan2Result = RowResult("loan2", Seq(RowEditDetail("V285", v285Description, v285FieldsL2)))
+    val loan3Result = RowResult("loan3", Seq(RowEditDetail("V285", v285Description, v285FieldsL3)))
 
     val expectedMacros =
       MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
@@ -86,7 +81,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits?sortBy=row") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
       val rowResponse = responseAs[RowResults]
-      rowResponse.rows.toSet mustBe expectedRows.toSet
+      rowResponse.rows.head mustBe tsS020
+      rowResponse.rows.find(_.rowId == "loan1").get mustBe loan1Result
+      rowResponse.rows.find(_.rowId == "loan2").get mustBe loan2Result
+      rowResponse.rows.find(_.rowId == "loan3").get mustBe loan3Result
       rowResponse.`macro` mustBe expectedMacros
     }
   }
