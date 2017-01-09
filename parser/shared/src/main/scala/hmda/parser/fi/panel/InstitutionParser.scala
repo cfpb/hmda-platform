@@ -13,7 +13,7 @@ object InstitutionParser {
     val institutionType = convertStringToInstitutionType(values(3))
     val respondentId = convertStringToExternalId(values(1), institutionType, agency)
     Institution(
-      "0", //How do we determine internal id?
+      values(1), //How do we determine internal id?
       agency,
       values(0).toInt,
       institutionType,
