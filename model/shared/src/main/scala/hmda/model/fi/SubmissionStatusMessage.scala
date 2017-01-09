@@ -11,6 +11,5 @@ object SubmissionStatusMessage {
   val validatedWithErrorsMsg = "validated with errors"
   val validatedMsg = "validated"
   val iRSGeneratedMsg = "IRS report generated"
-  val iRSVerifiedMsg = "IRS report verified"
   val signedMsg = "signed"
 }
