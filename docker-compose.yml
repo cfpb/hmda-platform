@@ -7,7 +7,7 @@ services:
       - '9090:8080'
     volumes:
     - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
-    links:
+    depends_on:
       - query_db
     environment:
       JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres

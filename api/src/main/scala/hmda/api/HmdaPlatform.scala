@@ -17,6 +17,7 @@ import hmda.query.view.institutions.InstitutionView
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
+import hmda.future.util.FutureRetry._
 
 import scala.concurrent.ExecutionContext
 
@@ -61,10 +62,12 @@ object HmdaPlatform {
     //Load demo data
     lazy val isDemo = config.getBoolean("hmda.isDemo")
     if (isDemo) {
+      implicit val scheduler = system.scheduler
+      val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
       log.info("...LOADING DEMO DATA...")
       val institutionCreatedF = for {
         i <- institutionViewF
-        q <- (i ? GetProjectionActorRef).mapTo[ActorRef]
+        q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
         s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
       } yield s
 
