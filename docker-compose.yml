@@ -7,6 +7,10 @@ services:
       - '9090:8080'
     volumes:
     - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
+    links:
+      - query_db
+    environment:
+      JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
 
   ui:
     build: ../hmda-platform-ui
@@ -97,3 +101,13 @@ services:
     image: djfarrelly/maildev:0.14.0
     ports:
       - '1080:80'
+
+  query_db:
+    image: postgres:9.6.1
+    ports:
+      - '54321:5432'
+    environment:
+      POSTGRES_DB: hmda
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+

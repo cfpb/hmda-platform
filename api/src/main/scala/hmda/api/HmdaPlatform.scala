@@ -61,6 +61,7 @@ object HmdaPlatform {
     //Load demo data
     lazy val isDemo = config.getBoolean("hmda.isDemo")
     if (isDemo) {
+      log.info("...LOADING DEMO DATA...")
       val institutionCreatedF = for {
         i <- institutionViewF
         q <- (i ? GetProjectionActorRef).mapTo[ActorRef]
