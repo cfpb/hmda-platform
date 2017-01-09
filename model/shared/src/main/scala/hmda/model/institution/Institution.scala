@@ -1,5 +1,9 @@
 package hmda.model.institution
 
+import hmda.model.institution.Agency.UndeterminedAgency
+import hmda.model.institution.ExternalIdType.UndeterminedExternalId
+import hmda.model.institution.InstitutionType.UndeterminedInstitutionType
+
 /**
  * A financial institution, geared towards requirements for filing HMDA data.
  */
@@ -18,6 +22,11 @@ case class Institution(
   otherLenderCode: Int,
   topHolder: TopHolder
 )
+case object Institution {
+  def empty: Institution = Institution("", UndeterminedAgency, -1, UndeterminedInstitutionType, cra = false, Set(),
+    EmailDomains("", "", ""), Respondent(ExternalId("", UndeterminedExternalId), "", "", "", ""), hmdaFilerFlag = false,
+    Parent("", -1, "", "", ""), -1, -1, TopHolder(-1, "", "", "", ""))
+}
 
 case class EmailDomains(email2015: String, email2014: String, email2013: String)
 case class Respondent(id: ExternalId, name: String, state: String, city: String, fipsStateNumber: String)

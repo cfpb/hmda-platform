@@ -60,7 +60,7 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   override def receiveCommand: Receive = {
     case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(i => i.id == institutionId).getOrElse(Nil)
+      val institution = state.institutions.find(i => i.id == institutionId).getOrElse(Institution.empty)
       sender() ! institution
 
     case GetInstitutionsById(ids) =>
