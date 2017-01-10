@@ -43,7 +43,6 @@ object DemoSubmissions extends ResourceUtils {
       case "validated-with-errors" => ValidatedWithErrors
       case "validated" => Validated
       case "irs-generated" => IRSGenerated
-      case "irs-vefified" => IRSVerified
       case "signed" => Signed
       case "failed" => Failed("")
     }

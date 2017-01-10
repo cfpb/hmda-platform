@@ -44,7 +44,6 @@ trait ModelGenerators {
       ValidatedWithErrors,
       Validated,
       IRSGenerated,
-      IRSVerified,
       Signed
     )
   }
@@ -81,19 +80,18 @@ trait ModelGenerators {
     } yield ErrorResponse(status, message, Path(path))
   }
 
-  implicit def larEditResultGen: Gen[LarEditResult] = {
+  implicit def larEditResultGen: Gen[EditResultRow] = {
     for {
       loanId <- Gen.alphaStr
-    } yield LarEditResult(LarId(loanId))
+    } yield EditResultRow(RowId(loanId))
   }
 
   implicit def editResultGen: Gen[EditResult] = {
     for {
       edit <- Gen.alphaStr
       description <- Gen.alphaStr
-      ts <- Gen.oneOf(true, false)
       lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, description, ts, lars)
+    } yield EditResult(edit, description, lars)
   }
 
   implicit def editResultsGen: Gen[EditResults] = {
@@ -102,32 +100,64 @@ trait ModelGenerators {
     } yield EditResults(edits)
   }
 
-  implicit def justificationGen: Gen[Justification] = {
-    for {
-      value <- Gen.alphaStr
-      selected <- Gen.oneOf(true, false)
-    } yield Justification(value, selected)
-  }
-
-  implicit def macroResultGen: Gen[MacroResult] = {
-    for {
-      id <- Gen.alphaStr
-      justification <- Gen.listOf(justificationGen)
-    } yield MacroResult(id, justification)
-  }
-
   implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
     Gen.oneOf(
       List(Syntactical, Validity, Quality)
     )
   }
 
-  implicit def validationErrorGen: Gen[ValidationError] = {
+  implicit def syntacticalValidationErrorGen: Gen[SyntacticalValidationError] = {
     for {
       id <- Gen.alphaStr
       name <- Gen.alphaStr
-      errorType <- validationErrorTypeGen
-    } yield ValidationError(id, name, errorType)
+      ts <- Gen.oneOf(true, false)
+    } yield SyntacticalValidationError(id, name, ts)
+  }
+
+  implicit def validityValidationErrorGen: Gen[ValidityValidationError] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+      ts <- Gen.oneOf(true, false)
+    } yield ValidityValidationError(id, name, ts)
+  }
+
+  implicit def qualityValidationErrorGen: Gen[QualityValidationError] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+      ts <- Gen.oneOf(true, false)
+    } yield QualityValidationError(id, name, ts)
+  }
+
+  implicit def macroEditJustificationGen: Gen[MacroEditJustification] = {
+    for {
+      id <- Gen.choose(Int.MinValue, Int.MaxValue)
+      value <- Gen.alphaStr
+      verified <- Gen.oneOf(true, false)
+      text <- Gen.option(Gen.alphaStr)
+    } yield MacroEditJustification(id, value, verified, text)
+  }
+
+  implicit def macroEditJustificationWithNameGen: Gen[MacroEditJustificationWithName] = {
+    for {
+      edit <- Gen.alphaStr
+      justification <- macroEditJustificationGen
+    } yield MacroEditJustificationWithName(edit, justification)
+  }
+
+  implicit def macroValidationErrorGen: Gen[MacroValidationError] = {
+    for {
+      id <- Gen.alphaStr
+      justifications <- Gen.listOf(macroEditJustificationGen)
+    } yield MacroValidationError(id, justifications)
+  }
+
+  implicit def macroResultGen: Gen[MacroResult] = {
+    for {
+      id <- Gen.alphaStr
+      justification <- Gen.listOf(macroEditJustificationGen)
+    } yield MacroResult(id, justification.toSet)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {

@@ -8,6 +8,7 @@ import hmda.persistence.processing._
 
 object HmdaSupervisor {
 
+  case class FindHmdaFiling(filingPeriod: String)
   case class FindFilings(name: String, institutionId: String)
   case class FindSubmissions(name: String, institutionId: String, period: String)
   case class FindProcessingActor(name: String, submissionId: SubmissionId)
@@ -25,6 +26,9 @@ class HmdaSupervisor extends HmdaSupervisorActor {
 
   override def receive: Receive = super.receive orElse {
 
+    case FindHmdaFiling(filingPeriod) =>
+      sender() ! findHmdaFiling(filingPeriod)
+
     case FindFilings(name, id) =>
       sender() ! findFilings(name, id)
 
@@ -38,6 +42,9 @@ class HmdaSupervisor extends HmdaSupervisorActor {
       log.debug(s"actor ${ref.path} terminated")
       actors = actors.filterNot { case (_, value) => value == ref }
   }
+
+  private def findHmdaFiling(filingPeriod: String) =
+    actors.getOrElse(s"${HmdaFiling.name}", createHmdaFiling(filingPeriod))
 
   private def findFilings(name: String, id: String): ActorRef =
     actors.getOrElse(s"$name-$id", createFilings(name, id))
@@ -56,6 +63,11 @@ class HmdaSupervisor extends HmdaSupervisorActor {
       val actor = context.actorOf(InstitutionPersistence.props, id)
       supervise(actor, id)
 
+  }
+
+  private def createHmdaFiling(filingPeriod: String): ActorRef = {
+    val actor = context.actorOf(HmdaFiling.props(filingPeriod), s"${HmdaFiling.name}-$filingPeriod")
+    supervise(actor, HmdaFiling.name)
   }
 
   private def createFilings(name: String, id: String): ActorRef = {

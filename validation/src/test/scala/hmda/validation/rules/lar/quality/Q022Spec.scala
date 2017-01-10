@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.quality
 
-import hmda.parser.fi.lar.LarGenerators
+import hmda.model.fi.lar.LarGenerators
 import hmda.validation.dsl.Success
 import hmda.validation.dsl.Failure
 import hmda.validation.rules.lar.BadValueUtils

@@ -1,6 +1,6 @@
 package hmda.validation.engine.lar.syntactical
 
-import hmda.parser.fi.lar.LarGenerators
+import hmda.model.fi.lar.LarGenerators
 import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks

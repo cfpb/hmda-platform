@@ -1,9 +1,7 @@
-package hmda.parser.fi.ts
+package hmda.model.fi.ts
 
-import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
-import hmda.model.util.FITestData
-import hmda.parser.fi.FIGenerators
-import FITestData._
+import hmda.model.fi.FIGenerators
+import hmda.model.util.FITestData.states
 import org.scalacheck.Gen
 
 trait TsGenerators extends FIGenerators {

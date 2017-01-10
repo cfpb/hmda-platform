@@ -1,6 +1,6 @@
 package hmda.query.repository.institutions
 
-import hmda.query.{ Db, DbConfiguration }
+import hmda.query.DbConfiguration
 import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.Repository
 import slick.basic.DatabaseConfig

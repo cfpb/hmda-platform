@@ -17,6 +17,7 @@ import hmda.validation.engine.lar.LarEngine
 import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 
 import scala.util.Try
 
@@ -27,8 +28,7 @@ object HmdaFileValidator {
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
-  case class TsValidated(ts: TransmittalSheet) extends Event
-  case class LarValidated(lar: LoanApplicationRegister) extends Event
+  case class JustifyMacroEdit(editName: String, macroEditJustification: MacroEditJustification) extends Command
   case class TsSyntacticalError(error: ValidationError) extends Event
   case class TsValidityError(error: ValidationError) extends Event
   case class TsQualityError(error: ValidationError) extends Event
@@ -36,6 +36,7 @@ object HmdaFileValidator {
   case class LarValidityError(error: ValidationError) extends Event
   case class LarQualityError(error: ValidationError) extends Event
   case class LarMacroError(error: ValidationError) extends Event
+  case class MacroEditJustified(name: String, justification: MacroEditJustification) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
@@ -52,7 +53,7 @@ object HmdaFileValidator {
       larSyntactical: Seq[ValidationError] = Nil,
       larValidity: Seq[ValidationError] = Nil,
       larQuality: Seq[ValidationError] = Nil,
-      larMacro: Seq[ValidationError] = Nil
+      larMacro: Seq[ValidationError] = Vector.empty[ValidationError]
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) =>
@@ -73,6 +74,14 @@ object HmdaFileValidator {
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality :+ e, larMacro)
       case LarMacroError(e) =>
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, larMacro :+ e)
+      case MacroEditJustified(e, j) =>
+        val elem = larMacro.find(x => x.ruleName == e)
+        elem match {
+          case Some(v) =>
+            val macroUpdated: Seq[ValidationError] = MacroValidationError.updateJustifications(larMacro, j, v)
+            HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, macroUpdated)
+          case None => this
+        }
     }
   }
 }
@@ -186,6 +195,12 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       } else {
         log.debug(s"Validation completed for $submissionId, errors found")
         replyTo ! ValidationCompletedWithErrors(submissionId)
+      }
+
+    case JustifyMacroEdit(error, j) =>
+      persist(MacroEditJustified(error, j)) { e =>
+        updateState(e)
+        sender() ! MacroEditJustified(error, j)
       }
 
     case GetState =>

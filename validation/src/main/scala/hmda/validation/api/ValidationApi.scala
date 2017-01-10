@@ -1,7 +1,7 @@
 package hmda.validation.api
 
 import hmda.validation.dsl.{ Failure, Result, Success }
-import hmda.validation.engine.{ ValidationError, ValidationErrorType }
+import hmda.validation.engine._
 import hmda.validation.rules.EditCheck
 
 import scalaz._
@@ -9,14 +9,19 @@ import scalaz.Scalaz._
 
 trait ValidationApi {
 
-  def check[T](editCheck: EditCheck[T], input: T, inputId: String, errorType: ValidationErrorType): ValidationNel[ValidationError, T] = {
-    convertResult(input, editCheck(input), editCheck.name, inputId, errorType)
+  def check[T](editCheck: EditCheck[T], input: T, inputId: String, errorType: ValidationErrorType, ts: Boolean): ValidationNel[ValidationError, T] = {
+    convertResult(input, editCheck(input), editCheck.name, inputId, errorType, ts)
   }
 
-  def convertResult[T](input: T, result: Result, ruleName: String, inputId: String, errorType: ValidationErrorType): ValidationNel[ValidationError, T] = {
+  def convertResult[T](input: T, result: Result, ruleName: String, inputId: String, errorType: ValidationErrorType, ts: Boolean): ValidationNel[ValidationError, T] = {
     result match {
       case Success() => input.success
-      case Failure() => ValidationError(inputId, ruleName, errorType).failure.toValidationNel
+      case Failure() => errorType match {
+        case Syntactical => SyntacticalValidationError(inputId, ruleName, ts).failure.toValidationNel
+        case Validity => ValidityValidationError(inputId, ruleName, ts).failure.toValidationNel
+        case Quality => QualityValidationError(inputId, ruleName, ts).failure.toValidationNel
+        case Macro => MacroValidationError(ruleName, Nil).failure.toValidationNel
+      }
     }
   }
 

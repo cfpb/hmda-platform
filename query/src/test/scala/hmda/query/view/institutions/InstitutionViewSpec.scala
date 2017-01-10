@@ -1,4 +1,4 @@
-package hmda.query.projections.institutions
+package hmda.query.view.institutions
 
 import akka.testkit.TestProbe
 import hmda.model.institution.InstitutionGenerators
@@ -6,7 +6,7 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
-import hmda.query.projections.institutions.InstitutionView._
+import hmda.query.view.institutions.InstitutionView._
 
 class InstitutionViewSpec extends ActorSpec {
 
@@ -15,7 +15,7 @@ class InstitutionViewSpec extends ActorSpec {
   val i3 = InstitutionGenerators.institutionGen.sample.get
   val i4 = i3.copy(cra = true)
 
-  val institutionQuery = createInstitutionQuery(system)
+  val institutionQuery = createInstitutionView(system)
 
   val probe = TestProbe()
 
@@ -27,7 +27,7 @@ class InstitutionViewSpec extends ActorSpec {
     institutionQuery ! EventWithSeqNr(4, InstitutionModified(i4))
   }
 
-  "Institutions Projection" must {
+  "Institutions View" must {
     "return institution by id" in {
       probe.send(institutionQuery, GetInstitutionById(i1.id))
       probe.expectMsg(i1)
@@ -48,10 +48,6 @@ class InstitutionViewSpec extends ActorSpec {
       probe.send(institutionQuery, GetState)
       probe.expectMsg(Set(i1, i2, i4))
     }
-  }
-
-  override def afterAll(): Unit = {
-    super.afterAll()
   }
 
 }

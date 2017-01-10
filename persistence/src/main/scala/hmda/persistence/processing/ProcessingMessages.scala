@@ -15,6 +15,7 @@ object ProcessingMessages {
   case class BeginValidation(replyTo: ActorRef) extends Command
   case class CompleteValidation(replyTo: ActorRef) extends Command
   case object CompleteValidationWithErrors extends Command
+  case object Sign extends Command
 
   //Events
   case class UploadStarted(submissionId: SubmissionId) extends Event
@@ -24,4 +25,5 @@ object ProcessingMessages {
   case class ParsingCompletedWithErrors(submissionId: SubmissionId) extends Event
   case class ValidationCompleted(submissionId: SubmissionId) extends Event
   case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
+  case class Signed(submissionId: SubmissionId) extends Event
 }

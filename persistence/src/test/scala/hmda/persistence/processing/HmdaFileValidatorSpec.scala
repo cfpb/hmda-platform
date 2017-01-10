@@ -41,11 +41,15 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     system.terminate()
   }
 
+  val e1 = SyntacticalValidationError("1", "S999", false)
+  val e2 = ValidityValidationError("1", "V999", true)
+  val e3 = QualityValidationError("1", "Q999", false)
+  val e4 = MacroValidationError("Q007", Nil)
+
   val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
   "HMDA File Validator" must {
     "persist LARs and TS" in {
-
       probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, GetState)
@@ -53,10 +57,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     }
 
     "persist validation errors" in {
-      val e1 = ValidationError("1", "S999", Syntactical)
-      val e2 = ValidationError("1", "V999", Validity)
-      val e3 = ValidationError("1", "Q999", Quality)
-      val e4 = ValidationError("1", "Q007", Macro)
       val larErrors = LarValidationErrors(Seq(e1, e2, e3, e4))
       val tsErrors = TsValidationErrors(Seq(e1, e2, e3))
       probe.send(hmdaFileValidator, larErrors)
@@ -93,14 +93,57 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Nil,
         Nil,
         Nil,
-        List(ValidationError("8299422144", "S020", Syntactical), ValidationError("2185751599", "S010", Syntactical), ValidationError("2185751599", "S020", Syntactical)),
-        List(ValidationError("4977566612", "V550", Validity), ValidationError("4977566612", "V555", Validity), ValidationError("4977566612", "V560", Validity)),
+        List(
+          SyntacticalValidationError("8299422144", "S020", false),
+          SyntacticalValidationError("2185751599", "S010", false),
+          SyntacticalValidationError("2185751599", "S020", false)
+        ),
+        List(
+          ValidityValidationError("4977566612", "V550", false),
+          ValidityValidationError("4977566612", "V555", false),
+          ValidityValidationError("4977566612", "V560", false)
+        ),
         Nil,
-        List(ValidationError("", "Q008", Macro), ValidationError("", "Q010", Macro), ValidationError("", "Q016", Macro), ValidationError("", "Q023", Macro))
+        List(
+          MacroValidationError("Q008", Nil),
+          MacroValidationError("Q010", Nil),
+          MacroValidationError("Q016", Nil),
+          MacroValidationError("Q023", Nil)
+        )
       ))
-
     }
 
+    "verify macro edits" in {
+      val j = MacroEditJustification(1, "Other", true, Some("text written by user"))
+      val justifications = Seq(j)
+      val e5 = e4.copy(justifications = justifications)
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Vector(e4)
+      ))
+      probe.send(hmdaFileValidator, JustifyMacroEdit("Q007", j))
+      probe.expectMsg(MacroEditJustified("Q007", j))
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Vector(e5)
+      ))
+    }
   }
 
 }
