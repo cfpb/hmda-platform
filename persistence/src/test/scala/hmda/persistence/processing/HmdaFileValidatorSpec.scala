@@ -89,7 +89,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator2, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
-        List(lars(1)),
+        lars,
         Nil,
         Nil,
         Nil,
