@@ -49,13 +49,14 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
   }
 
   private def createHmdaFilingView(period: String)(implicit ec: ExecutionContext): ActorRef = {
-    val actor = context.actorOf(HmdaFilingView.props(period), s"HmdaFilingView-$period")
+    val id = s"${HmdaFilingView.name}-$period"
+    val actor = context.actorOf(HmdaFilingView.props(period), id)
     for {
       p <- (actor ? GetProjectionActorRef).mapTo[ActorRef]
     } yield {
       p ! CreateSchema
     }
-    supervise(actor, s"${HmdaFilingView.name}-$period")
+    supervise(actor, id)
   }
 
 }
