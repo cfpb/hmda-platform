@@ -63,8 +63,7 @@ trait SubmissionBasePaths
                 onComplete(fLatest) {
                   case Success(submission) =>
                     if (filing.status != NotStarted) {
-                      val result = Await.result(filingActor ? UpdateFilingStatus(filing.copy(status = NotStarted)), 5.seconds)
-                      log.warning("********CREATED******** " + result)
+                      filingActor ? UpdateFilingStatus(filing.copy(status = NotStarted))
                     }
                     complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                   case Failure(error) =>
