@@ -8,7 +8,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.{ Filing, InProgress, Submission, SubmissionId }
 import hmda.persistence.institutions.FilingPersistence
-import hmda.persistence.institutions.FilingPersistence.{ FilingState, UpdateFilingStatus }
+import hmda.persistence.institutions.FilingPersistence.UpdateFilingStatus
 import hmda.persistence.HmdaSupervisor.FindHmdaFiling
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
@@ -20,7 +20,6 @@ import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 
-import scala.concurrent.Await
 import scala.concurrent.duration._
 
 object SubmissionManager {
@@ -58,7 +57,6 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
 
   override def preStart(): Unit = {
     super.preStart()
-    context.setReceiveTimeout(duration)
 
     val filings = (filingPersistence ? GetState).mapTo[Seq[Filing]]
     filings.map(f => filing = f.filter(s => s.period == submissionId.period).head)

@@ -47,7 +47,6 @@ trait SubmissionBasePaths
         val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
         val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
 
-
         val fFiling = for {
           f <- fFilingsActor
           s <- fSubmissionsActor
