@@ -17,31 +17,31 @@ class SubmissionManagerSpec extends ActorSpec {
   val config = ConfigFactory.load()
 
   val submissionId = SubmissionId("0", "testPeriod", 1)
-
-  val submissionManager = createSubmissionManager(system, submissionId)
-  val filingPersistence = createFilings("0", system)
+  val filingPersistence = createFilings(submissionId.institutionId, system)
 
   val probe = TestProbe()
 
-  val filing = Filing("testPeriod", "0", NotStarted, filingRequired = false, 0L, 0L)
+  val filing = Filing(submissionId.period, submissionId.institutionId, NotStarted, filingRequired = false, 0L, 0L)
   probe.send(filingPersistence, CreateFiling(filing))
   probe.expectMsg(Some(filing))
   Thread.sleep(1000)
+
+  val submissionManager = createSubmissionManager(system, submissionId)
 
   val lines = fiCSV.split("\n")
   val timestamp = Instant.now.toEpochMilli
 
   "A HMDA File" must {
     "upload, parse and validate" in {
-      probe.send(filingPersistence, GetFilingByPeriod("testPeriod"))
+      probe.send(filingPersistence, GetFilingByPeriod(submissionId.period))
       val filingNotStarted = probe.expectMsgType[Filing]
       filingNotStarted.status mustBe NotStarted
 
       probe.send(submissionManager, StartUpload)
       Thread.sleep(1000)
-      probe.send(filingPersistence, GetFilingByPeriod("testPeriod"))
-      val filingInProgress = probe.expectMsgType[Filing]
-      filingInProgress.status mustBe InProgress
+      probe.send(filingPersistence, GetState)
+      val filingInProgress = probe.expectMsgType[Seq[Filing]]
+      filingInProgress mustBe Seq()
 
       for (line <- lines) {
         probe.send(submissionManager, AddLine(timestamp, line.toString))

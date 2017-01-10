@@ -8,7 +8,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.{ Filing, InProgress, Submission, SubmissionId }
 import hmda.persistence.institutions.FilingPersistence
-import hmda.persistence.institutions.FilingPersistence.UpdateFilingStatus
+import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
 import hmda.persistence.HmdaSupervisor.FindHmdaFiling
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
@@ -53,13 +53,9 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   val filingPersistence: ActorRef = context.actorOf(FilingPersistence.props(submissionId.institutionId))
 
   var uploaded: Int = 0
-  var filing: Filing = new Filing()
 
   override def preStart(): Unit = {
     super.preStart()
-
-    val filings = (filingPersistence ? GetState).mapTo[Seq[Filing]]
-    filings.map(f => filing = f.filter(s => s.period == submissionId.period).head)
   }
 
   override def receive: Receive = {
@@ -68,9 +64,13 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
       log.info(s"Start upload for submission: ${submissionId.toString}")
       submissionFSM ! Create
       submissionFSM ! StartUpload
-      if (filing.status != InProgress) {
-        filingPersistence ? UpdateFilingStatus(filing.copy(status = InProgress, start = System.currentTimeMillis))
-      }
+      val filings = (filingPersistence ? GetFilingByPeriod(submissionId.period)).mapTo[Filing]
+      filings.onComplete(f => {
+        val filing = f.getOrElse(Filing())
+        if (filing.status != InProgress && filing.period != "") {
+          filingPersistence ? UpdateFilingStatus(filing.copy(status = InProgress, start = System.currentTimeMillis))
+        }
+      })
 
     case m @ AddLine(_, _) =>
       submissionUpload ! m
