@@ -32,57 +32,51 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
   val log: LoggingAdapter
 
   // institutions
-  val institutionsPath =
+  def institutionsPath(implicit ec: ExecutionContext) =
     path("institutions") {
       timedGet { uri =>
         extractRequestContext { ctx =>
-          extractExecutionContext { executor =>
-            implicit val ec: ExecutionContext = executor
-            val ids = institutionIdsFromHeader(ctx)
-            val supervisor = system.actorSelection("/user/query-supervisor")
-            val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-            val fInstitutions = for {
-              institutionsActor <- fInstitutionsActor
-              institutions <- (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
-            } yield institutions
-            onComplete(fInstitutions) {
-              case Success(institutions) =>
-                val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name))
-                complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
-              case Failure(error) => completeWithInternalError(uri, error)
-            }
+          val ids = institutionIdsFromHeader(ctx)
+          val supervisor = system.actorSelection("/user/query-supervisor")
+          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+          val fInstitutions = for {
+            institutionsActor <- fInstitutionsActor
+            institutions <- (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
+          } yield institutions
+          onComplete(fInstitutions) {
+            case Success(institutions) =>
+              val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name))
+              complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
+            case Failure(error) => completeWithInternalError(uri, error)
           }
         }
       }
     }
 
   // institutions/<institutionId>
-  def institutionByIdPath(institutionId: String) =
+  def institutionByIdPath(institutionId: String)(implicit ec: ExecutionContext) =
     pathEnd {
-      extractExecutionContext { executor =>
-        timedGet { uri =>
-          implicit val ec: ExecutionContext = executor
-          val supervisor = system.actorSelection("/user/supervisor")
-          val querySupervisor = system.actorSelection("/user/query-supervisor")
-          val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-          val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
-          val fInstitutionDetails = for {
-            i <- fInstitutionsActor
-            f <- fFilingsActor
-            d <- institutionDetails(institutionId, i, f)
-          } yield d
+      timedGet { uri =>
+        val supervisor = system.actorSelection("/user/supervisor")
+        val querySupervisor = system.actorSelection("/user/query-supervisor")
+        val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+        val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
+        val fInstitutionDetails = for {
+          i <- fInstitutionsActor
+          f <- fFilingsActor
+          d <- institutionDetails(institutionId, i, f)
+        } yield d
 
-          onComplete(fInstitutionDetails) {
-            case Success(institutionDetails) =>
-              if (institutionDetails.institution.name != "")
-                complete(ToResponseMarshallable(institutionDetails))
-              else {
-                val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path)
-                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
-              }
-            case Failure(error) =>
-              completeWithInternalError(uri, error)
-          }
+        onComplete(fInstitutionDetails) {
+          case Success(institutionDetails) =>
+            if (institutionDetails.institution.name != "")
+              complete(ToResponseMarshallable(institutionDetails))
+            else {
+              val errorResponse = ErrorResponse(404, s"Institution $institutionId not found", uri.path)
+              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+            }
+          case Failure(error) =>
+            completeWithInternalError(uri, error)
         }
       }
     }

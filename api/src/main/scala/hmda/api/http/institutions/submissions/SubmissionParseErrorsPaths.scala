@@ -32,29 +32,26 @@ trait SubmissionParseErrorsPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<id>/parseErrors
-  def submissionParseErrorsPath(institutionId: String) =
+  def submissionParseErrorsPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "parseErrors") { (period, seqNr) =>
-      extractExecutionContext { executor =>
-        timedGet { uri =>
-          implicit val ec: ExecutionContext = executor
-          val supervisor = system.actorSelection("/user/supervisor")
+      timedGet { uri =>
+        val supervisor = system.actorSelection("/user/supervisor")
 
-          completeVerified(institutionId, period, seqNr, uri) {
-            val submissionID = SubmissionId(institutionId, period, seqNr)
-            val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]
+        completeVerified(institutionId, period, seqNr, uri) {
+          val submissionID = SubmissionId(institutionId, period, seqNr)
+          val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]
 
-            val fHmdaFileParseState = for {
-              s <- fHmdaFileParser
-              xs <- (s ? GetState).mapTo[HmdaFileParseState]
-            } yield xs
+          val fHmdaFileParseState = for {
+            s <- fHmdaFileParser
+            xs <- (s ? GetState).mapTo[HmdaFileParseState]
+          } yield xs
 
-            onComplete(fHmdaFileParseState) {
-              case Success(state) =>
-                val summary = ParsingErrorSummary(state.tsParsingErrors, state.larParsingErrors)
-                complete(ToResponseMarshallable(summary))
-              case Failure(errors) =>
-                completeWithInternalError(uri, errors)
-            }
+          onComplete(fHmdaFileParseState) {
+            case Success(state) =>
+              val summary = ParsingErrorSummary(state.tsParsingErrors, state.larParsingErrors)
+              complete(ToResponseMarshallable(summary))
+            case Failure(errors) =>
+              completeWithInternalError(uri, errors)
           }
         }
       }

@@ -31,19 +31,16 @@ trait SubmissionSummaryPaths
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary
   // NOTE:  This is currently a mocked, static endpoint
-  def submissionSummaryPath(institutionId: String) =
+  def submissionSummaryPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "summary") { (period, submissionId) =>
-      extractExecutionContext { executor =>
-        timedGet { uri =>
-          implicit val ec: ExecutionContext = executor
-          val supervisor = system.actorSelection("/user/supervisor")
+      timedGet { uri =>
+        val supervisor = system.actorSelection("/user/supervisor")
 
-          //To avoid having to deal with relative paths on different systems
-          val summaryJson = "{\n  \"respondent\": {\n    \"name\": \"Bank\",\n    \"id\": \"1234567890\",\n    \"taxId\": \"0987654321\",\n    \"agency\": \"CFPB\",\n    \"contact\": {\n      \"name\": \"Your Name\",\n      \"phone\": \"123-456-7890\",\n      \"email\": \"your.name@bank.com\"\n    }\n  },\n  \"file\": {\n    \"name\": \"lar.dat\",\n    \"year\": \"2016\",\n    \"totalLARS\": 25\n  }\n}"
-          val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, summaryJson))
+        //To avoid having to deal with relative paths on different systems
+        val summaryJson = "{\n  \"respondent\": {\n    \"name\": \"Bank\",\n    \"id\": \"1234567890\",\n    \"taxId\": \"0987654321\",\n    \"agency\": \"CFPB\",\n    \"contact\": {\n      \"name\": \"Your Name\",\n      \"phone\": \"123-456-7890\",\n      \"email\": \"your.name@bank.com\"\n    }\n  },\n  \"file\": {\n    \"name\": \"lar.dat\",\n    \"year\": \"2016\",\n    \"totalLARS\": 25\n  }\n}"
+        val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, summaryJson))
 
-          complete(response)
-        }
+        complete(response)
       }
     }
 }
