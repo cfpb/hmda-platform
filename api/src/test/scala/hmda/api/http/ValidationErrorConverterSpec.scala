@@ -32,19 +32,18 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     val s100Desc = "Activity year must = year being processed (= 2017)."
 
     "be converted to edit check summary" in {
-      val s020 = EditResult("S020", s020Desc, Seq(EditResultRow(RowId("Transmittal Sheet")), EditResultRow(RowId("8299422144")), EditResultRow(RowId("2185751599"))))
-      val s010 = EditResult("S010", s010Desc, Seq(EditResultRow(RowId("2185751599"))))
-      val s100 = EditResult("S100", s100Desc, Seq(EditResultRow(RowId("Transmittal Sheet"))))
-
       val syntacticalEditResults = validationErrorsToEditResults(tsErrors, larErrors, Syntactical)
       val validityEditResults = validationErrorsToEditResults(tsErrors, larErrors, Validity)
       val qualityEditResults = validationErrorsToEditResults(tsErrors, larErrors, Quality)
       val macroEditResults = validationErrorsToMacroResults(larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
-      summaryEditResults.syntactical.edits.head mustBe s020
-      summaryEditResults.syntactical.edits.tail.contains(s010) mustBe true
-      summaryEditResults.syntactical.edits.tail.contains(s100) mustBe true
+      summaryEditResults.syntactical.edits.head.edit mustBe "S020"
+      summaryEditResults.syntactical.edits.head.description mustBe s020Desc
+      summaryEditResults.syntactical.edits.head.rows.size mustBe 3
+
+      summaryEditResults.syntactical.edits.tail.size mustBe 2
+
       summaryEditResults.validity.edits.size mustBe 3
       summaryEditResults.quality mustBe EditResults(Nil)
       summaryEditResults.`macro` mustBe MacroResults(Nil)
