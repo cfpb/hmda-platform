@@ -9,6 +9,8 @@ import hmda.api.http.institutions.submissions._
 import hmda.api.http.institutions.{ FilingPaths, InstitutionPaths, UploadPaths }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 
+import scala.concurrent.ExecutionContext
+
 trait InstitutionsHttpApi
     extends InstitutionProtocol
     with InstitutionPaths
@@ -30,24 +32,27 @@ trait InstitutionsHttpApi
   implicit val timeout: Timeout
 
   val institutionsRoutes =
-    encodeResponse {
-      headerAuthorize {
-        institutionsPath ~
-          pathPrefix("institutions" / Segment) { instId =>
-            institutionAuthorize(instId) {
-              institutionByIdPath(instId) ~
-                filingByPeriodPath(instId) ~
-                submissionPath(instId) ~
-                submissionLatestPath(instId) ~
-                uploadPath(instId) ~
-                submissionEditsPath(instId) ~
-                submissionParseErrorsPath(instId) ~
-                submissionSingleEditPath(instId) ~
-                submissionIrsPath(instId) ~
-                submissionSignPath(instId) ~
-                submissionSummaryPath(instId)
+    extractExecutionContext { executor =>
+      implicit val ec: ExecutionContext = executor
+      encodeResponse {
+        headerAuthorize {
+          institutionsPath ~
+            pathPrefix("institutions" / Segment) { instId =>
+              institutionAuthorize(instId) {
+                institutionByIdPath(instId) ~
+                  filingByPeriodPath(instId) ~
+                  submissionPath(instId) ~
+                  submissionLatestPath(instId) ~
+                  uploadPath(instId) ~
+                  submissionEditsPath(instId) ~
+                  submissionParseErrorsPath(instId) ~
+                  submissionSingleEditPath(instId) ~
+                  submissionIrsPath(instId) ~
+                  submissionSignPath(instId) ~
+                  submissionSummaryPath(instId)
+              }
             }
-          }
+        }
       }
     }
 }
