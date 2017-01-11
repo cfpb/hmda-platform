@@ -6,10 +6,10 @@ import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.{ Filing, InProgress, Submission, SubmissionId }
+import hmda.model.fi.{ Filing, InProgress, Submission, SubmissionId, FilingStatus, Completed }
 import hmda.persistence.institutions.FilingPersistence
 import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
-import hmda.persistence.HmdaSupervisor.FindHmdaFiling
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling }
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
@@ -50,7 +50,12 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   val submissionUpload: ActorRef = context.actorOf(HmdaRawFile.props(submissionId))
   val submissionParser: ActorRef = context.actorOf(HmdaFileParser.props(submissionId))
   val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator.props(submissionId))
-  val filingPersistence: ActorRef = context.actorOf(FilingPersistence.props(submissionId.institutionId))
+  val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
+
+  val filingF = for {
+    fp <- filingPersistence
+    f <- (fp ? GetFilingByPeriod(period)).mapTo[Filing]
+  } yield f
 
   var uploaded: Int = 0
 
@@ -64,13 +69,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
       log.info(s"Start upload for submission: ${submissionId.toString}")
       submissionFSM ! Create
       submissionFSM ! StartUpload
-      val filings = (filingPersistence ? GetFilingByPeriod(submissionId.period)).mapTo[Filing]
-      filings.onComplete(f => {
-        val filing = f.getOrElse(Filing())
-        if (filing.status != InProgress && filing.period != "") {
-          filingPersistence ? UpdateFilingStatus(filing.copy(status = InProgress, start = System.currentTimeMillis))
-        }
-      })
+      updateFilingStatus(InProgress)
 
     case m @ AddLine(_, _) =>
       submissionUpload ! m
@@ -112,6 +111,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
       log.info(s"Submission signed: ${sId.toString}")
       submissionFSM ! Sign
       hmdaFilingF.map(actorRef => actorRef ! SaveLars(sId))
+      updateFilingStatus(Completed)
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM
@@ -134,6 +134,26 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
     case Shutdown =>
       context stop self
 
+  }
+
+  private def updateFilingStatus(filingStatus: FilingStatus) = {
+    for {
+      p <- filingPersistence
+      f <- filingF
+    } yield {
+      val start = if (filingStatus == InProgress) {
+        System.currentTimeMillis
+      } else {
+        f.start
+      }
+      val end = if (filingStatus == Completed) {
+        System.currentTimeMillis
+      } else {
+        f.end
+      }
+
+      p ? UpdateFilingStatus(f.copy(status = filingStatus, start = start, end = end))
+    }
   }
 
 }

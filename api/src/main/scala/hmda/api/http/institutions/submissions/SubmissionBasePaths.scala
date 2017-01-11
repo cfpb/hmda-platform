@@ -51,18 +51,15 @@ trait SubmissionBasePaths
           f <- fFilingsActor
           s <- fSubmissionsActor
           d <- (f ? GetFilingByPeriod(period)).mapTo[Filing]
-        } yield (f, s, d)
+        } yield (s, d)
 
         onComplete(fFiling) {
-          case Success((filingActor, submissionsActor, filing)) =>
+          case Success((submissionsActor, filing)) =>
             if (filing.period == period) {
               submissionsActor ! CreateSubmission
               val fLatest = (submissionsActor ? GetLatestSubmission).mapTo[Submission]
               onComplete(fLatest) {
                 case Success(submission) =>
-                  if (filing.status != NotStarted) {
-                    filingActor ? UpdateFilingStatus(filing.copy(status = NotStarted))
-                  }
                   complete(ToResponseMarshallable(StatusCodes.Created -> submission))
                 case Failure(error) =>
                   completeWithInternalError(uri, error)
