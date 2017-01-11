@@ -29,7 +29,7 @@ case object Institution {
 }
 
 case class EmailDomains(email2015: String, email2014: String, email2013: String)
-case class Respondent(id: ExternalId, name: String, state: String, city: String, fipsStateNumber: String)
+case class Respondent(externalId: ExternalId, name: String, state: String, city: String, fipsStateNumber: String)
 case class Parent(respondentId: String, idRssd: Int, name: String, city: String, state: String)
 case class TopHolder(idRssd: Int, name: String, city: String, state: String, country: String)
 

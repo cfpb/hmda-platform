@@ -16,7 +16,7 @@ object InstitutionConverter {
       i.agency.value,
       year,
       i.activityYear,
-      i.respondent.id.id,
+      i.respondent.externalId.id,
       i.institutionType.entryName,
       i.cra,
       i.emailDomains.email2015,

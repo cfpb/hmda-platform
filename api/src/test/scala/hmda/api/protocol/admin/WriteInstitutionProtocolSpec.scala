@@ -37,8 +37,8 @@ class WriteInstitutionProtocolSpec extends PropSpec with PropertyChecks with Mus
           )),
           ("respondent", JsObject(
             ("id", JsObject(
-              ("id", JsString(i.respondent.id.id)),
-              ("idType", JsString(i.respondent.id.idType.entryName))
+              ("id", JsString(i.respondent.externalId.id)),
+              ("idType", JsString(i.respondent.externalId.idType.entryName))
             )),
             ("name", JsString(i.respondent.name)),
             ("state", JsString(i.respondent.state)),

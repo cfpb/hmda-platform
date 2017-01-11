@@ -35,7 +35,7 @@ object InstitutionView {
         case InstitutionCreated(i) =>
           InstitutionViewState(institutions + i, seqNr + 1)
         case InstitutionModified(i) =>
-          val others = institutions.filterNot(_.respondent.id == i.respondent.id)
+          val others = institutions.filterNot(_.respondent.externalId == i.respondent.externalId)
           InstitutionViewState(others + i, seqNr + 1)
       }
     }
