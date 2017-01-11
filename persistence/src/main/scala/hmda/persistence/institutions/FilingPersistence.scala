@@ -54,7 +54,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
     case CreateFiling(f) =>
-      println(s"  Filing persistence $institutionId creates: $f")
+      println(s"  Filing persistence $persistenceId creates: $f")
       if (!state.filings.contains(f)) {
         persist(FilingCreated(f)) { e =>
           log.debug(s"Persisted: $f")
@@ -70,9 +70,9 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
       if (state.filings.map(x => x.period).contains(modified.period)) {
         persist(FilingStatusUpdated(modified)) { e =>
           log.debug(s"persisted: $modified")
-          println(s"  Filing persistence $institutionId updates: $state")
+          println(s"  Filing persistence $persistenceId updates: $state")
           updateState(e)
-          println(s"  Filing persistence $institutionId is updated: $state")
+          println(s"  Filing persistence $persistenceId is updated: $state")
           sender() ! Some(modified)
         }
       } else {
@@ -82,7 +82,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
     case GetFilingByPeriod(period) =>
       val filing = state.filings.find(f => f.period == period).getOrElse(Filing())
-      println(s"  Filing persistence $institutionId gets by period: $state")
+      println(s"  Filing persistence $persistenceId gets by period: $state")
       println(s"    Period is $period")
 
       // TODO: How should we initialize the filingRequired value for the empty filing?
@@ -92,7 +92,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
         sender() ! filing
 
     case GetState =>
-      println(s"  Filing persistence $institutionId gets state: $state")
+      println(s"  Filing persistence $persistenceId gets state: $state")
       sender() ! state.filings
 
   }

@@ -39,9 +39,9 @@ class SubmissionManagerSpec extends ActorSpec {
 
       probe.send(submissionManager, StartUpload)
       Thread.sleep(1000)
-      probe.send(filingPersistence, GetState)
-      val filingInProgress = probe.expectMsgType[Seq[Filing]]
-      filingInProgress mustBe Seq()
+      probe.send(filingPersistence, GetFilingByPeriod(submissionId.period))
+      val filingInProgress = probe.expectMsgType[Filing]
+      filingInProgress.status mustBe InProgress
 
       for (line <- lines) {
         probe.send(submissionManager, AddLine(timestamp, line.toString))
