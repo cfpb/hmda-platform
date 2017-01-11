@@ -61,6 +61,9 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
 
   override def preStart(): Unit = {
     super.preStart()
+    val config = ConfigFactory.load()
+    val timeout = config.getInt("hmda.persistent-actor-timeout")
+    context.setReceiveTimeout(Duration.create(timeout, TimeUnit.SECONDS))
   }
 
   override def receive: Receive = {
