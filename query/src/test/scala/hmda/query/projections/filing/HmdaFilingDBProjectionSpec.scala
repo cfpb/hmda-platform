@@ -17,12 +17,12 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    Await.result(repository.createSchema(), timeout)
+    Await.result(larRepository.createSchema(), timeout)
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
-    Await.result(repository.dropSchema(), timeout)
+    Await.result(larRepository.dropSchema(), timeout)
   }
 
   val probe = TestProbe()
@@ -30,7 +30,7 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
   "Filing database projection" must {
     val projection = createHmdaFilingDBProjection(system, "2017")
     "create schema" in {
-      Await.result(repository.dropSchema(), timeout)
+      Await.result(larRepository.dropSchema(), timeout)
       probe.send(projection, CreateSchema)
       probe.expectMsg(FilingSchemaCreated())
     }

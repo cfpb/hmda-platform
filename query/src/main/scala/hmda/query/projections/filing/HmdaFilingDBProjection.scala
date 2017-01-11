@@ -13,7 +13,8 @@ import scala.concurrent.ExecutionContext
 
 object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
 
-  val repository = new LarRepository(config)
+  val larRepository = new LarRepository(config)
+  val larTotalsRepository = new LarTotalRepository(config)
 
   case object CreateSchema extends Command
   case class LarInserted(n: Int)
@@ -35,14 +36,21 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
 
   override def receive: Receive = {
     case CreateSchema =>
-      repository.createSchema().map(_ => FilingSchemaCreated()) pipeTo sender()
+      val schemaCreated = for {
+        s <- larRepository.createSchema()
+      } yield s
+
+      schemaCreated.map { _ =>
+        larTotalsRepository.createSchema()
+        FilingSchemaCreated()
+      } pipeTo sender()
 
     case event: HmdaValidatorEvent => event match {
       case LarValidated(lar) =>
         val larQuery = implicitly[LoanApplicationRegisterQuery](lar)
         val larWithPeriod = larQuery.copy(period = filingPeriod)
         log.info(s"Inserted: ${larWithPeriod.toString}")
-        repository.insertOrUpdate(larWithPeriod)
+        larRepository.insertOrUpdate(larWithPeriod)
           .map(x => LarInserted(x)) pipeTo sender()
     }
 
