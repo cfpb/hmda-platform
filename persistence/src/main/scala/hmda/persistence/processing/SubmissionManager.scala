@@ -96,15 +96,16 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
     case ValidationCompleted(sId) =>
       log.info(s"Validation completed for submission: ${sId.toString}")
       submissionFSM ! CompleteValidation(self)
+      hmdaFilingF.map(actorRef => actorRef ! SaveLars(sId))
 
     case ValidationCompletedWithErrors(sId) =>
       log.info(s"Validation completed with errors for submission: ${sId.toString}")
       submissionFSM ! CompleteValidationWithErrors
+      hmdaFilingF.map(actorRef => actorRef ! SaveLars(sId))
 
     case Signed(sId) =>
       log.info(s"Submission signed: ${sId.toString}")
       submissionFSM ! Sign
-      hmdaFilingF.map(actorRef => actorRef ! SaveLars(sId))
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM
