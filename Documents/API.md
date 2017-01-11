@@ -399,6 +399,8 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
 * `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
     * `GET`  - List of edits of a specific type, for a given submission
+       * By default, results are grouped by named edit.
+       * Use `sortBy=row` as a query parameter to group by the row in the submitted file.
 
     Example response, with HTTP code 200:
 
@@ -437,6 +439,41 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     editType, editId, loanId
     validity, V555, 4977566612
     validity, V550, 4977566612
+    ```
+
+    Sorted by row:
+    ```json
+    {
+      "rows": [
+        {
+          "rowId": "Transmittal Sheet",
+          "edits": [
+            {
+              "editId": "S020",
+              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+              "fields": {
+                "Agency Code": 4
+              }
+            }
+          ]
+        },
+        {
+          "rowId": "8299422144",
+          "edits": [
+            {
+              "editId": "S020",
+              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+              "fields": {
+                "Agency Code": 11
+              }
+            }
+          ]
+        },
+      ],
+      "macro": {
+            "edits": []
+        }
+    }
     ```
 
     * `POST` - Provides verification for macro edits
