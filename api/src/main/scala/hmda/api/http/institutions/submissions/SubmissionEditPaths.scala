@@ -83,11 +83,13 @@ trait SubmissionEditPaths
   def submissionSingleEditPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>
       timedGet { uri =>
-        parameters("format".?) { format =>
-
+        parameters("format".?, "sortBy".?) { (format: Option[String], sortBy: Option[String]) =>
           completeVerified(institutionId, period, seqNr, uri) {
             val fValidationState = getValidationState(institutionId, period, seqNr)
-            completeValidationState(editType, fValidationState, uri, format.getOrElse(""))
+            sortBy match {
+              case Some("row") => completeWithRowResults(editType, fValidationState, uri)
+              case _ => completeValidationState(editType, fValidationState, uri, format.getOrElse(""))
+            }
           }
         }
       } ~ timedPost { uri =>
@@ -133,6 +135,22 @@ trait SubmissionEditPaths
         if (format == "csv") complete("editType, editId, loanId\n" + edits.toCsv(editType))
         else complete(ToResponseMarshallable(edits))
       case Success(_) => completeWithInternalError(uri, new IllegalStateException)
+      case Failure(error) => completeWithInternalError(uri, error)
+    }
+  }
+
+  private def completeWithRowResults(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri)(implicit ec: ExecutionContext) = {
+    val fRowSummary: Future[RowResults] = fValidationState.map { e =>
+      editType match {
+        case "syntactical" => validationErrorsToRowResults(e.tsSyntactical, e.larSyntactical, Seq())
+        case "validity" => validationErrorsToRowResults(e.tsValidity, e.larValidity, Seq())
+        case "quality" => validationErrorsToRowResults(e.tsQuality, e.larQuality, Seq())
+        case "macro" => validationErrorsToRowResults(Seq(), Seq(), e.larMacro)
+      }
+    }
+
+    onComplete(fRowSummary) {
+      case Success(rows) => complete(ToResponseMarshallable(rows))
       case Failure(error) => completeWithInternalError(uri, error)
     }
   }
