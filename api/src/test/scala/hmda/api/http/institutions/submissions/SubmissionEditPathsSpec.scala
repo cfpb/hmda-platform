@@ -102,6 +102,50 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     }
   }
 
+  "Sort single type of edits by row with sortBy parameter (syntactical)" in {
+    val expectedRows =
+      Seq(
+        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description))),
+        RowResult("loan1", Seq(
+          RowEditDetail("S010", s010Description),
+          RowEditDetail("S020", s020Description)
+        ))
+      )
+
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/syntactical?sortBy=row") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val rowResponse = responseAs[RowResults]
+      rowResponse.rows.toSet mustBe expectedRows.toSet
+      rowResponse.`macro` mustBe MacroResults(List())
+    }
+  }
+  "Sort single type of edits by row with sortBy parameter (validity)" in {
+    val expectedRows =
+      Seq(
+        RowResult("loan1", Seq(RowEditDetail("V280", v280Description))),
+        RowResult("loan2", Seq(RowEditDetail("V285", v285Description))),
+        RowResult("loan3", Seq(RowEditDetail("V285", v285Description)))
+      )
+
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity?sortBy=row") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val rowResponse = responseAs[RowResults]
+      rowResponse.rows.toSet mustBe expectedRows.toSet
+      rowResponse.`macro` mustBe MacroResults(List())
+    }
+  }
+  "SortBy parameter doesn't affect macro edits" in {
+    val expectedMacros =
+      MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
+
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro?sortBy=row") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val rowResponse = responseAs[RowResults]
+      rowResponse.rows.toSet mustBe Set()
+      rowResponse.`macro` mustBe expectedMacros
+    }
+  }
+
   "Edits endpoint: return 404 for nonexistent institution" in {
     getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound

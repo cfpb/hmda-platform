@@ -39,34 +39,30 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>
-  def uploadPath(institutionId: String) =
+  def uploadPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber) { (period, seqNr) =>
       timedPost { uri =>
         val submissionId = SubmissionId(institutionId, period, seqNr)
-        extractExecutionContext { executor =>
-          implicit val ec: ExecutionContext = executor
-          val uploadTimestamp = Instant.now.toEpochMilli
-          val supervisor = system.actorSelection("/user/supervisor")
-          val querySupervisor = system.actorSelection("/user/query-supervisor")
-          val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
-          val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
-          val hmdaFilingViewF = (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
+        val uploadTimestamp = Instant.now.toEpochMilli
+        val supervisor = system.actorSelection("/user/supervisor")
+        val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
+        val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
+        val fHmdaFiling = (supervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
 
-          val fUploadSubmission = for {
-            p <- fProcessingActor
-            s <- fSubmissionsActor
-            fSubmission <- (s ? GetSubmissionById(submissionId)).mapTo[Submission]
-          } yield (fSubmission, fSubmission.status == Created, p)
+        val fUploadSubmission = for {
+          p <- fProcessingActor
+          s <- fSubmissionsActor
+          fSubmission <- (s ? GetSubmissionById(submissionId)).mapTo[Submission]
+        } yield (fSubmission, fSubmission.status == Created, p)
 
-          onComplete(fUploadSubmission) {
-            case Success((submission, true, processingActor)) =>
-              uploadFile(processingActor, uploadTimestamp, uri.path, submission)
-            case Success((_, false, _)) =>
-              val errorResponse = Failed(s"Submission $seqNr not available for upload")
-              complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse, 0L, 0L)))
-            case Failure(error) =>
-              completeWithInternalError(uri, error)
-          }
+        onComplete(fUploadSubmission) {
+          case Success((submission, true, processingActor)) =>
+            uploadFile(processingActor, uploadTimestamp, uri.path, submission)
+          case Success((_, false, _)) =>
+            val errorResponse = Failed(s"Submission $seqNr not available for upload")
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse, 0L, 0L)))
+          case Failure(error) =>
+            completeWithInternalError(uri, error)
         }
       }
     }
