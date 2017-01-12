@@ -2,11 +2,14 @@ package hmda.persistence.processing
 
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.pattern.pipe
+import akka.pattern.{ ask, pipe }
 import akka.stream.scaladsl.{ Sink, Source }
+import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
+import hmda.persistence.HmdaSupervisor.FindHmdaFiling
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
@@ -18,7 +21,7 @@ import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
-
+import scala.concurrent.duration._
 import scala.util.Try
 
 object HmdaFileValidator {
@@ -90,9 +93,18 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   import HmdaFileValidator._
 
+  val config = ConfigFactory.load()
+  val duration = config.getInt("hmda.actor-lookup-timeout")
+
+  implicit val timeout = Timeout(duration.seconds)
+
   val parserPersistenceId = s"${HmdaFileParser.name}-$submissionId"
 
   var state = HmdaFileValidationState()
+
+  val supervisor = system.actorSelection("/user/supervisor")
+  //val supervisor = context.system.actorSelection("/user/supervisor")
+  val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -137,6 +149,11 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       persist(LarValidated(lar)) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
+        for {
+          f <- fHmdaFiling
+        } yield {
+          f ! LarValidated(lar)
+        }
       }
 
     case ValidateMacro(larSource, replyTo) =>
