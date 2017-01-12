@@ -76,10 +76,9 @@ class V110Spec extends TsEditCheckSpec {
   }
 
   private def whenInstitutionTypeIs(instType: InstitutionType): Unit = {
-    val emails = EmailDomains("", "", "")
     val respondent = hmda.model.institution.Respondent(ExternalId("1", UndeterminedExternalId), "test bank", "", "", "")
     val parent = hmda.model.institution.Parent("123", 123, "test parent", "", "")
     val topHolder = TopHolder(-1, "", "", "", "")
-    institution = Institution("1", CFPB, 2017, instType, cra = true, Set(), emails, respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder)
+    institution = Institution("1", CFPB, 2017, instType, cra = true, Set(), Set(), respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder)
   }
 }

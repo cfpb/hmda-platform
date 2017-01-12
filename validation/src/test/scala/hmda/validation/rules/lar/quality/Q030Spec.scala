@@ -14,11 +14,10 @@ import scala.language.implicitConversions
 class Q030Spec extends WordSpec with PropertyChecks with LarGenerators with MustMatchers {
 
   val respondent = Respondent(ExternalId("", UndeterminedExternalId), "some bank", "", "", "")
-  val emails = EmailDomains("", "", "")
   val parent = Parent("", 0, "some parent", "", "")
   val topHolder = TopHolder(-1, "", "", "", "")
 
-  val craFI = Institution("123", Agency.CFPB, 2017, InstitutionType.Bank, cra = true, Set(), emails, respondent, hmdaFilerFlag = false, parent, 0, 0, topHolder)
+  val craFI = Institution("123", Agency.CFPB, 2017, InstitutionType.Bank, cra = true, Set(), Set(), respondent, hmdaFilerFlag = false, parent, 0, 0, topHolder)
   val nonCraFI = craFI.copy(cra = false)
   val craOrNot = Table("CRA", craFI, nonCraFI)
 

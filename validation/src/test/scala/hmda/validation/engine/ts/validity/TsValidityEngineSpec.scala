@@ -36,11 +36,10 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
 
   property("Transmittal Sheet fails V110 (Parent info)") {
     forAll(tsGen) { ts =>
-      val emails = EmailDomains("", "", "")
       val respondent = hmda.model.institution.Respondent(ExternalId("1", UndeterminedExternalId), "test bank", "", "", "")
       val parent = hmda.model.institution.Parent("123", 123, "test parent", "", "")
       val topHolder = TopHolder(-1, "", "", "", "")
-      val someMBS = Some(Institution("1", CFPB, 2017, MBS, cra = true, Set(), emails, respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder))
+      val someMBS = Some(Institution("1", CFPB, 2017, MBS, cra = true, Set(), Set(), respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder))
       val badTs = ts.copy(parent = Parent("", "", "", "", ""))
       checkValidity(badTs, ValidationContext(someMBS, None)).isFailure mustBe true
     }

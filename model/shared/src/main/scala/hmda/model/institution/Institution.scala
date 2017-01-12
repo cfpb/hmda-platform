@@ -14,7 +14,7 @@ case class Institution(
   institutionType: InstitutionType,
   cra: Boolean,
   externalIds: Set[ExternalId],
-  emailDomains: EmailDomains,
+  emailDomains: Set[String],
   respondent: Respondent,
   hmdaFilerFlag: Boolean,
   parent: Parent,
@@ -23,12 +23,22 @@ case class Institution(
   topHolder: TopHolder
 )
 case object Institution {
-  def empty: Institution = Institution("", UndeterminedAgency, -1, UndeterminedInstitutionType, cra = false, Set(),
-    EmailDomains("", "", ""), Respondent(ExternalId("", UndeterminedExternalId), "", "", "", ""), hmdaFilerFlag = false,
-    Parent("", -1, "", "", ""), -1, -1, TopHolder(-1, "", "", "", ""))
+  def empty: Institution = Institution(
+    "",
+    UndeterminedAgency,
+    -1,
+    UndeterminedInstitutionType,
+    cra = false,
+    Set(),
+    Set(),
+    Respondent(ExternalId("", UndeterminedExternalId), "", "", "", ""),
+    hmdaFilerFlag = false,
+    Parent("", -1, "", "", ""),
+    -1,
+    -1,
+    TopHolder(-1, "", "", "", ""))
 }
 
-case class EmailDomains(email2015: String, email2014: String, email2013: String)
 case class Respondent(externalId: ExternalId, name: String, state: String, city: String, fipsStateNumber: String)
 case class Parent(respondentId: String, idRssd: Int, name: String, city: String, state: String)
 case class TopHolder(idRssd: Int, name: String, city: String, state: String, country: String)

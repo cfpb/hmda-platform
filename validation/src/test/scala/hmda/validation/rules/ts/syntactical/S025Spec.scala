@@ -90,11 +90,10 @@ class S025Spec extends WordSpec with MustMatchers {
   }
 
   def createInstitution(externalId: ExternalId): Institution = {
-    val emails = EmailDomains("", "", "")
     val respondent = hmda.model.institution.Respondent(externalId, "test bank", "", "", "")
     val parent = hmda.model.institution.Parent("123", 123, "test parent", "", "")
     val topHolder = TopHolder(-1, "", "", "", "")
-    Institution("1", CFPB, 2017, Bank, cra = true, Set(), emails, respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder)
+    Institution("1", CFPB, 2017, Bank, cra = true, Set(), Set(), respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder)
   }
 }
 

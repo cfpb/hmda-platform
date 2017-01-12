@@ -13,20 +13,19 @@ object InstitutionParser {
     val institutionType = convertStringToInstitutionType(values(3))
     val respondentId = convertStringToExternalId(values(1), institutionType, agency)
     Institution(
-      values(1), //How do we determine internal id?
+      values(1),
       agency,
       values(0).toInt,
       institutionType,
-      stringToBoolean(values(4)),
+      cra = stringToBoolean(values(4)),
       getExternalIdSet(values),
-      EmailDomains(values(10), values(11), values(12)),
+      Set(values(10), values(11), values(12)),
       Respondent(respondentId, values(13), values(14), values(15), values(16)),
-      stringToBoolean(values(17)),
+      hmdaFilerFlag = stringToBoolean(values(17)),
       Parent(values(18), values(19).toInt, values(20), values(21), values(22)),
       values(23).toInt,
       values(24).toInt,
-      TopHolder(values(25).toInt, values(26), values(27), values(28), values(29))
-    )
+      TopHolder(values(25).toInt, values(26), values(27), values(28), values(29)))
   }
 
   private def stringToBoolean(s: String): Boolean = {

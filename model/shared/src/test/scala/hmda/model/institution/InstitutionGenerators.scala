@@ -13,9 +13,7 @@ object InstitutionGenerators {
       institutionType <- institutionTypeGen
       cra <- Gen.oneOf(true, false)
       externalIds <- Gen.listOf(externalIdGen)
-      emailDomain2015 <- Gen.alphaStr
-      emailDomain2014 <- Gen.alphaStr
-      emailDomain2013 <- Gen.alphaStr
+      emailDomains <- Gen.listOf(Gen.alphaStr)
       respondentName <- Gen.alphaStr
       respondentState <- Gen.alphaStr
       respondentCity <- Gen.alphaStr
@@ -33,8 +31,14 @@ object InstitutionGenerators {
       topHolderCity <- Gen.alphaStr
       topHolderState <- Gen.alphaStr
       topHolderCountry <- Gen.alphaStr
-    } yield Institution(id, agency, activityYear, institutionType, cra = cra, externalIds.toSet,
-      EmailDomains(emailDomain2015, emailDomain2014, emailDomain2013),
+    } yield Institution(
+      id,
+      agency,
+      activityYear,
+      institutionType,
+      cra = cra,
+      externalIds.toSet,
+      emailDomains.toSet,
       Respondent(respondentId, respondentName, respondentState, respondentCity, respondentFipsStateNumber),
       hmdaFilerFlag = hmdaFilerFlag,
       Parent(parentRespondentId, parentIdRssd, parentName, parentCity, parentState),

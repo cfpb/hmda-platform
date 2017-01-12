@@ -77,11 +77,10 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
     }
 
     "match 'CFPB-HMDA-Institutions' header case insensitively" in {
-      val emails = EmailDomains("", "", "")
       val respondent = Respondent(ExternalId("1", UndeterminedExternalId), "test bank", "", "", "")
       val parent = Parent("123", 123, "test parent", "", "")
       val topHolder = TopHolder(-1, "", "", "", "")
-      val caseInsensitiveBank = Institution("1", CFPB, 2017, MBS, cra = true, Set(), emails, respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder)
+      val caseInsensitiveBank = Institution("1", CFPB, 2017, MBS, cra = true, Set(), Set(), respondent = respondent, hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
       val supervisor = system.actorSelection("/user/supervisor")
       val querySupervisor = system.actorSelection("/user/query-supervisor")
       val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]

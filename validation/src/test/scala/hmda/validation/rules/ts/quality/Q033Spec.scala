@@ -51,7 +51,7 @@ class Q033Spec extends TsEditCheckSpec {
   }
 
   private def whenInstitution(instType: InstitutionType, parentName: String): Unit = {
-    institution = Institution("22", Agency.CFPB, 2017, instType, cra = true, Set(), EmailDomains("", "", ""),
+    institution = Institution("22", Agency.CFPB, 2017, instType, cra = true, Set(), Set(),
       Respondent(ExternalId("", FederalTaxId), "some bank", "", "", ""), hmdaFilerFlag = true,
       hmda.model.institution.Parent("", 0, parentName, "", ""), 0, 0, TopHolder(0, "", "", "", ""))
   }

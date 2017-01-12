@@ -86,7 +86,6 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
   implicit object InstitutionJsonFormat extends RootJsonFormat[Institution] {
 
     implicit val externalIdFormat = jsonFormat2(ExternalId.apply)
-    implicit val emailDomainsFormat = jsonFormat3(EmailDomains.apply)
     implicit val respondentFormat = jsonFormat5(Respondent.apply)
     implicit val parentFormat = jsonFormat5(Parent.apply)
     implicit val topHolderFormat = jsonFormat5(TopHolder.apply)
@@ -99,7 +98,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
         "institutionType" -> obj.institutionType.toJson,
         "cra" -> JsBoolean(obj.cra),
         "externalIds" -> JsArray(obj.externalIds.map(e => e.toJson).toVector),
-        "emailDomains" -> obj.emailDomains.toJson,
+        "emailDomains" -> JsArray(obj.emailDomains.toJson),
         "respondent" -> obj.respondent.toJson,
         "hmdaFilerFlag" -> JsBoolean(obj.hmdaFilerFlag),
         "parent" -> obj.parent.toJson,
@@ -125,21 +124,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
       "topHolder"
     ) match {
         case Seq(id, agency, activityYear, institutionType, cra, externalIds, emailDomains, respondent, hmdaFilerFlag, parent, assets, otherLenderCode, topHolder) =>
-          Institution(
-            id.convertTo[String],
-            agency.convertTo[Agency],
-            activityYear.convertTo[Int],
-            institutionType.convertTo[InstitutionType],
-            cra.convertTo[Boolean],
-            externalIds.convertTo[Set[ExternalId]],
-            emailDomains.convertTo[EmailDomains],
-            respondent.convertTo[Respondent],
-            hmdaFilerFlag.convertTo[Boolean],
-            parent.convertTo[Parent],
-            assets.convertTo[Int],
-            otherLenderCode.convertTo[Int],
-            topHolder.convertTo[TopHolder]
-          )
+          Institution(id.convertTo[String], agency.convertTo[Agency], activityYear.convertTo[Int], institutionType.convertTo[InstitutionType], cra.convertTo[Boolean], externalIds.convertTo[Set[ExternalId]], emailDomains.convertTo[Set[String]], respondent.convertTo[Respondent], hmdaFilerFlag.convertTo[Boolean], parent.convertTo[Parent], assets.convertTo[Int], otherLenderCode.convertTo[Int], topHolder.convertTo[TopHolder])
       }
   }
 }
