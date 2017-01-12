@@ -36,7 +36,8 @@ case object Institution {
     Parent("", -1, "", "", ""),
     -1,
     -1,
-    TopHolder(-1, "", "", "", ""))
+    TopHolder(-1, "", "", "", "")
+  )
 }
 
 case class Respondent(externalId: ExternalId, name: String, state: String, city: String, fipsStateNumber: String)

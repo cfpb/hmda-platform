@@ -44,7 +44,8 @@ object InstitutionGenerators {
       Parent(parentRespondentId, parentIdRssd, parentName, parentCity, parentState),
       assets,
       otherLenderCode,
-      TopHolder(topHolderIdRssd, topHolderName, topHolderCity, topHolderState, topHolderCountry))
+      TopHolder(topHolderIdRssd, topHolderName, topHolderCity, topHolderState, topHolderCountry)
+    )
   }
 
   implicit def agencyGen: Gen[Agency] = {

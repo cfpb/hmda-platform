@@ -25,7 +25,8 @@ object InstitutionParser {
       Parent(values(18), values(19).toInt, values(20), values(21), values(22)),
       values(23).toInt,
       values(24).toInt,
-      TopHolder(values(25).toInt, values(26), values(27), values(28), values(29)))
+      TopHolder(values(25).toInt, values(26), values(27), values(28), values(29))
+    )
   }
 
   private def stringToBoolean(s: String): Boolean = {

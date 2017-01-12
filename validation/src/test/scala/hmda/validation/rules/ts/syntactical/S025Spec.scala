@@ -5,7 +5,7 @@ import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId, UndeterminedExternalId }
 import hmda.model.institution.InstitutionType.Bank
-import hmda.model.institution.{ EmailDomains, ExternalId, Institution, TopHolder }
+import hmda.model.institution.{ ExternalId, Institution, TopHolder }
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalatest.{ MustMatchers, WordSpec }

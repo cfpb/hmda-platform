@@ -3,7 +3,7 @@ package hmda.validation.engine.ts.validity
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TsGenerators }
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.ExternalIdType.UndeterminedExternalId
-import hmda.model.institution.{ EmailDomains, ExternalId, Institution, TopHolder }
+import hmda.model.institution.{ ExternalId, Institution, TopHolder }
 import hmda.model.institution.InstitutionType.{ Bank, MBS }
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.ts.validity.ValidityUtils
