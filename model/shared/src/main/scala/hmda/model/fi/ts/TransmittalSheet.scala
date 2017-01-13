@@ -15,6 +15,10 @@ case class TransmittalSheet(
     contact: Contact
 ) extends HasControlNumber with StringPaddingUtils {
 
+  def valueOf(field: String) = {
+    TsFieldMapping.mapping(this)(field)
+  }
+
   def toCSV: String = {
     s"$id|${respondent.id}|$agencyCode|$timestamp|$activityYear" +
       s"|$taxId|$totalLines|${respondent.name}|${respondent.address}" +
