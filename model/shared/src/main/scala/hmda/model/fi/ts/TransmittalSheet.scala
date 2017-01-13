@@ -1,7 +1,6 @@
 package hmda.model.fi.ts
 
-import hmda.model.fi.HasControlNumber
-import hmda.model.fi.StringPaddingUtils
+import hmda.model.fi.{HasControlNumber, HmdaFileRow, StringPaddingUtils}
 
 case class TransmittalSheet(
     id: Int,
@@ -13,9 +12,9 @@ case class TransmittalSheet(
     respondent: Respondent,
     parent: Parent,
     contact: Contact
-) extends HasControlNumber with StringPaddingUtils {
+) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
 
-  def valueOf(field: String) = {
+  override def valueOf(field: String) = {
     TsFieldMapping.mapping(this)(field)
   }
 
