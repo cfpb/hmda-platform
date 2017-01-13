@@ -19,6 +19,11 @@ case class LoanApplicationRegister(
     hoepaStatus: Int,
     lienStatus: Int
 ) extends HasControlNumber with StringPaddingUtils {
+
+  def valueOf(field: String) = {
+    LarFieldMapping.mapping(this)(field)
+  }
+
   def toCSV: String = {
     s"$id|$respondentId|$agencyCode|${loan.id}|${loan.applicationDate}" +
       s"|${loan.loanType}|${loan.propertyType}|${loan.purpose}|${loan.occupancy}" +
