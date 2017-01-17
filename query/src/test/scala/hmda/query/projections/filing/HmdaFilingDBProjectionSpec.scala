@@ -39,6 +39,16 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
       probe.send(projection, LarValidated(lar))
       probe.expectMsg(LarInserted(1))
     }
+    "Delete records by respondent id" in {
+      val lar1 = larGen.sample.get
+      val lar2 = larGen.sample.get
+      probe.send(projection, LarValidated(lar1))
+      probe.expectMsg(LarInserted(1))
+      probe.send(projection, LarValidated(lar2))
+      probe.expectMsg(LarInserted(1))
+      probe.send(projection, DeleteLars(lar1.respondentId))
+      probe.expectMsg(LarsDeleted(lar1.respondentId))
+    }
   }
 
 }

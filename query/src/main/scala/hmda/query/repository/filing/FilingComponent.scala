@@ -288,6 +288,7 @@ trait FilingComponent { this: DbConfiguration =>
     def dropSchema() = db.run(table.schema.drop)
     def deleteById(id: String) = db.run(filterById(id).delete)
     def deleteAll = db.run(table.delete)
+    def deleteByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).delete)
   }
 
   class LarTotalTable(tag: Tag) extends Table[LoanApplicationRegisterTotal](tag, "lars_total") {

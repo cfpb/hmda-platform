@@ -17,8 +17,10 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val larTotalsRepository = new LarTotalRepository(config)
 
   case object CreateSchema extends Command
+  case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
+  case class LarsDeleted(respondentId: String) extends Event
   def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
 
   def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
@@ -44,6 +46,10 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
         larTotalsRepository.createSchema()
         FilingSchemaCreated()
       } pipeTo sender()
+
+    case DeleteLars(respondentId) =>
+      larRepository.deleteByRespondentId(respondentId)
+        .map(_ => LarsDeleted(respondentId)) pipeTo sender()
 
     case event: HmdaValidatorEvent => event match {
       case LarValidated(lar) =>
