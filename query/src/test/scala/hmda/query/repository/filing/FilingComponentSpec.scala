@@ -46,15 +46,31 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       val lar: LoanApplicationRegisterQuery = larGen.sample.get
       repository.insertOrUpdate(lar).map(x => x mustBe 1)
       repository.findById(lar.id).map {
-        case Some(x) => succeed
+        case Some(_) => succeed
         case None => fail
       }
       repository.deleteById(lar.id).map(x => x mustBe 1)
       repository.findById(lar.id).map {
-        case Some(x) => fail
+        case Some(_) => fail
         case None => succeed
       }
     }
+    "delete all records" in {
+      val lar: LoanApplicationRegisterQuery = larGen.sample.get
+      val lar2: LoanApplicationRegisterQuery = larGen.sample.get
+      repository.insertOrUpdate(lar).map(x => x mustBe 1)
+      repository.insertOrUpdate(lar2).map(x => x mustBe 1)
+      repository.findById(lar.id).map {
+        case Some(_) => succeed
+        case None => fail
+      }
+      repository.deleteAll.map(x => x mustBe 1)
+      repository.findById(lar.id).map {
+        case Some(_) => fail
+        case None => succeed
+      }
+    }
+
   }
 
 }
