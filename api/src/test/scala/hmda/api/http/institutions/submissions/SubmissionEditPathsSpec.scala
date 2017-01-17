@@ -7,12 +7,14 @@ import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ EditResult, _ }
 import hmda.model.fi._
+import hmda.model.fi.lar.LarGenerators
+import hmda.model.fi.ts.TsGenerators
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.validation.engine._
-import spray.json.{ JsBoolean, JsNumber, JsObject }
+import spray.json.{ JsBoolean, JsNumber, JsObject, JsString }
 
-class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
+class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators with TsGenerators {
 
   val supervisor = system.actorSelection("/user/supervisor")
 
@@ -25,22 +27,17 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
   val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
   val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
-  val s010FieldsL1 = JsObject(("Record Identifier", JsNumber(1)))
-  val s020FieldsL1 = JsObject(("Agency Code", JsNumber(1)))
-  val v280FieldsL1 = JsObject(("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
-  val s020FieldsTs = JsObject(("Agency Code", JsNumber(1)))
-  val v285FieldsL2 = JsObject(("State Code", JsNumber(1)), ("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
-  val v285FieldsL3 = JsObject(("State Code", JsNumber(1)), ("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
+  val s010FieldsL1 = JsObject(("Record Identifier", JsNumber(111)))
+  val s020FieldsL1 = JsObject(("Agency Code", JsNumber(222)))
+  val v280FieldsL1 = JsObject(("Metropolitan Statistical Area / Metropolitan Division", JsString("333")))
+  val v285FieldsL2 = JsObject(("State Code", JsString("444")), ("Metropolitan Statistical Area / Metropolitan Division", JsString("555")))
+  val v285FieldsL3 = JsObject(("State Code", JsString("666")), ("Metropolitan Statistical Area / Metropolitan Division", JsString("777")))
+  val s020FieldsTs = JsObject(("Agency Code", JsNumber(888)))
 
   val s020 = EditResult("S020", s020Description, List(EditResultRow(RowId("Transmittal Sheet"), s020FieldsTs), EditResultRow(RowId("loan1"), s020FieldsL1)))
   val s010 = EditResult("S010", s010Description, List(EditResultRow(RowId("loan1"), s010FieldsL1)))
   val v280 = EditResult("V280", v280Description, List(EditResultRow(RowId("loan1"), v280FieldsL1)))
   val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2"), v285FieldsL2), EditResultRow(RowId("loan3"), v285FieldsL3)))
-
-  val fields = JsObject(
-    ("Thing One", JsNumber(3)),
-    ("Thing Two", JsBoolean(false))
-  )
 
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
@@ -241,8 +238,30 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     val v2 = ValidityValidationError("loan2", "V285", false)
     val v3 = ValidityValidationError("loan3", "V285", false)
     val m1 = MacroValidationError("Q007", Nil)
-    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
 
+    val l1 = larGen.sample.get
+    val lar1 = l1.copy(
+      loan = l1.loan.copy(id = "loan1"),
+      id = 111,
+      agencyCode = 222,
+      geography = l1.geography.copy(msa = "333")
+    )
+
+    val l2 = larGen.sample.get
+    val lar2 = l2.copy(
+      loan = l2.loan.copy(id = "loan2"),
+      geography = l2.geography.copy(state = "444", msa = "555")
+    )
+
+    val l3 = larGen.sample.get
+    val lar3 = l3.copy(
+      loan = l3.loan.copy(id = "loan3"),
+      geography = l3.geography.copy(state = "666", msa = "777")
+    )
+
+    val ts = tsGen.sample.get.copy(agencyCode = 888)
+
+    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
     val tsValidationErrors = TsValidationErrors(Seq(s2.copy(ts = true)))
 
     for {
@@ -250,6 +269,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     } yield {
       h ! larValidationErrors
       h ! tsValidationErrors
+      h ! lar1
+      h ! lar2
+      h ! lar3
+      h ! ts
     }
 
   }

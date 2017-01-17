@@ -1,6 +1,6 @@
 package hmda.model.fi.lar
 
-import hmda.model.fi.{HasControlNumber, HmdaFileRow, StringPaddingUtils}
+import hmda.model.fi.{ HasControlNumber, HmdaFileRow, StringPaddingUtils }
 
 case class LoanApplicationRegister(
     id: Int,
@@ -19,7 +19,7 @@ case class LoanApplicationRegister(
     lienStatus: Int
 ) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
 
-  override def valueOf(field: String) = {
+  override def valueOf(field: String): Any = {
     LarFieldMapping.mapping(this)(field)
   }
 

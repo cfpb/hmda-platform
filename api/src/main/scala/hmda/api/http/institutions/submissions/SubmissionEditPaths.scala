@@ -50,7 +50,7 @@ trait SubmissionEditPaths
                   val tsErrors = e.tsSyntactical ++ e.tsValidity ++ e.tsQuality
                   val larErrors = e.larSyntactical ++ e.larValidity ++ e.larQuality
                   val macroErrors = e.larMacro
-                  validationErrorsToRowResults(tsErrors, larErrors, macroErrors)
+                  validationErrorsToRowResults(e, tsErrors, larErrors, macroErrors)
                 }
                 onComplete(fRowSummary) {
                   case Success(rows) => complete(ToResponseMarshallable(rows))
@@ -59,9 +59,9 @@ trait SubmissionEditPaths
 
               case _ =>
                 val fEditSummary: Future[SummaryEditResults] = fEditChecks.map { e =>
-                  val s = validationErrorsToEditResults(e.tsSyntactical, e.larSyntactical, Syntactical)
-                  val v = validationErrorsToEditResults(e.tsValidity, e.larValidity, Validity)
-                  val q = validationErrorsToEditResults(e.tsQuality, e.larQuality, Quality)
+                  val s = validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
+                  val v = validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
+                  val q = validationErrorsToEditResults(e, e.tsQuality, e.larQuality, Quality)
                   val m = validationErrorsToMacroResults(e.larMacro)
                   SummaryEditResults(s, v, q, m)
                 }
@@ -117,11 +117,11 @@ trait SubmissionEditPaths
     val fSingleEdits = fValidationState.map { editChecks =>
       editType match {
         case "syntactical" =>
-          validationErrorsToEditResults(editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
+          validationErrorsToEditResults(editChecks, editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
         case "validity" =>
-          validationErrorsToEditResults(editChecks.tsValidity, editChecks.larValidity, Validity)
+          validationErrorsToEditResults(editChecks, editChecks.tsValidity, editChecks.larValidity, Validity)
         case "quality" =>
-          validationErrorsToEditResults(editChecks.tsQuality, editChecks.larQuality, Quality)
+          validationErrorsToEditResults(editChecks, editChecks.tsQuality, editChecks.larQuality, Quality)
         case "macro" =>
           validationErrorsToMacroResults(editChecks.larMacro)
       }
@@ -142,10 +142,10 @@ trait SubmissionEditPaths
   private def completeWithRowResults(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri)(implicit ec: ExecutionContext) = {
     val fRowSummary: Future[RowResults] = fValidationState.map { e =>
       editType match {
-        case "syntactical" => validationErrorsToRowResults(e.tsSyntactical, e.larSyntactical, Seq())
-        case "validity" => validationErrorsToRowResults(e.tsValidity, e.larValidity, Seq())
-        case "quality" => validationErrorsToRowResults(e.tsQuality, e.larQuality, Seq())
-        case "macro" => validationErrorsToRowResults(Seq(), Seq(), e.larMacro)
+        case "syntactical" => validationErrorsToRowResults(e, e.tsSyntactical, e.larSyntactical, Seq())
+        case "validity" => validationErrorsToRowResults(e, e.tsValidity, e.larValidity, Seq())
+        case "quality" => validationErrorsToRowResults(e, e.tsQuality, e.larQuality, Seq())
+        case "macro" => validationErrorsToRowResults(e, Seq(), Seq(), e.larMacro)
       }
     }
 
