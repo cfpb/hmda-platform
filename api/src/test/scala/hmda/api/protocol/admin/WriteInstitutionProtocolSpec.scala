@@ -34,7 +34,7 @@ class WriteInstitutionProtocolSpec extends PropSpec with PropertyChecks with Mus
             JsString(e)
           }.toVector)),
           ("respondent", JsObject(
-            ("id", JsObject(
+            ("externalId", JsObject(
               ("id", JsString(i.respondent.externalId.id)),
               ("idType", JsString(i.respondent.externalId.idType.entryName))
             )),
@@ -65,3 +65,65 @@ class WriteInstitutionProtocolSpec extends PropSpec with PropertyChecks with Mus
   }
 
 }
+/*
+{"otherLenderCode":7,
+  "parent":{
+    "respondentId":"",
+    "city":"",
+    "name":"",
+    "state":"",
+    "idRssd":39},
+  "activityYear":2001,
+  "cra":true,
+  "assets":86,
+  "agency":"cfpb",
+  "hmdaFilerFlag":true,
+  "respondent":{
+    "city":"",
+    "name":"",
+    "externalId":{
+      "id":"",
+      "idType":"rssd-id"},
+    "state":"",
+    "fipsStateNumber":""},
+  "topHolder":{
+    "city":"",
+    "name":"",
+    "state":"",
+    "country":"",
+    "idRssd":29},
+  "externalIds":[],
+  "id":"",
+  "emailDomains":[],
+  "institutionType":"savings-and-loan"}
+
+{"otherLenderCode":7,
+  "parent":{
+    "respondentId":"",
+    "city":"",
+    "name":"",
+    "state":"",
+    "idRssd":39},
+  "activityYear":2001,
+  "cra":true,
+  "assets":86,
+  "agency":"cfpb",
+  "hmdaFilerFlag":true,
+  "respondent":{
+    "city":"",
+    "name":"",
+    "state":"",
+    "id":{
+      "id":"",
+      "idType":"rssd-id"},
+    "fipsStateNumber":""},
+  "topHolder":{
+    "city":"",
+    "name":"",
+    "state":"",
+    "country":"",
+    "idRssd":29},
+  "externalIds":[],
+  "id":"",
+  "emailDomains":[],
+  "institutionType":"savings-and-loan"}*/

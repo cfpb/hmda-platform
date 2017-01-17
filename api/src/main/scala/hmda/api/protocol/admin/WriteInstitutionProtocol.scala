@@ -98,7 +98,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
         "institutionType" -> obj.institutionType.toJson,
         "cra" -> JsBoolean(obj.cra),
         "externalIds" -> JsArray(obj.externalIds.map(e => e.toJson).toVector),
-        "emailDomains" -> JsArray(obj.emailDomains.toJson),
+        "emailDomains" -> JsArray(obj.emailDomains.map(e => e.toJson).toVector),
         "respondent" -> obj.respondent.toJson,
         "hmdaFilerFlag" -> JsBoolean(obj.hmdaFilerFlag),
         "parent" -> obj.parent.toJson,
