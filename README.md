@@ -53,30 +53,30 @@ The HMDA Platform uses sbt's multi-project builds, each project representing a s
 
 ### Interactive
 
-1. Start `sbt`
+1. In order to support the read side, a local PostgreSQL server is needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
+
+```shell
+export JDBC_URL='jdbc:postgresql://localhost/hmda?user=postgres&password=postgres'
+```
+
+2. Start `sbt`
 
 ```shell
 $ sbt
 ```
 
-2. Select project to build and run.This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
+3. Select project to build and run.This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
 
 ```shell
-> projects
-[info] In file:/Users/marinj/Development/hmda-platform/
-[info]     api
-[info]   * hmda
-[info]     model
-[info]     parser
-[info]     platformTest
-[info]     validation
 
+> project api
+> clean
 > ~re-start
 ```
 
 Confirm that the platform is up and running by browsing to http://localhost:8080
 
-3. To build JVM artifacts (the default, includes all projects), from the sbt prompt:
+4. To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
 ```shell
 > clean assembly
