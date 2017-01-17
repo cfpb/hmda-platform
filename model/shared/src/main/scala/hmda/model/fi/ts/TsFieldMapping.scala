@@ -2,7 +2,7 @@ package hmda.model.fi.ts
 
 // Maps a field's friendly name to its value in the LAR record
 object TsFieldMapping {
-  def mapping(ts: TransmittalSheet) = Map(
+  def mapping(ts: TransmittalSheet): Map[String, Any] = Map(
     "Record Identifier" -> ts.id,
     "Respondent-ID" -> ts.respondent.id,
     "Agency Code" -> ts.agencyCode,

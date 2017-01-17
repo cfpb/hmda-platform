@@ -2,7 +2,7 @@ package hmda.model.fi.lar
 
 // Maps a field's friendly name to its value in the LAR record
 object LarFieldMapping {
-  def mapping(lar: LoanApplicationRegister) = Map(
+  def mapping(lar: LoanApplicationRegister): Map[String, Any] = Map(
     "Record Identifier" -> lar.id,
     "Respondent Id" -> lar.respondentId,
     "Agency Code" -> lar.agencyCode,
