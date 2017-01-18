@@ -124,7 +124,21 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
       "topHolder"
     ) match {
         case Seq(id, agency, activityYear, institutionType, cra, externalIds, emailDomains, respondent, hmdaFilerFlag, parent, assets, otherLenderCode, topHolder) =>
-          Institution(id.convertTo[String], agency.convertTo[Agency], activityYear.convertTo[Int], institutionType.convertTo[InstitutionType], cra.convertTo[Boolean], externalIds.convertTo[Set[ExternalId]], emailDomains.convertTo[Set[String]], respondent.convertTo[Respondent], hmdaFilerFlag.convertTo[Boolean], parent.convertTo[Parent], assets.convertTo[Int], otherLenderCode.convertTo[Int], topHolder.convertTo[TopHolder])
+          Institution(
+            id.convertTo[String],
+            agency.convertTo[Agency],
+            activityYear.convertTo[Int],
+            institutionType.convertTo[InstitutionType],
+            cra.convertTo[Boolean],
+            externalIds.convertTo[Set[ExternalId]],
+            emailDomains.convertTo[Set[String]],
+            respondent.convertTo[Respondent],
+            hmdaFilerFlag.convertTo[Boolean],
+            parent.convertTo[Parent],
+            assets.convertTo[Int],
+            otherLenderCode.convertTo[Int],
+            topHolder.convertTo[TopHolder]
+          )
       }
   }
 }
