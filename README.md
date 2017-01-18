@@ -53,7 +53,7 @@ The HMDA Platform uses sbt's multi-project builds, each project representing a s
 
 ### Interactive
 
-1. In order to support the read side, a local PostgreSQL server is needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
+* In order to support the read side, a local PostgreSQL server is needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
 
 ```shell
 export JDBC_URL='jdbc:postgresql://localhost/hmda?user=postgres&password=postgres'
@@ -63,13 +63,13 @@ where `hmda` is the name of the `PostgreSQL` database, owned by the default user
 
 **Note: if you are running the backend only through sbt, the database needs to be created manually in advance, see instructions [here](https://www.postgresql.org/docs/9.1/static/manage-ag-createdb.html)**
 
-2. Start `sbt`
+* Start `sbt`
 
 ```shell
 $ sbt
 ```
 
-3. Select project to build and run.This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
+* Select project to build and run.This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
 
 ```shell
 
@@ -80,7 +80,7 @@ $ sbt
 
 Confirm that the platform is up and running by browsing to http://localhost:8080
 
-4. To build JVM artifacts (the default, includes all projects), from the sbt prompt:
+* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
 ```shell
 > clean assembly
