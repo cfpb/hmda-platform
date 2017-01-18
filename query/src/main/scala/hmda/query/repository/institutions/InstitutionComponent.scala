@@ -20,9 +20,9 @@ trait InstitutionComponent { this: DbConfiguration =>
     def institutionType = column[String]("type")
     def cra = column[Boolean]("cra")
 
-    def emailDomain2015 = column[String]("email_2015")
-    def emailDomain2014 = column[String]("email_2014")
-    def emailDomain2013 = column[String]("email_2013")
+    def emailDomain1 = column[String]("email_1")
+    def emailDomain2 = column[String]("email_2")
+    def emailDomain3 = column[String]("email_3")
 
     def respondentName = column[String]("respondent_name")
     def respondentState = column[String]("respondent_state")
@@ -56,9 +56,9 @@ trait InstitutionComponent { this: DbConfiguration =>
         respondentId ::
         institutionType ::
         cra ::
-        emailDomain2015 ::
-        emailDomain2014 ::
-        emailDomain2013 ::
+        emailDomain1 ::
+        emailDomain2 ::
+        emailDomain3 ::
         respondentName ::
         respondentState ::
         respondentCity ::
@@ -85,9 +85,9 @@ trait InstitutionComponent { this: DbConfiguration =>
           respondentId,
           institutionType,
           cra,
-          emailDomain2015,
-          emailDomain2014,
-          emailDomain2013,
+          emailDomain1,
+          emailDomain2,
+          emailDomain3,
           respondentName,
           respondentState,
           respondentCity,
@@ -117,9 +117,9 @@ trait InstitutionComponent { this: DbConfiguration =>
         respondentId,
         institutionType,
         cra,
-        emailDomain2015,
-        emailDomain2014,
-        emailDomain2013,
+        emailDomain1,
+        emailDomain2,
+        emailDomain3,
         respondentName,
         respondentState,
         respondentCity,
@@ -146,9 +146,9 @@ trait InstitutionComponent { this: DbConfiguration =>
             respondentId ::
             institutionType ::
             cra ::
-            emailDomain2015 ::
-            emailDomain2014 ::
-            emailDomain2013 ::
+            emailDomain1 ::
+            emailDomain2 ::
+            emailDomain3 ::
             respondentName ::
             respondentState ::
             respondentCity ::
@@ -178,9 +178,9 @@ trait InstitutionComponent { this: DbConfiguration =>
       respondentId ::
       institutionType ::
       cra ::
-      emailDomain2015 ::
-      emailDomain2014 ::
-      emailDomain2013 ::
+      emailDomain1 ::
+      emailDomain2 ::
+      emailDomain3 ::
       respondentName ::
       respondentState ::
       respondentCity ::
