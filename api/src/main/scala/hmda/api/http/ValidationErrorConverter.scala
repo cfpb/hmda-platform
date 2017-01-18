@@ -3,10 +3,9 @@ package hmda.api.http
 import hmda.api.model._
 import hmda.model.edits.EditMetaDataLookup
 import hmda.validation.engine._
+import spray.json.{ JsNumber, JsObject, JsValue }
 
 trait ValidationErrorConverter {
-
-  val editDescriptions = EditMetaDataLookup.values
 
   def validationErrorsToEditResults(tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError], validationErrorType: ValidationErrorType): EditResults = {
     val allErrorsOfThisType: Seq[ValidationError] = (tsErrors ++ larErrors).filter(_.errorType == validationErrorType)
@@ -17,19 +16,13 @@ trait ValidationErrorConverter {
       case (editName: String, errs: Seq[ValidationError]) =>
         val description = findEditDescription(editName)
         val rowIds = errs.map { e =>
-          if (e.ts) EditResultRow(RowId("Transmittal Sheet"))
-          else EditResultRow(RowId(e.errorId))
+          if (e.ts) EditResultRow(RowId("Transmittal Sheet"), relevantFields(e))
+          else EditResultRow(RowId(e.errorId), relevantFields(e))
         }
         EditResult(editName, description, rowIds)
     }.toSeq
 
     EditResults(editResults)
-  }
-
-  private def findEditDescription(editName: String): String = {
-    editDescriptions.find(x => x.editNumber == editName)
-      .map(_.editDescription)
-      .getOrElse("")
   }
 
   def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
@@ -53,9 +46,29 @@ trait ValidationErrorConverter {
     RowResults(tsRowResults ++ larRowResults, macroResults)
   }
 
+  //// Helper methods
+
+  val editDescriptions = EditMetaDataLookup.values
+
   private def rowDetail(err: ValidationError): RowEditDetail = {
     val name = err.ruleName
-    RowEditDetail(name, findEditDescription(name))
+    val fields = relevantFields(err)
+    RowEditDetail(name, findEditDescription(name), fields)
+  }
+
+  private def findEditDescription(editName: String): String = {
+    editDescriptions.find(x => x.editNumber == editName)
+      .map(_.editDescription)
+      .getOrElse("")
+  }
+
+  private def relevantFields(err: ValidationError): JsObject = {
+    val fieldNames: Seq[String] = editDescriptions.find(e => e.editNumber == err.ruleName)
+      .map(_.fieldNames).getOrElse(Seq())
+
+    val jsVals: Seq[(String, JsValue)] = fieldNames.map(n => (n, JsNumber(1)))
+
+    JsObject(jsVals: _*)
   }
 
 }
