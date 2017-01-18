@@ -59,6 +59,10 @@ The HMDA Platform uses sbt's multi-project builds, each project representing a s
 export JDBC_URL='jdbc:postgresql://localhost/hmda?user=postgres&password=postgres'
 ```
 
+where `hmda` is the name of the `PostgreSQL` database, owned by the default user with default password (`postgres`)
+
+**Note: if you are running the backend only through sbt, the database needs to be created manually in advance, see instructions [here](https://www.postgresql.org/docs/9.1/static/manage-ag-createdb.html)**
+
 2. Start `sbt`
 
 ```shell
