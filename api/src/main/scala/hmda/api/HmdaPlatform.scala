@@ -82,6 +82,7 @@ object HmdaPlatform {
   private def startApi(system: ActorSystem): Unit = {
     system.actorOf(HmdaFilingApi.props(), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(), "hmda-admin-api")
+    system.actorOf(HmdaPublicApi.props(), "hmda-public-api")
   }
 
 }
