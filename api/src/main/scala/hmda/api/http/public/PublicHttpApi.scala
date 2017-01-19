@@ -22,7 +22,9 @@ trait PublicHttpApi extends PublicProtocol with PublicLarHttpApi with HmdaCustom
     extractExecutionContext { executor =>
       implicit val ec: ExecutionContext = executor
       encodeResponse {
-        modifiedLar
+        pathPrefix("institutions" / Segment) { instId =>
+          modifiedLar(instId)
+        }
       }
     }
 }

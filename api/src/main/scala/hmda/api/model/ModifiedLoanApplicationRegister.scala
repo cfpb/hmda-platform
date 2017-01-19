@@ -1,8 +1,8 @@
 package hmda.api.model
 
-import hmda.model.fi.lar.{Applicant, Denial, Geography, Loan}
+import hmda.model.fi.lar.{ Applicant, Denial, Geography, Loan }
 
-case class ModifiedLoanApplicationRegister (
+case class ModifiedLoanApplicationRegister(
   id: Int,
   respondentId: String,
   agencyCode: Int,
@@ -17,4 +17,4 @@ case class ModifiedLoanApplicationRegister (
   rateSpread: String,
   hoepaStatus: Int,
   lienStatus: Int
-                                           )
+)

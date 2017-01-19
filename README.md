@@ -116,10 +116,11 @@ docker build -t hmda-api .
 
 Then, run the docker image
 ```shell
-docker run -d -p "8080:8080" hmda-api
+docker run -d -p "8080:8080 -p 8082:8082" hmda-api
 ```
 
-The API will run on `$(docker-machine ip):8080`
+The Filing API will run on `$(docker-machine ip):8080`
+The Public API will run on `$(docker-machine ip):8082`
 
 #### To run the entire platform
 Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) repo and the [HMDA Platform Auth](https://github.com/cfpb/hmda-platform-auth) repo into sibling directories of this one. Your directory structure should look like this:

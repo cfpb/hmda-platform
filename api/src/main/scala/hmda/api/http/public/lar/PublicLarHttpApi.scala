@@ -1,13 +1,17 @@
 package hmda.api.http.public.lar
 
-import akka.http.scaladsl.server.Directives.{complete, get, path}
+import akka.http.scaladsl.model.Uri.Path.Segment
+import akka.http.scaladsl.server.Directives.{ complete, get, path }
+import hmda.api.http.HmdaCustomDirectives
 
-trait PublicLarHttpApi {
+import scala.concurrent.ExecutionContext
 
-  val modifiedLar =
-    path("") {
-      get {
-        complete("")
+trait PublicLarHttpApi extends HmdaCustomDirectives {
+
+  def modifiedLar(institutionId: String)(implicit ec: ExecutionContext) =
+    path("lar") {
+      timedGet { uri =>
+        complete("modified lar")
       }
     }
 
