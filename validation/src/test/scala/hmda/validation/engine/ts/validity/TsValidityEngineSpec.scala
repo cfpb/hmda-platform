@@ -2,8 +2,9 @@ package hmda.validation.engine.ts.validity
 
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TsGenerators }
 import hmda.model.institution.Agency.CFPB
-import hmda.model.institution.Institution
-import hmda.model.institution.InstitutionType.MBS
+import hmda.model.institution.ExternalIdType.UndeterminedExternalId
+import hmda.model.institution.{ ExternalId, Institution, TopHolder }
+import hmda.model.institution.InstitutionType.{ Bank, MBS }
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.ts.validity.ValidityUtils
 import org.scalatest.concurrent.ScalaFutures
@@ -35,7 +36,10 @@ class TsValidityEngineSpec extends PropSpec with PropertyChecks with MustMatcher
 
   property("Transmittal Sheet fails V110 (Parent info)") {
     forAll(tsGen) { ts =>
-      val someMBS = Some(Institution("1", "Test MBS", Set(), CFPB, MBS, hasParent = true))
+      val respondent = hmda.model.institution.Respondent(ExternalId("1", UndeterminedExternalId), "test bank", "", "", "")
+      val parent = hmda.model.institution.Parent("123", 123, "test parent", "", "")
+      val topHolder = TopHolder(-1, "", "", "", "")
+      val someMBS = Some(Institution("1", CFPB, 2017, MBS, cra = true, Set(), Set(), respondent, hmdaFilerFlag = true, parent, 0, 0, topHolder))
       val badTs = ts.copy(parent = Parent("", "", "", "", ""))
       checkValidity(badTs, ValidationContext(someMBS, None)).isFailure mustBe true
     }

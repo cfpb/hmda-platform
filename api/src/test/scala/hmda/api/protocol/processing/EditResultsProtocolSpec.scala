@@ -20,10 +20,12 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
     }
   }
 
-  val rowDetail = RowEditDetail("V111", "the values must be correct")
+  val fields = JsObject(("Thing One", JsNumber(1)), ("Thing Two", JsString("two")))
+  val rowDetail = RowEditDetail("V111", "the values must be correct", fields)
   val expectedDetailJson = JsObject(
     ("editId", JsString("V111")),
-    ("description", JsString("the values must be correct"))
+    ("description", JsString("the values must be correct")),
+    ("fields", fields)
   )
   property("Row Edit Detail must have proper json format") {
     rowDetail.toJson mustBe expectedDetailJson

@@ -45,7 +45,7 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
           } yield institutions
           onComplete(fInstitutions) {
             case Success(institutions) =>
-              val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id.toString, inst.name))
+              val wrappedInstitutions = institutions.map(inst => InstitutionWrapper(inst.id, inst.respondent.name))
               complete(ToResponseMarshallable(Institutions(wrappedInstitutions)))
             case Failure(error) => completeWithInternalError(uri, error)
           }
@@ -86,6 +86,6 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
     for {
       i <- fInstitution
       filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-    } yield InstitutionDetail(InstitutionWrapper(i.id.toString, i.name), filings)
+    } yield InstitutionDetail(InstitutionWrapper(i.id, i.respondent.name), filings)
   }
 }
