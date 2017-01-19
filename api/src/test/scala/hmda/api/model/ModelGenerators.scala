@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.Uri.Path
 import hmda.model.fi._
 import hmda.validation.engine._
 import org.scalacheck.Gen
+import spray.json.{ JsObject, JsString }
 
 trait ModelGenerators {
 
@@ -80,10 +81,18 @@ trait ModelGenerators {
     } yield ErrorResponse(status, message, Path(path))
   }
 
+  implicit def fieldsGen: Gen[JsObject] = {
+    for {
+      str1 <- Gen.alphaStr
+      str2 <- Gen.alphaStr
+    } yield JsObject((str1, JsString(str2)), (str2, JsString(str1)))
+  }
+
   implicit def larEditResultGen: Gen[EditResultRow] = {
     for {
       loanId <- Gen.alphaStr
-    } yield EditResultRow(RowId(loanId))
+      fields <- fieldsGen
+    } yield EditResultRow(RowId(loanId), fields)
   }
 
   implicit def editResultGen: Gen[EditResult] = {

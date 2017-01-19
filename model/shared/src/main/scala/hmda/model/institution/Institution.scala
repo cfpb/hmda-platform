@@ -1,39 +1,48 @@
 package hmda.model.institution
 
+import hmda.model.institution.Agency.UndeterminedAgency
+import hmda.model.institution.ExternalIdType.UndeterminedExternalId
+import hmda.model.institution.InstitutionType.UndeterminedInstitutionType
+
 /**
  * A financial institution, geared towards requirements for filing HMDA data.
  */
 case class Institution(
-    id: String,
-    name: String,
-    externalIds: Set[ExternalId],
-    agency: Agency,
-    institutionType: InstitutionType,
-    hasParent: Boolean,
-    cra: Boolean = false // TODO do we have this info when creating the institution? if so, then don't default here.
-) extends Serializable {
-
-  private val extIdsByType: Map[ExternalIdType, ExternalId] = externalIds.map(extId => (extId.idType, extId)).toMap
-
-  /**
-   * Derives the respondentId for a given Institution based on [[hmda.model.institution.Agency]] and [[hmda.model.institution.InstitutionType]],
-   * the rules for which can be found in section "1.4 - Respondent Identification Numbers for 2017 HMDA Filers" of the
-   * <a href="http://www.consumerfinance.gov/data-research/hmda/static/for-filers/2017/2017-HMDA-File-Specifications.pdf">2017 HMDA File Specifications</a>
-   */
-  def respondentId: Either[InvalidRespondentId, ExternalId] = {
-
-    agency.externalIdTypes.get(institutionType.depositoryType) match {
-      case None => Left(UnsupportedDepositoryTypeByAgency(id, agency, institutionType.depositoryType))
-      case Some(extIdType) =>
-
-        extIdsByType.get(extIdType) match {
-          case None => Left(RequiredExternalIdNotPresent(id, extIdType))
-          case Some(extId) => Right(ExternalId(extId.id, extIdType))
-        }
-    }
-  }
-
+  id: String,
+  agency: Agency,
+  activityYear: Int,
+  institutionType: InstitutionType,
+  cra: Boolean,
+  externalIds: Set[ExternalId],
+  emailDomains: Set[String],
+  respondent: Respondent,
+  hmdaFilerFlag: Boolean,
+  parent: Parent,
+  assets: Int,
+  otherLenderCode: Int,
+  topHolder: TopHolder
+)
+case object Institution {
+  def empty: Institution = Institution(
+    "",
+    UndeterminedAgency,
+    -1,
+    UndeterminedInstitutionType,
+    cra = false,
+    Set(),
+    Set(),
+    Respondent(ExternalId("", UndeterminedExternalId), "", "", "", ""),
+    hmdaFilerFlag = false,
+    Parent("", -1, "", "", ""),
+    -1,
+    -1,
+    TopHolder(-1, "", "", "", "")
+  )
 }
+
+case class Respondent(externalId: ExternalId, name: String, state: String, city: String, fipsStateNumber: String)
+case class Parent(respondentId: String, idRssd: Int, name: String, city: String, state: String)
+case class TopHolder(idRssd: Int, name: String, city: String, state: String, country: String)
 
 sealed abstract class InvalidRespondentId {
   def message: String

@@ -10,10 +10,10 @@ class InstitutionProtocolSpec extends PropSpec with PropertyChecks with MustMatc
 
   property("An Institution must convert to a JSON wrapper") {
     forAll(institutionGen) { i =>
-      InstitutionWrapper(i.id.toString, i.name).toJson mustBe
+      InstitutionWrapper(i.id, i.respondent.name).toJson mustBe
         JsObject(
-          ("id", JsString(i.id.toString)),
-          ("name", JsString(i.name))
+          ("id", JsString(i.id)),
+          ("name", JsString(i.respondent.name))
         )
     }
   }

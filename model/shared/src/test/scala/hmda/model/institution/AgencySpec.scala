@@ -14,6 +14,7 @@ class AgencySpec extends WordSpec with MustMatchers {
       HUD.value mustBe 7
       NCUA.value mustBe 5
       OCC.value mustBe 1
+      UndeterminedAgency.value mustBe -1
     }
 
     "resolve agencyId to the appropriate Agency case class" in {
@@ -23,10 +24,11 @@ class AgencySpec extends WordSpec with MustMatchers {
       Agency.withValue(7) mustBe HUD
       Agency.withValue(5) mustBe NCUA
       Agency.withValue(1) mustBe OCC
+      Agency.withValue(-1) mustBe UndeterminedAgency
     }
 
     "must have entries for all agencies" in {
-      Agency.values mustBe IndexedSeq(CFPB, FDIC, FRS, HUD, NCUA, OCC)
+      Agency.values mustBe IndexedSeq(CFPB, FDIC, FRS, HUD, NCUA, OCC, UndeterminedAgency)
     }
 
   }
