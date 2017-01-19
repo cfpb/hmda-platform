@@ -40,7 +40,7 @@ services:
       INSTITUTION_SEARCH_URI: https://192.168.99.100:9443
       HOME_PAGE_URI: http://192.168.99.100
       INSTITUTION_SEARCH_VALIDATE_SSL: "OFF"
-      REDIRECT_URIS: '[ "http://192.168.99.100/oidc-callback", "http://192.168.99.100/silent_renew.html" ]'
+      REDIRECT_URIS: '[ "http://192.168.99.100", "http://192.168.99.100/oidc-callback", "http://192.168.99.100/silent_renew.html" ]'
       SUPPORT_EMAIL: 'support@localhost.localdomain'
     volumes:
       - '../hmda-platform-auth/keycloak/themes/hmda:/opt/jboss/keycloak/themes/hmda'
