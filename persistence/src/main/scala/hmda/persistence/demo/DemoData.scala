@@ -7,7 +7,7 @@ import hmda.model.fi._
 import hmda.model.institution.Agency.{ CFPB, FDIC, HUD, OCC }
 import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, OccCharterId, RssdId }
 import hmda.model.institution.InstitutionType.{ Bank, CreditUnion }
-import hmda.model.institution.{ ExternalId, Institution }
+import hmda.model.institution._
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
@@ -23,18 +23,21 @@ object DemoData {
   val externalId2 = ExternalId("externalTest2", OccCharterId)
   val externalId3 = ExternalId("externalTest3", FederalTaxId)
 
+  val parent = Parent("", 0, "", "", "")
+  val topHolder = TopHolder(0, "", "", "", "")
+
   val testInstitutions = {
-    val i0 = Institution("0", "Bank 0", Set(externalId0), FDIC, Bank, hasParent = true)
-    val i1 = Institution("1", "Bank 1", Set(externalId1), CFPB, CreditUnion, hasParent = true)
-    val i2 = Institution("2", "Bank 2", Set(externalId2), OCC, CreditUnion, hasParent = false)
-    val i3 = Institution("3", "Bank 3", Set(externalId3), HUD, CreditUnion, hasParent = true)
+    val i0 = Institution("0", FDIC, 2017, Bank, cra = false, Set(externalId0), Set(), respondent = Respondent(externalId0, "Bank 0", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
+    val i1 = Institution("1", CFPB, 2017, CreditUnion, cra = false, Set(externalId1), Set(), respondent = Respondent(externalId1, "Bank 1", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
+    val i2 = Institution("2", OCC, 2017, CreditUnion, cra = false, Set(externalId2), Set(), respondent = Respondent(externalId2, "Bank 2", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
+    val i3 = Institution("3", HUD, 2017, CreditUnion, cra = false, Set(externalId3), Set(), respondent = Respondent(externalId3, "Bank 3", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
     Set(i0, i1, i2, i3)
   }
 
   val testFilings = {
-    val f1 = Filing("2016", "0", Completed, true, 1483287071000L, 1514736671000L)
-    val f2 = Filing("2017", "0", NotStarted, true, 0L, 0L)
-    val f3 = Filing("2017", "1", Completed, false, 1483287071000L, 1514736671000L)
+    val f1 = Filing("2016", "0", Completed, filingRequired = true, 1483287071000L, 1514736671000L)
+    val f2 = Filing("2017", "0", NotStarted, filingRequired = true, 0L, 0L)
+    val f3 = Filing("2017", "1", Completed, filingRequired = false, 1483287071000L, 1514736671000L)
     Seq(f1, f2, f3)
   }
 
@@ -72,7 +75,7 @@ object DemoData {
   val institutionSummary = {
     val institution = testInstitutions.head
     val f = testFilings.filter(x => x.institutionId == institution.id.toString)
-    (institution.id, institution.name, f.reverse)
+    (institution.id, institution.respondent.name, f.reverse)
   }
 
   def loadInstitutions(institutions: Set[Institution], system: ActorSystem): Unit = {
@@ -85,6 +88,7 @@ object DemoData {
       case (instId: String, filings: Seq[Filing]) =>
         val filingActor = system.actorOf(FilingPersistence.props(instId))
         filings.foreach { filing => filingActor ? CreateFiling(filing) }
+        Thread.sleep(100)
         filingActor ! Shutdown
     }
   }

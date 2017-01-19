@@ -10,7 +10,7 @@ import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.validation.engine._
-import org.scalatest.words.MatcherWords
+import spray.json.{ JsBoolean, JsNumber, JsObject }
 
 class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
 
@@ -25,10 +25,22 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
   val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
   val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
-  val s020 = EditResult("S020", s020Description, List(EditResultRow(RowId("Transmittal Sheet")), EditResultRow(RowId("loan1"))))
-  val s010 = EditResult("S010", s010Description, List(EditResultRow(RowId("loan1"))))
-  val v280 = EditResult("V280", v280Description, List(EditResultRow(RowId("loan1"))))
-  val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2")), EditResultRow(RowId("loan3"))))
+  val s010FieldsL1 = JsObject(("Record Identifier", JsNumber(1)))
+  val s020FieldsL1 = JsObject(("Agency Code", JsNumber(1)))
+  val v280FieldsL1 = JsObject(("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
+  val s020FieldsTs = JsObject(("Agency Code", JsNumber(1)))
+  val v285FieldsL2 = JsObject(("State Code", JsNumber(1)), ("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
+  val v285FieldsL3 = JsObject(("State Code", JsNumber(1)), ("Metropolitan Statistical Area / Metropolitan Division", JsNumber(1)))
+
+  val s020 = EditResult("S020", s020Description, List(EditResultRow(RowId("Transmittal Sheet"), s020FieldsTs), EditResultRow(RowId("loan1"), s020FieldsL1)))
+  val s010 = EditResult("S010", s010Description, List(EditResultRow(RowId("loan1"), s010FieldsL1)))
+  val v280 = EditResult("V280", v280Description, List(EditResultRow(RowId("loan1"), v280FieldsL1)))
+  val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2"), v285FieldsL2), EditResultRow(RowId("loan3"), v285FieldsL3)))
+
+  val fields = JsObject(
+    ("Thing One", JsNumber(3)),
+    ("Thing Two", JsBoolean(false))
+  )
 
   "return summary of validation errors" in {
     val expectedSummary = SummaryEditResults(
@@ -54,20 +66,15 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
   }
 
   "Sort edits by row with sortBy parameter" in {
+    val tsS020 = RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, s020FieldsTs)))
     val loan1Result =
       RowResult("loan1", Seq(
-        RowEditDetail("S010", s010Description),
-        RowEditDetail("S020", s020Description),
-        RowEditDetail("V280", v280Description)
+        RowEditDetail("S010", s010Description, s010FieldsL1),
+        RowEditDetail("S020", s020Description, s020FieldsL1),
+        RowEditDetail("V280", v280Description, v280FieldsL1)
       ))
-
-    val expectedRows =
-      Seq(
-        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description))),
-        loan1Result,
-        RowResult("loan2", Seq(RowEditDetail("V285", v285Description))),
-        RowResult("loan3", Seq(RowEditDetail("V285", v285Description)))
-      )
+    val loan2Result = RowResult("loan2", Seq(RowEditDetail("V285", v285Description, v285FieldsL2)))
+    val loan3Result = RowResult("loan3", Seq(RowEditDetail("V285", v285Description, v285FieldsL3)))
 
     val expectedMacros =
       MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
@@ -75,7 +82,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits?sortBy=row") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
       val rowResponse = responseAs[RowResults]
-      rowResponse.rows.toSet mustBe expectedRows.toSet
+      rowResponse.rows.head mustBe tsS020
+      rowResponse.rows.find(_.rowId == "loan1").get mustBe loan1Result
+      rowResponse.rows.find(_.rowId == "loan2").get mustBe loan2Result
+      rowResponse.rows.find(_.rowId == "loan3").get mustBe loan3Result
       rowResponse.`macro` mustBe expectedMacros
     }
   }
@@ -99,6 +109,50 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec {
       status mustBe StatusCodes.OK
       responseAs[String] must include("editType, editId")
       responseAs[String] must include("macro, Q007")
+    }
+  }
+
+  "Sort single type of edits by row with sortBy parameter (syntactical)" in {
+    val expectedRows =
+      Seq(
+        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, s020FieldsTs))),
+        RowResult("loan1", Seq(
+          RowEditDetail("S010", s010Description, s010FieldsL1),
+          RowEditDetail("S020", s020Description, s020FieldsL1)
+        ))
+      )
+
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/syntactical?sortBy=row") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val rowResponse = responseAs[RowResults]
+      rowResponse.rows.toSet mustBe expectedRows.toSet
+      rowResponse.`macro` mustBe MacroResults(List())
+    }
+  }
+  "Sort single type of edits by row with sortBy parameter (validity)" in {
+    val expectedRows =
+      Seq(
+        RowResult("loan1", Seq(RowEditDetail("V280", v280Description, v280FieldsL1))),
+        RowResult("loan2", Seq(RowEditDetail("V285", v285Description, v285FieldsL2))),
+        RowResult("loan3", Seq(RowEditDetail("V285", v285Description, v285FieldsL3)))
+      )
+
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity?sortBy=row") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val rowResponse = responseAs[RowResults]
+      rowResponse.rows.toSet mustBe expectedRows.toSet
+      rowResponse.`macro` mustBe MacroResults(List())
+    }
+  }
+  "SortBy parameter doesn't affect macro edits" in {
+    val expectedMacros =
+      MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
+
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro?sortBy=row") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val rowResponse = responseAs[RowResults]
+      rowResponse.rows.toSet mustBe Set()
+      rowResponse.`macro` mustBe expectedMacros
     }
   }
 

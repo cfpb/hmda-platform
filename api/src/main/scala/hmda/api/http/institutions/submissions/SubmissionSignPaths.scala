@@ -36,46 +36,43 @@ trait SubmissionSignPaths
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign
   // NOTE:  This is currently a mocked, static endpoint
-  def submissionSignPath(institutionId: String) =
+  def submissionSignPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "sign") { (period, id) =>
-      extractExecutionContext { executor =>
-        implicit val ec: ExecutionContext = executor
-        timedGet { uri =>
-          complete(ToResponseMarshallable(Receipt(0L, "", IRSGenerated)))
-        } ~
-          timedPost { uri =>
-            entity(as[JsObject]) { json =>
-              val verified = json.fields("signed").asInstanceOf[JsBoolean]
+      timedGet { uri =>
+        complete(ToResponseMarshallable(Receipt(0L, "", IRSGenerated)))
+      } ~
+        timedPost { uri =>
+          entity(as[JsObject]) { json =>
+            val verified = json.fields("signed").asInstanceOf[JsBoolean]
 
-              val supervisor = system.actorSelection("/user/supervisor")
-              val querySupervisor = system.actorSelection("/user/query-supervisor")
+            val supervisor = system.actorSelection("/user/supervisor")
+            val querySupervisor = system.actorSelection("/user/query-supervisor")
 
-              val submissionId = SubmissionId(institutionId, period, id)
+            val submissionId = SubmissionId(institutionId, period, id)
 
-              val hmdaFilingViewF = (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
-              val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
+            val hmdaFilingViewF = (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
+            val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
 
-              verified match {
-                case JsTrue =>
-                  val managerF = for {
-                    filingView <- hmdaFilingViewF
-                    manager <- fProcessingActor
-                  } yield manager
+            verified match {
+              case JsTrue =>
+                val managerF = for {
+                  filingView <- hmdaFilingViewF
+                  manager <- fProcessingActor
+                } yield manager
 
-                  onComplete(managerF) {
-                    case Success(manager) =>
-                      manager ! hmda.persistence.processing.ProcessingMessages.Signed(submissionId)
-                      complete(ToResponseMarshallable(Receipt(System.currentTimeMillis(), "receiptHash", Signed)))
-                    case Failure(error) =>
-                      completeWithInternalError(uri, error)
-                  }
+                onComplete(managerF) {
+                  case Success(manager) =>
+                    manager ! hmda.persistence.processing.ProcessingMessages.Signed(submissionId)
+                    complete(ToResponseMarshallable(Receipt(System.currentTimeMillis(), "receiptHash", Signed)))
+                  case Failure(error) =>
+                    completeWithInternalError(uri, error)
+                }
 
-                case JsFalse =>
-                  complete(ToResponseMarshallable(Receipt(0l, "", IRSGenerated)))
-              }
-
+              case JsFalse =>
+                complete(ToResponseMarshallable(Receipt(0l, "", IRSGenerated)))
             }
+
           }
-      }
+        }
     }
 }

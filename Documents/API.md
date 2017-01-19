@@ -226,6 +226,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     * `GET`  - List of all edits for a given submission
        * By default, results are grouped by edit type, then by named edit.
        * Use `sortBy=row` as a query parameter to group by the row in the submitted file.
+       * Use `format=csv` as a query parameter for edits in CSV format, for importing into spreadsheet software.
 
     Example response, with HTTP code 200:
 
@@ -239,13 +240,28 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
             "rows": [
               {
-                "row": { "rowId": "Transmittal Sheet" }
+                "row": {
+                  "rowId": "Transmittal Sheet"
+                },
+                "fields": {
+                  "Agency Code": 10
+                }
               },
               {
-                "row": { "rowId": "8299422144" }
+                "row": {
+                  "rowId": "8299422144"
+                },
+                "fields": {
+                  "Agency Code": 10
+                }
               },
               {
-                "row": { "rowId": "2185751599" }
+                "row": {
+                  "rowId": "2185751599"
+                },
+                "fields": {
+                  "Agency Code": 10
+                }
               }
             ]
           },
@@ -254,7 +270,12 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
             "rows": [
               {
-                "row": { "rowId": "2185751599" }
+                "row": {
+                  "rowId": "2185751599"
+                },
+                "fields": {
+                  "Record Identifier": 1
+                }
               }
             ]
           }
@@ -267,7 +288,28 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
             "rows": [
               {
-                "row": { "rowId": "4977566612" }
+                "row": {
+                  "rowId": "4977566612"
+                },
+                "fields": {
+                  "Loan Purpose": 3,
+                  "Lien Status": 8
+                }
+              }
+            ]
+          },
+          {
+            "edit": "V560",
+            "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
+            "rows": [
+              {
+                "row": {
+                  "rowId": "4977566612"
+                },
+                "fields": {
+                  "Type of Action Taken": 2,
+                  "Lien Status": 8
+                }
               }
             ]
           }
@@ -302,9 +344,8 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
       }
     }
     ```
-    * `GET`  - List of all edits for a given submission, grouped by edit type with `format=csv` parameter
 
-    Example response, with HTTP code 200:
+    Formatted as CSV:
     ```
     editType, editId, loanId
     syntactical, S025, Transmittal Sheet
@@ -318,6 +359,140 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
 
     Sorted by Row:
+    ```json
+    {
+      "rows": [
+        {
+          "rowId": "Transmittal Sheet",
+          "edits": [
+            {
+              "editId": "S020",
+              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+              "fields": {
+                "Agency Code": 10
+              }
+            }
+          ]
+        },
+        {
+          "rowId": "8299422144",
+          "edits": [
+            {
+              "editId": "S020",
+              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+              "fields": {
+                "Agency Code": 10
+              }
+            }
+          ]
+        },
+        {
+          "rowId": "4977566612",
+          "edits": [
+            {
+              "editId": "V555",
+              "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
+              "fields": {
+                "Loan Purpose": 1,
+                "Lien Status": 0
+              }
+            },
+            {
+              "editId": "V560",
+              "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
+              "fields": {
+                "Action Taken Type": 3,
+                "Lien Status": 0
+              }
+            }
+          ]
+        }
+      ],
+      "macro": {
+        "edits": [
+          {
+            "edit": "Q008",
+            "justifications": [
+              {
+                "id": 1,
+                "value": "Applicants decided not to proceed with the loan.",
+                "verified": false
+              },
+              {
+                "id": 2,
+                "value": "There were a large number of applications, but few loans were closed",
+                "verified": false
+              },
+              {
+                "id": 3,
+                "value": "Loan activity for this filing year consisted mainly of purchased loans.",
+                "verified": false
+              }
+            ]
+          }
+        ]
+      }
+    }
+    ```
+
+* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
+    * `GET`  - List of edits of a specific type, for a given submission
+       * By default, results are grouped by named edit.
+       * Use `sortBy=row` as a query parameter to group by the row in the submitted file.
+       * Use `format=csv` as a query parameter for edits in CSV format, for importing into spreadsheet software.
+
+    Example response, with HTTP code 200:
+
+    ```json
+    {
+      "edits": [
+        {
+          "edit": "S020",
+          "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+          "rows": [
+            {
+              "row": {
+                "rowId": "Transmittal Sheet"
+              },
+              "fields": {
+                "Agency Code": 1
+              }
+            },
+            {
+              "row": {
+                "rowId": "8299422144"
+              },
+              "fields": {
+                "Agency Code": 1
+              }
+            }
+          ]
+        },
+        {
+          "edit": "S010",
+          "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
+          "rows": [
+            {
+              "row": {
+                "rowId": "2185751599"
+              },
+              "fields": {
+                "Record Identifier": 1
+              }
+            }
+          ]
+        }
+      ]
+    ```
+
+    Formatted as CSV:
+    ```
+    editType, editId, loanId
+    validity, V555, 4977566612
+    validity, V550, 4977566612
+    ```
+
+    Sorted by row:
     ```json
     {
       "rows": [
@@ -345,98 +520,11 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
             }
           ]
         },
-        {
-          "rowId": "4977566612",
-          "edits": [
-            {
-              "editId": "V550",
-              "description": "Lien status must = 1, 2, 3, or 4.",
-              "fields": {
-                "Lien Status": 0
-              }
-            },
-            {
-              "editId": "V555",
-              "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
-              "fields": {
-                "Loan Purpose": 1,
-                "Lien Status": 0
-              }
-            },
-            {
-              "editId": "V560",
-              "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
-              "fields": {
-                "Action Taken Type": 3,
-                "Lien Status": 0
-              }
-            }
-          ]
-        }
       ],
       "macro": {
-            "edits": [
-                {
-                    "edit": "Q023",
-                    "justifications": [
-                        {
-                            "id": 1,
-                            "value": "Most of the loan activity are in areas outside of an MSA/MD",
-                            "verified": true
-                        },
-                        {
-                            "id": 2,
-                            "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
-                            "verified": false
-                        },
-                   ]
-                }
-            ]
-        }
-
+        "edits": []
+      }
     }
-    ```
-
-* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
-    * `GET`  - List of edits of a specific type, for a given submission
-
-    Example response, with HTTP code 200:
-
-    ```json
-    {
-      "edits": [
-        {
-          "edit": "V555",
-          "ts": false,
-          "lars": [
-            {
-              "lar": {
-                "loanId": "4977566612"
-              }
-            }
-          ]
-        },
-        {
-          "edit": "V550",
-          "ts": false,
-          "lars": [
-            {
-              "lar": {
-                "loanId": "4977566612"
-              }
-            }
-          ]
-        }
-      ]
-    }
-    ```
-    * `GET`  - List of edits of a specific type, for a given submission with `format=csv` parameter
-
-    Example response, with HTTP code 200:
-    ```
-    editType, editId, loanId
-    validity, V555, 4977566612
-    validity, V550, 4977566612
     ```
 
     * `POST` - Provides verification for macro edits

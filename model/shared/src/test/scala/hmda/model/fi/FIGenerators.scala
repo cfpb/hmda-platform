@@ -7,7 +7,7 @@ import hmda.date.util.DateGenerators
 trait FIGenerators {
 
   implicit def agencyCodeGen: Gen[Int] = {
-    Gen.oneOf(Agency.values).map(_.value)
+    Gen.oneOf(Agency.values.filterNot(_.value == -1)).map(_.value)
   }
 
   implicit def respIdGen: Gen[String] = {
