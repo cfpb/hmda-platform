@@ -7,13 +7,13 @@ import enumeratum.{ Enum, EnumEntry }
  */
 sealed trait DepositoryType extends EnumEntry
 
-// FIXME: This could also be modeled as `isDepository: Option[Boolean]`.  Which is cleaner?
 object DepositoryType extends Enum[DepositoryType] {
 
   val values = findValues
 
   case object Depository extends DepositoryType
   case object NonDepository extends DepositoryType
+  case object UndeterminedDepositoryType extends DepositoryType
 }
 
 /**
@@ -36,5 +36,7 @@ object InstitutionType extends Enum[InstitutionType] {
   // an FI with either of these two types will generally have a parent, but the code does not enforce that constraint.
   case object MBS extends InstitutionType("mortgage-banking-subsidiary", NonDepository)
   case object Affiliate extends InstitutionType("affiliate", NonDepository)
+
+  case object UndeterminedInstitutionType extends InstitutionType("undetermined-institution-type", UndeterminedDepositoryType)
 
 }

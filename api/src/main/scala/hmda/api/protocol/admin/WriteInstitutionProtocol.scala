@@ -20,6 +20,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
       case JsString(HUD.name) => HUD
       case JsString(NCUA.name) => NCUA
       case JsString(OCC.name) => OCC
+      case JsString(UndeterminedAgency.name) => UndeterminedAgency
       case _ => throw DeserializationException("Unable to deserialize")
     }
 
@@ -84,40 +85,60 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
 
   implicit object InstitutionJsonFormat extends RootJsonFormat[Institution] {
 
+    implicit val externalIdFormat = jsonFormat2(ExternalId.apply)
+    implicit val respondentFormat = jsonFormat5(Respondent.apply)
+    implicit val parentFormat = jsonFormat5(Parent.apply)
+    implicit val topHolderFormat = jsonFormat5(TopHolder.apply)
+
     override def write(obj: Institution): JsValue = {
       JsObject(
         "id" -> JsString(obj.id),
-        "name" -> JsString(obj.name),
-        "externalIds" -> JsArray(obj.externalIds.map(e => e.toJson).toVector),
         "agency" -> obj.agency.toJson,
+        "activityYear" -> JsNumber(obj.activityYear),
         "institutionType" -> obj.institutionType.toJson,
-        "hasParent" -> JsBoolean(obj.hasParent),
-        "cra" -> JsBoolean(obj.cra)
+        "cra" -> JsBoolean(obj.cra),
+        "externalIds" -> JsArray(obj.externalIds.map(e => e.toJson).toVector),
+        "emailDomains" -> JsArray(obj.emailDomains.map(e => e.toJson).toVector),
+        "respondent" -> obj.respondent.toJson,
+        "hmdaFilerFlag" -> JsBoolean(obj.hmdaFilerFlag),
+        "parent" -> obj.parent.toJson,
+        "assets" -> JsNumber(obj.assets),
+        "otherLenderCode" -> JsNumber(obj.otherLenderCode),
+        "topHolder" -> obj.topHolder.toJson
       )
     }
 
     override def read(json: JsValue): Institution = json.asJsObject.getFields(
       "id",
-      "name",
-      "externalIds",
       "agency",
+      "activityYear",
       "institutionType",
-      "hasParent",
-      "cra"
+      "cra",
+      "externalIds",
+      "emailDomains",
+      "respondent",
+      "hmdaFilerFlag",
+      "parent",
+      "assets",
+      "otherLenderCode",
+      "topHolder"
     ) match {
-        case Seq(id, name, externalIds, agency, institutionType, hasParent, cra) =>
+        case Seq(id, agency, activityYear, institutionType, cra, externalIds, emailDomains, respondent, hmdaFilerFlag, parent, assets, otherLenderCode, topHolder) =>
           Institution(
             id.convertTo[String],
-            name.convertTo[String],
-            externalIds.convertTo[Set[ExternalId]],
             agency.convertTo[Agency],
+            activityYear.convertTo[Int],
             institutionType.convertTo[InstitutionType],
-            hasParent.convertTo[Boolean],
-            cra.convertTo[Boolean]
+            cra.convertTo[Boolean],
+            externalIds.convertTo[Set[ExternalId]],
+            emailDomains.convertTo[Set[String]],
+            respondent.convertTo[Respondent],
+            hmdaFilerFlag.convertTo[Boolean],
+            parent.convertTo[Parent],
+            assets.convertTo[Int],
+            otherLenderCode.convertTo[Int],
+            topHolder.convertTo[TopHolder]
           )
       }
-
   }
-
-  implicit val externalIdFormat = jsonFormat2(ExternalId.apply)
 }

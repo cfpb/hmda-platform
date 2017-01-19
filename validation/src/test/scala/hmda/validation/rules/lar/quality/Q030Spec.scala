@@ -1,7 +1,8 @@
 package hmda.validation.rules.lar.quality
 
 import hmda.model.fi.lar.{ Geography, LarGenerators, LoanApplicationRegister }
-import hmda.model.institution.{ Agency, Institution, InstitutionType }
+import hmda.model.institution.ExternalIdType.UndeterminedExternalId
+import hmda.model.institution._
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalacheck.Gen
@@ -12,8 +13,12 @@ import scala.language.implicitConversions
 
 class Q030Spec extends WordSpec with PropertyChecks with LarGenerators with MustMatchers {
 
-  val craFI = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = true)
-  val nonCraFI = Institution("123", "some bank", Set(), Agency.CFPB, InstitutionType.Bank, hasParent = true, cra = false)
+  val respondent = Respondent(ExternalId("", UndeterminedExternalId), "some bank", "", "", "")
+  val parent = Parent("", 0, "some parent", "", "")
+  val topHolder = TopHolder(-1, "", "", "", "")
+
+  val craFI = Institution("123", Agency.CFPB, 2017, InstitutionType.Bank, cra = true, Set(), Set(), respondent, hmdaFilerFlag = false, parent, 0, 0, topHolder)
+  val nonCraFI = craFI.copy(cra = false)
   val craOrNot = Table("CRA", craFI, nonCraFI)
 
   "Q030" when {
