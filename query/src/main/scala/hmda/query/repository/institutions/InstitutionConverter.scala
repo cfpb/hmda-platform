@@ -10,15 +10,36 @@ object InstitutionConverter {
 
   implicit def toInstitutionQuery(i: Institution): InstitutionQuery = {
     val dateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault())
+    val emails = i.emailDomains.toList
     val year = dateTime.getYear
     InstitutionQuery(
       i.id,
-      i.name,
-      i.cra,
       i.agency.value,
+      year,
+      i.activityYear,
+      i.respondent.externalId.id,
       i.institutionType.entryName,
-      i.hasParent,
-      year
+      i.cra,
+      emails(0),
+      emails(1),
+      emails(2),
+      i.respondent.name,
+      i.respondent.state,
+      i.respondent.city,
+      i.respondent.fipsStateNumber,
+      i.hmdaFilerFlag,
+      i.parent.respondentId,
+      i.parent.idRssd,
+      i.parent.name,
+      i.parent.city,
+      i.parent.state,
+      i.assets,
+      i.otherLenderCode,
+      i.topHolder.idRssd,
+      i.topHolder.name,
+      i.topHolder.city,
+      i.topHolder.state,
+      i.topHolder.country
     )
   }
 }

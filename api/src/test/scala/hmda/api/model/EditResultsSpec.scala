@@ -2,11 +2,14 @@ package hmda.api.model
 
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
+import spray.json.{ JsObject, JsString }
 
 class EditResultsSpec extends PropSpec with PropertyChecks with MustMatchers {
-  val e1Rows = Seq(EditResultRow(RowId("Transmittal Sheet")), EditResultRow(RowId("abc")), EditResultRow(RowId("def")))
+  val fields = JsObject(("name", JsString("value"))) // CSV format does not show field data
+
+  val e1Rows = Seq(EditResultRow(RowId("Transmittal Sheet"), fields), EditResultRow(RowId("abc"), fields), EditResultRow(RowId("def"), fields))
   val e1 = EditResult("V001", "", e1Rows)
-  val e2 = EditResult("S001", "", Seq(EditResultRow(RowId("ghi")), EditResultRow(RowId("jkl"))))
+  val e2 = EditResult("S001", "", Seq(EditResultRow(RowId("ghi"), fields), EditResultRow(RowId("jkl"), fields)))
   val m1 = MacroResult("Q001", Set.empty)
 
   val sum = SummaryEditResults(EditResults(Seq(e2)), EditResults(Seq(e1)), EditResults.empty, MacroResults(Seq(m1)))

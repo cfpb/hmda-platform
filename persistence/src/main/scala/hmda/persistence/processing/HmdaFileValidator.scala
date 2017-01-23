@@ -132,10 +132,13 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
 
-      larSource.map(lar => validateLar(lar, ctx).toEither)
+      larSource.map(lar => (lar, validateLar(lar, ctx).toEither))
         .map {
-          case Right(l) => l
-          case Left(errors) => LarValidationErrors(errors.list.toList)
+          case (_, Right(l)) => l
+          case (lar, Left(errors)) => {
+            self ! lar
+            LarValidationErrors(errors.list.toList)
+          }
         }
         .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
 

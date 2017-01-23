@@ -88,7 +88,8 @@ class InstitutionAdminHttpApiSpec
       }
     }
     "modify existing institution" in {
-      val updatedInstitution = newInstitution.copy(cra = true, name = "new name")
+      val updatedInstitutionRespondent = newInstitution.respondent.copy(name = "new name")
+      val updatedInstitution = newInstitution.copy(cra = true, respondent = updatedInstitutionRespondent)
       val jsonRequest = ByteString(updatedInstitution.toJson.toString)
       val putRequest = createRequest(jsonRequest, HttpMethods.PUT)
       putRequest ~> institutionAdminRoutes ~> check {

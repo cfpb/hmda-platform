@@ -18,4 +18,5 @@ object ExternalIdType extends Enum[ExternalIdType] {
   case object NcuaCharterId extends ExternalIdType("ncua-charter-id")
   case object OccCharterId extends ExternalIdType("occ-charter-id")
   case object RssdId extends ExternalIdType("rssd-id")
+  case object UndeterminedExternalId extends ExternalIdType("undetermined-external-id")
 }

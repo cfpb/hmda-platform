@@ -7,13 +7,45 @@ object InstitutionGenerators {
   implicit def institutionGen: Gen[Institution] = {
     for {
       id <- Gen.alphaStr
-      name <- Gen.alphaStr
-      externalIds <- Gen.listOf(externalIdGen)
       agency <- agencyGen
-      active <- Gen.oneOf(true, false)
-      cra <- Gen.oneOf(true, false)
+      activityYear <- Gen.choose(2000, 2020)
+      respondentId <- externalIdGen
       institutionType <- institutionTypeGen
-    } yield Institution(id, name, externalIds.toSet, agency, institutionType, active, cra)
+      cra <- Gen.oneOf(true, false)
+      externalIds <- Gen.listOf(externalIdGen)
+      emailDomains <- Gen.listOf(Gen.alphaStr)
+      respondentName <- Gen.alphaStr
+      respondentState <- Gen.alphaStr
+      respondentCity <- Gen.alphaStr
+      respondentFipsStateNumber <- Gen.alphaStr
+      hmdaFilerFlag <- Gen.oneOf(true, false)
+      parentRespondentId <- Gen.alphaStr
+      parentIdRssd <- Gen.choose(0, 100)
+      parentName <- Gen.alphaStr
+      parentCity <- Gen.alphaStr
+      parentState <- Gen.alphaStr
+      assets <- Gen.choose(0, 100)
+      otherLenderCode <- Gen.choose(0, 100)
+      topHolderIdRssd <- Gen.choose(0, 100)
+      topHolderName <- Gen.alphaStr
+      topHolderCity <- Gen.alphaStr
+      topHolderState <- Gen.alphaStr
+      topHolderCountry <- Gen.alphaStr
+    } yield Institution(
+      id,
+      agency,
+      activityYear,
+      institutionType,
+      cra = cra,
+      externalIds.toSet,
+      emailDomains.toSet,
+      Respondent(respondentId, respondentName, respondentState, respondentCity, respondentFipsStateNumber),
+      hmdaFilerFlag = hmdaFilerFlag,
+      Parent(parentRespondentId, parentIdRssd, parentName, parentCity, parentState),
+      assets,
+      otherLenderCode,
+      TopHolder(topHolderIdRssd, topHolderName, topHolderCity, topHolderState, topHolderCountry)
+    )
   }
 
   implicit def agencyGen: Gen[Agency] = {
