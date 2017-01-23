@@ -16,21 +16,28 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   val timeout = 5.seconds
 
   val repository = new LarRepository(config)
+  val totalRepository = new LarTotalRepository(config)
+  val modifiedLarRepository = new ModifiedLarRepository(config)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     Await.result(repository.createSchema(), timeout)
+    Await.result(totalRepository.createSchema(), timeout)
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
+    Await.result(totalRepository.dropSchema(), timeout)
     Await.result(repository.dropSchema(), timeout)
   }
 
   "LAR Repository" must {
     "insert new records" in {
-      val lar = larGen.sample.get
-      repository.insertOrUpdate(lar).map(x => x mustBe 1)
+      val lar1 = larGen.sample.get.copy(respondentId = "resp1")
+      val lar2 = larGen.sample.get.copy(respondentId = "resp1")
+      repository.insertOrUpdate(lar1).map(x => x mustBe 1)
+      repository.insertOrUpdate(lar2).map(x => x mustBe 1)
+      totalRepository.count("resp1").map(x => x mustBe Some(2))
     }
     "modify records and read them back" in {
       val lar: LoanApplicationRegisterQuery = larGen.sample.get.copy(agencyCode = 3)
@@ -72,6 +79,16 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     }
 
   }
+
+  //"LAR total repository" must {
+  //  "Store total lar count" in {
+
+  //    val lars = lar100ListGen.sample.get
+
+  //    1 mustBe 1
+  //    //val f = Await.result(Future.sequence(lars.map(lar => repository.insertOrUpdate(lar))), timeout)
+  //  }
+  //}
 
 }
 
