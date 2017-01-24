@@ -1,15 +1,18 @@
 package hmda.query.repository.filing
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{ Flow, Keep, RunnableGraph, Sink }
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister }
 
 import scala.concurrent.duration._
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterEach, MustMatchers }
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, BeforeAndAfterEach, MustMatchers }
 
 import scala.concurrent.{ Await, Future }
 
-class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingComponent with DbConfiguration with BeforeAndAfterEach with LarGenerators {
+class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingComponent with DbConfiguration with BeforeAndAfterEach with BeforeAndAfterAll with LarGenerators {
 
   import LarConverter._
 
@@ -18,6 +21,9 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   val repository = new LarRepository(config)
   val totalRepository = new LarTotalRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
+
+  implicit val system = ActorSystem()
+  implicit val materializer = ActorMaterializer()
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -31,6 +37,11 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     Await.result(modifiedLarRepository.dropSchema(), timeout)
     Await.result(totalRepository.dropSchema(), timeout)
     Await.result(repository.dropSchema(), timeout)
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    system.terminate()
   }
 
   "LAR Repository" must {
@@ -81,6 +92,34 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
         case Some(_) => fail
         case None => succeed
       }
+    }
+
+    "Stream rows for a specific respondent id" in {
+      val respId = "resp2"
+      val lar1 = larGen.sample.get.copy(respondentId = respId)
+      val lar2 = larGen.sample.get.copy(respondentId = respId)
+      val lar3 = larGen.sample.get.copy(respondentId = respId)
+      val lar4 = larGen.sample.get.copy(respondentId = "resp3")
+      repository.insertOrUpdate(lar1)
+      repository.insertOrUpdate(lar2)
+      repository.insertOrUpdate(lar3)
+      repository.insertOrUpdate(lar4)
+      totalRepository.count("resp2").map(x => x mustBe Some(3))
+      totalRepository.count("resp3").map(x => x mustBe Some(1))
+
+      val lars = modifiedLarRepository.findByRespondentIdSource(respId)
+      val count = Flow[ModifiedLoanApplicationRegister].map(_ => 1)
+      val sum: Sink[Int, Future[Int]] = Sink.fold[Int, Int](0)(_ + _)
+
+      val counterGraph: RunnableGraph[Future[Int]] =
+        lars
+          .via(count)
+          .toMat(sum)(Keep.right)
+
+      val sumF: Future[Int] = counterGraph.run()
+      val result = Await.result(sumF, timeout)
+      result mustBe 3
+
     }
 
   }
