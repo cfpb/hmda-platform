@@ -121,10 +121,12 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
         .map(e => e.asInstanceOf[TsParsed].ts)
-        .map(ts => validateTs(ts, ctx).toEither)
+        .map(ts => (ts, validateTs(ts, ctx).toEither))
         .map {
-          case Right(ts) => ts
-          case Left(errors) => TsValidationErrors(errors.list.toList)
+          case (_, Right(ts)) => ts
+          case (ts, Left(errors)) =>
+            self ! ts
+            TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
