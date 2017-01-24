@@ -82,4 +82,3 @@ case class LoanApplicationRegister(
       (" " * 270)
   }
 }
-

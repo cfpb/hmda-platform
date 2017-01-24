@@ -24,7 +24,6 @@ case class TransmittalSheet(
       s"|${respondent.city}|${respondent.state}|${respondent.zipCode}" +
       s"|${parent.name}|${parent.address}|${parent.city}|${parent.state}" +
       s"|${parent.zipCode}|${contact.name}|${contact.phone}|${contact.fax}|${contact.email}"
-
   }
 
   /**
@@ -58,4 +57,3 @@ case class TransmittalSheet(
   override def respondentId: String = respondent.id
 
 }
-
