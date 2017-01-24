@@ -47,7 +47,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
     case CreateInstitution(i) =>
       if (!state.institutionIds.contains(i.id)) {
         persist(InstitutionCreated(i)) { e =>
-          log.debug(s"Persisted: $i")
+          log.warning(s"Persisted: $i")
           updateState(e)
           sender() ! Some(e.i)
         }

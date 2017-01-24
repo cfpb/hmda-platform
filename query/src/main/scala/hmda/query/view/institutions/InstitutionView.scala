@@ -68,6 +68,7 @@ class InstitutionView extends HmdaPersistentActor {
       sender() ! institutions
 
     case EventWithSeqNr(seqNr, event) =>
+      log.warning("EVENT: " + event)
       if (counter >= snapshotCounter) {
         counter = 0
         saveSnapshot(state)

@@ -48,7 +48,7 @@ class InstitutionDBProjection extends HmdaActor {
 
       case InstitutionModified(i) =>
         val query = toInstitutionQuery(i)
-        log.info(s"Modified: $query")
+        log.warning(s"Modified: $query")
         repository.update(query)
           .map(x => InstitutionUpdated(x)) pipeTo sender()
     }
