@@ -2,7 +2,7 @@ package hmda.api.http
 
 import hmda.api.model._
 import hmda.model.edits.EditMetaDataLookup
-import hmda.model.fi.HmdaFileRow
+import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.engine._
 import spray.json.{ JsNumber, JsObject, JsString, JsValue }
@@ -71,8 +71,8 @@ trait ValidationErrorConverter {
   }
 
   private def relevantRow(err: ValidationError, vs: HmdaFileValidationState): HmdaFileRow = {
-    if (err.ts) vs.ts.get
-    else vs.lars.find(lar => lar.loan.id == err.errorId).get
+    if (err.ts) vs.ts.getOrElse(HmdaRowError())
+    else vs.lars.find(lar => lar.loan.id == err.errorId).getOrElse(HmdaRowError())
   }
 
   private def relevantFields(err: ValidationError, row: HmdaFileRow): JsObject = {
