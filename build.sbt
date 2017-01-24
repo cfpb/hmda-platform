@@ -43,6 +43,7 @@ lazy val hmda = (project in file("."))
     modelJS,
     parserJVM,
     parserJS,
+    panel,
     persistenceModel,
     persistence,
     api,
@@ -96,6 +97,14 @@ lazy val validation = (project in file("validation"))
   .settings(
     libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
   ).dependsOn(parserJVM % "compile->compile;test->test")
+
+lazy val panel = (project in file("panel"))
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    libraryDependencies ++= akkaPersistenceDeps
+  ).dependsOn(persistenceModel % "compile->compile;test->test")
+  .dependsOn(persistence % "compile->compile;test->test")
+  .dependsOn(parserJVM % "compile->compile;test->test")
 
 lazy val persistenceModel = (project in file("persistence-model"))
   .settings(hmdaBuildSettings:_*)
