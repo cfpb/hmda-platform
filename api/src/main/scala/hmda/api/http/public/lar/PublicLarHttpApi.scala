@@ -3,7 +3,7 @@ package hmda.api.http.public.lar
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.HttpEntity.ChunkStreamPart
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse, MediaTypes }
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import hmda.api.http.HmdaCustomDirectives
