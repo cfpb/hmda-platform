@@ -12,8 +12,12 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
+import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
 import hmda.query.view.institutions.InstitutionView
+import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
+import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
+import hmda.future.util.FutureRetry._
 
 import scala.concurrent.ExecutionContext
 
@@ -51,15 +55,27 @@ object HmdaPlatform {
         log.info(s"Started institutions at ${actor.path}")
       }
 
+    // Start query Actors
+    val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
+      .mapTo[ActorRef]
+
     //Load demo data
     lazy val isDemo = config.getBoolean("hmda.isDemo")
     if (isDemo) {
-      DemoData.loadDemoData(system)
-    }
+      implicit val scheduler = system.scheduler
+      val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
+      log.info("...LOADING DEMO DATA...")
+      val institutionCreatedF = for {
+        i <- institutionViewF
+        q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
+        s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
+      } yield s
 
-    // Start query Actors
-    (querySupervisor ? FindActorByName(InstitutionView.name))
-      .mapTo[ActorRef]
+      institutionCreatedF.map { x =>
+        log.info(x.toString)
+        DemoData.loadDemoData(system)
+      }
+    }
 
   }
 

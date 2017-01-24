@@ -1,6 +1,6 @@
 package hmda.persistence.model
 
-import akka.actor.ActorRef
+import akka.actor.{ ActorRef, Terminated }
 
 object HmdaSupervisorActor {
   case class FindActorByName(name: String)
@@ -15,6 +15,10 @@ abstract class HmdaSupervisorActor extends HmdaActor {
   override def receive: Receive = {
     case FindActorByName(name) =>
       sender() ! findActorByName(name)
+
+    case Terminated(ref) =>
+      log.info(s"actor ${ref.path} terminated")
+      actors = actors.filterNot { case (_, value) => value == ref }
   }
 
   protected def createActor(name: String): ActorRef

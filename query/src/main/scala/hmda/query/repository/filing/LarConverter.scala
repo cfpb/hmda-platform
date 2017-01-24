@@ -8,7 +8,7 @@ object LarConverter {
 
   implicit def toLoanApplicationRegisterQuery(lar: LoanApplicationRegister) = {
     LoanApplicationRegisterQuery(
-      lar.respondentId + lar.agencyCode,
+      lar.respondentId + lar.agencyCode + lar.loan.id,
       lar.respondentId,
       lar.agencyCode,
       lar.preapprovals,

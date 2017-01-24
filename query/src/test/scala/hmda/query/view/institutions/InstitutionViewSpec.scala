@@ -1,5 +1,6 @@
 package hmda.query.view.institutions
 
+import akka.actor.{ Actor, ActorRef }
 import akka.testkit.TestProbe
 import hmda.model.institution.InstitutionGenerators
 import hmda.persistence.messages.CommonMessages.GetState
@@ -7,6 +8,7 @@ import hmda.persistence.messages.events.institutions.InstitutionEvents.{ Institu
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
 import hmda.query.view.institutions.InstitutionView._
+import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 
 class InstitutionViewSpec extends ActorSpec {
 
@@ -16,6 +18,8 @@ class InstitutionViewSpec extends ActorSpec {
   val i4 = i3.copy(cra = true)
 
   val institutionQuery = createInstitutionView(system)
+
+  implicit val ec = system.dispatcher
 
   val probe = TestProbe()
 
@@ -47,6 +51,10 @@ class InstitutionViewSpec extends ActorSpec {
     "return full list of institutions" in {
       probe.send(institutionQuery, GetState)
       probe.expectMsg(Set(i1, i2, i4))
+    }
+    "return reference to institution query projector" in {
+      probe.send(institutionQuery, GetProjectionActorRef)
+      probe.expectMsgType[ActorRef]
     }
   }
 
