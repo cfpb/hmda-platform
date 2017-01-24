@@ -22,15 +22,15 @@ object HmdaPublicApi {
 
 class HmdaPublicApi extends HttpApi with BaseHttpApi with PublicHttpApi {
 
-  val config = ConfigFactory.load()
+  val configuration = ConfigFactory.load()
 
-  lazy val httpTimeout = config.getInt("hmda.http.timeout")
+  lazy val httpTimeout = configuration.getInt("hmda.http.timeout")
   override implicit val timeout = Timeout(httpTimeout.seconds)
 
   override val name: String = "hmda-public-api"
 
-  override val host: String = config.getString("hmda.http.publicHost")
-  override val port: Int = config.getInt("hmda.http.publicPort")
+  override val host: String = configuration.getString("hmda.http.publicHost")
+  override val port: Int = configuration.getInt("hmda.http.publicPort")
 
   override implicit val ec: ExecutionContext = context.dispatcher
   override implicit val system: ActorSystem = context.system
