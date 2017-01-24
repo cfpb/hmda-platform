@@ -2,12 +2,12 @@ package hmda.query.repository.filing
 
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.LoanApplicationRegisterQuery
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister }
 
 import scala.concurrent.duration._
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterEach, MustMatchers }
 
-import scala.concurrent.Await
+import scala.concurrent.{ Await, Future }
 
 class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingComponent with DbConfiguration with BeforeAndAfterEach with LarGenerators {
 
@@ -23,10 +23,12 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     super.beforeEach()
     Await.result(repository.createSchema(), timeout)
     Await.result(totalRepository.createSchema(), timeout)
+    Await.result(modifiedLarRepository.createSchema(), timeout)
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
+    Await.result(modifiedLarRepository.dropSchema(), timeout)
     Await.result(totalRepository.dropSchema(), timeout)
     Await.result(repository.dropSchema(), timeout)
   }
@@ -38,6 +40,9 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       repository.insertOrUpdate(lar1).map(x => x mustBe 1)
       repository.insertOrUpdate(lar2).map(x => x mustBe 1)
       totalRepository.count("resp1").map(x => x mustBe Some(2))
+      modifiedLarRepository.findByRespondentId(lar1.respondentId).map {
+        case xs: Seq[ModifiedLoanApplicationRegister] => xs.head.respondentId mustBe lar1.respondentId
+      }
     }
     "modify records and read them back" in {
       val lar: LoanApplicationRegisterQuery = larGen.sample.get.copy(agencyCode = 3)
@@ -79,16 +84,6 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     }
 
   }
-
-  //"LAR total repository" must {
-  //  "Store total lar count" in {
-
-  //    val lars = lar100ListGen.sample.get
-
-  //    1 mustBe 1
-  //    //val f = Await.result(Future.sequence(lars.map(lar => repository.insertOrUpdate(lar))), timeout)
-  //  }
-  //}
 
 }
 

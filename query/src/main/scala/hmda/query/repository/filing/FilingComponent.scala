@@ -574,47 +574,51 @@ trait FilingComponent { this: DbConfiguration =>
     private val createViewSchema =
       sqlu"""
             create view modified_lar as
-            select id,
-            respondentId,
-            agencyCode,
-            preapprovals,
-            actionTakenType,
-            purchaserType,
-            rateSpread,
-            hoepaStatus,
-            lienStatus,
-            loanType,
-            propertyType,
-            purpose,
-            occupancy,
-            amount,
-            msa,
-            state,
-            county,
-            tract,
-            ethnicity,
-            coEthnicity,
-            race1,
-            race2,
-            race3,
-            race4,
-            race5,
-            coRace1,
-            coRace2,
-            coRace3,
-            coRace4,
-            coRace5,
-            sex,
-            coSex,
-            income,
-            denialReason1,
-            denialReason2,
-            denialReason3,
-            period
+            select
+              id,
+              respondent_id,
+              agency_code,
+              preapprovals,
+              action_taken_type,
+              purchaser_type,
+              rate_spread,
+              hoepa_status,
+              lien_status,
+              loan_type,
+              property_type,
+              purpose,
+              occupancy,
+              amount,
+              msa,
+              state,
+              county,
+              tract,
+              ethnicity,
+              co_ethnicity,
+              race1,
+              race2,
+              race3,
+              race4,
+              race5,
+              co_race1,
+              co_race2,
+              co_race3,
+              co_race4,
+              co_race5,
+              sex,
+              co_sex,
+              income,
+              denial_reason1,
+              denial_reason2,
+              denial_reason3,
+              period
+            from lars
           """
 
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
+
+    def findByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).result)
 
   }
 
