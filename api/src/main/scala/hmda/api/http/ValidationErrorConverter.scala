@@ -81,13 +81,13 @@ trait ValidationErrorConverter {
 
     val jsVals: Seq[(String, JsValue)] = fieldNames.map { fieldName =>
       val fieldValue = row.valueOf(fieldName)
-      (fieldName, jsonify(fieldValue))
+      (fieldName, toJsonVal(fieldValue))
     }
 
     JsObject(jsVals: _*)
   }
 
-  private def jsonify(value: Any) = {
+  private def toJsonVal(value: Any) = {
     value match {
       case i: Int => JsNumber(i)
       case l: Long => JsNumber(l)
