@@ -5,18 +5,20 @@ import akka.http.scaladsl.model.{ ContentTypes, StatusCodes }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import hmda.api.RequestHeaderUtils
 import hmda.model.fi.lar.LarGenerators
-import org.scalatest.{ BeforeAndAfterEach, MustMatchers, WordSpec }
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, MustMatchers, WordSpec }
 import akka.util.Timeout
+
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import hmda.query.repository.filing.LarConverter._
 
-class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEach
+class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEach with BeforeAndAfterAll
     with ScalatestRouteTest with RequestHeaderUtils with PublicHttpApi with LarGenerators {
 
   override val log: LoggingAdapter = NoLogging
   implicit val ec = system.dispatcher
   val repository = new LarRepository(config)
+  val totalRepository = new LarTotalRepository(config)
 
   val duration = 10.seconds
   override implicit val timeout = Timeout(duration)
@@ -28,16 +30,28 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
   val l2 = toLoanApplicationRegisterQuery(lar2).copy(period = p)
 
   override def beforeEach(): Unit = {
-    super.beforeAll()
+    super.beforeEach()
     Await.result(repository.createSchema(), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
     loadData()
   }
 
   override def afterEach(): Unit = {
-    super.afterAll()
+    super.afterEach()
     Await.result(modifiedLarRepository.dropSchema(), duration)
     Await.result(repository.dropSchema(), duration)
+  }
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    Await.result(modifiedLarRepository.dropSchema(), duration)
+    Await.result(totalRepository.dropSchema(), duration)
+    Await.result(repository.dropSchema(), duration)
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    repository.config.db.close()
   }
 
   private def loadData(): Unit = {
