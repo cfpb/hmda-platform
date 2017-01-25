@@ -25,22 +25,9 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    Await.result(repository.createSchema(), timeout)
-    Await.result(totalRepository.createSchema(), timeout)
-    Await.result(modifiedLarRepository.createSchema(), timeout)
-  }
-
-  override def afterEach(): Unit = {
-    super.afterEach()
-    Await.result(modifiedLarRepository.dropSchema(), timeout)
-    Await.result(totalRepository.dropSchema(), timeout)
-    Await.result(repository.dropSchema(), timeout)
-  }
-
   override def afterAll(): Unit = {
     super.afterAll()
+    repository.config.db.close()
     system.terminate()
   }
 
