@@ -42,13 +42,6 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
     Await.result(repository.dropSchema(), duration)
   }
 
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    Await.result(modifiedLarRepository.dropSchema(), duration)
-    Await.result(totalRepository.dropSchema(), duration)
-    Await.result(repository.dropSchema(), duration)
-  }
-
   override def afterAll(): Unit = {
     super.afterAll()
     repository.config.db.close()
