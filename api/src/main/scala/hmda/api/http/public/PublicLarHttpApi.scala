@@ -1,4 +1,4 @@
-package hmda.api.http.public.lar
+package hmda.api.http.public
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter

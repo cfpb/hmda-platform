@@ -7,7 +7,6 @@ import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.protocol.public.PublicProtocol
 import akka.http.scaladsl.server.Directives._
-import hmda.api.http.public.lar.PublicLarHttpApi
 
 import scala.concurrent.ExecutionContext
 
