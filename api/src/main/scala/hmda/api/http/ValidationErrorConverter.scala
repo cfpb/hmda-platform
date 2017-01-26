@@ -16,9 +16,8 @@ trait ValidationErrorConverter {
 
     val editResults: Seq[EditResult] = errsByEdit.map {
       case (editName: String, errs: Seq[ValidationError]) =>
-        val description = editDescription(editName)
         val rows: Seq[EditResultRow] = errs.map(e => editDetail(e, vs))
-        EditResult(editName, description, rows)
+        EditResult(editName, editDescription(editName), rows)
     }.toSeq
 
     EditResults(editResults)
