@@ -25,6 +25,11 @@ object EditMetaDataLookup extends ResourceUtils {
 
     }.toSeq
   }
+
+  def forEdit(editName: String): EditMetaData = {
+    values.find(e => e.editNumber == editName)
+      .getOrElse(EditMetaData(editName, "description not found", "description not found", Seq()))
+  }
 }
 
 case class EditMetaData(
