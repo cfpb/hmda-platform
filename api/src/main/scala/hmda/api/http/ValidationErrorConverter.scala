@@ -51,16 +51,13 @@ trait ValidationErrorConverter {
   val editDescriptions = EditMetaDataLookup.values
 
   private def editDetail(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
-    val row = relevantRow(err, vs)
-
-    if (err.ts) EditResultRow(RowId("Transmittal Sheet"), relevantFields(err, row))
-    else EditResultRow(RowId(err.errorId), relevantFields(err, row))
+    if (err.ts) EditResultRow(RowId("Transmittal Sheet"), relevantFields(err, vs))
+    else EditResultRow(RowId(err.errorId), relevantFields(err, vs))
   }
 
   private def rowDetail(err: ValidationError, vs: HmdaFileValidationState): RowEditDetail = {
     val name = err.ruleName
-    val row = relevantRow(err, vs)
-    val fields = relevantFields(err, row)
+    val fields = relevantFields(err, vs)
     RowEditDetail(name, findEditDescription(name), fields)
   }
 
@@ -70,21 +67,22 @@ trait ValidationErrorConverter {
       .getOrElse("")
   }
 
-  private def relevantRow(err: ValidationError, vs: HmdaFileValidationState): HmdaFileRow = {
-    if (err.ts) vs.ts.getOrElse(HmdaRowError())
-    else vs.lars.find(lar => lar.loan.id == err.errorId).getOrElse(HmdaRowError())
-  }
-
-  private def relevantFields(err: ValidationError, row: HmdaFileRow): JsObject = {
+  private def relevantFields(err: ValidationError, vs: HmdaFileValidationState): JsObject = {
     val fieldNames: Seq[String] = editDescriptions.find(e => e.editNumber == err.ruleName)
       .map(_.fieldNames).getOrElse(Seq())
 
     val jsVals: Seq[(String, JsValue)] = fieldNames.map { fieldName =>
+      val row = relevantRow(err, vs)
       val fieldValue = row.valueOf(fieldName)
       (fieldName, toJsonVal(fieldValue))
     }
 
     JsObject(jsVals: _*)
+  }
+
+  private def relevantRow(err: ValidationError, vs: HmdaFileValidationState): HmdaFileRow = {
+    if (err.ts) vs.ts.getOrElse(HmdaRowError())
+    else vs.lars.find(lar => lar.loan.id == err.errorId).getOrElse(HmdaRowError())
   }
 
   private def toJsonVal(value: Any) = {
