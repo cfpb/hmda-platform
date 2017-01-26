@@ -53,9 +53,8 @@ object PanelCsvParser extends App {
     s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
     p <- institutionPersistenceF
   } yield {
-    log.warn("\nHEY\n")
     for (line <- lines) {
-      p ? CreateInstitution(InstitutionParser(line))
+      p ! CreateInstitution(InstitutionParser(line))
     }
   }
 }
