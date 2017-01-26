@@ -20,7 +20,7 @@ case class LoanApplicationRegister(
 ) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
 
   override def valueOf(field: String): Any = {
-    LarFieldMapping.mapping(this)(field)
+    LarFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")
   }
 
   def toCSV: String = {

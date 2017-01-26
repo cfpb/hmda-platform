@@ -15,7 +15,7 @@ case class TransmittalSheet(
 ) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
 
   override def valueOf(field: String): Any = {
-    TsFieldMapping.mapping(this)(field)
+    TsFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")
   }
 
   def toCSV: String = {

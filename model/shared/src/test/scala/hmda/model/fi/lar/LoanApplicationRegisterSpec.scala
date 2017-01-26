@@ -34,4 +34,10 @@ class LoanApplicationRegisterSpec extends PropSpec with PropertyChecks with Must
       lar.valueOf("Co-applicant Ethnicity") mustBe lar.applicant.coEthnicity
     }
   }
+
+  property("must not error when field name doesn't match one in the list") {
+    forAll(larGen) { lar =>
+      lar.valueOf("Nonsense Field") mustBe "error: field name mismatch"
+    }
+  }
 }

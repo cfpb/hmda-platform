@@ -34,4 +34,10 @@ class TransmittalSheetSpec extends PropSpec with PropertyChecks with MustMatcher
       ts.valueOf("Contact Person's Facsimile Number") mustBe ts.contact.fax
     }
   }
+
+  property("must not error when field name doesn't match one in the list") {
+    forAll(tsGen) { ts =>
+      ts.valueOf("Nonsense Field") mustBe "error: field name mismatch"
+    }
+  }
 }

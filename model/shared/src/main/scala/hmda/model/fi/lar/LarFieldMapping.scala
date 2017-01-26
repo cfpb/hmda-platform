@@ -8,6 +8,7 @@ object LarFieldMapping {
     "Agency Code" -> lar.agencyCode,
     "Loan Id" -> lar.loan.id,
     "Loan Application Date" -> lar.loan.applicationDate,
+    "Date Application Received" -> lar.loan.applicationDate,
     "Loan Type" -> lar.loan.loanType,
     "Property Type" -> lar.loan.propertyType,
     "Loan Purpose" -> lar.loan.purpose,
