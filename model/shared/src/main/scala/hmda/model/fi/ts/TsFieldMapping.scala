@@ -6,7 +6,6 @@ object TsFieldMapping {
     "Record Identifier" -> ts.id,
     "Respondent-ID" -> ts.respondent.id,
     "Agency Code" -> ts.agencyCode,
-    "Date of Action" -> ts.timestamp,
     "Timestamp" -> ts.timestamp,
     "Activity Year" -> ts.activityYear,
     "Tax ID" -> ts.taxId,

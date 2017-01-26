@@ -13,7 +13,7 @@ class TransmittalSheetSpec extends PropSpec with PropertyChecks with MustMatcher
 
   property("must return value from friendly field name: Timestamp") {
     forAll(tsGen) { (ts: TransmittalSheet) =>
-      ts.valueOf("Date of Action") mustBe ts.timestamp
+      ts.valueOf("Timestamp") mustBe ts.timestamp
     }
   }
 
