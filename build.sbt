@@ -79,6 +79,7 @@ lazy val parser = (crossProject in file("parser"))
     libraryDependencies ++= commonDeps ++ scalazDeps
   )
   .jsSettings(
+    scalaJSModuleKind := ModuleKind.CommonJSModule,
     scoverage.ScoverageKeys.coverageEnabled := false,
     libraryDependencies ++= Seq(
       "org.scalatest" %%% "scalatest" % Version.scalaTest % "test",
