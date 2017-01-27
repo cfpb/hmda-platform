@@ -3,7 +3,6 @@ package hmda.parser.fi.lar
 import hmda.model.fi.lar._
 
 import scala.collection.immutable.ListMap
-import scala.scalajs.js.annotation.JSExport
 import scalaz._
 import scalaz.Scalaz._
 import scala.util.{ Failure, Success, Try }

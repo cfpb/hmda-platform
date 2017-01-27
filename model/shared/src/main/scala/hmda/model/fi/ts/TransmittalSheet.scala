@@ -3,6 +3,9 @@ package hmda.model.fi.ts
 import hmda.model.fi.HasControlNumber
 import hmda.model.fi.StringPaddingUtils
 
+import scala.scalajs.js.annotation.JSExportAll
+
+@JSExportAll
 case class TransmittalSheet(
     id: Int,
     agencyCode: Int,

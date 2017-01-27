@@ -1,5 +1,8 @@
 package hmda.model.fi.ts
 
+import scala.scalajs.js.annotation.JSExportAll
+
+@JSExportAll
 trait NameAndAddress {
   def name: String
   def address: String

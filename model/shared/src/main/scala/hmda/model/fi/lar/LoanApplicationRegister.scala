@@ -3,6 +3,9 @@ package hmda.model.fi.lar
 import hmda.model.fi.HasControlNumber
 import hmda.model.fi.StringPaddingUtils
 
+import scala.scalajs.js.annotation.JSExportAll
+
+@JSExportAll
 case class LoanApplicationRegister(
     id: Int,
     respondentId: String,
