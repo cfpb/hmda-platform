@@ -87,30 +87,30 @@ which parses into the following structure:
   "gepography": {
     "msa": "45460",
     "state": "18",
-    "county": "165"
+    "county": "165",
     "tract": "0205.00"
   },
   "applicant": {
-    "ethnicity": 2
-    "coEthnicity": 5
-    "race1": 5
-    "race2": ""
-    "race3": ""
-    "race4": ""
-    "race5": ""
-    "coRace1": 8
-    "coRace2": ""
-    "coRace3": ""
-    "coRace4": ""
-    "coRace5": ""
-    "sex": 1
-    "coSex": 5
+    "ethnicity": 2,
+    "coEthnicity": 5,
+    "race1": 5,
+    "race2": "",
+    "race3": "",
+    "race4": "",
+    "race5": "",
+    "coRace1": 8,
+    "coRace2": "",
+    "coRace3": "",
+    "coRace4": "",
+    "coRace5": "",
+    "sex": 1,
+    "coSex": 5,
     "income": "23"
   },
   "purchaserType": 1,
   "denial": {
-    "reason1": "0"
-    "reason2": ""
+    "reason1": "0",
+    "reason2": "",
     "reason3": ""
   },
   "rateSpread": "NA",
@@ -118,4 +118,3 @@ which parses into the following structure:
   "lienStatus": 1
 }
 ```
-
