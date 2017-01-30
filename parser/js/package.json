@@ -1,6 +1,9 @@
 {
   "name": "hmda-file-parser",
-  "version": "1.1.9",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=6.x"
+  },
   "description": "Home Mortgage Disclosure Act (HMDA) submission file parser",
   "main": "target/scala-2.12/parserjs-opt.js",
   "scripts": {
@@ -10,9 +13,9 @@
     "type": "git",
     "url": "git+https://github.com/cfpb/hmda-platform.git"
   },
-  "author": "CFPB",
+  "author": "Consumer Financial Protection Bureau",
   "readme": "README.md",
-  "license": "CC0",
+  "license": "CC0-1.0",
   "bugs": {
     "url": "https://github.com/cfpb/hmda-platform/issues"
   },
