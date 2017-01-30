@@ -30,13 +30,13 @@ Which parses into the following structure:
 {
   "id": 1,
   "agencyCode": 1,
-  "timestamp": 201503111034
+  "timestamp": 201503111034,
   "activityYear": 2017,
   "taxId": "35-0704860",
   "totalLines": 10,
   "respondent": {
     "id": 21,
-    "name": "CENTRAL FIRST BANK,
+    "name": "CENTRAL FIRST BANK",
     "address": "221 Hesburgh Library",
     "city": "Notre Dame",
     "state": "IN",
