@@ -11,6 +11,7 @@
     "url": "git+https://github.com/cfpb/hmda-platform.git"
   },
   "author": "CFPB",
+  "readme": "README.md",
   "license": "CC0",
   "bugs": {
     "url": "https://github.com/cfpb/hmda-platform/issues"
