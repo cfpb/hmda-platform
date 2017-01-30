@@ -39,7 +39,7 @@ To instantiate the parser:
 
 ```javascript
 var js = require('hmda-file-parser');
-var parser = new hmda.parser.fi.CsvReader();
+var parser = new hmda.parser.fi.CsvParser();
 ```
 Here are a couple of examples parsing HMDA data
 
