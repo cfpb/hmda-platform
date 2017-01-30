@@ -2,7 +2,29 @@
 
 Standalone parser for the Home Mortgage Disclosure Act (HMDA) submission file, as per the 2017 [File Specification Guide](http://www.consumerfinance.gov/data-research/hmda/static/for-filers/2017/2017-HMDA-FIG.pdf)
 
-To run in a Node.js environment, do the following:
+## Building
+
+The standalone HMDA file parser is built with [Scala.js](https://www.scala-js.org/).
+To build this project, clone the repository from GitHub:
+
+```shell
+git clone https://github.com/cfpb/hmda-platform.git
+```
+
+[`SBT`](https://github.com/sbt/sbt) is required to build the library.
+
+```shell
+cd hmda-platform
+$ sbt
+> project parserJS
+> fullOptJS
+```
+
+This will build the production ready `JavaScript` library containing the parser, and place it in parser/js/target/scala-2.12/parserjs-opt.js
+
+## Using
+
+This library is published to [NPM](https://www.npmjs.com/), to run in a Node.js environment, do the following:
 
 ```javascript
 npm install hmda-file-parser
