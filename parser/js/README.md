@@ -22,6 +22,9 @@ $ sbt
 
 This will build the production ready `JavaScript` library containing the parser, and place it in parser/js/target/scala-2.12/parserjs-opt.js
 
+NOTE: Building the project is only necessary if you intend to work with it locally from source code, or work on the implementation.
+If you just want to use the library, see the next section
+
 ## Using
 
 This library is published to [NPM](https://www.npmjs.com/), to run in a Node.js environment, do the following:
