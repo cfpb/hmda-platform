@@ -1,6 +1,6 @@
 {
   "name": "hmda-file-parser",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Home Mortgage Disclosure Act (HMDA) submission file parser",
   "main": "target/scala-2.12/parserjs-opt.js",
   "scripts": {
