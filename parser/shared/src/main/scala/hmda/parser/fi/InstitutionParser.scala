@@ -32,10 +32,7 @@ object InstitutionParser {
   }
 
   private def stringToBoolean(s: String): Boolean = {
-    s match {
-      case "1" => true
-      case "0" => false
-    }
+    s == "1"
   }
 
   private def toIntSafe(s: String): Int = {
