@@ -8,9 +8,7 @@ import akka.util.{ ByteString, Timeout }
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Framing
-import akka.stream.scaladsl.{ FileIO, Flow, Sink, Source }
-import com.typesafe.config.ConfigFactory
-import hmda.future.util.FutureRetry._
+import akka.stream.scaladsl.{ FileIO, Flow, Sink }
 import hmda.model.institution.Institution
 import hmda.persistence.messages.CommonMessages._
 
@@ -19,14 +17,9 @@ import hmda.parser.fi.InstitutionParser
 import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
-import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.DbConfiguration
-import hmda.query.HmdaQuerySupervisor._
-import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
 import hmda.query.repository.institutions.InstitutionComponent
-import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Await
