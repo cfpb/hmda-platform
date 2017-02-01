@@ -40,7 +40,7 @@ class InstitutionDBProjection extends HmdaActor {
     case event: InstitutionEvent => event match {
       case InstitutionCreated(i) =>
         val query = toInstitutionQuery(i)
-        log.warning(s"Created: $query")
+        log.info(s"Created: $query")
         repository.insertOrUpdate(query)
           .map { x =>
             InstitutionInserted(x)
@@ -48,7 +48,7 @@ class InstitutionDBProjection extends HmdaActor {
 
       case InstitutionModified(i) =>
         val query = toInstitutionQuery(i)
-        log.warning(s"Modified: $query")
+        log.info(s"Modified: $query")
         repository.update(query)
           .map(x => InstitutionUpdated(x)) pipeTo sender()
     }

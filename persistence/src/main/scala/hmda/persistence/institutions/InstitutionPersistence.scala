@@ -1,7 +1,6 @@
 package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import hmda.model.institution.Institution
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.messages.CommonMessages._
@@ -40,7 +39,6 @@ class InstitutionPersistence extends HmdaPersistentActor {
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
-    saveSnapshot(state)
   }
 
   override def persistenceId: String = s"$name"
@@ -49,7 +47,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
     case CreateInstitution(i) =>
       if (!state.institutionIds.contains(i.id)) {
         persist(InstitutionCreated(i)) { e =>
-          log.warning(s"Persisted: $i")
+          log.debug(s"Persisted: $i")
           updateState(e)
           sender() ! Some(e.i)
         }
@@ -74,12 +72,6 @@ class InstitutionPersistence extends HmdaPersistentActor {
       sender() ! state.institutionIds
 
     case Shutdown => context stop self
-  }
-
-  override def receiveRecover: Receive = {
-    case SnapshotOffer(_, s: InstitutionPersistenceState) =>
-      println("recovered")
-      state = s
   }
 
 }
