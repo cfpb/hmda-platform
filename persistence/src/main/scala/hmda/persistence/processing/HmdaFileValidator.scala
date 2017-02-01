@@ -150,13 +150,14 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       }
 
     case lar: LoanApplicationRegister =>
-      persist(LarValidated(lar)) { e =>
+      val validated = LarValidated(lar)
+      persist(validated) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
         for {
           f <- fHmdaFiling
         } yield {
-          f ! LarValidated(lar)
+          f ! validated
         }
       }
 
