@@ -1,60 +1,70 @@
 package hmda.panel
 
+import java.io.File
+
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem }
-import akka.util.Timeout
+import akka.util.{ ByteString, Timeout }
 import akka.pattern.ask
-import com.typesafe.config.ConfigFactory
-import hmda.future.util.FutureRetry._
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Framing
+import akka.stream.scaladsl.{ FileIO, Flow, Sink }
+import hmda.model.institution.Institution
+import hmda.persistence.messages.CommonMessages._
 
 import scala.concurrent.duration._
 import hmda.parser.fi.InstitutionParser
 import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
-import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.HmdaQuerySupervisor._
-import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
-import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
+import hmda.query.DbConfiguration
+import hmda.query.repository.institutions.InstitutionComponent
 import org.slf4j.LoggerFactory
 
-import scala.io.Source
-import scala.util.Try
+import scala.concurrent.Await
 
-object PanelCsvParser extends App {
-  val config = ConfigFactory.load()
-
-  val system: ActorSystem = ActorSystem("hmda")
+object PanelCsvParser extends InstitutionComponent with DbConfiguration {
+  implicit val system: ActorSystem = ActorSystem("hmda")
+  implicit val materializer = ActorMaterializer()
   implicit val timeout: Timeout = Timeout(5.second)
   implicit val ec = system.dispatcher
   val log = LoggerFactory.getLogger("hmda")
 
   val supervisor = createSupervisor(system)
-  val querySupervisor = createQuerySupervisor(system)
   val institutionPersistenceF = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-  val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
-    .mapTo[ActorRef]
 
-  var file: Source = _
-  if (Try(Source.fromFile(args(0))).isSuccess) {
-    file = Source.fromFile(args(0))
-  } else {
-    println("\nWARNING: Unable to read file input.")
-    System.exit(1)
-  }
-  val lines = file.getLines().toList.tail
+  val repository = new InstitutionRepository(config)
 
-  implicit val scheduler = system.scheduler
-  val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
-  for {
-    i <- institutionViewF
-    q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
-    s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
-    p <- institutionPersistenceF
-  } yield {
-    for (line <- lines) {
-      p ! CreateInstitution(InstitutionParser(line))
+  def main(args: Array[String]): Unit = {
+
+    if (args.length < 1) {
+      println("ERROR: Please provide institutions file")
+      sys.exit(1)
     }
+
+    val timeout = 5.seconds
+
+    Await.result(repository.createSchema(), timeout)
+    val institutionPersistence = Await.result(institutionPersistenceF, timeout)
+
+    val source = FileIO.fromPath(new File(args(0)).toPath)
+
+    source
+      .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
+      .drop(1)
+      .via(byte2StringFlow)
+      .via(parseInstitutions)
+      .map(i => CreateInstitution(i))
+      .runWith(Sink.actorRef(institutionPersistence, Shutdown))
+
   }
+
+  private def parseInstitutions: Flow[String, Institution, NotUsed] =
+    Flow[String]
+      .map(x => InstitutionParser(x))
+
+  private def byte2StringFlow: Flow[ByteString, String, NotUsed] =
+    Flow[ByteString].map(bs => bs.utf8String)
+
 }
