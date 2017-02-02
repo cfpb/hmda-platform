@@ -17,12 +17,12 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    Await.result(repository.createSchema(), timeout)
+    Await.result(larRepository.createSchema(), timeout)
   }
 
   override def afterEach(): Unit = {
     super.afterEach()
-    Await.result(repository.dropSchema(), timeout)
+    Await.result(larRepository.dropSchema(), timeout)
   }
 
   val probe = TestProbe()
@@ -30,7 +30,7 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
   "Filing database projection" must {
     val projection = createHmdaFilingDBProjection(system, "2017")
     "create schema" in {
-      Await.result(repository.dropSchema(), timeout)
+      Await.result(larRepository.dropSchema(), timeout)
       probe.send(projection, CreateSchema)
       probe.expectMsg(FilingSchemaCreated())
     }
@@ -38,6 +38,16 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
       val lar = larGen.sample.get
       probe.send(projection, LarValidated(lar))
       probe.expectMsg(LarInserted(1))
+    }
+    "Delete records by respondent id" in {
+      val lar1 = larGen.sample.get
+      val lar2 = larGen.sample.get
+      probe.send(projection, LarValidated(lar1))
+      probe.expectMsg(LarInserted(1))
+      probe.send(projection, LarValidated(lar2))
+      probe.expectMsg(LarInserted(1))
+      probe.send(projection, DeleteLars(lar1.respondentId))
+      probe.expectMsg(LarsDeleted(lar1.respondentId))
     }
   }
 
