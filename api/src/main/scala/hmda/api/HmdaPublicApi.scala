@@ -1,24 +1,30 @@
 package hmda.api
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.event.Logging
-import akka.pattern.pipe
+import akka.pattern.{ ask, pipe }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.BaseHttpApi
-
+import hmda.api.http.public.InstitutionSearchPaths
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.query.view.institutions.InstitutionView
+import akka.http.scaladsl.server.Directives._
+import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaPublicApi {
-  def props(): Props = Props(new HmdaPublicApi)
+  def props(querySupervisor: ActorRef): Props = Props(new HmdaPublicApi(querySupervisor))
 }
 
-class HmdaPublicApi
+class HmdaPublicApi(querySupervisor: ActorRef)
     extends HttpApi
-    with BaseHttpApi {
+    with BaseHttpApi
+    with InstitutionSearchPaths {
 
   val config = ConfigFactory.load()
 
@@ -31,7 +37,12 @@ class HmdaPublicApi
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val paths: Route = routes(s"$name")
+  val duration = config.getInt("hmda.http.timeout").seconds
+  override implicit val timeout = Timeout(duration)
+  val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
+    .mapTo[ActorRef]
+
+  override val paths: Route = routes(s"$name") ~ institutionSearchPath(institutionViewF)
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
     host,

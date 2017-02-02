@@ -22,6 +22,7 @@ object InstitutionView {
 
   case class GetInstitutionById(institutionId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
+  case class FindInstitutionByPeriodAndDomain(domain: String) extends Command
 
   def props(): Props = Props(new InstitutionView)
 
@@ -85,6 +86,9 @@ class InstitutionView extends HmdaPersistentActor {
     case GetState =>
       sender() ! state.institutions
 
+    case FindInstitutionByPeriodAndDomain(domain) =>
+      sender() ! state.institutions.filter(i => i.emailDomains.map(e => extractDomain(e)).contains(domain))
+
   }
 
   override def receiveRecover: Receive = {
@@ -102,6 +106,14 @@ class InstitutionView extends HmdaPersistentActor {
     state = state.updated(event)
     counter += 1
     queryProjector ! event
+  }
+
+  private def extractDomain(email: String): String = {
+    val parts = email.split("@")
+    if (parts.length > 1)
+      parts(1)
+    else
+      ""
   }
 
 }
