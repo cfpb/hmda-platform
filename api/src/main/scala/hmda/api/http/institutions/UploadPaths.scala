@@ -17,13 +17,15 @@ import akka.util.{ ByteString, Timeout }
 import hmda.api.http.HmdaCustomDirectives
 import hmda.persistence.messages.CommonMessages._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
-import hmda.model.fi.{ Created, Submission, SubmissionId, Uploaded, Failed }
+import hmda.model.fi.{ Created, Failed, Submission, SubmissionId, Uploaded }
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload }
 import hmda.persistence.processing.SubmissionManager
+import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
+import hmda.query.projections.filing.HmdaFilingDBProjection.{ CreateSchema, DeleteLars }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -44,8 +46,11 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
         val submissionId = SubmissionId(institutionId, period, seqNr)
         val uploadTimestamp = Instant.now.toEpochMilli
         val supervisor = system.actorSelection("/user/supervisor")
+        val querySupervisor = system.actorSelection("/user/query-supervisor")
         val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
         val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
+        (supervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
+        (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
 
         val fUploadSubmission = for {
           p <- fProcessingActor
@@ -55,8 +60,11 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
 
         onComplete(fUploadSubmission) {
           case Success((submission, true, processingActor)) =>
+            val queryProjector = system.actorSelection(s"/user/query-supervisor/HmdaFilingView-$period/queryProjector")
+            queryProjector ! CreateSchema
+            queryProjector ! DeleteLars(institutionId)
             uploadFile(processingActor, uploadTimestamp, uri.path, submission)
-          case Success((submission, false, _)) =>
+          case Success((_, false, _)) =>
             val errorResponse = Failed(s"Submission $seqNr not available for upload")
             complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submissionId, errorResponse, 0L, 0L)))
           case Failure(error) =>

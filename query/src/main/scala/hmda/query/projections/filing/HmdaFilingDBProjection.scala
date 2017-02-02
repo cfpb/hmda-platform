@@ -13,13 +13,18 @@ import scala.concurrent.ExecutionContext
 
 object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
 
-  val repository = new LarRepository(config)
+  val larRepository = new LarRepository(config)
+  val larTotalsRepository = new LarTotalRepository(config)
 
   case object CreateSchema extends Command
   case object DropSchema extends Command
+
+  case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
   case class FilingSchemaDropped() extends Event
+  case class LarsDeleted(respondentId: String) extends Event
+
   def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
 
   def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
@@ -37,17 +42,28 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
 
   override def receive: Receive = {
     case CreateSchema =>
-      repository.createSchema().map(_ => FilingSchemaCreated()) pipeTo sender()
+      val schemaCreated = for {
+        s <- larRepository.createSchema()
+      } yield s
+
+      schemaCreated.map { _ =>
+        larTotalsRepository.createSchema()
+        FilingSchemaCreated()
+      } pipeTo sender()
+
+    case DeleteLars(respondentId) =>
+      larRepository.deleteByRespondentId(respondentId)
+        .map(_ => LarsDeleted(respondentId)) pipeTo sender()
 
     case DropSchema =>
-      repository.dropSchema().map(_ => FilingSchemaDropped()) pipeTo sender()
+      larRepository.dropSchema().map(_ => FilingSchemaDropped()) pipeTo sender()
 
     case event: HmdaValidatorEvent => event match {
       case LarValidated(lar) =>
         val larQuery = implicitly[LoanApplicationRegisterQuery](lar)
         val larWithPeriod = larQuery.copy(period = filingPeriod)
         log.info(s"Inserted: ${larWithPeriod.toString}")
-        repository.insertOrUpdate(larWithPeriod)
+        larRepository.insertOrUpdate(larWithPeriod)
           .map(x => LarInserted(x)) pipeTo sender()
     }
 
