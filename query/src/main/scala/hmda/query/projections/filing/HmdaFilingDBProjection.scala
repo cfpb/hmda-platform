@@ -1,13 +1,14 @@
 package hmda.query.projections.filing
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.pipe
-import hmda.persistence.messages.CommonMessages.{ Command, Event }
-import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ HmdaValidatorEvent, LarValidated }
+import hmda.persistence.messages.CommonMessages.{Command, Event}
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{HmdaValidatorEvent, LarValidated}
 import hmda.persistence.model.HmdaActor
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.FilingComponent
+import org.h2.command.ddl.DropSchema
 
 import scala.concurrent.ExecutionContext
 
@@ -17,12 +18,12 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val larTotalsRepository = new LarTotalRepository(config)
 
   case object CreateSchema extends Command
-  case object DropSchema extends Command
+  case object DeleteSchema extends Command
 
   case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
-  case class FilingSchemaDropped() extends Event
+  case class FilingSchemaDeleted() extends Event
   case class LarsDeleted(respondentId: String) extends Event
 
   def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
@@ -55,8 +56,8 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
       larRepository.deleteByRespondentId(respondentId)
         .map(_ => LarsDeleted(respondentId)) pipeTo sender()
 
-    case DropSchema =>
-      larRepository.dropSchema().map(_ => FilingSchemaDropped()) pipeTo sender()
+    case DeleteSchema =>
+      larRepository.dropSchema().map(_ => FilingSchemaDeleted()) pipeTo sender()
 
     case event: HmdaValidatorEvent => event match {
       case LarValidated(lar) =>

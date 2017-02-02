@@ -12,13 +12,14 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionDBProjection.{CreateSchema, DropSchema}
+import hmda.query.projections.institutions.InstitutionDBProjection.{CreateSchema, DeleteSchema, DropSchema}
 import hmda.query.view.institutions.InstitutionView
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{InstitutionSchemaCreated, InstitutionSchemaDropped}
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{InstitutionSchemaCreated, InstitutionSchemaDeleted, InstitutionSchemaDropped}
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
-import hmda.query.projections.filing.HmdaFilingDBProjection.FilingSchemaDropped
+import hmda.query.projections.filing.HmdaFilingDBProjection.{FilingSchemaDeleted, FilingSchemaDropped}
+import org.h2.command.ddl.DropSchema
 
 import scala.concurrent.ExecutionContext
 
@@ -54,8 +55,8 @@ object HmdaPlatform {
       h <- hmdaFilingViewF
       q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
       o <- retry((h ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
-      s <- (q ? DropSchema).mapTo[InstitutionSchemaDropped]
-      t <- (o ? DropSchema).mapTo[FilingSchemaDropped]
+      s <- (q ? DeleteSchema).mapTo[InstitutionSchemaDeleted]
+      t <- (o ? DeleteSchema).mapTo[FilingSchemaDeleted]
     } yield s
 
     instTableDropF.map { x =>
