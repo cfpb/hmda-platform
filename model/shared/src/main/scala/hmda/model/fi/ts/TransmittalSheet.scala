@@ -1,7 +1,6 @@
 package hmda.model.fi.ts
 
-import hmda.model.fi.HasControlNumber
-import hmda.model.fi.StringPaddingUtils
+import hmda.model.fi.{ HasControlNumber, HmdaFileRow, StringPaddingUtils }
 
 case class TransmittalSheet(
     id: Int,
@@ -13,7 +12,11 @@ case class TransmittalSheet(
     respondent: Respondent,
     parent: Parent,
     contact: Contact
-) extends HasControlNumber with StringPaddingUtils {
+) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
+
+  override def valueOf(field: String): Any = {
+    TsFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")
+  }
 
   def toCSV: String = {
     s"$id|${respondent.id}|$agencyCode|$timestamp|$activityYear" +
@@ -21,7 +24,6 @@ case class TransmittalSheet(
       s"|${respondent.city}|${respondent.state}|${respondent.zipCode}" +
       s"|${parent.name}|${parent.address}|${parent.city}|${parent.state}" +
       s"|${parent.zipCode}|${contact.name}|${contact.phone}|${contact.fax}|${contact.email}"
-
   }
 
   /**
@@ -55,4 +57,3 @@ case class TransmittalSheet(
   override def respondentId: String = respondent.id
 
 }
-
