@@ -12,12 +12,13 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
+import hmda.query.projections.institutions.InstitutionDBProjection.{CreateSchema, DropSchema}
 import hmda.query.view.institutions.InstitutionView
-import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{InstitutionSchemaCreated, InstitutionSchemaDropped}
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
+import hmda.query.projections.filing.HmdaFilingDBProjection.FilingSchemaDropped
 
 import scala.concurrent.ExecutionContext
 
@@ -34,9 +35,32 @@ object HmdaPlatform {
     val querySupervisor = createQuerySupervisor(system)
     implicit val ec = system.dispatcher
 
+    cleanup(system, supervisor, querySupervisor)
     startActors(system, supervisor, querySupervisor)
     startApi(system)
 
+  }
+
+  private def cleanup(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
+    implicit val scheduler = system.scheduler
+    val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
+
+    val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
+      .mapTo[ActorRef]
+    val hmdaFilingViewF = (supervisor ? FindHmdaFiling("")).mapTo[ActorRef]
+
+    val instTableDropF = for {
+      i <- institutionViewF
+      h <- hmdaFilingViewF
+      q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
+      o <- retry((h ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
+      s <- (q ? DropSchema).mapTo[InstitutionSchemaDropped]
+      t <- (o ? DropSchema).mapTo[FilingSchemaDropped]
+    } yield s
+
+    instTableDropF.map { x =>
+      log.info(x.toString)
+    }
   }
 
   private def startActors(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {

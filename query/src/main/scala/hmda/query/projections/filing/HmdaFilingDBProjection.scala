@@ -16,8 +16,10 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val repository = new LarRepository(config)
 
   case object CreateSchema extends Command
+  case object DropSchema extends Command
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
+  case class FilingSchemaDropped() extends Event
   def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
 
   def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
@@ -36,6 +38,9 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
   override def receive: Receive = {
     case CreateSchema =>
       repository.createSchema().map(_ => FilingSchemaCreated()) pipeTo sender()
+
+    case DropSchema =>
+      repository.dropSchema().map(_ => FilingSchemaDropped()) pipeTo sender()
 
     case event: HmdaValidatorEvent => event match {
       case LarValidated(lar) =>
