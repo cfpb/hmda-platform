@@ -36,9 +36,7 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
             case Success(institutions) =>
               if (institutions.nonEmpty) {
                 val institutionSearch = institutions.map(i => institutiontoInstitutionSearch(i))
-                println(institutionSearch)
-                complete("OK")
-                //complete(ToResponseMarshallable(institutions.map(i => institutiontoInstitutionSearch(i))))
+                complete(ToResponseMarshallable(institutions.map(i => institutiontoInstitutionSearch(i))))
               } else {
                 complete(HttpResponse(StatusCodes.NotFound))
               }
