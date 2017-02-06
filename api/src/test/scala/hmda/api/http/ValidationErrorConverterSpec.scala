@@ -38,6 +38,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       larErrors,
       Nil,
       Nil,
+      qualityVerified = false,
       macroErrors
     )
 

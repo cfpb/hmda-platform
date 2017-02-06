@@ -71,6 +71,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
+        qualityVerified = false,
         Seq(e4)
       ))
     }
@@ -104,6 +105,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
           ValidityValidationError("4977566612", "V560", false)
         ),
         Nil,
+        qualityVerified = false,
         List(
           MacroValidationError("Q008", Nil),
           MacroValidationError("Q010", Nil),
@@ -127,6 +129,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
+        qualityVerified = false,
         Vector(e4)
       ))
       probe.send(hmdaFileValidator, JustifyMacroEdit("Q007", j))
@@ -141,6 +144,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
+        qualityVerified = false,
         Vector(e5)
       ))
     }
