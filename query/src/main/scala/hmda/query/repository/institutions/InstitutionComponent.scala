@@ -2,7 +2,7 @@ package hmda.query.repository.institutions
 
 import hmda.query.DbConfiguration
 import hmda.query.model.institutions.InstitutionQuery
-import hmda.query.repository.Repository
+import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
@@ -202,7 +202,7 @@ trait InstitutionComponent { this: DbConfiguration =>
     ) <> (createInstitutionQuery, extractInstitutionQuery)
   }
 
-  class InstitutionRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[InstitutionsTable, String] {
+  class InstitutionRepository(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[InstitutionsTable, String] {
     val table = TableQuery[InstitutionsTable]
     def getId(table: InstitutionsTable) = table.id
 

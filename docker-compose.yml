@@ -7,6 +7,10 @@ services:
       - '9090:8080'
     volumes:
     - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
+    depends_on:
+      - query_db
+    environment:
+      JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
 
   ui:
     build: ../hmda-platform-ui
@@ -40,7 +44,7 @@ services:
       INSTITUTION_SEARCH_URI: https://192.168.99.100:9443
       HOME_PAGE_URI: http://192.168.99.100
       INSTITUTION_SEARCH_VALIDATE_SSL: "OFF"
-      REDIRECT_URIS: '[ "http://192.168.99.100/oidc-callback", "http://192.168.99.100/silent_renew.html" ]'
+      REDIRECT_URIS: '[ "http://192.168.99.100", "http://192.168.99.100/oidc-callback", "http://192.168.99.100/silent_renew.html" ]'
       SUPPORT_EMAIL: 'support@localhost.localdomain'
     volumes:
       - '../hmda-platform-auth/keycloak/themes/hmda:/opt/jboss/keycloak/themes/hmda'
@@ -97,3 +101,13 @@ services:
     image: djfarrelly/maildev:0.14.0
     ports:
       - '1080:80'
+
+  query_db:
+    image: postgres:9.6.1
+    ports:
+      - '54321:5432'
+    environment:
+      POSTGRES_DB: hmda
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+

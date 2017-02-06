@@ -38,9 +38,6 @@ class HmdaSupervisor extends HmdaSupervisorActor {
     case FindProcessingActor(name, submissionId) =>
       sender() ! findProcessingActor(name, submissionId)
 
-    case Terminated(ref) =>
-      log.debug(s"actor ${ref.path} terminated")
-      actors = actors.filterNot { case (_, value) => value == ref }
   }
 
   private def findHmdaFiling(filingPeriod: String) =

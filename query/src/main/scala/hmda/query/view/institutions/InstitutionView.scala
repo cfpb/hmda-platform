@@ -8,13 +8,13 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionType.Bank
-import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shutdown }
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
-import hmda.query.DbConfiguration
 import hmda.query.model.ViewMessages.StreamCompleted
 import hmda.query.projections.institutions.InstitutionDBProjection
+import hmda.query.view.messages.CommonViewMessages._
 
 object InstitutionView {
 
@@ -43,7 +43,7 @@ object InstitutionView {
 
 }
 
-class InstitutionView extends HmdaPersistentActor with DbConfiguration {
+class InstitutionView extends HmdaPersistentActor {
 
   import InstitutionView._
 
@@ -51,7 +51,7 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
 
   var counter = 0
 
-  val queryProjector = context.actorOf(InstitutionDBProjection.props())
+  val queryProjector = context.actorOf(InstitutionDBProjection.props(), "institution-projection")
 
   val conf = ConfigFactory.load()
   val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
@@ -78,6 +78,9 @@ class InstitutionView extends HmdaPersistentActor with DbConfiguration {
         case InstitutionModified(_) =>
           updateState(event)
       }
+
+    case GetProjectionActorRef =>
+      sender() ! queryProjector
 
     case GetState =>
       sender() ! state.institutions

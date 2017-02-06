@@ -14,7 +14,6 @@ import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
-import hmda.persistence.processing.HmdaFiling.SaveLars
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
@@ -113,7 +112,6 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
     case Signed(sId) =>
       log.info(s"Submission signed: ${sId.toString}")
       submissionFSM ! Sign
-      hmdaFilingF.map(actorRef => actorRef ! SaveLars(sId))
       updateFilingStatus(Completed)
 
     case GetActorRef(name) => name match {

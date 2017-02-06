@@ -14,7 +14,6 @@ object HmdaFiling {
 
   val name = "HmdaFiling"
 
-  case class SaveLars(submissionId: SubmissionId) extends Command
   case class AddLar(lar: LoanApplicationRegister) extends Command
   case class LarAdded(lar: LoanApplicationRegister) extends Event
 
@@ -44,13 +43,6 @@ class HmdaFiling(filingPeriod: String) extends HmdaPersistentActor {
   override def persistenceId: String = s"$name-$filingPeriod"
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
-
-    case SaveLars(sId) =>
-      val validatorPersistenceId = s"HmdaFileValidator-${sId.toString}"
-      events(validatorPersistenceId)
-        .filter(x => x.isInstanceOf[LarValidated])
-        .map(e => e.asInstanceOf[LarValidated])
-        .runWith(Sink.actorRef(self, NotUsed))
 
     case LarValidated(lar) =>
       persist(LarValidated(lar)) { e =>

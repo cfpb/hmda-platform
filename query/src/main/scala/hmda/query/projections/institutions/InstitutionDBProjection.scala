@@ -2,7 +2,8 @@ package hmda.query.projections.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionEvent, InstitutionModified }
+import hmda.persistence.messages.CommonMessages.Command
+import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaActor
 import hmda.query.DbConfiguration
 import hmda.query.repository.institutions.InstitutionComponent
@@ -13,8 +14,11 @@ object InstitutionDBProjection extends InstitutionComponent with DbConfiguration
 
   val repository = new InstitutionRepository(config)
 
+  case object CreateSchema extends Command
+  case object DeleteSchema extends Command
   case class InstitutionInserted(n: Int)
   case class InstitutionUpdated(n: Int)
+
   def props(): Props = Props(new InstitutionDBProjection())
 
   def createInstitutionDBProjection(system: ActorSystem): ActorRef = {
@@ -31,12 +35,20 @@ class InstitutionDBProjection extends HmdaActor {
   import hmda.query.projections.institutions.InstitutionDBProjection._
 
   override def receive: Receive = {
+    case CreateSchema =>
+      repository.createSchema().map(_ => InstitutionSchemaCreated()) pipeTo sender()
+
+    case DeleteSchema =>
+      repository.dropSchema().map(_ => InstitutionSchemaDeleted()) pipeTo sender()
+
     case event: InstitutionEvent => event match {
       case InstitutionCreated(i) =>
         val query = toInstitutionQuery(i)
         log.info(s"Created: $query")
         repository.insertOrUpdate(query)
-          .map(x => InstitutionInserted(x)) pipeTo sender()
+          .map { x =>
+            InstitutionInserted(x)
+          } pipeTo sender()
 
       case InstitutionModified(i) =>
         val query = toInstitutionQuery(i)

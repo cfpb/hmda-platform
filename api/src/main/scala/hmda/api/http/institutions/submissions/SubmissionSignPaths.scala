@@ -44,19 +44,13 @@ trait SubmissionSignPaths
         timedPost { uri =>
           entity(as[JsObject]) { json =>
             val verified = json.fields("signed").asInstanceOf[JsBoolean]
-
             val supervisor = system.actorSelection("/user/supervisor")
-            val querySupervisor = system.actorSelection("/user/query-supervisor")
-
             val submissionId = SubmissionId(institutionId, period, id)
-
-            val hmdaFilingViewF = (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
             val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
 
             verified match {
               case JsTrue =>
                 val managerF = for {
-                  filingView <- hmdaFilingViewF
                   manager <- fProcessingActor
                 } yield manager
 

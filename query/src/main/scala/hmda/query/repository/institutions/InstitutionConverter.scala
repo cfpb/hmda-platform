@@ -4,7 +4,9 @@ import java.time.{ Instant, LocalDateTime, ZoneId }
 
 import hmda.model.institution.Institution
 import hmda.query.model.institutions.InstitutionQuery
+
 import scala.language.implicitConversions
+import scala.util.Try
 
 object InstitutionConverter {
 
@@ -20,9 +22,9 @@ object InstitutionConverter {
       i.respondent.externalId.id,
       i.institutionType.entryName,
       i.cra,
-      emails(0),
-      emails(1),
-      emails(2),
+      Try(emails(0)).getOrElse(""),
+      Try(emails(1)).getOrElse(""),
+      Try(emails(2)).getOrElse(""),
       i.respondent.name,
       i.respondent.state,
       i.respondent.city,

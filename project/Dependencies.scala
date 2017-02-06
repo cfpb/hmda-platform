@@ -27,8 +27,9 @@ object Dependencies {
   val typesafeConfig = "com.typesafe" % "config" % Version.config
   val enumeratum = "com.beachape" %% "enumeratum" % Version.enumeratum
   val slick = "com.typesafe.slick" %% "slick" % Version.slick
-  val hikariCP = "com.zaxxer" % "HikariCP" % Version.hikariCP
+  val slickHikariCP = "com.typesafe.slick" %% "slick-hikaricp" % Version.slick
   val h2       = "com.h2database" % "h2" % Version.h2
+  val postgres = "org.postgresql" % "postgresql" % Version.postgresql
   val scalaCsv = "com.github.tototoshi" %% "scala-csv" % Version.scalaCsv
 
 }
