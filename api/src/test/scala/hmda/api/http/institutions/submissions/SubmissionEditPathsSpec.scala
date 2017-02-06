@@ -44,7 +44,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val expectedSummary = SummaryEditResults(
       EditResults(List(s020, s010)),
       EditResults(List(v285, v280)),
-      EditResults.empty,
+      QualityEditResults(false, Seq()),
       MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
     )
 

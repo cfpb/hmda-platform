@@ -9,6 +9,7 @@ trait EditResultsProtocol extends ValidationResultProtocol {
   implicit val larEditResultFormat = jsonFormat2(EditResultRow.apply)
   implicit val editResultFormat = jsonFormat3(EditResult.apply)
   implicit val editResultsFormat = jsonFormat1(EditResults.apply)
+  implicit val qualityEditResultsFormat = jsonFormat2(QualityEditResults.apply)
   implicit val rowEditDetailFormat = jsonFormat3(RowEditDetail.apply)
   implicit val rowResultFormat = jsonFormat2(RowResult.apply)
   implicit val macroResultFormat = jsonFormat2(MacroResult.apply)

@@ -61,7 +61,7 @@ trait SubmissionEditPaths
                 val fEditSummary: Future[SummaryEditResults] = fEditChecks.map { e =>
                   val s = validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
                   val v = validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
-                  val q = validationErrorsToEditResults(e, e.tsQuality, e.larQuality, Quality)
+                  val q = validationErrorsToQualityEditResults(e, e.tsQuality, e.larQuality)
                   val m = validationErrorsToMacroResults(e.larMacro)
                   SummaryEditResults(s, v, q, m)
                 }

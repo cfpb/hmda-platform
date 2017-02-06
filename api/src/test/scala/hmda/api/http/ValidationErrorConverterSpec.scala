@@ -38,7 +38,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       larErrors,
       Nil,
       Nil,
-      qualityVerified = false,
+      qualityVerified = true,
       macroErrors
     )
 
@@ -49,7 +49,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     "be converted to edit check summary" in {
       val syntacticalEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Syntactical)
       val validityEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Validity)
-      val qualityEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Quality)
+      val qualityEditResults = validationErrorsToQualityEditResults(validationState, tsErrors, larErrors)
       val macroEditResults = validationErrorsToMacroResults(larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
@@ -60,9 +60,8 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       summaryEditResults.syntactical.edits.tail.size mustBe 2
 
       summaryEditResults.validity.edits.size mustBe 3
-      summaryEditResults.quality mustBe EditResults(Nil)
+      summaryEditResults.quality mustBe QualityEditResults(true, Seq())
       summaryEditResults.`macro` mustBe MacroResults(Nil)
-
     }
 
     "sort failures by row" in {
