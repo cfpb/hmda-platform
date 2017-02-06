@@ -113,6 +113,9 @@ trait SubmissionEditPaths
       }
     }
 
+
+  /////// Helper Methods ///////
+
   private def completeValidationState(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri, format: String)(implicit ec: ExecutionContext) = {
     val fSingleEdits = fValidationState.map { e =>
       editType match {
