@@ -92,27 +92,28 @@ trait SubmissionEditPaths
             }
           }
         }
-      } ~ timedPost { uri =>
-        if (editType == "macro") {
-          entity(as[MacroEditJustificationWithName]) { justifyEdit =>
-            completeVerified(institutionId, period, seqNr, uri) {
-              val supervisor = system.actorSelection("/user/supervisor")
-              val submissionId = SubmissionId(institutionId, period, seqNr)
-              val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
-              val fValidationState = for {
-                a <- fHmdaFileValidator
-                j <- (a ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
-                state <- getValidationState(institutionId, period, seqNr)
-              } yield state
-              completeValidationState(editType, fValidationState, uri, "")
-            }
-          }
-        } else {
-          completeWithMethodNotAllowed(uri)
-        }
       }
     }
 
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/macro
+  def justifyMacroEditPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / "macro") { (period, seqNr) =>
+      timedPost { uri =>
+        entity(as[MacroEditJustificationWithName]) { justifyEdit =>
+          completeVerified(institutionId, period, seqNr, uri) {
+            val supervisor = system.actorSelection("/user/supervisor")
+            val submissionId = SubmissionId(institutionId, period, seqNr)
+            val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+            val fValidationState = for {
+              a <- fHmdaFileValidator
+              j <- (a ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
+              state <- getValidationState(institutionId, period, seqNr)
+            } yield state
+            completeValidationState("macro", fValidationState, uri, "")
+          }
+        }
+      }
+    }
 
   /////// Helper Methods ///////
 

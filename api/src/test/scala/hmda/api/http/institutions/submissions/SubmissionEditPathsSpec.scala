@@ -3,6 +3,7 @@ package hmda.api.http.institutions.submissions
 import akka.actor.ActorRef
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ EditResult, _ }
@@ -211,16 +212,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   }
 
   "Edit Type endpoint: return 405 when posting justification to syntactical endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes) ~> check {
       status mustBe StatusCodes.MethodNotAllowed
-      responseAs[ErrorResponse].message mustBe "Method not allowed"
     }
   }
 
   "Edit Type endpoint: return 405 when posting justification to validity endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> institutionsRoutes ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> Route.seal(institutionsRoutes) ~> check {
       status mustBe StatusCodes.MethodNotAllowed
-      responseAs[ErrorResponse].message mustBe "Method not allowed"
     }
   }
 
