@@ -114,16 +114,12 @@ trait SubmissionEditPaths
     }
 
   private def completeValidationState(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri, format: String)(implicit ec: ExecutionContext) = {
-    val fSingleEdits = fValidationState.map { editChecks =>
+    val fSingleEdits = fValidationState.map { e =>
       editType match {
-        case "syntactical" =>
-          validationErrorsToEditResults(editChecks, editChecks.tsSyntactical, editChecks.larSyntactical, Syntactical)
-        case "validity" =>
-          validationErrorsToEditResults(editChecks, editChecks.tsValidity, editChecks.larValidity, Validity)
-        case "quality" =>
-          validationErrorsToEditResults(editChecks, editChecks.tsQuality, editChecks.larQuality, Quality)
-        case "macro" =>
-          validationErrorsToMacroResults(editChecks.larMacro)
+        case "syntactical" => validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
+        case "validity" => validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
+        case "quality" => validationErrorsToEditResults(e, e.tsQuality, e.larQuality, Quality)
+        case "macro" => validationErrorsToMacroResults(e.larMacro)
       }
     }
 
