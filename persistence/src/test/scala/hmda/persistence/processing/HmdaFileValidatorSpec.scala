@@ -48,7 +48,9 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
+
   "HMDA File Validator" must {
+
     "persist LARs and TS" in {
       probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
@@ -115,6 +117,41 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       ))
     }
 
+    "verify quality edits" in {
+      // establish baseline
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        qualityVerified = false,
+        Vector(e4)
+      ))
+
+      // send VerifyQualityEdits message
+      probe.send(hmdaFileValidator, VerifyQualityEdits(true))
+
+      // expect updated validation state
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        qualityVerified = true,
+        Vector(e4)
+      ))
+    }
+
     "verify macro edits" in {
       val j = MacroEditJustification(1, "Other", true, Some("text written by user"))
       val justifications = Seq(j)
@@ -129,7 +166,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
-        qualityVerified = false,
+        qualityVerified = true,
         Vector(e4)
       ))
       probe.send(hmdaFileValidator, JustifyMacroEdit("Q007", j))
@@ -144,7 +181,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
-        qualityVerified = false,
+        qualityVerified = true,
         Vector(e5)
       ))
     }

@@ -31,6 +31,7 @@ object HmdaFileValidator {
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
+  case class VerifyQualityEdits(verified: Boolean) extends Command
   case class JustifyMacroEdit(editName: String, macroEditJustification: MacroEditJustification) extends Command
   case class TsSyntacticalError(error: ValidationError) extends Event
   case class TsValidityError(error: ValidationError) extends Event
@@ -39,6 +40,7 @@ object HmdaFileValidator {
   case class LarValidityError(error: ValidationError) extends Event
   case class LarQualityError(error: ValidationError) extends Event
   case class LarMacroError(error: ValidationError) extends Event
+  case class QualityEditsVerified(verified: Boolean) extends Event
   case class MacroEditJustified(name: String, justification: MacroEditJustification) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
@@ -78,6 +80,8 @@ object HmdaFileValidator {
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality :+ e, qualityVerified, larMacro)
       case LarMacroError(e) =>
         HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro :+ e)
+      case QualityEditsVerified(v) =>
+        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, v, larMacro)
       case MacroEditJustified(e, j) =>
         val elem = larMacro.find(x => x.ruleName == e)
         elem match {
@@ -218,6 +222,11 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       } else {
         log.debug(s"Validation completed for $submissionId, errors found")
         replyTo ! ValidationCompletedWithErrors(submissionId)
+      }
+
+    case VerifyQualityEdits(v) =>
+      persist(QualityEditsVerified(v)) { e =>
+        updateState(e)
       }
 
     case JustifyMacroEdit(error, j) =>
