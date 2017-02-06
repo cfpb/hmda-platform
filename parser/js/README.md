@@ -139,7 +139,7 @@ which parses into the following structure:
     "reason3": ""
   },
   "rateSpread": "NA",
-  "hoepaStatus: 2,
+  "hoepaStatus": 2,
   "lienStatus": 1
 }
 ```
