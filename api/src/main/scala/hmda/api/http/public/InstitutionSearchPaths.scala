@@ -26,22 +26,24 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
 
   def institutionSearchPath(institutionViewF: Future[ActorRef]) = {
     path("institutions") {
-      timedGet { uri =>
-        parameter('domain.as[String]) { domain =>
-          val institutionsF = for {
-            v <- institutionViewF
-            institutions <- (v ? FindInstitutionByPeriodAndDomain(domain)).mapTo[Set[Institution]]
-          } yield institutions
-          onComplete(institutionsF) {
-            case Success(institutions) =>
-              if (institutions.nonEmpty) {
-                val institutionSearch = institutions.map(i => institutiontoInstitutionSearch(i))
-                complete(ToResponseMarshallable(institutions.map(i => institutiontoInstitutionSearch(i))))
-              } else {
-                complete(HttpResponse(StatusCodes.NotFound))
-              }
-            case Failure(error) =>
-              completeWithInternalError(uri, error)
+      encodeResponse {
+        timedGet { uri =>
+          parameter('domain.as[String]) { domain =>
+            val institutionsF = for {
+              v <- institutionViewF
+              institutions <- (v ? FindInstitutionByPeriodAndDomain(domain)).mapTo[Set[Institution]]
+            } yield institutions
+            onComplete(institutionsF) {
+              case Success(institutions) =>
+                if (institutions.nonEmpty) {
+                  val institutionSearch = institutions.map(i => institutiontoInstitutionSearch(i))
+                  complete(ToResponseMarshallable(institutionSearch))
+                } else {
+                  complete(HttpResponse(StatusCodes.NotFound))
+                }
+              case Failure(error) =>
+                completeWithInternalError(uri, error)
+            }
           }
         }
       }
