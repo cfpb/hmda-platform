@@ -14,19 +14,17 @@ object CsvParser extends JSApp {
 
   def parseTs(ts: String) = {
     val parsed = TsCsvParser(ts)
-    if (parsed.isRight) {
-      parsed.right.get
-    } else {
-      parsed.left.get
+    parsed match {
+      case Right(x) => x
+      case Left(x) => x
     }
   }
 
   def parseLar(lar: String) = {
     val parsed = LarCsvParser(lar)
-    if (parsed.isRight) {
-      parsed.right.get
-    } else {
-      parsed.left.get
+    parsed match {
+      case Right(x) => x
+      case Left(x) => x
     }
   }
 
