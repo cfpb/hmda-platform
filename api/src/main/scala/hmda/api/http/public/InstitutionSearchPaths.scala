@@ -51,7 +51,7 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
     }
   }
 
-  private def institutiontoInstitutionSearch(i: Institution): InstitutionSearch = {
+  protected def institutiontoInstitutionSearch(i: Institution): InstitutionSearch = {
     InstitutionSearch(
       i.id,
       i.respondent.name,

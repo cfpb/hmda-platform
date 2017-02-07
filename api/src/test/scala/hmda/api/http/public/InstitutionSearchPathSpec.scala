@@ -3,23 +3,39 @@ package hmda.api.http.public
 import akka.actor.ActorRef
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.{ MissingQueryParamRejection, Route }
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import hmda.api.model.public.InstitutionSearch
+import hmda.model.institution.InstitutionGenerators
+import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
+import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import hmda.query.view.institutions.InstitutionView._
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ Await, ExecutionContext, Future }
 
 class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     with ScalatestRouteTest with InstitutionSearchPaths {
 
-  override implicit val timeout: Timeout = Timeout(10.seconds)
+  val duration = 10.seconds
+  override implicit val timeout: Timeout = Timeout(duration)
   override val ec: ExecutionContext = system.dispatcher
   override val log: LoggingAdapter = NoLogging
 
   val institutionViewF: Future[ActorRef] = Future(createInstitutionView(system))
+
+  val i0 = InstitutionGenerators.institutionGen.sample.get.copy(emailDomains = Set("test@bank0.com", "", ""))
+  val i1 = InstitutionGenerators.institutionGen.sample.get.copy(emailDomains = Set("test@bank1.com", "", ""))
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    val institutionView = Await.result(institutionViewF, duration)
+    institutionView ! EventWithSeqNr(1, InstitutionCreated(i0))
+    institutionView ! EventWithSeqNr(2, InstitutionCreated(i1))
+  }
 
   "Institution Search" must {
     "return not found when email domain not present" in {
@@ -31,6 +47,13 @@ class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAn
       Get("/institutions") ~> Route.seal(institutionSearchPath(institutionViewF)) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[String] mustBe "Request is missing required query parameter 'domain'"
+      }
+    }
+    "return filtered institution by email domain" in {
+      Get("/institutions?domain=bank0.com") ~> institutionSearchPath(institutionViewF) ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[Set[InstitutionSearch]].size mustBe 1
+        responseAs[Set[InstitutionSearch]].head mustBe institutiontoInstitutionSearch(i0)
       }
     }
   }
