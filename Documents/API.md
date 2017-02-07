@@ -316,6 +316,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
         ]
       },
       "quality": {
+        "verified": false,
         "edits": []
       },
       "macro": {
@@ -527,7 +528,29 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-    * `POST` - Provides verification for macro edits
+    * `POST` - Provides verification for Quality edits
+
+    Example payload, in `JSON` format:
+
+    ```json
+    {
+      "verified": true,
+    }
+    ```
+
+    Example response, with HTTP code 200:
+
+    ```json
+    {
+      "verified": true,
+      "status": {
+        "code": 8,
+        "message": "validated with errors"
+      }
+    }
+    ```
+
+    * `POST` - Provides justification for Macro edits
 
     Example payload, in `JSON` format:
 
