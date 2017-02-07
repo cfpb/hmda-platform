@@ -14,4 +14,10 @@ class InstitutionSearchProtocolSpec extends PropSpec with PropertyChecks with Mu
     }
   }
 
+  property("Institution search results should convert to and from json") {
+    forAll(institutionSearchGenList) { institutions =>
+      institutions.toJson.convertTo[List[InstitutionSearch]] mustBe institutions
+    }
+  }
+
 }

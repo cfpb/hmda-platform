@@ -13,22 +13,24 @@ This documenatation describes de public HMDA Platform HTTP API
    Example response, with HTTP code 200:
 
    ```json
-   [
-      {
-        "id": "0",
-        "name": "Bank 0",
-        "domains": ["test@bank0.com"],
-        "externalIds":[
-          {
-            "id": "1234",
-            "idType": "occ-charter-id"
-          },
-          {
-            "id": "1234",
-            "idType": "ncua-charter-id"
-          }
-        ]
-      }
-   ]
+   {
+     "institutions":
+     [
+        {
+          "id": "0",
+          "name": "Bank 0",
+          "domains": ["test@bank0.com"],
+          "externalIds":[
+            {
+              "id": "1234",
+              "idType": "occ-charter-id"
+            },
+            {
+              "id": "1234",
+              "idType": "ncua-charter-id"
+            }
+          ]
+        }
+     ]
    ```
 

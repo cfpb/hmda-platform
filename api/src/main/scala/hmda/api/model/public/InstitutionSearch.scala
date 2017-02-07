@@ -8,3 +8,5 @@ case class InstitutionSearch(
   domains: Set[String],
   externalIds: Set[ExternalId]
 )
+
+case class InstitutionSearchResults(institutions: Set[InstitutionSearch])

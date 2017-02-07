@@ -9,7 +9,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
-import hmda.api.model.public.InstitutionSearch
+import hmda.api.model.public.{ InstitutionSearch, InstitutionSearchResults }
 import hmda.api.protocol.public.InstitutionSearchProtocol
 import hmda.model.institution.Institution
 import hmda.query.view.institutions.InstitutionView.FindInstitutionByPeriodAndDomain
@@ -37,8 +37,9 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
             onComplete(institutionsF) {
               case Success(institutions) =>
                 if (institutions.nonEmpty) {
-                  val institutionSearch = institutions.map(i => institutiontoInstitutionSearch(i))
-                  complete(ToResponseMarshallable(institutionSearch))
+                  val xs = institutions.map(i => institutiontoInstitutionSearch(i))
+                  val institutionSearchResults = InstitutionSearchResults(xs)
+                  complete(ToResponseMarshallable(institutionSearchResults))
                 } else {
                   complete(HttpResponse(StatusCodes.NotFound))
                 }

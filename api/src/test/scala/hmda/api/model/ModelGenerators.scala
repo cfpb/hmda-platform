@@ -190,4 +190,8 @@ trait ModelGenerators {
     } yield InstitutionSearch(id, name, domains.toSet, externalIds.toSet)
   }
 
+  implicit def institutionSearchGenList: Gen[List[InstitutionSearch]] = {
+    Gen.listOf(institutionSearchGen)
+  }
+
 }
