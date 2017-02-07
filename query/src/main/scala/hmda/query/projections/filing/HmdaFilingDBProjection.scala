@@ -1,9 +1,9 @@
 package hmda.query.projections.filing
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.pipe
-import hmda.persistence.messages.CommonMessages.{Command, Event}
-import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{HmdaValidatorEvent, LarValidated}
+import hmda.persistence.messages.CommonMessages.{ Command, Event }
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ HmdaValidatorEvent, LarValidated }
 import hmda.persistence.model.HmdaActor
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.LoanApplicationRegisterQuery
