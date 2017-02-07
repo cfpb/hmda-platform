@@ -24,6 +24,7 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
   implicit val materializer: ActorMaterializer
   implicit val ec: ExecutionContext
 
+  // institutions?domain=<domain>
   def institutionSearchPath(institutionViewF: Future[ActorRef]) = {
     path("institutions") {
       encodeResponse {
