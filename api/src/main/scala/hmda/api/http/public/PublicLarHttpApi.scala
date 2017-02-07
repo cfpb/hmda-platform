@@ -21,14 +21,12 @@ trait PublicLarHttpApi extends HmdaCustomDirectives with FilingComponent with Db
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
   def modifiedLar(institutionId: String)(implicit ec: ExecutionContext) =
-    pathPrefix("filings" / Segment) { period =>
-      path("lar") {
-        timedGet { _ =>
-          val data = modifiedLarRepository.findByRespondentIdSource(institutionId, period)
-            .map(x => ChunkStreamPart(x.toCSV + "\n"))
-          val response = HttpResponse(entity = HttpEntity.Chunked(ContentTypes.`text/csv(UTF-8)`, data))
-          complete(response)
-        }
+    path("filings" / Segment / "lar") { period =>
+      timedGet { _ =>
+        val data = modifiedLarRepository.findByRespondentIdSource(institutionId, period)
+          .map(x => ChunkStreamPart(x.toCSV + "\n"))
+        val response = HttpResponse(entity = HttpEntity.Chunked(ContentTypes.`text/csv(UTF-8)`, data))
+        complete(response)
       }
     }
 

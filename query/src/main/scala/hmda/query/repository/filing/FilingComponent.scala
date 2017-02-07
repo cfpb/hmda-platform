@@ -629,7 +629,7 @@ trait FilingComponent { this: DbConfiguration =>
 
     def findByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).result)
 
-    private def findByRespondendIdStream(respId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[ModifiedLoanApplicationRegister] = {
+    private def findByRespondentIdStream(respId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[ModifiedLoanApplicationRegister] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
       val query = table.filter(x => x.respondentId === respId && x.period === period)
       val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
@@ -637,7 +637,7 @@ trait FilingComponent { this: DbConfiguration =>
     }
 
     def findByRespondentIdSource(respId: String, period: String)(implicit ec: ExecutionContext): Source[ModifiedLoanApplicationRegister, NotUsed] =
-      Source.fromPublisher(findByRespondendIdStream(respId, period))
+      Source.fromPublisher(findByRespondentIdStream(respId, period))
 
   }
 
