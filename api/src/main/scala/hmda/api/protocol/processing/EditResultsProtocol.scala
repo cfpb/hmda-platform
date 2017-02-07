@@ -2,9 +2,8 @@ package hmda.api.protocol.processing
 
 import hmda.api.model._
 import hmda.api.protocol.validation.ValidationResultProtocol
-import spray.json.DefaultJsonProtocol
 
-trait EditResultsProtocol extends ValidationResultProtocol {
+trait EditResultsProtocol extends ValidationResultProtocol with SubmissionProtocol {
   implicit val larIdFormat = jsonFormat1(RowId.apply)
   implicit val larEditResultFormat = jsonFormat2(EditResultRow.apply)
   implicit val editResultFormat = jsonFormat3(EditResult.apply)
@@ -16,4 +15,6 @@ trait EditResultsProtocol extends ValidationResultProtocol {
   implicit val macroResultsFormat = jsonFormat1(MacroResults.apply)
   implicit val rowResultsFormat = jsonFormat2(RowResults.apply)
   implicit val summaryEditResultsFormat = jsonFormat4(SummaryEditResults.apply)
+  implicit val qualityVerificationFormat = jsonFormat1(QualityEditsVerification.apply)
+  implicit val qualityVerifiedResponseFormat = jsonFormat2(QualityEditsVerifiedResponse.apply)
 }

@@ -1,5 +1,6 @@
 package hmda.api.model
 
+import hmda.model.fi.SubmissionStatus
 import hmda.validation.engine.MacroEditJustification
 import spray.json.JsObject
 
@@ -18,6 +19,9 @@ trait EditResultsCollection {
   def edits: Seq[EditResult]
   def toCsv(editType: String) = edits.map(e => e.toCsv(editType)).mkString
 }
+
+case class QualityEditsVerification(verified: Boolean)
+case class QualityEditsVerifiedResponse(verified: Boolean, status: SubmissionStatus)
 
 // For a single row, all of the edits that it failed
 case class RowResult(rowId: String, edits: Seq[RowEditDetail])
