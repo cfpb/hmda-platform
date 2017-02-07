@@ -227,6 +227,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
     case VerifyQualityEdits(v) =>
       persist(QualityEditsVerified(v)) { e =>
         updateState(e)
+        sender() ! QualityEditsVerified(v)
       }
 
     case JustifyMacroEdit(error, j) =>

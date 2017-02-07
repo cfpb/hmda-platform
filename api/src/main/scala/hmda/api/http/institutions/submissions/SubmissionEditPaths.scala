@@ -1,6 +1,6 @@
 package hmda.api.http.institutions.submissions
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.{ ActorRef, ActorSelection, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -12,11 +12,13 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
-import hmda.model.fi.SubmissionId
+import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.HmdaSupervisor.FindProcessingActor
+import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.{ HmdaFileValidationState, JustifyMacroEdit, MacroEditJustified }
+import hmda.persistence.processing.HmdaFileValidator.{ HmdaFileValidationState, JustifyMacroEdit, MacroEditJustified, VerifyQualityEdits }
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -101,12 +103,11 @@ trait SubmissionEditPaths
       timedPost { uri =>
         entity(as[MacroEditJustificationWithName]) { justifyEdit =>
           completeVerified(institutionId, period, seqNr, uri) {
-            val supervisor = system.actorSelection("/user/supervisor")
-            val submissionId = SubmissionId(institutionId, period, seqNr)
-            val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+            val fValidator = fHmdaFileValidator(SubmissionId(institutionId, period, seqNr))
+
             val fValidationState = for {
-              a <- fHmdaFileValidator
-              j <- (a ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
+              v <- fValidator
+              j <- (v ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
               state <- getValidationState(institutionId, period, seqNr)
             } yield state
             completeValidationState("macro", fValidationState, uri, "")
@@ -115,7 +116,38 @@ trait SubmissionEditPaths
       }
     }
 
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/quality
+  def verifyQualityEditsPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / "quality") { (period, seqNr) =>
+      timedPost { uri =>
+        entity(as[QualityEditsVerification]) { verification =>
+          completeVerified(institutionId, period, seqNr, uri) {
+            val verified = verification.verified
+            val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
+            val subId = SubmissionId(institutionId, period, seqNr)
+            val fValidator = fHmdaFileValidator(subId)
+
+            val fSubmissions = for {
+              va <- fValidator
+              v <- va ? VerifyQualityEdits(verified)
+              sa <- fSubmissionsActor
+              s <- (sa ? GetSubmissionById(subId)).mapTo[Submission]
+            } yield s
+
+            onComplete(fSubmissions) {
+              case Success(submission) =>
+                complete(ToResponseMarshallable(QualityEditsVerifiedResponse(verified, submission.status)))
+              case Failure(error) => completeWithInternalError(uri, error)
+            }
+          }
+        }
+      }
+    }
+
   /////// Helper Methods ///////
+  private def supervisor: ActorSelection = system.actorSelection("/user/supervisor")
+  private def fHmdaFileValidator(submissionId: SubmissionId): Future[ActorRef] =
+    (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
   private def completeValidationState(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri, format: String)(implicit ec: ExecutionContext) = {
     val fSingleEdits = fValidationState.map { e =>
@@ -156,12 +188,9 @@ trait SubmissionEditPaths
   }
 
   private def getValidationState(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
-    val supervisor = system.actorSelection("/user/supervisor")
-    val submissionID = SubmissionId(institutionId, period, seqNr)
-    val fHmdaFileValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionID)).mapTo[ActorRef]
-
+    val fValidator = fHmdaFileValidator(SubmissionId(institutionId, period, seqNr))
     for {
-      s <- fHmdaFileValidator
+      s <- fValidator
       xs <- (s ? GetState).mapTo[HmdaFileValidationState]
     } yield xs
   }
