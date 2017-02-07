@@ -74,7 +74,10 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
       }
 
     case GetFilingByPeriod(period) =>
-      val filing = state.filings.find(f => f.period == period).getOrElse(Filing())
+      val filing = state.filings.find(f => f.period == period).getOrElse(Filing(
+        "",
+        institutionId, NotStarted, false, 0L, 0L
+      ))
 
       // TODO: How should we initialize the filingRequired value for the empty filing?
       if (state.filings.isEmpty)
