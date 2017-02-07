@@ -23,16 +23,46 @@ This API is for internal use only. The following endpoints are available
     
     ```json
     {
-      "name": "Bank 2",
+      "id": "123",
+      "agency": "CFPB",
+      "activityYear": "2017",
+      "institutionType": "bank",
       "cra": false,
-      "agency": "fdic",
       "externalIds": [{
         "id": "bank-id",
         "idType": "fdic-certificate-number"
       }],
-      "id": "2",
-      "hasParent": false,
-      "institutionType": "bank"
+      "emailDomains": [
+        "email1",
+        "email2"
+      ],
+      "respondent": {
+        "externalId": {
+            "id": "bank-id",
+            "idType": "fdic-certificate-number"
+        },
+        "name": "bank 0",
+        "state": "VA",
+        "city": "City Name",
+        "fipsStateNumber": "2"
+      },
+      "hmdaFilerFlag": true,
+      "parent": {
+        "respondentId": "12-3",
+        "idRssd": 3,
+        "name": "parent name",
+        "city": "parent city",
+        "state": "VA"
+      },
+      "assets": 123,
+      "otherLenderCode": 0,
+      "topHolder": {
+        "idRssd": 4,
+        "name": "top holder name",
+        "city": "top holder city",
+        "state": "VA",
+        "country": "USA"
+      }
     }
     ```
     
@@ -45,16 +75,46 @@ This API is for internal use only. The following endpoints are available
     
     ```json
     {
-      "name": "Bank 2",
+      "id": "123",
+      "agency": "CFPB",
+      "activityYear": "2017",
+      "institutionType": "bank",
       "cra": false,
-      "agency": "fdic",
       "externalIds": [{
         "id": "bank-id",
         "idType": "fdic-certificate-number"
       }],
-      "id": "2",
-      "hasParent": false,
-      "institutionType": "bank"
+      "emailDomains": [
+        "email1",
+        "email2"
+      ],
+      "respondent": {
+        "externalId": {
+            "id": "bank-id",
+            "idType": "fdic-certificate-number"
+        },
+        "name": "bank 0",
+        "state": "VA",
+        "city": "City Name",
+        "fipsStateNumber": "2"
+      },
+      "hmdaFilerFlag": true,
+      "parent": {
+        "respondentId": "12-3",
+        "idRssd": 3,
+        "name": "parent name",
+        "city": "parent city",
+        "state": "VA"
+      },
+      "assets": 123,
+      "otherLenderCode": 0,
+      "topHolder": {
+        "idRssd": 4,
+        "name": "top holder name",
+        "city": "top holder city",
+        "state": "VA",
+        "country": "USA"
+      }
     }
     ```
     
