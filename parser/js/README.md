@@ -46,7 +46,7 @@ Here are a couple of examples parsing HMDA data
 * Transmittal Sheet
 
 ```javascript
-var ts = parser.parseTs('1|21|1|201503111034|2017|35-0704860|10|CENTRAL FIRST BANK|221 Hesburgh Library|Notre Dame|IN|46556|FIRST BANK|2566 S. Kinnickinnic Ave.|Milwaukee|WI|53207|Anne Shirley|574-555-2000|574-555-2001|as@centerfirst.COM');
+var ts = parser.parseTs('1|21|1|201503111034|2017|99-9999999|10|Bank 0|1275 1st ST NW|Washington|DC|20054|BANK 0|1275 1st ST NE|Washington|DC|20054|Joan Smith|555-555-5555|555-555-5555|js@bank0.com');
 ```
 
 Which parses into the following structure:
@@ -57,28 +57,28 @@ Which parses into the following structure:
   "agencyCode": 1,
   "timestamp": 201503111034,
   "activityYear": 2017,
-  "taxId": "35-0704860",
+  "taxId": "99-9999999",
   "totalLines": 10,
   "respondent": {
     "id": 21,
-    "name": "CENTRAL FIRST BANK",
-    "address": "221 Hesburgh Library",
-    "city": "Notre Dame",
-    "state": "IN",
-    "zipCode": "46556"
+    "name": "Bank 0",
+    "address": "1275 1st ST NW",
+    "city": "Washington",
+    "state": "DC",
+    "zipCode": "20054"
   },
   "parent": {
-    "name": "FIRST BANK",
-    "address": "2566 S. Kinnickinnic Ave.", 
-    "city": "Milwaukee",
-    "state": "WI",
-    "zipCode": "53207"
+    "name": "BANK 0",
+    "address": "1275 1st ST NW",
+    "city": "Washington",
+    "state": "DC",
+    "zipCode": "20054"
   },
   "Contact": {
-    "name": "Anne Shirley",
-    "phone": "574-555-2000",
-    "fax": "574-555-2001",
-    "email": "as@centerfirst.COM"
+    "name": "Joan Smith",
+    "phone": "555-555-5555",
+    "fax": "555-555-5555",
+    "email": "js@bank0.com"
   }
 }
 ```
