@@ -1,7 +1,7 @@
 package hmda.persistence.institutions
 
-import akka.actor.{ActorRef, ActorSystem, Props}
-import hmda.model.fi.{Completed, Filing, InProgress, NotStarted}
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import hmda.model.fi.{ Completed, Filing, InProgress, NotStarted }
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.model.HmdaPersistentActor
