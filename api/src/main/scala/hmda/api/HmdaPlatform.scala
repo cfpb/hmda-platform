@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
 import hmda.query.projections.filing.HmdaFilingDBProjection.FilingSchemaDeleted
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaPlatform {
 
@@ -40,33 +40,30 @@ object HmdaPlatform {
 
   }
 
-  private def cleanup(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
+  private def cleanup(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionSchemaDeleted] = {
     lazy val actorTimeout = config.getInt("hmda.actor.timeout")
     implicit val timeout = Timeout(actorTimeout.seconds)
     implicit val scheduler = system.scheduler
     val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
 
-    val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
-      .mapTo[ActorRef]
-    val instTableDropF = for {
-      i <- institutionViewF
-      q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
-      s <- (q ? DeleteSchema).mapTo[InstitutionSchemaDeleted]
-    } yield s
-
-    val hmdaFilingViewF = (supervisor ? FindHmdaFiling("")).mapTo[ActorRef]
+    val hmdaFilingViewF = (supervisor ? FindHmdaFiling("2017")).mapTo[ActorRef]
     val hmdaTableDropF = for {
       h <- hmdaFilingViewF
       r <- retry((h ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
       d <- (r ? DeleteSchema).mapTo[FilingSchemaDeleted]
     } yield d
 
-    instTableDropF.map { x =>
-      log.info("CLEANING.... " + x.toString)
-    }
     hmdaTableDropF.map { x =>
       log.info("CLEANING.... " + x.toString)
     }
+
+    val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
+      .mapTo[ActorRef]
+    for {
+      i <- institutionViewF
+      q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
+      s <- (q ? DeleteSchema).mapTo[InstitutionSchemaDeleted]
+    } yield s
   }
 
   private def startActors(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
@@ -92,19 +89,21 @@ object HmdaPlatform {
     //Load demo data
     lazy val isDemo = config.getBoolean("hmda.isDemo")
     if (isDemo) {
-      cleanup(system, supervisor, querySupervisor)
+      val institutionTableDropF = cleanup(system, supervisor, querySupervisor)
       implicit val scheduler = system.scheduler
       val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
       log.info("...LOADING DEMO DATA...")
-      val institutionCreatedF = for {
-        i <- institutionViewF
-        q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
-        s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
-      } yield s
+      institutionTableDropF.map { x =>
+        val institutionCreatedF = for {
+          i <- institutionViewF
+          q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
+          s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
+        } yield s
 
-      institutionCreatedF.map { x =>
-        log.info(x.toString)
-        DemoData.loadDemoData(system)
+        institutionCreatedF.map { x =>
+          log.info(x.toString)
+          DemoData.loadDemoData(system)
+        }
       }
     }
 

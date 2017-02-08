@@ -39,6 +39,7 @@ class InstitutionDBProjection extends HmdaActor {
       repository.createSchema().map(_ => InstitutionSchemaCreated()) pipeTo sender()
 
     case DeleteSchema =>
+      log.info("Institution table dropped")
       repository.dropSchema().map(_ => InstitutionSchemaDeleted()) pipeTo sender()
 
     case event: InstitutionEvent => event match {
