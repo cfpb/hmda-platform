@@ -2,13 +2,14 @@ package hmda.api.http.public
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
+import akka.http.scaladsl.model.{ HttpEntity, HttpResponse, StatusCodes }
 import akka.pattern.ask
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
+import hmda.api.model.ErrorResponse
 import hmda.api.model.public.{ InstitutionSearch, InstitutionSearchResults }
 import hmda.api.protocol.public.InstitutionSearchProtocol
 import hmda.model.institution.Institution
@@ -41,7 +42,8 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
                   val institutionSearchResults = InstitutionSearchResults(xs)
                   complete(ToResponseMarshallable(institutionSearchResults))
                 } else {
-                  complete(HttpResponse(StatusCodes.NotFound))
+                  val errorResponse = ErrorResponse(404, s"email domain $domain not found", uri.path)
+                  complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
                 }
               case Failure(error) =>
                 completeWithInternalError(uri, error)

@@ -7,6 +7,8 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.Uri.Path
+import hmda.api.model.ErrorResponse
 import hmda.api.model.public.InstitutionSearchResults
 import hmda.model.institution.InstitutionGenerators
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
@@ -41,6 +43,7 @@ class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAn
     "return not found when email domain not present" in {
       Get("/institutions?domain=xxxxx") ~> institutionSearchPath(institutionViewF) ~> check {
         status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse] mustBe ErrorResponse(404, s"email domain xxxxx not found", Path("/institutions"))
       }
     }
     "return error when domain parameter is not present" in {
