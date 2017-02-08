@@ -20,6 +20,6 @@ class S025 private (institution: Institution) extends EditCheck[HasControlNumber
   def apply(input: HasControlNumber): Result = compare(input.respondentId, input.agencyCode)
 
   private def compare(filingRespId: String, filingAgencyCode: Int): Result = {
-    (filingRespId is equalTo(institution.respondent.externalId.id)) and (filingAgencyCode is equalTo(institution.agency.value))
+    (filingRespId is equalTo(institution.respondent.externalId.name)) and (filingAgencyCode is equalTo(institution.agency.value))
   }
 }

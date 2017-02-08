@@ -5,7 +5,7 @@ import enumeratum.{ Enum, EnumEntry }
 /**
  * Additional unique identifiers for a financial institution.
  */
-case class ExternalId(id: String, idType: ExternalIdType)
+case class ExternalId(name: String, value: ExternalIdType)
 
 sealed abstract class ExternalIdType(override val entryName: String) extends EnumEntry with Serializable
 
