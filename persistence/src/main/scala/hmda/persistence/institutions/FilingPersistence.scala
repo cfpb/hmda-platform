@@ -1,7 +1,7 @@
 package hmda.persistence.institutions
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.fi.{ Filing, NotStarted }
+import akka.actor.{ActorRef, ActorSystem, Props}
+import hmda.model.fi.{Completed, Filing, InProgress, NotStarted}
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.model.HmdaPersistentActor
@@ -63,10 +63,21 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
     case UpdateFilingStatus(modified) =>
       if (state.filings.map(x => x.period).contains(modified.period)) {
-        persist(FilingStatusUpdated(modified)) { e =>
-          log.debug(s"persisted: $modified")
+        val start = if (modified.status == InProgress) {
+          System.currentTimeMillis
+        } else {
+          modified.start
+        }
+        val end = if (modified.status == Completed) {
+          System.currentTimeMillis
+        } else {
+          modified.end
+        }
+        val withTimes = modified.copy(start = start, end = end)
+        persist(FilingStatusUpdated(withTimes)) { e =>
+          log.debug(s"persisted: $withTimes")
           updateState(e)
-          sender() ! Some(modified)
+          sender() ! Some(withTimes)
         }
       } else {
         sender() ! None

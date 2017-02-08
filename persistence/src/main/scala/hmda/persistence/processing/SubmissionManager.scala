@@ -51,11 +51,6 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator.props(submissionId))
   val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
 
-  val filingF = for {
-    fp <- filingPersistence
-    f <- (fp ? GetFilingByPeriod(period)).mapTo[Filing]
-  } yield f
-
   var uploaded: Int = 0
 
   override def preStart(): Unit = {
@@ -140,20 +135,9 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   private def updateFilingStatus(filingStatus: FilingStatus) = {
     for {
       p <- filingPersistence
-      f <- filingF
+      f <- (p ? GetFilingByPeriod(period)).mapTo[Filing]
     } yield {
-      val start = if (filingStatus == InProgress) {
-        System.currentTimeMillis
-      } else {
-        f.start
-      }
-      val end = if (filingStatus == Completed) {
-        System.currentTimeMillis
-      } else {
-        f.end
-      }
-
-      p ? UpdateFilingStatus(f.copy(status = filingStatus, start = start, end = end))
+      p ? UpdateFilingStatus(f.copy(status = filingStatus))
     }
   }
 
