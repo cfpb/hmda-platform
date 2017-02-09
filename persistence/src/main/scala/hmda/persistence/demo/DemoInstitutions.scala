@@ -2,7 +2,7 @@ package hmda.persistence.demo
 
 import hmda.model.institution._
 import hmda.model.ResourceUtils
-import hmda.parser.fi.panel.InstitutionParser
+import hmda.parser.fi.InstitutionParser
 
 object DemoInstitutions extends ResourceUtils {
 

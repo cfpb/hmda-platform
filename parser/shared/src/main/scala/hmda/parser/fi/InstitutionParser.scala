@@ -1,10 +1,12 @@
-package hmda.parser.fi.panel
+package hmda.parser.fi
 
 import hmda.model.institution.Agency._
-import hmda.model.institution.DepositoryType.{ Depository, NonDepository, UndeterminedDepositoryType }
+import hmda.model.institution.DepositoryType.{ Depository, NonDepository }
 import hmda.model.institution.ExternalIdType._
 import hmda.model.institution.InstitutionType._
 import hmda.model.institution._
+
+import scala.util.Try
 
 object InstitutionParser {
   def apply(s: String): Institution = {
@@ -13,7 +15,7 @@ object InstitutionParser {
     val institutionType = convertStringToInstitutionType(values(3))
     val respondentId = convertStringToExternalId(values(1), institutionType, agency)
     Institution(
-      values(1),
+      values(6),
       agency,
       values(0).toInt,
       institutionType,
@@ -22,18 +24,19 @@ object InstitutionParser {
       Set(values(10), values(11), values(12)),
       Respondent(respondentId, values(13), values(14), values(15), values(16)),
       hmdaFilerFlag = stringToBoolean(values(17)),
-      Parent(values(18), values(19).toInt, values(20), values(21), values(22)),
-      values(23).toInt,
-      values(24).toInt,
-      TopHolder(values(25).toInt, values(26), values(27), values(28), values(29))
+      Parent(values(18), toIntSafe(values(19)), values(20), values(21), values(22)),
+      toIntSafe(values(23)),
+      toIntSafe(values(24)),
+      TopHolder(toIntSafe(values(25)), values(26), values(27), values(28), values(29))
     )
   }
 
   private def stringToBoolean(s: String): Boolean = {
-    s match {
-      case "1" => true
-      case "0" => false
-    }
+    s == "1"
+  }
+
+  private def toIntSafe(s: String): Int = {
+    Try(s.toInt).getOrElse(-1)
   }
 
   private def convertStringToAgency(s: String): Agency = {
