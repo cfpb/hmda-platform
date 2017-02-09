@@ -534,7 +534,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
     ```json
     {
-      "verified": true,
+      "verified": true
     }
     ```
 
