@@ -1,5 +1,8 @@
 package hmda.model.fi.lar
 
+import scala.scalajs.js.annotation.JSExportAll
+
+@JSExportAll
 case class Applicant(
   ethnicity: Int,
   coEthnicity: Int,
