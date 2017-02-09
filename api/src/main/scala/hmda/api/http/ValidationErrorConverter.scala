@@ -11,16 +11,14 @@ trait ValidationErrorConverter {
 
   def validationErrorsToEditResults(vs: HmdaFileValidationState, tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError], validationErrorType: ValidationErrorType): EditResults = {
     val allErrorsOfThisType: Seq[ValidationError] = (tsErrors ++ larErrors).filter(_.errorType == validationErrorType)
-
-    val errsByEdit: Map[String, Seq[ValidationError]] = allErrorsOfThisType.groupBy(_.ruleName)
-
-    val editResults: Seq[EditResult] = errsByEdit.map {
-      case (editName: String, errs: Seq[ValidationError]) =>
-        val rows: Seq[EditResultRow] = errs.map(e => editDetail(e, vs))
-        EditResult(editName, editDescription(editName), rows)
-    }.toSeq
-
+    val editResults: Seq[EditResult] = toEditResults(vs, allErrorsOfThisType)
     EditResults(editResults)
+  }
+
+  def validationErrorsToQualityEditResults(vs: HmdaFileValidationState, tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError]): QualityEditResults = {
+    val allQualityErrors: Seq[ValidationError] = (tsErrors ++ larErrors).filter(_.errorType == Quality)
+    val editResults: Seq[EditResult] = toEditResults(vs, allQualityErrors)
+    QualityEditResults(vs.qualityVerified, editResults)
   }
 
   def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
@@ -46,6 +44,16 @@ trait ValidationErrorConverter {
   }
 
   //// Helper methods
+
+  private def toEditResults(vs: HmdaFileValidationState, edits: Seq[ValidationError]): Seq[EditResult] = {
+    val errsByEdit: Map[String, Seq[ValidationError]] = edits.groupBy(_.ruleName)
+
+    errsByEdit.map {
+      case (editName: String, errs: Seq[ValidationError]) =>
+        val rows: Seq[EditResultRow] = errs.map(e => editDetail(e, vs))
+        EditResult(editName, editDescription(editName), rows)
+    }.toSeq
+  }
 
   private def editDetail(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
     if (err.ts) EditResultRow(RowId("Transmittal Sheet"), relevantFields(err, vs))

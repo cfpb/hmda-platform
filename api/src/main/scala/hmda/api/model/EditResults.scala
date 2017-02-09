@@ -1,5 +1,6 @@
 package hmda.api.model
 
+import hmda.model.fi.SubmissionStatus
 import hmda.validation.engine.MacroEditJustification
 import spray.json.JsObject
 
@@ -12,12 +13,15 @@ case class EditResult(edit: String, description: String, rows: Seq[EditResultRow
     rows.map(r => Seq(editType, edit, r.row.rowId).mkString("", ", ", "\n")).mkString
   }
 }
-case class EditResults(edits: Seq[EditResult]) {
+case class EditResults(edits: Seq[EditResult]) extends EditResultsCollection
+case class QualityEditResults(verified: Boolean, edits: Seq[EditResult]) extends EditResultsCollection
+trait EditResultsCollection {
+  def edits: Seq[EditResult]
   def toCsv(editType: String) = edits.map(e => e.toCsv(editType)).mkString
 }
-case object EditResults {
-  def empty: EditResults = EditResults(Nil)
-}
+
+case class QualityEditsVerification(verified: Boolean)
+case class QualityEditsVerifiedResponse(verified: Boolean, status: SubmissionStatus)
 
 // For a single row, all of the edits that it failed
 case class RowResult(rowId: String, edits: Seq[RowEditDetail])
@@ -31,7 +35,12 @@ case class MacroResults(edits: Seq[MacroResult]) {
 case object MacroResults {
   def empty: MacroResults = MacroResults(Nil)
 }
-case class SummaryEditResults(syntactical: EditResults, validity: EditResults, quality: EditResults, `macro`: MacroResults) {
+case class SummaryEditResults(
+    syntactical: EditResults,
+    validity: EditResults,
+    quality: QualityEditResults,
+    `macro`: MacroResults
+) {
   def toCsv = {
     val s = syntactical.toCsv("syntactical")
     val v = validity.toCsv("validity")
