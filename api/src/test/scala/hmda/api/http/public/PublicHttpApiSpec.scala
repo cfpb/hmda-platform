@@ -57,7 +57,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
       Get("/institutions/0/filings/2017/lar") ~> publicHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         contentType mustBe ContentTypes.`text/csv(UTF-8)`
-        responseAs[String].size must be > 0
+        responseAs[String].split("\n") must have size 2
       }
     }
   }
