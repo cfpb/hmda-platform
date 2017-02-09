@@ -1,5 +1,7 @@
 package hmda.api
 
+import java.io.File
+
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -45,6 +47,13 @@ object HmdaPlatform {
     implicit val timeout = Timeout(actorTimeout.seconds)
     implicit val scheduler = system.scheduler
     val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
+
+    // Delete persistence journal
+    val file = new File("target/journal")
+    if (file.isDirectory) {
+      log.info("CLEANING JOURNAL")
+      file.listFiles.foreach(f => f.delete())
+    }
 
     val hmdaFilingViewF = (supervisor ? FindHmdaFiling("2017")).mapTo[ActorRef]
     val hmdaTableDropF = for {
