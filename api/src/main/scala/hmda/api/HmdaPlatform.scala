@@ -83,7 +83,7 @@ object HmdaPlatform extends DbConfiguration {
     //Load demo data
     lazy val isDemo = configFactory.getBoolean("hmda.isDemo")
     if (isDemo) {
-      val institutionTableDropF = cleanup(system, supervisor, querySupervisor)
+      cleanup(system, supervisor, querySupervisor)
       implicit val scheduler = system.scheduler
       val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
       log.info("...LOADING DEMO DATA...")
