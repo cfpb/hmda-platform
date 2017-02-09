@@ -8,7 +8,6 @@ import hmda.persistence.model.HmdaActor
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.FilingComponent
-import org.h2.command.ddl.DropSchema
 
 import scala.concurrent.ExecutionContext
 
@@ -18,8 +17,6 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val larTotalsRepository = new LarTotalRepository(config)
 
   case object CreateSchema extends Command
-  case object DeleteSchema extends Command
-
   case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
@@ -27,7 +24,6 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   case class LarsDeleted(respondentId: String) extends Event
 
   def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
-
   def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
     system.actorOf(HmdaFilingDBProjection.props(period))
   }
@@ -55,9 +51,6 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
     case DeleteLars(respondentId) =>
       larRepository.deleteByRespondentId(respondentId)
         .map(_ => LarsDeleted(respondentId)) pipeTo sender()
-
-    case DeleteSchema =>
-      larRepository.dropSchema().map(_ => FilingSchemaDeleted()) pipeTo sender()
 
     case event: HmdaValidatorEvent => event match {
       case LarValidated(lar) =>
