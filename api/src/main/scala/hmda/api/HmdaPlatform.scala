@@ -43,7 +43,7 @@ object HmdaPlatform extends DbConfiguration {
 
   }
 
-  private def cleanup(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
+  private def cleanup(): Unit = {
     // Delete persistence journal
     val file = new File("target/journal")
     if (file.isDirectory) {
@@ -83,7 +83,7 @@ object HmdaPlatform extends DbConfiguration {
     //Load demo data
     lazy val isDemo = configFactory.getBoolean("hmda.isDemo")
     if (isDemo) {
-      cleanup(system, supervisor, querySupervisor)
+      cleanup()
       implicit val scheduler = system.scheduler
       val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
       log.info("...LOADING DEMO DATA...")
