@@ -18,7 +18,7 @@ import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.{ HmdaFileValidationState, JustifyMacroEdit, MacroEditJustified, VerifyQualityEdits }
+import hmda.persistence.processing.HmdaFileValidator._
 import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -129,7 +129,7 @@ trait SubmissionEditPaths
 
             val fSubmissions = for {
               va <- fValidator
-              v <- va ? VerifyQualityEdits(verified)
+              v <- (va ? VerifyQualityEdits(verified)).mapTo[QualityEditsVerified]
               sa <- fSubmissionsActor
               s <- (sa ? GetSubmissionById(subId)).mapTo[Submission]
             } yield s
