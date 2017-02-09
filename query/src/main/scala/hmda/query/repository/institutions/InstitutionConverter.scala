@@ -19,7 +19,7 @@ object InstitutionConverter {
       i.agency.value,
       year,
       i.activityYear,
-      i.respondent.externalId.name,
+      i.respondent.externalId.value,
       i.institutionType.entryName,
       i.cra,
       Try(emails(0)).getOrElse(""),
