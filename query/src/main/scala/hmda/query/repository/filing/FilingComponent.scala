@@ -310,6 +310,7 @@ trait FilingComponent { this: DbConfiguration =>
       """
 
     def createSchema() = db.run(createViewSchema)
+    def dropSchema() = db.run(table.schema.drop)
   }
 
 }
