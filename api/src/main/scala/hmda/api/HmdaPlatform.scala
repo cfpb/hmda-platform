@@ -39,7 +39,7 @@ object HmdaPlatform extends DbConfiguration {
     implicit val ec = system.dispatcher
 
     startActors(system, supervisor, querySupervisor)
-    startApi(system)
+    startApi(system, querySupervisor)
 
   }
 
@@ -102,9 +102,10 @@ object HmdaPlatform extends DbConfiguration {
 
   }
 
-  private def startApi(system: ActorSystem): Unit = {
+  private def startApi(system: ActorSystem, querySupervisor: ActorRef): Unit = {
     system.actorOf(HmdaFilingApi.props(), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(), "hmda-admin-api")
+    system.actorOf(HmdaPublicApi.props(querySupervisor), "hmda-public-api")
   }
 
 }

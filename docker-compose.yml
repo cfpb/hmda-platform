@@ -5,6 +5,8 @@ services:
     build: .
     ports:
       - '9090:8080'
+      - '9091:8081'
+      - '9092:8082'
     volumes:
     - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
     depends_on:
