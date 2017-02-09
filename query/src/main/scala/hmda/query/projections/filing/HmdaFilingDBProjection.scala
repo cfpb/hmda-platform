@@ -20,10 +20,9 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
-  case class FilingSchemaDeleted() extends Event
   case class LarsDeleted(respondentId: String) extends Event
-
   def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
+
   def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
     system.actorOf(HmdaFilingDBProjection.props(period))
   }
