@@ -87,7 +87,7 @@ class InstitutionView extends HmdaPersistentActor {
 
   }
 
-  override def receiveRecover: Receive = {
+  override def receiveRecover: Receive = super.receiveRecover orElse {
     case SnapshotOffer(_, s: InstitutionViewState) => state = s
     case RecoveryCompleted => recoveryCompleted()
   }
