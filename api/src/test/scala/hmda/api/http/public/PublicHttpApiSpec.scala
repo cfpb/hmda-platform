@@ -17,8 +17,8 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
 
   override val log: LoggingAdapter = NoLogging
   implicit val ec = system.dispatcher
-  val repository = new LarRepository(config)
-  val totalRepository = new LarTotalRepository(config)
+  val larRepository = new LarRepository(config)
+  val larTotalRepository = new LarTotalRepository(config)
 
   val duration = 10.seconds
   override implicit val timeout = Timeout(duration)
@@ -30,26 +30,24 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
   val l2 = toLoanApplicationRegisterQuery(lar2).copy(period = p)
 
   override def beforeEach(): Unit = {
-    super.beforeEach()
-    Await.result(repository.createSchema(), duration)
-    Await.result(modifiedLarRepository.createSchema(), duration)
     loadData()
-  }
-
-  override def afterEach(): Unit = {
-    super.afterEach()
-    Await.result(modifiedLarRepository.dropSchema(), duration)
-    Await.result(repository.dropSchema(), duration)
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
-    repository.config.db.close()
+    dropSchema()
   }
 
   private def loadData(): Unit = {
-    Await.result(repository.insertOrUpdate(l1), duration)
-    Await.result(repository.insertOrUpdate(l2), duration)
+    Await.result(larRepository.insertOrUpdate(l1), duration)
+    Await.result(larRepository.insertOrUpdate(l2), duration)
+  }
+
+  private def dropSchema(): Unit = {
+    Await.ready(modifiedLarRepository.dropSchema(), duration)
+    Await.ready(larTotalRepository.dropSchema(), duration)
+    Await.ready(larRepository.dropSchema(), duration)
+    larRepository.config.db.close()
   }
 
   "Modified LAR Http API" must {
