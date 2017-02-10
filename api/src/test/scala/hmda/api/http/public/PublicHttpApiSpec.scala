@@ -44,9 +44,9 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
   }
 
   private def dropSchema(): Unit = {
-    Await.ready(modifiedLarRepository.dropSchema(), duration)
-    Await.ready(larTotalRepository.dropSchema(), duration)
-    Await.ready(larRepository.dropSchema(), duration)
+    Await.result(modifiedLarRepository.dropSchema(), duration)
+    Await.result(larTotalRepository.dropSchema(), duration)
+    Await.result(larRepository.dropSchema(), duration)
     larRepository.config.db.close()
   }
 
