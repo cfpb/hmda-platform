@@ -29,7 +29,7 @@ class FilingPersistenceSpec extends ActorSpec {
       probe.send(filingsActor, UpdateFilingStatus(modified))
       probe.expectMsg(Some(modified))
       probe.send(filingsActor, GetFilingByPeriod(filing.period))
-      probe.expectMsg(filing.copy(status = Cancelled))
+      probe.expectMsg(modified)
     }
 
     "return None when persisting a filing that already exists" in {
