@@ -14,7 +14,7 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
+import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, _ }
 import hmda.query.view.institutions.InstitutionView
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef

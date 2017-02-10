@@ -30,6 +30,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
   val l2 = toLoanApplicationRegisterQuery(lar2).copy(period = p)
 
   override def beforeEach(): Unit = {
+    dropSchema()
     Await.result(larRepository.createSchema(), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
     loadData()
@@ -40,6 +41,11 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
     Await.result(larRepository.insertOrUpdate(l2), duration)
   }
 
+  override def afterAll(): Unit = {
+    dropSchema()
+    larRepository.config.db.close()
+  }
+
   private def dropSchema(): Unit = {
     import config.profile.api._
     val db = larRepository.config.db
@@ -48,7 +54,6 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
             drop table if exists lars cascade
           """
     Await.result(db.run(dropStmt), duration)
-    db.close()
   }
 
   "Modified LAR Http API" must {
