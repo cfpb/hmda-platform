@@ -48,7 +48,9 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
+
   "HMDA File Validator" must {
+
     "persist LARs and TS" in {
       probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
@@ -71,6 +73,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
+        qualityVerified = false,
         Seq(e4)
       ))
     }
@@ -104,12 +107,49 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
           ValidityValidationError("4977566612", "V560", false)
         ),
         Nil,
+        qualityVerified = false,
         List(
           MacroValidationError("Q008", Nil),
           MacroValidationError("Q010", Nil),
           MacroValidationError("Q016", Nil),
           MacroValidationError("Q023", Nil)
         )
+      ))
+    }
+
+    "verify quality edits" in {
+      // establish baseline
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        qualityVerified = false,
+        Vector(e4)
+      ))
+
+      // send VerifyQualityEdits message
+      probe.send(hmdaFileValidator, VerifyQualityEdits(true))
+      probe.expectMsg(QualityEditsVerified(true))
+
+      // expect updated validation state
+      probe.send(hmdaFileValidator, GetState)
+      probe.expectMsg(HmdaFileValidationState(
+        Some(ts),
+        lars,
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        Seq(e1),
+        Seq(e2),
+        Seq(e3),
+        qualityVerified = true,
+        Vector(e4)
       ))
     }
 
@@ -127,6 +167,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
+        qualityVerified = true,
         Vector(e4)
       ))
       probe.send(hmdaFileValidator, JustifyMacroEdit("Q007", j))
@@ -141,6 +182,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
+        qualityVerified = true,
         Vector(e5)
       ))
     }
