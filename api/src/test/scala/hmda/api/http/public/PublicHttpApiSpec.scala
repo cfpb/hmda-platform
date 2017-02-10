@@ -30,8 +30,8 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
   val l2 = toLoanApplicationRegisterQuery(lar2).copy(period = p)
 
   override def beforeEach(): Unit = {
-    larRepository.createSchema()
-    modifiedLarRepository.createSchema()
+    Await.result(larRepository.createSchema(), duration)
+    Await.result(modifiedLarRepository.createSchema(), duration)
     loadData()
   }
 
