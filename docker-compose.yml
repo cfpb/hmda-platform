@@ -42,10 +42,9 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_SERVER: keycloak_db
       POSTGRES_PORT: 5432
-      # Must use the external address since it is used both in frontend and backend.
       INSTITUTION_SEARCH_URI: https://192.168.99.100:9443
-      HOME_PAGE_URI: http://192.168.99.100
       INSTITUTION_SEARCH_VALIDATE_SSL: "OFF"
+      HOME_PAGE_URI: http://192.168.99.100
       REDIRECT_URIS: '[ "http://192.168.99.100", "http://192.168.99.100/oidc-callback", "http://192.168.99.100/silent_renew.html" ]'
       SUPPORT_EMAIL: 'support@localhost.localdomain'
     volumes:
@@ -63,7 +62,7 @@ services:
     links:
       - mail_dev
       - keycloak_db
-      - institution_search
+      - api
 
   keycloak_db:
     image: postgres:9.6.1
@@ -72,16 +71,11 @@ services:
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
 
-  institution_search:
-    build: ../hmda-platform-auth/institution-search
-    ports:
-      - 9443:5000
-
   auth_proxy:
     build: ../hmda-platform-auth/auth-proxy
     ports:
-      - '4480:8080'
-      - '4443:8443'   # Apache w/ mod_auth_openidc
+      - '4443:8443' # Auth Proxy
+      - '9443:9443' # Institution Search
     environment:
       OIDC_METADATA_URI: https://keycloak:8443/auth/realms/hmda/.well-known/openid-configuration
       OIDC_JWKS_URI: https://keycloak:8443/auth/realms/hmda/protocol/openid-connect/certs
@@ -92,8 +86,9 @@ services:
       CLAIM_HEADER_PREFIX: CFPB-HMDA-
       REMOTE_USER_CLAIM: preferred_username
       REMOTE_USER_HEADER: CFPB-HMDA-Username
-      UPSTREAM_API_URI: http://api:8080/
-      API_PATH_PREFIX: /hmda/
+      FILING_API_UPSTREAM_URI: http://api:8080/
+      FILING_API_PATH_PREFIX: /hmda/
+      PUBLIC_API_UPSTREAM_URI: http://api:8082/
       LOG_LEVEL: info
     links:
       - api
