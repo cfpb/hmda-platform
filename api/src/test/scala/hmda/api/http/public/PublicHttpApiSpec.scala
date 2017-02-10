@@ -33,11 +33,6 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
     loadData()
   }
 
-  override def afterAll(): Unit = {
-    super.afterAll()
-    dropSchema()
-  }
-
   private def loadData(): Unit = {
     Await.result(larRepository.insertOrUpdate(l1), duration)
     Await.result(larRepository.insertOrUpdate(l2), duration)
