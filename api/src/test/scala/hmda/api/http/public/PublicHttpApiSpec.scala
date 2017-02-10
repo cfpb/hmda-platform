@@ -44,10 +44,14 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
   }
 
   private def dropSchema(): Unit = {
-    Await.result(modifiedLarRepository.dropSchema(), duration)
-    Await.result(larTotalRepository.dropSchema(), duration)
-    Await.result(larRepository.dropSchema(), duration)
-    larRepository.config.db.close()
+    import config.profile.api._
+    val db = larRepository.config.db
+    val dropStmt =
+      sqlu"""
+            drop table if exists lars cascade
+          """
+    Await.result(db.run(dropStmt), duration)
+    db.close()
   }
 
   "Modified LAR Http API" must {

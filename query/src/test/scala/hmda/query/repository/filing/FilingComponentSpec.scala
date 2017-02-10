@@ -32,10 +32,14 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   }
 
   private def dropSchema(): Unit = {
-    Await.result(modifiedLarRepository.dropSchema(), duration)
-    Await.result(larTotalRepository.dropSchema(), duration)
-    Await.result(larRepository.dropSchema(), duration)
-    larRepository.config.db.close()
+    import config.profile.api._
+    val db = larRepository.config.db
+    val dropStmt =
+      sqlu"""
+            drop table if exists lars cascade
+          """
+    Await.result(db.run(dropStmt), duration)
+    db.close()
   }
 
   "LAR Repository" must {
