@@ -14,16 +14,16 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, DeleteSchema, _ }
+import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
 import hmda.query.view.institutions.InstitutionView
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionSchemaCreated, InstitutionSchemaDeleted }
+import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
 import hmda.query.DbConfiguration
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 object HmdaPlatform extends DbConfiguration {
 
@@ -39,7 +39,7 @@ object HmdaPlatform extends DbConfiguration {
     implicit val ec = system.dispatcher
 
     startActors(system, supervisor, querySupervisor)
-    startApi(system)
+    startApi(system, querySupervisor)
 
   }
 
@@ -102,10 +102,10 @@ object HmdaPlatform extends DbConfiguration {
 
   }
 
-  private def startApi(system: ActorSystem): Unit = {
+  private def startApi(system: ActorSystem, querySupervisor: ActorRef): Unit = {
     system.actorOf(HmdaFilingApi.props(), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(), "hmda-admin-api")
-    system.actorOf(HmdaPublicApi.props(), "hmda-public-api")
+    system.actorOf(HmdaPublicApi.props(querySupervisor), "hmda-public-api")
   }
 
 }
