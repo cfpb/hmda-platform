@@ -316,7 +316,6 @@ trait FilingComponent { this: DbConfiguration =>
 
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
-
     def count(respId: String) = db.run(table.filter(_.respondentId === respId).map(_.total).result.headOption)
 
   }
