@@ -1,8 +1,10 @@
 package hmda.model.fi.lar
 
-import hmda.model.fi.HasControlNumber
-import hmda.model.fi.StringPaddingUtils
+import hmda.model.fi.{ HasControlNumber, HmdaFileRow, StringPaddingUtils }
 
+import scala.scalajs.js.annotation.JSExportAll
+
+@JSExportAll
 case class LoanApplicationRegister(
     id: Int,
     respondentId: String,
@@ -18,7 +20,12 @@ case class LoanApplicationRegister(
     rateSpread: String,
     hoepaStatus: Int,
     lienStatus: Int
-) extends HasControlNumber with StringPaddingUtils {
+) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
+
+  override def valueOf(field: String): Any = {
+    LarFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")
+  }
+
   def toCSV: String = {
     s"$id|$respondentId|$agencyCode|${loan.id}|${loan.applicationDate}" +
       s"|${loan.loanType}|${loan.propertyType}|${loan.purpose}|${loan.occupancy}" +
@@ -78,4 +85,3 @@ case class LoanApplicationRegister(
       (" " * 270)
   }
 }
-

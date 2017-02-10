@@ -15,6 +15,7 @@ object InstitutionDBProjection extends InstitutionComponent with DbConfiguration
   val repository = new InstitutionRepository(config)
 
   case object CreateSchema extends Command
+  case object DeleteSchema extends Command
   case class InstitutionInserted(n: Int)
   case class InstitutionUpdated(n: Int)
 
@@ -36,6 +37,9 @@ class InstitutionDBProjection extends HmdaActor {
   override def receive: Receive = {
     case CreateSchema =>
       repository.createSchema().map(_ => InstitutionSchemaCreated()) pipeTo sender()
+
+    case DeleteSchema =>
+      repository.dropSchema().map(_ => InstitutionSchemaDeleted()) pipeTo sender()
 
     case event: InstitutionEvent => event match {
       case InstitutionCreated(i) =>

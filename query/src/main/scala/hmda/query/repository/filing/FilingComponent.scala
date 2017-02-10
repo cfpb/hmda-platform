@@ -1,8 +1,8 @@
 package hmda.query.repository.filing
 
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.LoanApplicationRegisterQuery
-import hmda.query.repository.Repository
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal }
+import hmda.query.repository.{ Repository, TableRepository }
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
@@ -280,12 +280,37 @@ trait FilingComponent { this: DbConfiguration =>
 
   }
 
-  class LarRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTable, String] {
+  class LarRepository(val config: DatabaseConfig[JdbcProfile]) extends TableRepository[LarTable, String] {
     val table = TableQuery[LarTable]
     def getId(table: LarTable) = table.id
 
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
     def deleteById(id: String) = db.run(filterById(id).delete)
+    def deleteAll = db.run(table.delete)
+    def deleteByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).delete)
   }
+
+  class LarTotalTable(tag: Tag) extends Table[LoanApplicationRegisterTotal](tag, "lars_total") {
+    def id = column[Int]("id", O.PrimaryKey)
+    def respondentId = column[String]("respondent_id")
+    def period = column[String]("period")
+    def total = column[Int]("total")
+
+    override def * = (id, respondentId, period, total) <> (LoanApplicationRegisterTotal.tupled, LoanApplicationRegisterTotal.unapply)
+  }
+
+  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, Int] {
+    val table = TableQuery[LarTotalTable]
+    def getId(table: LarTotalTable) = table.id
+
+    private val createViewSchema = sqlu"""create view lars_total as
+      select count(*) as total, respondent_id, period
+      from lars group by respondent_id, period
+      """
+
+    def createSchema() = db.run(createViewSchema)
+    def dropSchema() = db.run(table.schema.drop)
+  }
+
 }

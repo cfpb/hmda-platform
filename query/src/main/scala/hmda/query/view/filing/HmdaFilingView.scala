@@ -42,7 +42,7 @@ class HmdaFilingView(period: String) extends HmdaPersistentActor {
 
   var counter = 0
 
-  val queryProjector = context.actorOf(HmdaFilingDBProjection.props(period))
+  val queryProjector = context.actorOf(HmdaFilingDBProjection.props(period), "queryProjector")
 
   val conf = ConfigFactory.load()
   val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")

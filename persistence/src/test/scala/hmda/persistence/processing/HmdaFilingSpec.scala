@@ -33,7 +33,6 @@ class HmdaFilingSpec extends ActorSpec with LarGenerators {
       for (lar <- lars10) {
         probe.send(validator, lar)
       }
-      probe.send(hmdaFiling, SaveLars(submissionId))
       probe.send(hmdaFiling, GetState)
       probe.expectMsg(HmdaFilingState(10))
     }

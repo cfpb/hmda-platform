@@ -176,9 +176,10 @@ trait ModelGenerators {
     for {
       s <- editResultsGen
       v <- editResultsGen
-      q <- editResultsGen
+      qualVerified <- Gen.oneOf(true, false)
+      q <- Gen.listOf(editResultGen)
       m <- Gen.listOf(macroResultGen)
-    } yield SummaryEditResults(s, v, q, MacroResults(m))
+    } yield SummaryEditResults(s, v, QualityEditResults(qualVerified, q), MacroResults(m))
   }
 
   implicit def institutionSearchGen: Gen[InstitutionSearch] = {
