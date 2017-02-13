@@ -34,18 +34,18 @@ Quick links:
 - [`/institutions/<institutionId>/filings/<period>/submissions`](#submissions)
 - [`/institutions/<institutionId>/filings/<period>/submissions/latest`](#latest-submission)
 - [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`](#submission-by-id)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`](#parse-errors)
 - [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`](#edits)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`](#edits-by-type)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`](#irs)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`](#signature)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`](#summary)
-- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`](#parse-errors)
 
 ### Institutions
 
 `/institutions`
 
-`GET` - List of institutions
+`GET` - Returns the list of institutions
 
   Example response:
 
@@ -68,7 +68,7 @@ Quick links:
 
 `/institutions/<institutionId>`
 
-`GET` - Details for Financial Institution
+`GET` - Returns the details for an institution based on ID
 
 Example response:
 
@@ -109,7 +109,7 @@ Example response:
 
 `/institutions/<institutionId>/filings/<period>`
 
-`GET` - Details for a filing
+`GET` - Returns the details for a filing for an institution and filing period
 
 Example response:
 
@@ -174,7 +174,7 @@ Example response:
 
 `/institutions/<institutionId>/filings/<period>/submissions`
 
-`POST` - Create a new submission
+`POST` - Create a new submission for an institution and filing period
 
 Example response, with HTTP code 201:
 
@@ -198,7 +198,7 @@ Example response, with HTTP code 201:
 
 `/institutions/<institutionId>/filings/<period>/submissions/latest`
 
-`GET` - The latest submission for an institution and period
+`GET` - Returns the latest submission for an institution and filing period
 
 Example response:
 
@@ -256,11 +256,51 @@ Example response, with HTTP code 400:
 }
 ```
 
+### Parse errors
+
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/parseErrors`
+
+`GET` - Returns all parsing errors for a submission
+
+Example response, with HTTP code 201:
+
+```json
+{
+  "transmittalSheetErrors": [
+    "Record Identifier is not an Integer",
+    "Agency Code is not an Integer"
+  ],
+  "larErrors": [
+    {
+      "lineNumber": 2,
+      "errorMessages": [
+        "Incorrect number of fields. found: 32, expected: 39"
+      ]
+    },
+    {
+      "lineNumber": 4,
+      "errorMessages": [
+        "Record Identifier is not an Integer"
+      ]
+    },
+    {
+      "lineNumber": 11,
+      "errorMessages": [
+        "Loan Type is not an Integer",
+        "Property Type is not an Integer",
+        "Loan Purpose is not an Integer",
+        "Owner Occupancy is not an Integer"
+      ]
+    }
+  ]
+}
+```
+
 ### Edits
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`
 
-`GET`  - List of all edits for a given submission
+`GET`  - Returns a list of all edits for a given submission
 
 By default, results are grouped by edit type.
 
@@ -272,6 +312,7 @@ By default, results are grouped by edit type.
 Example responses:
 
 Default Sorting:
+
 ```json
 {
   "syntactical": {
@@ -388,6 +429,7 @@ Default Sorting:
 ```
 
 Formatted as CSV, `?format=csv`:
+
 ```csv
 editType, editId, loanId
 syntactical, S025, Transmittal Sheet
@@ -399,7 +441,10 @@ syntactical, S010, s5
 macro, Q007
 ```
 
-Sorted by row, `?sortBy=row` (macro edits remain their own object because they aren't row based):
+Sorted by row, `?sortBy=row`:
+
+_Macro edits remain their own object because they aren't row based._
+
 ```json
 {
   "rows": [
@@ -480,7 +525,7 @@ Sorted by row, `?sortBy=row` (macro edits remain their own object because they a
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
 
-`GET` - List of edits of a specific type, for a given submission
+`GET` - Returns a list of edits of a specific type, for a given submission
 
 By default, results are grouped by named edit.
 
@@ -541,7 +586,10 @@ validity, V555, 4977566612
 validity, V550, 4977566612
 ```
 
-Sorted by row, `?sortBy=row` (macro edits remain their own object because they aren't row based):
+Sorted by row, `?sortBy=row`:
+
+_Macro edits remain their own object because they aren't row based._
+
 ```json
 {
   "rows": [
@@ -576,7 +624,7 @@ Sorted by row, `?sortBy=row` (macro edits remain their own object because they a
 }
 ```
 
-`POST` - Provides verification for Quality edits
+`POST` - Provides verification for quality edits
 
 _Specific to the `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/quality` endpoint._
 
@@ -600,7 +648,7 @@ Example response:
 }
 ```
 
-`POST` - Provides justification for Macro edits
+`POST` - Provides justification for macro edits
 
 _Specific to the `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/macro` endpoint._
 
@@ -653,7 +701,7 @@ Example response:
 
 _NOTE: This is currently a mocked, static endpoint._
 
-`GET`  - Institution Register Summary
+`GET` - Returns the Institution Register Summary
 
 Example response:
 
@@ -769,46 +817,6 @@ Example response:
     "year": "2016",
     "totalLARS": 25
   }
-}
-```
-
-### Parse errors
-
-`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/parseErrors`
-
-`GET` - Returns all parsing errors for a submission
-
-Example response, with HTTP code 201:
-
-```json
-{
-  "transmittalSheetErrors": [
-    "Record Identifier is not an Integer",
-    "Agency Code is not an Integer"
-  ],
-  "larErrors": [
-    {
-      "lineNumber": 2,
-      "errorMessages": [
-        "Incorrect number of fields. found: 32, expected: 39"
-      ]
-    },
-    {
-      "lineNumber": 4,
-      "errorMessages": [
-        "Record Identifier is not an Integer"
-      ]
-    },
-    {
-      "lineNumber": 11,
-      "errorMessages": [
-        "Loan Type is not an Integer",
-        "Property Type is not an Integer",
-        "Loan Purpose is not an Integer",
-        "Owner Occupancy is not an Integer"
-      ]
-    }
-  ]
 }
 ```
 
