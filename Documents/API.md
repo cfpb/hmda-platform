@@ -19,10 +19,14 @@ Example response:
 }
 ```
 
+### Institutions endpoints
+
 All endpoints in the `/institutions` namespace require two headers (see ["Authorization" section](#authorization) below for more detail):
 
 - `CFPB-HMDA-Username`, containing a string
 - `CFPB-HMDA-Institutions`, containing a list of integers
+
+Quick links:
 
 - [`/institutions`](#institutions)
 - [`/institutions/<institutionId>`](#institutions-by-id)
