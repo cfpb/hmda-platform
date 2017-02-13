@@ -3,8 +3,8 @@
 ## HTTP Endpoints
 
 - `/`
-- `/institutions`
-- `/institutions/<institutionId>`
+- [`/institutions`](#institutions)
+- [`/institutions/<institutionId>`](#institutionsinstitutionid)
 - `/institutions/<institutionId>/filings/<period>`
 - `/institutions/<institutionId>/filings/<period>/submissions`
 - `/institutions/<institutionId>/filings/<period>/submissions/latest`
@@ -17,18 +17,19 @@
 - `/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`
 
 #### `/`
-    * `GET` - Root endpoint, with information about the HMDA Platform service. Used for health checks
 
-    Example response, with HTTP code 200:
+* `GET` - Root endpoint, with information about the HMDA Platform service. Used for health checks
 
-    ```json
-    {
-      "status": "OK",
-      "service": "hmda-filing-api",
-      "time": "2016-06-17T13:54:10.725Z",
-      "host": "localhost"
-    }
-    ```
+Example response, with HTTP code 200:
+
+```json
+{
+  "status": "OK",
+  "service": "hmda-filing-api",
+  "time": "2016-06-17T13:54:10.725Z",
+  "host": "localhost"
+}
+```
 
 All endpoints in the `/institutions` namespace require two headers (see ["Authorization" section](#authorization) below for more detail):
 * `CFPB-HMDA-Username`, containing a string
@@ -36,7 +37,8 @@ All endpoints in the `/institutions` namespace require two headers (see ["Author
 
 
 #### `/institutions`
-    * `GET` - List of Financial Institutions
+
+  * `GET` - List of Financial Institutions
 
     Example response, with HTTP code 200:
 
