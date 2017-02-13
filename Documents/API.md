@@ -2,7 +2,7 @@
 
 ## HTTP Endpoints
 
-#### `/`
+### `/`
 
 `GET` - Root endpoint with information about the HMDA Platform service. Used for health checks.
 
@@ -17,7 +17,7 @@ Example response:
 }
 ```
 
-- [`/institutions`](#financial-institutions)
+- [`/institutions`](#institutions)
 - [`/institutions/<institutionId>`](#institutions-by-id)
 - [`/institutions/<institutionId>/filings/<period>`](#filings)
 - [`/institutions/<institutionId>/filings/<period>/submissions`](#submissions)
@@ -34,7 +34,7 @@ All endpoints in the `/institutions` namespace require two headers (see ["Author
 * `CFPB-HMDA-Username`, containing a string
 * `CFPB-HMDA-Institutions`, containing a list of integers
 
-#### Institutions
+### Institutions
 
 `/institutions`
 
@@ -57,7 +57,7 @@ All endpoints in the `/institutions` namespace require two headers (see ["Author
 }
 ```
 
-#### Institutions by ID
+### Institutions by ID
 
 `/institutions/<institutionId>`
 
@@ -98,7 +98,7 @@ Example response:
 }
 ```
 
-#### Filings
+### Filings
 
 `/institutions/<institutionId>/filings/<period>`
 
@@ -163,7 +163,7 @@ Example response:
 }
 ```
 
-#### Submissions
+### Submissions
 
 `/institutions/<institutionId>/filings/<period>/submissions`
 
@@ -187,7 +187,7 @@ Example response, with HTTP code 201:
 }
 ```
 
-#### Latest submission
+### Latest submission
 
 `/institutions/<institutionId>/filings/<period>/submissions/latest`
 
@@ -211,7 +211,7 @@ Example response:
 }
 ```
 
-#### Submission by ID
+### Submission by ID
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`
 
@@ -249,7 +249,7 @@ Example response, with HTTP code 400:
 }
 ```
 
-#### Edits
+### Edits
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`
 
@@ -469,7 +469,7 @@ Sorted by row, `?sortBy=row` (macro edits remain their own object because they a
 }
 ```
 
-#### Edits by type
+### Edits by type
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
 
@@ -640,7 +640,7 @@ Example response:
 }
 ```
 
-#### IRS
+### IRS
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs`
 
@@ -693,7 +693,7 @@ Example response:
 }
 ```
 
-#### Signature
+### Signature
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign`
 
@@ -734,7 +734,7 @@ Example response:
 }
 ```
 
-#### Summary
+### Summary
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary`
 
@@ -765,7 +765,7 @@ Example response:
 }
 ```
 
-#### Parse errors
+### Parse errors
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/parseErrors`
 
