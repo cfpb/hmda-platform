@@ -2,25 +2,11 @@
 
 ## HTTP Endpoints
 
-- `/`
-- [`/institutions`](#institutions)
-- [`/institutions/<institutionId>`](#institutionsinstitutionid)
-- `/institutions/<institutionId>/filings/<period>`
-- `/institutions/<institutionId>/filings/<period>/submissions`
-- `/institutions/<institutionId>/filings/<period>/submissions/latest`
-- `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`
-- `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`
-- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
-- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
-- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`
-- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`
-- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`
-
 #### `/`
 
-* `GET` - Root endpoint, with information about the HMDA Platform service. Used for health checks
+`GET` - Root endpoint with information about the HMDA Platform service. Used for health checks.
 
-Example response, with HTTP code 200:
+Example response:
 
 ```json
 {
@@ -31,144 +17,113 @@ Example response, with HTTP code 200:
 }
 ```
 
+- [`/institutions`](#financial-institutions)
+- [`/institutions/<institutionId>`](#institutions-by-id)
+- [`/institutions/<institutionId>/filings/<period>`](#filings)
+- [`/institutions/<institutionId>/filings/<period>/submissions`](#submissions)
+- [`/institutions/<institutionId>/filings/<period>/submissions/latest`](#latest-submission)
+- [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`](#submission-by-id)
+- [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`](#edits)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`](#edits-by-type)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`](#irs)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`](#signature)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`](#summary)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`](#parse-errors)
+
 All endpoints in the `/institutions` namespace require two headers (see ["Authorization" section](#authorization) below for more detail):
 * `CFPB-HMDA-Username`, containing a string
 * `CFPB-HMDA-Institutions`, containing a list of integers
 
+#### Institutions
 
-#### `/institutions`
+`/institutions`
 
-  * `GET` - List of Financial Institutions
+`GET` - List of institutions
 
-    Example response, with HTTP code 200:
-
-    ```json
-    {
-      "institutions": [
-        {
-          "id": "12345",
-          "name": "First Bank",
-        },
-        {
-          "id": "123456",
-          "name": "Second Bank",
-        }
-      ]
-    }
-    ```
-
-#### `/institutions/<institutionId>`
-    * `GET` - Details for Financial Institution
-
-    Example response, with HTTP code 200:
-
-    ```json
-    {
-      "institution": {
-      "id": "12345",
-      "name": "First Bank",
-    },
-      "filings": [
-        {
-          "period": "2017",
-          "institutionId": "12345",
-          "filingRequired": true,
-          "status": {
-            "code": 1,
-            "message": "not-started"
-          },
-          "start": 0,
-          "end": 0
-        },
-        {
-          "period": "2016",
-          "institutionId": "12345",
-          "filingRequired": false,
-          "status": {
-            "code": 3,
-            "message": "completed"
-          },
-          "start": 1483287071000,
-          "end": 1514736671000
-        }
-      ]
-    }
-    ```
-
-
-#### `/institutions/<institutionId>/filings/<period>`
-  * `GET` - Details for a filing
-
-  Example response, with HTTP code 200:
+  Example response:
 
 ```json
 {
-"filing": {
-  "period": "2017",
-  "institutionId": "12345",
-  "filingRequired": true,
-  "status": {
-    "code": 1,
-    "message": "not-started"
-  },
-  "start": 0,
-  "end": 0
-},
-"submissions": [
-  {
-    "id": {
-      "institutionId": "12345",
-      "period": "2017",
-      "sequenceNumber": 1
+  "institutions": [
+    {
+      "id": "12345",
+      "name": "First Bank",
     },
-    "status": {
-      "code": 1,
-      "message": "created"
-    },
-    "start": 1483287071000,
-    "end": 0
-  },
-  {
-    "id": {
-      "institutionId": "12345",
-      "period": "2017",
-      "sequenceNumber": 2
-    },
-    "status": {
-      "code": 1,
-      "message": "created"
-    },
-    "start": 1483287071000,
-    "end": 0
-  },
-  {
-    "id": {
-      "institutionId": "12345",
-      "period": "2017",
-      "sequenceNumber": 3
-    },
-    "status": {
-      "code": 1,
-      "message": "created"
-    },
-    "start": 1483287071000,
-    "end": 0
-  }
- ]
+    {
+      "id": "123456",
+      "name": "Second Bank",
+    }
+  ]
 }
 ```
 
-#### `/institutions/<institutionId>/filings/<period>/submissions`
+#### Institutions by ID
 
-    * `POST` - Create a new submission
+`/institutions/<institutionId>`
 
-    Example response, with HTTP code 201:
+`GET` - Details for Financial Institution
 
-    ```json
+Example response:
+
+```json
+{
+  "institution": {
+    "id": "12345",
+    "name": "First Bank",
+  },
+  "filings": [
+    {
+      "period": "2017",
+      "institutionId": "12345",
+      "filingRequired": true,
+      "status": {
+        "code": 1,
+        "message": "not-started"
+      },
+      "start": 0,
+      "end": 0
+    },
+    {
+      "period": "2016",
+      "institutionId": "12345",
+      "filingRequired": false,
+      "status": {
+        "code": 3,
+        "message": "completed"
+      },
+      "start": 1483287071000,
+      "end": 1514736671000
+    }
+  ]
+}
+```
+
+#### Filings
+
+`/institutions/<institutionId>/filings/<period>`
+
+`GET` - Details for a filing
+
+Example response:
+
+```json
+{
+  "filing": {
+    "period": "2017",
+    "institutionId": "12345",
+    "filingRequired": true,
+    "status": {
+      "code": 1,
+      "message": "not-started"
+    },
+    "start": 0,
+    "end": 0
+  },
+  "submissions": [
     {
       "id": {
-        "institutionId": "0",
-        "period": "2016",
+        "institutionId": "12345",
+        "period": "2017",
         "sequenceNumber": 1
       },
       "status": {
@@ -177,19 +132,23 @@ All endpoints in the `/institutions` namespace require two headers (see ["Author
       },
       "start": 1483287071000,
       "end": 0
-    }
-    ```
-
-#### `/institutions/<institutionId>/filings/<period>/submissions/latest`
-
-    * `GET` - The latest submission for some institution and period
-
-     Example response, with HTTP code 200:
-
-    ```json
+    },
     {
       "id": {
-        "institutionId": "0",
+        "institutionId": "12345",
+        "period": "2017",
+        "sequenceNumber": 2
+      },
+      "status": {
+        "code": 1,
+        "message": "created"
+      },
+      "start": 1483287071000,
+      "end": 0
+    },
+    {
+      "id": {
+        "institutionId": "12345",
         "period": "2017",
         "sequenceNumber": 3
       },
@@ -198,426 +157,498 @@ All endpoints in the `/institutions` namespace require two headers (see ["Author
         "message": "created"
       },
       "start": 1483287071000,
-      "end": 1514736671000
+      "end": 0
     }
-    ```
+  ]
+}
+```
 
+#### Submissions
 
-#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`
-    * `POST` - Upload HMDA data to submission
+`/institutions/<institutionId>/filings/<period>/submissions`
 
-    Example response, with HTTP code 200:
+`POST` - Create a new submission
 
-    ```json
-    {
-      "id": {
-        "institutionId": "0",
-        "period": "2017",
-        "sequenceNumber": 3
-      },
-      "status": {
-        "code": 3,
-        "message": "uploaded"
-      }
-    }
-    ```
+Example response, with HTTP code 201:
 
-    Example response, with HTTP code 400:
+```json
+{
+  "id": {
+    "institutionId": "0",
+    "period": "2016",
+    "sequenceNumber": 1
+  },
+  "status": {
+    "code": 1,
+    "message": "created"
+  },
+  "start": 1483287071000,
+  "end": 0
+}
+```
 
-    ```json
-    {
-      "id": {
-        "institutionId": "0",
-        "period": "2017",
-        "sequenceNumber": 4848484
-      },
-      "status": {
-        "code": -1,
-        "message": "Submission 4848484 not available for upload"
-      }
-    }
-    ```
+#### Latest submission
 
-#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`
-    * `GET`  - List of all edits for a given submission
-       * By default, results are grouped by edit type, then by named edit.
-       * Use `sortBy=row` as a query parameter to group by the row in the submitted file.
-       * Use `format=csv` as a query parameter for edits in CSV format, for importing into spreadsheet software.
+`/institutions/<institutionId>/filings/<period>/submissions/latest`
 
-    Example response, with HTTP code 200:
+`GET` - The latest submission for an institution and period
 
-    Default Sorting:
-    ```json
-    {
-      "syntactical": {
-        "edits": [
+Example response:
+
+```json
+{
+  "id": {
+    "institutionId": "0",
+    "period": "2017",
+    "sequenceNumber": 3
+  },
+  "status": {
+    "code": 1,
+    "message": "created"
+  },
+  "start": 1483287071000,
+  "end": 1514736671000
+}
+```
+
+#### Submission by ID
+
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`
+
+`POST` - Upload HMDA data to submission
+
+Example response:
+
+```json
+{
+  "id": {
+    "institutionId": "0",
+    "period": "2017",
+    "sequenceNumber": 3
+  },
+  "status": {
+    "code": 3,
+    "message": "uploaded"
+  }
+}
+```
+
+Example response, with HTTP code 400:
+
+```json
+{
+  "id": {
+    "institutionId": "0",
+    "period": "2017",
+    "sequenceNumber": 4848484
+  },
+  "status": {
+    "code": -1,
+    "message": "Submission 4848484 not available for upload"
+  }
+}
+```
+
+#### Edits
+
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`
+
+`GET`  - List of all edits for a given submission
+
+By default, results are grouped by edit type.
+
+| Query parameter | Description |
+| --------------- | ----------- |
+| sortBy | `row` to group edits by row, rather than the default edit type. |
+| format | `csv` to return edits in CSV format, rather than the default by edit type, for use in spreadsheet software. |
+
+Example responses:
+
+Default Sorting:
+```json
+{
+  "syntactical": {
+    "edits": [
+      {
+        "edit": "S020",
+        "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+        "rows": [
           {
-            "edit": "S020",
-            "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-            "rows": [
-              {
-                "row": {
-                  "rowId": "Transmittal Sheet"
-                },
-                "fields": {
-                  "Agency Code": 10
-                }
-              },
-              {
-                "row": {
-                  "rowId": "8299422144"
-                },
-                "fields": {
-                  "Agency Code": 10
-                }
-              },
-              {
-                "row": {
-                  "rowId": "2185751599"
-                },
-                "fields": {
-                  "Agency Code": 10
-                }
-              }
-            ]
-          },
-          {
-            "edit": "S010",
-            "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
-            "rows": [
-              {
-                "row": {
-                  "rowId": "2185751599"
-                },
-                "fields": {
-                  "Record Identifier": 1
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "validity": {
-        "edits": [
-          {
-            "edit": "V555",
-            "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
-            "rows": [
-              {
-                "row": {
-                  "rowId": "4977566612"
-                },
-                "fields": {
-                  "Loan Purpose": 3,
-                  "Lien Status": 8
-                }
-              }
-            ]
-          },
-          {
-            "edit": "V560",
-            "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
-            "rows": [
-              {
-                "row": {
-                  "rowId": "4977566612"
-                },
-                "fields": {
-                  "Type of Action Taken": 2,
-                  "Lien Status": 8
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "quality": {
-        "verified": false,
-        "edits": []
-      },
-      "macro": {
-        "edits": [
-          {
-            "edit": "Q008",
-            "justifications": [
-              {
-                "id": 1,
-                "value": "Applicants decided not to proceed with the loan.",
-                "verified": false
-              },
-              {
-                "id": 2,
-                "value": "There were a large number of applications, but few loans were closed",
-                "verified": false
-              },
-              {
-                "id": 3,
-                "value": "Loan activity for this filing year consisted mainly of purchased loans.",
-                "verified": false
-              }
-            ]
-          }
-        ]
-      }
-    }
-    ```
-
-    Formatted as CSV:
-    ```
-    editType, editId, loanId
-    syntactical, S025, Transmittal Sheet
-    syntactical, S025, s1
-    syntactical, S025, s2
-    syntactical, S025, s3
-    syntactical, S010, s4
-    syntactical, S010, s5
-    macro, Q007
-    ```
-
-
-    Sorted by Row:
-    ```json
-    {
-      "rows": [
-        {
-          "rowId": "Transmittal Sheet",
-          "edits": [
-            {
-              "editId": "S020",
-              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-              "fields": {
-                "Agency Code": 10
-              }
-            }
-          ]
-        },
-        {
-          "rowId": "8299422144",
-          "edits": [
-            {
-              "editId": "S020",
-              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-              "fields": {
-                "Agency Code": 10
-              }
-            }
-          ]
-        },
-        {
-          "rowId": "4977566612",
-          "edits": [
-            {
-              "editId": "V555",
-              "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
-              "fields": {
-                "Loan Purpose": 1,
-                "Lien Status": 0
-              }
+            "row": {
+              "rowId": "Transmittal Sheet"
             },
-            {
-              "editId": "V560",
-              "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
-              "fields": {
-                "Action Taken Type": 3,
-                "Lien Status": 0
-              }
+            "fields": {
+              "Agency Code": 10
             }
-          ]
-        }
-      ],
-      "macro": {
-        "edits": [
+          },
           {
-            "edit": "Q008",
-            "justifications": [
-              {
-                "id": 1,
-                "value": "Applicants decided not to proceed with the loan.",
-                "verified": false
-              },
-              {
-                "id": 2,
-                "value": "There were a large number of applications, but few loans were closed",
-                "verified": false
-              },
-              {
-                "id": 3,
-                "value": "Loan activity for this filing year consisted mainly of purchased loans.",
-                "verified": false
-              }
-            ]
+            "row": {
+              "rowId": "8299422144"
+            },
+            "fields": {
+              "Agency Code": 10
+            }
+          },
+          {
+            "row": {
+              "rowId": "2185751599"
+            },
+            "fields": {
+              "Agency Code": 10
+            }
+          }
+        ]
+      },
+      {
+        "edit": "S010",
+        "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
+        "rows": [
+          {
+            "row": {
+              "rowId": "2185751599"
+            },
+            "fields": {
+              "Record Identifier": 1
+            }
           }
         ]
       }
-    }
-    ```
+    ]
+  },
+  "validity": {
+    "edits": [
+      {
+        "edit": "V555",
+        "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
+        "rows": [
+          {
+            "row": {
+              "rowId": "4977566612"
+            },
+            "fields": {
+              "Loan Purpose": 3,
+              "Lien Status": 8
+            }
+          }
+        ]
+      },
+      {
+        "edit": "V560",
+        "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
+        "rows": [
+          {
+            "row": {
+              "rowId": "4977566612"
+            },
+            "fields": {
+              "Type of Action Taken": 2,
+              "Lien Status": 8
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "quality": {
+    "verified": false,
+    "edits": []
+  },
+  "macro": {
+    "edits": [
+      {
+        "edit": "Q008",
+        "justifications": [
+          {
+            "id": 1,
+            "value": "Applicants decided not to proceed with the loan.",
+            "verified": false
+          },
+          {
+            "id": 2,
+            "value": "There were a large number of applications, but few loans were closed",
+            "verified": false
+          },
+          {
+            "id": 3,
+            "value": "Loan activity for this filing year consisted mainly of purchased loans.",
+            "verified": false
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
-#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
-    * `GET`  - List of edits of a specific type, for a given submission
-       * By default, results are grouped by named edit.
-       * Use `sortBy=row` as a query parameter to group by the row in the submitted file.
-       * Use `format=csv` as a query parameter for edits in CSV format, for importing into spreadsheet software.
+Formatted as CSV, `?format=csv`:
+```csv
+editType, editId, loanId
+syntactical, S025, Transmittal Sheet
+syntactical, S025, s1
+syntactical, S025, s2
+syntactical, S025, s3
+syntactical, S010, s4
+syntactical, S010, s5
+macro, Q007
+```
 
-    Example response, with HTTP code 200:
-
-    ```json
+Sorted by row, `?sortBy=row` (macro edits remain their own object because they aren't row based):
+```json
+{
+  "rows": [
     {
+      "rowId": "Transmittal Sheet",
       "edits": [
         {
-          "edit": "S020",
+          "editId": "S020",
           "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-          "rows": [
-            {
-              "row": {
-                "rowId": "Transmittal Sheet"
-              },
-              "fields": {
-                "Agency Code": 1
-              }
-            },
-            {
-              "row": {
-                "rowId": "8299422144"
-              },
-              "fields": {
-                "Agency Code": 1
-              }
-            }
-          ]
+          "fields": {
+            "Agency Code": 10
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "8299422144",
+      "edits": [
+        {
+          "editId": "S020",
+          "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+          "fields": {
+            "Agency Code": 10
+          }
+        }
+      ]
+    },
+    {
+      "rowId": "4977566612",
+      "edits": [
+        {
+          "editId": "V555",
+          "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
+          "fields": {
+            "Loan Purpose": 1,
+            "Lien Status": 0
+          }
         },
         {
-          "edit": "S010",
-          "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
-          "rows": [
-            {
-              "row": {
-                "rowId": "2185751599"
-              },
-              "fields": {
-                "Record Identifier": 1
-              }
-            }
-          ]
+          "editId": "V560",
+          "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
+          "fields": {
+            "Action Taken Type": 3,
+            "Lien Status": 0
+          }
         }
       ]
     }
-    ```
+  ],
+  "macro": {
+    "edits": [
+      {
+        "edit": "Q008",
+        "justifications": [
+          {
+            "id": 1,
+            "value": "Applicants decided not to proceed with the loan.",
+            "verified": false
+          },
+          {
+            "id": 2,
+            "value": "There were a large number of applications, but few loans were closed",
+            "verified": false
+          },
+          {
+            "id": 3,
+            "value": "Loan activity for this filing year consisted mainly of purchased loans.",
+            "verified": false
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
-    Formatted as CSV:
-    ```
-    editType, editId, loanId
-    validity, V555, 4977566612
-    validity, V550, 4977566612
-    ```
+#### Edits by type
 
-    Sorted by row:
-    ```json
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
+
+`GET` - List of edits of a specific type, for a given submission
+
+By default, results are grouped by named edit.
+
+| Query parameter | Description |
+| --------------- | ----------- |
+| sortBy | `row` to group edits by row, rather than the default edit type. |
+| format | `csv` to return edits in CSV format, rather than the default by edit type, for use in spreadsheet software. |
+
+Example response:
+
+```json
+{
+  "edits": [
     {
+      "edit": "S020",
+      "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
       "rows": [
         {
-          "rowId": "Transmittal Sheet",
-          "edits": [
-            {
-              "editId": "S020",
-              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-              "fields": {
-                "Agency Code": 4
-              }
-            }
-          ]
+          "row": {
+            "rowId": "Transmittal Sheet"
+          },
+          "fields": {
+            "Agency Code": 1
+          }
         },
         {
-          "rowId": "8299422144",
-          "edits": [
-            {
-              "editId": "S020",
-              "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-              "fields": {
-                "Agency Code": 11
-              }
-            }
-          ]
-        },
-      ],
-      "macro": {
-        "edits": []
-      }
-    }
-    ```
-
-    * `POST` - Provides verification for Quality edits
-
-    Example payload, in `JSON` format:
-
-    ```json
+          "row": {
+            "rowId": "8299422144"
+          },
+          "fields": {
+            "Agency Code": 1
+          }
+        }
+      ]
+    },
     {
-      "verified": true
+      "edit": "S010",
+      "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
+      "rows": [
+        {
+          "row": {
+            "rowId": "2185751599"
+          },
+          "fields": {
+            "Record Identifier": 1
+          }
+        }
+      ]
     }
-    ```
+  ]
+}
+```
 
-    Example response, with HTTP code 200:
+Formatted as CSV:
+```
+editType, editId, loanId
+validity, V555, 4977566612
+validity, V550, 4977566612
+```
 
-    ```json
+Sorted by row, `?sortBy=row` (macro edits remain their own object because they aren't row based):
+```json
+{
+  "rows": [
     {
-      "verified": true,
-      "status": {
-        "code": 8,
-        "message": "validated with errors"
-      }
-    }
-    ```
-
-    * `POST` - Provides justification for Macro edits
-
-    Example payload, in `JSON` format:
-
-    ```json
+      "rowId": "Transmittal Sheet",
+      "edits": [
+        {
+          "editId": "S020",
+          "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+          "fields": {
+            "Agency Code": 4
+          }
+        }
+      ]
+    },
     {
-      "edit": "Q023",
-      "justification": {
+      "rowId": "8299422144",
+      "edits": [
+        {
+          "editId": "S020",
+          "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+          "fields": {
+            "Agency Code": 11
+          }
+        }
+      ]
+    },
+  ],
+  "macro": {
+    "edits": []
+  }
+}
+```
+
+`POST` - Provides verification for Quality edits
+
+_Specific to the `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/quality` endpoint._
+
+Example payload, in `JSON` format:
+
+```json
+{
+  "verified": true
+}
+```
+
+Example response:
+
+```json
+{
+  "verified": true,
+  "status": {
+    "code": 8,
+    "message": "validated with errors"
+  }
+}
+```
+
+`POST` - Provides justification for Macro edits
+
+_Specific to the `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/macro` endpoint._
+
+Example payload, in `JSON` format:
+
+```json
+{
+  "edit": "Q023",
+  "justification": {
+  "id": 1,
+  "value": "Most of the loan activity are in areas outside of an MSA/MD",
+  "verified": true
+  }
+}
+```
+
+Example response:
+
+```json
+{
+  "edit": "Q023",
+  "justifications": [
+    {
       "id": 1,
       "value": "Most of the loan activity are in areas outside of an MSA/MD",
       "verified": true
-      }
-    }
-    ```
-
-    Example response, with HTTP code 200:
-
-    ```json
+    },
     {
-      "edit": "Q023",
-      "justifications": [
-        {
-          "id": 1,
-          "value": "Most of the loan activity are in areas outside of an MSA/MD",
-          "verified": true
-        },
-        {
-          "id": 2,
-          "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
-          "verified": false
-        },
-        {
-          "id": 3,
-          "value": "Acquired or merged with an entity whose loan activity are outside of an MSA/MD.",
-          "verified": false
-        },
-        {
-          "id": 4,
-          "value": "Purchased loans are located in areas outside of an MSA/MD.",
-          "verified": false
-        }
-      ]
+      "id": 2,
+      "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
+      "verified": false
+    },
+    {
+      "id": 3,
+      "value": "Acquired or merged with an entity whose loan activity are outside of an MSA/MD.",
+      "verified": false
+    },
+    {
+      "id": 4,
+      "value": "Purchased loans are located in areas outside of an MSA/MD.",
+      "verified": false
     }
-    ```
+  ]
+}
+```
 
-#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs`
-*NOTE:*  This is a mocked, static endpoint.
+#### IRS
 
-    * `GET`  - Institution Register Summary
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs`
 
-    Example response, with HTTP code 200:
+_NOTE: This is currently a mocked, static endpoint._
+
+`GET`  - Institution Register Summary
+
+Example response:
 
 ```json
 {
@@ -662,15 +693,19 @@ All endpoints in the `/institutions` namespace require two headers (see ["Author
 }
 ```
 
+#### Signature
 
-####  `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign`
-*NOTE:*  This is a mocked, static endpoint.
-    * `GET`  - Returns a receipt
-    Example response, with HTTP code 200:
-```
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign`
+
+_NOTE: This is currently a mocked, static endpoint._
+
+`GET`  - Returns a receipt
+
+Example response:
+```json
 {
   "timestamp": 1476809530772,
-  "receipt": asd0f987134asdlfasdflk,
+  "receipt": "asd0f987134asdlfasdflk",
   "status": {
       "code": 11,
       "message": "IRS report verified"
@@ -678,30 +713,38 @@ All endpoints in the `/institutions` namespace require two headers (see ["Author
 }
 ```
 
-   * `POST`  - Sign the submission
-    Example body:
-```
+`POST`  - Sign the submission
+
+Example body:
+```json
 {
   "signed": true
 }
 ```
-    Example response, with HTTP code 200:
-```
+
+Example response:
+```json
 {
   "timestamp": 1476809530772,
-  "receipt": asd0f987134asdlfasdflk,
+  "receipt": "asd0f987134asdlfasdflk",
   "status": {
-      "code": 12,
-      "message": "signed"
-    }
+    "code": 12,
+    "message": "signed"
+  }
 }
 ```
 
-####  `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary`
-*NOTE:*  This is a mocked, static endpoint.
-    * `GET`  - Returns a submission summary
-    Example response, with HTTP code 200:
-```
+#### Summary
+
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary`
+
+_NOTE: This is currently a mocked, static endpoint._
+
+`GET`  - Returns a submission summary
+
+Example response:
+
+```json
 {
   "respondent": {
     "name": "Bank",
@@ -722,53 +765,56 @@ All endpoints in the `/institutions` namespace require two headers (see ["Author
 }
 ```
 
-#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/parseErrors`
+#### Parse errors
 
-    * `GET` - Returns all parsing errors for a submission
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/parseErrors`
 
-    Example response, with HTTP code 201:
+`GET` - Returns all parsing errors for a submission
 
-    ```json
+Example response, with HTTP code 201:
+
+```json
+{
+  "transmittalSheetErrors": [
+    "Record Identifier is not an Integer",
+    "Agency Code is not an Integer"
+  ],
+  "larErrors": [
     {
-      "transmittalSheetErrors": [
-        "Record Identifier is not an Integer",
-        "Agency Code is not an Integer"
-      ],
-      "larErrors": [
-        {
-          "lineNumber": 2,
-          "errorMessages": [
-            "Incorrect number of fields. found: 32, expected: 39"
-          ]
-        },
-        {
-          "lineNumber": 4,
-          "errorMessages": [
-            "Record Identifier is not an Integer"
-          ]
-        },
-        {
-          "lineNumber": 11,
-          "errorMessages": [
-            "Loan Type is not an Integer",
-            "Property Type is not an Integer",
-            "Loan Purpose is not an Integer",
-            "Owner Occupancy is not an Integer"
-          ]
-        }
+      "lineNumber": 2,
+      "errorMessages": [
+        "Incorrect number of fields. found: 32, expected: 39"
+      ]
+    },
+    {
+      "lineNumber": 4,
+      "errorMessages": [
+        "Record Identifier is not an Integer"
+      ]
+    },
+    {
+      "lineNumber": 11,
+      "errorMessages": [
+        "Loan Type is not an Integer",
+        "Property Type is not an Integer",
+        "Loan Purpose is not an Integer",
+        "Owner Occupancy is not an Integer"
       ]
     }
-    ```
+  ]
+}
+```
 
 ## Authorization
+
 Each endpoint that starts with `/institutions` is protected by three authorization requirements.
 
-* Requests must include the `CFPB-HMDA-Username` header.
-  * Its value should be the username of the user making the request.
-* Requests must include the `CFPB-HMDA-Institutions` header.
-  * This header will contain the comma-separated list of institution IDs
+- Requests must include the `CFPB-HMDA-Username` header.
+  - Its value should be the username of the user making the request.
+- Requests must include the `CFPB-HMDA-Institutions` header.
+  - This header will contain the comma-separated list of institution IDs
     that the user is authorized to view.
-* For requests to institution-specific paths, such as `/institutions/<institutionId>`
+- For requests to institution-specific paths, such as `/institutions/<institutionId>`
   and `/institutions/<institutionId>/summary` (any endpoint except `/institutions`),
   the institution ID requested must match one of the IDs in the `CFPB-HMDA-Institutions`
   header.
