@@ -2,7 +2,9 @@
 
 ## HTTP Endpoints
 
-### `/`
+### Root
+
+ `/`
 
 `GET` - Root endpoint with information about the HMDA Platform service. Used for health checks.
 
@@ -18,8 +20,9 @@ Example response:
 ```
 
 All endpoints in the `/institutions` namespace require two headers (see ["Authorization" section](#authorization) below for more detail):
-* `CFPB-HMDA-Username`, containing a string
-* `CFPB-HMDA-Institutions`, containing a list of integers
+
+- `CFPB-HMDA-Username`, containing a string
+- `CFPB-HMDA-Institutions`, containing a list of integers
 
 - [`/institutions`](#institutions)
 - [`/institutions/<institutionId>`](#institutions-by-id)
