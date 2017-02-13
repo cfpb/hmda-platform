@@ -17,6 +17,10 @@ Example response:
 }
 ```
 
+All endpoints in the `/institutions` namespace require two headers (see ["Authorization" section](#authorization) below for more detail):
+* `CFPB-HMDA-Username`, containing a string
+* `CFPB-HMDA-Institutions`, containing a list of integers
+
 - [`/institutions`](#institutions)
 - [`/institutions/<institutionId>`](#institutions-by-id)
 - [`/institutions/<institutionId>/filings/<period>`](#filings)
@@ -29,10 +33,6 @@ Example response:
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`](#signature)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`](#summary)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`](#parse-errors)
-
-All endpoints in the `/institutions` namespace require two headers (see ["Authorization" section](#authorization) below for more detail):
-* `CFPB-HMDA-Username`, containing a string
-* `CFPB-HMDA-Institutions`, containing a list of integers
 
 ### Institutions
 
