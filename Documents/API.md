@@ -1,8 +1,22 @@
 # HMDA Platform API
 
-## Public HTTP Endpoints
+## HTTP Endpoints
 
-* `/`
+- `/`
+- `/institutions`
+- `/institutions/<institutionId>`
+- `/institutions/<institutionId>/filings/<period>`
+- `/institutions/<institutionId>/filings/<period>/submissions`
+- `/institutions/<institutionId>/filings/<period>/submissions/latest`
+- `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`
+- `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`
+- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
+- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
+- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`
+- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`
+- `/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`
+
+#### `/`
     * `GET` - Root endpoint, with information about the HMDA Platform service. Used for health checks
 
     Example response, with HTTP code 200:
@@ -16,12 +30,12 @@
     }
     ```
 
-All endpoints in the `/institutions` namespace require two headers (see "Authorization" section below for more detail):
+All endpoints in the `/institutions` namespace require two headers (see ["Authorization" section](#authorization) below for more detail):
 * `CFPB-HMDA-Username`, containing a string
 * `CFPB-HMDA-Institutions`, containing a list of integers
 
 
-* `/institutions`
+#### `/institutions`
     * `GET` - List of Financial Institutions
 
     Example response, with HTTP code 200:
@@ -41,7 +55,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-* `/institutions/<institution>`
+#### `/institutions/<institutionId>`
     * `GET` - Details for Financial Institution
 
     Example response, with HTTP code 200:
@@ -80,7 +94,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     ```
 
 
-* `/institutions/<institution>/filings/<period>`
+#### `/institutions/<institutionId>/filings/<period>`
   * `GET` - Details for a filing
 
   Example response, with HTTP code 200:
@@ -142,7 +156,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 }
 ```
 
-* `/institutions/<institution>/filings/<period>/submissions`
+#### `/institutions/<institutionId>/filings/<period>/submissions`
 
     * `POST` - Create a new submission
 
@@ -164,7 +178,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-* `/institutions/<institution>/filings/<period>/submissions/latest`
+#### `/institutions/<institutionId>/filings/<period>/submissions/latest`
 
     * `GET` - The latest submission for some institution and period
 
@@ -187,11 +201,11 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     ```
 
 
-* `/institutions/<institution>/filings/<period>/submissions/<submissionId>`
+#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`
     * `POST` - Upload HMDA data to submission
-    
+
     Example response, with HTTP code 200:
-    
+
     ```json
     {
       "id": {
@@ -207,7 +221,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     ```
 
     Example response, with HTTP code 400:
-    
+
     ```json
     {
       "id": {
@@ -222,7 +236,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits`
+#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`
     * `GET`  - List of all edits for a given submission
        * By default, results are grouped by edit type, then by named edit.
        * Use `sortBy=row` as a query parameter to group by the row in the submitted file.
@@ -436,7 +450,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
     }
     ```
 
-* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
+#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
     * `GET`  - List of edits of a specific type, for a given submission
        * By default, results are grouped by named edit.
        * Use `sortBy=row` as a query parameter to group by the row in the submitted file.
@@ -484,6 +498,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
           ]
         }
       ]
+    }
     ```
 
     Formatted as CSV:
@@ -569,36 +584,33 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 
     ```json
     {
-      {
-        "edit": "Q023",
-        "justifications": [
-          {
-            "id": 1,
-            "value": "Most of the loan activity are in areas outside of an MSA/MD",
-            "verified": true
-          },
-          {
-            "id": 2,
-            "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
-            "verified": false
-          },
-          {
-            "id": 3,
-            "value": "Acquired or merged with an entity whose loan activity are outside of an MSA/MD.",
-            "verified": false
-          },
-          {
-            "id": 4,
-            "value": "Purchased loans are located in areas outside of an MSA/MD.",
-            "verified": false
-          }
-        ]
-      }
+      "edit": "Q023",
+      "justifications": [
+        {
+          "id": 1,
+          "value": "Most of the loan activity are in areas outside of an MSA/MD",
+          "verified": true
+        },
+        {
+          "id": 2,
+          "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
+          "verified": false
+        },
+        {
+          "id": 3,
+          "value": "Acquired or merged with an entity whose loan activity are outside of an MSA/MD.",
+          "verified": false
+        },
+        {
+          "id": 4,
+          "value": "Purchased loans are located in areas outside of an MSA/MD.",
+          "verified": false
+        }
       ]
     }
     ```
 
-* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`
+#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs`
 *NOTE:*  This is a mocked, static endpoint.
 
     * `GET`  - Institution Register Summary
@@ -649,7 +661,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 ```
 
 
-* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`
+####  `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign`
 *NOTE:*  This is a mocked, static endpoint.
     * `GET`  - Returns a receipt
     Example response, with HTTP code 200:
@@ -683,7 +695,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 }
 ```
 
-* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`
+####  `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary`
 *NOTE:*  This is a mocked, static endpoint.
     * `GET`  - Returns a submission summary
     Example response, with HTTP code 200:
@@ -708,7 +720,7 @@ All endpoints in the `/institutions` namespace require two headers (see "Authori
 }
 ```
 
-* `/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`
+#### `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/parseErrors`
 
     * `GET` - Returns all parsing errors for a submission
 
@@ -754,7 +766,7 @@ Each endpoint that starts with `/institutions` is protected by three authorizati
 * Requests must include the `CFPB-HMDA-Institutions` header.
   * This header will contain the comma-separated list of institution IDs
     that the user is authorized to view.
-* For requests to institution-specific paths, such as `/institutions/<institution>`
-  and `/institutions/<institution>/summary` (any endpoint except `/institutions`),
+* For requests to institution-specific paths, such as `/institutions/<institutionId>`
+  and `/institutions/<institutionId>/summary` (any endpoint except `/institutions`),
   the institution ID requested must match one of the IDs in the `CFPB-HMDA-Institutions`
   header.
