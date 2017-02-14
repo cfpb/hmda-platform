@@ -137,7 +137,14 @@ drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
 drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
 ```
 
-From `hmda-platform`'s root directory, run the following:
+From the _`hmda-platform-ui`'s_ root directory, run the following:
+
+```shell
+npm install
+npm run build
+```
+
+From _`hmda-platform`'s_ root directory, run the following:
 
 ```shell
 sbt clean assembly
@@ -145,18 +152,6 @@ docker-compose up
 ```
 
 This will bring up all the HMDA Platform services. The first run may take several minutes.
-
-For convenience when doing development on the UI, Auth setup, and API, the `docker-compose` file uses a `volumes` which mounts the ui's `dist/` directory into the `hmda-platform-ui` container, the `hmda.jar` into `hmda-platform` container, the `hmda` themes directory in the auth repo into the `keycloak` container, and the auth-proxy's `000-default.conf` file into the `auth_proxy` container. This means you can make changes to the UI, Auth, or API and (in most cases) view them without needing to rebuild their respective containers.
-
-A consequence of the mounted volume for `hmda-platform-ui` requires building the front-end:
-
-```shell
-# requires node 6+
-# while still in the hmda-platform directory
-cd ../hmda-platform-ui
-npm install
-npm run build
-```
 
 Next, find your docker machine's endpoint.
 
@@ -173,17 +168,35 @@ https://192.168.99.100:4443/
 https://192.168.99.100:9443/
 ```
 
-Visit the app at `http://192.168.99.100` and click "Register" when redirected to the keycloak login screen
+Visit the app at `http://192.168.99.100`, click the "Login" button, and click "Register" when redirected to the keycloak login screen.
 
-Confirm your signup via MailDev by visiting http://192.168.99.100:1080, opening the email, and clicking the verifying link
+The sample data currently contains four institutions; Bank 0, Bank 1, Bank 2, and Bank 3. To register for any of these institutions you have to use the corresponding domain:
+
+- Bank 0 = bank0.com
+- Bank 1 = bank1.com
+- Bank 2 = bank2.com
+- Bank 3 = bank3.com
+
+Confirm your signup via MailDev by visiting http://192.168.99.100:1080, opening the email, and clicking the verifying link.
 
 You can now interact with the app/begin uploading files, etc.
 
+#### Development conveniences
+
+##### Mounted volumes
+
+For convenience when doing development on the UI, Auth setup, and API, the `docker-compose` file uses a `volumes` which mounts
+
+- the ui's `dist/` directory into the `hmda-platform-ui` container,
+- the `hmda.jar` into `hmda-platform` container,
+- and the `hmda` themes directory in the auth repo into the `keycloak` container.
+
+This means you can make changes to the UI, Keycloak theme, or API and (in most cases) view them without needing to rebuild their respective containers.
 
 In order to view changes in the API you need to rebuild the jar and then restart the container:
 
 ```shell
-# while still in the hmda-platform directory
+# from the hmda-platform directory
 sbt clean assembly
 docker-compose stop
 docker-compose up
@@ -192,9 +205,7 @@ docker-compose up
 To allow continued rebuilding of the front-end, you can run the following:
 
 ```shell
-# requires node 6+
 # from the hmda-platform-ui directory
-npm install #if not already installed
 npm run watch
 ```
 
@@ -204,11 +215,15 @@ CFPB is developing the HMDA Platform in the open to maximize transparency and en
 
 We use GitHub issues in this repository to track features, bugs, and enhancements to the software. [Pull Requests](https://help.github.com/articles/using-pull-requests/) are welcome
 
-
-
-----
-
 ## Open source licensing info
 1. [TERMS](TERMS.md)
 2. [LICENSE](LICENSE)
 3. [CFPB Source Code Policy](https://github.com/cfpb/source-code-policy/)
+
+## Credits and references
+
+1. Projects that inspired you
+  - https://github.com/cfpb/hmda-pilot
+2. Related projects
+  - https://github.com/cfpb/hmda-platform-ui
+  - https://github.com/cfpb/hmda-platform-auth
