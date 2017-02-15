@@ -11,7 +11,7 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
-import hmda.model.fi.{ IRSGenerated, Signed, SubmissionId }
+import hmda.model.fi.{ Signed, SubmissionId, Validated }
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.SubmissionManager
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
@@ -39,7 +39,7 @@ trait SubmissionSignPaths
   def submissionSignPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "sign") { (period, id) =>
       timedGet { uri =>
-        complete(ToResponseMarshallable(Receipt(0L, "", IRSGenerated)))
+        complete(ToResponseMarshallable(Receipt(0L, "", Validated)))
       } ~
         timedPost { uri =>
           entity(as[JsObject]) { json =>
@@ -63,7 +63,7 @@ trait SubmissionSignPaths
                 }
 
               case JsFalse =>
-                complete(ToResponseMarshallable(Receipt(0l, "", IRSGenerated)))
+                complete(ToResponseMarshallable(Receipt(0l, "", Validated)))
             }
 
           }
