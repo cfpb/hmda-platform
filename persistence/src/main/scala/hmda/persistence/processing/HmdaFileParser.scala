@@ -23,6 +23,7 @@ object HmdaFileParser {
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
   case class LarParsedErrors(errors: LarParsingError) extends Event
+  case class GetStatePaginated(page: Integer)
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 
@@ -121,6 +122,20 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
     case GetState =>
       sender() ! state
+
+    case GetStatePaginated(page) =>
+      val tsErrState = state.tsParsingErrors
+
+      val (tsErrorsReturn, offset) =
+        if (tsErrState.nonEmpty && page == 1) (tsErrState, 1)
+        else (Seq(), 0)
+
+      val totalErrors = state.larParsingErrors.size
+      val from = Math.min(totalErrors, (page - 1) * 20)
+      val to = Math.min(totalErrors, (page * 20) - offset)
+      val larErrors = state.larParsingErrors.slice(from, to)
+
+      sender() ! HmdaFileParseState(state.size, tsErrorsReturn, larErrors)
 
     case Shutdown =>
       context stop self

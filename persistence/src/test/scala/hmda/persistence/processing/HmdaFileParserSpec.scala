@@ -2,8 +2,8 @@ package hmda.persistence.processing
 
 import java.time.Instant
 
-import akka.actor.{ ActorRef, ActorSystem }
-import akka.testkit.{ EventFilter, TestProbe }
+import akka.actor.ActorRef
+import akka.testkit.TestProbe
 import org.scalatest.BeforeAndAfterEach
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
@@ -100,6 +100,34 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       probe.send(parserActor, ReadHmdaRawFile(s"${HmdaRawFile.name}-$submissionId3", probe.testActor))
       probe.expectMsg(ParsingCompletedWithErrors(submissionId3))
 
+    }
+
+    "get paginated results with GetState(page)" in {
+      // Setup: persist enough errors that pagination is necessary
+      val tsErrors = List("TS 1", "TS 2")
+      probe.send(hmdaFileParser, TsParsedErrors(tsErrors))
+      0.to(42).foreach { i =>
+        val err = LarParsingError(i, List(s"$i"))
+        probe.send(hmdaFileParser, LarParsedErrors(err))
+      }
+
+      // First page should have TS errors and 19 LAR errors (20 rows' errors total)
+      probe.send(hmdaFileParser, GetStatePaginated(1))
+      val page1 = probe.expectMsgType[HmdaFileParseState]
+      page1.tsParsingErrors mustBe tsErrors
+      page1.larParsingErrors.size mustBe 19
+
+      // Second page should have 20 LAR errors
+      probe.send(hmdaFileParser, GetStatePaginated(2))
+      val page2 = probe.expectMsgType[HmdaFileParseState]
+      page2.tsParsingErrors mustBe Seq()
+      page2.larParsingErrors.size mustBe 20
+
+      // Third page should have the last 3 LAR errors
+      probe.send(hmdaFileParser, GetStatePaginated(3))
+      val page3 = probe.expectMsgType[HmdaFileParseState]
+      page3.tsParsingErrors mustBe Seq()
+      page3.larParsingErrors.size mustBe 3
     }
 
   }
