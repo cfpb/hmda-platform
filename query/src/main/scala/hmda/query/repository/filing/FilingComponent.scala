@@ -1,8 +1,8 @@
 package hmda.query.repository.filing
 
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal }
-import hmda.query.repository.{ Repository, TableRepository }
+import hmda.query.model.filing.{LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, Msa}
+import hmda.query.repository.{Repository, TableRepository}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
@@ -291,26 +291,60 @@ trait FilingComponent { this: DbConfiguration =>
     def deleteByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).delete)
   }
 
-  class LarTotalTable(tag: Tag) extends Table[LoanApplicationRegisterTotal](tag, "lars_total") {
-    def id = column[Int]("id", O.PrimaryKey)
-    def respondentId = column[String]("respondent_id")
-    def period = column[String]("period")
-    def total = column[Int]("total")
+  class LarTotalTable(tag: Tag) extends Table[Msa](tag, "lars_total") {
+    def msa = column[Int]("msa", O.PrimaryKey)
+    def total_lars = column[Int]("total_lars")
+    def total_amount = column[Int]("total_amount")
+    def conv = column[Int]("conv")
+    def fha = column[Int]("fha")
+    def va = column[Int]("va")
+    def fsa = column[Int]("fsa")
+    def oneToFourFamily = column[Int]("oneToFourFamily")
+    def manuf_home = column[Int]("manuf_home")
+    def multi_family = column[Int]("multi_family")
+    def home_purchase = column[Int]("home_purchase")
+    def home_improve = column[Int]("home_improve")
+    def refinance = column[Int]("refinance")
 
-    override def * = (id, respondentId, period, total) <> (LoanApplicationRegisterTotal.tupled, LoanApplicationRegisterTotal.unapply)
+    override def * = (msa,
+      total_lars,
+      total_amount,
+      conv,
+      fha,
+      va,
+      fsa,
+      oneToFourFamily,
+      manuf_home,
+      multi_family,
+      home_purchase,
+      home_improve,
+      refinance) <> (Msa.tupled, Msa.unapply)
   }
 
   class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, Int] {
     val table = TableQuery[LarTotalTable]
-    def getId(table: LarTotalTable) = table.id
+    def getId(table: LarTotalTable) = table.msa
 
     private val createViewSchema = sqlu"""create view lars_total as
-      select count(*) as total, respondent_id, period
-      from lars group by respondent_id, period
+        select msa, count(*) as total_lars, sum(amount) as total_amount,
+        count(case when loan_type = 1 then 1 else null end) as conv,
+        count(case when loan_type = 2 then 1 else null end) as fha,
+        count(case when loan_type = 3 then 1 else null end) as va,
+        count(case when loan_type = 4 then 1 else null end) as fsa,
+        count(case when property_type = 1 then 1 else null end) as oneToFourFamily,
+        count(case when property_type = 2 then 1 else null end) as manuf_home,
+        count(case when property_type = 3 then 1 else null end) as multi_family,
+        count(case when purpose = 1 then 1 else null end) as home_purchase,
+        count(case when purpose = 2 then 1 else null end) as home_improve,
+        count(case when purpose = 3 then 1 else null end) as refinance
+        from lars group by msa;
       """
+
+    private val selectAllSchema = sqlu"""select * from lars_total;"""
 
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
+    def selectAll() = db.run(selectAllSchema)
   }
 
 }

@@ -699,8 +699,6 @@ Example response:
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs`
 
-_NOTE: This is currently a mocked, static endpoint._
-
 `GET` - Returns the Institution Register Summary
 
 Example response:
@@ -717,7 +715,7 @@ Example response:
       "FHA": 0,
       "VA": 0,
       "FSA": 0,
-      "1to4Family": 4,
+      "oneToFourFamily": 4,
       "MFD": 0,
       "multiFamily": 0,
       "homePurchase": 0,
@@ -733,18 +731,14 @@ Example response:
       "FHA": 0,
       "VA": 0,
       "FSA": 0,
-      "1to4Family": 5,
+      "oneToFourFamily": 5,
       "MFD": 0,
       "multiFamily": 0,
       "homePurchase": 0,
       "homeImprovement": 0,
       "refinance": 5
     }
-  ],
-  "status": {
-       "code": 10,
-       "message": "IRS report generated"
-     }
+  ]
 }
 ```
 
