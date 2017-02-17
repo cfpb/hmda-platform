@@ -10,9 +10,8 @@ import hmda.model.fi._
 import hmda.parser.fi.lar.{ LarParsingError, ParsingErrorSummary }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
-import hmda.persistence.processing.{ HmdaFileParser, HmdaFileValidator }
-import hmda.persistence.processing.HmdaFileParser.{ HmdaFileParseState, LarParsedErrors }
-import hmda.validation.engine._
+import hmda.persistence.processing.HmdaFileParser
+import hmda.persistence.processing.HmdaFileParser.{ HmdaFileParseState, LarParsedErrors, TsParsedErrors }
 
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
@@ -30,21 +29,65 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     }
 
     "return errors for a parsed submission" in {
-      val subId = SubmissionId("0", "2017", 1)
-      val fActor = (supervisor ? FindProcessingActor(HmdaFileParser.name, subId)).mapTo[ActorRef]
-      val actor = Await.result(fActor, 5.seconds)
+      val actor: ActorRef = parserActorFor(SubmissionId("0", "2017", 1))
 
       val errors = LarParsingError(10, List("test", "ing"))
       actor ! LarParsedErrors(errors)
-      val state = (actor ? GetState).mapTo[HmdaFileParseState]
-      val result = Await.result(state, 5.seconds)
-      result.larParsingErrors.size mustBe 1
+      currentParseState(actor).larParsingErrors.size mustBe 1
 
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[ParsingErrorSummary] mustBe ParsingErrorSummary(List(), List(LarParsingError(10, List("test", "ing"))))
       }
     }
+
+    ////// Pagination /////
+
+    "Set up: persist 1 TS error and 42 LAR errors" in {
+      val actor: ActorRef = parserActorFor(SubmissionId("0", "2017", 2))
+
+      val tsErrors = List("TS 1", "TS 2")
+      actor ! TsParsedErrors(tsErrors)
+
+      1.to(42).foreach { i =>
+        val err = LarParsingError(i, List(s"$i"))
+        actor ! LarParsedErrors(err)
+      }
+
+      currentParseState(actor).larParsingErrors.size mustBe 42
+    }
+
+    "return first page (up to 20 errors) if request doesn't include 'page' query param" in {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        val response = responseAs[ParsingErrorSummary]
+        response.transmittalSheetErrors mustBe List("TS 1", "TS 2")
+        response.larErrors.size mustBe 19
+        response.larErrors.head.lineNumber mustBe 1
+      }
+    }
+
+    "return next 20 errors on page 2" in {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=2") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        val response = responseAs[ParsingErrorSummary]
+        response.transmittalSheetErrors mustBe List()
+        response.larErrors.size mustBe 20
+        response.larErrors.head.lineNumber mustBe 21
+      }
+    }
+
+    "return last 2 errors on page 3" in {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=3") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        val response = responseAs[ParsingErrorSummary]
+        response.transmittalSheetErrors mustBe List()
+        response.larErrors.size mustBe 2
+        response.larErrors.head.lineNumber mustBe 41
+      }
+    }
+
+    ////// "Not Found" Responses /////
 
     "Return 404 for nonexistent institution" in {
       getWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
@@ -71,4 +114,13 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     }
   }
 
+  def parserActorFor(subId: SubmissionId): ActorRef = {
+    val fActor = (supervisor ? FindProcessingActor(HmdaFileParser.name, subId)).mapTo[ActorRef]
+    Await.result(fActor, 5.seconds)
+  }
+
+  def currentParseState(actor: ActorRef): HmdaFileParseState = {
+    val state = (actor ? GetState).mapTo[HmdaFileParseState]
+    Await.result(state, 5.seconds)
+  }
 }

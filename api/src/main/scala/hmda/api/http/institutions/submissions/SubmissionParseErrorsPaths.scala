@@ -14,11 +14,11 @@ import hmda.model.fi.SubmissionId
 import hmda.parser.fi.lar.ParsingErrorSummary
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
-import hmda.persistence.processing.HmdaFileParser.HmdaFileParseState
+import hmda.persistence.processing.HmdaFileParser.{ GetStatePaginated, HmdaFileParseState }
 import hmda.persistence.processing.HmdaFileParser
 
 import scala.concurrent.ExecutionContext
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Success, Try }
 
 trait SubmissionParseErrorsPaths
     extends LarProtocol
@@ -36,22 +36,24 @@ trait SubmissionParseErrorsPaths
     path("filings" / Segment / "submissions" / IntNumber / "parseErrors") { (period, seqNr) =>
       timedGet { uri =>
         val supervisor = system.actorSelection("/user/supervisor")
-
         completeVerified(institutionId, period, seqNr, uri) {
-          val submissionID = SubmissionId(institutionId, period, seqNr)
-          val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]
+          parameters("page".?) { (page: Option[String]) =>
+            val submissionID = SubmissionId(institutionId, period, seqNr)
+            val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]
+            val pageNum: Int = Try(page.getOrElse("").toInt).getOrElse(1)
 
-          val fHmdaFileParseState = for {
-            s <- fHmdaFileParser
-            xs <- (s ? GetState).mapTo[HmdaFileParseState]
-          } yield xs
+            val fHmdaFileParseState = for {
+              s <- fHmdaFileParser
+              xs <- (s ? GetStatePaginated(pageNum)).mapTo[HmdaFileParseState]
+            } yield xs
 
-          onComplete(fHmdaFileParseState) {
-            case Success(state) =>
-              val summary = ParsingErrorSummary(state.tsParsingErrors, state.larParsingErrors)
-              complete(ToResponseMarshallable(summary))
-            case Failure(errors) =>
-              completeWithInternalError(uri, errors)
+            onComplete(fHmdaFileParseState) {
+              case Success(state) =>
+                val summary = ParsingErrorSummary(state.tsParsingErrors, state.larParsingErrors)
+                complete(ToResponseMarshallable(summary))
+              case Failure(errors) =>
+                completeWithInternalError(uri, errors)
+            }
           }
         }
       }
