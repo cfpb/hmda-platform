@@ -116,18 +116,21 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       val page1 = probe.expectMsgType[HmdaFileParseState]
       page1.tsParsingErrors mustBe tsErrors
       page1.larParsingErrors.size mustBe 19
+      page1.larParsingErrors.head.lineNumber mustBe 0
 
       // Second page should have 20 LAR errors
       probe.send(hmdaFileParser, GetStatePaginated(2))
       val page2 = probe.expectMsgType[HmdaFileParseState]
       page2.tsParsingErrors mustBe Seq()
       page2.larParsingErrors.size mustBe 20
+      page2.larParsingErrors.head.lineNumber mustBe 20
 
       // Third page should have the last 3 LAR errors
       probe.send(hmdaFileParser, GetStatePaginated(3))
       val page3 = probe.expectMsgType[HmdaFileParseState]
       page3.tsParsingErrors mustBe Seq()
       page3.larParsingErrors.size mustBe 3
+      page3.larParsingErrors.head.lineNumber mustBe 40
     }
 
   }
