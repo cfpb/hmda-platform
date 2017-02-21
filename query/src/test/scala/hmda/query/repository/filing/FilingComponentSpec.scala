@@ -17,10 +17,10 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   import LarConverter._
   import config.profile.api._
 
-  val timeout = 5.seconds
+  val duration = 5.seconds
 
   val repository = new LarRepository(config)
-  val totalRepository = new LarTotalRepository(config)
+  val larTotalRepository = new LarTotalRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
   implicit val system = ActorSystem()
@@ -29,8 +29,8 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   override def beforeAll(): Unit = {
     super.beforeAll()
     dropAllObjects()
-    Await.result(repository.createSchema(), timeout)
-    Await.result(modifiedLarRepository.createSchema(), timeout)
+    Await.result(repository.createSchema(), duration)
+    Await.result(modifiedLarRepository.createSchema(), duration)
   }
 
   override def afterAll(): Unit = {
@@ -43,7 +43,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   private def dropAllObjects() = {
     val db = repository.config.db
     val dropAll = sqlu"""DROP ALL OBJECTS"""
-    Await.result(db.run(dropAll), timeout)
+    Await.result(db.run(dropAll), duration)
   }
 
   "LAR Repository" must {
@@ -52,7 +52,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       val lar2 = larGen.sample.get.copy(respondentId = "resp1")
       repository.insertOrUpdate(lar1).map(x => x mustBe 1)
       repository.insertOrUpdate(lar2).map(x => x mustBe 1)
-      totalRepository.count("resp1").map(x => x mustBe Some(2))
+      larTotalRepository.count("resp1").map(x => x mustBe Some(2))
       modifiedLarRepository.findByRespondentId(lar1.respondentId).map {
         case xs: Seq[ModifiedLoanApplicationRegister] => xs.head.respondentId mustBe lar1.respondentId
       }
@@ -107,8 +107,8 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       repository.insertOrUpdate(lar2)
       repository.insertOrUpdate(lar3)
       repository.insertOrUpdate(lar4)
-      totalRepository.count("resp2").map(x => x mustBe Some(3))
-      totalRepository.count("resp3").map(x => x mustBe Some(1))
+      larTotalRepository.count("resp2").map(x => x mustBe Some(3))
+      larTotalRepository.count("resp3").map(x => x mustBe Some(1))
 
       val lars = modifiedLarRepository.findByRespondentIdSource(respId, p)
       val count = Flow[ModifiedLoanApplicationRegister].map(_ => 1)
@@ -120,7 +120,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
           .toMat(sum)(Keep.right)
 
       val sumF: Future[Int] = counterGraph.run()
-      val result = Await.result(sumF, timeout)
+      val result = Await.result(sumF, duration)
       result mustBe 3
 
     }

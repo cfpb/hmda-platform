@@ -3,6 +3,7 @@ package hmda.api.http.institutions.submissions
 import akka.actor.ActorRef
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ EditResult, _ }
@@ -10,9 +11,14 @@ import hmda.model.fi._
 import hmda.model.fi.lar.LarGenerators
 import hmda.model.fi.ts.TsGenerators
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
+import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
+import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.engine._
-import spray.json.{ JsBoolean, JsNumber, JsObject, JsString }
+import spray.json.{ JsNumber, JsObject, JsString }
+
+import scala.concurrent.{ Await, Future }
+import scala.concurrent.duration._
 
 class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators with TsGenerators {
 
@@ -43,7 +49,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val expectedSummary = SummaryEditResults(
       EditResults(List(s020, s010)),
       EditResults(List(v285, v280)),
-      EditResults.empty,
+      QualityEditResults(false, Seq()),
       MacroResults(List(MacroResult("Q007", MacroEditJustificationLookup.getJustifications("Q007"))))
     )
 
@@ -211,27 +217,34 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   }
 
   "Edit Type endpoint: return 405 when posting justification to syntactical endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes) ~> check {
       status mustBe StatusCodes.MethodNotAllowed
-      responseAs[ErrorResponse].message mustBe "Method not allowed"
     }
   }
 
   "Edit Type endpoint: return 405 when posting justification to validity endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> institutionsRoutes ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> Route.seal(institutionsRoutes) ~> check {
       status mustBe StatusCodes.MethodNotAllowed
-      responseAs[ErrorResponse].message mustBe "Method not allowed"
+    }
+  }
+
+  "Verify Quality edits endpoint: Responds with correct json and updates validation state" in {
+    val verification = QualityEditsVerification(true)
+    val currentStatus = Created
+
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/quality", verification) ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+
+      // test that it responds correctly
+      responseAs[QualityEditsVerifiedResponse] mustBe QualityEditsVerifiedResponse(true, currentStatus)
+
+      // test that it updates validation state
+      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
+      state.qualityVerified mustBe true
     }
   }
 
   private def loadValidationErrors(): Unit = {
-    val supervisor = system.actorSelection("/user/supervisor")
-    val id = "0"
-    val period = "2017"
-    val seqNr = 1
-    val submissionId = SubmissionId(id, period, seqNr)
-    val fHmdaValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
-
     val s1 = SyntacticalValidationError("loan1", "S010", false)
     val s2 = SyntacticalValidationError("loan1", "S020", false)
     val v1 = ValidityValidationError("loan1", "V280", false)
@@ -265,7 +278,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val tsValidationErrors = TsValidationErrors(Seq(s2.copy(ts = true)))
 
     for {
-      h <- fHmdaValidator
+      h <- fHmdaValidatorActor
     } yield {
       h ! larValidationErrors
       h ! tsValidationErrors
@@ -275,5 +288,20 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       h ! ts
     }
 
+  }
+
+  private def fValidationState: Future[HmdaFileValidationState] = {
+    for {
+      s <- fHmdaValidatorActor
+      xs <- (s ? GetState).mapTo[HmdaFileValidationState]
+    } yield xs
+  }
+
+  private def fHmdaValidatorActor: Future[ActorRef] = {
+    val id = "0"
+    val period = "2017"
+    val seqNr = 1
+    val submissionId = SubmissionId(id, period, seqNr)
+    (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
   }
 }

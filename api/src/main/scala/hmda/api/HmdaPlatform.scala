@@ -1,5 +1,7 @@
 package hmda.api
 
+import java.io.File
+
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -12,18 +14,20 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionDBProjection.CreateSchema
+import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, _ }
 import hmda.query.view.institutions.InstitutionView
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
+import hmda.query.DbConfiguration
+import hmda.query.projections.filing.HmdaFilingDBProjection._
 
 import scala.concurrent.ExecutionContext
 
-object HmdaPlatform {
+object HmdaPlatform extends DbConfiguration {
 
-  val config = ConfigFactory.load()
+  val configFactory = ConfigFactory.load()
 
   val log = LoggerFactory.getLogger("hmda")
 
@@ -35,12 +39,29 @@ object HmdaPlatform {
     implicit val ec = system.dispatcher
 
     startActors(system, supervisor, querySupervisor)
-    startApi(system)
+    startApi(system, querySupervisor)
 
   }
 
+  private def cleanup(): Unit = {
+    // Delete persistence journal
+    val file = new File("target/journal")
+    if (file.isDirectory) {
+      log.info("CLEANING JOURNAL")
+      file.listFiles.foreach(f => f.delete())
+    }
+
+    val larRepository = new LarRepository(config)
+    val larTotalsRepository = new LarTotalRepository(config)
+    val institutionRepository = new InstitutionRepository(config)
+
+    larRepository.dropSchema()
+    larTotalsRepository.dropSchema()
+    institutionRepository.dropSchema()
+  }
+
   private def startActors(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
-    lazy val actorTimeout = config.getInt("hmda.actor.timeout")
+    lazy val actorTimeout = configFactory.getInt("hmda.actor.timeout")
     implicit val timeout = Timeout(actorTimeout.seconds)
 
     (supervisor ? FindActorByName(SingleLarValidation.name))
@@ -60,11 +81,13 @@ object HmdaPlatform {
       .mapTo[ActorRef]
 
     //Load demo data
-    lazy val isDemo = config.getBoolean("hmda.isDemo")
+    lazy val isDemo = configFactory.getBoolean("hmda.isDemo")
     if (isDemo) {
+      cleanup()
       implicit val scheduler = system.scheduler
       val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
       log.info("...LOADING DEMO DATA...")
+
       val institutionCreatedF = for {
         i <- institutionViewF
         q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
@@ -79,10 +102,10 @@ object HmdaPlatform {
 
   }
 
-  private def startApi(system: ActorSystem): Unit = {
+  private def startApi(system: ActorSystem, querySupervisor: ActorRef): Unit = {
     system.actorOf(HmdaFilingApi.props(), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(), "hmda-admin-api")
-    system.actorOf(HmdaPublicApi.props(), "hmda-public-api")
+    system.actorOf(HmdaPublicApi.props(querySupervisor), "hmda-public-api")
   }
 
 }

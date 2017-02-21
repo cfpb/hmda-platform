@@ -15,15 +15,15 @@ import hmda.query.repository.filing.LarConverter._
 class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     with ScalatestRouteTest with RequestHeaderUtils with PublicHttpApi with LarGenerators {
 
-  import repository.config.profile.api._
-
   override val log: LoggingAdapter = NoLogging
   implicit val ec = system.dispatcher
   val repository = new LarRepository(config)
-  val totalRepository = new LarTotalRepository(config)
+  val larTotalRepository = new LarTotalRepository(config)
 
   val duration = 10.seconds
   override implicit val timeout = Timeout(duration)
+
+  import repository.config.profile.api._
 
   val lar1 = larGen.sample.get.copy(respondentId = "0")
   val lar2 = larGen.sample.get.copy(respondentId = "0")
@@ -54,6 +54,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
   private def loadData(): Unit = {
     Await.result(repository.insertOrUpdate(l1), duration)
     Await.result(repository.insertOrUpdate(l2), duration)
+
   }
 
   "Modified LAR Http API" must {

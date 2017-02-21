@@ -1,11 +1,14 @@
 package hmda.api.model
 
 import java.util.Calendar
+
 import akka.http.scaladsl.model.Uri.Path
+import hmda.api.model.public.InstitutionSearch
 import hmda.model.fi._
 import hmda.validation.engine._
 import org.scalacheck.Gen
 import spray.json.{ JsObject, JsString }
+import hmda.model.institution.InstitutionGenerators._
 
 trait ModelGenerators {
 
@@ -173,9 +176,23 @@ trait ModelGenerators {
     for {
       s <- editResultsGen
       v <- editResultsGen
-      q <- editResultsGen
+      qualVerified <- Gen.oneOf(true, false)
+      q <- Gen.listOf(editResultGen)
       m <- Gen.listOf(macroResultGen)
-    } yield SummaryEditResults(s, v, q, MacroResults(m))
+    } yield SummaryEditResults(s, v, QualityEditResults(qualVerified, q), MacroResults(m))
+  }
+
+  implicit def institutionSearchGen: Gen[InstitutionSearch] = {
+    for {
+      id <- Gen.alphaStr
+      name <- Gen.alphaStr
+      domains <- Gen.listOfN(3, Gen.alphaStr)
+      externalIds <- Gen.listOf(externalIdGen)
+    } yield InstitutionSearch(id, name, domains.toSet, externalIds.toSet)
+  }
+
+  implicit def institutionSearchGenList: Gen[List[InstitutionSearch]] = {
+    Gen.listOf(institutionSearchGen)
   }
 
 }
