@@ -40,7 +40,7 @@ This documenatation describes de public HMDA Platform HTTP API
 
    * `GET` - Returns the Modified LAR, in CSV format. The schema for the data is as follows:
 
-
+```
    id
    respondent_id
    agency_code
@@ -78,6 +78,7 @@ This documenatation describes de public HMDA Platform HTTP API
    denial_reason2
    denial_reason3
    period
+```
 
 For a definition of these fields, please consult the [HMDA Filing Instructions Guide](http://www.consumerfinance.gov/data-research/hmda/static/for-filers/2017/2017-HMDA-FIG.pdf).
 Please note that the Modified LAR does not include the fields `Loan Application Number`, `Date Application Received` or `Date of Action` described in HMDA Filing Instructions Guide.
