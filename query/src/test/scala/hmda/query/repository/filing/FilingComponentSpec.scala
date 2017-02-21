@@ -8,13 +8,14 @@ import hmda.query.DbConfiguration
 import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister }
 
 import scala.concurrent.duration._
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, BeforeAndAfterEach, MustMatchers }
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.{ Await, Future }
 
-class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingComponent with DbConfiguration with BeforeAndAfterEach with BeforeAndAfterAll with LarGenerators {
+class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingComponent with DbConfiguration with BeforeAndAfterAll with LarGenerators {
 
   import LarConverter._
+  import config.profile.api._
 
   val timeout = 5.seconds
 
@@ -25,10 +26,24 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
 
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    dropAllObjects()
+    Await.result(repository.createSchema(), timeout)
+    Await.result(modifiedLarRepository.createSchema(), timeout)
+  }
+
   override def afterAll(): Unit = {
     super.afterAll()
+    dropAllObjects()
     repository.config.db.close()
     system.terminate()
+  }
+
+  private def dropAllObjects() = {
+    val db = repository.config.db
+    val dropAll = sqlu"""DROP ALL OBJECTS"""
+    Await.result(db.run(dropAll), timeout)
   }
 
   "LAR Repository" must {

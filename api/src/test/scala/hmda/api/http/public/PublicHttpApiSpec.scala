@@ -12,8 +12,10 @@ import scala.concurrent.duration._
 import scala.concurrent.Await
 import hmda.query.repository.filing.LarConverter._
 
-class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEach with BeforeAndAfterAll
+class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     with ScalatestRouteTest with RequestHeaderUtils with PublicHttpApi with LarGenerators {
+
+  import repository.config.profile.api._
 
   override val log: LoggingAdapter = NoLogging
   implicit val ec = system.dispatcher
@@ -29,22 +31,24 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterEa
   val l1 = toLoanApplicationRegisterQuery(lar1).copy(period = p)
   val l2 = toLoanApplicationRegisterQuery(lar2).copy(period = p)
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    dropAllObjects()
     Await.result(repository.createSchema(), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
     loadData()
   }
 
-  override def afterEach(): Unit = {
-    super.afterEach()
-    Await.result(modifiedLarRepository.dropSchema(), duration)
-    Await.result(repository.dropSchema(), duration)
-  }
-
   override def afterAll(): Unit = {
     super.afterAll()
+    dropAllObjects()
     repository.config.db.close()
+  }
+
+  private def dropAllObjects() = {
+    val db = repository.config.db
+    val dropAll = sqlu"""DROP ALL OBJECTS"""
+    Await.result(db.run(dropAll), duration)
   }
 
   private def loadData(): Unit = {
