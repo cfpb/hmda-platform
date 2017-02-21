@@ -1,8 +1,8 @@
 package hmda.query.repository.filing
 
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.{LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, Msa}
-import hmda.query.repository.{Repository, TableRepository}
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, Msa }
+import hmda.query.repository.{ Repository, TableRepository }
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
@@ -306,7 +306,8 @@ trait FilingComponent { this: DbConfiguration =>
     def home_improve = column[Int]("home_improve")
     def refinance = column[Int]("refinance")
 
-    override def * = (msa,
+    override def * = (
+      msa,
       total_lars,
       total_amount,
       conv,
@@ -318,7 +319,8 @@ trait FilingComponent { this: DbConfiguration =>
       multi_family,
       home_purchase,
       home_improve,
-      refinance) <> (Msa.tupled, Msa.unapply)
+      refinance
+    ) <> (Msa.tupled, Msa.unapply)
   }
 
   class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, Int] {

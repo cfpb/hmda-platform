@@ -49,6 +49,7 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
       } pipeTo sender()
 
     case GetIrs =>
+      log.info("getting IRS")
       val irs = for {
         s <- larTotalsRepository.selectAll()
       } yield s
