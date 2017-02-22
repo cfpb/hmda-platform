@@ -8,6 +8,7 @@ import hmda.persistence.model.HmdaActor
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.FilingComponent
+import org.h2.command.Command
 
 import scala.concurrent.ExecutionContext
 
@@ -16,8 +17,7 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val larRepository = new LarRepository(config)
   val larTotalsRepository = new LarTotalRepository(config)
 
-  case object CreateSchema extends Command
-  case object GetIrs extends Command
+  case class CreateSchema(period: Int)
   case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
@@ -38,21 +38,15 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
   import hmda.query.repository.filing.LarConverter._
 
   override def receive: Receive = {
-    case CreateSchema =>
+    case CreateSchema(period) =>
       val schemaCreated = for {
         s <- larRepository.createSchema()
       } yield s
 
       schemaCreated.map { _ =>
-        larTotalsRepository.createSchema()
+        larTotalsRepository.createSchema(period)
         FilingSchemaCreated()
       } pipeTo sender()
-
-    case GetIrs =>
-      log.info("getting IRS")
-      val irs = for {
-        s <- larTotalsRepository.selectAll()
-      } yield s
 
     case DeleteLars(respondentId) =>
       larRepository.deleteByRespondentId(respondentId)

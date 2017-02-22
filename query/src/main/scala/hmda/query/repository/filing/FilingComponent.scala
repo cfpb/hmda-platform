@@ -1,12 +1,17 @@
 package hmda.query.repository.filing
 
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+import com.typesafe.config.ConfigFactory
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, Msa }
 import hmda.query.repository.{ Repository, TableRepository }
-import slick.basic.DatabaseConfig
+import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
+
+import scala.concurrent.ExecutionContext
 
 trait FilingComponent { this: DbConfiguration =>
   import config.profile.api._
@@ -324,10 +329,14 @@ trait FilingComponent { this: DbConfiguration =>
   }
 
   class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, Int] {
+    val configuration = ConfigFactory.load()
+    val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
+
     val table = TableQuery[LarTotalTable]
     def getId(table: LarTotalTable) = table.msa
 
-    private val createViewSchema = sqlu"""create view lars_total as
+    private def createViewSchema(period: Int) = {
+      sqlu"""create view lars_total as
         select msa, count(*) as total_lars, sum(amount) as total_amount,
         count(case when loan_type = 1 then 1 else null end) as conv,
         count(case when loan_type = 2 then 1 else null end) as fha,
@@ -339,14 +348,25 @@ trait FilingComponent { this: DbConfiguration =>
         count(case when purpose = 1 then 1 else null end) as home_purchase,
         count(case when purpose = 2 then 1 else null end) as home_improve,
         count(case when purpose = 3 then 1 else null end) as refinance
-        from lars group by msa;
+        from lars where period = $period group by msa;
       """
+    }
 
-    private val selectAllSchema = sqlu"""select * from lars_total;"""
-
-    def createSchema() = db.run(createViewSchema)
+    def createSchema(period: Int) = db.run(createViewSchema(period))
     def dropSchema() = db.run(table.schema.drop)
-    def selectAll() = db.run(selectAllSchema)
+    def selectAll() = db.run(table.to[Set].result)
+
+    private def getTableStream()(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
+      val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
+      val query = table.to[Set]
+      val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
+
+      db.stream(disableAutocommit andThen action)
+    }
+
+    def getMsaSource()(implicit ec: ExecutionContext): Source[Msa, NotUsed] = {
+      Source.fromPublisher(getTableStream())
+    }
   }
 
 }
