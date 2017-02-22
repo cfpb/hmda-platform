@@ -45,7 +45,7 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
     "return a 200" in {
       getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr/summary") ~> institutionsRoutes ~> check {
         val contactSummary = ContactSummary(ts.contact.name, ts.contact.phone, ts.contact.email)
-        val respondentSummary = RespondentSummary(ts.respondent.name, ts.respondent.id, ts.taxId, ts.agencyCode.toString, contactSummary)
+        val respondentSummary = RespondentSummary(ts.respondent.name, ts.respondent.id, ts.taxId, "cfpb", contactSummary)
         val fileSummary = FileSummary(fileName, period, lars.size)
         val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
 
