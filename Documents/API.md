@@ -262,6 +262,17 @@ Example response, with HTTP code 400:
 
 `GET` - Returns all parsing errors for a submission
 
+This endpoint is paginated.
+If no query parameter is included, it will return the first 20 parse errors for the file.
+Include the `page` param to access any other pages. Ex: `.../parseErrors?page=3`
+
+It contains 3 fields of pagination metadata:
+
+ - `total`: total number of parser errors for this file
+ - `count`: number of errors returned on this page
+ - `links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
+
+
 Example response, with HTTP code 201:
 
 ```json
@@ -292,7 +303,17 @@ Example response, with HTTP code 201:
         "Owner Occupancy is not an Integer"
       ]
     }
-  ]
+  ],
+  "count": 20,
+  "total": 130,
+  "_links": {
+    "first": "?page=1",
+    "prev": "?page=1",
+    "self": "?page=1",
+    "next": "?page=2",
+    "last": "?page=7",
+    "href": "/institutions/1/filings/2017/submissions/1/parseErrors{rel}"
+  }
 }
 ```
 
