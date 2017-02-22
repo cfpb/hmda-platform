@@ -9,19 +9,18 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
-import hmda.api.protocol.fi.lar.LarProtocol
+import hmda.api.model.ParsingErrorSummary
+import hmda.api.protocol.processing.ParserResultsProtocol
 import hmda.model.fi.SubmissionId
-import hmda.parser.fi.lar.ParsingErrorSummary
-import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
-import hmda.persistence.processing.HmdaFileParser.{ GetStatePaginated, HmdaFileParseState }
+import hmda.persistence.processing.HmdaFileParser.{ GetStatePaginated, PaginatedFileParseState }
 import hmda.persistence.processing.HmdaFileParser
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success, Try }
 
 trait SubmissionParseErrorsPaths
-    extends LarProtocol
+    extends ParserResultsProtocol
     with RequestVerificationUtils
     with HmdaCustomDirectives {
 
@@ -44,12 +43,18 @@ trait SubmissionParseErrorsPaths
 
             val fHmdaFileParseState = for {
               s <- fHmdaFileParser
-              xs <- (s ? GetStatePaginated(pageNum)).mapTo[HmdaFileParseState]
+              xs <- (s ? GetStatePaginated(pageNum)).mapTo[PaginatedFileParseState]
             } yield xs
 
             onComplete(fHmdaFileParseState) {
               case Success(state) =>
-                val summary = ParsingErrorSummary(state.tsParsingErrors, state.larParsingErrors)
+                val summary = ParsingErrorSummary(
+                  state.tsParsingErrors,
+                  state.larParsingErrors,
+                  uri.path.toString,
+                  pageNum,
+                  state.totalErroredLines
+                )
                 complete(ToResponseMarshallable(summary))
               case Failure(errors) =>
                 completeWithInternalError(uri, errors)

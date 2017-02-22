@@ -2,7 +2,6 @@ package hmda.api.protocol.processing
 
 import hmda.api.model.{ FilingDetail, ModelGenerators }
 import hmda.model.fi.Filing
-import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 import spray.json._

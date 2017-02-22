@@ -5,15 +5,15 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.http.scaladsl.model.StatusCodes
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.api.model.ErrorResponse
+import hmda.api.model.{ ErrorResponse, ParsingErrorSummary }
 import hmda.model.fi._
-import hmda.parser.fi.lar.{ LarParsingError, ParsingErrorSummary }
+import hmda.parser.fi.lar.LarParsingError
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.HmdaFileParser
 import hmda.persistence.processing.HmdaFileParser.{ HmdaFileParseState, LarParsedErrors, TsParsedErrors }
 
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
@@ -24,7 +24,9 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     "return no errors for an unparsed submission" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[ParsingErrorSummary] mustBe ParsingErrorSummary(Seq.empty, Seq.empty)
+        val summary = responseAs[ParsingErrorSummary]
+        summary.transmittalSheetErrors mustBe Seq.empty
+        summary.larErrors mustBe Seq.empty
       }
     }
 
@@ -37,13 +39,15 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
 
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[ParsingErrorSummary] mustBe ParsingErrorSummary(List(), List(LarParsingError(10, List("test", "ing"))))
+        val summary = responseAs[ParsingErrorSummary]
+        summary.transmittalSheetErrors mustBe Seq.empty
+        summary.larErrors mustBe List(LarParsingError(10, List("test", "ing")))
       }
     }
 
     ////// Pagination /////
 
-    "Set up: persist 1 TS error and 42 LAR errors" in {
+    "Set up: persist 2 TS errors and 42 LAR errors" in {
       val actor: ActorRef = parserActorFor(SubmissionId("0", "2017", 2))
 
       val tsErrors = List("TS 1", "TS 2")
@@ -60,30 +64,39 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     "return first page (up to 20 errors) if request doesn't include 'page' query param" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val response = responseAs[ParsingErrorSummary]
-        response.transmittalSheetErrors mustBe List("TS 1", "TS 2")
-        response.larErrors.size mustBe 19
-        response.larErrors.head.lineNumber mustBe 1
+        val summary = responseAs[ParsingErrorSummary]
+        summary.transmittalSheetErrors mustBe List("TS 1", "TS 2")
+        summary.larErrors.size mustBe 19
+        summary.larErrors.head.lineNumber mustBe 1
       }
     }
 
     "return next 20 errors on page 2" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=2") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val response = responseAs[ParsingErrorSummary]
-        response.transmittalSheetErrors mustBe List()
-        response.larErrors.size mustBe 20
-        response.larErrors.head.lineNumber mustBe 21
+        val summary = responseAs[ParsingErrorSummary]
+        summary.transmittalSheetErrors mustBe List()
+        summary.larErrors.size mustBe 20
+        summary.larErrors.head.lineNumber mustBe 21
       }
     }
 
     "return last 2 errors on page 3" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=3") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        val response = responseAs[ParsingErrorSummary]
-        response.transmittalSheetErrors mustBe List()
-        response.larErrors.size mustBe 2
-        response.larErrors.head.lineNumber mustBe 41
+        val summary = responseAs[ParsingErrorSummary]
+        summary.transmittalSheetErrors mustBe List()
+        summary.larErrors.size mustBe 2
+        summary.larErrors.head.lineNumber mustBe 41
+      }
+    }
+
+    "include pagination metadata" in {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=3") ~> institutionsRoutes ~> check {
+        val summary = responseAs[ParsingErrorSummary]
+        summary.path mustBe "/institutions/0/filings/2017/submissions/2/parseErrors"
+        summary.currentPage mustBe 3
+        summary.total mustBe 43
       }
     }
 
