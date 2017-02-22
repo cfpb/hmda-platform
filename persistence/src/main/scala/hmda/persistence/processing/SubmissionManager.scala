@@ -6,8 +6,10 @@ import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.{ Submission, SubmissionId }
-import hmda.persistence.HmdaSupervisor.FindHmdaFiling
+import hmda.model.fi.{ Filing, InProgress, Submission, SubmissionId, FilingStatus, Completed }
+import hmda.persistence.institutions.FilingPersistence
+import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling }
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
@@ -47,6 +49,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   val submissionUpload: ActorRef = context.actorOf(HmdaRawFile.props(submissionId))
   val submissionParser: ActorRef = context.actorOf(HmdaFileParser.props(submissionId))
   val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator.props(submissionId))
+  val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
 
   var uploaded: Int = 0
 
@@ -63,6 +66,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
       log.info(s"Start upload for submission: ${submissionId.toString}")
       submissionFSM ! Create
       submissionFSM ! StartUpload
+      updateFilingStatus(InProgress)
 
     case m @ AddLine(_, _) =>
       submissionUpload ! m
@@ -103,6 +107,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
     case Signed(sId) =>
       log.info(s"Submission signed: ${sId.toString}")
       submissionFSM ! Sign
+      updateFilingStatus(Completed)
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM
@@ -125,6 +130,15 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
     case Shutdown =>
       context stop self
 
+  }
+
+  private def updateFilingStatus(filingStatus: FilingStatus) = {
+    for {
+      p <- filingPersistence
+      f <- (p ? GetFilingByPeriod(period)).mapTo[Filing]
+    } yield {
+      p ? UpdateFilingStatus(f.copy(status = filingStatus))
+    }
   }
 
 }

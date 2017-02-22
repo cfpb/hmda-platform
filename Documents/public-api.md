@@ -32,6 +32,7 @@ This documenatation describes de public HMDA Platform HTTP API
           ]
         }
      ]
+   }
    ```
 
 ### Modified LAR
