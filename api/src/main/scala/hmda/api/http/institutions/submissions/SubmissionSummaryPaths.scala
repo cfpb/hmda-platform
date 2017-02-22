@@ -37,6 +37,8 @@ trait SubmissionSummaryPaths
 
   implicit val timeout: Timeout
 
+  case class TsLarSummary(ts: Option[TransmittalSheet], larSize: Int)
+
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary
   // NOTE:  This is currently a mocked, static endpoint
   def submissionSummaryPath(institutionId: String)(implicit ec: ExecutionContext) =
@@ -50,16 +52,18 @@ trait SubmissionSummaryPaths
         val tsF = for {
           validator <- validatorF
           s <- (validator ? GetState).mapTo[HmdaFileValidationState]
+          larSize = s.lars.size
           ts = s.ts
-        } yield ts
+          tsLarSummary = TsLarSummary(ts, larSize)
+        } yield tsLarSummary
 
         onComplete(tsF) {
-          case Success(x) => x match {
+          case Success(x) => x.ts match {
             case Some(t) =>
               val contactSummary = ContactSummary(t.contact.name, t.contact.phone, t.contact.email)
               val respondentSummary = RespondentSummary(t.respondent.name, t.respondent.id, t.taxId, t.agencyCode.toString, contactSummary)
 
-              val fileSummary = FileSummary("lar.dat", period, 25)
+              val fileSummary = FileSummary("lar.dat", period, x.larSize)
               val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
               complete(ToResponseMarshallable(submissionSummary))
             case None =>
