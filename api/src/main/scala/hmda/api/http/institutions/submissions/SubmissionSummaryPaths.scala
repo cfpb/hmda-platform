@@ -17,8 +17,10 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.processing.HmdaFileValidator
+import hmda.persistence.processing.{ HmdaFileValidator, HmdaRawFile, SubmissionManager }
 import hmda.persistence.processing.HmdaFileValidator._
+import hmda.persistence.processing.HmdaRawFile.{ GetFileName, HmdaFileDetails }
+import hmda.persistence.processing.SubmissionManager.GetActorRef
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -37,24 +39,27 @@ trait SubmissionSummaryPaths
 
   implicit val timeout: Timeout
 
-  case class TsLarSummary(ts: Option[TransmittalSheet], larSize: Int)
+  case class TsLarSummary(ts: Option[TransmittalSheet], larSize: Int, hmdaFileDetails: HmdaFileDetails)
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary
-  // NOTE:  This is currently a mocked, static endpoint
   def submissionSummaryPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "summary") { (period, seqNr) =>
       timedGet { uri =>
         val submissionId = SubmissionId(institutionId, period, seqNr)
 
         val supervisor = system.actorSelection("/user/supervisor")
+        val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
         val validatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+        val hmdaRawF = submissionManagerF.flatMap(actorRef => (actorRef ? GetActorRef(HmdaRawFile.name)).mapTo[ActorRef])
 
         val tsF = for {
           validator <- validatorF
+          hmdaRaw <- hmdaRawF
           s <- (validator ? GetState).mapTo[HmdaFileValidationState]
+          fileDetails <- (hmdaRaw ? GetFileName).mapTo[HmdaFileDetails]
           larSize = s.lars.size
           ts = s.ts
-          tsLarSummary = TsLarSummary(ts, larSize)
+          tsLarSummary = TsLarSummary(ts, larSize, fileDetails)
         } yield tsLarSummary
 
         onComplete(tsF) {
@@ -63,7 +68,7 @@ trait SubmissionSummaryPaths
               val contactSummary = ContactSummary(t.contact.name, t.contact.phone, t.contact.email)
               val respondentSummary = RespondentSummary(t.respondent.name, t.respondent.id, t.taxId, t.agencyCode.toString, contactSummary)
 
-              val fileSummary = FileSummary("lar.dat", period, x.larSize)
+              val fileSummary = FileSummary(x.hmdaFileDetails.name, period, x.larSize)
               val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
               complete(ToResponseMarshallable(submissionSummary))
             case None =>
