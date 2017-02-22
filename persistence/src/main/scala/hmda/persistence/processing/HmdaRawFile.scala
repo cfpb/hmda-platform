@@ -49,7 +49,6 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor {
   override def receiveCommand: Receive = {
 
     case AddFileName(n) =>
-      println(s"FILENAME: $n")
       fileName = n
 
     case GetFileName =>
