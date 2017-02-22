@@ -263,13 +263,16 @@ Example response, with HTTP code 400:
 `GET` - Returns all parsing errors for a submission
 
 This endpoint is paginated.
-If no query parameter is included, it will return the first 20 parse errors for the file.
-Include the `page` param to access any other pages. Ex: `.../parseErrors?page=3`
 
-It contains 3 fields of pagination metadata:
+| Query parameter | Description |
+| --------------- | ----------- |
+| page | Integer. If blank, will default to page 1. Page size is 20 lines of errors. |
+
+
+The response contains 3 fields of pagination metadata:
 
  - `total`: total number of parser errors for this file
- - `count`: number of errors returned on this page
+ - `count`: number of errors returned on this page. Full page contains errors from 20 lines of the HMDA file.
  - `links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
 
 
