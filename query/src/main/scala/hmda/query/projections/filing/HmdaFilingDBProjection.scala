@@ -16,6 +16,7 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
 
   val larRepository = new LarRepository(config)
   val larTotalsRepository = new LarTotalRepository(config)
+  val modifiedLarRepository = new ModifiedLarRepository(config)
 
   case class CreateSchema(period: Int)
   case class DeleteLars(respondentId: String)
@@ -45,6 +46,7 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
 
       schemaCreated.map { _ =>
         larTotalsRepository.createSchema(period)
+        modifiedLarRepository.createSchema()
         FilingSchemaCreated()
       } pipeTo sender()
 
