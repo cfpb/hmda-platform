@@ -22,7 +22,7 @@ trait ParserResultsProtocol extends DefaultJsonProtocol {
 
     override def read(json: JsValue): ParsingErrorSummary = {
       json.asJsObject.getFields("transmittalSheetErrors", "larErrors", "count", "total", "_links") match {
-        case Seq(JsArray(ts), JsArray(lar), JsNumber(count), JsNumber(tot), JsObject(links)) =>
+        case Seq(JsArray(ts), JsArray(lar), JsNumber(_), JsNumber(tot), JsObject(links)) =>
           val tsErrs: Seq[String] = ts.map(_.convertTo[String])
           val larErrs: Seq[LarParsingError] = lar.map(_.convertTo[LarParsingError])
           val path: String = WithPagination.staticPath(links("href").convertTo[String])
