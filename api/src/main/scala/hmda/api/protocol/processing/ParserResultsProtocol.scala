@@ -1,6 +1,6 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ PaginationLinks, ParsingErrorSummary, WithPagination }
+import hmda.api.model.{ PaginationLinks, ParsingErrorSummary, PaginatedResponse }
 import hmda.parser.fi.lar.LarParsingError
 import spray.json._
 
@@ -25,8 +25,8 @@ trait ParserResultsProtocol extends DefaultJsonProtocol {
         case Seq(JsArray(ts), JsArray(lar), JsNumber(_), JsNumber(tot), JsObject(links)) =>
           val tsErrs: Seq[String] = ts.map(_.convertTo[String])
           val larErrs: Seq[LarParsingError] = lar.map(_.convertTo[LarParsingError])
-          val path: String = WithPagination.staticPath(links("href").convertTo[String])
-          val currentPage: Int = WithPagination.currentPage(links("self").convertTo[String])
+          val path: String = PaginatedResponse.staticPath(links("href").convertTo[String])
+          val currentPage: Int = PaginatedResponse.currentPage(links("self").convertTo[String])
           val total: Int = tot.intValue
           ParsingErrorSummary(tsErrs, larErrs, path, currentPage, total)
 

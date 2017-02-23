@@ -1,8 +1,8 @@
 package hmda.api.model
 
-trait WithPagination {
-  def pageSize: Int = 20
+import hmda.persistence.WithPagination
 
+trait PaginatedResponse extends WithPagination {
   def path: String
   def currentPage: Int
   def total: Int
@@ -60,7 +60,7 @@ case class PaginationLinks(
   last: String
 )
 
-object WithPagination {
+object PaginatedResponse {
   def staticPath(configurablePath: String): String = {
     val extractPath = """(.+)\{rel\}""".r
 

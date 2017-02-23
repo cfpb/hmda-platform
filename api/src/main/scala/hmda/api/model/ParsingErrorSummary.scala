@@ -8,4 +8,4 @@ case class ParsingErrorSummary(
   path: String,
   currentPage: Int,
   total: Int
-) extends WithPagination
+) extends PaginatedResponse
