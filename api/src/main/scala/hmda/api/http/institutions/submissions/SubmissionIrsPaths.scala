@@ -34,10 +34,9 @@ trait SubmissionIrsPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs
-  // NOTE:  This is currently a mocked, static endpoint
   def submissionIrsPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, submissionId) =>
-      timedGet { uri =>
+      timedGet { _ =>
         val larTotalRepository = new LarTotalRepository(config)
 
         val data = larTotalRepository.getMsaSource().map(x => ChunkStreamPart(x.toString))
