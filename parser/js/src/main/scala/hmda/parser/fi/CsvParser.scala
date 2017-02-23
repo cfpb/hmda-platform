@@ -1,6 +1,7 @@
 package hmda.parser.fi
 
 import hmda.model.fi.lar._
+import hmda.model.fi.ts._
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
 
@@ -17,7 +18,7 @@ object CsvParser extends JSApp {
   def parseTs(ts: String) = {
     val parsed = TsCsvParser(ts)
     parsed match {
-      case Right(x) => x
+      case Right(x) => createTsJS(x)
       case Left(x) => x
     }
   }
@@ -27,6 +28,51 @@ object CsvParser extends JSApp {
     parsed match {
       case Right(x) => createLarJS(x)
       case Left(x) => x
+    }
+  }
+
+  private def createTsJS(ts: TransmittalSheet): TransmittalSheetJS = {
+    new TransmittalSheetJS {
+      override val agencyCode: Int = ts.agencyCode
+      override val contact: ContactJS = createContactJS(ts.contact)
+      override val totalLines: Int = ts.totalLines
+      override val taxId: String = ts.taxId
+      override val respondent: RespondentJS = createRespondentJS(ts.respondent)
+      override val timestamp: Long = ts.timestamp
+      override val activityYear: Int = ts.activityYear
+      override val respondentId: String = ts.respondentId
+      override val parent: ParentJS = createParentJS(ts.parent)
+      override val id: Int = ts.id
+    }
+  }
+
+  private def createRespondentJS(respondent: Respondent): RespondentJS = {
+    new RespondentJS {
+      override val city: String = respondent.city
+      override val address: String = respondent.address
+      override val state: String = respondent.state
+      override val zipCode: String = respondent.zipCode
+      override val name: String = respondent.name
+      override val id: String = respondent.name
+    }
+  }
+
+  private def createContactJS(contact: Contact): ContactJS = {
+    new ContactJS {
+      override val name: String = contact.name
+      override val fax: String = contact.fax
+      override val email: String = contact.email
+      override val phone: String = contact.phone
+    }
+  }
+
+  private def createParentJS(parent: Parent): ParentJS = {
+    new ParentJS {
+      override val city: String = parent.city
+      override val address: String = parent.address
+      override val state: String = parent.state
+      override val zipCode: String = parent.zipCode
+      override val name: String = parent.name
     }
   }
 
