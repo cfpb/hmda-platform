@@ -9,11 +9,11 @@ trait WithPagination {
 
   def links = PaginationLinks(
     configurablePath,
-    pg(currentPage),
-    pg(1),
-    pg(prevPage),
-    pg(nextPage),
-    pg(lastPage)
+    pageQuery(currentPage),
+    pageQuery(1),
+    pageQuery(prevPage),
+    pageQuery(nextPage),
+    pageQuery(lastPage)
   )
   def count: Int = {
     if (validPage) {
@@ -48,7 +48,7 @@ trait WithPagination {
     else remainder
   }
 
-  private def pg(n: Int): String = s"?page=$n"
+  private def pageQuery(n: Int): String = s"?page=$n"
 }
 
 case class PaginationLinks(
