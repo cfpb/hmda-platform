@@ -2,11 +2,13 @@ package hmda.parser.fi
 
 import hmda.model.fi.lar._
 import hmda.model.fi.ts._
-import hmda.parser.fi.lar.LarCsvParser
+import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
 import hmda.parser.fi.ts.TsCsvParser
 
+import scalajs.js
 import scala.scalajs.js.annotation.JSExportAll
-import scala.scalajs.js.JSApp
+import scala.scalajs.js.{ Array, JSApp }
+import js.JSConverters._
 
 @JSExportAll
 object CsvParser extends JSApp {
@@ -19,7 +21,7 @@ object CsvParser extends JSApp {
     val parsed = TsCsvParser(ts)
     parsed match {
       case Right(x) => createTsJS(x)
-      case Left(x) => x
+      case Left(x) => createTSParsingErrors(x)
     }
   }
 
@@ -27,7 +29,7 @@ object CsvParser extends JSApp {
     val parsed = LarCsvParser(lar)
     parsed match {
       case Right(x) => createLarJS(x)
-      case Left(x) => x
+      case Left(x) => createLARParsingError(x)
     }
   }
 
@@ -141,6 +143,18 @@ object CsvParser extends JSApp {
       override val sex: Int = applicant.sex
       override val race4: String = applicant.race4
       override val coRace2: String = applicant.coRace2
+    }
+  }
+
+  private def createTSParsingErrors(errorMessages: List[String]): ParsingErrorsJS = {
+    new ParsingErrorsJS {
+      override val errors: Array[String] = errorMessages.toJSArray
+    }
+  }
+
+  private def createLARParsingError(error: LarParsingError): ParsingErrorsJS = {
+    new ParsingErrorsJS {
+      override val errors: Array[String] = error.errorMessages.toJSArray
     }
   }
 
