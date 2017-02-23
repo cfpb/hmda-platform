@@ -6,12 +6,12 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.HttpEntity.ChunkStreamPart
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.{HmdaCustomDirectives, ValidationErrorConverter}
-import hmda.api.protocol.processing.{ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol}
+import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
+import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.query.DbConfiguration
 import hmda.query.repository.filing.FilingComponent
 
