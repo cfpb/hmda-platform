@@ -7,7 +7,7 @@ import scalajs.js.annotation.ScalaJSDefined
 trait TransmittalSheetJS extends js.Object {
   val id: Int
   val agencyCode: Int
-  val timestamp: Long
+  val timestamp: String
   val activityYear: Int
   val taxId: String
   val totalLines: Int

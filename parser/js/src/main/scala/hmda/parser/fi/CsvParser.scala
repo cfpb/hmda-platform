@@ -38,7 +38,7 @@ object CsvParser extends JSApp {
       override val totalLines: Int = ts.totalLines
       override val taxId: String = ts.taxId
       override val respondent: RespondentJS = createRespondentJS(ts.respondent)
-      override val timestamp: Long = ts.timestamp
+      override val timestamp: String = ts.timestamp.toString
       override val activityYear: Int = ts.activityYear
       override val respondentId: String = ts.respondentId
       override val parent: ParentJS = createParentJS(ts.parent)
