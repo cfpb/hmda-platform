@@ -56,11 +56,13 @@ class UploadPathsSpec extends InstitutionHttpApiSpec with SubmissionProtocol wit
     }
 
     "return 400 when trying to upload to a completed submission" in {
+      val time = 5.seconds
+
       val supervisor = system.actorSelection("/user/supervisor")
       val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, "0", "2017")).mapTo[ActorRef]
-      val submissionsActor = Await.result(fSubmissionsActor, 5.seconds)
-      submissionsActor ! UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)
-      val submission = Await.result((submissionsActor ? GetSubmissionById(SubmissionId("0", "2017", 1))).mapTo[Submission], 5.seconds)
+      val submissionsActor = Await.result(fSubmissionsActor, time)
+      Await.result(submissionsActor ? UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed), time)
+      val submission = Await.result((submissionsActor ? GetSubmissionById(SubmissionId("0", "2017", 1))).mapTo[Submission], time)
 
       submission.status mustBe Signed
 
