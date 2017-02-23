@@ -14,16 +14,16 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, DeleteSchema, _ }
+import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, _ }
 import hmda.query.view.institutions.InstitutionView
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionSchemaCreated, InstitutionSchemaDeleted }
+import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
 import hmda.query.DbConfiguration
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 object HmdaPlatform extends DbConfiguration {
 
