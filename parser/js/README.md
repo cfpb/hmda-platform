@@ -91,10 +91,10 @@ This `Transmittal Sheet` does not conform to the specification, returning the fo
 
 ```json
 { 
-errors:
-   [ 'Record Identifier is not an Integer',
-     'Agency Code is not an Integer',
-     'Applicant Ethnicity is not an Integer' ] 
+  "errors":
+   [ "Record Identifier is not an Integer",
+     "Agency Code is not an Integer",
+     "Applicant Ethnicity is not an Integer" ]
 }
 ```
 
@@ -166,9 +166,9 @@ This `Loan Application Register` does not conform to the specification, this par
 
 ```json
 { 
-  errors:
-   [ 'Record Identifier is not an Integer',
-     'Agency Code is not an Integer' ] 
+  "errors":
+   [ "Record Identifier is not an Integer",
+     "Agency Code is not an Integer" ]
 }
 ```
 
