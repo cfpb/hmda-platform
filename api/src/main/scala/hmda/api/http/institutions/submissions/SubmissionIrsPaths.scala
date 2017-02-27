@@ -1,15 +1,8 @@
 package hmda.api.http.institutions.submissions
 
-import akka.pattern.ask
-import akka.actor.ActorSystem
-import akka.event.LoggingAdapter
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.HttpEntity.ChunkStreamPart
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
-import akka.stream.ActorMaterializer
-import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.query.DbConfiguration
@@ -26,12 +19,6 @@ trait SubmissionIrsPaths
     with ValidationErrorConverter
     with FilingComponent
     with DbConfiguration {
-
-  implicit val system: ActorSystem
-  implicit val materializer: ActorMaterializer
-  val log: LoggingAdapter
-
-  implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs
   def submissionIrsPath(institutionId: String)(implicit ec: ExecutionContext) =

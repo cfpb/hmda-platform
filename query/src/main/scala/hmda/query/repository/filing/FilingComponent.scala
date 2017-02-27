@@ -4,14 +4,14 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, Msa, ModifiedLoanApplicationRegister }
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister, Msa }
 import hmda.query.repository.{ Repository, TableRepository }
 import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait FilingComponent { this: DbConfiguration =>
   import config.profile.api._
@@ -328,7 +328,7 @@ trait FilingComponent { this: DbConfiguration =>
     ) <> (Msa.tupled, Msa.unapply)
   }
 
-  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, Int] {
+  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, String] {
     val configuration = ConfigFactory.load()
     val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
 
@@ -354,11 +354,10 @@ trait FilingComponent { this: DbConfiguration =>
 
     def createSchema(period: Int) = db.run(createViewSchema(period))
     def dropSchema() = db.run(table.schema.drop)
-    def selectAll() = db.run(table.to[Set].result)
 
     private def getTableStream()(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
-      val query = table.to[Set]
+      val query = table.drop(0)
       val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
 
       db.stream(disableAutocommit andThen action)
