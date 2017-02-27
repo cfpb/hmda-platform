@@ -77,17 +77,17 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
         val summary = responseAs[ParsingErrorSummary]
         summary.transmittalSheetErrors mustBe List()
         summary.larErrors.size mustBe 20
-        summary.larErrors.head.lineNumber mustBe 21
+        summary.larErrors.head.lineNumber mustBe 20
       }
     }
 
-    "return last 2 errors on page 3" in {
+    "return last 3 errors on page 3" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=3") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val summary = responseAs[ParsingErrorSummary]
         summary.transmittalSheetErrors mustBe List()
-        summary.larErrors.size mustBe 2
-        summary.larErrors.head.lineNumber mustBe 41
+        summary.larErrors.size mustBe 3
+        summary.larErrors.head.lineNumber mustBe 40
       }
     }
 
