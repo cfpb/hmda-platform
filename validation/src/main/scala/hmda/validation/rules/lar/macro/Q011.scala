@@ -24,7 +24,7 @@ class Q011 private (year: Int) extends AggregateEditCheck[LoanApplicationRegiste
 
   val config = ConfigFactory.load()
   val previousFixed = config.getInt("hmda.validation.macro.Q011.loan.previous.fixed")
-  val multiplier = config.getInt("hmda.validation.macro.Q011.multiplier")
+  val multiplier = config.getInt("hmda.validation.macro.Q011.loan.actual.multiplier")
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
     val currentLarCount = count(lars)
