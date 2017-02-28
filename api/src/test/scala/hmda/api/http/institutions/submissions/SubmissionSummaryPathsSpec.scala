@@ -10,6 +10,7 @@ import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.{ HmdaFileValidator, HmdaRawFile, SubmissionManager }
 import org.scalatest.BeforeAndAfterAll
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import hmda.api.model.ErrorResponse
 import hmda.parser.fi.lar.LarCsvParser
 
 import scala.concurrent.Await
@@ -51,6 +52,24 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
 
         status mustBe StatusCodes.OK
         responseAs[SubmissionSummary] mustBe submissionSummary
+      }
+    }
+    "return 404 for nonexistent institution" in {
+      getWithCfpbHeaders(s"/institutions/xxxxx/filings/$period/submissions/$seqNr/summary") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
+      }
+    }
+    "return 404 for nonexistent filing period" in {
+      getWithCfpbHeaders(s"/institutions/$institutionId/filings/1980/submissions/$seqNr/summary") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
+      }
+    }
+    "return 404 for nonexistent submission" in {
+      getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/0/summary") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
       }
     }
   }

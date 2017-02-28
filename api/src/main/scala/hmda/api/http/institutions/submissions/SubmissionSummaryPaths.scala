@@ -31,7 +31,7 @@ trait SubmissionSummaryPaths
     with SubmissionProtocol
     with ApiErrorProtocol
     with EditResultsProtocol
-    with HmdaCustomDirectives
+    with RequestVerificationUtils
     with ValidationErrorConverter {
 
   implicit val system: ActorSystem
@@ -46,40 +46,42 @@ trait SubmissionSummaryPaths
   def submissionSummaryPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "summary") { (period, seqNr) =>
       timedGet { uri =>
-        val submissionId = SubmissionId(institutionId, period, seqNr)
+        completeVerified(institutionId, period, seqNr, uri) {
+          val submissionId = SubmissionId(institutionId, period, seqNr)
 
-        val supervisor = system.actorSelection("/user/supervisor")
-        val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
-        val validatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
-        val hmdaRawF = submissionManagerF.flatMap(actorRef => (actorRef ? GetActorRef(HmdaRawFile.name)).mapTo[ActorRef])
+          val supervisor = system.actorSelection("/user/supervisor")
+          val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
+          val validatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
+          val hmdaRawF = submissionManagerF.flatMap(actorRef => (actorRef ? GetActorRef(HmdaRawFile.name)).mapTo[ActorRef])
 
-        val tsF = for {
-          validator <- validatorF
-          hmdaRaw <- hmdaRawF
-          s <- (validator ? GetState).mapTo[HmdaFileValidationState]
-          fileDetails <- (hmdaRaw ? GetFileName).mapTo[HmdaFileDetails]
-          larSize = s.lars.size
-          ts = s.ts
-          tsLarSummary = TsLarSummary(ts, larSize, fileDetails)
-        } yield tsLarSummary
+          val tsF = for {
+            validator <- validatorF
+            hmdaRaw <- hmdaRawF
+            s <- (validator ? GetState).mapTo[HmdaFileValidationState]
+            fileDetails <- (hmdaRaw ? GetFileName).mapTo[HmdaFileDetails]
+            larSize = s.lars.size
+            ts = s.ts
+            tsLarSummary = TsLarSummary(ts, larSize, fileDetails)
+          } yield tsLarSummary
 
-        onComplete(tsF) {
-          case Success(x) => x.ts match {
-            case Some(t) =>
-              val contactSummary = ContactSummary(t.contact.name, t.contact.phone, t.contact.email)
-              val agency = Try(Agency.withValue(t.agencyCode)).getOrElse(Agency.UndeterminedAgency)
-              val respondentSummary = RespondentSummary(t.respondent.name, t.respondent.id, t.taxId, agency.name, contactSummary)
+          onComplete(tsF) {
+            case Success(x) => x.ts match {
+              case Some(t) =>
+                val contactSummary = ContactSummary(t.contact.name, t.contact.phone, t.contact.email)
+                val agency = Try(Agency.withValue(t.agencyCode)).getOrElse(Agency.UndeterminedAgency)
+                val respondentSummary = RespondentSummary(t.respondent.name, t.respondent.id, t.taxId, agency.name, contactSummary)
 
-              val fileSummary = FileSummary(x.hmdaFileDetails.name, period, x.larSize)
-              val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
-              complete(ToResponseMarshallable(submissionSummary))
-            case None =>
-              val errorResponse = ErrorResponse(404, s"submission $submissionId not found", uri.path)
-              complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+                val fileSummary = FileSummary(x.hmdaFileDetails.name, period, x.larSize)
+                val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
+                complete(ToResponseMarshallable(submissionSummary))
+              case None =>
+                val errorResponse = ErrorResponse(404, s"submission $submissionId not found", uri.path)
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+            }
+
+            case Failure(error) =>
+              completeWithInternalError(uri, error)
           }
-
-          case Failure(error) =>
-            completeWithInternalError(uri, error)
         }
       }
     }
