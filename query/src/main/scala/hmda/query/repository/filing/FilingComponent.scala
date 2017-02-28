@@ -328,7 +328,7 @@ trait FilingComponent { this: DbConfiguration =>
     ) <> (Msa.tupled, Msa.unapply)
   }
 
-  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, String] {
+  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, Int] {
     val configuration = ConfigFactory.load()
     val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
 
@@ -348,7 +348,7 @@ trait FilingComponent { this: DbConfiguration =>
         count(case when purpose = 1 then 1 else null end) as home_purchase,
         count(case when purpose = 2 then 1 else null end) as home_improve,
         count(case when purpose = 3 then 1 else null end) as refinance
-        from lars where period = $period group by msa;
+        from lars where period = '#$period' group by msa;
       """
     }
 
