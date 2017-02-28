@@ -23,28 +23,29 @@ class HmdaRawFileSpec extends ActorSpec {
   val lines = fiCSV.split("\n")
   val timestamp = Instant.now.toEpochMilli
 
+  val fileName = "lars.dat"
+
   "A HMDA File" must {
     "persist file name" in {
-      val fileName = "lars.dat"
+
       probe.send(hmdaFileUpload, AddFileName(fileName))
-      probe.send(hmdaFileUpload, GetFileName)
-      probe.expectMsg(HmdaFileDetails(fileName))
+      probe.send(hmdaFileUpload, GetState)
+      probe.expectMsg(HmdaRawFileState(0, fileName))
     }
     "persist raw data" in {
       for (line <- lines) {
         probe.send(hmdaFileUpload, AddLine(timestamp, line.toString))
       }
       probe.send(hmdaFileUpload, GetState)
-      probe.expectMsg(HmdaRawFileState(4))
+      probe.expectMsg(HmdaRawFileState(4, fileName))
     }
-
     "recover with event" in {
       probe.send(hmdaFileUpload, Shutdown)
 
       val secondHmdaFileUpload = createHmdaRawFile(system, submissionId)
 
       probe.send(secondHmdaFileUpload, GetState)
-      probe.expectMsg(HmdaRawFileState(4))
+      probe.expectMsg(HmdaRawFileState(4, fileName))
       probe.send(secondHmdaFileUpload, Shutdown)
     }
   }
