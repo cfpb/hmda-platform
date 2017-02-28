@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.Result
 import hmda.validation.rules.{ AggregateEditCheck, IfYearPresentInAggregate }
@@ -15,11 +16,11 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object Q011 {
   def inContext(ctx: ValidationContext) = {
-    IfYearPresentInAggregate(ctx) { new Q011(_) }
+    IfYearPresentInAggregate(ctx) { new Q011(_, _) }
   }
 }
 
-class Q011 private (year: Int) extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
+class Q011 private (institution: Institution, year: Int) extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
   override def name: String = "Q011"
 
   val config = ConfigFactory.load()
