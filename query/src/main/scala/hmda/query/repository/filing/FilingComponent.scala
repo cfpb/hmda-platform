@@ -12,6 +12,7 @@ import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
 
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Try
 
 trait FilingComponent { this: DbConfiguration =>
   import config.profile.api._
@@ -297,7 +298,7 @@ trait FilingComponent { this: DbConfiguration =>
   }
 
   class LarTotalTable(tag: Tag) extends Table[Msa](tag, "lars_total") {
-    def msa = column[Int]("msa", O.PrimaryKey)
+    def msa = column[String]("msa", O.PrimaryKey)
     def total_lars = column[Int]("total_lars")
     def total_amount = column[Int]("total_amount")
     def conv = column[Int]("conv")
@@ -328,14 +329,14 @@ trait FilingComponent { this: DbConfiguration =>
     ) <> (Msa.tupled, Msa.unapply)
   }
 
-  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, Int] {
+  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, String] {
     val configuration = ConfigFactory.load()
     val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
 
     val table = TableQuery[LarTotalTable]
     def getId(table: LarTotalTable) = table.msa
 
-    private def createViewSchema(period: Int) = {
+    private def createViewSchema(period: String) = {
       sqlu"""create view lars_total as
         select msa, count(*) as total_lars, sum(amount) as total_amount,
         count(case when loan_type = 1 then 1 else null end) as conv,
@@ -352,7 +353,7 @@ trait FilingComponent { this: DbConfiguration =>
       """
     }
 
-    def createSchema(period: Int) = db.run(createViewSchema(period))
+    def createSchema(period: String) = db.run(createViewSchema(period))
     def dropSchema() = db.run(table.schema.drop)
 
     private def getTableStream()(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {

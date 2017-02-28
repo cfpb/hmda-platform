@@ -18,7 +18,7 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val larTotalsRepository = new LarTotalRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
-  case class CreateSchema(period: Int)
+  case class CreateSchema(period: String)
   case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event

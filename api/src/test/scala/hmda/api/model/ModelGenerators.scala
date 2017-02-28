@@ -7,7 +7,7 @@ import hmda.api.model.public.InstitutionSearch
 import hmda.model.fi._
 import hmda.validation.engine._
 import org.scalacheck.Gen
-import spray.json.{JsObject, JsString}
+import spray.json.{ JsObject, JsString }
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.processing.SubmissionFSM.IRSGenerated
 

@@ -1,7 +1,7 @@
 package hmda.query.model.filing
 
 case class Msa(
-  id: Int,
+  id: String,
   totalLars: Int,
   totalAmount: Int,
   conv: Int,

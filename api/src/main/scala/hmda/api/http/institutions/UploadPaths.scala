@@ -61,7 +61,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
         onComplete(fUploadSubmission) {
           case Success((submission, true, processingActor)) =>
             val queryProjector = system.actorSelection(s"/user/query-supervisor/HmdaFilingView-$period/queryProjector")
-            queryProjector ! CreateSchema(period.toInt)
+            queryProjector ! CreateSchema(period)
             queryProjector ! DeleteLars(institutionId)
             uploadFile(processingActor, uploadTimestamp, uri.path, submission)
           case Success((_, false, _)) =>

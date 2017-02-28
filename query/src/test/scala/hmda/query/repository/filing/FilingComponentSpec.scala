@@ -5,7 +5,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Flow, Keep, RunnableGraph, Sink }
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister }
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister, Msa }
 
 import scala.concurrent.duration._
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
@@ -30,6 +30,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     super.beforeAll()
     dropAllObjects()
     Await.result(repository.createSchema(), duration)
+    Await.result(larTotalRepository.createSchema(""), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
   }
 
@@ -52,7 +53,6 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       val lar2 = larGen.sample.get.copy(respondentId = "resp1")
       repository.insertOrUpdate(lar1).map(x => x mustBe 1)
       repository.insertOrUpdate(lar2).map(x => x mustBe 1)
-      larTotalRepository.count("resp1").map(x => x mustBe Some(2))
       modifiedLarRepository.findByRespondentId(lar1.respondentId).map {
         case xs: Seq[ModifiedLoanApplicationRegister] => xs.head.respondentId mustBe lar1.respondentId
       }
@@ -107,8 +107,6 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       repository.insertOrUpdate(lar2)
       repository.insertOrUpdate(lar3)
       repository.insertOrUpdate(lar4)
-      larTotalRepository.count("resp2").map(x => x mustBe Some(3))
-      larTotalRepository.count("resp3").map(x => x mustBe Some(1))
 
       val lars = modifiedLarRepository.findByRespondentIdSource(respId, p)
       val count = Flow[ModifiedLoanApplicationRegister].map(_ => 1)
@@ -122,6 +120,37 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       val sumF: Future[Int] = counterGraph.run()
       val result = Await.result(sumF, duration)
       result mustBe 3
+
+    }
+
+    "Stream IRS" in {
+      repository.deleteAll.map(x => x mustBe 1)
+      val msa1 = geographyGen.sample.get.copy(msa = "12345")
+      val msaNa = geographyGen.sample.get.copy(msa = "NA")
+      val lar1 = larGen.sample.get.copy(geography = msa1)
+      val lar2 = larGen.sample.get.copy(geography = msa1)
+      val lar3 = larGen.sample.get.copy(geography = msa1)
+      val lar4 = larGen.sample.get.copy(geography = msaNa)
+      repository.insertOrUpdate(lar1)
+      repository.insertOrUpdate(lar2)
+      repository.insertOrUpdate(lar3)
+      repository.insertOrUpdate(lar4)
+
+      val lars = larTotalRepository.getMsaSource()
+      val count = Flow[Msa].map(msa => {
+        println(msa)
+        1
+      })
+      val sum: Sink[Int, Future[Int]] = Sink.fold[Int, Int](0)(_ + _)
+
+      val counterGraph: RunnableGraph[Future[Int]] =
+        lars
+          .via(count)
+          .toMat(sum)(Keep.right)
+
+      val sumF: Future[Int] = counterGraph.run()
+      val result = Await.result(sumF, duration)
+      result mustBe 2
 
     }
 
