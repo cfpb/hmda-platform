@@ -9,7 +9,6 @@ import hmda.validation.engine._
 import org.scalacheck.Gen
 import spray.json.{ JsObject, JsString }
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.processing.SubmissionFSM.IRSGenerated
 
 trait ModelGenerators {
 

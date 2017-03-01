@@ -4,7 +4,7 @@ import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.Receipt
-import hmda.model.fi.{ IRSGenerated, Validated }
+import hmda.model.fi.{ Validated }
 import spray.json.{ JsBoolean, JsObject }
 
 class SubmissionSignPathsSpec extends InstitutionHttpApiSpec {
