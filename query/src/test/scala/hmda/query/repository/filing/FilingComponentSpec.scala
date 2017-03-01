@@ -127,10 +127,11 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       repository.deleteAll.map(x => x mustBe 1)
       val msa1 = geographyGen.sample.get.copy(msa = "12345")
       val msaNa = geographyGen.sample.get.copy(msa = "NA")
-      val lar1 = larGen.sample.get.copy(geography = msa1)
-      val lar2 = larGen.sample.get.copy(geography = msa1)
-      val lar3 = larGen.sample.get.copy(geography = msa1)
-      val lar4 = larGen.sample.get.copy(geography = msaNa)
+      val loan = loanGen.sample.get.copy(amount = 12)
+      val lar1 = larGen.sample.get.copy(geography = msa1, loan = loan)
+      val lar2 = larGen.sample.get.copy(geography = msa1, loan = loan)
+      val lar3 = larGen.sample.get.copy(geography = msa1, loan = loan)
+      val lar4 = larGen.sample.get.copy(geography = msaNa, loan = loan)
       repository.insertOrUpdate(lar1)
       repository.insertOrUpdate(lar2)
       repository.insertOrUpdate(lar3)
@@ -139,7 +140,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       val lars = larTotalRepository.getMsaSource()
       val count = Flow[Msa].map(msa => {
         println(msa)
-        1
+        msa.totalAmount
       })
       val sum: Sink[Int, Future[Int]] = Sink.fold[Int, Int](0)(_ + _)
 
@@ -150,7 +151,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
 
       val sumF: Future[Int] = counterGraph.run()
       val result = Await.result(sumF, duration)
-      result mustBe 2
+      result mustBe 48
 
     }
 
