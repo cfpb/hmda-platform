@@ -15,7 +15,7 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 object Q011 {
-  def inContext(ctx: ValidationContext) = {
+  def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
     IfYearPresentInAggregate(ctx) { new Q011(_, _) }
   }
 }

@@ -5,5 +5,6 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 
 object MacroEditTypes {
-  type LoanApplicationRegisterSource = Source[LoanApplicationRegister, NotUsed]
+  type HmdaSource[T] = Source[T, NotUsed]
+  type LoanApplicationRegisterSource = HmdaSource[LoanApplicationRegister]
 }
