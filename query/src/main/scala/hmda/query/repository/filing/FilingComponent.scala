@@ -317,7 +317,10 @@ trait FilingComponent { this: DbConfiguration =>
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
     def count(respId: String) = db.run(table.filter(_.respondentId === respId).map(_.total).result.headOption)
-
+    def countInYear(respId: String, year: Int) = {
+      val q = table.filter(t => t.period === year.toString && t.respondentId === respId).map(_.total)
+      db.run(q.result.headOption)
+    }
   }
 
   class ModifiedLarTable(tag: Tag) extends Table[ModifiedLoanApplicationRegister](tag, "modified_lar") {
