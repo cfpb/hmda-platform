@@ -33,8 +33,8 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
     val lastYear = year - 1
-    val currentLarCount = count(lars)
-    val lastYearLarCount = Future(100) //TODO: implement this!
+    val currentLarCount: Future[Int] = count(lars)
+    val lastYearLarCount: Future[Int] = larTotalRepository.countInYear(institution.respondent.externalId.value, lastYear).map(x => x.getOrElse(0)) //TODO: implement this!
 
     for {
       t <- currentLarCount
