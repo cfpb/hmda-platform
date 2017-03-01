@@ -36,14 +36,13 @@ trait SubmissionParseErrorsPaths
       timedGet { uri =>
         val supervisor = system.actorSelection("/user/supervisor")
         completeVerified(institutionId, period, seqNr, uri) {
-          parameters("page".?) { (page: Option[String]) =>
+          parameters('page.as[Int] ? 1) { (page: Int) =>
             val submissionID = SubmissionId(institutionId, period, seqNr)
             val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]
-            val pageNum: Int = Try(page.getOrElse("").toInt).getOrElse(1)
 
             val fHmdaFileParseState = for {
               s <- fHmdaFileParser
-              xs <- (s ? GetStatePaginated(pageNum)).mapTo[PaginatedFileParseState]
+              xs <- (s ? GetStatePaginated(page)).mapTo[PaginatedFileParseState]
             } yield xs
 
             onComplete(fHmdaFileParseState) {
@@ -52,7 +51,7 @@ trait SubmissionParseErrorsPaths
                   state.tsParsingErrors,
                   state.larParsingErrors,
                   uri.path.toString,
-                  pageNum,
+                  page,
                   state.totalErroredLines
                 )
                 complete(ToResponseMarshallable(summary))
