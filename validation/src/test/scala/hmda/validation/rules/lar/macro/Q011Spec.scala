@@ -58,11 +58,10 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   }
 
   "Q011" must {
-    val respId1 = "respId1"
-    val resp1 = Respondent(ExternalId(respId1, RssdId), "", "", "", "")
     val currentYear = 2017
+    val lastYear = currentYear - 1
     "be named Q011 when institution and year are present" in {
-      val ctx = ValidationContext(Some(Institution.empty.copy(respondent = resp1)), Some(currentYear))
+      val ctx = ValidationContext(Some(Institution.empty), Some(currentYear))
       Q011.inContext(ctx).name mustBe "Q011"
     }
     "be named empty when institution is not present" in {
@@ -73,27 +72,76 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val ctx = ValidationContext(Some(Institution.empty), None)
       Q011.inContext(ctx).name mustBe "empty"
     }
-    "succeed when number of last year and current year lars is less than configured value" in {
-      val ctx = ValidationContext(Some(Institution.empty.copy(respondent = resp1)), Some(currentYear))
-      val lastYear = currentYear - 1
+    "succeed when previous and current lar count are less than configured value" in {
+      val respId = "respId1"
+      val ctx = generateValidationContext(currentYear, respId)
       val n1 = Gen.choose(1, larSize - 1).sample.getOrElse(0)
       val n2 = Gen.choose(1, larSize - 1).sample.getOrElse(0)
-      val lars = larNGen(n1).sample.getOrElse(List())
-      val larSource = Source.fromIterator(() => lars.toIterator)
-      val lastYearLars = larNGen(n2).sample.getOrElse(List()).map(lar => lar.copy(respondentId = respId1))
-      val lastYearList = larsToLarQueryList(lastYearLars, respId1, lastYear)
-      val resultF = Future.sequence(lastYearList.map(lar => repository.insertOrUpdate(lar)))
-      Await.result(resultF, timeout)
+      val larSource1 = generateLarSource(n1, n2, respId, lastYear, timeout)
+      Q011.inContext(ctx)(larSource1).map(r => r mustBe a[Success])
+    }
+
+    "succeed when previous count is greater than configured value and current count is within range" in {
+      val respId = "respId2"
+      val ctx = generateValidationContext(currentYear, respId)
+      val lastYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+      val lower = (1 - multiplier) * lastYearCount
+      val upper = (1 + multiplier) * lastYearCount
+      val currentYearCount = Gen.choose(lower.toInt, upper.toInt).sample.getOrElse(0)
+      val larSource = generateLarSource(currentYearCount, lastYearCount, respId, lastYear, timeout)
       Q011.inContext(ctx)(larSource).map(r => r mustBe a[Success])
     }
+
+    "fail when previous count is greater than configured value and current count is out of range" in {
+      val respId = "respId3"
+      val ctx = generateValidationContext(currentYear, respId)
+      val lastYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+      val currentYearCount = larSize / 2
+      val larSource = generateLarSource(currentYearCount, lastYearCount, respId, lastYear, timeout)
+      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Failure])
+    }
+
+    "succeed when current count is greater than configured value, and comparison is within range" in {
+      val respId = "respId4"
+      val ctx = generateValidationContext(currentYear, respId)
+      val currentYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+      val lower = (1 - multiplier) * currentYearCount
+      val upper = (1 + multiplier) * currentYearCount
+      val lastYearCount = Gen.choose(lower.toInt, upper.toInt).sample.getOrElse(0)
+      val larSource = generateLarSource(currentYearCount.toInt, lastYearCount.toInt, respId, lastYear, timeout)
+      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Success])
+    }
+
+    "fail current count is greater than configured value, and comparison is out of range" in {
+      val respId = "respId5"
+      val ctx = generateValidationContext(currentYear, respId)
+      val currentYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+      val lastYearCount = larSize / 2
+      val larSource = generateLarSource(currentYearCount, lastYearCount, respId, lastYear, timeout)
+      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Failure])
+    }
+
   }
 
-
+  private def generateValidationContext(currentYear: Int, respId: String): ValidationContext = {
+    val resp1 = Respondent(ExternalId(respId, RssdId), "", "", "", "")
+    ValidationContext(Some(Institution.empty.copy(respondent = resp1)), Some(currentYear))
+  }
 
   private def larsToLarQueryList(lars: List[LoanApplicationRegister], respId: String, year: Int): List[LoanApplicationRegisterQuery] = {
     lars
       .map(lar => implicitly[LoanApplicationRegisterQuery](lar))
       .map(lar => lar.copy(period = year.toString))
+  }
+
+  private def generateLarSource(nCurrentLars: Int, nPreviousLars: Int, respId: String, lastYear: Int, timeout: Duration) = {
+    val lars = larNGen(nCurrentLars).sample.getOrElse(List())
+    val larSource = Source.fromIterator(() => lars.toIterator)
+    val lastYearLars = larNGen(nPreviousLars).sample.getOrElse(List()).map(lar => lar.copy(respondentId = respId))
+    val lastYearList = larsToLarQueryList(lastYearLars, respId, lastYear)
+    val resultF = Future.sequence(lastYearList.map(lar => repository.insertOrUpdate(lar)))
+    Await.result(resultF, timeout)
+    larSource
   }
 
 }

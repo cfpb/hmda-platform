@@ -47,7 +47,6 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
       println(s"Current Year: $c")
       when(c is greaterThanOrEqual(larSize) or (l is greaterThanOrEqual(larSize))) {
         c.toDouble.toString is numericallyBetween(lower.toString, upper.toString)
-        //c.toDouble is greaterThan(lower)
       }
     }
   }
