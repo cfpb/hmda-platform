@@ -64,8 +64,8 @@ class SubmissionIrsPathsSpec
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val irs = responseAs[Irs]
-        irs.msaSummary.amount mustBe 48
-        irs.msaSummary.lars mustBe 4
+        irs.totals.amount mustBe 48
+        irs.totals.lars mustBe 4
         irs.msas.length mustBe 2
       }
     }

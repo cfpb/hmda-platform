@@ -52,7 +52,7 @@ case object MsaSummary {
   def empty: MsaSummary = MsaSummary(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 
-case class Irs(msas: List[Msa], msaSummary: MsaSummary)
+case class Irs(msas: List[Msa], totals: MsaSummary)
 
 case object Irs {
   def createIrs(msas: List[Msa]): Irs = {

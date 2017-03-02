@@ -737,7 +737,7 @@ Example response:
       "refinance": 5
     }
   ],
-  "msaSummary": {
+  "totals": {
     "homeImprovement": 0,
     "multiFamily": 0,
     "lars": 9,
