@@ -708,7 +708,6 @@ Example response:
   "msas": [
     {
       "id": "123",
-      "name": "MSA 123",
       "totalLARS": 4,
       "totalAmount": 123,
       "conv": 4,
@@ -724,7 +723,6 @@ Example response:
     },
     {
       "id": "456",
-      "name": "MSA 456",
       "totalLARS": 5,
       "totalAmount": 456,
       "conv": 5,
@@ -738,7 +736,21 @@ Example response:
       "homeImprovement": 0,
       "refinance": 5
     }
-  ]
+  ],
+  "msaSummary": {
+    "homeImprovement": 0,
+    "multiFamily": 0,
+    "lars": 9,
+    "FSA": 0,
+    "FHA": 0,
+    "amount": 579,
+    "oneToFourFamily": 9,
+    "refinance": 9,
+    "MFD": 0,
+    "conv": 9,
+    "homePurchase": 0,
+    "VA": 0
+  }
 }
 ```
 
