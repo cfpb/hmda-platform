@@ -23,7 +23,7 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
   "Filing database projection" must {
     val projection = createHmdaFilingDBProjection(system, "2017")
     "create schema" in {
-      probe.send(projection, CreateSchema)
+      probe.send(projection, CreateSchema("2017"))
       probe.expectMsg(FilingSchemaCreated())
     }
     "Insert records" in {
