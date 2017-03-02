@@ -11,6 +11,7 @@ import akka.util.Timeout
 import akka.pattern.ask
 import hmda.api.model.SingleValidationErrorResult
 import hmda.api.protocol.fi.lar.LarProtocol
+import hmda.api.protocol.processing.ParserResultsProtocol
 import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.parser.fi.lar.LarCsvParser
@@ -23,7 +24,7 @@ import hmda.validation.engine._
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
-trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCustomDirectives {
+trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCustomDirectives with ParserResultsProtocol {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer

@@ -1,6 +1,6 @@
 {
   "name": "hmda-file-parser",
-  "version": "0.0.5",
+  "version": "1.0.10",
   "engines": {
     "node": ">=6.x"
   },
