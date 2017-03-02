@@ -1,30 +1,45 @@
 package hmda.api.http.institutions.submissions
 
+import akka.actor.ActorSystem
+import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.HttpEntity.ChunkStreamPart
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse, StatusCodes }
+import akka.http.scaladsl.model.{ HttpEntity, _ }
 import akka.http.scaladsl.server.Directives._
-import hmda.api.http.{ HmdaCustomDirectives }
+import akka.stream.ActorMaterializer
+import akka.util.Timeout
+import hmda.api.http.HmdaCustomDirectives
 import hmda.query.DbConfiguration
 import hmda.query.repository.filing.FilingComponent
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Failure, Success }
 
 trait SubmissionIrsPaths
     extends HmdaCustomDirectives
     with FilingComponent
     with DbConfiguration {
 
+  implicit val system: ActorSystem
+  implicit val materializer: ActorMaterializer
+  val log: LoggingAdapter
+
+  implicit val timeout: Timeout
+
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs
   def submissionIrsPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, submissionId) =>
-      timedGet { _ =>
+      timedGet { uri =>
         val larTotalRepository = new LarTotalRepository(config)
+        val data = larTotalRepository.getMsaSource()
 
-        val data = larTotalRepository.getMsaSource().map(x => ChunkStreamPart(x.toString))
+        onComplete(data) {
+          case Success(msaSeq) =>
+            val test = msaSeq.toList.toString
+            val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, test))
 
-        val response = HttpResponse(StatusCodes.OK, entity = HttpEntity.Chunked(ContentTypes.`application/json`, data))
-
-        complete(response)
+            complete(response)
+          case Failure(e) => completeWithInternalError(uri, e)
+        }
       }
     }
 }

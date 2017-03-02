@@ -1,7 +1,9 @@
 package hmda.query.repository.filing
 
 import akka.NotUsed
-import akka.stream.scaladsl.Source
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.config.ConfigFactory
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister, Msa }
@@ -305,7 +307,7 @@ trait FilingComponent { this: DbConfiguration =>
     def fha = column[Int]("fha")
     def va = column[Int]("va")
     def fsa = column[Int]("fsa")
-    def oneToFourFamily = column[Int]("oneToFourFamily")
+    def oneToFourFamily = column[Int]("one_to_four_family")
     def manuf_home = column[Int]("manuf_home")
     def multi_family = column[Int]("multi_family")
     def home_purchase = column[Int]("home_purchase")
@@ -330,6 +332,9 @@ trait FilingComponent { this: DbConfiguration =>
   }
 
   class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, String] {
+    implicit val system = ActorSystem()
+    implicit val materializer = ActorMaterializer()
+
     val configuration = ConfigFactory.load()
     val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
 
@@ -343,7 +348,7 @@ trait FilingComponent { this: DbConfiguration =>
         count(case when loan_type = 2 then 1 else null end) as fha,
         count(case when loan_type = 3 then 1 else null end) as va,
         count(case when loan_type = 4 then 1 else null end) as fsa,
-        count(case when property_type = 1 then 1 else null end) as oneToFourFamily,
+        count(case when property_type = 1 then 1 else null end) as one_to_four_family,
         count(case when property_type = 2 then 1 else null end) as manuf_home,
         count(case when property_type = 3 then 1 else null end) as multi_family,
         count(case when purpose = 1 then 1 else null end) as home_purchase,
@@ -364,8 +369,8 @@ trait FilingComponent { this: DbConfiguration =>
       db.stream(disableAutocommit andThen action)
     }
 
-    def getMsaSource()(implicit ec: ExecutionContext): Source[Msa, NotUsed] = {
-      Source.fromPublisher(getTableStream())
+    def getMsaSource()(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+      Source.fromPublisher(getTableStream()).grouped(1000).runWith(Sink.head)
     }
   }
 
