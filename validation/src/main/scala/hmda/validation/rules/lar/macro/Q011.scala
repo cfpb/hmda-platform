@@ -26,24 +26,28 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
   override def name: String = "Q011"
 
   val configuration = ConfigFactory.load()
-  val previousFixed = configuration.getInt("hmda.validation.macro.Q011.lar.size")
-  val multiplier = configuration.getInt("hmda.validation.macro.Q011.lar.multiplier")
-
+  val larSize = configuration.getInt("hmda.validation.macro.Q011.numOfTotalLars")
+  val multiplier = configuration.getDouble("hmda.validation.macro.Q011.numOfLarsMultiplier")
   val larTotalRepository = new LarTotalRepository(config)
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
     val lastYear = year - 1
     val currentLarCount: Future[Int] = count(lars)
-    val lastYearLarCount: Future[Int] = larTotalRepository.countInYear(institution.respondent.externalId.value, lastYear).map(x => x.getOrElse(0)) //TODO: implement this!
+    val lastYearLarCount: Future[Int] = larTotalRepository.countInYear(institution.respondent.externalId.value, lastYear).map(x => x.getOrElse(0))
 
     for {
-      t <- currentLarCount
+      c <- currentLarCount
       l <- lastYearLarCount
-      lower = l - l * multiplier
-      upper = l + l * multiplier
+      lower = l * (1 - multiplier)
+      upper = l * (1 + multiplier)
     } yield {
-      when(t is greaterThan(previousFixed) or (l is greaterThan(previousFixed))) {
-        t is between(lower, upper)
+      println(s"Fixed lar size: $larSize")
+      println(s"Multiplier: $multiplier")
+      println(s"Previous Year: $l")
+      println(s"Current Year: $c")
+      when(c is greaterThanOrEqual(larSize) or (l is greaterThanOrEqual(larSize))) {
+        c.toDouble.toString is numericallyBetween(lower.toString, upper.toString)
+        //c.toDouble is greaterThan(lower)
       }
     }
   }
