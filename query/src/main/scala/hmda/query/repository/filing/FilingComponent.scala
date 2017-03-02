@@ -369,7 +369,7 @@ trait FilingComponent { this: DbConfiguration =>
       db.stream(disableAutocommit andThen action)
     }
 
-    def getMsaSource()(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+    def getMsaSeq()(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
       Source.fromPublisher(getTableStream()).grouped(1000).runWith(Sink.head)
     }
   }

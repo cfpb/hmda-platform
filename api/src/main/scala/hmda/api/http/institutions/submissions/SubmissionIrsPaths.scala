@@ -10,7 +10,7 @@ import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.protocol.processing.MsaProtocol
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.{ Irs, Msa, MsaSummary }
+import hmda.query.model.filing.Irs
 import hmda.query.repository.filing.FilingComponent
 
 import scala.concurrent.ExecutionContext
@@ -33,7 +33,7 @@ trait SubmissionIrsPaths
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, submissionId) =>
       timedGet { uri =>
         val larTotalRepository = new LarTotalRepository(config)
-        val data = larTotalRepository.getMsaSource()
+        val data = larTotalRepository.getMsaSeq()
 
         onComplete(data) {
           case Success(msaSeq) =>

@@ -137,7 +137,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       repository.insertOrUpdate(lar3)
       repository.insertOrUpdate(lar4)
 
-      val msaF = larTotalRepository.getMsaSource()
+      val msaF = larTotalRepository.getMsaSeq()
       val msaSeq: Seq[Msa] = Await.result(msaF, duration)
       msaSeq.toList.length mustBe 2
     }
