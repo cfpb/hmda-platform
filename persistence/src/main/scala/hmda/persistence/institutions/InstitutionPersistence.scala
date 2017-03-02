@@ -13,6 +13,7 @@ object InstitutionPersistence {
 
   case class CreateInstitution(i: Institution) extends Command
   case class ModifyInstitution(i: Institution) extends Command
+  case class GetInstitution(id: String) extends Command
 
   def props: Props = Props(new InstitutionPersistence)
 
@@ -72,6 +73,10 @@ class InstitutionPersistence extends HmdaPersistentActor {
 
     case GetState =>
       sender() ! state.institutions
+
+    case GetInstitution(id) =>
+      val i = state.institutions.find(x => x.id == id)
+      sender() ! i
 
     case Shutdown => context stop self
   }
