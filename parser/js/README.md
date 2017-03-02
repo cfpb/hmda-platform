@@ -83,6 +83,21 @@ Which parses into the following structure:
 }
 ```
 
+```javascript
+var ts = parser.parseTs('NA|21|NA|201503111034|2017|99-9999999|10|Bank 0|1275 1st ST NW|Washington|DC|20054|BANK 0|1275 1st ST NE|Washington|DC|20054|Joan Smith|555-555-5555|555-555-5555|js@bank0.com');
+```
+
+This `Transmittal Sheet` does not conform to the specification, returning the following errors:
+
+```json
+{ 
+  "errors":
+   [ "Record Identifier is not an Integer",
+     "Agency Code is not an Integer",
+     "Applicant Ethnicity is not an Integer" ]
+}
+```
+
 
 * Loan Application Register
 
@@ -143,3 +158,17 @@ which parses into the following structure:
   "lienStatus": 1
 }
 ```
+
+```javascript
+var lar = parser.parseLar('NA|21|NA|10531                    |20170304|1|1|2|1|43|3|4|20170723|45460|18|165|0205.00|2|5|5| | | | |8| | | | |1|5|23|0| | | |NA   |2|1');
+```
+This `Loan Application Register` does not conform to the specification, this parsing operation returns the following errors
+
+```json
+{ 
+  "errors":
+   [ "Record Identifier is not an Integer",
+     "Agency Code is not an Integer" ]
+}
+```
+
