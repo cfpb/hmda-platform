@@ -41,10 +41,12 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
       lower = l * (1 - multiplier)
       upper = l * (1 + multiplier)
     } yield {
+      //TODO: remove println statements
       println(s"Fixed lar size: $larSize")
       println(s"Multiplier: $multiplier")
       println(s"Previous Year: $l")
       println(s"Current Year: $c")
+      println("***********")
       when(c is greaterThanOrEqual(larSize) or (l is greaterThanOrEqual(larSize))) {
         c.toDouble.toString is numericallyBetween(lower.toString, upper.toString)
       }
