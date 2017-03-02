@@ -37,15 +37,10 @@ trait SubmissionIrsPaths
 
         onComplete(data) {
           case Success(msaSeq) =>
-            val msaList = msaSeq.toList
-            val irs = Irs(msaList, createSummary(msaList))
+            val irs = Irs.createIrs(msaSeq.toList)
             complete(ToResponseMarshallable(irs))
           case Failure(e) => completeWithInternalError(uri, e)
         }
       }
     }
-
-  private def createSummary(msaList: Seq[Msa]): MsaSummary = {
-    msaList.foldLeft(MsaSummary.empty) { (summary, msa) => summary + msa }
-  }
 }

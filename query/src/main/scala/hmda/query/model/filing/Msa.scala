@@ -53,3 +53,10 @@ case object MsaSummary {
 }
 
 case class Irs(msas: List[Msa], msaSummary: MsaSummary)
+
+case object Irs {
+  def createIrs(msas: List[Msa]): Irs = {
+    val summary = msas.foldLeft(MsaSummary.empty) { (summary, msa) => summary + msa }
+    Irs(msas, summary)
+  }
+}
