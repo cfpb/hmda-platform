@@ -137,24 +137,10 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       repository.insertOrUpdate(lar3)
       repository.insertOrUpdate(lar4)
 
-      val lars = larTotalRepository.getMsaSource()
-      val count = Flow[Msa].map(msa => {
-        println(msa)
-        msa.totalAmount
-      })
-      val sum: Sink[Int, Future[Int]] = Sink.fold[Int, Int](0)(_ + _)
-
-      val counterGraph: RunnableGraph[Future[Int]] =
-        lars
-          .via(count)
-          .toMat(sum)(Keep.right)
-
-      val sumF: Future[Int] = counterGraph.run()
-      val result = Await.result(sumF, duration)
-      result mustBe 48
-
+      val msaF = larTotalRepository.getMsaSource()
+      val msaSeq: Seq[Msa] = Await.result(msaF, duration)
+      msaSeq.toList.length mustBe 2
     }
-
   }
 
 }

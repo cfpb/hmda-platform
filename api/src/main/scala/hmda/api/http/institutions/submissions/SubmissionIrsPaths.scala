@@ -13,7 +13,7 @@ import hmda.query.DbConfiguration
 import hmda.query.model.filing.{ Irs, Msa, MsaSummary }
 import hmda.query.repository.filing.FilingComponent
 
-import scala.concurrent.{ ExecutionContext }
+import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
 trait SubmissionIrsPaths
