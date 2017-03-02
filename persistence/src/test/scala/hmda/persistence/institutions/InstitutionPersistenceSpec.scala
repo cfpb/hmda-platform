@@ -24,7 +24,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
         probe.expectMsg(Some(institution))
       }
       probe.send(institutionsActor, GetState)
-      probe.expectMsg(institutions.map(i => i.id))
+      probe.expectMsg(institutions)
     }
     "be created, modified and read back" in {
       val institution = DemoData.testInstitutions.head

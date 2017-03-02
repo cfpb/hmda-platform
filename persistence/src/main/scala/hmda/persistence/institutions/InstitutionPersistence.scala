@@ -20,13 +20,15 @@ object InstitutionPersistence {
     system.actorOf(InstitutionPersistence.props, "institutions")
   }
 
-  case class InstitutionPersistenceState(institutionIds: Set[String] = Set.empty[String]) {
+  case class InstitutionPersistenceState(institutions: Set[Institution] = Set.empty[Institution]) {
     def updated(event: Event): InstitutionPersistenceState = {
       event match {
         case InstitutionCreated(i) =>
-          InstitutionPersistenceState(institutionIds + i.id)
+          InstitutionPersistenceState(institutions + i)
         case InstitutionModified(i) =>
-          InstitutionPersistenceState(institutionIds)
+          val elem = institutions.find(x => x.id == i.id).getOrElse(Institution.empty)
+          val updated = (institutions - elem) + i
+          InstitutionPersistenceState(updated)
 
       }
     }
@@ -45,11 +47,11 @@ class InstitutionPersistence extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = {
     case CreateInstitution(i) =>
-      if (!state.institutionIds.contains(i.id)) {
+      if (!state.institutions.contains(i)) {
         persist(InstitutionCreated(i)) { e =>
           log.debug(s"Persisted: $i")
           updateState(e)
-          sender() ! Some(e.i)
+          sender() ! Some(e.institution)
         }
       } else {
         sender() ! None
@@ -57,11 +59,11 @@ class InstitutionPersistence extends HmdaPersistentActor {
       }
 
     case ModifyInstitution(i) =>
-      if (state.institutionIds.contains(i.id)) {
+      if (state.institutions.map(x => x.id).contains(i.id)) {
         persist(InstitutionModified(i)) { e =>
           log.debug(s"Modified: ${i.respondent.name}")
           updateState(e)
-          sender() ! Some(e.i)
+          sender() ! Some(e.institution)
         }
       } else {
         sender() ! None
@@ -69,7 +71,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
       }
 
     case GetState =>
-      sender() ! state.institutionIds
+      sender() ! state.institutions
 
     case Shutdown => context stop self
   }
