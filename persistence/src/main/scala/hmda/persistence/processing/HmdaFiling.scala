@@ -46,7 +46,7 @@ class HmdaFiling(filingPeriod: String) extends HmdaPersistentActor {
 
     case LarValidated(lar) =>
       persist(LarValidated(lar)) { e =>
-        log.info(s"Persisted: $e")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 

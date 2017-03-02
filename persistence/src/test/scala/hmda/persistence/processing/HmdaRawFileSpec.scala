@@ -24,7 +24,13 @@ class HmdaRawFileSpec extends ActorSpec {
   val timestamp = Instant.now.toEpochMilli
 
   "A HMDA File" must {
-    "be persisted" in {
+    "persist file name" in {
+      val fileName = "lars.dat"
+      probe.send(hmdaFileUpload, AddFileName(fileName))
+      probe.send(hmdaFileUpload, GetFileName)
+      probe.expectMsg(HmdaFileDetails(fileName))
+    }
+    "persist raw data" in {
       for (line <- lines) {
         probe.send(hmdaFileUpload, AddLine(timestamp, line.toString))
       }
