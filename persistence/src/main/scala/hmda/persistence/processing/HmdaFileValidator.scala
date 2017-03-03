@@ -138,9 +138,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   override def receiveCommand: Receive = {
     case BeginValidation(replyTo) =>
-
-      println(ctx)
-
+      log.debug(s"Validation Context: Institution ID=${ctx.institution.getOrElse(Institution.empty).id} Filing Year=${ctx.filingYear.getOrElse(0)}")
       val validationStarted = ValidationStarted(submissionId)
       sender() ! validationStarted
       events(parserPersistenceId)
