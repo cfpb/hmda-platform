@@ -136,6 +136,7 @@ lazy val persistence = (project in file("persistence"))
 lazy val query = (project in file("query"))
   .settings(hmdaBuildSettings:_*)
   .settings(
+    parallelExecution in Test := false,
     libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
@@ -146,6 +147,7 @@ lazy val api = (project in file("api"))
   .settings(Revolver.settings:_*)
   .settings(
     Seq(
+      parallelExecution in Test := false,
       scoverage.ScoverageKeys.coverageExcludedPackages := "hmda.api.HmdaFilingApi;hmda.api.HmdaAdminApi",
       assemblyJarName in assembly := {s"${name.value}.jar"},
       mainClass in assembly := Some("hmda.api.HmdaFilingApi"),

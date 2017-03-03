@@ -19,7 +19,7 @@ import org.scalacheck.Gen
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 
-class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll with FilingComponent with DbConfiguration {
+class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll with FilingComponent with DbConfiguration with ParallelTestExecution {
   import config.profile.api._
 
   val configuration = ConfigFactory.load()
