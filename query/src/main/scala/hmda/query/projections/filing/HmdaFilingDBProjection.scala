@@ -57,7 +57,7 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
       case LarValidated(lar) =>
         val larQuery = implicitly[LoanApplicationRegisterQuery](lar)
         val larWithPeriod = larQuery.copy(period = filingPeriod)
-        log.info(s"Inserted: ${larWithPeriod.toString}")
+        log.debug(s"Inserted: ${larWithPeriod.toString}")
         larRepository.insertOrUpdate(larWithPeriod)
           .map(x => LarInserted(x)) pipeTo sender()
     }
