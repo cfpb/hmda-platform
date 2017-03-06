@@ -1,10 +1,10 @@
 package hmda.query.view.institutions
 
-import akka.actor.{ Actor, ActorRef }
+import akka.actor.{Actor, ActorRef}
 import akka.testkit.TestProbe
-import hmda.model.institution.InstitutionGenerators
+import hmda.model.institution.{Institution, InstitutionGenerators}
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{InstitutionCreated, InstitutionModified}
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
 import hmda.query.view.institutions.InstitutionView._
@@ -12,9 +12,9 @@ import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 
 class InstitutionViewSpec extends ActorSpec {
 
-  val i1 = InstitutionGenerators.institutionGen.sample.get
-  val i2 = InstitutionGenerators.institutionGen.sample.get
-  val i3 = InstitutionGenerators.institutionGen.sample.get
+  val i1 = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty)
+  val i2 = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty)
+  val i3 = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty)
   val i4 = i3.copy(cra = true)
 
   val institutionQuery = createInstitutionView(system)

@@ -1,12 +1,13 @@
 package hmda.query.projections.institutions
 
 import akka.testkit.TestProbe
-import hmda.model.institution.InstitutionGenerators
+import hmda.model.institution.{Institution, InstitutionGenerators}
 import hmda.persistence.model.ActorSpec
 import hmda.query.projections.institutions.InstitutionDBProjection._
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.query.DbConfiguration
 import org.scalatest.BeforeAndAfterEach
+
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
@@ -34,7 +35,7 @@ class InstitutionDBProjectionSpec extends ActorSpec with DbConfiguration with Be
       probe.expectMsg(InstitutionSchemaCreated())
     }
     "Insert records" in {
-      val i = InstitutionGenerators.institutionGen.sample.get
+      val i = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty)
       probe.send(projection, InstitutionCreated(i))
       probe.expectMsg(InstitutionInserted(1))
     }

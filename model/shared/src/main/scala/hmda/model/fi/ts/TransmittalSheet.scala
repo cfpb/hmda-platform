@@ -60,3 +60,17 @@ case class TransmittalSheet(
   override def respondentId: String = respondent.id
 
 }
+
+case object TransmittalSheet {
+  def empty: TransmittalSheet = TransmittalSheet(
+    0,
+    0,
+    0,
+    0,
+    "",
+    0,
+    Respondent("", "", "", "", "", ""),
+    Parent("", "", "", "", ""),
+    Contact("", "", "", "")
+  )
+}

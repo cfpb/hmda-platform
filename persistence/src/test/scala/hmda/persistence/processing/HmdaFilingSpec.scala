@@ -2,7 +2,7 @@ package hmda.persistence.processing
 
 import akka.testkit.TestProbe
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.LarGenerators
+import hmda.model.fi.lar.{LarGenerators, LoanApplicationRegister}
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
@@ -13,7 +13,7 @@ class HmdaFilingSpec extends ActorSpec with LarGenerators {
 
   val period = "2017"
 
-  val lars10 = larListGen.sample.get
+  val lars10 = larListGen.sample.getOrElse(List[LoanApplicationRegister]())
 
   val hmdaFiling = createHmdaFiling(system, period)
 

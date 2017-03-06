@@ -85,3 +85,22 @@ case class LoanApplicationRegister(
       (" " * 270)
   }
 }
+
+case object LoanApplicationRegister {
+  def empty: LoanApplicationRegister = LoanApplicationRegister(
+    0,
+    "",
+    0,
+    Loan("", "", 0, 0, 0, 0, 0),
+    0,
+    0,
+    0,
+    Geography("", "", "", ""),
+    Applicant(0, 0, 0, "", "", "", "", 0, "", "", "", "", 0, 0, ""),
+    0,
+    Denial("", "", ""),
+    "",
+    0,
+    0
+  )
+}

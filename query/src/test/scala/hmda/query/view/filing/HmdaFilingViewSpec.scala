@@ -1,7 +1,7 @@
 package hmda.query.view.filing
 
 import akka.testkit.TestProbe
-import hmda.model.fi.lar.LarGenerators
+import hmda.model.fi.lar.{LarGenerators, LoanApplicationRegister}
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
@@ -10,9 +10,9 @@ import hmda.query.view.filing.HmdaFilingView._
 
 class HmdaFilingViewSpec extends ActorSpec with LarGenerators {
 
-  val l1 = larGen.sample.get
-  val l2 = larGen.sample.get
-  val l3 = larGen.sample.get
+  val l1 = larGen.sample.getOrElse(LoanApplicationRegister.empty)
+  val l2 = larGen.sample.getOrElse(LoanApplicationRegister.empty)
+  val l3 = larGen.sample.getOrElse(LoanApplicationRegister.empty)
 
   val period = "2017"
 

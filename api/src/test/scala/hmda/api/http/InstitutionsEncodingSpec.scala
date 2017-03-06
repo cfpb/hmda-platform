@@ -8,7 +8,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
 
   "Endpoint Response Encodings" must {
     def encodingChooser: HttpEncoding = {
-      Gen.oneOf(deflate, gzip, identity).sample.get
+      Gen.oneOf(deflate, gzip, identity).sample.getOrElse(deflate)
     }
 
     "use requested encoding for institutions path" in {

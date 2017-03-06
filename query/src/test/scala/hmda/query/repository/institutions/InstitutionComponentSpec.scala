@@ -1,10 +1,10 @@
 package hmda.query.repository.institutions
 
-import hmda.model.institution.InstitutionGenerators
+import hmda.model.institution.{Institution, InstitutionGenerators}
 import hmda.query.DbConfiguration
 
 import scala.concurrent.duration._
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterEach, MustMatchers }
+import org.scalatest.{AsyncWordSpec, BeforeAndAfterEach, MustMatchers}
 
 import scala.concurrent.Await
 
@@ -28,11 +28,11 @@ class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with Inst
 
   "Institution Repository" must {
     "insert new records" in {
-      val i = InstitutionGenerators.institutionGen.sample.get
+      val i = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty)
       repository.insertOrUpdate(i).map(x => x mustBe 1)
     }
     "modify records and read them back" in {
-      val i = InstitutionGenerators.institutionGen.sample.get.copy(cra = false)
+      val i = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty).copy(cra = false)
       repository.insertOrUpdate(i).map(x => x mustBe 1)
       val modified = i.copy(cra = true)
       repository.insertOrUpdate(modified).map(x => x mustBe 1)
@@ -42,7 +42,7 @@ class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with Inst
       }
     }
     "delete record" in {
-      val i = InstitutionGenerators.institutionGen.sample.get
+      val i = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty)
       repository.insertOrUpdate(i).map(x => x mustBe 1)
       repository.findById(i.id).map {
         case Some(x) => succeed

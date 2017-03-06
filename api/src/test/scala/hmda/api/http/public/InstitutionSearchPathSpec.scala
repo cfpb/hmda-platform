@@ -1,7 +1,7 @@
 package hmda.api.http.public
 
 import akka.actor.ActorRef
-import akka.event.{ LoggingAdapter, NoLogging }
+import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
@@ -10,14 +10,14 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.model.ErrorResponse
 import hmda.api.model.public.InstitutionSearchResults
-import hmda.model.institution.InstitutionGenerators
+import hmda.model.institution.{Institution, InstitutionGenerators}
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 import hmda.query.view.institutions.InstitutionView._
 
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, ExecutionContext, Future }
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     with ScalatestRouteTest with InstitutionSearchPaths {
@@ -29,8 +29,8 @@ class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAn
 
   val institutionViewF: Future[ActorRef] = Future(createInstitutionView(system))
 
-  val i0 = InstitutionGenerators.institutionGen.sample.get.copy(emailDomains = Set("test@bank0.com", "", ""))
-  val i1 = InstitutionGenerators.institutionGen.sample.get.copy(emailDomains = Set("test@bank1.com", "", ""))
+  val i0 = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty).copy(emailDomains = Set("test@bank0.com", "", ""))
+  val i1 = InstitutionGenerators.institutionGen.sample.getOrElse(Institution.empty).copy(emailDomains = Set("test@bank1.com", "", ""))
 
   override def beforeAll(): Unit = {
     super.beforeAll()
