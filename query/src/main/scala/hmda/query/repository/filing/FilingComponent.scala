@@ -3,17 +3,18 @@ package hmda.query.repository.filing
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{Sink, Source}
 import com.typesafe.config.ConfigFactory
+import hmda.model.fi.SubmissionId
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister, Msa }
-import hmda.query.repository.{ Repository, TableRepository }
-import slick.basic.{ DatabaseConfig, DatabasePublisher }
+import hmda.query.model.filing.{LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister, Msa}
+import hmda.query.repository.{Repository, TableRepository}
+import slick.basic.{DatabaseConfig, DatabasePublisher}
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 trait FilingComponent { this: DbConfiguration =>
@@ -342,9 +343,10 @@ trait FilingComponent { this: DbConfiguration =>
     val table = TableQuery[LarTotalMsaTable]
     def getId(table: LarTotalMsaTable) = table.msa
 
-    private def createViewSchema(period: String) = {
+    private def createViewSchema(submissionId: SubmissionId) = {
       sqlu"""create view lars_total_msa as
-        select msa, count(*) as total_lars, sum(amount) as total_amount,
+        select msa,
+        count(*) as total_lars, sum(amount) as total_amount,
         count(case when loan_type = 1 then 1 else null end) as conv,
         count(case when loan_type = 2 then 1 else null end) as fha,
         count(case when loan_type = 3 then 1 else null end) as va,
@@ -355,11 +357,13 @@ trait FilingComponent { this: DbConfiguration =>
         count(case when purpose = 1 then 1 else null end) as home_purchase,
         count(case when purpose = 2 then 1 else null end) as home_improve,
         count(case when purpose = 3 then 1 else null end) as refinance
-        from lars where period = '#$period' group by msa;
+        from lars
+        where period = '#${submissionId.period}' and respondentId = '#${submissionId.institutionId}'
+        group by msa;
       """
     }
 
-    def createSchema(period: String) = db.run(createViewSchema(period))
+    def createSchema(submissionId: SubmissionId) = db.run(createViewSchema(submissionId))
     def dropSchema() = db.run(table.schema.drop)
 
     private def getTableStream()(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {

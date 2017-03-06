@@ -3,10 +3,11 @@ package hmda.api.http.institutions.submissions
 import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.InstitutionHttpApiSpec
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.Irs
-import hmda.query.repository.filing.{ FilingComponent, LarConverter }
+import hmda.query.repository.filing.{FilingComponent, LarConverter}
 
 import scala.concurrent.duration._
 import scala.concurrent.Await
@@ -30,7 +31,7 @@ class SubmissionIrsPathsSpec
     super.beforeAll()
     dropAllObjects()
     Await.result(repository.createSchema(), duration)
-    Await.result(larTotalMsaRepository.createSchema(""), duration)
+    Await.result(larTotalMsaRepository.createSchema(SubmissionId("", "", 0)), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
 
     val msa1 = geographyGen.sample.get.copy(msa = "12345")

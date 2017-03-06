@@ -1,9 +1,10 @@
 package hmda.query.projections.filing
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.pattern.pipe
-import hmda.persistence.messages.CommonMessages.{ Command, Event }
-import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ HmdaValidatorEvent, LarValidated }
+import hmda.model.fi.SubmissionId
+import hmda.persistence.messages.CommonMessages.{Command, Event}
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{HmdaValidatorEvent, LarValidated}
 import hmda.persistence.model.HmdaActor
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.LoanApplicationRegisterQuery
@@ -18,7 +19,7 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val larTotalMsaRepository = new LarTotalMsaRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
-  case class CreateSchema(period: String)
+  case class CreateSchema(submissionId: SubmissionId)
   case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
@@ -39,13 +40,13 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
   import hmda.query.repository.filing.LarConverter._
 
   override def receive: Receive = {
-    case CreateSchema(period) =>
+    case CreateSchema(submissionId) =>
       val schemaCreated = for {
         s <- larRepository.createSchema()
       } yield s
 
       schemaCreated.map { _ =>
-        larTotalMsaRepository.createSchema(period)
+        larTotalMsaRepository.createSchema(submissionId)
         modifiedLarRepository.createSchema()
         FilingSchemaCreated()
       } pipeTo sender()
