@@ -337,6 +337,7 @@ trait FilingComponent { this: DbConfiguration =>
 
     val configuration = ConfigFactory.load()
     val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
+    val groupSize = configuration.getInt("hmda.query.group.size")
 
     val table = TableQuery[LarTotalMsaTable]
     def getId(table: LarTotalMsaTable) = table.msa
@@ -370,7 +371,7 @@ trait FilingComponent { this: DbConfiguration =>
     }
 
     def getMsaSeq()(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
-      Source.fromPublisher(getTableStream()).grouped(1000).runWith(Sink.head)
+      Source.fromPublisher(getTableStream()).grouped(groupSize).runWith(Sink.head)
     }
   }
 
