@@ -23,7 +23,8 @@ trait InstitutionHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAf
     with ScalatestRouteTest with RequestHeaderUtils with InstitutionsHttpApi {
 
   override val log: LoggingAdapter = NoLogging
-  override implicit val timeout: Timeout = Timeout(10.seconds)
+  val duration = 10.seconds
+  override implicit val timeout: Timeout = Timeout(duration)
 
   val ec = system.dispatcher
 

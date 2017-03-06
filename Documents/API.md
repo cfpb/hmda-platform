@@ -817,8 +817,6 @@ Example response:
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary`
 
-_NOTE: This is currently a mocked, static endpoint._
-
 `GET`  - Returns a submission summary
 
 Example response:
@@ -829,7 +827,7 @@ Example response:
     "name": "Bank",
     "id": "1234567890",
     "taxId": "0987654321",
-    "agency": "CFPB",
+    "agency": "cfpb",
     "contact": {
       "name": "Your Name",
       "phone": "123-456-7890",
