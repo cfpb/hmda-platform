@@ -13,7 +13,7 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
-import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, ParsingCompleted, ParsingCompletedWithErrors, UploadCompleted }
+import hmda.persistence.processing.ProcessingMessages._
 
 class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._

@@ -26,4 +26,6 @@ object ProcessingMessages {
   case class ValidationCompleted(submissionId: SubmissionId) extends Event
   case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
   case class Signed(submissionId: SubmissionId) extends Event
+
+  case class Persisted() extends Event
 }
