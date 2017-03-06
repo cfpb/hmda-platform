@@ -299,7 +299,7 @@ trait FilingComponent { this: DbConfiguration =>
     def deleteByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).delete)
   }
 
-  class LarTotalTable(tag: Tag) extends Table[Msa](tag, "lars_total") {
+  class LarTotalMsaTable(tag: Tag) extends Table[Msa](tag, "lars_total_msa") {
     def msa = column[String]("msa", O.PrimaryKey)
     def total_lars = column[Int]("total_lars")
     def total_amount = column[Int]("total_amount")
@@ -331,18 +331,18 @@ trait FilingComponent { this: DbConfiguration =>
     ) <> (Msa.tupled, Msa.unapply)
   }
 
-  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, String] {
+  class LarTotalMsaRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalMsaTable, String] {
     implicit val system = ActorSystem()
     implicit val materializer = ActorMaterializer()
 
     val configuration = ConfigFactory.load()
     val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
 
-    val table = TableQuery[LarTotalTable]
-    def getId(table: LarTotalTable) = table.msa
+    val table = TableQuery[LarTotalMsaTable]
+    def getId(table: LarTotalMsaTable) = table.msa
 
     private def createViewSchema(period: String) = {
-      sqlu"""create view lars_total as
+      sqlu"""create view lars_total_msa as
         select msa, count(*) as total_lars, sum(amount) as total_amount,
         count(case when loan_type = 1 then 1 else null end) as conv,
         count(case when loan_type = 2 then 1 else null end) as fha,

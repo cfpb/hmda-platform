@@ -20,7 +20,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   val duration = 5.seconds
 
   val repository = new LarRepository(config)
-  val larTotalRepository = new LarTotalRepository(config)
+  val larTotalMsaRepository = new LarTotalMsaRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
   implicit val system = ActorSystem()
@@ -30,7 +30,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     super.beforeAll()
     dropAllObjects()
     Await.result(repository.createSchema(), duration)
-    Await.result(larTotalRepository.createSchema(""), duration)
+    Await.result(larTotalMsaRepository.createSchema(""), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
   }
 
@@ -137,7 +137,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       repository.insertOrUpdate(lar3)
       repository.insertOrUpdate(lar4)
 
-      val msaF = larTotalRepository.getMsaSeq()
+      val msaF = larTotalMsaRepository.getMsaSeq()
       val msaSeq: Seq[Msa] = Await.result(msaF, duration)
       msaSeq.toList.length mustBe 2
     }

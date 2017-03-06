@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext
 object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
 
   val larRepository = new LarRepository(config)
-  val larTotalsRepository = new LarTotalRepository(config)
+  val larTotalMsaRepository = new LarTotalMsaRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
   case class CreateSchema(period: String)
@@ -45,7 +45,7 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
       } yield s
 
       schemaCreated.map { _ =>
-        larTotalsRepository.createSchema(period)
+        larTotalMsaRepository.createSchema(period)
         modifiedLarRepository.createSchema()
         FilingSchemaCreated()
       } pipeTo sender()

@@ -18,7 +18,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
   override val log: LoggingAdapter = NoLogging
   implicit val ec = system.dispatcher
   val repository = new LarRepository(config)
-  val larTotalRepository = new LarTotalRepository(config)
+  val larTotalMsaRepository = new LarTotalMsaRepository(config)
 
   val duration = 10.seconds
   override implicit val timeout = Timeout(duration)

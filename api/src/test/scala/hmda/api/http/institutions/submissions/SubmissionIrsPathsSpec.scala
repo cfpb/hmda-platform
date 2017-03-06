@@ -23,14 +23,14 @@ class SubmissionIrsPathsSpec
   val duration = 5.seconds
 
   val repository = new LarRepository(config)
-  val larTotalRepository = new LarTotalRepository(config)
+  val larTotalMsaRepository = new LarTotalMsaRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
   override def beforeAll(): Unit = {
     super.beforeAll()
     dropAllObjects()
     Await.result(repository.createSchema(), duration)
-    Await.result(larTotalRepository.createSchema(""), duration)
+    Await.result(larTotalMsaRepository.createSchema(""), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
 
     val msa1 = geographyGen.sample.get.copy(msa = "12345")
