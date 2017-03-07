@@ -21,7 +21,7 @@ import hmda.model.fi.{ Created, Failed, Submission, SubmissionId, Uploaded }
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.processing.HmdaRawFile.AddLine
+import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload }
 import hmda.persistence.processing.SubmissionManager
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
@@ -76,6 +76,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
   private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, submission: Submission): Route = {
     fileUpload("file") {
       case (metadata, byteSource) if metadata.fileName.endsWith(".txt") =>
+        processingActor ! AddFileName(metadata.fileName)
         processingActor ! StartUpload
         val uploadedF = byteSource
           .via(splitLines)

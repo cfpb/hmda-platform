@@ -3,6 +3,7 @@ package hmda.api.model
 import java.util.Calendar
 
 import akka.http.scaladsl.model.Uri.Path
+import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
 import hmda.api.model.public.InstitutionSearch
 import hmda.model.fi._
 import hmda.validation.engine._
@@ -192,6 +193,39 @@ trait ModelGenerators {
 
   implicit def institutionSearchGenList: Gen[List[InstitutionSearch]] = {
     Gen.listOf(institutionSearchGen)
+  }
+
+  implicit def fileSummaryGen: Gen[FileSummary] = {
+    for {
+      name <- Gen.alphaStr
+      year <- Gen.alphaStr
+      totalLars <- Gen.choose(Int.MinValue, Int.MaxValue)
+    } yield FileSummary(name, year, totalLars)
+  }
+
+  implicit def contactSummaryGen: Gen[ContactSummary] = {
+    for {
+      name <- Gen.alphaStr
+      phone <- Gen.alphaStr
+      email <- Gen.alphaStr
+    } yield ContactSummary(name, phone, email)
+  }
+
+  implicit def respondentSummaryGen: Gen[RespondentSummary] = {
+    for {
+      name <- Gen.alphaStr
+      id <- Gen.alphaStr
+      taxId <- Gen.alphaStr
+      agency <- Gen.alphaStr
+      contact <- contactSummaryGen
+    } yield RespondentSummary(name, id, taxId, agency, contact)
+  }
+
+  implicit def submissionSummaryGen: Gen[SubmissionSummary] = {
+    for {
+      respondent <- respondentSummaryGen
+      file <- fileSummaryGen
+    } yield SubmissionSummary(respondent, file)
   }
 
 }

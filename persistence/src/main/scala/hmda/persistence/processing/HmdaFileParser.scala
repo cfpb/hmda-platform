@@ -7,6 +7,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
 import hmda.parser.fi.ts.TsCsvParser
+import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
@@ -23,12 +24,15 @@ object HmdaFileParser {
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
   case class LarParsedErrors(errors: LarParsingError) extends Event
+  case class GetStatePaginated(page: Integer)
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 
   def createHmdaFileParser(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
     system.actorOf(HmdaFileParser.props(submissionId))
   }
+
+  case class PaginatedFileParseState(tsParsingErrors: Seq[String], larParsingErrors: Seq[LarParsingError], totalErroredLines: Int)
 
   case class HmdaFileParseState(size: Int = 0, tsParsingErrors: Seq[String] = Nil, larParsingErrors: Seq[LarParsingError] = Nil) {
     def updated(event: Event): HmdaFileParseState = event match {
@@ -121,6 +125,17 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
     case GetState =>
       sender() ! state
+
+    case GetStatePaginated(page) =>
+      val tsErrState = state.tsParsingErrors
+      val tsLineError = if (tsErrState.isEmpty) 0 else 1
+      val tsErrorsReturn = if (page == 1) tsErrState else Seq()
+
+      val totalLarErrors: Int = state.larParsingErrors.size
+      val p = PaginatedResource(totalLarErrors, tsLineError)(page)
+      val larErrorsReturn = state.larParsingErrors.slice(p.fromIndex, p.toIndex)
+
+      sender() ! PaginatedFileParseState(tsErrorsReturn, larErrorsReturn, totalLarErrors + tsLineError)
 
     case Shutdown =>
       context stop self

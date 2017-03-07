@@ -262,6 +262,20 @@ Example response, with HTTP code 400:
 
 `GET` - Returns all parsing errors for a submission
 
+This endpoint is paginated.
+
+| Query parameter | Description |
+| --------------- | ----------- |
+| page | Integer. If blank, will default to page 1. Page size is 20 lines of errors. |
+
+
+The response contains 3 fields of pagination metadata:
+
+ - `total`: total number of parser errors for this file
+ - `count`: number of errors returned on this page. Full page contains errors from 20 lines of the HMDA file.
+ - `links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
+
+
 Example response, with HTTP code 201:
 
 ```json
@@ -292,7 +306,17 @@ Example response, with HTTP code 201:
         "Owner Occupancy is not an Integer"
       ]
     }
-  ]
+  ],
+  "count": 20,
+  "total": 130,
+  "_links": {
+    "first": "?page=1",
+    "prev": "?page=1",
+    "self": "?page=1",
+    "next": "?page=2",
+    "last": "?page=7",
+    "href": "/institutions/1/filings/2017/submissions/1/parseErrors{rel}"
+  }
 }
 ```
 
@@ -799,8 +823,6 @@ Example response:
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary`
 
-_NOTE: This is currently a mocked, static endpoint._
-
 `GET`  - Returns a submission summary
 
 Example response:
@@ -811,7 +833,7 @@ Example response:
     "name": "Bank",
     "id": "1234567890",
     "taxId": "0987654321",
-    "agency": "CFPB",
+    "agency": "cfpb",
     "contact": {
       "name": "Your Name",
       "phone": "123-456-7890",
