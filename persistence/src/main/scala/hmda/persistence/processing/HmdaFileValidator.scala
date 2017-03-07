@@ -100,6 +100,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   val config = ConfigFactory.load()
   val duration = config.getInt("hmda.actor-lookup-timeout")
+  val flowParallelism = config.getInt("hmda.actor-flow-parallelism")
 
   implicit val timeout = Timeout(duration.seconds)
 
