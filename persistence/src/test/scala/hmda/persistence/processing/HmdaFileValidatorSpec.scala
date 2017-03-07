@@ -10,7 +10,7 @@ import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, ValidationCompletedWithErrors }
+import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, Persisted, ValidationCompletedWithErrors }
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
