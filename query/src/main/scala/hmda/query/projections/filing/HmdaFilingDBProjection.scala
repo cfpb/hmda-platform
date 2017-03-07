@@ -19,7 +19,7 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val larTotalMsaRepository = new LarTotalMsaRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
-  case class CreateSchema(submissionId: SubmissionId)
+  case class CreateSchema()
   case class DeleteLars(respondentId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
@@ -40,13 +40,13 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
   import hmda.query.repository.filing.LarConverter._
 
   override def receive: Receive = {
-    case CreateSchema(submissionId) =>
+    case CreateSchema() =>
       val schemaCreated = for {
         s <- larRepository.createSchema()
       } yield s
 
       schemaCreated.map { _ =>
-        larTotalMsaRepository.createSchema(submissionId)
+        larTotalMsaRepository.createSchema()
         modifiedLarRepository.createSchema()
         FilingSchemaCreated()
       } pipeTo sender()

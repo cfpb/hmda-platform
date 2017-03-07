@@ -33,7 +33,7 @@ trait SubmissionIrsPaths
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, submissionId) =>
       timedGet { uri =>
         val larTotalMsaRepository = new LarTotalMsaRepository(config)
-        val data = larTotalMsaRepository.getMsaSeq()
+        val data = larTotalMsaRepository.getMsaSeq(institutionId, period)
 
         onComplete(data) {
           case Success(msaSeq) =>

@@ -302,6 +302,8 @@ trait FilingComponent { this: DbConfiguration =>
 
   class LarTotalMsaTable(tag: Tag) extends Table[Msa](tag, "lars_total_msa") {
     def msa = column[String]("msa", O.PrimaryKey)
+    def respondentId = column[String]("respondent_id")
+    def period = column[String]("period")
     def total_lars = column[Int]("total_lars")
     def total_amount = column[Int]("total_amount")
     def conv = column[Int]("conv")
@@ -343,12 +345,11 @@ trait FilingComponent { this: DbConfiguration =>
     val table = TableQuery[LarTotalMsaTable]
     def getId(table: LarTotalMsaTable) = table.msa
 
-    private def createViewSchema(submissionId: SubmissionId) = {
-      val period = submissionId.period
-      val instId = submissionId.institutionId
-      println(s"CATCH ME HERE WITH ***$period*** AND ***$instId***")
+    private def createViewSchema() = {
       sqlu"""create view lars_total_msa as
         select msa,
+        respondentId,
+        period,
         count(*) as total_lars, sum(amount) as total_amount,
         count(case when loan_type = 1 then 1 else null end) as conv,
         count(case when loan_type = 2 then 1 else null end) as fha,
@@ -361,24 +362,23 @@ trait FilingComponent { this: DbConfiguration =>
         count(case when purpose = 2 then 1 else null end) as home_improve,
         count(case when purpose = 3 then 1 else null end) as refinance
         from lars
-        where period = '#$period' and respondent_id = '#$instId'
         group by msa;
       """
     }
 
-    def createSchema(submissionId: SubmissionId) = db.run(createViewSchema(submissionId))
+    def createSchema() = db.run(createViewSchema())
     def dropSchema() = db.run(table.schema.drop)
 
-    private def getTableStream()(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
+    private def getTableStream(respId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
-      val query = table.drop(0)
+      val query = table.filter(x => x.respondentId === respId && x.period === period)
       val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
 
       db.stream(disableAutocommit andThen action)
     }
 
-    def getMsaSeq()(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
-      Source.fromPublisher(getTableStream()).grouped(groupSize).runWith(Sink.head)
+    def getMsaSeq(respId: String, period: String)(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+      Source.fromPublisher(getTableStream(respId, period)).grouped(groupSize).runWith(Sink.head)
     }
   }
 
