@@ -68,7 +68,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       val hmdaRawFile = createHmdaRawFile(system, submissionId2)
       for (line <- lines) {
         probe.send(hmdaRawFile, AddLine(timestamp, line.toString))
-        probe.expectMsg(Persisted)
+        probe.expectMsg(Persisted())
       }
 
       probe.send(hmdaRawFile, CompleteUpload)
@@ -92,7 +92,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       // setup: persist raw lines
       for (line <- badLines) {
         probe.send(rawFileActor, AddLine(timestamp, line))
-        probe.expectMsg(Persisted)
+        probe.expectMsg(Persisted())
       }
 
       probe.send(rawFileActor, CompleteUpload)

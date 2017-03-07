@@ -28,7 +28,7 @@ class HmdaRawFileSpec extends ActorSpec {
     "be persisted" in {
       for (line <- lines) {
         probe.send(hmdaFileUpload, AddLine(timestamp, line.toString))
-        probe.expectMsg(Persisted)
+        probe.expectMsg(Persisted())
       }
       probe.send(hmdaFileUpload, GetState)
       probe.expectMsg(HmdaRawFileState(4))
