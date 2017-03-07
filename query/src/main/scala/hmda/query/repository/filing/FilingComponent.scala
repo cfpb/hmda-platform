@@ -358,7 +358,7 @@ trait FilingComponent { this: DbConfiguration =>
         count(case when purpose = 2 then 1 else null end) as home_improve,
         count(case when purpose = 3 then 1 else null end) as refinance
         from lars
-        where period = '#${submissionId.period}' and respondentId = '#${submissionId.institutionId}'
+        where period = '#${submissionId.period}' and respondent_id = '#${submissionId.institutionId}'
         group by msa;
       """
     }
