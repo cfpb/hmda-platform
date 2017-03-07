@@ -344,6 +344,9 @@ trait FilingComponent { this: DbConfiguration =>
     def getId(table: LarTotalMsaTable) = table.msa
 
     private def createViewSchema(submissionId: SubmissionId) = {
+      val period = submissionId.period
+      val instId = submissionId.institutionId
+      println(s"CATCH ME HERE WITH ***$period*** AND ***$instId***")
       sqlu"""create view lars_total_msa as
         select msa,
         count(*) as total_lars, sum(amount) as total_amount,
@@ -358,7 +361,7 @@ trait FilingComponent { this: DbConfiguration =>
         count(case when purpose = 2 then 1 else null end) as home_improve,
         count(case when purpose = 3 then 1 else null end) as refinance
         from lars
-        where period = '#${submissionId.period}' and respondent_id = '#${submissionId.institutionId}'
+        where period = '#$period' and respondent_id = '#$instId'
         group by msa;
       """
     }

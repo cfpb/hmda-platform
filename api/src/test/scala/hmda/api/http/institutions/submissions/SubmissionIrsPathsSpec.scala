@@ -7,7 +7,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.Irs
-import hmda.query.repository.filing.{FilingComponent, LarConverter}
+import hmda.query.repository.filing.{ FilingComponent, LarConverter }
 
 import scala.concurrent.duration._
 import scala.concurrent.Await
@@ -21,8 +21,6 @@ class SubmissionIrsPathsSpec
   import LarConverter._
   import config.profile.api._
 
-  val duration = 5.seconds
-
   val repository = new LarRepository(config)
   val larTotalMsaRepository = new LarTotalMsaRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
@@ -31,16 +29,16 @@ class SubmissionIrsPathsSpec
     super.beforeAll()
     dropAllObjects()
     Await.result(repository.createSchema(), duration)
-    Await.result(larTotalMsaRepository.createSchema(SubmissionId("", "", 0)), duration)
+    Await.result(larTotalMsaRepository.createSchema(SubmissionId("0", "2017", 0)), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
 
     val msa1 = geographyGen.sample.get.copy(msa = "12345")
     val msaNa = geographyGen.sample.get.copy(msa = "NA")
     val loan = loanGen.sample.get.copy(amount = 12)
-    val lar1 = larGen.sample.get.copy(geography = msa1, loan = loan)
-    val lar2 = larGen.sample.get.copy(geography = msa1, loan = loan)
-    val lar3 = larGen.sample.get.copy(geography = msa1, loan = loan)
-    val lar4 = larGen.sample.get.copy(geography = msaNa, loan = loan)
+    val lar1 = larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan)
+    val lar2 = larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan)
+    val lar3 = larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan)
+    val lar4 = larGen.sample.get.copy(respondentId = "0", geography = msaNa, loan = loan)
     repository.insertOrUpdate(lar1).map(x => x mustBe 1)
     repository.insertOrUpdate(lar2).map(x => x mustBe 1)
     repository.insertOrUpdate(lar3).map(x => x mustBe 1)

@@ -6,7 +6,7 @@ import hmda.model.fi.lar.LarGenerators
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
 import hmda.query.DbConfiguration
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach }
 
 import scala.concurrent.duration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
