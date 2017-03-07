@@ -3,18 +3,18 @@ package hmda.query.repository.filing
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.{LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister, Msa}
-import hmda.query.repository.{Repository, TableRepository}
-import slick.basic.{DatabaseConfig, DatabasePublisher}
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister, Msa }
+import hmda.query.repository.{ Repository, TableRepository }
+import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 trait FilingComponent { this: DbConfiguration =>
