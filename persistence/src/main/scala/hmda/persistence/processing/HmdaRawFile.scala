@@ -2,7 +2,7 @@ package hmda.persistence.processing
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
-import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, UploadCompleted }
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, UploadCompleted }
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.{ HmdaPersistentActor, LocalEventPublisher }
 
@@ -47,6 +47,7 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor {
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
         log.debug(s"Persisted: ${e.data}")
         updateState(e)
+        sender() ! Persisted
       }
 
     case CompleteUpload =>
