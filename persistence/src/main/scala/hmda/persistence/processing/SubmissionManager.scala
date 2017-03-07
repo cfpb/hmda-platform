@@ -69,7 +69,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
       updateFilingStatus(InProgress)
 
     case m @ AddLine(_, _) =>
-      submissionUpload ! m
+      submissionUpload forward m
 
     case CompleteUpload =>
       log.info(s"Finish upload for submission: ${submissionId.toString}")
