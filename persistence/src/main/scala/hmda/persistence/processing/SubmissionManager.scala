@@ -6,7 +6,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.{ Filing, InProgress, Submission, SubmissionId, FilingStatus, Completed }
+import hmda.model.fi.{ Completed, Filing, FilingStatus, InProgress, Submission, SubmissionId }
 import hmda.persistence.institutions.FilingPersistence
 import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling }
@@ -14,7 +14,7 @@ import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
-import hmda.persistence.processing.HmdaRawFile.AddLine
+import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
 import hmda.persistence.processing.SubmissionManager.GetActorRef
@@ -61,6 +61,9 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   }
 
   override def receive: Receive = {
+
+    case AddFileName(name) =>
+      submissionUpload ! AddFileName(name)
 
     case StartUpload =>
       log.info(s"Start upload for submission: ${submissionId.toString}")
