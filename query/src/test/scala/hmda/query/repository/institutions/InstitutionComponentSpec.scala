@@ -1,10 +1,10 @@
 package hmda.query.repository.institutions
 
-import hmda.model.institution.{Institution, InstitutionGenerators}
+import hmda.model.institution.{ Institution, InstitutionGenerators }
 import hmda.query.DbConfiguration
 
 import scala.concurrent.duration._
-import org.scalatest.{AsyncWordSpec, BeforeAndAfterEach, MustMatchers}
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterEach, MustMatchers }
 
 import scala.concurrent.Await
 

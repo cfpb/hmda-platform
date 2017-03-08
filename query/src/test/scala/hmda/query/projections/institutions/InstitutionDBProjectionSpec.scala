@@ -1,7 +1,7 @@
 package hmda.query.projections.institutions
 
 import akka.testkit.TestProbe
-import hmda.model.institution.{Institution, InstitutionGenerators}
+import hmda.model.institution.{ Institution, InstitutionGenerators }
 import hmda.persistence.model.ActorSpec
 import hmda.query.projections.institutions.InstitutionDBProjection._
 import hmda.persistence.messages.events.institutions.InstitutionEvents._

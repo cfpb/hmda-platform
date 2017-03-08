@@ -6,20 +6,20 @@ import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
 case class LoanApplicationRegister(
-    id: Int,
-    respondentId: String,
-    agencyCode: Int,
-    loan: Loan,
-    preapprovals: Int,
-    actionTakenType: Int,
-    actionTakenDate: Int,
-    geography: Geography,
-    applicant: Applicant,
-    purchaserType: Int,
-    denial: Denial,
-    rateSpread: String,
-    hoepaStatus: Int,
-    lienStatus: Int
+    id: Int = 0,
+    respondentId: String = "",
+    agencyCode: Int = 0,
+    loan: Loan = Loan("", "", 0, 0, 0, 0, 0),
+    preapprovals: Int = 0,
+    actionTakenType: Int = 0,
+    actionTakenDate: Int = 0,
+    geography: Geography = Geography("", "", "", ""),
+    applicant: Applicant = Applicant(0, 0, 0, "", "", "", "", 0, "", "", "", "", 0, 0, ""),
+    purchaserType: Int = 0,
+    denial: Denial = Denial("", "", ""),
+    rateSpread: String = "",
+    hoepaStatus: Int = 0,
+    lienStatus: Int = 0
 ) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
 
   override def valueOf(field: String): Any = {
@@ -84,23 +84,4 @@ case class LoanApplicationRegister(
       lienStatus +
       (" " * 270)
   }
-}
-
-case object LoanApplicationRegister {
-  def empty: LoanApplicationRegister = LoanApplicationRegister(
-    0,
-    "",
-    0,
-    Loan("", "", 0, 0, 0, 0, 0),
-    0,
-    0,
-    0,
-    Geography("", "", "", ""),
-    Applicant(0, 0, 0, "", "", "", "", 0, "", "", "", "", 0, 0, ""),
-    0,
-    Denial("", "", ""),
-    "",
-    0,
-    0
-  )
 }

@@ -1,11 +1,11 @@
 package hmda.query.projections.filing
 
 import akka.testkit.TestProbe
-import hmda.model.fi.lar.{LarGenerators, LoanApplicationRegister}
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
 import hmda.query.DbConfiguration
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach }
 
 import scala.concurrent.duration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
@@ -28,13 +28,13 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
       probe.expectMsg(FilingSchemaCreated())
     }
     "Insert records" in {
-      val lar = larGen.sample.getOrElse(LoanApplicationRegister.empty)
+      val lar = larGen.sample.getOrElse(LoanApplicationRegister())
       probe.send(projection, LarValidated(lar))
       probe.expectMsg(LarInserted(1))
     }
     "Delete records by respondent id" in {
-      val lar1 = larGen.sample.getOrElse(LoanApplicationRegister.empty)
-      val lar2 = larGen.sample.getOrElse(LoanApplicationRegister.empty)
+      val lar1 = larGen.sample.getOrElse(LoanApplicationRegister())
+      val lar2 = larGen.sample.getOrElse(LoanApplicationRegister())
       probe.send(projection, LarValidated(lar1))
       probe.expectMsg(LarInserted(1))
       probe.send(projection, LarValidated(lar2))

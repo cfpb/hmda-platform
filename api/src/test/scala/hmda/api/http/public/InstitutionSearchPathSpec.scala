@@ -1,7 +1,7 @@
 package hmda.api.http.public
 
 import akka.actor.ActorRef
-import akka.event.{LoggingAdapter, NoLogging}
+import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.ScalatestRouteTest
@@ -10,14 +10,14 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.model.ErrorResponse
 import hmda.api.model.public.InstitutionSearchResults
-import hmda.model.institution.{Institution, InstitutionGenerators}
+import hmda.model.institution.{ Institution, InstitutionGenerators }
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import hmda.query.view.institutions.InstitutionView._
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ Await, ExecutionContext, Future }
 
 class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     with ScalatestRouteTest with InstitutionSearchPaths {

@@ -1,10 +1,10 @@
 package hmda.query.view.institutions
 
-import akka.actor.{Actor, ActorRef}
+import akka.actor.{ Actor, ActorRef }
 import akka.testkit.TestProbe
-import hmda.model.institution.{Institution, InstitutionGenerators}
+import hmda.model.institution.{ Institution, InstitutionGenerators }
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{InstitutionCreated, InstitutionModified}
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
 import hmda.query.view.institutions.InstitutionView._

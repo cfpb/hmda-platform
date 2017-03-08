@@ -2,7 +2,7 @@ package hmda.persistence.processing
 
 import akka.testkit.TestProbe
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.{LarGenerators, LoanApplicationRegister}
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
