@@ -3,7 +3,7 @@ package hmda.validation.rules
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 
-object IfYearPresentInAggregate {
+object IfContextPresentInAggregate {
   def apply[S, T](ctx: ValidationContext)(constructor: (Institution, Int) => AggregateEditCheck[S, T]): AggregateEditCheck[S, T] = {
     ctx match {
       case ValidationContext(Some(institution), Some(year)) => constructor(institution, year)

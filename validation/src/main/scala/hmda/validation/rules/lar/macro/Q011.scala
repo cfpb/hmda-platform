@@ -9,7 +9,7 @@ import hmda.query.DbConfiguration
 import hmda.query.repository.filing.FilingComponent
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.Result
-import hmda.validation.rules.{ AggregateEditCheck, IfYearPresentInAggregate }
+import hmda.validation.rules.{ AggregateEditCheck, IfContextPresentInAggregate }
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -18,7 +18,7 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object Q011 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
-    IfYearPresentInAggregate(ctx) { new Q011(_, _) }
+    IfContextPresentInAggregate(ctx) { new Q011(_, _) }
   }
 }
 
