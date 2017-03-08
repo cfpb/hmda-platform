@@ -48,7 +48,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = {
     case CreateInstitution(i) =>
-      if (!state.institutions.contains(i)) {
+      if (!state.institutions.map(x => x.id).contains(i.id)) {
         persist(InstitutionCreated(i)) { e =>
           log.debug(s"Persisted: $i")
           updateState(e)
