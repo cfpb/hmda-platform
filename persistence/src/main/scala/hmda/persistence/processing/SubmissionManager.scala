@@ -107,8 +107,8 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
       log.info(s"Validation completed with errors for submission: ${sId.toString}")
       submissionFSM ! CompleteValidationWithErrors
 
-    case Signed(sId) =>
-      log.info(s"Submission signed: ${sId.toString}")
+    case Signed =>
+      log.info(s"Submission signed: ${submissionId.toString}")
       submissionFSM ! Sign
       updateFilingStatus(Completed)
 
