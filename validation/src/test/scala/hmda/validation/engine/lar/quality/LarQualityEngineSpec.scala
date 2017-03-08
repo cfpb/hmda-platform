@@ -18,15 +18,13 @@ class LarQualityEngineSpec
     with LarQualityEngine {
 
   property("A LAR must pass quality checks") {
-    for (x <- 1 to 5) {
-      val lines = Source.fromFile(new File("parser/jvm/src/test/resources/txt/QualityMacroPasses_Test" + x + ".txt")).getLines()
-      val lars = lines.drop(1).map(line => LarCsvParser(line)).collect {
-        case Right(lar) => lar
-      }
+    val lines = Source.fromFile(new File("parser/jvm/src/test/resources/txt/clean_5508-lars.txt")).getLines()
+    val lars = lines.drop(1).map(line => LarCsvParser(line)).collect {
+      case Right(lar) => lar
+    }
 
-      lars.foreach { lar =>
-        checkQuality(lar, ValidationContext(None, None)).isSuccess mustBe true
-      }
+    lars.foreach { lar =>
+      checkQuality(lar, ValidationContext(None, None)).isSuccess mustBe true
     }
   }
 
