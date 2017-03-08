@@ -2,7 +2,7 @@ package hmda.api.http.institutions.submissions
 
 import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import hmda.api.http.InstitutionHttpApiSpec
+import hmda.api.http.{ InstitutionHttpApiAsyncSpec, InstitutionHttpApiSpec }
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.Irs
@@ -11,7 +11,7 @@ import hmda.query.repository.filing.{ FilingComponent, LarConverter }
 import scala.concurrent.Await
 
 class SubmissionIrsPathsSpec
-    extends InstitutionHttpApiSpec
+    extends InstitutionHttpApiAsyncSpec
     with DbConfiguration
     with FilingComponent
     with LarGenerators {
@@ -29,22 +29,6 @@ class SubmissionIrsPathsSpec
     Await.result(repository.createSchema(), duration)
     Await.result(larTotalMsaRepository.createSchema(), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
-
-    val msa1 = geographyGen.sample.get.copy(msa = "12345")
-    val msaNa = geographyGen.sample.get.copy(msa = "NA")
-    val loan = loanGen.sample.get.copy(amount = 12)
-    val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
-    val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
-    val lar3 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
-    val lar4 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msaNa, loan = loan))
-    val query1 = lar1.copy(period = "2017")
-    val query2 = lar2.copy(period = "2017")
-    val query3 = lar3.copy(period = "2017")
-    val query4 = lar4.copy(period = "2017")
-    repository.insertOrUpdate(query1).map(x => x mustBe 1)
-    repository.insertOrUpdate(query2).map(x => x mustBe 1)
-    repository.insertOrUpdate(query3).map(x => x mustBe 1)
-    repository.insertOrUpdate(query4).map(x => x mustBe 1)
   }
 
   override def afterAll(): Unit = {
@@ -62,12 +46,33 @@ class SubmissionIrsPathsSpec
 
   "Submission Irs Paths" must {
     "return a 200" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.OK
-        val irs = responseAs[Irs]
-        irs.totals.amount mustBe 48
-        irs.totals.lars mustBe 4
-        irs.msas.length mustBe 2
+      val msa1 = geographyGen.sample.get.copy(msa = "12345")
+      val msaNa = geographyGen.sample.get.copy(msa = "NA")
+      val loan = loanGen.sample.get.copy(amount = 12)
+      val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
+      val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
+      val lar3 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
+      val lar4 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msaNa, loan = loan))
+      val query1 = lar1.copy(period = "2017")
+      val query2 = lar2.copy(period = "2017")
+      val query3 = lar3.copy(period = "2017")
+      val query4 = lar4.copy(period = "2017")
+
+      val fInsert = for {
+        a <- repository.insertOrUpdate(query1)
+        b <- repository.insertOrUpdate(query2)
+        c <- repository.insertOrUpdate(query3)
+        d <- repository.insertOrUpdate(query4)
+      } yield d
+
+      fInsert.map { _ =>
+        getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
+          status mustBe StatusCodes.OK
+          val irs = responseAs[Irs]
+          irs.totals.amount mustBe 48
+          irs.totals.lars mustBe 4
+          irs.msas.length mustBe 2
+        }
       }
     }
   }
