@@ -35,7 +35,7 @@ class InstitutionDBProjectionSpec extends ActorSpec with DbConfiguration with Be
       probe.expectMsg(InstitutionSchemaCreated())
     }
     "Insert records" in {
-      val i = InstitutionGenerators.getOneInstitution
+      val i = InstitutionGenerators.sampleInstitution
       probe.send(projection, InstitutionCreated(i))
       probe.expectMsg(InstitutionInserted(1))
     }

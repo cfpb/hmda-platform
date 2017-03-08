@@ -12,9 +12,9 @@ import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 
 class InstitutionViewSpec extends ActorSpec {
 
-  val i1 = InstitutionGenerators.getOneInstitution
-  val i2 = InstitutionGenerators.getOneInstitution
-  val i3 = InstitutionGenerators.getOneInstitution
+  val i1 = InstitutionGenerators.sampleInstitution
+  val i2 = InstitutionGenerators.sampleInstitution
+  val i3 = InstitutionGenerators.sampleInstitution
   val i4 = i3.copy(cra = true)
 
   val institutionQuery = createInstitutionView(system)

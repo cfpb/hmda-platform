@@ -252,7 +252,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val v3 = ValidityValidationError("loan3", "V285", false)
     val m1 = MacroValidationError("Q007", Nil)
 
-    val l1 = getOneLar
+    val l1 = sampleLar
     val lar1 = l1.copy(
       loan = l1.loan.copy(id = "loan1"),
       id = 111,
@@ -260,13 +260,13 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       geography = l1.geography.copy(msa = "333")
     )
 
-    val l2 = getOneLar
+    val l2 = sampleLar
     val lar2 = l2.copy(
       loan = l2.loan.copy(id = "loan2"),
       geography = l2.geography.copy(state = "444", msa = "555")
     )
 
-    val l3 = getOneLar
+    val l3 = sampleLar
     val lar3 = l3.copy(
       loan = l3.loan.copy(id = "loan3"),
       geography = l3.geography.copy(state = "666", msa = "777")

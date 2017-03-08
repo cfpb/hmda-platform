@@ -10,9 +10,9 @@ import hmda.query.view.filing.HmdaFilingView._
 
 class HmdaFilingViewSpec extends ActorSpec with LarGenerators {
 
-  val l1 = getOneLar
-  val l2 = getOneLar
-  val l3 = getOneLar
+  val l1 = sampleLar
+  val l2 = sampleLar
+  val l3 = sampleLar
 
   val period = "2017"
 

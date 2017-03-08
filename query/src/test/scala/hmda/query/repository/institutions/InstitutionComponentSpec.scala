@@ -28,11 +28,11 @@ class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with Inst
 
   "Institution Repository" must {
     "insert new records" in {
-      val i = InstitutionGenerators.getOneInstitution
+      val i = InstitutionGenerators.sampleInstitution
       repository.insertOrUpdate(i).map(x => x mustBe 1)
     }
     "modify records and read them back" in {
-      val i = InstitutionGenerators.getOneInstitution.copy(cra = false)
+      val i = InstitutionGenerators.sampleInstitution.copy(cra = false)
       repository.insertOrUpdate(i).map(x => x mustBe 1)
       val modified = i.copy(cra = true)
       repository.insertOrUpdate(modified).map(x => x mustBe 1)
@@ -42,7 +42,7 @@ class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with Inst
       }
     }
     "delete record" in {
-      val i = InstitutionGenerators.getOneInstitution
+      val i = InstitutionGenerators.sampleInstitution
       repository.insertOrUpdate(i).map(x => x mustBe 1)
       repository.findById(i.id).map {
         case Some(x) => succeed
