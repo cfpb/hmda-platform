@@ -28,13 +28,13 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with Bef
       probe.expectMsg(FilingSchemaCreated())
     }
     "Insert records" in {
-      val lar = larGen.sample.getOrElse(LoanApplicationRegister())
+      val lar = getOneLar
       probe.send(projection, LarValidated(lar))
       probe.expectMsg(LarInserted(1))
     }
     "Delete records by respondent id" in {
-      val lar1 = larGen.sample.getOrElse(LoanApplicationRegister())
-      val lar2 = larGen.sample.getOrElse(LoanApplicationRegister())
+      val lar1 = getOneLar
+      val lar2 = getOneLar
       probe.send(projection, LarValidated(lar1))
       probe.expectMsg(LarInserted(1))
       probe.send(projection, LarValidated(lar2))
