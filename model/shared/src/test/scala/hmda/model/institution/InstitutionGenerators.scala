@@ -48,6 +48,8 @@ object InstitutionGenerators {
     )
   }
 
+  def sampleInstitution: Institution = institutionGen.sample.getOrElse(Institution.empty)
+
   implicit def agencyGen: Gen[Agency] = {
     Gen.oneOf(
       Agency.values

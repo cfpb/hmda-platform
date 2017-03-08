@@ -20,7 +20,7 @@ class Q065Spec extends MacroSpec {
   property(s"be valid if there are fewer than $threshold HOEPA loans") {
     forAll(nonHoepaLoans) { extras =>
       val belowThreshold = threshold - 1
-      val lars = larNGen(belowThreshold + extras).sample.get
+      val lars = larNGen(belowThreshold + extras).sample.getOrElse(List[LoanApplicationRegister]())
       val larSource = newLarSource(lars, belowThreshold, relevantLar, irrelevantLar)
       larSource.mustPass
     }
@@ -28,7 +28,7 @@ class Q065Spec extends MacroSpec {
 
   property(s"be invalid if there are $threshold HOEPA loans") {
     forAll(nonHoepaLoans) { extras =>
-      val lars = larNGen(threshold + extras).sample.get
+      val lars = larNGen(threshold + extras).sample.getOrElse(List[LoanApplicationRegister]())
       val larSource = newLarSource(lars, threshold, relevantLar, irrelevantLar)
       larSource.mustFail
     }
@@ -37,7 +37,7 @@ class Q065Spec extends MacroSpec {
   property(s"be invalid if there are more than $threshold HOEPA loans") {
     forAll(nonHoepaLoans) { extras =>
       val overThreshold = threshold + 1
-      val lars = larNGen(overThreshold + extras).sample.get
+      val lars = larNGen(overThreshold + extras).sample.getOrElse(List[LoanApplicationRegister]())
       val larSource = newLarSource(lars, overThreshold, relevantLar, irrelevantLar)
       larSource.mustFail
     }
