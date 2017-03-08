@@ -3,13 +3,11 @@ package hmda.api.http.institutions.submissions
 import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.Irs
 import hmda.query.repository.filing.{ FilingComponent, LarConverter }
 
-import scala.concurrent.duration._
 import scala.concurrent.Await
 
 class SubmissionIrsPathsSpec
@@ -35,14 +33,18 @@ class SubmissionIrsPathsSpec
     val msa1 = geographyGen.sample.get.copy(msa = "12345")
     val msaNa = geographyGen.sample.get.copy(msa = "NA")
     val loan = loanGen.sample.get.copy(amount = 12)
-    val lar1 = larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan)
-    val lar2 = larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan)
-    val lar3 = larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan)
-    val lar4 = larGen.sample.get.copy(respondentId = "0", geography = msaNa, loan = loan)
-    repository.insertOrUpdate(lar1).map(x => x mustBe 1)
-    repository.insertOrUpdate(lar2).map(x => x mustBe 1)
-    repository.insertOrUpdate(lar3).map(x => x mustBe 1)
-    repository.insertOrUpdate(lar4).map(x => x mustBe 1)
+    val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
+    val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
+    val lar3 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
+    val lar4 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msaNa, loan = loan))
+    val query1 = lar1.copy(period = "2017")
+    val query2 = lar2.copy(period = "2017")
+    val query3 = lar3.copy(period = "2017")
+    val query4 = lar4.copy(period = "2017")
+    repository.insertOrUpdate(query1).map(x => x mustBe 1)
+    repository.insertOrUpdate(query2).map(x => x mustBe 1)
+    repository.insertOrUpdate(query3).map(x => x mustBe 1)
+    repository.insertOrUpdate(query4).map(x => x mustBe 1)
   }
 
   override def afterAll(): Unit = {
