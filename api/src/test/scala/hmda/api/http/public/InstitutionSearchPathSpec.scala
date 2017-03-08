@@ -10,7 +10,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.model.ErrorResponse
 import hmda.api.model.public.InstitutionSearchResults
-import hmda.model.institution.InstitutionGenerators
+import hmda.model.institution.{ Institution, InstitutionGenerators }
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
@@ -29,8 +29,8 @@ class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAn
 
   val institutionViewF: Future[ActorRef] = Future(createInstitutionView(system))
 
-  val i0 = InstitutionGenerators.institutionGen.sample.get.copy(emailDomains = Set("test@bank0.com", "", ""))
-  val i1 = InstitutionGenerators.institutionGen.sample.get.copy(emailDomains = Set("test@bank1.com", "", ""))
+  val i0 = InstitutionGenerators.sampleInstitution.copy(emailDomains = Set("test@bank0.com", "", ""))
+  val i1 = InstitutionGenerators.sampleInstitution.copy(emailDomains = Set("test@bank1.com", "", ""))
 
   override def beforeAll(): Unit = {
     super.beforeAll()

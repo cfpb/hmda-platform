@@ -4,7 +4,7 @@ import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, StatusCodes }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import hmda.api.RequestHeaderUtils
-import hmda.model.fi.lar.LarGenerators
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, MustMatchers, WordSpec }
 import akka.util.Timeout
 
@@ -25,8 +25,8 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
 
   import repository.config.profile.api._
 
-  val lar1 = larGen.sample.get.copy(respondentId = "0")
-  val lar2 = larGen.sample.get.copy(respondentId = "0")
+  val lar1 = sampleLar.copy(respondentId = "0")
+  val lar2 = sampleLar.copy(respondentId = "0")
   val p = "2017"
   val l1 = toLoanApplicationRegisterQuery(lar1).copy(period = p)
   val l2 = toLoanApplicationRegisterQuery(lar2).copy(period = p)

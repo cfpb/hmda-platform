@@ -3,7 +3,7 @@ package hmda.query.repository.filing
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Flow, Keep, RunnableGraph, Sink }
-import hmda.model.fi.lar.LarGenerators
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.query.DbConfiguration
 import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister }
 
@@ -48,8 +48,8 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
 
   "LAR Repository" must {
     "insert new records" in {
-      val lar1 = larGen.sample.get.copy(respondentId = "resp1")
-      val lar2 = larGen.sample.get.copy(respondentId = "resp1")
+      val lar1 = sampleLar.copy(respondentId = "resp1")
+      val lar2 = sampleLar.copy(respondentId = "resp1")
       repository.insertOrUpdate(lar1).map(x => x mustBe 1)
       repository.insertOrUpdate(lar2).map(x => x mustBe 1)
       larTotalRepository.count("resp1").map(x => x mustBe Some(2))
@@ -58,7 +58,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       }
     }
     "modify records and read them back" in {
-      val lar: LoanApplicationRegisterQuery = larGen.sample.get.copy(agencyCode = 3)
+      val lar: LoanApplicationRegisterQuery = sampleLar.copy(agencyCode = 3)
       repository.insertOrUpdate(lar).map(x => x mustBe 1)
       val modified = lar.copy(agencyCode = 7)
       repository.insertOrUpdate(modified).map(x => x mustBe 1)
@@ -68,7 +68,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       }
     }
     "delete record" in {
-      val lar: LoanApplicationRegisterQuery = larGen.sample.get
+      val lar: LoanApplicationRegisterQuery = toLoanApplicationRegisterQuery(sampleLar)
       repository.insertOrUpdate(lar).map(x => x mustBe 1)
       repository.findById(lar.id).map {
         case Some(_) => succeed
@@ -81,8 +81,8 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       }
     }
     "delete all records" in {
-      val lar: LoanApplicationRegisterQuery = larGen.sample.get
-      val lar2: LoanApplicationRegisterQuery = larGen.sample.get
+      val lar: LoanApplicationRegisterQuery = toLoanApplicationRegisterQuery(sampleLar)
+      val lar2: LoanApplicationRegisterQuery = toLoanApplicationRegisterQuery(sampleLar)
       repository.insertOrUpdate(lar).map(x => x mustBe 1)
       repository.insertOrUpdate(lar2).map(x => x mustBe 1)
       repository.findById(lar.id).map {
@@ -99,10 +99,10 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     "Stream rows for a specific respondent id" in {
       val respId = "resp2"
       val p = ""
-      val lar1 = larGen.sample.get.copy(respondentId = respId)
-      val lar2 = larGen.sample.get.copy(respondentId = respId)
-      val lar3 = larGen.sample.get.copy(respondentId = respId)
-      val lar4 = larGen.sample.get.copy(respondentId = "resp3")
+      val lar1 = sampleLar.copy(respondentId = respId)
+      val lar2 = sampleLar.copy(respondentId = respId)
+      val lar3 = sampleLar.copy(respondentId = respId)
+      val lar4 = sampleLar.copy(respondentId = "resp3")
       repository.insertOrUpdate(lar1)
       repository.insertOrUpdate(lar2)
       repository.insertOrUpdate(lar3)

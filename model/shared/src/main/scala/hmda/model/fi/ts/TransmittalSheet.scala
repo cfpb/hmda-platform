@@ -6,15 +6,15 @@ import scala.scalajs.js.annotation.JSExportAll
 
 @JSExportAll
 case class TransmittalSheet(
-    id: Int,
-    agencyCode: Int,
-    timestamp: Long,
-    activityYear: Int,
-    taxId: String,
-    totalLines: Int,
-    respondent: Respondent,
-    parent: Parent,
-    contact: Contact
+    id: Int = 0,
+    agencyCode: Int = 0,
+    timestamp: Long = 0,
+    activityYear: Int = 0,
+    taxId: String = "",
+    totalLines: Int = 0,
+    respondent: Respondent = Respondent("", "", "", "", "", ""),
+    parent: Parent = Parent("", "", "", "", ""),
+    contact: Contact = Contact("", "", "", "")
 ) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
 
   override def valueOf(field: String): Any = {

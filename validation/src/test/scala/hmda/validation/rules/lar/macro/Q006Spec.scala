@@ -24,7 +24,7 @@ class Q006Spec extends MacroSpec {
 
   property(s"be valid if fewer than $numOfOriginatedHomePurchaseLoans originated loans") {
     forAll(irrelevantAmount) { (totalLar) =>
-      val lars = larNGen(totalLar).sample.get
+      val lars = larNGen(totalLar).sample.getOrElse(List[LoanApplicationRegister]())
       val validLarSource = newLarSource(lars, totalLar, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
@@ -33,7 +33,7 @@ class Q006Spec extends MacroSpec {
   property(s"be valid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated < $multiplier * total") {
     forAll(relevantAmount) { (totalLar) =>
       val numOfLars = (totalLar / multiplier).toInt + 1
-      val lars = larNGen(numOfLars).sample.get
+      val lars = larNGen(numOfLars).sample.getOrElse(List[LoanApplicationRegister]())
       val validLarSource = newLarSource(lars, totalLar, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
@@ -42,7 +42,7 @@ class Q006Spec extends MacroSpec {
   property(s"be valid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated = $multiplier * total") {
     forAll(relevantAmount) { (totalLar) =>
       val numOfLars = math.ceil(totalLar / multiplier).toInt
-      val lars = larNGen(numOfLars).sample.get
+      val lars = larNGen(numOfLars).sample.getOrElse(List[LoanApplicationRegister]())
       val validLarSource = newLarSource(lars, totalLar, relevantLar, irrelevantLar)
       validLarSource.mustPass
     }
@@ -51,7 +51,7 @@ class Q006Spec extends MacroSpec {
   property(s"be invalid if more than $numOfOriginatedHomePurchaseLoans originated loans and originated > $multiplier * total") {
     forAll(relevantAmount) { (totalLar) =>
       val numOfLars = (totalLar / multiplier).toInt - 1
-      val lars = larNGen(numOfLars).sample.get
+      val lars = larNGen(numOfLars).sample.getOrElse(List[LoanApplicationRegister]())
       val invalidLarSource = newLarSource(lars, totalLar, relevantLar, irrelevantLar)
       invalidLarSource.mustFail
     }
