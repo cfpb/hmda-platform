@@ -17,13 +17,17 @@ object HmdaRawFile {
   }
 
   case class AddLine(timestamp: Long, data: String) extends Command
+  case class AddFileName(fileName: String) extends Command
 
   case class LineAdded(timestamp: Long, data: String) extends Event
+  case class FileNameAdded(fileName: String) extends Event
 
-  case class HmdaRawFileState(size: Int = 0) {
+  case class HmdaRawFileState(size: Int = 0, fileName: String = "") {
     def updated(event: Event): HmdaRawFileState = event match {
       case LineAdded(_, _) =>
-        HmdaRawFileState(size + 1)
+        HmdaRawFileState(size + 1, fileName)
+      case FileNameAdded(n) =>
+        HmdaRawFileState(size, n)
     }
   }
 
@@ -42,6 +46,9 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor {
   }
 
   override def receiveCommand: Receive = {
+
+    case AddFileName(n) =>
+      updateState(FileNameAdded(n))
 
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>

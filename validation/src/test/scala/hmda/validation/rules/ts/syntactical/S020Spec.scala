@@ -12,6 +12,15 @@ class S020Spec extends TsEditCheckSpec {
     }
   }
 
+  property("Transmittal Sheet Agency Code must not = 8") {
+    forAll(tsGen) { ts =>
+      whenever(ts.id == 1) {
+        val failedTs = ts.copy(agencyCode = 8)
+        failedTs.mustFail
+      }
+    }
+  }
+
   override def check = S020
 
 }

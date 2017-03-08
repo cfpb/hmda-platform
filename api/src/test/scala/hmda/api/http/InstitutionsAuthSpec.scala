@@ -5,9 +5,9 @@ import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
-import hmda.model.institution.Agency.{ CFPB, FDIC }
-import hmda.model.institution.ExternalIdType.{ RssdId, UndeterminedExternalId }
-import hmda.model.institution.InstitutionType.{ Bank, MBS }
+import hmda.model.institution.Agency.CFPB
+import hmda.model.institution.ExternalIdType.UndeterminedExternalId
+import hmda.model.institution.InstitutionType.MBS
 import hmda.model.institution._
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
