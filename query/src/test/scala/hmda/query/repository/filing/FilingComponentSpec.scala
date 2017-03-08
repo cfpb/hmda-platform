@@ -31,7 +31,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     super.beforeAll()
     dropAllObjects()
     Await.result(repository.createSchema(), duration)
-    Await.result(larTotalMsaRepository.createSchema(SubmissionId("", "", 0)), duration)
+    Await.result(larTotalMsaRepository.createSchema(), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
   }
 
@@ -129,16 +129,20 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       val msa1 = geographyGen.sample.get.copy(msa = "12345")
       val msaNa = geographyGen.sample.get.copy(msa = "NA")
       val loan = loanGen.sample.get.copy(amount = 12)
-      val lar1 = larGen.sample.get.copy(geography = msa1, loan = loan)
-      val lar2 = larGen.sample.get.copy(geography = msa1, loan = loan)
-      val lar3 = larGen.sample.get.copy(geography = msa1, loan = loan)
-      val lar4 = larGen.sample.get.copy(geography = msaNa, loan = loan)
-      repository.insertOrUpdate(lar1)
-      repository.insertOrUpdate(lar2)
-      repository.insertOrUpdate(lar3)
-      repository.insertOrUpdate(lar4)
+      val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
+      val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
+      val lar3 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
+      val lar4 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msaNa, loan = loan))
+      val query1 = lar1.copy(period = "2017")
+      val query2 = lar2.copy(period = "2017")
+      val query3 = lar3.copy(period = "2017")
+      val query4 = lar4.copy(period = "2017")
+      repository.insertOrUpdate(query1)
+      repository.insertOrUpdate(query2)
+      repository.insertOrUpdate(query3)
+      repository.insertOrUpdate(query4)
 
-      val msaF = larTotalMsaRepository.getMsaSeq()
+      val msaF = larTotalMsaRepository.getMsaSeq("1", "2017")
       val msaSeq: Seq[Msa] = Await.result(msaF, duration)
       msaSeq.toList.length mustBe 2
     }

@@ -348,7 +348,7 @@ trait FilingComponent { this: DbConfiguration =>
     private def createViewSchema() = {
       sqlu"""create view lars_total_msa as
         select msa,
-        respondentId,
+        respondent_id,
         period,
         count(*) as total_lars, sum(amount) as total_amount,
         count(case when loan_type = 1 then 1 else null end) as conv,

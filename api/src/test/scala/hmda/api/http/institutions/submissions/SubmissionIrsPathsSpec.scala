@@ -29,7 +29,7 @@ class SubmissionIrsPathsSpec
     super.beforeAll()
     dropAllObjects()
     Await.result(repository.createSchema(), duration)
-    Await.result(larTotalMsaRepository.createSchema(SubmissionId("0", "2017", 0)), duration)
+    Await.result(larTotalMsaRepository.createSchema(), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
 
     val msa1 = geographyGen.sample.get.copy(msa = "12345")
