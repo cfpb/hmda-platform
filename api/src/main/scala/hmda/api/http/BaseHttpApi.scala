@@ -20,7 +20,7 @@ trait BaseHttpApi extends HmdaApiProtocol with HmdaCustomDirectives {
 
   def rootPath(name: String) =
     pathSingleSlash {
-      timedGet { uri =>
+      timedGet { _ =>
         complete {
           val now = Instant.now.toString
           val host = InetAddress.getLocalHost.getHostName

@@ -33,9 +33,9 @@ trait SubmissionProtocol extends ValidationResultProtocol {
           case -1 =>
             val message = json.asJsObject.getFields("message").head.toString()
             Failed(message.substring(1, message.length - 1))
-          case _ => throw new DeserializationException("Submission Status expected")
+          case _ => throw DeserializationException("Submission Status expected")
         }
-        case _ => throw new DeserializationException("Unable to deserialize")
+        case _ => throw DeserializationException("Unable to deserialize")
 
       }
     }

@@ -223,7 +223,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Validated) {
-    case Event(Sign, data) =>
+    case Event(Sign, _) =>
       val status = hmda.model.fi.Signed
       updateStatus(status)
       goto(Signed) applying SubmissionSigned(Submission(submissionId, status))
