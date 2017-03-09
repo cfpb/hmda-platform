@@ -13,7 +13,8 @@ import slick.collection.heterogeneous.syntax._
 
 import scala.concurrent.ExecutionContext
 
-trait FilingComponent { this: DbConfiguration =>
+trait FilingComponent {
+  import hmda.query.DbConfiguration._
   import config.profile.api._
 
   class LarTable(tag: Tag) extends Table[LoanApplicationRegisterQuery](tag, "lars") {

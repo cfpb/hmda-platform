@@ -1,28 +1,22 @@
 package hmda.query.projections.institutions
 
 import akka.testkit.TestProbe
-import hmda.model.institution.{ Institution, InstitutionGenerators }
+import hmda.model.institution.InstitutionGenerators
 import hmda.persistence.model.ActorSpec
 import hmda.query.projections.institutions.InstitutionDBProjection._
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
-import hmda.query.DbConfiguration
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
-class InstitutionDBProjectionSpec extends ActorSpec with DbConfiguration with BeforeAndAfterEach {
+class InstitutionDBProjectionSpec extends ActorSpec with BeforeAndAfterAll {
 
   implicit val timeout = 5.seconds
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
+  override def beforeAll(): Unit = {
+    super.beforeAll()
     Await.result(repository.createSchema(), timeout)
-  }
-
-  override def afterEach(): Unit = {
-    super.afterEach()
-    Await.result(repository.dropSchema(), timeout)
   }
 
   val probe = TestProbe()

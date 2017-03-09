@@ -1,22 +1,21 @@
 package hmda.query.projections.filing
 
 import akka.testkit.TestProbe
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.fi.lar.LarGenerators
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
-import hmda.query.DbConfiguration
-import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach }
+import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.duration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 
-class HmdaFilingDBProjectionSpec extends ActorSpec with DbConfiguration with BeforeAndAfterEach with BeforeAndAfterAll with LarGenerators {
+class HmdaFilingDBProjectionSpec extends ActorSpec with BeforeAndAfterAll with LarGenerators {
 
   implicit val timeout = 5.seconds
 
   override def afterAll(): Unit = {
     super.afterAll()
-    larRepository.config.db.close()
+    //larRepository.config.db.close()
   }
 
   val probe = TestProbe()

@@ -5,12 +5,12 @@ import akka.pattern.pipe
 import hmda.persistence.messages.CommonMessages.Command
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaActor
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.repository.institutions.InstitutionComponent
 
 import scala.concurrent.ExecutionContext
 
-object InstitutionDBProjection extends InstitutionComponent with DbConfiguration {
+object InstitutionDBProjection extends InstitutionComponent {
 
   val repository = new InstitutionRepository(config)
 
