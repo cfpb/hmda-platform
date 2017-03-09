@@ -787,7 +787,7 @@ Example response:
   "receipt": "asd0f987134asdlfasdflk",
   "status": {
       "code": 11,
-      "message": "IRS report verified"
+      "message": "signed"
     }
 }
 ```
