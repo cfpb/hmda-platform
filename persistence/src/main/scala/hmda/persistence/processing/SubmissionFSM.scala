@@ -249,9 +249,8 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       stay replying None
     case Event(Some(_), data) =>
       stay replying data
-    //case Event(None, _) =>
-    //println("received none.... ")
-    //goto(Failed(failedMsg)) applying SubmissionFailed(Submission(submissionId, hmda.model.fi.Failed(failedMsg)))
+    case Event(None, _) =>
+      goto(Failed(failedMsg)) applying SubmissionFailed(Submission(submissionId, hmda.model.fi.Failed(failedMsg)))
     case Event(GetState, data) =>
       stay replying data
     case Event(e, d) =>
