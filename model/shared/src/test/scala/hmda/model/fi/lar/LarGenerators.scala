@@ -50,6 +50,8 @@ trait LarGenerators extends FIGenerators {
     )
   }
 
+  def sampleLar: LoanApplicationRegister = larGen.sample.getOrElse(LoanApplicationRegister())
+
   implicit def loanGen: Gen[Loan] = {
     for {
       id <- stringOfOneToN(25, Gen.alphaChar)
