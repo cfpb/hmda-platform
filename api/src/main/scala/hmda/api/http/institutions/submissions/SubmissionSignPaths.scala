@@ -61,7 +61,7 @@ trait SubmissionSignPaths
                   } yield s
                   onComplete(fSign) {
                     case Success(Some(_)) => completeWithSubmissionReceipt(submissionId, uri)
-                    case Success(None) =>
+                    case Success(_) =>
                       val errorResponse = ErrorResponse(400, "Illegal State: Submission must be Validated or ValidatedWithErrors to sign", uri.path)
                       complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
                     case Failure(error) => completeWithInternalError(uri, error)
