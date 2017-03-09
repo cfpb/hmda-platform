@@ -6,7 +6,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.{ Completed, Filing, FilingStatus, InProgress, Submission, SubmissionId }
+import hmda.model.fi.{ Signed => _, _ }
 import hmda.persistence.institutions.FilingPersistence
 import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling }
@@ -109,7 +109,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
 
     case Signed =>
       log.info(s"Submission signed: ${submissionId.toString}")
-      submissionFSM ! Sign
+      submissionFSM forward Sign
       updateFilingStatus(Completed)
 
     case GetActorRef(name) => name match {

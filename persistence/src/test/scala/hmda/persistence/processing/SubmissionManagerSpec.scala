@@ -48,16 +48,19 @@ class SubmissionManagerSpec extends ActorSpec {
     probe.expectMsg(Some(filing))
 
     "Filing status begins as 'not started'" in {
-      expectedFiling.status mustBe NotStarted
+      val filing = expectedFiling
+      filing.status mustBe NotStarted
+      filing.start mustBe 0
     }
 
     "have Filing status 'in progress' and a 'start' time after StartUpload event" in {
       probe.send(submissionManager, StartUpload)
-      Thread.sleep(200)
+      probe.send(submissionManager, GetState)
+      probe.expectMsg(Uploading)
 
       val filing = expectedFiling
       filing.status mustBe InProgress
-      (filing.start == 0) mustBe false
+      filing.start must not be 0
       filing.end mustBe 0
     }
 
@@ -68,19 +71,21 @@ class SubmissionManagerSpec extends ActorSpec {
 
       probe.send(submissionManager, CompleteUpload)
       probe.send(submissionManager, GetState)
-      //probe.expectMsg(Uploaded)
-      Thread.sleep(5000) //TODO: can this be avoided?
+      probe.expectMsg(Uploaded)
+      Thread.sleep(4000) //TODO: can this be avoided?
       probe.send(submissionManager, GetState)
-      //probe.expectMsg(ValidatedWithErrors)
+      probe.expectMsg(ValidatedWithErrors)
     }
 
     "have Filing status 'completed' after signature" in {
-      probe.send(submissionManager, Signed)
-      Thread.sleep(200)
+      probe.send(submissionManager, hmda.persistence.processing.ProcessingMessages.Signed)
+      probe.expectMsg(Some(Signed))
+      probe.send(submissionManager, GetState)
+      probe.expectMsg(Signed)
 
-      //val filing = expectedFiling
-      //filing.status mustBe Completed
-      //(filing.end == 0) mustBe false
+      val filing = expectedFiling
+      filing.status mustBe Completed
+      filing.end must not be 0
     }
 
   }
