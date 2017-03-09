@@ -366,7 +366,7 @@ trait FilingComponent { this: DbConfiguration =>
       """
     }
 
-    def createSchema() = db.run(createViewSchema())
+    def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
 
     private def getTableStream(respId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
