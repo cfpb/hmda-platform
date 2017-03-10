@@ -174,9 +174,15 @@ Visit the app at `http://192.168.99.100`, click the "Login" button, and click "R
 The sample data currently contains four institutions; Bank 0, Bank 1, Bank 2, and Bank 3. To register for any of these institutions you have to use the corresponding domain:
 
 - Bank 0 = bank0.com
+    - Has no filings and no submissions
 - Bank 1 = bank1.com
+    - Has a filing that's not started with no submissions
 - Bank 2 = bank2.com
+    - Has a filing that's in progress with various submissions
 - Bank 3 = bank3.com
+    - Has a filing that's completed with various submissions including one that's `signed`
+- Bank 4 = bank4.com
+    - Has a filing that's cancelled with various submissions
 
 Confirm your signup via MailDev by visiting http://192.168.99.100:1080, opening the email, and clicking the verifying link.
 

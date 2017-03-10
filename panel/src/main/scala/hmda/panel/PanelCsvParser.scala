@@ -45,11 +45,15 @@ object PanelCsvParser extends InstitutionComponent {
 
     val timeout = 5.seconds
 
+    println("Cleaning DB...")
+    Await.result(repository.dropSchema(), timeout)
+    println("Creating new schema...")
     Await.result(repository.createSchema(), timeout)
     val institutionPersistence = Await.result(institutionPersistenceF, timeout)
 
     val source = FileIO.fromPath(new File(args(0)).toPath)
 
+    println("Reading file...")
     source
       .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
       .drop(1)

@@ -1,17 +1,21 @@
 package hmda.query.repository.filing
 
 import akka.NotUsed
-import akka.stream.scaladsl.Source
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.config.ConfigFactory
+import hmda.model.fi.SubmissionId
 import hmda.query.DbConfiguration
-import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister }
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister, Msa }
 import hmda.query.repository.{ Repository, TableRepository }
 import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.Try
 
 trait FilingComponent {
   import hmda.query.DbConfiguration._
@@ -297,28 +301,86 @@ trait FilingComponent {
     def deleteByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).delete)
   }
 
-  class LarTotalTable(tag: Tag) extends Table[LoanApplicationRegisterTotal](tag, "lars_total") {
-    def id = column[Int]("id", O.PrimaryKey)
+  class LarTotalMsaTable(tag: Tag) extends Table[Msa](tag, "lars_total_msa") {
+    def msa = column[String]("msa", O.PrimaryKey)
     def respondentId = column[String]("respondent_id")
     def period = column[String]("period")
-    def total = column[Int]("total")
+    def total_lars = column[Int]("total_lars")
+    def total_amount = column[Int]("total_amount")
+    def conv = column[Int]("conv")
+    def fha = column[Int]("fha")
+    def va = column[Int]("va")
+    def fsa = column[Int]("fsa")
+    def oneToFourFamily = column[Int]("one_to_four_family")
+    def manuf_home = column[Int]("manuf_home")
+    def multi_family = column[Int]("multi_family")
+    def home_purchase = column[Int]("home_purchase")
+    def home_improve = column[Int]("home_improve")
+    def refinance = column[Int]("refinance")
 
-    override def * = (id, respondentId, period, total) <> (LoanApplicationRegisterTotal.tupled, LoanApplicationRegisterTotal.unapply)
+    override def * = (
+      msa,
+      total_lars,
+      total_amount,
+      conv,
+      fha,
+      va,
+      fsa,
+      oneToFourFamily,
+      manuf_home,
+      multi_family,
+      home_purchase,
+      home_improve,
+      refinance
+    ) <> (Msa.tupled, Msa.unapply)
   }
 
-  class LarTotalRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalTable, Int] {
-    val table = TableQuery[LarTotalTable]
-    def getId(table: LarTotalTable) = table.id
+  class LarTotalMsaRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalMsaTable, String] {
+    implicit val system = ActorSystem()
+    implicit val materializer = ActorMaterializer()
 
-    private val createViewSchema = sqlu"""create view lars_total as
-      select count(*) as total, respondent_id, period
-      from lars group by respondent_id, period
+    val configuration = ConfigFactory.load()
+    val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
+    val groupSize = configuration.getInt("hmda.query.group.size")
+
+    val table = TableQuery[LarTotalMsaTable]
+    def getId(table: LarTotalMsaTable) = table.msa
+
+    private def createViewSchema() = {
+      sqlu"""create view lars_total_msa as
+        select msa,
+        respondent_id,
+        period,
+        count(*) as total_lars, sum(amount) as total_amount,
+        count(case when loan_type = 1 then 1 else null end) as conv,
+        count(case when loan_type = 2 then 1 else null end) as fha,
+        count(case when loan_type = 3 then 1 else null end) as va,
+        count(case when loan_type = 4 then 1 else null end) as fsa,
+        count(case when property_type = 1 then 1 else null end) as one_to_four_family,
+        count(case when property_type = 2 then 1 else null end) as manuf_home,
+        count(case when property_type = 3 then 1 else null end) as multi_family,
+        count(case when purpose = 1 then 1 else null end) as home_purchase,
+        count(case when purpose = 2 then 1 else null end) as home_improve,
+        count(case when purpose = 3 then 1 else null end) as refinance
+        from lars
+        group by msa, respondent_id, period;
       """
+    }
 
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
-    def count(respId: String) = db.run(table.filter(_.respondentId === respId).map(_.total).result.headOption)
 
+    private def getTableStream(respId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
+      val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
+      val query = table.filter(x => x.respondentId === respId && x.period === period)
+      val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
+
+      db.stream(disableAutocommit andThen action)
+    }
+
+    def getMsaSeq(respId: String, period: String)(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+      Source.fromPublisher(getTableStream(respId, period)).grouped(groupSize).runWith(Sink.head)
+    }
   }
 
   class ModifiedLarTable(tag: Tag) extends Table[ModifiedLoanApplicationRegister](tag, "modified_lar") {
@@ -638,7 +700,6 @@ trait FilingComponent {
 
     def findByRespondentIdSource(respId: String, period: String)(implicit ec: ExecutionContext): Source[ModifiedLoanApplicationRegister, NotUsed] =
       Source.fromPublisher(findByRespondentIdStream(respId, period))
-
   }
 
 }

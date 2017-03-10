@@ -89,10 +89,6 @@ object SubmissionFSM {
     override def identifier: String = validatedMsg
   }
 
-  case object IRSGenerated extends SubmissionFSMState {
-    override def identifier: String = iRSGeneratedMsg
-  }
-
   case object Signed extends SubmissionFSMState {
     override def identifier: String = signedMsg
   }
@@ -223,13 +219,17 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Validated) {
-    case Event(Sign, data) =>
+    case Event(Sign, _) =>
       val status = hmda.model.fi.Signed
       updateStatus(status)
-      goto(Signed) applying SubmissionSigned(Submission(submissionId, status))
+      goto(Signed) applying SubmissionSigned(Submission(submissionId, status)) replying Some(status)
   }
 
   when(ValidatedWithErrors) {
+    case Event(Sign, _) =>
+      val status = hmda.model.fi.Signed
+      updateStatus(status)
+      goto(Signed) applying SubmissionSigned(Submission(submissionId, status)) replying Some(status)
     case Event(GetState, data) =>
       stay replying data
   }
@@ -245,10 +245,13 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   whenUnhandled {
+    case Event(Sign, _) =>
+      stay replying None
     case Event(Some(_), data) =>
       stay replying data
-    case Event(None, _) =>
-      goto(Failed(failedMsg)) applying SubmissionFailed(Submission(submissionId, hmda.model.fi.Failed(failedMsg)))
+    //case Event(None, _) =>
+    //println("received none.... ")
+    //goto(Failed(failedMsg)) applying SubmissionFailed(Submission(submissionId, hmda.model.fi.Failed(failedMsg)))
     case Event(GetState, data) =>
       stay replying data
     case Event(e, d) =>
