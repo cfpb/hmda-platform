@@ -64,6 +64,17 @@ class SubmissionManagerSpec extends ActorSpec {
       filing.end mustBe 0
     }
 
+    "not update filing status if signature fails" in {
+      probe.send(submissionManager, hmda.persistence.processing.ProcessingMessages.Signed)
+      probe.expectMsg(None)
+      probe.send(submissionManager, GetState)
+      probe.expectMsg(Uploading)
+
+      val filing = expectedFiling
+      filing.status mustBe InProgress
+      filing.end mustBe 0
+    }
+
     "upload, parse and validate" in {
       for (line <- lines) {
         probe.send(submissionManager, AddLine(timestamp, line.toString))

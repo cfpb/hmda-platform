@@ -109,8 +109,12 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
 
     case Signed =>
       log.info(s"Submission signed: ${submissionId.toString}")
-      submissionFSM forward Sign
-      updateFilingStatus(Completed)
+      val result = (submissionFSM ? Sign).mapTo[Option[SubmissionStatus]]
+      val originalSender: ActorRef = sender()
+      result.map { r =>
+        if (r.isDefined) updateFilingStatus(Completed)
+        originalSender ! r
+      }
 
     case GetActorRef(name) => name match {
       case SubmissionFSM.name => sender() ! submissionFSM
