@@ -8,13 +8,30 @@ import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.Await
 
-class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with InstitutionComponent {
-
+class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with InstitutionComponent with BeforeAndAfterAll {
+  import config.profile.api._
   import InstitutionConverter._
 
   val timeout = 5.seconds
 
   val repository = new InstitutionRepository(config)
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    dropAllObjects()
+    Await.result(repository.createSchema(), timeout)
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    dropAllObjects()
+  }
+
+  private def dropAllObjects() = {
+    val db = repository.config.db
+    val dropAll = sqlu"""DROP ALL OBJECTS"""
+    Await.result(db.run(dropAll), timeout)
+  }
 
   "Institution Repository" must {
     "insert new records" in {
@@ -35,7 +52,7 @@ class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with Inst
       val i = InstitutionGenerators.sampleInstitution
       repository.insertOrUpdate(i).map(x => x mustBe 1)
       repository.findById(i.id).map {
-        case Some(_) => succeed
+        case Some(x) => succeed
         case None => fail
       }
       repository.deleteById(i.id).map(x => x mustBe 1)
