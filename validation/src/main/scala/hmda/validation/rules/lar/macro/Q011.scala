@@ -28,7 +28,7 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
   val configuration = ConfigFactory.load()
   val larSize = configuration.getInt("hmda.validation.macro.Q011.numOfTotalLars")
   val multiplier = configuration.getDouble("hmda.validation.macro.Q011.numOfLarsMultiplier")
-  val larTotalRepository = new LarTotalRepository(config)
+  val larTotalRepository = new LarTotalMsaRepository(config)
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
     val lastYear = year - 1

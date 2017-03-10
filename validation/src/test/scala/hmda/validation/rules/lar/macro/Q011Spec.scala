@@ -32,7 +32,7 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
 
   val repository = new LarRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
-  val totalLarRepository = new LarTotalRepository(config)
+  val totalLarRepository = new LarTotalMsaRepository(config)
 
   implicit val timeout = 5.seconds
 
