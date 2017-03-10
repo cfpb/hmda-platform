@@ -89,10 +89,6 @@ object SubmissionFSM {
     override def identifier: String = validatedMsg
   }
 
-  case object IRSGenerated extends SubmissionFSMState {
-    override def identifier: String = iRSGeneratedMsg
-  }
-
   case object Signed extends SubmissionFSMState {
     override def identifier: String = signedMsg
   }

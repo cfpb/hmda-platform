@@ -2,24 +2,26 @@ package hmda.api.http.institutions.submissions
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse, StatusCodes }
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
-import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
+import hmda.api.http.HmdaCustomDirectives
+import hmda.api.protocol.processing.MsaProtocol
+import hmda.query.DbConfiguration
+import hmda.query.model.filing.{ Irs, Msa, MsaSummary }
+import hmda.query.repository.filing.FilingComponent
 
 import scala.concurrent.ExecutionContext
+import scala.util.{ Failure, Success }
 
 trait SubmissionIrsPaths
-    extends InstitutionProtocol
-    with SubmissionProtocol
-    with ApiErrorProtocol
-    with EditResultsProtocol
-    with HmdaCustomDirectives
-    with ValidationErrorConverter {
+    extends HmdaCustomDirectives
+    with RequestVerificationUtils
+    with MsaProtocol
+    with FilingComponent
+    with DbConfiguration {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -28,18 +30,20 @@ trait SubmissionIrsPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs
-  // NOTE:  This is currently a mocked, static endpoint
   def submissionIrsPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, submissionId) =>
       timedGet { uri =>
-        val supervisor = system.actorSelection("/user/supervisor")
+        completeVerified(institutionId, period, submissionId, uri) {
+          val larTotalMsaRepository = new LarTotalMsaRepository(config)
+          val data = larTotalMsaRepository.getMsaSeq(institutionId, period)
 
-        //To avoid having to deal with relative paths on different systems
-        val irsJson = "{\n  \"msas\": [\n    {\n      \"id\": \"123\",\n      \"name\": \"MSA 123\",\n      \"totalLARS\": 4,\n      \"totalAmount\": 123,\n      \"conv\": 4,\n      \"FHA\": 0,\n      \"VA\": 0,\n      \"FSA\": 0,\n      \"1to4Family\": 4,\n      \"MFD\": 0,\n      \"multiFamily\": 0,\n      \"homePurchase\": 0,\n      \"homeImprovement\": 0,\n      \"refinance\": 4\n    },\n    {\n      \"id\": \"456\",\n      \"name\": \"MSA 456\",\n      \"totalLARS\": 5,\n      \"totalAmount\": 456,\n      \"conv\": 5,\n      \"FHA\": 0,\n      \"VA\": 0,\n      \"FSA\": 0,\n      \"1to4Family\": 5,\n      \"MFD\": 0,\n      \"multiFamily\": 0,\n      \"homePurchase\": 0,\n      \"homeImprovement\": 0,\n      \"refinance\": 5\n    }\n  ],\n   \"status\": {\n       \"code\": 10,\n       \"message\": \"IRS report generated\"\n     }}"
-
-        val response = HttpResponse(StatusCodes.OK, entity = HttpEntity(ContentTypes.`application/json`, irsJson))
-
-        complete(response)
+          onComplete(data) {
+            case Success(msaSeq) =>
+              val irs = Irs.createIrs(msaSeq.toList)
+              complete(ToResponseMarshallable(irs))
+            case Failure(e) => completeWithInternalError(uri, e)
+          }
+        }
       }
     }
 }
