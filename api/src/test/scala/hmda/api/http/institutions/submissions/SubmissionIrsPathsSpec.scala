@@ -11,7 +11,7 @@ import hmda.query.repository.filing.{ FilingComponent, LarConverter }
 import scala.concurrent.Await
 
 class SubmissionIrsPathsSpec
-    extends InstitutionHttpApiAsyncSpec
+    extends InstitutionHttpApiSpec
     with DbConfiguration
     with FilingComponent
     with LarGenerators {
@@ -54,19 +54,15 @@ class SubmissionIrsPathsSpec
       val query1 = lar1.copy(period = "2017")
       val query2 = lar2.copy(period = "2017")
 
-      val fInsert = for {
-        a <- repository.insertOrUpdate(query1)
-        b <- repository.insertOrUpdate(query2)
-      } yield (a, b)
+      Await.result(repository.insertOrUpdate(query1), duration)
+      Await.result(repository.insertOrUpdate(query2), duration)
 
-      fInsert.map { _ =>
-        getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
-          status mustBe StatusCodes.OK
-          val irs = responseAs[Irs]
-          irs.totals.amount mustBe 24
-          irs.totals.lars mustBe 2
-          irs.msas.length mustBe 2
-        }
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        val irs = responseAs[Irs]
+        irs.totals.amount mustBe 24
+        irs.totals.lars mustBe 2
+        irs.msas.length mustBe 2
       }
     }
   }
