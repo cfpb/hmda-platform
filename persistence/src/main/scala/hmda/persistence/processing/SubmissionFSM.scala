@@ -223,14 +223,14 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Validated) {
-    case Event(Sign, data) =>
+    case Event(Sign, _) =>
       val status = hmda.model.fi.Signed
       updateStatus(status)
       goto(Signed) applying SubmissionSigned(Submission(submissionId, status)) replying Some(status)
   }
 
   when(ValidatedWithErrors) {
-    case Event(Sign, data) =>
+    case Event(Sign, _) =>
       val status = hmda.model.fi.Signed
       updateStatus(status)
       goto(Signed) applying SubmissionSigned(Submission(submissionId, status)) replying Some(status)
@@ -249,7 +249,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   whenUnhandled {
-    case Event(Sign, data) =>
+    case Event(Sign, _) =>
       stay replying None
     case Event(Some(_), data) =>
       stay replying data
