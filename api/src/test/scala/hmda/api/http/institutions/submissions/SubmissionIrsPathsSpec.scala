@@ -50,27 +50,21 @@ class SubmissionIrsPathsSpec
       val msaNa = geographyGen.sample.get.copy(msa = "NA")
       val loan = loanGen.sample.get.copy(amount = 12)
       val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
-      val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
-      val lar3 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msa1, loan = loan))
-      val lar4 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msaNa, loan = loan))
+      val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "0", geography = msaNa, loan = loan))
       val query1 = lar1.copy(period = "2017")
       val query2 = lar2.copy(period = "2017")
-      val query3 = lar3.copy(period = "2017")
-      val query4 = lar4.copy(period = "2017")
 
       val fInsert = for {
         a <- repository.insertOrUpdate(query1)
         b <- repository.insertOrUpdate(query2)
-        c <- repository.insertOrUpdate(query3)
-        d <- repository.insertOrUpdate(query4)
-      } yield d
+      } yield (a, b)
 
       fInsert.map { _ =>
         getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
           status mustBe StatusCodes.OK
           val irs = responseAs[Irs]
-          irs.totals.amount mustBe 48
-          irs.totals.lars mustBe 4
+          irs.totals.amount mustBe 24
+          irs.totals.lars mustBe 2
           irs.msas.length mustBe 2
         }
       }
