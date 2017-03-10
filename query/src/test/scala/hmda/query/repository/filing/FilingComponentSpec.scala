@@ -14,6 +14,9 @@ import scala.concurrent.{ Await, Future }
 
 class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingComponent with BeforeAndAfterAll with LarGenerators {
 
+  implicit val system = ActorSystem()
+  implicit val materializer = ActorMaterializer()
+
   import LarConverter._
   import config.profile.api._
 
@@ -22,9 +25,6 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   val repository = new LarRepository(config)
   val larTotalMsaRepository = new LarTotalMsaRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
-
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
 
   override def beforeAll(): Unit = {
     super.beforeAll()

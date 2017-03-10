@@ -335,8 +335,8 @@ trait FilingComponent {
     ) <> (Msa.tupled, Msa.unapply)
   }
 
-  class LarTotalMsaRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalMsaTable, String] {
-    implicit val system = ActorSystem()
+  class LarTotalMsaRepository(val config: DatabaseConfig[JdbcProfile])(implicit system: ActorSystem) extends Repository[LarTotalMsaTable, String] {
+
     implicit val materializer = ActorMaterializer()
 
     val configuration = ConfigFactory.load()
