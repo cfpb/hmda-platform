@@ -782,8 +782,6 @@ Example response:
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign`
 
-_NOTE: This is currently a mocked, static endpoint._
-
 `GET`  - Returns a receipt
 
 Example response:
@@ -793,7 +791,7 @@ Example response:
   "receipt": "asd0f987134asdlfasdflk",
   "status": {
       "code": 11,
-      "message": "IRS report verified"
+      "message": "signed"
     }
 }
 ```
