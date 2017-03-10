@@ -7,13 +7,15 @@ import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration._
 import hmda.query.model.filing.Irs
 import hmda.query.repository.filing.{ FilingComponent, LarConverter }
+import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach }
 
 import scala.concurrent.Await
 
 class SubmissionIrsPathsSpec
-    extends InstitutionHttpApiSpec
+    extends InstitutionHttpApiAsyncSpec
     with FilingComponent
-    with LarGenerators {
+    with LarGenerators
+    with BeforeAndAfterAll {
 
   import LarConverter._
   import config.profile.api._
