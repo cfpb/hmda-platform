@@ -10,7 +10,7 @@ trait LessThanOrEqualToPropertyMacroSpec extends MacroSpec {
   def irrelevantLar(lar: LoanApplicationRegister): LoanApplicationRegister
 
   protected def lessThanOrEqualToPropertyTests(name: String, multiplier: Double, relevantLar: LoanApplicationRegister => LoanApplicationRegister, irrelevantLar: LoanApplicationRegister => LoanApplicationRegister): Unit = {
-    val testLars = lar100ListGen.sample.get
+    val testLars = lar100ListGen.sample.getOrElse(List[LoanApplicationRegister]())
     val sampleSize = testLars.length
     val targetSize = (sampleSize * multiplier).toInt
 

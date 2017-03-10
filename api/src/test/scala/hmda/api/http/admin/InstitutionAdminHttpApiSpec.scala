@@ -41,7 +41,7 @@ class InstitutionAdminHttpApiSpec
 
   "Institution Admin Paths" must {
 
-    val newInstitution = institutionGen.sample.get
+    val newInstitution = sampleInstitution
 
     "return OK for GET requests to the root path" in {
       Get() ~> routes("hmda-admin-api") ~> check {
@@ -65,7 +65,7 @@ class InstitutionAdminHttpApiSpec
       }
     }
     "use requested encoding for institution create/update path" in {
-      val jsonRequest = ByteString(institutionGen.sample.get.toJson.toString)
+      val jsonRequest = ByteString(sampleInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
       postRequest.addHeader(`Accept-Encoding`(deflate)) ~> institutionAdminRoutes ~> check {
         response.encoding mustBe HttpEncodings.deflate
@@ -99,7 +99,7 @@ class InstitutionAdminHttpApiSpec
 
     }
     "return not found when modifying non existing institution" in {
-      val i1 = institutionGen.sample.get
+      val i1 = sampleInstitution
       val jsonRequest = ByteString(i1.toJson.toString)
       val putRequest = createRequest(jsonRequest, HttpMethods.PUT)
       putRequest ~> institutionAdminRoutes ~> check {

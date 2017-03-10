@@ -12,7 +12,7 @@ class LarValidityEngineSpec extends WordSpec with MustMatchers with LarValidityE
 
   "LAR Validity engine" must {
     "pass validation on valid sample file" in {
-      val lines = Source.fromFile(new File("parser/jvm/src/test/resources/txt/FirstTestBankData_clean_407_2017.txt")).getLines()
+      val lines = Source.fromFile(new File("parser/jvm/src/test/resources/txt/edits-SVQM_412-lars.txt")).getLines()
       val lars = lines.drop(1).map(line => LarCsvParser(line)).collect {
         case Right(lar) => lar
       }

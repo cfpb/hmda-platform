@@ -22,28 +22,28 @@ class Q074Spec extends MacroSpec {
   val threshold = numOfLoanApplications
 
   property(s"be valid if fewer than $numOfLoanApplications specified loans") {
-    val lars = larNGen(belowThreshold).sample.get
+    val lars = larNGen(belowThreshold).sample.getOrElse(List[LoanApplicationRegister]())
     val validLarSource = newLarSource(lars, belowThreshold, relevantLar, irrelevantLar)
     validLarSource.mustPass
   }
 
   property(s"be valid if more than $numOfLoanApplications specified loans and count > $multiplier * sold") {
     val numOfRelevantLars = (threshold * multiplier).toInt + 1
-    val lars = larNGen(threshold).sample.get
+    val lars = larNGen(threshold).sample.getOrElse(List[LoanApplicationRegister]())
     val validLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
     validLarSource.mustPass
   }
 
   property(s"be invalid if more than $numOfLoanApplications specified loans and count = $multiplier * sold") {
     val numOfRelevantLars = (threshold * multiplier).toInt
-    val lars = larNGen(threshold).sample.get
+    val lars = larNGen(threshold).sample.getOrElse(List[LoanApplicationRegister]())
     val invalidLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
     invalidLarSource.mustFail
   }
 
   property(s"be invalid if more than $numOfLoanApplications specified loans and count < $multiplier * sold") {
     val numOfRelevantLars = (threshold * multiplier).toInt - 1
-    val lars = larNGen(threshold).sample.get
+    val lars = larNGen(threshold).sample.getOrElse(List[LoanApplicationRegister]())
     val invalidLarSource = newLarSource(lars, numOfRelevantLars, relevantLar, irrelevantLar)
     invalidLarSource.mustFail
   }

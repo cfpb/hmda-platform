@@ -96,12 +96,12 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)
             val errorResponse = Failed("Invalid File Format")
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse, 0L, 0L)))
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse)))
         }
       case _ =>
         processingActor ! Shutdown
         val errorResponse = Failed("Invalid File Format")
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse, 0L, 0L)))
+        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse)))
     }
   }
 }

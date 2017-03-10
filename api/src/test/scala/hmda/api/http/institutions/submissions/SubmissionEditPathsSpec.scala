@@ -8,8 +8,8 @@ import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ EditResult, _ }
 import hmda.model.fi._
-import hmda.model.fi.lar.LarGenerators
-import hmda.model.fi.ts.TsGenerators
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
@@ -252,7 +252,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val v3 = ValidityValidationError("loan3", "V285", false)
     val m1 = MacroValidationError("Q007", Nil)
 
-    val l1 = larGen.sample.get
+    val l1 = sampleLar
     val lar1 = l1.copy(
       loan = l1.loan.copy(id = "loan1"),
       id = 111,
@@ -260,19 +260,19 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       geography = l1.geography.copy(msa = "333")
     )
 
-    val l2 = larGen.sample.get
+    val l2 = sampleLar
     val lar2 = l2.copy(
       loan = l2.loan.copy(id = "loan2"),
       geography = l2.geography.copy(state = "444", msa = "555")
     )
 
-    val l3 = larGen.sample.get
+    val l3 = sampleLar
     val lar3 = l3.copy(
       loan = l3.loan.copy(id = "loan3"),
       geography = l3.geography.copy(state = "666", msa = "777")
     )
 
-    val ts = tsGen.sample.get.copy(agencyCode = 888)
+    val ts = tsGen.sample.getOrElse(TransmittalSheet()).copy(agencyCode = 888)
 
     val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
     val tsValidationErrors = TsValidationErrors(Seq(s2.copy(ts = true)))
