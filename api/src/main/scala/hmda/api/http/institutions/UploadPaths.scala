@@ -84,7 +84,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           .runForeach(line => processingActor ! AddLine(uploadTimestamp, line))
 
         onComplete(uploadedF) {
-          case Success(response) =>
+          case Success(_) =>
             processingActor ! CompleteUpload
             complete(ToResponseMarshallable(StatusCodes.Accepted -> submission.copy(status = Uploaded)))
           case Failure(error) =>

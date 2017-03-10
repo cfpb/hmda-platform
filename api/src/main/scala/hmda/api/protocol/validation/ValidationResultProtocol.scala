@@ -14,7 +14,7 @@ trait ValidationResultProtocol extends DefaultJsonProtocol {
           case "quality" => Quality
           case "macro" => Macro
         }
-        case _ => throw new DeserializationException("ValidationErrorType expected")
+        case _ => throw DeserializationException("ValidationErrorType expected")
       }
     }
     override def write(errorType: ValidationErrorType): JsValue = {
@@ -33,7 +33,7 @@ trait ValidationResultProtocol extends DefaultJsonProtocol {
       case JsString("validity") => validityValidationErrorFormat.read(json)
       case JsString("quality") => qualityValidationErrorFormat.read(json)
       case JsString("macro") => macroValidationErrorFormat.read(json)
-      case _ => throw new DeserializationException("ValidationError expected")
+      case _ => throw DeserializationException("ValidationError expected")
     }
     override def write(error: ValidationError): JsValue = error.errorType match {
       case Syntactical => syntacticalValidationErrorFormat.write(error.asInstanceOf[SyntacticalValidationError])

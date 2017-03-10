@@ -122,7 +122,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
 
     }
 
-    "Stream IRS" in {
+    /*"Stream IRS" in {
       repository.deleteAll.map(x => x mustBe 1)
       val msa1 = geographyGen.sample.get.copy(msa = "12345")
       val msaNa = geographyGen.sample.get.copy(msa = "NA")
@@ -150,7 +150,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       val msaF = larTotalMsaRepository.getMsaSeq("1", "2017")
       val msaSeq: Seq[Msa] = Await.result(msaF, duration)
       msaSeq.toList.length mustBe 2
-    }
+    }*/
   }
 
 }

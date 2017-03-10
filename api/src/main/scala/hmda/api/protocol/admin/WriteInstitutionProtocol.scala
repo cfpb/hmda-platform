@@ -36,7 +36,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
           try {
             InstitutionType.withName(name)
           } catch {
-            case e: NoSuchElementException => throw DeserializationException(
+            case _: NoSuchElementException => throw DeserializationException(
               s"Unable to translate JSON string into valid InstitutionType value: $name"
             )
           }
@@ -55,7 +55,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
         try {
           ExternalIdType.withName(name)
         } catch {
-          case e: NoSuchElementException => throw DeserializationException(
+          case _: NoSuchElementException => throw DeserializationException(
             s"Unable to translate JSON string into valid ExternalIdType value: $name"
           )
         }
@@ -73,7 +73,7 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
         try {
           DepositoryType.withName(name)
         } catch {
-          case e: NoSuchElementException => throw DeserializationException(
+          case _: NoSuchElementException => throw DeserializationException(
             s"Unable to translate JSON string into valid DepositoryType value: $name"
           )
         }

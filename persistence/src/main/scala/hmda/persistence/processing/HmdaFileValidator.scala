@@ -247,7 +247,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
   private def persistErrors(errors: Seq[Event]): Unit = {
     errors.foreach { error =>
       persist(error) { e =>
-        log.debug(s"Persisted: ${e}")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
     }

@@ -68,7 +68,7 @@ class InstitutionView extends HmdaPersistentActor {
       val institutions = state.institutions.filter(i => ids.contains(i.id))
       sender() ! institutions
 
-    case EventWithSeqNr(seqNr, event) =>
+    case EventWithSeqNr(_, event) =>
       if (counter >= snapshotCounter) {
         counter = 0
         saveSnapshot(state)
