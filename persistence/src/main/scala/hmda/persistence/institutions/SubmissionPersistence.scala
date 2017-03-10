@@ -31,13 +31,15 @@ object SubmissionPersistence {
           SubmissionState(s +: submissions)
 
         case SubmissionStatusUpdated(id, status) =>
-          val x: Submission = submissions.find(x => x.id == id).getOrElse(Submission())
+          val x = submissions.find(x => x.id == id).getOrElse(Submission())
           val i = submissions.indexOf(x)
 
-          val updatedSub: Submission = if (status == Signed) {
-            val now = System.currentTimeMillis
-            x.copy(status = status, end = now, receipt = generateReceipt(x.id, now))
-          } else x.copy(status = status)
+          val updatedSub: Submission = {
+            if (status == Signed) {
+              val now = System.currentTimeMillis
+              x.copy(status = status, end = now, receipt = generateReceipt(x.id, now))
+            } else x.copy(status = status)
+          }
 
           SubmissionState(submissions.updated(i, updatedSub))
       }
