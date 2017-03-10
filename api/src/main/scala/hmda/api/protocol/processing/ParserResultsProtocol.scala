@@ -30,7 +30,7 @@ trait ParserResultsProtocol extends DefaultJsonProtocol {
           val total: Int = tot.intValue
           ParsingErrorSummary(tsErrs, larErrs, path, currentPage, total)
 
-        case _ => throw new DeserializationException("Parsing Error Summary expected")
+        case _ => throw DeserializationException("Parsing Error Summary expected")
       }
     }
 
