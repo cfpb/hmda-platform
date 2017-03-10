@@ -28,21 +28,20 @@ trait SubmissionProtocol extends ValidationResultProtocol {
           case 7 => Validating
           case 8 => ValidatedWithErrors
           case 9 => Validated
-          case 10 => IRSGenerated
-          case 11 => Signed
+          case 10 => Signed
           case -1 =>
             val message = json.asJsObject.getFields("message").head.toString()
             Failed(message.substring(1, message.length - 1))
-          case _ => throw new DeserializationException("Submission Status expected")
+          case _ => throw DeserializationException("Submission Status expected")
         }
-        case _ => throw new DeserializationException("Unable to deserialize")
+        case _ => throw DeserializationException("Unable to deserialize")
 
       }
     }
   }
 
   implicit val submissionIdProtocol = jsonFormat3(SubmissionId.apply)
-  implicit val submissionFormat = jsonFormat4(Submission.apply)
+  implicit val submissionFormat = jsonFormat5(Submission.apply)
   implicit val submissionsFormat = jsonFormat1(Submissions.apply)
   implicit val receiptFormat = jsonFormat3(Receipt.apply)
   implicit val macroJustifyFormat = jsonFormat2(MacroEditJustificationWithName.apply)
