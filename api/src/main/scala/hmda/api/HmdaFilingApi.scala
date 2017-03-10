@@ -25,7 +25,7 @@ class HmdaFilingApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
 
-  val configuration = ConfigFactory.load()
+  override val configuration = ConfigFactory.load()
 
   override val name = "hmda-filing-api"
 
