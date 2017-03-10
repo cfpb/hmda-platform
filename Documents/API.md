@@ -776,8 +776,6 @@ Example response:
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign`
 
-_NOTE: This is currently a mocked, static endpoint._
-
 `GET`  - Returns a receipt
 
 Example response:
