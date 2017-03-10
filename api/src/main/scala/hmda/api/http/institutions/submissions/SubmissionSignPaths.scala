@@ -71,7 +71,7 @@ trait SubmissionSignPaths
                   val errorResponse = ErrorResponse(400, "Illegal Argument: signed = false", uri.path)
                   complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
               }
-              
+
             }
           }
         }
