@@ -18,13 +18,13 @@ import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.repository.institutions.InstitutionComponent
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Await
 
-object PanelCsvParser extends InstitutionComponent with DbConfiguration {
+object PanelCsvParser extends InstitutionComponent {
   implicit val system: ActorSystem = ActorSystem("hmda")
   implicit val materializer = ActorMaterializer()
   implicit val timeout: Timeout = Timeout(5.second)
