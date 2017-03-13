@@ -48,7 +48,11 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
 
   implicit object ExternalIdTypeJsonFormat extends RootJsonFormat[ExternalIdType] {
 
-    override def write(obj: ExternalIdType): JsValue = JsString(obj.entryName)
+    override def write(obj: ExternalIdType): JsValue =
+      JsObject(
+        "entryName" -> JsString(obj.entryName),
+        "formattedName" -> JsString(obj.name)
+      )
 
     override def read(json: JsValue): ExternalIdType = json match {
       case JsString(name) =>
