@@ -25,15 +25,15 @@ class HmdaFilingApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
 
-  val config = ConfigFactory.load()
+  val configuration = ConfigFactory.load()
 
   override val name = "hmda-filing-api"
 
-  lazy val httpTimeout = config.getInt("hmda.http.timeout")
+  lazy val httpTimeout = configuration.getInt("hmda.http.timeout")
   implicit val timeout = Timeout(httpTimeout.seconds)
 
-  override lazy val host = config.getString("hmda.http.host")
-  override lazy val port = config.getInt("hmda.http.port")
+  override lazy val host = configuration.getString("hmda.http.host")
+  override lazy val port = configuration.getInt("hmda.http.port")
 
   implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()

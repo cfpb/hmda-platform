@@ -76,7 +76,7 @@ class V485Spec extends LarEditCheckSpec {
   }
 
   private def withValidCoRace2To5(applicant: Applicant): Applicant = {
-    val vals: List[String] = Gen.listOfN(4, otherCoRaceGen).sample.get
+    val vals: List[String] = Gen.listOfN(4, otherCoRaceGen).sample.getOrElse(List[String]())
     applicant.copy(coRace2 = vals(0), coRace3 = vals(1), coRace4 = vals(2), coRace5 = vals(3))
   }
 

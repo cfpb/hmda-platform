@@ -17,7 +17,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
     "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
     "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
     "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
-  val file = multiPartFile(csv, "sample.txt")
+  val file = multiPartFile(csv, "parse-length_4-lars.txt")
 
   val badContent = "qdemd"
   val badFile = multiPartFile(badContent, "sample.dat")
@@ -61,7 +61,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
 
       fSubmission.map { s =>
         s.getOrElse(Submission()).status mustBe Signed
-        val file = multiPartFile("bad file content", "sample.txt")
+        val file = multiPartFile("bad file content", "parse-length_4-lars.txt")
         val path = Path("/institutions/0/filings/2017/submissions/1")
         postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
           status mustBe StatusCodes.BadRequest

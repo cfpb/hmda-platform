@@ -89,19 +89,19 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           .runWith(Sink.ignore)
 
         onComplete(uploadedF) {
-          case Success(response) =>
+          case Success(_) =>
             processingActor ! CompleteUpload
             complete(ToResponseMarshallable(StatusCodes.Accepted -> submission.copy(status = Uploaded)))
           case Failure(error) =>
             processingActor ! Shutdown
             log.error(error.getLocalizedMessage)
             val errorResponse = Failed("Invalid File Format")
-            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse, 0L, 0L)))
+            complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse)))
         }
       case _ =>
         processingActor ! Shutdown
         val errorResponse = Failed("Invalid File Format")
-        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse, 0L, 0L)))
+        complete(ToResponseMarshallable(StatusCodes.BadRequest -> Submission(submission.id, errorResponse)))
     }
   }
 }

@@ -35,7 +35,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
   // lar/parse
   val parseLarRoute =
     path("parse") {
-      timedPost { uri =>
+      timedPost { _ =>
         entity(as[String]) { s =>
           LarCsvParser(s) match {
             case Right(lar) => complete(ToResponseMarshallable(lar))
