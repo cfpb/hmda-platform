@@ -2,7 +2,7 @@ package hmda.api.http.institutions
 
 import java.time.Instant
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -12,24 +12,24 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Framing, Sink}
-import akka.util.{ByteString, Timeout}
+import akka.stream.scaladsl.{ Framing, Sink }
+import akka.util.{ ByteString, Timeout }
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.HmdaCustomDirectives
 import hmda.persistence.messages.CommonMessages._
-import hmda.api.protocol.processing.{ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol}
-import hmda.model.fi.{Created, Failed, Submission, SubmissionId, Uploaded}
-import hmda.persistence.HmdaSupervisor.{FindProcessingActor, FindSubmissions}
+import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
+import hmda.model.fi.{ Created, Failed, Submission, SubmissionId, Uploaded }
+import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.processing.HmdaRawFile.{AddFileName, AddLine}
-import hmda.persistence.processing.ProcessingMessages.{CompleteUpload, Persisted, StartUpload}
+import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.processing.SubmissionManager
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
-import hmda.query.projections.filing.HmdaFilingDBProjection.{CreateSchema, DeleteLars}
+import hmda.query.projections.filing.HmdaFilingDBProjection.{ CreateSchema, DeleteLars }
 
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with SubmissionProtocol with HmdaCustomDirectives {
   implicit val system: ActorSystem
