@@ -1,29 +1,36 @@
 package hmda.query.repository.institutions
 
-import hmda.model.institution.{ Institution, InstitutionGenerators }
-import hmda.query.DbConfiguration
+import hmda.model.institution.InstitutionGenerators
+import hmda.query.DbConfiguration._
 
 import scala.concurrent.duration._
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterEach, MustMatchers }
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.Await
 
-class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with InstitutionComponent with DbConfiguration with BeforeAndAfterEach {
-
+class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with InstitutionComponent with BeforeAndAfterAll {
+  import config.profile.api._
   import InstitutionConverter._
 
   val timeout = 5.seconds
 
   val repository = new InstitutionRepository(config)
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    dropAllObjects()
     Await.result(repository.createSchema(), timeout)
   }
 
-  override def afterEach(): Unit = {
-    super.afterEach()
-    Await.result(repository.dropSchema(), timeout)
+  override def afterAll(): Unit = {
+    super.afterAll()
+    dropAllObjects()
+  }
+
+  private def dropAllObjects() = {
+    val db = repository.config.db
+    val dropAll = sqlu"""DROP ALL OBJECTS"""
+    Await.result(db.run(dropAll), timeout)
   }
 
   "Institution Repository" must {

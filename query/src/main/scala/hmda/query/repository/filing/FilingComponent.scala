@@ -17,7 +17,8 @@ import slick.collection.heterogeneous.syntax._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
-trait FilingComponent { this: DbConfiguration =>
+trait FilingComponent {
+  import hmda.query.DbConfiguration._
   import config.profile.api._
 
   class LarTable(tag: Tag) extends Table[LoanApplicationRegisterQuery](tag, "lars") {
@@ -334,8 +335,8 @@ trait FilingComponent { this: DbConfiguration =>
     ) <> (Msa.tupled, Msa.unapply)
   }
 
-  class LarTotalMsaRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalMsaTable, String] {
-    implicit val system = ActorSystem()
+  class LarTotalMsaRepository(val config: DatabaseConfig[JdbcProfile])(implicit system: ActorSystem) extends Repository[LarTotalMsaTable, String] {
+
     implicit val materializer = ActorMaterializer()
 
     val configuration = ConfigFactory.load()

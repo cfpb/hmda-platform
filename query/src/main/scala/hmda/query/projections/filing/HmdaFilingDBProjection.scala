@@ -5,17 +5,13 @@ import akka.pattern.pipe
 import hmda.persistence.messages.CommonMessages.{ Command, Event }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ HmdaValidatorEvent, LarValidated }
 import hmda.persistence.model.HmdaActor
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.FilingComponent
 
 import scala.concurrent.ExecutionContext
 
-object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
-
-  val larRepository = new LarRepository(config)
-  val larTotalMsaRepository = new LarTotalMsaRepository(config)
-  val modifiedLarRepository = new ModifiedLarRepository(config)
+object HmdaFilingDBProjection {
 
   case object CreateSchema extends Command
   case class DeleteLars(respondentId: String)
@@ -30,12 +26,16 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
 
 }
 
-class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
-
-  implicit val ec: ExecutionContext = context.dispatcher
-
+class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor with FilingComponent {
   import HmdaFilingDBProjection._
   import hmda.query.repository.filing.LarConverter._
+
+  implicit val system = context.system
+  implicit val ec: ExecutionContext = context.dispatcher
+
+  val larRepository = new LarRepository(config)
+  val larTotalMsaRepository = new LarTotalMsaRepository(config)
+  val modifiedLarRepository = new ModifiedLarRepository(config)
 
   override def receive: Receive = {
     case CreateSchema =>

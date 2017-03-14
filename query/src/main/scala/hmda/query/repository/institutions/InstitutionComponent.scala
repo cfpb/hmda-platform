@@ -1,14 +1,14 @@
 package hmda.query.repository.institutions
 
-import hmda.query.DbConfiguration
 import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
 import slick.jdbc.JdbcProfile
+import hmda.query.DbConfiguration._
 
-trait InstitutionComponent { this: DbConfiguration =>
+trait InstitutionComponent {
   import config.profile.api._
 
   class InstitutionsTable(tag: Tag) extends Table[InstitutionQuery](tag, "institutions") {

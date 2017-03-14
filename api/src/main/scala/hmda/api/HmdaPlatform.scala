@@ -20,20 +20,20 @@ import hmda.persistence.messages.events.institutions.InstitutionEvents.Instituti
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
+import hmda.query.repository.filing.FilingComponent
 
 import scala.concurrent.ExecutionContext
 
-object HmdaPlatform extends DbConfiguration {
+object HmdaPlatform extends FilingComponent {
 
   val configFactory = ConfigFactory.load()
 
   val log = LoggerFactory.getLogger("hmda")
+  implicit val system = ActorSystem("hmda")
 
   def main(args: Array[String]): Unit = {
-
-    val system = ActorSystem("hmda")
     val supervisor = createSupervisor(system)
     val querySupervisor = createQuerySupervisor(system)
     implicit val ec = system.dispatcher

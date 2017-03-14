@@ -9,7 +9,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.protocol.processing.MsaProtocol
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.model.filing.{ Irs, Msa, MsaSummary }
 import hmda.query.repository.filing.FilingComponent
 
@@ -20,8 +20,7 @@ trait SubmissionIrsPaths
     extends HmdaCustomDirectives
     with RequestVerificationUtils
     with MsaProtocol
-    with FilingComponent
-    with DbConfiguration {
+    with FilingComponent {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer

@@ -3,6 +3,6 @@ package hmda.query
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-trait DbConfiguration {
+object DbConfiguration {
   lazy val config = DatabaseConfig.forConfig[JdbcProfile]("db")
 }
