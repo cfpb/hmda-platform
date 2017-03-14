@@ -49,12 +49,12 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
 
   "LAR Repository" must {
     "insert new records" in {
-      val lar1 = sampleLar.copy(respondentId = "resp1")
-      val lar2 = sampleLar.copy(respondentId = "resp1")
+      val lar1 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "inst1")
+      val lar2 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "inst1")
       repository.insertOrUpdate(lar1).map(x => x mustBe 1)
       repository.insertOrUpdate(lar2).map(x => x mustBe 1)
-      modifiedLarRepository.findByRespondentId(lar1.respondentId).map {
-        case xs: Seq[ModifiedLoanApplicationRegister] => xs.head.respondentId mustBe lar1.respondentId
+      modifiedLarRepository.findByInstitutionId("inst1").map {
+        case xs: Seq[ModifiedLoanApplicationRegister] => xs.head.institutionId mustBe lar1.institutionId
       }
     }
     "modify records and read them back" in {
@@ -96,19 +96,19 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       }
     }
 
-    "Stream rows for a specific respondent id" in {
-      val respId = "resp2"
-      val p = ""
-      val lar1 = sampleLar.copy(respondentId = respId)
-      val lar2 = sampleLar.copy(respondentId = respId)
-      val lar3 = sampleLar.copy(respondentId = respId)
-      val lar4 = sampleLar.copy(respondentId = "resp3")
+    "Stream rows for a specific institution id" in {
+      val instId = "test"
+      val period = ""
+      val lar1 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = instId)
+      val lar2 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = instId)
+      val lar3 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = instId)
+      val lar4 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "otherTest")
       repository.insertOrUpdate(lar1)
       repository.insertOrUpdate(lar2)
       repository.insertOrUpdate(lar3)
       repository.insertOrUpdate(lar4)
 
-      val lars = modifiedLarRepository.findByRespondentIdSource(respId, p)
+      val lars = modifiedLarRepository.findByInstitutionIdSource(instId, period)
       val count = Flow[ModifiedLoanApplicationRegister].map(_ => 1)
       val sum: Sink[Int, Future[Int]] = Sink.fold[Int, Int](0)(_ + _)
 

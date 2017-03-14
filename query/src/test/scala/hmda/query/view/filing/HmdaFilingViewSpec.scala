@@ -22,9 +22,9 @@ class HmdaFilingViewSpec extends ActorSpec with LarGenerators {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    hmdaFilingView ! EventWithSeqNr(1, LarValidated(l1))
-    hmdaFilingView ! EventWithSeqNr(2, LarValidated(l2))
-    hmdaFilingView ! EventWithSeqNr(3, LarValidated(l3))
+    hmdaFilingView ! EventWithSeqNr(1, LarValidated(l1, ""))
+    hmdaFilingView ! EventWithSeqNr(2, LarValidated(l2, ""))
+    hmdaFilingView ! EventWithSeqNr(3, LarValidated(l3, ""))
   }
 
   "HMDA Filing View" must {

@@ -18,19 +18,19 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
   case object CreateSchema extends Command
-  case class DeleteLars(respondentId: String)
+  case class DeleteLars(institutionId: String)
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
   case class LarsDeleted(respondentId: String) extends Event
-  def props(period: String, institutionId: String): Props = Props(new HmdaFilingDBProjection(period, institutionId))
+  def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
 
-  def createHmdaFilingDBProjection(system: ActorSystem, period: String, institutionId: String): ActorRef = {
-    system.actorOf(HmdaFilingDBProjection.props(period, institutionId))
+  def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
+    system.actorOf(HmdaFilingDBProjection.props(period))
   }
 
 }
 
-class HmdaFilingDBProjection(filingPeriod: String, institutionId: String) extends HmdaActor {
+class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
 
   implicit val ec: ExecutionContext = context.dispatcher
 
@@ -49,12 +49,12 @@ class HmdaFilingDBProjection(filingPeriod: String, institutionId: String) extend
         FilingSchemaCreated()
       } pipeTo sender()
 
-    case DeleteLars(respondentId) =>
-      larRepository.deleteByRespondentId(respondentId)
-        .map(_ => LarsDeleted(respondentId)) pipeTo sender()
+    case DeleteLars(institutionId) =>
+      larRepository.deleteByInstitutionId(institutionId)
+        .map(_ => LarsDeleted(institutionId)) pipeTo sender()
 
     case event: HmdaValidatorEvent => event match {
-      case LarValidated(lar) =>
+      case LarValidated(lar, institutionId) =>
         val larQuery = implicitly[LoanApplicationRegisterQuery](lar)
         val larWithPeriod = larQuery.copy(period = filingPeriod, institutionId = institutionId)
         log.debug(s"Inserted: ${larWithPeriod.toString}")

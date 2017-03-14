@@ -64,7 +64,7 @@ object HmdaFileValidator {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) =>
         HmdaFileValidationState(Some(newTs), lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro)
-      case larValidated @ LarValidated(lar) =>
+      case larValidated @ LarValidated(lar, _) =>
         HmdaFileValidationState(ts, lars :+ lar, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro)
       case TsSyntacticalError(e) =>
         HmdaFileValidationState(ts, lars, tsSyntactical :+ e, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro)
@@ -155,7 +155,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       }
 
     case lar: LoanApplicationRegister =>
-      val validated = LarValidated(lar)
+      val validated = LarValidated(lar, submissionId.institutionId)
       persist(validated) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)

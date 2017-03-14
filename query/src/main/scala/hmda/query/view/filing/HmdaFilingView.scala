@@ -25,7 +25,7 @@ object HmdaFilingView {
 
   case class FilingViewState(size: Long = 0, seqNr: Long = 0L) {
     def updated(event: Event): FilingViewState = event match {
-      case LarValidated(_) =>
+      case LarValidated(_, _) =>
         FilingViewState(size + 1, seqNr + 1)
       case _ => this
     }
@@ -54,7 +54,7 @@ class HmdaFilingView(period: String) extends HmdaPersistentActor {
         saveSnapshot(state)
       }
       event match {
-        case LarValidated(lar) =>
+        case LarValidated(lar, institutionId) =>
           log.debug(s"Reading LAR: $lar")
           updateState(event)
       }

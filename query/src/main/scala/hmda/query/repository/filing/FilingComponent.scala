@@ -303,12 +303,12 @@ trait FilingComponent { this: DbConfiguration =>
     def dropSchema() = db.run(table.schema.drop)
     def deleteById(id: String) = db.run(filterById(id).delete)
     def deleteAll = db.run(table.delete)
-    def deleteByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).delete)
+    def deleteByInstitutionId(instId: String) = db.run(table.filter(_.institutionId === instId).delete)
   }
 
   class LarTotalMsaTable(tag: Tag) extends Table[Msa](tag, "lars_total_msa") {
     def msa = column[String]("msa", O.PrimaryKey)
-    def respondentId = column[String]("respondent_id")
+    def institutionId = column[String]("institution_id")
     def period = column[String]("period")
     def total_lars = column[Int]("total_lars")
     def total_amount = column[Int]("total_amount")
@@ -354,7 +354,7 @@ trait FilingComponent { this: DbConfiguration =>
     private def createViewSchema() = {
       sqlu"""create view lars_total_msa as
         select msa,
-        respondent_id,
+        institution_id,
         period,
         count(*) as total_lars, sum(amount) as total_amount,
         count(case when loan_type = 1 then 1 else null end) as conv,
@@ -368,23 +368,23 @@ trait FilingComponent { this: DbConfiguration =>
         count(case when purpose = 2 then 1 else null end) as home_improve,
         count(case when purpose = 3 then 1 else null end) as refinance
         from lars
-        group by msa, respondent_id, period;
+        group by msa, institution_id, period;
       """
     }
 
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
 
-    private def getTableStream(respId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
+    private def getTableStream(instId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
-      val query = table.filter(x => x.respondentId === respId && x.period === period)
+      val query = table.filter(x => x.institutionId === instId && x.period === period)
       val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
 
       db.stream(disableAutocommit andThen action)
     }
 
-    def getMsaSeq(respId: String, period: String)(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
-      Source.fromPublisher(getTableStream(respId, period)).grouped(groupSize).runWith(Sink.head)
+    def getMsaSeq(instId: String, period: String)(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+      Source.fromPublisher(getTableStream(instId, period)).grouped(groupSize).runWith(Sink.head)
     }
   }
 
@@ -701,17 +701,17 @@ trait FilingComponent { this: DbConfiguration =>
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
 
-    def findByRespondentId(respId: String) = db.run(table.filter(_.respondentId === respId).result)
+    def findByInstitutionId(instId: String) = db.run(table.filter(_.institutionId === instId).result)
 
-    private def findByRespondentIdStream(respId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[ModifiedLoanApplicationRegister] = {
+    private def findByInstitutionIdStream(instId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[ModifiedLoanApplicationRegister] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
-      val query = table.filter(x => x.respondentId === respId && x.period === period)
+      val query = table.filter(x => x.institutionId === instId && x.period === period)
       val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
       db.stream(disableAutocommit andThen action)
     }
 
-    def findByRespondentIdSource(respId: String, period: String)(implicit ec: ExecutionContext): Source[ModifiedLoanApplicationRegister, NotUsed] =
-      Source.fromPublisher(findByRespondentIdStream(respId, period))
+    def findByInstitutionIdSource(instId: String, period: String)(implicit ec: ExecutionContext): Source[ModifiedLoanApplicationRegister, NotUsed] =
+      Source.fromPublisher(findByInstitutionIdStream(instId, period))
   }
 
 }
