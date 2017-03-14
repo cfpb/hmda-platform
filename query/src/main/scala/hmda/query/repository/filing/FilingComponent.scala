@@ -65,9 +65,10 @@ trait FilingComponent { this: DbConfiguration =>
     def denialReason1 = column[String]("denial_reason1")
     def denialReason2 = column[String]("denial_reason2")
     def denialReason3 = column[String]("denial_reason3")
+    def institutionId = column[String]("institution_id")
     def period = column[String]("period")
 
-    type LarQueryHList = String :: String :: Int :: Int :: Int :: Int :: Int :: String :: Int :: Int :: String :: String :: Int :: Int :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: String :: String :: String :: String :: Int :: Int :: String :: String :: String :: String :: String :: HNil
+    type LarQueryHList = String :: String :: Int :: Int :: Int :: Int :: Int :: String :: Int :: Int :: String :: String :: Int :: Int :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: String :: String :: String :: String :: Int :: Int :: String :: String :: String :: String :: String :: String :: HNil
 
     def createLarQuery(data: LarQueryHList): LoanApplicationRegisterQuery = data match {
       case id ::
@@ -109,6 +110,7 @@ trait FilingComponent { this: DbConfiguration =>
         denialReason1 ::
         denialReason2 ::
         denialReason3 ::
+        institutionId ::
         period ::
         HNil =>
         LoanApplicationRegisterQuery(
@@ -151,6 +153,7 @@ trait FilingComponent { this: DbConfiguration =>
           denialReason1,
           denialReason2,
           denialReason3,
+          institutionId,
           period
         )
     }
@@ -196,6 +199,7 @@ trait FilingComponent { this: DbConfiguration =>
         denialReason1,
         denialReason2,
         denialReason3,
+        institutionId,
         period
         ) =>
         Some(
@@ -238,6 +242,7 @@ trait FilingComponent { this: DbConfiguration =>
             denialReason1 ::
             denialReason2 ::
             denialReason3 ::
+            institutionId ::
             period ::
             HNil
         )
@@ -283,6 +288,7 @@ trait FilingComponent { this: DbConfiguration =>
       denialReason1 ::
       denialReason2 ::
       denialReason3 ::
+      institutionId ::
       period ::
       HNil
     ) <> (createLarQuery, extractLarQuery)
@@ -424,9 +430,10 @@ trait FilingComponent { this: DbConfiguration =>
     def denialReason1 = column[String]("denial_reason1")
     def denialReason2 = column[String]("denial_reason2")
     def denialReason3 = column[String]("denial_reason3")
+    def institutionId = column[String]("institution_id")
     def period = column[String]("period")
 
-    type ModifiedLarHList = String :: String :: Int :: Int :: Int :: Int :: String :: Int :: Int :: Int :: Int :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: String :: String :: String :: String :: Int :: Int :: String :: String :: String :: String :: String :: HNil
+    type ModifiedLarHList = String :: String :: Int :: Int :: Int :: Int :: String :: Int :: Int :: Int :: Int :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: Int :: Int :: String :: String :: String :: String :: Int :: String :: String :: String :: String :: Int :: Int :: String :: String :: String :: String :: String :: String :: HNil
 
     def createModifiedLar(data: ModifiedLarHList): ModifiedLoanApplicationRegister = data match {
       case id ::
@@ -465,6 +472,7 @@ trait FilingComponent { this: DbConfiguration =>
         denialReason1 ::
         denialReason2 ::
         denialReason3 ::
+        institutionId ::
         period ::
         HNil =>
         ModifiedLoanApplicationRegister(
@@ -504,6 +512,7 @@ trait FilingComponent { this: DbConfiguration =>
           denialReason1,
           denialReason2,
           denialReason3,
+          institutionId,
           period
         )
     }
@@ -547,6 +556,7 @@ trait FilingComponent { this: DbConfiguration =>
         denialReason1,
         denialReason2,
         denialReason3,
+        institutionId,
         period
         ) =>
         Some(
@@ -586,6 +596,7 @@ trait FilingComponent { this: DbConfiguration =>
             denialReason1 ::
             denialReason2 ::
             denialReason3 ::
+            institutionId ::
             period ::
             HNil
         )
@@ -628,6 +639,7 @@ trait FilingComponent { this: DbConfiguration =>
       denialReason1 ::
       denialReason2 ::
       denialReason3 ::
+      institutionId ::
       period ::
       HNil
     ) <> (createModifiedLar, extractModifiedLar)
@@ -681,6 +693,7 @@ trait FilingComponent { this: DbConfiguration =>
               denial_reason1,
               denial_reason2,
               denial_reason3,
+              institution_id,
               period
             from lars
           """

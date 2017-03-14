@@ -40,6 +40,7 @@ case class LoanApplicationRegisterQuery(
   denialReason1: String,
   denialReason2: String,
   denialReason3: String,
+  institutionId: String,
   period: String
 )
 

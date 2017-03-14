@@ -47,6 +47,7 @@ object LarConverter {
       lar.denial.reason1,
       lar.denial.reason2,
       lar.denial.reason3,
+      "",
       ""
     )
   }

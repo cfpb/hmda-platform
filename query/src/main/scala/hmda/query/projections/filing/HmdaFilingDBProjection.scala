@@ -22,15 +22,15 @@ object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
   case class LarInserted(n: Int)
   case class FilingSchemaCreated() extends Event
   case class LarsDeleted(respondentId: String) extends Event
-  def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
+  def props(period: String, institutionId: String): Props = Props(new HmdaFilingDBProjection(period, institutionId))
 
-  def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
-    system.actorOf(HmdaFilingDBProjection.props(period))
+  def createHmdaFilingDBProjection(system: ActorSystem, period: String, institutionId: String): ActorRef = {
+    system.actorOf(HmdaFilingDBProjection.props(period, institutionId))
   }
 
 }
 
-class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
+class HmdaFilingDBProjection(filingPeriod: String, institutionId: String) extends HmdaActor {
 
   implicit val ec: ExecutionContext = context.dispatcher
 
@@ -56,7 +56,7 @@ class HmdaFilingDBProjection(filingPeriod: String) extends HmdaActor {
     case event: HmdaValidatorEvent => event match {
       case LarValidated(lar) =>
         val larQuery = implicitly[LoanApplicationRegisterQuery](lar)
-        val larWithPeriod = larQuery.copy(period = filingPeriod)
+        val larWithPeriod = larQuery.copy(period = filingPeriod, institutionId = institutionId)
         log.debug(s"Inserted: ${larWithPeriod.toString}")
         larRepository.insertOrUpdate(larWithPeriod)
           .map(x => LarInserted(x)) pipeTo sender()
