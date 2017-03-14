@@ -59,7 +59,7 @@ object TsCsvParser {
   }
 
   def toLongOrFail(value: String, fieldName: String): ValidationNel[String, Long] = {
-    convert(value.toLong, s"$fieldName is not a integer")
+    convert(value.toLong, s"$fieldName is not an integer")
   }
 
   private def convert[T](x: => T, message: String): ValidationNel[String, T] = {
