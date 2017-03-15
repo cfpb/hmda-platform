@@ -123,35 +123,29 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
 
     }
 
-    /*"Stream IRS" in {
+    "Stream IRS" in {
       repository.deleteAll.map(x => x mustBe 1)
       val msa1 = geographyGen.sample.get.copy(msa = "12345")
       val msaNa = geographyGen.sample.get.copy(msa = "NA")
       val otherMsa = geographyGen.sample.get.copy(msa = "Don't include")
       val loan = loanGen.sample.get.copy(amount = 12)
-      val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
-      val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
-      val lar3 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
-      val lar4 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msaNa, loan = loan))
-      val lar5 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "2", geography = otherMsa, loan = loan))
-      val lar6 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = otherMsa, loan = loan))
-      val query1 = lar1.copy(period = "2017")
-      val query2 = lar2.copy(period = "2017")
-      val query3 = lar3.copy(period = "2017")
-      val query4 = lar4.copy(period = "2017")
-      val query5 = lar5.copy(period = "2017")
-      val query6 = lar6.copy(period = "2016")
+      val lar1 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = msa1, loan = loan))
+      val lar2 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = msaNa, loan = loan))
+      val lar3 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = otherMsa, loan = loan))
+      val lar4 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = otherMsa, loan = loan))
+      val query1 = lar1.copy(period = "2017", institutionId = "1")
+      val query2 = lar2.copy(period = "2017", institutionId = "1")
+      val query3 = lar3.copy(period = "2017", institutionId = "2")
+      val query4 = lar4.copy(period = "2016", institutionId = "1")
       Await.result(repository.insertOrUpdate(query1), duration)
       Await.result(repository.insertOrUpdate(query2), duration)
       Await.result(repository.insertOrUpdate(query3), duration)
       Await.result(repository.insertOrUpdate(query4), duration)
-      Await.result(repository.insertOrUpdate(query5), duration)
-      Await.result(repository.insertOrUpdate(query6), duration)
 
       val msaF = larTotalMsaRepository.getMsaSeq("1", "2017")
       val msaSeq: Seq[Msa] = Await.result(msaF, duration)
       msaSeq.toList.length mustBe 2
-    }*/
+    }
   }
 
 }
