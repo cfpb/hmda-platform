@@ -335,9 +335,6 @@ trait FilingComponent { this: DbConfiguration =>
   }
 
   class LarTotalMsaRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalMsaTable, String] {
-    implicit val system = ActorSystem()
-    implicit val materializer = ActorMaterializer()
-
     val configuration = ConfigFactory.load()
     val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
     val groupSize = configuration.getInt("hmda.query.group.size")
@@ -369,7 +366,7 @@ trait FilingComponent { this: DbConfiguration =>
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
 
-    private def getTableStream(respId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
+    private def getTableStream(respId: String, period: String)(implicit ec: ExecutionContext, materializer: ActorMaterializer): DatabasePublisher[Msa] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
       val query = table.filter(x => x.respondentId === respId && x.period === period)
       val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
@@ -377,7 +374,7 @@ trait FilingComponent { this: DbConfiguration =>
       db.stream(disableAutocommit andThen action)
     }
 
-    def getMsaSeq(respId: String, period: String)(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+    def getMsaSeq(respId: String, period: String)(implicit ec: ExecutionContext, materializer: ActorMaterializer): Future[Seq[Msa]] = {
       Source.fromPublisher(getTableStream(respId, period)).grouped(groupSize).runWith(Sink.head)
     }
   }
