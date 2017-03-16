@@ -50,17 +50,17 @@ trait WriteInstitutionProtocol extends InstitutionProtocol {
 
     override def write(obj: ExternalIdType): JsValue =
       JsObject(
-        "entryName" -> JsString(obj.entryName),
-        "formattedName" -> JsString(obj.formattedName)
+        "code" -> JsString(obj.entryName),
+        "name" -> JsString(obj.formattedName)
       )
 
-    override def read(json: JsValue): ExternalIdType = json.asJsObject.getFields("entryName", "formattedName") match {
-      case Seq(entryName, formattedName) =>
+    override def read(json: JsValue): ExternalIdType = json.asJsObject.getFields("code", "name") match {
+      case Seq(code, name) =>
         try {
-          ExternalIdType.withName(entryName.convertTo[String])
+          ExternalIdType.withName(code.convertTo[String])
         } catch {
           case _: NoSuchElementException => throw DeserializationException(
-            s"Unable to translate JSON string into valid ExternalIdType value: $entryName"
+            s"Unable to translate JSON string into valid ExternalIdType value: $code"
           )
         }
       case _ => throw DeserializationException("Unable to deserialize")

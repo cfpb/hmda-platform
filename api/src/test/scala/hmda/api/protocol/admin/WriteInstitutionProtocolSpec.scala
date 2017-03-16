@@ -27,9 +27,9 @@ class WriteInstitutionProtocolSpec extends PropSpec with PropertyChecks with Mus
           ("externalIds", JsArray(i.externalIds.map { x =>
             JsObject(
               ("value", JsString(x.value)),
-              ("name", JsObject(
-                ("entryName", JsString(x.name.entryName)),
-                ("formattedName", JsString(x.name.formattedName))
+              ("externalIdType", JsObject(
+                ("code", JsString(x.externalIdType.entryName)),
+                ("name", JsString(x.externalIdType.formattedName))
               ))
             )
           }.toVector)),
@@ -39,9 +39,9 @@ class WriteInstitutionProtocolSpec extends PropSpec with PropertyChecks with Mus
           ("respondent", JsObject(
             ("externalId", JsObject(
               ("value", JsString(i.respondent.externalId.value)),
-              ("name", JsObject(
-                ("entryName", JsString(i.respondent.externalId.name.entryName)),
-                ("formattedName", JsString(i.respondent.externalId.name.formattedName))
+              ("externalIdType", JsObject(
+                ("code", JsString(i.respondent.externalId.externalIdType.entryName)),
+                ("name", JsString(i.respondent.externalId.externalIdType.formattedName))
               ))
             )),
             ("name", JsString(i.respondent.name)),
