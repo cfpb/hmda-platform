@@ -159,6 +159,57 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     }
   }
 
+  "Justify macro edits" in {
+    val justification = MacroEditJustificationLookup.getJustifications("Q007").head.copy(verified = true)
+    val justifyEdit = MacroEditJustificationWithName("Q007", justification)
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", justifyEdit) ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val macroResults = responseAs[MacroResults].edits.head
+      macroResults.justifications.head.verified mustBe true
+      macroResults.justifications.tail.map(x => x.verified mustBe false)
+    }
+    val justification2 = MacroEditJustificationLookup.getJustifications("Q007").head.copy(verified = false)
+    val justifyEdit2 = MacroEditJustificationWithName("Q007", justification2)
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", justifyEdit2) ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      val macroResults = responseAs[MacroResults].edits.head
+      macroResults.justifications.head.verified mustBe false
+      macroResults.justifications.tail.map(x => x.verified mustBe false)
+    }
+  }
+
+  "Verify Quality edits endpoint: Responds with correct json and updates validation state" in {
+    val verification = QualityEditsVerification(true)
+    val currentStatus = Created
+
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/quality", verification) ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+
+      // test that it responds correctly
+      responseAs[QualityEditsVerifiedResponse] mustBe QualityEditsVerifiedResponse(true, currentStatus)
+
+      // test that it updates validation state
+      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
+      state.qualityVerified mustBe true
+    }
+  }
+
+  ///// 405 (Method Not Allowed) Responses /////
+
+  "Edit Type endpoint: return 405 when posting justification to syntactical endpoint" in {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes) ~> check {
+      status mustBe StatusCodes.MethodNotAllowed
+    }
+  }
+
+  "Edit Type endpoint: return 405 when posting justification to validity endpoint" in {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> Route.seal(institutionsRoutes) ~> check {
+      status mustBe StatusCodes.MethodNotAllowed
+    }
+  }
+
+  ///// 404 (Not Found) Responses /////
+
   "Edits endpoint: return 404 for nonexistent institution" in {
     getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.NotFound
@@ -197,52 +248,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     }
   }
 
-  "Justify macro edits" in {
-    val justification = MacroEditJustificationLookup.getJustifications("Q007").head.copy(verified = true)
-    val justifyEdit = MacroEditJustificationWithName("Q007", justification)
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", justifyEdit) ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.OK
-      val macroResults = responseAs[MacroResults].edits.head
-      macroResults.justifications.head.verified mustBe true
-      macroResults.justifications.tail.map(x => x.verified mustBe false)
-    }
-    val justification2 = MacroEditJustificationLookup.getJustifications("Q007").head.copy(verified = false)
-    val justifyEdit2 = MacroEditJustificationWithName("Q007", justification2)
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", justifyEdit2) ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.OK
-      val macroResults = responseAs[MacroResults].edits.head
-      macroResults.justifications.head.verified mustBe false
-      macroResults.justifications.tail.map(x => x.verified mustBe false)
-    }
-  }
-
-  "Edit Type endpoint: return 405 when posting justification to syntactical endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes) ~> check {
-      status mustBe StatusCodes.MethodNotAllowed
-    }
-  }
-
-  "Edit Type endpoint: return 405 when posting justification to validity endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> Route.seal(institutionsRoutes) ~> check {
-      status mustBe StatusCodes.MethodNotAllowed
-    }
-  }
-
-  "Verify Quality edits endpoint: Responds with correct json and updates validation state" in {
-    val verification = QualityEditsVerification(true)
-    val currentStatus = Created
-
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/quality", verification) ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.OK
-
-      // test that it responds correctly
-      responseAs[QualityEditsVerifiedResponse] mustBe QualityEditsVerifiedResponse(true, currentStatus)
-
-      // test that it updates validation state
-      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
-      state.qualityVerified mustBe true
-    }
-  }
+  ///// Helper Methods /////
 
   private def loadValidationErrors(): Unit = {
     val s1 = SyntacticalValidationError("loan1", "S010", false)
