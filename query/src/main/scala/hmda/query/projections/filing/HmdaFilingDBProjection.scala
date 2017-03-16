@@ -5,13 +5,13 @@ import akka.pattern.pipe
 import hmda.persistence.messages.CommonMessages.{ Command, Event }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ HmdaValidatorEvent, LarValidated }
 import hmda.persistence.model.HmdaActor
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.FilingComponent
 
 import scala.concurrent.ExecutionContext
 
-object HmdaFilingDBProjection extends FilingComponent with DbConfiguration {
+object HmdaFilingDBProjection extends FilingComponent {
 
   val larRepository = new LarRepository(config)
   val larTotalMsaRepository = new LarTotalMsaRepository(config)

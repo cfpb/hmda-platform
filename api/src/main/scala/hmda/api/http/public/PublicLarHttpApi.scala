@@ -7,12 +7,12 @@ import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import hmda.api.http.HmdaCustomDirectives
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.repository.filing.FilingComponent
 
 import scala.concurrent.ExecutionContext
 
-trait PublicLarHttpApi extends HmdaCustomDirectives with FilingComponent with DbConfiguration {
+trait PublicLarHttpApi extends HmdaCustomDirectives with FilingComponent {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
