@@ -18,8 +18,6 @@ import scala.concurrent.duration._
 
 class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
 
-  val supervisor = system.actorSelection("/user/supervisor")
-
   "Submission Parse Errors Path" must {
     "return no errors for an unparsed submission" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {

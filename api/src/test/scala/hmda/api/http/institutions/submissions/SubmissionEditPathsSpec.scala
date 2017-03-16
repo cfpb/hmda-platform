@@ -22,8 +22,6 @@ import scala.concurrent.duration._
 
 class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators with TsGenerators {
 
-  val supervisor = system.actorSelection("/user/supervisor")
-
   override def beforeAll(): Unit = {
     super.beforeAll()
     loadValidationErrors()

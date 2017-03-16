@@ -52,8 +52,6 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
     }
 
     "return 400 when trying to upload to a completed submission" in {
-      val supervisor = system.actorSelection("/user/supervisor")
-
       val fSubmission = for {
         a <- (supervisor ? FindSubmissions(SubmissionPersistence.name, "0", "2017")).mapTo[ActorRef]
         s <- (a ? UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)).mapTo[Option[Submission]]
