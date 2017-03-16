@@ -62,26 +62,16 @@ object HmdaFileValidator {
       larMacro: Seq[ValidationError] = Vector.empty[ValidationError]
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
-      case tsValidated @ TsValidated(newTs) =>
-        HmdaFileValidationState(Some(newTs), lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro)
-      case larValidated @ LarValidated(lar) =>
-        HmdaFileValidationState(ts, lars :+ lar, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro)
-      case TsSyntacticalError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical :+ e, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro)
-      case TsValidityError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity :+ e, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro)
-      case TsQualityError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality :+ e, larSyntactical, larValidity, larQuality, qualityVerified, larMacro)
-      case LarSyntacticalError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical :+ e, larValidity, larQuality, qualityVerified, larMacro)
-      case LarValidityError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity :+ e, larQuality, qualityVerified, larMacro)
-      case LarQualityError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality :+ e, qualityVerified, larMacro)
-      case LarMacroError(e) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, larMacro :+ e)
-      case QualityEditsVerified(v) =>
-        HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, v, larMacro)
+      case tsValidated @ TsValidated(newTs) => this.copy(ts = Some(newTs))
+      case larValidated @ LarValidated(lar) => this.copy(lars = lars :+ lar)
+      case TsSyntacticalError(e) => this.copy(tsSyntactical = tsSyntactical :+ e)
+      case TsValidityError(e) => this.copy(tsValidity = tsValidity :+ e)
+      case TsQualityError(e) => this.copy(tsQuality = tsQuality :+ e)
+      case LarSyntacticalError(e) => this.copy(larSyntactical = larSyntactical :+ e)
+      case LarValidityError(e) => this.copy(larValidity = larValidity :+ e)
+      case LarQualityError(e) => this.copy(larQuality = larQuality :+ e)
+      case LarMacroError(e) => this.copy(larMacro = larMacro :+ e)
+      case QualityEditsVerified(v) => this.copy(qualityVerified = v)
       case MacroEditJustified(e, j) =>
         val elem = larMacro.find(x => x.ruleName == e)
         elem match {
