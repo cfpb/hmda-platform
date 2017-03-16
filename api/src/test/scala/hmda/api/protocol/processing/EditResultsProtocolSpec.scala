@@ -41,7 +41,7 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
     rowResult.toJson mustBe expectedRowJson
   }
 
-  val macroResult = MacroResult("Q888", Set(MacroEditJustification(1, "justified 1", false)))
+  val macroResult = MacroResult("Q888")
   val expectedMacroJson = JsObject(
     ("edit", JsString("Q888")),
     ("justifications", JsArray(
@@ -57,7 +57,7 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
   }
 
   property("RowResults must have proper json format") {
-    val macros = MacroResults(Seq(macroResult))
+    val macros = MacroResults(true, Seq(macroResult))
     val rows = RowResults(Seq(rowResult), macros)
     val expectedRowsJson = JsObject(
       ("rows", JsArray(expectedRowJson)),

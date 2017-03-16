@@ -32,7 +32,6 @@ object HmdaFileValidator {
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
   case class VerifyQualityEdits(verified: Boolean) extends Command
-  case class JustifyMacroEdit(editName: String, macroEditJustification: MacroEditJustification) extends Command
   case class TsSyntacticalError(error: ValidationError) extends Event
   case class TsValidityError(error: ValidationError) extends Event
   case class TsQualityError(error: ValidationError) extends Event
@@ -41,7 +40,6 @@ object HmdaFileValidator {
   case class LarQualityError(error: ValidationError) extends Event
   case class LarMacroError(error: ValidationError) extends Event
   case class QualityEditsVerified(verified: Boolean) extends Event
-  case class MacroEditJustified(name: String, justification: MacroEditJustification) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
@@ -72,14 +70,6 @@ object HmdaFileValidator {
       case LarQualityError(e) => this.copy(larQuality = larQuality :+ e)
       case LarMacroError(e) => this.copy(larMacro = larMacro :+ e)
       case QualityEditsVerified(v) => this.copy(qualityVerified = v)
-      case MacroEditJustified(e, j) =>
-        val elem = larMacro.find(x => x.ruleName == e)
-        elem match {
-          case Some(v) =>
-            val macroUpdated: Seq[ValidationError] = MacroValidationError.updateJustifications(larMacro, j, v)
-            HmdaFileValidationState(ts, lars, tsSyntactical, tsValidity, tsQuality, larSyntactical, larValidity, larQuality, qualityVerified, macroUpdated)
-          case None => this
-        }
     }
   }
 }
@@ -218,12 +208,6 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       persist(QualityEditsVerified(v)) { e =>
         updateState(e)
         sender() ! QualityEditsVerified(v)
-      }
-
-    case JustifyMacroEdit(error, j) =>
-      persist(MacroEditJustified(error, j)) { e =>
-        updateState(e)
-        sender() ! MacroEditJustified(error, j)
       }
 
     case GetState =>

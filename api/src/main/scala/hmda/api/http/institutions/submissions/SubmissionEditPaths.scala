@@ -64,7 +64,7 @@ trait SubmissionEditPaths
                   val s = validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
                   val v = validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
                   val q = validationErrorsToQualityEditResults(e, e.tsQuality, e.larQuality)
-                  val m = validationErrorsToMacroResults(e.larMacro)
+                  val m = validationErrorsToMacroResults(e, e.larMacro)
                   SummaryEditResults(s, v, q, m)
                 }
 
@@ -92,25 +92,6 @@ trait SubmissionEditPaths
               case Some("row") => completeWithRowResults(editType, fValidationState, uri)
               case _ => completeValidationState(editType, fValidationState, uri, format.getOrElse(""))
             }
-          }
-        }
-      }
-    }
-
-  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/macro
-  def justifyMacroEditPath(institutionId: String)(implicit ec: ExecutionContext) =
-    path("filings" / Segment / "submissions" / IntNumber / "edits" / "macro") { (period, seqNr) =>
-      timedPost { uri =>
-        entity(as[MacroEditJustificationWithName]) { justifyEdit =>
-          completeVerified(institutionId, period, seqNr, uri) {
-            val fValidator = fHmdaFileValidator(SubmissionId(institutionId, period, seqNr))
-
-            val fValidationState = for {
-              v <- fValidator
-              j <- (v ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
-              state <- getValidationState(institutionId, period, seqNr)
-            } yield state
-            completeValidationState("macro", fValidationState, uri, "")
           }
         }
       }
@@ -155,7 +136,7 @@ trait SubmissionEditPaths
         case "syntactical" => validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
         case "validity" => validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
         case "quality" => validationErrorsToEditResults(e, e.tsQuality, e.larQuality, Quality)
-        case "macro" => validationErrorsToMacroResults(e.larMacro)
+        case "macro" => validationErrorsToMacroResults(e, e.larMacro)
       }
     }
 

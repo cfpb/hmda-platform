@@ -28,12 +28,12 @@ case class RowResult(rowId: String, edits: Seq[RowEditDetail])
 case class RowResults(rows: Seq[RowResult], `macro`: MacroResults)
 case class RowEditDetail(editId: String, description: String, fields: JsObject)
 
-case class MacroResult(edit: String, justifications: Set[MacroEditJustification])
-case class MacroResults(edits: Seq[MacroResult]) {
+case class MacroResult(edit: String)
+case class MacroResults(verified: Boolean, edits: Seq[MacroResult]) {
   def toCsv = edits.map(e => "macro, " + e.edit + "\n").mkString
 }
 case object MacroResults {
-  def empty: MacroResults = MacroResults(Nil)
+  def empty: MacroResults = MacroResults(true, Nil)
 }
 case class SummaryEditResults(
     syntactical: EditResults,

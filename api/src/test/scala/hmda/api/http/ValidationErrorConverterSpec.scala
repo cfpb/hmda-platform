@@ -50,7 +50,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val syntacticalEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Syntactical)
       val validityEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Validity)
       val qualityEditResults = validationErrorsToQualityEditResults(validationState, tsErrors, larErrors)
-      val macroEditResults = validationErrorsToMacroResults(larErrors)
+      val macroEditResults = validationErrorsToMacroResults(validationState, larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
       summaryEditResults.syntactical.edits.head.edit mustBe "S020"
@@ -61,11 +61,11 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
 
       summaryEditResults.validity.edits.size mustBe 3
       summaryEditResults.quality mustBe QualityEditResults(true, Seq())
-      summaryEditResults.`macro` mustBe MacroResults(Nil)
+      summaryEditResults.`macro` mustBe MacroResults(true, Nil)
     }
 
     "sort failures by row" in {
-      val macros = MacroResult("Q047", Set(MacroEditJustification(1, "There were many requests for preapprovals, but the applicant did not proceed with the loan.", false)))
+      val macros = MacroResult("Q047")
 
       val results: RowResults = validationErrorsToRowResults(validationState, tsErrors, larErrors, macroErrors)
       results.rows.size mustBe 4
