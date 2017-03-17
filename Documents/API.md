@@ -506,26 +506,10 @@ _Macro edits remain their own object because they aren't row based._
     }
   ],
   "macro": {
+    "verified": true,
     "edits": [
       {
-        "edit": "Q008",
-        "justifications": [
-          {
-            "id": 1,
-            "value": "Applicants decided not to proceed with the loan.",
-            "verified": false
-          },
-          {
-            "id": 2,
-            "value": "There were a large number of applications, but few loans were closed",
-            "verified": false
-          },
-          {
-            "id": 3,
-            "value": "Loan activity for this filing year consisted mainly of purchased loans.",
-            "verified": false
-          }
-        ]
+        "edit": "Q008"
       }
     ]
   }
