@@ -82,7 +82,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileParser, TsParsed(ts))
       lars.foreach { lar =>
         probe.send(hmdaFileParser, LarParsed(lar))
-        probe.expectMsg(Persisted())
+        probe.expectMsg(Persisted)
       }
       val hmdaFileValidator2 = createHmdaFileValidator(system, submissionId2)
       probe.send(hmdaFileParser, GetState)

@@ -54,7 +54,7 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor {
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
         log.debug(s"Persisted: ${e.data}")
         updateState(e)
-        sender() ! Persisted()
+        sender() ! Persisted
       }
 
     case CompleteUpload =>
