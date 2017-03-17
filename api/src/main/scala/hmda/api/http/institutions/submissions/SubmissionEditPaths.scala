@@ -101,7 +101,7 @@ trait SubmissionEditPaths
   def verifyQualityEditsPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / "quality") { (period, seqNr) =>
       timedPost { uri =>
-        entity(as[QualityEditsVerification]) { verification =>
+        entity(as[EditsVerification]) { verification =>
           completeVerified(institutionId, period, seqNr, uri) {
             val verified = verification.verified
             val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
@@ -110,14 +110,14 @@ trait SubmissionEditPaths
 
             val fSubmissions = for {
               va <- fValidator
-              v <- (va ? VerifyQualityEdits(verified)).mapTo[QualityEditsVerified]
+              v <- (va ? VerifyEdits(Quality, verified)).mapTo[EditsVerified]
               sa <- fSubmissionsActor
               s <- (sa ? GetSubmissionById(subId)).mapTo[Submission]
             } yield s
 
             onComplete(fSubmissions) {
               case Success(submission) =>
-                complete(ToResponseMarshallable(QualityEditsVerifiedResponse(verified, submission.status)))
+                complete(ToResponseMarshallable(EditsVerifiedResponse(verified, submission.status)))
               case Failure(error) => completeWithInternalError(uri, error)
             }
           }

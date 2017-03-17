@@ -31,7 +31,7 @@ object HmdaFileValidator {
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
-  case class VerifyQualityEdits(verified: Boolean) extends Command
+  case class VerifyEdits(editType: ValidationErrorType, verified: Boolean) extends Command
   case class TsSyntacticalError(error: ValidationError) extends Event
   case class TsValidityError(error: ValidationError) extends Event
   case class TsQualityError(error: ValidationError) extends Event
@@ -39,7 +39,7 @@ object HmdaFileValidator {
   case class LarValidityError(error: ValidationError) extends Event
   case class LarQualityError(error: ValidationError) extends Event
   case class LarMacroError(error: ValidationError) extends Event
-  case class QualityEditsVerified(verified: Boolean) extends Event
+  case class EditsVerified(editType: ValidationErrorType, verified: Boolean) extends Event
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
@@ -57,7 +57,8 @@ object HmdaFileValidator {
       larValidity: Seq[ValidationError] = Nil,
       larQuality: Seq[ValidationError] = Nil,
       qualityVerified: Boolean = false,
-      larMacro: Seq[ValidationError] = Vector.empty[ValidationError]
+      larMacro: Seq[ValidationError] = Vector.empty[ValidationError],
+      macroVerified: Boolean = false
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) => this.copy(ts = Some(newTs))
@@ -69,7 +70,10 @@ object HmdaFileValidator {
       case LarValidityError(e) => this.copy(larValidity = larValidity :+ e)
       case LarQualityError(e) => this.copy(larQuality = larQuality :+ e)
       case LarMacroError(e) => this.copy(larMacro = larMacro :+ e)
-      case QualityEditsVerified(v) => this.copy(qualityVerified = v)
+      case EditsVerified(editType, v) =>
+        if (editType == Quality) this.copy(qualityVerified = v)
+        else if (editType == Macro) this.copy(macroVerified = v)
+        else this
     }
   }
 }
@@ -204,11 +208,13 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         replyTo ! ValidationCompletedWithErrors(submissionId)
       }
 
-    case VerifyQualityEdits(v) =>
-      persist(QualityEditsVerified(v)) { e =>
-        updateState(e)
-        sender() ! QualityEditsVerified(v)
-      }
+    case VerifyEdits(editType, v) =>
+      if (editType == Quality || editType == Macro) {
+        persist(EditsVerified(editType, v)) { e =>
+          updateState(e)
+          sender() ! EditsVerified(editType, v)
+        }
+      } else sender() ! None
 
     case GetState =>
       sender() ! state

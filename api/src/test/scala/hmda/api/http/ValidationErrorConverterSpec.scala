@@ -39,7 +39,8 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       Nil,
       Nil,
       qualityVerified = true,
-      macroErrors
+      macroErrors,
+      macroVerified = false
     )
 
     val s020Desc = "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code."
@@ -61,7 +62,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
 
       summaryEditResults.validity.edits.size mustBe 3
       summaryEditResults.quality mustBe QualityEditResults(true, Seq())
-      summaryEditResults.`macro` mustBe MacroResults(true, Nil)
+      summaryEditResults.`macro` mustBe MacroResults(false, Nil)
     }
 
     "sort failures by row" in {

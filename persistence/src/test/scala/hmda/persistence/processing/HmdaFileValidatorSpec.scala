@@ -137,8 +137,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       ))
 
       // send VerifyQualityEdits message
-      probe.send(hmdaFileValidator, VerifyQualityEdits(true))
-      probe.expectMsg(QualityEditsVerified(true))
+      probe.send(hmdaFileValidator, VerifyEdits(Quality, true))
+      probe.expectMsg(EditsVerified(Quality, true))
 
       // expect updated validation state
       probe.send(hmdaFileValidator, GetState)

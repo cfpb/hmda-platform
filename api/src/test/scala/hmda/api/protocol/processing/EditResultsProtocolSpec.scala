@@ -42,16 +42,7 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
   }
 
   val macroResult = MacroResult("Q888")
-  val expectedMacroJson = JsObject(
-    ("edit", JsString("Q888")),
-    ("justifications", JsArray(
-      JsObject(
-        ("id", JsNumber(1)),
-        ("value", JsString("justified 1")),
-        ("verified", JsBoolean(false))
-      )
-    ))
-  )
+  val expectedMacroJson = JsObject(("edit", JsString("Q888")))
   property("MacroResults must have proper json format") {
     macroResult.toJson mustBe expectedMacroJson
   }
@@ -62,6 +53,7 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
     val expectedRowsJson = JsObject(
       ("rows", JsArray(expectedRowJson)),
       ("macro", JsObject(
+        ("verified", JsBoolean(true)),
         ("edits", JsArray(expectedMacroJson))
       ))
     )
@@ -69,7 +61,7 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
   }
 
   property("QualityEditsVerifiedResponse must have correct json format") {
-    val response = QualityEditsVerifiedResponse(true, ValidatedWithErrors)
+    val response = EditsVerifiedResponse(true, ValidatedWithErrors)
     response.toJson mustBe JsObject(
       ("verified", JsBoolean(true)),
       ("status", JsObject(

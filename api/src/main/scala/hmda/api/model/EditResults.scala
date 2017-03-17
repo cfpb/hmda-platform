@@ -20,8 +20,8 @@ trait EditResultsCollection {
   def toCsv(editType: String) = edits.map(e => e.toCsv(editType)).mkString
 }
 
-case class QualityEditsVerification(verified: Boolean)
-case class QualityEditsVerifiedResponse(verified: Boolean, status: SubmissionStatus)
+case class EditsVerification(verified: Boolean)
+case class EditsVerifiedResponse(verified: Boolean, status: SubmissionStatus)
 
 // For a single row, all of the edits that it failed
 case class RowResult(rowId: String, edits: Seq[RowEditDetail])

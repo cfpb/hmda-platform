@@ -178,14 +178,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   */
 
   "Verify Quality edits endpoint: Responds with correct json and updates validation state" in {
-    val verification = QualityEditsVerification(true)
+    val verification = EditsVerification(true)
     val currentStatus = Created
 
     postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/quality", verification) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
 
       // test that it responds correctly
-      responseAs[QualityEditsVerifiedResponse] mustBe QualityEditsVerifiedResponse(true, currentStatus)
+      responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
       val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
