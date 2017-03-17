@@ -334,8 +334,6 @@ By default, results are grouped by edit type.
 
 Example responses:
 
-Default Sorting:
-
 ```json
 {
   "syntactical": {
