@@ -74,7 +74,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = false,
-        Seq(e4)
+        Seq(e4),
+        macroVerified = false
       ))
     }
 
@@ -117,6 +118,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
           MacroValidationError("Q016"),
           MacroValidationError("Q023")
         ),
+        macroVerified = false
       ))
     }
 
@@ -133,7 +135,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = false,
-        Vector(e4)
+        Vector(e4),
+        macroVerified = false
       ))
 
       // send VerifyQualityEdits message
@@ -152,12 +155,12 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = true,
-        Vector(e4)
+        Vector(e4),
+        macroVerified = false
       ))
     }
 
-    /*
-    "verify quality edits" in {
+    "verify macro edits" in {
       // establish baseline
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
@@ -169,13 +172,14 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e1),
         Seq(e2),
         Seq(e3),
-        qualityVerified = false,
-        Vector(e4)
+        qualityVerified = true,
+        Vector(e4),
+        macroVerified = false
       ))
 
       // send VerifyQualityEdits message
-      probe.send(hmdaFileValidator, VerifyQualityEdits(true))
-      probe.expectMsg(QualityEditsVerified(true))
+      probe.send(hmdaFileValidator, VerifyEdits(Macro, true))
+      probe.expectMsg(EditsVerified(Macro, true))
 
       // expect updated validation state
       probe.send(hmdaFileValidator, GetState)
@@ -189,10 +193,10 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = true,
-        Vector(e4)
+        Vector(e4),
+        macroVerified = true
       ))
     }
-    */
 
   }
 
