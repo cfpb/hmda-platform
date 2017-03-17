@@ -45,7 +45,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     "persist TS parsing errors" in {
       parseTs(badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(0, Seq("Timestamp is not a Long"), Nil))
+      probe.expectMsg(HmdaFileParseState(0, Seq("Timestamp is not an integer"), Nil))
     }
 
     "persist parsed LARs" in {
@@ -57,7 +57,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     "persist parsed LARs and parsing errors" in {
       parseLars(hmdaFileParser, probe, badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(2, Nil, Seq(LarParsingError(0, List("Agency Code is not an Integer")))))
+      probe.expectMsg(HmdaFileParseState(2, Nil, Seq(LarParsingError(0, List("Agency Code is not an integer")))))
     }
 
     "read entire raw file" in {
