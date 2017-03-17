@@ -6,7 +6,7 @@ import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ Config, ConfigFactory }
 import hmda.api.RequestHeaderUtils
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.demo.DemoData
@@ -24,6 +24,9 @@ trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with Reque
   val duration = 10.seconds
   override val log: LoggingAdapter = NoLogging
   override implicit val timeout: Timeout = Timeout(duration)
+
+  val configuration: Config = ConfigFactory.load()
+  implicit val flowParallelism: Int = configuration.getInt("hmda.actor-flow-parallelism")
 
   val ec = system.dispatcher
 

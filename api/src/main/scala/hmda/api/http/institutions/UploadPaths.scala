@@ -14,7 +14,6 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Framing, Sink }
 import akka.util.{ ByteString, Timeout }
-import com.typesafe.config.ConfigFactory
 import hmda.api.http.HmdaCustomDirectives
 import hmda.persistence.messages.CommonMessages._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
@@ -38,8 +37,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
 
   implicit val timeout: Timeout
 
-  val configuration = ConfigFactory.load()
-  val flowParallelism = configuration.getInt("hmda.actor-flow-parallelism")
+  implicit val flowParallelism: Int
 
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
@@ -89,7 +87,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
           .runWith(Sink.ignore)
 
         onComplete(uploadedF) {
-          case Success(response) =>
+          case Success(_) =>
             processingActor ! CompleteUpload
             complete(ToResponseMarshallable(StatusCodes.Accepted -> submission.copy(status = Uploaded)))
           case Failure(error) =>
