@@ -10,7 +10,7 @@ import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, ValidationCompletedWithErrors }
+import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, Persisted, ValidationCompletedWithErrors }
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
@@ -80,7 +80,10 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
     "read parsed data and validate it" in {
       probe.send(hmdaFileParser, TsParsed(ts))
-      lars.foreach(lar => probe.send(hmdaFileParser, LarParsed(lar)))
+      lars.foreach { lar =>
+        probe.send(hmdaFileParser, LarParsed(lar))
+        probe.expectMsg(Persisted)
+      }
       val hmdaFileValidator2 = createHmdaFileValidator(system, submissionId2)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(5, Nil))

@@ -1,14 +1,14 @@
 package hmda.query.repository.institutions
 
-import hmda.model.institution.{ Institution, InstitutionGenerators }
-import hmda.query.DbConfiguration
+import hmda.model.institution.InstitutionGenerators
+import hmda.query.DbConfiguration._
 
 import scala.concurrent.duration._
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterEach, MustMatchers }
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, BeforeAndAfterEach, MustMatchers }
 
 import scala.concurrent.Await
 
-class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with InstitutionComponent with DbConfiguration with BeforeAndAfterEach {
+class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with InstitutionComponent with BeforeAndAfterAll {
 
   import InstitutionConverter._
 
@@ -16,13 +16,13 @@ class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with Inst
 
   val repository = new InstitutionRepository(config)
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
+  override def beforeAll(): Unit = {
+    super.beforeAll()
     Await.result(repository.createSchema(), timeout)
   }
 
-  override def afterEach(): Unit = {
-    super.afterEach()
+  override def afterAll(): Unit = {
+    super.afterAll()
     Await.result(repository.dropSchema(), timeout)
   }
 

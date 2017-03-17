@@ -14,7 +14,7 @@ import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindS
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
-import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, StartUpload }
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
 import hmda.persistence.processing.HmdaRawFile.AddLine
@@ -84,6 +84,7 @@ class SubmissionManagerSpec extends ActorSpec {
     "upload, parse and validate" in {
       for (line <- lines) {
         probe.send(submissionManager, AddLine(timestamp, line.toString))
+        probe.expectMsg(Persisted)
       }
 
       probe.send(submissionManager, CompleteUpload)

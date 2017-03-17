@@ -6,7 +6,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister, Msa }
 import hmda.query.repository.{ Repository, TableRepository }
 import slick.basic.{ DatabaseConfig, DatabasePublisher }
@@ -17,7 +17,7 @@ import slick.collection.heterogeneous.syntax._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
-trait FilingComponent { this: DbConfiguration =>
+trait FilingComponent {
   import config.profile.api._
 
   class LarTable(tag: Tag) extends Table[LoanApplicationRegisterQuery](tag, "lars") {
@@ -341,9 +341,6 @@ trait FilingComponent { this: DbConfiguration =>
   }
 
   class LarTotalMsaRepository(val config: DatabaseConfig[JdbcProfile]) extends Repository[LarTotalMsaTable, String] {
-    implicit val system = ActorSystem()
-    implicit val materializer = ActorMaterializer()
-
     val configuration = ConfigFactory.load()
     val queryFetchSize = configuration.getInt("hmda.query.fetch.size")
     val groupSize = configuration.getInt("hmda.query.group.size")
@@ -375,7 +372,7 @@ trait FilingComponent { this: DbConfiguration =>
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
 
-    private def getTableStream(instId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[Msa] = {
+    private def getTableStream(instId: String, period: String)(implicit ec: ExecutionContext, materializer: ActorMaterializer): DatabasePublisher[Msa] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
       val query = table.filter(x => x.institutionId === instId && x.period === period)
       val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
@@ -383,7 +380,7 @@ trait FilingComponent { this: DbConfiguration =>
       db.stream(disableAutocommit andThen action)
     }
 
-    def getMsaSeq(instId: String, period: String)(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+    def getMsaSeq(instId: String, period: String)(implicit ec: ExecutionContext, materializer: ActorMaterializer): Future[Seq[Msa]] = {
       Source.fromPublisher(getTableStream(instId, period)).grouped(groupSize).runWith(Sink.head)
     }
   }

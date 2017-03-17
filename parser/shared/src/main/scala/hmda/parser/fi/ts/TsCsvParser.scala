@@ -10,7 +10,7 @@ object TsCsvParser {
   def apply(s: String): Either[List[String], TransmittalSheet] = {
     val values = (s + " ").split('|').map(_.trim).toList
     if (values.length != 21) {
-      return Left(List("Incorrect number of fields. found: " + values.length + ", expected: 21"))
+      return Left(List(s"An incorrect number of data fields were reported: ${values.length} data fields were found, when 21 data fields were expected."))
     }
 
     val id = toIntOrFail(values(0), "Record Identifier")
@@ -55,11 +55,11 @@ object TsCsvParser {
   }
 
   def toIntOrFail(value: String, fieldName: String): ValidationNel[String, Int] = {
-    convert(value.toInt, s"$fieldName is not an Integer")
+    convert(value.toInt, s"$fieldName is not an integer")
   }
 
   def toLongOrFail(value: String, fieldName: String): ValidationNel[String, Long] = {
-    convert(value.toLong, s"$fieldName is not a Long")
+    convert(value.toLong, s"$fieldName is not an integer")
   }
 
   private def convert[T](x: => T, message: String): ValidationNel[String, T] = {

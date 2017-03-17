@@ -3,8 +3,8 @@ package hmda.query.repository.filing
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Flow, Keep, RunnableGraph, Sink }
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.query.DbConfiguration
+import hmda.model.fi.lar.LarGenerators
+import hmda.query.DbConfiguration._
 import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister, Msa }
 
 import scala.concurrent.duration._
@@ -12,7 +12,7 @@ import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.{ Await, Future }
 
-class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingComponent with DbConfiguration with BeforeAndAfterAll with LarGenerators {
+class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingComponent with BeforeAndAfterAll with LarGenerators {
 
   import LarConverter._
   import config.profile.api._
@@ -37,7 +37,7 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   override def afterAll(): Unit = {
     super.afterAll()
     dropAllObjects()
-    repository.config.db.close()
+    //repository.config.db.close()
     system.terminate()
   }
 

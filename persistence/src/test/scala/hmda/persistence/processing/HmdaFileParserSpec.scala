@@ -13,7 +13,7 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaRawFile._
-import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, ParsingCompleted, ParsingCompletedWithErrors, UploadCompleted }
+import hmda.persistence.processing.ProcessingMessages._
 
 class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
@@ -45,7 +45,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     "persist TS parsing errors" in {
       parseTs(badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(0, Seq("Timestamp is not a Long"), Nil))
+      probe.expectMsg(HmdaFileParseState(0, Seq("Timestamp is not an integer"), Nil))
     }
 
     "persist parsed LARs" in {
@@ -57,7 +57,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
     "persist parsed LARs and parsing errors" in {
       parseLars(hmdaFileParser, probe, badLines)
       probe.send(hmdaFileParser, GetState)
-      probe.expectMsg(HmdaFileParseState(2, Nil, Seq(LarParsingError(0, List("Agency Code is not an Integer")))))
+      probe.expectMsg(HmdaFileParseState(2, Nil, Seq(LarParsingError(0, List("Agency Code is not an integer")))))
     }
 
     "read entire raw file" in {
@@ -66,6 +66,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       val hmdaRawFile = createHmdaRawFile(system, submissionId2)
       for (line <- lines) {
         probe.send(hmdaRawFile, AddLine(timestamp, line.toString))
+        probe.expectMsg(Persisted)
       }
 
       probe.send(hmdaRawFile, CompleteUpload)
@@ -89,6 +90,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       // setup: persist raw lines
       for (line <- badLines) {
         probe.send(rawFileActor, AddLine(timestamp, line))
+        probe.expectMsg(Persisted)
       }
 
       probe.send(rawFileActor, CompleteUpload)
@@ -109,6 +111,7 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
       1.to(42).foreach { i =>
         val err = LarParsingError(i, List(s"$i"))
         probe.send(hmdaFileParser, LarParsedErrors(err))
+        probe.expectMsg(Persisted)
       }
 
       // First page should have TS errors and 19 LAR errors (20 rows' errors total)
