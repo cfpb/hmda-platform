@@ -10,12 +10,13 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.fi._
 import hmda.model.util.FITestData._
 import hmda.persistence.HmdaSupervisor
-import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor }
-import hmda.persistence.institutions.FilingPersistence
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
+import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.institutions.FilingPersistence._
+import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
 import hmda.persistence.processing.HmdaRawFile.AddLine
 
 import scala.concurrent.Await
@@ -32,8 +33,10 @@ class SubmissionManagerSpec extends ActorSpec {
   val supervisor = system.actorOf(HmdaSupervisor.props(), "supervisor")
   val fFilingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
   val fSubmissionManager = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
+  val fSubmissionPersistence = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
   val filingPersistence: ActorRef = Await.result(fFilingPersistence, 2.seconds)
   val submissionManager: ActorRef = Await.result(fSubmissionManager, 2.seconds)
+  val submissionPersistence: ActorRef = Await.result(fSubmissionPersistence, 2.seconds)
 
   val probe = TestProbe()
 
@@ -46,6 +49,10 @@ class SubmissionManagerSpec extends ActorSpec {
     val filing = Filing(submissionId.period, submissionId.institutionId, NotStarted, filingRequired = false, 0L, 0L)
     probe.send(filingPersistence, CreateFiling(filing))
     probe.expectMsg(Some(filing))
+
+    // setup: create Submission object
+    probe.send(submissionPersistence, CreateSubmission)
+    probe.expectMsgType[Some[Submission]]
 
     "Filing status begins as 'not started'" in {
       val filing = expectedFiling
@@ -72,7 +79,6 @@ class SubmissionManagerSpec extends ActorSpec {
 
       val filing = expectedFiling
       filing.status mustBe InProgress
-      filing.end mustBe 0
     }
 
     "upload, parse and validate" in {

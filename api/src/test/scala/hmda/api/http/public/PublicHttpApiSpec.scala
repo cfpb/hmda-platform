@@ -4,10 +4,10 @@ import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, StatusCodes }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import hmda.api.RequestHeaderUtils
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import org.scalatest.{ BeforeAndAfterAll, BeforeAndAfterEach, MustMatchers, WordSpec }
+import hmda.model.fi.lar.LarGenerators
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.util.Timeout
-
+import hmda.query.DbConfiguration._
 import scala.concurrent.duration._
 import scala.concurrent.Await
 import hmda.query.repository.filing.LarConverter._
@@ -42,7 +42,6 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
   override def afterAll(): Unit = {
     super.afterAll()
     dropAllObjects()
-    repository.config.db.close()
   }
 
   private def dropAllObjects() = {

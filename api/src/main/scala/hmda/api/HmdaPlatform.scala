@@ -20,12 +20,12 @@ import hmda.persistence.messages.events.institutions.InstitutionEvents.Instituti
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 
 import scala.concurrent.ExecutionContext
 
-object HmdaPlatform extends DbConfiguration {
+object HmdaPlatform {
 
   val configFactory = ConfigFactory.load()
 
