@@ -11,18 +11,52 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import akka.pattern.ask
 import hmda.api.protocol.processing.SubmissionProtocol
+import hmda.query.DbConfiguration
+import hmda.query.model.filing.ModifiedLoanApplicationRegister
 
-class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtocol with UploadPaths {
+import scala.concurrent.Await
+
+class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtocol with UploadPaths with DbConfiguration {
+  import config.profile.api._
+
   val csv = "1|0123456789|9|201301171330|2013|99-9999999|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St       XXXXXXXXXXXXXXXXXXXXX|Sacramento         XXXXXX|CA|99999-9999|MIKES SMALL INC    XXXXXXXXXXX|1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX|San Francisco      XXXXXX|CA|99999-1234|Mrs. Krabappel     XXXXXXXXXXX|916-999-9999|999-753-9999|krabappel@gmail.comXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
-    "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
-    "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
-    "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
+    "2|0123456789|9|ABC|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
+    "2|0123456789|9|DEF|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
+    "2|0123456789|9|GHI|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
+  val csv2 = "1|0123456789|9|201301171330|2013|99-9999999|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St       XXXXXXXXXXXXXXXXXXXXX|Sacramento         XXXXXX|CA|99999-9999|MIKES SMALL INC    XXXXXXXXXXX|1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX|San Francisco      XXXXXX|CA|99999-1234|Mrs. Krabappel     XXXXXXXXXXX|916-999-9999|999-753-9999|krabappel@gmail.comXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
+    "2|0123456789|8|JKL|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
+    "2|0123456789|8|MNO|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
+    "2|0123456789|8|PQR|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
   val file = multiPartFile(csv, "parse-length_4-lars.txt")
+  val file2 = multiPartFile(csv2, "parse-length_5-lars.txt")
 
   val badContent = "qdemd"
   val badFile = multiPartFile(badContent, "sample.dat")
 
   val id = SubmissionId("0", "2017", 1)
+
+  val repository = new LarRepository(config)
+  val modifiedLarRepository = new ModifiedLarRepository(config)
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    dropAllObjects()
+    Await.result(repository.createSchema(), duration)
+    Await.result(modifiedLarRepository.createSchema(), duration)
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    dropAllObjects()
+    repository.config.db.close()
+    system.terminate()
+  }
+
+  private def dropAllObjects() = {
+    val db = repository.config.db
+    val dropAll = sqlu"""DROP ALL OBJECTS"""
+    Await.result(db.run(dropAll), duration)
+  }
 
   "Upload Paths" must {
 
@@ -40,6 +74,21 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", badFile) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[Submission] mustBe Submission(id2, Failed("Invalid File Format"), 0L, 0L)
+      }
+    }
+
+    "delete previous submission when re-uploading another HMDA file" in {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file2) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.Accepted
+        val submission = responseAs[Submission]
+        submission.status mustBe Uploaded
+        submission.start must be < System.currentTimeMillis()
+        Thread.sleep(4000) //Needs to go through validation process
+        modifiedLarRepository.findByInstitutionId("0").map {
+          case xs: Seq[ModifiedLoanApplicationRegister] =>
+            xs.length mustBe 3
+            xs.head.agencyCode mustBe 8
+        }
       }
     }
 
