@@ -47,7 +47,7 @@ trait InstitutionsHttpApi
                   submissionEditsPath(instId) ~
                   submissionParseErrorsPath(instId) ~
                   submissionSingleEditPath(instId) ~
-                  verifyQualityEditsPath(instId) ~
+                  verifyEditsPath(instId) ~
                   submissionIrsPath(instId) ~
                   submissionSignPath(instId) ~
                   submissionSummaryPath(instId)

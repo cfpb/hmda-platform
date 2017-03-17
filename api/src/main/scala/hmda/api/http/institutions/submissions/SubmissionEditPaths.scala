@@ -19,9 +19,10 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
+import hmda.validation.engine._
 
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
 trait SubmissionEditPaths
@@ -97,9 +98,10 @@ trait SubmissionEditPaths
       }
     }
 
-  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/quality
-  def verifyQualityEditsPath(institutionId: String)(implicit ec: ExecutionContext) =
-    path("filings" / Segment / "submissions" / IntNumber / "edits" / "quality") { (period, seqNr) =>
+  private val editTypeRegex = new Regex("quality|macro")
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/quality|macro
+  def verifyEditsPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) { (period, seqNr, verificationType) =>
       timedPost { uri =>
         entity(as[EditsVerification]) { verification =>
           completeVerified(institutionId, period, seqNr, uri) {
@@ -107,10 +109,11 @@ trait SubmissionEditPaths
             val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
             val subId = SubmissionId(institutionId, period, seqNr)
             val fValidator = fHmdaFileValidator(subId)
+            val editType: ValidationErrorType = if (verificationType == "quality") Quality else Macro
 
             val fSubmissions = for {
               va <- fValidator
-              v <- (va ? VerifyEdits(Quality, verified)).mapTo[EditsVerified]
+              v <- (va ? VerifyEdits(editType, verified)).mapTo[EditsVerified]
               sa <- fSubmissionsActor
               s <- (sa ? GetSubmissionById(subId)).mapTo[Submission]
             } yield s
