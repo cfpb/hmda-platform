@@ -8,6 +8,7 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaRawFile._
+import hmda.persistence.processing.ProcessingMessages.Persisted
 
 class HmdaRawFileSpec extends ActorSpec {
   import hmda.model.util.FITestData._
@@ -35,6 +36,7 @@ class HmdaRawFileSpec extends ActorSpec {
     "persist raw data" in {
       for (line <- lines) {
         probe.send(hmdaFileUpload, AddLine(timestamp, line.toString))
+        probe.expectMsg(Persisted)
       }
       probe.send(hmdaFileUpload, GetState)
       probe.expectMsg(HmdaRawFileState(4, fileName))

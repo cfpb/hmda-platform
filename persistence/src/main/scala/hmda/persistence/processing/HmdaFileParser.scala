@@ -1,7 +1,10 @@
 package hmda.persistence.processing
 
+import akka.pattern.ask
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.stream.scaladsl.{ Sink, Source }
+import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
@@ -13,6 +16,8 @@ import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.HmdaRawFile.LineAdded
 import hmda.persistence.processing.ProcessingMessages._
+
+import scala.concurrent.duration._
 
 object HmdaFileParser {
 
@@ -60,6 +65,12 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   override def persistenceId: String = s"$name-$submissionId"
 
+  val duration = 10.seconds
+  implicit val timeout = Timeout(duration)
+
+  val config = ConfigFactory.load()
+  val flowParallelism = config.getInt("hmda.actor-flow-parallelism")
+
   override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId, replyTo: ActorRef) =>
@@ -91,6 +102,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         }
 
       parsedLar
+        .mapAsync(parallelism = flowParallelism)(x => (self ? x).mapTo[Persisted.type])
         .runWith(Sink.actorRef(self, FinishParsing(replyTo)))
 
     case tp @ TsParsed(ts) =>
@@ -109,12 +121,14 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
       persist(lp) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
+        sender() ! Persisted
       }
 
     case larErr @ LarParsedErrors(errors) =>
       persist(larErr) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
+        sender() ! Persisted
       }
 
     case FinishParsing(replyTo) =>

@@ -25,5 +25,6 @@ object ProcessingMessages {
   case class ParsingCompletedWithErrors(submissionId: SubmissionId) extends Event
   case class ValidationCompleted(submissionId: SubmissionId) extends Event
   case class ValidationCompletedWithErrors(submissionId: SubmissionId) extends Event
+  case object Persisted extends Event
   case object Signed extends Event
 }

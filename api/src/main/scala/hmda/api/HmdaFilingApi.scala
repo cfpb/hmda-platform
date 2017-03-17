@@ -26,6 +26,7 @@ class HmdaFilingApi
     with HmdaCustomDirectives {
 
   val configuration = ConfigFactory.load()
+  implicit val flowParallelism = configuration.getInt("hmda.actor-flow-parallelism")
 
   override val name = "hmda-filing-api"
 

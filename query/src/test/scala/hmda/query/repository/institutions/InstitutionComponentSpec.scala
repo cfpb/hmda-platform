@@ -21,6 +21,11 @@ class InstitutionComponentSpec extends AsyncWordSpec with MustMatchers with Inst
     Await.result(repository.createSchema(), timeout)
   }
 
+  override def afterAll(): Unit = {
+    super.afterAll()
+    Await.result(repository.dropSchema(), timeout)
+  }
+
   "Institution Repository" must {
     "insert new records" in {
       val i = InstitutionGenerators.sampleInstitution
