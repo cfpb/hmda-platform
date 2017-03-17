@@ -50,14 +50,12 @@ class HmdaFileParserSpec extends ActorSpec with BeforeAndAfterEach with HmdaFile
 
     "persist parsed LARs" in {
       parseLars(hmdaFileParser, probe, lines)
-      (1 to lines.length - 1).foreach(_ => probe.expectMsg(Persisted))
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(3, Nil, Nil))
     }
 
     "persist parsed LARs and parsing errors" in {
       parseLars(hmdaFileParser, probe, badLines)
-      (1 to badLines.length - 1).foreach(_ => probe.expectMsg(Persisted))
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(2, Nil, Seq(LarParsingError(0, List("Agency Code is not an Integer")))))
     }
