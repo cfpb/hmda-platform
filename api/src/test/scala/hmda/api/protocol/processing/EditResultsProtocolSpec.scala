@@ -2,7 +2,6 @@ package hmda.api.protocol.processing
 
 import hmda.api.model._
 import hmda.model.fi.ValidatedWithErrors
-import hmda.validation.engine.MacroEditJustification
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._

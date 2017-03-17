@@ -1,7 +1,6 @@
 package hmda.api.model
 
 import hmda.model.fi.SubmissionStatus
-import hmda.validation.engine.MacroEditJustification
 import spray.json.JsObject
 
 case class RowId(rowId: String)

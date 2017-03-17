@@ -255,7 +255,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val v1 = ValidityValidationError("loan1", "V280", false)
     val v2 = ValidityValidationError("loan2", "V285", false)
     val v3 = ValidityValidationError("loan3", "V285", false)
-    val m1 = MacroValidationError("Q007", Nil)
+    val m1 = MacroValidationError("Q007")
 
     val l1 = sampleLar
     val lar1 = l1.copy(

@@ -44,7 +44,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   val e1 = SyntacticalValidationError("1", "S999", false)
   val e2 = ValidityValidationError("1", "V999", true)
   val e3 = QualityValidationError("1", "Q999", false)
-  val e4 = MacroValidationError("Q007", Nil)
+  val e4 = MacroValidationError("Q007")
 
   val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
@@ -112,11 +112,11 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Nil,
         qualityVerified = false,
         List(
-          MacroValidationError("Q008", Nil),
-          MacroValidationError("Q010", Nil),
-          MacroValidationError("Q016", Nil),
-          MacroValidationError("Q023", Nil)
-        )
+          MacroValidationError("Q008"),
+          MacroValidationError("Q010"),
+          MacroValidationError("Q016"),
+          MacroValidationError("Q023")
+        ),
       ))
     }
 

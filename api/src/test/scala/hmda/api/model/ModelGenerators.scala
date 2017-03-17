@@ -143,20 +143,10 @@ trait ModelGenerators {
     } yield QualityValidationError(id, name, ts)
   }
 
-  implicit def macroEditJustificationGen: Gen[MacroEditJustification] = {
-    for {
-      id <- Gen.choose(Int.MinValue, Int.MaxValue)
-      value <- Gen.alphaStr
-      verified <- Gen.oneOf(true, false)
-      text <- Gen.option(Gen.alphaStr)
-    } yield MacroEditJustification(id, value, verified, text)
-  }
-
   implicit def macroValidationErrorGen: Gen[MacroValidationError] = {
     for {
       id <- Gen.alphaStr
-      justifications <- Gen.listOf(macroEditJustificationGen)
-    } yield MacroValidationError(id, justifications)
+    } yield MacroValidationError(id)
   }
 
   implicit def macroResultGen: Gen[MacroResult] = {

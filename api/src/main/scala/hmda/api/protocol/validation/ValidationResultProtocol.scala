@@ -43,11 +43,10 @@ trait ValidationResultProtocol extends DefaultJsonProtocol {
     }
   }
 
-  implicit val macroEditJustificationFormat = jsonFormat4(MacroEditJustification.apply)
   implicit val syntacticalValidationErrorFormat = jsonFormat3(SyntacticalValidationError.apply)
   implicit val validityValidationErrorFormat = jsonFormat3(ValidityValidationError.apply)
   implicit val qualityValidationErrorFormat = jsonFormat3(QualityValidationError.apply)
-  implicit val macroValidationErrorFormat = jsonFormat2(MacroValidationError.apply)
+  implicit val macroValidationErrorFormat = jsonFormat1(MacroValidationError.apply)
   implicit val larValidationErrorsFormat = jsonFormat1(LarValidationErrors.apply)
   implicit val tsValidationErrorsFormat = jsonFormat1(TsValidationErrors.apply)
   implicit val validationErrorsSummaryFormat = jsonFormat1(ValidationErrorsSummary.apply)

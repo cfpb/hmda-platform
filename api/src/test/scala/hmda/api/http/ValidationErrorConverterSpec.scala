@@ -27,7 +27,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val ctx = ValidationContext(None, Some(2017))
       badLars.flatMap(lar => validationErrors(lar, ctx, validateLar).errors)
     }
-    val macroErrors: Seq[MacroValidationError] = Seq(MacroValidationError("Q047", Seq()))
+    val macroErrors: Seq[MacroValidationError] = Seq(MacroValidationError("Q047"))
 
     val validationState = HmdaFileValidationState(
       Some(ts),
