@@ -11,12 +11,12 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import akka.pattern.ask
 import hmda.api.protocol.processing.SubmissionProtocol
-import hmda.query.DbConfiguration
+import hmda.query.DbConfiguration._
 import hmda.query.model.filing.ModifiedLoanApplicationRegister
 
 import scala.concurrent.Await
 
-class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtocol with UploadPaths with DbConfiguration {
+class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtocol with UploadPaths {
   import config.profile.api._
 
   val csv = "1|0123456789|9|201301171330|2013|99-9999999|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St       XXXXXXXXXXXXXXXXXXXXX|Sacramento         XXXXXX|CA|99999-9999|MIKES SMALL INC    XXXXXXXXXXX|1234 Kearney St    XXXXXXXXXXXXXXXXXXXXX|San Francisco      XXXXXX|CA|99999-1234|Mrs. Krabappel     XXXXXXXXXXX|916-999-9999|999-753-9999|krabappel@gmail.comXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
