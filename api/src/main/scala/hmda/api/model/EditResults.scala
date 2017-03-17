@@ -23,11 +23,6 @@ trait EditResultsCollection {
 case class QualityEditsVerification(verified: Boolean)
 case class QualityEditsVerifiedResponse(verified: Boolean, status: SubmissionStatus)
 
-// For a single row, all of the edits that it failed
-case class RowResult(rowId: String, edits: Seq[RowEditDetail])
-case class RowResults(rows: Seq[RowResult], `macro`: MacroResults)
-case class RowEditDetail(editId: String, description: String, fields: JsObject)
-
 case class MacroResult(edit: String, justifications: Set[MacroEditJustification])
 case class MacroResults(edits: Seq[MacroResult]) {
   def toCsv = edits.map(e => "macro, " + e.edit + "\n").mkString
