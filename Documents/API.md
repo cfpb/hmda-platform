@@ -330,12 +330,9 @@ By default, results are grouped by edit type.
 
 | Query parameter | Description |
 | --------------- | ----------- |
-| sortBy | `row` to group edits by row, rather than the default edit type. |
 | format | `csv` to return edits in CSV format, rather than the default by edit type, for use in spreadsheet software. |
 
 Example responses:
-
-Default Sorting:
 
 ```json
 {
@@ -465,86 +462,6 @@ syntactical, S010, s5
 macro, Q007
 ```
 
-Sorted by row, `?sortBy=row`:
-
-_Macro edits remain their own object because they aren't row based._
-
-```json
-{
-  "rows": [
-    {
-      "rowId": "Transmittal Sheet",
-      "edits": [
-        {
-          "editId": "S020",
-          "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-          "fields": {
-            "Agency Code": 10
-          }
-        }
-      ]
-    },
-    {
-      "rowId": "8299422144",
-      "edits": [
-        {
-          "editId": "S020",
-          "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-          "fields": {
-            "Agency Code": 10
-          }
-        }
-      ]
-    },
-    {
-      "rowId": "4977566612",
-      "edits": [
-        {
-          "editId": "V555",
-          "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
-          "fields": {
-            "Loan Purpose": 1,
-            "Lien Status": 0
-          }
-        },
-        {
-          "editId": "V560",
-          "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
-          "fields": {
-            "Action Taken Type": 3,
-            "Lien Status": 0
-          }
-        }
-      ]
-    }
-  ],
-  "macro": {
-    "edits": [
-      {
-        "edit": "Q008",
-        "justifications": [
-          {
-            "id": 1,
-            "value": "Applicants decided not to proceed with the loan.",
-            "verified": false
-          },
-          {
-            "id": 2,
-            "value": "There were a large number of applications, but few loans were closed",
-            "verified": false
-          },
-          {
-            "id": 3,
-            "value": "Loan activity for this filing year consisted mainly of purchased loans.",
-            "verified": false
-          }
-        ]
-      }
-    ]
-  }
-}
-```
-
 ### Edits by type
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`
@@ -555,7 +472,6 @@ By default, results are grouped by named edit.
 
 | Query parameter | Description |
 | --------------- | ----------- |
-| sortBy | `row` to group edits by row, rather than the default edit type. |
 | format | `csv` to return edits in CSV format, rather than the default by edit type, for use in spreadsheet software. |
 
 Example response:
@@ -610,43 +526,6 @@ validity, V555, 4977566612
 validity, V550, 4977566612
 ```
 
-Sorted by row, `?sortBy=row`:
-
-_Macro edits remain their own object because they aren't row based._
-
-```json
-{
-  "rows": [
-    {
-      "rowId": "Transmittal Sheet",
-      "edits": [
-        {
-          "editId": "S020",
-          "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-          "fields": {
-            "Agency Code": 4
-          }
-        }
-      ]
-    },
-    {
-      "rowId": "8299422144",
-      "edits": [
-        {
-          "editId": "S020",
-          "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-          "fields": {
-            "Agency Code": 11
-          }
-        }
-      ]
-    },
-  ],
-  "macro": {
-    "edits": []
-  }
-}
-```
 
 `POST` - Provides verification for quality edits
 
