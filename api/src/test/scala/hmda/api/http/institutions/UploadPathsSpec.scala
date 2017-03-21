@@ -70,6 +70,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
     }
 
     "delete previous submission when re-uploading another HMDA file" in {
+      Thread.sleep(5000)
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file2) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Accepted
         val submission = responseAs[Submission]
