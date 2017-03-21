@@ -64,24 +64,6 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       summaryEditResults.quality mustBe QualityEditResults(true, Seq())
       summaryEditResults.`macro` mustBe MacroResults(false, Nil)
     }
-
-    "sort failures by row" in {
-      val macros = MacroResult("Q047")
-
-      val results: RowResults = validationErrorsToRowResults(validationState, tsErrors, larErrors, macroErrors)
-      results.rows.size mustBe 4
-      results.`macro`.edits.contains(macros) mustBe true
-
-      val tsRow = results.rows.head
-      tsRow.rowId mustBe "Transmittal Sheet"
-      tsRow.edits.size mustBe 2
-      tsRow.edits.head.editId mustBe "S020"
-      tsRow.edits.head.description mustBe s020Desc
-
-      val larRow = results.rows.find(_.rowId == "4977566612").get
-      larRow.edits.size mustBe 3
-      larRow.edits.head.editId mustBe "V550"
-    }
   }
 
 }

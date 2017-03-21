@@ -68,31 +68,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     }
   }
 
-  "Sort edits by row with sortBy parameter" in {
-    val tsS020 = RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, s020FieldsTs)))
-    val loan1Result =
-      RowResult("loan1", Seq(
-        RowEditDetail("S010", s010Description, s010FieldsL1),
-        RowEditDetail("S020", s020Description, s020FieldsL1),
-        RowEditDetail("V280", v280Description, v280FieldsL1)
-      ))
-    val loan2Result = RowResult("loan2", Seq(RowEditDetail("V285", v285Description, v285FieldsL2)))
-    val loan3Result = RowResult("loan3", Seq(RowEditDetail("V285", v285Description, v285FieldsL3)))
-
-    val expectedMacros =
-      MacroResults(false, List(MacroResult("Q007")))
-
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits?sortBy=row") ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.OK
-      val rowResponse = responseAs[RowResults]
-      rowResponse.rows.head mustBe tsS020
-      rowResponse.rows.find(_.rowId == "loan1").get mustBe loan1Result
-      rowResponse.rows.find(_.rowId == "loan2").get mustBe loan2Result
-      rowResponse.rows.find(_.rowId == "loan3").get mustBe loan3Result
-      rowResponse.`macro` mustBe expectedMacros
-    }
-  }
-
   "return a list of validation errors for a single type" in {
     val expectedEdits = EditResults(List(v285, v280))
 
@@ -112,50 +87,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       status mustBe StatusCodes.OK
       responseAs[String] must include("editType, editId")
       responseAs[String] must include("macro, Q007")
-    }
-  }
-
-  "Sort single type of edits by row with sortBy parameter (syntactical)" in {
-    val expectedRows =
-      Seq(
-        RowResult("Transmittal Sheet", Seq(RowEditDetail("S020", s020Description, s020FieldsTs))),
-        RowResult("loan1", Seq(
-          RowEditDetail("S010", s010Description, s010FieldsL1),
-          RowEditDetail("S020", s020Description, s020FieldsL1)
-        ))
-      )
-
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/syntactical?sortBy=row") ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.OK
-      val rowResponse = responseAs[RowResults]
-      rowResponse.rows.toSet mustBe expectedRows.toSet
-      rowResponse.`macro` mustBe MacroResults(false, List())
-    }
-  }
-  "Sort single type of edits by row with sortBy parameter (validity)" in {
-    val expectedRows =
-      Seq(
-        RowResult("loan1", Seq(RowEditDetail("V280", v280Description, v280FieldsL1))),
-        RowResult("loan2", Seq(RowEditDetail("V285", v285Description, v285FieldsL2))),
-        RowResult("loan3", Seq(RowEditDetail("V285", v285Description, v285FieldsL3)))
-      )
-
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity?sortBy=row") ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.OK
-      val rowResponse = responseAs[RowResults]
-      rowResponse.rows.toSet mustBe expectedRows.toSet
-      rowResponse.`macro` mustBe MacroResults(false, List())
-    }
-  }
-  "SortBy parameter doesn't affect macro edits" in {
-    val expectedMacros =
-      MacroResults(false, List(MacroResult("Q007")))
-
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro?sortBy=row") ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.OK
-      val rowResponse = responseAs[RowResults]
-      rowResponse.rows.toSet mustBe Set()
-      rowResponse.`macro` mustBe expectedMacros
     }
   }
 
