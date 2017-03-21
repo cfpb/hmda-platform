@@ -63,6 +63,7 @@ class SubmissionIrsPathsSpec
         irs.totals.amount mustBe 24
         irs.totals.lars mustBe 2
         irs.msas.length mustBe 2
+        Thread.sleep(1000)
       }
     }
   }
