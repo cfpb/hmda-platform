@@ -69,14 +69,6 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
       }
     }
 
-    "return 400 when trying to upload the wrong file" in {
-      val id2 = SubmissionId("0", "2017", 2)
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", badFile) ~> institutionsRoutes ~> check {
-        status mustBe StatusCodes.BadRequest
-        responseAs[Submission] mustBe Submission(id2, Failed("Invalid File Format"), 0L, 0L)
-      }
-    }
-
     "delete previous submission when re-uploading another HMDA file" in {
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file2) ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.Accepted
@@ -89,6 +81,14 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
             xs.length mustBe 3
             xs.head.agencyCode mustBe 8
         }
+      }
+    }
+
+    "return 400 when trying to upload the wrong file" in {
+      val id2 = SubmissionId("0", "2017", 3)
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/3", badFile) ~> institutionsRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        responseAs[Submission] mustBe Submission(id2, Failed("Invalid File Format"), 0L, 0L)
       }
     }
 
@@ -105,7 +105,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
 
       val fSubmission = for {
         a <- (supervisor ? FindSubmissions(SubmissionPersistence.name, "0", "2017")).mapTo[ActorRef]
-        s <- (a ? UpdateSubmissionStatus(SubmissionId("0", "2017", 1), Signed)).mapTo[Option[Submission]]
+        s <- (a ? UpdateSubmissionStatus(id, Signed)).mapTo[Option[Submission]]
       } yield s
 
       fSubmission.map { s =>

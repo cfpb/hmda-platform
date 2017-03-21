@@ -27,7 +27,7 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with LarGenerators {
       probe.send(projection, LarValidated(lar, ""))
       probe.expectMsg(LarInserted(1))
     }
-    "Delete records by respondent id" in {
+    "Delete records by institution id" in {
       val lar1 = sampleLar
       val lar2 = sampleLar
       val testInstId = "test"
