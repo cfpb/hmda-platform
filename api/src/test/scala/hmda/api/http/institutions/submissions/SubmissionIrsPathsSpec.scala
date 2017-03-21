@@ -33,7 +33,6 @@ class SubmissionIrsPathsSpec
   override def afterAll(): Unit = {
     super.afterAll()
     dropAllObjects()
-    system.terminate()
   }
 
   private def dropAllObjects() = {
