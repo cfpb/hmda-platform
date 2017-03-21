@@ -28,11 +28,25 @@ class SubmissionIrsPathsSpec
     Await.result(repository.createSchema(), duration)
     Await.result(larTotalMsaRepository.createSchema(), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
+    loadData()
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
     dropAllObjects()
+  }
+
+  private def loadData() = {
+    val msa1 = geographyGen.sample.get.copy(msa = "12345")
+    val msaNa = geographyGen.sample.get.copy(msa = "NA")
+    val loan = loanGen.sample.get.copy(amount = 12)
+    val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(geography = msa1, loan = loan)).copy(institutionId = "0")
+    val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(geography = msaNa, loan = loan)).copy(institutionId = "0")
+    val query1 = lar1.copy(period = "2017")
+    val query2 = lar2.copy(period = "2017")
+
+    Await.result(repository.insertOrUpdate(query1), duration)
+    Await.result(repository.insertOrUpdate(query2), duration)
   }
 
   private def dropAllObjects() = {
@@ -43,17 +57,6 @@ class SubmissionIrsPathsSpec
 
   "Submission Irs Paths" must {
     "return a 200" in {
-      val msa1 = geographyGen.sample.get.copy(msa = "12345")
-      val msaNa = geographyGen.sample.get.copy(msa = "NA")
-      val loan = loanGen.sample.get.copy(amount = 12)
-      val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(geography = msa1, loan = loan)).copy(institutionId = "0")
-      val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(geography = msaNa, loan = loan)).copy(institutionId = "0")
-      val query1 = lar1.copy(period = "2017")
-      val query2 = lar2.copy(period = "2017")
-
-      Await.result(repository.insertOrUpdate(query1), duration)
-      Await.result(repository.insertOrUpdate(query2), duration)
-
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
         val irs = responseAs[Irs]
