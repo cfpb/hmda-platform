@@ -11,8 +11,6 @@ import hmda.persistence.demo.DemoData
 
 class SubmissionBasePathsSpec extends InstitutionHttpApiSpec {
 
-  val supervisor = system.actorSelection("/user/supervisor")
-
   "Submission Paths" must {
     "return not found when looking for a latest submission for non existent institution" in {
       val path = Path("/institutions/xxxxx/filings/2017/submissions/latest")
