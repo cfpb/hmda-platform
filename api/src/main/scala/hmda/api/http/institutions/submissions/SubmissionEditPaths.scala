@@ -56,9 +56,9 @@ trait SubmissionEditPaths
             onComplete(fEditSummary) {
               case Success(edits) =>
                 onComplete(getSubmissionStatus(SubmissionId(institutionId, period, seqNr))) {
-                  case Success(submission) =>
+                  case Success(status) =>
                     if (format.getOrElse("") == "csv") complete(edits.toCsv)
-                    else complete(ToResponseMarshallable(edits))
+                    else complete(ToResponseMarshallable(SummaryEditResultsResponse(edits.syntactical, edits.validity, edits.quality, edits.`macro`, status)))
                   case Failure(error) => completeWithInternalError(uri, error)
                 }
               case Failure(error) => completeWithInternalError(uri, error)
@@ -143,14 +143,14 @@ trait SubmissionEditPaths
       }
     }
     onComplete(getSubmissionStatus(submissionId)) {
-      case Success(submissionState) =>
+      case Success(status) =>
         onComplete(fSingleEdits) {
-          case Success(edits: MacroResults) =>
-            if (format == "csv") complete("editType, editId\n" + edits.toCsv)
-            else complete(ToResponseMarshallable(edits))
-          case Success(edits: EditResults) =>
-            if (format == "csv") complete("editType, editId, loanId\n" + edits.toCsv(editType))
-            else complete(ToResponseMarshallable(edits))
+          case Success(results: MacroResults) =>
+            if (format == "csv") complete("editType, editId\n" + results.toCsv)
+            else complete(ToResponseMarshallable(MacroResultsResponse(results.edits, status)))
+          case Success(results: EditResults) =>
+            if (format == "csv") complete("editType, editId, loanId\n" + results.toCsv(editType))
+            else complete(ToResponseMarshallable(EditResultsResponse(results.edits, status)))
           case Success(_) => completeWithInternalError(uri, new IllegalStateException)
           case Failure(error) => completeWithInternalError(uri, error)
         }

@@ -14,6 +14,7 @@ case class EditResult(edit: String, description: String, rows: Seq[EditResultRow
   }
 }
 case class EditResults(edits: Seq[EditResult]) extends EditResultsCollection
+case class EditResultsResponse(edits: Seq[EditResult], status: SubmissionStatus)
 case class QualityEditResults(verified: Boolean, edits: Seq[EditResult]) extends EditResultsCollection
 trait EditResultsCollection {
   def edits: Seq[EditResult]
@@ -30,6 +31,7 @@ case class MacroResults(edits: Seq[MacroResult]) {
 case object MacroResults {
   def empty: MacroResults = MacroResults(Nil)
 }
+case class MacroResultsResponse(edits: Seq[MacroResult], status: SubmissionStatus)
 case class SummaryEditResults(
     syntactical: EditResults,
     validity: EditResults,
@@ -43,4 +45,11 @@ case class SummaryEditResults(
     "editType, editId, loanId\n" + s + v + q + `macro`.toCsv
   }
 }
+case class SummaryEditResultsResponse(
+  syntactical: EditResults,
+  validity: EditResults,
+  quality: QualityEditResults,
+  `macro`: MacroResults,
+  status: SubmissionStatus
+)
 
