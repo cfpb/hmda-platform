@@ -32,6 +32,7 @@ lazy val hmda = (project in file("."))
       assemblyMergeStrategy in assembly := {
         case "application.conf" => MergeStrategy.concat
         case "JS_DEPENDENCIES" => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -102,6 +103,13 @@ lazy val validation = (project in file("validation"))
 lazy val panel = (project in file("panel"))
   .settings(hmdaBuildSettings: _*)
   .settings(
+    assemblyMergeStrategy in assembly := {
+      case "application.conf" => MergeStrategy.concat
+      case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
     libraryDependencies ++= akkaPersistenceDeps
   ).dependsOn(persistenceModel % "compile->compile;test->test")
   .dependsOn(persistence % "compile->compile;test->test")
@@ -111,6 +119,12 @@ lazy val panel = (project in file("panel"))
 lazy val persistenceModel = (project in file("persistence-model"))
   .settings(hmdaBuildSettings:_*)
   .settings(
+    assemblyMergeStrategy in assembly := {
+      case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
     libraryDependencies ++= akkaPersistenceDeps
   ).disablePlugins(ScoverageSbtPlugin)
   .dependsOn(modelJVM % "compile->compile;test->test")
@@ -122,6 +136,7 @@ lazy val persistence = (project in file("persistence"))
     Seq(
       assemblyMergeStrategy in assembly := {
         case "application.conf" => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -135,6 +150,12 @@ lazy val persistence = (project in file("persistence"))
 lazy val query = (project in file("query"))
   .settings(hmdaBuildSettings:_*)
   .settings(
+    assemblyMergeStrategy in assembly := {
+      case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
     libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
