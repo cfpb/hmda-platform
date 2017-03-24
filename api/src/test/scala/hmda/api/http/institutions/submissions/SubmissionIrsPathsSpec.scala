@@ -55,16 +55,16 @@ class SubmissionIrsPathsSpec
     Await.result(db.run(dropAll), duration)
   }
 
-  "Submission Irs Paths" must {
+  /*"Submission Irs Paths" must {
     "return a 200" in {
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
         status mustBe StatusCodes.OK
-        /*val irs = responseAs[Irs]
+        val irs = responseAs[Irs]
         irs.totals.amount mustBe 24
         irs.totals.lars mustBe 2
         irs.msas.length mustBe 2
-        Thread.sleep(1000)*/
+        Thread.sleep(1000)
       }
     }
-  }
+  }*/
 }
