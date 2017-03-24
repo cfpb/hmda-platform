@@ -13,7 +13,7 @@ services:
       - query_db
       - cassandra
     environment:
-      CASSANDRA_CLUSTER_HOSTS: cassandra
+      CASSANDRA_CLUSTER_HOSTS: '192.168.99.100'
       JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
 
   ui:
