@@ -8,6 +8,7 @@ object Version {
   val akkaHttp   = "10.0.4"
   val leveldb    = "0.7"
   val leveldbjni = "1.8"
+  val cassandra  = "0.23"
   val config     = "1.3.1"
   val enumeratum = "1.5.8"
   val inMemoryPersistence = "2.4.17.1"
