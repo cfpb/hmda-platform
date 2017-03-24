@@ -11,7 +11,9 @@ services:
     - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
     depends_on:
       - query_db
+      - cassandra
     environment:
+      CASSANDRA_CLUSTER_HOSTS: cassandra
       JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
 
   ui:
@@ -107,4 +109,12 @@ services:
       POSTGRES_DB: hmda
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+
+  cassandra:
+     image: cassandra:latest
+     ports:
+       - '7000:7000'
+       - '9042:9042'
+       - '7199:7199'
+
 
