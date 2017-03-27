@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext
 
 object HmdaPlatform {
 
-  val configFactory = ConfigFactory.load()
+  val configuration = ConfigFactory.load()
 
   val log = LoggerFactory.getLogger("hmda")
 
@@ -61,7 +61,7 @@ object HmdaPlatform {
   }
 
   private def startActors(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
-    lazy val actorTimeout = configFactory.getInt("hmda.actor.timeout")
+    lazy val actorTimeout = configuration.getInt("hmda.actor.timeout")
     implicit val timeout = Timeout(actorTimeout.seconds)
 
     (supervisor ? FindActorByName(SingleLarValidation.name))
@@ -81,7 +81,7 @@ object HmdaPlatform {
       .mapTo[ActorRef]
 
     //Load demo data
-    lazy val isDemo = configFactory.getBoolean("hmda.isDemo")
+    lazy val isDemo = configuration.getBoolean("hmda.isDemo")
     if (isDemo) {
       cleanup()
       implicit val scheduler = system.scheduler
