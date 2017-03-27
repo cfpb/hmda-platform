@@ -309,6 +309,10 @@ Example response, with HTTP code 201:
   ],
   "count": 20,
   "total": 130,
+  "status": {
+      "code": 3,
+      "message": "uploaded"
+  },
   "_links": {
     "first": "?page=1",
     "prev": "?page=1",
@@ -445,6 +449,10 @@ Example responses:
         ]
       }
     ]
+  },
+  "status": {
+      "code": 3,
+      "message": "uploaded"
   }
 }
 ```
@@ -515,7 +523,11 @@ Example response:
         }
       ]
     }
-  ]
+  ],
+  "status": {
+    "code": 3,
+    "message": "uploaded"
+  }
 }
 ```
 
@@ -594,7 +606,11 @@ Example response:
       "value": "Purchased loans are located in areas outside of an MSA/MD.",
       "verified": false
     }
-  ]
+  ],
+  "status": {
+      "code": 3,
+      "message": "uploaded"
+  }
 }
 ```
 
