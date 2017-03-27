@@ -29,7 +29,7 @@ trait ParserResultsProtocol extends DefaultJsonProtocol with SubmissionProtocol 
           val larErrs: Seq[LarParsingError] = lar.map(_.convertTo[LarParsingError])
           val path: String = PaginatedResponse.staticPath(links("href").convertTo[String])
           val currentPage: Int = PaginatedResponse.currentPage(links("self").convertTo[String])
-          val status: SubmissionStatus = SubmissionStatusJsonFormat.read(stat.asInstanceOf[JsValue])
+          val status: SubmissionStatus = SubmissionStatusJsonFormat.read(JsObject(stat))
           val total: Int = tot.intValue
           ParsingErrorSummary(tsErrs, larErrs, path, currentPage, total, status)
 
