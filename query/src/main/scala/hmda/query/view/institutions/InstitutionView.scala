@@ -53,8 +53,6 @@ class InstitutionView extends HmdaPersistentActor {
 
   val snapshotCounter = configuration.getInt("hmda.journal.snapshot.counter")
 
-  println(context.system.settings.config.getString("akka.persistence.query.journal.id"))
-
   override def persistenceId: String = name
 
   override def receiveCommand: Receive = {
