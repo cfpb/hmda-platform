@@ -87,7 +87,7 @@ class InstitutionView extends HmdaPersistentActor {
       sender() ! state.institutions
 
     case FindInstitutionByPeriodAndDomain(domain) =>
-      sender() ! state.institutions.filter(i => i.emailDomains.map(e => extractDomain(e)).contains(domain))
+      sender() ! state.institutions.filter(i => i.emailDomains.map(e => extractDomain(e)).contains(domain.toLowerCase))
 
   }
 
@@ -111,9 +111,9 @@ class InstitutionView extends HmdaPersistentActor {
   private def extractDomain(email: String): String = {
     val parts = email.split("@")
     if (parts.length > 1)
-      parts(1)
+      parts(1).toLowerCase
     else
-      ""
+      parts(0).toLowerCase
   }
 
 }

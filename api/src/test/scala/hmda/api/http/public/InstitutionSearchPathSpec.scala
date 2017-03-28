@@ -29,7 +29,7 @@ class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAn
 
   val institutionViewF: Future[ActorRef] = Future(createInstitutionView(system))
 
-  val i0 = InstitutionGenerators.sampleInstitution.copy(emailDomains = Set("test@bank0.com", "", ""))
+  val i0 = InstitutionGenerators.sampleInstitution.copy(emailDomains = Set("bank0.com", "", ""))
   val i1 = InstitutionGenerators.sampleInstitution.copy(emailDomains = Set("test@bank1.com", "", ""))
 
   override def beforeAll(): Unit = {
@@ -56,6 +56,13 @@ class InstitutionSearchPathSpec extends WordSpec with MustMatchers with BeforeAn
       Get("/institutions?domain=bank0.com") ~> institutionSearchPath(institutionViewF) ~> check {
         status mustBe StatusCodes.OK
         responseAs[InstitutionSearchResults].institutions.size mustBe 1
+        responseAs[InstitutionSearchResults].institutions.head mustBe institutiontoInstitutionSearch(i0)
+      }
+    }
+    "return multiple institutions by email domain" in {
+      Get("/institutions?domain=bank") ~> institutionSearchPath(institutionViewF) ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[InstitutionSearchResults].institutions.size mustBe 2
         responseAs[InstitutionSearchResults].institutions.head mustBe institutiontoInstitutionSearch(i0)
       }
     }
