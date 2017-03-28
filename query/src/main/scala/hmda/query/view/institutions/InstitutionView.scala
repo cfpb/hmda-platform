@@ -2,12 +2,8 @@ package hmda.query.view.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import com.typesafe.config.ConfigFactory
-import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
-import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
@@ -15,6 +11,7 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.query.model.ViewMessages.StreamCompleted
 import hmda.query.projections.institutions.InstitutionDBProjection
 import hmda.query.view.messages.CommonViewMessages._
+import hmda.persistence.config.PersistenceConfig._
 
 object InstitutionView {
 
@@ -54,8 +51,9 @@ class InstitutionView extends HmdaPersistentActor {
 
   val queryProjector = context.actorOf(InstitutionDBProjection.props(), "institution-projection")
 
-  val conf = ConfigFactory.load()
-  val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
+  val snapshotCounter = configuration.getInt("hmda.journal.snapshot.counter")
+
+  println(context.system.settings.config.getString("akka.persistence.query.journal.id"))
 
   override def persistenceId: String = name
 
@@ -97,7 +95,6 @@ class InstitutionView extends HmdaPersistentActor {
   }
 
   def recoveryCompleted(): Unit = {
-    implicit val materializer = ActorMaterializer()
     eventsWithSequenceNumber("institutions", state.seqNr + 1, Long.MaxValue)
       .runWith(Sink.actorRef(self, StreamCompleted))
   }

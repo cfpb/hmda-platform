@@ -22,18 +22,17 @@ import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
 import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
+import hmda.persistence.config.PersistenceConfig._
 
 import scala.concurrent.ExecutionContext
 
 object HmdaPlatform {
 
-  val configuration = ConfigFactory.load()
-
   val log = LoggerFactory.getLogger("hmda")
 
   def main(args: Array[String]): Unit = {
 
-    val system = ActorSystem("hmda")
+    val system = ActorSystem("hmda", configuration)
     val supervisor = createSupervisor(system)
     val querySupervisor = createQuerySupervisor(system)
     implicit val ec = system.dispatcher
