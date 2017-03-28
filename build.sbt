@@ -126,6 +126,7 @@ lazy val persistence = (project in file("persistence"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
       },
+      parallelExecution in Test := false,
       libraryDependencies ++= akkaPersistenceDeps
     )
   )
@@ -135,6 +136,7 @@ lazy val persistence = (project in file("persistence"))
 lazy val query = (project in file("query"))
   .settings(hmdaBuildSettings:_*)
   .settings(
+    parallelExecution in Test := false,
     libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
@@ -154,6 +156,7 @@ lazy val api = (project in file("api"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
       },
+      parallelExecution in Test := false,
       libraryDependencies ++= httpDeps
     )
   )
