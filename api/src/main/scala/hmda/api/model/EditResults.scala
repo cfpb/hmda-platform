@@ -26,9 +26,6 @@ case class MacroResult(edit: String)
 case class MacroResults(verified: Boolean, edits: Seq[MacroResult]) {
   def toCsv = edits.map(e => "macro, " + e.edit + "\n").mkString
 }
-case object MacroResults {
-  def empty: MacroResults = MacroResults(true, Nil)
-}
 case class SummaryEditResults(
     syntactical: EditResults,
     validity: EditResults,
