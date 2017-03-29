@@ -328,7 +328,7 @@ Example response, with HTTP code 201:
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`
 
-`GET`  - Returns a list of all edits for a given submission
+`GET`  - Returns a list of all edits for a given submission, including the edit name and description
 
 By default, results are grouped by edit type.
 
@@ -345,46 +345,10 @@ Example responses:
       {
         "edit": "S020",
         "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-        "rows": [
-          {
-            "row": {
-              "rowId": "Transmittal Sheet"
-            },
-            "fields": {
-              "Agency Code": 10
-            }
-          },
-          {
-            "row": {
-              "rowId": "8299422144"
-            },
-            "fields": {
-              "Agency Code": 10
-            }
-          },
-          {
-            "row": {
-              "rowId": "2185751599"
-            },
-            "fields": {
-              "Agency Code": 10
-            }
-          }
-        ]
-      },
+      }
       {
         "edit": "S010",
         "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
-        "rows": [
-          {
-            "row": {
-              "rowId": "2185751599"
-            },
-            "fields": {
-              "Record Identifier": 1
-            }
-          }
-        ]
       }
     ]
   },
@@ -393,32 +357,10 @@ Example responses:
       {
         "edit": "V555",
         "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
-        "rows": [
-          {
-            "row": {
-              "rowId": "4977566612"
-            },
-            "fields": {
-              "Loan Purpose": 3,
-              "Lien Status": 8
-            }
-          }
-        ]
       },
       {
         "edit": "V560",
         "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
-        "rows": [
-          {
-            "row": {
-              "rowId": "4977566612"
-            },
-            "fields": {
-              "Type of Action Taken": 2,
-              "Lien Status": 8
-            }
-          }
-        ]
       }
     ]
   },
@@ -438,8 +380,8 @@ Example responses:
     ]
   },
   "status": {
-      "code": 3,
-      "message": "uploaded"
+      "code": 8,
+      "message": "validated with errors"
   }
 }
 ```
@@ -456,6 +398,63 @@ syntactical, S010, s4
 syntactical, S010, s5
 macro, Q007
 ```
+
+### Edit Details
+
+`/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<type>/<edit>`
+
+`GET` - For an edit, return a collection of all rows that failed it, including the relevant fields and their values.
+
+This endpoint is paginated.
+
+| Query parameter | Description |
+| --------------- | ----------- |
+| page | Integer. If blank, will default to page 1. Page size is 20 lines of errors. |
+
+Example response:
+
+```json
+{
+  "edit": "S020",
+  "rows": [
+    {
+      "row": {
+        "rowId": "Transmittal Sheet"
+      },
+      "fields": {
+        "Agency Code": 10
+      }
+    },
+    {
+      "row": {
+        "rowId": "8299422144"
+      },
+      "fields": {
+        "Agency Code": 10
+      }
+    },
+    {
+      "row": {
+        "rowId": "2185751599"
+      },
+      "fields": {
+        "Agency Code": 10
+      }
+    }
+  ],
+  "count": 20,
+  "total": 130,
+  "_links": {
+    "first": "?page=1",
+    "prev": "?page=1",
+    "self": "?page=1",
+    "next": "?page=2",
+    "last": "?page=7",
+    "href": "/institutions/1/filings/2017/submissions/1/edits/S020"
+  }
+}
+```
+
 
 ### Edits by type
 
@@ -477,38 +476,10 @@ Example response:
     {
       "edit": "S020",
       "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
-      "rows": [
-        {
-          "row": {
-            "rowId": "Transmittal Sheet"
-          },
-          "fields": {
-            "Agency Code": 1
-          }
-        },
-        {
-          "row": {
-            "rowId": "8299422144"
-          },
-          "fields": {
-            "Agency Code": 1
-          }
-        }
-      ]
     },
     {
       "edit": "S010",
       "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
-      "rows": [
-        {
-          "row": {
-            "rowId": "2185751599"
-          },
-          "fields": {
-            "Record Identifier": 1
-          }
-        }
-      ]
     }
   ],
   "status": {
