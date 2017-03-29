@@ -24,23 +24,10 @@ case class QualityValidationError(errorId: String, ruleName: String, ts: Boolean
   override def errorType: ValidationErrorType = Quality
 }
 
-case class MacroEditJustification(id: Int = 1, value: String = "", verified: Boolean = false, text: Option[String] = None)
-
-case class MacroValidationError(ruleName: String, justifications: Seq[MacroEditJustification]) extends ValidationError {
+case class MacroValidationError(ruleName: String) extends ValidationError {
   override def ts: Boolean = false
   override def errorId: String = ""
   override def errorType: ValidationErrorType = Macro
-}
-object MacroValidationError {
-  def updateJustifications(larMacro: Seq[ValidationError], j: MacroEditJustification, v: ValidationError): Seq[MacroValidationError] = {
-    val justifications = v.asInstanceOf[MacroValidationError].justifications
-    val id = j.id
-    val untouched = justifications.filter(x => x.id != id)
-    val updatedJustifications = untouched :+ j
-    val newElem = MacroValidationError(v.ruleName, updatedJustifications)
-    val index = larMacro.indexOf(v)
-    larMacro.updated(index, newElem).asInstanceOf[Seq[MacroValidationError]]
-  }
 }
 
 abstract class ValidationErrors {

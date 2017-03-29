@@ -9,7 +9,7 @@ object DemoInstitutions extends ResourceUtils {
   val values: Set[Institution] = {
     val lines = resourceLines("/demoInstitutions.csv")
 
-    lines.map { line =>
+    lines.tail.map { line =>
       InstitutionParser(line)
     }.toSet
   }

@@ -27,7 +27,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val ctx = ValidationContext(None, Some(2017))
       badLars.flatMap(lar => validationErrors(lar, ctx, validateLar).errors)
     }
-    val macroErrors: Seq[MacroValidationError] = Seq(MacroValidationError("Q047", Seq()))
+    val macroErrors: Seq[MacroValidationError] = Seq(MacroValidationError("Q047"))
 
     val validationState = HmdaFileValidationState(
       Some(ts),
@@ -39,7 +39,8 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       Nil,
       Nil,
       qualityVerified = true,
-      macroErrors
+      macroErrors,
+      macroVerified = false
     )
 
     val s020Desc = "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code."
@@ -50,7 +51,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val syntacticalEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Syntactical)
       val validityEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Validity)
       val qualityEditResults = validationErrorsToQualityEditResults(validationState, tsErrors, larErrors)
-      val macroEditResults = validationErrorsToMacroResults(larErrors)
+      val macroEditResults = validationErrorsToMacroResults(validationState, larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
       summaryEditResults.syntactical.edits.head.edit mustBe "S020"
@@ -61,25 +62,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
 
       summaryEditResults.validity.edits.size mustBe 3
       summaryEditResults.quality mustBe QualityEditResults(true, Seq())
-      summaryEditResults.`macro` mustBe MacroResults(Nil)
-    }
-
-    "sort failures by row" in {
-      val macros = MacroResult("Q047", Set(MacroEditJustification(1, "There were many requests for preapprovals, but the applicant did not proceed with the loan.", false)))
-
-      val results: RowResults = validationErrorsToRowResults(validationState, tsErrors, larErrors, macroErrors)
-      results.rows.size mustBe 4
-      results.`macro`.edits.contains(macros) mustBe true
-
-      val tsRow = results.rows.head
-      tsRow.rowId mustBe "Transmittal Sheet"
-      tsRow.edits.size mustBe 2
-      tsRow.edits.head.editId mustBe "S020"
-      tsRow.edits.head.description mustBe s020Desc
-
-      val larRow = results.rows.find(_.rowId == "4977566612").get
-      larRow.edits.size mustBe 3
-      larRow.edits.head.editId mustBe "V550"
+      summaryEditResults.`macro` mustBe MacroResults(false, Nil)
     }
   }
 
