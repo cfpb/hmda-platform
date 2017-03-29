@@ -2,7 +2,6 @@ package hmda.api.protocol.processing
 
 import hmda.api.model._
 import hmda.model.fi.ValidatedWithErrors
-import hmda.validation.engine.MacroEditJustification
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._
@@ -21,23 +20,14 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
     }
   }
 
-  val macroResult = MacroResult("Q888", Set(MacroEditJustification(1, "justified 1", false)))
-  val expectedMacroJson = JsObject(
-    ("edit", JsString("Q888")),
-    ("justifications", JsArray(
-      JsObject(
-        ("id", JsNumber(1)),
-        ("value", JsString("justified 1")),
-        ("verified", JsBoolean(false))
-      )
-    ))
-  )
+  val macroResult = MacroResult("Q888")
+  val expectedMacroJson = JsObject(("edit", JsString("Q888")))
   property("MacroResults must have proper json format") {
     macroResult.toJson mustBe expectedMacroJson
   }
 
   property("QualityEditsVerifiedResponse must have correct json format") {
-    val response = QualityEditsVerifiedResponse(true, ValidatedWithErrors)
+    val response = EditsVerifiedResponse(true, ValidatedWithErrors)
     response.toJson mustBe JsObject(
       ("verified", JsBoolean(true)),
       ("status", JsObject(

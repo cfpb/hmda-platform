@@ -44,7 +44,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   val e1 = SyntacticalValidationError("1", "S999", false)
   val e2 = ValidityValidationError("1", "V999", true)
   val e3 = QualityValidationError("1", "Q999", false)
-  val e4 = MacroValidationError("Q007", Nil)
+  val e4 = MacroValidationError("Q007")
 
   val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
@@ -74,7 +74,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = false,
-        Seq(e4)
+        Seq(e4),
+        macroVerified = false
       ))
     }
 
@@ -112,11 +113,12 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Nil,
         qualityVerified = false,
         List(
-          MacroValidationError("Q008", Nil),
-          MacroValidationError("Q010", Nil),
-          MacroValidationError("Q016", Nil),
-          MacroValidationError("Q023", Nil)
-        )
+          MacroValidationError("Q008"),
+          MacroValidationError("Q010"),
+          MacroValidationError("Q016"),
+          MacroValidationError("Q023")
+        ),
+        macroVerified = false
       ))
     }
 
@@ -133,12 +135,13 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = false,
-        Vector(e4)
+        Vector(e4),
+        macroVerified = false
       ))
 
       // send VerifyQualityEdits message
-      probe.send(hmdaFileValidator, VerifyQualityEdits(true))
-      probe.expectMsg(QualityEditsVerified(true))
+      probe.send(hmdaFileValidator, VerifyEdits(Quality, true))
+      probe.expectMsg(EditsVerified(Quality, true))
 
       // expect updated validation state
       probe.send(hmdaFileValidator, GetState)
@@ -152,14 +155,13 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = true,
-        Vector(e4)
+        Vector(e4),
+        macroVerified = false
       ))
     }
 
     "verify macro edits" in {
-      val j = MacroEditJustification(1, "Other", true, Some("text written by user"))
-      val justifications = Seq(j)
-      val e5 = e4.copy(justifications = justifications)
+      // establish baseline
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
@@ -171,10 +173,15 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = true,
-        Vector(e4)
+        Vector(e4),
+        macroVerified = false
       ))
-      probe.send(hmdaFileValidator, JustifyMacroEdit("Q007", j))
-      probe.expectMsg(MacroEditJustified("Q007", j))
+
+      // send VerifyQualityEdits message
+      probe.send(hmdaFileValidator, VerifyEdits(Macro, true))
+      probe.expectMsg(EditsVerified(Macro, true))
+
+      // expect updated validation state
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
@@ -186,9 +193,11 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Seq(e2),
         Seq(e3),
         qualityVerified = true,
-        Vector(e5)
+        Vector(e4),
+        macroVerified = true
       ))
     }
+
   }
 
 }

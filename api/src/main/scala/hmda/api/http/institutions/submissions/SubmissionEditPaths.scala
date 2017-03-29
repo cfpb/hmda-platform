@@ -19,9 +19,10 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
+import hmda.validation.engine._
 
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
 trait SubmissionEditPaths
@@ -49,7 +50,7 @@ trait SubmissionEditPaths
               val s = validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
               val v = validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
               val q = validationErrorsToQualityEditResults(e, e.tsQuality, e.larQuality)
-              val m = validationErrorsToMacroResults(e.larMacro)
+              val m = validationErrorsToMacroResults(e, e.larMacro)
               SummaryEditResults(s, v, q, m)
             }
 
@@ -77,46 +78,29 @@ trait SubmissionEditPaths
       }
     }
 
-  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/macro
-  def justifyMacroEditPath(institutionId: String)(implicit ec: ExecutionContext) =
-    path("filings" / Segment / "submissions" / IntNumber / "edits" / "macro") { (period, seqNr) =>
+  private val editTypeRegex = new Regex("quality|macro")
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/quality|macro
+  def verifyEditsPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) { (period, seqNr, verificationType) =>
       timedPost { uri =>
-        entity(as[MacroEditJustificationWithName]) { justifyEdit =>
-          completeVerified(institutionId, period, seqNr, uri) {
-            val fValidator = fHmdaFileValidator(SubmissionId(institutionId, period, seqNr))
-
-            val fValidationState = for {
-              v <- fValidator
-              j <- (v ? JustifyMacroEdit(justifyEdit.edit, justifyEdit.justification)).mapTo[MacroEditJustified]
-              state <- getValidationState(institutionId, period, seqNr)
-            } yield state
-            completeValidationState("macro", fValidationState, uri, "")
-          }
-        }
-      }
-    }
-
-  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/quality
-  def verifyQualityEditsPath(institutionId: String)(implicit ec: ExecutionContext) =
-    path("filings" / Segment / "submissions" / IntNumber / "edits" / "quality") { (period, seqNr) =>
-      timedPost { uri =>
-        entity(as[QualityEditsVerification]) { verification =>
+        entity(as[EditsVerification]) { verification =>
           completeVerified(institutionId, period, seqNr, uri) {
             val verified = verification.verified
             val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
             val subId = SubmissionId(institutionId, period, seqNr)
             val fValidator = fHmdaFileValidator(subId)
+            val editType: ValidationErrorType = if (verificationType == "quality") Quality else Macro
 
             val fSubmissions = for {
               va <- fValidator
-              v <- (va ? VerifyQualityEdits(verified)).mapTo[QualityEditsVerified]
+              v <- (va ? VerifyEdits(editType, verified)).mapTo[EditsVerified]
               sa <- fSubmissionsActor
               s <- (sa ? GetSubmissionById(subId)).mapTo[Submission]
             } yield s
 
             onComplete(fSubmissions) {
               case Success(submission) =>
-                complete(ToResponseMarshallable(QualityEditsVerifiedResponse(verified, submission.status)))
+                complete(ToResponseMarshallable(EditsVerifiedResponse(verified, submission.status)))
               case Failure(error) => completeWithInternalError(uri, error)
             }
           }
@@ -135,7 +119,7 @@ trait SubmissionEditPaths
         case "syntactical" => validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
         case "validity" => validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
         case "quality" => validationErrorsToEditResults(e, e.tsQuality, e.larQuality, Quality)
-        case "macro" => validationErrorsToMacroResults(e.larMacro)
+        case "macro" => validationErrorsToMacroResults(e, e.larMacro)
       }
     }
 

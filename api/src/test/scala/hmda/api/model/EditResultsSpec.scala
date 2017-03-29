@@ -10,9 +10,9 @@ class EditResultsSpec extends PropSpec with PropertyChecks with MustMatchers {
   val e1Rows = Seq(EditResultRow(RowId("Transmittal Sheet"), fields), EditResultRow(RowId("abc"), fields), EditResultRow(RowId("def"), fields))
   val e1 = EditResult("V001", "", e1Rows)
   val e2 = EditResult("S001", "", Seq(EditResultRow(RowId("ghi"), fields), EditResultRow(RowId("jkl"), fields)))
-  val m1 = MacroResult("Q001", Set.empty)
+  val m1 = MacroResult("Q001")
 
-  val sum = SummaryEditResults(EditResults(Seq(e2)), EditResults(Seq(e1)), QualityEditResults(false, Seq()), MacroResults(Seq(m1)))
+  val sum = SummaryEditResults(EditResults(Seq(e2)), EditResults(Seq(e1)), QualityEditResults(false, Seq()), MacroResults(false, Seq(m1)))
 
   property("Edit results and summary edit results must convert to CSV") {
     EditResults(Seq(e1)).toCsv("validity") mustBe
