@@ -27,7 +27,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val ctx = ValidationContext(None, Some(2017))
       badLars.flatMap(lar => validationErrors(lar, ctx, validateLar).errors)
     }
-    val macroErrors: Seq[MacroValidationError] = Seq(MacroValidationError("Q047", Seq()))
+    val macroErrors: Seq[MacroValidationError] = Seq(MacroValidationError("Q047"))
 
     val validationState = HmdaFileValidationState(
       Some(ts),
@@ -39,7 +39,8 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       Nil,
       Nil,
       qualityVerified = true,
-      macroErrors
+      macroErrors,
+      macroVerified = false
     )
 
     val s020Desc = "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code."
@@ -50,7 +51,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val syntacticalEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Syntactical)
       val validityEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Validity)
       val qualityEditResults = validationErrorsToQualityEditResults(validationState, tsErrors, larErrors)
-      val macroEditResults = validationErrorsToMacroResults(larErrors)
+      val macroEditResults = validationErrorsToMacroResults(validationState, larErrors)
       val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
 
       summaryEditResults.syntactical.edits.head.edit mustBe "S020"
@@ -61,7 +62,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
 
       summaryEditResults.validity.edits.size mustBe 3
       summaryEditResults.quality mustBe QualityEditResults(true, Seq())
-      summaryEditResults.`macro` mustBe MacroResults(Nil)
+      summaryEditResults.`macro` mustBe MacroResults(false, Nil)
     }
   }
 
