@@ -9,6 +9,7 @@ import hmda.query.projections.filing.HmdaFilingDBProjection.CreateSchema
 import hmda.query.view.filing.HmdaFilingView
 import hmda.query.view.institutions.InstitutionView
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
+import hmda.persistence.PersistenceConfig._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -27,8 +28,7 @@ object HmdaQuerySupervisor {
 class HmdaQuerySupervisor extends HmdaSupervisorActor {
   import HmdaQuerySupervisor._
 
-  val config = ConfigFactory.load()
-  val duration = config.getInt("hmda.actor-lookup-timeout")
+  val duration = configuration.getInt("hmda.actor-lookup-timeout")
 
   implicit val timeout = Timeout(duration.seconds)
   implicit val ec = context.dispatcher

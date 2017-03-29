@@ -11,6 +11,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, LarHttpApi }
+import hmda.api.HmdaConfig._
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -25,7 +26,6 @@ class HmdaFilingApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
 
-  val configuration = ConfigFactory.load()
   implicit val flowParallelism = configuration.getInt("hmda.actor-flow-parallelism")
 
   override val name = "hmda-filing-api"
