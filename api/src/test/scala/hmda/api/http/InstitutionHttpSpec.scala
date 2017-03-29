@@ -2,6 +2,7 @@ package hmda.api.http
 
 import java.io.File
 
+import akka.actor.ActorSystem
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
@@ -20,13 +21,18 @@ import org.scalatest._
 import scala.concurrent.duration._
 
 trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with RequestHeaderUtils with InstitutionsHttpApi with ScalatestRouteTest { suite: Suite =>
+  val configuration: Config = ConfigFactory.load()
+
+  override def createActorSystem(): ActorSystem = {
+    ActorSystem("hmda", configuration)
+  }
+
   val supervisor = system.actorSelection("/user/supervisor")
 
   val duration = 10.seconds
   override val log: LoggingAdapter = NoLogging
   override implicit val timeout: Timeout = Timeout(duration)
 
-  val configuration: Config = ConfigFactory.load()
   implicit val flowParallelism: Int = configuration.getInt("hmda.actor-flow-parallelism")
 
   val ec = system.dispatcher

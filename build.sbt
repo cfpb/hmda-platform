@@ -182,8 +182,8 @@ lazy val api = (project in file("api"))
     )
   )
   .dependsOn(persistenceModel % "compile->compile;test->test")
-  .dependsOn(query % "compile->compile;test->test")
-  .dependsOn(persistence % "compile->compile;test->test")
+  .dependsOn(query % "compile->compile")
+  .dependsOn(persistence % "compile->compile")
 
 
 lazy val platformTest = (project in file("platform-test"))
