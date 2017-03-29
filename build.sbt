@@ -31,6 +31,7 @@ lazy val hmda = (project in file("."))
       mainClass in assembly := Some("hmda.api.HmdaPlatform"),
       assemblyMergeStrategy in assembly := {
         case "application.conf" => MergeStrategy.concat
+        case "application-dev.conf" => MergeStrategy.concat
         case "JS_DEPENDENCIES" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case x =>
