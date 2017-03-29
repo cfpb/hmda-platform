@@ -23,10 +23,6 @@ import scala.concurrent.duration._
 trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with RequestHeaderUtils with InstitutionsHttpApi with ScalatestRouteTest { suite: Suite =>
   val configuration: Config = ConfigFactory.load()
 
-  override def createActorSystem(): ActorSystem = {
-    ActorSystem("hmda", configuration)
-  }
-
   val supervisor = system.actorSelection("/user/supervisor")
 
   val duration = 10.seconds
