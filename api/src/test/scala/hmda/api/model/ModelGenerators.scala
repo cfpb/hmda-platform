@@ -143,34 +143,16 @@ trait ModelGenerators {
     } yield QualityValidationError(id, name, ts)
   }
 
-  implicit def macroEditJustificationGen: Gen[MacroEditJustification] = {
-    for {
-      id <- Gen.choose(Int.MinValue, Int.MaxValue)
-      value <- Gen.alphaStr
-      verified <- Gen.oneOf(true, false)
-      text <- Gen.option(Gen.alphaStr)
-    } yield MacroEditJustification(id, value, verified, text)
-  }
-
-  implicit def macroEditJustificationWithNameGen: Gen[MacroEditJustificationWithName] = {
-    for {
-      edit <- Gen.alphaStr
-      justification <- macroEditJustificationGen
-    } yield MacroEditJustificationWithName(edit, justification)
-  }
-
   implicit def macroValidationErrorGen: Gen[MacroValidationError] = {
     for {
       id <- Gen.alphaStr
-      justifications <- Gen.listOf(macroEditJustificationGen)
-    } yield MacroValidationError(id, justifications)
+    } yield MacroValidationError(id)
   }
 
   implicit def macroResultGen: Gen[MacroResult] = {
     for {
       id <- Gen.alphaStr
-      justification <- Gen.listOf(macroEditJustificationGen)
-    } yield MacroResult(id, justification.toSet)
+    } yield MacroResult(id)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {
@@ -179,8 +161,9 @@ trait ModelGenerators {
       v <- editResultsGen
       qualVerified <- Gen.oneOf(true, false)
       q <- Gen.listOf(editResultGen)
+      macroVerified <- Gen.oneOf(true, false)
       m <- Gen.listOf(macroResultGen)
-    } yield SummaryEditResults(s, v, QualityEditResults(qualVerified, q), MacroResults(m))
+    } yield SummaryEditResults(s, v, QualityEditResults(qualVerified, q), MacroResults(macroVerified, m))
   }
 
   implicit def institutionSearchGen: Gen[InstitutionSearch] = {

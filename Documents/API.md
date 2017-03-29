@@ -423,26 +423,13 @@ Example responses:
     "edits": []
   },
   "macro": {
+    "verified": false,
     "edits": [
       {
-        "edit": "Q008",
-        "justifications": [
-          {
-            "id": 1,
-            "value": "Applicants decided not to proceed with the loan.",
-            "verified": false
-          },
-          {
-            "id": 2,
-            "value": "There were a large number of applications, but few loans were closed",
-            "verified": false
-          },
-          {
-            "id": 3,
-            "value": "Loan activity for this filing year consisted mainly of purchased loans.",
-            "verified": false
-          }
-        ]
+        "edit": "Q008"
+      },
+      {
+        "edit": "Q070"
       }
     ]
   }
@@ -527,9 +514,9 @@ validity, V550, 4977566612
 ```
 
 
-`POST` - Provides verification for quality edits
+`POST` - Provides verification for quality or macro edits
 
-_Specific to the `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/quality` endpoint._
+_Specific to the `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<quality|macro>` endpoint._
 
 Example payload, in `JSON` format:
 
@@ -551,52 +538,6 @@ Example response:
 }
 ```
 
-`POST` - Provides justification for macro edits
-
-_Specific to the `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/macro` endpoint._
-
-Example payload, in `JSON` format:
-
-```json
-{
-  "edit": "Q023",
-  "justification": {
-  "id": 1,
-  "value": "Most of the loan activity are in areas outside of an MSA/MD",
-  "verified": true
-  }
-}
-```
-
-Example response:
-
-```json
-{
-  "edit": "Q023",
-  "justifications": [
-    {
-      "id": 1,
-      "value": "Most of the loan activity are in areas outside of an MSA/MD",
-      "verified": true
-    },
-    {
-      "id": 2,
-      "value": "Most branches or the main branch is located outside of an MSA/MD, therefore many loans are located outside of an MSA/MD.",
-      "verified": false
-    },
-    {
-      "id": 3,
-      "value": "Acquired or merged with an entity whose loan activity are outside of an MSA/MD.",
-      "verified": false
-    },
-    {
-      "id": 4,
-      "value": "Purchased loans are located in areas outside of an MSA/MD.",
-      "verified": false
-    }
-  ]
-}
-```
 
 ### IRS
 
