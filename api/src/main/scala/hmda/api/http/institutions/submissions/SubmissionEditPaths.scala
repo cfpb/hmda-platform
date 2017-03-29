@@ -53,14 +53,15 @@ trait SubmissionEditPaths
               SummaryEditResults(s, v, q, m)
             }
 
-            onComplete(fEditSummary) {
-              case Success(edits) =>
-                onComplete(getSubmissionStatus(SubmissionId(institutionId, period, seqNr))) {
-                  case Success(status) =>
-                    if (format.getOrElse("") == "csv") complete(edits.toCsv)
-                    else complete(ToResponseMarshallable(SummaryEditResultsResponse(edits.syntactical, edits.validity, edits.quality, edits.`macro`, status)))
-                  case Failure(error) => completeWithInternalError(uri, error)
-                }
+            val futures = for {
+              editSummary <- fEditSummary
+              status <- getSubmissionStatus(SubmissionId(institutionId, period, seqNr))
+            } yield (editSummary, status)
+
+            onComplete(futures) {
+              case Success((edits, status)) =>
+                if (format.getOrElse("") == "csv") complete(edits.toCsv)
+                else complete(ToResponseMarshallable(SummaryEditResultsResponse(edits.syntactical, edits.validity, edits.quality, edits.`macro`, status)))
               case Failure(error) => completeWithInternalError(uri, error)
             }
           }
@@ -142,18 +143,20 @@ trait SubmissionEditPaths
         case "macro" => validationErrorsToMacroResults(e.larMacro)
       }
     }
-    onComplete(getSubmissionStatus(submissionId)) {
-      case Success(status) =>
-        onComplete(fSingleEdits) {
-          case Success(results: MacroResults) =>
-            if (format == "csv") complete("editType, editId\n" + results.toCsv)
-            else complete(ToResponseMarshallable(MacroResultsResponse(results.edits, status)))
-          case Success(results: EditResults) =>
-            if (format == "csv") complete("editType, editId, loanId\n" + results.toCsv(editType))
-            else complete(ToResponseMarshallable(EditResultsResponse(results.edits, status)))
-          case Success(_) => completeWithInternalError(uri, new IllegalStateException)
-          case Failure(error) => completeWithInternalError(uri, error)
-        }
+
+    val futures = for {
+      status <- getSubmissionStatus(submissionId)
+      results <- fSingleEdits
+    } yield (status, results)
+
+    onComplete(futures) {
+      case Success((status: SubmissionStatus, results: MacroResults)) =>
+        if (format == "csv") complete("editType, editId\n" + results.toCsv)
+        else complete(ToResponseMarshallable(MacroResultsResponse(results.edits, status)))
+      case Success((status: SubmissionStatus, results: EditResults)) =>
+        if (format == "csv") complete("editType, editId, loanId\n" + results.toCsv(editType))
+        else complete(ToResponseMarshallable(EditResultsResponse(results.edits, status)))
+      case Success((_, _)) => completeWithInternalError(uri, new IllegalStateException)
       case Failure(error) => completeWithInternalError(uri, error)
     }
   }
