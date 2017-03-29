@@ -309,6 +309,10 @@ Example response, with HTTP code 201:
   ],
   "count": 20,
   "total": 130,
+  "status": {
+      "code": 3,
+      "message": "uploaded"
+  },
   "_links": {
     "first": "?page=1",
     "prev": "?page=1",
@@ -432,6 +436,10 @@ Example responses:
         "edit": "Q070"
       }
     ]
+  },
+  "status": {
+      "code": 3,
+      "message": "uploaded"
   }
 }
 ```
@@ -502,7 +510,11 @@ Example response:
         }
       ]
     }
-  ]
+  ],
+  "status": {
+    "code": 3,
+    "message": "uploaded"
+  }
 }
 ```
 

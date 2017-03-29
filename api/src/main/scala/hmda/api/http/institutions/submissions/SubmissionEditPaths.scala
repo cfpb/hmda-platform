@@ -12,7 +12,7 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
-import hmda.model.fi.{ Submission, SubmissionId }
+import hmda.model.fi.{ Submission, SubmissionId, SubmissionStatus }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
@@ -54,10 +54,15 @@ trait SubmissionEditPaths
               SummaryEditResults(s, v, q, m)
             }
 
-            onComplete(fEditSummary) {
-              case Success(edits) =>
+            val futures = for {
+              editSummary <- fEditSummary
+              status <- getSubmissionStatus(SubmissionId(institutionId, period, seqNr))
+            } yield (editSummary, status)
+
+            onComplete(futures) {
+              case Success((edits, status)) =>
                 if (format.getOrElse("") == "csv") complete(edits.toCsv)
-                else complete(ToResponseMarshallable(edits))
+                else complete(ToResponseMarshallable(SummaryEditResultsResponse(edits.syntactical, edits.validity, edits.quality, edits.`macro`, status)))
               case Failure(error) => completeWithInternalError(uri, error)
             }
           }
@@ -72,7 +77,7 @@ trait SubmissionEditPaths
         parameters("format".?) { format: Option[String] =>
           completeVerified(institutionId, period, seqNr, uri) {
             val fValidationState = getValidationState(institutionId, period, seqNr)
-            completeValidationState(editType, fValidationState, uri, format.getOrElse(""))
+            completeValidationState(editType, fValidationState, uri, format.getOrElse(""), SubmissionId(institutionId, period, seqNr))
           }
         }
       }
@@ -113,7 +118,7 @@ trait SubmissionEditPaths
   private def fHmdaFileValidator(submissionId: SubmissionId): Future[ActorRef] =
     (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
-  private def completeValidationState(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri, format: String)(implicit ec: ExecutionContext) = {
+  private def completeValidationState(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri, format: String, submissionId: SubmissionId)(implicit ec: ExecutionContext) = {
     val fSingleEdits = fValidationState.map { e =>
       editType match {
         case "syntactical" => validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
@@ -123,16 +128,29 @@ trait SubmissionEditPaths
       }
     }
 
-    onComplete(fSingleEdits) {
-      case Success(edits: MacroResults) =>
-        if (format == "csv") complete("editType, editId\n" + edits.toCsv)
-        else complete(ToResponseMarshallable(edits))
-      case Success(edits: EditResults) =>
-        if (format == "csv") complete("editType, editId, loanId\n" + edits.toCsv(editType))
-        else complete(ToResponseMarshallable(edits))
-      case Success(_) => completeWithInternalError(uri, new IllegalStateException)
+    val futures = for {
+      status <- getSubmissionStatus(submissionId)
+      results <- fSingleEdits
+    } yield (status, results)
+
+    onComplete(futures) {
+      case Success((status: SubmissionStatus, results: MacroResults)) =>
+        if (format == "csv") complete("editType, editId\n" + results.toCsv)
+        else complete(ToResponseMarshallable(MacroResultsResponse(results.verified, results.edits, status)))
+      case Success((status: SubmissionStatus, results: EditResults)) =>
+        if (format == "csv") complete("editType, editId, loanId\n" + results.toCsv(editType))
+        else complete(ToResponseMarshallable(EditResultsResponse(results.edits, status)))
+      case Success((_, _)) => completeWithInternalError(uri, new IllegalStateException)
       case Failure(error) => completeWithInternalError(uri, error)
     }
+  }
+
+  private def getSubmissionStatus(submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[SubmissionStatus] = {
+    val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
+    for {
+      sa <- fSubmissionsActor
+      s <- (sa ? GetSubmissionById(submissionId)).mapTo[Submission]
+    } yield s.status
   }
 
   private def getValidationState(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
