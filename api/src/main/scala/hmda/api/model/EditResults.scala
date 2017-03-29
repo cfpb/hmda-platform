@@ -1,7 +1,6 @@
 package hmda.api.model
 
 import hmda.model.fi.SubmissionStatus
-import hmda.validation.engine.MacroEditJustification
 import spray.json.JsObject
 
 case class RowId(rowId: String)
@@ -21,17 +20,15 @@ trait EditResultsCollection {
   def toCsv(editType: String) = edits.map(e => e.toCsv(editType)).mkString
 }
 
-case class QualityEditsVerification(verified: Boolean)
-case class QualityEditsVerifiedResponse(verified: Boolean, status: SubmissionStatus)
+case class EditsVerification(verified: Boolean)
+case class EditsVerifiedResponse(verified: Boolean, status: SubmissionStatus)
 
-case class MacroResult(edit: String, justifications: Set[MacroEditJustification])
-case class MacroResults(edits: Seq[MacroResult]) {
+case class MacroResult(edit: String)
+case class MacroResults(verified: Boolean, edits: Seq[MacroResult]) {
   def toCsv = edits.map(e => "macro, " + e.edit + "\n").mkString
 }
-case object MacroResults {
-  def empty: MacroResults = MacroResults(Nil)
-}
-case class MacroResultsResponse(edits: Seq[MacroResult], status: SubmissionStatus)
+case class MacroResultsResponse(verified: Boolean, edits: Seq[MacroResult], status: SubmissionStatus)
+
 case class SummaryEditResults(
     syntactical: EditResults,
     validity: EditResults,

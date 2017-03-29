@@ -21,9 +21,9 @@ trait ValidationErrorConverter {
     QualityEditResults(vs.qualityVerified, editResults)
   }
 
-  def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
+  def validationErrorsToMacroResults(vs: HmdaFileValidationState, errors: Seq[ValidationError]): MacroResults = {
     val macroValidationErrors: Seq[MacroValidationError] = errors.filter(_.errorType == Macro).asInstanceOf[Seq[MacroValidationError]]
-    MacroResults(macroValidationErrors.map(x => MacroResult(x.ruleName, MacroEditJustificationLookup.updateJustifications(x.ruleName, x.justifications))))
+    MacroResults(vs.macroVerified, macroValidationErrors.map(x => MacroResult(x.ruleName)))
   }
 
   //// Helper methods

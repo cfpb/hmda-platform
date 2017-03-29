@@ -20,7 +20,7 @@ trait ValidationApi {
         case Syntactical => SyntacticalValidationError(inputId, ruleName, ts).failure.toValidationNel
         case Validity => ValidityValidationError(inputId, ruleName, ts).failure.toValidationNel
         case Quality => QualityValidationError(inputId, ruleName, ts).failure.toValidationNel
-        case Macro => MacroValidationError(ruleName, Nil).failure.toValidationNel
+        case Macro => MacroValidationError(ruleName).failure.toValidationNel
       }
     }
   }
