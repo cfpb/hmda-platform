@@ -67,16 +67,17 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   }
 
   "return a list of validation errors for a single type" in {
-    val expectedEdits = EditResults(List(v285, v280))
+    val expectedEdits = List(v285, v280)
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[EditResults] mustBe expectedEdits
+      responseAs[EditResultsResponse].edits mustBe expectedEdits
     }
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[MacroResults] mustBe MacroResults(false, List(MacroResult("Q007")))
+      val macros = responseAs[MacroResultsResponse]
+      macros.edits mustBe List(MacroResult("Q007"))
     }
   }
 

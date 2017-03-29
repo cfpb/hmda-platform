@@ -1,6 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.{ ModelGenerators, ParsingErrorSummary }
+import hmda.model.fi.ParsedWithErrors
 import hmda.parser.fi.lar.LarParsingError
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
@@ -11,7 +12,7 @@ class ParserResultsProtocolSpec extends PropSpec with PropertyChecks with MustMa
   val tsErrors = List("ts err 1", "ts err 2")
   val larError = LarParsingError(3, List("first", "second"))
   val larError2 = LarParsingError(9, List("third", "fourth"))
-  val parsingErrorSummary = ParsingErrorSummary(tsErrors, Seq(larError, larError2), "uri/path/", 4, 315)
+  val parsingErrorSummary = ParsingErrorSummary(tsErrors, Seq(larError, larError2), "uri/path/", 4, 315, ParsedWithErrors)
 
   val expectedLarErrorJson = JsObject(
     ("lineNumber", JsNumber(3)),
@@ -32,6 +33,10 @@ class ParserResultsProtocolSpec extends PropSpec with PropertyChecks with MustMa
       ("larErrors", JsArray(expectedLarErrorJson, expectedLarError2Json)),
       ("count", JsNumber(20)),
       ("total", JsNumber(315)),
+      ("status", JsObject(
+        ("code", JsNumber(5)),
+        ("message", JsString("parsed with errors"))
+      )),
       ("_links", JsObject(
         ("href", JsString("uri/path/{rel}")),
         ("self", JsString("?page=4")),
