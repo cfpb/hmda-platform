@@ -2,7 +2,7 @@ package hmda.api.protocol.processing
 
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
 import hmda.model.fi._
-import hmda.api.model.{ MacroEditJustificationWithName, Receipt, Submissions }
+import hmda.api.model.{ Receipt, Submissions }
 import hmda.api.protocol.validation.ValidationResultProtocol
 import spray.json.{ DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat }
 
@@ -44,7 +44,6 @@ trait SubmissionProtocol extends ValidationResultProtocol {
   implicit val submissionFormat = jsonFormat5(Submission.apply)
   implicit val submissionsFormat = jsonFormat1(Submissions.apply)
   implicit val receiptFormat = jsonFormat3(Receipt.apply)
-  implicit val macroJustifyFormat = jsonFormat2(MacroEditJustificationWithName.apply)
 
   implicit val fileSummaryFormat = jsonFormat3(FileSummary.apply)
   implicit val contactSummaryFormat = jsonFormat3(ContactSummary.apply)

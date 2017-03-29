@@ -15,6 +15,7 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.query.model.ViewMessages.StreamCompleted
 import hmda.query.projections.institutions.InstitutionDBProjection
 import hmda.query.view.messages.CommonViewMessages._
+import hmda.persistence.PersistenceConfig._
 
 object InstitutionView {
 
@@ -54,8 +55,7 @@ class InstitutionView extends HmdaPersistentActor {
 
   val queryProjector = context.actorOf(InstitutionDBProjection.props(), "institution-projection")
 
-  val conf = ConfigFactory.load()
-  val snapshotCounter = conf.getInt("hmda.journal.snapshot.counter")
+  val snapshotCounter = configuration.getInt("hmda.journal.snapshot.counter")
 
   override def persistenceId: String = name
 
