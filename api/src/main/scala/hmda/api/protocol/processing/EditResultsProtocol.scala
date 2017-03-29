@@ -12,7 +12,7 @@ trait EditResultsProtocol extends ValidationResultProtocol with SubmissionProtoc
   implicit val qualityEditResultsFormat = jsonFormat2(QualityEditResults.apply)
   implicit val macroResultFormat = jsonFormat1(MacroResult.apply)
   implicit val macroResultsFormat = jsonFormat2(MacroResults.apply)
-  implicit val macroResultsResponseFormat = jsonFormat2(MacroResultsResponse.apply)
+  implicit val macroResultsResponseFormat = jsonFormat3(MacroResultsResponse.apply)
   implicit val summaryEditResultsFormat = jsonFormat4(SummaryEditResults.apply)
   implicit val summaryEditResultsResponseFormat = jsonFormat5(SummaryEditResultsResponse.apply)
   implicit val editsVerificationFormat = jsonFormat1(EditsVerification.apply)

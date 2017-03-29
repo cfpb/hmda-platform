@@ -136,7 +136,7 @@ trait SubmissionEditPaths
     onComplete(futures) {
       case Success((status: SubmissionStatus, results: MacroResults)) =>
         if (format == "csv") complete("editType, editId\n" + results.toCsv)
-        else complete(ToResponseMarshallable(MacroResultsResponse(results.edits, status)))
+        else complete(ToResponseMarshallable(MacroResultsResponse(results.verified, results.edits, status)))
       case Success((status: SubmissionStatus, results: EditResults)) =>
         if (format == "csv") complete("editType, editId, loanId\n" + results.toCsv(editType))
         else complete(ToResponseMarshallable(EditResultsResponse(results.edits, status)))
