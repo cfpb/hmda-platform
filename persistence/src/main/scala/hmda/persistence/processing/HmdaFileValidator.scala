@@ -76,9 +76,10 @@ object HmdaFileValidator {
         else this
     }
 
-    def tsErrors: Seq[ValidationError] = tsSyntactical ++ tsValidity ++ tsQuality
-    def larErrors: Seq[ValidationError] = larSyntactical ++ larValidity ++ larQuality ++ larMacro
-    def allErrors: Seq[ValidationError] = tsErrors ++ larErrors
+    def syntacticalErrors: Seq[ValidationError] = tsSyntactical ++ larSyntactical
+    def validityErrors: Seq[ValidationError] = tsValidity ++ larValidity
+    def qualityErrors: Seq[ValidationError] = tsQuality ++ larQuality
+    def allErrors: Seq[ValidationError] = syntacticalErrors ++ validityErrors ++ qualityErrors ++ larMacro
   }
 }
 

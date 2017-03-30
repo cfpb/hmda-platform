@@ -8,9 +8,15 @@ import spray.json._
 
 class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with ModelGenerators with EditResultsProtocol {
 
-  property("EditResults must convert to and from json") {
-    forAll(editResultsGen) { e =>
-      e.toJson.convertTo[EditResults] mustBe e
+  property("EditCollection must convert to and from json") {
+    forAll(editCollectionGen) { e =>
+      e.toJson.convertTo[EditCollection] mustBe e
+    }
+  }
+
+  property("VerifiableEditCollection must convert to and from json") {
+    forAll(verifiableEditCollectionGen) { v =>
+      v.toJson.convertTo[VerifiableEditCollection] mustBe v
     }
   }
 
@@ -18,12 +24,6 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
     forAll(summaryEditResultsGen) { s =>
       s.toJson.convertTo[SummaryEditResults] mustBe s
     }
-  }
-
-  val macroResult = MacroResult("Q888")
-  val expectedMacroJson = JsObject(("edit", JsString("Q888")))
-  property("MacroResults must have proper json format") {
-    macroResult.toJson mustBe expectedMacroJson
   }
 
   property("QualityEditsVerifiedResponse must have correct json format") {

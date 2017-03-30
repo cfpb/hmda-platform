@@ -47,6 +47,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     val s010Desc = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
     val s100Desc = "Activity year must = year being processed (= 2017)."
 
+    /*
     "be converted to edit check summary" in {
       val syntacticalEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Syntactical)
       val validityEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Validity)
@@ -64,6 +65,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       summaryEditResults.quality mustBe QualityEditResults(true, Seq())
       summaryEditResults.`macro` mustBe MacroResults(false, Nil)
     }
+    */
 
     "convert edits to CSV" in {
       val csvResults: Seq[String] = validationErrorsToCsvResults(validationState).split("\n")
