@@ -70,6 +70,22 @@ trait SubmissionEditPaths
       }
     }
 
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/csv
+  def submissionEditCsvPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / "csv") { (period, seqNr) =>
+      timedGet { uri =>
+        completeVerified(institutionId, period, seqNr, uri) {
+          val fValidationState = getValidationState(institutionId, period, seqNr)
+          onComplete(fValidationState) {
+            case Success(validationState) =>
+              val csv: String = validationErrorsToCsvResults(validationState)
+              complete(ToResponseMarshallable(csv))
+            case Failure(error) => completeWithInternalError(uri, error)
+          }
+        }
+      }
+    }
+
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/<editType>
   def submissionSingleEditPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>

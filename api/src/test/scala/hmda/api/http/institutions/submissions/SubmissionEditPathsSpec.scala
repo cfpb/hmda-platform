@@ -58,11 +58,11 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   }
 
   "Return summary edits in CSV format" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits?format=csv") ~> institutionsRoutes ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/csv") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
       responseAs[String] must include("editType, editId, loanId")
-      responseAs[String] must include("syntactical, S020, Transmittal Sheet")
-      responseAs[String] must include("validity, V285, loan2")
+      responseAs[String] must include("Syntactical, S020, Transmittal Sheet")
+      responseAs[String] must include("Validity, V285, loan2")
     }
   }
 
