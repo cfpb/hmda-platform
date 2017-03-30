@@ -1,10 +1,14 @@
 package hmda.validation.rules.lar.`macro`
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.config.ConfigFactory
+import hmda.model.fi.{ Filing, SubmissionId }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.Result
 import hmda.validation.rules.AggregateEditCheck
@@ -14,6 +18,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.IfInstitutionPresentInAggregate
+import hmda.persistence.processing.HmdaQuery._
 
 object Q011 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
@@ -43,5 +48,18 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
         c.toDouble.toString is numericallyBetween(lower.toString, upper.toString)
       }
     }
+  }
+
+  //  private def filing(institutionId: String, period: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Sink[Filing, Future[Filing]] = {
+  //    events(s"filings-$institutionId").filter(x => x.isInstanceOf[Filing])
+  //      .map(e => e.asInstanceOf[Filing])
+  //      .filter(x => x.period == period)
+  //      .to(Sink.headOption)
+  //  }
+
+  private def findLarSource(submissionId: SubmissionId)(implicit system: ActorSystem, materializer: ActorMaterializer): LoanApplicationRegisterSource = {
+    events(s"HmdaFileValidator-$submissionId")
+      .filter(x => x.isInstanceOf[LarValidated])
+      .map(e => e.asInstanceOf[LarValidated].lar)
   }
 }
