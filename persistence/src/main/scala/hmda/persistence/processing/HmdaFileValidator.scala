@@ -75,6 +75,10 @@ object HmdaFileValidator {
         else if (editType == Macro) this.copy(macroVerified = v)
         else this
     }
+
+    def tsErrors: Seq[ValidationError] = tsSyntactical ++ tsValidity ++ tsQuality
+    def larErrors: Seq[ValidationError] = larSyntactical ++ larValidity ++ larQuality ++ larMacro
+    def allErrors: Seq[ValidationError] = tsErrors ++ larErrors
   }
 }
 

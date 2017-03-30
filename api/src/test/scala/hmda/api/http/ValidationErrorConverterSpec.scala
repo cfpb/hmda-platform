@@ -64,6 +64,16 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       summaryEditResults.quality mustBe QualityEditResults(true, Seq())
       summaryEditResults.`macro` mustBe MacroResults(false, Nil)
     }
+
+    "convert edits to CSV" in {
+      val csvResults: Seq[String] = validationErrorsToCsvResults(validationState).split("\n")
+
+      csvResults.length mustBe 10
+      csvResults.head mustBe "editType, editId, loanId"
+      csvResults(1) mustBe "Syntactical, S020, Transmittal Sheet"
+      csvResults.last mustBe "Macro, Q047, "
+
+    }
   }
 
 }

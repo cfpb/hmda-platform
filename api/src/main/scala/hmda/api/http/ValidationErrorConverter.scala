@@ -26,6 +26,12 @@ trait ValidationErrorConverter {
     MacroResults(vs.macroVerified, macroValidationErrors.map(x => MacroResult(x.ruleName)))
   }
 
+  def validationErrorsToCsvResults(vs: HmdaFileValidationState): String = {
+    val errors: Seq[ValidationError] = vs.allErrors
+    val rows: Seq[String] = errors.map(_.toCsv)
+    "editType, editId, loanId\n" + rows.mkString("\n")
+  }
+
   //// Helper methods
 
   private def toEditResults(vs: HmdaFileValidationState, edits: Seq[ValidationError]): Seq[EditResult] = {
