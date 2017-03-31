@@ -37,6 +37,8 @@ Quick links:
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`](#parse-errors)
 - [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`](#edits)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`](#edits-by-type)
+- [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/csv`](#edits-csv)
+- [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<edit>`](#edit-details)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`](#irs)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`](#signature)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`](#summary)
@@ -262,14 +264,12 @@ Example response, with HTTP code 400:
 
 `GET` - Returns all parsing errors for a submission
 
-This endpoint is paginated.
-
 | Query parameter | Description |
 | --------------- | ----------- |
 | page | Integer. If blank, will default to page 1. Page size is 20 lines of errors. |
 
 
-The response contains 3 fields of pagination metadata:
+This endpoint is paginated. The response contains 3 fields of pagination metadata:
 
  - `total`: total number of parser errors for this file
  - `count`: number of errors returned on this page. Full page contains errors from 20 lines of the HMDA file.
@@ -330,13 +330,9 @@ Example response, with HTTP code 201:
 
 `GET`  - Returns a list of all edits for a given submission, including the edit name and description
 
-By default, results are grouped by edit type.
+Results are grouped by edit type.
 
-| Query parameter | Description |
-| --------------- | ----------- |
-| format | `csv` to return edits in CSV format, rather than the default by edit type, for use in spreadsheet software. |
-
-Example responses:
+Example response:
 
 ```json
 {
@@ -386,71 +382,67 @@ Example responses:
 }
 ```
 
-Formatted as CSV, `?format=csv`:
-
-```csv
-editType, editId, loanId
-syntactical, S025, Transmittal Sheet
-syntactical, S025, s1
-syntactical, S025, s2
-syntactical, S025, s3
-syntactical, S010, s4
-syntactical, S010, s5
-macro, Q007
-```
-
 ### Edit Details
 
 `/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<type>/<edit>`
 
 `GET` - For an edit, return a collection of all rows that failed it, including the relevant fields and their values.
 
-This endpoint is paginated.
 
 | Query parameter | Description |
 | --------------- | ----------- |
 | page | Integer. If blank, will default to page 1. Page size is 20 lines of errors. |
 
+This endpoint is paginated. The response contains 3 fields of pagination metadata:
+
+ - `total`: total number of parser errors for this file
+ - `count`: number of errors returned on this page. Full page contains errors from 20 lines of the HMDA file.
+ - `links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
+
+
 Example response:
 
 ```json
 {
-  "edit": "S020",
+  "edit": "Q036",
   "rows": [
     {
       "row": {
-        "rowId": "Transmittal Sheet"
+        "rowId": "4514746044"
       },
       "fields": {
-        "Agency Code": 10
+        "Property Type": 2,
+        "Loan Amount": 213
       }
     },
     {
       "row": {
-        "rowId": "8299422144"
+        "rowId": "6072140231"
       },
       "fields": {
-        "Agency Code": 10
+        "Property Type": 2,
+        "Loan Amount": 185
       }
     },
     {
       "row": {
-        "rowId": "2185751599"
+        "rowId": "7254350246"
       },
       "fields": {
-        "Agency Code": 10
+        "Property Type": 2,
+        "Loan Amount": 252
       }
     }
   ],
-  "count": 20,
-  "total": 130,
+  "count": 3,
+  "total": 3,
   "_links": {
-    "first": "?page=1",
-    "prev": "?page=1",
     "self": "?page=1",
-    "next": "?page=2",
-    "last": "?page=7",
-    "href": "/institutions/1/filings/2017/submissions/1/edits/S020"
+    "prev": "?page=1",
+    "last": "?page=1",
+    "next": "?page=1",
+    "first": "?page=1",
+    "href": "/institutions/2/filings/2017/submissions/2/edits/Q036{rel}"
   }
 }
 ```
@@ -463,10 +455,6 @@ Example response:
 `GET` - Returns a list of edits of a specific type, for a given submission
 
 By default, results are grouped by named edit.
-
-| Query parameter | Description |
-| --------------- | ----------- |
-| format | `csv` to return edits in CSV format, rather than the default by edit type, for use in spreadsheet software. |
 
 Example response:
 
@@ -487,13 +475,6 @@ Example response:
     "message": "uploaded"
   }
 }
-```
-
-Formatted as CSV:
-```
-editType, editId, loanId
-validity, V555, 4977566612
-validity, V550, 4977566612
 ```
 
 
@@ -519,6 +500,30 @@ Example response:
     "message": "validated with errors"
   }
 }
+```
+
+
+### Edits CSV
+
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/csv`
+
+`GET` - Returns a list of all validation errors for the submission, formatted as CSV for use in spreadsheet software
+
+Example response:
+
+```csv
+editType, editId, loanId
+Syntactical, S020, Transmittal Sheet
+Validity, V125, Transmittal Sheet
+Quality, Q027, 9553605194
+Quality, Q027, 9401122359
+Quality, Q027, 2156575876
+Quality, Q027, 12073393.95
+Quality, Q027, 4101572269
+Quality, Q027, 4748775957
+Quality, Q027, 6024192341
+Quality, Q027, 621742533.4
+Macro, Q023,
 ```
 
 
