@@ -19,7 +19,6 @@ case class SummaryEditResults(
 )
 case class SingleTypeEditResults(edits: Seq[EditInfo], status: SubmissionStatus)
 
-// For an individual edit, all of the rows that failed it
 case class EditResult(
   edit: String,
   rows: Seq[EditResultRow],

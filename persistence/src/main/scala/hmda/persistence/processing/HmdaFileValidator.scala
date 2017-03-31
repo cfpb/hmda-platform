@@ -229,8 +229,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
     case GetState =>
       sender() ! state
 
-    case GetNamedErrorResultsPaginated(name, page) =>
-      val allFailures = state.allErrors.filter(e => e.ruleName == name)
+    case GetNamedErrorResultsPaginated(editName, page) =>
+      val allFailures = state.allErrors.filter(e => e.ruleName == editName)
       val totalSize = allFailures.size
       val p = PaginatedResource(totalSize)(page)
       val pageOfFailures = allFailures.slice(p.fromIndex, p.toIndex)

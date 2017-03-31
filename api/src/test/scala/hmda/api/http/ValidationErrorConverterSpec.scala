@@ -11,7 +11,7 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import org.scalatest.{ MustMatchers, WordSpec }
-import spray.json.{ JsBoolean, JsNumber, JsObject }
+import spray.json.{ JsNumber, JsObject }
 
 class ValidationErrorConverterSpec extends WordSpec with MustMatchers with ValidationErrorConverter with LarEngine {
 

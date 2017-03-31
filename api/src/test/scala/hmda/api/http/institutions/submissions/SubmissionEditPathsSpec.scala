@@ -45,8 +45,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       val r = responseAs[SummaryEditResults]
       r.syntactical mustBe EditCollection(Seq(s020info, s010info))
       r.validity mustBe EditCollection(Seq(v285info, v280info))
-      r.quality mustBe VerifiableEditCollection(false, Seq())
-      r.`macro` mustBe VerifiableEditCollection(false, Seq(q007info))
+      r.quality mustBe VerifiableEditCollection(verified = false, Seq())
+      r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info))
     }
   }
 
