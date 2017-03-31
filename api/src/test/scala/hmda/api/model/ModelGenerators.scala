@@ -99,14 +99,6 @@ trait ModelGenerators {
     } yield EditResultRow(RowId(loanId), fields)
   }
 
-  implicit def editResultGen: Gen[EditResult] = {
-    for {
-      edit <- Gen.alphaStr
-      description <- Gen.alphaStr
-      lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, description, lars)
-  }
-
   implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
     Gen.oneOf(
       List(Syntactical, Validity, Quality)

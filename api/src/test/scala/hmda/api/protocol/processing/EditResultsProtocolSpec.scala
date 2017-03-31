@@ -36,4 +36,36 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
       ))
     )
   }
+
+  val rowDetail1 = EditResultRow(RowId("one"), JsObject(("thing", JsString("two"))))
+  property("EditResultRow must have correct JSON format") {
+    rowDetail1.toJson mustBe JsObject(
+      ("row", JsObject(
+        ("rowId", JsString("one"))
+      )),
+      ("fields", JsObject(
+        ("thing", JsString("two"))
+      ))
+    )
+  }
+
+  val errResult = EditResult("V567", Seq(rowDetail1), "uri/path/", 4, 315)
+
+  property("Paginated EditResult must have correct JSON format") {
+    errResult.toJson mustBe JsObject(
+      ("edit", JsString("V567")),
+      ("rows", JsArray(rowDetail1.toJson)),
+      ("count", JsNumber(20)),
+      ("total", JsNumber(315)),
+      ("_links", JsObject(
+        ("href", JsString("uri/path/{rel}")),
+        ("self", JsString("?page=4")),
+        ("first", JsString("?page=1")),
+        ("prev", JsString("?page=3")),
+        ("next", JsString("?page=5")),
+        ("last", JsString("?page=16"))
+      ))
+    )
+
+  }
 }

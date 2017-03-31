@@ -3,16 +3,6 @@ package hmda.api.model
 import hmda.model.fi.SubmissionStatus
 import spray.json.JsObject
 
-case class RowId(rowId: String)
-case class EditResultRow(row: RowId, fields: JsObject)
-
-// For an individual edit, all of the rows that failed it
-case class EditResult(edit: String, description: String, rows: Seq[EditResultRow]) {
-  def toCsv(editType: String) = {
-    rows.map(r => Seq(editType, edit, r.row.rowId).mkString("", ", ", "\n")).mkString
-  }
-}
-
 case class EditsVerification(verified: Boolean)
 case class EditsVerifiedResponse(verified: Boolean, status: SubmissionStatus)
 
@@ -28,3 +18,26 @@ case class SummaryEditResults(
   status: SubmissionStatus
 )
 case class SingleTypeEditResults(edits: Seq[EditInfo], status: SubmissionStatus)
+
+// For an individual edit, all of the rows that failed it
+case class EditResult(
+  edit: String,
+  rows: Seq[EditResultRow],
+  path: String,
+  currentPage: Int,
+  total: Int
+) extends PaginatedResponse
+
+case class RowId(rowId: String)
+case class EditResultRow(row: RowId, fields: JsObject)
+
+/* When converted to JSON, EditResult has this format:
+
+EditResult(
+  edit: String,
+  rows: Seq[EditResultRow],
+  count: Int,
+  total: Int,
+  _links: PaginatedLinks)
+
+This happens in EditResultsProtocol.scala */

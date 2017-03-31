@@ -5,10 +5,9 @@ import hmda.model.fi.SubmissionStatus
 import hmda.parser.fi.lar.LarParsingError
 import spray.json._
 
-trait ParserResultsProtocol extends DefaultJsonProtocol with SubmissionProtocol {
+trait ParserResultsProtocol extends DefaultJsonProtocol with SubmissionProtocol with PaginationProtocol {
 
   implicit val larParsingErrorFormat = jsonFormat2(LarParsingError.apply)
-  implicit val paginationLinksFormat = jsonFormat6(PaginationLinks.apply)
 
   implicit object ParsingSummaryJsonFormat extends RootJsonFormat[ParsingErrorSummary] {
     override def write(summary: ParsingErrorSummary): JsValue = {
