@@ -8,14 +8,14 @@ import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ EditResult, _ }
 import hmda.model.fi._
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.fi.lar.LarGenerators
 import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.engine._
-import spray.json.{ JsNumber, JsObject, JsString }
+import spray.json.{ JsNumber, JsObject }
 
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
@@ -26,20 +26,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     super.beforeAll()
     loadValidationErrors()
   }
-
-  /*
-  val s010FieldsL1 = JsObject(("Record Identifier", JsNumber(111)))
-  val s020FieldsL1 = JsObject(("Agency Code", JsNumber(222)))
-  val v280FieldsL1 = JsObject(("Metropolitan Statistical Area / Metropolitan Division", JsString("333")))
-  val v285FieldsL2 = JsObject(("State Code", JsString("444")), ("Metropolitan Statistical Area / Metropolitan Division", JsString("555")))
-  val v285FieldsL3 = JsObject(("State Code", JsString("666")), ("Metropolitan Statistical Area / Metropolitan Division", JsString("777")))
-  val s020FieldsTs = JsObject(("Agency Code", JsNumber(888)))
-
-  val s020 = EditResult("S020", List(EditResultRow(RowId("Transmittal Sheet"), s020FieldsTs), EditResultRow(RowId("loan1"), s020FieldsL1)))
-  val s010 = EditResult("S010", List(EditResultRow(RowId("loan1"), s010FieldsL1)))
-  val v280 = EditResult("V280", List(EditResultRow(RowId("loan1"), v280FieldsL1)))
-  val v285 = EditResult("V285", List(EditResultRow(RowId("loan2"), v285FieldsL2), EditResultRow(RowId("loan3"), v285FieldsL3)))
-  */
 
   val s020Description = "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code."
   val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
@@ -76,16 +62,16 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     }
   }
 
-  /*
+  val s010 = Seq(EditResultRow(RowId("loan1"), JsObject(("Record Identifier", JsNumber(111)))))
   "return row details for an edit" in {
-    val expectedDetails = EditDetails("Hi")
+    val path = "/institutions/0/filings/2017/submissions/1/edits/S010"
+    val expected = EditResult("S010", s010, path, 1, 1)
 
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/S010") ~> institutionsRoutes ~> check {
+    getWithCfpbHeaders(path) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[EditDetails] mustBe expectedDetails
+      responseAs[EditResult] mustBe expected
     }
   }
-  */
 
   ///// CSV /////
 

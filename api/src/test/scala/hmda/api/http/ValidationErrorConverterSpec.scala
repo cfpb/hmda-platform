@@ -44,28 +44,31 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     )
 
     val s020Desc = "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code."
-    val s010Desc = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
     val s100Desc = "Activity year must = year being processed (= 2017)."
 
-    /*
-    "be converted to edit check summary" in {
-      val syntacticalEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Syntactical)
-      val validityEditResults = validationErrorsToEditResults(validationState, tsErrors, larErrors, Validity)
-      val qualityEditResults = validationErrorsToQualityEditResults(validationState, tsErrors, larErrors)
-      val macroEditResults = validationErrorsToMacroResults(validationState, larErrors)
-      val summaryEditResults = SummaryEditResults(syntacticalEditResults, validityEditResults, qualityEditResults, macroEditResults)
+    "get descriptions for a collection of edits, removing duplicates" in {
+      val infos: Seq[EditInfo] = editInfos(larErrors)
+      infos.size mustBe larErrors.map(_.ruleName).distinct.size
 
-      summaryEditResults.syntactical.edits.head.edit mustBe "S020"
-      summaryEditResults.syntactical.edits.head.description mustBe s020Desc
-      summaryEditResults.syntactical.edits.head.rows.size mustBe 3
-
-      summaryEditResults.syntactical.edits.tail.size mustBe 2
-
-      summaryEditResults.validity.edits.size mustBe 3
-      summaryEditResults.quality mustBe QualityEditResults(true, Seq())
-      summaryEditResults.`macro` mustBe MacroResults(false, Nil)
+      val s020 = infos.find(i => i.edit == "S020").get
+      s020 mustBe EditInfo("S020", s020Desc)
     }
-    */
+
+    "get edit info for validationErrors" in {
+      val infos = editInfos(tsErrors)
+      infos.size mustBe tsErrors.size
+      infos.head mustBe EditInfo("S020", s020Desc)
+      infos.last mustBe EditInfo("S100", s100Desc)
+    }
+
+    "convert edit to EditResultRow" in {
+      val err = tsErrors.head
+      val result = validationErrorToResultRow(err, validationState)
+      result mustBe EditResultRow(
+        RowId("Transmittal Sheet"),
+        JsObject("Agency Code" -> JsNumber(9))
+      )
+    }
 
     "convert edits to CSV" in {
       val csvResults: Seq[String] = validationErrorsToCsvResults(validationState).split("\n")

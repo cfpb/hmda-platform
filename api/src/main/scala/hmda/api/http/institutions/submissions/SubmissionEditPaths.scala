@@ -91,6 +91,32 @@ trait SubmissionEditPaths
       }
     }
 
+  // /institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<edit>
+  private val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d""")
+  def editFailureDetailsPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / editNameRegex) { (period, seqNr, editName) =>
+      timedGet { uri =>
+        completeVerified(institutionId, period, seqNr, uri) {
+          parameters('page.as[Int] ? 1) { (page: Int) =>
+            val fValidator: Future[ActorRef] = fHmdaFileValidator(SubmissionId(institutionId, period, seqNr))
+            val fPaginatedErrors: Future[(PaginatedErrors, HmdaFileValidationState)] = for {
+              va <- fValidator
+              vs <- (va ? GetState).mapTo[HmdaFileValidationState]
+              p <- (va ? GetNamedErrorResultsPaginated(editName, page)).mapTo[PaginatedErrors]
+            } yield (p, vs)
+
+            onComplete(fPaginatedErrors) {
+              case Success((errorCollection, vs)) =>
+                val rows: Seq[EditResultRow] = errorCollection.errors.map(validationErrorToResultRow(_, vs))
+                val result = EditResult(editName, rows, uri.path.toString, page, errorCollection.totalErrors)
+                complete(ToResponseMarshallable(result))
+              case Failure(error) => completeWithInternalError(uri, error)
+            }
+          }
+        }
+      }
+    }
+
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/quality|macro
   private val editTypeRegex = new Regex("quality|macro")
   def verifyEditsPath(institutionId: String)(implicit ec: ExecutionContext) =

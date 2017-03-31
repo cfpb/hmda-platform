@@ -42,6 +42,11 @@ trait ValidationErrorConverter {
     "editType, editId, loanId\n" + rows.mkString("\n")
   }
 
+  def validationErrorToResultRow(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
+    val rowId = if (err.ts) "Transmittal Sheet" else err.errorId
+    EditResultRow(RowId(rowId), relevantFields(err, vs))
+  }
+
   //// Helper methods
 
   private def toEditResults(vs: HmdaFileValidationState, edits: Seq[ValidationError]): Seq[EditResult] = {
