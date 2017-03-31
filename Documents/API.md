@@ -368,10 +368,8 @@ Example response:
     "verified": false,
     "edits": [
       {
-        "edit": "Q008"
-      },
-      {
-        "edit": "Q070"
+        "edit": "Q023",
+        "description": "The number of loan applications that report MSA/MD = NA should be ≤ 30% of the total number of loan applications."
       }
     ]
   },
