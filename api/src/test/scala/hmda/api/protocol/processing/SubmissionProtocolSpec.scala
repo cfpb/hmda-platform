@@ -1,7 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.institutions.submissions.SubmissionSummary
-import hmda.api.model.{ MacroEditJustificationWithName, ModelGenerators }
+import hmda.api.model.ModelGenerators
 import hmda.model.fi.Submission
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
@@ -32,40 +32,6 @@ class SubmissionProtocolSpec extends PropSpec with PropertyChecks with MustMatch
           ("start", JsNumber(s.start)),
           ("end", JsNumber(s.end))
         )
-    }
-  }
-
-  property("Macro edit justfication must convert to and from json") {
-    forAll(macroEditJustificationWithNameGen) { m =>
-      m.toJson.convertTo[MacroEditJustificationWithName] mustBe m
-    }
-  }
-
-  property("Macro edit justification JSON must be in correct format") {
-    forAll(macroEditJustificationWithNameGen) { m =>
-      m.justification.text match {
-        case None =>
-          m.toJson mustBe
-            JsObject(
-              ("edit", JsString(m.edit)),
-              ("justification", JsObject(
-                ("id", JsNumber(m.justification.id)),
-                ("value", JsString(m.justification.value)),
-                ("verified", JsBoolean(m.justification.verified))
-              ))
-            )
-        case Some(t) =>
-          m.toJson mustBe
-            JsObject(
-              ("edit", JsString(m.edit)),
-              ("justification", JsObject(
-                ("id", JsNumber(m.justification.id)),
-                ("value", JsString(m.justification.value)),
-                ("verified", JsBoolean(m.justification.verified)),
-                ("text", JsString(t))
-              ))
-            )
-      }
     }
   }
 

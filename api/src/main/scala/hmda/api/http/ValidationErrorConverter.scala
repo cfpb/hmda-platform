@@ -21,26 +21,9 @@ trait ValidationErrorConverter {
     QualityEditResults(vs.qualityVerified, editResults)
   }
 
-  def validationErrorsToMacroResults(errors: Seq[ValidationError]): MacroResults = {
+  def validationErrorsToMacroResults(vs: HmdaFileValidationState, errors: Seq[ValidationError]): MacroResults = {
     val macroValidationErrors: Seq[MacroValidationError] = errors.filter(_.errorType == Macro).asInstanceOf[Seq[MacroValidationError]]
-    MacroResults(macroValidationErrors.map(x => MacroResult(x.ruleName, MacroEditJustificationLookup.updateJustifications(x.ruleName, x.justifications))))
-  }
-
-  def validationErrorsToRowResults(vs: HmdaFileValidationState, tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError], macroErrors: Seq[ValidationError]): RowResults = {
-    val tsEdits: Seq[RowEditDetail] = tsErrors.map(e => rowDetail(e, vs))
-    val tsRowResults: Seq[RowResult] =
-      if (tsEdits.isEmpty) Seq()
-      else Seq(RowResult("Transmittal Sheet", tsEdits))
-
-    val larFailuresByRow: Map[String, Seq[ValidationError]] = larErrors.groupBy(_.errorId)
-    val larRowResults: Seq[RowResult] = larFailuresByRow.map {
-      case (rowId: String, errors: Seq[ValidationError]) =>
-        RowResult(rowId, errors.map(e => rowDetail(e, vs)))
-    }.toSeq
-
-    val macroResults = validationErrorsToMacroResults(macroErrors)
-
-    RowResults(tsRowResults ++ larRowResults, macroResults)
+    MacroResults(vs.macroVerified, macroValidationErrors.map(x => MacroResult(x.ruleName)))
   }
 
   //// Helper methods
@@ -58,12 +41,6 @@ trait ValidationErrorConverter {
   private def editDetail(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
     if (err.ts) EditResultRow(RowId("Transmittal Sheet"), relevantFields(err, vs))
     else EditResultRow(RowId(err.errorId), relevantFields(err, vs))
-  }
-
-  private def rowDetail(err: ValidationError, vs: HmdaFileValidationState): RowEditDetail = {
-    val name = err.ruleName
-    val fields = relevantFields(err, vs)
-    RowEditDetail(name, editDescription(name), fields)
   }
 
   private def editDescription(editName: String): String = {
