@@ -452,8 +452,6 @@ Example response:
 
 `GET` - Returns a list of edits of a specific type, for a given submission
 
-By default, results are grouped by named edit.
-
 Example response:
 
 ```json
