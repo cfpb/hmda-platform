@@ -1,6 +1,6 @@
 package hmda.persistence
 
-case class PaginatedResource(totalRecords: Int, offset: Int)(page: Int)
+case class PaginatedResource(totalRecords: Int, offset: Int = 0)(page: Int)
     extends WithPagination {
 
   def fromIndex: Int = {
