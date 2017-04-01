@@ -365,6 +365,11 @@ trait FilingComponent {
 
     def createSchema() = db.run(createViewSchema)
     def dropSchema() = db.run(table.schema.drop)
+    def count(respId: String) = db.run(table.filter(_.respondentId === respId).map(_.total_lars).result.headOption)
+    def countInYear(respId: String, year: Int) = {
+      val q = table.filter(t => t.period === year.toString && t.respondentId === respId).map(_.total_lars)
+      db.run(q.result.headOption)
+    }
 
     private def getTableStream(respId: String, period: String)(implicit ec: ExecutionContext, materializer: ActorMaterializer): DatabasePublisher[Msa] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))

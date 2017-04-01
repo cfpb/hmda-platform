@@ -98,6 +98,7 @@ lazy val validation = (project in file("validation"))
   .settings(
     libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
   ).dependsOn(parserJVM % "compile->compile;test->test")
+   .dependsOn(query % "compile->compile;test->test")
 
 lazy val panel = (project in file("panel"))
   .settings(hmdaBuildSettings: _*)
@@ -147,6 +148,7 @@ lazy val api = (project in file("api"))
   .settings(Revolver.settings:_*)
   .settings(
     Seq(
+      parallelExecution in Test := false,
       scoverage.ScoverageKeys.coverageExcludedPackages := "hmda.api.HmdaFilingApi;hmda.api.HmdaAdminApi",
       assemblyJarName in assembly := {s"${name.value}.jar"},
       mainClass in assembly := Some("hmda.api.HmdaFilingApi"),

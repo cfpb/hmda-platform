@@ -49,10 +49,17 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
 
   "LAR Repository" must {
     "insert new records" in {
-      val lar1 = sampleLar.copy(respondentId = "resp1")
-      val lar2 = sampleLar.copy(respondentId = "resp1")
+      val respId = "resp1"
+      val year1 = 2016
+      val year2 = 2017
+      val lar1 = implicitly[LoanApplicationRegisterQuery](larGen.sample.get.copy(respondentId = "resp1")).copy(period = year1.toString)
+      val lar2 = implicitly[LoanApplicationRegisterQuery](larGen.sample.get.copy(respondentId = "resp1")).copy(period = year2.toString)
+      val lar3 = implicitly[LoanApplicationRegisterQuery](larGen.sample.get.copy(respondentId = "resp1")).copy(period = year2.toString)
       repository.insertOrUpdate(lar1).map(x => x mustBe 1)
       repository.insertOrUpdate(lar2).map(x => x mustBe 1)
+      repository.insertOrUpdate(lar3).map(x => x mustBe 1)
+      larTotalMsaRepository.count("resp1").map(x => x mustBe Some(3))
+      larTotalMsaRepository.countInYear("resp1", 2017).map(x => x mustBe Some(2))
       modifiedLarRepository.findByRespondentId(lar1.respondentId).map {
         case xs: Seq[ModifiedLoanApplicationRegister] => xs.head.respondentId mustBe lar1.respondentId
       }
