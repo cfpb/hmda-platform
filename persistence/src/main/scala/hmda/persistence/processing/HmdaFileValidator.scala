@@ -139,7 +139,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       }
 
     case lar: LoanApplicationRegister =>
-      val validated = LarValidated(lar, submissionId.institutionId)
+      val validated = LarValidated(lar, submissionId)
       persist(validated) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
