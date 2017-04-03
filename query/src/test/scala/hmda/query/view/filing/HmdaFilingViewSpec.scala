@@ -1,6 +1,7 @@
 package hmda.query.view.filing
 
 import akka.testkit.TestProbe
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
@@ -22,9 +23,9 @@ class HmdaFilingViewSpec extends ActorSpec with LarGenerators {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    hmdaFilingView ! EventWithSeqNr(1, LarValidated(l1, ""))
-    hmdaFilingView ! EventWithSeqNr(2, LarValidated(l2, ""))
-    hmdaFilingView ! EventWithSeqNr(3, LarValidated(l3, ""))
+    hmdaFilingView ! EventWithSeqNr(1, LarValidated(l1, SubmissionId()))
+    hmdaFilingView ! EventWithSeqNr(2, LarValidated(l2, SubmissionId()))
+    hmdaFilingView ! EventWithSeqNr(3, LarValidated(l3, SubmissionId()))
   }
 
   "HMDA Filing View" must {

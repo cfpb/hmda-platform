@@ -22,7 +22,7 @@ class HmdaFilingSpec extends ActorSpec with LarGenerators {
   "HMDA Filing" must {
     "Store 10 lars" in {
       for (lar <- lars10) {
-        probe.send(hmdaFiling, LarValidated(lar, ""))
+        probe.send(hmdaFiling, LarValidated(lar, SubmissionId()))
       }
       probe.send(hmdaFiling, GetState)
       probe.expectMsg(HmdaFilingState(10))
