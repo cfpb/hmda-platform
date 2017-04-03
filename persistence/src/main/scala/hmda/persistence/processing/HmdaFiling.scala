@@ -44,8 +44,8 @@ class HmdaFiling(filingPeriod: String) extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
 
-    case LarValidated(lar) =>
-      persist(LarValidated(lar)) { e =>
+    case LarValidated(lar, institutionId) =>
+      persist(LarValidated(lar, institutionId)) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
       }

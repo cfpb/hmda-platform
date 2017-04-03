@@ -7,5 +7,5 @@ import hmda.persistence.messages.CommonMessages.Event
 object CommonHmdaValidatorEvents {
   trait HmdaValidatorEvent extends Event
   case class TsValidated(ts: TransmittalSheet) extends HmdaValidatorEvent
-  case class LarValidated(lar: LoanApplicationRegister) extends HmdaValidatorEvent
+  case class LarValidated(lar: LoanApplicationRegister, institutionId: String) extends HmdaValidatorEvent
 }
