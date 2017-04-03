@@ -382,7 +382,7 @@ Example response:
 
 ### Edit Details
 
-`/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<type>/<edit>`
+`/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<edit>`
 
 `GET` - For an edit, return a collection of all rows that failed it, including the relevant fields and their values.
 
