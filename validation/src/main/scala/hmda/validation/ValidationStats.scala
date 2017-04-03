@@ -2,7 +2,7 @@ package hmda.validation
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
-import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shutdown }
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.validation.rules.SourceUtils
