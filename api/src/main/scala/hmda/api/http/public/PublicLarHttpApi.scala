@@ -23,7 +23,7 @@ trait PublicLarHttpApi extends HmdaCustomDirectives with FilingComponent {
   def modifiedLar(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "lar") { period =>
       timedGet { _ =>
-        val data = modifiedLarRepository.findByRespondentIdSource(institutionId, period)
+        val data = modifiedLarRepository.findByInstitutionIdSource(institutionId, period)
           .map(x => ChunkStreamPart(x.toCSV + "\n"))
         val response = HttpResponse(entity = HttpEntity.Chunked(ContentTypes.`text/csv(UTF-8)`, data))
         complete(response)

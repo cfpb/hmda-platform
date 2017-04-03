@@ -24,18 +24,19 @@ class HmdaFilingDBProjectionSpec extends ActorSpec with LarGenerators {
     }
     "Insert records" in {
       val lar = sampleLar
-      probe.send(projection, LarValidated(lar))
+      probe.send(projection, LarValidated(lar, ""))
       probe.expectMsg(LarInserted(1))
     }
-    "Delete records by respondent id" in {
+    "Delete records by institution id" in {
       val lar1 = sampleLar
       val lar2 = sampleLar
-      probe.send(projection, LarValidated(lar1))
+      val testInstId = "test"
+      probe.send(projection, LarValidated(lar1, testInstId))
       probe.expectMsg(LarInserted(1))
-      probe.send(projection, LarValidated(lar2))
+      probe.send(projection, LarValidated(lar2, ""))
       probe.expectMsg(LarInserted(1))
-      probe.send(projection, DeleteLars(lar1.respondentId))
-      probe.expectMsg(LarsDeleted(lar1.respondentId))
+      probe.send(projection, DeleteLars(testInstId))
+      probe.expectMsg(LarsDeleted(testInstId))
     }
   }
 

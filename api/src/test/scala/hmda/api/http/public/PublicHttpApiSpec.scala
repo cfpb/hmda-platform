@@ -25,11 +25,9 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
 
   import repository.config.profile.api._
 
-  val lar1 = sampleLar.copy(respondentId = "0")
-  val lar2 = sampleLar.copy(respondentId = "0")
   val p = "2017"
-  val l1 = toLoanApplicationRegisterQuery(lar1).copy(period = p)
-  val l2 = toLoanApplicationRegisterQuery(lar2).copy(period = p)
+  val l1 = toLoanApplicationRegisterQuery(sampleLar).copy(period = p, institutionId = "0")
+  val l2 = toLoanApplicationRegisterQuery(sampleLar).copy(period = p, institutionId = "0")
 
   override def beforeAll(): Unit = {
     super.beforeAll()

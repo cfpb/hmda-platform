@@ -49,12 +49,12 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
 
   "LAR Repository" must {
     "insert new records" in {
-      val lar1 = sampleLar.copy(respondentId = "resp1")
-      val lar2 = sampleLar.copy(respondentId = "resp1")
+      val lar1 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "inst1")
+      val lar2 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "inst1")
       repository.insertOrUpdate(lar1).map(x => x mustBe 1)
       repository.insertOrUpdate(lar2).map(x => x mustBe 1)
-      modifiedLarRepository.findByRespondentId(lar1.respondentId).map {
-        case xs: Seq[ModifiedLoanApplicationRegister] => xs.head.respondentId mustBe lar1.respondentId
+      modifiedLarRepository.findByInstitutionId("inst1").map {
+        case xs: Seq[ModifiedLoanApplicationRegister] => xs.head.institutionId mustBe lar1.institutionId
       }
     }
     "modify records and read them back" in {
@@ -80,6 +80,25 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
         case None => succeed
       }
     }
+
+    "delete all records for an institution id" in {
+      val lar1: LoanApplicationRegisterQuery = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "delete")
+      val lar2: LoanApplicationRegisterQuery = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "delete")
+      val lar3: LoanApplicationRegisterQuery = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "nope")
+      repository.insertOrUpdate(lar1).map(x => x mustBe 1)
+      repository.insertOrUpdate(lar2).map(x => x mustBe 1)
+      repository.insertOrUpdate(lar3).map(x => x mustBe 1)
+      repository.findById(lar1.id).map {
+        case Some(_) => succeed
+        case None => fail
+      }
+      repository.deleteByInstitutionId("delete").map(x => x mustBe 1)
+      repository.findById(lar1.id).map {
+        case Some(_) => fail
+        case None => succeed
+      }
+    }
+
     "delete all records" in {
       val lar: LoanApplicationRegisterQuery = toLoanApplicationRegisterQuery(sampleLar)
       val lar2: LoanApplicationRegisterQuery = toLoanApplicationRegisterQuery(sampleLar)
@@ -96,19 +115,19 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       }
     }
 
-    "Stream rows for a specific respondent id" in {
-      val respId = "resp2"
-      val p = ""
-      val lar1 = sampleLar.copy(respondentId = respId)
-      val lar2 = sampleLar.copy(respondentId = respId)
-      val lar3 = sampleLar.copy(respondentId = respId)
-      val lar4 = sampleLar.copy(respondentId = "resp3")
+    "Stream rows for a specific institution id" in {
+      val instId = "test"
+      val period = ""
+      val lar1 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = instId)
+      val lar2 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = instId)
+      val lar3 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = instId)
+      val lar4 = toLoanApplicationRegisterQuery(sampleLar).copy(institutionId = "otherTest")
       repository.insertOrUpdate(lar1)
       repository.insertOrUpdate(lar2)
       repository.insertOrUpdate(lar3)
       repository.insertOrUpdate(lar4)
 
-      val lars = modifiedLarRepository.findByRespondentIdSource(respId, p)
+      val lars = modifiedLarRepository.findByInstitutionIdSource(instId, period)
       val count = Flow[ModifiedLoanApplicationRegister].map(_ => 1)
       val sum: Sink[Int, Future[Int]] = Sink.fold[Int, Int](0)(_ + _)
 
@@ -123,35 +142,29 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
 
     }
 
-    /*"Stream IRS" in {
+    "Stream IRS" in {
       repository.deleteAll.map(x => x mustBe 1)
       val msa1 = geographyGen.sample.get.copy(msa = "12345")
       val msaNa = geographyGen.sample.get.copy(msa = "NA")
       val otherMsa = geographyGen.sample.get.copy(msa = "Don't include")
       val loan = loanGen.sample.get.copy(amount = 12)
-      val lar1 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
-      val lar2 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
-      val lar3 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msa1, loan = loan))
-      val lar4 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = msaNa, loan = loan))
-      val lar5 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "2", geography = otherMsa, loan = loan))
-      val lar6 = toLoanApplicationRegisterQuery(larGen.sample.get.copy(respondentId = "1", geography = otherMsa, loan = loan))
-      val query1 = lar1.copy(period = "2017")
-      val query2 = lar2.copy(period = "2017")
-      val query3 = lar3.copy(period = "2017")
-      val query4 = lar4.copy(period = "2017")
-      val query5 = lar5.copy(period = "2017")
-      val query6 = lar6.copy(period = "2016")
+      val lar1 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = msa1, loan = loan))
+      val lar2 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = msaNa, loan = loan))
+      val lar3 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = otherMsa, loan = loan))
+      val lar4 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = otherMsa, loan = loan))
+      val query1 = lar1.copy(period = "2017", institutionId = "1")
+      val query2 = lar2.copy(period = "2017", institutionId = "1")
+      val query3 = lar3.copy(period = "2017", institutionId = "2")
+      val query4 = lar4.copy(period = "2016", institutionId = "1")
       Await.result(repository.insertOrUpdate(query1), duration)
       Await.result(repository.insertOrUpdate(query2), duration)
       Await.result(repository.insertOrUpdate(query3), duration)
       Await.result(repository.insertOrUpdate(query4), duration)
-      Await.result(repository.insertOrUpdate(query5), duration)
-      Await.result(repository.insertOrUpdate(query6), duration)
 
       val msaF = larTotalMsaRepository.getMsaSeq("1", "2017")
       val msaSeq: Seq[Msa] = Await.result(msaF, duration)
       msaSeq.toList.length mustBe 2
-    }*/
+    }
   }
 
 }
