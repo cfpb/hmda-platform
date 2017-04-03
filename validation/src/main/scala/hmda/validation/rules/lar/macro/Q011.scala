@@ -5,7 +5,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.{ Filing, SubmissionId }
+import hmda.model.fi.{ Filing, Submission, SubmissionId }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
@@ -34,6 +34,19 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
   val multiplier = configuration.getDouble("hmda.validation.macro.Q011.numOfLarsMultiplier")
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
+
+    /*
+
+    1. LAR validation process stores number of LARs for every submission ID in HmdaFiling
+
+    2. Get submissions for previous year (period), get the latest one that has been signed —> events from persistenceId = s”submissions-$institutionId-$period”
+
+    3. Get number of lar for that submissionId —> events from persistenceId = s“HmdaFiling-$filingperiod”, filter by submissionId
+
+    4. Compare number with this year’s total lar number
+
+    */
+
     val lastYear = year - 1
     val currentLarCount: Future[Int] = count(lars)
     val lastYearCount: Future[Int] = Future(500) //TODO: implement counting on last years source
@@ -50,11 +63,9 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
     }
   }
 
-  //  private def filing(institutionId: String, period: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Sink[Filing, Future[Filing]] = {
-  //    events(s"filings-$institutionId").filter(x => x.isInstanceOf[Filing])
-  //      .map(e => e.asInstanceOf[Filing])
-  //      .filter(x => x.period == period)
-  //      .to(Sink.headOption)
+  //  private def findSubmissionsFromLastYear(period: String, institutionId: String): Source[Submission, NotUsed] = {
+  //    events(s"submissions-$institutionId-$period")
+  //      .filter()
   //  }
 
   private def findLarSource(submissionId: SubmissionId)(implicit system: ActorSystem, materializer: ActorMaterializer): LoanApplicationRegisterSource = {
