@@ -1,14 +1,10 @@
 package hmda.persistence.processing
 
-import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.stream.scaladsl.Sink
-import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.persistence.processing.HmdaQuery._
 
 object HmdaFiling {
 
@@ -17,9 +13,14 @@ object HmdaFiling {
   case class AddLar(lar: LoanApplicationRegister) extends Command
   case class LarAdded(lar: LoanApplicationRegister) extends Event
 
-  case class HmdaFilingState(size: Long = 0L) {
+  case class HmdaFilingState(filings: Map[String, Int] = Map.empty[String, Int]) {
     def updated(event: Event): HmdaFilingState = {
-      HmdaFilingState(size + 1)
+      event match {
+        case LarValidated(_, submissionId) =>
+          val count = filings.getOrElse(submissionId.toString, 0)
+          HmdaFilingState(filings.updated(submissionId.toString, count + 1))
+        case _ => this
+      }
     }
   }
 
@@ -44,8 +45,8 @@ class HmdaFiling(filingPeriod: String) extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
 
-    case LarValidated(lar, institutionId) =>
-      persist(LarValidated(lar, institutionId)) { e =>
+    case LarValidated(lar, submissionId) =>
+      persist(LarValidated(lar, submissionId)) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
       }

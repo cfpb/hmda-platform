@@ -13,7 +13,8 @@ class HmdaFilingSpec extends ActorSpec with LarGenerators {
 
   val period = "2017"
 
-  val lars10 = larListGen.sample.getOrElse(List[LoanApplicationRegister]())
+  val lars10 = get10SampleLars
+  val lars20 = get10SampleLars ++ get10SampleLars
 
   val hmdaFiling = createHmdaFiling(system, period)
 
@@ -22,19 +23,19 @@ class HmdaFilingSpec extends ActorSpec with LarGenerators {
   "HMDA Filing" must {
     "Store 10 lars" in {
       for (lar <- lars10) {
-        probe.send(hmdaFiling, LarValidated(lar, SubmissionId()))
+        probe.send(hmdaFiling, LarValidated(lar, SubmissionId("12345", period, 0)))
       }
       probe.send(hmdaFiling, GetState)
-      probe.expectMsg(HmdaFilingState(10))
+      probe.expectMsg(HmdaFilingState(Map(s"12345-$period-0" -> 10)))
     }
-    "read validated lars from HmdaFileValidator and save them" in {
-      val submissionId = SubmissionId("12345", period, 1)
-      val validator = createHmdaFileValidator(system, submissionId)
-      for (lar <- lars10) {
-        probe.send(validator, lar)
+    "Store additional 20 lars" in {
+      for (lar <- lars20) {
+        probe.send(hmdaFiling, LarValidated(lar, SubmissionId("9999", period, 1)))
       }
       probe.send(hmdaFiling, GetState)
-      probe.expectMsg(HmdaFilingState(10))
+      probe.expectMsg(HmdaFilingState(Map(s"12345-2017-0" -> 10, s"9999-$period-1" -> 20)))
     }
   }
+
+  private def get10SampleLars = larListGen.sample.getOrElse(List[LoanApplicationRegister]())
 }
