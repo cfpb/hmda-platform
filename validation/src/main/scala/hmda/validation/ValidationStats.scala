@@ -16,7 +16,7 @@ object ValidationStats {
   def props(): Props = Props(new ValidationStats)
 
   def createValidationStats(system: ActorSystem): ActorRef = {
-    system.actorOf(ValidationStats.props())
+    system.actorOf(ValidationStats.props(), "validation-stats")
   }
 
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
@@ -49,9 +49,9 @@ class ValidationStats extends HmdaPersistentActor {
       val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
       if (filtered.nonEmpty) {
         val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! Some(submission.totalLars)
+        sender() ! submission.totalLars
       } else {
-        sender() ! None
+        sender() ! 0
       }
 
     case GetState =>

@@ -25,9 +25,9 @@ class ValidationStatsSpec extends ActorSpec {
     }
     "Find total lars for an institution in a certain period" in {
       probe.send(submissionValidationStats, FindTotalLars("12345", "2016"))
-      probe.expectMsg(Some(100))
+      probe.expectMsg(100)
       probe.send(submissionValidationStats, FindTotalLars("12345", "2017"))
-      probe.expectMsg(Some(125))
+      probe.expectMsg(125)
     }
   }
 
