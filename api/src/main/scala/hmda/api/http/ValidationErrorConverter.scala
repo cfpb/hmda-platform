@@ -35,8 +35,7 @@ trait ValidationErrorConverter {
   }
 
   def validationErrorToResultRow(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
-    val rowId = if (err.ts) "Transmittal Sheet" else err.errorId
-    EditResultRow(RowId(rowId), relevantFields(err, vs))
+    EditResultRow(RowId(err.publicErrorId), relevantFields(err, vs))
   }
 
   //// Helper methods
