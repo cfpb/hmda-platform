@@ -52,6 +52,7 @@ class ValidationStats(submissionId: SubmissionId) extends HmdaPersistentActor wi
 
     case UpdateValidationStats(total) =>
       persist(ValidationStatsUpdated(total)) { e =>
+        log.debug(s"Persisted: $total")
         updateState(e)
       }
 
