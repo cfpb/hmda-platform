@@ -60,49 +60,53 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val currentTotal = Gen.choose(1, larSize - 1).sample.getOrElse(0)
       val lastYearTotal = Gen.choose(1, larSize - 1).sample.getOrElse(0)
       val larSource1 = generateLarSource(currentTotal)
-      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, "2016", 1), lastYearTotal))
+      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, lastYear.toString, 1), lastYearTotal))
       Q011.inContext(ctx)(larSource1).map(r => r mustBe a[Success])
     }
-    //
+
     //    "succeed when previous count is greater than configured value and current count is within range" in {
-    //      val respId = "respId2"
-    //      val ctx = generateValidationContext(currentYear, respId)
-    //      val lastYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
-    //      val lower = (1 - multiplier) * lastYearCount
-    //      val upper = (1 + multiplier) * lastYearCount
+    //      val instId2 = "instId2"
+    //      val ctx = generateValidationContext(currentYear, instId2)
+    //      val lastYearTotal = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+    //      val lower = (1 - multiplier) * lastYearTotal
+    //      val upper = (1 + multiplier) * lastYearTotal
     //      val currentYearCount = Gen.choose(lower.toInt, upper.toInt).sample.getOrElse(0)
-    //      val larSource = generateLarSource(currentYearCount, lastYearCount, respId, lastYear, timeout)
+    //      val larSource = generateLarSource(currentYearCount)
+    //      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId2, "2016", 1), lastYearTotal))
     //      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Success])
     //    }
     //
-    //    "fail when previous count is greater than configured value and current count is out of range" in {
-    //      val respId = "respId3"
-    //      val ctx = generateValidationContext(currentYear, respId)
-    //      val lastYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
-    //      val currentYearCount = larSize / 2
-    //      val larSource = generateLarSource(currentYearCount, lastYearCount, respId, lastYear, timeout)
-    //      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Failure])
-    //    }
-    //
+    "fail when previous count is greater than configured value and current count is out of range" in {
+      val instId = "instId3"
+      val ctx = generateValidationContext(currentYear, instId)
+      val lastYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+      val currentYearCount = larSize / 2
+      val larSource = generateLarSource(currentYearCount)
+      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, lastYear.toString, 1), lastYearCount))
+      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Failure])
+    }
+
     //    "succeed when current count is greater than configured value, and comparison is within range" in {
-    //      val respId = "respId4"
-    //      val ctx = generateValidationContext(currentYear, respId)
-    //      val currentYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+    //      val instId = "respId4"
+    //      val ctx = generateValidationContext(currentYear, instId)
+    //      val currentYearCount = Gen.choose(larSize + 1, larSize * 2).sample.getOrElse(0)
     //      val lower = (1 - multiplier) * currentYearCount
     //      val upper = (1 + multiplier) * currentYearCount
     //      val lastYearCount = Gen.choose(lower.toInt, upper.toInt).sample.getOrElse(0)
-    //      val larSource = generateLarSource(currentYearCount.toInt, lastYearCount.toInt, respId, lastYear, timeout)
+    //      val larSource = generateLarSource(currentYearCount.toInt)
+    //      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, lastYear.toString, 1), lastYearCount))
     //      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Success])
     //    }
-    //
-    //    "fail current count is greater than configured value, and comparison is out of range" in {
-    //      val respId = "respId5"
-    //      val ctx = generateValidationContext(currentYear, respId)
-    //      val currentYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
-    //      val lastYearCount = larSize / 2
-    //      val larSource = generateLarSource(currentYearCount, lastYearCount, respId, lastYear, timeout)
-    //      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Failure])
-    //    }
+
+    "fail when current count is greater than configured value, and comparison is out of range" in {
+      val instId = "respId5"
+      val ctx = generateValidationContext(currentYear, instId)
+      val currentYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+      val lastYearCount = larSize / 2
+      val larSource = generateLarSource(currentYearCount)
+      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, lastYear.toString, 1), lastYearCount))
+      Q011.inContext(ctx)(larSource).map(r => r mustBe a[Failure])
+    }
 
   }
 
