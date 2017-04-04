@@ -47,8 +47,11 @@ class HmdaRawFile(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = {
 
-    case AddFileName(n) =>
-      updateState(FileNameAdded(n))
+    case cmd: AddFileName =>
+      persist(FileNameAdded(cmd.fileName)) { e =>
+        log.debug(s"Persisted: ${cmd.fileName}")
+        updateState(FileNameAdded(cmd.fileName))
+      }
 
     case cmd: AddLine =>
       persist(LineAdded(cmd.timestamp, cmd.data)) { e =>
