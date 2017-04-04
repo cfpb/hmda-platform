@@ -3,57 +3,55 @@ package hmda.validation
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
-import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.rules.SourceUtils
 
 object ValidationStats {
 
   def name = "ValidationStats"
+  case class SubmissionStats(id: SubmissionId, totalLars: Int)
+  case class AddSubmissionStats(stats: SubmissionStats) extends Command
+  case class SubmissionStatsAdded(stats: SubmissionStats) extends Event
+  case class FindTotalLars(institutionId: String, period: String) extends Command
 
-  case class CountLarsInSubmission() extends Command
-  case class UpdateValidationStats(total: Int) extends Command
-  case class ValidationStatsUpdated(total: Int) extends Event
+  def props(): Props = Props(new ValidationStats)
 
-  def props(submissionId: SubmissionId): Props = Props(new ValidationStats(submissionId))
-
-  def createValidationStats(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
-    system.actorOf(ValidationStats.props(submissionId))
+  def createValidationStats(system: ActorSystem): ActorRef = {
+    system.actorOf(ValidationStats.props())
   }
 
-  case class ValidationStatsState(totalLars: Int = 0) {
+  case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
     def updated(event: Event): ValidationStatsState = event match {
-      case ValidationStatsUpdated(total) =>
-        ValidationStatsState(total)
+      case SubmissionStatsAdded(s) =>
+        ValidationStatsState(stats :+ s)
     }
   }
 }
 
-class ValidationStats(submissionId: SubmissionId) extends HmdaPersistentActor with SourceUtils {
+class ValidationStats extends HmdaPersistentActor {
   import ValidationStats._
 
-  var totalLars = 0
+  override def persistenceId: String = s"$name"
 
   var state = ValidationStatsState()
-
-  override def persistenceId: String = s"$name-${submissionId.toString}"
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
   }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
-
-    case LarValidated(_, _) =>
-      totalLars = totalLars + 1
-
-    case CountLarsInSubmission =>
-      self ! UpdateValidationStats(totalLars)
-
-    case UpdateValidationStats(total) =>
-      persist(ValidationStatsUpdated(total)) { e =>
-        log.debug(s"Persisted: $total")
+    case AddSubmissionStats(stats) =>
+      persist(SubmissionStatsAdded(stats)) { e =>
+        log.debug(s"Persisted: $stats")
         updateState(e)
+      }
+    case FindTotalLars(id, period) =>
+      val submissionStats = state.stats
+      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
+      if (filtered.nonEmpty) {
+        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
+        sender() ! Some(submission.totalLars)
+      } else {
+        sender() ! None
       }
 
     case GetState =>

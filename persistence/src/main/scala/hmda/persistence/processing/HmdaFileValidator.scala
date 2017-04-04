@@ -25,8 +25,8 @@ import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.validation.ValidationStats
-import hmda.validation.ValidationStats.CountLarsInSubmission
+import hmda.validation.SubmissionLarStats
+import hmda.validation.SubmissionLarStats.CountLarsInSubmission
 
 import scala.concurrent.duration._
 import scala.util.Try
@@ -105,7 +105,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
   val supervisor = system.actorSelection("/user/supervisor")
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
 
-  val validationStats = context.actorOf(ValidationStats.props(submissionId))
+  val submissionLarStats = context.actorOf(SubmissionLarStats.props(submissionId))
 
   override def preStart(): Unit = {
     super.preStart()
@@ -167,7 +167,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       persist(validated) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
-        validationStats ! LarValidated(lar, submissionId)
+        submissionLarStats ! LarValidated(lar, submissionId)
         for {
           f <- fHmdaFiling
         } yield {
@@ -177,7 +177,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ValidateMacro(larSource, replyTo) =>
       log.debug("Quality Validation completed")
-      validationStats ! CountLarsInSubmission
+      submissionLarStats ! CountLarsInSubmission
       val fMacro = checkMacro(larSource, ctx)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
