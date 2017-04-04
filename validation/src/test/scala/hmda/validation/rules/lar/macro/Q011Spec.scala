@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.institution.ExternalIdType.RssdId
 import hmda.model.institution.{ ExternalId, Institution, Respondent }
@@ -54,11 +55,12 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     }
 
     "succeed when previous and current lar count are less than configured value" in {
-      val respId = "respId1"
-      val ctx = generateValidationContext(currentYear, respId)
-      val n1 = Gen.choose(1, larSize - 1).sample.getOrElse(0)
-      val n2 = Gen.choose(1, larSize - 1).sample.getOrElse(0)
-      val larSource1 = generateLarSource(n1, n2, respId, lastYear, timeout)
+      val instId = "instId1"
+      val ctx = generateValidationContext(currentYear, instId)
+      val currentTotal = Gen.choose(1, larSize - 1).sample.getOrElse(0)
+      val lastYearTotal = Gen.choose(1, larSize - 1).sample.getOrElse(0)
+      val larSource1 = generateLarSource(currentTotal)
+      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, "2016", 1), lastYearTotal))
       Q011.inContext(ctx)(larSource1).map(r => r mustBe a[Success])
     }
     //
@@ -104,18 +106,13 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
 
   }
 
-  private def generateValidationContext(currentYear: Int, respId: String): ValidationContext = {
-    val resp1 = Respondent(ExternalId(respId, RssdId), "", "", "", "")
-    ValidationContext(Some(Institution.empty.copy(respondent = resp1)), Some(currentYear))
+  private def generateValidationContext(currentYear: Int, institutionId: String): ValidationContext = {
+    ValidationContext(Some(Institution.empty.copy(id = institutionId)), Some(currentYear))
   }
 
-  private def generateLarSource(nCurrentLars: Int, nPreviousLars: Int, respId: String, lastYear: Int, timeout: Duration) = {
+  private def generateLarSource(nCurrentLars: Int) = {
     val lars = larNGen(nCurrentLars).sample.getOrElse(List())
     val larSource = Source.fromIterator(() => lars.toIterator)
-    //    val lastYearLars = larNGen(nPreviousLars).sample.getOrElse(List()).map(lar => lar.copy(respondentId = respId))
-    //    val lastYearList = larsToLarQueryList(lastYearLars, respId, lastYear)
-    //    val resultF = Future.sequence(lastYearList.map(lar => repository.insertOrUpdate(lar)))
-    //    Await.result(resultF, timeout)
     larSource
   }
 }

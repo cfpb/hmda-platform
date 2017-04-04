@@ -37,6 +37,8 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 
+    println(institution.id)
+
     val configuration = ConfigFactory.load()
     val duration = configuration.getInt("hmda.actor.timeout")
     implicit val timeout = Timeout(duration.seconds)
@@ -54,6 +56,8 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
       lower = 1 * (1 - multiplier)
       upper = 1 * (1 + multiplier)
     } yield {
+      println(s"CURRENT TOTAL: $c")
+      println(s"LAST YEAR TOTAL: $l")
       when(c is greaterThanOrEqual(larSize) or (l is greaterThanOrEqual(larSize))) {
         c.toDouble.toString is numericallyBetween(lower.toString, upper.toString)
       }
