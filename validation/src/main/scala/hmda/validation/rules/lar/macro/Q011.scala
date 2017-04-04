@@ -1,11 +1,11 @@
 package hmda.validation.rules.lar.`macro`
 
-import akka.NotUsed
 import akka.actor.ActorSystem
+import akka.pattern.ask
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.{ Filing, Submission, SubmissionId }
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
@@ -19,6 +19,8 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.IfInstitutionPresentInAggregate
 import hmda.persistence.processing.HmdaQuery._
+import hmda.validation.ValidationStats.FindTotalLars
+import scala.concurrent.duration._
 
 object Q011 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
@@ -35,21 +37,16 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
 
   override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
 
-    /*
-
-    1. LAR validation process stores number of LARs for every submission ID in HmdaFiling
-
-    2. Get submissions for previous year (period), get the latest one that has been signed —> events from persistenceId = s”submissions-$institutionId-$period”
-
-    3. Get number of lar for that submissionId —> events from persistenceId = s“HmdaFiling-$filingperiod”, filter by submissionId
-
-    4. Compare number with this year’s total lar number
-
-    */
+    val configuration = ConfigFactory.load()
+    val duration = configuration.getInt("hmda.actor.timeout")
+    implicit val timeout = Timeout(duration.seconds)
 
     val lastYear = year - 1
     val currentLarCount: Future[Int] = count(lars)
-    val lastYearCount: Future[Int] = Future(500) //TODO: implement counting on last years source
+
+    val validationStats = system.actorSelection("/user/validation-stats")
+
+    val lastYearCount = (validationStats ? FindTotalLars(institution.id, lastYear.toString)).mapTo[Int]
 
     for {
       c <- currentLarCount
@@ -63,14 +60,4 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
     }
   }
 
-  //  private def findSubmissionsFromLastYear(period: String, institutionId: String): Source[Submission, NotUsed] = {
-  //    events(s"submissions-$institutionId-$period")
-  //      .filter()
-  //  }
-
-  private def findLarSource(submissionId: SubmissionId)(implicit system: ActorSystem, materializer: ActorMaterializer): LoanApplicationRegisterSource = {
-    events(s"HmdaFileValidator-$submissionId")
-      .filter(x => x.isInstanceOf[LarValidated])
-      .map(e => e.asInstanceOf[LarValidated].lar)
-  }
 }

@@ -14,6 +14,7 @@ import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers, ParallelT
 
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
+import hmda.validation.ValidationStats._
 
 class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
   val configuration = ConfigFactory.load()
@@ -23,6 +24,8 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   implicit override def executionContext = system.dispatcher
+
+  val validationStats = createValidationStats(system)
 
   implicit val timeout = 5.seconds
 
@@ -50,14 +53,14 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       Q011.inContext(ctx).name mustBe "empty"
     }
 
-    //    "succeed when previous and current lar count are less than configured value" in {
-    //      val respId = "respId1"
-    //      val ctx = generateValidationContext(currentYear, respId)
-    //      val n1 = Gen.choose(1, larSize - 1).sample.getOrElse(0)
-    //      val n2 = Gen.choose(1, larSize - 1).sample.getOrElse(0)
-    //      val larSource1 = generateLarSource(n1, n2, respId, lastYear, timeout)
-    //      Q011.inContext(ctx)(larSource1).map(r => r mustBe a[Success])
-    //    }
+    "succeed when previous and current lar count are less than configured value" in {
+      val respId = "respId1"
+      val ctx = generateValidationContext(currentYear, respId)
+      val n1 = Gen.choose(1, larSize - 1).sample.getOrElse(0)
+      val n2 = Gen.choose(1, larSize - 1).sample.getOrElse(0)
+      val larSource1 = generateLarSource(n1, n2, respId, lastYear, timeout)
+      Q011.inContext(ctx)(larSource1).map(r => r mustBe a[Success])
+    }
     //
     //    "succeed when previous count is greater than configured value and current count is within range" in {
     //      val respId = "respId2"
