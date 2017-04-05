@@ -16,7 +16,7 @@ This repository contains the code for the entirety of the HMDA platform backend.
 
 The HMDA Platform is composed of the following modules:
 
-### Parser
+### Parser (JS/JVM)
 
 Module responsible for reading incoming data and making sure that it conforms to the HMDA File Specification
 
@@ -32,6 +32,21 @@ Module responsible for persisting information into the system. It becomes the sy
 
 This module contains both public APIs for HMDA data for general use by third party clients and web applications, as well as endpoints for receiving data and providing information about the filing process for Financial Institutions
 
+### Query
+
+This module is responsible for interacting with the back-end database, as well as conversion between model objects and database objects.
+
+### Panel
+
+This module is responsible for parsing and persisting a CSV-format panel file
+
+### Model (JS/JVM)
+
+This module is responsible for maintaining the objects used in our platform
+
+### Census
+
+This module is responsible for geographic translation (e.g. state number -> state code)
 
 ## Dependencies
 
