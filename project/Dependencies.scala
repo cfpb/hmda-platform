@@ -20,7 +20,8 @@ object Dependencies {
   val leveldb = "org.iq80.leveldb" % "leveldb" % Version.leveldb
   val leveldbjni = "org.fusesource.leveldbjni" % "leveldbjni-all" % Version.leveldbjni
   val akkaPersistenceQuery = "com.typesafe.akka" %% "akka-persistence-query-experimental" % Version.akka
-  val inMemoryPersistence = "com.github.dnvriend" %% "akka-persistence-inmemory" % Version.inMemoryPersistence % "test" exclude("com.github.dnvriend", "akka-persistence-query-writer")
+  val inMemoryPersistence = "com.github.dnvriend" %% "akka-persistence-inmemory" % Version.inMemoryPersistence exclude("com.github.dnvriend", "akka-persistence-query-writer")
+  val cassandraPersistence = "com.typesafe.akka" %% "akka-persistence-cassandra" % Version.cassandra
   val akkaHttp = "com.typesafe.akka" %% "akka-http" % Version.akkaHttp
   val akkaHttpJson = "com.typesafe.akka" %% "akka-http-spray-json" % Version.akkaHttp
   val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akkaHttp % "test"

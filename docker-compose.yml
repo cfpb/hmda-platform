@@ -107,4 +107,3 @@ services:
       POSTGRES_DB: hmda
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-

@@ -8,7 +8,7 @@ val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
 val akkaDeps = commonDeps ++ Seq(akka, akkaSlf4J, akkaStream, akkaTestkit)
 
-val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence)
+val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence, cassandraPersistence)
 
 val httpDeps = akkaDeps ++ Seq(akkaHttp, akkaHttpJson, akkaHttpTestkit)
 
@@ -31,7 +31,9 @@ lazy val hmda = (project in file("."))
       mainClass in assembly := Some("hmda.api.HmdaPlatform"),
       assemblyMergeStrategy in assembly := {
         case "application.conf" => MergeStrategy.concat
+        case "application-dev.conf" => MergeStrategy.concat
         case "JS_DEPENDENCIES" => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -102,6 +104,13 @@ lazy val validation = (project in file("validation"))
 lazy val panel = (project in file("panel"))
   .settings(hmdaBuildSettings: _*)
   .settings(
+    assemblyMergeStrategy in assembly := {
+      case "application.conf" => MergeStrategy.concat
+      case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
     libraryDependencies ++= akkaPersistenceDeps
   ).dependsOn(persistenceModel % "compile->compile;test->test")
   .dependsOn(persistence % "compile->compile;test->test")
@@ -111,6 +120,12 @@ lazy val panel = (project in file("panel"))
 lazy val persistenceModel = (project in file("persistence-model"))
   .settings(hmdaBuildSettings:_*)
   .settings(
+    assemblyMergeStrategy in assembly := {
+      case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
     libraryDependencies ++= akkaPersistenceDeps
   ).disablePlugins(ScoverageSbtPlugin)
   .dependsOn(modelJVM % "compile->compile;test->test")
@@ -122,6 +137,7 @@ lazy val persistence = (project in file("persistence"))
     Seq(
       assemblyMergeStrategy in assembly := {
         case "application.conf" => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -136,6 +152,12 @@ lazy val persistence = (project in file("persistence"))
 lazy val query = (project in file("query"))
   .settings(hmdaBuildSettings:_*)
   .settings(
+    assemblyMergeStrategy in assembly := {
+      case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assemblyMergeStrategy in assembly).value
+        oldStrategy(x)
+    },
     parallelExecution in Test := false,
     libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
   )
@@ -160,8 +182,9 @@ lazy val api = (project in file("api"))
       libraryDependencies ++= httpDeps
     )
   )
-  .dependsOn(query % "compile->compile;test->test")
-  .dependsOn(persistence % "compile->compile;test->test")
+  .dependsOn(persistenceModel % "compile->compile;test->test")
+  .dependsOn(query % "compile->compile")
+  .dependsOn(persistence % "compile->compile")
 
 
 lazy val platformTest = (project in file("platform-test"))
