@@ -51,10 +51,10 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
       lower = 1 * (1 - multiplier)
       upper = 1 * (1 + multiplier)
     } yield {
-      println(s"CURRENT TOTAL: $c")
-      println(s"LAST YEAR TOTAL: $l")
       when(c is greaterThanOrEqual(larSize) or (l is greaterThanOrEqual(larSize))) {
-        c.toDouble.toString is numericallyBetween(lower.toString, upper.toString)
+        val lowerValue = lower * l
+        val upperValue = upper * l
+        c.toDouble.toString is numericallyBetween(lowerValue.toString, upperValue.toString)
       }
     }
   }
