@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.`macro`
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
@@ -57,22 +57,22 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     "succeed when previous and current lar count are less than configured value" in {
       val instId = "instId1"
       val ctx = generateValidationContext(currentYear, instId)
-      val currentTotal = Gen.choose(1, larSize - 1).sample.getOrElse(0)
-      val lastYearTotal = Gen.choose(1, larSize - 1).sample.getOrElse(0)
-      val larSource1 = generateLarSource(currentTotal)
-      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, lastYear.toString, 1), lastYearTotal))
+      val currentYearCount = Gen.choose(1, larSize - 1).sample.getOrElse(0)
+      val lastYearCount = Gen.choose(1, larSize - 1).sample.getOrElse(0)
+      val larSource1 = generateLarSource(currentYearCount)
+      sendValidationStats(validationStats, instId, 1, lastYear, lastYearCount)
       Q011.inContext(ctx)(larSource1).map(r => r mustBe a[Success])
     }
 
     "succeed when previous count is greater than configured value and current count is within range" in {
-      val instId2 = "instId2"
-      val ctx = generateValidationContext(currentYear, instId2)
-      val lastYearTotal = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
-      val lower = (1 - multiplier) * lastYearTotal
-      val upper = (1 + multiplier) * lastYearTotal
+      val instId = "instId2"
+      val ctx = generateValidationContext(currentYear, instId)
+      val lastYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
+      val lower = (1 - multiplier) * lastYearCount
+      val upper = (1 + multiplier) * lastYearCount
       val currentYearCount = Gen.choose(lower.toInt, upper.toInt).sample.getOrElse(0)
       val larSource = generateLarSource(currentYearCount)
-      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId2, "2016", 1), lastYearTotal))
+      sendValidationStats(validationStats, instId, 1, lastYear, lastYearCount)
       Q011.inContext(ctx)(larSource).map(r => r mustBe a[Success])
     }
     "fail when previous count is greater than configured value and current count is out of range" in {
@@ -81,7 +81,7 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val lastYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
       val currentYearCount = larSize / 2
       val larSource = generateLarSource(currentYearCount)
-      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, lastYear.toString, 1), lastYearCount))
+      sendValidationStats(validationStats, instId, 1, lastYear, lastYearCount)
       Q011.inContext(ctx)(larSource).map(r => r mustBe a[Failure])
     }
 
@@ -93,7 +93,7 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val upper = (1 + multiplier) * currentYearCount
       val lastYearCount = Gen.choose(lower.toInt, upper.toInt).sample.getOrElse(0)
       val larSource = generateLarSource(currentYearCount.toInt)
-      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, lastYear.toString, 1), lastYearCount))
+      sendValidationStats(validationStats, instId, 1, lastYear, lastYearCount)
       Q011.inContext(ctx)(larSource).map(r => r mustBe a[Success])
     }
 
@@ -103,7 +103,7 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val currentYearCount = Gen.choose(larSize, larSize * 2).sample.getOrElse(0)
       val lastYearCount = larSize / 2
       val larSource = generateLarSource(currentYearCount)
-      validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(instId, lastYear.toString, 1), lastYearCount))
+      sendValidationStats(validationStats, instId, 1, lastYear, lastYearCount)
       Q011.inContext(ctx)(larSource).map(r => r mustBe a[Failure])
     }
 
@@ -117,5 +117,9 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     val lars = larNGen(nCurrentLars).sample.getOrElse(List())
     val larSource = Source.fromIterator(() => lars.toIterator)
     larSource
+  }
+
+  private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, lastYear: Int, lastYearCount: Int): Unit = {
+    validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(institutionId, lastYear.toString, 1), lastYearCount))
   }
 }
