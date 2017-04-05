@@ -5,15 +5,12 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.model.institution.ExternalIdType.RssdId
-import hmda.model.institution.{ ExternalId, Institution, Respondent }
+import hmda.model.fi.lar.LarGenerators
+import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalacheck.Gen
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers, ParallelTestExecution }
-
-import scala.concurrent.{ Await, Future }
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import scala.concurrent.duration._
 import hmda.validation.ValidationStats._
 
