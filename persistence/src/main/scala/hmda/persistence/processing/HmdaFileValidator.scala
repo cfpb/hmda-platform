@@ -1,9 +1,9 @@
 package hmda.persistence.processing
 
 import akka.NotUsed
-import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.pattern.{ask, pipe}
-import akka.stream.scaladsl.{Sink, Source}
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.pattern.{ ask, pipe }
+import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
@@ -15,8 +15,8 @@ import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.GetInstitution
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.persistence.processing.HmdaFileParser.{LarParsed, TsParsed}
-import hmda.persistence.processing.ProcessingMessages.{BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors}
+import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
+import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine

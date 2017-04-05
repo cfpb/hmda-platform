@@ -15,6 +15,7 @@
   </root>
 
   <logger name="slick" level="INFO" />
-  <logger name="com.zaxxer.hikari" level="info" />
+  <logger name="com.zaxxer.hikari" level="INFO" />
+  <logger name="com.datastax.driver" level="INFO" />
 
 </configuration>

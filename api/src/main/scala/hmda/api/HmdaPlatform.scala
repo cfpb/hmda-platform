@@ -14,7 +14,7 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionDBProjection.{CreateSchema, _}
+import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, _ }
 import hmda.query.view.institutions.InstitutionView
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
@@ -23,18 +23,17 @@ import hmda.future.util.FutureRetry._
 import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
+import hmda.api.HmdaConfig._
 
 import scala.concurrent.ExecutionContext
 
 object HmdaPlatform {
 
-  val configFactory = ConfigFactory.load()
-
   val log = LoggerFactory.getLogger("hmda")
 
   def main(args: Array[String]): Unit = {
 
-    val system = ActorSystem("hmda")
+    val system = ActorSystem("hmda", configuration)
     val supervisor = createSupervisor(system)
     val querySupervisor = createQuerySupervisor(system)
     implicit val ec = system.dispatcher
@@ -62,7 +61,7 @@ object HmdaPlatform {
   }
 
   private def startActors(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
-    lazy val actorTimeout = configFactory.getInt("hmda.actor.timeout")
+    lazy val actorTimeout = configuration.getInt("hmda.actor.timeout")
     implicit val timeout = Timeout(actorTimeout.seconds)
 
     (supervisor ? FindActorByName(SingleLarValidation.name))
@@ -85,7 +84,7 @@ object HmdaPlatform {
     system.actorOf(ValidationStats.props(), "validation-stats")
 
     //Load demo data
-    lazy val isDemo = configFactory.getBoolean("hmda.isDemo")
+    lazy val isDemo = configuration.getBoolean("hmda.isDemo")
     if (isDemo) {
       cleanup()
       implicit val scheduler = system.scheduler

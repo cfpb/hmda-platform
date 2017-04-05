@@ -2,11 +2,11 @@ package hmda.persistence.processing
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.persistence.query.{ EventEnvelope, PersistenceQuery }
+import akka.persistence.query.PersistenceQuery
 import akka.persistence.query.scaladsl._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import com.typesafe.config.ConfigFactory
+import hmda.persistence.PersistenceConfig._
 import hmda.persistence.messages.CommonMessages._
 
 object HmdaQuery {
@@ -15,9 +15,7 @@ object HmdaQuery {
 
   case class EventWithSeqNr(seqNr: Long, event: Event)
 
-  val config = ConfigFactory.load()
-
-  val journalId = config.getString("akka.persistence.query.journal.id")
+  val journalId = configuration.getString("akka.persistence.query.journal.id")
 
   def readJournal(system: ActorSystem) = {
     PersistenceQuery(system).readJournalFor[RJ](journalId)
