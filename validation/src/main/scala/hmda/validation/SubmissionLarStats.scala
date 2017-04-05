@@ -1,10 +1,11 @@
 package hmda.validation
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import hmda.model.fi.SubmissionId
-import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.messages.CommonMessages.{Command, Event, GetState}
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
+import hmda.validation.ValidationStats.{AddSubmissionStats, SubmissionStats}
 
 object SubmissionLarStats {
   def name = "SubmissionStats"
@@ -46,6 +47,8 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       persist(SubmissionStatsUpdated(totalLars)) { e =>
         log.debug(s"Persisted: $totalLars")
         updateState(e)
+        val validationStats = context.actorSelection("/user/validation-stats")
+        validationStats ! AddSubmissionStats(SubmissionStats(submissionId, totalLars))
       }
 
     case GetState =>
