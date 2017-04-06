@@ -8,9 +8,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
+import hmda.api.model.{ Irs, IrsResponse }
 import hmda.api.protocol.processing.MsaProtocol
 import hmda.query.DbConfiguration._
-import hmda.query.model.filing.{ Irs, Msa, MsaSummary }
 import hmda.query.repository.filing.FilingComponent
 
 import scala.concurrent.ExecutionContext
@@ -33,14 +33,16 @@ trait SubmissionIrsPaths
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, submissionId) =>
       timedGet { uri =>
         completeVerified(institutionId, period, submissionId, uri) {
-          val larTotalMsaRepository = new LarTotalMsaRepository(config)
-          val data = larTotalMsaRepository.getMsaSeq(institutionId, period)
+          parameters('page.as[Int] ? 1) { (page: Int) =>
+            val larTotalMsaRepository = new LarTotalMsaRepository(config)
+            val data = larTotalMsaRepository.getMsaSeq(institutionId, period)
 
-          onComplete(data) {
-            case Success(msaSeq) =>
-              val irs = Irs.createIrs(msaSeq.toList)
-              complete(ToResponseMarshallable(irs))
-            case Failure(e) => completeWithInternalError(uri, e)
+            onComplete(data) {
+              case Success(msaSeq) =>
+                val irs: IrsResponse = Irs(msaSeq).page(page, uri.path.toString)
+                complete(ToResponseMarshallable(irs))
+              case Failure(e) => completeWithInternalError(uri, e)
+            }
           }
         }
       }

@@ -5,7 +5,6 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.{ InstitutionHttpApiAsyncSpec, InstitutionHttpApiSpec }
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration._
-import hmda.query.model.filing.Irs
 import hmda.query.repository.filing.{ FilingComponent, LarConverter }
 
 import scala.concurrent.Await

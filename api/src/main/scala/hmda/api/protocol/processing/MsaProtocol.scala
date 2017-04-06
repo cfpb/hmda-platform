@@ -4,10 +4,10 @@ import hmda.api.model.{ IrsResponse, PaginatedResponse, PaginationLinks }
 import hmda.query.model.filing.{ Msa, MsaSummary }
 import spray.json._
 
-trait MsaProtocol extends DefaultJsonProtocol {
+trait MsaProtocol extends DefaultJsonProtocol with ParserResultsProtocol {
   implicit val msaProtocol = jsonFormat13(Msa.apply)
   implicit val msaSummaryProtocol = jsonFormat12(MsaSummary.apply)
-  implicit val paginationLinkFormat = jsonFormat6(PaginationLinks.apply)
+  //implicit val paginationLinkFormat = jsonFormat6(PaginationLinks.apply)
 
   implicit object IrsResponseJsonFormat extends RootJsonFormat[IrsResponse] {
     override def write(irs: IrsResponse): JsValue = {
