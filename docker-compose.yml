@@ -15,7 +15,10 @@ services:
       JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
 
   ui:
-    build: ../hmda-platform-ui
+    build:
+      context: ../hmda-platform-ui
+      args:
+        SKIP_JS_BUILD: 1
     ports:
       - "80:80"
     depends_on:
