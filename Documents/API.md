@@ -529,6 +529,18 @@ Macro, Q023,
 
 `GET` - Returns the Institution Register Summary
 
+| Query parameter | Description |
+| --------------- | ----------- |
+| page | Integer. If blank, will default to page 1. Page size is 20 MSAs. |
+
+
+This endpoint is paginated. The response contains 3 fields of pagination metadata:
+
+ - `total`: total number of parser errors for this file
+ - `count`: number of errors returned on this page. Full page contains errors from 20 lines of the HMDA file.
+ - `links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
+
+
 Example response:
 
 ```json
@@ -578,6 +590,16 @@ Example response:
     "conv": 9,
     "homePurchase": 0,
     "VA": 0
+  },
+  "count": 20,
+  "total": 130,
+  "_links": {
+    "first": "?page=1",
+    "prev": "?page=1",
+    "self": "?page=1",
+    "next": "?page=2",
+    "last": "?page=7",
+    "href": "/institutions/1/filings/2017/submissions/1/irs{rel}"
   }
 }
 ```
