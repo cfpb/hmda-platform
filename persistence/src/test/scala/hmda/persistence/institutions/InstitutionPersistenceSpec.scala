@@ -24,8 +24,15 @@ class InstitutionPersistenceSpec extends ActorSpec {
         probe.expectMsg(Some(institution))
       }
       probe.send(institutionsActor, GetState)
-      probe.expectMsg(institutions.map(i => i.id))
+      probe.expectMsg(institutions)
     }
+
+    "get institution by id" in {
+      val institution = DemoData.testInstitutions.head
+      probe.send(institutionsActor, GetInstitution(institution.id))
+      probe.expectMsg(Some(institution))
+    }
+
     "be created, modified and read back" in {
       val institution = DemoData.testInstitutions.head
       val modifiedRespondent = institution.respondent.copy(name = "new name")
@@ -35,7 +42,6 @@ class InstitutionPersistenceSpec extends ActorSpec {
     }
 
     "Error logging" must {
-
       "warn when creating an institution that already exists" in {
         val i1 = DemoData.testInstitutions.head.copy(id = "123")
         probe.send(institutionsActor, CreateInstitution(i1))
