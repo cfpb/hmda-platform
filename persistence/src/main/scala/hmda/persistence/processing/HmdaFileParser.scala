@@ -76,6 +76,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
     case ReadHmdaRawFile(persistenceId, replyTo: ActorRef) =>
 
       val parsedTs = events(persistenceId)
+        .filter { x => x.isInstanceOf[LineAdded] }
         .map { case LineAdded(_, data) => data }
         .take(1)
         .map(line => TsCsvParser(line))
@@ -90,6 +91,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         .runForeach(pTs => self ! pTs)
 
       val parsedLar = events(persistenceId)
+        .filter { x => x.isInstanceOf[LineAdded] }
         .map { case LineAdded(_, data) => data }
         .drop(1)
         .zip(Source.fromIterator(() => Iterator.from(2)))
