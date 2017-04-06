@@ -50,13 +50,8 @@ case class MsaSummary(
 
 case object MsaSummary {
   def empty: MsaSummary = MsaSummary(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-}
 
-case class Irs(msas: List[Msa], totals: MsaSummary)
-
-case object Irs {
-  def createIrs(msas: List[Msa]): Irs = {
-    val summary = msas.foldLeft(MsaSummary.empty) { (summary, msa) => summary + msa }
-    Irs(msas, summary)
+  def fromMsaCollection(msas: Seq[Msa]): MsaSummary = {
+    msas.foldLeft(MsaSummary.empty) { (summary, msa) => summary + msa }
   }
 }
