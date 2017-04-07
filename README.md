@@ -188,12 +188,7 @@ drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
 drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
 ```
 
-From the _`hmda-platform-ui`'s_ root directory, run the following:
-
-```shell
-npm install
-npm run build
-```
+From the _`hmda-platform-ui`'s_ root directory, run `yarn`. (Get yarn [here](https://yarnpkg.com/lang/en/docs/install/) if you don't have it installed.)
 
 From _`hmda-platform`'s_ root directory, run the following:
 
