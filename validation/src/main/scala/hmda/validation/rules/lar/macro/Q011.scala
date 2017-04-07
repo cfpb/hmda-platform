@@ -48,10 +48,8 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
     for {
       c <- currentLarCount
       l <- lastYearCount
-      lower = 1 * (1 - multiplier)
-      upper = 1 * (1 + multiplier)
-      lowerValue = lower * l
-      upperValue = upper * l
+      lowerValue = l * (1 - multiplier)
+      upperValue = l * (1 + multiplier)
     } yield {
       when(c is greaterThanOrEqual(larSize) or (l is greaterThanOrEqual(larSize))) {
         c.toDouble is between(lowerValue, upperValue)

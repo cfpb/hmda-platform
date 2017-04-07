@@ -99,7 +99,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   import HmdaFileValidator._
 
-  var institution: Option[Institution] = None
+  var institution: Option[Institution] = Some(Institution.empty.copy(id = submissionId.institutionId))
 
   val config = ConfigFactory.load()
   val duration = config.getInt("hmda.actor-lookup-timeout")
@@ -137,7 +137,6 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
   override def receiveCommand: Receive = {
 
     case BeginValidation(replyTo) =>
-      val ctx = ValidationContext(None, Try(Some(submissionId.period.toInt)).getOrElse(None))
       val validationStarted = ValidationStarted(submissionId)
       sender() ! validationStarted
       events(parserPersistenceId)
