@@ -188,12 +188,7 @@ drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
 drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
 ```
 
-From the _`hmda-platform-ui`'s_ root directory, run the following:
-
-```shell
-npm install
-npm run build
-```
+From the _`hmda-platform-ui`'s_ root directory, run `yarn`. (Get yarn [here](https://yarnpkg.com/lang/en/docs/install/) if you don't have it installed.)
 
 From _`hmda-platform`'s_ root directory, run the following:
 
@@ -213,13 +208,11 @@ docker-machine ip dev
 
 Then, visit the following URLS and click advanced -> proceed. This will bypass self-signed cert errors from your browser when running the app.
 
-```shell
-https://192.168.99.100:8443/
-https://192.168.99.100:4443/
-https://192.168.99.100:9443/
-```
+- https://192.168.99.100:8443/
+- https://192.168.99.100:4443/
+- https://192.168.99.100:9443/
 
-Visit the app at `http://192.168.99.100`, click the "Login" button, and click "Register" when redirected to the keycloak login screen.
+Visit the app at http://192.168.99.100, click the "Login" button, and click "Register" when redirected to the keycloak login screen.
 
 To use demo data there are two institutions available; Bank 0 and Bank 1. To register for either of these institutions you have to use the corresponding domain:
 
