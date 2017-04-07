@@ -213,20 +213,18 @@ docker-machine ip dev
 
 Then, visit the following URLS and click advanced -> proceed. This will bypass self-signed cert errors from your browser when running the app.
 
-```shell
-https://192.168.99.100:8443/
-https://192.168.99.100:4443/
-https://192.168.99.100:9443/
-```
+- [https://192.168.99.100:8443/]
+- [https://192.168.99.100:4443/]
+- [https://192.168.99.100:9443/]
 
-Visit the app at `http://192.168.99.100`, click the "Login" button, and click "Register" when redirected to the keycloak login screen.
+Visit the app at [http://192.168.99.100], click the "Login" button, and click "Register" when redirected to the keycloak login screen.
 
 To use demo data there are two institutions available; Bank 0 and Bank 1. To register for either of these institutions you have to use the corresponding domain:
 
 - Bank 0 = bank0.com
 - Bank 1 = bank1.com
 
-Confirm your signup via MailDev by visiting http://192.168.99.100:1080, opening the email, and clicking the verifying link.
+Confirm your signup via MailDev by visiting [http://192.168.99.100:1080], opening the email, and clicking the verifying link.
 
 You can now interact with the app/begin uploading files, etc.
 
