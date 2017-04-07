@@ -33,7 +33,7 @@ class HmdaFilingSpec extends ActorSpec with LarGenerators {
         probe.send(hmdaFiling, LarValidated(lar, SubmissionId("9999", period, 1)))
       }
       probe.send(hmdaFiling, GetState)
-      probe.expectMsg(HmdaFilingState(Map(s"12345-2017-0" -> 10, s"9999-$period-1" -> 20)))
+      probe.expectMsg(HmdaFilingState(Map(s"12345-$period-0" -> 10, s"9999-$period-1" -> 20)))
     }
   }
 

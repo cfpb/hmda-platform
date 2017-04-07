@@ -50,11 +50,11 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
       l <- lastYearCount
       lower = 1 * (1 - multiplier)
       upper = 1 * (1 + multiplier)
+      lowerValue = lower * l
+      upperValue = upper * l
     } yield {
       when(c is greaterThanOrEqual(larSize) or (l is greaterThanOrEqual(larSize))) {
-        val lowerValue = lower * l
-        val upperValue = upper * l
-        c.toDouble.toString is numericallyBetween(lowerValue.toString, upperValue.toString)
+        c.toDouble is between(lowerValue, upperValue)
       }
     }
   }
