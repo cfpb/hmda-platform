@@ -14,7 +14,7 @@ object EditMetaDataLookup extends ResourceUtils {
       val editNumber = values(2)
       val editDescription = values(3)
       val userFriendlyEditDescription = values(4)
-      val fieldNames: Seq[String] = values(5).split(";").map(_.trim)
+      val fieldNames: Seq[String] = values(5).split(";").map(_.trim).filter(_.nonEmpty)
 
       EditMetaData(
         editNumber,

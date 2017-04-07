@@ -9,39 +9,36 @@ import spray.json.{ JsNumber, JsObject, JsString, JsValue }
 
 trait ValidationErrorConverter {
 
-  def validationErrorsToEditResults(vs: HmdaFileValidationState, tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError], validationErrorType: ValidationErrorType): EditResults = {
-    val allErrorsOfThisType: Seq[ValidationError] = (tsErrors ++ larErrors).filter(_.errorType == validationErrorType)
-    val editResults: Seq[EditResult] = toEditResults(vs, allErrorsOfThisType)
-    EditResults(editResults)
+  def editsOfType(errType: String, vs: HmdaFileValidationState): Seq[ValidationError] = {
+    errType.toLowerCase match {
+      case "syntactical" => vs.syntacticalErrors
+      case "validity" => vs.validityErrors
+      case "quality" => vs.qualityErrors
+      case "macro" => vs.larMacro
+      case _ => Seq()
+    }
   }
 
-  def validationErrorsToQualityEditResults(vs: HmdaFileValidationState, tsErrors: Seq[ValidationError], larErrors: Seq[ValidationError]): QualityEditResults = {
-    val allQualityErrors: Seq[ValidationError] = (tsErrors ++ larErrors).filter(_.errorType == Quality)
-    val editResults: Seq[EditResult] = toEditResults(vs, allQualityErrors)
-    QualityEditResults(vs.qualityVerified, editResults)
-  }
-
-  def validationErrorsToMacroResults(vs: HmdaFileValidationState, errors: Seq[ValidationError]): MacroResults = {
-    val macroValidationErrors: Seq[MacroValidationError] = errors.filter(_.errorType == Macro).asInstanceOf[Seq[MacroValidationError]]
-    MacroResults(vs.macroVerified, macroValidationErrors.map(x => MacroResult(x.ruleName)))
-  }
-
-  //// Helper methods
-
-  private def toEditResults(vs: HmdaFileValidationState, edits: Seq[ValidationError]): Seq[EditResult] = {
+  def editInfos(edits: Seq[ValidationError]): Seq[EditInfo] = {
     val errsByEdit: Map[String, Seq[ValidationError]] = edits.groupBy(_.ruleName)
 
     errsByEdit.map {
-      case (editName: String, errs: Seq[ValidationError]) =>
-        val rows: Seq[EditResultRow] = errs.map(e => editDetail(e, vs))
-        EditResult(editName, editDescription(editName), rows)
+      case (editName: String, _) =>
+        EditInfo(editName, editDescription(editName))
     }.toSeq
   }
 
-  private def editDetail(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
-    if (err.ts) EditResultRow(RowId("Transmittal Sheet"), relevantFields(err, vs))
-    else EditResultRow(RowId(err.errorId), relevantFields(err, vs))
+  def validationErrorsToCsvResults(vs: HmdaFileValidationState): String = {
+    val errors: Seq[ValidationError] = vs.allErrors
+    val rows: Seq[String] = errors.map(_.toCsv)
+    "editType, editId, loanId\n" + rows.mkString("\n")
   }
+
+  def validationErrorToResultRow(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
+    EditResultRow(RowId(err.publicErrorId), relevantFields(err, vs))
+  }
+
+  //// Helper methods
 
   private def editDescription(editName: String): String = {
     EditMetaDataLookup.forEdit(editName).editDescription

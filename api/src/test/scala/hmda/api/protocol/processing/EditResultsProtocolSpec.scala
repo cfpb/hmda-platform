@@ -8,9 +8,15 @@ import spray.json._
 
 class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with ModelGenerators with EditResultsProtocol {
 
-  property("EditResults must convert to and from json") {
-    forAll(editResultsGen) { e =>
-      e.toJson.convertTo[EditResults] mustBe e
+  property("EditCollection must convert to and from json") {
+    forAll(editCollectionGen) { e =>
+      e.toJson.convertTo[EditCollection] mustBe e
+    }
+  }
+
+  property("VerifiableEditCollection must convert to and from json") {
+    forAll(verifiableEditCollectionGen) { v =>
+      v.toJson.convertTo[VerifiableEditCollection] mustBe v
     }
   }
 
@@ -18,12 +24,6 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
     forAll(summaryEditResultsGen) { s =>
       s.toJson.convertTo[SummaryEditResults] mustBe s
     }
-  }
-
-  val macroResult = MacroResult("Q888")
-  val expectedMacroJson = JsObject(("edit", JsString("Q888")))
-  property("MacroResults must have proper json format") {
-    macroResult.toJson mustBe expectedMacroJson
   }
 
   property("QualityEditsVerifiedResponse must have correct json format") {
@@ -35,5 +35,37 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
         ("message", JsString("validated with errors"))
       ))
     )
+  }
+
+  val rowDetail1 = EditResultRow(RowId("one"), JsObject(("thing", JsString("two"))))
+  property("EditResultRow must have correct JSON format") {
+    rowDetail1.toJson mustBe JsObject(
+      ("row", JsObject(
+        ("rowId", JsString("one"))
+      )),
+      ("fields", JsObject(
+        ("thing", JsString("two"))
+      ))
+    )
+  }
+
+  val errResult = EditResult("V567", Seq(rowDetail1), "uri/path/", 4, 315)
+
+  property("Paginated EditResult must have correct JSON format") {
+    errResult.toJson mustBe JsObject(
+      ("edit", JsString("V567")),
+      ("rows", JsArray(rowDetail1.toJson)),
+      ("count", JsNumber(20)),
+      ("total", JsNumber(315)),
+      ("_links", JsObject(
+        ("href", JsString("uri/path/{rel}")),
+        ("self", JsString("?page=4")),
+        ("first", JsString("?page=1")),
+        ("prev", JsString("?page=3")),
+        ("next", JsString("?page=5")),
+        ("last", JsString("?page=16"))
+      ))
+    )
+
   }
 }
