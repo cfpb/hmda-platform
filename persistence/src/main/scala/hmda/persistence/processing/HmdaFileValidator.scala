@@ -10,6 +10,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.HmdaSupervisor.FindHmdaFiling
+import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
@@ -40,6 +41,8 @@ object HmdaFileValidator {
   case class LarQualityError(error: ValidationError) extends Event
   case class LarMacroError(error: ValidationError) extends Event
   case class EditsVerified(editType: ValidationErrorType, verified: Boolean) extends Event
+
+  case class GetNamedErrorResultsPaginated(editName: String, page: Int)
 
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
@@ -75,7 +78,14 @@ object HmdaFileValidator {
         else if (editType == Macro) this.copy(macroVerified = v)
         else this
     }
+
+    def syntacticalErrors: Seq[ValidationError] = tsSyntactical ++ larSyntactical
+    def validityErrors: Seq[ValidationError] = tsValidity ++ larValidity
+    def qualityErrors: Seq[ValidationError] = tsQuality ++ larQuality
+    def allErrors: Seq[ValidationError] = syntacticalErrors ++ validityErrors ++ qualityErrors ++ larMacro
   }
+
+  case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)
 }
 
 class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor with TsEngine with LarEngine {
@@ -218,6 +228,13 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case GetState =>
       sender() ! state
+
+    case GetNamedErrorResultsPaginated(editName, page) =>
+      val allFailures = state.allErrors.filter(e => e.ruleName == editName)
+      val totalSize = allFailures.size
+      val p = PaginatedResource(totalSize)(page)
+      val pageOfFailures = allFailures.slice(p.fromIndex, p.toIndex)
+      sender() ! PaginatedErrors(pageOfFailures, totalSize)
 
     case Shutdown =>
       context stop self

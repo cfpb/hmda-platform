@@ -99,20 +99,6 @@ trait ModelGenerators {
     } yield EditResultRow(RowId(loanId), fields)
   }
 
-  implicit def editResultGen: Gen[EditResult] = {
-    for {
-      edit <- Gen.alphaStr
-      description <- Gen.alphaStr
-      lars <- Gen.listOf(larEditResultGen)
-    } yield EditResult(edit, description, lars)
-  }
-
-  implicit def editResultsGen: Gen[EditResults] = {
-    for {
-      edits <- Gen.listOf(editResultGen)
-    } yield EditResults(edits)
-  }
-
   implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
     Gen.oneOf(
       List(Syntactical, Validity, Quality)
@@ -149,21 +135,34 @@ trait ModelGenerators {
     } yield MacroValidationError(id)
   }
 
-  implicit def macroResultGen: Gen[MacroResult] = {
+  implicit def editInfoGen: Gen[EditInfo] = {
     for {
-      id <- Gen.alphaStr
-    } yield MacroResult(id)
+      name <- Gen.alphaStr
+      desc <- Gen.alphaStr
+    } yield EditInfo(name, desc)
+  }
+
+  implicit def editCollectionGen: Gen[EditCollection] = {
+    for {
+      e <- Gen.listOf(editInfoGen)
+    } yield EditCollection(e)
+  }
+
+  implicit def verifiableEditCollectionGen: Gen[VerifiableEditCollection] = {
+    for {
+      b <- Gen.oneOf(true, false)
+      e <- Gen.listOf(editInfoGen)
+    } yield VerifiableEditCollection(b, e)
   }
 
   implicit def summaryEditResultsGen: Gen[SummaryEditResults] = {
     for {
-      s <- editResultsGen
-      v <- editResultsGen
-      qualVerified <- Gen.oneOf(true, false)
-      q <- Gen.listOf(editResultGen)
-      macroVerified <- Gen.oneOf(true, false)
-      m <- Gen.listOf(macroResultGen)
-    } yield SummaryEditResults(s, v, QualityEditResults(qualVerified, q), MacroResults(macroVerified, m))
+      s <- editCollectionGen
+      v <- editCollectionGen
+      q <- verifiableEditCollectionGen
+      m <- verifiableEditCollectionGen
+      st <- submissionStatusGen
+    } yield SummaryEditResults(s, v, q, m, st)
   }
 
   implicit def institutionSearchGen: Gen[InstitutionSearch] = {

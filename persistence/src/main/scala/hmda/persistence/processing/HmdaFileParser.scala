@@ -29,7 +29,7 @@ object HmdaFileParser {
   case class TsParsedErrors(errors: List[String]) extends Event
   case class LarParsed(lar: LoanApplicationRegister) extends Event
   case class LarParsedErrors(errors: LarParsingError) extends Event
-  case class GetStatePaginated(page: Integer)
+  case class GetStatePaginated(page: Int)
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 

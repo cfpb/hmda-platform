@@ -8,14 +8,14 @@ import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ EditResult, _ }
 import hmda.model.fi._
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.fi.lar.LarGenerators
 import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.engine._
-import spray.json.{ JsNumber, JsObject, JsString }
+import spray.json.{ JsNumber, JsObject }
 
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
@@ -31,63 +31,60 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   val s010Description = "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR)."
   val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
   val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
-  val s010FieldsL1 = JsObject(("Record Identifier", JsNumber(111)))
-  val s020FieldsL1 = JsObject(("Agency Code", JsNumber(222)))
-  val v280FieldsL1 = JsObject(("Metropolitan Statistical Area / Metropolitan Division", JsString("333")))
-  val v285FieldsL2 = JsObject(("State Code", JsString("444")), ("Metropolitan Statistical Area / Metropolitan Division", JsString("555")))
-  val v285FieldsL3 = JsObject(("State Code", JsString("666")), ("Metropolitan Statistical Area / Metropolitan Division", JsString("777")))
-  val s020FieldsTs = JsObject(("Agency Code", JsNumber(888)))
+  val q007Description = "If action taken type = 2, then the total number of these loans should be ≤ 15% of the total number of loan applications."
 
-  val s020 = EditResult("S020", s020Description, List(EditResultRow(RowId("Transmittal Sheet"), s020FieldsTs), EditResultRow(RowId("loan1"), s020FieldsL1)))
-  val s010 = EditResult("S010", s010Description, List(EditResultRow(RowId("loan1"), s010FieldsL1)))
-  val v280 = EditResult("V280", v280Description, List(EditResultRow(RowId("loan1"), v280FieldsL1)))
-  val v285 = EditResult("V285", v285Description, List(EditResultRow(RowId("loan2"), v285FieldsL2), EditResultRow(RowId("loan3"), v285FieldsL3)))
+  val s020info = EditInfo("S020", s020Description)
+  val s010info = EditInfo("S010", s010Description)
+  val v280info = EditInfo("V280", v280Description)
+  val v285info = EditInfo("V285", v285Description)
+  val q007info = EditInfo("Q007", q007Description)
 
   "return summary of validation errors" in {
-    val expectedSummary = SummaryEditResults(
-      EditResults(List(s020, s010)),
-      EditResults(List(v285, v280)),
-      QualityEditResults(false, Seq()),
-      MacroResults(false, List(MacroResult("Q007")))
-    )
-
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[SummaryEditResults] mustBe expectedSummary
-    }
-  }
-
-  "Return summary edits in CSV format" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits?format=csv") ~> institutionsRoutes ~> check {
-      status mustBe StatusCodes.OK
-      responseAs[String] must include("editType, editId, loanId")
-      responseAs[String] must include("syntactical, S020, Transmittal Sheet")
-      responseAs[String] must include("validity, V285, loan2")
+      val r = responseAs[SummaryEditResults]
+      r.syntactical mustBe EditCollection(Seq(s020info, s010info))
+      r.validity mustBe EditCollection(Seq(v285info, v280info))
+      r.quality mustBe VerifiableEditCollection(verified = false, Seq())
+      r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info))
     }
   }
 
   "return a list of validation errors for a single type" in {
-    val expectedEdits = List(v285, v280)
-
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[EditResultsResponse].edits mustBe expectedEdits
+      responseAs[SingleTypeEditResults].edits mustBe Seq(v285info, v280info)
     }
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      val macros = responseAs[MacroResultsResponse]
-      macros.edits mustBe List(MacroResult("Q007"))
+      responseAs[SingleTypeEditResults].edits mustBe Seq(q007info)
     }
   }
 
-  "Return single type edits in CSV format" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro?format=csv") ~> institutionsRoutes ~> check {
+  val s010 = Seq(EditResultRow(RowId("loan1"), JsObject(("Record Identifier", JsNumber(111)))))
+  "return row details for an edit" in {
+    val path = "/institutions/0/filings/2017/submissions/1/edits/S010"
+    val expected = EditResult("S010", s010, path, 1, 1)
+
+    getWithCfpbHeaders(path) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
-      responseAs[String] must include("editType, editId")
-      responseAs[String] must include("macro, Q007")
+      responseAs[EditResult] mustBe expected
     }
   }
+
+  ///// CSV /////
+
+  "Return summary edits in CSV format" in {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/csv") ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[String] must include("editType, editId, loanId")
+      responseAs[String] must include("Syntactical, S020, Transmittal Sheet")
+      responseAs[String] must include("Validity, V285, loan2")
+    }
+  }
+
+  ///// Verification /////
 
   "Verify Macro edits endpoint: Responds with correct json and updates validation state" in {
     val verification = EditsVerification(true)

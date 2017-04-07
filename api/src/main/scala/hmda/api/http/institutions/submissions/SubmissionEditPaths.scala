@@ -44,25 +44,72 @@ trait SubmissionEditPaths
     path("filings" / Segment / "submissions" / IntNumber / "edits") { (period, seqNr) =>
       timedGet { uri =>
         completeVerified(institutionId, period, seqNr, uri) {
-          val fEditChecks = getValidationState(institutionId, period, seqNr)
-          parameters("format".?) { format: Option[String] =>
-            val fEditSummary: Future[SummaryEditResults] = fEditChecks.map { e =>
-              val s = validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
-              val v = validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
-              val q = validationErrorsToQualityEditResults(e, e.tsQuality, e.larQuality)
-              val m = validationErrorsToMacroResults(e, e.larMacro)
-              SummaryEditResults(s, v, q, m)
-            }
+          val fState = getStatusAndValidationState(SubmissionId(institutionId, period, seqNr))
+          onComplete(fState) {
+            case Success((vs, status)) =>
+              val s = EditCollection(editInfos(vs.syntacticalErrors))
+              val v = EditCollection(editInfos(vs.validityErrors))
+              val q = VerifiableEditCollection(vs.qualityVerified, editInfos(vs.qualityErrors))
+              val m = VerifiableEditCollection(vs.macroVerified, editInfos(vs.larMacro))
+              complete(ToResponseMarshallable(SummaryEditResults(s, v, q, m, status)))
+            case Failure(error) => completeWithInternalError(uri, error)
+          }
+        }
+      }
+    }
 
-            val futures = for {
-              editSummary <- fEditSummary
-              status <- getSubmissionStatus(SubmissionId(institutionId, period, seqNr))
-            } yield (editSummary, status)
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/csv
+  def submissionEditCsvPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / "csv") { (period, seqNr) =>
+      timedGet { uri =>
+        completeVerified(institutionId, period, seqNr, uri) {
+          val fValidationState = getValidationState(institutionId, period, seqNr)
+          onComplete(fValidationState) {
+            case Success(validationState) =>
+              val csv: String = validationErrorsToCsvResults(validationState)
+              complete(ToResponseMarshallable(csv))
+            case Failure(error) => completeWithInternalError(uri, error)
+          }
+        }
+      }
+    }
 
-            onComplete(futures) {
-              case Success((edits, status)) =>
-                if (format.getOrElse("") == "csv") complete(edits.toCsv)
-                else complete(ToResponseMarshallable(SummaryEditResultsResponse(edits.syntactical, edits.validity, edits.quality, edits.`macro`, status)))
+  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/<editType>
+  private val svqmRegex = new Regex("syntactical|validity|quality|macro")
+  def submissionSingleEditPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / svqmRegex) { (period, seqNr, editType) =>
+      timedGet { uri =>
+        completeVerified(institutionId, period, seqNr, uri) {
+          val fState = getStatusAndValidationState(SubmissionId(institutionId, period, seqNr))
+          onComplete(fState) {
+            case Success((vs, status)) =>
+              val edits = editInfos(editsOfType(editType, vs))
+              complete(ToResponseMarshallable(SingleTypeEditResults(edits, status)))
+            case Failure(error) => completeWithInternalError(uri, error)
+          }
+        }
+      }
+    }
+
+  // /institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<edit>
+  private val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d""")
+  def editFailureDetailsPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "edits" / editNameRegex) { (period, seqNr, editName) =>
+      timedGet { uri =>
+        completeVerified(institutionId, period, seqNr, uri) {
+          parameters('page.as[Int] ? 1) { (page: Int) =>
+            val fValidator: Future[ActorRef] = fHmdaFileValidator(SubmissionId(institutionId, period, seqNr))
+            val fPaginatedErrors: Future[(PaginatedErrors, HmdaFileValidationState)] = for {
+              va <- fValidator
+              vs <- (va ? GetState).mapTo[HmdaFileValidationState]
+              p <- (va ? GetNamedErrorResultsPaginated(editName, page)).mapTo[PaginatedErrors]
+            } yield (p, vs)
+
+            onComplete(fPaginatedErrors) {
+              case Success((errorCollection, vs)) =>
+                val rows: Seq[EditResultRow] = errorCollection.errors.map(validationErrorToResultRow(_, vs))
+                val result = EditResult(editName, rows, uri.path.toString, page, errorCollection.totalErrors)
+                complete(ToResponseMarshallable(result))
               case Failure(error) => completeWithInternalError(uri, error)
             }
           }
@@ -70,21 +117,8 @@ trait SubmissionEditPaths
       }
     }
 
-  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/<editType>
-  def submissionSingleEditPath(institutionId: String)(implicit ec: ExecutionContext) =
-    path("filings" / Segment / "submissions" / IntNumber / "edits" / Segment) { (period, seqNr, editType) =>
-      timedGet { uri =>
-        parameters("format".?) { format: Option[String] =>
-          completeVerified(institutionId, period, seqNr, uri) {
-            val fValidationState = getValidationState(institutionId, period, seqNr)
-            completeValidationState(editType, fValidationState, uri, format.getOrElse(""), SubmissionId(institutionId, period, seqNr))
-          }
-        }
-      }
-    }
-
-  private val editTypeRegex = new Regex("quality|macro")
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/quality|macro
+  private val editTypeRegex = new Regex("quality|macro")
   def verifyEditsPath(institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) { (period, seqNr, verificationType) =>
       timedPost { uri =>
@@ -118,39 +152,17 @@ trait SubmissionEditPaths
   private def fHmdaFileValidator(submissionId: SubmissionId): Future[ActorRef] =
     (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
-  private def completeValidationState(editType: String, fValidationState: Future[HmdaFileValidationState], uri: Uri, format: String, submissionId: SubmissionId)(implicit ec: ExecutionContext) = {
-    val fSingleEdits = fValidationState.map { e =>
-      editType match {
-        case "syntactical" => validationErrorsToEditResults(e, e.tsSyntactical, e.larSyntactical, Syntactical)
-        case "validity" => validationErrorsToEditResults(e, e.tsValidity, e.larValidity, Validity)
-        case "quality" => validationErrorsToEditResults(e, e.tsQuality, e.larQuality, Quality)
-        case "macro" => validationErrorsToMacroResults(e, e.larMacro)
-      }
-    }
-
-    val futures = for {
-      status <- getSubmissionStatus(submissionId)
-      results <- fSingleEdits
-    } yield (status, results)
-
-    onComplete(futures) {
-      case Success((status: SubmissionStatus, results: MacroResults)) =>
-        if (format == "csv") complete("editType, editId\n" + results.toCsv)
-        else complete(ToResponseMarshallable(MacroResultsResponse(results.verified, results.edits, status)))
-      case Success((status: SubmissionStatus, results: EditResults)) =>
-        if (format == "csv") complete("editType, editId, loanId\n" + results.toCsv(editType))
-        else complete(ToResponseMarshallable(EditResultsResponse(results.edits, status)))
-      case Success((_, _)) => completeWithInternalError(uri, new IllegalStateException)
-      case Failure(error) => completeWithInternalError(uri, error)
-    }
-  }
-
-  private def getSubmissionStatus(submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[SubmissionStatus] = {
+  private def getStatusAndValidationState(submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[(HmdaFileValidationState, SubmissionStatus)] = {
+    val fValidator = fHmdaFileValidator(submissionId)
     val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
+
     for {
       sa <- fSubmissionsActor
       s <- (sa ? GetSubmissionById(submissionId)).mapTo[Submission]
-    } yield s.status
+      va <- fValidator
+      vs <- (va ? GetState).mapTo[HmdaFileValidationState]
+    } yield (vs, s.status)
+
   }
 
   private def getValidationState(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {

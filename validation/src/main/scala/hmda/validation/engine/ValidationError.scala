@@ -12,6 +12,8 @@ trait ValidationError {
   def ruleName: String
   def errorType: ValidationErrorType
   def ts: Boolean
+  def toCsv: String = s"$errorType, $ruleName, $publicErrorId"
+  def publicErrorId = if (ts) "Transmittal Sheet" else errorId
 }
 
 case class SyntacticalValidationError(errorId: String, ruleName: String, ts: Boolean) extends ValidationError {
