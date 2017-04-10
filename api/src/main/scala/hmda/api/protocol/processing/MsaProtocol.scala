@@ -1,6 +1,6 @@
 package hmda.api.protocol.processing
 
-import hmda.api.model.{ IrsResponse, PaginatedResponse, PaginationLinks }
+import hmda.api.model.{ IrsResponse, PaginatedResponse }
 import hmda.query.model.filing.{ Msa, MsaSummary }
 import spray.json._
 
