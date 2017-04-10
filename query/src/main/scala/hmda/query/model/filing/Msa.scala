@@ -86,7 +86,7 @@ case object Irs {
   private def addMsaName(msa: Msa, name: Option[String]): MsaWithName = {
     MsaWithName(
       msa.id,
-      name.getOrElse(""),
+      name.getOrElse("NA"),
       msa.totalLars,
       msa.totalAmount,
       msa.conv,
