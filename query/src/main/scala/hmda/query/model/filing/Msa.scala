@@ -1,5 +1,7 @@
 package hmda.query.model.filing
 
+import hmda.census.model.CbsaLookup
+
 case class Msa(
   id: String,
   totalLars: Int,
@@ -15,6 +17,42 @@ case class Msa(
   homeImprovement: Int,
   refinance: Int
 )
+
+case class MsaWithName(
+    id: String = "",
+    name: String = "",
+    totalLars: Int = 0,
+    totalAmount: Int = 0,
+    conv: Int = 0,
+    FHA: Int = 0,
+    VA: Int = 0,
+    FSA: Int = 0,
+    oneToFourFamily: Int = 0,
+    MFD: Int = 0,
+    multiFamily: Int = 0,
+    homePurchase: Int = 0,
+    homeImprovement: Int = 0,
+    refinance: Int = 0
+) {
+  def fromMsa(name: Option[String], msa: Msa): MsaWithName = {
+    new MsaWithName(
+      msa.id,
+      name.getOrElse(""),
+      msa.totalLars,
+      msa.totalAmount,
+      msa.conv,
+      msa.FHA,
+      msa.VA,
+      msa.FSA,
+      msa.oneToFourFamily,
+      msa.MFD,
+      msa.multiFamily,
+      msa.homePurchase,
+      msa.homeImprovement,
+      msa.refinance
+    )
+  }
+}
 
 case class MsaSummary(
     lars: Int,
@@ -52,11 +90,15 @@ case object MsaSummary {
   def empty: MsaSummary = MsaSummary(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 
-case class Irs(msas: List[Msa], totals: MsaSummary)
+case class Irs(msas: List[MsaWithName], totals: MsaSummary)
 
 case object Irs {
   def createIrs(msas: List[Msa]): Irs = {
+    val codeMap = CbsaLookup.codeMap
+    val msaSeqWithName = msas.map(m => MsaWithName().fromMsa(codeMap.get(m.id), m))
+
     val summary = msas.foldLeft(MsaSummary.empty) { (summary, msa) => summary + msa }
-    Irs(msas, summary)
+
+    Irs(msaSeqWithName, summary)
   }
 }

@@ -536,6 +536,7 @@ Example response:
   "msas": [
     {
       "id": "123",
+      "name": "Some, Place",
       "totalLARS": 4,
       "totalAmount": 123,
       "conv": 4,
@@ -551,6 +552,7 @@ Example response:
     },
     {
       "id": "456",
+      "name": "Other, Place",
       "totalLARS": 5,
       "totalAmount": 456,
       "conv": 5,
