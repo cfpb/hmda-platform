@@ -57,5 +57,5 @@ class ValidationStats extends HmdaPersistentActor {
     case GetState =>
       sender() ! state
   }
-
 }
+

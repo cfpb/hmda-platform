@@ -30,5 +30,4 @@ class ValidationStatsSpec extends ActorSpec {
       probe.expectMsg(125)
     }
   }
-
 }

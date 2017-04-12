@@ -56,5 +56,4 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
       }
     }
   }
-
 }

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory
 import hmda.future.util.FutureRetry._
 import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
+import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
 import hmda.validation.ValidationStats._
 

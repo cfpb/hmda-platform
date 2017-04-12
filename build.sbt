@@ -148,7 +148,6 @@ lazy val persistence = (project in file("persistence"))
       libraryDependencies ++= akkaPersistenceDeps
     )
   )
-  .dependsOn(persistenceModel % "compile->compile;test->test")
   .dependsOn(validation % "compile->compile;test->test")
 
 lazy val query = (project in file("query"))
