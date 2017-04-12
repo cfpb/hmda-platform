@@ -23,7 +23,7 @@ import hmda.future.util.FutureRetry._
 import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.api.HmdaConfig._
-import hmda.validation.ValidationStats
+import hmda.validation.ValidationStats._
 
 import scala.concurrent.ExecutionContext
 
@@ -81,7 +81,7 @@ object HmdaPlatform {
       .mapTo[ActorRef]
 
     // Start validation stats actor
-    system.actorOf(ValidationStats.props(), "validation-stats")
+    createValidationStats(system)
 
     //Load demo data
     lazy val isDemo = configuration.getBoolean("hmda.isDemo")
