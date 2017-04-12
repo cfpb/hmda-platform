@@ -1,14 +1,15 @@
 package hmda.api.model
 
 import hmda.persistence.PaginatedResource
-import hmda.query.model.filing.{ Msa, MsaSummary }
+import hmda.query.model.filing.{ Msa, MsaSummary, MsaWithName }
 
 case class Irs(msas: Seq[Msa]) {
 
-  def page(page: Int, path: String): IrsResponse = {
+  def paginatedResponse(page: Int, path: String): IrsResponse = {
     val total = msas.size
+    val namedMsas = msas.map(_.addName)
     val p = PaginatedResource(total)(page)
-    val pageOfMsas = msas.slice(p.fromIndex, p.toIndex)
+    val pageOfMsas = namedMsas.slice(p.fromIndex, p.toIndex)
     val summary = MsaSummary.fromMsaCollection(msas)
     IrsResponse(pageOfMsas.toList, summary, path, page, total)
   }
@@ -16,7 +17,7 @@ case class Irs(msas: Seq[Msa]) {
 }
 
 case class IrsResponse(
-  msas: List[Msa],
+  msas: List[MsaWithName],
   summary: MsaSummary,
   path: String,
   currentPage: Int,

@@ -1,7 +1,43 @@
 package hmda.query.model.filing
 
+import hmda.census.model.CbsaLookup
+
 case class Msa(
+    id: String,
+    totalLars: Int,
+    totalAmount: Int,
+    conv: Int,
+    FHA: Int,
+    VA: Int,
+    FSA: Int,
+    oneToFourFamily: Int,
+    MFD: Int,
+    multiFamily: Int,
+    homePurchase: Int,
+    homeImprovement: Int,
+    refinance: Int
+) {
+  def addName: MsaWithName = MsaWithName(
+    this.id,
+    CbsaLookup.nameFor(this.id),
+    this.totalLars,
+    this.totalAmount,
+    this.conv,
+    this.FHA,
+    this.VA,
+    this.FSA,
+    this.oneToFourFamily,
+    this.MFD,
+    this.multiFamily,
+    this.homePurchase,
+    this.homeImprovement,
+    this.refinance
+  )
+}
+
+case class MsaWithName(
   id: String,
+  name: String,
   totalLars: Int,
   totalAmount: Int,
   conv: Int,

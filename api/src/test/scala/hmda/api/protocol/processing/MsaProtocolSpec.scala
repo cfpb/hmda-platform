@@ -1,16 +1,17 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.IrsResponse
-import hmda.query.model.filing.{ Msa, MsaSummary }
+import hmda.query.model.filing.{ MsaSummary, MsaWithName }
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._
 
 class MsaProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with MsaProtocol {
 
-  val msa1 = Msa("second", 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
-  val expectedMsa1 = JsObject(
-    ("id", JsString("second")),
+  val msaWithName = MsaWithName("first", "Cincinnati, OH", 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+  val expectedMsa = JsObject(
+    ("id", JsString("first")),
+    ("name", JsString("Cincinnati, OH")),
     ("totalLars", JsNumber(12)),
     ("totalAmount", JsNumber(11)),
     ("conv", JsNumber(10)),
@@ -25,7 +26,7 @@ class MsaProtocolSpec extends PropSpec with PropertyChecks with MustMatchers wit
     ("refinance", JsNumber(1))
   )
   property("Msa must have correct JSON format") {
-    msa1.toJson mustBe expectedMsa1
+    msaWithName.toJson mustBe expectedMsa
   }
 
   val summ = MsaSummary(55, 54, 53, 52, 51, 59, 58, 57, 56, 55, 54, 53)
@@ -48,11 +49,11 @@ class MsaProtocolSpec extends PropSpec with PropertyChecks with MustMatchers wit
     summ.toJson mustBe expectedSummary
   }
 
-  val irs = IrsResponse(List(msa1), summ, "uri/path/", 4, 315)
+  val irs = IrsResponse(List(msaWithName), summ, "uri/path/", 4, 315)
 
   property("IrsResponse must have correct JSON format") {
     IrsResponseJsonFormat.write(irs) mustBe JsObject(
-      ("msas", JsArray(expectedMsa1)),
+      ("msas", JsArray(expectedMsa)),
       ("summary", expectedSummary),
       ("count", JsNumber(20)),
       ("total", JsNumber(315)),

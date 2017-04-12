@@ -39,7 +39,7 @@ trait SubmissionIrsPaths
 
             onComplete(data) {
               case Success(msaSeq) =>
-                val irs: IrsResponse = Irs(msaSeq).page(page, uri.path.toString)
+                val irs: IrsResponse = Irs(msaSeq).paginatedResponse(page, uri.path.toString)
                 complete(ToResponseMarshallable(irs))
               case Failure(e) => completeWithInternalError(uri, e)
             }
