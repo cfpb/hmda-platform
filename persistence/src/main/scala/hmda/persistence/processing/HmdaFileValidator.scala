@@ -58,18 +58,18 @@ object HmdaFileValidator {
   }
 
   case class HmdaFileValidationState(
-                                      ts: Option[TransmittalSheet] = None,
-                                      lars: Seq[LoanApplicationRegister] = Nil,
-                                      tsSyntactical: Seq[ValidationError] = Nil,
-                                      tsValidity: Seq[ValidationError] = Nil,
-                                      tsQuality: Seq[ValidationError] = Nil,
-                                      larSyntactical: Seq[ValidationError] = Nil,
-                                      larValidity: Seq[ValidationError] = Nil,
-                                      larQuality: Seq[ValidationError] = Nil,
-                                      qualityVerified: Boolean = false,
-                                      larMacro: Seq[ValidationError] = Vector.empty[ValidationError],
-                                      macroVerified: Boolean = false
-                                    ) {
+      ts: Option[TransmittalSheet] = None,
+      lars: Seq[LoanApplicationRegister] = Nil,
+      tsSyntactical: Seq[ValidationError] = Nil,
+      tsValidity: Seq[ValidationError] = Nil,
+      tsQuality: Seq[ValidationError] = Nil,
+      larSyntactical: Seq[ValidationError] = Nil,
+      larValidity: Seq[ValidationError] = Nil,
+      larQuality: Seq[ValidationError] = Nil,
+      qualityVerified: Boolean = false,
+      larMacro: Seq[ValidationError] = Vector.empty[ValidationError],
+      macroVerified: Boolean = false
+  ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) => this.copy(ts = Some(newTs))
       case larValidated @ LarValidated(lar, _) => this.copy(lars = lars :+ lar)
