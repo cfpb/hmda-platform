@@ -162,6 +162,7 @@ lazy val query = (project in file("query"))
     libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
+  .dependsOn(census % "compile->compile;test->test")
   .dependsOn(persistenceModel % "compile->compile;test->test")
 
 lazy val api = (project in file("api"))

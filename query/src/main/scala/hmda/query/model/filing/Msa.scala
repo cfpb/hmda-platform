@@ -1,5 +1,7 @@
 package hmda.query.model.filing
 
+import hmda.census.model.CbsaLookup
+
 case class Msa(
   id: String,
   totalLars: Int,
@@ -14,6 +16,23 @@ case class Msa(
   homePurchase: Int,
   homeImprovement: Int,
   refinance: Int
+)
+
+case class MsaWithName(
+    id: String,
+    name: String,
+    totalLars: Int,
+    totalAmount: Int,
+    conv: Int,
+    FHA: Int,
+    VA: Int,
+    FSA: Int,
+    oneToFourFamily: Int,
+    MFD: Int,
+    multiFamily: Int,
+    homePurchase: Int,
+    homeImprovement: Int,
+    refinance: Int
 )
 
 case class MsaSummary(
@@ -52,11 +71,34 @@ case object MsaSummary {
   def empty: MsaSummary = MsaSummary(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
 
-case class Irs(msas: List[Msa], totals: MsaSummary)
+case class Irs(msas: List[MsaWithName], totals: MsaSummary)
 
 case object Irs {
   def createIrs(msas: List[Msa]): Irs = {
+    val codeMap = CbsaLookup.codeMap
+    val msaSeqWithName = msas.map(m => addMsaName(m, codeMap.get(m.id)))
+
     val summary = msas.foldLeft(MsaSummary.empty) { (summary, msa) => summary + msa }
-    Irs(msas, summary)
+
+    Irs(msaSeqWithName, summary)
+  }
+
+  private def addMsaName(msa: Msa, name: Option[String]): MsaWithName = {
+    MsaWithName(
+      msa.id,
+      name.getOrElse("NA"),
+      msa.totalLars,
+      msa.totalAmount,
+      msa.conv,
+      msa.FHA,
+      msa.VA,
+      msa.FSA,
+      msa.oneToFourFamily,
+      msa.MFD,
+      msa.multiFamily,
+      msa.homePurchase,
+      msa.homeImprovement,
+      msa.refinance
+    )
   }
 }

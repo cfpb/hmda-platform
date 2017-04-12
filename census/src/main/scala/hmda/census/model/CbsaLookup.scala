@@ -33,6 +33,10 @@ object CbsaLookup extends CbsaResourceUtils {
       )
     }
   }.toSeq
+
+  val codeMap: Map[String, String] = {
+    values.map(x => (x.cbsa, x.cbsaTitle)).toMap
+  }
 }
 
 case class Cbsa(
