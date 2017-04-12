@@ -98,8 +98,10 @@ lazy val parserJS = parser.js
 lazy val validation = (project in file("validation"))
   .settings(hmdaBuildSettings: _*)
   .settings(
+    parallelExecution in Test := true,
     libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
   ).dependsOn(parserJVM % "compile->compile;test->test")
+   .dependsOn(persistenceModel % "compile->compile;test->test")
 
 lazy val panel = (project in file("panel"))
   .settings(hmdaBuildSettings: _*)
