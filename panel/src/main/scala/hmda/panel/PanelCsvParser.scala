@@ -6,16 +6,17 @@ import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.util.{ ByteString, Timeout }
 import akka.pattern.ask
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Framing
-import akka.stream.scaladsl.{ FileIO, Flow, Sink }
+import akka.stream.{ ActorMaterializer, FlowShape }
+import akka.stream.scaladsl.{ Broadcast, BroadcastHub, FileIO, Flow, Framing, GraphDSL, Keep, Sink, Source }
+import hmda.model.fi.{ Filing, NotStarted }
 import hmda.model.institution.Institution
 import hmda.persistence.messages.CommonMessages._
 
 import scala.concurrent.duration._
 import hmda.parser.fi.InstitutionParser
 import hmda.persistence.HmdaSupervisor._
-import hmda.persistence.institutions.InstitutionPersistence
+import hmda.persistence.institutions.FilingPersistence.CreateFiling
+import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.DbConfiguration._
@@ -43,24 +44,50 @@ object PanelCsvParser extends InstitutionComponent {
       sys.exit(1)
     }
 
-    val timeout = 5.seconds
-
     println("Cleaning DB...")
-    Await.result(repository.dropSchema(), timeout)
+    Await.result(repository.dropSchema(), 5.seconds)
     println("Creating new schema...")
-    Await.result(repository.createSchema(), timeout)
-    val institutionPersistence = Await.result(institutionPersistenceF, timeout)
+    Await.result(repository.createSchema(), 5.seconds)
+    val institutionPersistence = Await.result(institutionPersistenceF, 5.seconds)
 
     val source = FileIO.fromPath(new File(args(0)).toPath)
 
-    println("Reading file...")
-    source
+    val graph = source
       .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
       .drop(1)
       .via(byte2StringFlow)
       .via(parseInstitutions)
+      .toMat(BroadcastHub.sink(bufferSize = 1024))(Keep.right)
+
+    val fromGraph: Source[Institution, NotUsed] = graph.run()
+
+    println("Reading file...")
+
+    fromGraph
       .map(i => CreateInstitution(i))
       .runWith(Sink.actorRef(institutionPersistence, Shutdown))
+
+    fromGraph
+      .runForeach(i => {
+        val f = Filing(i.activityYear.toString, i.id, NotStarted, filingRequired = false, 0, 0)
+        for {
+          s <- (supervisor ? FindFilings(FilingPersistence.name, i.id)).mapTo[ActorRef]
+        } yield s ! CreateFiling(f)
+      })
+
+    /*source
+      .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
+      .drop(1)
+      .via(byte2StringFlow)
+      .via(parseInstitutions)
+      .map(inst => {
+          for {
+              s <- (supervisor ? FindFilings(FilingPersistence.name, inst.id)).mapTo[ActorRef]
+          } yield s ! CreateFiling(Filing(inst.activityYear.toString, inst.id, NotStarted, filingRequired = false, 0, 0))
+          inst
+        })
+      .map(i => CreateInstitution(i))
+      .runWith(Sink.actorRef(institutionPersistence, Shutdown))*/
 
   }
 
