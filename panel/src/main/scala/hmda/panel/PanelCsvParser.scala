@@ -6,8 +6,8 @@ import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.util.{ ByteString, Timeout }
 import akka.pattern.ask
-import akka.stream.{ ActorMaterializer, FlowShape }
-import akka.stream.scaladsl.{ Broadcast, BroadcastHub, FileIO, Flow, Framing, GraphDSL, Keep, Sink, Source }
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{ BroadcastHub, FileIO, Flow, Framing, Keep, Sink, Source }
 import hmda.model.fi.{ Filing, NotStarted }
 import hmda.model.institution.Institution
 import hmda.persistence.messages.CommonMessages._
@@ -74,21 +74,6 @@ object PanelCsvParser extends InstitutionComponent {
           s <- (supervisor ? FindFilings(FilingPersistence.name, i.id)).mapTo[ActorRef]
         } yield s ! CreateFiling(f)
       })
-
-    /*source
-      .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
-      .drop(1)
-      .via(byte2StringFlow)
-      .via(parseInstitutions)
-      .map(inst => {
-          for {
-              s <- (supervisor ? FindFilings(FilingPersistence.name, inst.id)).mapTo[ActorRef]
-          } yield s ! CreateFiling(Filing(inst.activityYear.toString, inst.id, NotStarted, filingRequired = false, 0, 0))
-          inst
-        })
-      .map(i => CreateInstitution(i))
-      .runWith(Sink.actorRef(institutionPersistence, Shutdown))*/
-
   }
 
   private def parseInstitutions: Flow[String, Institution, NotUsed] =
