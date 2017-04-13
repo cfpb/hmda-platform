@@ -17,7 +17,7 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.processing.HmdaFileValidator
+import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
 import hmda.persistence.processing.HmdaFileValidator._
 import hmda.validation.engine._
 
@@ -126,13 +126,15 @@ trait SubmissionEditPaths
           completeVerified(institutionId, period, seqNr, uri) {
             val verified = verification.verified
             val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
+            val fSubmissionManager = (supervisor ? FindProcessingActor(SubmissionManager.name, SubmissionId(institutionId, period, seqNr))).mapTo[ActorRef]
             val subId = SubmissionId(institutionId, period, seqNr)
             val fValidator = fHmdaFileValidator(subId)
             val editType: ValidationErrorType = if (verificationType == "quality") Quality else Macro
 
             val fSubmissions = for {
+              replyTo <- fSubmissionManager
               va <- fValidator
-              v <- (va ? VerifyEdits(editType, verified)).mapTo[EditsVerified]
+              v <- (va ? VerifyEdits(editType, verified, replyTo)).mapTo[EditsVerified]
               sa <- fSubmissionsActor
               s <- (sa ? GetSubmissionById(subId)).mapTo[Submission]
             } yield s

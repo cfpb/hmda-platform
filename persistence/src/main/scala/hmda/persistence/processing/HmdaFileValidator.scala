@@ -32,7 +32,7 @@ object HmdaFileValidator {
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
-  case class VerifyEdits(editType: ValidationErrorType, verified: Boolean) extends Command
+  case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
   case class TsSyntacticalError(error: ValidationError) extends Event
   case class TsValidityError(error: ValidationError) extends Event
   case class TsQualityError(error: ValidationError) extends Event
@@ -209,7 +209,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       self ! CompleteValidation(replyTo)
 
     case CompleteValidation(replyTo) =>
-      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty && state.larMacro.isEmpty
+      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.qualityVerified && state.macroVerified
         && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(submissionId)
@@ -218,10 +218,11 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         replyTo ! ValidationCompletedWithErrors(submissionId)
       }
 
-    case VerifyEdits(editType, v) =>
+    case VerifyEdits(editType, v, replyTo) =>
       if (editType == Quality || editType == Macro) {
         persist(EditsVerified(editType, v)) { e =>
           updateState(e)
+          self ! CompleteValidation(replyTo)
           sender() ! EditsVerified(editType, v)
         }
       } else sender() ! None
