@@ -22,11 +22,11 @@ trait MsaProtocol extends DefaultJsonProtocol with ParserResultsProtocol {
     override def read(json: JsValue): IrsResponse = {
       json.asJsObject.getFields("msas", "summary", "total", "_links") match {
         case Seq(JsArray(msas), JsObject(summ), JsNumber(tot), JsObject(links)) =>
-          val msaCollection: Seq[MsaWithName] = msas.map(_.convertTo[MsaWithName])
-          val path: String = PaginatedResponse.staticPath(links("href").convertTo[String])
-          val currentPage: Int = PaginatedResponse.currentPage(links("self").convertTo[String])
-          val summary: MsaSummary = JsObject(summ).convertTo[MsaSummary]
-          val total: Int = tot.intValue
+          val msaCollection = msas.map(_.convertTo[MsaWithName])
+          val path = PaginatedResponse.staticPath(links("href").convertTo[String])
+          val currentPage = PaginatedResponse.currentPage(links("self").convertTo[String])
+          val summary = JsObject(summ).convertTo[MsaSummary]
+          val total = tot.intValue
           IrsResponse(msaCollection.toList, summary, path, currentPage, total)
 
         case _ => throw DeserializationException("IRS Summary expected")
