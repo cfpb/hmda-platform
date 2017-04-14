@@ -34,10 +34,12 @@ object CbsaLookup extends CbsaResourceUtils {
     }
   }.toSeq
 
+  private val cbsaIdToNameMap: Map[String, String] = {
+    values.map(x => (x.cbsa, x.cbsaTitle)).toMap
+  }
+
   def nameFor(cbsaId: String): String = {
-    values.find(_.cbsa == cbsaId)
-      .getOrElse(Cbsa(cbsaTitle = "NA"))
-      .cbsaTitle
+    cbsaIdToNameMap.getOrElse(cbsaId, "NA")
   }
 }
 
