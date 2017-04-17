@@ -19,20 +19,20 @@ case class Msa(
 )
 
 case class MsaWithName(
-    id: String,
-    name: String,
-    totalLars: Int,
-    totalAmount: Int,
-    conv: Int,
-    FHA: Int,
-    VA: Int,
-    FSA: Int,
-    oneToFourFamily: Int,
-    MFD: Int,
-    multiFamily: Int,
-    homePurchase: Int,
-    homeImprovement: Int,
-    refinance: Int
+  id: String,
+  name: String,
+  totalLars: Int,
+  totalAmount: Int,
+  conv: Int,
+  FHA: Int,
+  VA: Int,
+  FSA: Int,
+  oneToFourFamily: Int,
+  MFD: Int,
+  multiFamily: Int,
+  homePurchase: Int,
+  homeImprovement: Int,
+  refinance: Int
 )
 
 case class MsaSummary(

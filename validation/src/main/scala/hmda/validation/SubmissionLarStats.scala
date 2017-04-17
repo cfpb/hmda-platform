@@ -48,7 +48,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
         log.debug(s"Persisted: $totalLars")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")
-        validationStats ! AddSubmissionStats(SubmissionStats(submissionId, totalLars))
+        validationStats ! AddSubmissionStats(SubmissionStats(submissionId, totalLars, ""))
       }
 
     case GetState =>

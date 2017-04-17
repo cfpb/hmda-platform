@@ -28,6 +28,7 @@ import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.validation.SubmissionLarStats
 import hmda.validation.SubmissionLarStats.CountLarsInSubmission
+import hmda.validation.ValidationStats.{ AddSubmissionStats, SubmissionStats }
 
 import scala.concurrent.duration._
 import scala.util.Try
@@ -168,6 +169,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
         log.debug(s"Persisted: $e")
+        val validationStats = context.actorSelection("/user/validation-stats")
+        validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, ts.taxId))
         updateState(e)
       }
 
