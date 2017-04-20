@@ -4,6 +4,7 @@ Every submission will store a `SubmissionStatus` object with the following struc
 
 * `code`: `Integer`
 * `message`: `String`
+* `description`: `String`
 
 For example:
 
@@ -12,7 +13,8 @@ For example:
   "id": 3,
   "status": {
     "code": 1,
-    "message": "created"
+    "message": "created",
+    "description": "The filing period is now open and available to accept HMDA data."
   }
 }
 ```
