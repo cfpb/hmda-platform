@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import hmda.api.EC
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
@@ -32,7 +33,7 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
   val log: LoggingAdapter
 
   // institutions
-  def institutionsPath(implicit ec: ExecutionContext) =
+  def institutionsPath[_: EC] =
     path("institutions") {
       timedGet { uri =>
         extractRequestContext { ctx =>
@@ -54,7 +55,7 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
     }
 
   // institutions/<institutionId>
-  def institutionByIdPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def institutionByIdPath[_: EC](institutionId: String) =
     pathEnd {
       timedGet { uri =>
         val supervisor = system.actorSelection("/user/supervisor")
@@ -81,7 +82,7 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
       }
     }
 
-  private def institutionDetails(institutionId: String, institutionsActor: ActorRef, filingsActor: ActorRef)(implicit ec: ExecutionContext): Future[InstitutionDetail] = {
+  private def institutionDetails[_: EC](institutionId: String, institutionsActor: ActorRef, filingsActor: ActorRef): Future[InstitutionDetail] = {
     val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
     for {
       i <- fInstitution
