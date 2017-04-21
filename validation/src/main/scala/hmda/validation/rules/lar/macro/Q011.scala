@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.`macro`
 
-import akka.actor.ActorSystem
+import hmda.validation._
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory

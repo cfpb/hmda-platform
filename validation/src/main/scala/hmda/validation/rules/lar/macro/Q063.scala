@@ -1,11 +1,12 @@
 package hmda.validation.rules.lar.`macro`
 
+import hmda.validation._
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.Result
-import hmda.validation.rules.{ AS, AggregateEditCheck, EC, MAT }
+import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
 import scala.concurrent.Future

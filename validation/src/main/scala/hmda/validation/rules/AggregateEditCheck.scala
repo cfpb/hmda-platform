@@ -1,6 +1,7 @@
 package hmda.validation.rules
 
 import hmda.validation.dsl.Result
+import hmda.validation._
 
 import scala.concurrent.Future
 
