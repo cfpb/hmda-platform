@@ -1,11 +1,12 @@
 package hmda.validation.rules.lar.quality
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.validation.EC
 import hmda.validation.dsl.Result
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import scala.util.Try
 
 object Q022 {
@@ -19,7 +20,7 @@ object Q022 {
     (year - applicationYear) is between(0, 2)
   }
 
-  def apply(lar: LoanApplicationRegister, fYear: Future[Int])(implicit ec: ExecutionContext): Future[Result] = {
+  def apply[_: EC](lar: LoanApplicationRegister, fYear: Future[Int]): Future[Result] = {
     val applicationYear = parseYear(lar)
 
     fYear.map { year =>
