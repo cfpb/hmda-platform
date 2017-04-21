@@ -1,16 +1,14 @@
 package hmda.validation.rules.lar.`macro`
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
-import hmda.validation.rules.AggregateEditCheck
+import hmda.validation.rules.{ AS, AggregateEditCheck, EC, MAT }
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
 object Q007 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
@@ -19,7 +17,7 @@ object Q007 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def name = "Q007"
 
-  override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
+  override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
 
     val approvedButNotAccepted =
       count(lars.filter(lar => lar.actionTakenType == 2))

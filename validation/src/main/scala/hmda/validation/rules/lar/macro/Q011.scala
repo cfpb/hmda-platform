@@ -2,21 +2,20 @@ package hmda.validation.rules.lar.`macro`
 
 import akka.actor.ActorSystem
 import akka.pattern.ask
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.Result
-import hmda.validation.rules.AggregateEditCheck
+import hmda.validation.rules._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
-import hmda.validation.rules.IfInstitutionPresentInAggregate
 import hmda.validation.ValidationStats.FindTotalLars
+
 import scala.concurrent.duration._
 
 object Q011 {
@@ -32,7 +31,9 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
   val larSize = configuration.getInt("hmda.validation.macro.Q011.numOfTotalLars")
   val multiplier = configuration.getDouble("hmda.validation.macro.Q011.numOfLarsMultiplier")
 
-  override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
+  override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
+
+    val system = implicitly[AS[_]]
 
     val configuration = ConfigFactory.load()
     val duration = configuration.getInt("hmda.actor.timeout")
