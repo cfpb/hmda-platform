@@ -14,11 +14,14 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 trait TsEngine extends TsSyntacticalEngine with TsValidityEngine with TsQualityEngine {
 
-  def validateTs(ts: TransmittalSheet, ctx: ValidationContext)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): TsValidation = {
+  def validateTs(ts: TransmittalSheet, ctx: ValidationContext): TsValidation = {
     (
       checkValidity(ts, ctx)
       |@| checkSyntactical(ts, ctx)
-      |@| checkQuality(ts, ctx)
-    )((_, _, _) => ts)
+    )((_, _) => ts)
+  }
+
+  def validateTsQuality(ts: TransmittalSheet, ctx: ValidationContext)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[TsValidation] = {
+    checkQuality(ts, ctx)
   }
 }

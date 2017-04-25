@@ -39,6 +39,7 @@ object HmdaFileValidator {
 
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
+  case class ValidateTsQuality(ts: TransmittalSheet) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean) extends Command
   case class TsSyntacticalError(error: ValidationError) extends Event
@@ -139,15 +140,20 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case BeginValidation(replyTo) =>
       val validationStarted = ValidationStarted(submissionId)
+      val validationStats = context.actorSelection("/user/validation-stats")
+
       sender() ! validationStarted
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
         .map(e => e.asInstanceOf[TsParsed].ts)
         .map(ts => (ts, validateTs(ts, ctx).toEither))
         .map {
-          case (_, Right(ts)) => ts
+          case (_, Right(ts)) =>
+            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, ts.taxId))
+            ValidateTsQuality(ts)
           case (ts, Left(errors)) =>
-            self ! ts
+            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, ts.taxId))
+            self ! ValidateTsQuality(ts)
             TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
@@ -166,11 +172,19 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         }
         .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
 
+    case ValidateTsQuality(ts) =>
+      validateTsQuality(ts, ctx)
+        .map(validations => validations.toEither)
+        .map {
+          case Right(_) => self ! ts
+          case Left(errors) =>
+            self ! ts
+            TsValidationErrors(errors.list.toList)
+        }
+
     case ts: TransmittalSheet =>
       persist(TsValidated(ts)) { e =>
         log.debug(s"Persisted: $e")
-        val validationStats = context.actorSelection("/user/validation-stats")
-        validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, ts.taxId))
         updateState(e)
       }
 
