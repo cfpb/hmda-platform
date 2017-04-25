@@ -69,7 +69,7 @@ object PanelCsvParser extends InstitutionComponent {
 
     fromGraph
       .runForeach(i => {
-        val f = Filing(i.activityYear.toString, i.id, NotStarted, filingRequired = false, 0, 0)
+        val f = Filing(i.activityYear.toString, i.id)
         for {
           s <- (supervisor ? FindFilings(FilingPersistence.name, i.id)).mapTo[ActorRef]
         } yield s ! CreateFiling(f)
