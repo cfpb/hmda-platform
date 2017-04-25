@@ -64,15 +64,6 @@ class ValidationStats extends HmdaPersistentActor {
       } else {
         sender() ! 0
       }
-    case FindTaxId(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.taxId
-      } else {
-        sender() ! "0"
-      }
 
     case FindTaxId(id, period) =>
       val submissionStats = state.stats

@@ -10,7 +10,7 @@ import hmda.validation.engine.ts.validity.TsValidityEngine
 
 import scalaz._
 import Scalaz._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait TsEngine extends TsSyntacticalEngine with TsValidityEngine with TsQualityEngine {
 

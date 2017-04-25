@@ -9,22 +9,21 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.validation.ValidationStats.FindTaxId
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.{AggregateEditCheck, IfInstitutionPresentIn}
+import hmda.validation.rules.{ AggregateEditCheck, IfInstitutionPresentIn, IfInstitutionPresentInAggregate }
 import hmda.validation.dsl.Result
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
-
 
 object Q012 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[TransmittalSheet, TransmittalSheet] = {
-    IfInstitutionPresentIn(ctx) { new Q012(_) }
+    IfInstitutionPresentInAggregate(ctx) { new Q012(_, _) }
   }
 }
 
-class Q012 private (institution: Institution) extends AggregateEditCheck[TransmittalSheet, TransmittalSheet] {
+class Q012 private (institution: Institution, year: Int) extends AggregateEditCheck[TransmittalSheet, TransmittalSheet] {
   override def name: String = "Q012"
 
   override def apply(input: TransmittalSheet)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
@@ -33,7 +32,7 @@ class Q012 private (institution: Institution) extends AggregateEditCheck[Transmi
     implicit val timeout = Timeout(duration.seconds)
 
     val validationStats = system.actorSelection("/user/validation-stats")
-    val fLastYearTaxId = (validationStats ? FindTaxId(institution.id, (institution.activityYear - 1).toString)).mapTo[String]
+    val fLastYearTaxId = (validationStats ? FindTaxId(institution.id, (year - 1).toString)).mapTo[String]
 
     for {
       l <- fLastYearTaxId
