@@ -137,7 +137,8 @@ Example response:
       },
       "status": {
         "code": 1,
-        "message": "created"
+        "message": "created",
+        "description": "The filing period is now open and available to accept HMDA data."
       },
       "start": 1483287071000,
       "end": 0
@@ -150,7 +151,8 @@ Example response:
       },
       "status": {
         "code": 1,
-        "message": "created"
+        "message": "created",
+        "description": "The filing period is now open and available to accept HMDA data."
       },
       "start": 1483287071000,
       "end": 0
@@ -163,7 +165,8 @@ Example response:
       },
       "status": {
         "code": 1,
-        "message": "created"
+        "message": "created",
+        "description": "The filing period is now open and available to accept HMDA data."
       },
       "start": 1483287071000,
       "end": 0
@@ -189,7 +192,8 @@ Example response, with HTTP code 201:
   },
   "status": {
     "code": 1,
-    "message": "created"
+    "message": "created",
+    "description": "The filing period is now open and available to accept HMDA data."
   },
   "start": 1483287071000,
   "end": 0
@@ -213,7 +217,8 @@ Example response:
   },
   "status": {
     "code": 1,
-    "message": "created"
+    "message": "created",
+    "description": "The filing period is now open and available to accept HMDA data."
   },
   "start": 1483287071000,
   "end": 1514736671000
@@ -237,7 +242,8 @@ Example response:
   },
   "status": {
     "code": 3,
-    "message": "uploaded"
+    "message": "uploaded",
+    "description": "The data have finished uploading and are ready to be analyzed."
   }
 }
 ```
@@ -253,7 +259,8 @@ Example response, with HTTP code 400:
   },
   "status": {
     "code": -1,
-    "message": "Submission 4848484 not available for upload"
+    "message": "Submission 4848484 not available for upload",
+    "description": "An error occurred during the process of submitting the data. Please re-upload your file."
   }
 }
 ```
@@ -310,8 +317,9 @@ Example response, with HTTP code 201:
   "count": 20,
   "total": 130,
   "status": {
-      "code": 3,
-      "message": "uploaded"
+      "code": 5,
+      "message": "parsed with errors",
+      "description": "The data are not formatted according to certain formatting requirements specified in the Filing Instructions Guide. The filing process may not proceed until the data have been corrected and the file has been reuploaded."
   },
   "_links": {
     "first": "?page=1",
@@ -375,7 +383,8 @@ Example response:
   },
   "status": {
       "code": 8,
-      "message": "validated with errors"
+      "message": "validated with errors",
+      "description": "The data validation process is complete, but there are edits that need to be addressed. The filing process may not proceed until the file has been corrected and reuploaded."
   }
 }
 ```
@@ -467,8 +476,9 @@ Example response:
     }
   ],
   "status": {
-    "code": 3,
-    "message": "uploaded"
+    "code": 8,
+    "message": "validated with errors",
+    "description": "The data validation process is complete, but there are edits that need to be addressed. The filing process may not proceed until the file has been corrected and reuploaded."
   }
 }
 ```
@@ -493,7 +503,8 @@ Example response:
   "verified": true,
   "status": {
     "code": 8,
-    "message": "validated with errors"
+    "message": "validated with errors",
+    "description": "The data validation process is complete, but there are edits that need to be addressed. The filing process may not proceed until the file has been corrected and reuploaded."
   }
 }
 ```
@@ -596,8 +607,9 @@ Example response:
   "timestamp": 1476809530772,
   "receipt": "asd0f987134asdlfasdflk",
   "status": {
-      "code": 11,
-      "message": "signed"
+      "code": 10,
+      "message": "signed",
+      "description": "Your financial institution has certified that the data is correct. This completes the HMDA filing process for this year."
     }
 }
 ```
@@ -617,8 +629,9 @@ Example response:
   "timestamp": 1476809530772,
   "receipt": "asd0f987134asdlfasdflk",
   "status": {
-    "code": 12,
-    "message": "signed"
+    "code": 10,
+    "message": "signed",
+    "description": "Your financial institution has certified that the data is correct. This completes the HMDA filing process for this year."
   }
 }
 ```
