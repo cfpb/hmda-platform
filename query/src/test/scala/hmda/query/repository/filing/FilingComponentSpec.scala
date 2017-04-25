@@ -37,7 +37,6 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   override def afterAll(): Unit = {
     super.afterAll()
     dropAllObjects()
-    //repository.config.db.close()
     system.terminate()
   }
 

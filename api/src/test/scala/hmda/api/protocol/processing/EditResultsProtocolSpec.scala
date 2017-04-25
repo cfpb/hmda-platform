@@ -32,7 +32,8 @@ class EditResultsProtocolSpec extends PropSpec with PropertyChecks with MustMatc
       ("verified", JsBoolean(true)),
       ("status", JsObject(
         ("code", JsNumber(8)),
-        ("message", JsString("validated with errors"))
+        ("message", JsString("validated with errors")),
+        ("description", JsString("The data validation process is complete, but there are edits that need to be addressed. The filing process may not proceed until the file has been corrected and reuploaded."))
       ))
     )
   }
