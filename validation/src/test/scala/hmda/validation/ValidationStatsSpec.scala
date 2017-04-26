@@ -14,9 +14,9 @@ class ValidationStatsSpec extends ActorSpec {
 
   "Submission Validation Stats" must {
     "Add submission stats" in {
-      val s1 = SubmissionStats(SubmissionId("12345", "2017", 1), 100)
-      val s2 = SubmissionStats(SubmissionId("12345", "2017", 2), 125)
-      val s3 = SubmissionStats(SubmissionId("12345", "2016", 1), 100)
+      val s1 = SubmissionStats(SubmissionId("12345", "2017", 1), 100, "a")
+      val s2 = SubmissionStats(SubmissionId("12345", "2017", 2), 125, "b")
+      val s3 = SubmissionStats(SubmissionId("12345", "2016", 1), 100, "c")
       probe.send(submissionValidationStats, AddSubmissionStats(s1))
       probe.send(submissionValidationStats, AddSubmissionStats(s2))
       probe.send(submissionValidationStats, AddSubmissionStats(s3))
@@ -28,6 +28,12 @@ class ValidationStatsSpec extends ActorSpec {
       probe.expectMsg(100)
       probe.send(submissionValidationStats, FindTotalLars("12345", "2017"))
       probe.expectMsg(125)
+    }
+    "Find tax ID for an institution in a certain period" in {
+      probe.send(submissionValidationStats, FindTaxId("12345", "2017"))
+      probe.expectMsg("b")
+      probe.send(submissionValidationStats, FindTaxId("12345", "2016"))
+      probe.expectMsg("c")
     }
   }
 

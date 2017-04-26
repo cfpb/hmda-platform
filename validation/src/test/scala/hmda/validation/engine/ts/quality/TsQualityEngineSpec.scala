@@ -2,6 +2,8 @@ package hmda.validation.engine.ts.quality
 
 import java.io.File
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.validation.context.ValidationContext
 import org.scalatest.{ MustMatchers, PropSpec }
@@ -16,6 +18,8 @@ class TsQualityEngineSpec
     with MustMatchers
     with TsQualityEngine {
 
+  implicit val system = ActorSystem("ts-quality-test")
+  implicit val materializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   private val ctx = ValidationContext(None, None)
 
@@ -24,7 +28,7 @@ class TsQualityEngineSpec
     val ts = line.map(l => TsCsvParser(l))
 
     ts.foreach { ts =>
-      checkQuality(ts.right.get, ctx).isSuccess mustBe true
+      checkQuality(ts.right.get, ctx).map(validation => validation.isSuccess mustBe true)
     }
   }
 }

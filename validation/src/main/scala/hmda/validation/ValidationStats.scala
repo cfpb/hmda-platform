@@ -23,15 +23,13 @@ object ValidationStats {
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
     def updated(event: Event): ValidationStatsState = event match {
       case SubmissionStatsAdded(s) =>
-        val matchingSubs = stats.filter(stat =>
-          stat.id.institutionId == s.id.institutionId
-            && stat.id.period == s.id.period).sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
+        val matchingSubs = stats.filter(stat => stat.id == s.id)
         if (matchingSubs.isEmpty) {
           ValidationStatsState(stats :+ s)
         } else {
-          val firstSub = matchingSubs.head
-          val newSub = firstSub.copy(id = s.id, totalLars = firstSub.totalLars + s.totalLars, taxId = firstSub.taxId + s.taxId)
-          ValidationStatsState(stats.filterNot(s => s == firstSub) :+ newSub)
+          val oldSub = matchingSubs.head
+          val newSub = oldSub.copy(id = s.id, totalLars = oldSub.totalLars + s.totalLars, taxId = oldSub.taxId + s.taxId)
+          ValidationStatsState(stats.filterNot(s => s == oldSub) :+ newSub)
         }
     }
   }
