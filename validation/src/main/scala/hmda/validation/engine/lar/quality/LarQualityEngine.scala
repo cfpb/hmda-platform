@@ -9,10 +9,6 @@ import hmda.validation.rules.lar.quality._
 
 trait LarQualityEngine extends LarCommonEngine with ValidationApi {
 
-  private def q022(lar: LoanApplicationRegister): LarValidation = {
-    convertResult(lar, Q022(lar, 2017), "Q022", lar.loan.id, Quality, false)
-  }
-
   def checkQuality(lar: LoanApplicationRegister, ctx: ValidationContext): LarValidation = {
     val checks = List(
       Q001,
@@ -22,6 +18,7 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q005,
       Q013,
       Q014,
+      Q022.inContext(ctx),
       Q024,
       Q025,
       Q027,
@@ -48,8 +45,6 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q068
     ).map(check(_, lar, lar.loan.id, Quality, false))
 
-    val allChecks = checks :+ q022(lar)
-
-    validateAll(allChecks, lar)
+    validateAll(checks, lar)
   }
 }
