@@ -15,6 +15,7 @@ import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.HmdaQuerySupervisor
 import hmda.query.view.institutions.InstitutionView
+import hmda.validation.ValidationStats
 import org.iq80.leveldb.util.FileUtils
 import org.scalatest._
 
@@ -24,6 +25,8 @@ trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with Reque
   val configuration: Config = ConfigFactory.load()
 
   val supervisor = system.actorSelection("/user/supervisor")
+
+  val validationStats = system.actorOf(ValidationStats.props(), "validation-stats")
 
   val duration = 10.seconds
   override val log: LoggingAdapter = NoLogging

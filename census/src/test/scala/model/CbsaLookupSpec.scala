@@ -17,6 +17,12 @@ class CbsaLookupSpec extends WordSpec with MustMatchers {
       emptyOne mustBe Cbsa()
       emptyTwo mustBe Cbsa()
     }
+
+    "match a cbsa with its name" in {
+      CbsaLookup.nameFor("46860") mustBe "Vernal, UT"
+      CbsaLookup.nameFor("17140") mustBe "Cincinnati, OH-KY-IN"
+      CbsaLookup.nameFor("wrongId") mustBe "NA"
+    }
   }
 
 }

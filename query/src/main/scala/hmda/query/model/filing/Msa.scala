@@ -16,7 +16,24 @@ case class Msa(
   homePurchase: Int,
   homeImprovement: Int,
   refinance: Int
-)
+) {
+  def addName: MsaWithName = MsaWithName(
+    this.id,
+    CbsaLookup.nameFor(this.id),
+    this.totalLars,
+    this.totalAmount,
+    this.conv,
+    this.FHA,
+    this.VA,
+    this.FSA,
+    this.oneToFourFamily,
+    this.MFD,
+    this.multiFamily,
+    this.homePurchase,
+    this.homeImprovement,
+    this.refinance
+  )
+}
 
 case class MsaWithName(
   id: String,
@@ -69,36 +86,8 @@ case class MsaSummary(
 
 case object MsaSummary {
   def empty: MsaSummary = MsaSummary(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-}
 
-case class Irs(msas: List[MsaWithName], totals: MsaSummary)
-
-case object Irs {
-  def createIrs(msas: List[Msa]): Irs = {
-    val codeMap = CbsaLookup.codeMap
-    val msaSeqWithName = msas.map(m => addMsaName(m, codeMap.get(m.id)))
-
-    val summary = msas.foldLeft(MsaSummary.empty) { (summary, msa) => summary + msa }
-
-    Irs(msaSeqWithName, summary)
-  }
-
-  private def addMsaName(msa: Msa, name: Option[String]): MsaWithName = {
-    MsaWithName(
-      msa.id,
-      name.getOrElse("NA"),
-      msa.totalLars,
-      msa.totalAmount,
-      msa.conv,
-      msa.FHA,
-      msa.VA,
-      msa.FSA,
-      msa.oneToFourFamily,
-      msa.MFD,
-      msa.multiFamily,
-      msa.homePurchase,
-      msa.homeImprovement,
-      msa.refinance
-    )
+  def fromMsaCollection(msas: Seq[Msa]): MsaSummary = {
+    msas.foldLeft(MsaSummary.empty) { (summary, msa) => summary + msa }
   }
 }
