@@ -53,7 +53,6 @@ class ValidationStats extends HmdaPersistentActor {
       persist(SubmissionStatsAdded(stats)) { e =>
         log.debug(s"Persisted: $stats")
         updateState(e)
-        println(s"\nNEW STATE IS ${state.stats}")
       }
     case FindTotalLars(id, period) =>
       val submissionStats = state.stats
