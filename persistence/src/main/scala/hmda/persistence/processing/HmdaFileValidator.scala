@@ -9,7 +9,10 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
+import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindHmdaFiling
+import hmda.persistence.institutions.InstitutionPersistence
+import hmda.persistence.institutions.InstitutionPersistence.GetInstitution
 import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
@@ -22,6 +25,10 @@ import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.validation.SubmissionLarStats
+import hmda.validation.SubmissionLarStats.CountLarsInSubmission
+
 import scala.concurrent.duration._
 import scala.util.Try
 
@@ -92,6 +99,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   import HmdaFileValidator._
 
+  var institution: Option[Institution] = Some(Institution.empty.copy(id = submissionId.institutionId))
+
   val config = ConfigFactory.load()
   val duration = config.getInt("hmda.actor-lookup-timeout")
 
@@ -99,10 +108,25 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   val parserPersistenceId = s"${HmdaFileParser.name}-$submissionId"
 
+  def ctx: ValidationContext = ValidationContext(institution, Try(Some(submissionId.period.toInt)).getOrElse(None))
+
   var state = HmdaFileValidationState()
 
   val supervisor = system.actorSelection("/user/supervisor")
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
+
+  val submissionLarStats = context.actorOf(SubmissionLarStats.props(submissionId))
+
+  override def preStart(): Unit = {
+    super.preStart()
+    val fInstitutions = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+    for {
+      a <- fInstitutions
+      i <- (a ? GetInstitution(submissionId.institutionId)).mapTo[Option[Institution]]
+    } yield {
+      institution = i
+    }
+  }
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -113,7 +137,6 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
   override def receiveCommand: Receive = {
 
     case BeginValidation(replyTo) =>
-      val ctx = ValidationContext(None, Try(Some(submissionId.period.toInt)).getOrElse(None))
       val validationStarted = ValidationStarted(submissionId)
       sender() ! validationStarted
       events(parserPersistenceId)
@@ -153,6 +176,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       persist(validated) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
+        submissionLarStats ! LarValidated(lar, submissionId)
         for {
           f <- fHmdaFiling
         } yield {
@@ -162,7 +186,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ValidateMacro(larSource, replyTo) =>
       log.debug("Quality Validation completed")
-      val fMacro = checkMacro(larSource)
+      submissionLarStats ! CountLarsInSubmission
+      val fMacro = checkMacro(larSource, ctx)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
         .map {

@@ -12,7 +12,8 @@ trait SubmissionProtocol extends ValidationResultProtocol {
     override def write(status: SubmissionStatus): JsValue = {
       JsObject(
         "code" -> JsNumber(status.code),
-        "message" -> JsString(status.message)
+        "message" -> JsString(status.message),
+        "description" -> JsString(status.description)
       )
     }
 

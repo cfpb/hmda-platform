@@ -14,6 +14,7 @@ import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, Persist
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
+import hmda.validation.ValidationStats._
 
 class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
@@ -25,6 +26,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   val larValidator = system.actorSelection(createSingleLarValidator(system).path)
 
   val hmdaFileParser = createHmdaFileParser(system, submissionId2)
+
+  val validationStats = createValidationStats(system)
 
   var hmdaFileValidator: ActorRef = _
 
@@ -99,13 +102,19 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
         lars,
-        Nil,
+        List(
+          SyntacticalValidationError("38800009923", "S025", true)
+        ),
         Nil,
         Nil,
         List(
           SyntacticalValidationError("8299422144", "S020", false),
+          SyntacticalValidationError("8299422144", "S025", false),
+          SyntacticalValidationError("9471480396", "S025", false),
           SyntacticalValidationError("2185751599", "S010", false),
-          SyntacticalValidationError("2185751599", "S020", false)
+          SyntacticalValidationError("2185751599", "S020", false),
+          SyntacticalValidationError("2185751599", "S025", false),
+          SyntacticalValidationError("4977566612", "S025", false)
         ),
         List(
           ValidityValidationError("4977566612", "V550", false),
