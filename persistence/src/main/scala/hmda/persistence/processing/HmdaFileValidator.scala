@@ -178,8 +178,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map {
           case Right(_) => self ! ts
           case Left(errors) =>
+            self ! TsValidationErrors(errors.list.toList)
             self ! ts
-            TsValidationErrors(errors.list.toList)
         }
 
     case ts: TransmittalSheet =>
