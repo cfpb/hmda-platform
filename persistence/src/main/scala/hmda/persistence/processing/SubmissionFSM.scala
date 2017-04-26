@@ -189,6 +189,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Parsed
       updateStatus(status)
       goto(Parsed) applying SubmissionParsed(Submission(submissionId, status))
+
     case Event(CompleteParsingWithErrors, _) =>
       val status = hmda.model.fi.ParsedWithErrors
       updateStatus(status)
@@ -212,6 +213,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Validated
       updateStatus(status)
       goto(Validated) applying SubmissionValidated(Submission(submissionId, status))
+
     case Event(CompleteValidationWithErrors, _) =>
       val status = hmda.model.fi.ValidatedWithErrors
       updateStatus(status)
@@ -219,6 +221,11 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Validated) {
+    case Event(CompleteValidationWithErrors, _) =>
+      val status = hmda.model.fi.ValidatedWithErrors
+      updateStatus(status)
+      goto(ValidatedWithErrors) applying SubmissionValidatedWithErrors(Submission(submissionId, status))
+
     case Event(Sign, _) =>
       val status = hmda.model.fi.Signed
       updateStatus(status)

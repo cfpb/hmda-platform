@@ -234,8 +234,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       self ! CompleteValidation(replyTo)
 
     case CompleteValidation(replyTo) =>
-      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.qualityVerified && state.macroVerified
-        && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
+      if (state.syntacticalErrors.isEmpty && state.validityErrors.isEmpty && state.qualityVerified && state.macroVerified) {
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(submissionId)
       } else {
