@@ -37,24 +37,27 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
   val repository = new LarRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
+  private def dropAllObjects: Future[Int] = {
+    val db = repository.config.db
+    val dropAll = sqlu"""DROP ALL OBJECTS"""
+    db.run(dropAll)
+  }
+
   override def beforeAll(): Unit = {
     super.beforeAll()
-    dropAllObjects()
-    Await.result(repository.createSchema(), duration)
-    Await.result(modifiedLarRepository.createSchema(), duration)
+    val setup = for {
+      _ <- dropAllObjects
+      _ <- repository.createSchema()
+      c <- modifiedLarRepository.createSchema()
+    } yield c
+    Await.result(setup, duration)
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
-    dropAllObjects()
-    repository.config.db.close()
-    system.terminate()
-  }
-
-  private def dropAllObjects() = {
-    val db = repository.config.db
-    val dropAll = sqlu"""DROP ALL OBJECTS"""
-    Await.result(db.run(dropAll), duration)
+    dropAllObjects.onComplete {
+      case _ => system.terminate()
+    }
   }
 
   "Upload Paths" must {

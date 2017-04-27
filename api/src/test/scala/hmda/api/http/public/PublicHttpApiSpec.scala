@@ -32,27 +32,25 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    dropAllObjects()
-    Await.result(repository.createSchema(), duration)
-    Await.result(modifiedLarRepository.createSchema(), duration)
-    loadData()
+    val setup = for {
+      a <- dropAllObjects
+      b <- repository.createSchema()
+      c <- modifiedLarRepository.createSchema()
+      d <- repository.insertOrUpdate(l1)
+      e <- repository.insertOrUpdate(l2)
+    } yield (d, e)
+    Await.result(setup, duration)
   }
 
   override def afterAll(): Unit = {
     super.afterAll()
-    dropAllObjects()
+    dropAllObjects
   }
 
-  private def dropAllObjects() = {
+  private def dropAllObjects: Future[Int] = {
     val db = repository.config.db
     val dropAll = sqlu"""DROP ALL OBJECTS"""
-    Await.result(db.run(dropAll), duration)
-  }
-
-  private def loadData(): Unit = {
-    Await.result(repository.insertOrUpdate(l1), duration)
-    Await.result(repository.insertOrUpdate(l2), duration)
-
+    db.run(dropAll)
   }
 
   "Modified LAR Http API" must {
