@@ -11,12 +11,12 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.Result
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
-
-import scala.concurrent.{ ExecutionContext, Future }
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.IfInstitutionPresentInAggregate
 import hmda.validation.ValidationStats.FindTotalLars
+
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration._
 
 object Q011 {

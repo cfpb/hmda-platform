@@ -3,14 +3,15 @@ package hmda.api.http.public
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, StatusCodes }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
 import hmda.model.fi.lar.LarGenerators
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
-import akka.util.Timeout
-import hmda.query.DbConfiguration._
-import scala.concurrent.duration._
-import scala.concurrent.Await
 import hmda.query.repository.filing.LarConverter._
+import hmda.query.DbConfiguration._
+
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import scala.concurrent.duration._
+import scala.concurrent.{ Await, Future }
 
 class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     with ScalatestRouteTest with RequestHeaderUtils with PublicHttpApi with LarGenerators {

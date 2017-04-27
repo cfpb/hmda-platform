@@ -4,17 +4,16 @@ import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
+import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiAsyncSpec
+import hmda.api.protocol.processing.SubmissionProtocol
 import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
-import akka.pattern.ask
-import hmda.api.protocol.processing.SubmissionProtocol
 import hmda.query.DbConfiguration._
 import hmda.query.model.filing.ModifiedLoanApplicationRegister
-
-import scala.concurrent.Await
+import scala.concurrent.{ Await, Future }
 
 class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtocol with UploadPaths {
   import config.profile.api._

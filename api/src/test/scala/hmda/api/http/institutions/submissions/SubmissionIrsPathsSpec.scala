@@ -2,15 +2,17 @@ package hmda.api.http.institutions.submissions
 
 import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import hmda.api.http.{ InstitutionHttpApiAsyncSpec, InstitutionHttpApiSpec }
+import hmda.api.http.InstitutionHttpApiAsyncSpec
+import hmda.api.model.IrsResponse
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration._
 import hmda.query.repository.filing.{ FilingComponent, LarConverter }
 
-import scala.concurrent.Await
+import scala.concurrent.{ Await, Future }
+import scala.util.{ Failure, Success }
 
 class SubmissionIrsPathsSpec
-    extends InstitutionHttpApiSpec
+    extends InstitutionHttpApiAsyncSpec
     with FilingComponent
     with LarGenerators {
 
