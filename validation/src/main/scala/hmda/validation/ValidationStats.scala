@@ -8,10 +8,11 @@ import hmda.persistence.model.HmdaPersistentActor
 object ValidationStats {
 
   def name = "ValidationStats"
-  case class SubmissionStats(id: SubmissionId, totalLars: Int, taxId: String)
+  case class SubmissionStats(id: SubmissionId = SubmissionId(), totalSubmittedLars: Int = 0, totalVerifiedLars: Int = 0, taxId: String = "")
   case class AddSubmissionStats(stats: SubmissionStats) extends Command
   case class SubmissionStatsAdded(stats: SubmissionStats) extends Event
-  case class FindTotalLars(institutionId: String, period: String) extends Command
+  case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
+  case class FindTotalVerifiedLars(institutionId: String, period: String) extends Command
   case class FindTaxId(institutionId: String, period: String) extends Command
 
   def props(): Props = Props(new ValidationStats)
@@ -28,7 +29,12 @@ object ValidationStats {
           ValidationStatsState(stats :+ s)
         } else {
           val oldSub = matchingSubs.head
-          val newSub = oldSub.copy(id = s.id, totalLars = oldSub.totalLars + s.totalLars, taxId = oldSub.taxId + s.taxId)
+          val newSub = oldSub.copy(
+            id = s.id,
+            totalSubmittedLars = oldSub.totalSubmittedLars + s.totalSubmittedLars,
+            totalVerifiedLars = oldSub.totalVerifiedLars + s.totalVerifiedLars,
+            taxId = oldSub.taxId + s.taxId
+          )
           ValidationStatsState(stats.filterNot(s => s == oldSub) :+ newSub)
         }
     }
@@ -52,28 +58,24 @@ class ValidationStats extends HmdaPersistentActor {
         log.debug(s"Persisted: $stats")
         updateState(e)
       }
-    case FindTotalLars(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.totalLars
-      } else {
-        sender() ! 0
-      }
+
+    case FindTotalSubmittedLars(id, period) =>
+      sender ! getSubmissionStat(id, period).totalSubmittedLars
+
+    case FindTotalVerifiedLars(id, period) =>
+      sender ! getSubmissionStat(id, period).totalVerifiedLars
 
     case FindTaxId(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.taxId
-      } else {
-        sender() ! ""
-      }
+      sender ! getSubmissionStat(id, period).taxId
 
     case GetState =>
       sender() ! state
+  }
+
+  private def getSubmissionStat(id: String, period: String): SubmissionStats = {
+    val filtered = state.stats.filter(s => s.id.institutionId == id && s.id.period == period)
+    val sorted = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
+    sorted.headOption.getOrElse(SubmissionStats())
   }
 
 }

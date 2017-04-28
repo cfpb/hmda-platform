@@ -11,6 +11,7 @@ import hmda.validation.SubmissionLarStats._
 class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
 
   val lars10 = larListGen.sample.getOrElse(Nil)
+  val lars10String = lars10.map(x => x.toCSV)
 
   val submissionId = SubmissionId("12345", "2017", 1)
 
@@ -19,13 +20,22 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
   val probe = TestProbe()
 
   "Submission Lar Stats" must {
-    "Aggregate total lar count for a submission" in {
+    "Aggregate total submitted lar count for a submission" in {
+      for (lar <- lars10String) {
+        probe.send(submissionLarStats, lar)
+      }
+      probe.send(submissionLarStats, CountSubmittedLarsInSubmission)
+      probe.send(submissionLarStats, GetState)
+      probe.expectMsg(SubmissionLarStatsState(10, 0))
+    }
+
+    "Aggregate total verified lar count for a submission" in {
       for (lar <- lars10) {
         probe.send(submissionLarStats, LarValidated(lar, submissionId))
       }
-      probe.send(submissionLarStats, CountLarsInSubmission)
+      probe.send(submissionLarStats, CountVerifiedLarsInSubmission)
       probe.send(submissionLarStats, GetState)
-      probe.expectMsg(SubmissionLarStatsState(10))
+      probe.expectMsg(SubmissionLarStatsState(10, 10))
     }
   }
 }

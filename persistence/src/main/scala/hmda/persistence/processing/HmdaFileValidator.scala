@@ -27,7 +27,7 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.validation.SubmissionLarStats
-import hmda.validation.SubmissionLarStats.CountLarsInSubmission
+import hmda.validation.SubmissionLarStats.CountVerifiedLarsInSubmission
 import hmda.validation.ValidationStats.{ AddSubmissionStats, SubmissionStats }
 
 import scala.concurrent.duration._
@@ -149,10 +149,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(ts => (ts, validateTs(ts, ctx).toEither))
         .map {
           case (_, Right(ts)) =>
-            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, ts.taxId))
+            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, 0, ts.taxId))
             ValidateTsQuality(ts)
           case (ts, Left(errors)) =>
-            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, ts.taxId))
+            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, 0, ts.taxId))
             self ! ValidateTsQuality(ts)
             TsValidationErrors(errors.list.toList)
         }
@@ -203,7 +203,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ValidateMacro(larSource, replyTo) =>
       log.debug("Quality Validation completed")
-      submissionLarStats ! CountLarsInSubmission
+      submissionLarStats ! CountVerifiedLarsInSubmission
       val fMacro = checkMacro(larSource, ctx)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)

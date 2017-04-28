@@ -16,6 +16,8 @@ import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.HmdaRawFile.LineAdded
 import hmda.persistence.processing.ProcessingMessages._
+import hmda.validation.SubmissionLarStats
+import hmda.validation.SubmissionLarStats.CountSubmittedLarsInSubmission
 
 import scala.concurrent.duration._
 
@@ -71,6 +73,8 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
   val config = ConfigFactory.load()
   val flowParallelism = config.getInt("hmda.actor-flow-parallelism")
 
+  val submissionLarStats = context.actorOf(SubmissionLarStats.props(submissionId))
+
   override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId, replyTo: ActorRef) =>
@@ -95,7 +99,11 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         .map { case LineAdded(_, data) => data }
         .drop(1)
         .zip(Source.fromIterator(() => Iterator.from(2)))
-        .map { case (lar, index) => LarCsvParser(lar, index) }
+        .map {
+          case (lar, index) =>
+            submissionLarStats ! lar
+            LarCsvParser(lar, index)
+        }
         .map {
           case Left(errors) =>
             encounteredParsingErrors = true
@@ -134,6 +142,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
       }
 
     case FinishParsing(replyTo) =>
+      submissionLarStats ! CountSubmittedLarsInSubmission
       if (encounteredParsingErrors)
         replyTo ! ParsingCompletedWithErrors(submissionId)
       else

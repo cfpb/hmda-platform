@@ -17,7 +17,7 @@ import scala.concurrent.duration._
 import hmda.validation.ValidationStats._
 import hmda.validation.rules.lar.`macro`.Q011
 
-class Q012Spec extends AsyncWordSpec with MustMatchers with TsGenerators with BeforeAndAfterAll {
+class Q130Spec extends AsyncWordSpec with MustMatchers with TsGenerators with BeforeAndAfterAll {
   val configuration = ConfigFactory.load()
 
   implicit val system = ActorSystem()
@@ -33,58 +33,50 @@ class Q012Spec extends AsyncWordSpec with MustMatchers with TsGenerators with Be
     system.terminate()
   }
 
-  "Q012" must {
+  "Q130" must {
     val currentYear = 2017
-    val lastYear = currentYear - 1
+    val count = 100
 
-    "be named Q012 when institution and year are present" in {
+    "be named Q130 when institution and year are present" in {
       val ctx = ValidationContext(Some(Institution.empty), Some(currentYear))
-      Q012.inContext(ctx).name mustBe "Q012"
+      Q130.inContext(ctx).name mustBe "Q130"
     }
 
     "be named empty when institution is not present" in {
       val ctx = ValidationContext(None, Some(currentYear))
-      Q012.inContext(ctx).name mustBe "empty"
+      Q130.inContext(ctx).name mustBe "empty"
     }
 
     "be named empty when year is not present" in {
       val ctx = ValidationContext(Some(Institution.empty), None)
-      Q012.inContext(ctx).name mustBe "empty"
+      Q130.inContext(ctx).name mustBe "empty"
     }
 
-    "succeed when previous and current tax ID are equal" in {
+    "succeed when total submitted lars matches transmittal sheet" in {
       val instId = "instId1"
       val ctx = generateValidationContext(currentYear, instId)
-      val taxId = Gen.alphaStr.sample.getOrElse("")
-      sendValidationStats(validationStats, instId, 1, lastYear, 0, taxId)
-      Q012.inContext(ctx)(tsGenWithTaxId(taxId)).map(r => r mustBe a[Success])
+      sendValidationStats(validationStats, instId, 1, currentYear, count, 0, "")
+      Q130.inContext(ctx)(tsGenWithLarCount(count)).map(r => r mustBe a[Success])
     }
 
-    "succeed when previous year is empty" in {
+    "fail when total submitted lars does not match transmittal sheet" in {
       val instId = "instId2"
       val ctx = generateValidationContext(currentYear, instId)
-      val taxId = Gen.alphaStr.sample.getOrElse("")
-      Q012.inContext(ctx)(tsGenWithTaxId(taxId)).map(r => r mustBe a[Success])
-    }
-    "fail when previous tax ID is different from current tax ID" in {
-      val instId = "instId3"
-      val ctx = generateValidationContext(currentYear, instId)
-      val taxId = Gen.alphaStr.sample.getOrElse("")
-      sendValidationStats(validationStats, instId, 1, lastYear, 0, taxId)
-      Q012.inContext(ctx)(tsGenWithTaxId(taxId + "will fail")).map(r => r mustBe a[Failure])
+      sendValidationStats(validationStats, instId, 1, currentYear, count, 0, "")
+      Q130.inContext(ctx)(tsGenWithLarCount(count + 1)).map(r => r mustBe a[Failure])
     }
 
   }
 
-  private def tsGenWithTaxId(taxId: String): TransmittalSheet = {
-    tsGen.sample.getOrElse(TransmittalSheet()).copy(taxId = taxId)
+  private def tsGenWithLarCount(count: Int): TransmittalSheet = {
+    tsGen.sample.getOrElse(TransmittalSheet()).copy(totalLines = count)
   }
 
   private def generateValidationContext(currentYear: Int, institutionId: String): ValidationContext = {
     ValidationContext(Some(Institution.empty.copy(id = institutionId)), Some(currentYear))
   }
 
-  private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, lastYear: Int, lastYearCount: Int, taxId: String): Unit = {
-    validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(institutionId, lastYear.toString, 1), 0, lastYearCount, taxId))
+  private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, year: Int, submittedCount: Int, validatedCount: Int, taxId: String): Unit = {
+    validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(institutionId, year.toString, 1), submittedCount, validatedCount, taxId))
   }
 }

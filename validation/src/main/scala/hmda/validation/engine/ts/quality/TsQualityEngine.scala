@@ -20,7 +20,7 @@ trait TsQualityEngine extends TsCommonEngine with ValidationApi {
       Q033.inContext(ctx)
     ).map(x => Future(check(x, ts, tsId, Quality, ts = true)))
 
-    val allChecks = Future.sequence(checks :+ q012(ts, ctx))
+    val allChecks = Future.sequence(checks :+ q012(ts, ctx) :+ q130(ts, ctx))
 
     allChecks.map(c => validateAll(c, ts))
   }
@@ -30,5 +30,12 @@ trait TsQualityEngine extends TsCommonEngine with ValidationApi {
     for {
       n <- fEdit
     } yield convertResult(ts, n, "Q012", "", Quality, ts = true)
+  }
+
+  private def q130(ts: TransmittalSheet, ctx: ValidationContext)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext) = {
+    val fEdit = Q130.inContext(ctx)(ts)
+    for {
+      n <- fEdit
+    } yield convertResult(ts, n, "Q130", "", Quality, ts = true)
   }
 }

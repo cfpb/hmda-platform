@@ -16,7 +16,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.IfInstitutionPresentInAggregate
-import hmda.validation.ValidationStats.FindTotalLars
+import hmda.validation.ValidationStats.FindTotalVerifiedLars
 import scala.concurrent.duration._
 
 object Q011 {
@@ -43,7 +43,7 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
 
     val validationStats = system.actorSelection("/user/validation-stats")
 
-    val lastYearCount = (validationStats ? FindTotalLars(institution.id, lastYear.toString)).mapTo[Int]
+    val lastYearCount = (validationStats ? FindTotalVerifiedLars(institution.id, lastYear.toString)).mapTo[Int]
 
     for {
       c <- currentLarCount
