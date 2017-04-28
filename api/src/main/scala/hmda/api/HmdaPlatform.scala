@@ -60,7 +60,7 @@ object HmdaPlatform {
     institutionRepository.dropSchema()
   }
 
-  private def startActors(system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef)(implicit ec: ExecutionContext): Unit = {
+  private def startActors[_: EC](system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef): Unit = {
     lazy val actorTimeout = configuration.getInt("hmda.actor.timeout")
     implicit val timeout = Timeout(actorTimeout.seconds)
 

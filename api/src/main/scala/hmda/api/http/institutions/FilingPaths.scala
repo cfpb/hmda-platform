@@ -9,6 +9,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import hmda.api.EC
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.model.{ ErrorResponse, FilingDetail }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
@@ -29,7 +30,7 @@ trait FilingPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>
-  def filingByPeriodPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def filingByPeriodPath[_: EC](institutionId: String) =
     path("filings" / Segment) { period =>
       timedGet { uri =>
         val supervisor = system.actorSelection("/user/supervisor")
@@ -60,7 +61,7 @@ trait FilingPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
       }
     }
 
-  private def filingDetailsByPeriod(period: String, filingsActor: ActorRef, submissionActor: ActorRef)(implicit ec: ExecutionContext): Future[FilingDetail] = {
+  private def filingDetailsByPeriod[_: EC](period: String, filingsActor: ActorRef, submissionActor: ActorRef): Future[FilingDetail] = {
     val fFiling = (filingsActor ? GetFilingByPeriod(period)).mapTo[Filing]
     for {
       filing <- fFiling

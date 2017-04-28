@@ -1,7 +1,6 @@
 package hmda.validation.rules.lar.`macro`
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import hmda.validation._
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.PredicateCommon._
@@ -10,7 +9,7 @@ import hmda.validation.dsl.Result
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
 object Q073 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
@@ -20,7 +19,7 @@ object Q073 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def name = "Q073"
 
-  override def apply(lars: LoanApplicationRegisterSource)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[Result] = {
+  override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
     val applicableLoans = lars.filter(lar =>
       lar.loan.purpose == 1
         && Seq(1, 6).contains(lar.actionTakenType)

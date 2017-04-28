@@ -14,6 +14,7 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Framing, Sink }
 import akka.util.{ ByteString, Timeout }
+import hmda.api.EC
 import hmda.api.http.HmdaCustomDirectives
 import hmda.persistence.messages.CommonMessages._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
@@ -42,7 +43,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>
-  def uploadPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def uploadPath[_: EC](institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber) { (period, seqNr) =>
       timedPost { uri =>
         val submissionId = SubmissionId(institutionId, period, seqNr)

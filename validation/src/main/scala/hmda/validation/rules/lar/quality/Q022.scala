@@ -6,8 +6,6 @@ import hmda.validation.dsl.Result
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.{ EditCheck, IfYearPresentIn }
-
-import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.Try
 
 object Q022 {

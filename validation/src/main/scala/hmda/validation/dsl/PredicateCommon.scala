@@ -4,17 +4,19 @@ import scala.language.implicitConversions
 import scala.util.Try
 
 object PredicateCommon {
+
   implicit def equalTo[T](that: T): Predicate[T] = (_: T) == that
 
-  def greaterThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = ord.gt(_: T, that)
+  def greaterThan[T: Ordering](that: T): Predicate[T] = implicitly[Ordering[T]].gt(_: T, that)
 
-  def greaterThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = ord.gteq(_: T, that)
+  def greaterThanOrEqual[T: Ordering](that: T): Predicate[T] = implicitly[Ordering[T]].gteq(_: T, that)
 
-  def lessThan[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = ord.lt(_: T, that)
+  def lessThan[T: Ordering](that: T): Predicate[T] = implicitly[Ordering[T]].lt(_: T, that)
 
-  def lessThanOrEqual[T](that: T)(implicit ord: Ordering[T]): Predicate[T] = ord.lteq(_: T, that)
+  def lessThanOrEqual[T: Ordering](that: T): Predicate[T] = implicitly[Ordering[T]].lteq(_: T, that)
 
-  def between[T](lower: T, upper: T)(implicit ord: Ordering[T]): Predicate[T] = { x: T =>
+  def between[T: Ordering](lower: T, upper: T): Predicate[T] = { x: T =>
+    val ord = implicitly[Ordering[T]]
     ord.lteq(lower, x) && ord.lteq(x, upper)
   }
 
