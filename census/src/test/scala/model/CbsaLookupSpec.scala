@@ -23,6 +23,12 @@ class CbsaLookupSpec extends WordSpec with MustMatchers {
       CbsaLookup.nameFor("17140") mustBe "Cincinnati, OH-KY-IN"
       CbsaLookup.nameFor("wrongId") mustBe "NA"
     }
+
+    "match a MD code with its name" in {
+      CbsaLookup.nameFor("14454") mustBe "Boston, MA"
+      CbsaLookup.nameFor("15764") mustBe "Cambridge-Newton-Framingham, MA"
+      CbsaLookup.nameFor("40484") mustBe "Rockingham County-Strafford County, NH"
+    }
   }
 
 }
