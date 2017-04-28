@@ -1,7 +1,6 @@
 package hmda.validation.engine.lar.`macro`
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import hmda.validation._
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
@@ -11,11 +10,11 @@ import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.rules.lar.`macro`._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
 trait LarMacroEngine extends LarCommonEngine with ValidationApi {
 
-  def checkMacro(larSource: LoanApplicationRegisterSource, ctx: ValidationContext)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[LarSourceValidation] = {
+  def checkMacro[_: AS: MAT: EC](larSource: LoanApplicationRegisterSource, ctx: ValidationContext): Future[LarSourceValidation] = {
     Future.sequence(
       List(
         Q006,
@@ -52,12 +51,12 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
 
   }
 
-  private def checkAggregate(
+  private def checkAggregate[_: AS: MAT: EC](
     editCheck: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister],
     input: LoanApplicationRegisterSource,
     inputId: String,
     errorType: ValidationErrorType
-  )(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[LarSourceValidation] = {
+  ): Future[LarSourceValidation] = {
     val fResult = editCheck(input)
     for {
       result <- fResult

@@ -1,17 +1,17 @@
 package hmda.validation.rules
 
 import akka.NotUsed
-import akka.stream._
 import akka.stream.scaladsl._
 import scala.concurrent.Future
+import hmda.validation._
 
 trait SourceUtils {
 
-  def count[T](input: Source[T, NotUsed])(implicit materializer: ActorMaterializer): Future[Int] = {
+  def count[T: AS: MAT](input: Source[T, NotUsed]): Future[Int] = {
     input.runWith(sinkCount)
   }
 
-  def sum[T](input: Source[T, NotUsed], summation: T => Int)(implicit materializer: ActorMaterializer): Future[Int] = {
+  def sum[T: AS: MAT](input: Source[T, NotUsed], summation: T => Int): Future[Int] = {
     input.runWith(sinkSum(summation))
   }
 

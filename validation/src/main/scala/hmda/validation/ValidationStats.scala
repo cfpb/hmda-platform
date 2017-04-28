@@ -46,6 +46,10 @@ class ValidationStats extends HmdaPersistentActor {
 
   override def persistenceId: String = s"$name"
 
+  override def preStart(): Unit = {
+    log.info(s"Actor started at ${self.path}")
+  }
+
   var state = ValidationStatsState()
 
   override def updateState(event: Event): Unit = {
