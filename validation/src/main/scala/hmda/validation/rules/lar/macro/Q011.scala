@@ -10,13 +10,12 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.Result
 import hmda.validation.rules._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
-
-import scala.concurrent.Future
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.ValidationStats.FindTotalLars
 
 import scala.concurrent.duration._
+import scala.concurrent.Future
 
 object Q011 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
