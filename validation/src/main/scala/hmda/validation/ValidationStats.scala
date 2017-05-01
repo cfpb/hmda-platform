@@ -29,7 +29,7 @@ object ValidationStats {
         } else {
           val oldSub = matchingSubs.head
           val newSub = oldSub.copy(id = s.id, totalLars = oldSub.totalLars + s.totalLars, taxId = oldSub.taxId + s.taxId)
-          ValidationStatsState(stats.filterNot(s => s == oldSub) :+ newSub)
+          ValidationStatsState(stats.filterNot(sub => sub == oldSub) :+ newSub)
         }
     }
   }
