@@ -12,7 +12,7 @@ import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
-import hmda.persistence.processing.ProcessingMessages.{ Sign, _ }
+import hmda.persistence.processing.ProcessingMessages.{ CompleteValidationWithErrors, Sign, _ }
 import hmda.persistence.processing.SubmissionFSM.{ Signed, _ }
 
 import scala.concurrent.Future
@@ -189,6 +189,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Parsed
       updateStatus(status)
       goto(Parsed) applying SubmissionParsed(Submission(submissionId, status))
+
     case Event(CompleteParsingWithErrors, _) =>
       val status = hmda.model.fi.ParsedWithErrors
       updateStatus(status)
@@ -212,6 +213,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Validated
       updateStatus(status)
       goto(Validated) applying SubmissionValidated(Submission(submissionId, status))
+
     case Event(CompleteValidationWithErrors, _) =>
       val status = hmda.model.fi.ValidatedWithErrors
       updateStatus(status)
@@ -219,6 +221,11 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Validated) {
+    case Event(CompleteValidationWithErrors, _) =>
+      val status = hmda.model.fi.ValidatedWithErrors
+      updateStatus(status)
+      goto(ValidatedWithErrors) applying SubmissionValidatedWithErrors(Submission(submissionId, status))
+
     case Event(Sign, _) =>
       val status = hmda.model.fi.Signed
       updateStatus(status)
@@ -230,6 +237,15 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       val status = hmda.model.fi.Signed
       updateStatus(status)
       goto(Signed) applying SubmissionSigned(Submission(submissionId, status)) replying Some(status)
+
+    case Event(CompleteValidationWithErrors, data) =>
+      stay replying data
+
+    case Event(CompleteValidation(_), _) =>
+      val status = hmda.model.fi.Validated
+      updateStatus(status)
+      goto(Validated) applying SubmissionValidated(Submission(submissionId, status))
+
     case Event(GetState, data) =>
       stay replying data
   }

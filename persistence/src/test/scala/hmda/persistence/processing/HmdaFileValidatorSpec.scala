@@ -31,6 +31,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   var hmdaFileValidator: ActorRef = _
 
+  val submissionManager = system.actorOf(SubmissionManager.props(submissionId1))
+
   val probe = TestProbe()
 
   val lines = fiCSVEditErrors.split("\n")
@@ -132,6 +134,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     }
 
     "verify quality edits" in {
+
       // establish baseline
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
@@ -149,7 +152,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       ))
 
       // send VerifyQualityEdits message
-      probe.send(hmdaFileValidator, VerifyEdits(Quality, true))
+      probe.send(hmdaFileValidator, VerifyEdits(Quality, true, submissionManager))
       probe.expectMsg(EditsVerified(Quality, true))
 
       // expect updated validation state
@@ -187,7 +190,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       ))
 
       // send VerifyQualityEdits message
-      probe.send(hmdaFileValidator, VerifyEdits(Macro, true))
+      probe.send(hmdaFileValidator, VerifyEdits(Macro, true, submissionManager))
       probe.expectMsg(EditsVerified(Macro, true))
 
       // expect updated validation state
