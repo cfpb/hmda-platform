@@ -4,7 +4,7 @@ package hmda.model.fi.lar
 object LarFieldMapping {
   def mapping(lar: LoanApplicationRegister): Map[String, Any] = Map(
     "Record Identifier" -> lar.id,
-    "Respondent Id" -> lar.respondentId,
+    "Respondent-ID" -> lar.respondentId,
     "Agency Code" -> lar.agencyCode,
     "Loan Id" -> lar.loan.id,
     "Loan Application Date" -> lar.loan.applicationDate,
