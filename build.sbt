@@ -128,7 +128,10 @@ lazy val persistenceModel = (project in file("persistence-model"))
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
     },
-    libraryDependencies ++= akkaPersistenceDeps
+    libraryDependencies ++= akkaPersistenceDeps,
+    PB.targets in Compile := Seq(
+      scalapb.gen() -> (sourceManaged in Compile).value
+    )
   ).disablePlugins(ScoverageSbtPlugin)
   .dependsOn(modelJVM % "compile->compile;test->test")
 
