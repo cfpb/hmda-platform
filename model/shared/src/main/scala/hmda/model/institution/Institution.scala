@@ -31,7 +31,7 @@ case object Institution {
     cra = false,
     Set(),
     Set(),
-    Respondent(ExternalId("", UndeterminedExternalId), "", "", "", ""),
+    Respondent(),
     hmdaFilerFlag = false,
     Parent("", -1, "", "", ""),
     -1,
@@ -40,7 +40,13 @@ case object Institution {
   )
 }
 
-case class Respondent(externalId: ExternalId, name: String, state: String, city: String, fipsStateNumber: String)
+case class Respondent(
+  externalId: ExternalId = ExternalId("", UndeterminedExternalId),
+  name: String = "",
+  state: String = "",
+  city: String = "",
+  fipsStateNumber: String = ""
+)
 case class Parent(respondentId: String, idRssd: Int, name: String, city: String, state: String)
 case class TopHolder(idRssd: Int, name: String, city: String, state: String, country: String)
 
