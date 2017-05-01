@@ -38,8 +38,17 @@ object CbsaLookup extends CbsaResourceUtils {
     values.map(x => (x.cbsa, x.cbsaTitle)).toMap
   }
 
-  def nameFor(cbsaId: String): String = {
-    cbsaIdToNameMap.getOrElse(cbsaId, "NA")
+  private val mdIdToNameMap: Map[String, String] = {
+    values.map(c => (c.metroDiv, c.metroDivTitle)).toMap
+  }
+
+  // Returns CBSA Title if `id` is a CBSA Code, or
+  //   Metropolitan Division Title if `id` is a MD Code.
+  def nameFor(id: String): String = {
+    val cbsa = cbsaIdToNameMap.get(id)
+    val md = mdIdToNameMap.get(id)
+    val na = Some("NA")
+    Seq(cbsa, md, na).flatten.head
   }
 }
 
