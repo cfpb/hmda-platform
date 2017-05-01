@@ -28,10 +28,11 @@ import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.validation.SubmissionLarStats
 import hmda.validation.SubmissionLarStats.CountLarsInSubmission
-import hmda.validation.ValidationStats.{ AddSubmissionStats, SubmissionStats }
+import hmda.validation.ValidationStats.AddSubmissionTaxId
 
-import scala.concurrent.duration._
+import scala._
 import scala.util.Try
+import scala.concurrent.duration._
 
 object HmdaFileValidator {
 
@@ -149,10 +150,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(ts => (ts, validateTs(ts, ctx).toEither))
         .map {
           case (_, Right(ts)) =>
-            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, ts.taxId))
+            validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
             ValidateTsQuality(ts)
           case (ts, Left(errors)) =>
-            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, ts.taxId))
+            validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
             self ! ValidateTsQuality(ts)
             TsValidationErrors(errors.list.toList)
         }

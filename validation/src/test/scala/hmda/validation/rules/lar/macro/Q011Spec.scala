@@ -117,6 +117,6 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   }
 
   private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, lastYear: Int, lastYearCount: Int): Unit = {
-    validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(institutionId, lastYear.toString, 1), lastYearCount, ""))
+    validationStats ! AddSubmissionValidationTotal(lastYearCount, SubmissionId(institutionId, lastYear.toString, 1))
   }
 }

@@ -5,7 +5,7 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.ValidationStats.{ AddSubmissionStats, SubmissionStats }
+import hmda.validation.ValidationStats.AddSubmissionValidationTotal
 
 object SubmissionLarStats {
   def name = "SubmissionStats"
@@ -48,7 +48,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
         log.debug(s"Persisted: $totalLars")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")
-        validationStats ! AddSubmissionStats(SubmissionStats(submissionId, totalLars, ""))
+        validationStats ! AddSubmissionValidationTotal(totalLars, submissionId)
       }
 
     case GetState =>

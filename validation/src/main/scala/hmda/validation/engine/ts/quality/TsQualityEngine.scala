@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 trait TsQualityEngine extends TsCommonEngine with ValidationApi {
 
-  def checkQuality[as: AS, mat: MAT, ec: EC](ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
+  def checkQuality[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
     val tsId = ts.agencyCode + ts.respondent.id
     val checks = List(
       Q020,
@@ -24,7 +24,7 @@ trait TsQualityEngine extends TsCommonEngine with ValidationApi {
     allChecks.map(c => validateAll(c, ts))
   }
 
-  private def q012[as: AS, mat: MAT, ec: EC](ts: TransmittalSheet, ctx: ValidationContext) = {
+  private def q012[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext) = {
     val fEdit = Q012.inContext(ctx)(ts)
     for {
       n <- fEdit
