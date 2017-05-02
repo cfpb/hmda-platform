@@ -1,6 +1,6 @@
 package hmda.api.http.admin
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
@@ -16,12 +16,12 @@ import hmda.model.fi.Filing
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
-import hmda.persistence.institutions.{FilingPersistence, InstitutionPersistence}
-import hmda.persistence.institutions.InstitutionPersistence.{CreateInstitution, ModifyInstitution}
+import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
+import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, ModifyInstitution }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.ExecutionContext
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 trait InstitutionAdminHttpApi
     extends WriteInstitutionProtocol
@@ -48,7 +48,7 @@ trait InstitutionAdminHttpApi
               a <- fInstitutionsActor
               i <- (a ? CreateInstitution(institution)).mapTo[Option[Institution]]
               p <- fFilingPersistence
-              f <- p ! CreateFiling(Filing(institution.activityYear.toString, institution.id))
+              f <- p ? CreateFiling(Filing(institution.activityYear.toString, institution.id))
             } yield i
 
             onComplete(fCreated) {

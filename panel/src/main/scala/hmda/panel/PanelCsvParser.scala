@@ -3,12 +3,12 @@ package hmda.panel
 import java.io.File
 
 import akka.NotUsed
-import akka.actor.{ActorRef, ActorSystem}
-import akka.util.{ByteString, Timeout}
+import akka.actor.ActorSystem
+import akka.util.{ ByteString, Timeout }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{BroadcastHub, FileIO, Flow, Framing, Keep, Sink, Source}
+import akka.stream.scaladsl.{ FileIO, Flow, Framing, Sink }
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpEntity, _}
+import akka.http.scaladsl.model.{ HttpEntity, _ }
 import com.typesafe.config.ConfigFactory
 import hmda.api.protocol.admin.WriteInstitutionProtocol
 
@@ -29,7 +29,9 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
 
   val repository = new InstitutionRepository(hmda.query.DbConfiguration.config)
 
-  val host = hmda.api.HmdaAdminApi.props().
+  val config = ConfigFactory.parseFile(new File("api/src/main/resources/application.conf")).resolve()
+  val host = config.getString("hmda.http.adminHost")
+  val port = config.getInt("hmda.http.adminPort")
 
   def main(args: Array[String]): Unit = {
 
@@ -45,7 +47,7 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
 
     val source = FileIO.fromPath(new File(args(0)).toPath)
 
-    val connectionFlow = Http().outgoingConnection("", 0)
+    val connectionFlow = Http().outgoingConnection(host, port)
 
     source
       .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
@@ -69,7 +71,4 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
 
   private def byte2StringFlow: Flow[ByteString, String, NotUsed] =
     Flow[ByteString].map(bs => bs.utf8String)
-
-  }
-
 }
