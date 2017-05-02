@@ -86,11 +86,18 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
   ///// Verification /////
 
+  "Set up: get submission to ValidatedWithErrors state" in {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file) ~> institutionsRoutes ~> check {
+      Thread.sleep(5000) // wait for the submission to complete validation
+      status mustBe StatusCodes.Accepted
+    }
+  }
+
   "Verify Macro edits endpoint: Responds with correct json and updates validation state" in {
     val verification = EditsVerification(true)
-    val currentStatus = Created
+    val currentStatus = ValidatedWithErrors
 
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/macro", verification) ~> institutionsRoutes ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/macro", verification) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
 
       // test that it responds correctly
@@ -103,11 +110,11 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     }
   }
 
-  "Verify Quality edits endpoint: Responds with correct json and updates validation state" in {
+  "Verify Quality edits endpoint: Responds with correct json, updates validation state, updates submission state" in {
     val verification = EditsVerification(true)
-    val currentStatus = Created
+    val currentStatus = Validated
 
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/quality", verification) ~> institutionsRoutes ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/quality", verification) ~> institutionsRoutes ~> check {
       status mustBe StatusCodes.OK
 
       // test that it responds correctly
@@ -209,7 +216,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val tsValidationErrors = TsValidationErrors(Seq(s2.copy(ts = true)))
 
     for {
-      h <- fHmdaValidatorActor
+      h <- fHmdaValidatorActor(1)
     } yield {
       h ! larValidationErrors
       h ! tsValidationErrors
@@ -223,16 +230,22 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
   private def fValidationState: Future[HmdaFileValidationState] = {
     for {
-      s <- fHmdaValidatorActor
+      s <- fHmdaValidatorActor(2)
       xs <- (s ? GetState).mapTo[HmdaFileValidationState]
     } yield xs
   }
 
-  private def fHmdaValidatorActor: Future[ActorRef] = {
+  private def fHmdaValidatorActor(seqNr: Int): Future[ActorRef] = {
     val id = "0"
     val period = "2017"
-    val seqNr = 1
     val submissionId = SubmissionId(id, period, seqNr)
     (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
   }
+
+  val csv = "1|0|1|201502221111|2017|35-0704860|10|Passes Bank|555 Passes Court|Passes City|CA|92130|Passes Bank Parent|555 Passes Court Parent|Passes City|CA|92130|Passes Person|555-555-5555|555-555-5555|pperson@passes.com\n" +
+    "2|0|1|10164 |20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1\n" +
+    "2|0|1|10174 |20170224|1|1|2|1|60|3|1|20170402|45460|18|153|0503.00|2|2|5| | | | |5| | | | |1|2|210|0| | | |NA   |2|2\n" +
+    "2|0|1|10370 |20170228|1|1|3|1|73|3|3|20170326|45460|18|153|0505.00|2|2|5| | | | |5| | | | |1|2|89|0|4| | |NA   |2|1"
+
+  val file = multiPartFile(csv, "sample.txt")
 }
