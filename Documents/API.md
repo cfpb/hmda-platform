@@ -547,9 +547,9 @@ Macro, Q023,
 
 This endpoint is paginated. The response contains 3 fields of pagination metadata:
 
- - `total`: total number of parser errors for this file
- - `count`: number of errors returned on this page. Full page contains errors from 20 lines of the HMDA file.
- - `links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
+ - `total`: total number of MSAs for this file.
+ - `count`: number of MSAs returned on this page.
+ - `_links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
 
 
 Example response:
@@ -590,7 +590,7 @@ Example response:
       "refinance": 5
     }
   ],
-  "totals": {
+  "summary": {
     "homeImprovement": 0,
     "multiFamily": 0,
     "lars": 9,
