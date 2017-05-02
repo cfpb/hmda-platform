@@ -251,21 +251,20 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       self ! LarValidationErrors(e.errors)
       self ! CompleteValidation(replyTo)
 
-    case CompleteValidation(replyTo) =>
+    case CompleteValidation(replyTo, originalSender) =>
       if (state.syntacticalErrors.isEmpty && state.validityErrors.isEmpty && state.qualityVerified && state.macroVerified) {
         log.debug(s"Validation completed for $submissionId")
-        replyTo ! ValidationCompleted(submissionId)
+        replyTo ! ValidationCompleted(originalSender)
       } else {
         log.debug(s"Validation completed for $submissionId, errors found")
-        replyTo ! ValidationCompletedWithErrors(submissionId)
+        replyTo ! ValidationCompletedWithErrors(originalSender)
       }
 
     case VerifyEdits(editType, v, replyTo) =>
       if (editType == Quality || editType == Macro) {
         persist(EditsVerified(editType, v)) { e =>
           updateState(e)
-          self ! CompleteValidation(replyTo)
-          sender() ! EditsVerified(editType, v)
+          self ! CompleteValidation(replyTo, Some(sender()))
         }
       } else sender() ! None
 
