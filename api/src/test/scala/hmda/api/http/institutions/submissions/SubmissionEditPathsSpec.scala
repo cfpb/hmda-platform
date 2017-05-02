@@ -126,6 +126,16 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     }
   }
 
+  "Un-verify quality edits: updates submission state correctly back to `ValidatedWithErrors`" in {
+    val verification = EditsVerification(false)
+    val currentStatus = ValidatedWithErrors
+
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/quality", verification) ~> institutionsRoutes ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(false, currentStatus)
+    }
+  }
+
   ///// 405 (Method Not Allowed) Responses /////
 
   "Edit Type endpoint: return 405 when posting verification to syntactical endpoint" in {
