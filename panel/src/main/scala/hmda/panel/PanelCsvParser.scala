@@ -3,39 +3,33 @@ package hmda.panel
 import java.io.File
 
 import akka.NotUsed
-import akka.actor.{ ActorRef, ActorSystem }
-import akka.util.{ ByteString, Timeout }
-import akka.pattern.ask
+import akka.actor.{ActorRef, ActorSystem}
+import akka.util.{ByteString, Timeout}
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ BroadcastHub, FileIO, Flow, Framing, Keep, Sink, Source }
-import hmda.model.fi.{ Filing, NotStarted }
-import hmda.model.institution.Institution
-import hmda.persistence.messages.CommonMessages._
+import akka.stream.scaladsl.{BroadcastHub, FileIO, Flow, Framing, Keep, Sink, Source}
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.{HttpEntity, _}
+import com.typesafe.config.ConfigFactory
+import hmda.api.protocol.admin.WriteInstitutionProtocol
 
 import scala.concurrent.duration._
 import hmda.parser.fi.InstitutionParser
-import hmda.persistence.HmdaSupervisor._
-import hmda.persistence.institutions.FilingPersistence.CreateFiling
-import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
-import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
-import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.DbConfiguration._
 import hmda.query.repository.institutions.InstitutionComponent
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Await
+import spray.json._
 
-object PanelCsvParser extends InstitutionComponent {
+object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol {
   implicit val system: ActorSystem = ActorSystem("hmda")
   implicit val materializer = ActorMaterializer()
   implicit val timeout: Timeout = Timeout(5.second)
   implicit val ec = system.dispatcher
   val log = LoggerFactory.getLogger("hmda")
 
-  val supervisor = createSupervisor(system)
-  val institutionPersistenceF = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+  val repository = new InstitutionRepository(hmda.query.DbConfiguration.config)
 
-  val repository = new InstitutionRepository(config)
+  val host = hmda.api.HmdaAdminApi.props().
 
   def main(args: Array[String]): Unit = {
 
@@ -48,39 +42,34 @@ object PanelCsvParser extends InstitutionComponent {
     Await.result(repository.dropSchema(), 5.seconds)
     println("Creating new schema...")
     Await.result(repository.createSchema(), 5.seconds)
-    val institutionPersistence = Await.result(institutionPersistenceF, 5.seconds)
 
     val source = FileIO.fromPath(new File(args(0)).toPath)
 
-    val graph = source
+    val connectionFlow = Http().outgoingConnection("", 0)
+
+    source
       .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
       .drop(1)
       .via(byte2StringFlow)
-      .via(parseInstitutions)
-      .toMat(BroadcastHub.sink(bufferSize = 1024))(Keep.right)
-
-    val fromGraph: Source[Institution, NotUsed] = graph.run()
-
-    println("Reading file...")
-
-    fromGraph
-      .map(i => CreateInstitution(i))
-      .runWith(Sink.actorRef(institutionPersistence, Shutdown))
-
-    fromGraph
-      .runForeach(i => {
-        val f = Filing(i.activityYear.toString, i.id)
-        for {
-          s <- (supervisor ? FindFilings(FilingPersistence.name, i.id)).mapTo[ActorRef]
-        } yield s ! CreateFiling(f)
-      })
+      .via(stringToHttpFlow)
+      .via(connectionFlow)
+      .runWith(Sink.head)
   }
 
-  private def parseInstitutions: Flow[String, Institution, NotUsed] =
+  private def stringToHttpFlow: Flow[String, HttpRequest, NotUsed] =
     Flow[String]
-      .map(x => InstitutionParser(x))
+      .map(x => {
+        val payload = ByteString(InstitutionParser(x).toJson.toString)
+        HttpRequest(
+          HttpMethods.POST,
+          uri = "/institutions",
+          entity = HttpEntity(MediaTypes.`application/json`, payload)
+        )
+      })
 
   private def byte2StringFlow: Flow[ByteString, String, NotUsed] =
     Flow[ByteString].map(bs => bs.utf8String)
+
+  }
 
 }
