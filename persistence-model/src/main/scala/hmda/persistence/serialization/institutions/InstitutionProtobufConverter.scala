@@ -1,4 +1,4 @@
-package hmda.persistence.institutions.serialization
+package hmda.persistence.serialization.institutions
 
 import hmda.model.institution.ExternalIdType._
 import hmda.model.institution._

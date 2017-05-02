@@ -1,9 +1,9 @@
-package hmda.persistence.institutions.serialization
+package hmda.persistence.serialization.institutions
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.persistence.institutions.serialization.InstitutionProtobufConverter._
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.serialization.InstitutionEvents.{ InstitutionCreatedMessage, InstitutionModifiedMessage }
+import hmda.persistence.serialization.institutions.InstitutionProtobufConverter._
 
 class InstitutionProtobufSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 1000
