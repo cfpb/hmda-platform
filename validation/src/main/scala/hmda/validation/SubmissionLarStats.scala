@@ -1,18 +1,18 @@
 package hmda.validation
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import hmda.model.fi.SubmissionId
-import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.messages.CommonMessages.{Command, Event, GetState}
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.ValidationStats.{ AddSubmissionStats, SubmissionStats }
+import hmda.validation.ValidationStats.{AddSubmissionValidationTotal, SubmissionStats}
 
 object SubmissionLarStats {
   def name = "SubmissionStats"
 
-  case class CountVerifiedLarsInSubmission() extends Command
+  case class CountValidatedLarsInSubmission() extends Command
   case class CountSubmittedLarsInSubmission() extends Command
-  case class SubmissionStatsUpdated(totalSubmitted: Int, totalVerified: Int) extends Event
+  case class SubmissionStatsUpdated(totalSubmitted: Int, totalValidated: Int) extends Event
 
   def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
 
@@ -32,7 +32,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
   import SubmissionLarStats._
 
   var totalSubmittedLars = 0
-  var totalVerifiedLars = 0
+  var totalValidatedLars = 0
 
   var state = SubmissionLarStatsState()
 
@@ -47,22 +47,22 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       totalSubmittedLars = totalSubmittedLars + 1
 
     case LarValidated(_, _) =>
-      totalVerifiedLars = totalVerifiedLars + 1
+      totalValidatedLars = totalValidatedLars + 1
 
     case CountSubmittedLarsInSubmission =>
       persist(SubmissionStatsUpdated(totalSubmittedLars, 0)) { e =>
         log.debug(s"Persisted: $totalSubmittedLars")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")
-        validationStats ! AddSubmissionStats(SubmissionStats(submissionId, totalSubmittedLars, 0, ""))
+        validationStats ! AddSubmissionValidationTotal(totalSubmittedLars, submissionId)
       }
 
-    case CountVerifiedLarsInSubmission =>
-      persist(SubmissionStatsUpdated(0, totalVerifiedLars)) { e =>
-        log.debug(s"Persisted: $totalVerifiedLars")
+    case CountValidatedLarsInSubmission =>
+      persist(SubmissionStatsUpdated(0, totalValidatedLars)) { e =>
+        log.debug(s"Persisted: $totalValidatedLars")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")
-        validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, totalVerifiedLars, ""))
+        validationStats ! AddSubmissionValidationTotal(totalValidatedLars, submissionId)
       }
 
     case GetState =>

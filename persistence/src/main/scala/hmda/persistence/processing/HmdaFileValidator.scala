@@ -27,11 +27,12 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.validation.SubmissionLarStats
-import hmda.validation.SubmissionLarStats.CountVerifiedLarsInSubmission
-import hmda.validation.ValidationStats.{ AddSubmissionStats, SubmissionStats }
+import hmda.validation.SubmissionLarStats.CountValidatedLarsInSubmission
+import hmda.validation.ValidationStats.AddSubmissionTaxId
 
-import scala.concurrent.duration._
+import scala._
 import scala.util.Try
+import scala.concurrent.duration._
 
 object HmdaFileValidator {
 
@@ -41,7 +42,7 @@ object HmdaFileValidator {
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
   case class ValidateTsQuality(ts: TransmittalSheet) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
-  case class VerifyEdits(editType: ValidationErrorType, verified: Boolean) extends Command
+  case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
   case class TsSyntacticalError(error: ValidationError) extends Event
   case class TsValidityError(error: ValidationError) extends Event
   case class TsQualityError(error: ValidationError) extends Event
@@ -149,10 +150,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map(ts => (ts, validateTs(ts, ctx).toEither))
         .map {
           case (_, Right(ts)) =>
-            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, 0, ts.taxId))
+            validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
             ValidateTsQuality(ts)
           case (ts, Left(errors)) =>
-            validationStats ! AddSubmissionStats(SubmissionStats(submissionId, 0, 0, ts.taxId))
+            validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
             self ! ValidateTsQuality(ts)
             TsValidationErrors(errors.list.toList)
         }
@@ -203,7 +204,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ValidateMacro(larSource, replyTo) =>
       log.debug("Quality Validation completed")
-      submissionLarStats ! CountVerifiedLarsInSubmission
+      submissionLarStats ! CountValidatedLarsInSubmission
       val fMacro = checkMacro(larSource, ctx)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
@@ -251,8 +252,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       self ! CompleteValidation(replyTo)
 
     case CompleteValidation(replyTo) =>
-      if (state.larSyntactical.isEmpty && state.larValidity.isEmpty && state.larQuality.isEmpty && state.larMacro.isEmpty
-        && state.tsSyntactical.isEmpty && state.tsValidity.isEmpty && state.tsQuality.isEmpty) {
+      if (state.syntacticalErrors.isEmpty && state.validityErrors.isEmpty && state.qualityVerified && state.macroVerified) {
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(submissionId)
       } else {
@@ -260,10 +260,11 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         replyTo ! ValidationCompletedWithErrors(submissionId)
       }
 
-    case VerifyEdits(editType, v) =>
+    case VerifyEdits(editType, v, replyTo) =>
       if (editType == Quality || editType == Macro) {
         persist(EditsVerified(editType, v)) { e =>
           updateState(e)
+          self ! CompleteValidation(replyTo)
           sender() ! EditsVerified(editType, v)
         }
       } else sender() ! None

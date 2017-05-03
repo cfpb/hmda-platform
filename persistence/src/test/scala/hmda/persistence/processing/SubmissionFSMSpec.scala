@@ -46,6 +46,14 @@ class SubmissionFSMSpec extends ActorSpec {
       probe.send(fsm, GetState)
       probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Validated)))
 
+      probe.send(fsm, CompleteValidationWithErrors)
+      probe.send(fsm, GetState)
+      probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.ValidatedWithErrors)))
+
+      probe.send(fsm, CompleteValidation(probe.testActor))
+      probe.send(fsm, GetState)
+      probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Validated)))
+
       probe.send(fsm, Sign)
       probe.expectMsg(Some(hmda.model.fi.Signed))
       probe.send(fsm, GetState)

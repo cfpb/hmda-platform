@@ -56,7 +56,7 @@ class Q012Spec extends AsyncWordSpec with MustMatchers with TsGenerators with Be
       val instId = "instId1"
       val ctx = generateValidationContext(currentYear, instId)
       val taxId = Gen.alphaStr.sample.getOrElse("")
-      sendValidationStats(validationStats, instId, 1, lastYear, 0, taxId)
+      sendValidationStats(validationStats, instId, 1, lastYear, taxId)
       Q012.inContext(ctx)(tsGenWithTaxId(taxId)).map(r => r mustBe a[Success])
     }
 
@@ -70,7 +70,7 @@ class Q012Spec extends AsyncWordSpec with MustMatchers with TsGenerators with Be
       val instId = "instId3"
       val ctx = generateValidationContext(currentYear, instId)
       val taxId = Gen.alphaStr.sample.getOrElse("")
-      sendValidationStats(validationStats, instId, 1, lastYear, 0, taxId)
+      sendValidationStats(validationStats, instId, 1, lastYear, taxId)
       Q012.inContext(ctx)(tsGenWithTaxId(taxId + "will fail")).map(r => r mustBe a[Failure])
     }
 
@@ -84,7 +84,7 @@ class Q012Spec extends AsyncWordSpec with MustMatchers with TsGenerators with Be
     ValidationContext(Some(Institution.empty.copy(id = institutionId)), Some(currentYear))
   }
 
-  private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, lastYear: Int, lastYearCount: Int, taxId: String): Unit = {
-    validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(institutionId, lastYear.toString, 1), 0, lastYearCount, taxId))
+  private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, lastYear: Int, taxId: String): Unit = {
+    validationStats ! AddSubmissionTaxId(taxId, SubmissionId(institutionId, lastYear.toString, 1))
   }
 }

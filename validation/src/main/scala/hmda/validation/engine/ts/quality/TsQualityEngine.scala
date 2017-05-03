@@ -1,19 +1,18 @@
 package hmda.validation.engine.ts.quality
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import hmda.model.fi.ts.TransmittalSheet
+import hmda.validation._
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.Quality
 import hmda.validation.engine.ts.TsCommonEngine
 import hmda.validation.rules.ts.quality._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
 trait TsQualityEngine extends TsCommonEngine with ValidationApi {
 
-  def checkQuality(ts: TransmittalSheet, ctx: ValidationContext)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[TsValidation] = {
+  def checkQuality[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
     val tsId = ts.agencyCode + ts.respondent.id
     val checks = List(
       Q020,
@@ -25,7 +24,7 @@ trait TsQualityEngine extends TsCommonEngine with ValidationApi {
     allChecks.map(c => validateAll(c, ts))
   }
 
-  private def q012(ts: TransmittalSheet, ctx: ValidationContext)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext) = {
+  private def q012[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext) = {
     val fEdit = Q012.inContext(ctx)(ts)
     for {
       n <- fEdit

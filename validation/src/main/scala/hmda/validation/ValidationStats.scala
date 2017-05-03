@@ -8,11 +8,15 @@ import hmda.persistence.model.HmdaPersistentActor
 object ValidationStats {
 
   def name = "ValidationStats"
-  case class SubmissionStats(id: SubmissionId = SubmissionId(), totalSubmittedLars: Int = 0, totalVerifiedLars: Int = 0, taxId: String = "")
-  case class AddSubmissionStats(stats: SubmissionStats) extends Command
-  case class SubmissionStatsAdded(stats: SubmissionStats) extends Event
+  case class SubmissionStats(id: SubmissionId, totalSubmittedLars: Int = 0, totalValidatedLars: Int = 0, taxId: String = "")
+  case class AddSubmissionSubmittedTotal(total: Int, id: SubmissionId) extends Command
+  case class AddSubmissionValidationTotal(total: Int, id: SubmissionId) extends Command
+  case class AddSubmissionTaxId(taxId: String, id: SubmissionId) extends Command
+  case class SubmissionSubmittedTotalsAdded(total: Int, id: SubmissionId) extends Event
+  case class SubmissionValidationTotalsAdded(total: Int, id: SubmissionId) extends Event
+  case class SubmissionTaxIdAdded(taxId: String, id: SubmissionId) extends Event
   case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
-  case class FindTotalVerifiedLars(institutionId: String, period: String) extends Command
+  case class FindTotalValidatedLars(institutionId: String, period: String) extends Command
   case class FindTaxId(institutionId: String, period: String) extends Command
 
   def props(): Props = Props(new ValidationStats)
@@ -23,20 +27,21 @@ object ValidationStats {
 
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
     def updated(event: Event): ValidationStatsState = event match {
-      case SubmissionStatsAdded(s) =>
-        val matchingSubs = stats.filter(stat => stat.id == s.id)
-        if (matchingSubs.isEmpty) {
-          ValidationStatsState(stats :+ s)
-        } else {
-          val oldSub = matchingSubs.head
-          val newSub = oldSub.copy(
-            id = s.id,
-            totalSubmittedLars = oldSub.totalSubmittedLars + s.totalSubmittedLars,
-            totalVerifiedLars = oldSub.totalVerifiedLars + s.totalVerifiedLars,
-            taxId = oldSub.taxId + s.taxId
-          )
-          ValidationStatsState(stats.filterNot(s => s == oldSub) :+ newSub)
-        }
+      case SubmissionSubmittedTotalsAdded(total, id) =>
+        val modifiedSub = stats.find(stat => stat.id == id)
+          .getOrElse(SubmissionStats(id))
+          .copy(totalSubmittedLars = total)
+        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+      case SubmissionValidationTotalsAdded(total, id) =>
+        val modifiedSub = stats.find(stat => stat.id == id)
+          .getOrElse(SubmissionStats(id))
+          .copy(totalValidatedLars = total)
+        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+      case SubmissionTaxIdAdded(tax, id) =>
+        val modifiedSub = stats.find(stat => stat.id == id)
+          .getOrElse(SubmissionStats(id))
+          .copy(taxId = tax)
+        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
     }
   }
 }
@@ -57,17 +62,29 @@ class ValidationStats extends HmdaPersistentActor {
   }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
-    case AddSubmissionStats(stats) =>
-      persist(SubmissionStatsAdded(stats)) { e =>
-        log.debug(s"Persisted: $stats")
+    case AddSubmissionValidationTotal(total, id) =>
+      persist(SubmissionSubmittedTotalsAdded(total, id)) { e =>
+        log.debug(s"Persisted: $e")
+        updateState(e)
+      }
+
+    case AddSubmissionValidationTotal(total, id) =>
+      persist(SubmissionValidationTotalsAdded(total, id)) { e =>
+        log.debug(s"Persisted: $e")
+        updateState(e)
+      }
+
+    case AddSubmissionTaxId(tax, id) =>
+      persist(SubmissionTaxIdAdded(tax, id)) { e =>
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
     case FindTotalSubmittedLars(id, period) =>
       sender ! getSubmissionStat(id, period).totalSubmittedLars
 
-    case FindTotalVerifiedLars(id, period) =>
-      sender ! getSubmissionStat(id, period).totalVerifiedLars
+    case FindTotalValidatedLars(id, period) =>
+      sender ! getSubmissionStat(id, period).totalValidatedLars
 
     case FindTaxId(id, period) =>
       sender ! getSubmissionStat(id, period).taxId
@@ -79,7 +96,7 @@ class ValidationStats extends HmdaPersistentActor {
   private def getSubmissionStat(id: String, period: String): SubmissionStats = {
     val filtered = state.stats.filter(s => s.id.institutionId == id && s.id.period == period)
     val sorted = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
-    sorted.headOption.getOrElse(SubmissionStats())
+    sorted.headOption.getOrElse(SubmissionStats(SubmissionId()))
   }
 
 }
