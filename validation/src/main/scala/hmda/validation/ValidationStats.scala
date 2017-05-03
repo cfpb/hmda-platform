@@ -8,10 +8,13 @@ import hmda.persistence.model.HmdaPersistentActor
 object ValidationStats {
 
   def name = "ValidationStats"
-  case class SubmissionStats(id: SubmissionId, totalLars: Int)
-  case class AddSubmissionStats(stats: SubmissionStats) extends Command
-  case class SubmissionStatsAdded(stats: SubmissionStats) extends Event
+  case class SubmissionStats(id: SubmissionId, totalLars: Int, taxId: String)
+  case class AddSubmissionValidationTotal(total: Int, id: SubmissionId) extends Command
+  case class AddSubmissionTaxId(taxId: String, id: SubmissionId) extends Command
+  case class SubmissionValidationTotalsAdded(total: Int, id: SubmissionId) extends Event
+  case class SubmissionTaxIdAdded(taxId: String, id: SubmissionId) extends Event
   case class FindTotalLars(institutionId: String, period: String) extends Command
+  case class FindTaxId(institutionId: String, period: String) extends Command
 
   def props(): Props = Props(new ValidationStats)
 
@@ -21,8 +24,16 @@ object ValidationStats {
 
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
     def updated(event: Event): ValidationStatsState = event match {
-      case SubmissionStatsAdded(s) =>
-        ValidationStatsState(stats :+ s)
+      case SubmissionValidationTotalsAdded(total, id) =>
+        val modifiedSub = stats.find(stat => stat.id == id)
+          .getOrElse(SubmissionStats(id, 0, ""))
+          .copy(totalLars = total)
+        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+      case SubmissionTaxIdAdded(tax, id) =>
+        val modifiedSub = stats.find(stat => stat.id == id)
+          .getOrElse(SubmissionStats(id, 0, ""))
+          .copy(taxId = tax)
+        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
     }
   }
 }
@@ -43,11 +54,18 @@ class ValidationStats extends HmdaPersistentActor {
   }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
-    case AddSubmissionStats(stats) =>
-      persist(SubmissionStatsAdded(stats)) { e =>
-        log.debug(s"Persisted: $stats")
+    case AddSubmissionValidationTotal(total, id) =>
+      persist(SubmissionValidationTotalsAdded(total, id)) { e =>
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
+
+    case AddSubmissionTaxId(tax, id) =>
+      persist(SubmissionTaxIdAdded(tax, id)) { e =>
+        log.debug(s"Persisted: $e")
+        updateState(e)
+      }
+
     case FindTotalLars(id, period) =>
       val submissionStats = state.stats
       val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
@@ -56,6 +74,16 @@ class ValidationStats extends HmdaPersistentActor {
         sender() ! submission.totalLars
       } else {
         sender() ! 0
+      }
+
+    case FindTaxId(id, period) =>
+      val submissionStats = state.stats
+      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
+      if (filtered.nonEmpty) {
+        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
+        sender() ! submission.taxId
+      } else {
+        sender() ! ""
       }
 
     case GetState =>
