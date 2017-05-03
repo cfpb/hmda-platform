@@ -24,7 +24,7 @@ class InstitutionProtobufConverterSpec extends PropSpec with PropertyChecks with
 
   property("Respondent must serialize to protobuf and back") {
     forAll(respondentGen) { respondent =>
-      val bytes = respondentToProtobud(respondent).toByteArray
+      val bytes = respondentToProtobuf(respondent).toByteArray
       respondentFromProtobuf(RespondentMessage.parseFrom(bytes)) mustBe respondent
     }
   }

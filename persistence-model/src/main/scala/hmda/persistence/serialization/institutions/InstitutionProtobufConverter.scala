@@ -40,7 +40,7 @@ object InstitutionProtobufConverter {
       cra = obj.cra,
       externalIds = obj.externalIds.map(externalId => externalIdToProtobuf(externalId)).toSeq,
       emailDomains = obj.emailDomains.toSeq,
-      respondent = Some(respondentToProtobud(obj.respondent)),
+      respondent = Some(respondentToProtobuf(obj.respondent)),
       hmdaFilerFlag = obj.hmdaFilerFlag,
       parent = Some(parentToProtobuf(obj.parent)),
       assets = obj.assets,
@@ -150,7 +150,7 @@ object InstitutionProtobufConverter {
     }
   }
 
-  def respondentToProtobud(obj: Respondent): RespondentMessage = {
+  def respondentToProtobuf(obj: Respondent): RespondentMessage = {
     RespondentMessage(
       externalId = Some(externalIdToProtobuf(obj.externalId)),
       name = obj.name,
