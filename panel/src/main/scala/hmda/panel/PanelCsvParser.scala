@@ -29,7 +29,7 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
 
   val repository = new InstitutionRepository(hmda.query.DbConfiguration.config)
 
-  val config = ConfigFactory.parseFile(new File("api/src/main/resources/application.conf")).resolve()
+  val config = ConfigFactory.load()
   val host = config.getString("hmda.http.adminHost")
   val port = config.getInt("hmda.http.adminPort")
 
