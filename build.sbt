@@ -113,11 +113,10 @@ lazy val panel = (project in file("panel"))
         val oldStrategy = (assemblyMergeStrategy in assembly).value
         oldStrategy(x)
     },
-    libraryDependencies ++= akkaPersistenceDeps
-  ).dependsOn(persistenceModel % "compile->compile;test->test")
-  .dependsOn(persistence % "compile->compile;test->test")
-  .dependsOn(parserJVM % "compile->compile;test->test")
+    libraryDependencies ++= akkaPersistenceDeps ++ httpDeps
+  ).dependsOn(parserJVM % "compile->compile;test->test")
   .dependsOn(query % "compile->compile;test->test")
+  .dependsOn(api % "compile->compile;test->test")
 
 lazy val persistenceModel = (project in file("persistence-model"))
   .settings(hmdaBuildSettings:_*)
