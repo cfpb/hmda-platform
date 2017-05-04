@@ -8,7 +8,7 @@ import hmda.persistence.model.HmdaPersistentActor
 object ValidationStats {
 
   def name = "ValidationStats"
-  case class SubmissionStats(id: SubmissionId, totalLars: Int, taxId: String)
+  case class SubmissionStats(id: SubmissionId, totalLars: Int = 0, taxId: String = "")
   case class AddSubmissionValidationTotal(total: Int, id: SubmissionId) extends Command
   case class AddSubmissionTaxId(taxId: String, id: SubmissionId) extends Command
   case class SubmissionValidationTotalsAdded(total: Int, id: SubmissionId) extends Event
@@ -25,15 +25,11 @@ object ValidationStats {
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
     def updated(event: Event): ValidationStatsState = event match {
       case SubmissionValidationTotalsAdded(total, id) =>
-        val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id, 0, ""))
-          .copy(totalLars = total)
-        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+        val modified = getStat(id).copy(totalLars = total)
+        updateCollection(modified)
       case SubmissionTaxIdAdded(tax, id) =>
-        val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id, 0, ""))
-          .copy(taxId = tax)
-        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+        val modified = getStat(id).copy(taxId = tax)
+        updateCollection(modified)
     }
 
     def latestStatsFor(inst: String, period: String): Option[SubmissionStats] = {
@@ -45,6 +41,15 @@ object ValidationStats {
         Some(stats)
       } else None
     }
+
+    private def updateCollection(modified: SubmissionStats): ValidationStatsState = {
+      ValidationStatsState(stats.filterNot(sub => sub.id == modified.id) :+ modified)
+    }
+
+    private def getStat(subId: SubmissionId): SubmissionStats = {
+      stats.find(stat => stat.id == subId).getOrElse(SubmissionStats(subId))
+    }
+
   }
 }
 
