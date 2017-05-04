@@ -28,21 +28,36 @@ object ValidationStats {
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
     def updated(event: Event): ValidationStatsState = event match {
       case SubmissionSubmittedTotalsAdded(total, id) =>
-        val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id))
-          .copy(totalSubmittedLars = total)
-        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+        val modified = getStat(id).copy(totalSubmittedLars = total)
+        updateCollection(modified)
       case SubmissionValidationTotalsAdded(total, id) =>
-        val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id))
-          .copy(totalValidatedLars = total)
-        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+        val modifiedSub = getStat(id).copy(totalValidatedLars = total)
+        updateCollection(modifiedSub)
       case SubmissionTaxIdAdded(tax, id) =>
-        val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id))
-          .copy(taxId = tax)
-        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+        val modified = getStat(id).copy(taxId = tax)
+        updateCollection(modified)
     }
+
+    // For an institution and filing period, return SubmissionStats for latest submission
+    def latestStatsFor(inst: String, period: String): Option[SubmissionStats] = {
+      val filtered = stats.filter { s =>
+        s.id.institutionId == inst && s.id.period == period
+      }
+      if (filtered.nonEmpty) {
+        val stats = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
+        Some(stats)
+      } else None
+    }
+
+    private def updateCollection(modified: SubmissionStats): ValidationStatsState = {
+      ValidationStatsState(stats.filterNot(sub => sub.id == modified.id) :+ modified)
+    }
+
+    // Return SubmissionStats for a given SubmissionId. Used for updating ValidationStatsState.
+    private def getStat(subId: SubmissionId): SubmissionStats = {
+      stats.find(stat => stat.id == subId).getOrElse(SubmissionStats(subId))
+    }
+
   }
 }
 
