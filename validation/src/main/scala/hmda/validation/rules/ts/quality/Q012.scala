@@ -19,7 +19,7 @@ import scala.concurrent.duration._
 
 object Q012 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[TransmittalSheet, TransmittalSheet] = {
-    IfInstitutionPresentInAggregate(ctx) { new Q012(_, _) }
+    IfContextPresentInAggregate(ctx) { new Q012(_, _) }
   }
 }
 

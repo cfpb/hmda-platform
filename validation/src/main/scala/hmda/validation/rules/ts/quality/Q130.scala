@@ -8,7 +8,7 @@ import hmda.model.institution.Institution
 import hmda.validation.ValidationStats.FindTotalSubmittedLars
 import hmda.validation._
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.{ AggregateEditCheck, IfInstitutionPresentInAggregate }
+import hmda.validation.rules.{ AggregateEditCheck, IfContextPresentInAggregate }
 import hmda.validation.dsl.Result
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
@@ -18,7 +18,7 @@ import scala.concurrent.duration._
 
 object Q130 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[TransmittalSheet, TransmittalSheet] = {
-    IfInstitutionPresentInAggregate(ctx) { new Q130(_, _) }
+    IfContextPresentInAggregate(ctx) { new Q130(_, _) }
   }
 }
 
