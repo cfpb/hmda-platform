@@ -14,23 +14,12 @@ object InstitutionGenerators {
       cra <- Gen.oneOf(true, false)
       externalIds <- Gen.listOf(externalIdGen)
       emailDomains <- Gen.listOf(Gen.alphaStr)
-      respondentName <- Gen.alphaStr
-      respondentState <- Gen.alphaStr
-      respondentCity <- Gen.alphaStr
-      respondentFipsStateNumber <- Gen.alphaStr
+      respondent <- respondentGen
       hmdaFilerFlag <- Gen.oneOf(true, false)
-      parentRespondentId <- Gen.alphaStr
-      parentIdRssd <- Gen.choose(0, 100)
-      parentName <- Gen.alphaStr
-      parentCity <- Gen.alphaStr
-      parentState <- Gen.alphaStr
+      parent <- parentGen
       assets <- Gen.choose(0, 100)
       otherLenderCode <- Gen.choose(0, 100)
-      topHolderIdRssd <- Gen.choose(0, 100)
-      topHolderName <- Gen.alphaStr
-      topHolderCity <- Gen.alphaStr
-      topHolderState <- Gen.alphaStr
-      topHolderCountry <- Gen.alphaStr
+      topHolder <- topHolderGen
     } yield Institution(
       id,
       agency,
@@ -39,12 +28,12 @@ object InstitutionGenerators {
       cra = cra,
       externalIds.toSet,
       emailDomains.toSet,
-      Respondent(respondentId, respondentName, respondentState, respondentCity, respondentFipsStateNumber),
+      respondent,
       hmdaFilerFlag = hmdaFilerFlag,
-      Parent(parentRespondentId, parentIdRssd, parentName, parentCity, parentState),
+      parent,
       assets,
       otherLenderCode,
-      TopHolder(topHolderIdRssd, topHolderName, topHolderCity, topHolderState, topHolderCountry)
+      topHolder
     )
   }
 
@@ -73,5 +62,35 @@ object InstitutionGenerators {
     Gen.oneOf(
       ExternalIdType.values
     )
+  }
+
+  implicit def respondentGen: Gen[Respondent] = {
+    for {
+      respondentId <- externalIdGen
+      respondentName <- Gen.alphaStr
+      respondentState <- Gen.alphaStr
+      respondentCity <- Gen.alphaStr
+      respondentFipsStateNumber <- Gen.alphaStr
+    } yield Respondent(respondentId, respondentName, respondentState, respondentCity, respondentFipsStateNumber)
+  }
+
+  implicit def parentGen: Gen[Parent] = {
+    for {
+      parentRespondentId <- Gen.alphaStr
+      parentIdRssd <- Gen.choose(0, 100)
+      parentName <- Gen.alphaStr
+      parentCity <- Gen.alphaStr
+      parentState <- Gen.alphaStr
+    } yield Parent(parentRespondentId, parentIdRssd, parentName, parentCity, parentState)
+  }
+
+  implicit def topHolderGen: Gen[TopHolder] = {
+    for {
+      topHolderIdRssd <- Gen.choose(0, 100)
+      topHolderName <- Gen.alphaStr
+      topHolderCity <- Gen.alphaStr
+      topHolderState <- Gen.alphaStr
+      topHolderCountry <- Gen.alphaStr
+    } yield TopHolder(topHolderIdRssd, topHolderName, topHolderCity, topHolderState, topHolderCountry)
   }
 }
