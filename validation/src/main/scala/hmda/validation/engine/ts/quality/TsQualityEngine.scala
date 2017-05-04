@@ -31,7 +31,7 @@ trait TsQualityEngine extends TsCommonEngine with ValidationApi {
     } yield convertResult(ts, n, "Q012", "", Quality, ts = true)
   }
 
-  private def q130(ts: TransmittalSheet, ctx: ValidationContext)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext) = {
+  private def q130[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext) = {
     val fEdit = Q130.inContext(ctx)(ts)
     for {
       n <- fEdit

@@ -41,18 +41,11 @@ class ValidationStatsSpec extends ActorSpec {
       probe.expectMsg(124)
     }
 
-    "Find total verified lars for an institution in a certain period" in {
+    "Find total validated lars for an institution in a certain period" in {
       probe.send(submissionValidationStats, FindTotalValidatedLars("12345", "2016"))
-      probe.expectMsg(150)
+      probe.expectMsg(100)
       probe.send(submissionValidationStats, FindTotalValidatedLars("12345", "2017"))
       probe.expectMsg(125)
-    }
-
-    "Find total submitted lars for an institution in a certain period" in {
-      probe.send(submissionValidationStats, FindTotalSubmittedLars("12345", "2016"))
-      probe.expectMsg(300)
-      probe.send(submissionValidationStats, FindTotalSubmittedLars("12345", "2017"))
-      probe.expectMsg(250)
     }
 
     "Find tax ID for an institution in a certain period" in {

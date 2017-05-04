@@ -1,11 +1,11 @@
 package hmda.validation
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
-import hmda.persistence.messages.CommonMessages.{Command, Event, GetState}
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.ValidationStats.{AddSubmissionValidationTotal, SubmissionStats}
+import hmda.validation.ValidationStats.{ AddSubmissionSubmittedTotal, AddSubmissionValidationTotal, SubmissionStats }
 
 object SubmissionLarStats {
   def name = "SubmissionStats"
@@ -54,7 +54,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
         log.debug(s"Persisted: $totalSubmittedLars")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")
-        validationStats ! AddSubmissionValidationTotal(totalSubmittedLars, submissionId)
+        validationStats ! AddSubmissionSubmittedTotal(totalSubmittedLars, submissionId)
       }
 
     case CountValidatedLarsInSubmission =>

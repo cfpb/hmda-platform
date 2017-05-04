@@ -55,14 +55,14 @@ class Q130Spec extends AsyncWordSpec with MustMatchers with TsGenerators with Be
     "succeed when total submitted lars matches transmittal sheet" in {
       val instId = "instId1"
       val ctx = generateValidationContext(currentYear, instId)
-      sendValidationStats(validationStats, instId, 1, currentYear, count, 0, "")
+      sendValidationStats(validationStats, instId, currentYear, count)
       Q130.inContext(ctx)(tsGenWithLarCount(count)).map(r => r mustBe a[Success])
     }
 
     "fail when total submitted lars does not match transmittal sheet" in {
       val instId = "instId2"
       val ctx = generateValidationContext(currentYear, instId)
-      sendValidationStats(validationStats, instId, 1, currentYear, count, 0, "")
+      sendValidationStats(validationStats, instId, currentYear, count)
       Q130.inContext(ctx)(tsGenWithLarCount(count + 1)).map(r => r mustBe a[Failure])
     }
 
@@ -76,7 +76,7 @@ class Q130Spec extends AsyncWordSpec with MustMatchers with TsGenerators with Be
     ValidationContext(Some(Institution.empty.copy(id = institutionId)), Some(currentYear))
   }
 
-  private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, year: Int, submittedCount: Int, validatedCount: Int, taxId: String): Unit = {
-    validationStats ! AddSubmissionStats(SubmissionStats(SubmissionId(institutionId, year.toString, 1), submittedCount, validatedCount, taxId))
+  private def sendValidationStats(validationStats: ActorRef, institutionId: String, year: Int, submittedCount: Int): Unit = {
+    validationStats ! AddSubmissionSubmittedTotal(submittedCount, SubmissionId(institutionId, year.toString, 1))
   }
 }
