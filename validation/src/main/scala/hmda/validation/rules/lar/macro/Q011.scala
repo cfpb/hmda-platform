@@ -19,7 +19,7 @@ import scala.concurrent.Future
 
 object Q011 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
-    IfInstitutionPresentInAggregate(ctx) { new Q011(_, _) }
+    IfContextPresentInAggregate(ctx) { new Q011(_, _) }
   }
 }
 
