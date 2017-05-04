@@ -35,6 +35,16 @@ object ValidationStats {
           .copy(taxId = tax)
         ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
     }
+
+    def latestStatsFor(inst: String, period: String): Option[SubmissionStats] = {
+      val filtered = stats.filter { s =>
+        s.id.institutionId == inst && s.id.period == period
+      }
+      if (filtered.nonEmpty) {
+        val stats = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
+        Some(stats)
+      } else None
+    }
   }
 }
 
@@ -67,23 +77,15 @@ class ValidationStats extends HmdaPersistentActor {
       }
 
     case FindTotalLars(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.totalLars
-      } else {
-        sender() ! 0
+      state.latestStatsFor(id, period) match {
+        case Some(stats) => stats.totalLars
+        case None => 0
       }
 
     case FindTaxId(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.taxId
-      } else {
-        sender() ! ""
+      state.latestStatsFor(id, period) match {
+        case Some(stats) => stats.taxId
+        case None => ""
       }
 
     case GetState =>
