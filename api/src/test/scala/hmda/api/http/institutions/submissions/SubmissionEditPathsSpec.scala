@@ -90,6 +90,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file) ~> institutionsRoutes ~> check {
       Thread.sleep(5000) // wait for the submission to complete validation
       status mustBe StatusCodes.Accepted
+
+      // Check for correct baseline validation state.
+      //   Incorrect baseline will invalidate the other tests in this section.
+      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
+      state.validityErrors.isEmpty mustBe true
+      state.syntacticalErrors.isEmpty mustBe true
+      state.macroVerified mustBe false
+      state.qualityVerified mustBe false
     }
   }
 
@@ -252,10 +260,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
   }
 
-  val csv = "1|0|1|201502221111|2017|35-0704860|10|Passes Bank|555 Passes Court|Passes City|CA|92130|Passes Bank Parent|555 Passes Court Parent|Passes City|CA|92130|Passes Person|555-555-5555|555-555-5555|pperson@passes.com\n" +
-    "2|0|1|10164 |20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1\n" +
-    "2|0|1|10174 |20170224|1|1|2|1|60|3|1|20170402|45460|18|153|0503.00|2|2|5| | | | |5| | | | |1|2|210|0| | | |NA   |2|2\n" +
-    "2|0|1|10370 |20170228|1|1|3|1|73|3|3|20170326|45460|18|153|0505.00|2|2|5| | | | |5| | | | |1|2|89|0|4| | |NA   |2|1"
+  val csv = "1|externalTest0|3|201502221111|2017|35-0704860|10|Passes Bank|555 Passes Court|Passes City|CA|92130|Passes Bank Parent|555 Passes Court Parent|Passes City|CA|92130|Passes Person|555-555-5555|555-555-5555|pperson@passes.com\n" +
+    "2|externalTest0|3|10164 |20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1\n" +
+    "2|externalTest0|3|10174 |20170224|1|1|2|1|60|3|1|20170402|45460|18|153|0503.00|2|2|5| | | | |5| | | | |1|2|210|0| | | |NA   |2|2\n" +
+    "2|externalTest0|3|10370 |20170228|1|1|3|1|73|3|3|20170326|45460|18|153|0505.00|2|2|5| | | | |5| | | | |1|2|89|0|4| | |NA   |2|1"
 
   val file = multiPartFile(csv, "sample.txt")
 }
