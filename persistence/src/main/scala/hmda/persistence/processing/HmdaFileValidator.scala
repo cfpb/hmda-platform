@@ -261,12 +261,13 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       }
 
     case VerifyEdits(editType, v, replyTo) =>
+      val client = sender()
       if (editType == Quality || editType == Macro) {
         persist(EditsVerified(editType, v)) { e =>
           updateState(e)
-          self ! CompleteValidation(replyTo, Some(sender()))
+          self ! CompleteValidation(replyTo, Some(client))
         }
-      } else sender() ! None
+      } else client ! None
 
     case GetState =>
       sender() ! state
