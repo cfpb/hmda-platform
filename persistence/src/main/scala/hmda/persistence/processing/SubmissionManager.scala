@@ -19,6 +19,7 @@ import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object SubmissionManager {
@@ -99,13 +100,15 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
       log.info(s"Validation started for submission: ${sId.toString}")
       submissionFSM ! BeginValidation(self)
 
-    case ValidationCompleted(sId) =>
-      log.info(s"Validation completed for submission: ${sId.toString}")
-      submissionFSM ! CompleteValidation(self)
+    case ValidationCompleted(replyTo) =>
+      log.info(s"Validation completed for submission: ${submissionId.toString}")
+      val result = (submissionFSM ? CompleteValidation(self)).mapTo[SubmissionStatus]
+      sendResult(result, replyTo)
 
-    case ValidationCompletedWithErrors(sId) =>
-      log.info(s"Validation completed with errors for submission: ${sId.toString}")
-      submissionFSM ! CompleteValidationWithErrors
+    case ValidationCompletedWithErrors(replyTo) =>
+      log.info(s"Validation completed with errors for submission: ${submissionId.toString}")
+      val result = (submissionFSM ? CompleteValidationWithErrors).mapTo[SubmissionStatus]
+      sendResult(result, replyTo)
 
     case Signed =>
       log.info(s"Submission signed: ${submissionId.toString}")
@@ -137,6 +140,15 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
     case Shutdown =>
       context stop self
 
+  }
+
+  private def sendResult[T](future: Future[T], target: Option[ActorRef]) = {
+    future.map { r =>
+      target match {
+        case Some(actor) => actor ! r
+        case _ => // Do nothing
+      }
+    }
   }
 
   private def updateFilingStatus(filingStatus: FilingStatus) = {

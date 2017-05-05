@@ -209,7 +209,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   }
 
   when(Validating) {
-    case Event(CompleteValidation(_), _) =>
+    case Event(CompleteValidation(_, _), _) =>
       val status = hmda.model.fi.Validated
       updateStatus(status)
       goto(Validated) applying SubmissionValidated(Submission(submissionId, status))
@@ -224,7 +224,11 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
     case Event(CompleteValidationWithErrors, _) =>
       val status = hmda.model.fi.ValidatedWithErrors
       updateStatus(status)
-      goto(ValidatedWithErrors) applying SubmissionValidatedWithErrors(Submission(submissionId, status))
+      goto(ValidatedWithErrors) applying SubmissionValidatedWithErrors(Submission(submissionId, status)) replying status
+
+    case Event(CompleteValidation(_, _), _) =>
+      val status = hmda.model.fi.Validated
+      stay replying status
 
     case Event(Sign, _) =>
       val status = hmda.model.fi.Signed
@@ -238,13 +242,14 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
       updateStatus(status)
       goto(Signed) applying SubmissionSigned(Submission(submissionId, status)) replying Some(status)
 
-    case Event(CompleteValidationWithErrors, data) =>
-      stay replying data
+    case Event(CompleteValidationWithErrors, _) =>
+      val status = hmda.model.fi.ValidatedWithErrors
+      stay replying status
 
-    case Event(CompleteValidation(_), _) =>
+    case Event(CompleteValidation(_, _), _) =>
       val status = hmda.model.fi.Validated
       updateStatus(status)
-      goto(Validated) applying SubmissionValidated(Submission(submissionId, status))
+      goto(Validated) applying SubmissionValidated(Submission(submissionId, status)) replying status
 
     case Event(GetState, data) =>
       stay replying data

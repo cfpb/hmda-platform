@@ -125,23 +125,20 @@ trait SubmissionEditPaths
         entity(as[EditsVerification]) { verification =>
           completeVerified(institutionId, period, seqNr, uri) {
             val verified = verification.verified
-            val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
             val fSubmissionManager = (supervisor ? FindProcessingActor(SubmissionManager.name, SubmissionId(institutionId, period, seqNr))).mapTo[ActorRef]
             val subId = SubmissionId(institutionId, period, seqNr)
             val fValidator = fHmdaFileValidator(subId)
             val editType: ValidationErrorType = if (verificationType == "quality") Quality else Macro
 
-            val fSubmissions = for {
+            val fVerification = for {
               replyTo <- fSubmissionManager
               va <- fValidator
-              v <- (va ? VerifyEdits(editType, verified, replyTo)).mapTo[EditsVerified]
-              sa <- fSubmissionsActor
-              s <- (sa ? GetSubmissionById(subId)).mapTo[Submission]
-            } yield s
+              v <- (va ? VerifyEdits(editType, verified, replyTo)).mapTo[SubmissionStatus]
+            } yield v
 
-            onComplete(fSubmissions) {
-              case Success(submission) =>
-                complete(ToResponseMarshallable(EditsVerifiedResponse(verified, submission.status)))
+            onComplete(fVerification) {
+              case Success(status) =>
+                complete(ToResponseMarshallable(EditsVerifiedResponse(verified, status)))
               case Failure(error) => completeWithInternalError(uri, error)
             }
           }

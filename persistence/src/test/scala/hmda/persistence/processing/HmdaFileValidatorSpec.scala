@@ -96,7 +96,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
       probe.send(hmdaFileValidator2, BeginValidation(probe.testActor))
       probe.expectMsg(ValidationStarted(submissionId2))
-      probe.expectMsg(ValidationCompletedWithErrors(submissionId2))
+      probe.expectMsgType[ValidationCompletedWithErrors]
 
       probe.send(hmdaFileValidator2, GetState)
       probe.expectMsg(HmdaFileValidationState(
@@ -153,7 +153,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
       // send VerifyQualityEdits message
       probe.send(hmdaFileValidator, VerifyEdits(Quality, true, submissionManager))
-      probe.expectMsg(EditsVerified(Quality, true))
 
       // expect updated validation state
       probe.send(hmdaFileValidator, GetState)
@@ -191,7 +190,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
       // send VerifyQualityEdits message
       probe.send(hmdaFileValidator, VerifyEdits(Macro, true, submissionManager))
-      probe.expectMsg(EditsVerified(Macro, true))
 
       // expect updated validation state
       probe.send(hmdaFileValidator, GetState)
