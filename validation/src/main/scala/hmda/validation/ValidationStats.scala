@@ -32,6 +32,8 @@ object ValidationStats {
         updateCollection(modified)
     }
 
+    // For an institution and filing period, determine which
+    //   submission is latest and return its SubmissionStats
     def latestStatsFor(inst: String, period: String): Option[SubmissionStats] = {
       val filtered = stats.filter { s =>
         s.id.institutionId == inst && s.id.period == period
@@ -46,6 +48,8 @@ object ValidationStats {
       ValidationStatsState(stats.filterNot(sub => sub.id == modified.id) :+ modified)
     }
 
+    // Return SubmissionStats for a given SubmissionId.
+    //   Used for updating ValidationStatsState.
     private def getStat(subId: SubmissionId): SubmissionStats = {
       stats.find(stat => stat.id == subId).getOrElse(SubmissionStats(subId))
     }
