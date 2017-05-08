@@ -82,16 +82,18 @@ class ValidationStats extends HmdaPersistentActor {
       }
 
     case FindTotalLars(id, period) =>
-      state.latestStatsFor(id, period) match {
+      val total = state.latestStatsFor(id, period) match {
         case Some(stats) => stats.totalLars
         case None => 0
       }
+      sender() ! total
 
     case FindTaxId(id, period) =>
-      state.latestStatsFor(id, period) match {
+      val taxId = state.latestStatsFor(id, period) match {
         case Some(stats) => stats.taxId
         case None => ""
       }
+      sender() ! taxId
 
     case GetState =>
       sender() ! state
