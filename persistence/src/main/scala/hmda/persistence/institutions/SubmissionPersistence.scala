@@ -5,6 +5,7 @@ import hmda.model.fi._
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.institutions.SubmissionPersistence._
 import hmda.persistence.model.HmdaPersistentActor
+import hmda.persistence.messages.events.institutions.SubmissionEvents._
 
 object SubmissionPersistence {
 
@@ -14,9 +15,6 @@ object SubmissionPersistence {
   case class UpdateSubmissionStatus(id: SubmissionId, status: SubmissionStatus) extends Command
   case class GetSubmissionById(id: SubmissionId) extends Command
   case object GetLatestSubmission extends Command
-
-  case class SubmissionCreated(submission: Submission) extends Event
-  case class SubmissionStatusUpdated(id: SubmissionId, status: SubmissionStatus) extends Event
 
   def props(institutionId: String, period: String): Props = Props(new SubmissionPersistence(institutionId, period))
 
