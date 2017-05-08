@@ -6,13 +6,31 @@ import hmda.persistence.model.serialization.SubmissionEvents._
 
 object SubmissionProtobufConverter {
 
-  def submissionCreatedToProtobuf(obj: SubmissionCreated): SubmissionCreatedMessage = ???
+  def submissionCreatedToProtobuf(obj: SubmissionCreated): SubmissionCreatedMessage = {
+    SubmissionCreatedMessage(
+      submission = Some(submissionToProtobuf(obj.submission))
+    )
+  }
 
-  def submissionCreatedFromProtobuf(msg: SubmissionCreatedMessage): SubmissionCreated = ???
+  def submissionCreatedFromProtobuf(msg: SubmissionCreatedMessage): SubmissionCreated = {
+    SubmissionCreated(
+      submission = submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage()))
+    )
+  }
 
-  def submissionStatusUpdatedToProtobuf(obj: SubmissionStatusUpdated): SubmissionStatusUpdatedMessage = ???
+  def submissionStatusUpdatedToProtobuf(obj: SubmissionStatusUpdated): SubmissionStatusUpdatedMessage = {
+    SubmissionStatusUpdatedMessage(
+      id = Some(submissionIdToProtobuf(obj.id)),
+      status = Some(submissionStatusToProtobuf(obj.status))
+    )
+  }
 
-  def submissionStatusUpdatedFromProtobuf(msg: SubmissionStatusUpdatedMessage): SubmissionStatusUpdated = ???
+  def submissionStatusUpdatedFromProtobuf(msg: SubmissionStatusUpdatedMessage): SubmissionStatusUpdated = {
+    SubmissionStatusUpdated(
+      id = submissionIdFromProtobuf(msg.id.getOrElse(SubmissionIdMessage())),
+      status = submissionStatusFromProtobuf(msg.status.getOrElse(SubmissionStatusMessage()))
+    )
+  }
 
   def submissionToProtobuf(obj: Submission): SubmissionMessage = {
     SubmissionMessage(
