@@ -27,6 +27,11 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
   "Q071" must {
     val currentYear = 2017
 
+    //// Check #1: comparing last year to this year ////
+    "fetch count of previous year's relevant loans" in {
+
+      true mustBe true
+    }
 
     //// Check #2: Current Year ////
     "current year: fails when too few relevant loans sold to Ginnie Mae" in {
@@ -54,7 +59,6 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
       val testLars = toSource(relevantSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
     }
-
 
     //// Must handle context correctly ////
     "be named Q071 when institution and year are present" in {

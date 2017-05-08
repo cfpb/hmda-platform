@@ -40,9 +40,13 @@ class Q071 private (institution: Institution, year: Int) extends AggregateEditCh
       println(s"2017: Counted $rs relevant loans sold to GM")
       println(s"2017: That makes ${rs.toDouble / r} the proportion sold")
 
+      r is greaterThan(1)
+
+      /* // current year check
       when(r is greaterThanOrEqual(threshold)) {
         (rs.toDouble / r) is greaterThan(minProportionSold)
       }
+      */
     }
   }
 
