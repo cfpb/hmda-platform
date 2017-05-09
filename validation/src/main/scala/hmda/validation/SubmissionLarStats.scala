@@ -8,7 +8,7 @@ import hmda.persistence.model.HmdaPersistentActor
 import hmda.validation.ValidationStats.{ AddSubmissionSubmittedTotal, AddSubmissionValidationTotal, SubmissionStats }
 
 object SubmissionLarStats {
-  def name = "SubmissionStats"
+  val name = "SubmissionStats"
 
   case class CountValidatedLarsInSubmission() extends Command
   case class CountSubmittedLarsInSubmission() extends Command

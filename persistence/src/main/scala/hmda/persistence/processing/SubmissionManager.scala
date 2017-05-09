@@ -18,6 +18,7 @@ import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
 import hmda.persistence.processing.SubmissionManager.GetActorRef
+import hmda.validation.SubmissionLarStats
 
 import scala.concurrent.duration._
 
@@ -45,6 +46,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   val supervisor = context.parent
   val hmdaFilingF = (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
 
+  val submissionLarStats: ActorRef = context.actorOf(SubmissionLarStats.props(submissionId), s"submission-lar-stats-${submissionId.toString}")
   val submissionFSM: ActorRef = context.actorOf(SubmissionFSM.props(submissionId))
   val submissionUpload: ActorRef = context.actorOf(HmdaRawFile.props(submissionId))
   val submissionParser: ActorRef = context.actorOf(HmdaFileParser.props(submissionId))
