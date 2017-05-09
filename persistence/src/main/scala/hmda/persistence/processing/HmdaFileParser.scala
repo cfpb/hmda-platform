@@ -144,14 +144,11 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
     case GetStatePaginated(page) =>
       val tsErrState = state.tsParsingErrors
-      val tsLineError = if (tsErrState.isEmpty) 0 else 1
-      val tsErrorsReturn = if (page == 1) tsErrState else Seq()
-
       val totalLarErrors: Int = state.larParsingErrors.size
-      val p = PaginatedResource(totalLarErrors, tsLineError)(page)
+      val p = PaginatedResource(totalLarErrors)(page)
       val larErrorsReturn = state.larParsingErrors.slice(p.fromIndex, p.toIndex)
 
-      sender() ! PaginatedFileParseState(tsErrorsReturn, larErrorsReturn, totalLarErrors + tsLineError)
+      sender() ! PaginatedFileParseState(tsErrState, larErrorsReturn, totalLarErrors)
 
     case Shutdown =>
       context stop self
