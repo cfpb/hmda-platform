@@ -3,12 +3,20 @@ syntax = "proto3";
 option java_package = "hmda.persistence.model.serialization";
 option optimize_for = SPEED;
 
+message FilingCreatedMessage {
+    FilingMessage filing = 1;
+}
+
+message FilingStatusUpdatedMessage {
+    FilingMessage filing = 1;
+}
+
 message FilingStatusMessage {
     int32 code = 1;
     string message = 2;
 }
 
-message Filing {
+message FilingMessage {
     string period = 1;
     string institutionId = 2;
     FilingStatusMessage status = 3;
