@@ -11,7 +11,6 @@ object HmdaFiling {
   val name = "HmdaFiling"
 
   case class AddLar(lar: LoanApplicationRegister) extends Command
-  case class LarAdded(lar: LoanApplicationRegister) extends Event
 
   case class HmdaFilingState(filings: Map[String, Int] = Map.empty[String, Int]) {
     def updated(event: Event): HmdaFilingState = {
