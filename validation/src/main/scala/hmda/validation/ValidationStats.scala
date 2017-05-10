@@ -39,14 +39,10 @@ object ValidationStats {
     }
 
     // For an institution and filing period, return SubmissionStats for latest submission
-    def latestStatsFor(inst: String, period: String): Option[SubmissionStats] = {
-      val filtered = stats.filter { s =>
-        s.id.institutionId == inst && s.id.period == period
-      }
-      if (filtered.nonEmpty) {
-        val stats = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        Some(stats)
-      } else None
+    def latestStatsFor(inst: String, period: String): SubmissionStats = {
+      val filtered = stats.filter(s => s.id.institutionId == inst && s.id.period == period)
+      val sorted = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
+      sorted.headOption.getOrElse(SubmissionStats(SubmissionId()))
     }
 
     private def updateCollection(modified: SubmissionStats): ValidationStatsState = {
@@ -96,22 +92,16 @@ class ValidationStats extends HmdaPersistentActor {
       }
 
     case FindTotalSubmittedLars(id, period) =>
-      sender ! getSubmissionStat(id, period).totalSubmittedLars
+      sender ! state.latestStatsFor(id, period).totalSubmittedLars
 
     case FindTotalValidatedLars(id, period) =>
-      sender ! getSubmissionStat(id, period).totalValidatedLars
+      sender ! state.latestStatsFor(id, period).totalValidatedLars
 
     case FindTaxId(id, period) =>
-      sender ! getSubmissionStat(id, period).taxId
+      sender ! state.latestStatsFor(id, period).taxId
 
     case GetState =>
       sender() ! state
-  }
-
-  private def getSubmissionStat(id: String, period: String): SubmissionStats = {
-    val filtered = state.stats.filter(s => s.id.institutionId == id && s.id.period == period)
-    val sorted = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
-    sorted.headOption.getOrElse(SubmissionStats(SubmissionId()))
   }
 
 }
