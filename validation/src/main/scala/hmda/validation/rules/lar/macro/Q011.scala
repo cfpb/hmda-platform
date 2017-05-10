@@ -2,8 +2,6 @@ package hmda.validation.rules.lar.`macro`
 
 import hmda.validation._
 import akka.pattern.ask
-import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
@@ -14,35 +12,25 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.ValidationStats.FindTotalLars
 
-import scala.concurrent.duration._
 import scala.concurrent.Future
 
 object Q011 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
-    IfInstitutionPresentInAggregate(ctx) { new Q011(_, _) }
+    IfContextPresentInAggregate(ctx) { new Q011(_, _) }
   }
 }
 
-class Q011 private (institution: Institution, year: Int) extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
+class Q011 private (institution: Institution, year: Int) extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] with StatsLookup {
   override def name: String = "Q011"
 
-  val configuration = ConfigFactory.load()
   val larSize = configuration.getInt("hmda.validation.macro.Q011.numOfTotalLars")
   val multiplier = configuration.getDouble("hmda.validation.macro.Q011.numOfLarsMultiplier")
 
   override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
-
-    val system = implicitly[AS[_]]
-
-    val configuration = ConfigFactory.load()
-    val duration = configuration.getInt("hmda.actor.timeout")
-    implicit val timeout = Timeout(duration.seconds)
-
     val lastYear = year - 1
     val currentLarCount: Future[Int] = count(lars)
 
-    val validationStats = system.actorSelection("/user/validation-stats")
-
+    val system = implicitly[AS[_]]
     val lastYearCount = (validationStats ? FindTotalLars(institution.id, lastYear.toString)).mapTo[Int]
 
     for {

@@ -8,7 +8,7 @@ import hmda.persistence.model.HmdaPersistentActor
 object ValidationStats {
 
   def name = "ValidationStats"
-  case class SubmissionStats(id: SubmissionId, totalLars: Int, taxId: String)
+  case class SubmissionStats(id: SubmissionId, totalLars: Int = 0, taxId: String = "")
   case class AddSubmissionValidationTotal(total: Int, id: SubmissionId) extends Command
   case class AddSubmissionTaxId(taxId: String, id: SubmissionId) extends Command
   case class SubmissionValidationTotalsAdded(total: Int, id: SubmissionId) extends Event
@@ -25,16 +25,35 @@ object ValidationStats {
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
     def updated(event: Event): ValidationStatsState = event match {
       case SubmissionValidationTotalsAdded(total, id) =>
-        val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id, 0, ""))
-          .copy(totalLars = total)
-        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+        val modified = getStat(id).copy(totalLars = total)
+        updateCollection(modified)
       case SubmissionTaxIdAdded(tax, id) =>
-        val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id, 0, ""))
-          .copy(taxId = tax)
-        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
+        val modified = getStat(id).copy(taxId = tax)
+        updateCollection(modified)
     }
+
+    // For an institution and filing period, determine which
+    //   submission is latest and return its SubmissionStats
+    def latestStatsFor(inst: String, period: String): Option[SubmissionStats] = {
+      val filtered = stats.filter { s =>
+        s.id.institutionId == inst && s.id.period == period
+      }
+      if (filtered.nonEmpty) {
+        val stats = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
+        Some(stats)
+      } else None
+    }
+
+    private def updateCollection(modified: SubmissionStats): ValidationStatsState = {
+      ValidationStatsState(stats.filterNot(sub => sub.id == modified.id) :+ modified)
+    }
+
+    // Return SubmissionStats for a given SubmissionId.
+    //   Used for updating ValidationStatsState.
+    private def getStat(subId: SubmissionId): SubmissionStats = {
+      stats.find(stat => stat.id == subId).getOrElse(SubmissionStats(subId))
+    }
+
   }
 }
 
@@ -67,24 +86,18 @@ class ValidationStats extends HmdaPersistentActor {
       }
 
     case FindTotalLars(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.totalLars
-      } else {
-        sender() ! 0
+      val total = state.latestStatsFor(id, period) match {
+        case Some(stats) => stats.totalLars
+        case None => 0
       }
+      sender() ! total
 
     case FindTaxId(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.taxId
-      } else {
-        sender() ! ""
+      val taxId = state.latestStatsFor(id, period) match {
+        case Some(stats) => stats.taxId
+        case None => ""
       }
+      sender() ! taxId
 
     case GetState =>
       sender() ! state
