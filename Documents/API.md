@@ -276,10 +276,10 @@ Example response, with HTTP code 400:
 | page | Integer. If blank, will default to page 1. Page size is 20 lines of errors. |
 
 
-This endpoint is paginated. The response contains 3 fields of pagination metadata:
+The `larErrors` array in this endpoint is paginated. The response contains 3 fields of pagination metadata:
 
- - `total`: total number of parser errors for this file
- - `count`: number of errors returned on this page. Full page contains errors from 20 lines of the HMDA file.
+ - `total`: total number of LAR parser errors for this file
+ - `count`: number of errors returned on this page. Full page contains errors from 20 LARs of the HMDA file.
  - `links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
 
 

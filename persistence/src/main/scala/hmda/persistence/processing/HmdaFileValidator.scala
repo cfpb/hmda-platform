@@ -93,6 +93,10 @@ object HmdaFileValidator {
     def validityErrors: Seq[ValidationError] = tsValidity ++ larValidity
     def qualityErrors: Seq[ValidationError] = tsQuality ++ larQuality
     def allErrors: Seq[ValidationError] = syntacticalErrors ++ validityErrors ++ qualityErrors ++ larMacro
+    def readyToSign: Boolean =
+      syntacticalErrors.isEmpty && validityErrors.isEmpty &&
+        (qualityErrors.isEmpty || qualityVerified) &&
+        (larMacro.isEmpty || macroVerified)
   }
 
   case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)
@@ -252,7 +256,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       self ! CompleteValidation(replyTo)
 
     case CompleteValidation(replyTo, originalSender) =>
-      if (state.syntacticalErrors.isEmpty && state.validityErrors.isEmpty && state.qualityVerified && state.macroVerified) {
+      if (state.readyToSign) {
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(originalSender)
       } else {
