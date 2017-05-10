@@ -30,7 +30,6 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
     val lastYear = year - 1
     val currentLarCount: Future[Int] = count(lars)
 
-    val system = implicitly[AS[_]]
     val lastYearCount = (validationStats ? FindTotalValidatedLars(institution.id, lastYear.toString)).mapTo[Int]
 
     for {
