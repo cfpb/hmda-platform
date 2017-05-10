@@ -56,6 +56,13 @@ class ValidationStatsSpec extends ActorSpec {
       probe.send(submissionValidationStats, FindTaxId("12345", "2016"))
       probe.expectMsg("c")
     }
+
+    "Find Q071 stats" in {
+      probe.send(submissionValidationStats, FindQ071("12345", "2017"))
+      probe.expectMsg((126, 127))
+      probe.send(submissionValidationStats, FindQ071("12345", "2016"))
+      probe.expectMsg((99, 98))
+    }
   }
 
 }

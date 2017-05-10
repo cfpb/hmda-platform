@@ -38,6 +38,7 @@ object ValidationStats {
   case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
   case class FindTotalValidatedLars(institutionId: String, period: String) extends Command
   case class FindTaxId(institutionId: String, period: String) extends Command
+  case class FindQ071(institutionId: String, period: String) extends Command
 
   def props(): Props = Props(new ValidationStats)
 
@@ -123,6 +124,11 @@ class ValidationStats extends HmdaPersistentActor {
 
     case FindTaxId(id, period) =>
       sender ! state.latestStatsFor(id, period).taxId
+
+    case FindQ071(id, period) =>
+      val stats = state.latestStatsFor(id, period)
+      val q071Stats = (stats.q071Lars, stats.q071SoldLars)
+      sender() ! q071Stats
 
     case GetState =>
       sender() ! state
