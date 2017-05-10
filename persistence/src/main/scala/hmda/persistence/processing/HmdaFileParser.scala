@@ -16,6 +16,7 @@ import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.HmdaRawFile.LineAdded
 import hmda.persistence.processing.ProcessingMessages._
+import hmda.validation.SubmissionLarStats.CountSubmittedLarsInSubmission
 
 import scala.concurrent.duration._
 
@@ -58,6 +59,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
+  val submissionLarStats = context.actorSelection(s"submission-lar-stats-${submissionId.toString}")
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -95,7 +97,11 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         .map { case LineAdded(_, data) => data }
         .drop(1)
         .zip(Source.fromIterator(() => Iterator.from(2)))
-        .map { case (lar, index) => LarCsvParser(lar, index) }
+        .map {
+          case (lar, index) =>
+            submissionLarStats ! lar
+            LarCsvParser(lar, index)
+        }
         .map {
           case Left(errors) =>
             encounteredParsingErrors = true
@@ -134,6 +140,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
       }
 
     case FinishParsing(replyTo) =>
+      submissionLarStats ! CountSubmittedLarsInSubmission
       if (encounteredParsingErrors)
         replyTo ! ParsingCompletedWithErrors(submissionId)
       else
