@@ -33,7 +33,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       for (lar <- lars10) {
         probe.send(submissionLarStats, LarValidated(lar, submissionId))
       }
-      probe.send(submissionLarStats, CountValidatedLarsInSubmission)
+      probe.send(submissionLarStats, PersistStatsForMacroEdits)
       probe.send(submissionLarStats, GetState)
       probe.expectMsg(SubmissionLarStatsState(10, 10))
     }

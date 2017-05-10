@@ -17,6 +17,18 @@ object Q071 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
     IfContextPresentInAggregate(ctx) { new Q071(_, _) }
   }
+
+  def relevant(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    (lar.actionTakenType == 1 || lar.actionTakenType == 6) &&
+      (loan.purpose == 1 || loan.purpose == 3) &&
+      (loan.propertyType == 1 || loan.propertyType == 2) &&
+      (loan.loanType == 2)
+  }
+
+  def sold(lar: LoanApplicationRegister): Boolean = {
+    lar.purchaserType == 2
+  }
 }
 
 class Q071 private (institution: Institution, year: Int) extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
@@ -28,9 +40,9 @@ class Q071 private (institution: Institution, year: Int) extends AggregateEditCh
   val yearDifference = configuration.getDouble("hmda.validation.macro.Q071.relativeProportion")
 
   override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
-    val relevantLars = lars.filter(relevant)
+    val relevantLars = lars.filter(Q071.relevant)
     val numRelevant = count(relevantLars)
-    val numRelevantSold = count(relevantLars.filter(relevantSold))
+    val numRelevantSold = count(relevantLars.filter(Q071.sold))
 
     for {
       r <- numRelevant
@@ -48,17 +60,5 @@ class Q071 private (institution: Institution, year: Int) extends AggregateEditCh
       }
       */
     }
-  }
-
-  private def relevant(lar: LoanApplicationRegister): Boolean = {
-    val loan = lar.loan
-    (lar.actionTakenType == 1 || lar.actionTakenType == 6) &&
-      (loan.purpose == 1 || loan.purpose == 3) &&
-      (loan.propertyType == 1 || loan.propertyType == 2) &&
-      (loan.loanType == 2)
-  }
-
-  private def relevantSold(lar: LoanApplicationRegister): Boolean = {
-    relevant(lar) && lar.purchaserType == 2
   }
 }
