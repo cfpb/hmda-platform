@@ -38,8 +38,6 @@ trait ModelGenerators {
     } yield Filing(id, fid, status, filingRequired, start, end)
   }
 
-
-
   implicit def filingDetailGen: Gen[FilingDetail] = {
     for {
       filing <- filingGen
