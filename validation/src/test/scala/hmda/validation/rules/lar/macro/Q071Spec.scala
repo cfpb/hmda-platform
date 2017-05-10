@@ -37,25 +37,25 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
     "current year: fails when too few relevant loans sold to Ginnie Mae" in {
       val instId = "first"
       val numSold: Int = (threshold * proportionSold).toInt
-      val relevantNotSoldLars = listOfN(threshold - numSold, relevantNotSold)
-      val relevantSoldLars = listOfN(numSold, relevantSold)
-      val irrelevantLars = listOfN(any, irrelevant)
+      val relevantNotSoldLars = listOfN(threshold - numSold, Q071Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(numSold, Q071Spec.relevantSold)
+      val irrelevantLars = listOfN(any, Q071Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Failure])
     }
     "current year: passes when enough relevant loans sold to Ginnie Mae" in {
       val instId = "second"
       val numSold: Int = (threshold * proportionSold).toInt + 1
-      val relevantNotSoldLars = listOfN(threshold - numSold, relevantNotSold)
-      val relevantSoldLars = listOfN(numSold, relevantSold)
-      val irrelevantLars = listOfN(any, irrelevant)
+      val relevantNotSoldLars = listOfN(threshold - numSold, Q071Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(numSold, Q071Spec.relevantSold)
+      val irrelevantLars = listOfN(any, Q071Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
     }
     s"current year: passes when number of relevant loans is below $threshold" in {
       val instId = "third"
-      val relevantSoldLars = listOfN(threshold - 1, relevantSold)
-      val irrelevantLars = listOfN(any, irrelevant)
+      val relevantSoldLars = listOfN(threshold - 1, Q071Spec.relevantSold)
+      val irrelevantLars = listOfN(any, Q071Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
     }
@@ -87,17 +87,20 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
     larNGen(n).sample.getOrElse(List()).map(transform)
   }
 
+}
+
+object Q071Spec {
   //// LAR transformation methods /////
 
-  private def irrelevant(lar: LoanApplicationRegister): LoanApplicationRegister = {
+  def irrelevant(lar: LoanApplicationRegister): LoanApplicationRegister = {
     lar.copy(actionTakenType = 2)
   }
 
-  private def relevantSold(lar: LoanApplicationRegister): LoanApplicationRegister = {
+  def relevantSold(lar: LoanApplicationRegister): LoanApplicationRegister = {
     relevant(lar).copy(purchaserType = 2)
   }
 
-  private def relevantNotSold(lar: LoanApplicationRegister): LoanApplicationRegister = {
+  def relevantNotSold(lar: LoanApplicationRegister): LoanApplicationRegister = {
     val purchaser = Gen.oneOf(0, 1, 3, 4, 5, 6, 7, 8, 9).sample.get
     relevant(lar).copy(purchaserType = purchaser)
   }
