@@ -101,6 +101,11 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val testLars = toSource(relevantSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
     }
+    s"(current year check) doesn't blow up when there are 0 relevant loans" in {
+      val instId = "fourth"
+      val irrelevantLarSource = toSource(listOfN(any, Q071Spec.irrelevant))
+      Q071.inContext(ctx(instId))(irrelevantLarSource).map(r => r mustBe a[Success])
+    }
 
     //// Must handle context correctly ////
     "be named Q071 when institution and year are present" in {
