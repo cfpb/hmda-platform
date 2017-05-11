@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+message SubmissionIdMessage {
+    string institutionId = 1;
+    string period = 2;
+    int32 sequenceNumber = 3;
+}
+
+message SubmissionStatusMessage {
+    int32 code = 1;
+    string message = 2;
+    string description = 3;
+}
+
+message SubmissionMessage {
+    SubmissionIdMessage id = 1;
+    SubmissionStatusMessage status = 2;
+    int64 start = 3;
+    int64 end = 4;
+    string receipt = 5;
+}
+
+message SubmissionCreatedMessage {
+    SubmissionMessage submission = 1;
+}
+
+message SubmissionStatusUpdatedMessage {
+    SubmissionIdMessage id = 1;
+    SubmissionStatusMessage status = 2;
+}
