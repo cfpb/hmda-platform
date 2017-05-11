@@ -45,7 +45,7 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     val instId = "inst-with-prev-year-data"
     "set up: persist last year's data: sold 60% of loans" in {
       validationStats ! AddSubmissionMacroStats(SubmissionId(instId, "2016", 1), 0, 100, 60)
-      val (relevant, relevantSold) = Await.result((validationStats ? FindQ071(instId, "2016")).mapTo[(Int, Int)], 2.seconds)
+      val (relevant, relevantSold) = Await.result((validationStats ? FindQ071(instId, "2016")).mapTo[(Int, Int)], 5.seconds)
       relevant mustBe 100
       relevantSold mustBe 60
     }
