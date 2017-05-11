@@ -28,7 +28,9 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       }
       probe.send(submissionLarStats, CountSubmittedLarsInSubmission)
       probe.send(submissionLarStats, GetState)
-      probe.expectMsg(SubmissionLarStatsState(10, 0))
+      val stats = probe.expectMsgType[SubmissionLarStatsState]
+      stats.totalSubmitted mustBe 10
+      stats.totalValidated mustBe 0
     }
 
     "Aggregate total verified lar count for a submission" in {
@@ -37,7 +39,9 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       }
       probe.send(submissionLarStats, PersistStatsForMacroEdits)
       probe.send(submissionLarStats, GetState)
-      probe.expectMsg(SubmissionLarStatsState(10, 10))
+      val stats = probe.expectMsgType[SubmissionLarStatsState]
+      stats.totalSubmitted mustBe 10
+      stats.totalValidated mustBe 10
     }
 
     "Aggregate all lars relevant to Q071" in {

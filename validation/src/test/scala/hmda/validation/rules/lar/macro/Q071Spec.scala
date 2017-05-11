@@ -1,22 +1,31 @@
 package hmda.validation.rules.lar.`macro`
 
 import akka.actor.ActorSystem
+import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
+import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.sampleInstitution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
+import hmda.validation.ValidationStats._
 import org.scalacheck.Gen
-import org.scalatest.{ AsyncWordSpec, MustMatchers }
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
-class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
+import scala.concurrent.{ Await, duration }
+import scala.concurrent.duration._
+
+class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   implicit override def executionContext = system.dispatcher
+  implicit val timeout = Timeout(5.seconds)
+  val validationStats = createValidationStats(system)
 
   val configuration = ConfigFactory.load()
   val threshold = configuration.getInt("hmda.validation.macro.Q071.currentYearThreshold")
@@ -24,17 +33,50 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
   val yearDifference = configuration.getDouble("hmda.validation.macro.Q071.relativeProportion")
   def any: Int = Gen.choose(0, 100).sample.get
 
+  override def afterAll(): Unit = {
+    super.afterAll()
+    system.terminate()
+  }
+
   "Q071" must {
     val currentYear = 2017
 
     //// Check #1: comparing last year to this year ////
-    "fetch count of previous year's relevant loans" in {
+    val instId = "inst-with-prev-year-data"
+    "set up: persist last year's data: sold 60% of loans" in {
+      validationStats ! AddSubmissionMacroStats(SubmissionId(instId, "2016", 1), 0, 100, 60)
+      val (relevant, relevantSold) = Await.result((validationStats ? FindQ071(instId, "2016")).mapTo[(Int, Int)], 2.seconds)
+      relevant mustBe 100
+      relevantSold mustBe 60
+    }
 
-      true mustBe true
+    "(previous year check) pass when percentage sold is greater in current year than previous year" in {
+      val numSold = (200 * (0.6 + yearDifference)).toInt
+      val relevantNotSoldLars = listOfN(200 - numSold, Q071Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(numSold, Q071Spec.relevantSold)
+      val irrelevantLars = listOfN(any, Q071Spec.irrelevant)
+      val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
+      Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
+    }
+    s"(previous year check) pass when percentage sold is close enough to last year's percentage sold (within $yearDifference)" in {
+      val numSold = (200 * (0.6 - yearDifference) + 1).toInt
+      val relevantNotSoldLars = listOfN(200 - numSold, Q071Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(numSold, Q071Spec.relevantSold)
+      val irrelevantLars = listOfN(any, Q071Spec.irrelevant)
+      val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
+      Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
+    }
+    s"(previous year check) fail when percentage sold is too low compared to previous year ($yearDifference difference or more)" in {
+      val numSold = (200 * (0.6 - yearDifference) - 1).toInt
+      val relevantNotSoldLars = listOfN(200 - numSold, Q071Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(numSold, Q071Spec.relevantSold)
+      val irrelevantLars = listOfN(any, Q071Spec.irrelevant)
+      val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
+      Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Failure])
     }
 
     //// Check #2: Current Year ////
-    "current year: fails when too few relevant loans sold to Ginnie Mae" in {
+    "(current year check) fails when too few relevant loans sold to Ginnie Mae" in {
       val instId = "first"
       val numSold: Int = (threshold * proportionSold).toInt
       val relevantNotSoldLars = listOfN(threshold - numSold, Q071Spec.relevantNotSold)
@@ -43,7 +85,7 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Failure])
     }
-    "current year: passes when enough relevant loans sold to Ginnie Mae" in {
+    "(current year check) passes when enough relevant loans sold to Ginnie Mae" in {
       val instId = "second"
       val numSold: Int = (threshold * proportionSold).toInt + 1
       val relevantNotSoldLars = listOfN(threshold - numSold, Q071Spec.relevantNotSold)
@@ -52,7 +94,7 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
     }
-    s"current year: passes when number of relevant loans is below $threshold" in {
+    s"(current year check) passes when number of relevant loans is below $threshold" in {
       val instId = "third"
       val relevantSoldLars = listOfN(threshold - 1, Q071Spec.relevantSold)
       val irrelevantLars = listOfN(any, Q071Spec.irrelevant)
