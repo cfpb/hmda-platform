@@ -41,20 +41,24 @@ class Q072 private (institution: Institution, year: Int) extends AggregateEditCh
 
   override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
     val relevantLars = lars.filter(Q072.relevant)
-    val numRelevant = count(relevantLars)
-    val numRelevantSold = count(relevantLars.filter(Q072.sold))
+    val currentYearCount = count(relevantLars)
+    val currentYearSold = count(relevantLars.filter(Q072.sold))
+
+    val previousYearCount = 0
+    val previousYearSold = 0
 
     for {
-      r <- numRelevant
-      rs <- numRelevantSold
+      relevantCount <- currentYearCount
+      relevantSold <- currentYearSold
     } yield {
-      r is greaterThan(1)
+      val currentRatio = relevantSold.toDouble / relevantCount
+      val previousRatio = previousYearSold.toDouble / previousYearCount
 
-      /* // current year check
-      when(r is greaterThanOrEqual(threshold)) {
-        (rs.toDouble / r) is greaterThan(minProportionSold)
+      when(currentRatio is lessThan(previousRatio)) {
+        (previousRatio - currentRatio) is greaterThanOrEqual(yearDifference)
+      } or when(relevantCount is greaterThanOrEqual(threshold)) {
+        currentRatio is greaterThanOrEqual(minProportionSold)
       }
-      */
     }
   }
 }
