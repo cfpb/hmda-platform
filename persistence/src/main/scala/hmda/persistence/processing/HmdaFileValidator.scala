@@ -27,7 +27,7 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.validation.SubmissionLarStats
-import hmda.validation.SubmissionLarStats.CountLarsInSubmission
+import hmda.validation.SubmissionLarStats.CountValidatedLarsInSubmission
 import hmda.validation.ValidationStats.AddSubmissionTaxId
 
 import scala._
@@ -93,6 +93,10 @@ object HmdaFileValidator {
     def validityErrors: Seq[ValidationError] = tsValidity ++ larValidity
     def qualityErrors: Seq[ValidationError] = tsQuality ++ larQuality
     def allErrors: Seq[ValidationError] = syntacticalErrors ++ validityErrors ++ qualityErrors ++ larMacro
+    def readyToSign: Boolean =
+      syntacticalErrors.isEmpty && validityErrors.isEmpty &&
+        (qualityErrors.isEmpty || qualityVerified) &&
+        (larMacro.isEmpty || macroVerified)
   }
 
   case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)
@@ -118,7 +122,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
   val supervisor = system.actorSelection("/user/supervisor")
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
 
-  val submissionLarStats = context.actorOf(SubmissionLarStats.props(submissionId))
+  val submissionLarStats = context.actorSelection(s"submission-lar-stats-${submissionId.toString}")
 
   override def preStart(): Unit = {
     super.preStart()
@@ -204,7 +208,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ValidateMacro(larSource, replyTo) =>
       log.debug("Quality Validation completed")
-      submissionLarStats ! CountLarsInSubmission
+      submissionLarStats ! CountValidatedLarsInSubmission
       val fMacro = checkMacro(larSource, ctx)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
@@ -252,7 +256,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       self ! CompleteValidation(replyTo)
 
     case CompleteValidation(replyTo, originalSender) =>
-      if (state.syntacticalErrors.isEmpty && state.validityErrors.isEmpty && state.qualityVerified && state.macroVerified) {
+      if (state.readyToSign) {
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(originalSender)
       } else {

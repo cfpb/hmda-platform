@@ -8,12 +8,15 @@ import hmda.persistence.model.HmdaPersistentActor
 object ValidationStats {
 
   def name = "ValidationStats"
-  case class SubmissionStats(id: SubmissionId, totalLars: Int, taxId: String)
+  case class SubmissionStats(id: SubmissionId, totalSubmittedLars: Int = 0, totalValidatedLars: Int = 0, taxId: String = "")
+  case class AddSubmissionSubmittedTotal(total: Int, id: SubmissionId) extends Command
   case class AddSubmissionValidationTotal(total: Int, id: SubmissionId) extends Command
   case class AddSubmissionTaxId(taxId: String, id: SubmissionId) extends Command
+  case class SubmissionSubmittedTotalsAdded(total: Int, id: SubmissionId) extends Event
   case class SubmissionValidationTotalsAdded(total: Int, id: SubmissionId) extends Event
   case class SubmissionTaxIdAdded(taxId: String, id: SubmissionId) extends Event
-  case class FindTotalLars(institutionId: String, period: String) extends Command
+  case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
+  case class FindTotalValidatedLars(institutionId: String, period: String) extends Command
   case class FindTaxId(institutionId: String, period: String) extends Command
 
   def props(): Props = Props(new ValidationStats)
@@ -24,14 +27,19 @@ object ValidationStats {
 
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
     def updated(event: Event): ValidationStatsState = event match {
+      case SubmissionSubmittedTotalsAdded(total, id) =>
+        val modifiedSub = stats.find(stat => stat.id == id)
+          .getOrElse(SubmissionStats(id))
+          .copy(totalSubmittedLars = total)
+        ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
       case SubmissionValidationTotalsAdded(total, id) =>
         val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id, 0, ""))
-          .copy(totalLars = total)
+          .getOrElse(SubmissionStats(id))
+          .copy(totalValidatedLars = total)
         ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
       case SubmissionTaxIdAdded(tax, id) =>
         val modifiedSub = stats.find(stat => stat.id == id)
-          .getOrElse(SubmissionStats(id, 0, ""))
+          .getOrElse(SubmissionStats(id))
           .copy(taxId = tax)
         ValidationStatsState(stats.filterNot(sub => sub.id == id) :+ modifiedSub)
     }
@@ -54,6 +62,12 @@ class ValidationStats extends HmdaPersistentActor {
   }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
+    case AddSubmissionSubmittedTotal(total, id) =>
+      persist(SubmissionSubmittedTotalsAdded(total, id)) { e =>
+        log.debug(s"Persisted: $e")
+        updateState(e)
+      }
+
     case AddSubmissionValidationTotal(total, id) =>
       persist(SubmissionValidationTotalsAdded(total, id)) { e =>
         log.debug(s"Persisted: $e")
@@ -66,28 +80,23 @@ class ValidationStats extends HmdaPersistentActor {
         updateState(e)
       }
 
-    case FindTotalLars(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.totalLars
-      } else {
-        sender() ! 0
-      }
+    case FindTotalSubmittedLars(id, period) =>
+      sender ! getSubmissionStat(id, period).totalSubmittedLars
+
+    case FindTotalValidatedLars(id, period) =>
+      sender ! getSubmissionStat(id, period).totalValidatedLars
 
     case FindTaxId(id, period) =>
-      val submissionStats = state.stats
-      val filtered = submissionStats.filter(s => s.id.institutionId == id && s.id.period == period)
-      if (filtered.nonEmpty) {
-        val submission = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber).head
-        sender() ! submission.taxId
-      } else {
-        sender() ! ""
-      }
+      sender ! getSubmissionStat(id, period).taxId
 
     case GetState =>
       sender() ! state
+  }
+
+  private def getSubmissionStat(id: String, period: String): SubmissionStats = {
+    val filtered = state.stats.filter(s => s.id.institutionId == id && s.id.period == period)
+    val sorted = filtered.sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
+    sorted.headOption.getOrElse(SubmissionStats(SubmissionId()))
   }
 
 }

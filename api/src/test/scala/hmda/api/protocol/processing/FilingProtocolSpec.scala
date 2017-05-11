@@ -5,6 +5,7 @@ import hmda.model.fi.Filing
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 import spray.json._
+import hmda.model.institution.FilingGenerators._
 
 class FilingProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with ModelGenerators with FilingProtocol {
 

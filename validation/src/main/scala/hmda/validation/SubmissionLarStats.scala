@@ -5,13 +5,14 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.ValidationStats.AddSubmissionValidationTotal
+import hmda.validation.ValidationStats.{ AddSubmissionSubmittedTotal, AddSubmissionValidationTotal, SubmissionStats }
 
 object SubmissionLarStats {
-  def name = "SubmissionStats"
+  val name = "SubmissionStats"
 
-  case class CountLarsInSubmission() extends Command
-  case class SubmissionStatsUpdated(total: Int) extends Event
+  case class CountValidatedLarsInSubmission() extends Command
+  case class CountSubmittedLarsInSubmission() extends Command
+  case class SubmissionStatsUpdated(totalSubmitted: Int, totalValidated: Int) extends Event
 
   def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
 
@@ -19,10 +20,10 @@ object SubmissionLarStats {
     system.actorOf(SubmissionLarStats.props(submissionId))
   }
 
-  case class SubmissionLarStatsState(totalLars: Int = 0) {
+  case class SubmissionLarStatsState(totalSubmitted: Int = 0, totalVerified: Int = 0) {
     def updated(event: Event): SubmissionLarStatsState = event match {
-      case SubmissionStatsUpdated(total) =>
-        SubmissionLarStatsState(total)
+      case SubmissionStatsUpdated(submitted, verified) =>
+        SubmissionLarStatsState(totalSubmitted + submitted, totalVerified + verified)
     }
   }
 }
@@ -30,7 +31,9 @@ object SubmissionLarStats {
 class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor {
   import SubmissionLarStats._
 
-  var totalLars = 0
+  var totalSubmittedLars = 0
+  var totalValidatedLars = 0
+
   var state = SubmissionLarStatsState()
 
   override def persistenceId: String = s"$name-${submissionId.toString}"
@@ -40,15 +43,26 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
   }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
-    case LarValidated(_, _) =>
-      totalLars = totalLars + 1
+    case s: String =>
+      totalSubmittedLars = totalSubmittedLars + 1
 
-    case CountLarsInSubmission =>
-      persist(SubmissionStatsUpdated(totalLars)) { e =>
-        log.debug(s"Persisted: $totalLars")
+    case LarValidated(_, _) =>
+      totalValidatedLars = totalValidatedLars + 1
+
+    case CountSubmittedLarsInSubmission =>
+      persist(SubmissionStatsUpdated(totalSubmittedLars, 0)) { e =>
+        log.debug(s"Persisted: $totalSubmittedLars")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")
-        validationStats ! AddSubmissionValidationTotal(totalLars, submissionId)
+        validationStats ! AddSubmissionSubmittedTotal(totalSubmittedLars, submissionId)
+      }
+
+    case CountValidatedLarsInSubmission =>
+      persist(SubmissionStatsUpdated(0, totalValidatedLars)) { e =>
+        log.debug(s"Persisted: $totalValidatedLars")
+        updateState(e)
+        val validationStats = context.actorSelection("/user/validation-stats")
+        validationStats ! AddSubmissionValidationTotal(totalValidatedLars, submissionId)
       }
 
     case GetState =>

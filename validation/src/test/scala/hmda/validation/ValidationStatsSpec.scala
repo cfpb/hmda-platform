@@ -14,24 +14,40 @@ class ValidationStatsSpec extends ActorSpec {
 
   "Submission Validation Stats" must {
     "Add submission stats" in {
-      val s1 = SubmissionStats(SubmissionId("12345", "2017", 1), 100, "a")
-      val s2 = SubmissionStats(SubmissionId("12345", "2017", 2), 125, "b")
-      val s3 = SubmissionStats(SubmissionId("12345", "2016", 1), 100, "c")
-      probe.send(submissionValidationStats, AddSubmissionValidationTotal(100, SubmissionId("12345", "2017", 1)))
-      probe.send(submissionValidationStats, AddSubmissionTaxId("a", SubmissionId("12345", "2017", 1)))
-      probe.send(submissionValidationStats, AddSubmissionValidationTotal(125, SubmissionId("12345", "2017", 2)))
-      probe.send(submissionValidationStats, AddSubmissionTaxId("b", SubmissionId("12345", "2017", 2)))
-      probe.send(submissionValidationStats, AddSubmissionValidationTotal(100, SubmissionId("12345", "2016", 1)))
-      probe.send(submissionValidationStats, AddSubmissionTaxId("c", SubmissionId("12345", "2016", 1)))
+      val id1 = SubmissionId("12345", "2017", 1)
+      val id2 = SubmissionId("12345", "2017", 2)
+      val id3 = SubmissionId("12345", "2016", 1)
+      val s1 = SubmissionStats(id1, 99, 100, "a")
+      val s2 = SubmissionStats(id2, 124, 125, "b")
+      val s3 = SubmissionStats(id3, 101, 100, "c")
+      probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(99, id1))
+      probe.send(submissionValidationStats, AddSubmissionValidationTotal(100, id1))
+      probe.send(submissionValidationStats, AddSubmissionTaxId("a", id1))
+      probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(124, id2))
+      probe.send(submissionValidationStats, AddSubmissionValidationTotal(125, id2))
+      probe.send(submissionValidationStats, AddSubmissionTaxId("b", id2))
+      probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(101, id3))
+      probe.send(submissionValidationStats, AddSubmissionValidationTotal(100, id3))
+      probe.send(submissionValidationStats, AddSubmissionTaxId("c", id3))
+
       probe.send(submissionValidationStats, GetState)
       probe.expectMsg(ValidationStatsState(Seq(s1, s2, s3)))
     }
-    "Find total lars for an institution in a certain period" in {
-      probe.send(submissionValidationStats, FindTotalLars("12345", "2016"))
+
+    "Find total submitted lars for an institution in a certain period" in {
+      probe.send(submissionValidationStats, FindTotalSubmittedLars("12345", "2016"))
+      probe.expectMsg(101)
+      probe.send(submissionValidationStats, FindTotalSubmittedLars("12345", "2017"))
+      probe.expectMsg(124)
+    }
+
+    "Find total validated lars for an institution in a certain period" in {
+      probe.send(submissionValidationStats, FindTotalValidatedLars("12345", "2016"))
       probe.expectMsg(100)
-      probe.send(submissionValidationStats, FindTotalLars("12345", "2017"))
+      probe.send(submissionValidationStats, FindTotalValidatedLars("12345", "2017"))
       probe.expectMsg(125)
     }
+
     "Find tax ID for an institution in a certain period" in {
       probe.send(submissionValidationStats, FindTaxId("12345", "2017"))
       probe.expectMsg("b")
