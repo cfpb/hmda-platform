@@ -1,11 +1,11 @@
-package hmda.persistence.serialization.filing
+package hmda.persistence.serialization.validation
 
 import akka.serialization.SerializerWithStringManifest
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.serialization.HmdaFilingEvents.LarValidatedMessage
-import hmda.persistence.serialization.filing.HmdaFilingProtobufConverter._
+import hmda.persistence.serialization.validation.LarValidatedProtobufConverter._
 
-class HmdaFilingProtobufSerializer extends SerializerWithStringManifest {
+class LarValidatedProtobufSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 1004
 
   override def manifest(o: AnyRef): String = o.getClass.getName

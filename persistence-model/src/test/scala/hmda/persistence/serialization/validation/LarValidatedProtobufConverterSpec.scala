@@ -1,14 +1,14 @@
-package hmda.persistence.serialization.filing
+package hmda.persistence.serialization.validation
 
 import hmda.model.fi.lar.LarGenerators
-import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
-import org.scalatest.{ MustMatchers, PropSpec }
-import org.scalatest.prop.PropertyChecks
-import hmda.persistence.serialization.filing.HmdaFilingProtobufConverter._
 import hmda.model.institution.SubmissionGenerators._
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.serialization.HmdaFilingEvents.LarValidatedMessage
+import LarValidatedProtobufConverter._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 
-class HmdaFilingProtobufConverterSpec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
+class LarValidatedProtobufConverterSpec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators {
 
   property("Lar Validated must serialize to protobuf and back") {
     forAll(larGen, submissionIdGen) { (lar, submissionId) =>
