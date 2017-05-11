@@ -6,6 +6,7 @@ import hmda.model.fi.Submission
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._
+import hmda.model.institution.SubmissionGenerators._
 
 class SubmissionProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with ModelGenerators with SubmissionProtocol {
 
