@@ -4,5 +4,59 @@ option java_package = "hmda.persistence.model.serialization";
 option optimize_for = SPEED;
 
 message LoanApplicationRegisterMessage {
+    int32 id = 1;
+    string respondentId = 2;
+    int32 agencyCode = 3;
+    LoanMessage loan = 4;
+    int32 preapprovals = 5;
+    int32 actionTakenType = 6;
+    int32 actionTakenDate = 7;
+    GeographyMessage geography = 8;
+    ApplicantMessage applicant = 9;
+    int32 purchaserType = 10;
+    DenialMessage denial = 11;
+    string rateSpread = 12;
+    int32 hoepaStatus = 13;
+    int32 lienStatus = 14;
+}
 
+message LoanMessage {
+    string id = 1;
+    string applicationDate = 2;
+    int32 loanType = 3;
+    int32 propertyType = 4;
+    int32 purpose = 5;
+    int32 occupancy = 6;
+    int32 amount = 7;
+}
+
+message GeographyMessage {
+    string msa = 1;
+    string state = 2;
+    string county = 3;
+    string tract = 4;
+}
+
+message ApplicantMessage {
+    int32 ethnicity = 1;
+    int32 coEthnicity = 2;
+    int32 race1 = 3;
+    string race2 = 4;
+    string race3 = 5;
+    string race4 = 6;
+    string race5 = 7;
+    int32 coRace1 = 8;
+    string coRace2 = 9;
+    string coRace3 = 10;
+    string coRace4 = 11;
+    string coRace5 = 12;
+    int32 sex = 13;
+    int32 coSex = 14;
+    string income = 15;
+}
+
+message DenialMessage {
+    string reason1 = 1;
+    string reason2 = 2;
+    string reason3 = 3;
 }
