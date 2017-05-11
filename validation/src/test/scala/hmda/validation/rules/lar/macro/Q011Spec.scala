@@ -9,10 +9,10 @@ import hmda.model.fi.lar.LarGenerators
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.ValidationStats._
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import scala.concurrent.duration._
-import hmda.validation.ValidationStats._
 
 class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
   val configuration = ConfigFactory.load()
