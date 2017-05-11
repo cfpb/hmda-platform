@@ -38,8 +38,6 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     system.terminate()
   }
 
-  // TODO: Remember to change the values in application.conf
-
   "Q071" must {
     val currentYear = 2017
 

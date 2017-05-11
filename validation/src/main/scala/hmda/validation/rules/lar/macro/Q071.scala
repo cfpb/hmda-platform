@@ -55,13 +55,17 @@ class Q071 private (institution: Institution, year: Int) extends AggregateEditCh
       val percentageSoldCurrentYear = rs.toDouble / r
       val percentageSoldPreviousYear = lastYearSold.toDouble / lastYearRelevant
 
-      // Previous Year Check
-      (percentageSoldCurrentYear is lessThan(percentageSoldPreviousYear)) and
-        ((percentageSoldPreviousYear - percentageSoldCurrentYear) is lessThan(yearDifference)) or
-        // Current Year Check
-        when(r is greaterThanOrEqual(threshold)) {
-          percentageSoldCurrentYear is greaterThan(minProportionSold)
-        }
+      val check1Fails = (percentageSoldPreviousYear - percentageSoldCurrentYear) not lessThan(yearDifference)
+      val check2Fails = percentageSoldCurrentYear not greaterThan(minProportionSold)
+      val check1NotApplicable = percentageSoldCurrentYear not lessThan(percentageSoldPreviousYear)
+      val check2NotApplicable = r not greaterThanOrEqual(threshold)
+
+      when(check1Fails) {
+        check1NotApplicable
+      } and when(check2Fails) {
+        check2NotApplicable
+      }
+
     }
   }
 }
