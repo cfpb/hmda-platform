@@ -5,6 +5,7 @@ import hmda.model.fi.{ Completed, Filing, InProgress, NotStarted }
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.model.HmdaPersistentActor
+import hmda.persistence.messages.events.institutions.FilingEvents._
 
 object FilingPersistence {
 
@@ -13,9 +14,6 @@ object FilingPersistence {
   case class CreateFiling(filing: Filing) extends Command
   case class UpdateFilingStatus(filing: Filing) extends Command
   case class GetFilingByPeriod(period: String) extends Command
-
-  case class FilingCreated(filing: Filing) extends Event
-  case class FilingStatusUpdated(filing: Filing) extends Event
 
   def props(institutionId: String): Props = Props(new FilingPersistence(institutionId))
 
@@ -73,11 +71,11 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
         } else {
           modified.end
         }
-        val withTimes = modified.copy(start = start, end = end)
-        persist(FilingStatusUpdated(withTimes)) { e =>
-          log.debug(s"persisted: $withTimes")
+        val updatedFiling = modified.copy(start = start, end = end)
+        persist(FilingStatusUpdated(updatedFiling)) { e =>
+          log.debug(s"persisted: $updatedFiling")
           updateState(e)
-          sender() ! Some(withTimes)
+          sender() ! Some(updatedFiling)
         }
       } else {
         sender() ! None
