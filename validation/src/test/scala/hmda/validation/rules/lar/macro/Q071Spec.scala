@@ -45,7 +45,7 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     val instId = "inst-with-prev-year-data"
     "set up: persist last year's data: sold 60% of loans" in {
       validationStats ! AddSubmissionMacroStats(SubmissionId(instId, "2016", 1), 0, 100, 60)
-      val (relevant, relevantSold) = Await.result((validationStats ? FindQ071(instId, "2016")).mapTo[(Int, Int)], 2.seconds)
+      val (relevant, relevantSold) = Await.result((validationStats ? FindQ071(instId, "2016")).mapTo[(Int, Int)], 5.seconds)
       relevant mustBe 100
       relevantSold mustBe 60
     }
@@ -100,6 +100,11 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val irrelevantLars = listOfN(any, Q071Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
+    }
+    s"(current year check) doesn't blow up when there are 0 relevant loans" in {
+      val instId = "fourth"
+      val irrelevantLarSource = toSource(listOfN(any, Q071Spec.irrelevant))
+      Q071.inContext(ctx(instId))(irrelevantLarSource).map(r => r mustBe a[Success])
     }
 
     //// Must handle context correctly ////
