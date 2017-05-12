@@ -1,55 +1,30 @@
 package hmda.validation.rules.lar.`macro`
 
-import akka.actor.ActorSystem
 import akka.pattern.ask
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
-import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
-import hmda.model.institution.InstitutionGenerators.sampleInstitution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
-import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.ValidationStats._
 import org.scalacheck.Gen
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
-import scala.concurrent.{ Await, duration }
-import scala.concurrent.duration._
+import scala.concurrent.Await
 
-class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  implicit override def executionContext = system.dispatcher
-  implicit val timeout = Timeout(5.seconds)
-  val validationStats = createValidationStats(system)
-
-  val configuration = ConfigFactory.load()
+class Q071Spec extends MacroSpecWithValidationStats {
   val threshold = configuration.getInt("hmda.validation.macro.Q071.currentYearThreshold")
   val proportionSold = configuration.getDouble("hmda.validation.macro.Q071.currentYearProportion")
   val yearDifference = configuration.getDouble("hmda.validation.macro.Q071.relativeProportion")
-  def any: Int = Gen.choose(0, 100).sample.get
-
-  override def afterAll(): Unit = {
-    super.afterAll()
-    system.terminate()
-  }
 
   "Q071" must {
-    val currentYear = 2017
-
     //// Check #1: comparing last year to this year ////
     val instId = "inst-with-prev-year-data"
     "set up: persist last year's data: sold 60% of loans" in {
       validationStats ! AddSubmissionMacroStats(SubmissionId(instId, "2016", 1), 0, 100, 60)
-      val (relevant, relevantSold) = Await.result((validationStats ? FindQ071(instId, "2016")).mapTo[(Int, Int)], 5.seconds)
+      val (relevant, relevantSold) = Await.result((validationStats ? FindQ071(instId, "2016")).mapTo[(Int, Int)], duration)
       relevant mustBe 100
       relevantSold mustBe 60
     }
-
     "(previous year check) pass when percentage sold is greater in current year than previous year" in {
       val numSold = (200 * (0.6 + yearDifference)).toInt
       val relevantNotSoldLars = listOfN(200 - numSold, Q071Spec.relevantNotSold)
@@ -101,7 +76,7 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val testLars = toSource(relevantSoldLars ++ irrelevantLars)
       Q071.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
     }
-    s"(current year check) doesn't blow up when there are 0 relevant loans" in {
+    "(current year check) doesn't blow up when there are 0 relevant loans" in {
       val instId = "fourth"
       val irrelevantLarSource = toSource(listOfN(any, Q071Spec.irrelevant))
       Q071.inContext(ctx(instId))(irrelevantLarSource).map(r => r mustBe a[Success])
@@ -111,9 +86,8 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     "be named Q071 when institution and year are present" in {
       Q071.inContext(ctx("Any")).name mustBe "Q071"
     }
-
     "be named 'empty' when institution or year is not present" in {
-      val ctx1 = ValidationContext(None, Some(currentYear))
+      val ctx1 = ValidationContext(None, Some(2017))
       Q071.inContext(ctx1).name mustBe "empty"
 
       val ctx2 = ValidationContext(Some(Institution.empty), None)
@@ -121,22 +95,10 @@ class Q071Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     }
 
   }
-
-  private def ctx(institutionId: String, currentYear: Int = 2017): ValidationContext = {
-    ValidationContext(Some(sampleInstitution.copy(id = institutionId)), Some(currentYear))
-  }
-
-  private def toSource(lars: List[LoanApplicationRegister]): LoanApplicationRegisterSource = {
-    Source.fromIterator(() => lars.toIterator)
-  }
-
-  private def listOfN(n: Int, transform: LoanApplicationRegister => LoanApplicationRegister): List[LoanApplicationRegister] = {
-    larNGen(n).sample.getOrElse(List()).map(transform)
-  }
-
 }
 
 object Q071Spec {
+
   //// LAR transformation methods /////
 
   def irrelevant(lar: LoanApplicationRegister): LoanApplicationRegister = {
