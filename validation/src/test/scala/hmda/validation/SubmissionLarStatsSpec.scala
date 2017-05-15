@@ -7,7 +7,7 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
 import hmda.validation.SubmissionLarStats._
-import hmda.validation.rules.lar.`macro`.{ Q071Spec, Q072Spec }
+import hmda.validation.rules.lar.`macro`.{ Q070Spec, Q071Spec, Q072Spec }
 import org.scalacheck.Gen
 
 class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
@@ -44,13 +44,13 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       stats.totalValidated mustBe 10
     }
 
-    "Aggregate all lars relevant to Q071" in {
+    "Aggregate all lars relevant to Q070" in {
       val submissionId2 = SubmissionId("12345", "2017", 2)
       val submissionLarStats2 = createSubmissionStats(system, submissionId2)
 
-      val irrelevantLars = listOfN(5, Q071Spec.irrelevant)
-      val relevantNotSoldLars = listOfN(6, Q071Spec.relevantNotSold)
-      val relevantSoldLars = listOfN(7, Q071Spec.relevantSold)
+      val irrelevantLars = listOfN(11, Q070Spec.irrelevant)
+      val relevantNotSoldLars = listOfN(12, Q070Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(13, Q070Spec.relevantSold)
       val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
 
       for (lar <- lars) {
@@ -59,16 +59,16 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
 
       probe.send(submissionLarStats2, PersistStatsForMacroEdits)
       probe.send(submissionLarStats2, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 18, 13, 7))
+      probe.expectMsg(SubmissionLarStatsState(0, 36, 23, 13))
     }
 
-    "Aggregate all lars relevant to Q072" in {
+    "Aggregate all lars relevant to Q071" in {
       val submissionId3 = SubmissionId("12345", "2017", 3)
       val submissionLarStats3 = createSubmissionStats(system, submissionId3)
 
-      val irrelevantLars = listOfN(9, Q072Spec.irrelevant)
-      val relevantNotSoldLars = listOfN(8, Q072Spec.relevantNotSold)
-      val relevantSoldLars = listOfN(7, Q072Spec.relevantSold)
+      val irrelevantLars = listOfN(5, Q071Spec.irrelevant)
+      val relevantNotSoldLars = listOfN(6, Q071Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(7, Q071Spec.relevantSold)
       val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
 
       for (lar <- lars) {
@@ -77,7 +77,25 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
 
       probe.send(submissionLarStats3, PersistStatsForMacroEdits)
       probe.send(submissionLarStats3, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 15, 7))
+      probe.expectMsg(SubmissionLarStatsState(0, 18, 0, 0, 13, 7))
+    }
+
+    "Aggregate all lars relevant to Q072" in {
+      val submissionId4 = SubmissionId("12345", "2017", 4)
+      val submissionLarStats4 = createSubmissionStats(system, submissionId4)
+
+      val irrelevantLars = listOfN(9, Q072Spec.irrelevant)
+      val relevantNotSoldLars = listOfN(8, Q072Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(7, Q072Spec.relevantSold)
+      val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
+
+      for (lar <- lars) {
+        probe.send(submissionLarStats4, LarValidated(lar, submissionId4))
+      }
+
+      probe.send(submissionLarStats4, PersistStatsForMacroEdits)
+      probe.send(submissionLarStats4, GetState)
+      probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 0, 0, 15, 7))
     }
   }
 
