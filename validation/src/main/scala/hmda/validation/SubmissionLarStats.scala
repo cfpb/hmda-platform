@@ -15,13 +15,15 @@ object SubmissionLarStats {
   case class PersistStatsForMacroEdits() extends Command
   case class CountSubmittedLarsInSubmission() extends Command
   case class SubmittedLarsUpdated(totalSubmitted: Int) extends Event
-  case class MacroStatsUpdated(totalValidated: Int,
-                               q070Total: Int,
-                               q070Sold: Int,
-                               q071Total: Int,
-                               q071Sold: Int,
-                               q072Total: Int,
-                               q072Sold: Int) extends Event
+  case class MacroStatsUpdated(
+    totalValidated: Int,
+    q070Total: Int,
+    q070Sold: Int,
+    q071Total: Int,
+    q071Sold: Int,
+    q072Total: Int,
+    q072Sold: Int
+  ) extends Event
 
   def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
 
