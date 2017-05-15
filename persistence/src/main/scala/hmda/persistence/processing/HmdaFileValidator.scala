@@ -26,11 +26,9 @@ import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.validation.SubmissionLarStats
-import hmda.validation.SubmissionLarStats.CountValidatedLarsInSubmission
+import hmda.validation.SubmissionLarStats.PersistStatsForMacroEdits
 import hmda.validation.ValidationStats.AddSubmissionTaxId
 
-import scala._
 import scala.util.Try
 import scala.concurrent.duration._
 
@@ -208,7 +206,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case ValidateMacro(larSource, replyTo) =>
       log.debug("Quality Validation completed")
-      submissionLarStats ! CountValidatedLarsInSubmission
+      submissionLarStats ! PersistStatsForMacroEdits
       val fMacro = checkMacro(larSource, ctx)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)

@@ -17,17 +17,19 @@ class ValidationStatsSpec extends ActorSpec {
       val id1 = SubmissionId("12345", "2017", 1)
       val id2 = SubmissionId("12345", "2017", 2)
       val id3 = SubmissionId("12345", "2016", 1)
-      val s1 = SubmissionStats(id1, 99, 100, "a")
-      val s2 = SubmissionStats(id2, 124, 125, "b")
-      val s3 = SubmissionStats(id3, 101, 100, "c")
-      probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(99, id1))
-      probe.send(submissionValidationStats, AddSubmissionValidationTotal(100, id1))
+      val s1 = SubmissionStats(id1, 20, 21, 22, 23, "a")
+      val s2 = SubmissionStats(id2, 124, 125, 126, 127, "b")
+      val s3 = SubmissionStats(id3, 101, 100, 99, 98, "c")
+      probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(20, id1))
+      probe.send(submissionValidationStats, AddSubmissionMacroStats(id1, 21, 22, 23))
       probe.send(submissionValidationStats, AddSubmissionTaxId("a", id1))
+
       probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(124, id2))
-      probe.send(submissionValidationStats, AddSubmissionValidationTotal(125, id2))
+      probe.send(submissionValidationStats, AddSubmissionMacroStats(id2, 125, 126, 127))
       probe.send(submissionValidationStats, AddSubmissionTaxId("b", id2))
+
       probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(101, id3))
-      probe.send(submissionValidationStats, AddSubmissionValidationTotal(100, id3))
+      probe.send(submissionValidationStats, AddSubmissionMacroStats(id3, 100, 99, 98))
       probe.send(submissionValidationStats, AddSubmissionTaxId("c", id3))
 
       probe.send(submissionValidationStats, GetState)
@@ -53,6 +55,15 @@ class ValidationStatsSpec extends ActorSpec {
       probe.expectMsg("b")
       probe.send(submissionValidationStats, FindTaxId("12345", "2016"))
       probe.expectMsg("c")
+    }
+
+    "Find Q071 stats" in {
+      probe.send(submissionValidationStats, FindQ071("12345", "2017"))
+      probe.expectMsg((126, 127))
+      probe.send(submissionValidationStats, FindQ071("12345", "2016"))
+      probe.expectMsg((99, 98))
+      probe.send(submissionValidationStats, FindQ071("nonexistent", "bogus"))
+      probe.expectMsg((0, 0))
     }
   }
 
