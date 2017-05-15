@@ -34,7 +34,13 @@ object SubmissionLarStats {
     def updated(event: Event): SubmissionLarStatsState = event match {
       case SubmittedLarsUpdated(submitted) => this.copy(totalSubmitted = submitted)
       case MacroStatsUpdated(total, q071, q071sold, q072, q072sold) =>
-        this.copy(totalValidated = total, q071Total = q071, q071SoldTotal = q071sold)
+        this.copy(
+          totalValidated = total,
+          q071Total = q071,
+          q071SoldTotal = q071sold,
+          q072Total = q072,
+          q072SoldTotal = q072sold
+        )
     }
   }
 }

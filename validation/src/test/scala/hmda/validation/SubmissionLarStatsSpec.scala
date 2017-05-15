@@ -2,12 +2,12 @@ package hmda.validation
 
 import akka.testkit.TestProbe
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.{LarGenerators, LoanApplicationRegister}
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
 import hmda.validation.SubmissionLarStats._
-import hmda.validation.rules.lar.`macro`.{Q071Spec, Q072Spec}
+import hmda.validation.rules.lar.`macro`.{ Q071Spec, Q072Spec }
 import org.scalacheck.Gen
 
 class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
@@ -66,8 +66,8 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       val submissionId3 = SubmissionId("12345", "2017", 3)
       val submissionLarStats3 = createSubmissionStats(system, submissionId3)
 
-      val irrelevantLars = listOfN(5, Q072Spec.irrelevant)
-      val relevantNotSoldLars = listOfN(6, Q072Spec.relevantNotSold)
+      val irrelevantLars = listOfN(9, Q072Spec.irrelevant)
+      val relevantNotSoldLars = listOfN(8, Q072Spec.relevantNotSold)
       val relevantSoldLars = listOfN(7, Q072Spec.relevantSold)
       val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
 
@@ -77,7 +77,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
 
       probe.send(submissionLarStats3, PersistStatsForMacroEdits)
       probe.send(submissionLarStats3, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 18, 0, 0, 13, 7))
+      probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 15, 7))
     }
   }
 
