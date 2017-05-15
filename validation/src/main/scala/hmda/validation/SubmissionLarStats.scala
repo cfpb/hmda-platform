@@ -1,13 +1,13 @@
 package hmda.validation
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.persistence.messages.CommonMessages.{Command, Event, GetState}
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.ValidationStats.{AddSubmissionMacroStats, AddSubmissionSubmittedTotal}
-import hmda.validation.rules.lar.`macro`.{Q071, Q072}
+import hmda.validation.ValidationStats.{ AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
+import hmda.validation.rules.lar.`macro`.{ Q071, Q072 }
 
 object SubmissionLarStats {
   val name = "SubmissionStats"
