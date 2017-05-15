@@ -97,6 +97,24 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       probe.send(submissionLarStats4, GetState)
       probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 0, 0, 15, 7))
     }
+
+    "Aggregate all lars relevant to Q072" in {
+      val submissionId3 = SubmissionId("12345", "2017", 3)
+      val submissionLarStats3 = createSubmissionStats(system, submissionId3)
+
+      val irrelevantLars = listOfN(9, Q072Spec.irrelevant)
+      val relevantNotSoldLars = listOfN(8, Q072Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(7, Q072Spec.relevantSold)
+      val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
+
+      for (lar <- lars) {
+        probe.send(submissionLarStats3, LarValidated(lar, submissionId3))
+      }
+
+      probe.send(submissionLarStats3, PersistStatsForMacroEdits)
+      probe.send(submissionLarStats3, GetState)
+      probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 15, 7))
+    }
   }
 
   private def listOfN(n: Int, transform: LoanApplicationRegister => LoanApplicationRegister): List[LoanApplicationRegister] = {
