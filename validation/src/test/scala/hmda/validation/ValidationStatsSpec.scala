@@ -57,12 +57,12 @@ class ValidationStatsSpec extends ActorSpec {
       probe.expectMsg("c")
     }
 
-    "Find Q071 stats" in {
-      probe.send(submissionValidationStats, FindQ071("12345", "2017"))
+    "Find Q070 stats" in {
+      probe.send(submissionValidationStats, FindQ070("12345", "2017"))
       probe.expectMsg((126, 127))
-      probe.send(submissionValidationStats, FindQ071("12345", "2016"))
+      probe.send(submissionValidationStats, FindQ070("12345", "2016"))
       probe.expectMsg((99, 98))
-      probe.send(submissionValidationStats, FindQ071("nonexistent", "bogus"))
+      probe.send(submissionValidationStats, FindQ070("nonexistent", "bogus"))
       probe.expectMsg((0, 0))
     }
 

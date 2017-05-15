@@ -59,7 +59,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
 
       probe.send(submissionLarStats2, PersistStatsForMacroEdits)
       probe.send(submissionLarStats2, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 36, 23, 13))
+      probe.expectMsg(SubmissionLarStatsState(0, 36, 25, 13))
     }
 
     "Aggregate all lars relevant to Q071" in {
@@ -81,24 +81,6 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
     }
 
     "Aggregate all lars relevant to Q072" in {
-      val submissionId4 = SubmissionId("12345", "2017", 4)
-      val submissionLarStats4 = createSubmissionStats(system, submissionId4)
-
-      val irrelevantLars = listOfN(9, Q072Spec.irrelevant)
-      val relevantNotSoldLars = listOfN(8, Q072Spec.relevantNotSold)
-      val relevantSoldLars = listOfN(7, Q072Spec.relevantSold)
-      val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
-
-      for (lar <- lars) {
-        probe.send(submissionLarStats4, LarValidated(lar, submissionId4))
-      }
-
-      probe.send(submissionLarStats4, PersistStatsForMacroEdits)
-      probe.send(submissionLarStats4, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 0, 0, 15, 7))
-    }
-
-    "Aggregate all lars relevant to Q072" in {
       val submissionId3 = SubmissionId("12345", "2017", 3)
       val submissionLarStats3 = createSubmissionStats(system, submissionId3)
 
@@ -113,7 +95,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
 
       probe.send(submissionLarStats3, PersistStatsForMacroEdits)
       probe.send(submissionLarStats3, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 15, 7))
+      probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 0, 0, 15, 7))
     }
   }
 
