@@ -40,9 +40,9 @@ class Q072 private (institution: Institution, year: Int) extends AggregateEditCh
   val yearDifference = configuration.getDouble("hmda.validation.macro.Q072.relativeProportion")
 
   override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
-    val relevantLars = lars.filter(Q071.relevant)
+    val relevantLars = lars.filter(Q072.relevant)
     val numRelevant = count(relevantLars)
-    val numRelevantSold = count(relevantLars.filter(Q071.sold))
+    val numRelevantSold = count(relevantLars.filter(Q072.sold))
 
     val lastYearLars = (validationStats ? FindQ072(institution.id, (year - 1).toString)).mapTo[(Int, Int)]
 

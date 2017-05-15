@@ -40,6 +40,7 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
         Q063,
         Q065,
         Q071.inContext(ctx),
+        Q072.inContext(ctx),
         Q073,
         Q074,
         Q080,
