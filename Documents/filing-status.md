@@ -22,4 +22,4 @@ In order to track the status of a filing for a financial institution, the follow
 * `1`: `not-started` - A filing has been opened but no submission has been submitted for the filing.
 * `2`: `in-progress` - At least one submission has been submitted for the filing but no submission has the status of signed.
 * `3`: `completed` - A signed submission has been submitted for this filing, signifying that the filing is complete.
-* `4`: `cancelled` - The filing has been cancelled, signifying that the filing is no longer required.
+* `-1`: `cancelled` - The filing has been cancelled, signifying that the filing is no longer required.

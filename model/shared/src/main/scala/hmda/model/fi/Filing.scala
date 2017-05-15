@@ -17,7 +17,7 @@ case object Completed extends FilingStatus {
   override def message: String = "completed"
 }
 case object Cancelled extends FilingStatus {
-  override def code: Int = 1
+  override def code: Int = -1
   override def message: String = "cancelled"
 }
 

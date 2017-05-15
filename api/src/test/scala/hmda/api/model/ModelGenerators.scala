@@ -5,11 +5,12 @@ import java.util.Calendar
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
 import hmda.api.model.public.InstitutionSearch
-import hmda.model.fi._
 import hmda.validation.engine._
 import org.scalacheck.Gen
 import spray.json.{ JsObject, JsString }
 import hmda.model.institution.InstitutionGenerators._
+import hmda.model.institution.FilingGenerators._
+import hmda.model.institution.SubmissionGenerators._
 
 trait ModelGenerators {
 
@@ -20,54 +21,6 @@ trait ModelGenerators {
       time = Calendar.getInstance.getTime.toString
       host = "localhost"
     } yield Status(status, service, time, host)
-  }
-
-  implicit def filingStatusGen: Gen[FilingStatus] = {
-    Gen.oneOf(NotStarted, InProgress, Completed, Cancelled)
-  }
-
-  implicit def filingGen: Gen[Filing] = {
-    for {
-      id <- Gen.alphaStr
-      fid <- Gen.alphaStr
-      status <- filingStatusGen
-      filingRequired <- Gen.oneOf(true, false)
-      start <- Gen.choose(1483287071000L, 1514736671000L)
-      end <- Gen.choose(1483287071000L, 1514736671000L)
-    } yield Filing(id, fid, status, filingRequired, start, end)
-  }
-
-  implicit def submissionStatusGen: Gen[SubmissionStatus] = {
-    Gen.oneOf(
-      Created,
-      Uploading,
-      Uploaded,
-      Parsing,
-      Parsed,
-      ParsedWithErrors,
-      Validating,
-      ValidatedWithErrors,
-      Validated,
-      Signed
-    )
-  }
-
-  implicit def submissionIdGen: Gen[SubmissionId] = {
-    for {
-      institutionId <- Gen.alphaStr
-      period <- Gen.alphaStr
-      seqNr <- Gen.choose(0, Int.MaxValue)
-    } yield SubmissionId(institutionId, period, seqNr)
-  }
-
-  implicit def submissionGen: Gen[Submission] = {
-    for {
-      id <- submissionIdGen
-      status <- submissionStatusGen
-      start <- Gen.choose(1483287071000L, 1514736671000L)
-      end <- Gen.choose(1483287071000L, 1514736671000L)
-      receipt <- Gen.alphaStr
-    } yield Submission(id, status, start, end, receipt)
   }
 
   implicit def filingDetailGen: Gen[FilingDetail] = {
