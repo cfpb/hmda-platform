@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+import "SubmissionEvents.proto";
+import "LoanApplicationRegister.proto";
+
+message LarValidatedMessage {
+    LoanApplicationRegisterMessage lar = 1;
+    SubmissionIdMessage submissionId = 2;
+}
