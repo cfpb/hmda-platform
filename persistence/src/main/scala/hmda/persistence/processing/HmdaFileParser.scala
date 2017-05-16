@@ -10,12 +10,15 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
 import hmda.parser.fi.ts.TsCsvParser
+import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.HmdaRawFile.LineAdded
 import hmda.persistence.processing.ProcessingMessages._
+import hmda.persistence.processing.SubmissionManager.GetActorRef
+import hmda.validation.SubmissionLarStats
 import hmda.validation.SubmissionLarStats.CountSubmittedLarsInSubmission
 
 import scala.concurrent.duration._
@@ -56,22 +59,24 @@ object HmdaFileParser {
 class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   import HmdaFileParser._
+  val duration = 10.seconds
+  implicit val timeout = Timeout(duration)
+  val config = ConfigFactory.load()
+  val flowParallelism = config.getInt("hmda.actor-flow-parallelism")
 
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
-  val submissionLarStats = context.actorSelection(s"submission-lar-stats-${submissionId.toString}")
+  val supervisor = context.parent
+  val statRef = for {
+    manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
+    stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
+  } yield stat
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
   }
 
   override def persistenceId: String = s"$name-$submissionId"
-
-  val duration = 10.seconds
-  implicit val timeout = Timeout(duration)
-
-  val config = ConfigFactory.load()
-  val flowParallelism = config.getInt("hmda.actor-flow-parallelism")
 
   override def receiveCommand: Receive = {
 
@@ -99,7 +104,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         .zip(Source.fromIterator(() => Iterator.from(2)))
         .map {
           case (lar, index) =>
-            submissionLarStats ! lar
+            sendLar(lar)
             LarCsvParser(lar, index)
         }
         .map {
@@ -140,7 +145,10 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
       }
 
     case FinishParsing(replyTo) =>
-      submissionLarStats ! CountSubmittedLarsInSubmission
+      for {
+        stat <- statRef
+      } yield stat ! CountSubmittedLarsInSubmission
+
       if (encounteredParsingErrors)
         replyTo ! ParsingCompletedWithErrors(submissionId)
       else
@@ -161,5 +169,10 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   }
 
+  private def sendLar(s: String) {
+    for {
+      stat <- statRef
+    } yield stat ! s
+  }
 }
 
