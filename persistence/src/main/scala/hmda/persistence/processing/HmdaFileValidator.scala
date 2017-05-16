@@ -10,7 +10,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
-import hmda.persistence.HmdaSupervisor.FindHmdaFiling
+import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor }
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.GetInstitution
 import hmda.persistence.PaginatedResource
@@ -26,6 +26,8 @@ import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.persistence.processing.SubmissionManager.GetActorRef
+import hmda.validation.SubmissionLarStats
 import hmda.validation.SubmissionLarStats.PersistStatsForMacroEdits
 import hmda.validation.ValidationStats.AddSubmissionTaxId
 
@@ -119,8 +121,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   val supervisor = system.actorSelection("/user/supervisor")
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
-
-  val submissionLarStats = context.actorSelection(s"submission-lar-stats-${submissionId.toString}")
+  val statRef = for {
+    manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
+    stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
+  } yield stat
 
   override def preStart(): Unit = {
     super.preStart()
@@ -196,17 +200,20 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       persist(validated) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
-        submissionLarStats ! LarValidated(lar, submissionId)
         for {
           f <- fHmdaFiling
+          stat <- statRef
         } yield {
           f ! validated
+          stat ! validated
         }
       }
 
     case ValidateMacro(larSource, replyTo) =>
       log.debug("Quality Validation completed")
-      submissionLarStats ! PersistStatsForMacroEdits
+      for {
+        stat <- statRef
+      } stat ! PersistStatsForMacroEdits
       val fMacro = checkMacro(larSource, ctx)
         .mapTo[LarSourceValidation]
         .map(larSourceValidation => larSourceValidation.toEither)
