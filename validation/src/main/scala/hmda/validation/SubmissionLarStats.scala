@@ -1,13 +1,13 @@
 package hmda.validation
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.messages.CommonMessages.{Command, Event, GetState}
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.validation.ValidationStats.{ AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
-import hmda.validation.rules.lar.`macro`.{ Q070, Q071, Q072 }
+import hmda.validation.rules.lar.`macro`.{ Q070, Q071, Q072, Q075 }
 
 object SubmissionLarStats {
   val name = "SubmissionStats"
@@ -68,6 +68,8 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
   var q071TotalSoldLars = 0
   var q072TotalLars = 0
   var q072TotalSoldLars = 0
+  var q075TotalLars = 0
+  var q075TotalSoldLars = 0
 
   var state = SubmissionLarStatsState()
 
@@ -86,6 +88,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       tallyQ070Lar(lar)
       tallyQ071Lar(lar)
       tallyQ072Lar(lar)
+      tallyQ075Lar(lar)
 
     case CountSubmittedLarsInSubmission =>
       persist(SubmittedLarsUpdated(totalSubmittedLars)) { e =>
@@ -108,7 +111,9 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
           q071TotalLars,
           q071TotalSoldLars,
           q072TotalLars,
-          q072TotalSoldLars
+          q072TotalSoldLars,
+          q075TotalLars,
+          q075TotalSoldLars
         )
         validationStats ! msg
       }
@@ -140,6 +145,15 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       q072TotalLars = q072TotalLars + 1
       if (Q072.sold(lar)) {
         q072TotalSoldLars = q072TotalSoldLars + 1
+      }
+    }
+  }
+
+  private def tallyQ075Lar(lar: LoanApplicationRegister) = {
+    if (Q075.relevant(lar)) {
+      q075TotalLars = q072TotalLars + 1
+      if (Q075.sold(lar)) {
+        q075TotalSoldLars = q072TotalSoldLars + 1
       }
     }
   }
