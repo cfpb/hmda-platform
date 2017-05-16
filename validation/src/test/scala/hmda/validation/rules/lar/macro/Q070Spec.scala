@@ -51,7 +51,7 @@ class Q070Spec extends MacroSpecWithValidationStats {
     }
 
     //// Check #2: Current Year ////
-    "(current year check) fails when too few relevant loans sold to Ginnie Mae" in {
+    "(current year check) fails when too few relevant loans sold to Fannie Mae or Freddie Mac" in {
       val instId = "first"
       val numSold: Int = (threshold * proportionSold).toInt
       val relevantNotSoldLars = listOfN(threshold - numSold, Q070Spec.relevantNotSold)
@@ -60,7 +60,7 @@ class Q070Spec extends MacroSpecWithValidationStats {
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
       Q070.inContext(ctx(instId))(testLars).map(r => r mustBe a[Failure])
     }
-    "(current year check) passes when enough relevant loans sold to Ginnie Mae" in {
+    "(current year check) passes when enough relevant loans sold to Fannie Mae or Freddie Mac" in {
       val instId = "second"
       val numSold: Int = (threshold * proportionSold).toInt + 1
       val relevantNotSoldLars = listOfN(threshold - numSold, Q070Spec.relevantNotSold)
