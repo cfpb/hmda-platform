@@ -119,7 +119,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   var state = HmdaFileValidationState()
 
-  val supervisor = context.parent
+  val supervisor = system.actorSelection("/user/supervisor")
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
   val statRef = for {
     manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
