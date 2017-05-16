@@ -10,25 +10,24 @@ import hmda.validation.rules.{ AggregateEditCheck, IfContextPresentInAggregate, 
 
 import scala.concurrent.Future
 
-object Q075 {
+object Q076 {
   def inContext(ctx: ValidationContext): AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = {
-    IfContextPresentInAggregate(ctx) { new Q075(_, _) }
+    IfContextPresentInAggregate(ctx) { new Q076(_, _) }
   }
 
   def relevant(lar: LoanApplicationRegister): Boolean = {
     (lar.actionTakenType == 1 || lar.actionTakenType == 6) &&
       (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
-      lar.loan.purpose == 1
+      lar.loan.purpose == 3
   }
 
   def sold(lar: LoanApplicationRegister): Boolean = {
     List(1, 2, 3, 4, 5, 6, 7, 8, 9).contains(lar.purchaserType)
   }
-
 }
 
-class Q075 private (institution: Institution, year: Int) extends AggregateEditCheck with StatsLookup {
-  override def name: String = "Q075"
+class Q076 private (institution: Institution, year: Int) extends AggregateEditCheck with StatsLookup {
+  override def name: String = "Q076"
 
   override def apply[as: AS, mat: MAT, ec: EC](input: Any): Future[Result] = ???
 }

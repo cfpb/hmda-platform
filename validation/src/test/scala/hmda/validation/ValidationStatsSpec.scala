@@ -17,19 +17,19 @@ class ValidationStatsSpec extends ActorSpec {
       val id1 = SubmissionId("12345", "2017", 1)
       val id2 = SubmissionId("12345", "2017", 2)
       val id3 = SubmissionId("12345", "2016", 1)
-      val s1 = SubmissionStats(id1, 20, 21, 22, 23, 24, 25, 26, 27, "a")
-      val s2 = SubmissionStats(id2, 124, 125, 126, 127, 128, 129, 130, 131, "b")
-      val s3 = SubmissionStats(id3, 101, 100, 99, 98, 97, 96, 95, 94, "c")
+      val s1 = SubmissionStats(id1, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, "a")
+      val s2 = SubmissionStats(id2, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, "b")
+      val s3 = SubmissionStats(id3, 101, 100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90, "c")
       probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(20, id1))
-      probe.send(submissionValidationStats, AddSubmissionMacroStats(id1, 21, 22, 23, 24, 25, 26, 27))
+      probe.send(submissionValidationStats, AddSubmissionMacroStats(id1, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31))
       probe.send(submissionValidationStats, AddSubmissionTaxId("a", id1))
 
       probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(124, id2))
-      probe.send(submissionValidationStats, AddSubmissionMacroStats(id2, 125, 126, 127, 128, 129, 130, 131))
+      probe.send(submissionValidationStats, AddSubmissionMacroStats(id2, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135))
       probe.send(submissionValidationStats, AddSubmissionTaxId("b", id2))
 
       probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(101, id3))
-      probe.send(submissionValidationStats, AddSubmissionMacroStats(id3, 100, 99, 98, 97, 96, 95, 94))
+      probe.send(submissionValidationStats, AddSubmissionMacroStats(id3, 100, 99, 98, 97, 96, 95, 94, 93, 92, 91, 90))
       probe.send(submissionValidationStats, AddSubmissionTaxId("c", id3))
 
       probe.send(submissionValidationStats, GetState)
@@ -86,10 +86,19 @@ class ValidationStatsSpec extends ActorSpec {
 
     "Find Q075 stats" in {
       probe.send(submissionValidationStats, FindQ075("12345", "2017"))
-      probe.expectMsg((128, 129))
+      probe.expectMsg((132, 133))
       probe.send(submissionValidationStats, FindQ075("12345", "2016"))
-      probe.expectMsg((97, 96))
+      probe.expectMsg((93, 92))
       probe.send(submissionValidationStats, FindQ075("nonexistent", "bogus"))
+      probe.expectMsg((0, 0))
+    }
+
+    "Find Q076 stats" in {
+      probe.send(submissionValidationStats, FindQ076("12345", "2017"))
+      probe.expectMsg((134, 135))
+      probe.send(submissionValidationStats, FindQ076("12345", "2016"))
+      probe.expectMsg((91, 90))
+      probe.send(submissionValidationStats, FindQ076("nonexistent", "bogus"))
       probe.expectMsg((0, 0))
     }
   }

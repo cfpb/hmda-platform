@@ -2,12 +2,12 @@ package hmda.validation
 
 import akka.testkit.TestProbe
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.{LarGenerators, LoanApplicationRegister}
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.model.ActorSpec
 import hmda.validation.SubmissionLarStats._
-import hmda.validation.rules.lar.`macro`.{ Q070Spec, Q071Spec, Q072Spec, Q075Spec }
+import hmda.validation.rules.lar.`macro`._
 import org.scalacheck.Gen
 
 class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
@@ -59,7 +59,10 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
 
       probe.send(submissionLarStats2, PersistStatsForMacroEdits)
       probe.send(submissionLarStats2, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 36, 25, 13))
+      val st = probe.expectMsgType[SubmissionLarStatsState]
+      st.totalValidated mustBe 11 + 12 + 13
+      st.q070Total mustBe 12 + 13
+      st.q070SoldTotal mustBe 13
     }
 
     "Aggregate all lars relevant to Q071" in {
@@ -77,12 +80,15 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
 
       probe.send(submissionLarStats3, PersistStatsForMacroEdits)
       probe.send(submissionLarStats3, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 18, 0, 0, 13, 7))
+      val st = probe.expectMsgType[SubmissionLarStatsState]
+      st.totalValidated mustBe 5 + 6 + 7
+      st.q071Total mustBe 6 + 7
+      st.q071SoldTotal mustBe 7
     }
 
     "Aggregate all lars relevant to Q072" in {
-      val submissionId3 = SubmissionId("12345", "2017", 3)
-      val submissionLarStats3 = createSubmissionStats(system, submissionId3)
+      val submissionId = SubmissionId("12345", "2017", 4)
+      val submissionLarStats = createSubmissionStats(system, submissionId)
 
       val irrelevantLars = listOfN(9, Q072Spec.irrelevant)
       val relevantNotSoldLars = listOfN(8, Q072Spec.relevantNotSold)
@@ -90,17 +96,20 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
 
       for (lar <- lars) {
-        probe.send(submissionLarStats3, LarValidated(lar, submissionId3))
+        probe.send(submissionLarStats, LarValidated(lar, submissionId))
       }
 
-      probe.send(submissionLarStats3, PersistStatsForMacroEdits)
-      probe.send(submissionLarStats3, GetState)
-      probe.expectMsg(SubmissionLarStatsState(0, 24, 0, 0, 0, 0, 15, 7))
+      probe.send(submissionLarStats, PersistStatsForMacroEdits)
+      probe.send(submissionLarStats, GetState)
+      val st = probe.expectMsgType[SubmissionLarStatsState]
+      st.totalValidated mustBe 9 + 8 + 7
+      st.q072Total mustBe 8 + 7
+      st.q072SoldTotal mustBe 7
     }
 
     "Aggregate all lars relevant to Q075" in {
-      val submissionId7 = SubmissionId("12345", "2017", 7)
-      val submissionLarStats7 = createSubmissionStats(system, submissionId7)
+      val submissionId = SubmissionId("12345", "2017", 5)
+      val submissionLarStats = createSubmissionStats(system, submissionId)
 
       val irrelevantLars = listOfN(6, Q075Spec.irrelevant)
       val relevantNotSoldLars = listOfN(5, Q075Spec.relevantNotSold)
@@ -108,21 +117,20 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
 
       for (lar <- lars) {
-        probe.send(submissionLarStats7, LarValidated(lar, submissionId7))
+        probe.send(submissionLarStats, LarValidated(lar, submissionId))
       }
 
-      probe.send(submissionLarStats7, PersistStatsForMacroEdits)
-      probe.send(submissionLarStats7, GetState)
+      probe.send(submissionLarStats, PersistStatsForMacroEdits)
+      probe.send(submissionLarStats, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 6 + 5 + 4
       st.q075Total mustBe 5 + 4
       st.q075SoldTotal mustBe 4
     }
 
-    /*
     "Aggregate all lars relevant to Q076" in {
-      val submissionId8 = SubmissionId("12345", "2018", 8)
-      val submissionLarStats8 = createSubmissionStats(system, submissionId8)
+      val submissionId = SubmissionId("12345", "2018", 6)
+      val submissionLarStats = createSubmissionStats(system, submissionId)
 
       val irrelevantLars = listOfN(11, Q076Spec.irrelevant)
       val relevantNotSoldLars = listOfN(13, Q076Spec.relevantNotSold)
@@ -130,17 +138,16 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       val lars = irrelevantLars ++ relevantNotSoldLars ++ relevantSoldLars
 
       for (lar <- lars) {
-        probe.send(submissionLarStats8, LarValidated(lar, submissionId8))
+        probe.send(submissionLarStats, LarValidated(lar, submissionId))
       }
 
-      probe.send(submissionLarStats8, PersistStatsForMacroEdits)
-      probe.send(submissionLarStats8, GetState)
+      probe.send(submissionLarStats, PersistStatsForMacroEdits)
+      probe.send(submissionLarStats, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 11 + 13 + 15
       st.q076Total mustBe 13 + 15
       st.q076SoldTotal mustBe 15
     }
-    */
   }
 
   private def listOfN(n: Int, transform: LoanApplicationRegister => LoanApplicationRegister): List[LoanApplicationRegister] = {
