@@ -17,7 +17,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
 
   "Validation errors" must {
     val ts: TransmittalSheet = TsDatParser(tsDAT)
-    val badLars: Seq[LoanApplicationRegister] = fiCSVEditErrors.split("\n").tail.map(line => LarCsvParser(line).right.get)
+    val badLars: Seq[LoanApplicationRegister] = fiCSVEditErrorsWithMsa.split("\n").tail.map(line => LarCsvParser(line).right.get)
 
     val tsErrors = Seq(
       SyntacticalValidationError("1299422144", "S020", true),
