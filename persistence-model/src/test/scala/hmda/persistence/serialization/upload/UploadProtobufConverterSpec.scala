@@ -14,7 +14,6 @@ class UploadProtobufConverterSpec extends PropSpec with PropertyChecks with Must
       val lineAdded = LineAdded(timestamp, data)
       val protobuf = lineAddedToProtobuf(lineAdded).toByteArray
       lineAddedFromProtobuf(LineAddedMessage.parseFrom(protobuf)) mustBe lineAdded
-
     }
   }
 
