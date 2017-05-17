@@ -102,6 +102,7 @@ lazy val validation = (project in file("validation"))
     libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream)
   ).dependsOn(parserJVM % "compile->compile;test->test")
   .dependsOn(persistenceModel % "compile->compile;test->test")
+  .dependsOn(census % "compile->compile;test->test")
 
 lazy val panel = (project in file("panel"))
   .settings(hmdaBuildSettings: _*)
