@@ -64,7 +64,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     "get msa info for Q595 or Q029" in {
       val errorQ595 = QualityValidationError("8299422144", "Q595", ts = false)
       val result = validationErrorToResultRow(errorQ595, validationState)
-      val msaField = result.fields.getFields("Metropolitan Statistical Area / Metropolitan Division").head.toString
+      val msaField = result.fields.getFields("Metropolitan Statistical Area / Metropolitan Division Name").head.toString
       msaField mustBe "\"Battle Creek, MI\""
     }
 
