@@ -12,7 +12,7 @@ import org.scalacheck.Gen
 import scala.concurrent.Await
 
 class Q075Spec extends MacroSpecWithValidationStats {
-  val threshold = configuration.getInt("hmda.validation.macro.Q075.threshold")
+  val threshold = configuration.getInt("hmda.validation.macro.Q075.threshold") + 1
   val yearDifference = configuration.getDouble("hmda.validation.macro.Q075.relativeProportion")
 
   "Q075" must {
@@ -26,7 +26,7 @@ class Q075Spec extends MacroSpecWithValidationStats {
     }
     s"pass when current year's percentage sold is within -$yearDifference of prev year's" in {
       val numSold = (threshold * (0.6 - yearDifference) + 1).toInt
-      val relevantNotSoldLars = listOfN(200 - numSold, Q075Spec.relevantNotSold)
+      val relevantNotSoldLars = listOfN(threshold - numSold, Q075Spec.relevantNotSold)
       val relevantSoldLars = listOfN(numSold, Q075Spec.relevantSold)
       val irrelevantLars = listOfN(any, Q075Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
@@ -34,7 +34,7 @@ class Q075Spec extends MacroSpecWithValidationStats {
     }
     s"pass when current year's percentage sold is within +$yearDifference of prev year's" in {
       val numSold = (threshold * (0.6 + yearDifference) - 1).toInt
-      val relevantNotSoldLars = listOfN(200 - numSold, Q075Spec.relevantNotSold)
+      val relevantNotSoldLars = listOfN(threshold - numSold, Q075Spec.relevantNotSold)
       val relevantSoldLars = listOfN(numSold, Q075Spec.relevantSold)
       val irrelevantLars = listOfN(any, Q075Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
@@ -42,7 +42,7 @@ class Q075Spec extends MacroSpecWithValidationStats {
     }
     s"fail when percentage sold is too high compared to previous year ($yearDifference difference or more)" in {
       val numSold = (threshold * (0.6 + yearDifference) + 1).toInt
-      val relevantNotSoldLars = listOfN(200 - numSold, Q075Spec.relevantNotSold)
+      val relevantNotSoldLars = listOfN(threshold - numSold, Q075Spec.relevantNotSold)
       val relevantSoldLars = listOfN(numSold, Q075Spec.relevantSold)
       val irrelevantLars = listOfN(any, Q075Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
@@ -50,7 +50,7 @@ class Q075Spec extends MacroSpecWithValidationStats {
     }
     s"fail when percentage sold is too low compared to previous year ($yearDifference difference or more)" in {
       val numSold = (threshold * (0.6 - yearDifference) - 1).toInt
-      val relevantNotSoldLars = listOfN(200 - numSold, Q075Spec.relevantNotSold)
+      val relevantNotSoldLars = listOfN(threshold - numSold, Q075Spec.relevantNotSold)
       val relevantSoldLars = listOfN(numSold, Q075Spec.relevantSold)
       val irrelevantLars = listOfN(any, Q075Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
@@ -58,14 +58,12 @@ class Q075Spec extends MacroSpecWithValidationStats {
     }
 
     s"passes when number of relevant loans is below $threshold" in {
-      val instId = "two"
       val relevantSoldLars = listOfN(threshold - 1, Q075Spec.relevantSold)
       val irrelevantLars = listOfN(any, Q075Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ irrelevantLars)
       Q075.inContext(ctx(instId))(testLars).map(r => r mustBe a[Success])
     }
     "doesn't blow up when there are 0 relevant loans" in {
-      val instId = "three"
       val irrelevantLarSource = toSource(listOfN(any, Q075Spec.irrelevant))
       Q075.inContext(ctx(instId))(irrelevantLarSource).map(r => r mustBe a[Success])
     }
