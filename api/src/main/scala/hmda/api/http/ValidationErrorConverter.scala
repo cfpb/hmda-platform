@@ -59,7 +59,7 @@ trait ValidationErrorConverter {
       val fieldName = "Metropolitan Statistical Area / Metropolitan Division"
       val msaMd = relevantRow(err, vs).valueOf(fieldName).toString
       val msaMdName = CbsaLookup.nameFor(msaMd)
-      jsVals :+ ((fieldName, toJsonVal(msaMdName)))
+      jsVals :+ ((fieldName + " Name", toJsonVal(msaMdName)))
     } else {
       jsVals
     }
