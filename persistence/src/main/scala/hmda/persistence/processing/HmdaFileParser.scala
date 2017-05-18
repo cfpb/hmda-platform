@@ -67,13 +67,15 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
   val supervisor = context.parent
-  val statRef = for {
+  val statActorPath = s"/user/${SubmissionManager.name}-$submissionId/submission-lar-stats-$submissionId"
+  println(s"\nSTAT ACTOR PATH IS $statActorPath")
+  val statRef = context.actorSelection(statActorPath) /*for {
     manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
     stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
   } yield {
     println("\nGOT THE STAT ACTOR")
     stat
-  }
+  }*/
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -148,13 +150,14 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
       }
 
     case FinishParsing(replyTo) =>
-      for {
+      /*for {
         stat <- statRef
       } yield {
         println("\nSENDING THE COUNT MESSAGE")
         stat ! CountSubmittedLarsInSubmission
-      }
+      }*/
 
+      statRef ! CountSubmittedLarsInSubmission
       if (encounteredParsingErrors)
         replyTo ! ParsingCompletedWithErrors(submissionId)
       else
@@ -176,9 +179,10 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
   }
 
   private def sendLar(s: String) {
-    for {
+    statRef ! s
+    /*for {
       stat <- statRef
-    } yield stat ! s
+    } yield stat ! s*/
   }
 }
 

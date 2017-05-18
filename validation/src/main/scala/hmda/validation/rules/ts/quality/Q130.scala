@@ -26,6 +26,8 @@ class Q130 private (institution: Institution, year: Int) extends AggregateEditCh
 
     val fSubmittedLars = (validationStats ? FindTotalSubmittedLars(institution.id, year.toString)).mapTo[Int]
 
+    println("\nRUNNING Q130")
+
     for {
       submitted <- fSubmittedLars
     } yield {
