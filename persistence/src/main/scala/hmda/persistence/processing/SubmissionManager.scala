@@ -126,7 +126,9 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
       case HmdaRawFile.name => sender() ! submissionUpload
       case HmdaFileParser.name => sender() ! submissionParser
       case HmdaFileValidator.name => sender() ! submissionValidator
-      case SubmissionLarStats.name => sender() ! submissionLarStats
+      case SubmissionLarStats.name =>
+        println(s"\nGOT THE MESSAGE, SENDING ACTOR REF ${submissionLarStats.toString()} TO ${sender().toString()}")
+        sender() ! submissionLarStats
     }
 
     case GetState =>

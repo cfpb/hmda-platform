@@ -89,6 +89,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
 
     case CountSubmittedLarsInSubmission =>
       persist(SubmittedLarsUpdated(totalSubmittedLars)) { e =>
+        println(s"\nFINISHED COUNTING AT $totalSubmittedLars")
         log.debug(s"Persisted: $totalSubmittedLars")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")

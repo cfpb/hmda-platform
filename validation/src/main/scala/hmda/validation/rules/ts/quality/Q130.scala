@@ -29,6 +29,7 @@ class Q130 private (institution: Institution, year: Int) extends AggregateEditCh
     for {
       submitted <- fSubmittedLars
     } yield {
+      println(s"\nCOMPARING $submitted SUBMITTED LARS TO ${input.totalLines} IN THE TS")
       submitted is input.totalLines
     }
   }
