@@ -18,6 +18,7 @@ object LarFieldMapping {
     "Type of Action Taken" -> lar.actionTakenType,
     "Date of Action" -> lar.actionTakenDate,
     "Metropolitan Statistical Area / Metropolitan Division" -> lar.geography.msa,
+    "Metropolitan Statistical Area / Metropolitan Division Name" -> "",
     "State Code" -> lar.geography.state,
     "County Code" -> lar.geography.county,
     "Census Tract" -> lar.geography.tract,
