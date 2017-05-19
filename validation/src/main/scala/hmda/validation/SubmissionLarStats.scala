@@ -110,7 +110,6 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
     case PersistStatsForMacroEdits =>
       val q075Ratio = q075TotalSoldLars.toDouble / q075TotalLars
       val q076Ratio = q076TotalSoldLars.toDouble / q076TotalLars
-      println(s"totals: $q076TotalSoldLars sold, $q076TotalLars relevant. ratio: $q076Ratio")
       val event = MacroStatsUpdated(totalValidatedLars, q070TotalLars, q070TotalSoldLars, q071TotalLars,
         q071TotalSoldLars, q072TotalLars, q072TotalSoldLars, q075Ratio, q076Ratio)
       persist(event) { e =>
