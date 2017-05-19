@@ -19,10 +19,9 @@ class Q075Spec extends MacroSpecWithValidationStats {
 
     val instId = "inst-with-prev-year-data"
     "set up: persist last year's data: sold 60% of loans" in {
-      validationStats ! AddSubmissionMacroStats(SubmissionId(instId, "2016", 1), 0, 0, 0, 0, 0, 0, 0, 100, 60, 0, 0)
-      val (relevant, relevantSold) = Await.result((validationStats ? FindQ075(instId, "2016")).mapTo[(Int, Int)], duration)
-      relevant mustBe 100
-      relevantSold mustBe 60
+      validationStats ! AddSubmissionMacroStats(SubmissionId(instId, "2016", 1), 0, 0, 0, 0, 0, 0, 0, 0.6, 0)
+      val ratio = Await.result((validationStats ? FindQ075(instId, "2016")).mapTo[Double], duration)
+      ratio mustBe 0.6
     }
     s"pass when current year's percentage sold is within -$yearDifference of prev year's" in {
       val numSold = (threshold * (0.6 - yearDifference) + 1).toInt
@@ -57,7 +56,7 @@ class Q075Spec extends MacroSpecWithValidationStats {
       Q075.inContext(ctx(instId))(testLars).map(r => r mustBe a[Failure])
     }
 
-    s"passes when number of relevant loans is below $threshold" in {
+    s"pass when number of relevant loans is below $threshold" in {
       val relevantSoldLars = listOfN(threshold - 1, Q075Spec.relevantSold)
       val irrelevantLars = listOfN(any, Q075Spec.irrelevant)
       val testLars = toSource(relevantSoldLars ++ irrelevantLars)
@@ -66,6 +65,15 @@ class Q075Spec extends MacroSpecWithValidationStats {
     "doesn't blow up when there are 0 relevant loans" in {
       val irrelevantLarSource = toSource(listOfN(any, Q075Spec.irrelevant))
       Q075.inContext(ctx(instId))(irrelevantLarSource).map(r => r mustBe a[Success])
+    }
+
+    s"fail when >$threshold relevant loans and data is missing for previous year" in {
+      val numSold = (threshold * (0.6 + yearDifference) - 1).toInt
+      val relevantNotSoldLars = listOfN(threshold - numSold, Q075Spec.relevantNotSold)
+      val relevantSoldLars = listOfN(numSold, Q075Spec.relevantSold)
+      val irrelevantLars = listOfN(any, Q075Spec.irrelevant)
+      val testLars = toSource(relevantSoldLars ++ relevantNotSoldLars ++ irrelevantLars)
+      Q075.inContext(ctx("otherId"))(testLars).map(r => r mustBe a[Failure])
     }
 
     //// Must handle context correctly ////

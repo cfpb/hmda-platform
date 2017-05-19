@@ -42,16 +42,15 @@ class Q075 private (institution: Institution, year: Int) extends AggregateEditCh
     val numRelevant = count(relevantLars)
     val numRelevantSold = count(relevantLars.filter(Q075.sold))
 
-    val lastYearStats = (validationStats ? FindQ075(institution.id, (year - 1).toString)).mapTo[(Int, Int)]
+    val lastYearStats = (validationStats ? FindQ075(institution.id, (year - 1).toString)).mapTo[Double]
 
     for {
       r <- numRelevant
       rs <- numRelevantSold
-      ly <- lastYearStats
+      percentageSoldPreviousYear <- lastYearStats
     } yield {
-      val (lastYearRelevant, lastYearSold) = ly
+
       val percentageSoldCurrentYear = rs.toDouble / r
-      val percentageSoldPreviousYear = lastYearSold.toDouble / lastYearRelevant
 
       when(r is greaterThan(threshold)) {
         math.abs(percentageSoldCurrentYear - percentageSoldPreviousYear) is lessThan(yearDifference)

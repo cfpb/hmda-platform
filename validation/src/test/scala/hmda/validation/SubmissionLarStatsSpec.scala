@@ -124,8 +124,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       probe.send(submissionLarStats, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 6 + 5 + 4
-      st.q075Total mustBe 5 + 4
-      st.q075SoldTotal mustBe 4
+      st.q075Ratio mustBe 4.toDouble / (5 + 4)
     }
 
     "Aggregate all lars relevant to Q076" in {
@@ -145,8 +144,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       probe.send(submissionLarStats, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 11 + 13 + 15
-      st.q076Total mustBe 13 + 15
-      st.q076SoldTotal mustBe 15
+      st.q076Ratio mustBe 15.toDouble / (13 + 15)
     }
   }
 

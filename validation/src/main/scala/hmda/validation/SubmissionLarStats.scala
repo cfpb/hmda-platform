@@ -23,10 +23,8 @@ object SubmissionLarStats {
     q071Sold: Int,
     q072Total: Int,
     q072Sold: Int,
-    q075Total: Int,
-    q075Sold: Int,
-    q076Total: Int,
-    q076Sold: Int
+    q075Ratio: Double,
+    q076Ratio: Double
   ) extends Event
 
   def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
@@ -44,14 +42,12 @@ object SubmissionLarStats {
       q071SoldTotal: Int = 0,
       q072Total: Int = 0,
       q072SoldTotal: Int = 0,
-      q075Total: Int = 0,
-      q075SoldTotal: Int = 0,
-      q076Total: Int = 0,
-      q076SoldTotal: Int = 0
+      q075Ratio: Double = 0.0,
+      q076Ratio: Double = 0.0
   ) {
     def updated(event: Event): SubmissionLarStatsState = event match {
       case SubmittedLarsUpdated(submitted) => this.copy(totalSubmitted = submitted)
-      case MacroStatsUpdated(total, q070, q070sold, q071, q071sold, q072, q072sold, q075, q075sold, q076, q076sold) =>
+      case MacroStatsUpdated(total, q070, q070sold, q071, q071sold, q072, q072sold, q075, q076) =>
         this.copy(
           totalValidated = total,
           q070Total = q070,
@@ -60,10 +56,8 @@ object SubmissionLarStats {
           q071SoldTotal = q071sold,
           q072Total = q072,
           q072SoldTotal = q072sold,
-          q075Total = q075,
-          q075SoldTotal = q075sold,
-          q076Total = q076,
-          q076SoldTotal = q076sold
+          q075Ratio = q075,
+          q076Ratio = q076
         )
     }
   }
@@ -114,8 +108,11 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       }
 
     case PersistStatsForMacroEdits =>
-      val event = MacroStatsUpdated(totalValidatedLars, q070TotalLars, q070TotalSoldLars, q071TotalLars, q071TotalSoldLars, q072TotalLars, q072TotalSoldLars,
-        q075TotalLars, q075TotalSoldLars, q076TotalLars, q076TotalSoldLars)
+      val q075Ratio = q075TotalSoldLars.toDouble / q075TotalLars
+      val q076Ratio = q076TotalSoldLars.toDouble / q076TotalLars
+      println(s"totals: $q076TotalSoldLars sold, $q076TotalLars relevant. ratio: $q076Ratio")
+      val event = MacroStatsUpdated(totalValidatedLars, q070TotalLars, q070TotalSoldLars, q071TotalLars,
+        q071TotalSoldLars, q072TotalLars, q072TotalSoldLars, q075Ratio, q076Ratio)
       persist(event) { e =>
         log.debug(s"Persisted: $totalValidatedLars")
         updateState(e)
@@ -129,10 +126,8 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
           q071TotalSoldLars,
           q072TotalLars,
           q072TotalSoldLars,
-          q075TotalLars,
-          q075TotalSoldLars,
-          q076TotalLars,
-          q076TotalSoldLars
+          q075Ratio,
+          q076Ratio
         )
         validationStats ! msg
       }
