@@ -15,8 +15,8 @@ import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
-import hmda.persistence.processing.HmdaRawFile.LineAdded
 import hmda.persistence.processing.ProcessingMessages._
+import hmda.persistence.messages.events.processing.FileUploadEvents._
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.SubmissionLarStats
 import hmda.validation.SubmissionLarStats.CountSubmittedLarsInSubmission

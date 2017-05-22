@@ -18,6 +18,8 @@ object ValidationStats {
     q071SoldLars: Int = 0,
     q072Lars: Int = 0,
     q072SoldLars: Int = 0,
+    q075Ratio: Double = 0.0,
+    q076Ratio: Double = 0.0,
     taxId: String = ""
   )
 
@@ -31,7 +33,9 @@ object ValidationStats {
     q071: Int,
     q071Sold: Int,
     q072: Int,
-    q072Sold: Int
+    q072Sold: Int,
+    q075Ratio: Double,
+    q076Ratio: Double
   ) extends Command
 
   case class SubmissionSubmittedTotalsAdded(total: Int, id: SubmissionId) extends Event
@@ -44,7 +48,9 @@ object ValidationStats {
     q071Lars: Int,
     q071Sold: Int,
     q072Lars: Int,
-    q072Sold: Int
+    q072Sold: Int,
+    q075Ratio: Double,
+    q076Ratio: Double
   ) extends Event
 
   case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
@@ -53,6 +59,8 @@ object ValidationStats {
   case class FindQ070(institutionId: String, period: String) extends Command
   case class FindQ071(institutionId: String, period: String) extends Command
   case class FindQ072(institutionId: String, period: String) extends Command
+  case class FindQ075(institutionId: String, period: String) extends Command
+  case class FindQ076(institutionId: String, period: String) extends Command
 
   def props(): Props = Props(new ValidationStats)
 
@@ -65,7 +73,7 @@ object ValidationStats {
       case SubmissionSubmittedTotalsAdded(total, id) =>
         val modified = getStat(id).copy(totalSubmittedLars = total)
         updateCollection(modified)
-      case SubmissionMacroStatsAdded(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold) =>
+      case SubmissionMacroStatsAdded(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
         val modifiedSub = getStat(id).copy(
           totalValidatedLars = total,
           q070Lars = q070,
@@ -73,7 +81,9 @@ object ValidationStats {
           q071Lars = q071,
           q071SoldLars = q071Sold,
           q072Lars = q072,
-          q072SoldLars = q072Sold
+          q072SoldLars = q072Sold,
+          q075Ratio = q075,
+          q076Ratio = q076
         )
         updateCollection(modifiedSub)
       case SubmissionTaxIdAdded(tax, id) =>
@@ -122,8 +132,8 @@ class ValidationStats extends HmdaPersistentActor {
         updateState(e)
       }
 
-    case AddSubmissionMacroStats(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold) =>
-      persist(SubmissionMacroStatsAdded(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold)) { e =>
+    case AddSubmissionMacroStats(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
+      persist(SubmissionMacroStatsAdded(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076)) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
       }
@@ -157,6 +167,14 @@ class ValidationStats extends HmdaPersistentActor {
       val stats = state.latestStatsFor(id, period)
       val q072Stats = (stats.q072Lars, stats.q072SoldLars)
       sender() ! q072Stats
+
+    case FindQ075(id, period) =>
+      val stats = state.latestStatsFor(id, period)
+      sender() ! stats.q075Ratio
+
+    case FindQ076(id, period) =>
+      val stats = state.latestStatsFor(id, period)
+      sender() ! stats.q076Ratio
 
     case GetState =>
       sender() ! state
