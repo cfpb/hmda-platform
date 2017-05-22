@@ -10,7 +10,6 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
 import hmda.parser.fi.ts.TsCsvParser
-import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
@@ -66,11 +65,12 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
-  val supervisor = context.parent
+  val manager = context.parent
   val statRef = for {
-    manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
     stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
-  } yield stat
+  } yield {
+    stat
+  }
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
