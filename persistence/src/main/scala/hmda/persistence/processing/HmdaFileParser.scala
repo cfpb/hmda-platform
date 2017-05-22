@@ -148,9 +148,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
     case FinishParsing(replyTo) =>
       for {
         stat <- statRef
-      } yield {
-        stat ! CountSubmittedLarsInSubmission
-      }
+      } yield stat ! CountSubmittedLarsInSubmission
 
       if (encounteredParsingErrors)
         replyTo ! ParsingCompletedWithErrors(submissionId)
