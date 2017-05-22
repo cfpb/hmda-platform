@@ -40,8 +40,8 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
       sys.exit(1)
     }
 
-    println("Cleaning DB...")
-    Await.result(repository.dropSchema(), 5.seconds)
+    //println("Cleaning DB...")
+    //Await.result(repository.dropSchema(), 5.seconds)
     println("Creating new schema...")
     Await.result(repository.createSchema(), 5.seconds)
 
