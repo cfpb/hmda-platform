@@ -26,12 +26,9 @@ class Q130 private (institution: Institution, year: Int) extends AggregateEditCh
 
     val fSubmittedLars = (validationStats ? FindTotalSubmittedLars(institution.id, year.toString)).mapTo[Int]
 
-    println("\nRUNNING Q130")
-
     for {
       submitted <- fSubmittedLars
     } yield {
-      println(s"\nCOMPARING $submitted SUBMITTED LARS TO ${input.totalLines} IN THE TS")
       submitted is input.totalLines
     }
   }
