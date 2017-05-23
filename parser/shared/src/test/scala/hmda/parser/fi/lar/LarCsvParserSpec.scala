@@ -1,6 +1,7 @@
 package hmda.parser.fi.lar
 
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.parser.LarParsingError
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 

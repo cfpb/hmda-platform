@@ -5,7 +5,7 @@ import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import hmda.api.model.SingleValidationErrorResult
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
+import hmda.parser.fi.lar.LarCsvParser
 import hmda.validation.engine.ValidationErrorsSummary
 import org.scalatest.{ MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -14,6 +14,7 @@ import akka.http.scaladsl.model.headers.HttpEncodings
 import akka.http.scaladsl.model.headers.`Accept-Encoding`
 import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
+import hmda.model.parser.LarParsingError
 import hmda.persistence.HmdaSupervisor
 import spray.json._
 

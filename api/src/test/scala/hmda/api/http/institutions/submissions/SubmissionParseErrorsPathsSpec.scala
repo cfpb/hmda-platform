@@ -7,11 +7,12 @@ import akka.http.scaladsl.model.StatusCodes
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ ErrorResponse, ParsingErrorSummary }
 import hmda.model.fi._
-import hmda.parser.fi.lar.LarParsingError
+import hmda.model.parser.LarParsingError
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
+import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsedErrors, TsParsedErrors }
 import hmda.persistence.processing.HmdaFileParser
-import hmda.persistence.processing.HmdaFileParser.{ HmdaFileParseState, LarParsedErrors, TsParsedErrors }
+import hmda.persistence.processing.HmdaFileParser.HmdaFileParseState
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

@@ -16,7 +16,6 @@ import hmda.persistence.institutions.InstitutionPersistence.GetInstitution
 import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.persistence.processing.HmdaFileParser.{ LarParsed, TsParsed }
 import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors }
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
@@ -25,6 +24,7 @@ import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
+import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.SubmissionLarStats

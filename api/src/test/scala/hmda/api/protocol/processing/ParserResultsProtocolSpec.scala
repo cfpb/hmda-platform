@@ -2,7 +2,7 @@ package hmda.api.protocol.processing
 
 import hmda.api.model.{ ModelGenerators, ParsingErrorSummary }
 import hmda.model.fi.ParsedWithErrors
-import hmda.parser.fi.lar.LarParsingError
+import hmda.model.parser.LarParsingError
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._
