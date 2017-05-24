@@ -5,6 +5,7 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, UploadCompleted }
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
+import hmda.persistence.messages.events.processing.FileUploadEvents._
 
 object HmdaRawFile {
 
@@ -18,9 +19,6 @@ object HmdaRawFile {
 
   case class AddLine(timestamp: Long, data: String) extends Command
   case class AddFileName(fileName: String) extends Command
-
-  case class LineAdded(timestamp: Long, data: String) extends Event
-  case class FileNameAdded(fileName: String) extends Event
 
   case class HmdaRawFileState(size: Int = 0, fileName: String = "") {
     def updated(event: Event): HmdaRawFileState = event match {

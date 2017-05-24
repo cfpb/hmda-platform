@@ -18,7 +18,7 @@ class LarQualityEngineSpec
     with LarQualityEngine {
 
   property("A LAR must pass quality checks") {
-    val lines = Source.fromFile(new File("parser/jvm/src/test/resources/txt/clean_5508-lars.txt")).getLines()
+    val lines = Source.fromFile(new File("parser/jvm/src/test/resources/txt/edits-M_5508-lars.txt")).getLines()
     val lars = lines.drop(1).map(line => LarCsvParser(line)).collect {
       case Right(lar) => lar
     }
