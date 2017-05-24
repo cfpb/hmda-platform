@@ -1,9 +1,9 @@
 package hmda.validation.engine.lar.quality
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.validation.Quality
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.Quality
 import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.rules.lar.quality._
 

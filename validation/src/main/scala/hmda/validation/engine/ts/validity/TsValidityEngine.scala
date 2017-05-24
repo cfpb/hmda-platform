@@ -1,9 +1,9 @@
 package hmda.validation.engine.ts.validity
 
 import hmda.model.fi.ts.TransmittalSheet
+import hmda.model.validation.Validity
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.Validity
 import hmda.validation.engine.ts.TsCommonEngine
 import hmda.validation.rules.ts.validity._
 

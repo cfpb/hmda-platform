@@ -1,8 +1,9 @@
 package hmda.validation.engine.lar
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.validation.ValidationError
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.{ LarValidationErrors, ValidationError, ValidationErrors }
+import hmda.validation.engine.{ LarValidationErrors, ValidationErrors }
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 
 import scalaz._

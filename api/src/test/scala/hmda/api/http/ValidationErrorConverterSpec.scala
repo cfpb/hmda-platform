@@ -4,6 +4,7 @@ import hmda.api.model._
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.util.FITestData._
+import hmda.model.validation.ValidationError
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsDatParser
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState

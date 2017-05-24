@@ -4,6 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
+import hmda.model.validation.{ Macro, Quality }
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.messages.CommonMessages._

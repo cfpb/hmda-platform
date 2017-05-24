@@ -11,6 +11,7 @@ import spray.json.{ JsObject, JsString }
 import hmda.model.institution.InstitutionGenerators._
 import hmda.model.institution.FilingGenerators._
 import hmda.model.institution.SubmissionGenerators._
+import hmda.model.validation.{ Quality, Syntactical, ValidationErrorType, Validity }
 
 trait ModelGenerators {
 

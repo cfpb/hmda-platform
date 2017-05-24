@@ -2,10 +2,10 @@ package hmda.validation.engine.lar.`macro`
 
 import hmda.validation._
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.validation.{ Macro, ValidationErrorType }
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine
-import hmda.validation.engine.{ Macro, ValidationErrorType }
 import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.rules.lar.`macro`._
