@@ -50,7 +50,7 @@ trait ValidationErrorConverter {
 
     val jsVals: Seq[(String, JsValue)] = fieldNames.map { fieldName =>
       val row = relevantRow(err, vs)
-      val fieldValue = if(fieldName == "Metropolitan Statistical Area / Metropolitan Division Name"){
+      val fieldValue = if (fieldName == "Metropolitan Statistical Area / Metropolitan Division Name") {
         CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
       } else {
         row.valueOf(fieldName)
