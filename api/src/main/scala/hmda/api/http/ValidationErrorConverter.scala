@@ -1,6 +1,7 @@
 package hmda.api.http
 
 import hmda.api.model._
+import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
 import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
@@ -49,7 +50,11 @@ trait ValidationErrorConverter {
 
     val jsVals: Seq[(String, JsValue)] = fieldNames.map { fieldName =>
       val row = relevantRow(err, vs)
-      val fieldValue = row.valueOf(fieldName)
+      val fieldValue = if(fieldName == "Metropolitan Statistical Area / Metropolitan Division Name"){
+        CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
+      } else {
+        row.valueOf(fieldName)
+      }
       (fieldName, toJsonVal(fieldValue))
     }
 
