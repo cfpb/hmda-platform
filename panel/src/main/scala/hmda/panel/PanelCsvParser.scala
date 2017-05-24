@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.Await
 import spray.json._
 
+import scala.util.Try
+
 object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol {
   implicit val system: ActorSystem = ActorSystem("hmda")
   implicit val materializer = ActorMaterializer()
@@ -40,10 +42,7 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
       sys.exit(1)
     }
 
-    //println("Cleaning DB...")
-    //Await.result(repository.dropSchema(), 5.seconds)
-    println("Creating new schema...")
-    Await.result(repository.createSchema(), 5.seconds)
+    Try(createInstitutionDB()).orElse(Try(dropAndCreateInstitutionDB()))
 
     val source = FileIO.fromPath(new File(args(0)).toPath)
 
@@ -71,4 +70,15 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
 
   private def byte2StringFlow: Flow[ByteString, String, NotUsed] =
     Flow[ByteString].map(bs => bs.utf8String)
+
+  private def createInstitutionDB() {
+    println("Creating new schema...")
+    Await.result(repository.createSchema(), 5.seconds)
+  }
+
+  private def dropAndCreateInstitutionDB() {
+    println("Cleaning DB...")
+    Await.result(repository.dropSchema(), 5.seconds)
+    createInstitutionDB()
+  }
 }
