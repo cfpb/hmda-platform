@@ -10,9 +10,12 @@ services:
     volumes:
     - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
     depends_on:
+      - zookeeper
       - query_db
     environment:
       JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
+      ZOOKEEPER_HOST: zookeeper
+      ZOOKEEPER_PORT: 2181
 
   ui:
     build:
@@ -110,3 +113,8 @@ services:
       POSTGRES_DB: hmda
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+
+  zookeeper:
+    image: jplock/zookeeper
+    ports:
+      - '2181:2181'

@@ -16,4 +16,6 @@ object Version {
   val h2         = "1.4.193"
   val postgresql = "42.0.0.jre7"
   val scalaCsv = "1.3.4"
+  val constructrVersion = "0.17.0"
+  val constructrZookeeperVersion = "0.3.3"
 }

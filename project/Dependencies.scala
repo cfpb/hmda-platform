@@ -33,5 +33,7 @@ object Dependencies {
   val h2       = "com.h2database" % "h2" % Version.h2
   val postgres = "org.postgresql" % "postgresql" % Version.postgresql
   val scalaCsv = "com.github.tototoshi" %% "scala-csv" % Version.scalaCsv
+  val constructr = "de.heikoseeberger" %% "constructr" % Version.constructrVersion
+  val constructrZookeeper = "com.lightbend.constructr" %% "constructr-coordination-zookeeper" % Version.constructrZookeeperVersion
 
 }
