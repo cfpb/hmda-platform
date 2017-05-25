@@ -186,6 +186,7 @@ lazy val api = (project in file("api"))
       libraryDependencies ++= httpDeps
     )
   )
+  .dependsOn(persistenceModel % "compile->compile;test->test")
   .dependsOn(query % "compile->compile")
   .dependsOn(persistence % "compile->compile")
 
