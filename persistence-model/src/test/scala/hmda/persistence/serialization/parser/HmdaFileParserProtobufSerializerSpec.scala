@@ -38,7 +38,7 @@ class HmdaFileParserProtobufSerializerSpec extends PropSpec with PropertyChecks
     }
   }
   property("LarParsedErrors messages must serialize to binary and back") {
-    forAll(intGen, listOfStringsGen) { (lineNo: Int, errs: List[String]) =>
+    forAll(intGen, listOfStringsGen) { (lineNo, errs) =>
       val message = LarParsedErrors(LarParsingError(lineNo, errs))
       val bytes = serializer.toBinary(message)
       serializer.fromBinary(bytes, serializer.LarParsedErrorsManifest) mustBe message

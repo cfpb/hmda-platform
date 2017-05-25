@@ -25,7 +25,7 @@ class HmdaFileParserProtobufConverterSpec extends PropSpec with PropertyChecks w
   }
 
   property("TsParsedErrors must convert to protobuf and back") {
-    forAll(listOfStringsGen) { errs: List[String] =>
+    forAll(listOfStringsGen) { errs =>
       val message = TsParsedErrors(errs)
       val protobuf = tsParsedErrorsToProtobuf(message).toByteArray
       tsParsedErrorsFromProtobuf(TsParsedErrorsMessage.parseFrom(protobuf)) mustBe message
@@ -41,7 +41,7 @@ class HmdaFileParserProtobufConverterSpec extends PropSpec with PropertyChecks w
   }
 
   property("LarParsingError must convert to protobuf and back") {
-    forAll(intGen, listOfStringsGen) { (lineNo: Int, errs: List[String]) =>
+    forAll(intGen, listOfStringsGen) { (lineNo, errs) =>
       val message = LarParsingError(lineNo, errs)
       val protobuf = larParsingErrorToProtobuf(message).toByteArray
       larParsingErrorFromProtobuf(LarParsingErrorMessage.parseFrom(protobuf)) mustBe message
@@ -49,7 +49,7 @@ class HmdaFileParserProtobufConverterSpec extends PropSpec with PropertyChecks w
   }
 
   property("LarParsedErrors must convert to protobuf and back") {
-    forAll(intGen, listOfStringsGen) { (lineNo: Int, errs: List[String]) =>
+    forAll(intGen, listOfStringsGen) { (lineNo, errs) =>
       val message = LarParsedErrors(LarParsingError(lineNo, errs))
       val protobuf = larParsedErrorsToProtobuf(message).toByteArray
       larParsedErrorsFromProtobuf(LarParsedErrorsMessage.parseFrom(protobuf)) mustBe message
