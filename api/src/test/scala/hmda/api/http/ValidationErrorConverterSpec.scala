@@ -17,7 +17,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
 
   "Validation errors" must {
     val ts: TransmittalSheet = TsDatParser(tsDAT)
-    val badLars: Seq[LoanApplicationRegister] = fiCSVEditErrors.split("\n").tail.map(line => LarCsvParser(line).right.get)
+    val badLars: Seq[LoanApplicationRegister] = fiCSVEditErrorsWithMsa.split("\n").tail.map(line => LarCsvParser(line).right.get)
 
     val tsErrors = Seq(
       SyntacticalValidationError("1299422144", "S020", true),
@@ -27,7 +27,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       val ctx = ValidationContext(None, Some(2017))
       badLars.flatMap(lar => validationErrors(lar, ctx, validateLar).errors)
     }
-    val macroErrors: Seq[MacroValidationError] = Seq(MacroValidationError("Q047"))
+    val macroMsaErrors: Seq[MacroValidationError] = Seq(MacroValidationError("Q595"), MacroValidationError("Q029"))
 
     val validationState = HmdaFileValidationState(
       Some(ts),
@@ -39,7 +39,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       Nil,
       Nil,
       qualityVerified = true,
-      macroErrors,
+      macroMsaErrors,
       macroVerified = false
     )
 
@@ -61,6 +61,13 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       infos.last mustBe EditInfo("S100", s100Desc)
     }
 
+    "get msa info for Q595 or Q029" in {
+      val errorQ595 = QualityValidationError("8299422144", "Q595", ts = false)
+      val result = validationErrorToResultRow(errorQ595, validationState)
+      val msaField = result.fields.getFields("Metropolitan Statistical Area / Metropolitan Division Name").head.toString
+      msaField mustBe "\"Battle Creek, MI\""
+    }
+
     "convert edit to EditResultRow" in {
       val err = tsErrors.head
       val result = validationErrorToResultRow(err, validationState)
@@ -73,10 +80,10 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     "convert edits to CSV" in {
       val csvResults: Seq[String] = validationErrorsToCsvResults(validationState).split("\n")
 
-      csvResults.length mustBe 10
+      csvResults.length mustBe 15
       csvResults.head mustBe "editType, editId, loanId"
       csvResults(1) mustBe "Syntactical, S020, Transmittal Sheet"
-      csvResults.last mustBe "Macro, Q047, "
+      csvResults.last mustBe "Macro, Q029, "
 
     }
   }

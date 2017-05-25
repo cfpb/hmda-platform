@@ -1,6 +1,7 @@
 package hmda.api.http
 
 import hmda.api.model._
+import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
 import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
@@ -53,7 +54,17 @@ trait ValidationErrorConverter {
       (fieldName, toJsonVal(fieldValue))
     }
 
-    JsObject(jsVals: _*)
+    // Add MSA/MD name to edits
+    val jsValsWithMsaName = if (err.ruleName == "Q595" || err.ruleName == "Q029") {
+      val fieldName = "Metropolitan Statistical Area / Metropolitan Division"
+      val msaMd = relevantRow(err, vs).valueOf(fieldName).toString
+      val msaMdName = CbsaLookup.nameFor(msaMd)
+      jsVals :+ ((fieldName + " Name", toJsonVal(msaMdName)))
+    } else {
+      jsVals
+    }
+
+    JsObject(jsValsWithMsaName: _*)
   }
 
   private def relevantRow(err: ValidationError, vs: HmdaFileValidationState): HmdaFileRow = {
