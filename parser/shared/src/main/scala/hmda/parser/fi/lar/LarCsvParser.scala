@@ -1,6 +1,7 @@
 package hmda.parser.fi.lar
 
 import hmda.model.fi.lar._
+import hmda.model.parser.LarParsingError
 
 import scala.collection.immutable.ListMap
 import scalaz._

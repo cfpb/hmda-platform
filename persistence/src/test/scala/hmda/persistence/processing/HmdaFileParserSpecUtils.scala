@@ -3,7 +3,7 @@ package hmda.persistence.processing
 import akka.actor.ActorRef
 import akka.testkit.TestProbe
 import hmda.parser.fi.lar.LarCsvParser
-import hmda.persistence.processing.HmdaFileParser.{ LarParsed, LarParsedErrors }
+import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, LarParsedErrors }
 import hmda.persistence.processing.ProcessingMessages.Persisted
 
 trait HmdaFileParserSpecUtils {

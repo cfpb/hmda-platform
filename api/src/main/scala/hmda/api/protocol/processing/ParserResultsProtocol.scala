@@ -2,7 +2,7 @@ package hmda.api.protocol.processing
 
 import hmda.api.model.{ PaginatedResponse, PaginationLinks, ParsingErrorSummary }
 import hmda.model.fi.SubmissionStatus
-import hmda.parser.fi.lar.LarParsingError
+import hmda.model.parser.LarParsingError
 import spray.json._
 
 trait ParserResultsProtocol extends DefaultJsonProtocol with SubmissionProtocol with PaginationProtocol {
