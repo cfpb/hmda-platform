@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+message SubmittedLarsUpdated {
+    int32 totalSubmitted = 1;
+}
+
+message MacroStatsUpdated {
+    int32 totalValidated = 1;
+    int32 q070Total = 2;
+    int32 q070Sold = 3;
+    int32 q071Total = 4;
+    int32 q071Sold = 5;
+    int32 q072Total = 6;
+    int32 q072Sold = 7;
+    double q075Ratio = 8;
+    double q076Ratio = 9;
+}
