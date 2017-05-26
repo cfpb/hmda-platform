@@ -3,11 +3,11 @@ syntax = "proto3";
 option java_package = "hmda.persistence.model.serialization";
 option optimize_for = SPEED;
 
-message SubmittedLarsUpdated {
+message SubmittedLarsUpdatedMessage {
     int32 totalSubmitted = 1;
 }
 
-message MacroStatsUpdated {
+message MacroStatsUpdatedMessage {
     int32 totalValidated = 1;
     int32 q070Total = 2;
     int32 q070Sold = 3;
