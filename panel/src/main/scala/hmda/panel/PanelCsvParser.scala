@@ -38,7 +38,7 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
   def main(args: Array[String]): Unit = {
 
     if (args.length < 1) {
-      println("ERROR: Please provide institutions file")
+      log.error("ERROR: Please provide institutions file")
       sys.exit(1)
     }
 
@@ -72,12 +72,12 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
     Flow[ByteString].map(bs => bs.utf8String)
 
   private def createInstitutionDB() {
-    println("Creating new schema...")
+    log.info("Creating new schema...")
     Await.result(repository.createSchema(), 5.seconds)
   }
 
   private def dropAndCreateInstitutionDB() {
-    println("Cleaning DB...")
+    log.info("Cleaning DB...")
     Await.result(repository.dropSchema(), 5.seconds)
     createInstitutionDB()
   }
