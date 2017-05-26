@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+enum ValidationErrorTypeMessage {
+    SYNTACTICAL = 0;
+    VALIDITY = 1;
+    QUALITY = 2;
+    MACRO = 3;
+}
+
+message ValidationErrorMessage {
+    string errorId = 1;
+    string ruleName = 2;
+    ValidationErrorTypeMessage errorType = 3;
+    bool ts = 4;
+}

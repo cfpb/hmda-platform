@@ -15,3 +15,18 @@ trait ValidationError {
   def toCsv: String = s"$errorType, $ruleName, $publicErrorId"
   def publicErrorId = if (ts) "Transmittal Sheet" else errorId
 }
+
+case class SyntacticalValidationError(errorId: String, ruleName: String, ts: Boolean) extends ValidationError {
+  override def errorType: ValidationErrorType = Syntactical
+}
+case class ValidityValidationError(errorId: String, ruleName: String, ts: Boolean) extends ValidationError {
+  override def errorType: ValidationErrorType = Validity
+}
+case class QualityValidationError(errorId: String, ruleName: String, ts: Boolean) extends ValidationError {
+  override def errorType: ValidationErrorType = Quality
+}
+case class MacroValidationError(ruleName: String) extends ValidationError {
+  override def ts: Boolean = false
+  override def errorId: String = ""
+  override def errorType: ValidationErrorType = Macro
+}
