@@ -2,7 +2,8 @@ package hmda.parser.fi
 
 import hmda.model.fi.lar._
 import hmda.model.fi.ts._
-import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
+import hmda.model.parser.LarParsingError
+import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
 
 import scalajs.js
