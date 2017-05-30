@@ -119,6 +119,13 @@ where `hmda` is the name of the `PostgreSQL` database, owned by the default user
 $ sbt
 ```
 
+* The `HMDA Platform` is a distributed system that is meant to be run as a clustered application in production. 
+As such, it needs a mechanism for storing configuration information for additional nodes joining the cluster. 
+`Apache Zookeeper` is used to store this information. To run the project, zookeeper must be running and available in the local network. 
+An easy way to satisfy this requirement is to launch a docker container with `ZooKeeper`, as follows:
+
+`docker run --rm -p 2181:2181 -p 2888:2888 -p 3888:3888 jplock/zookeeper`
+
 * Select project to build and run.This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
 
 ```shell
