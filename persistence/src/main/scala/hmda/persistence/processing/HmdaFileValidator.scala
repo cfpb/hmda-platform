@@ -10,6 +10,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
+import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor }
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.institutions.InstitutionPersistence.GetInstitution
@@ -25,6 +26,7 @@ import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
+import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.SubmissionLarStats
@@ -43,14 +45,6 @@ object HmdaFileValidator {
   case class ValidateTsQuality(ts: TransmittalSheet) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
-  case class TsSyntacticalError(error: ValidationError) extends Event
-  case class TsValidityError(error: ValidationError) extends Event
-  case class TsQualityError(error: ValidationError) extends Event
-  case class LarSyntacticalError(error: ValidationError) extends Event
-  case class LarValidityError(error: ValidationError) extends Event
-  case class LarQualityError(error: ValidationError) extends Event
-  case class LarMacroError(error: ValidationError) extends Event
-  case class EditsVerified(editType: ValidationErrorType, verified: Boolean) extends Event
 
   case class GetNamedErrorResultsPaginated(editName: String, page: Int)
 

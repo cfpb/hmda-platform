@@ -1,7 +1,8 @@
 package hmda.api.protocol.validation
 
 import hmda.api.model.ModelGenerators
-import hmda.validation.engine._
+import hmda.model.validation.ValidationErrorGenerators._
+import hmda.model.validation._
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._

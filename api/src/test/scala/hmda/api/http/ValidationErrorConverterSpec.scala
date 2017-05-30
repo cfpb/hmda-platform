@@ -4,11 +4,11 @@ import hmda.api.model._
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.util.FITestData._
+import hmda.model.validation._
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsDatParser
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
 import org.scalatest.{ MustMatchers, WordSpec }
 import spray.json.{ JsNumber, JsObject }

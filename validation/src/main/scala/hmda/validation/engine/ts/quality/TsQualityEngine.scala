@@ -1,10 +1,10 @@
 package hmda.validation.engine.ts.quality
 
 import hmda.model.fi.ts.TransmittalSheet
+import hmda.model.validation.Quality
 import hmda.validation._
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
-import hmda.validation.engine.Quality
 import hmda.validation.engine.ts.TsCommonEngine
 import hmda.validation.rules.ts.quality._
 

@@ -11,6 +11,7 @@ import spray.json.{ JsObject, JsString }
 import hmda.model.institution.InstitutionGenerators._
 import hmda.model.institution.FilingGenerators._
 import hmda.model.institution.SubmissionGenerators._
+import hmda.model.validation._
 
 trait ModelGenerators {
 
@@ -50,42 +51,6 @@ trait ModelGenerators {
       loanId <- Gen.alphaStr
       fields <- fieldsGen
     } yield EditResultRow(RowId(loanId), fields)
-  }
-
-  implicit def validationErrorTypeGen: Gen[ValidationErrorType] = {
-    Gen.oneOf(
-      List(Syntactical, Validity, Quality)
-    )
-  }
-
-  implicit def syntacticalValidationErrorGen: Gen[SyntacticalValidationError] = {
-    for {
-      id <- Gen.alphaStr
-      name <- Gen.alphaStr
-      ts <- Gen.oneOf(true, false)
-    } yield SyntacticalValidationError(id, name, ts)
-  }
-
-  implicit def validityValidationErrorGen: Gen[ValidityValidationError] = {
-    for {
-      id <- Gen.alphaStr
-      name <- Gen.alphaStr
-      ts <- Gen.oneOf(true, false)
-    } yield ValidityValidationError(id, name, ts)
-  }
-
-  implicit def qualityValidationErrorGen: Gen[QualityValidationError] = {
-    for {
-      id <- Gen.alphaStr
-      name <- Gen.alphaStr
-      ts <- Gen.oneOf(true, false)
-    } yield QualityValidationError(id, name, ts)
-  }
-
-  implicit def macroValidationErrorGen: Gen[MacroValidationError] = {
-    for {
-      id <- Gen.alphaStr
-    } yield MacroValidationError(id)
   }
 
   implicit def editInfoGen: Gen[EditInfo] = {

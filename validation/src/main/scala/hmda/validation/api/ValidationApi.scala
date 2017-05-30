@@ -1,5 +1,6 @@
 package hmda.validation.api
 
+import hmda.model.validation._
 import hmda.validation.dsl.{ Failure, Result, Success }
 import hmda.validation.engine._
 import hmda.validation.rules.EditCheck
