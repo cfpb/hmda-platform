@@ -18,18 +18,18 @@ class SubmissionLarStatsProtobufConverterSpec extends PropSpec with PropertyChec
   }
 
   property("MacroStatsUpdated must convert to protobuf and back") {
-    val difGen = Gen.choose(-50000, 50000)
-    forAll(Gen.choose(0, 50000)) { num =>
+    val intGen = Gen.choose(0, 1000)
+    forAll(Gen.choose(0d, 1d)) { d =>
       val macroStatsUpdated = MacroStatsUpdated(
-        totalValidated = num + difGen.sample.get,
-        q070Total = num + difGen.sample.get,
-        q070Sold = num + difGen.sample.get,
-        q071Total = num + difGen.sample.get,
-        q071Sold = num + difGen.sample.get,
-        q072Total = num + difGen.sample.get,
-        q072Sold = num + difGen.sample.get,
-        q075Ratio = num + difGen.sample.get,
-        q076Ratio = num + difGen.sample.get
+        totalValidated = intGen.sample.get,
+        q070Total = intGen.sample.get,
+        q070Sold = intGen.sample.get,
+        q071Total = intGen.sample.get,
+        q071Sold = intGen.sample.get,
+        q072Total = intGen.sample.get,
+        q072Sold = intGen.sample.get,
+        q075Ratio = d,
+        q076Ratio = d
       )
       val protobuf = macroStatsUpdatedToProtobuf(macroStatsUpdated).toByteArray
       macroStatsUpdatedFromProtobuf(MacroStatsUpdatedMessage.parseFrom(protobuf)) mustBe macroStatsUpdated
