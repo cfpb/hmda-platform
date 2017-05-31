@@ -3,6 +3,7 @@ package hmda.validation
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.messages.events.validation.ValidationStatsEvents._
 import hmda.persistence.model.HmdaPersistentActor
 
 object ValidationStats {
@@ -37,21 +38,6 @@ object ValidationStats {
     q075Ratio: Double,
     q076Ratio: Double
   ) extends Command
-
-  case class SubmissionSubmittedTotalsAdded(total: Int, id: SubmissionId) extends Event
-  case class SubmissionTaxIdAdded(taxId: String, id: SubmissionId) extends Event
-  case class SubmissionMacroStatsAdded(
-    id: SubmissionId,
-    total: Int,
-    q070: Int,
-    q070Sold: Int,
-    q071Lars: Int,
-    q071Sold: Int,
-    q072Lars: Int,
-    q072Sold: Int,
-    q075Ratio: Double,
-    q076Ratio: Double
-  ) extends Event
 
   case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
   case class FindTotalValidatedLars(institutionId: String, period: String) extends Command
