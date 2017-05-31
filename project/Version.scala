@@ -18,4 +18,5 @@ object Version {
   val scalaCsv = "1.3.4"
   val constructrVersion = "0.17.0"
   val constructrZookeeperVersion = "0.3.3"
+  val cassandraUnit = "3.1.3.2"
 }
