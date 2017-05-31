@@ -5,18 +5,18 @@ import hmda.persistence.messages.CommonMessages.Event
 
 object SubmissionFSMEvents {
 
-  trait SubmissionEvent extends Event
+  trait SubmissionFSMEvent extends Event
 
-  case class SubmissionCreated(s: Submission) extends SubmissionEvent
-  case class SubmissionUploading(s: Submission) extends SubmissionEvent
-  case class SubmissionUploaded(s: Submission) extends SubmissionEvent
-  case class SubmissionParsing(s: Submission) extends SubmissionEvent
-  case class SubmissionParsed(s: Submission) extends SubmissionEvent
-  case class SubmissionParsedWithErrors(s: Submission) extends SubmissionEvent
-  case class SubmissionValidating(s: Submission) extends SubmissionEvent
-  case class SubmissionValidated(s: Submission) extends SubmissionEvent
-  case class SubmissionValidatedWithErrors(s: Submission) extends SubmissionEvent
-  case class SubmissionSigned(s: Submission) extends SubmissionEvent
-  case class SubmissionFailed(s: Submission) extends SubmissionEvent
+  case class SubmissionFSMCreated(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionUploading(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionUploaded(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionParsing(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionParsed(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionParsedWithErrors(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionValidating(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionValidated(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionValidatedWithErrors(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionSigned(s: Submission) extends SubmissionFSMEvent
+  case class SubmissionFailed(s: Submission) extends SubmissionFSMEvent
 
 }

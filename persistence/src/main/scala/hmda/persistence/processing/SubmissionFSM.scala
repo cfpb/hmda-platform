@@ -109,7 +109,7 @@ object SubmissionFSM {
 
 }
 
-class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag: ClassTag[SubmissionEvent]) extends PersistentFSM[SubmissionFSMState, SubmissionData, SubmissionEvent] {
+class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag: ClassTag[SubmissionFSMEvent]) extends PersistentFSM[SubmissionFSMState, SubmissionData, SubmissionFSMEvent] {
 
   val config = ConfigFactory.load()
   val actorTimeout = config.getInt("hmda.actor-lookup-timeout")
@@ -125,8 +125,8 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
 
   override def persistenceId: String = submissionId.toString
 
-  override def applyEvent(event: SubmissionEvent, currentData: SubmissionData): SubmissionData = event match {
-    case SubmissionCreated(s) => currentData.add(s)
+  override def applyEvent(event: SubmissionFSMEvent, currentData: SubmissionData): SubmissionData = event match {
+    case SubmissionFSMCreated(s) => currentData.add(s)
     case SubmissionUploading(s) => currentData.update(s)
     case SubmissionUploaded(s) => currentData.update(s)
     case SubmissionParsing(s) => currentData.update(s)
@@ -143,7 +143,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
 
   when(Idle) {
     case Event(Create, _) =>
-      goto(Created) applying SubmissionCreated(Submission(submissionId, hmda.model.fi.Created))
+      goto(Created) applying SubmissionFSMCreated(Submission(submissionId, hmda.model.fi.Created))
   }
 
   when(Created) {
