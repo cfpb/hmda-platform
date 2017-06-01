@@ -163,7 +163,7 @@ lazy val query = (project in file("query"))
     },
     parallelExecution in Test := false,
     fork in Test := true,
-    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps ++ Seq(cassandraUnit)
+    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps ++ Seq(cassandraUnit, alpakkaCassandra)
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
   .dependsOn(census % "compile->compile;test->test")

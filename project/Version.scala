@@ -19,4 +19,5 @@ object Version {
   val constructrVersion = "0.17.0"
   val constructrZookeeperVersion = "0.3.3"
   val cassandraUnit = "3.1.3.2"
+  val alpakka = "0.9"
 }

@@ -17,7 +17,7 @@ class CassandraSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
     session = cluster.connect()
 
     val dataLoader = new CQLDataLoader(session)
-    dataLoader.load(new ClassPathCQLDataSet("simple.cql", "mykeyspace"))
+    dataLoader.load(new ClassPathCQLDataSet("simple.cql", "hmda_query"))
   }
 
   override def afterAll(): Unit = {
