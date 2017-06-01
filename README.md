@@ -113,6 +113,22 @@ where `hmda` is the name of the `PostgreSQL` database, owned by the default user
 
 **Note: if you are running the backend only through sbt, the database needs to be created manually in advance, see instructions [here](https://www.postgresql.org/docs/9.1/static/manage-ag-createdb.html)**
 
+* The `HMDA Platform` is a distributed system that is meant to be run as a clustered application in production.
+As such, it needs a mechanism for storing configuration information for additional nodes joining the cluster.
+`Apache Zookeeper` is used to store this information. To run the project, zookeeper must be running and available in the local network.
+An easy way to satisfy this requirement is to launch a docker container with `ZooKeeper`, as follows:
+
+```shell
+$ docker run --rm -p 2181:2181 -p 2888:2888 -p 3888:3888 jplock/zookeeper
+```
+
+* Set the environemnet variables for Zookeper
+
+```shell
+export ZOOKEEPER_HOST=192.168.99.100
+export ZOOKEEPER_PORT=2181
+```
+
 * Start `sbt`
 
 ```shell

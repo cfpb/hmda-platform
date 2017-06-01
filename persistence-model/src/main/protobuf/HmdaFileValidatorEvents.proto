@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+enum ValidationErrorTypeMessage {
+    SYNTACTICAL = 0;
+    VALIDITY = 1;
+    QUALITY = 2;
+    MACRO = 3;
+}
+
+message ValidationErrorMessage {
+    string errorId = 1;
+    string ruleName = 2;
+    ValidationErrorTypeMessage errorType = 3;
+    bool ts = 4;
+}
+
+message EditsVerifiedMessage {
+    ValidationErrorTypeMessage editType = 1;
+    bool verified = 2;
+}
+
+message TsSyntacticalErrorMessage {
+    ValidationErrorMessage error = 1;
+}
+message TsValidityErrorMessage {
+    ValidationErrorMessage error = 1;
+}
+message TsQualityErrorMessage {
+    ValidationErrorMessage error = 1;
+}
+
+message LarSyntacticalErrorMessage {
+    ValidationErrorMessage error = 1;
+}
+message LarValidityErrorMessage {
+    ValidationErrorMessage error = 1;
+}
+message LarQualityErrorMessage {
+    ValidationErrorMessage error = 1;
+}
+message LarMacroErrorMessage {
+    ValidationErrorMessage error = 1;
+}

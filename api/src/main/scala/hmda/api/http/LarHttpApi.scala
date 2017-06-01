@@ -14,6 +14,7 @@ import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.api.protocol.processing.ParserResultsProtocol
 import hmda.api.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.validation.{ Quality, Syntactical, ValidationErrorType, Validity }
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation

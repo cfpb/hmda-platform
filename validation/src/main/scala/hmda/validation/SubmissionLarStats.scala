@@ -5,6 +5,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ MacroStatsUpdated, SubmittedLarsUpdated }
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.validation.ValidationStats.{ AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
 import hmda.validation.rules.lar.`macro`._
@@ -14,18 +15,6 @@ object SubmissionLarStats {
 
   case class PersistStatsForMacroEdits() extends Command
   case class CountSubmittedLarsInSubmission() extends Command
-  case class SubmittedLarsUpdated(totalSubmitted: Int) extends Event
-  case class MacroStatsUpdated(
-    totalValidated: Int,
-    q070Total: Int,
-    q070Sold: Int,
-    q071Total: Int,
-    q071Sold: Int,
-    q072Total: Int,
-    q072Sold: Int,
-    q075Ratio: Double,
-    q076Ratio: Double
-  ) extends Event
 
   def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
 

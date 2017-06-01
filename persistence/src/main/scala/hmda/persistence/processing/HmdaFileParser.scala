@@ -6,17 +6,16 @@ import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.fi.ts.TransmittalSheet
-import hmda.parser.fi.lar.{ LarCsvParser, LarParsingError }
+import hmda.model.parser.LarParsingError
+import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
-import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.messages.events.processing.FileUploadEvents._
+import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, LarParsedErrors, TsParsed, TsParsedErrors }
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.SubmissionLarStats
 import hmda.validation.SubmissionLarStats.CountSubmittedLarsInSubmission
@@ -29,10 +28,6 @@ object HmdaFileParser {
 
   case class ReadHmdaRawFile(persistenceId: String, replyTo: ActorRef) extends Command
   case class FinishParsing(replyTo: ActorRef) extends Command
-  case class TsParsed(ts: TransmittalSheet) extends Event
-  case class TsParsedErrors(errors: List[String]) extends Event
-  case class LarParsed(lar: LoanApplicationRegister) extends Event
-  case class LarParsedErrors(errors: LarParsingError) extends Event
   case class GetStatePaginated(page: Int)
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
@@ -66,11 +61,12 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
-  val supervisor = context.parent
+  val manager = context.parent
   val statRef = for {
-    manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
     stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
-  } yield stat
+  } yield {
+    stat
+  }
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)

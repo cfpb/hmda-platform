@@ -1,7 +1,7 @@
 package hmda.validation.engine.ts
 
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.validation.engine.ValidationError
+import hmda.model.validation.ValidationError
 
 import scala.concurrent.ExecutionContext
 import scalaz._

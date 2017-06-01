@@ -11,7 +11,8 @@ import hmda.model.fi.{ Submission, SubmissionId, SubmissionStatus }
 import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.UpdateSubmissionStatus
-import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.messages.CommonMessages.{ Command, GetState }
+import hmda.persistence.messages.events.processing.SubmissionFSMEvents._
 import hmda.persistence.processing.ProcessingMessages.{ CompleteValidationWithErrors, Sign, _ }
 import hmda.persistence.processing.SubmissionFSM.{ Signed, _ }
 
@@ -25,26 +26,8 @@ object SubmissionFSM {
 
   val failedMsg = "Submission status update failed"
 
-  trait SubmissionEvent extends Event
-
-  trait SubmissionState
-
   //Commands
   case object Create extends Command
-
-  //Domain Events (persisted)
-  case class SubmissionCreated(s: Submission) extends SubmissionEvent
-  case class SubmissionUploading(s: Submission) extends SubmissionEvent
-  case class SubmissionUploaded(s: Submission) extends SubmissionEvent
-
-  case class SubmissionParsing(s: Submission) extends SubmissionEvent
-  case class SubmissionParsed(s: Submission) extends SubmissionEvent
-  case class SubmissionParsedWithErrors(s: Submission) extends SubmissionEvent
-  case class SubmissionValidating(s: Submission) extends SubmissionEvent
-  case class SubmissionValidated(s: Submission) extends SubmissionEvent
-  case class SubmissionValidatedWithErrors(s: Submission) extends SubmissionEvent
-  case class SubmissionSigned(s: Submission) extends SubmissionEvent
-  case class SubmissionFailed(s: Submission) extends SubmissionEvent
 
   //Submission States
   sealed trait SubmissionFSMState extends FSMState
@@ -126,7 +109,7 @@ object SubmissionFSM {
 
 }
 
-class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag: ClassTag[SubmissionEvent]) extends PersistentFSM[SubmissionFSMState, SubmissionData, SubmissionEvent] {
+class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag: ClassTag[SubmissionFSMEvent]) extends PersistentFSM[SubmissionFSMState, SubmissionData, SubmissionFSMEvent] {
 
   val config = ConfigFactory.load()
   val actorTimeout = config.getInt("hmda.actor-lookup-timeout")
@@ -142,8 +125,8 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
 
   override def persistenceId: String = submissionId.toString
 
-  override def applyEvent(event: SubmissionEvent, currentData: SubmissionData): SubmissionData = event match {
-    case SubmissionCreated(s) => currentData.add(s)
+  override def applyEvent(event: SubmissionFSMEvent, currentData: SubmissionData): SubmissionData = event match {
+    case SubmissionFSMCreated(s) => currentData.add(s)
     case SubmissionUploading(s) => currentData.update(s)
     case SubmissionUploaded(s) => currentData.update(s)
     case SubmissionParsing(s) => currentData.update(s)
@@ -160,7 +143,7 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
 
   when(Idle) {
     case Event(Create, _) =>
-      goto(Created) applying SubmissionCreated(Submission(submissionId, hmda.model.fi.Created))
+      goto(Created) applying SubmissionFSMCreated(Submission(submissionId, hmda.model.fi.Created))
   }
 
   when(Created) {

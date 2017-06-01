@@ -13,6 +13,7 @@ import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Submission, SubmissionId }
+import hmda.model.validation.Macro
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
@@ -20,7 +21,6 @@ import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, G
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
-import hmda.validation.engine.{ Macro, Quality, Syntactical, Validity }
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
