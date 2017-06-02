@@ -11,7 +11,7 @@ class InstitutionViewProtobufSerializerSpec extends PropSpec with PropertyChecks
 
   val institutionList = Gen.listOf(institutionGen)
   property("InstitutionViewState must serialize to protobuf and back") {
-    forAll(institutionList, Gen.choose(0l, 100000l)) { (i, seq) =>
+    forAll(institutionList, Gen.choose(0: Long, 100000: Long)) { (i, seq) =>
       val state = InstitutionViewState(i.toSet, seq)
       val bytes = serializer.toBinary(state)
       serializer.fromBinary(bytes, serializer.InstitutionViewStateManifest) mustBe state
