@@ -1,14 +1,15 @@
-package hmda.query.cassandra
+package hmda.query.repository.institutions
 
 import com.datastax.driver.core.{ Cluster, Session }
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers, WordSpec }
+import hmda.query.cassandra.CassandraSpec
 import org.cassandraunit.CQLDataLoader
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.Future
 
-class CassandraSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
+class InstitutionCassandraRepositorySpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
 
   var cluster: Cluster = _
   var session: Session = _
@@ -27,12 +28,19 @@ class CassandraSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
   def loadData(): Unit = {
     val dataLoader = new CQLDataLoader(session)
     dataLoader.load(new ClassPathCQLDataSet("simple.cql", "hmda_query"))
+    dataLoader.load(new ClassPathCQLDataSet("institutions.cql", "hmda_query"))
   }
 
-  "Cassandra" must {
-    "Select from table" in {
-      val resultSet = session.execute("select * from myTable where id = 'myKey01'")
-      resultSet.iterator().next().getString("value") mustBe "myValue01"
+  "Institutions in Cassandra" must {
+    "read back data from default data in test" in {
+      val f = InstitutionCassandraRepository.readData(100)
+      f.map(xs => xs.size mustBe 82)
+    }
+    "read back a subset of data from default data in test, based on fetchsize" in {
+      Future(1 mustBe 1)
+    }
+    "Drop the table, create it again and populate it with some data that can be read back" in {
+      Future(1 mustBe 1)
     }
   }
 

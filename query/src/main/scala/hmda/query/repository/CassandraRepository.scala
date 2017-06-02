@@ -39,6 +39,6 @@ trait CassandraRepository[A] {
   def createTable(): Unit
   def dropTable(): Unit
   def insertData(source: Source[A, NotUsed]): Future[Done]
-  def read(fetchSize: Int): Future[Seq[Row]]
+  def readData(fetchSize: Int): Future[Seq[Row]]
 
 }
