@@ -1,7 +1,6 @@
 package hmda.query.repository.institutions
 
 import com.datastax.driver.core.{ Cluster, Session }
-import hmda.query.cassandra.CassandraSpec
 import org.cassandraunit.CQLDataLoader
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
