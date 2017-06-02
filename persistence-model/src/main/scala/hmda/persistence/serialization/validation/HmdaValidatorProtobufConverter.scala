@@ -9,7 +9,7 @@ import hmda.persistence.serialization.lar.LARProtobufConverter._
 import hmda.persistence.serialization.ts.TsProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionProtobufConverter._
 
-object CommonHmdaValidatorProtobufConverter {
+object HmdaValidatorProtobufConverter {
 
   def larValidatedToProtobuf(obj: LarValidated): LarValidatedMessage = {
     LarValidatedMessage(

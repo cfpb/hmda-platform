@@ -3,9 +3,9 @@ package hmda.persistence.serialization.validation
 import akka.serialization.SerializerWithStringManifest
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ LarValidated, TsValidated }
 import hmda.persistence.model.serialization.CommonHmdaValidator.{ LarValidatedMessage, TsValidatedMessage }
-import hmda.persistence.serialization.validation.CommonHmdaValidatorProtobufConverter._
+import hmda.persistence.serialization.validation.HmdaValidatorProtobufConverter._
 
-class CommonHmdaValidatorProtobufSerializer extends SerializerWithStringManifest {
+class HmdaValidatorProtobufSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 1004
 
   override def manifest(o: AnyRef): String = o.getClass.getName

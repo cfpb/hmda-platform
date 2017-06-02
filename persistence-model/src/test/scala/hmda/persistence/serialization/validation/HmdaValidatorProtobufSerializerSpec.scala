@@ -7,9 +7,9 @@ import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ L
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 
-class CommonHmdaValidatorProtobufSerializerSpec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators with TsGenerators {
+class HmdaValidatorProtobufSerializerSpec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators with TsGenerators {
 
-  val serializer = new CommonHmdaValidatorProtobufSerializer()
+  val serializer = new HmdaValidatorProtobufSerializer()
 
   property("Lar Validated must be serialized to binary and back") {
     forAll(larGen, submissionIdGen) { (lar, submissionId) =>

@@ -5,11 +5,11 @@ import hmda.model.fi.ts.TsGenerators
 import hmda.model.institution.SubmissionGenerators._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.{ LarValidated, TsValidated }
 import hmda.persistence.model.serialization.CommonHmdaValidator.{ LarValidatedMessage, TsValidatedMessage }
-import CommonHmdaValidatorProtobufConverter._
+import HmdaValidatorProtobufConverter._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 
-class CommonHmdaValidatorProtobufConverterSpec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators with TsGenerators {
+class HmdaValidatorProtobufConverterSpec extends PropSpec with PropertyChecks with MustMatchers with LarGenerators with TsGenerators {
 
   property("Lar Validated must serialize to protobuf and back") {
     forAll(larGen, submissionIdGen) { (lar, submissionId) =>
