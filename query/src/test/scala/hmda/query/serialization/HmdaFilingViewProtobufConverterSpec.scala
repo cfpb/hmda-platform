@@ -9,7 +9,7 @@ import org.scalatest.prop.PropertyChecks
 
 class HmdaFilingViewProtobufConverterSpec extends PropSpec with PropertyChecks with MustMatchers {
   property("InstitutionViewState must serialize to protobuf and back") {
-    forAll(Gen.choose(0l, 100000l), Gen.choose(0l, 100000l)) { (size, seq) =>
+    forAll(Gen.choose(0: Long, 100000: Long), Gen.choose(0: Long, 100000: Long)) { (size, seq) =>
       val state = FilingViewState(size, seq)
       val protobuf = filingViewStateToProtobuf(state).toByteArray
       filingViewStateFromProtobuf(FilingViewStateMessage.parseFrom(protobuf)) mustBe state
