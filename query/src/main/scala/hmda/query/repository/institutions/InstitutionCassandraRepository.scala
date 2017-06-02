@@ -64,7 +64,7 @@ object InstitutionCassandraRepository extends CassandraRepository[InstitutionQue
   }
 
   override def readData(fetchSize: Int): Future[Seq[Row]] = {
-    val statement = new SimpleStatement(s"SELECT FROM $keyspace.institutions").setFetchSize(fetchSize)
+    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.institutions").setFetchSize(fetchSize)
     CassandraSource(statement).runWith(Sink.seq).mapTo[Seq[Row]]
   }
 
