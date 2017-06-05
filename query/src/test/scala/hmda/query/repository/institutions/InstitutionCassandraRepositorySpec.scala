@@ -1,12 +1,13 @@
 package hmda.query.repository.institutions
 
+import akka.stream.scaladsl.Source
 import com.datastax.driver.core.{ Cluster, Session }
+import hmda.model.institution.{ Agency, InstitutionGenerators }
 import org.cassandraunit.CQLDataLoader
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
-
-import scala.concurrent.Future
+import hmda.query.repository.institutions.InstitutionConverter._
 
 class InstitutionCassandraRepositorySpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
 
@@ -27,19 +28,27 @@ class InstitutionCassandraRepositorySpec extends AsyncWordSpec with MustMatchers
   def loadData(): Unit = {
     val dataLoader = new CQLDataLoader(session)
     dataLoader.load(new ClassPathCQLDataSet("simple.cql", "hmda_query"))
-    dataLoader.load(new ClassPathCQLDataSet("institutions.cql", "hmda_query"))
   }
 
   "Institutions in Cassandra" must {
-    "read back data from default data in test" in {
-      val f = InstitutionCassandraRepository.readData(100)
-      f.map(xs => xs.size mustBe 2)
-    }
-    "read back a subset of data from default data in test, based on fetchsize" in {
-      Future(1 mustBe 1)
-    }
-    "Drop the table, create it again and populate it with some data that can be read back" in {
-      Future(1 mustBe 1)
+    "Drop the table if it exists, create it again and populate it with some data that can be read back" in {
+      InstitutionCassandraRepository.dropTable()
+      InstitutionCassandraRepository.createTable()
+      val institutions = List(
+        toInstitutionQuery(InstitutionGenerators.sampleInstitution.copy(agency = Agency.CFPB)),
+        toInstitutionQuery(InstitutionGenerators.sampleInstitution.copy(agency = Agency.CFPB)),
+        toInstitutionQuery(InstitutionGenerators.sampleInstitution.copy(agency = Agency.CFPB))
+      )
+      val source = Source.fromIterator(() => institutions.toIterator)
+      val inserted = InstitutionCassandraRepository.insertData(source)
+      val read = InstitutionCassandraRepository.readData(20)
+      for {
+        _ <- inserted
+        r <- read
+      } yield {
+        r.map(x => x.getInt("agency") mustBe Agency.CFPB.value)
+        r.size mustBe 3
+      }
     }
   }
 

@@ -59,8 +59,68 @@ object InstitutionCassandraRepository extends CassandraRepository[InstitutionQue
   }
 
   override def insertData(source: Source[InstitutionQuery, NotUsed]): Future[Done] = {
-    val preparedStatement = session.prepare(s"INSERT INTO $keyspace.institutions VALUES (?)")
-    val statementBinder = (institution: InstitutionQuery, statement: PreparedStatement) => statement.bind(institution)
+    val preparedStatement = session.prepare(s"INSERT INTO $keyspace.institutions" +
+      s"(id," +
+      s"agency," +
+      s"period," +
+      s"activity_year," +
+      s"respondent_id," +
+      s"type," +
+      s"cra," +
+      s"email_1," +
+      s"email_2," +
+      s"email_3," +
+      s"respondent_name," +
+      s"respondent_state," +
+      s"respondent_city," +
+      s"respondent_fips," +
+      s"hmda_filer," +
+      s"parent_respondent_id," +
+      s"parent_id_rssd," +
+      s"parent_name," +
+      s"parent_city," +
+      s"parent_state," +
+      s"assets," +
+      s"other_lender_codes," +
+      s"top_holder_id_rssd," +
+      s"top_holder_name," +
+      s"top_holder_city," +
+      s"top_holder_state," +
+      s"top_holder_country) " +
+      s" VALUES " +
+      s"(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+
+    val statementBinder = (institution: InstitutionQuery, statement: PreparedStatement) =>
+      statement.bind(
+        institution.id,
+        new Integer(institution.agency),
+        new Integer(institution.filingPeriod),
+        new Integer(institution.activityYear),
+        institution.respondentId,
+        institution.institutionType,
+        new java.lang.Boolean(institution.cra),
+        institution.emailDomain1,
+        institution.emailDomain2,
+        institution.emailDomain3,
+        institution.respondentName,
+        institution.respondentState,
+        institution.respondentCity,
+        institution.respondentFipsStateNumber,
+        new java.lang.Boolean(institution.hmdaFilerFlag),
+        institution.parentRespondentId,
+        new Integer(institution.parentIdRssd),
+        institution.parentName,
+        institution.parentCity,
+        institution.parentState,
+        new Integer(institution.assets),
+        new Integer(institution.otherLenderCode),
+        new Integer(institution.topHolderIdRssd),
+        institution.topHolderName,
+        institution.topHolderCity,
+        institution.topHolderState,
+        institution.topHolderCountry
+      )
+
     val sink = CassandraSink[InstitutionQuery](parallelism = 2, preparedStatement, statementBinder)
     source.runWith(sink)
   }
