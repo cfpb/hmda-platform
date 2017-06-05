@@ -15,33 +15,35 @@ object InstitutionCassandraRepository extends CassandraRepository[InstitutionQue
   override def createTable(): Unit = {
     val query =
       s"""
-        |CREATE TABLE IF NOT EXISTS $keyspace.institutions(
-          |id varchar PRIMARY KEY,
-          |agency int,
-          |filingPeriod int,
-          |activityYear int,
-          |respondentId varchar,
-          |institutionType varchar,
-          |cra boolean,
-          |emailDomain1 varchar,
-          |emailDomain2 varchar,
-          |emailDomain3 varchar,
-          |respondentName varchar,
-          |respondentState varchar,
-          |respondentCity varchar,
-          |respondentFipsStateNumber varchar,
-          |hmdaFilerFlag boolean,
-          |parentRespondentId varchar,
-          |parentIdRssd int,
-          |parentName varchar,
-          |assets int,
-          |otherLenderCode int,
-          |topHolderIdRssd int,
-          |topHolderName varchar,
-          |topHolderCity varchar,
-          |topHolderState varchar,
-          |topHolderCountry varchar
-        |);
+         |CREATE TABLE IF NOT EXISTS $keyspace.institutions(
+         |    id varchar PRIMARY KEY,
+         |    agency int,
+         |    period int,
+         |    activity_year int,
+         |    respondent_id varchar,
+         |    type varchar,
+         |    cra boolean,
+         |    email_1 varchar,
+         |    email_2 varchar,
+         |    email_3 varchar,
+         |    respondent_name varchar,
+         |    respondent_state varchar,
+         |    respondent_city varchar,
+         |    respondent_fips varchar,
+         |    hmda_filer boolean,
+         |    parent_respondent_id varchar,
+         |    parent_id_rssd int,
+         |    parent_name varchar,
+         |    parent_city varchar,
+         |    parent_state varchar,
+         |    assets int,
+         |    other_lender_codes int,
+         |    top_holder_id_rssd int,
+         |    top_holder_name varchar,
+         |    top_holder_city varchar,
+         |    top_holder_state varchar,
+         |    top_holder_country varchar
+         |);
       """.stripMargin
 
     session.execute(query)

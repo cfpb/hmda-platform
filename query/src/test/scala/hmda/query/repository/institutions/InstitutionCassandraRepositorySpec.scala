@@ -33,7 +33,7 @@ class InstitutionCassandraRepositorySpec extends AsyncWordSpec with MustMatchers
   "Institutions in Cassandra" must {
     "read back data from default data in test" in {
       val f = InstitutionCassandraRepository.readData(100)
-      f.map(xs => xs.size mustBe 1)
+      f.map(xs => xs.size mustBe 2)
     }
     "read back a subset of data from default data in test, based on fetchsize" in {
       Future(1 mustBe 1)
