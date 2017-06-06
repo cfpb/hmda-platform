@@ -1,15 +1,14 @@
 package hmda.api.model
 
+import hmda.census.model.{ MsaSummary, Msa }
 import hmda.persistence.PaginatedResource
-import hmda.query.model.filing.{ Msa, MsaSummary, MsaWithName }
 
 case class Irs(msas: Seq[Msa]) {
 
   def paginatedResponse(page: Int, path: String): IrsResponse = {
     val total = msas.size
-    val namedMsas = msas.map(_.addName)
     val p = PaginatedResource(total)(page)
-    val pageOfMsas = namedMsas.slice(p.fromIndex, p.toIndex)
+    val pageOfMsas = msas.slice(p.fromIndex, p.toIndex)
     val summary = MsaSummary.fromMsaCollection(msas)
     IrsResponse(pageOfMsas.toList, summary, path, page, total)
   }
@@ -17,7 +16,7 @@ case class Irs(msas: Seq[Msa]) {
 }
 
 case class IrsResponse(
-  msas: List[MsaWithName],
+  msas: List[Msa],
   summary: MsaSummary,
   path: String,
   currentPage: Int,
@@ -33,4 +32,4 @@ IrsResponse(
   total: Int,
   _links: PaginatedLinks)
 
-This happens in MsaProtocol.scala */ 
+This happens in MsaProtocol.scala */

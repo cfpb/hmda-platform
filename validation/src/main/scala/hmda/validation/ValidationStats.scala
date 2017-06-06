@@ -1,6 +1,7 @@
 package hmda.validation
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import hmda.census.model.{ Msa, MsaMap }
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.validation.ValidationStatsEvents._
@@ -21,7 +22,8 @@ object ValidationStats {
     q072SoldLars: Int = 0,
     q075Ratio: Double = 0.0,
     q076Ratio: Double = 0.0,
-    taxId: String = ""
+    taxId: String = "",
+    msas: Seq[Msa] = Seq[Msa]()
   )
 
   case class AddSubmissionSubmittedTotal(total: Int, id: SubmissionId) extends Command
@@ -38,9 +40,11 @@ object ValidationStats {
     q075Ratio: Double,
     q076Ratio: Double
   ) extends Command
+  case class AddIrsStats(msas: Seq[Msa], id: SubmissionId) extends Command
 
   case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
   case class FindTotalValidatedLars(institutionId: String, period: String) extends Command
+  case class FindIrsStats(institutionId: String, period: String) extends Command
   case class FindTaxId(institutionId: String, period: String) extends Command
   case class FindQ070(institutionId: String, period: String) extends Command
   case class FindQ071(institutionId: String, period: String) extends Command
@@ -74,6 +78,9 @@ object ValidationStats {
         updateCollection(modifiedSub)
       case SubmissionTaxIdAdded(tax, id) =>
         val modified = getStat(id).copy(taxId = tax)
+        updateCollection(modified)
+      case IrsStatsAdded(seq, id) =>
+        val modified = getStat(id).copy(msas = seq)
         updateCollection(modified)
     }
 
@@ -130,11 +137,20 @@ class ValidationStats extends HmdaPersistentActor {
         updateState(e)
       }
 
+    case AddIrsStats(map, id) =>
+      persist(IrsStatsAdded(map, id)) { e =>
+        log.debug(s"Persisted: $e")
+        updateState(e)
+      }
+
     case FindTotalSubmittedLars(id, period) =>
       sender ! state.latestStatsFor(id, period).totalSubmittedLars
 
     case FindTotalValidatedLars(id, period) =>
       sender ! state.latestStatsFor(id, period).totalValidatedLars
+
+    case FindIrsStats(id, period) =>
+      sender ! state.latestStatsFor(id, period).msas
 
     case FindTaxId(id, period) =>
       sender ! state.latestStatsFor(id, period).taxId

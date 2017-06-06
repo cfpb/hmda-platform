@@ -1,13 +1,14 @@
 package hmda.validation
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import hmda.census.model.{ Msa, MsaMap }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ MacroStatsUpdated, SubmittedLarsUpdated }
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.ValidationStats.{ AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
+import hmda.validation.ValidationStats.{ AddIrsStats, AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
 import hmda.validation.rules.lar.`macro`._
 
 object SubmissionLarStats {
@@ -15,6 +16,7 @@ object SubmissionLarStats {
 
   case class PersistStatsForMacroEdits() extends Command
   case class CountSubmittedLarsInSubmission() extends Command
+  case class PersistIrs() extends Command
 
   def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
 
@@ -32,7 +34,8 @@ object SubmissionLarStats {
       q072Total: Int = 0,
       q072SoldTotal: Int = 0,
       q075Ratio: Double = 0.0,
-      q076Ratio: Double = 0.0
+      q076Ratio: Double = 0.0,
+      msas: Seq[Msa] = Seq[Msa]()
   ) {
     def updated(event: Event): SubmissionLarStatsState = event match {
       case SubmittedLarsUpdated(submitted) => this.copy(totalSubmitted = submitted)
@@ -48,6 +51,8 @@ object SubmissionLarStats {
           q075Ratio = q075,
           q076Ratio = q076
         )
+      case IrsStatsUpdated(msaSeq) =>
+        this.copy(msas = msaSeq)
     }
   }
 }
@@ -67,6 +72,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
   var q075TotalSoldLars = 0
   var q076TotalLars = 0
   var q076TotalSoldLars = 0
+  var msaMap = MsaMap()
 
   var state = SubmissionLarStatsState()
 
@@ -87,6 +93,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       tallyQ072Lar(lar)
       tallyQ075Lar(lar)
       tallyQ076Lar(lar)
+      msaMap = msaMap + lar
 
     case CountSubmittedLarsInSubmission =>
       persist(SubmittedLarsUpdated(totalSubmittedLars)) { e =>
@@ -118,6 +125,15 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
           q076Ratio
         )
         validationStats ! msg
+      }
+
+    case PersistIrs =>
+      val msaSeq = msaMap.msas.values.toSeq
+      persist(IrsStatsUpdated(msaSeq)) { e =>
+        log.debug(s"Persisted: $msaSeq")
+        updateState(e)
+        val validationStats = context.actorSelection("/user/validation-stats")
+        validationStats ! AddIrsStats(msaSeq, submissionId)
       }
 
     case GetState =>
