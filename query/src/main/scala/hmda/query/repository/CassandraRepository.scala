@@ -28,16 +28,16 @@ trait CassandraRepository[A] {
   def createKeyspace(): ResultSet = {
     val query =
       s"""
-        |CREATE KEYSPACE IF NOT EXISTS $keyspace (
+        |CREATE KEYSPACE IF NOT EXISTS $keyspace WITH REPLICATION={
         |  'class': 'SimpleStrategy',
         |  'replication_factor': '1'
-        |)
+        |}
       """.stripMargin
 
     session.execute(query)
   }
-  def createTable(): Unit
-  def dropTable(): Unit
+  def createTable(): ResultSet
+  def dropTable(): ResultSet
   def insertData(source: Source[A, NotUsed]): Future[Done]
   def readData(fetchSize: Int): Future[Seq[Row]]
 

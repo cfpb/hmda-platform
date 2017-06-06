@@ -4,7 +4,7 @@ import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.{ Done, NotUsed }
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.stream.scaladsl.{ Sink, Source }
-import com.datastax.driver.core.{ PreparedStatement, Row, SimpleStatement }
+import com.datastax.driver.core.{ PreparedStatement, ResultSet, Row, SimpleStatement }
 import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.CassandraRepository
 
@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 object InstitutionCassandraRepository extends CassandraRepository[InstitutionQuery] {
 
-  override def createTable(): Unit = {
+  override def createTable(): ResultSet = {
     val query =
       s"""
          |CREATE TABLE IF NOT EXISTS $keyspace.institutions(
@@ -50,7 +50,7 @@ object InstitutionCassandraRepository extends CassandraRepository[InstitutionQue
 
   }
 
-  override def dropTable(): Unit = {
+  override def dropTable(): ResultSet = {
     val query = s"""
       |DROP TABLE IF EXISTS $keyspace.institutions;
     """.stripMargin

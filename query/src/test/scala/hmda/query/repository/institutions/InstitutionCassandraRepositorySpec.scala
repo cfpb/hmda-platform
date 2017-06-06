@@ -8,6 +8,9 @@ import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import hmda.query.repository.institutions.InstitutionConverter._
+import org.apache.cassandra.db.rows.Row
+import scala.concurrent.duration._
+import scala.concurrent.{ Await, Future }
 
 class InstitutionCassandraRepositorySpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
 
@@ -18,16 +21,11 @@ class InstitutionCassandraRepositorySpec extends AsyncWordSpec with MustMatchers
     EmbeddedCassandraServerHelper.startEmbeddedCassandra(20000L)
     cluster = EmbeddedCassandraServerHelper.getCluster()
     session = cluster.connect()
-    loadData()
+    InstitutionCassandraRepository.createKeyspace()
   }
 
   override def afterAll(): Unit = {
     EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
-  }
-
-  def loadData(): Unit = {
-    val dataLoader = new CQLDataLoader(session)
-    dataLoader.load(new ClassPathCQLDataSet("simple.cql", "hmda_query"))
   }
 
   "Institutions in Cassandra" must {
@@ -40,14 +38,12 @@ class InstitutionCassandraRepositorySpec extends AsyncWordSpec with MustMatchers
         toInstitutionQuery(InstitutionGenerators.sampleInstitution.copy(agency = Agency.CFPB))
       )
       val source = Source.fromIterator(() => institutions.toIterator)
-      val inserted = InstitutionCassandraRepository.insertData(source)
+      val insertedF = InstitutionCassandraRepository.insertData(source)
+      Await.result(insertedF, 5.seconds)
       val read = InstitutionCassandraRepository.readData(20)
-      for {
-        _ <- inserted
-        r <- read
-      } yield {
+      read.map { r =>
         r.map(x => x.getInt("agency") mustBe Agency.CFPB.value)
-        r.size mustBe 3
+        r.seq.size mustBe 3
       }
     }
   }
