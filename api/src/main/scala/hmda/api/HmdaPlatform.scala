@@ -81,6 +81,9 @@ object HmdaPlatform {
     val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
       .mapTo[ActorRef]
 
+    val cassandraProjection = new InstitutionCassandraProjection
+    cassandraProjection.startUp()
+
     // Start validation stats actor
     system.actorOf(ValidationStats.props(), "validation-stats")
 
