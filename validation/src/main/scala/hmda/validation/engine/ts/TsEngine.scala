@@ -18,10 +18,11 @@ trait TsEngine extends TsSyntacticalEngine with TsValidityEngine with TsQualityE
     (
       checkValidity(ts, ctx)
       |@| checkSyntactical(ts, ctx)
-    )((_, _) => ts)
+      |@| checkQuality(ts, ctx)
+    )((_, _, _) => ts)
   }
 
   def validateTsQuality(ts: TransmittalSheet, ctx: ValidationContext)(implicit system: ActorSystem, materializer: ActorMaterializer, ec: ExecutionContext): Future[TsValidation] = {
-    checkQuality(ts, ctx)
+    checkQualityAsync(ts, ctx)
   }
 }
