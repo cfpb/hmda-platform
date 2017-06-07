@@ -42,7 +42,7 @@ object HmdaFileValidator {
 
   case class ValidationStarted(submissionId: SubmissionId) extends Event
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
-  case class ValidateTsQuality(ts: TransmittalSheet) extends Command
+  case class ValidateAggregate(ts: TransmittalSheet) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
 
@@ -151,10 +151,10 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         .map {
           case (_, Right(ts)) =>
             validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
-            ValidateTsQuality(ts)
+            ValidateAggregate(ts)
           case (ts, Left(errors)) =>
             validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
-            self ! ValidateTsQuality(ts)
+            self ! ValidateAggregate(ts)
             TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
@@ -173,8 +173,8 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         }
         .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
 
-    case ValidateTsQuality(ts) =>
-      validateTsQuality(ts, ctx)
+    case ValidateAggregate(ts) =>
+      performAsyncChecks(ts, ctx)
         .map(validations => validations.toEither)
         .map {
           case Right(_) => self ! ts
