@@ -2,20 +2,15 @@ package hmda.validation.rules.ts.quality
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.LarGenerators
 import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
-import org.scalacheck.Gen
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
-
-import scala.concurrent.duration._
 import hmda.validation.ValidationStats._
-import hmda.validation.rules.lar.`macro`.Q011
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
+import scala.concurrent.duration._
 
 class Q130Spec extends AsyncWordSpec with MustMatchers with TsGenerators with BeforeAndAfterAll {
   val configuration = ConfigFactory.load()
