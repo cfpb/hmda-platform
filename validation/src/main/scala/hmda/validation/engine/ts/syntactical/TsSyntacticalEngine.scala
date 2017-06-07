@@ -2,6 +2,7 @@ package hmda.validation.engine.ts.syntactical
 
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.validation.Syntactical
+import hmda.validation.{ AS, MAT }
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.ts.TsCommonEngine
@@ -22,6 +23,16 @@ trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi {
     val checks = checksToRun.map(check(_, ts, ts.agencyCode + ts.respondent.id, Syntactical, true))
 
     validateAll(checks, ts)
+  }
+
+  def checkSyntacticalAsync[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
+    val checks = List(
+      S011.inContext(ctx)
+    ).map(edit => checkAsync(edit, ts, ts.errorId, Syntactical, true))
+
+    val fChecks = Future.sequence(checks)
+
+    fChecks.map(list => validateAll(list, ts))
   }
 
 }
