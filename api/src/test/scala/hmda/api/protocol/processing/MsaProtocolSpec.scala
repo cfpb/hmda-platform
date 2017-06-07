@@ -2,8 +2,6 @@ package hmda.api.protocol.processing
 
 import hmda.api.model.IrsResponse
 import hmda.census.model.{ MsaSummary, Msa }
-import hmda.query.model.filing.MsaSummary
-import hmda.validation.model.MsaSummary
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._

@@ -21,7 +21,7 @@ case class Msa(
     homeImprovement: Int = 0,
     refinance: Int = 0
 ) {
-  def +(lar: LoanApplicationRegister): Msa = {
+  def addLar(lar: LoanApplicationRegister): Msa = {
     implicit def bool2int(b: Boolean): Int = if (b) 1 else 0
 
     new Msa(
@@ -49,7 +49,7 @@ case class MsaMap(
   def +(lar: LoanApplicationRegister): MsaMap = {
     val id = lar.geography.msa
     val original = msas.getOrElse(id, Msa(id, CbsaLookup.nameFor(id)))
-    val modified = original + lar
+    val modified = original.addLar(lar)
     MsaMap(msas + ((id, modified)))
   }
 }
