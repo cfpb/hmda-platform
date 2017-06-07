@@ -21,7 +21,7 @@ class ValidationStatsSpec extends ActorSpec with MsaGenerators {
       val id2 = SubmissionId("12345", "2017", 2)
       val id3 = SubmissionId("12345", "2016", 1)
       val s1 = SubmissionStats(id1, 20, 21, 22, 23, 24, 25, 26, 27, .28, .29, "a", msa)
-      val s2 = SubmissionStats(id2, 124, 125, 126, 127, 128, 129, 130, 131, .132, .133, "b", msa)
+      val s2 = SubmissionStats(id2, 124, 125, 126, 127, 128, 129, 130, 131, .132, .133, "b", List[Msa]())
       val s3 = SubmissionStats(id3, 101, 100, 99, 98, 97, 96, 95, 94, .93, .92, "c", List[Msa]())
       probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(20, id1))
       probe.send(submissionValidationStats, AddSubmissionMacroStats(id1, 21, 22, 23, 24, 25, 26, 27, 0.28, 0.29))
@@ -31,7 +31,6 @@ class ValidationStatsSpec extends ActorSpec with MsaGenerators {
       probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(124, id2))
       probe.send(submissionValidationStats, AddSubmissionMacroStats(id2, 125, 126, 127, 128, 129, 130, 131, 0.132, 0.133))
       probe.send(submissionValidationStats, AddSubmissionTaxId("b", id2))
-      probe.send(submissionValidationStats, AddIrsStats(msa, id2))
 
       probe.send(submissionValidationStats, AddSubmissionSubmittedTotal(101, id3))
       probe.send(submissionValidationStats, AddSubmissionMacroStats(id3, 100, 99, 98, 97, 96, 95, 94, .93, .92))
@@ -62,10 +61,12 @@ class ValidationStatsSpec extends ActorSpec with MsaGenerators {
       probe.expectMsg("c")
     }
 
-    "Find IRS stats for an institution in a certain period" in {
-      probe.send(submissionValidationStats, FindIrsStats("12345", "2017"))
+    "Find IRS stats for an institution in a certain submission" in {
+      probe.send(submissionValidationStats, FindIrsStats(SubmissionId("12345", "2017", 1)))
       probe.expectMsg(msa)
-      probe.send(submissionValidationStats, FindIrsStats("12345", "2016"))
+      probe.send(submissionValidationStats, FindIrsStats(SubmissionId("12345", "2017", 2)))
+      probe.expectMsg(List[Msa]())
+      probe.send(submissionValidationStats, FindIrsStats(SubmissionId("12345", "2016", 1)))
       probe.expectMsg(List[Msa]())
     }
 

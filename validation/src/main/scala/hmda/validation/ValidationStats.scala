@@ -44,7 +44,7 @@ object ValidationStats {
 
   case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
   case class FindTotalValidatedLars(institutionId: String, period: String) extends Command
-  case class FindIrsStats(institutionId: String, period: String) extends Command
+  case class FindIrsStats(submissionId: SubmissionId) extends Command
   case class FindTaxId(institutionId: String, period: String) extends Command
   case class FindQ070(institutionId: String, period: String) extends Command
   case class FindQ071(institutionId: String, period: String) extends Command
@@ -149,8 +149,9 @@ class ValidationStats extends HmdaPersistentActor {
     case FindTotalValidatedLars(id, period) =>
       sender ! state.latestStatsFor(id, period).totalValidatedLars
 
-    case FindIrsStats(id, period) =>
-      sender ! state.latestStatsFor(id, period).msas
+    case FindIrsStats(subId) =>
+      val stats = state.stats.find(s => s.id == subId).getOrElse(SubmissionStats(subId))
+      sender ! stats.msas
 
     case FindTaxId(id, period) =>
       sender ! state.latestStatsFor(id, period).taxId
