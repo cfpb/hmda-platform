@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.syntactical
+package hmda.validation.rules.ts.syntactical
 
 import akka.pattern.ask
 import hmda.model.fi.ts.TransmittalSheet
@@ -6,10 +6,10 @@ import hmda.model.institution.Institution
 import hmda.validation.ValidationStats.FindTotalSubmittedLars
 import hmda.validation._
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.{ AggregateEditCheck, IfContextPresentInAggregate, StatsLookup }
-import hmda.validation.dsl.Result
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.dsl.Result
+import hmda.validation.rules.{ AggregateEditCheck, IfContextPresentInAggregate, StatsLookup }
 
 import scala.concurrent.Future
 

@@ -1,4 +1,4 @@
-package hmda.validation.rules.lar.syntactical
+package hmda.validation.rules.ts.syntactical
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.stream.ActorMaterializer
