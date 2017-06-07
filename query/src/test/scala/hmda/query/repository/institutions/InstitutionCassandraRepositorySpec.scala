@@ -3,14 +3,11 @@ package hmda.query.repository.institutions
 import akka.stream.scaladsl.Source
 import com.datastax.driver.core.{ Cluster, Session }
 import hmda.model.institution.{ Agency, InstitutionGenerators }
-import org.cassandraunit.CQLDataLoader
-import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import hmda.query.repository.institutions.InstitutionConverter._
-import org.apache.cassandra.db.rows.Row
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.Await
 
 class InstitutionCassandraRepositorySpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
 

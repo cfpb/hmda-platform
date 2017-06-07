@@ -24,6 +24,7 @@ import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
+import hmda.query.projections.institutions.InstitutionCassandraProjection
 
 import scala.concurrent.ExecutionContext
 

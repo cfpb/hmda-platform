@@ -11,11 +11,6 @@ import scala.concurrent.Future
 
 trait CassandraRepository[A] {
 
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher
-  implicit val timeout = 10.seconds
-
   val keyspace = "hmda_query"
 
   implicit val session = Cluster
@@ -28,12 +23,19 @@ trait CassandraRepository[A] {
   def createKeyspace(): ResultSet = {
     val query =
       s"""
-        |CREATE KEYSPACE IF NOT EXISTS $keyspace WITH REPLICATION={
+        |CREATE KEYSPACE IF NOT EXISTS $keyspace WITH REPLICATION = {
         |  'class': 'SimpleStrategy',
         |  'replication_factor': '1'
         |}
       """.stripMargin
 
+    session.execute(query)
+  }
+  def dropKeyspace(): ResultSet = {
+    val query =
+      s"""
+        |DROP KEYSPACE $keyspace
+      """.stripMargin
     session.execute(query)
   }
   def createTable(): ResultSet
