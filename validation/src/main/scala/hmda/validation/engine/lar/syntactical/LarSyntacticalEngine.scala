@@ -25,7 +25,7 @@ trait LarSyntacticalEngine extends LarCommonEngine with ValidationApi {
 
   def checkSyntacticalCollection(lars: Iterable[LoanApplicationRegister]): LarsValidation = {
     val checks = List(
-      S011,
+      //S011,
       S040
     ).map(check(_, lars, "", Syntactical, false))
 
