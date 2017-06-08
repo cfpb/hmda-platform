@@ -1,14 +1,14 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.IrsResponse
-import hmda.query.model.filing.{ MsaSummary, MsaWithName }
+import hmda.census.model.{ MsaSummary, Msa }
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._
 
 class MsaProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with MsaProtocol {
 
-  val msaWithName = MsaWithName("first", "Cincinnati, OH", 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+  val msaWithName = Msa("first", "Cincinnati, OH", 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)
   val expectedMsa = JsObject(
     ("id", JsString("first")),
     ("name", JsString("Cincinnati, OH")),

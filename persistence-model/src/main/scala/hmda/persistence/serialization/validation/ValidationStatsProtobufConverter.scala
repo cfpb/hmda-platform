@@ -4,6 +4,7 @@ import hmda.persistence.messages.events.validation.ValidationStatsEvents._
 import hmda.persistence.model.serialization.SubmissionEvents.SubmissionIdMessage
 import hmda.persistence.model.serialization.ValidationStatsEvents._
 import hmda.persistence.serialization.submission.SubmissionProtobufConverter.{ submissionIdFromProtobuf, submissionIdToProtobuf }
+import hmda.persistence.serialization.validation.SubmissionLarStatsProtobufConverter.{ msaToProtobuf, msaFromProtobuf }
 
 object ValidationStatsProtobufConverter {
 
@@ -13,6 +14,7 @@ object ValidationStatsProtobufConverter {
       id = Some(submissionIdToProtobuf(event.id))
     )
   }
+
   def submissionSubmittedTotalsAddedFromProtobuf(msg: SubmissionSubmittedTotalsAddedMessage): SubmissionSubmittedTotalsAdded = {
     SubmissionSubmittedTotalsAdded(
       total = msg.total,
@@ -47,6 +49,7 @@ object ValidationStatsProtobufConverter {
       q076Ratio = event.q076Ratio
     )
   }
+
   def submissionMacroStatsAddedFromProtobuf(msg: SubmissionMacroStatsAddedMessage): SubmissionMacroStatsAdded = {
     SubmissionMacroStatsAdded(
       id = submissionIdFromProtobuf(msg.id.getOrElse(SubmissionIdMessage())),
@@ -59,6 +62,20 @@ object ValidationStatsProtobufConverter {
       q072Sold = msg.q072Sold,
       q075Ratio = msg.q075Ratio,
       q076Ratio = msg.q076Ratio
+    )
+  }
+
+  def irsStatsAddedToProtobuf(event: IrsStatsAdded): IrsStatsAddedMessage = {
+    IrsStatsAddedMessage(
+      id = Some(submissionIdToProtobuf(event.id)),
+      msas = event.msas.map(msa => msaToProtobuf(msa))
+    )
+  }
+
+  def irsStatsAddedFromProtobuf(msg: IrsStatsAddedMessage): IrsStatsAdded = {
+    IrsStatsAdded(
+      id = submissionIdFromProtobuf(msg.id.getOrElse(SubmissionIdMessage())),
+      msas = msg.msas.map(msg => msaFromProtobuf(msg))
     )
   }
 }

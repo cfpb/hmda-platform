@@ -4,6 +4,7 @@ option java_package = "hmda.persistence.model.serialization";
 option optimize_for = SPEED;
 
 import "SubmissionEvents.proto";
+import "SubmissionLarStatsEvents.proto";
 
 message SubmissionSubmittedTotalsAddedMessage {
     int32 total = 1;
@@ -26,4 +27,9 @@ message SubmissionMacroStatsAddedMessage {
     int32 q072Sold = 8;
     double q075Ratio = 9;
     double q076Ratio = 10;
+}
+
+message IrsStatsAddedMessage {
+    repeated MsaMessage msas = 1;
+    SubmissionIdMessage id = 2;
 }

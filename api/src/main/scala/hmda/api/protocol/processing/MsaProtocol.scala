@@ -1,11 +1,11 @@
 package hmda.api.protocol.processing
 
 import hmda.api.model.{ IrsResponse, PaginatedResponse }
-import hmda.query.model.filing.{ MsaSummary, MsaWithName }
+import hmda.census.model.{ MsaSummary, Msa }
 import spray.json._
 
 trait MsaProtocol extends DefaultJsonProtocol with ParserResultsProtocol {
-  implicit val msaWithNameProtocol = jsonFormat14(MsaWithName.apply)
+  implicit val msaWithNameProtocol = jsonFormat14(Msa.apply)
   implicit val msaSummaryProtocol = jsonFormat12(MsaSummary.apply)
 
   implicit object IrsResponseJsonFormat extends RootJsonFormat[IrsResponse] {
@@ -22,7 +22,7 @@ trait MsaProtocol extends DefaultJsonProtocol with ParserResultsProtocol {
     override def read(json: JsValue): IrsResponse = {
       json.asJsObject.getFields("msas", "summary", "total", "_links") match {
         case Seq(JsArray(msas), JsObject(summ), JsNumber(tot), JsObject(links)) =>
-          val msaCollection = msas.map(_.convertTo[MsaWithName])
+          val msaCollection = msas.map(_.convertTo[Msa])
           val path = PaginatedResponse.staticPath(links("href").convertTo[String])
           val currentPage = PaginatedResponse.currentPage(links("self").convertTo[String])
           val summary = JsObject(summ).convertTo[MsaSummary]

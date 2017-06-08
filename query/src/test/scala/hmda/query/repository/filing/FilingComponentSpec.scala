@@ -5,7 +5,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Flow, Keep, RunnableGraph, Sink }
 import hmda.model.fi.lar.LarGenerators
 import hmda.query.DbConfiguration._
-import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister, Msa }
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister }
 
 import scala.concurrent.duration._
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
@@ -20,7 +20,6 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
   val duration = 5.seconds
 
   val repository = new LarRepository(config)
-  val larTotalMsaRepository = new LarTotalMsaRepository(config)
   val modifiedLarRepository = new ModifiedLarRepository(config)
 
   implicit val system = ActorSystem()
@@ -30,7 +29,6 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
     super.beforeAll()
     dropAllObjects()
     Await.result(repository.createSchema(), duration)
-    Await.result(larTotalMsaRepository.createSchema(), duration)
     Await.result(modifiedLarRepository.createSchema(), duration)
   }
 
@@ -139,30 +137,6 @@ class FilingComponentSpec extends AsyncWordSpec with MustMatchers with FilingCom
       val result = Await.result(sumF, duration)
       result mustBe 3
 
-    }
-
-    "Stream IRS" in {
-      repository.deleteAll.map(x => x mustBe 1)
-      val msa1 = geographyGen.sample.get.copy(msa = "12345")
-      val msaNa = geographyGen.sample.get.copy(msa = "NA")
-      val otherMsa = geographyGen.sample.get.copy(msa = "Don't include")
-      val loan = loanGen.sample.get.copy(amount = 12)
-      val lar1 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = msa1, loan = loan))
-      val lar2 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = msaNa, loan = loan))
-      val lar3 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = otherMsa, loan = loan))
-      val lar4 = toLoanApplicationRegisterQuery(sampleLar.copy(geography = otherMsa, loan = loan))
-      val query1 = lar1.copy(period = "2017", institutionId = "1")
-      val query2 = lar2.copy(period = "2017", institutionId = "1")
-      val query3 = lar3.copy(period = "2017", institutionId = "2")
-      val query4 = lar4.copy(period = "2016", institutionId = "1")
-      Await.result(repository.insertOrUpdate(query1), duration)
-      Await.result(repository.insertOrUpdate(query2), duration)
-      Await.result(repository.insertOrUpdate(query3), duration)
-      Await.result(repository.insertOrUpdate(query4), duration)
-
-      val msaF = larTotalMsaRepository.getMsaSeq("1", "2017")
-      val msaSeq: Seq[Msa] = Await.result(msaF, duration)
-      msaSeq.toList.length mustBe 2
     }
   }
 

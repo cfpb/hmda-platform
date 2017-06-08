@@ -132,7 +132,7 @@ lazy val persistenceModel = (project in file("persistence-model"))
       scalapb.gen() -> (sourceManaged in Compile).value
     )
   ).disablePlugins(ScoverageSbtPlugin)
-  .dependsOn(modelJVM % "compile->compile;test->test")
+  .dependsOn(census % "compile->compile;test->test")
 
 lazy val persistence = (project in file("persistence"))
   .settings(hmdaBuildSettings:_*)
@@ -165,7 +165,6 @@ lazy val query = (project in file("query"))
     libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
-  .dependsOn(census % "compile->compile;test->test")
   .dependsOn(persistenceModel % "compile->compile;test->test")
 
 lazy val api = (project in file("api"))
