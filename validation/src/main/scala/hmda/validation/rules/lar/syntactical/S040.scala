@@ -1,20 +1,38 @@
 package hmda.validation.rules.lar.syntactical
 
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.validation._
 import hmda.validation.dsl.{ Failure, Result, Success }
-import hmda.validation.rules.EditCheck
+import hmda.validation.dsl.PredicateCommon._
+import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
+import hmda.validation.rules.AggregateEditCheck
 
-object S040 extends EditCheck[Iterable[LoanApplicationRegister]] {
+import scala.concurrent.Future
 
-  //TODO: naive implementation, bail out as soon as a duplicate is found
-  override def apply(lars: Iterable[LoanApplicationRegister]): Result = {
-
-    val loanIds = lars.map(lar => lar.loan.id)
-    val size = loanIds.size
-    val uniqueIds = lars.toSeq.distinct
-    val uniqueSize = uniqueIds.size
-    if (size != uniqueSize) Failure() else Success()
-  }
+object S040 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
   override def name = "S040"
+
+  override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
+    var larIds: List[String] = List()
+    var result: Result = Success()
+
+    val detectDuplicates = lars.map(lar => lar.loan.id)
+      .takeWhile(_ => result.isInstanceOf[Success])
+      .runForeach { id =>
+        if (larIds.contains(id)) {
+          result = Failure()
+        } else {
+          larIds = larIds :+ id
+        }
+      }
+
+    for {
+      _ <- detectDuplicates
+    } yield {
+      result
+    }
+  }
+
 }

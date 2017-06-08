@@ -1,12 +1,14 @@
 package hmda.validation.engine.lar.`macro`
 
 import hmda.validation._
-import hmda.model.validation.Macro
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.validation.{Macro, Syntactical, ValidationErrorType}
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.rules.lar.`macro`._
+import hmda.validation.rules.lar.syntactical.S040
 
 import scala.concurrent.Future
 
@@ -54,4 +56,26 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
 
   }
 
+<<<<<<< HEAD
+=======
+  def checkS040[_: AS: MAT: EC](larSource: LoanApplicationRegisterSource, ctx: ValidationContext): Future[LarSourceValidation] = {
+    val fCheck = checkAggregate(S040, larSource, "", Syntactical)
+    fCheck.map(checks => validateAll(List(checks), larSource))
+  }
+
+  private def checkAggregate[_: AS: MAT: EC](
+    editCheck: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister],
+    input: LoanApplicationRegisterSource,
+    inputId: String,
+    errorType: ValidationErrorType
+  ): Future[LarSourceValidation] = {
+    val fResult = editCheck(input)
+    for {
+      result <- fResult
+    } yield {
+      convertResult(input, result, editCheck.name, inputId, errorType, false)
+    }
+  }
+
+>>>>>>> bb73a2f9... RESET ME: start implementing s040 as macro
 }
