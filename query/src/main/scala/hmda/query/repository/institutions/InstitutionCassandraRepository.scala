@@ -18,6 +18,8 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
   implicit def materializer: ActorMaterializer
   implicit def ec: ExecutionContext
 
+  val session = getSession
+
   def preparedStatement = session.prepare(s"INSERT INTO $keyspace.institutions" +
     s"(id," +
     s"agency," +

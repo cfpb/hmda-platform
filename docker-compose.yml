@@ -10,12 +10,17 @@ services:
     volumes:
     - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
     depends_on:
+      - cassandra
       - zookeeper
       - query_db
     environment:
       JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
       ZOOKEEPER_HOST: zookeeper
       ZOOKEEPER_PORT: 2181
+      CASSANDRA_CLUSTER_HOSTS: cassandra
+      CASSANDRA_CLUSTER_PORT: 9042
+    restart: unless-stopped
+
 
   ui:
     build:
@@ -118,3 +123,12 @@ services:
     image: jplock/zookeeper
     ports:
       - '2181:2181'
+    depends_on:
+      - cassandra
+
+  cassandra:
+    image: cassandra
+    ports:
+      - '9042:9042'
+      - '7000:7000'
+      - '7199:7199'

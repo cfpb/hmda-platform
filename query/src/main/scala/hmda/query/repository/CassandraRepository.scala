@@ -1,24 +1,29 @@
 package hmda.query.repository
 
 import akka.{ Done, NotUsed }
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import com.datastax.driver.core.{ Cluster, ResultSet, Row }
+import com.datastax.driver.core.policies.{ ConstantReconnectionPolicy, DowngradingConsistencyRetryPolicy, ExponentialReconnectionPolicy, LoggingRetryPolicy }
+import com.datastax.driver.core.{ Cluster, ResultSet, Row, Session }
 import hmda.query.CassandraConfig._
-import scala.concurrent.duration._
+
 import scala.concurrent.Future
 
 trait CassandraRepository[A] {
 
   val keyspace = "hmda_query"
 
-  implicit val session = Cluster
-    .builder
-    .addContactPoint(cassandraHost)
-    .withPort(cassandraPort)
-    .build
-    .connect()
+  implicit def getSession: Session =
+    try {
+      Cluster
+        .builder
+        .addContactPoint(cassandraHost)
+        .withPort(cassandraPort)
+        .withReconnectionPolicy(new ExponentialReconnectionPolicy(100L, 200000L))
+        .build
+        .connect()
+    } catch {
+      case ex: Exception => getSession
+    }
 
   def createKeyspace(): ResultSet = {
     val query =
@@ -29,14 +34,14 @@ trait CassandraRepository[A] {
         |}
       """.stripMargin
 
-    session.execute(query)
+    getSession.execute(query)
   }
   def dropKeyspace(): ResultSet = {
     val query =
       s"""
         |DROP KEYSPACE $keyspace
       """.stripMargin
-    session.execute(query)
+    getSession.execute(query)
   }
   def createTable(): ResultSet
   def dropTable(): ResultSet
