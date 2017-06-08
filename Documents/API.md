@@ -384,7 +384,7 @@ Example response:
   "status": {
       "code": 8,
       "message": "validated with errors",
-      "description": "The data validation process is complete, but there are edits that need to be addressed. The filing process may not proceed until the file has been corrected and reuploaded."
+      "description": "The data validation process is complete, but there are edits that may need to be addressed."
   }
 }
 ```
@@ -478,7 +478,7 @@ Example response:
   "status": {
     "code": 8,
     "message": "validated with errors",
-    "description": "The data validation process is complete, but there are edits that need to be addressed. The filing process may not proceed until the file has been corrected and reuploaded."
+    "description": "The data validation process is complete, but there are edits that may need to be addressed."
   }
 }
 ```
@@ -504,7 +504,7 @@ Example response:
   "status": {
     "code": 8,
     "message": "validated with errors",
-    "description": "The data validation process is complete, but there are edits that need to be addressed. The filing process may not proceed until the file has been corrected and reuploaded."
+    "description": "The data validation process is complete, but there are edits that may need to be addressed."
   }
 }
 ```
