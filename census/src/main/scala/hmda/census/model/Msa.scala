@@ -2,7 +2,6 @@ package hmda.census.model
 
 import hmda.model.fi.lar.LoanApplicationRegister
 
-import scala.collection.immutable.ListMap
 import scala.language.implicitConversions
 
 case class Msa(
@@ -44,7 +43,7 @@ case class Msa(
 }
 
 case class MsaMap(
-    msas: ListMap[String, Msa] = ListMap[String, Msa]()
+    msas: Map[String, Msa] = Map[String, Msa]()
 ) {
   def +(lar: LoanApplicationRegister): MsaMap = {
     val id = lar.geography.msa
