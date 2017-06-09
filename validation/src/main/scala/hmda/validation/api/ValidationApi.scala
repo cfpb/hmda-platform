@@ -1,10 +1,11 @@
 package hmda.validation.api
 
 import hmda.model.validation._
+import hmda.validation.{ AS, MAT, EC }
 import hmda.validation.dsl.{ Failure, Result, Success }
-import hmda.validation.engine._
-import hmda.validation.rules.EditCheck
+import hmda.validation.rules.{ AggregateEditCheck, EditCheck }
 
+import scala.concurrent.Future
 import scalaz._
 import scalaz.Scalaz._
 
@@ -24,6 +25,19 @@ trait ValidationApi {
         case Macro => MacroValidationError(ruleName).failure.toValidationNel
       }
     }
+  }
+
+  def checkAsync[T, E, as: AS, mat: MAT, ec: EC](
+    editCheck: AggregateEditCheck[T, E],
+    input: T,
+    inputId: String,
+    errorType: ValidationErrorType,
+    ts: Boolean
+  ): Future[ValidationNel[ValidationError, T]] = {
+    val fEdit = editCheck(input)
+    for {
+      result <- fEdit
+    } yield convertResult(input, result, editCheck.name, inputId, errorType, ts)
   }
 
   def validateAll[E, T](checks: List[ValidationNel[E, T]], input: T): ValidationNel[E, T] = {

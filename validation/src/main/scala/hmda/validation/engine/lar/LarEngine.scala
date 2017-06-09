@@ -21,8 +21,4 @@ trait LarEngine extends LarSyntacticalEngine with LarValidityEngine with LarQual
 
   }
 
-  def validateLars(lars: Iterable[LoanApplicationRegister]): LarsValidation = {
-    checkSyntacticalCollection(lars)
-  }
-
 }

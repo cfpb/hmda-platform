@@ -29,7 +29,7 @@ class TsQualityEngineSpec
       val line = Source.fromFile(new File("parser/jvm/src/test/resources/txt/clean_10-lars.txt")).getLines().take(1)
       val ts = line.map(l => TsCsvParser(l).right.getOrElse(TransmittalSheet())).toList.head
 
-      checkQuality(ts, ctx).map(validation => validation.isSuccess mustBe true)
+      checkQuality(ts, ctx).isSuccess mustBe true
     }
   }
 }

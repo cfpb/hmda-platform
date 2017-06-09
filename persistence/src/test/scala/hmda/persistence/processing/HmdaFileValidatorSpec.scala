@@ -105,7 +105,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         Some(ts),
         lars,
         List(
-          SyntacticalValidationError("38800009923", "S025", true)
+          SyntacticalValidationError("38800009923", "S025", true),
+          SyntacticalValidationError("38800009923", "S011", true)
         ),
         Nil,
         Nil,

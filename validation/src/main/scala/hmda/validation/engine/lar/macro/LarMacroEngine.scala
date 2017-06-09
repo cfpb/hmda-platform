@@ -1,12 +1,10 @@
 package hmda.validation.engine.lar.`macro`
 
 import hmda.validation._
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.validation.{ Macro, ValidationErrorType }
+import hmda.model.validation.Macro
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine
-import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.rules.lar.`macro`._
 
@@ -50,24 +48,10 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
         Q081,
         Q082,
         Q083
-      ).map(checkAggregate(_, larSource, "", Macro))
+      ).map(checkAsync(_, larSource, "", Macro, false))
     )
       .map(checks => validateAll(checks, larSource))
 
-  }
-
-  private def checkAggregate[_: AS: MAT: EC](
-    editCheck: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister],
-    input: LoanApplicationRegisterSource,
-    inputId: String,
-    errorType: ValidationErrorType
-  ): Future[LarSourceValidation] = {
-    val fResult = editCheck(input)
-    for {
-      result <- fResult
-    } yield {
-      convertResult(input, result, editCheck.name, inputId, errorType, false)
-    }
   }
 
 }

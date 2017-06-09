@@ -21,6 +21,8 @@ case class TransmittalSheet(
     TsFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")
   }
 
+  def errorId: String = this.agencyCode + this.respondent.id
+
   def toCSV: String = {
     s"$id|${respondent.id}|$agencyCode|$timestamp|$activityYear" +
       s"|$taxId|$totalLines|${respondent.name}|${respondent.address}" +
