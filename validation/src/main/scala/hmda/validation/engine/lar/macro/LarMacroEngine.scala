@@ -1,12 +1,10 @@
 package hmda.validation.engine.lar.`macro`
 
 import hmda.validation._
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.validation.{ Macro, Syntactical, ValidationErrorType }
+import hmda.model.validation.{ Macro, Syntactical }
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine
-import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.rules.lar.`macro`._
 import hmda.validation.rules.lar.syntactical.S040
@@ -59,25 +57,11 @@ trait LarMacroEngine extends LarCommonEngine with ValidationApi {
       Q081,
       Q082,
       Q083
-    ).map(checkAggregate(_, larSource, "", Macro))
+    ).map(checkAsync(_, larSource, "", Macro, false))
   }
 
   private def checkS040[_: AS: MAT: EC](larSource: LoanApplicationRegisterSource, ctx: ValidationContext): Future[LarSourceValidation] = {
-    checkAggregate(S040, larSource, "", Syntactical)
-  }
-
-  private def checkAggregate[_: AS: MAT: EC](
-                                              editCheck: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister],
-                                              input: LoanApplicationRegisterSource,
-                                              inputId: String,
-                                              errorType: ValidationErrorType
-                                            ): Future[LarSourceValidation] = {
-    val fResult = editCheck(input)
-    for {
-      result <- fResult
-    } yield {
-      convertResult(input, result, editCheck.name, inputId, errorType, false)
-    }
+    checkAsync(S040, larSource, "", Syntactical, false)
   }
 
 }
