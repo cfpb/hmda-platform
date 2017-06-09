@@ -2,7 +2,7 @@ package hmda.validation.engine.lar.`macro`
 
 import hmda.validation._
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.validation.{Macro, Syntactical, ValidationErrorType}
+import hmda.model.validation.{ Macro, Syntactical, ValidationErrorType }
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarCommonEngine

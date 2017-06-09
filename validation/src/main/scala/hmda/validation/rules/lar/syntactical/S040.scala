@@ -3,8 +3,6 @@ package hmda.validation.rules.lar.syntactical
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation._
 import hmda.validation.dsl.{ Failure, Result, Success }
-import hmda.validation.dsl.PredicateCommon._
-import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.rules.AggregateEditCheck
 
