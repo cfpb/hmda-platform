@@ -49,4 +49,23 @@ trait SubmissionIrsPaths
         }
       }
     }
+
+  // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs/csv
+  def submissionIrsCsvPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "irs" / "csv") { (period, seqNr) =>
+      timedGet { uri =>
+        completeVerified(institutionId, period, seqNr, uri) {
+          val validationStats = system.actorSelection("/user/validation-stats")
+          val submissionId = SubmissionId(institutionId, period, seqNr)
+          val data = (validationStats ? FindIrsStats(submissionId)).mapTo[Seq[Msa]]
+
+          onComplete(data) {
+            case Success(msaSeq) =>
+              val csv = Irs(msaSeq).toCsv
+              complete(ToResponseMarshallable(csv))
+            case Failure(e) => completeWithInternalError(uri, e)
+          }
+        }
+      }
+    }
 }
