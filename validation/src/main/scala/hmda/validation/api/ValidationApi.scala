@@ -27,7 +27,13 @@ trait ValidationApi {
     }
   }
 
-  def checkAsync[T, E, as: AS, mat: MAT, ec: EC](editCheck: AggregateEditCheck[T, E], input: T, inputId: String, errorType: ValidationErrorType, ts: Boolean): Future[ValidationNel[ValidationError, T]] = {
+  def checkAsync[T, E, as: AS, mat: MAT, ec: EC](
+    editCheck: AggregateEditCheck[T, E],
+    input: T,
+    inputId: String,
+    errorType: ValidationErrorType,
+    ts: Boolean
+  ): Future[ValidationNel[ValidationError, T]] = {
     val fEdit = editCheck(input)
     for {
       result <- fEdit
