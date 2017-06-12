@@ -3,23 +3,37 @@ package hmda.query.repository
 import akka.actor.Scheduler
 import akka.{ Done, NotUsed }
 import akka.stream.scaladsl.Source
-import com.datastax.driver.core.policies.{ ConstantReconnectionPolicy, DowngradingConsistencyRetryPolicy, ExponentialReconnectionPolicy, LoggingRetryPolicy }
+import com.datastax.driver.core.policies.ExponentialReconnectionPolicy
 import com.datastax.driver.core.{ Cluster, ResultSet, Row, Session }
 import hmda.query.CassandraConfig._
-import hmda.future.util.FutureRetry._
-
-import scala.concurrent.duration._
+import scala.annotation.tailrec
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.util.{ Success, Try }
+import org.slf4j.LoggerFactory
 
 trait CassandraRepository[A] {
 
   implicit val ec: ExecutionContext
   implicit val scheduler: Scheduler
 
+  val log = LoggerFactory.getLogger("CassandraRepository")
+
   val keyspace = "hmda_query"
 
-  implicit val session: Session =
-    try {
+  @tailrec
+  private def retry[T](n: Int)(fn: => T): Try[T] = {
+    log.info("*********ATTEMPTING CONNECTION TO CASSANDRA QUERY CLUSTER********")
+    Try { fn } match {
+      case x: Success[T] => x
+      case _ if n > 1 =>
+        Thread.sleep(retryInterval)
+        retry(n - 1)(fn)
+      case fn => fn
+    }
+  }
+
+  implicit val session: Session = {
+    retry(numberOfRetries) {
       Cluster
         .builder
         .addContactPoint(cassandraHost)
@@ -27,10 +41,8 @@ trait CassandraRepository[A] {
         .withReconnectionPolicy(new ExponentialReconnectionPolicy(100L, 200000L))
         .build
         .connect()
-    } catch {
-      case ex: Exception =>
-        session
-    }
+    }.getOrElse(null)
+  }
 
   def createKeyspace(): ResultSet = {
     val query =

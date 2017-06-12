@@ -1,19 +1,6 @@
 # Assumes UI repo is cloned in parent directory
 version: '2'
 services:
-  start_dependencies:
-      image: ubuntu:14.04
-      depends_on:
-        - cassandra
-      command: >
-        /bin/bash -c "
-          while ! nc -z cassandra 9042;
-          do
-            echo sleeping;
-            sleep 1;
-          done;
-          echo Connected!;
-        "
   api:
     build: .
     ports:
@@ -32,8 +19,8 @@ services:
       ZOOKEEPER_PORT: 2181
       CASSANDRA_CLUSTER_HOSTS: cassandra
       CASSANDRA_CLUSTER_PORT: 9042
-
-
+      HMDA_IS_DEMO: 'true'
+    restart: always
 
   ui:
     build:

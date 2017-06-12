@@ -7,7 +7,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 
 import scala.concurrent.duration._
-import com.typesafe.config.ConfigFactory
 import hmda.persistence.HmdaSupervisor._
 import hmda.query.HmdaQuerySupervisor._
 import hmda.persistence.demo.DemoData
@@ -25,9 +24,6 @@ import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
 import hmda.query.projections.institutions.InstitutionCassandraProjection
-import org.cassandraunit.utils.EmbeddedCassandraServerHelper
-
-import scala.concurrent.ExecutionContext
 
 object HmdaPlatform {
 
@@ -47,7 +43,6 @@ object HmdaPlatform {
 
   private def cleanup(): Unit = {
     // Delete persistence journal
-    EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
     val file = new File("target/journal")
     if (file.isDirectory) {
       log.info("CLEANING JOURNAL")
