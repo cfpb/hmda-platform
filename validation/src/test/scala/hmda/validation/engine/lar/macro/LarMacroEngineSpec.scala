@@ -34,6 +34,12 @@ class LarMacroEngineSpec extends AsyncWordSpec with MustMatchers with LarMacroEn
       val q008Source = Source.fromIterator(() => larsQ008.toIterator)
       checkMacro(q008Source, ctx).map(validation => validation mustBe a[Failure[_]])
     }
+
+    "fail S040" in {
+      val larsWithDuplicate = lars :+ lars.head
+      val s040Source = Source.fromIterator(() => larsWithDuplicate.toIterator)
+      checkMacro(s040Source, ctx).map(result => result mustBe a[Failure[_]])
+    }
   }
 
 }
