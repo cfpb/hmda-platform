@@ -25,6 +25,7 @@ import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
 import hmda.query.projections.institutions.InstitutionCassandraProjection
+import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 
 import scala.concurrent.ExecutionContext
 
@@ -46,6 +47,7 @@ object HmdaPlatform {
 
   private def cleanup(): Unit = {
     // Delete persistence journal
+    EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
     val file = new File("target/journal")
     if (file.isDirectory) {
       log.info("CLEANING JOURNAL")
@@ -90,6 +92,7 @@ object HmdaPlatform {
     //Load demo data
     lazy val isDemo = configuration.getBoolean("hmda.isDemo")
     if (isDemo) {
+      EmbeddedCassandraServerHelper.startEmbeddedCassandra(20000L)
       cleanup()
       implicit val scheduler = system.scheduler
       val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
