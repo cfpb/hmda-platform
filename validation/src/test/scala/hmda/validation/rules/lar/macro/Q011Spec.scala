@@ -85,11 +85,11 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     "succeed when current count is greater than configured value, and comparison is within range" in {
       val instId = "respId4"
       val ctx = generateValidationContext(currentYear, instId)
-      val currentYearCount = Gen.choose(larSize + 1, larSize * 2).sample.getOrElse(0)
-      val lower = (1 - multiplier) * currentYearCount
-      val upper = (1 + multiplier) * currentYearCount
-      val lastYearCount = Gen.choose(lower.toInt, upper.toInt).sample.getOrElse(0)
-      val larSource = generateLarSource(currentYearCount.toInt)
+      val lastYearCount = Gen.choose(larSize + 1, larSize * 2).sample.getOrElse(0)
+      val lower = (1 - multiplier) * lastYearCount
+      val upper = (1 + multiplier) * lastYearCount
+      val currentYearCount = Gen.choose(lower.toInt + 1, upper.toInt - 1).sample.getOrElse(0)
+      val larSource = generateLarSource(currentYearCount)
       sendValidationStats(validationStats, instId, 1, lastYear, lastYearCount)
       Q011.inContext(ctx)(larSource).map(r => r mustBe a[Success])
     }
