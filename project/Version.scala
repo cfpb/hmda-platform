@@ -4,7 +4,7 @@ object Version {
   val scalaTest  = "3.0.1"
   val scalaCheck = "1.13.4"
   val scalaz     = "7.2.9"
-  val akka       = "2.4.17"
+  val akka       = "2.4.19"
   val akkaHttp   = "10.0.6"
   val leveldb    = "0.7"
   val leveldbjni = "1.8"
