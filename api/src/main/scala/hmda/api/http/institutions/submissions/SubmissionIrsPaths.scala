@@ -15,7 +15,7 @@ import hmda.model.fi.SubmissionId
 import hmda.query.repository.filing.FilingComponent
 import hmda.validation.ValidationStats.FindIrsStats
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 trait SubmissionIrsPaths
@@ -35,11 +35,7 @@ trait SubmissionIrsPaths
       timedGet { uri =>
         completeVerified(institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
-            val validationStats = system.actorSelection("/user/validation-stats")
-            val submissionId = SubmissionId(institutionId, period, seqNr)
-            val data = (validationStats ? FindIrsStats(submissionId)).mapTo[Seq[Msa]]
-
-            onComplete(data) {
+            onComplete(getMsa(institutionId, period, seqNr)) {
               case Success(msaSeq) =>
                 val irs: IrsResponse = Irs(msaSeq).paginatedResponse(page, uri.path.toString)
                 complete(ToResponseMarshallable(irs))
@@ -49,4 +45,25 @@ trait SubmissionIrsPaths
         }
       }
     }
+
+  // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs/csv
+  def submissionIrsCsvPath(institutionId: String)(implicit ec: ExecutionContext) =
+    path("filings" / Segment / "submissions" / IntNumber / "irs" / "csv") { (period, seqNr) =>
+      timedGet { uri =>
+        completeVerified(institutionId, period, seqNr, uri) {
+          onComplete(getMsa(institutionId, period, seqNr)) {
+            case Success(msaSeq) =>
+              val csv = Irs(msaSeq).toCsv
+              complete(ToResponseMarshallable(csv))
+            case Failure(e) => completeWithInternalError(uri, e)
+          }
+        }
+      }
+    }
+
+  private def getMsa(instId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+    val validationStats = system.actorSelection("/user/validation-stats")
+    val submissionId = SubmissionId(instId, period, seqNr)
+    (validationStats ? FindIrsStats(submissionId)).mapTo[Seq[Msa]]
+  }
 }

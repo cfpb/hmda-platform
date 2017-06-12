@@ -40,6 +40,8 @@ case class Msa(
       refinance = refinance + (lar.loan.purpose == 3)
     )
   }
+
+  def toCsv: String = s"$id, $name, $totalLars, $totalAmount, $conv, $FHA, $VA, $FSA, $oneToFourFamily, $MFD, $multiFamily, $homePurchase, $homeImprovement, $refinance"
 }
 
 case class MsaMap(
@@ -83,6 +85,8 @@ case class MsaSummary(
       refinance + elem.refinance
     )
   }
+
+  def toCsv: String = s"Totals,, $lars, $amount, $conv, $FHA, $VA, $FSA, $oneToFourFamily, $MFD, $multiFamily, $homePurchase, $homeImprovement, $refinance"
 }
 
 case object MsaSummary {

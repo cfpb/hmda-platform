@@ -51,6 +51,7 @@ trait InstitutionsHttpApi
                   editFailureDetailsPath(instId) ~
                   verifyEditsPath(instId) ~
                   submissionIrsPath(instId) ~
+                  submissionIrsCsvPath(instId) ~
                   submissionSignPath(instId) ~
                   submissionSummaryPath(instId)
               }
