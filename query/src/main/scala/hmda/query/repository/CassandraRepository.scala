@@ -37,7 +37,7 @@ trait CassandraRepository[A] {
     retry(Future(getSession), retries, 20, 30.seconds)
   }
 
-  def createKeyspace(): Future[ResultSet] = {
+  def createKeyspace(): ResultSet = {
     val query =
       s"""
         |CREATE KEYSPACE IF NOT EXISTS $keyspace WITH REPLICATION = {
@@ -46,7 +46,7 @@ trait CassandraRepository[A] {
         |}
       """.stripMargin
 
-    fSession.map(session => session.execute(query))
+    getSession.execute(query)
   }
   def dropKeyspace(): ResultSet = {
     val query =
@@ -55,9 +55,9 @@ trait CassandraRepository[A] {
       """.stripMargin
     getSession.execute(query)
   }
-  def createTable(): Future[ResultSet]
-  def dropTable(): Future[ResultSet]
-  def insertData(source: Source[A, NotUsed]): Future[NotUsed]
+  def createTable(): ResultSet
+  def dropTable(): ResultSet
+  def insertData(source: Source[A, NotUsed]): Future[Done]
   def readData(fetchSize: Int): Future[Seq[Row]]
 
 }

@@ -6,7 +6,7 @@ import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.{ Done, NotUsed }
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.stream.scaladsl.{ Sink, Source }
-import com.datastax.driver.core.{ PreparedStatement, ResultSet, Row, SimpleStatement }
+import com.datastax.driver.core._
 import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.CassandraRepository
 
@@ -18,7 +18,7 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
   implicit def materializer: ActorMaterializer
   implicit val ec: ExecutionContext
 
-  def fPreparedStatement: Future[PreparedStatement] = fSession.map { implicit session =>
+  def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.institutions" +
       s"(id," +
       s"agency," +
@@ -82,7 +82,7 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
       institution.topHolderCountry
     )
 
-  override def createTable(): Future[ResultSet] = {
+  override def createTable(): ResultSet = {
     val query =
       s"""
          |CREATE TABLE IF NOT EXISTS $keyspace.institutions(
@@ -116,24 +116,25 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
          |);
       """.stripMargin
 
-    fSession.map(session => session.execute(query))
+    getSession.execute(query)
 
   }
 
-  override def dropTable(): Future[ResultSet] = {
+  override def dropTable(): ResultSet = {
     val query = s"""
       |DROP TABLE IF EXISTS $keyspace.institutions;
     """.stripMargin
 
-    fSession.map(session => session.execute(query))
+    getSession.execute(query)
   }
 
-  override def insertData(source: Source[InstitutionQuery, NotUsed]): Future[NotUsed] = {
+  override def insertData(source: Source[InstitutionQuery, NotUsed]): Future[Done] = {
+    val sink = CassandraSink[InstitutionQuery](parallelism = 2, preparedStatement, statementBinder)
     for {
-      preparedStatement <- fPreparedStatement
-      sink = CassandraSink[InstitutionQuery](parallelism = 2, preparedStatement, statementBinder)
+      //preparedStatement <- fPreparedStatement
+      result <- source.runWith(sink)
     } yield {
-      source.to(sink).run()
+      result
     }
   }
 
