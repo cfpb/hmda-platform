@@ -27,12 +27,10 @@ class InstitutionCassandraProjection extends InstitutionCassandraRepository {
 
     val sink = CassandraSink[InstitutionQuery](parallelism = 2, preparedStatement, statementBinder)
 
-    source.runWith(sink)
+    source
+      .map { e => println(e); e }
+      .runWith(sink)
 
-    //for {
-    //  preparedStatement <- fPreparedStatement
-    //  sink = CassandraSink[InstitutionQuery](parallelism = 2, preparedStatement, statementBinder)
-    //} yield source.to(sink).run()
   }
 
   override implicit def materializer: ActorMaterializer = ActorMaterializer()

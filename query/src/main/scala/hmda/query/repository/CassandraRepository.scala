@@ -18,7 +18,7 @@ trait CassandraRepository[A] {
 
   val keyspace = "hmda_query"
 
-  implicit def getSession: Session =
+  implicit val session: Session =
     try {
       Cluster
         .builder
@@ -29,13 +29,8 @@ trait CassandraRepository[A] {
         .connect()
     } catch {
       case ex: Exception =>
-        getSession
+        session
     }
-
-  def fSession: Future[Session] = {
-    val retries = List(1.seconds, 2.seconds, 5.seconds, 10.seconds, 20.seconds, 30.seconds)
-    retry(Future(getSession), retries, 20, 30.seconds)
-  }
 
   def createKeyspace(): ResultSet = {
     val query =
@@ -46,14 +41,14 @@ trait CassandraRepository[A] {
         |}
       """.stripMargin
 
-    getSession.execute(query)
+    session.execute(query)
   }
   def dropKeyspace(): ResultSet = {
     val query =
       s"""
         |DROP KEYSPACE $keyspace
       """.stripMargin
-    getSession.execute(query)
+    session.execute(query)
   }
   def createTable(): ResultSet
   def dropTable(): ResultSet

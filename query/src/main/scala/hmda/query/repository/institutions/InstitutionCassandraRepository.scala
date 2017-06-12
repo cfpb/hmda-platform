@@ -116,7 +116,7 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
          |);
       """.stripMargin
 
-    getSession.execute(query)
+    session.execute(query)
 
   }
 
@@ -125,7 +125,7 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
       |DROP TABLE IF EXISTS $keyspace.institutions;
     """.stripMargin
 
-    getSession.execute(query)
+    session.execute(query)
   }
 
   override def insertData(source: Source[InstitutionQuery, NotUsed]): Future[Done] = {
