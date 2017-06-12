@@ -92,7 +92,6 @@ object HmdaPlatform {
     //Load demo data
     lazy val isDemo = configuration.getBoolean("hmda.isDemo")
     if (isDemo) {
-      EmbeddedCassandraServerHelper.startEmbeddedCassandra(20000L)
       cleanup()
       implicit val scheduler = system.scheduler
       val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
