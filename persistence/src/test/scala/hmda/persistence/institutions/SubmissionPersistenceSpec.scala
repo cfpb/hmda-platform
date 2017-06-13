@@ -53,6 +53,14 @@ class SubmissionPersistenceSpec extends ActorSpec {
       probe.send(submissionsActor, UpdateSubmissionStatus(id, Created))
       probe.expectMsg(None)
     }
+
+    "return list of submissions in order of descending sequence number" in {
+      probe.send(submissionsActor, GetState)
+      val subs = probe.expectMsgType[List[Submission]]
+      subs.head.id.sequenceNumber mustBe 3
+      subs(1).id.sequenceNumber mustBe 2
+      subs(2).id.sequenceNumber mustBe 1
+    }
   }
 
 }
