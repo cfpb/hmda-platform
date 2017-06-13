@@ -1,16 +1,16 @@
 package hmda.validation
 
 import akka.testkit.TestProbe
+import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.fi.lar.{ Geography, LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
-import hmda.persistence.model.ActorSpec
+import hmda.persistence.model.{ ActorSpec, MsaGenerators }
 import hmda.validation.SubmissionLarStats._
 import hmda.validation.rules.lar.`macro`._
-import org.scalacheck.Gen
 
-class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
+class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenerators {
 
   val lars10 = larListGen.sample.getOrElse(Nil)
   val lars10String = lars10.map(x => x.toCSV)
@@ -145,6 +145,27 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators {
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 11 + 13 + 15
       st.q076Ratio mustBe 15.toDouble / (13 + 15)
+    }
+
+    "Aggregate all IRS information" in {
+      val submissionId = SubmissionId("12345", "2018", 7)
+      val submissionLarStats = createSubmissionStats(system, submissionId)
+
+      val msaNA = Geography("NA", "", "", "")
+      val msaVT = Geography("13980", "", "", "")
+      val msa1 = listOfN(11, (x: LoanApplicationRegister) => x.copy(geography = msaNA))
+      val msa2 = listOfN(72, (x: LoanApplicationRegister) => x.copy(geography = msaVT))
+
+      for (lar <- msa1 ++ msa2) {
+        probe.send(submissionLarStats, LarValidated(lar, submissionId))
+      }
+
+      probe.send(submissionLarStats, PersistIrs)
+      probe.send(submissionLarStats, GetState)
+      val st = probe.expectMsgType[SubmissionLarStatsState]
+      st.msas.length mustBe 2
+      st.msas.map(_.totalLars).sum mustBe 83
+      st.msas.map(_.name) must contain("Blacksburg-Christiansburg-Radford, VA")
     }
   }
 

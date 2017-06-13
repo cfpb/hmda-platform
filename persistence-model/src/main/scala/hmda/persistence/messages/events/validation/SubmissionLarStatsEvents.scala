@@ -1,5 +1,6 @@
 package hmda.persistence.messages.events.validation
 
+import hmda.census.model.Msa
 import hmda.persistence.messages.CommonMessages.Event
 
 object SubmissionLarStatsEvents {
@@ -16,4 +17,5 @@ object SubmissionLarStatsEvents {
     q075Ratio: Double,
     q076Ratio: Double
   ) extends SubmissionLarStatsEvent
+  case class IrsStatsUpdated(msas: Seq[Msa]) extends SubmissionLarStatsEvent
 }

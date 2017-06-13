@@ -1,8 +1,8 @@
 package hmda.persistence.serialization.validation
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ MacroStatsUpdated, SubmittedLarsUpdated }
-import hmda.persistence.model.serialization.SubmissionLarStatsEvents.{ MacroStatsUpdatedMessage, SubmittedLarsUpdatedMessage }
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
+import hmda.persistence.model.serialization.SubmissionLarStatsEvents.{ IrsStatsUpdatedMessage, MacroStatsUpdatedMessage, SubmittedLarsUpdatedMessage }
 import hmda.persistence.serialization.validation.SubmissionLarStatsProtobufConverter._
 
 class SubmissionLarStatsProtobufSerializer extends SerializerWithStringManifest {
@@ -12,10 +12,12 @@ class SubmissionLarStatsProtobufSerializer extends SerializerWithStringManifest 
 
   final val SubmittedLarsUpdatedManifest = classOf[SubmittedLarsUpdated].getName
   final val MacroStatsUpdatedManifest = classOf[MacroStatsUpdated].getName
+  final val IrsStatsUpdatedManifest = classOf[IrsStatsUpdated].getName
 
   override def toBinary(o: AnyRef): Array[Byte] = o match {
     case evt: SubmittedLarsUpdated => submittedLarsUpdatedToProtobuf(evt).toByteArray
     case evt: MacroStatsUpdated => macroStatsUpdatedToProtobuf(evt).toByteArray
+    case evt: IrsStatsUpdated => irsStatsUpdatedToProtobuf(evt).toByteArray
     case msg: Any => throw new RuntimeException(s"Cannot serialize this message: ${msg.toString}")
   }
 
@@ -24,6 +26,8 @@ class SubmissionLarStatsProtobufSerializer extends SerializerWithStringManifest 
       submittedLarsUpdatedFromProtobuf(SubmittedLarsUpdatedMessage.parseFrom(bytes))
     case MacroStatsUpdatedManifest =>
       macroStatsUpdatedFromProtobuf(MacroStatsUpdatedMessage.parseFrom(bytes))
+    case IrsStatsUpdatedManifest =>
+      irsStatsUpdatedFromProtobuf(IrsStatsUpdatedMessage.parseFrom(bytes))
     case msg: Any => throw new RuntimeException(s"Cannot deserialize this message: ${msg.toString}")
   }
 }

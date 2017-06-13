@@ -91,7 +91,7 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
       sender() ! latest
 
     case GetState =>
-      sender() ! state.submissions
+      sender() ! state.submissions.sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
 
   }
 

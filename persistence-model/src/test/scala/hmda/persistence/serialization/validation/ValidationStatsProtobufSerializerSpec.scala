@@ -2,11 +2,12 @@ package hmda.persistence.serialization.validation
 
 import hmda.model.institution.SubmissionGenerators.submissionIdGen
 import hmda.persistence.messages.events.validation.ValidationStatsEvents._
+import hmda.persistence.model.MsaGenerators
 import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 
-class ValidationStatsProtobufSerializerSpec extends PropSpec with PropertyChecks with MustMatchers {
+class ValidationStatsProtobufSerializerSpec extends PropSpec with PropertyChecks with MustMatchers with MsaGenerators {
   def intGen = Gen.choose(0, 10000)
   def ratioGen = Gen.choose(0d, 1d)
 
@@ -37,4 +38,11 @@ class ValidationStatsProtobufSerializerSpec extends PropSpec with PropertyChecks
     }
   }
 
+  property("IrsStatsAdded must serialize to binary and back") {
+    forAll(submissionIdGen, listOfMsaGen) { (subId, list) =>
+      val event = IrsStatsAdded(list, subId)
+      val bytes = serializer.toBinary(event)
+      serializer.fromBinary(bytes, serializer.IrsStatsAddedManifest) mustBe event
+    }
+  }
 }

@@ -13,11 +13,13 @@ class ValidationStatsProtobufSerializer extends SerializerWithStringManifest {
   final val SubmissionSubmittedTotalsAddedManifest = classOf[SubmissionSubmittedTotalsAdded].getName
   final val SubmissionTaxIdAddedManifest = classOf[SubmissionTaxIdAdded].getName
   final val SubmissionMacroStatsAddedManifest = classOf[SubmissionMacroStatsAdded].getName
+  final val IrsStatsAddedManifest = classOf[IrsStatsAdded].getName
 
   override def toBinary(o: AnyRef): Array[Byte] = o match {
     case evt: SubmissionSubmittedTotalsAdded => submissionSubmittedTotalsAddedToProtobuf(evt).toByteArray
     case evt: SubmissionTaxIdAdded => submissionTaxIdAddedToProtobuf(evt).toByteArray
     case evt: SubmissionMacroStatsAdded => submissionMacroStatsAddedToProtobuf(evt).toByteArray
+    case evt: IrsStatsAdded => irsStatsAddedToProtobuf(evt).toByteArray
     case msg: Any => throw new RuntimeException(s"Cannot serialize message $msg")
   }
 
@@ -28,6 +30,8 @@ class ValidationStatsProtobufSerializer extends SerializerWithStringManifest {
       submissionTaxIdAddedFromProtobuf(SubmissionTaxIdAddedMessage.parseFrom(bytes))
     case SubmissionMacroStatsAddedManifest =>
       submissionMacroStatsAddedFromProtobuf(SubmissionMacroStatsAddedMessage.parseFrom(bytes))
+    case IrsStatsAddedManifest =>
+      irsStatsAddedFromProtobuf(IrsStatsAddedMessage.parseFrom(bytes))
     case msg: Any => throw new RuntimeException(s"Cannot deserialize message $msg")
   }
 }

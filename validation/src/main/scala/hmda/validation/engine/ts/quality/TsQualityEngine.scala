@@ -12,29 +12,23 @@ import scala.concurrent.Future
 
 trait TsQualityEngine extends TsCommonEngine with ValidationApi {
 
-  def checkQuality[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
-    val tsId = ts.agencyCode + ts.respondent.id
+  def checkQuality(ts: TransmittalSheet, ctx: ValidationContext): TsValidation = {
     val checks = List(
       Q020,
       Q033.inContext(ctx)
-    ).map(x => Future(check(x, ts, tsId, Quality, ts = true)))
+    ).map(check(_, ts, ts.errorId, Quality, true))
 
-    val allChecks = Future.sequence(checks :+ q012(ts, ctx) :+ q130(ts, ctx))
-
-    allChecks.map(c => validateAll(c, ts))
+    validateAll(checks, ts)
   }
 
-  private def q012[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext) = {
-    val fEdit = Q012.inContext(ctx)(ts)
-    for {
-      n <- fEdit
-    } yield convertResult(ts, n, "Q012", "", Quality, ts = true)
-  }
+  def checkQualityAsync[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext): Future[TsValidation] = {
+    val checks = List(
+      Q012.inContext(ctx),
+      Q130.inContext(ctx)
+    ).map(edit => checkAsync(edit, ts, ts.errorId, Quality, true))
 
-  private def q130[as: AS, mat: MAT](ts: TransmittalSheet, ctx: ValidationContext) = {
-    val fEdit = Q130.inContext(ctx)(ts)
-    for {
-      n <- fEdit
-    } yield convertResult(ts, n, "Q130", "", Quality, ts = true)
+    val fChecks = Future.sequence(checks)
+
+    fChecks.map(list => validateAll(list, ts))
   }
 }

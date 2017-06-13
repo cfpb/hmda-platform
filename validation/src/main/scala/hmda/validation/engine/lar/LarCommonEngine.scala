@@ -10,7 +10,6 @@ import scalaz._
 
 trait LarCommonEngine {
   type LarValidation = ValidationNel[ValidationError, LoanApplicationRegister]
-  type LarsValidation = ValidationNel[ValidationError, Iterable[LoanApplicationRegister]]
   type LarSourceValidation = ValidationNel[ValidationError, LoanApplicationRegisterSource]
 
   def validationErrors(lar: LoanApplicationRegister, ctx: ValidationContext, f: (LoanApplicationRegister, ValidationContext) => LarValidation): ValidationErrors = {

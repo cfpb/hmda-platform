@@ -1,5 +1,6 @@
 package hmda.persistence.messages.events.validation
 
+import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.Event
 
@@ -20,5 +21,5 @@ object ValidationStatsEvents {
     q075Ratio: Double,
     q076Ratio: Double
   ) extends ValidationStatsEvent
-
+  case class IrsStatsAdded(msas: Seq[Msa], id: SubmissionId) extends ValidationStatsEvent
 }

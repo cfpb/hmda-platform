@@ -52,11 +52,9 @@ object HmdaPlatform {
     }
 
     val larRepository = new LarRepository(config)
-    val larTotalMsaRepository = new LarTotalMsaRepository(config)
     val institutionRepository = new InstitutionRepository(config)
 
     larRepository.dropSchema()
-    larTotalMsaRepository.dropSchema()
     institutionRepository.dropSchema()
   }
 
