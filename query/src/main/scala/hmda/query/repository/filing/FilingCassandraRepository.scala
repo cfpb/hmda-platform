@@ -23,7 +23,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       s"respondent_id," +
       s"agency_code," +
       s"loan_id," +
-      s"application_type," +
+      s"application_date" +
       s"loan_type," +
       s"property_type," +
       s"purpose," +
@@ -63,14 +63,89 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   }
 
   val statementBinder = (lar: LoanApplicationRegister, statement: PreparedStatement) =>
-    statement.bind()
+    statement.bind(
+      new Integer(lar.id),
+      lar.respondentId,
+      new Integer(lar.agencyCode),
+      lar.loan.id,
+      lar.loan.applicationDate,
+      new Integer(lar.loan.loanType),
+      new Integer(lar.loan.propertyType),
+      new Integer(lar.loan.purpose),
+      new Integer(lar.loan.occupancy),
+      new Integer(lar.loan.amount),
+      new Integer(lar.preapprovals),
+      new Integer(lar.actionTakenType),
+      new Integer(lar.actionTakenDate),
+      lar.geography.msa,
+      lar.geography.state,
+      lar.geography.county,
+      lar.geography.tract,
+      new Integer(lar.applicant.ethnicity),
+      new Integer(lar.applicant.coEthnicity),
+      new Integer(lar.applicant.race1),
+      lar.applicant.race2,
+      lar.applicant.race3,
+      lar.applicant.race4,
+      lar.applicant.race5,
+      new Integer(lar.applicant.coRace1),
+      lar.applicant.coRace2,
+      lar.applicant.coRace3,
+      lar.applicant.coRace4,
+      lar.applicant.coRace5,
+      new Integer(lar.applicant.sex),
+      new Integer(lar.applicant.coSex),
+      lar.applicant.income,
+      new Integer(lar.purchaserType),
+      lar.rateSpread,
+      new Integer(lar.hoepaStatus),
+      new Integer(lar.lienStatus)
+    )
 
   override def createTable(): ResultSet = {
     val query =
       s"""
          |CREATE TABLE IF NOT EXISTS $keyspace.lars(
-         |
-         |)
+         |      id int PRIMARY KEY,
+         |      respondent_id varchar,
+         |      agency_code int,
+         |      loan_id varchar,
+         |      application_date varchar,
+         |      loan_type int,
+         |      property_type int,
+         |      purpose int,
+         |      occupancy int,
+         |      amount int,
+         |      preapprovals int,
+         |      action_taken_type int,
+         |      action_taken_date int,
+         |      msa varchar,
+         |      state varchar,
+         |      county varchar,
+         |      tract varchar,
+         |      ethnicity int,
+         |      co_ethnicity int,
+         |      race1 int,
+         |      race2 varchar,
+         |      race3 varchar,
+         |      race4 varchar,
+         |      race5 varchar,
+         |      co_race1 int,
+         |      co_race2 varchar,
+         |      co_race3 varchar,
+         |      co_race4 varchar,
+         |      co_race5 varchar,
+         |      sex int,
+         |      co_sex int,
+         |      income varchar,
+         |      purchaser_type int,
+         |      denial1 varchar,
+         |      denial2 varchar,
+         |      denial3 varchar,
+         |      rate_spread varchar,
+         |      hoepa_status int,
+         |      lien_status int
+         |);
        """.stripMargin
 
     session.execute(query)
