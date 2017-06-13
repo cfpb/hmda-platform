@@ -27,9 +27,7 @@ class InstitutionCassandraProjection extends InstitutionCassandraRepository {
 
     val sink = CassandraSink[InstitutionQuery](parallelism = 2, preparedStatement, statementBinder)
 
-    source
-      .map { e => println(e); e }
-      .runWith(sink)
+    source.runWith(sink)
 
   }
 
