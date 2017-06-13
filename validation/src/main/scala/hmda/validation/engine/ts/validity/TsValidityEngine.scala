@@ -10,7 +10,6 @@ import hmda.validation.rules.ts.validity._
 trait TsValidityEngine extends TsCommonEngine with ValidationApi {
 
   def checkValidity(ts: TransmittalSheet, ctx: ValidationContext): TsValidation = {
-    val tsId = ts.agencyCode + ts.respondent.id
     val checks: List[TsValidation] = List(
       V105,
       V108,
@@ -25,7 +24,7 @@ trait TsValidityEngine extends TsCommonEngine with ValidationApi {
       V145,
       V150,
       V155
-    ).map(check(_, ts, tsId, Validity, true))
+    ).map(check(_, ts, ts.errorId, Validity, true))
 
     validateAll(checks, ts)
   }
