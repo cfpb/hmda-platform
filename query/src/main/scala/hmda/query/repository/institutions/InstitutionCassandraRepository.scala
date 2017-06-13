@@ -130,12 +130,7 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
 
   override def insertData(source: Source[InstitutionQuery, NotUsed]): Future[Done] = {
     val sink = CassandraSink[InstitutionQuery](parallelism = 2, preparedStatement, statementBinder)
-    for {
-      //preparedStatement <- fPreparedStatement
-      result <- source.runWith(sink)
-    } yield {
-      result
-    }
+    source.runWith(sink)
   }
 
   override def readData(fetchSize: Int): Future[Seq[Row]] = {
