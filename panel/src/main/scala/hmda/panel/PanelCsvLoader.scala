@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 
 import spray.json._
 
-object PanelCsvParser extends WriteInstitutionProtocol {
+object PanelCsvLoader extends WriteInstitutionProtocol {
   implicit val system: ActorSystem = ActorSystem("hmda")
   implicit val materializer = ActorMaterializer()
   implicit val timeout: Timeout = Timeout(5.second)
@@ -26,8 +26,8 @@ object PanelCsvParser extends WriteInstitutionProtocol {
   val log = LoggerFactory.getLogger("hmda")
 
   val config = ConfigFactory.load()
-  val host = config.getString("hmda.http.adminHost")
-  val port = config.getInt("hmda.http.adminPort")
+  val host = config.getString("hmda.adminHost")
+  val port = config.getInt("hmda.adminPort")
 
   def main(args: Array[String]): Unit = {
 

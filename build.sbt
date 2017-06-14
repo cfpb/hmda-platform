@@ -109,7 +109,7 @@ lazy val panel = (project in file("panel"))
   .settings(
     Seq(
       assemblyJarName in assembly := {s"${name.value}.jar"},
-      mainClass in assembly := Some("hmda.panel.PanelCsvParser"),
+      mainClass in assembly := Some("hmda.panel.PanelCsvLoader"),
       assemblyMergeStrategy in assembly := {
         case "application.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
