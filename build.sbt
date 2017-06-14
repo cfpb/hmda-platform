@@ -217,6 +217,6 @@ lazy val census = (project in file("census"))
 lazy val apiModel = (project in file("api-model"))
   .settings(hmdaBuildSettings: _*)
   .settings(
-    libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream) ++ httpDeps
+    libraryDependencies ++= commonDeps ++ httpDeps
   ).dependsOn(modelJVM % "compile->compile;test->test")
   .dependsOn(persistence % "compile->compile")
