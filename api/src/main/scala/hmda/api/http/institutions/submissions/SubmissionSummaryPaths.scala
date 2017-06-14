@@ -10,9 +10,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.ValidationErrorConverter
-import hmda.api.model.ErrorResponse
-import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
-import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
+import hmda.apiModel.model.ErrorResponse
+import hmda.apiModel.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
+import hmda.apiModel.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Agency

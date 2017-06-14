@@ -8,8 +8,8 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
-import hmda.api.model.ErrorResponse
-import hmda.api.model.public.InstitutionSearchResults
+import hmda.apiModel.model.ErrorResponse
+import hmda.apiModel.model.public.InstitutionSearchResults
 import hmda.model.institution.{ Institution, InstitutionGenerators }
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr

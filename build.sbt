@@ -45,10 +45,10 @@ lazy val hmda = (project in file("."))
     modelJS,
     parserJVM,
     parserJS,
-    panel,
     persistenceModel,
     persistence,
     api,
+    apiModel,
     query,
     platformTest,
     validation,
@@ -105,18 +105,22 @@ lazy val validation = (project in file("validation"))
 
 lazy val panel = (project in file("panel"))
   .settings(hmdaBuildSettings: _*)
+  .settings(Revolver.settings:_*)
   .settings(
-    assemblyMergeStrategy in assembly := {
-      case "application.conf" => MergeStrategy.concat
-      case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
-      case x =>
-        val oldStrategy = (assemblyMergeStrategy in assembly).value
-        oldStrategy(x)
-    },
-    libraryDependencies ++= akkaPersistenceDeps ++ httpDeps
+    Seq(
+      assemblyJarName in assembly := {s"${name.value}.jar"},
+      mainClass in assembly := Some("hmda.panel.PanelCsvParser"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf" => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+        },
+      libraryDependencies ++= httpDeps
+    )
   ).dependsOn(parserJVM % "compile->compile;test->test")
-  .dependsOn(query % "compile->compile;test->test")
-  .dependsOn(api % "compile->compile;test->test")
+  .dependsOn(apiModel % "compile->compile;test->test")
 
 lazy val persistenceModel = (project in file("persistence-model"))
   .settings(hmdaBuildSettings:_*)
@@ -188,6 +192,7 @@ lazy val api = (project in file("api"))
   .dependsOn(persistenceModel % "compile->compile;test->test")
   .dependsOn(query % "compile->compile")
   .dependsOn(persistence % "compile->compile")
+  .dependsOn(apiModel % "compile->compile;test->test")
 
 
 lazy val platformTest = (project in file("platform-test"))
@@ -208,3 +213,10 @@ lazy val census = (project in file("census"))
       libraryDependencies ++= commonDeps ++ csvDeps
     )
   ).dependsOn(modelJVM % "compile->compile;test->test")
+
+lazy val apiModel = (project in file("api-model"))
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    libraryDependencies ++= commonDeps ++ scalazDeps ++ configDeps ++ Seq(akkaStream) ++ httpDeps
+  ).dependsOn(modelJVM % "compile->compile;test->test")
+  .dependsOn(persistence % "compile->compile")

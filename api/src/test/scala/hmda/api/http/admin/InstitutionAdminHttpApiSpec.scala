@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.headers.HttpEncodings._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit._
 import akka.util.{ ByteString, Timeout }
-import hmda.api.model.{ ModelGenerators, Status }
+import hmda.apiModel.model.{ ModelGenerators, Status }
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.MalformedRequestContentRejection

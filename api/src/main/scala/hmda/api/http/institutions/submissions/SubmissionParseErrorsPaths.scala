@@ -9,8 +9,8 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
-import hmda.api.model.ParsingErrorSummary
-import hmda.api.protocol.processing.ParserResultsProtocol
+import hmda.apiModel.model.ParsingErrorSummary
+import hmda.apiModel.protocol.processing.ParserResultsProtocol
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence

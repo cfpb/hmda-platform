@@ -9,10 +9,10 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.pattern.ask
-import hmda.api.model.SingleValidationErrorResult
-import hmda.api.protocol.fi.lar.LarProtocol
-import hmda.api.protocol.processing.ParserResultsProtocol
-import hmda.api.protocol.validation.ValidationResultProtocol
+import hmda.apiModel.model.SingleValidationErrorResult
+import hmda.apiModel.protocol.fi.lar.LarProtocol
+import hmda.apiModel.protocol.processing.ParserResultsProtocol
+import hmda.apiModel.protocol.validation.ValidationResultProtocol
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.validation.{ Quality, Syntactical, ValidationErrorType, Validity }
 import hmda.parser.fi.lar.LarCsvParser

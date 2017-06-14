@@ -11,8 +11,8 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.EC
 import hmda.api.http.HmdaCustomDirectives
-import hmda.api.model._
-import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
+import hmda.apiModel.model._
+import hmda.apiModel.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.Filing
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings

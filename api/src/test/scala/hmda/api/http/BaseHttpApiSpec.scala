@@ -5,7 +5,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.headers.{ HttpEncodings, `Accept-Encoding` }
 import akka.http.scaladsl.model.headers.HttpEncodings._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import hmda.api.model.Status
+import hmda.apiModel.model.Status
 import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.ExecutionContext

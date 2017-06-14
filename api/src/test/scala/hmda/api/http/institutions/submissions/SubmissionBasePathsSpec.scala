@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.Uri.Path
 import akka.http.scaladsl.server.MethodRejection
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.api.model._
+import hmda.apiModel.model._
 import hmda.model.fi._
 import hmda.persistence.demo.DemoData
 

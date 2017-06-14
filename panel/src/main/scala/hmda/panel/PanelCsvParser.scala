@@ -10,24 +10,20 @@ import akka.stream.scaladsl.{ FileIO, Flow, Framing, Sink }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ HttpEntity, _ }
 import com.typesafe.config.ConfigFactory
-import hmda.api.protocol.admin.WriteInstitutionProtocol
+import hmda.apiModel.protocol.admin.WriteInstitutionProtocol
 
 import scala.concurrent.duration._
 import hmda.parser.fi.InstitutionParser
-import hmda.query.repository.institutions.InstitutionComponent
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.Await
 import spray.json._
 
-object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol {
+object PanelCsvParser extends WriteInstitutionProtocol {
   implicit val system: ActorSystem = ActorSystem("hmda")
   implicit val materializer = ActorMaterializer()
   implicit val timeout: Timeout = Timeout(5.second)
   implicit val ec = system.dispatcher
   val log = LoggerFactory.getLogger("hmda")
-
-  val repository = new InstitutionRepository(hmda.query.DbConfiguration.config)
 
   val config = ConfigFactory.load()
   val host = config.getString("hmda.http.adminHost")
@@ -41,9 +37,7 @@ object PanelCsvParser extends InstitutionComponent with WriteInstitutionProtocol
     }
 
     println("Cleaning DB...")
-    Await.result(repository.dropSchema(), 5.seconds)
-    println("Creating new schema...")
-    Await.result(repository.createSchema(), 5.seconds)
+    //TODO
 
     val source = FileIO.fromPath(new File(args(0)).toPath)
 
