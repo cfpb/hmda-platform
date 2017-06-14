@@ -18,7 +18,11 @@ import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, ModifyInstitution }
+import hmda.persistence.messages.CommonMessages.Event
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.query.projections.institutions.InstitutionDBProjection.DeleteSchema
+import hmda.query.view.institutions.InstitutionView
+import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -81,5 +85,26 @@ trait InstitutionAdminHttpApi
       }
     }
 
-  val institutionAdminRoutes = encodeResponse { institutionsWritePath }
+  val institutionsDeletePath =
+    path("institutions" / "delete") {
+      extractExecutionContext { executor =>
+        implicit val ec: ExecutionContext = executor
+        val querySupervisor = system.actorSelection("/user/query-supervisor")
+        val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+        timedGet { uri =>
+          val deleteEvent = for {
+            instAct <- fInstitutionsActor
+            dbAct <- (instAct ? GetProjectionActorRef).mapTo[ActorRef]
+            delete <- (dbAct ? DeleteSchema).mapTo[Event]
+          } yield delete
+
+          onComplete(deleteEvent) {
+            case Success(message) => complete(message.toString)
+            case Failure(error) => completeWithInternalError(uri, error)
+          }
+        }
+      }
+    }
+
+  val institutionAdminRoutes = encodeResponse { institutionsWritePath ~ institutionsDeletePath }
 }

@@ -9,13 +9,13 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ FileIO, Flow, Framing, Sink }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ HttpEntity, _ }
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import com.typesafe.config.ConfigFactory
 import hmda.apiModel.protocol.admin.WriteInstitutionProtocol
 
 import scala.concurrent.duration._
 import hmda.parser.fi.InstitutionParser
 import org.slf4j.LoggerFactory
-
 import spray.json._
 
 object PanelCsvLoader extends WriteInstitutionProtocol {
@@ -32,24 +32,34 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
   def main(args: Array[String]): Unit = {
 
     if (args.length < 1) {
-      println("ERROR: Please provide institutions file")
+      log.error("ERROR: Please provide institutions file")
       sys.exit(1)
     }
 
-    println("Cleaning DB...")
-    //TODO
+    log.info("Cleaning DB...")
+    val deleteRequest = HttpRequest(HttpMethods.GET, uri = s"http://$host:$port/institutions/delete")
+    val deleteResponse = for {
+      response <- Http().singleRequest(deleteRequest)
+      content <- Unmarshal(response.entity).to[String]
+    } yield content
 
     val source = FileIO.fromPath(new File(args(0)).toPath)
 
     val connectionFlow = Http().outgoingConnection(host, port)
 
-    source
-      .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
-      .drop(1)
-      .via(byte2StringFlow)
-      .via(stringToHttpFlow)
-      .via(connectionFlow)
-      .runWith(Sink.head)
+    deleteResponse.onComplete(s =>
+      if(s.getOrElse("").equals("InstitutionSchemaDeleted()")) {
+        source
+          .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
+          .drop(1)
+          .via(byte2StringFlow)
+          .via(stringToHttpFlow)
+          .via(connectionFlow)
+          .runWith(Sink.head)
+      } else {
+        log.error("Error deleting institutions schema")
+        sys.exit(1)
+      })
   }
 
   private def stringToHttpFlow: Flow[String, HttpRequest, NotUsed] =
