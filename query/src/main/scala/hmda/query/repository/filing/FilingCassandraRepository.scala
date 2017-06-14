@@ -18,7 +18,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   implicit val ec: ExecutionContext
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
-    session.prepare(s"INSERT INTO $keyspace.lars" +
+    session.prepare(s"INSERT INTO $keyspace.lars2017" +
       s"(id," +
       s"respondent_id," +
       s"agency_code," +
@@ -105,7 +105,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   override def createTable(): ResultSet = {
     val query =
       s"""
-         |CREATE TABLE IF NOT EXISTS $keyspace.lars(
+         |CREATE TABLE IF NOT EXISTS $keyspace.lars2017(
          |      id int PRIMARY KEY,
          |      respondent_id varchar,
          |      agency_code int,
@@ -154,7 +154,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   override def dropTable(): ResultSet = {
     val query =
       s"""
-         |DROP TABLE IF EXISTS $keyspace.lars;
+         |DROP TABLE IF EXISTS $keyspace.lars2017;
        """.stripMargin
 
     session.execute(query)
@@ -166,7 +166,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   }
 
   override def readData(fetchSize: Int): Future[Seq[Row]] = {
-    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.lars").setFetchSize(fetchSize)
+    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.lars2017").setFetchSize(fetchSize)
     CassandraSource(statement).runWith(Sink.seq).mapTo[Seq[Row]]
   }
 
