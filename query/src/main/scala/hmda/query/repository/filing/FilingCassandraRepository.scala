@@ -19,47 +19,47 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.lars2017" +
-      s"(id," +
-      s"respondent_id," +
-      s"agency_code," +
-      s"loan_id," +
-      s"application_date" +
-      s"loan_type," +
-      s"property_type," +
-      s"purpose," +
-      s"occupancy," +
-      s"amount," +
-      s"preapprovals," +
-      s"action_taken_type," +
-      s"action_taken_date," +
-      s"msa," +
-      s"state," +
-      s"county," +
-      s"tract," +
-      s"ethnicity," +
-      s"co_ethnicity," +
-      s"race1," +
-      s"race2," +
-      s"race3," +
-      s"race4," +
-      s"race5," +
-      s"co_race1," +
-      s"co_race2," +
-      s"co_race3," +
-      s"co_race4," +
-      s"co_race5" +
-      s"sex," +
-      s"co_sex," +
-      s"income," +
-      s"purchaser_type," +
-      s"denial1," +
-      s"denial2," +
-      s"denial3," +
-      s"rate_spread," +
-      s"hoepa_status," +
-      s"lien_status) " +
-      s" VALUES " +
-      s"(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,)")
+      "(id," +
+      "respondent_id," +
+      "agency_code," +
+      "loan_id," +
+      "application_date" +
+      "loan_type," +
+      "property_type," +
+      "purpose," +
+      "occupancy," +
+      "amount," +
+      "preapprovals," +
+      "action_taken_type," +
+      "action_taken_date," +
+      "msa," +
+      "state," +
+      "county," +
+      "tract," +
+      "ethnicity," +
+      "co_ethnicity," +
+      "race1," +
+      "race2," +
+      "race3," +
+      "race4," +
+      "race5," +
+      "co_race1," +
+      "co_race2," +
+      "co_race3," +
+      "co_race4," +
+      "co_race5" +
+      "sex," +
+      "co_sex," +
+      "income," +
+      "purchaser_type," +
+      "denial1," +
+      "denial2," +
+      "denial3," +
+      "rate_spread," +
+      "hoepa_status," +
+      "lien_status) " +
+      " VALUES " +
+      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,)")
   }
 
   val statementBinder = (lar: LoanApplicationRegister, statement: PreparedStatement) =>
