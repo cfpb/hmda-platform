@@ -14,7 +14,7 @@ class CassandraSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
   var session: Session = _
 
   override def beforeAll(): Unit = {
-    EmbeddedCassandraServerHelper.startEmbeddedCassandra(20000L)
+    EmbeddedCassandraServerHelper.startEmbeddedCassandra(60000L)
     cluster = EmbeddedCassandraServerHelper.getCluster()
     session = cluster.connect()
     loadData()

@@ -20,35 +20,35 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.institutions" +
-      s"(id," +
-      s"agency," +
-      s"period," +
-      s"activity_year," +
-      s"respondent_id," +
-      s"type," +
-      s"cra," +
-      s"email_1," +
-      s"email_2," +
-      s"email_3," +
-      s"respondent_name," +
-      s"respondent_state," +
-      s"respondent_city," +
-      s"respondent_fips," +
-      s"hmda_filer," +
-      s"parent_respondent_id," +
-      s"parent_id_rssd," +
-      s"parent_name," +
-      s"parent_city," +
-      s"parent_state," +
-      s"assets," +
-      s"other_lender_codes," +
-      s"top_holder_id_rssd," +
-      s"top_holder_name," +
-      s"top_holder_city," +
-      s"top_holder_state," +
-      s"top_holder_country) " +
-      s" VALUES " +
-      s"(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      "(id," +
+      "agency," +
+      "period," +
+      "activity_year," +
+      "respondent_id," +
+      "type," +
+      "cra," +
+      "email_1," +
+      "email_2," +
+      "email_3," +
+      "respondent_name," +
+      "respondent_state," +
+      "respondent_city," +
+      "respondent_fips," +
+      "hmda_filer," +
+      "parent_respondent_id," +
+      "parent_id_rssd," +
+      "parent_name," +
+      "parent_city," +
+      "parent_state," +
+      "assets," +
+      "other_lender_codes," +
+      "top_holder_id_rssd," +
+      "top_holder_name," +
+      "top_holder_city," +
+      "top_holder_state," +
+      "top_holder_country) " +
+      " VALUES " +
+      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
   }
 
   val statementBinder = (institution: InstitutionQuery, statement: PreparedStatement) =>
