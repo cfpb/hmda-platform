@@ -23,7 +23,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       "respondent_id," +
       "agency_code," +
       "loan_id," +
-      "application_date" +
+      "application_date," +
       "loan_type," +
       "property_type," +
       "purpose," +
@@ -47,7 +47,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       "co_race2," +
       "co_race3," +
       "co_race4," +
-      "co_race5" +
+      "co_race5," +
       "sex," +
       "co_sex," +
       "income," +
@@ -57,9 +57,9 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       "denial3," +
       "rate_spread," +
       "hoepa_status," +
-      "lien_status) " +
+      "lien_status)" +
       " VALUES " +
-      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,)")
+      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
   }
 
   val statementBinder = (lar: LoanApplicationRegister, statement: PreparedStatement) =>
@@ -97,6 +97,9 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       new Integer(lar.applicant.coSex),
       lar.applicant.income,
       new Integer(lar.purchaserType),
+      lar.denial.reason1,
+      lar.denial.reason2,
+      lar.denial.reason3,
       lar.rateSpread,
       new Integer(lar.hoepaStatus),
       new Integer(lar.lienStatus)

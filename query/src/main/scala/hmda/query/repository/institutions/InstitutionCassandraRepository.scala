@@ -14,10 +14,6 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuery] {
 
-  implicit def system: ActorSystem
-  implicit def materializer: ActorMaterializer
-  implicit val ec: ExecutionContext
-
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.institutions" +
       "(id," +
