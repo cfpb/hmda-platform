@@ -32,6 +32,10 @@ Module responsible for persisting information into the system. It becomes the sy
 
 This module contains both public APIs for HMDA data for general use by third party clients and web applications, as well as endpoints for receiving data and providing information about the filing process for Financial Institutions
 
+### API Model
+
+This module contains objects and JSON protocols for use by the API project
+
 ### Query
 
 This module is responsible for interacting with the back-end database, as well as conversion between model objects and database objects.

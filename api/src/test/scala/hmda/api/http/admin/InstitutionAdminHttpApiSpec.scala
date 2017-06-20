@@ -15,8 +15,6 @@ import hmda.api.http.BaseHttpApi
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
-import hmda.persistence.messages.CommonMessages.Event
-import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaDeleted
 import hmda.query.HmdaQuerySupervisor
 import hmda.query.projections.institutions.InstitutionDBProjection._
 
@@ -117,6 +115,7 @@ class InstitutionAdminHttpApiSpec
     }
     "delete institution schema" in {
       HttpRequest(HttpMethods.GET, uri = "/institutions/delete") ~> institutionAdminRoutes ~> check {
+        status mustBe StatusCodes.Accepted
         responseAs[String] mustBe "InstitutionSchemaDeleted()"
       }
     }

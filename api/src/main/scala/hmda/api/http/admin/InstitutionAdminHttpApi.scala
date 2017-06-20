@@ -19,6 +19,7 @@ import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, ModifyInstitution }
 import hmda.persistence.messages.CommonMessages.Event
+import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaDeleted
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.projections.institutions.InstitutionDBProjection.DeleteSchema
 import hmda.query.view.institutions.InstitutionView
@@ -95,11 +96,11 @@ trait InstitutionAdminHttpApi
           val deleteEvent = for {
             instAct <- fInstitutionsActor
             dbAct <- (instAct ? GetProjectionActorRef).mapTo[ActorRef]
-            delete <- (dbAct ? DeleteSchema).mapTo[Event]
+            delete <- (dbAct ? DeleteSchema).mapTo[InstitutionSchemaDeleted]
           } yield delete
 
           onComplete(deleteEvent) {
-            case Success(message) => complete(message.toString)
+            case Success(message) => complete(ToResponseMarshallable(StatusCodes.Accepted -> message.toString()))
             case Failure(error) => completeWithInternalError(uri, error)
           }
         }

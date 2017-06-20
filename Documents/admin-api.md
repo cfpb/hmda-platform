@@ -4,7 +4,7 @@ This API is for internal use only. The following endpoints are available
 
 * `/`
     * `GET` - Root endpoint, with information about the HMDA Platform admin service. Used for health checks
- 
+
     Example response, with HTTP code 200:
 
     ```json
@@ -15,12 +15,12 @@ This API is for internal use only. The following endpoints are available
       "host": "localhost"
     }
     ```
-    
+
 * `/institutions`
     * `POST` - Creates new financial institution
-    
+
     Accepts data in `json` format. For example:
-    
+
     ```json
     {
       "id": "123",
@@ -65,14 +65,14 @@ This API is for internal use only. The following endpoints are available
       }
     }
     ```
-    
+
     Response is the same object inserted, with code 201
-    
-    
+
+
     * `PUT` - Modifies existing financial institution. Can modify any field except `id` (used for finding the institution to be updated)
-    
-    Accepts data in `json` format. For example: 
-    
+
+    Accepts data in `json` format. For example:
+
     ```json
     {
       "id": "123",
@@ -117,5 +117,14 @@ This API is for internal use only. The following endpoints are available
       }
     }
     ```
-    
+
     Response is the same object that has been modified, with code 202
+
+* `/institutions/delete`
+    * `GET` - Deletes the instutition schema
+
+    Example response, with HTTP code 202
+
+    ```
+    InstitutionSchemaDeleted()
+    ```

@@ -6,7 +6,7 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.util.{ ByteString, Timeout }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ FileIO, Flow, Framing, Sink }
+import akka.stream.scaladsl.{ FileIO, Flow, Framing, Sink, Source }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ HttpEntity, _ }
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -32,30 +32,37 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
   def main(args: Array[String]): Unit = {
 
     if (args.length < 1) {
-      log.error("ERROR: Please provide institutions file")
-      sys.exit(1)
+      sys.exit(2)
     }
 
-    log.info("Cleaning DB...")
+    val file = new File(args(0))
+    if (!file.exists() || !file.isFile) {
+      sys.exit(3)
+    }
+
+    val source = FileIO.fromPath(file.toPath)
+
     val deleteRequest = HttpRequest(HttpMethods.GET, uri = s"http://$host:$port/institutions/delete")
     val deleteResponse = for {
       response <- Http().singleRequest(deleteRequest)
       content <- Unmarshal(response.entity).to[String]
     } yield content
 
-    val source = FileIO.fromPath(new File(args(0)).toPath)
-
     val connectionFlow = Http().outgoingConnection(host, port)
 
     deleteResponse.onComplete(s =>
-      if(s.getOrElse("").equals("InstitutionSchemaDeleted()")) {
-        source
+      if (s.getOrElse("").equals("InstitutionSchemaDeleted()")) {
+        log.info(s.getOrElse(""))
+        val completedF = source
           .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
           .drop(1)
           .via(byte2StringFlow)
           .via(stringToHttpFlow)
           .via(connectionFlow)
-          .runWith(Sink.head)
+          .runWith(Sink.foreach[HttpResponse](elem => println(elem.entity)))
+
+        //Currently exiting prematurely
+        //completedF.onComplete(sys.exit(0))
       } else {
         log.error("Error deleting institutions schema")
         sys.exit(1)

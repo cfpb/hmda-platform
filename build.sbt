@@ -117,7 +117,8 @@ lazy val panel = (project in file("panel"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
         },
-      libraryDependencies ++= httpDeps
+      libraryDependencies ++= httpDeps,
+      fork in run := true
     )
   ).dependsOn(parserJVM % "compile->compile;test->test")
   .dependsOn(apiModel % "compile->compile;test->test")
