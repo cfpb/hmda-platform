@@ -1,21 +1,16 @@
 package hmda.query.repository.filing
 
 import akka.{ Done, NotUsed }
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import akka.stream.alpakka.cassandra.scaladsl.{ CassandraSink, CassandraSource }
 import akka.stream.scaladsl.{ Sink, Source }
 import com.datastax.driver.core._
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.query.projections.ProjectionRuntime
 import hmda.query.repository.CassandraRepository
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
-trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegister] {
-
-  implicit def system: ActorSystem
-  implicit def materializer: ActorMaterializer
-  implicit val ec: ExecutionContext
+trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegister] with ProjectionRuntime {
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.lars2017" +

@@ -1,18 +1,17 @@
 package hmda.query.repository.institutions
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.{ Done, NotUsed }
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.stream.scaladsl.{ Sink, Source }
 import com.datastax.driver.core._
 import hmda.query.model.institutions.InstitutionQuery
+import hmda.query.projections.ProjectionRuntime
 import hmda.query.repository.CassandraRepository
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
-trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuery] {
+trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuery] with ProjectionRuntime {
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.institutions" +
