@@ -21,7 +21,10 @@ class FilingCassandraProjection extends FilingCassandraRepository {
     }
     val sink = CassandraSink[LoanApplicationRegisterQuery](parallelism = 2, preparedStatement, statementBinder)
     source
-      .map(lar => toLoanApplicationRegisterQuery(lar))
+      .map { lar =>
+        val queryLar = toLoanApplicationRegisterQuery(lar)
+        queryLar.copy(institutionId = queryLar.id, period = "2017")
+      }
       .to(sink).run()
   }
 
