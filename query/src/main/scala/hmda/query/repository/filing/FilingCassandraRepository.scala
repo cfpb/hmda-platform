@@ -4,13 +4,13 @@ import akka.{ Done, NotUsed }
 import akka.stream.alpakka.cassandra.scaladsl.{ CassandraSink, CassandraSource }
 import akka.stream.scaladsl.{ Sink, Source }
 import com.datastax.driver.core._
-import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.projections.ProjectionRuntime
 import hmda.query.repository.CassandraRepository
 
 import scala.concurrent.Future
 
-trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegister] with ProjectionRuntime {
+trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegisterQuery] with ProjectionRuntime {
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.lars2017" +
@@ -57,44 +57,44 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
   }
 
-  val statementBinder = (lar: LoanApplicationRegister, statement: PreparedStatement) =>
+  val statementBinder = (lar: LoanApplicationRegisterQuery, statement: PreparedStatement) =>
     statement.bind(
-      new Integer(lar.id),
+      lar.id,
       lar.respondentId,
       new Integer(lar.agencyCode),
-      lar.loan.id,
-      lar.loan.applicationDate,
-      new Integer(lar.loan.loanType),
-      new Integer(lar.loan.propertyType),
-      new Integer(lar.loan.purpose),
-      new Integer(lar.loan.occupancy),
-      new Integer(lar.loan.amount),
+      lar.loanId,
+      lar.applicationDate,
+      new Integer(lar.loanType),
+      new Integer(lar.propertyType),
+      new Integer(lar.purpose),
+      new Integer(lar.occupancy),
+      new Integer(lar.amount),
       new Integer(lar.preapprovals),
       new Integer(lar.actionTakenType),
       new Integer(lar.actionTakenDate),
-      lar.geography.msa,
-      lar.geography.state,
-      lar.geography.county,
-      lar.geography.tract,
-      new Integer(lar.applicant.ethnicity),
-      new Integer(lar.applicant.coEthnicity),
-      new Integer(lar.applicant.race1),
-      lar.applicant.race2,
-      lar.applicant.race3,
-      lar.applicant.race4,
-      lar.applicant.race5,
-      new Integer(lar.applicant.coRace1),
-      lar.applicant.coRace2,
-      lar.applicant.coRace3,
-      lar.applicant.coRace4,
-      lar.applicant.coRace5,
-      new Integer(lar.applicant.sex),
-      new Integer(lar.applicant.coSex),
-      lar.applicant.income,
+      lar.msa,
+      lar.state,
+      lar.county,
+      lar.tract,
+      new Integer(lar.ethnicity),
+      new Integer(lar.coEthnicity),
+      new Integer(lar.race1),
+      lar.race2,
+      lar.race3,
+      lar.race4,
+      lar.race5,
+      new Integer(lar.coRace1),
+      lar.coRace2,
+      lar.coRace3,
+      lar.coRace4,
+      lar.coRace5,
+      new Integer(lar.sex),
+      new Integer(lar.coSex),
+      lar.income,
       new Integer(lar.purchaserType),
-      lar.denial.reason1,
-      lar.denial.reason2,
-      lar.denial.reason3,
+      lar.denialReason1,
+      lar.denialReason2,
+      lar.denialReason3,
       lar.rateSpread,
       new Integer(lar.hoepaStatus),
       new Integer(lar.lienStatus)
@@ -104,7 +104,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
     val query =
       s"""
          |CREATE TABLE IF NOT EXISTS $keyspace.lars2017(
-         |      id int PRIMARY KEY,
+         |      id varchar PRIMARY KEY,
          |      respondent_id varchar,
          |      agency_code int,
          |      loan_id varchar,
@@ -158,8 +158,8 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
     session.execute(query)
   }
 
-  override def insertData(source: Source[LoanApplicationRegister, NotUsed]): Future[Done] = {
-    val sink = CassandraSink[LoanApplicationRegister](parallelism = 2, preparedStatement, statementBinder)
+  override def insertData(source: Source[LoanApplicationRegisterQuery, NotUsed]): Future[Done] = {
+    val sink = CassandraSink[LoanApplicationRegisterQuery](parallelism = 2, preparedStatement, statementBinder)
     source.runWith(sink)
   }
 

@@ -23,6 +23,7 @@ import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
+import hmda.query.HmdaProjectionQuery
 import hmda.query.projections.institutions.InstitutionCassandraProjection
 
 object HmdaPlatform {
@@ -76,8 +77,8 @@ object HmdaPlatform {
     val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
       .mapTo[ActorRef]
 
-    val cassandraProjection = new InstitutionCassandraProjection
-    cassandraProjection.startUp()
+    //Start Query Projections
+    HmdaProjectionQuery.main(Array.empty[String])
 
     // Start validation stats actor
     system.actorOf(ValidationStats.props(), "validation-stats")
