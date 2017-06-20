@@ -19,13 +19,13 @@ import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, ModifyInstitution }
 import hmda.persistence.messages.CommonMessages.Event
-import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaDeleted
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.projections.institutions.InstitutionDBProjection.DeleteSchema
+import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, DeleteSchema }
 import hmda.query.view.institutions.InstitutionView
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 
 import scala.concurrent.ExecutionContext
+import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
 trait InstitutionAdminHttpApi
@@ -86,26 +86,31 @@ trait InstitutionAdminHttpApi
       }
     }
 
-  val institutionsDeletePath =
-    path("institutions" / "delete") {
+  private val cdRegex = new Regex("create|delete")
+  val institutionsSchemaPath =
+    path("institutions" / cdRegex) { command =>
       extractExecutionContext { executor =>
         implicit val ec: ExecutionContext = executor
         val querySupervisor = system.actorSelection("/user/query-supervisor")
         val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+        val message = command match {
+          case "create" => CreateSchema
+          case "delete" => DeleteSchema
+        }
         timedGet { uri =>
-          val deleteEvent = for {
+          val event = for {
             instAct <- fInstitutionsActor
             dbAct <- (instAct ? GetProjectionActorRef).mapTo[ActorRef]
-            delete <- (dbAct ? DeleteSchema).mapTo[InstitutionSchemaDeleted]
-          } yield delete
+            cd <- (dbAct ? message).mapTo[Event]
+          } yield cd
 
-          onComplete(deleteEvent) {
-            case Success(message) => complete(ToResponseMarshallable(StatusCodes.Accepted -> message.toString()))
+          onComplete(event) {
+            case Success(response) => complete(ToResponseMarshallable(StatusCodes.Accepted -> response.toString))
             case Failure(error) => completeWithInternalError(uri, error)
           }
         }
       }
     }
 
-  val institutionAdminRoutes = encodeResponse { institutionsWritePath ~ institutionsDeletePath }
+  val institutionAdminRoutes = encodeResponse { institutionsWritePath ~ institutionsSchemaPath }
 }

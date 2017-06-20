@@ -119,6 +119,12 @@ class InstitutionAdminHttpApiSpec
         responseAs[String] mustBe "InstitutionSchemaDeleted()"
       }
     }
+    "create institution schema" in {
+      HttpRequest(HttpMethods.GET, uri = "/institutions/create") ~> institutionAdminRoutes ~> check {
+        status mustBe StatusCodes.Accepted
+        responseAs[String] mustBe "InstitutionSchemaCreated()"
+      }
+    }
   }
 
   private def createRequest(jsonRequest: ByteString, method: HttpMethod): HttpRequest = {

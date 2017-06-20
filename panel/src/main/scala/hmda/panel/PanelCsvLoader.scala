@@ -2,7 +2,7 @@ package hmda.panel
 
 import java.io.File
 
-import akka.NotUsed
+import akka.{ Done, NotUsed }
 import akka.actor.ActorSystem
 import akka.util.{ ByteString, Timeout }
 import akka.stream.ActorMaterializer
@@ -18,6 +18,8 @@ import hmda.parser.fi.InstitutionParser
 import org.slf4j.LoggerFactory
 import spray.json._
 
+import scala.util.Try
+
 object PanelCsvLoader extends WriteInstitutionProtocol {
   implicit val system: ActorSystem = ActorSystem("hmda")
   implicit val materializer = ActorMaterializer()
@@ -32,41 +34,42 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
   def main(args: Array[String]): Unit = {
 
     if (args.length < 1) {
-      sys.exit(2)
+      exitSys("No file argument provided", 1)
     }
 
     val file = new File(args(0))
     if (!file.exists() || !file.isFile) {
-      sys.exit(3)
+      exitSys("File does not exist", 2)
     }
 
-    val source = FileIO.fromPath(file.toPath)
+    sendRequest("delete").map(_ => {
+      val response = sendRequest("create")
 
-    val deleteRequest = HttpRequest(HttpMethods.GET, uri = s"http://$host:$port/institutions/delete")
-    val deleteResponse = for {
-      response <- Http().singleRequest(deleteRequest)
-      content <- Unmarshal(response.entity).to[String]
-    } yield content
+      val source = FileIO.fromPath(file.toPath)
+      val connectionFlow = Http().outgoingConnection(host, port)
 
-    val connectionFlow = Http().outgoingConnection(host, port)
+      response.onComplete(s =>
+        if (s.getOrElse("").equals("InstitutionSchemaCreated()")) {
+          log.info(s.get)
+          val completedF = source
+            .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
+            .drop(1)
+            .via(byte2StringFlow)
+            .via(stringToHttpFlow)
+            .via(connectionFlow)
+            .runWith(Sink.foreach[HttpResponse](elem => log.info(elem.entity.toString)))
 
-    deleteResponse.onComplete(s =>
-      if (s.getOrElse("").equals("InstitutionSchemaDeleted()")) {
-        log.info(s.getOrElse(""))
-        val completedF = source
-          .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 1024, allowTruncation = true))
-          .drop(1)
-          .via(byte2StringFlow)
-          .via(stringToHttpFlow)
-          .via(connectionFlow)
-          .runWith(Sink.foreach[HttpResponse](elem => println(elem.entity)))
-
-        //Currently exiting prematurely
-        //completedF.onComplete(sys.exit(0))
-      } else {
-        log.error("Error deleting institutions schema")
-        sys.exit(1)
-      })
+          completedF.onComplete(result => {
+            if (result.isSuccess)
+              sys.exit(0)
+            else {
+              exitSys("Error while processing institutions", 4)
+            }
+          })
+        } else {
+          exitSys("Error creating institutions schema", 3)
+        })
+    })
   }
 
   private def stringToHttpFlow: Flow[String, HttpRequest, NotUsed] =
@@ -82,4 +85,17 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
 
   private def byte2StringFlow: Flow[ByteString, String, NotUsed] =
     Flow[ByteString].map(bs => bs.utf8String)
+
+  private def sendRequest(req: String) = {
+    val request = HttpRequest(HttpMethods.GET, uri = s"http://$host:$port/institutions/$req")
+    for {
+      response <- Http().singleRequest(request)
+      content <- Unmarshal(response.entity).to[String]
+    } yield content
+  }
+
+  private def exitSys(errorMessage: String, code: Int) = {
+    log.error(errorMessage)
+    sys.exit(code)
+  }
 }
