@@ -107,13 +107,20 @@ run <full local path to sample file>
 A sample file is located in the following folder: `hmda-platform/persistence/src/main/resources/demoInstitutions.csv`
 
 
-* In order to support the read side, a local PostgreSQL server is needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
+* In order to support the read side, a local PostgreSQL and Cassandra server are needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
 
 ```shell
 export JDBC_URL='jdbc:postgresql://localhost/hmda?user=postgres&password=postgres'
 ```
 
 where `hmda` is the name of the `PostgreSQL` database, owned by the default user with default password (`postgres`)
+
+For Cassandra, the following environment variables need to be set (assuming Cassandra is running on a docker container as described above):
+
+```shell
+export CASSANDRA_CLUSTER_HOSTS=192.168.99.100
+export CASSANDRA_CLUSTER_PORT=9042
+```
 
 **Note: if you are running the backend only through sbt, the database needs to be created manually in advance, see instructions [here](https://www.postgresql.org/docs/9.1/static/manage-ag-createdb.html)**
 

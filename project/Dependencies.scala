@@ -35,5 +35,7 @@ object Dependencies {
   val scalaCsv = "com.github.tototoshi" %% "scala-csv" % Version.scalaCsv
   val constructr = "de.heikoseeberger" %% "constructr" % Version.constructrVersion
   val constructrZookeeper = "com.lightbend.constructr" %% "constructr-coordination-zookeeper" % Version.constructrZookeeperVersion
-
+  val cassandraUnit = "org.cassandraunit" % "cassandra-unit" % Version.cassandraUnit
+  val alpakkaCassandra = "com.lightbend.akka" %% "akka-stream-alpakka-cassandra" % Version.alpakka
+  val cassandraDriver = "com.datastax.cassandra" % "cassandra-driver-core" % Version.cassandraDriver
 }

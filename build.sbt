@@ -167,7 +167,8 @@ lazy val query = (project in file("query"))
         oldStrategy(x)
     },
     parallelExecution in Test := false,
-    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps
+    fork in Test := false,
+    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps ++ Seq(cassandraDriver, cassandraUnit, alpakkaCassandra)
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
   .dependsOn(persistenceModel % "compile->compile;test->test")
