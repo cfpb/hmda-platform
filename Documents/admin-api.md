@@ -120,8 +120,8 @@ This API is for internal use only. The following endpoints are available
 
     Response is the same object that has been modified, with code 202
 
-* `/institutions/delete`
-    * `GET` - Deletes the instutition schema
+* `/institutions/create|delete`
+    * `GET` - Creates or deletes the instutition schema
 
     Example response, with HTTP code 202
 
