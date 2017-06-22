@@ -7,7 +7,6 @@ import akka.pattern.ask
 import akka.util.Timeout
 
 import scala.concurrent.duration._
-import com.typesafe.config.ConfigFactory
 import hmda.persistence.HmdaSupervisor._
 import hmda.query.HmdaQuerySupervisor._
 import hmda.persistence.demo.DemoData
@@ -24,8 +23,7 @@ import hmda.query.DbConfiguration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
-
-import scala.concurrent.ExecutionContext
+import hmda.query.projections.institutions.InstitutionCassandraProjection
 
 object HmdaPlatform {
 
@@ -77,6 +75,9 @@ object HmdaPlatform {
     // Start query Actors
     val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
       .mapTo[ActorRef]
+
+    val cassandraProjection = new InstitutionCassandraProjection
+    cassandraProjection.startUp()
 
     // Start validation stats actor
     system.actorOf(ValidationStats.props(), "validation-stats")

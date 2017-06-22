@@ -26,6 +26,11 @@ object HmdaQuery {
       .map(_.event.asInstanceOf[Event])
   }
 
+  def liveEvents(persistenceId: String)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[Event, NotUsed] = {
+    readJournal(system).eventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
+      .map(_.event.asInstanceOf[Event])
+  }
+
   def eventsWithSequenceNumber(persistenceId: String, fromSequenceNr: Long, toSequenceNr: Long)(implicit system: ActorSystem, materializer: ActorMaterializer): Source[EventWithSeqNr, NotUsed] = {
     readJournal(system)
       .eventsByPersistenceId(persistenceId, fromSequenceNr, toSequenceNr)
