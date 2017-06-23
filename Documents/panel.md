@@ -15,6 +15,12 @@ sbt> clean
 sbt> run /path/to/panelData.csv
 ```
 
+The project can also be run as a java `.jar` file.  While running `sbt` and in the panel project, run the following commands:
+```shell
+sbt> clean
+sbt> assembly
+```
+Then the panel loader can be run with `java -jar  panel/target/scala-2.12/panel.jar path/to/institution_file.csv`
 ## Testing
 Make sure your authorization header is updated with a few real `id_rssd` fields from the given file.  This can be found in the API log output (first field argument in the `InstitutionQuery` object), or in the CSV file (seventh field).
 
