@@ -10,17 +10,22 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
-import hmda.api.protocol.admin.WriteInstitutionProtocol
-import hmda.api.protocol.processing.ApiErrorProtocol
+import hmda.apiModel.protocol.admin.WriteInstitutionProtocol
+import hmda.apiModel.protocol.processing.ApiErrorProtocol
 import hmda.model.fi.Filing
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, ModifyInstitution }
+import hmda.persistence.messages.CommonMessages.Event
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, DeleteSchema }
+import hmda.query.view.institutions.InstitutionView
+import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 
 import scala.concurrent.ExecutionContext
+import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
 trait InstitutionAdminHttpApi
@@ -81,5 +86,31 @@ trait InstitutionAdminHttpApi
       }
     }
 
-  val institutionAdminRoutes = encodeResponse { institutionsWritePath }
+  private val cdRegex = new Regex("create|delete")
+  val institutionsSchemaPath =
+    path("institutions" / cdRegex) { command =>
+      extractExecutionContext { executor =>
+        implicit val ec: ExecutionContext = executor
+        val querySupervisor = system.actorSelection("/user/query-supervisor")
+        val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+        val message = command match {
+          case "create" => CreateSchema
+          case "delete" => DeleteSchema
+        }
+        timedGet { uri =>
+          val event = for {
+            instAct <- fInstitutionsActor
+            dbAct <- (instAct ? GetProjectionActorRef).mapTo[ActorRef]
+            cd <- (dbAct ? message).mapTo[Event]
+          } yield cd
+
+          onComplete(event) {
+            case Success(response) => complete(ToResponseMarshallable(StatusCodes.Accepted -> response.toString))
+            case Failure(error) => completeWithInternalError(uri, error)
+          }
+        }
+      }
+    }
+
+  val institutionAdminRoutes = encodeResponse { institutionsWritePath ~ institutionsSchemaPath }
 }

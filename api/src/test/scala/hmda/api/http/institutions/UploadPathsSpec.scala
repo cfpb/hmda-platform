@@ -6,7 +6,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiAsyncSpec
-import hmda.api.protocol.processing.SubmissionProtocol
+import hmda.apiModel.protocol.processing.SubmissionProtocol
 import hmda.model.fi._
 import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence

@@ -91,3 +91,4 @@ scalastyle-config.xml
 .idea/
 projectFilesBackup/
 .ensime
+*.iml

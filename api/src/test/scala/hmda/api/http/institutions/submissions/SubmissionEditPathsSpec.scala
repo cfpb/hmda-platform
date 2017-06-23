@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.api.model.{ EditResult, _ }
+import hmda.apiModel.model.{ EditResult, _ }
 import hmda.model.fi._
 import hmda.model.fi.lar.LarGenerators
 import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }

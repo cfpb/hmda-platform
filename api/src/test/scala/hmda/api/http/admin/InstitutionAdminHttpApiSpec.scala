@@ -6,14 +6,17 @@ import akka.http.scaladsl.model.headers.HttpEncodings._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.testkit._
 import akka.util.{ ByteString, Timeout }
-import hmda.api.model.{ ModelGenerators, Status }
+import hmda.apiModel.model.{ ModelGenerators, Status }
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.MalformedRequestContentRejection
+import akka.testkit.TestProbe
 import hmda.api.http.BaseHttpApi
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
+import hmda.query.HmdaQuerySupervisor
+import hmda.query.projections.institutions.InstitutionDBProjection._
 
 import scala.concurrent.duration._
 import spray.json._
@@ -32,6 +35,11 @@ class InstitutionAdminHttpApiSpec
 
   override def beforeAll(): Unit = {
     HmdaSupervisor.createSupervisor(system)
+    HmdaQuerySupervisor.createQuerySupervisor(system)
+
+    val probe = TestProbe()
+    val db = createInstitutionDBProjection(system)
+    probe.send(db, CreateSchema)
   }
 
   override def afterAll(): Unit = {
@@ -56,7 +64,6 @@ class InstitutionAdminHttpApiSpec
     }
 
     "create a new institution" in {
-      val id = newInstitution.id
       val jsonRequest = ByteString(newInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
       postRequest ~> institutionAdminRoutes ~> check {
@@ -104,6 +111,18 @@ class InstitutionAdminHttpApiSpec
       val putRequest = createRequest(jsonRequest, HttpMethods.PUT)
       putRequest ~> institutionAdminRoutes ~> check {
         status mustBe StatusCodes.NotFound
+      }
+    }
+    "delete institution schema" in {
+      HttpRequest(HttpMethods.GET, uri = "/institutions/delete") ~> institutionAdminRoutes ~> check {
+        status mustBe StatusCodes.Accepted
+        responseAs[String] mustBe "InstitutionSchemaDeleted()"
+      }
+    }
+    "create institution schema" in {
+      HttpRequest(HttpMethods.GET, uri = "/institutions/create") ~> institutionAdminRoutes ~> check {
+        status mustBe StatusCodes.Accepted
+        responseAs[String] mustBe "InstitutionSchemaCreated()"
       }
     }
   }
