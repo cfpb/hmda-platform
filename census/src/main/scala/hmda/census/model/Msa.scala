@@ -41,7 +41,7 @@ case class Msa(
     )
   }
 
-  def toCsv: String = s"$id, $name, $totalLars, $totalAmount, $conv, $FHA, $VA, $FSA, $oneToFourFamily, $MFD, $multiFamily, $homePurchase, $homeImprovement, $refinance"
+  def toCsv: String = s"""$id,\"$name\", $totalLars, $totalAmount, $conv, $FHA, $VA, $FSA, $oneToFourFamily, $MFD, $multiFamily, $homePurchase, $homeImprovement, $refinance"""
 }
 
 case class MsaMap(
