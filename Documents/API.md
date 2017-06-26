@@ -627,8 +627,8 @@ Example response:
 Example response:
 ```csv
 MSA/MD, MSA/MD Name, Total LARs, Total Amt. (in thousands), CONV, FHA, VA, FSA/RHS, 1-4 Family, MFD, Multi-Family, Home Purchase, Home Improvement, Refinance
-45460, Terre Haute, IN, 7, 297, 7, 0, 0, 0, 7, 0, 0, 0, 4, 3
-NA, NA, 3, 79, 3, 0, 0, 0, 3, 0, 0, 0, 1, 2
+45460,"Terre Haute, IN", 7, 297, 7, 0, 0, 0, 7, 0, 0, 0, 4, 3
+NA,"NA", 3, 79, 3, 0, 0, 0, 3, 0, 0, 0, 1, 2
 Totals,, 10, 376, 10, 0, 0, 0, 10, 0, 0, 0, 5, 5
 ```
 
