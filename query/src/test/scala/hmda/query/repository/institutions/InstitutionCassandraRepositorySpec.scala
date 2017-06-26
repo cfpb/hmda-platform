@@ -1,28 +1,15 @@
 package hmda.query.repository.institutions
 
-import akka.actor.{ ActorSystem, Scheduler }
-import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import com.datastax.driver.core.{ Cluster, Session }
 import hmda.model.institution.{ Agency, InstitutionGenerators }
-import org.cassandraunit.utils.EmbeddedCassandraServerHelper
-import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
+import hmda.query.model.institutions.InstitutionQuery
+import hmda.query.repository.CassandraRepositorySpec
 import hmda.query.repository.institutions.InstitutionConverter._
 
-import scala.concurrent.ExecutionContext
-
-class InstitutionCassandraRepositorySpec extends WordSpec with MustMatchers with BeforeAndAfterAll with InstitutionCassandraRepository {
-
-  EmbeddedCassandraServerHelper.startEmbeddedCassandra(20000L)
-  val cluster: Cluster = EmbeddedCassandraServerHelper.getCluster
-  override val session: Session = cluster.connect()
+class InstitutionCassandraRepositorySpec extends CassandraRepositorySpec[InstitutionQuery] with InstitutionCassandraRepository {
 
   override def beforeAll(): Unit = {
     createKeyspace()
-  }
-
-  override def afterAll(): Unit = {
-    EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
   }
 
   "Institutions in Cassandra" must {
@@ -46,10 +33,4 @@ class InstitutionCassandraRepositorySpec extends WordSpec with MustMatchers with
     }
   }
 
-  override implicit def materializer: ActorMaterializer = ActorMaterializer()
-
-  override implicit val ec: ExecutionContext = system.dispatcher
-  override implicit val scheduler: Scheduler = system.scheduler
-
-  override implicit def system: ActorSystem = ActorSystem()
 }

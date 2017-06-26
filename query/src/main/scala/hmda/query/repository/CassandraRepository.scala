@@ -1,11 +1,13 @@
 package hmda.query.repository
 
-import akka.actor.Scheduler
+import akka.actor.{ ActorSystem, Scheduler }
+import akka.stream.ActorMaterializer
 import akka.{ Done, NotUsed }
 import akka.stream.scaladsl.Source
 import com.datastax.driver.core.policies.ExponentialReconnectionPolicy
 import com.datastax.driver.core.{ Cluster, ResultSet, Row, Session }
 import hmda.query.CassandraConfig._
+
 import scala.annotation.tailrec
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Success, Try }
@@ -13,6 +15,8 @@ import org.slf4j.LoggerFactory
 
 trait CassandraRepository[A] {
 
+  implicit def system: ActorSystem
+  implicit def materializer: ActorMaterializer
   implicit val ec: ExecutionContext
   implicit val scheduler: Scheduler
 
