@@ -12,8 +12,10 @@ import scala.concurrent.Future
 
 trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegisterQuery] with ProjectionRuntime {
 
+  val larTable = "lars2017"
+
   def preparedStatement(implicit session: Session): PreparedStatement = {
-    session.prepare(s"INSERT INTO $keyspace.lars2017" +
+    session.prepare(s"INSERT INTO $keyspace.$larTable" +
       "(id," +
       "respondent_id," +
       "agency_code," +
@@ -103,7 +105,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   override def createTable(): ResultSet = {
     val query =
       s"""
-         |CREATE TABLE IF NOT EXISTS $keyspace.lars2017(
+         |CREATE TABLE IF NOT EXISTS $keyspace.$larTable(
          |      id varchar PRIMARY KEY,
          |      respondent_id varchar,
          |      agency_code int,
@@ -152,7 +154,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   override def dropTable(): ResultSet = {
     val query =
       s"""
-         |DROP TABLE IF EXISTS $keyspace.lars2017;
+         |DROP TABLE IF EXISTS $keyspace.$larTable;
        """.stripMargin
 
     session.execute(query)
@@ -164,7 +166,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   }
 
   override def readData(fetchSize: Int): Future[Seq[Row]] = {
-    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.lars2017").setFetchSize(fetchSize)
+    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.$larTable").setFetchSize(fetchSize)
     CassandraSource(statement).runWith(Sink.seq).mapTo[Seq[Row]]
   }
 
