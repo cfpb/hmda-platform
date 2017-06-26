@@ -39,7 +39,7 @@ class SubmissionIrsPathsSpec
         val csv = responseAs[String]
         csv must include("MSA/MD, MSA/MD Name, Total LARs, Total Amt. (in thousands), CONV, FHA, VA, FSA/RHS, 1-4 Family, MFD, Multi-Family, Home Purchase, Home Improvement, Refinance")
         csv must include("Totals")
-        csv must include("13980, Blacksburg-Christiansburg-Radford, VA")
+        csv must include("13980,\"Blacksburg-Christiansburg-Radford, VA\"")
       }
     }
   }
