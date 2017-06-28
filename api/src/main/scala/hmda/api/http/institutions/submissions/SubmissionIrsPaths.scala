@@ -8,8 +8,8 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.pattern.ask
 import hmda.api.http.HmdaCustomDirectives
-import hmda.apiModel.model.{ Irs, IrsResponse }
-import hmda.apiModel.protocol.processing.MsaProtocol
+import hmda.api.model.{ Irs, IrsResponse }
+import hmda.api.protocol.processing.MsaProtocol
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.query.repository.filing.FilingComponent

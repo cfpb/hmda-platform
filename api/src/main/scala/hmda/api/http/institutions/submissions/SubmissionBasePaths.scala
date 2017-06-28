@@ -10,8 +10,8 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
-import hmda.apiModel.model._
-import hmda.apiModel.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
+import hmda.api.model._
+import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Submission, SubmissionId }
 import hmda.model.validation.Macro
 import hmda.persistence.messages.CommonMessages.GetState

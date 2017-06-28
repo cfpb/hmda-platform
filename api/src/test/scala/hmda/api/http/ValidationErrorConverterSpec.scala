@@ -1,6 +1,6 @@
 package hmda.api.http
 
-import hmda.apiModel.model._
+import hmda.api.model._
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.util.FITestData._

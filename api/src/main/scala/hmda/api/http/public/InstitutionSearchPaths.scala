@@ -9,9 +9,9 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
-import hmda.apiModel.model.ErrorResponse
-import hmda.apiModel.model.public.{ InstitutionSearch, InstitutionSearchResults }
-import hmda.apiModel.protocol.public.InstitutionSearchProtocol
+import hmda.api.model.ErrorResponse
+import hmda.api.model.public.{ InstitutionSearch, InstitutionSearchResults }
+import hmda.api.protocol.public.InstitutionSearchProtocol
 import hmda.model.institution.Institution
 import hmda.query.view.institutions.InstitutionView.FindInstitutionByPeriodAndDomain
 

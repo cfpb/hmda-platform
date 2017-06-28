@@ -3,7 +3,7 @@ package hmda.api.http.institutions.submissions
 import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.apiModel.model.IrsResponse
+import hmda.api.model.IrsResponse
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.persistence.model.MsaGenerators

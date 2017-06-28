@@ -5,8 +5,8 @@ import akka.http.scaladsl.server.Directives._
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
-import hmda.apiModel.model.ErrorResponse
-import hmda.apiModel.protocol.processing.ApiErrorProtocol
+import hmda.api.model.ErrorResponse
+import hmda.api.protocol.processing.ApiErrorProtocol
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
 trait HmdaCustomDirectives extends ApiErrorProtocol {

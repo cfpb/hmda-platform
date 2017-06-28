@@ -5,7 +5,7 @@ import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.apiModel.model._
+import hmda.api.model._
 import hmda.model.institution.Institution
 import hmda.persistence.demo.DemoData
 
