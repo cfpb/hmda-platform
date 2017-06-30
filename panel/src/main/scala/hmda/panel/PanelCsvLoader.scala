@@ -11,7 +11,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ HttpEntity, _ }
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import com.typesafe.config.ConfigFactory
-import hmda.apiModel.protocol.admin.WriteInstitutionProtocol
+import hmda.api.protocol.admin.WriteInstitutionProtocol
 
 import scala.concurrent.duration._
 import hmda.parser.fi.InstitutionParser

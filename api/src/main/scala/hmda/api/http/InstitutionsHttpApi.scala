@@ -7,7 +7,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.institutions.submissions._
 import hmda.api.http.institutions.{ FilingPaths, InstitutionPaths, UploadPaths }
-import hmda.apiModel.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
+import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 
 import scala.concurrent.ExecutionContext
 

@@ -17,7 +17,7 @@ import akka.util.{ ByteString, Timeout }
 import hmda.api.EC
 import hmda.api.http.HmdaCustomDirectives
 import hmda.persistence.messages.CommonMessages._
-import hmda.apiModel.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
+import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.model.fi.{ Created, Failed, Submission, SubmissionId, Uploaded }
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence

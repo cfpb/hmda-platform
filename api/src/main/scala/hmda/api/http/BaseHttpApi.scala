@@ -7,9 +7,9 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import hmda.apiModel.model.Status
+import hmda.api.model.Status
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import hmda.apiModel.protocol.HmdaApiProtocol
+import hmda.api.protocol.HmdaApiProtocol
 import spray.json._
 
 trait BaseHttpApi extends HmdaApiProtocol with HmdaCustomDirectives {

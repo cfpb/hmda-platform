@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
-import hmda.apiModel.model.ErrorResponse
+import hmda.api.model.ErrorResponse
 import hmda.model.fi.{ Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }

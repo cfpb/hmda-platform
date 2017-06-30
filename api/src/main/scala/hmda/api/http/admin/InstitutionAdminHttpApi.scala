@@ -10,8 +10,8 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
-import hmda.apiModel.protocol.admin.WriteInstitutionProtocol
-import hmda.apiModel.protocol.processing.ApiErrorProtocol
+import hmda.api.protocol.admin.WriteInstitutionProtocol
+import hmda.api.protocol.processing.ApiErrorProtocol
 import hmda.model.fi.Filing
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings

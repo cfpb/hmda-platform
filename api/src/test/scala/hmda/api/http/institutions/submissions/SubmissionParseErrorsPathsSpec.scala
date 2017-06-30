@@ -5,7 +5,7 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import akka.http.scaladsl.model.StatusCodes
 import hmda.api.http.InstitutionHttpApiSpec
-import hmda.apiModel.model.{ ErrorResponse, ParsingErrorSummary }
+import hmda.api.model.{ ErrorResponse, ParsingErrorSummary }
 import hmda.model.fi._
 import hmda.model.parser.LarParsingError
 import hmda.persistence.messages.CommonMessages.GetState

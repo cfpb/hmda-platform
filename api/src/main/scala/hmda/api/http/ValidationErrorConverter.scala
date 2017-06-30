@@ -1,6 +1,6 @@
 package hmda.api.http
 
-import hmda.apiModel.model._
+import hmda.api.model._
 import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
 import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
