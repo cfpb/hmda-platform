@@ -222,3 +222,20 @@ lazy val apiModel = (project in file("api-model"))
     libraryDependencies ++= commonDeps ++ httpDeps
   ).dependsOn(modelJVM % "compile->compile;test->test")
   .dependsOn(persistence % "compile->compile")
+
+lazy val publication = (project in file("publication"))
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      assemblyMergeStrategy in assembly := {
+        case "application.conf" => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      parallelExecution in Test := true,
+      libraryDependencies ++= akkaPersistenceDeps ++ Seq(akkaHttpJson)
+    )
+  ).dependsOn(modelJVM % "compile->compile;test->test")
+   .dependsOn(persistenceModel % "compile->compile;test->test")
