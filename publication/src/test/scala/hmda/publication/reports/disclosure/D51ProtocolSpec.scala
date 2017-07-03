@@ -1,10 +1,10 @@
 package hmda.publication.reports.disclosure
 
-import hmda.publication.reports.disclosure.D51
+import hmda.publication.reports.protocol.disclosure.D51Protocol
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
-import hmda.publication.reports.disclosure.DisclosureReportGenerators._
 import spray.json._
+import DisclosureReportGenerators._
 
 class D51ProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with D51Protocol {
 
