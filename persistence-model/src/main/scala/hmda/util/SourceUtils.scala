@@ -1,9 +1,10 @@
-package hmda.validation.rules
+package hmda.util
 
 import akka.NotUsed
 import akka.stream.scaladsl._
+import hmda._
+
 import scala.concurrent.Future
-import hmda.validation._
 
 trait SourceUtils {
 

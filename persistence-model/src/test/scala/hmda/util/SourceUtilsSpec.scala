@@ -1,11 +1,9 @@
-package hmda.validation.rules
+package hmda.util
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.Source
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
-import scala.concurrent.Await
-import scala.concurrent.duration._
 
 class SourceUtilsSpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll with SourceUtils {
 
