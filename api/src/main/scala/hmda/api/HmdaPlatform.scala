@@ -32,7 +32,7 @@ object HmdaPlatform {
 
   def main(args: Array[String]): Unit = {
 
-    val system = ActorSystem("hmda", configuration)
+    val system = ActorSystem(configuration.getString("clustering.name"), configuration)
     val supervisor = createSupervisor(system)
     val querySupervisor = createQuerySupervisor(system)
     implicit val ec = system.dispatcher
