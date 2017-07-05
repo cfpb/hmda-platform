@@ -1,26 +1,33 @@
 package hmda.publication.reports.disclosure
 
+import java.util.Calendar
+
 import akka.NotUsed
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.publication.reports.{ ActionTakenTypeEnum, Disposition, MSAReport }
 import hmda.publication.reports._
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
+import scala.util.Try
+import hmda.publication.reports.util.DateUtil._
+import hmda.publication.reports.disclosure.DispositionGenerator._
 
-object DisclosureReportGenerator extends SourceUtils {
+class DisclosureReportGenerator extends SourceUtils {
 
   def generateReports[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegister, NotUsed]): Future[Unit] = {
-    genD51Report(larSource)
+    val d51 = genD51Report(larSource)
+    Future {
+      ()
+    }
   }
-
-
 
   // Table filters:
   // Loan Type 2,3,4
   // Property Type 1,2
   // Purpose of Loan 1
-  private def genD51Report(larSource: Source[LoanApplicationRegister, NotUsed]): Future[Unit] = {
+  private def genD51Report[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegister, NotUsed]): Future[D51] = {
 
     val filtered = larSource.filter { lar =>
       (lar.loan.loanType == 2 || lar.loan.loanType == 3 || lar.loan.loanType == 4) &&
@@ -29,12 +36,34 @@ object DisclosureReportGenerator extends SourceUtils {
     }
 
     //Income statistics
-    
 
+    //val incomeValuesF = filtered
+    //  .map(lar => lar.applicant.income)
+    //  .filter(i => i != "NA")
+    //  .runWith(Sink.seq)
 
-    Future {
-      ()
+    //incomeValuesF onComplete {
+    //  case xs: Try[Seq[String]] => xs.getOrElse(Seq.empty).map(x => x.toInt)
+    //}
+
+    //val totalApplicationsReceived = filtered.filter(x => x)
+
+    val totalF: Future[List[Disposition]] = calculateDispositions(filtered)
+
+    for {
+      total <- totalF
+    } yield {
+      D51(
+        "",
+        "",
+        0,
+        formatDate(Calendar.getInstance().toInstant),
+        MSAReport("", "", "", ""),
+        Nil,
+        total
+      )
     }
+
   }
 
 

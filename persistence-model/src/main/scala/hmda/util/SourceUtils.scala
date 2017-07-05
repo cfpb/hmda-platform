@@ -2,7 +2,7 @@ package hmda.util
 
 import akka.NotUsed
 import akka.stream.scaladsl._
-import hmda._
+import hmda.{ AS, MAT }
 
 import scala.concurrent.Future
 

@@ -1,10 +1,9 @@
 package hmda.publication.reports.disclosure
 
-import java.time.{ Instant, ZoneId }
-import java.time.format.{ DateTimeFormatter, FormatStyle }
-import java.util.{ Calendar, Locale }
+import java.util.Calendar
 import hmda.publication.reports.ReportGenerators._
 import org.scalacheck.Gen
+import hmda.publication.reports.util.DateUtil._
 
 object DisclosureReportGenerators {
 
@@ -18,14 +17,6 @@ object DisclosureReportGenerators {
       applicantIncomes <- Gen.listOf(applicantIncomeGen)
       total <- totalDispositionGen
     } yield D51(respId, instName, year, reportDate, msa, applicantIncomes, total)
-  }
-
-  private def formatDate(instant: Instant): String = {
-    val formatter = DateTimeFormatter
-      .ofLocalizedDateTime(FormatStyle.SHORT)
-      .withLocale(Locale.US)
-      .withZone(ZoneId.systemDefault)
-    formatter.format(instant)
   }
 
 }
