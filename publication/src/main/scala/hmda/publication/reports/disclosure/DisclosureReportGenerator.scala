@@ -5,12 +5,11 @@ import java.util.Calendar
 import akka.NotUsed
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.publication.reports.{ ActionTakenTypeEnum, Disposition, MSAReport }
+import hmda.model.publication.reports.{  Disposition, MSAReport }
 import hmda.publication.reports._
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
-import scala.util.Try
 import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.disclosure.DispositionGenerator._
 
@@ -48,15 +47,17 @@ class DisclosureReportGenerator extends SourceUtils {
 
     //val totalApplicationsReceived = filtered.filter(x => x)
 
+    val dateF = filtered.take(1).map(lar => lar.actionTakenDate.toString.substring(0, 4).toInt)
     val totalF: Future[List[Disposition]] = calculateDispositions(filtered)
 
     for {
+      date <- dateF
       total <- totalF
     } yield {
       D51(
         "",
         "",
-        0,
+        date,
         formatDate(Calendar.getInstance().toInstant),
         MSAReport("", "", "", ""),
         Nil,
