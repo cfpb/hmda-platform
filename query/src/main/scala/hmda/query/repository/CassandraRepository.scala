@@ -22,7 +22,7 @@ trait CassandraRepository[A] {
 
   val log = LoggerFactory.getLogger("CassandraRepository")
 
-  val keyspace = "hmda_query"
+  val keyspace = cassandraKeyspace
 
   @tailrec
   private def retry[T](n: Int)(fn: => T): Try[T] = {
