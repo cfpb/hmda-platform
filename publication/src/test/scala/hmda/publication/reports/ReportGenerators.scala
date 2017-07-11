@@ -73,14 +73,14 @@ object ReportGenerators {
     } yield EthnicityCharacteristic(ethnicity, dispositions)
   }
 
-  implicit def minorityCharacteristicGen: Gen[MinorityCharacteristic] = {
+  implicit def minorityCharacteristicGen: Gen[MinorityStatusCharacteristic] = {
     for {
       minorityStatus <- minorityStatusEnumGen
       dispositions <- Gen.listOf(dispositionGen)
-    } yield MinorityCharacteristic(minorityStatus, dispositions)
+    } yield MinorityStatusCharacteristic(minorityStatus, dispositions)
   }
 
-  implicit def borrowerCharacteristicGen: Gen[BorrowerCharacteristic] = {
+  implicit def characteristicGen: Gen[Characteristic] = {
     for {
       characteristic <- Gen.oneOf(raceCharacteristicGen, ethnicityCharacteristicGen, minorityCharacteristicGen)
     } yield characteristic
@@ -89,7 +89,7 @@ object ReportGenerators {
   implicit def applicantIncomeGen: Gen[ApplicantIncome] = {
     for {
       applicantIncome <- applicantIncomeEnumGen
-      borrowerCharacteristic <- Gen.listOf(borrowerCharacteristicGen)
+      borrowerCharacteristic <- Gen.listOf(characteristicGen)
     } yield ApplicantIncome(applicantIncome, borrowerCharacteristic)
   }
 

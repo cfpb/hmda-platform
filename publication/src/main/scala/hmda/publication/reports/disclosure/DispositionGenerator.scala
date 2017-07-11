@@ -3,11 +3,10 @@ package hmda.publication.reports.disclosure
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.publication.reports.{ActionTakenTypeEnum, Disposition}
-import hmda.publication.reports.{AS, EC, MAT}
+import hmda.model.publication.reports.{ ActionTakenTypeEnum, Disposition }
+import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.util.SourceUtils
 import scala.util.Try
-
 
 object DispositionGenerator extends SourceUtils {
   def calculateDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]) = {
