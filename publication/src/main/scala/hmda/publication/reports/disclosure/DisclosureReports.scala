@@ -6,7 +6,6 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.ApplicantIncomeEnum._
-import hmda.model.publication.reports.RaceEnum._
 import hmda.model.publication.reports._
 import hmda.publication.reports._
 

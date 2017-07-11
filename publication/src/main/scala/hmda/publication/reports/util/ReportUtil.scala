@@ -7,7 +7,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
 import hmda.model.publication.reports.RaceEnum._
-import hmda.publication.reports.{AS, EC, MAT}
+import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
@@ -208,7 +208,7 @@ object ReportUtil extends SourceUtils {
         (lar.applicant.coRace5 != "" && lar.applicant.coRace5 != "5"))
   }
 
-  def raceBorrowerCharacteristic(larSource: Source[LoanApplicationRegister, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum): Future[List[RaceCharacteristic]] = {
+  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegister, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum): Future[List[RaceCharacteristic]] = {
 
     val larsAlaskan = filterRace(larSource, AmericanIndianOrAlaskaNative)
     val larsAsian = filterRace(larSource, Asian)
