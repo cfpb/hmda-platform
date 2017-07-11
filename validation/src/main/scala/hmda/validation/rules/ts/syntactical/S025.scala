@@ -20,7 +20,7 @@ class S025 private (institution: Institution) extends EditCheck[HasControlNumber
 
   def apply(input: HasControlNumber): Result = compare(input.respondentId, input.agencyCode)
 
-  val demoMode = ConfigFactory.load().getBoolean("hmda.isDemo")
+  val demoMode = ConfigFactory.load().getBoolean("hmda.edits.demoMode")
 
   private def compare(filingRespId: String, filingAgencyCode: Int): Result = {
     // in demo mode, always return Success. Otherwise, run the usual check.
