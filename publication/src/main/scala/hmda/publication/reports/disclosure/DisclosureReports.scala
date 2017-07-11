@@ -5,8 +5,9 @@ import java.util.Calendar
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports.RaceEnum._
-import hmda.model.publication.reports.{ Disposition, MSAReport, RaceCharacteristic }
+import hmda.model.publication.reports._
 import hmda.publication.reports._
 
 import scala.concurrent.Future
@@ -46,33 +47,78 @@ class DisclosureReports {
       .filter(lar => lar.applicant.income != "NA")
       .filter(lar => lar.applicant.income.toInt < incomeIntervals(0))
 
-    val lars50Alaskan = filterRace(lars50, AmericanIndianOrAlaskaNative)
-    val lars50Asian = filterRace(lars50, Asian)
-    val lars50Black = filterRace(lars50, BlackOrAfricanAmerican)
-    val lars50Hawaiian = filterRace(lars50, HawaiianOrPacific)
-    val lars50White = filterRace(lars50, White)
-    val larsTwoMinorities = filterRace(lars50, TwoOrMoreMinority)
-    val lars50Joint = filterRace(lars50, Joint)
-    val lars50NotProvided = filterRace(lars50, NotProvided)
+    val lars50To79 = lars
+      .filter(lar => lar.applicant.income != "NA")
+      .filter(lar => lar.applicant.income.toInt > incomeIntervals(0) && lar.applicant.income.toInt < incomeIntervals(1))
 
-    val disp50AlaskanF = calculateDispositions(lars50Alaskan)
+    val lars80To99 = lars
+      .filter(lar => lar.applicant.income != "NA")
+      .filter(lar => lar.applicant.income.toInt > incomeIntervals(1) && lar.applicant.income.toInt < incomeIntervals(2))
+
+    val lars100to120 = lars
+      .filter(lar => lar.applicant.income != "NA")
+      .filter(lar => lar.applicant.income.toInt > incomeIntervals(2) && lar.applicant.income.toInt < incomeIntervals(3))
+
+    val lars120 = lars
+      .filter(lar => lar.applicant.income != "NA")
+      .filter(lar => lar.applicant.income.toInt > incomeIntervals(4))
 
     val dateF = calculateDate(larSource)
     val totalF = calculateDispositions(lars)
 
     for {
-      disp50laskan <- disp50AlaskanF
+      races50 <- raceBorrowerCharacteristic(lars50, LessThan50PercentOfMSAMedian)
+      races50to79 <- raceBorrowerCharacteristic(lars50To79, Between50And79PercentOfMSAMedian)
+      races80to99 <- raceBorrowerCharacteristic(lars80To99, Between80And99PercentOfMSAMedian)
+      races100to120 <- raceBorrowerCharacteristic(lars100to120, Between100And119PercentOfMSAMedian)
+      races120 <- raceBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian)
       date <- dateF
       total <- totalF
     } yield {
-      val alaskan50Characteristic = RaceCharacteristic(AmericanIndianOrAlaskaNative, disp50laskan)
+      val income50 = ApplicantIncome(
+        LessThan50PercentOfMSAMedian,
+        List(
+          RaceBorrowerCharacteristic(races50)
+        )
+      )
+      val income50To79 = ApplicantIncome(
+        Between50And79PercentOfMSAMedian,
+        List(
+          RaceBorrowerCharacteristic(races50to79)
+        )
+      )
+      val income80To99 = ApplicantIncome(
+        Between80And99PercentOfMSAMedian,
+        List(
+          RaceBorrowerCharacteristic(races80to99)
+        )
+      )
+      val income100To120 = ApplicantIncome(
+        Between100And119PercentOfMSAMedian,
+        List(
+          RaceBorrowerCharacteristic(races100to120)
+        )
+      )
+      val income120 = ApplicantIncome(
+        GreaterThan120PercentOfMSAMedian,
+        List(
+          RaceBorrowerCharacteristic(races120)
+        )
+      )
+
       D51(
         respId,
         "",
         date,
         formatDate(Calendar.getInstance().toInstant),
         msa,
-        Nil,
+        List(
+          income50,
+          income50To79,
+          income80To99,
+          income100To120,
+          income120
+        ),
         total
       )
     }
