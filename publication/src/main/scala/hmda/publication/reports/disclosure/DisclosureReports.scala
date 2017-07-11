@@ -13,7 +13,7 @@ import scala.concurrent.Future
 import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.ReportUtil._
 
-class DisclosureReportGenerator {
+class DisclosureReports {
 
   def generateReports[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegister, NotUsed], fipsCode: Int, respId: String): Future[Unit] = {
     val d51 = genD51Report(larSource, fipsCode, respId)
