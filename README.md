@@ -104,7 +104,7 @@ $ sbt
 project panel
 run <full local path to sample file>
 ```
-A sample file is located in the following folder: `hmda-platform/persistence/src/main/resources/demoInstitutions.csv`
+A sample file is located in the following folder: `panel/src/main/resources/inst_data_2017_dummy.csv`
 
 
 * In order to support the read side, a local PostgreSQL and Cassandra server are needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
