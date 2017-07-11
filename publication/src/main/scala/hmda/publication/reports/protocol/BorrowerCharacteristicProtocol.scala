@@ -1,9 +1,9 @@
 package hmda.publication.reports.protocol
 
-import hmda.model.publication.reports.{ BorrowerCharacteristic, EthnicityBorrowerCharacteristic, MinorityStatusBorrowerCharacteristic, RaceBorrowerCharacteristic }
+import hmda.model.publication.reports._
 import spray.json._
 
-class BorrowerCharacteristicProtocol extends CharacteristicProtocol {
+trait BorrowerCharacteristicProtocol extends CharacteristicProtocol {
 
   implicit object BorrowerCharacteristicFormat extends RootJsonFormat[BorrowerCharacteristic] {
     override def write(obj: BorrowerCharacteristic): JsValue = obj match {
@@ -23,12 +23,27 @@ class BorrowerCharacteristicProtocol extends CharacteristicProtocol {
       case MinorityStatusBorrowerCharacteristic(minoritystatus) =>
         JsObject(
           "characteristic" -> JsString("Minority Status"),
-          "ethnicities" -> minoritystatus.toJson
+          "minoritystatus" -> minoritystatus.toJson
         )
 
     }
 
-    override def read(json: JsValue): BorrowerCharacteristic = ???
+    override def read(json: JsValue): BorrowerCharacteristic = json match {
+      case JsObject(fields) if fields.isDefinedAt("races") =>
+        RaceBorrowerCharacteristic(
+          fields("races").convertTo[List[RaceCharacteristic]]
+        )
+
+      case JsObject(fields) if fields.isDefinedAt("ethnicities") =>
+        EthnicityBorrowerCharacteristic(
+          fields("ethnicities").convertTo[List[EthnicityCharacteristic]]
+        )
+
+      case JsObject(fields) if fields.isDefinedAt("minoritystatus") =>
+        MinorityStatusBorrowerCharacteristic(
+          fields("minoritystatus").convertTo[List[MinorityStatusCharacteristic]]
+        )
+    }
 
   }
 }
