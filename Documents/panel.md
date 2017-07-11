@@ -8,7 +8,7 @@ There are two environment variables used by the panel loader.  Both must be set 
 
 For testing locally, no changes need to be made.  The defaults for both of these variables will point to the correct local admin API.
 
-For loading panel data into the cluster, navigate to a running `hmda-platform` service in DC/OS.  Under the "Endpoints" section you'll find the IP address and three ports.  As of now, the middle port will always be the admin API.  In your terminal, set both of the environment variables to the DC/OS values.
+For loading panel data into a remote system, you'll need to set the following environment variables:
 ```shell
 > export HMDA_HTTP_ADMIN_HOST={ip address}
 > export HMDA_HTTP_ADMIN_PORT={port #}
@@ -36,10 +36,11 @@ Then the panel loader can be run with `java -jar  panel/target/scala-2.12/panel.
 
 ## Error codes
 There are four ways the panel loader can fail.  The exit code and error message should tell you what happened.
-1) There were no command line arguments passed to the loader
-2) The path passed to the loader didn't point to a file
-3) The call to `institutions/create` didn't return the correct response.  This can indicate that you don't have the correct environment variables set, or that something is wrong with the hmda-platform.
-4) The loader didn't finish processing all the institutions.  This will happen when running the real panel file, but unsure as to why this happens.
+
+1. There were no command line arguments passed to the loader
+2. The path passed to the loader didn't point to a file
+3. The call to `institutions/create` didn't return the correct response.  This can indicate that you don't have the correct environment variables set, or that something is wrong with the hmda-platform.
+4. The loader didn't finish processing all the institutions.  This will happen when running the real panel file, but unsure as to why this happens.
 
 ## Testing
 Make sure your authorization header is updated with a few real `id_rssd` fields from the given file.  This can be found in the API log output (first field argument in the `InstitutionQuery` object), or in the CSV file (seventh field).
