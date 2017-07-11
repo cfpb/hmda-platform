@@ -1,12 +1,12 @@
 package hmda.publication.reports.disclosure
 
-import hmda.publication.reports.protocol.disclosure.D51Protocol
+import hmda.publication.reports.protocol.disclosure.D51Protocol._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 import spray.json._
 import DisclosureReportGenerators._
 
-class D51ProtocolSpec extends PropSpec with PropertyChecks with MustMatchers with D51Protocol {
+class D51ProtocolSpec extends PropSpec with PropertyChecks with MustMatchers {
 
   property("D51 Report must convert to and from JSON") {
     forAll(d51Gen) { d51 =>

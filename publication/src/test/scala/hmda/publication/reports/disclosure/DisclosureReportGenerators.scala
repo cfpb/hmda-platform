@@ -14,7 +14,7 @@ object DisclosureReportGenerators {
       year = Calendar.getInstance().get(Calendar.YEAR)
       reportDate = formatDate(Calendar.getInstance().toInstant)
       msa <- msaReportGen
-      applicantIncomes <- Gen.listOf(applicantIncomeGen)
+      applicantIncomes <- Gen.listOfN(5, applicantIncomeGen)
       total <- totalDispositionGen
     } yield D51(respId, instName, year, reportDate, msa, applicantIncomes, total)
   }

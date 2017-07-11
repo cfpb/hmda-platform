@@ -7,7 +7,7 @@ import hmda.publication.reports.disclosure.D51
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
 import spray.json._
 
-trait D51Protocol
+object D51Protocol
     extends DefaultJsonProtocol
     with ReportTypeEnumProtocol
     with MSAReportProtocol

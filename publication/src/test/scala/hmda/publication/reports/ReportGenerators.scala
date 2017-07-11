@@ -1,6 +1,7 @@
 package hmda.publication.reports
 
 import hmda.model.census.Census
+import hmda.model.publication.reports.MinorityStatusEnum.WhiteNonHispanic
 import hmda.model.publication.reports._
 import org.scalacheck.Gen
 
@@ -62,39 +63,39 @@ object ReportGenerators {
   implicit def raceCharacteristicGen: Gen[RaceCharacteristic] = {
     for {
       race <- raceEnumGen
-      dispositions <- Gen.listOf(dispositionGen)
+      dispositions <- Gen.listOfN(6, dispositionGen)
     } yield RaceCharacteristic(race, dispositions)
   }
 
   implicit def ethnicityCharacteristicGen: Gen[EthnicityCharacteristic] = {
     for {
       ethnicity <- ethnicityEnumGen
-      dispositions <- Gen.listOf(dispositionGen)
+      dispositions <- Gen.listOfN(6, dispositionGen)
     } yield EthnicityCharacteristic(ethnicity, dispositions)
   }
 
   implicit def minorityCharacteristicGen: Gen[MinorityStatusCharacteristic] = {
     for {
       minorityStatus <- minorityStatusEnumGen
-      dispositions <- Gen.listOf(dispositionGen)
+      dispositions <- Gen.listOfN(6, dispositionGen)
     } yield MinorityStatusCharacteristic(minorityStatus, dispositions)
   }
 
   implicit def raceBorrowerCharacteristicGen: Gen[RaceBorrowerCharacteristic] = {
     for {
-      raceList <- Gen.listOf(raceCharacteristicGen)
+      raceList <- Gen.listOfN(8, raceCharacteristicGen)
     } yield RaceBorrowerCharacteristic(raceList)
   }
 
   implicit def ethnicityBorrowerCharacteristic: Gen[EthnicityBorrowerCharacteristic] = {
     for {
-      ethnicityList <- Gen.listOf(ethnicityCharacteristicGen)
+      ethnicityList <- Gen.listOfN(4, ethnicityCharacteristicGen)
     } yield EthnicityBorrowerCharacteristic(ethnicityList)
   }
 
   implicit def minorityStatusBorrowerCharacteristic: Gen[MinorityStatusBorrowerCharacteristic] = {
     for {
-      minorityStatusList <- Gen.listOf(minorityCharacteristicGen)
+      minorityStatusList <- Gen.listOfN(2, minorityCharacteristicGen)
     } yield MinorityStatusBorrowerCharacteristic(minorityStatusList)
   }
 
@@ -113,7 +114,7 @@ object ReportGenerators {
   implicit def applicantIncomeGen: Gen[ApplicantIncome] = {
     for {
       applicantIncome <- applicantIncomeEnumGen
-      borrowerCharacteristic <- Gen.listOf(characteristicGen)
+      borrowerCharacteristic <- Gen.listOfN(3, borrowerCharacteristicGen)
     } yield ApplicantIncome(applicantIncome, borrowerCharacteristic)
   }
 
