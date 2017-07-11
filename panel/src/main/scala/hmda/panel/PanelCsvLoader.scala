@@ -2,11 +2,11 @@ package hmda.panel
 
 import java.io.File
 
-import akka.{ Done, NotUsed }
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.util.{ ByteString, Timeout }
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ FileIO, Flow, Framing, Sink, Source }
+import akka.stream.scaladsl.{ FileIO, Flow, Framing, Sink }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ HttpEntity, _ }
 import akka.http.scaladsl.unmarshalling.Unmarshal
@@ -17,8 +17,6 @@ import scala.concurrent.duration._
 import hmda.parser.fi.InstitutionParser
 import org.slf4j.LoggerFactory
 import spray.json._
-
-import scala.util.Try
 
 object PanelCsvLoader extends WriteInstitutionProtocol {
   implicit val system: ActorSystem = ActorSystem("hmda")
@@ -96,6 +94,7 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
 
   private def exitSys(errorMessage: String, code: Int) = {
     log.error(errorMessage)
+    Thread.sleep(100)
     sys.exit(code)
   }
 }
