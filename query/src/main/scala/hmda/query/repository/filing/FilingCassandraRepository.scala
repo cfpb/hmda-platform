@@ -2,7 +2,7 @@ package hmda.query.repository.filing
 
 import akka.{ Done, NotUsed }
 import akka.stream.alpakka.cassandra.scaladsl.{ CassandraSink, CassandraSource }
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{ Flow, Sink, Source }
 import com.datastax.driver.core._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.projections.ProjectionRuntime
@@ -12,10 +12,10 @@ import scala.concurrent.Future
 
 trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegisterQuery] with ProjectionRuntime {
 
-  val larTable = "lars2017"
+  override val table = "lars2017"
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
-    session.prepare(s"INSERT INTO $keyspace.$larTable" +
+    session.prepare(s"INSERT INTO $keyspace.$table" +
       "(id," +
       "respondent_id," +
       "agency_code," +
@@ -105,7 +105,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   override def createTable(): ResultSet = {
     val query =
       s"""
-         |CREATE TABLE IF NOT EXISTS $keyspace.$larTable(
+         |CREATE TABLE IF NOT EXISTS $keyspace.$table(
          |      id varchar PRIMARY KEY,
          |      respondent_id varchar,
          |      agency_code int,
@@ -154,7 +154,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
   override def dropTable(): ResultSet = {
     val query =
       s"""
-         |DROP TABLE IF EXISTS $keyspace.$larTable;
+         |DROP TABLE IF EXISTS $keyspace.$table;
        """.stripMargin
 
     session.execute(query)
@@ -165,9 +165,92 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
     source.runWith(sink)
   }
 
-  override def readData(fetchSize: Int): Future[Seq[Row]] = {
-    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.$larTable").setFetchSize(fetchSize)
-    CassandraSource(statement).runWith(Sink.seq).mapTo[Seq[Row]]
+  override protected def parseRows: Flow[Row, LoanApplicationRegisterQuery, NotUsed] = {
+    Flow[Row].map { row =>
+      val id = row.getString("id")
+      val respId = row.getString("respondent_id")
+      val agencyCode = row.getInt("agency_code")
+      val loanId = row.getString("loan_id")
+      val applicatioDate = row.getString("application_date")
+      val loanType = row.getInt("loan_type")
+      val propertyType = row.getInt("property_type")
+      val purpose = row.getInt("purpose")
+      val occupancy = row.getInt("occupancy")
+      val amount = row.getInt("amount")
+      val preapprovals = row.getInt("preapprovals")
+      val actionTakenType = row.getInt("action_taken_type")
+      val actionTakenDate = row.getInt("action_taken_date")
+      val msa = row.getString("msa")
+      val state = row.getString("state")
+      val county = row.getString("county")
+      val tract = row.getString("tract")
+      val ethnicity = row.getInt("ethnicity")
+      val coEthnicity = row.getInt("co_ethnicity")
+      val race1 = row.getInt("race1")
+      val race2 = row.getString("race2")
+      val race3 = row.getString("race3")
+      val race4 = row.getString("race4")
+      val race5 = row.getString("race5")
+      val coRace1 = row.getInt("coRace1")
+      val coRace2 = row.getString("coRace2")
+      val coRace3 = row.getString("coRace3")
+      val coRace4 = row.getString("coRace4")
+      val coRace5 = row.getString("coRace5")
+      val sex = row.getInt("sex")
+      val coSex = row.getInt("co_sex")
+      val income = row.getString("income")
+      val purchaserType = row.getInt("purchaser_type")
+      val denial1 = row.getString("denial1")
+      val denial2 = row.getString("denial2")
+      val denial3 = row.getString("denial3")
+      val rateSpread = row.getString("rate_spread")
+      val hoepaStatus = row.getInt("hoepa_status")
+      val lienStatus = row.getInt("lien_status")
+
+      LoanApplicationRegisterQuery(
+        id,
+        respId,
+        agencyCode,
+        preapprovals,
+        actionTakenType,
+        actionTakenDate,
+        purchaserType,
+        rateSpread,
+        hoepaStatus,
+        lienStatus,
+        loanId,
+        applicatioDate,
+        loanType,
+        propertyType,
+        purpose,
+        occupancy,
+        amount,
+        msa,
+        state,
+        county,
+        tract,
+        ethnicity,
+        coEthnicity,
+        race1,
+        race2,
+        race3,
+        race4,
+        race5,
+        coRace1,
+        coRace2,
+        coRace3,
+        coRace4,
+        coRace5,
+        sex,
+        coSex,
+        income,
+        denial1,
+        denial2,
+        denial3,
+        "",
+        "2017"
+      )
+    }
   }
 
 }

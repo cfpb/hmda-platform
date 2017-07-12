@@ -237,5 +237,4 @@ lazy val publication = (project in file("publication"))
       parallelExecution in Test := true,
       libraryDependencies ++= akkaPersistenceDeps ++ Seq(akkaHttpJson)
     )
-  ).dependsOn(modelJVM % "compile->compile;test->test")
-   .dependsOn(persistenceModel % "compile->compile;test->test")
+  ).dependsOn(query % "compile->compile;test->test")

@@ -1,6 +1,6 @@
 package hmda.query.repository.filing
 
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.lar.LarGenerators
 import hmda.model.institution.Agency
 import hmda.query.model.filing.LoanApplicationRegisterQuery
@@ -23,10 +23,10 @@ class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicat
         .fromIterator(() => lars.toIterator)
         .map(lar => toLoanApplicationRegisterQuery(lar))
       insertData(source)
-      val read = readData(100)
-      read.map { r =>
-        r.map(x => x.getInt("agency") mustBe Agency.CFPB.value)
-        r.seq.size mustBe 100
+      val readF = readData(100).runWith(Sink.seq)
+      readF.map { lars =>
+        lars.map(lar => lar.agencyCode mustBe Agency.CFPB.value)
+        lars.size mustBe 100
       }
     }
   }

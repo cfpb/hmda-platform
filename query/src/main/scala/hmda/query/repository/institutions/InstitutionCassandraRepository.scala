@@ -3,7 +3,7 @@ package hmda.query.repository.institutions
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.{ Done, NotUsed }
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.{ Flow, Source }
 import com.datastax.driver.core._
 import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.projections.ProjectionRuntime
@@ -13,8 +13,10 @@ import scala.concurrent.Future
 
 trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuery] with ProjectionRuntime {
 
+  override val table = "institutions"
+
   def preparedStatement(implicit session: Session): PreparedStatement = {
-    session.prepare(s"INSERT INTO $keyspace.institutions" +
+    session.prepare(s"INSERT INTO $keyspace.$table" +
       "(id," +
       "agency," +
       "period," +
@@ -80,7 +82,7 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
   override def createTable(): ResultSet = {
     val query =
       s"""
-         |CREATE TABLE IF NOT EXISTS $keyspace.institutions(
+         |CREATE TABLE IF NOT EXISTS $keyspace.$table(
          |    id varchar PRIMARY KEY,
          |    agency int,
          |    period int,
@@ -117,7 +119,7 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
 
   override def dropTable(): ResultSet = {
     val query = s"""
-      |DROP TABLE IF EXISTS $keyspace.institutions;
+      |DROP TABLE IF EXISTS $keyspace.$table;
     """.stripMargin
 
     session.execute(query)
@@ -128,9 +130,67 @@ trait InstitutionCassandraRepository extends CassandraRepository[InstitutionQuer
     source.runWith(sink)
   }
 
-  override def readData(fetchSize: Int): Future[Seq[Row]] = {
-    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.institutions").setFetchSize(fetchSize)
-    CassandraSource(statement).runWith(Sink.seq).mapTo[Seq[Row]]
+  override protected def parseRows: Flow[Row, InstitutionQuery, NotUsed] = {
+    Flow[Row].map { row =>
+      val id = row.getString("id")
+      val agency = row.getInt("agency")
+      val period = row.getInt("period")
+      val activityYear = row.getInt("activity_year")
+      val respondentId = row.getString("respondent_id")
+      val institutionType = row.getString("type")
+      val cra = row.getBool("cra")
+      val email1 = row.getString("email_1")
+      val email2 = row.getString("email_2")
+      val email3 = row.getString("email_3")
+      val respondentName = row.getString("respondent_name")
+      val respondentState = row.getString("respondent_state")
+      val respondentCity = row.getString("respondent_city")
+      val respontentFips = row.getString("respondent_fips")
+      val hmdaFiler = row.getBool("hmda_filer")
+      val parentRespondentId = row.getString("parent_respondent_id")
+      val parentIdRssd = row.getInt("parent_id_rssd")
+      val parentName = row.getString("parent_name")
+      val parentCity = row.getString("parent_city")
+      val parentState = row.getString("parent_state")
+      val assets = row.getInt("assets")
+      val otherLenderCodes = row.getInt("other_lender_codes")
+      val topHolderIdRssd = row.getInt("top_holder_id_rssd")
+      val topHolderName = row.getString("top_holder_name")
+      val topHolderCity = row.getString("top_holder_city")
+      val topHolderState = row.getString("top_holder_state")
+      val topHolderCountry = row.getString("top_holder_country")
+
+      InstitutionQuery(
+        id,
+        agency,
+        period,
+        activityYear,
+        respondentId,
+        institutionType,
+        cra,
+        email1,
+        email2,
+        email3,
+        respondentName,
+        respondentState,
+        respondentCity,
+        respontentFips,
+        hmdaFiler,
+        parentRespondentId,
+        parentIdRssd,
+        parentName,
+        parentCity,
+        parentState,
+        assets,
+        otherLenderCodes,
+        topHolderIdRssd,
+        topHolderName,
+        topHolderCity,
+        topHolderState,
+        topHolderCountry
+      )
+
+    }
   }
 
 }

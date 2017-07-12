@@ -1,6 +1,6 @@
 package hmda.query.repository.institutions
 
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.institution.{ Agency, InstitutionGenerators }
 import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.CassandraRepositorySpec
@@ -25,10 +25,10 @@ class InstitutionCassandraRepositorySpec extends CassandraRepositorySpec[Institu
 
       val source = Source.fromIterator(() => institutions.toIterator)
       insertData(source)
-      val read = readData(20)
-      read.map { r =>
-        r.map(x => x.getInt("agency") mustBe Agency.CFPB.value)
-        r.seq.size mustBe 3
+      val readF = readData(20).runWith(Sink.seq)
+      readF.map { institutions =>
+        institutions.map(i => i.agency mustBe Agency.CFPB.value)
+        institutions.size mustBe 3
       }
     }
   }
