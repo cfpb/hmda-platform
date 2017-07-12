@@ -3,11 +3,10 @@ package hmda.publication.reports.util
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model._
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports.{ AS, EC, MAT }
+import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
@@ -32,12 +31,12 @@ object ReportUtil extends SourceUtils {
     Array(i50, i80, i100, i120)
   }
 
-  def calculateDate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[Int] = {
+  def calculateDate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[Int] = {
     collectHeadValue(larSource).map(lar => lar.actionTakenDate.toString.substring(0, 4).toInt)
   }
 
-  def calculateDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[List[Disposition]] = {
-    def incomeSum(lar: LoanApplicationRegister): Int = Try(lar.applicant.income.toInt).getOrElse(0)
+  def calculateDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[List[Disposition]] = {
+    def incomeSum(lar: LoanApplicationRegisterQuery): Int = Try(lar.income.toInt).getOrElse(0)
 
     val loansOriginated = larSource.filter(lar => lar.actionTakenType == 1)
     val loansOriginatedCountF = count(loansOriginated)
@@ -116,34 +115,34 @@ object ReportUtil extends SourceUtils {
     }
   }
 
-  def filterRace(larSource: Source[LoanApplicationRegister, NotUsed], race: RaceEnum): Source[LoanApplicationRegister, NotUsed] = {
+  def filterRace(larSource: Source[LoanApplicationRegisterQuery, NotUsed], race: RaceEnum): Source[LoanApplicationRegisterQuery, NotUsed] = {
     race match {
       case AmericanIndianOrAlaskaNative =>
         larSource.filter { lar =>
-          (lar.applicant.race1 == 1 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
-            (lar.applicant.race1 == 1 && lar.applicant.race2 == "5" && coApplicantNonWhite(lar))
+          (lar.race1 == 1 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
+            (lar.race1 == 1 && lar.race2 == "5" && coApplicantNonWhite(lar))
         }
 
       case Asian =>
         larSource.filter { lar =>
-          (lar.applicant.race1 == 2 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
-            (lar.applicant.race1 == 2 && lar.applicant.race2 == "5" && coApplicantNonWhite(lar))
+          (lar.race1 == 2 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
+            (lar.race1 == 2 && lar.race2 == "5" && coApplicantNonWhite(lar))
         }
 
       case BlackOrAfricanAmerican =>
         larSource.filter { lar =>
-          (lar.applicant.race1 == 3 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
-            (lar.applicant.race1 == 3 && lar.applicant.race2 == "5" && coApplicantNonWhite(lar))
+          (lar.race1 == 3 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
+            (lar.race1 == 3 && lar.race2 == "5" && coApplicantNonWhite(lar))
         }
 
       case HawaiianOrPacific =>
         larSource.filter { lar =>
-          (lar.applicant.race1 == 4 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
-            (lar.applicant.race1 == 4 && lar.applicant.race2 == "5" && coApplicantNonWhite(lar))
+          (lar.race1 == 4 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
+            (lar.race1 == 4 && lar.race2 == "5" && coApplicantNonWhite(lar))
         }
 
       case White =>
-        larSource.filter(lar => lar.applicant.race1 == 5 && coApplicantNonWhite(lar))
+        larSource.filter(lar => lar.race1 == 5 && coApplicantNonWhite(lar))
 
       case TwoOrMoreMinority =>
         larSource.filter(lar => applicantTwoOrMoreMinorities(lar) && coApplicantNonWhite(lar))
@@ -155,60 +154,60 @@ object ReportUtil extends SourceUtils {
         }
 
       case NotProvided =>
-        larSource.filter(lar => lar.applicant.race1 == 6 || lar.applicant.race1 == 7)
+        larSource.filter(lar => lar.race1 == 6 || lar.race1 == 7)
 
     }
   }
 
-  private def applicantWhite(lar: LoanApplicationRegister): Boolean = {
-    lar.applicant.race1 == 5 &&
-      lar.applicant.race2 == "" &&
-      lar.applicant.race3 == "" &&
-      lar.applicant.race4 == "" &&
-      lar.applicant.race5 == ""
+  private def applicantWhite(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.race1 == 5 &&
+      lar.race2 == "" &&
+      lar.race3 == "" &&
+      lar.race4 == "" &&
+      lar.race5 == ""
   }
 
-  private def applicantNonWhite(lar: LoanApplicationRegister): Boolean = {
-    lar.applicant.race1 != 5 &&
-      lar.applicant.race2 == "" &&
-      lar.applicant.race3 == "" &&
-      lar.applicant.race4 == "" &&
-      lar.applicant.race5 == ""
+  private def applicantNonWhite(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.race1 != 5 &&
+      lar.race2 == "" &&
+      lar.race3 == "" &&
+      lar.race4 == "" &&
+      lar.race5 == ""
   }
 
-  private def coApplicantWhite(lar: LoanApplicationRegister): Boolean = {
-    lar.applicant.coRace1 == 5 &&
-      lar.applicant.coRace2 != "5" &&
-      lar.applicant.coRace3 != "5" &&
-      lar.applicant.coRace4 != "5" &&
-      lar.applicant.coRace5 != "5"
+  private def coApplicantWhite(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.coRace1 == 5 &&
+      lar.coRace2 != "5" &&
+      lar.coRace3 != "5" &&
+      lar.coRace4 != "5" &&
+      lar.coRace5 != "5"
   }
 
-  private def coApplicantNonWhite(lar: LoanApplicationRegister): Boolean = {
-    lar.applicant.coRace1 != 5 &&
-      lar.applicant.coRace2 != "5" &&
-      lar.applicant.coRace3 != "5" &&
-      lar.applicant.coRace4 != "5" &&
-      lar.applicant.coRace5 != "5"
+  private def coApplicantNonWhite(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.coRace1 != 5 &&
+      lar.coRace2 != "5" &&
+      lar.coRace3 != "5" &&
+      lar.coRace4 != "5" &&
+      lar.coRace5 != "5"
   }
 
-  private def applicantTwoOrMoreMinorities(lar: LoanApplicationRegister): Boolean = {
-    lar.applicant.race1 != 5 &&
-      ((lar.applicant.race2 != "" && lar.applicant.race2 != "5") ||
-        (lar.applicant.race3 != "" && lar.applicant.race3 != "5") ||
-        (lar.applicant.race4 != "" && lar.applicant.race4 != "5") ||
-        (lar.applicant.race5 != "" && lar.applicant.race5 != "5"))
+  private def applicantTwoOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.race1 != 5 &&
+      ((lar.race2 != "" && lar.race2 != "5") ||
+        (lar.race3 != "" && lar.race3 != "5") ||
+        (lar.race4 != "" && lar.race4 != "5") ||
+        (lar.race5 != "" && lar.race5 != "5"))
   }
 
-  private def coApplicantTwoOrMoreMinorities(lar: LoanApplicationRegister): Boolean = {
-    lar.applicant.coRace1 != 5 &&
-      ((lar.applicant.coRace2 != "" && lar.applicant.coRace2 != "5") ||
-        (lar.applicant.coRace3 != "" && lar.applicant.coRace3 != "5") ||
-        (lar.applicant.coRace4 != "" && lar.applicant.coRace4 != "5") ||
-        (lar.applicant.coRace5 != "" && lar.applicant.coRace5 != "5"))
+  private def coApplicantTwoOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.coRace1 != 5 &&
+      ((lar.coRace2 != "" && lar.coRace2 != "5") ||
+        (lar.coRace3 != "" && lar.coRace3 != "5") ||
+        (lar.coRace4 != "" && lar.coRace4 != "5") ||
+        (lar.coRace5 != "" && lar.coRace5 != "5"))
   }
 
-  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegister, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum): Future[List[RaceCharacteristic]] = {
+  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum): Future[List[RaceCharacteristic]] = {
 
     val larsAlaskan = filterRace(larSource, AmericanIndianOrAlaskaNative)
     val larsAsian = filterRace(larSource, Asian)
