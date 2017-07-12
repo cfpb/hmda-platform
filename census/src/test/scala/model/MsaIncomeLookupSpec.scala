@@ -9,7 +9,8 @@ class MsaIncomeLookupSpec extends WordSpec with MustMatchers {
     "find income for a particular MSA" in {
       val lookup = MsaIncomeLookup.values
       val msa = lookup.find(m => m.fips == 11540).getOrElse(MsaIncome())
-      msa.income mustBe 69972
+      msa.name mustBe "APPLETON, WI"
+      msa.income mustBe 73709
     }
   }
 }

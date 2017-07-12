@@ -6,7 +6,7 @@ import com.github.tototoshi.csv.CSVParser.parse
 // Median income by MSA.
 object MsaIncomeLookup extends ResourceUtils {
   val values: Seq[MsaIncome] = {
-    val lines = resourceLines("/msa16inc.csv")
+    val lines = resourceLines("/msa17inc.csv")
     lines.tail.map { line =>
       val values = parse(line, '\\', ',', '"').getOrElse(List())
       val fipsCode = values(0).toInt
