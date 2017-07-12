@@ -12,14 +12,17 @@ import hmda.publication.reports._
 import scala.concurrent.Future
 import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.ReportUtil._
+import spray.json._
+import hmda.publication.reports.protocol.disclosure.D51Protocol._
 
-class DisclosureReports {
+class DisclosureReports() {
 
   def generateReports[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegister, NotUsed], fipsCode: Int, respId: String): Future[Unit] = {
-    val d51 = genD51Report(larSource, fipsCode, respId)
-    Future {
-      ()
+    val d51F = genD51Report(larSource, fipsCode, respId)
+    d51F.map { d51 =>
+      println(d51.toJson.prettyPrint)
     }
+
   }
 
   // Table filters:
