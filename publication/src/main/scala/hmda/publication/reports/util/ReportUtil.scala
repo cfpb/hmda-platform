@@ -15,7 +15,7 @@ import scala.util.Try
 object ReportUtil extends SourceUtils {
 
   def msaReport(fipsCode: String): MSAReport = {
-    val cbsa = CbsaLookup.values.find(x => x.key == fipsCode).getOrElse(Cbsa())
+    val cbsa = CbsaLookup.values.find(x => x.cbsa == fipsCode).getOrElse(Cbsa())
     val stateFips = cbsa.key.substring(0, 2)
     val state = StateAbrvLookup.values.find(s => s.state == stateFips).getOrElse(StateAbrv("", "", ""))
     MSAReport(fipsCode, CbsaLookup.nameFor(fipsCode), state.stateAbrv, state.stateName)

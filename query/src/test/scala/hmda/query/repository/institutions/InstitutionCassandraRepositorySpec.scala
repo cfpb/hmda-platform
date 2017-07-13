@@ -1,5 +1,7 @@
 package hmda.query.repository.institutions
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.institution.{ Agency, InstitutionGenerators }
 import hmda.query.model.institutions.InstitutionQuery
@@ -10,6 +12,11 @@ class InstitutionCassandraRepositorySpec extends CassandraRepositorySpec[Institu
 
   override def beforeAll(): Unit = {
     createKeyspace()
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    system.terminate()
   }
 
   "Institutions in Cassandra" must {
@@ -33,4 +40,7 @@ class InstitutionCassandraRepositorySpec extends CassandraRepositorySpec[Institu
     }
   }
 
+  override implicit def system: ActorSystem = ActorSystem()
+
+  override implicit def materializer: ActorMaterializer = ActorMaterializer()
 }

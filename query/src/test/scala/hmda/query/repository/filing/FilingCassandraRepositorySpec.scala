@@ -1,5 +1,7 @@
 package hmda.query.repository.filing
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.lar.LarGenerators
 import hmda.model.institution.Agency
@@ -11,6 +13,11 @@ class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicat
 
   override def beforeAll(): Unit = {
     createKeyspace()
+  }
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    system.terminate()
   }
 
   "LAR in Cassandra" must {
@@ -31,4 +38,7 @@ class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicat
     }
   }
 
+  override implicit def system: ActorSystem = ActorSystem()
+
+  override implicit def materializer: ActorMaterializer = ActorMaterializer()
 }

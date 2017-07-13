@@ -1,6 +1,5 @@
 package hmda.query.repository.institutions
 
-import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.{ Done, NotUsed }
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.stream.scaladsl.{ Flow, Source }

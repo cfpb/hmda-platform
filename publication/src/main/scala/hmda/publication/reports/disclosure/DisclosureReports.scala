@@ -3,8 +3,9 @@ package hmda.publication.reports.disclosure
 import java.util.Calendar
 
 import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
 import hmda.publication.reports._
@@ -14,12 +15,18 @@ import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.ReportUtil._
 import spray.json._
 import hmda.publication.reports.protocol.disclosure.D51Protocol._
-import hmda.query.model.filing.LoanApplicationRegisterQuery
+import hmda.query.repository.filing.FilingCassandraRepository
 
-class DisclosureReports() {
+class DisclosureReports(val sys: ActorSystem, val mat: ActorMaterializer) extends FilingCassandraRepository {
 
-  def generateReports[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], fipsCode: Int, respId: String): Future[Unit] = {
-    val d51F = genD51Report(larSource, fipsCode, respId)
+  override implicit def system: ActorSystem = sys
+
+  override implicit def materializer: ActorMaterializer = mat
+
+  val larSource = readData(1000)
+
+  def generateReports(fipsCode: Int, respId: String): Future[Unit] = {
+    val d51F = genD51Report(fipsCode, respId)
     d51F.map { d51 =>
       println(d51.toJson.prettyPrint)
     }
@@ -30,7 +37,7 @@ class DisclosureReports() {
   // Loan Type 2,3,4
   // Property Type 1,2
   // Purpose of Loan 1
-  private def genD51Report[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], fipsCode: Int, respId: String): Future[D51] = {
+  private def genD51Report(fipsCode: Int, respId: String): Future[D51] = {
 
     val lars = larSource
       .filter(lar => lar.respondentId == respId)
