@@ -1,6 +1,6 @@
-# Assumes UI repo is cloned in parent directory
 version: '2'
 services:
+
   api:
     build: .
     ports:
@@ -21,11 +21,11 @@ services:
       CASSANDRA_CLUSTER_PORT: 9042
       HMDA_IS_DEMO: 'true'
       # lb settings
-      EXCLUDE_PORTS: '8080, 8081'
+      EXCLUDE_PORTS: '8080, 8081' # 8080 proxied through auth_proxy; 8081 (Admin API) doesn't need proxy
       VIRTUAL_HOST: 'https://*:4443/public/*'
-      VIRTUAL_HOST_WEIGHT: 1
+      VIRTUAL_HOST_WEIGHT: 1 # avoids conflicts with auth_proxy
+      # add simple CORS support; proxypass /public/ to Public API
       EXTRA_SETTINGS: 'rspadd Access-Control-Allow-Origin:\ *, reqirep "^([^ :]*)\ /public//?(.*)" "\1\ /\2"'
-
     restart: always
 
   ui:
@@ -45,8 +45,8 @@ services:
       KEYCLOAK_URL: https://192.168.99.100:8443/auth/realms/hmda
       # lb settings 
       VIRTUAL_HOST: 'http://*:80/*, https://*:443/*'
-      EXCLUDE_PORTS: '443'
-      FORCE_SSL: 'true'
+      EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
+      FORCE_SSL: 'true' # redirect 80 to 443
 
   keycloak:
     build: ../hmda-platform-auth/keycloak
@@ -58,6 +58,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_SERVER: keycloak_db
       POSTGRES_PORT: 5432
+      PROXY_HTTPS_PORT: 8443
       SMTP_SERVER: mail_dev
       SMTP_PORT: 25
       INSTITUTION_SEARCH_URI: 'https://192.168.99.100:4443/public/'
@@ -65,7 +66,7 @@ services:
       HOME_PAGE_URI: 'https://192.168.99.100'
       REDIRECT_URIS: '[ "https://192.168.99.100", "https://192.168.99.100/oidc-callback", "https://192.168.99.100/silent_renew.html" ]'
       SUPPORT_EMAIL: 'support@localhost.localdomain'
-      # HA Proxy
+      # lb settings
       VIRTUAL_HOST: 'https://*:8443/*'
       VIRTUAL_HOST_WEIGHT: 0
     volumes:
@@ -111,7 +112,8 @@ services:
     environment:
       # lb settings
       VIRTUAL_HOST: 'https://*:8443/mail/*'
-      EXCLUDE_PORTS: '25'
+      VIRTUAL_HOST_WEIGHT: 1
+      EXCLUDE_PORTS: '25' # don't proxy SMTP port
       EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /mail//?(.*)" "\1\ /\2"'
 
   query_db:
@@ -142,10 +144,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - '80:80'
-      - '443:443'
-      - '8443:8443'
-      - '4443:4443'
+      - '80:80'     # ui http - redirects to https (443)
+      - '443:443'   # ui https
+      - '8443:8443' # auth https - keycloak and maildev
+      - '4443:4443' # api https - auth_proxy and api's public api
     links:
       - api
       - auth_proxy
@@ -153,7 +155,7 @@ services:
       - mail_dev
       - ui
     environment:
-      EXTRA_GLOBAL_SETTINGS: 'debug'
+      # EXTRA_GLOBAL_SETTINGS: 'debug' # enable for request logging
       # Default SSL cert for ALL services served by lb
       # SEE: https://github.com/docker/dockercloud-haproxy#pem-files
       DEFAULT_SSL_CERT: '-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Mal2qHA1EXk0w4Lq7K7GHT/snGZrT/bIzGmZtQGzccb6OrO\nyBs0NI+bWKuZTStrewFYPKQ/r5N2twqoWAYHiTKcp9ykWE6KKcO3NjAv0bqsZXwi\nV7BcDstlYSjE5f+4i6uwUbQKG1huSwp22QaDXJx2MWS8towihZ03cCMq7DAJLDWP\n474GpsrxVKscfZMgcUUEly7jY+y4/ot/RJE1/cwNAd7R2mUaiE8kZ3KO804UplJB\njUGzZp5zQEeqgO27esD9teYnQRLVwWbB5BkY38Uh9DOK8zUUJK3uJvAC0lUsftus\n8sloYQky2v5u8xpJQMVYNcEctp1CTh4FllRy1wIDAQABAoIBAQDCGY2lAHGIaRre\n5dYP4XF0wYHgYyFfI1kXFVgBjeptckoOeA+blz8oBsOE4rT6O/4HNC7W4lWbZNwg\nPTZZ7/EdqwJeRhI9T3fAcIdrR82NjaIuEATVxc8wqgUtGXxF4UOwBwU8UMh8t/CC\nr83i491JQuXX8jJI/WwzEQGzrd6AClLdurNP9NqRVmShbW5cNnTXi0vTZpeEQXPy\n17w7GHHCGkKVDfzdCd3lnj47thg1LdjYpNyMYMUQ0NxdUGqEhP3d355gNVdW4q7g\nzneh29hXtYzxAgovpvQ3PRkfiPKo4GbW3UUIZmKjHjWqNYtE/Kj2daqsqt+xL9Dq\nLiLpmJLRAoGBAOzD6F7MNpJQZSDkN2iUruk38kBM0GJyJp2GIB8QDtcYZzq9zAXU\n7UI+dnfRus8suZTiGQ6fx6gsVvi1mnFvYonvbe64U5iA/s/DUEo+REsLFTbCw/5X\nXKqKiHJYt6WnjbjDY23xsjT2dt+XsNlWqsiawGhQYpnNgs9D5LJ5PKilAoGBAOG8\nov/sNeRTGYOrX8equNWltKpUmA11D0Fb0RDAHYNlkw1gR7p0YJ1kteCq13zoMTMg\n1+2fR83clcpcpCpESsHOBZs0g1dujSemJvgc3x9Gf7/fc3w7gfIADbOMiG+lbzqx\n+299z8l9NMDr4XSpDIOvi7WcW07roFXW19GumljLAoGAS6+cmqFBWKhmi4sowz+0\nYk1GHZPwkWfYPEbiAcwKUmw0o6yEieC1L5X0HP1ocE3lzVgxlmExW+tAqiSziEuI\n/nsRc1xtLLUfv566DeG1xx912pmMOcQHlWTPlW4S1tunDEc5g63dv9yBx5wgJnn0\nAkil9TKtMmllxYf4laz33RkCgYBbeFCkW1bLGlEwZXT+N1OGXwsCKh0i9tgjp8zj\neLV81N/tf6IRD69Gl9SLIS8IUh39lcVpaC10YXng8gEjj2Crf4wOBA1klEtmUZFg\n4HIY/jwtx6HIKWTSZusmYj+23dZgdlZoKxbTkoSZ1/sXhpink66M/LqTFC94GQKC\n2Ll6WQKBgQDXnrheOts4P8+1n3MM2flHPe2oY5AqjpgFngSLqqz+xHRtYsu+nNjs\ntDVRhdxwvgsLJG9ELFXEO+BVrIzAGL9zbJq+G/S3XT5WOUmYn5yfNveyX1orfTk/\n4zH+IE2LHuXeKcbgM7SPuYYSe13AXvAjP0WiQQABLpJUg1xR7+FUpw==\n-----END RSA PRIVATE KEY-----\n-----BEGIN CERTIFICATE-----\nMIIDXjCCAkagAwIBAgIJAMIn/5yNe6lzMA0GCSqGSIb3DQEBBQUAMCgxCjAIBgNV\nBAMUASoxDTALBgNVBAoTBENGUEIxCzAJBgNVBAYTAlVTMB4XDTE3MDcxMDIxMjYx\nM1oXDTIwMDYyNDIxMjYxM1owKDEKMAgGA1UEAxQBKjENMAsGA1UEChMEQ0ZQQjEL\nMAkGA1UEBhMCVVMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDQxqXa\nocDUReTTDgursrsYdP+ycZmtP9sjMaZm1AbNxxvo6s7IGzQ0j5tYq5lNK2t7AVg8\npD+vk3a3CqhYBgeJMpyn3KRYToopw7c2MC/RuqxlfCJXsFwOy2VhKMTl/7iLq7BR\ntAobWG5LCnbZBoNcnHYxZLy2jCKFnTdwIyrsMAksNY/jvgamyvFUqxx9kyBxRQSX\nLuNj7Lj+i39EkTX9zA0B3tHaZRqITyRnco7zThSmUkGNQbNmnnNAR6qA7bt6wP21\n5idBEtXBZsHkGRjfxSH0M4rzNRQkre4m8ALSVSx+26zyyWhhCTLa/m7zGklAxVg1\nwRy2nUJOHgWWVHLXAgMBAAGjgYowgYcwHQYDVR0OBBYEFLL5wreeYENfq9VPn2XQ\np2BNDu7XMFgGA1UdIwRRME+AFLL5wreeYENfq9VPn2XQp2BNDu7XoSykKjAoMQow\nCAYDVQQDFAEqMQ0wCwYDVQQKEwRDRlBCMQswCQYDVQQGEwJVU4IJAMIn/5yNe6lz\nMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADggEBAGPxIPQRh6nWbZZcKxij\ndnqmam8j97N1r53LbAT4YtEOrHIhAtVImIMqUEc2wrr+UsrVCTf2N8V7EiFiWyJS\nFkQSmPUyrZyMX/vptwIXQj9nhMl8acT2rxOuCj2ughiWdhXBNiR5pknmsPFo36TR\nhtUFLphbHU9g9eCINUuQYlBirvssCXhc+lE9VVHC5tGpjj3XyfapeDhWLDqd8ovY\n9wCXceWH3X7I0uVSRXAOWvJ9s3b3USikoLX6MpX/yntY7vMULbZhd8jd1Mv9tT/r\nMuFEdymyyoNAYVeuhjPeZF4f9WFEgDtHOf5L5F5pmu3E4JZwWKj5q5W8EInseOgG\nwRU=\n-----END CERTIFICATE-----\n'
