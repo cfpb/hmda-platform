@@ -54,15 +54,12 @@ object DemoData {
 
   val demoFilings = DemoFilings.values
 
-  val demoSubmissions = DemoSubmissions.values
-
   implicit val timeout = Timeout(5.seconds)
 
   def loadDemoData(system: ActorSystem): Unit = {
     Thread.sleep(500)
     loadInstitutions(demoInstitutions, system)
     loadFilings(demoFilings, system)
-    loadSubmissions(demoSubmissions, system)
   }
 
   def loadTestData(system: ActorSystem): Unit = {
