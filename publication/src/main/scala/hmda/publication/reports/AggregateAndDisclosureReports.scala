@@ -3,7 +3,6 @@ package hmda.publication.reports
 import akka.actor.{ Actor, ActorRef, ActorSystem, Props }
 import akka.stream.ActorMaterializer
 import hmda.publication.reports.disclosure.DisclosureReports
-import hmda.query.repository.filing.FilingCassandraRepository
 
 object AggregateAndDisclosureReports {
   case class GenerateDisclosureByMSAReports(respondentId: String, fipsCode: Int)
@@ -17,11 +16,13 @@ class AggregateAndDisclosureReports extends Actor {
 
   import AggregateAndDisclosureReports._
 
+  implicit val system = context.system
+  implicit val ec = system.dispatcher
+  implicit val materializer = ActorMaterializer()
+
   override def receive: Receive = {
     case GenerateDisclosureByMSAReports(respId, fipsCode) =>
-      //implicit val system = context.system
-      implicit val materializer = ActorMaterializer()
-      val disclosureReports = new DisclosureReports(context.system, materializer)
+      val disclosureReports = new DisclosureReports(system, materializer)
       disclosureReports.generateReports(fipsCode, respId)
   }
 }
