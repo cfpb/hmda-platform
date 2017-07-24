@@ -6,11 +6,11 @@ import hmda.census.model._
 import hmda.model.publication.reports._
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports.{ AS, EC, MAT }
+import hmda.publication.reports.util.DispositionTypes._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
-import scala.util.Try
 
 object ReportUtil extends SourceUtils {
 
@@ -35,84 +35,8 @@ object ReportUtil extends SourceUtils {
     collectHeadValue(larSource).map(lar => lar.actionTakenDate.toString.substring(0, 4).toInt)
   }
 
-  def calculateDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[List[Disposition]] = {
-    def incomeSum(lar: LoanApplicationRegisterQuery): Int = Try(lar.income.toInt).getOrElse(0)
-
-    val loansOriginated = larSource.filter(lar => lar.actionTakenType == 1)
-    val loansOriginatedCountF = count(loansOriginated)
-    val incomeLoansOriginatedF = sum(loansOriginated, incomeSum)
-
-    val loanApprovedButNotAccepted = larSource.filter(lar => lar.actionTakenType == 2)
-    val loanApprovedButNotAcceptedCountF = count(loanApprovedButNotAccepted)
-    val incomeApprovedButNotAcceptedF = sum(loanApprovedButNotAccepted, incomeSum)
-
-    val loansDenied = larSource.filter(lar => lar.actionTakenType == 3)
-    val loansDeniedCountF = count(loansDenied)
-    val incomeLoansDeniedF = sum(loansDenied, incomeSum)
-
-    val loansWithdrawn = larSource.filter(lar => lar.actionTakenType == 4)
-    val loansWithdrawnCountF = count(loansWithdrawn)
-    val incomeLoansWithdrawnF = sum(loansWithdrawn, incomeSum)
-
-    val loansClosed = larSource.filter(lar => lar.actionTakenType == 5)
-    val loansClosedCountF = count(loansClosed)
-    val incomeLoansClosedF = sum(loansClosed, incomeSum)
-
-    val loansPurchased = larSource.filter(lar => lar.actionTakenType == 6)
-    val loansPurchasedCountF = count(loansPurchased)
-    val incomeLoansPurchasedF = sum(loansPurchased, incomeSum)
-
-    val preapprovalDenied = larSource.filter(lar => lar.actionTakenType == 7)
-    val preapprovalDeniedCountF = count(preapprovalDenied)
-    val incomePreapprovalDeniedF = sum(preapprovalDenied, incomeSum)
-
-    val preapprovalAccepted = larSource.filter(lar => lar.actionTakenType == 8)
-    val preapprovalAcceptedCountF = count(preapprovalAccepted)
-    val incomePreapprovalAcceptedF = sum(preapprovalAccepted, incomeSum)
-
-    for {
-      loansOriginatedCount <- loansOriginatedCountF
-      incomeLoansOriginated <- incomeLoansOriginatedF
-      loanApprovedButNotAcceptedCount <- loanApprovedButNotAcceptedCountF
-      incomeApprovedButNotAccepted <- incomeApprovedButNotAcceptedF
-      loansDeniedCount <- loansDeniedCountF
-      incomeLoansDenied <- incomeLoansDeniedF
-      loansWithdrawnCount <- loansWithdrawnCountF
-      incomeLoansWithdrawn <- incomeLoansWithdrawnF
-      loansClosedCount <- loansClosedCountF
-      incomeLoansClosed <- incomeLoansClosedF
-      loansPurchasedCount <- loansPurchasedCountF
-      incomeLoansPurchased <- incomeLoansPurchasedF
-      preapprovalDeniedCount <- preapprovalDeniedCountF
-      incomePreapprovalDenied <- incomePreapprovalDeniedF
-      preapprovalAcceptedCount <- preapprovalAcceptedCountF
-      incomePreapprovalAccepted <- incomePreapprovalAcceptedF
-      receivedCount = loansOriginatedCount + loanApprovedButNotAcceptedCount + loansDeniedCount + loansWithdrawnCount +
-        loansClosedCount + loansPurchasedCount + preapprovalDeniedCount + preapprovalAcceptedCount
-      incomeReceivedCount = incomeLoansOriginated + incomeApprovedButNotAccepted + incomeLoansDenied +
-        incomeLoansWithdrawn + incomeLoansClosed + incomeLoansPurchased + incomePreapprovalDenied + incomePreapprovalAccepted
-    } yield {
-      val applicationsReceived = Disposition(ActionTakenTypeEnum.ApplicationReceived, receivedCount, incomeReceivedCount)
-      val loansOriginatedDisp = Disposition(ActionTakenTypeEnum.LoansOriginated, loansOriginatedCount, incomeLoansOriginated)
-      val loansApprovedButNotAcceptedDisp = Disposition(ActionTakenTypeEnum.ApprovedButNotAccepted, loanApprovedButNotAcceptedCount, incomeApprovedButNotAccepted)
-      val loansDenied = Disposition(ActionTakenTypeEnum.ApplicationsDenied, loansDeniedCount, incomeLoansDenied)
-      val loansWithdrawn = Disposition(ActionTakenTypeEnum.ApplicationsWithdrawn, loansWithdrawnCount, incomeLoansWithdrawn)
-      val loansClosed = Disposition(ActionTakenTypeEnum.ClosedForIncompleteness, loansClosedCount, incomeLoansClosed)
-      val loansPurchased = Disposition(ActionTakenTypeEnum.LoanPurchased, loansPurchasedCount, incomeLoansPurchased)
-      val preapprovalDenied = Disposition(ActionTakenTypeEnum.PreapprovalDenied, preapprovalDeniedCount, incomePreapprovalDenied)
-      val preapprovalAccepted = Disposition(ActionTakenTypeEnum.PreapprovalApprovedButNotAccepted, preapprovalAcceptedCount, incomePreapprovalAccepted)
-      List(
-        applicationsReceived,
-        loansOriginatedDisp,
-        loansApprovedButNotAcceptedDisp,
-        loansDenied,
-        loansWithdrawn,
-        loansClosed,
-        loansPurchased,
-        preapprovalDenied,
-        preapprovalAccepted
-      )
-    }
+  def calculateDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed], dispositions: List[DispositionType]): Future[List[Disposition]] = {
+    Future.sequence(dispositions.map(_.calculateDisposition(larSource)))
   }
 
   def filterRace(larSource: Source[LoanApplicationRegisterQuery, NotUsed], race: RaceEnum): Source[LoanApplicationRegisterQuery, NotUsed] = {
@@ -207,7 +131,7 @@ object ReportUtil extends SourceUtils {
         (lar.coRace5 != "" && lar.coRace5 != "5"))
   }
 
-  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum): Future[List[RaceCharacteristic]] = {
+  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum, dispositions: List[DispositionType]): Future[List[RaceCharacteristic]] = {
 
     val larsAlaskan = filterRace(larSource, AmericanIndianOrAlaskaNative)
     val larsAsian = filterRace(larSource, Asian)
@@ -218,14 +142,14 @@ object ReportUtil extends SourceUtils {
     val larsJoint = filterRace(larSource, Joint)
     val larsNotProvided = filterRace(larSource, NotProvided)
 
-    val dispAlaskanF = calculateDispositions(larsAlaskan)
-    val dispAsianF = calculateDispositions(larsAsian)
-    val dispBlackF = calculateDispositions(larsBlack)
-    val dispHawaiianF = calculateDispositions(larsHawaiian)
-    val dispWhiteF = calculateDispositions(larsWhite)
-    val dispTwoMinoritiesF = calculateDispositions(larsTwoMinorities)
-    val dispJointF = calculateDispositions(larsJoint)
-    val dispNotProvidedF = calculateDispositions(larsNotProvided)
+    val dispAlaskanF = calculateDispositions(larsAlaskan, dispositions)
+    val dispAsianF = calculateDispositions(larsAsian, dispositions)
+    val dispBlackF = calculateDispositions(larsBlack, dispositions)
+    val dispHawaiianF = calculateDispositions(larsHawaiian, dispositions)
+    val dispWhiteF = calculateDispositions(larsWhite, dispositions)
+    val dispTwoMinoritiesF = calculateDispositions(larsTwoMinorities, dispositions)
+    val dispJointF = calculateDispositions(larsJoint, dispositions)
+    val dispNotProvidedF = calculateDispositions(larsNotProvided, dispositions)
 
     for {
       dispAlaskan <- dispAlaskanF

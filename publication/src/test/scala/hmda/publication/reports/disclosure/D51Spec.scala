@@ -5,7 +5,9 @@ import akka.actor.{ Actor, ActorRef, ActorSystem, Props }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.model.publication.reports.MSAReport
+import hmda.model.publication.reports.ActionTakenTypeEnum._
+import hmda.model.publication.reports.ApplicantIncomeEnum.LessThan50PercentOfMSAMedian
+import hmda.model.publication.reports.{ MSAReport, RaceBorrowerCharacteristic }
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.LarConverter._
 import org.scalacheck.Gen
@@ -35,12 +37,23 @@ class D51Spec extends WordSpec with MustMatchers with LarGenerators {
     .fromIterator(() => lars.toIterator)
     .map(lar => toLoanApplicationRegisterQuery(lar))
 
+  val expectedDispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted, ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
+
   "Generate a Disclosure 5-1 report" in {
     val result = Await.result(D51.generate(source, fips, respId), 5.seconds)
 
     result.msa mustBe MSAReport("18700", "Corvallis, OR", "OR", "Oregon")
     result.table mustBe "5-1"
     result.respondentId mustBe "98765"
+    result.applicantIncomes.size mustBe 5
+
+    val lowestIncome = result.applicantIncomes.head
+    lowestIncome.applicantIncome mustBe LessThan50PercentOfMSAMedian
+
+    val races = lowestIncome.borrowerCharacteristics.head.asInstanceOf[RaceBorrowerCharacteristic].races
+    races.size mustBe 8
+
+    races.head.dispositions.map(_.disposition) mustBe expectedDispositions
   }
 
 }

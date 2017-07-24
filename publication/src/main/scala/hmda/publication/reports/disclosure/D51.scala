@@ -5,16 +5,15 @@ import java.util.Calendar
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.publication.reports.ApplicantIncomeEnum._
-import hmda.model.publication.reports._
 import hmda.publication.reports._
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
 import hmda.model.publication.reports._
 import hmda.publication.reports.util.DateUtil._
+import hmda.publication.reports.util.DispositionTypes._
 import hmda.publication.reports.util.ReportUtil._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 
-import scala.concurrent.{ Await, Future }
-import scala.concurrent.duration._
+import scala.concurrent.Future
 
 case class D51(
   respondentId: String,
@@ -56,6 +55,16 @@ object D51 {
     )
   }
 
+  val dispositions: List[DispositionType] =
+    List(
+      ReceivedDisp,
+      OriginatedDisp,
+      ApprovedButNotAcceptedDisp,
+      DeniedDisp,
+      WithdrawnDisp,
+      ClosedDisp
+    )
+
   // Table filters:
   // Loan Type 2,3,4
   // Property Type 1,2
@@ -93,14 +102,14 @@ object D51 {
       .filter(lar => lar.income.toInt >= incomeIntervals(3))
 
     val dateF = calculateDate(larSource)
-    val totalF = calculateDispositions(lars)
+    val totalF = calculateDispositions(lars, dispositions)
 
     for {
-      races50 <- raceBorrowerCharacteristic(lars50, LessThan50PercentOfMSAMedian)
-      races50to79 <- raceBorrowerCharacteristic(lars50To79, Between50And79PercentOfMSAMedian)
-      races80to99 <- raceBorrowerCharacteristic(lars80To99, Between80And99PercentOfMSAMedian)
-      races100to120 <- raceBorrowerCharacteristic(lars100To120, Between100And119PercentOfMSAMedian)
-      races120 <- raceBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian)
+      races50 <- raceBorrowerCharacteristic(lars50, LessThan50PercentOfMSAMedian, dispositions)
+      races50to79 <- raceBorrowerCharacteristic(lars50To79, Between50And79PercentOfMSAMedian, dispositions)
+      races80to99 <- raceBorrowerCharacteristic(lars80To99, Between80And99PercentOfMSAMedian, dispositions)
+      races100to120 <- raceBorrowerCharacteristic(lars100To120, Between100And119PercentOfMSAMedian, dispositions)
+      races120 <- raceBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian, dispositions)
       date <- dateF
       total <- totalF
     } yield {
