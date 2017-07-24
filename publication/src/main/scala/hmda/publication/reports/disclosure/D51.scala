@@ -71,29 +71,25 @@ object D51 {
           (lar.propertyType == 1 || lar.propertyType == 2) &&
           (lar.purpose == 1)
       }
+    val larsWithIncome = lars.filter(lar => lar.income != "NA")
 
     val msa = msaReport(fipsCode.toString)
 
     val incomeIntervals = calculateMedianIncomeIntervals(fipsCode)
 
-    val lars50 = lars
-      .filter(lar => lar.income != "NA")
+    val lars50 = larsWithIncome
       .filter(lar => lar.income.toInt < incomeIntervals(0))
 
-    val lars50To79 = lars
-      .filter(lar => lar.income != "NA")
+    val lars50To79 = larsWithIncome
       .filter(lar => lar.income.toInt >= incomeIntervals(0) && lar.income.toInt < incomeIntervals(1))
 
-    val lars80To99 = lars
-      .filter(lar => lar.income != "NA")
+    val lars80To99 = larsWithIncome
       .filter(lar => lar.income.toInt >= incomeIntervals(1) && lar.income.toInt < incomeIntervals(2))
 
-    val lars100to120 = lars
-      .filter(lar => lar.income != "NA")
+    val lars100To120 = larsWithIncome
       .filter(lar => lar.income.toInt >= incomeIntervals(2) && lar.income.toInt < incomeIntervals(3))
 
-    val lars120 = lars
-      .filter(lar => lar.income != "NA")
+    val lars120 = larsWithIncome
       .filter(lar => lar.income.toInt >= incomeIntervals(3))
 
     val dateF = calculateDate(larSource)
@@ -103,7 +99,7 @@ object D51 {
       races50 <- raceBorrowerCharacteristic(lars50, LessThan50PercentOfMSAMedian)
       races50to79 <- raceBorrowerCharacteristic(lars50To79, Between50And79PercentOfMSAMedian)
       races80to99 <- raceBorrowerCharacteristic(lars80To99, Between80And99PercentOfMSAMedian)
-      races100to120 <- raceBorrowerCharacteristic(lars100to120, Between100And119PercentOfMSAMedian)
+      races100to120 <- raceBorrowerCharacteristic(lars100To120, Between100And119PercentOfMSAMedian)
       races120 <- raceBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian)
       date <- dateF
       total <- totalF
