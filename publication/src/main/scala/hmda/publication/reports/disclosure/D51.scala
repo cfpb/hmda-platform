@@ -9,7 +9,7 @@ import hmda.publication.reports._
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
 import hmda.model.publication.reports._
 import hmda.publication.reports.util.DateUtil._
-import hmda.publication.reports.util.DispositionTypes._
+import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.ReportUtil._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 

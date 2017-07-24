@@ -6,7 +6,7 @@ import hmda.census.model._
 import hmda.model.publication.reports._
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports.{ AS, EC, MAT }
-import hmda.publication.reports.util.DispositionTypes._
+import hmda.publication.reports.util.DispositionType._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.util.SourceUtils
 

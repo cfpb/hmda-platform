@@ -11,7 +11,7 @@ import hmda.util.SourceUtils
 import scala.concurrent.Future
 import scala.util.Try
 
-object DispositionTypes {
+object DispositionType {
 
   sealed trait DispositionType extends SourceUtils {
     def filter(lar: LoanApplicationRegisterQuery): Boolean
