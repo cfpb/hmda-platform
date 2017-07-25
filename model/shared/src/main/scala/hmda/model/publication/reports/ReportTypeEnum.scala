@@ -10,5 +10,5 @@ object ReportTypeEnum extends Enum[ReportTypeEnum] {
 
   case object Disclosure extends ReportTypeEnum
   case object Aggregate extends ReportTypeEnum
-  case object Nationwide extends ReportTypeEnum
+  case object NationalAggregate extends ReportTypeEnum
 }
