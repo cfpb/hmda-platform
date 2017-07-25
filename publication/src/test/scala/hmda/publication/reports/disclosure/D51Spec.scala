@@ -1,9 +1,9 @@
 package hmda.publication.reports.disclosure
 
 import akka.NotUsed
-import akka.actor.{ Actor, ActorRef, ActorSystem, Props }
+import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.publication.reports.ActionTakenTypeEnum._
 import hmda.model.publication.reports.ApplicantIncomeEnum.LessThan50PercentOfMSAMedian
@@ -13,7 +13,7 @@ import hmda.query.repository.filing.LarConverter._
 import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, WordSpec }
 
-import scala.concurrent.{ Await, ExecutionContext }
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
 class D51Spec extends WordSpec with MustMatchers with LarGenerators {
