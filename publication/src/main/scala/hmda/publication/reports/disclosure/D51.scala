@@ -101,7 +101,7 @@ object D51 {
     val lars120 = larsWithIncome
       .filter(lar => lar.income.toInt >= incomeIntervals(3))
 
-    val dateF = calculateDate(larSource)
+    val dateF = calculateYear(larSource)
     val totalF = calculateDispositions(lars, dispositions)
 
     for {

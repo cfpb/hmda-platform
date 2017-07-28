@@ -31,7 +31,7 @@ object ReportUtil extends SourceUtils {
     Array(i50, i80, i100, i120)
   }
 
-  def calculateDate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[Int] = {
+  def calculateYear[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[Int] = {
     collectHeadValue(larSource).map(lar => lar.actionTakenDate.toString.substring(0, 4).toInt)
   }
 
