@@ -24,8 +24,8 @@ class D51Spec extends WordSpec with MustMatchers with LarGenerators {
 
   val respId = "98765"
   val fips = 18700 //Corvallis, OR
-  val loanType = Gen.oneOf(2, 3, 4).sample.get
-  val propType = Gen.oneOf(1, 2).sample.get
+  def loanType = Gen.oneOf(2, 3, 4).sample.get
+  def propType = Gen.oneOf(1, 2).sample.get
 
   val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
     val geo = lar.geography.copy(msa = fips.toString)

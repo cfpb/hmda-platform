@@ -89,42 +89,29 @@ object D51 {
 
     val incomeIntervals = calculateMedianIncomeIntervals(fipsCode)
 
-    val lars50 = larsWithIncome
-      .filter(lar => lar.income.toInt < incomeIntervals(0))
-
-    val lars50To79 = larsWithIncome
-      .filter(lar => lar.income.toInt >= incomeIntervals(0) && lar.income.toInt < incomeIntervals(1))
-
-    val lars80To99 = larsWithIncome
-      .filter(lar => lar.income.toInt >= incomeIntervals(1) && lar.income.toInt < incomeIntervals(2))
-
-    val lars100To120 = larsWithIncome
-      .filter(lar => lar.income.toInt >= incomeIntervals(2) && lar.income.toInt < incomeIntervals(3))
-
-    val lars120 = larsWithIncome
-      .filter(lar => lar.income.toInt >= incomeIntervals(3))
+    val larsByIncome = larsByIncomeInterval(larsWithIncome, incomeIntervals)
 
     val dateF = calculateYear(larSource)
     val totalF = calculateDispositions(lars, dispositions)
 
     for {
-      races50 <- raceBorrowerCharacteristic(lars50, LessThan50PercentOfMSAMedian, dispositions)
-      races50to79 <- raceBorrowerCharacteristic(lars50To79, Between50And79PercentOfMSAMedian, dispositions)
-      races80to99 <- raceBorrowerCharacteristic(lars80To99, Between80And99PercentOfMSAMedian, dispositions)
-      races100to120 <- raceBorrowerCharacteristic(lars100To120, Between100And119PercentOfMSAMedian, dispositions)
-      races120 <- raceBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian, dispositions)
+      races50 <- raceBorrowerCharacteristic(larsByIncome(LessThan50PercentOfMSAMedian), LessThan50PercentOfMSAMedian, dispositions)
+      races50to79 <- raceBorrowerCharacteristic(larsByIncome(Between50And79PercentOfMSAMedian), Between50And79PercentOfMSAMedian, dispositions)
+      races80to99 <- raceBorrowerCharacteristic(larsByIncome(Between80And99PercentOfMSAMedian), Between80And99PercentOfMSAMedian, dispositions)
+      races100to120 <- raceBorrowerCharacteristic(larsByIncome(Between100And119PercentOfMSAMedian), Between100And119PercentOfMSAMedian, dispositions)
+      races120 <- raceBorrowerCharacteristic(larsByIncome(GreaterThan120PercentOfMSAMedian), GreaterThan120PercentOfMSAMedian, dispositions)
 
-      ethnicity50 <- ethnicityBorrowerCharacteristic(lars50, LessThan50PercentOfMSAMedian, dispositions)
-      ethnicity50to79 <- ethnicityBorrowerCharacteristic(lars50To79, Between50And79PercentOfMSAMedian, dispositions)
-      ethnicity80to99 <- ethnicityBorrowerCharacteristic(lars80To99, Between80And99PercentOfMSAMedian, dispositions)
-      ethnicity100to120 <- ethnicityBorrowerCharacteristic(lars100To120, Between100And119PercentOfMSAMedian, dispositions)
-      ethnicity120 <- ethnicityBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian, dispositions)
+      ethnicity50 <- ethnicityBorrowerCharacteristic(larsByIncome(LessThan50PercentOfMSAMedian), LessThan50PercentOfMSAMedian, dispositions)
+      ethnicity50to79 <- ethnicityBorrowerCharacteristic(larsByIncome(Between50And79PercentOfMSAMedian), Between50And79PercentOfMSAMedian, dispositions)
+      ethnicity80to99 <- ethnicityBorrowerCharacteristic(larsByIncome(Between80And99PercentOfMSAMedian), Between80And99PercentOfMSAMedian, dispositions)
+      ethnicity100to120 <- ethnicityBorrowerCharacteristic(larsByIncome(Between100And119PercentOfMSAMedian), Between100And119PercentOfMSAMedian, dispositions)
+      ethnicity120 <- ethnicityBorrowerCharacteristic(larsByIncome(GreaterThan120PercentOfMSAMedian), GreaterThan120PercentOfMSAMedian, dispositions)
 
-      minorityStatus50 <- minorityStatusBorrowerCharacteristic(lars50, LessThan50PercentOfMSAMedian, dispositions)
-      minorityStatus50to79 <- minorityStatusBorrowerCharacteristic(lars50To79, Between50And79PercentOfMSAMedian, dispositions)
-      minorityStatus80to99 <- minorityStatusBorrowerCharacteristic(lars80To99, Between80And99PercentOfMSAMedian, dispositions)
-      minorityStatus100to120 <- minorityStatusBorrowerCharacteristic(lars100To120, Between100And119PercentOfMSAMedian, dispositions)
-      minorityStatus120 <- minorityStatusBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian, dispositions)
+      minorityStatus50 <- minorityStatusBorrowerCharacteristic(larsByIncome(LessThan50PercentOfMSAMedian), LessThan50PercentOfMSAMedian, dispositions)
+      minorityStatus50to79 <- minorityStatusBorrowerCharacteristic(larsByIncome(Between50And79PercentOfMSAMedian), Between50And79PercentOfMSAMedian, dispositions)
+      minorityStatus80to99 <- minorityStatusBorrowerCharacteristic(larsByIncome(Between80And99PercentOfMSAMedian), Between80And99PercentOfMSAMedian, dispositions)
+      minorityStatus100to120 <- minorityStatusBorrowerCharacteristic(larsByIncome(Between100And119PercentOfMSAMedian), Between100And119PercentOfMSAMedian, dispositions)
+      minorityStatus120 <- minorityStatusBorrowerCharacteristic(larsByIncome(GreaterThan120PercentOfMSAMedian), GreaterThan120PercentOfMSAMedian, dispositions)
 
       date <- dateF
       total <- totalF

@@ -3,8 +3,8 @@ package hmda.publication.reports.util
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model._
+import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
-import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.publication.reports.util.DispositionType._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
@@ -29,6 +29,31 @@ object ReportUtil extends SourceUtils {
     val i100 = medianIncome
     val i120 = medianIncome * 1.2
     Array(i50, i80, i100, i120)
+  }
+
+  def larsByIncomeInterval(larSource: Source[LoanApplicationRegisterQuery, NotUsed], incomeIntervals: Array[Double]): Map[ApplicantIncomeEnum, Source[LoanApplicationRegisterQuery, NotUsed]] = {
+    val lars50 = larSource
+      .filter(lar => lar.income.toInt < incomeIntervals(0))
+
+    val lars50To79 = larSource
+      .filter(lar => lar.income.toInt >= incomeIntervals(0) && lar.income.toInt < incomeIntervals(1))
+
+    val lars80To99 = larSource
+      .filter(lar => lar.income.toInt >= incomeIntervals(1) && lar.income.toInt < incomeIntervals(2))
+
+    val lars100To120 = larSource
+      .filter(lar => lar.income.toInt >= incomeIntervals(2) && lar.income.toInt < incomeIntervals(3))
+
+    val lars120 = larSource
+      .filter(lar => lar.income.toInt >= incomeIntervals(3))
+
+    Map(
+      LessThan50PercentOfMSAMedian -> lars50,
+      Between50And79PercentOfMSAMedian -> lars50To79,
+      Between80And99PercentOfMSAMedian -> lars80To99,
+      Between100And119PercentOfMSAMedian -> lars100To120,
+      GreaterThan120PercentOfMSAMedian -> lars120
+    )
   }
 
   def calculateYear[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[Int] = {
