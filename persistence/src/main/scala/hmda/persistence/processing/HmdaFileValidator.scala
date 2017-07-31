@@ -258,7 +258,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
       if (state.readyToSign) {
         for {
           stat <- statRef
-        } stat ! PersistIrs
+        } yield stat ! PersistIrs
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(originalSender)
       } else {
