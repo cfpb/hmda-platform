@@ -17,29 +17,29 @@ object D51Protocol
 
     override def write(obj: D51): JsValue = {
       JsObject(
-        "respondent_id" -> JsString(obj.respondentId),
-        "institution_name" -> JsString(obj.institutionName),
+        "respondentId" -> JsString(obj.respondentId),
+        "institutionName" -> JsString(obj.institutionName),
         "table" -> JsString("5-1"),
         "type" -> JsString(Disclosure.toString),
         "desc" -> JsString(obj.description),
         "year" -> JsNumber(obj.year),
-        "report_date" -> JsString(obj.reportDate),
+        "reportDate" -> JsString(obj.reportDate),
         "msa" -> obj.msa.toJson,
-        "applicant_incomes" -> obj.applicantIncomes.toJson,
+        "applicantIncomes" -> obj.applicantIncomes.toJson,
         "total" -> obj.total.toJson
       )
     }
 
     override def read(json: JsValue): D51 = json.asJsObject.getFields(
-      "respondent_id",
-      "institution_name",
+      "respondentId",
+      "institutionName",
       "table",
       "type",
       "desc",
       "year",
-      "report_date",
+      "reportDate",
       "msa",
-      "applicant_incomes",
+      "applicantIncomes",
       "total"
     ) match {
         case Seq(respondentId, institutionName, table, reportType, description, year, reportDate, msa, applicantIncomes, total) =>

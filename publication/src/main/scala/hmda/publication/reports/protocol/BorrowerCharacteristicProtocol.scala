@@ -20,10 +20,10 @@ trait BorrowerCharacteristicProtocol extends CharacteristicProtocol {
           "ethnicities" -> ethnicities.toJson
         )
 
-      case MinorityStatusBorrowerCharacteristic(minoritystatus) =>
+      case MinorityStatusBorrowerCharacteristic(minorityStatus) =>
         JsObject(
           "characteristic" -> JsString("Minority Status"),
-          "minoritystatus" -> minoritystatus.toJson
+          "minorityStatus" -> minorityStatus.toJson
         )
 
     }
@@ -39,9 +39,9 @@ trait BorrowerCharacteristicProtocol extends CharacteristicProtocol {
           fields("ethnicities").convertTo[List[EthnicityCharacteristic]]
         )
 
-      case JsObject(fields) if fields.isDefinedAt("minoritystatus") =>
+      case JsObject(fields) if fields.isDefinedAt("minorityStatus") =>
         MinorityStatusBorrowerCharacteristic(
-          fields("minoritystatus").convertTo[List[MinorityStatusCharacteristic]]
+          fields("minorityStatus").convertTo[List[MinorityStatusCharacteristic]]
         )
     }
 

@@ -12,7 +12,7 @@ trait MSAReportProtocol extends DefaultJsonProtocol {
         "id" -> JsString(obj.id),
         "name" -> JsString(obj.name),
         "state" -> JsString(obj.state),
-        "state_name" -> JsString(obj.stateName)
+        "stateName" -> JsString(obj.stateName)
       )
     }
 
@@ -20,12 +20,12 @@ trait MSAReportProtocol extends DefaultJsonProtocol {
       case JsObject(fields) if fields.isDefinedAt("id")
         & fields.isDefinedAt("name")
         & fields.isDefinedAt("state")
-        & fields.isDefinedAt("state_name") =>
+        & fields.isDefinedAt("stateName") =>
         MSAReport(
           fields("id").convertTo[String],
           fields("name").convertTo[String],
           fields("state").convertTo[String],
-          fields("state_name").convertTo[String]
+          fields("stateName").convertTo[String]
         )
     }
   }
