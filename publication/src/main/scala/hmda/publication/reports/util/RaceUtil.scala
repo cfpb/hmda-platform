@@ -17,30 +17,32 @@ object RaceUtil {
     race match {
       case AmericanIndianOrAlaskaNative =>
         larSource.filter { lar =>
-          (lar.race1 == 1 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
-            (lar.race1 == 1 && lar.race2 == "5" && coApplicantNonWhite(lar))
+          lar.race1 == 1 && coApplicantNonWhite(lar) &&
+            (applicantRace2Thru5Blank(lar) || lar.race2 == "5")
         }
 
       case Asian =>
         larSource.filter { lar =>
-          (lar.race1 == 2 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
-            (lar.race1 == 2 && lar.race2 == "5" && coApplicantNonWhite(lar))
+          lar.race1 == 2 && coApplicantNonWhite(lar) &&
+            (applicantRace2Thru5Blank(lar) || lar.race2 == "5")
         }
 
       case BlackOrAfricanAmerican =>
         larSource.filter { lar =>
-          (lar.race1 == 3 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
-            (lar.race1 == 3 && lar.race2 == "5" && coApplicantNonWhite(lar))
+          lar.race1 == 3 && coApplicantNonWhite(lar) &&
+            (applicantRace2Thru5Blank(lar) || lar.race2 == "5")
         }
 
       case HawaiianOrPacific =>
         larSource.filter { lar =>
-          (lar.race1 == 4 && applicantNonWhite(lar) && coApplicantNonWhite(lar)) ||
-            (lar.race1 == 4 && lar.race2 == "5" && coApplicantNonWhite(lar))
+          lar.race1 == 4 && coApplicantNonWhite(lar) &&
+            (applicantRace2Thru5Blank(lar) || lar.race2 == "5")
         }
 
       case White =>
-        larSource.filter(lar => lar.race1 == 5 && coApplicantNonWhite(lar))
+        larSource.filter { lar =>
+          lar.race1 == 5 && applicantRace2Thru5Blank(lar) && coApplicantNonMinority(lar)
+        }
 
       case TwoOrMoreMinority =>
         larSource.filter(lar => applicantTwoOrMoreMinorities(lar) && coApplicantNonWhite(lar))
@@ -48,7 +50,7 @@ object RaceUtil {
       case Joint =>
         larSource.filter { lar =>
           (applicantTwoOrMoreMinorities(lar) || coApplicantTwoOrMoreMinorities(lar)) &&
-            (applicantWhite(lar) || coApplicantWhite(lar))
+            (lar.race1 == 5 || coApplicantWhite(lar))
         }
 
       case NotProvided =>
@@ -57,17 +59,8 @@ object RaceUtil {
     }
   }
 
-  private def applicantWhite(lar: LoanApplicationRegisterQuery): Boolean = {
-    lar.race1 == 5 &&
-      lar.race2 == "" &&
-      lar.race3 == "" &&
-      lar.race4 == "" &&
-      lar.race5 == ""
-  }
-
-  private def applicantNonWhite(lar: LoanApplicationRegisterQuery): Boolean = {
-    lar.race1 != 5 &&
-      lar.race2 == "" &&
+  private def applicantRace2Thru5Blank(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.race2 == "" &&
       lar.race3 == "" &&
       lar.race4 == "" &&
       lar.race5 == ""
@@ -75,10 +68,10 @@ object RaceUtil {
 
   private def coApplicantWhite(lar: LoanApplicationRegisterQuery): Boolean = {
     lar.coRace1 == 5 &&
-      lar.coRace2 != "5" &&
-      lar.coRace3 != "5" &&
-      lar.coRace4 != "5" &&
-      lar.coRace5 != "5"
+      lar.coRace2 == "" &&
+      lar.coRace3 == "" &&
+      lar.coRace4 == "" &&
+      lar.coRace5 == ""
   }
 
   private def coApplicantNonWhite(lar: LoanApplicationRegisterQuery): Boolean = {
@@ -87,6 +80,15 @@ object RaceUtil {
       lar.coRace3 != "5" &&
       lar.coRace4 != "5" &&
       lar.coRace5 != "5"
+  }
+
+  private def coApplicantNonMinority(lar: LoanApplicationRegisterQuery): Boolean = {
+    val race1NonMinority = lar.coRace1 == 5 || lar.coRace1 == 6 || lar.coRace1 == 7 || lar.coRace1 == 8
+    race1NonMinority &&
+      (lar.race2 == "5" || lar.race2 == "") &&
+      (lar.race3 == "5" || lar.race3 == "") &&
+      (lar.race4 == "5" || lar.race4 == "") &&
+      (lar.race5 == "5" || lar.race5 == "")
   }
 
   private def applicantTwoOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
