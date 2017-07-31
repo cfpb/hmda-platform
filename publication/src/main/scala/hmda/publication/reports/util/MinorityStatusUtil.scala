@@ -42,17 +42,10 @@ object MinorityStatusUtil {
     val race1NonWhite = lar.race1 == 1 || lar.race1 == 2 || lar.race1 == 3 || lar.race1 == 4
 
     race1NonWhite &&
-      applicantRaceNotWhite(lar.race2) &&
-      applicantRaceNotWhite(lar.race3) &&
-      applicantRaceNotWhite(lar.race4) &&
-      applicantRaceNotWhite(lar.race5)
-  }
-
-  private def applicantRaceNotWhite(raceEntry: String): Boolean = {
-    raceEntry == "1" ||
-      raceEntry == "2" ||
-      raceEntry == "3" ||
-      raceEntry == "4"
+      lar.race2 != "5" &&
+      lar.race3 != "5" &&
+      lar.race4 != "5" &&
+      lar.race5 != "5"
   }
 
   def minorityStatusBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](
