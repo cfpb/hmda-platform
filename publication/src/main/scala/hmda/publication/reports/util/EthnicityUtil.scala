@@ -2,7 +2,7 @@ package hmda.publication.reports.util
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.model.publication.reports.{ ApplicantIncomeEnum, EthnicityCharacteristic, EthnicityEnum }
+import hmda.model.publication.reports.{ ApplicantIncomeEnum, EthnicityBorrowerCharacteristic, EthnicityCharacteristic, EthnicityEnum }
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.publication.reports.util.DispositionType.DispositionType
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
@@ -43,7 +43,7 @@ object EthnicityUtil {
     larSource: Source[LoanApplicationRegisterQuery, NotUsed],
     applicantIncomeEnum: ApplicantIncomeEnum,
     dispositions: List[DispositionType]
-  ): Future[List[EthnicityCharacteristic]] = {
+  ): Future[EthnicityBorrowerCharacteristic] = {
 
     val larsHispanic = filterEthnicity(larSource, HispanicOrLatino)
     val larsNotHispanic = filterEthnicity(larSource, NotHispanicOrLatino)
@@ -62,11 +62,13 @@ object EthnicityUtil {
       jointDispositions <- dispJointF
     } yield {
 
-      List(
-        EthnicityCharacteristic(HispanicOrLatino, hispanicDispositions),
-        EthnicityCharacteristic(NotHispanicOrLatino, notHispanicDispositions),
-        EthnicityCharacteristic(NotAvailable, notAvailableDispositions),
-        EthnicityCharacteristic(Joint, jointDispositions)
+      EthnicityBorrowerCharacteristic(
+        List(
+          EthnicityCharacteristic(HispanicOrLatino, hispanicDispositions),
+          EthnicityCharacteristic(NotHispanicOrLatino, notHispanicDispositions),
+          EthnicityCharacteristic(NotAvailable, notAvailableDispositions),
+          EthnicityCharacteristic(Joint, jointDispositions)
+        )
       )
 
     }

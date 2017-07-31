@@ -2,7 +2,7 @@ package hmda.publication.reports.util
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.model.publication.reports.{ ApplicantIncomeEnum, RaceCharacteristic, RaceEnum }
+import hmda.model.publication.reports.{ ApplicantIncomeEnum, RaceBorrowerCharacteristic, RaceCharacteristic, RaceEnum }
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
@@ -105,7 +105,7 @@ object RaceUtil {
         (lar.coRace5 != "" && lar.coRace5 != "5"))
   }
 
-  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum, dispositions: List[DispositionType]): Future[List[RaceCharacteristic]] = {
+  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum, dispositions: List[DispositionType]): Future[RaceBorrowerCharacteristic] = {
 
     val larsAlaskan = filterRace(larSource, AmericanIndianOrAlaskaNative)
     val larsAsian = filterRace(larSource, Asian)
@@ -144,15 +144,17 @@ object RaceUtil {
       val jointCharacteristic = RaceCharacteristic(Joint, dispJoint)
       val notProvidedCharacteristic = RaceCharacteristic(NotProvided, dispNotProvided)
 
-      List(
-        alaskanCharacteristic,
-        asianCharacteristic,
-        blackCharacteristic,
-        hawaiianCharacteristic,
-        whiteCharacteristic,
-        twoOrMoreMinorityCharacteristic,
-        jointCharacteristic,
-        notProvidedCharacteristic
+      RaceBorrowerCharacteristic(
+        List(
+          alaskanCharacteristic,
+          asianCharacteristic,
+          blackCharacteristic,
+          hawaiianCharacteristic,
+          whiteCharacteristic,
+          twoOrMoreMinorityCharacteristic,
+          jointCharacteristic,
+          notProvidedCharacteristic
+        )
       )
     }
 

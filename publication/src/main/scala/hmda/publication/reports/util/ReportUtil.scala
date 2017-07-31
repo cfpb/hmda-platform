@@ -7,6 +7,9 @@ import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
 import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.publication.reports.util.DispositionType._
+import hmda.publication.reports.util.RaceUtil.raceBorrowerCharacteristic
+import hmda.publication.reports.util.EthnicityUtil.ethnicityBorrowerCharacteristic
+import hmda.publication.reports.util.MinorityStatusUtil.minorityStatusBorrowerCharacteristic
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.util.SourceUtils
 
@@ -54,6 +57,20 @@ object ReportUtil extends SourceUtils {
       Between100And119PercentOfMSAMedian -> lars100To120,
       GreaterThan120PercentOfMSAMedian -> lars120
     )
+  }
+
+  def borrowerCharacteristicsByIncomeInterval[ec: EC, mat: MAT, as: AS](larsByIncome: Map[ApplicantIncomeEnum, Source[LoanApplicationRegisterQuery, NotUsed]], dispositions: List[DispositionType]): Map[ApplicantIncomeEnum, Future[List[BorrowerCharacteristic]]] = {
+    larsByIncome.map {
+      case (income, lars) =>
+        val characteristics = Future.sequence(
+          List(
+            raceBorrowerCharacteristic(lars, income, dispositions),
+            ethnicityBorrowerCharacteristic(lars, income, dispositions),
+            minorityStatusBorrowerCharacteristic(lars, income, dispositions)
+          )
+        )
+        income -> characteristics
+    }
   }
 
   def calculateYear[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[Int] = {

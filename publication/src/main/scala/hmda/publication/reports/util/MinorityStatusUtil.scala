@@ -59,7 +59,7 @@ object MinorityStatusUtil {
     larSource: Source[LoanApplicationRegisterQuery, NotUsed],
     applicantIncomeEnum: ApplicantIncomeEnum,
     dispositions: List[DispositionType]
-  ): Future[List[MinorityStatusCharacteristic]] = {
+  ): Future[MinorityStatusBorrowerCharacteristic] = {
 
     val larsWhite = filterMinorityStatus(larSource, WhiteNonHispanic)
     val larsOther = filterMinorityStatus(larSource, OtherIncludingHispanic)
@@ -72,9 +72,11 @@ object MinorityStatusUtil {
       otherDispositions <- dispOtherF
     } yield {
 
-      List(
-        MinorityStatusCharacteristic(WhiteNonHispanic, whiteDispositions),
-        MinorityStatusCharacteristic(OtherIncludingHispanic, otherDispositions)
+      MinorityStatusBorrowerCharacteristic(
+        List(
+          MinorityStatusCharacteristic(WhiteNonHispanic, whiteDispositions),
+          MinorityStatusCharacteristic(OtherIncludingHispanic, otherDispositions)
+        )
       )
 
     }
