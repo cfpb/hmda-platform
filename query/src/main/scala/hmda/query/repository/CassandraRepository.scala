@@ -2,10 +2,11 @@ package hmda.query.repository
 
 import akka.actor.{ ActorSystem, Scheduler }
 import akka.stream.ActorMaterializer
+import akka.stream.alpakka.cassandra.scaladsl.CassandraSource
 import akka.{ Done, NotUsed }
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Flow, Source }
 import com.datastax.driver.core.policies.ExponentialReconnectionPolicy
-import com.datastax.driver.core.{ Cluster, ResultSet, Row, Session }
+import com.datastax.driver.core._
 import hmda.query.CassandraConfig._
 
 import scala.annotation.tailrec
@@ -23,6 +24,8 @@ trait CassandraRepository[A] {
   val log = LoggerFactory.getLogger("CassandraRepository")
 
   val keyspace = cassandraKeyspace
+
+  def table: String
 
   @tailrec
   private def retry[T](n: Int)(fn: => T): Try[T] = {
@@ -69,6 +72,12 @@ trait CassandraRepository[A] {
   def createTable(): ResultSet
   def dropTable(): ResultSet
   def insertData(source: Source[A, NotUsed]): Future[Done]
-  def readData(fetchSize: Int): Future[Seq[Row]]
+  def readData(fetchSize: Int): Source[A, NotUsed] = {
+    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.$table").setFetchSize(fetchSize)
+    val rowSource = CassandraSource(statement)
+    val entitySource = rowSource.via(parseRows)
+    entitySource
+  }
+  protected def parseRows: Flow[Row, A, NotUsed]
 
 }
