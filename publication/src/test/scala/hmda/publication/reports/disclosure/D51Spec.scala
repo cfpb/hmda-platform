@@ -7,7 +7,7 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.publication.reports.ActionTakenTypeEnum._
 import hmda.model.publication.reports.ApplicantIncomeEnum.LessThan50PercentOfMSAMedian
-import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, MSAReport, RaceBorrowerCharacteristic }
+import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, MSAReport, MinorityStatusBorrowerCharacteristic, RaceBorrowerCharacteristic }
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.LarConverter._
 import org.scalacheck.Gen
@@ -55,6 +55,9 @@ class D51Spec extends WordSpec with MustMatchers with LarGenerators {
 
     val ethnicities = lowestIncome.borrowerCharacteristics(1).asInstanceOf[EthnicityBorrowerCharacteristic].ethnicities
     ethnicities.size mustBe 4
+
+    val minorityStatuses = lowestIncome.borrowerCharacteristics(2).asInstanceOf[MinorityStatusBorrowerCharacteristic].minoritystatus
+    minorityStatuses.size mustBe 2
 
     races.head.dispositions.map(_.disposition) mustBe expectedDispositions
   }

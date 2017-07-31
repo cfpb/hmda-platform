@@ -11,6 +11,7 @@ import hmda.model.publication.reports._
 import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.EthnicityUtil._
+import hmda.publication.reports.util.MinorityStatusUtil._
 import hmda.publication.reports.util.RaceUtil._
 import hmda.publication.reports.util.ReportUtil._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
@@ -119,6 +120,12 @@ object D51 {
       ethnicity100to120 <- ethnicityBorrowerCharacteristic(lars100To120, Between100And119PercentOfMSAMedian, dispositions)
       ethnicity120 <- ethnicityBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian, dispositions)
 
+      minorityStatus50 <- minorityStatusBorrowerCharacteristic(lars50, LessThan50PercentOfMSAMedian, dispositions)
+      minorityStatus50to79 <- minorityStatusBorrowerCharacteristic(lars50To79, Between50And79PercentOfMSAMedian, dispositions)
+      minorityStatus80to99 <- minorityStatusBorrowerCharacteristic(lars80To99, Between80And99PercentOfMSAMedian, dispositions)
+      minorityStatus100to120 <- minorityStatusBorrowerCharacteristic(lars100To120, Between100And119PercentOfMSAMedian, dispositions)
+      minorityStatus120 <- minorityStatusBorrowerCharacteristic(lars120, GreaterThan120PercentOfMSAMedian, dispositions)
+
       date <- dateF
       total <- totalF
     } yield {
@@ -126,35 +133,40 @@ object D51 {
         LessThan50PercentOfMSAMedian,
         List(
           RaceBorrowerCharacteristic(races50),
-          EthnicityBorrowerCharacteristic(ethnicity50)
+          EthnicityBorrowerCharacteristic(ethnicity50),
+          MinorityStatusBorrowerCharacteristic(minorityStatus50)
         )
       )
       val income50To79 = ApplicantIncome(
         Between50And79PercentOfMSAMedian,
         List(
           RaceBorrowerCharacteristic(races50to79),
-          EthnicityBorrowerCharacteristic(ethnicity50to79)
+          EthnicityBorrowerCharacteristic(ethnicity50to79),
+          MinorityStatusBorrowerCharacteristic(minorityStatus50to79)
         )
       )
       val income80To99 = ApplicantIncome(
         Between80And99PercentOfMSAMedian,
         List(
           RaceBorrowerCharacteristic(races80to99),
-          EthnicityBorrowerCharacteristic(ethnicity80to99)
+          EthnicityBorrowerCharacteristic(ethnicity80to99),
+          MinorityStatusBorrowerCharacteristic(minorityStatus80to99)
         )
       )
       val income100To120 = ApplicantIncome(
         Between100And119PercentOfMSAMedian,
         List(
           RaceBorrowerCharacteristic(races100to120),
-          EthnicityBorrowerCharacteristic(ethnicity100to120)
+          EthnicityBorrowerCharacteristic(ethnicity100to120),
+          MinorityStatusBorrowerCharacteristic(minorityStatus100to120)
         )
       )
       val income120 = ApplicantIncome(
         GreaterThan120PercentOfMSAMedian,
         List(
           RaceBorrowerCharacteristic(races120),
-          EthnicityBorrowerCharacteristic(ethnicity120)
+          EthnicityBorrowerCharacteristic(ethnicity120),
+          MinorityStatusBorrowerCharacteristic(minorityStatus120)
         )
       )
 
