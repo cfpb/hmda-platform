@@ -52,6 +52,10 @@ This module is responsible for maintaining the objects used in our platform
 
 This module is responsible for geographic translation (e.g. state number -> state code)
 
+### Publication
+
+This module generates Aggregate and Disclosure reports, as required by HMDA statute.
+
 ## Dependencies
 
 ### Java 8 SDK
