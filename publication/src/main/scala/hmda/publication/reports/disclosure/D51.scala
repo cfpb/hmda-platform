@@ -19,14 +19,13 @@ case class D51(
   respondentId: String,
   institutionName: String,
   table: String,
-  reportType: ReportTypeEnum,
   description: String,
   year: Int,
   reportDate: String,
   msa: MSAReport,
   applicantIncomes: List[ApplicantIncome],
   total: List[Disposition]
-)
+) extends DisclosureReport
 
 object D51 {
   def apply(
@@ -45,7 +44,6 @@ object D51 {
       respondentId,
       institutionName,
       "5-1",
-      Disclosure,
       description,
       year,
       reportDate,
