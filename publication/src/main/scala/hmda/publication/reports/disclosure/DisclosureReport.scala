@@ -1,6 +1,6 @@
 package hmda.publication.reports.disclosure
 
-import hmda.model.publication.reports.{MSAReport, ReportTypeEnum}
+import hmda.model.publication.reports.{ MSAReport, ReportTypeEnum }
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
 
 trait DisclosureReport {
@@ -13,6 +13,5 @@ trait DisclosureReport {
   val msa: MSAReport
 
   val reportType: ReportTypeEnum = Disclosure
-
 
 }
