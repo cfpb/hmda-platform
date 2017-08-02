@@ -5,7 +5,7 @@ import sbtassembly.AssemblyPlugin.autoImport._
 object BuildSettings {
   val buildOrganization = "cfpb"
   val buildVersion      = "1.0.0"
-  val buildScalaVersion = "2.12.1"
+  val buildScalaVersion = "2.12.3"
 
   val hmdaBuildSettings = Defaults.coreDefaultSettings ++
     Seq(
