@@ -1,0 +1,31 @@
+package hmda.query.model.institutions
+
+case class InstitutionQuery(
+  id: String,
+  agency: Int,
+  filingPeriod: Int,
+  activityYear: Int,
+  respondentId: String,
+  institutionType: String,
+  cra: Boolean,
+  emailDomain1: String,
+  emailDomain2: String,
+  emailDomain3: String,
+  respondentName: String,
+  respondentState: String,
+  respondentCity: String,
+  respondentFipsStateNumber: String,
+  hmdaFilerFlag: Boolean,
+  parentRespondentId: String,
+  parentIdRssd: Int,
+  parentName: String,
+  parentCity: String,
+  parentState: String,
+  assets: Int,
+  otherLenderCode: Int,
+  topHolderIdRssd: Int,
+  topHolderName: String,
+  topHolderCity: String,
+  topHolderState: String,
+  topHolderCountry: String
+)

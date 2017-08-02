@@ -1,98 +1,302 @@
-#### CFPB Open Source Project Template Instructions
+[![Build Status](https://travis-ci.org/cfpb/hmda-platform.svg?branch=master)](https://travis-ci.org/cfpb/hmda-platform) [![codecov.io](https://codecov.io/github/cfpb/hmda-platform/coverage.svg?branch=master)](https://codecov.io/github/cfpb/hmda-platform?branch=master)
 
-1. Create a new project.
-2. Copy these files into the new project.
-3. Update the README, replacing the contents below as prescribed.
-4. Add any libraries, assets, or hard dependencies whose source code will be included
-   in the project's repository to the _Exceptions_ section in the [TERMS](TERMS.md).
-  - If no exceptions are needed, remove that section from TERMS.
-5. If working with an existing code base, answer the questions on the [open source checklist](opensource-checklist.md)
-6. Delete these instructions and everything up to the _Project Title_ from the README.
-7. Write some great software and tell people about it.
+# HMDA Platform
 
-> Keep the README fresh! It's the first thing people see and will make the initial impression.
+## This project is a work in progress
 
-----
+Information contained in this repository should be considered provisional and a work in progress, and not the final implementation for the HMDA Platform, unless otherwise indicated.
 
-# Project Title
+## Introduction
 
-**Description**:  Put a meaningful, short, plain-language description of what
-this project is trying to accomplish and why it matters.
-Describe the problem(s) this project solves.
-Describe how this software can improve the lives of its audience.
+For more information on HMDA, checkout the [About HMDA page](http://www.consumerfinance.gov/data-research/hmda/learn-more) on the CFPB website.
 
-Other things to include:
+## The HMDA Platform
 
-  - **Technology stack**: Indicate the technological nature of the software, including primary programming language(s) and whether the software is intended as standalone or as a module in a framework or other ecosystem.
-  - **Status**:  Alpha, Beta, 1.1, etc. It's OK to write a sentence, too. The goal is to let interested people know where this project is at. This is also a good place to link to the [CHANGELOG](CHANGELOG.md).
-  - **Links to production or demo instances**
-  - Describe what sets this apart from related-projects. Linking to another doc or page is OK if this can't be expressed in a sentence or two.
+This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset.
 
+The HMDA Platform is composed of the following modules:
 
-**Screenshot**: If the software has visual components, place a screenshot after the description; e.g.,
+### Parser (JS/JVM)
 
-![](https://raw.githubusercontent.com/cfpb/open-source-project-template/master/screenshot.png)
+Module responsible for reading incoming data and making sure that it conforms to the HMDA File Specification
 
+### Data Validation
+
+Module responsible for validating incoming data by executing validation rules as per the Edit Checks documentation
+
+### Persistence
+
+Module responsible for persisting information into the system. It becomes the system of record for HMDA data
+
+### API
+
+This module contains both public APIs for HMDA data for general use by third party clients and web applications, as well as endpoints for receiving data and providing information about the filing process for Financial Institutions
+
+### API Model
+
+This module contains objects and JSON protocols for use by the API project
+
+### Query
+
+This module is responsible for interacting with the back-end database, as well as conversion between model objects and database objects.
+
+### Panel
+
+This module is responsible for parsing and persisting a CSV-format panel file
+
+### Model (JS/JVM)
+
+This module is responsible for maintaining the objects used in our platform
+
+### Census
+
+This module is responsible for geographic translation (e.g. state number -> state code)
+
+### Publication
+
+This module generates Aggregate and Disclosure reports, as required by HMDA statute.
 
 ## Dependencies
 
-Describe any dependencies that must be installed for this software to work.
-This includes programming languages, databases or other storage mechanisms, build tools, frameworks, and so forth.
-If specific versions of other software are required, or known not to work, call that out.
+### Java 8 SDK
 
-## Installation
+The HMDA Platform runs on the Java Virtual Machine (JVM), and requires the Java 8 JDK to build and run the project. This project is currently being built and tested on [Oracle JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html). See [Oracle's JDK Install Overview](http://docs.oracle.com/javase/8/docs/technotes/guides/install/install_overview.html) for install instructions.
 
-Detailed instructions on how to install, configure, and get the project running.
-This should be frequently tested to ensure reliability. Alternatively, link to
-a separate [INSTALL](INSTALL.md) document.
+The HMDA Platform should also run on OpenJDK 8.
 
-## Configuration
+### Scala
 
-If the software is configurable, describe it in detail, either here or in other documentation to which you link.
+The HMDA Platform is written in [Scala](http://www.scala-lang.org/). To build it, you will need to [download](http://www.scala-lang.org/download/) and [install](http://www.scala-lang.org/download/install.html) Scala 2.11.x
 
-## Usage
+In addition, you'll need Scala's interactive build tool [sbt](http://www.scala-sbt.org/0.13/tutorial/index.html). Please refer to sbt's [installation instructions](http://www.scala-sbt.org/0.13/tutorial/Setup.html) to get started.
 
-Show users how to use the software.
-Be specific.
-Use appropriate formatting when showing code snippets.
+## Building and Running
 
-## How to test the software
+The HMDA Platform uses sbt's multi-project builds, each project representing a specific task.
 
-If the software includes automated tests, detail how to run those tests.
+### Interactive
 
-## Known issues
+* The write side of this system is supported by either a local `leveldb` database or Cassandra. By default, the local `leveldb` is utilized, and some sample data is loaded automatically.
+If using `Cassandra` is desired, the following environment variable needs to be set:
 
-Document any known significant shortcomings with the software.
+```shell
+export HDMA_IS_DEMO=false
+```
 
-## Getting help
+The easiest way to run a Cassandra server to support this application for testing is to do it through Docker:
 
-Instruct users how to get help with this software; this might include links to an issue tracker, wiki, mailing list, etc.
+```shell
+docker run --name cassandra -p 9042:9042 -p 7000:7000 -p 7199:7199 cassandra:3.10
+```
 
-**Example**
+If you want to connect to this server, the following `docker` command will give you access to the Cassandra instance started in the previous step:
 
-If you have questions, concerns, bug reports, etc, please file an issue in this repository's Issue Tracker.
+```shell
+docker run -it --link cassandra:cassandra --rm cassandra cqlsh cassandra
+```
 
-## Getting involved
+Once the `Cassandra` server is running, set the following environment variable to the appropriate Cassandra host (in this example, the default local docker host for a machine running MacOs X):
 
-This section should detail why people should get involved and describe key areas you are
-currently focusing on; e.g., trying to get feedback on features, fixing certain bugs, building
-important pieces, etc.
+```shell
+export CASSANDRA_CLUSTER_HOSTS=192.168.99.100
+```
 
-General instructions on _how_ to contribute should be stated with a link to [CONTRIBUTING](CONTRIBUTING.md).
+To load data into `Cassandra`, you can run the following (the Cassandra server needs to be running and correct environment variables configured as per the previous instructions):
+
+```shell
+$ sbt
+project panel
+run <full local path to sample file>
+```
+A sample file is located in the following folder: `panel/src/main/resources/inst_data_2017_dummy.csv`
 
 
-----
+* In order to support the read side, a local PostgreSQL and Cassandra server are needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
+
+```shell
+export JDBC_URL='jdbc:postgresql://localhost/hmda?user=postgres&password=postgres'
+```
+
+where `hmda` is the name of the `PostgreSQL` database, owned by the default user with default password (`postgres`)
+
+For Cassandra, the following environment variables need to be set (assuming Cassandra is running on a docker container as described above):
+
+```shell
+export CASSANDRA_CLUSTER_HOSTS=192.168.99.100
+export CASSANDRA_CLUSTER_PORT=9042
+```
+
+**Note: if you are running the backend only through sbt, the database needs to be created manually in advance, see instructions [here](https://www.postgresql.org/docs/9.1/static/manage-ag-createdb.html)**
+
+* The `HMDA Platform` is a distributed system that is meant to be run as a clustered application in production.
+As such, it needs a mechanism for storing configuration information for additional nodes joining the cluster.
+`Apache Zookeeper` is used to store this information. To run the project, zookeeper must be running and available in the local network.
+An easy way to satisfy this requirement is to launch a docker container with `ZooKeeper`, as follows:
+
+```shell
+$ docker run --rm -p 2181:2181 -p 2888:2888 -p 3888:3888 jplock/zookeeper
+```
+
+* Set the environemnet variables for Zookeper
+
+```shell
+export ZOOKEEPER_HOST=192.168.99.100
+export ZOOKEEPER_PORT=2181
+```
+
+* Start `sbt`
+
+```shell
+$ sbt
+```
+
+* Select project to build and run.This will retrieve all necessary dependencies, compile Scala source, and start a local server. It also listens for changes to underlying source code, and auto-deploys to local server.
+
+```shell
+
+> project api
+> clean
+> ~re-start
+```
+
+Confirm that the platform is up and running by browsing to http://localhost:8080
+
+* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
+
+```shell
+> clean assembly
+```
+
+This task will create a `fat jar`, which can be executed directly on any JDK8 compliant JVM:
+
+```shell
+java -jar target/scala-2.11/hmda.jar
+```
+
+
+### Docker
+
+First, make sure that you have the [Docker Toolbox](https://www.docker.com/docker-toolbox) installed.
+
+If you don't have a Docker machine created, you can create one by issuing the following:
+```shell
+docker-machine create --driver virtualbox dev
+```
+
+After the machine is created, make sure that you connect your shell with the newly created machine
+```shell
+$ eval "(docker-machine env dev)"
+```
+
+Ensure there's a compiled jar to create the Docker image with:
+```shell
+sbt clean assembly
+```
+#### To run only the API
+
+Build the docker image
+```shell
+docker build -t hmda-api .
+```
+
+Then, run the docker image
+```shell
+docker run -d -p "8080:8080 -p 8082:8082" hmda-api
+```
+
+The Filing API will run on `$(docker-machine ip):8080`
+The Public API will run on `$(docker-machine ip):8082`
+
+#### To run the entire platform
+Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) repo and the [HMDA Platform Auth](https://github.com/cfpb/hmda-platform-auth) repo into sibling directories of this one. Your directory structure should look like this:
+```shell
+~/dev/hmda-project$ ls -la
+total 16
+drwxr-xr-x   6 lortone  staff   204B Jul 25 17:44 ./
+drwxr-xr-x   9 lortone  staff   306B Jul 25 17:50 ../
+drwxr-xr-x  22 lortone  staff   748B Jul 27 16:28 hmda-platform/
+drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
+drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
+```
+
+From the _`hmda-platform-ui`'s_ root directory, run `yarn`. (Get yarn [here](https://yarnpkg.com/lang/en/docs/install/) if you don't have it installed.)
+
+From _`hmda-platform`'s_ root directory, run the following:
+
+```shell
+sbt clean assembly
+docker-compose up
+```
+
+This will bring up all the HMDA Platform services. The first run may take several minutes.
+
+Next, find your docker machine's endpoint.
+
+```shell
+# Typically defaults to 192.168.99.100, which will be used in the following examples
+docker-machine ip dev
+```
+
+Then, visit the following URLS and click advanced -> proceed. This will bypass self-signed cert errors from your browser when running the app.
+
+- https://192.168.99.100:8443/
+- https://192.168.99.100:4443/
+- https://192.168.99.100:9443/
+
+Visit the app at http://192.168.99.100, click the "Login" button, and click "Register" when redirected to the keycloak login screen.
+
+To use demo data there are two institutions available; Bank 0 and Bank 1. To register for either of these institutions you have to use the corresponding domain:
+
+- Bank 0 = bank0.com
+- Bank 1 = bank1.com
+
+Confirm your signup via MailDev by visiting http://192.168.99.100:1080, opening the email, and clicking the verifying link.
+
+You can now interact with the app/begin uploading files, etc.
+
+#### Development conveniences
+
+##### Mounted volumes
+
+For convenience when doing development on the UI, Auth setup, and API, the `docker-compose` file uses a `volumes` which mounts
+
+- the ui's `dist/` directory into the `hmda-platform-ui` container,
+- the `hmda.jar` into `hmda-platform` container,
+- and the `hmda` themes directory in the auth repo into the `keycloak` container.
+
+This means you can make changes to the UI, Keycloak theme, or API and (in most cases) view them without needing to rebuild their respective containers.
+
+In order to view changes in the API you need to rebuild the jar and then restart the container:
+
+```shell
+# from the hmda-platform directory
+sbt clean assembly
+docker-compose stop
+docker-compose up
+```
+
+To allow continued rebuilding of the front-end, you can run the following:
+
+```shell
+# from the hmda-platform-ui directory
+npm run watch
+```
+
+## Contributing
+
+CFPB is developing the HMDA Platform in the open to maximize transparency and encourage third party contributions. If you want to contribute, please read and abide by the terms of the [License](LICENSE) for this project.
+
+We use GitHub issues in this repository to track features, bugs, and enhancements to the software. [Pull Requests](https://help.github.com/articles/using-pull-requests/) are welcome
 
 ## Open source licensing info
 1. [TERMS](TERMS.md)
 2. [LICENSE](LICENSE)
 3. [CFPB Source Code Policy](https://github.com/cfpb/source-code-policy/)
 
-
-----
-
 ## Credits and references
 
 1. Projects that inspired you
+  - https://github.com/cfpb/hmda-pilot
 2. Related projects
-3. Books, papers, talks, or other sources that have meaningful impact or influence on this project
+  - https://github.com/cfpb/hmda-platform-ui
+  - https://github.com/cfpb/hmda-platform-auth
