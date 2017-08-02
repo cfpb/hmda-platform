@@ -1,6 +1,8 @@
 package hmda.query.projections.filing
 
 import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -10,7 +12,7 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.LarConverter._
 
-class FilingCassandraProjection extends FilingCassandraRepository {
+class FilingCassandraProjection(sys: ActorSystem, mat: ActorMaterializer) extends FilingCassandraRepository {
 
   def startUp(): Unit = {
     createKeyspace()
@@ -28,4 +30,7 @@ class FilingCassandraProjection extends FilingCassandraRepository {
       .to(sink).run()
   }
 
+  override implicit def system: ActorSystem = sys
+
+  override implicit def materializer: ActorMaterializer = mat
 }

@@ -1,5 +1,6 @@
 package hmda.validation.rules
 
+import hmda.util.SourceUtils
 import hmda.validation.dsl.Result
 import hmda.validation._
 

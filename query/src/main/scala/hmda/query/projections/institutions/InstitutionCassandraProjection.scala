@@ -1,6 +1,8 @@
 package hmda.query.projections.institutions
 
 import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.stream.scaladsl.Source
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
@@ -9,7 +11,7 @@ import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.institutions.InstitutionCassandraRepository
 import hmda.query.repository.institutions.InstitutionConverter._
 
-class InstitutionCassandraProjection extends InstitutionCassandraRepository {
+class InstitutionCassandraProjection(sys: ActorSystem, mat: ActorMaterializer) extends InstitutionCassandraRepository {
 
   def startUp(): Unit = {
     createKeyspace()
@@ -23,4 +25,7 @@ class InstitutionCassandraProjection extends InstitutionCassandraRepository {
     source.to(sink).run()
   }
 
+  override implicit def system: ActorSystem = sys
+
+  override implicit def materializer: ActorMaterializer = mat
 }

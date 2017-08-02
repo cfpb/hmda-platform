@@ -1,4 +1,4 @@
-package hmda.future.util
+package hmda.util
 
 import akka.actor.Scheduler
 import akka.pattern.after

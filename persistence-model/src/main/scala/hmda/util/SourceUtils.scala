@@ -1,9 +1,10 @@
-package hmda.validation.rules
+package hmda.util
 
 import akka.NotUsed
 import akka.stream.scaladsl._
+import hmda._
+
 import scala.concurrent.Future
-import hmda.validation._
 
 trait SourceUtils {
 
@@ -13,6 +14,10 @@ trait SourceUtils {
 
   def sum[T: AS: MAT](input: Source[T, NotUsed], summation: T => Int): Future[Int] = {
     input.runWith(sinkSum(summation))
+  }
+
+  def collectHeadValue[T: AS: MAT: EC](input: Source[T, NotUsed]): Future[T] = {
+    input.take(1).runWith(Sink.seq).map(xs => xs.head)
   }
 
   private def sinkCount[T]: Sink[T, Future[Int]] = {
