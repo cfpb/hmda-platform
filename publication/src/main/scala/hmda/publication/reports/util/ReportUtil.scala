@@ -26,7 +26,7 @@ object ReportUtil extends SourceUtils {
 
   def calculateMedianIncomeIntervals(fipsCode: Int): Array[Double] = {
     val msaIncome = MsaIncomeLookup.values.find(msa => msa.fips == fipsCode).getOrElse(MsaIncome())
-    val medianIncome = msaIncome.income / 1000
+    val medianIncome = msaIncome.income.toDouble / 1000
     val i50 = medianIncome * 0.5
     val i80 = medianIncome * 0.8
     val i100 = medianIncome
