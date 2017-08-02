@@ -6,7 +6,6 @@ import hmda.model.edits.EditMetaDataLookup
 import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.model.validation.ValidationError
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
-import hmda.validation.engine._
 import spray.json.{ JsNumber, JsObject, JsString, JsValue }
 
 trait ValidationErrorConverter {

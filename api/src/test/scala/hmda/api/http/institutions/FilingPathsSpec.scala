@@ -6,7 +6,6 @@ import akka.http.scaladsl.model.Uri.Path
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ ErrorResponse, FilingDetail }
 import hmda.model.fi.{ Filing, NotStarted }
-import hmda.persistence.demo.DemoData
 
 class FilingPathsSpec extends InstitutionHttpApiSpec with FilingPaths {
 

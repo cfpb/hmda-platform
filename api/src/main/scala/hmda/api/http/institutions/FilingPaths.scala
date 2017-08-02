@@ -19,7 +19,7 @@ import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
 import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
 trait FilingPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCustomDirectives {

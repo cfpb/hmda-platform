@@ -4,7 +4,6 @@ import akka.actor.{ ActorRef, ActorSelection, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
@@ -20,8 +19,6 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.validation.engine._
-
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }

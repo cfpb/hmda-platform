@@ -19,7 +19,7 @@ import hmda.persistence.processing.HmdaFileParser.{ GetStatePaginated, Paginated
 import hmda.persistence.processing.HmdaFileParser
 
 import scala.concurrent.ExecutionContext
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Success }
 
 trait SubmissionParseErrorsPaths
     extends ParserResultsProtocol

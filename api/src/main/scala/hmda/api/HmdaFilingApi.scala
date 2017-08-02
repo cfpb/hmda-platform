@@ -1,15 +1,14 @@
 package hmda.api
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ ActorSystem, Props }
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.pattern.{ ask, pipe }
+import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, LarHttpApi }
 import hmda.api.HmdaConfig._
 import scala.concurrent.duration._
