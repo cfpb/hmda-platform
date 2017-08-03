@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 abstract class SummaryEditCheckSpec extends PropSpec with PropertyChecks with MustMatchers {
 

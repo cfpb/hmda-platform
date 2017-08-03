@@ -1,7 +1,7 @@
 package hmda.validation
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.census.model.{ Msa, MsaMap }
+import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.validation.ValidationStatsEvents._

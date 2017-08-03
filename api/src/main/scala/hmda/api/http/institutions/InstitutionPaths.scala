@@ -22,7 +22,7 @@ import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.view.institutions.InstitutionView
 import hmda.query.view.institutions.InstitutionView.{ GetInstitutionById, GetInstitutionsById }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
 trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCustomDirectives {

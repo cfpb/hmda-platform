@@ -1,21 +1,15 @@
 package hmda.query.repository.filing
 
 import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.SubmissionId
 import hmda.query.DbConfiguration._
-import hmda.query.model.filing.{ LoanApplicationRegisterQuery, LoanApplicationRegisterTotal, ModifiedLoanApplicationRegister }
+import hmda.query.model.filing.{ LoanApplicationRegisterQuery, ModifiedLoanApplicationRegister }
 import hmda.query.repository.{ Repository, TableRepository }
 import slick.basic.{ DatabaseConfig, DatabasePublisher }
 import slick.jdbc.JdbcProfile
 import slick.collection.heterogeneous._
 import slick.collection.heterogeneous.syntax._
-
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.Try
 
 trait FilingComponent {
   import config.profile.api._
@@ -621,14 +615,14 @@ trait FilingComponent {
 
     def findByInstitutionId(instId: String) = db.run(table.filter(_.institutionId === instId).result)
 
-    private def findByInstitutionIdStream(instId: String, period: String)(implicit ec: ExecutionContext): DatabasePublisher[ModifiedLoanApplicationRegister] = {
+    private def findByInstitutionIdStream(instId: String, period: String): DatabasePublisher[ModifiedLoanApplicationRegister] = {
       val disableAutocommit = SimpleDBIO(_.connection.setAutoCommit(false))
       val query = table.filter(x => x.institutionId === instId && x.period === period)
       val action = query.result.withStatementParameters(fetchSize = queryFetchSize)
       db.stream(disableAutocommit andThen action)
     }
 
-    def findByInstitutionIdSource(instId: String, period: String)(implicit ec: ExecutionContext): Source[ModifiedLoanApplicationRegister, NotUsed] =
+    def findByInstitutionIdSource(instId: String, period: String): Source[ModifiedLoanApplicationRegister, NotUsed] =
       Source.fromPublisher(findByInstitutionIdStream(instId, period))
   }
 

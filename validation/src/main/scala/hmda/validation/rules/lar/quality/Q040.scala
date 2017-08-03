@@ -7,8 +7,6 @@ import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 
-import scala.util.Try
-
 object Q040 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): Result = {
     val config = ConfigFactory.load()

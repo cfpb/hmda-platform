@@ -2,7 +2,6 @@ package hmda.api.http
 
 import java.io.File
 
-import akka.actor.ActorSystem
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart }
 import akka.http.scaladsl.testkit.ScalatestRouteTest

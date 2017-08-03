@@ -1,12 +1,10 @@
 package hmda.query.cassandra
 
 import com.datastax.driver.core.{ Cluster, Session }
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers, WordSpec }
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import org.cassandraunit.CQLDataLoader
 import org.cassandraunit.dataset.cql.ClassPathCQLDataSet
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
-
-import scala.concurrent.Future
 
 class CassandraSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
@@ -15,7 +13,7 @@ class CassandraSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     EmbeddedCassandraServerHelper.startEmbeddedCassandra(60000L)
-    cluster = EmbeddedCassandraServerHelper.getCluster()
+    cluster = EmbeddedCassandraServerHelper.getCluster
     session = cluster.connect()
     loadData()
   }

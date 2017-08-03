@@ -98,8 +98,4 @@ class LarDatParserSpec extends PropSpec with MustMatchers with PropertyChecks wi
     applicant.income mustBe "9000"
   }
 
-  private def padLeftWithZero(s: String, n: Int): String = {
-    String.format("%1$" + n + "s", s).replace(' ', '0')
-  }
-
 }

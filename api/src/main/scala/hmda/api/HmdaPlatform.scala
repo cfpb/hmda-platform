@@ -24,7 +24,6 @@ import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
 import hmda.query.HmdaProjectionQuery
-import hmda.query.projections.institutions.InstitutionCassandraProjection
 
 object HmdaPlatform {
 

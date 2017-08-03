@@ -3,8 +3,7 @@ package hmda.validation.rules.lar.quality
 import hmda.model.fi.FIGenerators
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
-import hmda.validation.rules.lar.{ BadValueUtils, LarEditCheckSpec }
-import org.scalacheck.Gen
+import hmda.validation.rules.lar.LarEditCheckSpec
 
 class Q032Spec extends LarEditCheckSpec with FIGenerators {
 

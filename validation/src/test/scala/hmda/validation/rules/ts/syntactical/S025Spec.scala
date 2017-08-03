@@ -3,7 +3,7 @@ package hmda.validation.rules.ts.syntactical
 import hmda.model.fi.lar._
 import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.model.institution.Agency.CFPB
-import hmda.model.institution.ExternalIdType.{ FdicCertNo, FederalTaxId, RssdId, UndeterminedExternalId }
+import hmda.model.institution.ExternalIdType.{ FdicCertNo, RssdId }
 import hmda.model.institution.InstitutionType.Bank
 import hmda.model.institution.{ ExternalId, Institution, TopHolder }
 import hmda.validation.context.ValidationContext

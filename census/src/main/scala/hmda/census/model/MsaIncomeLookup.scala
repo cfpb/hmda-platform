@@ -9,7 +9,7 @@ object MsaIncomeLookup extends ResourceUtils {
     val lines = resourceLines("/msa17inc.csv")
     lines.tail.map { line =>
       val values = parse(line, '\\', ',', '"').getOrElse(List())
-      val fipsCode = values(0).toInt
+      val fipsCode = values.head.toInt
       val name = values(1)
       val income = values(2).toInt
       MsaIncome(fipsCode, name, income)

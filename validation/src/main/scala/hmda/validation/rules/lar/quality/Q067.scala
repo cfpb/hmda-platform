@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.quality
 
-import hmda.model.fi.lar.{ Applicant, LoanApplicationRegister }
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.validation.dsl.Result
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
