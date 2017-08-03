@@ -20,7 +20,6 @@ import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.util.FutureRetry._
 import hmda.query.DbConfiguration._
-import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
 import hmda.query.HmdaProjectionQuery
@@ -50,10 +49,7 @@ object HmdaPlatform {
       file.listFiles.foreach(f => f.delete())
     }
 
-    val larRepository = new LarRepository(config)
     val institutionRepository = new InstitutionRepository(config)
-
-    larRepository.dropSchema()
     institutionRepository.dropSchema()
   }
 

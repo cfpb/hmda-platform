@@ -26,7 +26,6 @@ import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.processing.SubmissionManager
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
-import hmda.query.projections.filing.HmdaFilingDBProjection.{ CreateSchema, DeleteLars }
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
@@ -63,9 +62,6 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
 
         onComplete(fUploadSubmission) {
           case Success((submission, true, processingActor)) =>
-            val queryProjector = system.actorSelection(s"/user/query-supervisor/HmdaFilingView-$period/queryProjector")
-            queryProjector ! CreateSchema
-            queryProjector ! DeleteLars(institutionId)
             uploadFile(processingActor, uploadTimestamp, uri.path, submission)
           case Success((_, false, _)) =>
             val errorResponse = Failed(s"Submission $seqNr not available for upload")

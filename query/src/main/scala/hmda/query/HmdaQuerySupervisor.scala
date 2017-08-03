@@ -1,14 +1,10 @@
 package hmda.query
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.pattern.ask
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.persistence.model.HmdaSupervisorActor
-import hmda.query.projections.filing.HmdaFilingDBProjection.CreateSchema
 import hmda.query.view.filing.HmdaFilingView
 import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import hmda.persistence.PersistenceConfig._
 
 import scala.concurrent.ExecutionContext
@@ -51,11 +47,6 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
   private def createHmdaFilingView(period: String)(implicit ec: ExecutionContext): ActorRef = {
     val id = s"${HmdaFilingView.name}-$period"
     val actor = context.actorOf(HmdaFilingView.props(period), id)
-    for {
-      p <- (actor ? GetProjectionActorRef).mapTo[ActorRef]
-    } yield {
-      p ! CreateSchema
-    }
     supervise(actor, id)
   }
 
