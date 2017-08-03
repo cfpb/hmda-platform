@@ -7,7 +7,7 @@ import akka.stream.ActorMaterializer
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.validation.context.ValidationContext
-import org.scalatest.{ AsyncWordSpec, MustMatchers, PropSpec }
+import org.scalatest.{ AsyncWordSpec, MustMatchers }
 import org.scalatest.prop.PropertyChecks
 
 import scala.concurrent.ExecutionContext

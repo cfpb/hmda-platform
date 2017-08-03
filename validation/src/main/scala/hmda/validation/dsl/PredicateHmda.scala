@@ -4,8 +4,6 @@ import java.text.SimpleDateFormat
 
 import hmda.model.fi.ts.NameAndAddress
 
-import scala.language.implicitConversions
-
 object PredicateHmda {
   def validTimestampFormat[T]: Predicate[T] = (_: T) match {
     case s: String =>

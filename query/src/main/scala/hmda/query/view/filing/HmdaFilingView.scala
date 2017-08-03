@@ -11,7 +11,6 @@ import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.query.model.ViewMessages.StreamCompleted
 import hmda.query.projections.filing.HmdaFilingDBProjection
-import hmda.query.projections.filing.HmdaFilingDBProjection.CreateSchema
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 
 object HmdaFilingView {

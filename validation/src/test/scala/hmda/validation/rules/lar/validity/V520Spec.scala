@@ -1,7 +1,5 @@
 package hmda.validation.rules.lar.validity
 
-import hmda.validation.dsl.Success
-
 class V520Spec extends RateSpreadEditCheckSpec {
   override def check = V520
 

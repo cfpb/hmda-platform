@@ -4,10 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import com.typesafe.config.ConfigFactory
-import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
-import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor

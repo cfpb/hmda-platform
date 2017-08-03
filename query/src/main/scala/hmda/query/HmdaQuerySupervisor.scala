@@ -3,7 +3,6 @@ package hmda.query
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.ask
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.persistence.model.HmdaSupervisorActor
 import hmda.query.projections.filing.HmdaFilingDBProjection.CreateSchema
 import hmda.query.view.filing.HmdaFilingView

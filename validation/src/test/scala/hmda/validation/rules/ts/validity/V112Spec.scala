@@ -3,7 +3,6 @@ package hmda.validation.rules.ts.validity
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.ts.TsEditCheckSpec
-import org.scalacheck.Gen
 
 class V112Spec extends TsEditCheckSpec with ValidityUtils {
 

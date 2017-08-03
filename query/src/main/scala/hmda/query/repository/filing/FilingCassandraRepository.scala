@@ -1,8 +1,8 @@
 package hmda.query.repository.filing
 
 import akka.{ Done, NotUsed }
-import akka.stream.alpakka.cassandra.scaladsl.{ CassandraSink, CassandraSource }
-import akka.stream.scaladsl.{ Flow, Sink, Source }
+import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
+import akka.stream.scaladsl.{ Flow, Source }
 import com.datastax.driver.core._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.projections.ProjectionRuntime

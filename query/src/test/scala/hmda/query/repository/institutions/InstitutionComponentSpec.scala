@@ -4,7 +4,7 @@ import hmda.model.institution.InstitutionGenerators
 import hmda.query.DbConfiguration._
 
 import scala.concurrent.duration._
-import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, BeforeAndAfterEach, MustMatchers }
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.Await
 
