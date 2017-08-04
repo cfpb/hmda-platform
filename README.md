@@ -254,7 +254,7 @@ The Public API will run on `$(docker-machine ip):8082`
     1. Browse to the app at http://192.168.99.100.
     1. Select the "Login" button.  This will redirect your browser to the Keycloak login screen.
     1. Select "create and account" on the login screen.
-    1. Entry you account information and select "Register".
+    1. Enter you account information and select "Register".
 
         **Note:** You must register with an email address from our whitelist of email domains.
         For convenience, `bank0.com` and `bank1.com` address should be available automatically.
@@ -275,16 +275,14 @@ changes reflected in the Docker Compose setup, the simplest way to do this is to
 rebuild everything from scratch.  The following command should be executed from
 within the `hmda-platform` directory.
 
-```shell
-docker-compose stop -t0 && \
-docker-compose rm -vf && \
-cd ../hmda-platform-ui && \
-yarn && \
-cd ../hmda-platform && \
-sbt clean assembly && \
-docker-compose build --no-cache && \
-docker-compose up
-```
+    docker-compose stop -t0 && \
+    docker-compose rm -vf && \
+    cd ../hmda-platform-ui && \
+    yarn && \
+    cd ../hmda-platform && \
+    sbt clean assembly && \
+    docker-compose build --no-cache && \
+    docker-compose up
 
 
 ##### Service URLs
@@ -294,9 +292,9 @@ When running the full stack via Docker Compose, the following services are avail
 | Service                | URL                                 |
 |------------------------|-------------------------------------|
 | Filing UI              | https://192.168.99.100              |
-| Filing API (Unsecured) | https://192.168.99.100:8080         |
+| Filing API (Unsecured) | http://192.168.99.100:8080          |
 | Filing API (Secured)   | https://192.168.99.100:4443/hmda/   |
-| Admin API              | https://192.168.99.100:8081         |
+| Admin API              | http://192.168.99.100:8081          |
 | Public API             | https://192.168.99.100:4443/public/ |
 | Keycloak               | https://192.168.99.100:8443         |
 | MailDev                | https://192.168.99.100:8443/mail/   |
