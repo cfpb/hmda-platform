@@ -70,13 +70,18 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
     })
   }
 
+  private def singleConnectionFlow: Flow[HttpRequest, HttpResponse, NotUsed] =
+    Flow[HttpRequest]
+    .map(r => {
+      Http().singleRequest(r).
+    })
+
   private def stringToHttpFlow: Flow[String, HttpRequest, NotUsed] =
     Flow[String]
       .map(x => {
         val payload = ByteString(InstitutionParser(x).toJson.toString)
         HttpRequest(
           HttpMethods.POST,
-          uri = "/institutions",
           entity = HttpEntity(MediaTypes.`application/json`, payload)
         )
       })
