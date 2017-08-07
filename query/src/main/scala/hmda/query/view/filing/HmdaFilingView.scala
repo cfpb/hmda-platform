@@ -19,7 +19,7 @@ object HmdaFilingView {
   def props(period: String): Props = Props(new HmdaFilingView(period))
 
   def createHmdaFilingView(system: ActorSystem, period: String): ActorRef = {
-    system.actorOf(HmdaFilingView.props(period), s"$name-$period")
+    system.actorOf(HmdaFilingView.props(period).withDispatcher("query-dispatcher"), s"$name-$period")
   }
 
   case class FilingViewState(size: Long = 0, seqNr: Long = 0L) {
