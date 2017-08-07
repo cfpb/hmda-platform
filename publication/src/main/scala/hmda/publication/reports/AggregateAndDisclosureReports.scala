@@ -1,7 +1,8 @@
 package hmda.publication.reports
 
-import akka.actor.{ Actor, ActorRef, ActorSystem, Props }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.stream.ActorMaterializer
+import hmda.persistence.model.HmdaActor
 import hmda.publication.reports.disclosure.DisclosureReports
 
 object AggregateAndDisclosureReports {
@@ -12,7 +13,7 @@ object AggregateAndDisclosureReports {
   }
 }
 
-class AggregateAndDisclosureReports extends Actor {
+class AggregateAndDisclosureReports extends HmdaActor {
 
   import AggregateAndDisclosureReports._
 
