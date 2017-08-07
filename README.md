@@ -144,6 +144,12 @@ export ZOOKEEPER_HOST=192.168.99.100
 export ZOOKEEPER_PORT=2181
 ```
 
+* If you want to use the sample files in this repo for testing the app, run the edits in demo mode. Otherwise, edit S025 will trigger for all files.
+
+```shell
+export EDITS_DEMO_MODE=true
+```
+
 * Start `sbt`
 
 ```shell
