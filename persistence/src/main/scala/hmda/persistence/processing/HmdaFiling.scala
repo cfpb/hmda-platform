@@ -26,7 +26,7 @@ object HmdaFiling {
   def props(filingPeriod: String): Props = Props(new HmdaFiling(filingPeriod))
 
   def createHmdaFiling(system: ActorSystem, filingPeriod: String): ActorRef = {
-    system.actorOf(HmdaFiling.props(filingPeriod))
+    system.actorOf(HmdaFiling.props(filingPeriod).withDispatcher("persistence-dispatcher"))
   }
 
 }

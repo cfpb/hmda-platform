@@ -14,7 +14,7 @@ object HmdaRawFile {
   def props(id: SubmissionId): Props = Props(new HmdaRawFile(id))
 
   def createHmdaRawFile(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
-    system.actorOf(HmdaRawFile.props(submissionId))
+    system.actorOf(HmdaRawFile.props(submissionId).withDispatcher("persistence-dispatcher"))
   }
 
   case class AddLine(timestamp: Long, data: String) extends Command
