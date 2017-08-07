@@ -8,7 +8,7 @@ object AggregateAndDisclosureReports {
   case class GenerateDisclosureByMSAReports(respondentId: String, fipsCode: Int)
   def props(): Props = Props(new AggregateAndDisclosureReports)
   def createAggregateDisclosureReports(system: ActorSystem): ActorRef = {
-    system.actorOf(AggregateAndDisclosureReports.props())
+    system.actorOf(AggregateAndDisclosureReports.props(), "hmda-aggregate-disclosure")
   }
 }
 
