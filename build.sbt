@@ -52,7 +52,8 @@ lazy val hmda = (project in file("."))
     query,
     platformTest,
     validation,
-    census)
+    census,
+    publication)
 
 lazy val model = (crossProject in file("model"))
   .settings(hmdaBuildSettings: _*)
