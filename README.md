@@ -217,8 +217,8 @@ The Public API will run on `$(docker-machine ip):8082`
     * 80 GB Disk space
 
     Assuming you are using Docker Machine to provision your Docker
-    environment, you can check you current settings with (ignore the 
-    second `Memory`):
+    environment, you can check you current settings with the following 
+    (ignore the second `Memory`):
 
         $ docker-machine inspect | grep 'CPU\|Memory\|DiskSize'
             "CPU": 4,
@@ -226,9 +226,9 @@ The Public API will run on `$(docker-machine ip):8082`
             "DiskSize": 81920,
             "Memory": 0,
 
-    If your settings are _below_ these suggestions, you should create a new
-    Docker VM. The following will create a _machine_ named `hmda-platform`
-    with the appropriate resources:
+    If your settings are below these suggestions, you should create a new
+    Docker VM. The following will create a VM named `hmda-platform` with 
+    the appropriate resources:
 
         $ docker-machine create \
         --driver virtualbox \
