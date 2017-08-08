@@ -16,7 +16,6 @@ import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
 import hmda.query.HmdaQuerySupervisor
-import hmda.query.projections.institutions.InstitutionDBProjection._
 
 import scala.concurrent.duration._
 import spray.json._
@@ -38,8 +37,6 @@ class InstitutionAdminHttpApiSpec
     HmdaQuerySupervisor.createQuerySupervisor(system)
 
     val probe = TestProbe()
-    val db = createInstitutionDBProjection(system)
-    probe.send(db, CreateSchema)
   }
 
   override def afterAll(): Unit = {

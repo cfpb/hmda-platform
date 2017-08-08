@@ -13,17 +13,13 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, _ }
 import hmda.query.view.institutions.InstitutionView
-import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import org.slf4j.LoggerFactory
 import hmda.util.FutureRetry._
-import hmda.query.DbConfiguration._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
 import hmda.query.HmdaProjectionQuery
-import hmda.query.projections.institutions.InstitutionCassandraProjection
 
 object HmdaPlatform {
 
@@ -48,9 +44,6 @@ object HmdaPlatform {
       log.info("CLEANING JOURNAL")
       file.listFiles.foreach(f => f.delete())
     }
-
-    val institutionRepository = new InstitutionRepository(config)
-    institutionRepository.dropSchema()
   }
 
   private def startActors[_: EC](system: ActorSystem, supervisor: ActorRef, querySupervisor: ActorRef): Unit = {
@@ -90,8 +83,7 @@ object HmdaPlatform {
       val institutionCreatedF = for {
         i <- institutionViewF
         q <- retry((i ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
-        s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
-      } yield s
+      } yield q
 
       institutionCreatedF.map { x =>
         log.info(x.toString)

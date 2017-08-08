@@ -12,7 +12,6 @@ import hmda.api.model.{ Irs, IrsResponse }
 import hmda.api.protocol.processing.MsaProtocol
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
-import hmda.query.repository.filing.FilingComponent
 import hmda.validation.ValidationStats.FindIrsStats
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -21,8 +20,7 @@ import scala.util.{ Failure, Success }
 trait SubmissionIrsPaths
     extends HmdaCustomDirectives
     with RequestVerificationUtils
-    with MsaProtocol
-    with FilingComponent {
+    with MsaProtocol {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer

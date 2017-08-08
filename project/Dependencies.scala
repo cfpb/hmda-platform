@@ -28,10 +28,6 @@ object Dependencies {
   val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akkaHttp % "test"
   val typesafeConfig = "com.typesafe" % "config" % Version.config
   val enumeratum = "com.beachape" %% "enumeratum" % Version.enumeratum
-  val slick = "com.typesafe.slick" %% "slick" % Version.slick
-  val slickHikariCP = "com.typesafe.slick" %% "slick-hikaricp" % Version.slick
-  val h2       = "com.h2database" % "h2" % Version.h2
-  val postgres = "org.postgresql" % "postgresql" % Version.postgresql
   val scalaCsv = "com.github.tototoshi" %% "scala-csv" % Version.scalaCsv
   val constructr = "de.heikoseeberger" %% "constructr" % Version.constructrVersion
   val constructrZookeeper = "com.lightbend.constructr" %% "constructr-coordination-zookeeper" % Version.constructrZookeeperVersion

@@ -18,8 +18,6 @@ val configDeps = Seq(typesafeConfig)
 
 val enumDeps = Seq(enumeratum)
 
-val slickDeps = Seq(slick, slickHikariCP, h2, postgres)
-
 val csvDeps = Seq(scalaCsv)
 
 lazy val hmda = (project in file("."))
@@ -168,7 +166,7 @@ lazy val query = (project in file("query"))
     },
     parallelExecution in Test := false,
     fork in Test := false,
-    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps ++ Seq(cassandraDriver, cassandraUnit, alpakkaCassandra)
+    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ Seq(cassandraDriver, cassandraUnit, alpakkaCassandra)
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
   .dependsOn(persistenceModel % "compile->compile;test->test")

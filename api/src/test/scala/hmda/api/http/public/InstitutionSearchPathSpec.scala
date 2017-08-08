@@ -10,7 +10,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
 import hmda.api.model.ErrorResponse
 import hmda.api.model.public.InstitutionSearchResults
-import hmda.model.institution.{ Institution, InstitutionGenerators }
+import hmda.model.institution.InstitutionGenerators
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionCreated
 import hmda.persistence.processing.HmdaQuery.EventWithSeqNr
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }

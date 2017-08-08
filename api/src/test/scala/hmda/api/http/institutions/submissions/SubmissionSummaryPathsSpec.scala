@@ -7,7 +7,7 @@ import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
 import hmda.model.fi.SubmissionId
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
-import hmda.persistence.processing.{ HmdaFileValidator, HmdaRawFile, SubmissionManager }
+import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
 import org.scalatest.BeforeAndAfterAll
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.model.ErrorResponse
