@@ -148,6 +148,11 @@ Alternatively, these dependencies (`Cassandra`, `Zookeeper` and `PostgreSQL`) ca
 
 `docker-compose -f docker-dev.yml up`
 
+* If you want to use the sample files in this repo for testing the app, run the edits in demo mode. Otherwise, edit S025 will trigger for all files.
+
+```shell
+export EDITS_DEMO_MODE=true
+```
 
 * Start `sbt`
 

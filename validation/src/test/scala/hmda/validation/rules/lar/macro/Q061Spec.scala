@@ -10,10 +10,11 @@ class Q061Spec extends LessThanOrEqualToPropertyMacroSpec {
 
   override def irrelevantLar(lar: LoanApplicationRegister) = lar.copy(rateSpread = "NA").copy(actionTakenType = 1)
   override def relevantLar(lar: LoanApplicationRegister) = {
-    lar.copy(actionTakenType = 1).copy(hoepaStatus = 1).copy(rateSpread = "5").copy(lienStatus = 1).copy(actionTakenType = 1)
+    val newLoan = lar.loan.copy(propertyType = 1)
+    lar.copy(actionTakenType = 1).copy(loan = newLoan).copy(rateSpread = "5.01").copy(lienStatus = 1).copy(actionTakenType = 1)
   }
 
-  lessThanOrEqualToPropertyTests("first lien hoepa loans", multiplier, relevantLar, irrelevantLar)
+  lessThanOrEqualToPropertyTests("first lien property type loans", multiplier, relevantLar, irrelevantLar)
 
   override def check: AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] = Q061
 }
