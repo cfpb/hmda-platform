@@ -209,6 +209,34 @@ The Public API will run on `$(docker-machine ip):8082`
 
 #### To run the entire platform
 
+1. Dedicate appropriate resources to your Docker environment.  We've found
+    that for the full stack to run efficiently, you need approximately:
+
+    * 4 CPUs
+    * 6 GB RAM
+    * 80 GB Disk space
+
+    Assuming you are using Docker Machine to provision your Docker
+    environment, you can check you current settings with (ignore the 
+    second `Memory`):
+
+        $ docker-machine inspect | grep 'CPU\|Memory\|DiskSize'
+            "CPU": 4,
+            "Memory": 6144,
+            "DiskSize": 81920,
+            "Memory": 0,
+
+    If your settings are _below_ these suggestions, you should create a new
+    Docker VM. The following will create a _machine_ named `hmda-platform`
+    with the appropriate resources:
+
+        $ docker-machine create \
+        --driver virtualbox \
+        --virtualbox-disk-size 81920 \
+        --virtualbox-cpu-count 4 \
+        --virtualbox-memory 6144 \
+        hmda-platform
+
 1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui) and 
     [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth) into the same
     directory as hmda-platform.
@@ -237,7 +265,7 @@ The Public API will run on `$(docker-machine ip):8082`
 
     This will bring up all the HMDA Platform services. The first run may take several minutes.
 
-1. Discover you Docker host's IP
+1. Discover your Docker host's IP
 
         echo $DOCKER_HOST
 
