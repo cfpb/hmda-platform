@@ -144,6 +144,10 @@ export ZOOKEEPER_HOST=192.168.99.100
 export ZOOKEEPER_PORT=2181
 ```
 
+Alternatively, these dependencies (`Cassandra`, `Zookeeper` and `PostgreSQL`) can be started from `docker` providing default resources for the `HMDA Platform`:
+
+`docker-compose -f docker-dev.yml up`
+
 * If you want to use the sample files in this repo for testing the app, run the edits in demo mode. Otherwise, edit S025 will trigger for all files.
 
 ```shell

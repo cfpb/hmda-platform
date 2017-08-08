@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+  zookeeper:
+    image: jplock/zookeeper
+    ports:
+      - '2181:2181'
+
+  cassandra:
+    image: cassandra
+    ports:
+      - '9042:9042'
+      - '7000:7000'
+      - '7199:7199'
+
+  query_db:
+    image: postgres:9.6.1
+    ports:
+      - '54321:5432'
+    environment:
+      POSTGRES_DB: hmda
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
