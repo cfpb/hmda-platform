@@ -52,10 +52,6 @@ class InstitutionViewSpec extends ActorSpec {
       probe.send(institutionQuery, GetState)
       probe.expectMsg(Set(i1, i2, i4))
     }
-    "return reference to institution query projector" in {
-      probe.send(institutionQuery, GetProjectionActorRef)
-      probe.expectMsgType[ActorRef]
-    }
   }
 
 }
