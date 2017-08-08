@@ -1,13 +1,11 @@
 package hmda.validation.rules.ts.syntactical
 
-import hmda.model.fi.HasControlNumber
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax.PredicateOps
-import hmda.validation.dsl.{ Failure, Result }
-import hmda.validation.rules.{ EditCheck, IfInstitutionPresentIn, IfYearPresentIn }
+import hmda.validation.dsl.Result
+import hmda.validation.rules.{ EditCheck, IfYearPresentIn }
 
 object S100 {
   def inContext(ctx: ValidationContext): EditCheck[TransmittalSheet] = {

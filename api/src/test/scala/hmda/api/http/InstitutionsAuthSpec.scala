@@ -81,7 +81,6 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
       val parent = Parent("123", 123, "test parent", "", "")
       val topHolder = TopHolder(-1, "", "", "", "")
       val caseInsensitiveBank = Institution("1", CFPB, 2017, MBS, cra = true, Set(), Set(), respondent = respondent, hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
-      val querySupervisor = system.actorSelection("/user/query-supervisor")
       val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
 
       val fInstitutions: Future[Unit] = for {

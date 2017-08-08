@@ -27,7 +27,6 @@ import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persiste
 import hmda.persistence.processing.SubmissionManager
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 
-import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
 trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with SubmissionProtocol with HmdaCustomDirectives {

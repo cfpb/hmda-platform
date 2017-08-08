@@ -59,7 +59,7 @@ trait SubmissionIrsPaths
       }
     }
 
-  private def getMsa(instId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Seq[Msa]] = {
+  private def getMsa(instId: String, period: String, seqNr: Int): Future[Seq[Msa]] = {
     val validationStats = system.actorSelection("/user/validation-stats")
     val submissionId = SubmissionId(instId, period, seqNr)
     (validationStats ? FindIrsStats(submissionId)).mapTo[Seq[Msa]]

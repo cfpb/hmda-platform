@@ -1,6 +1,6 @@
 package hmda.persistence
 
-import akka.actor.{ ActorRef, ActorSystem, Props, Terminated }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.fi.SubmissionId
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor

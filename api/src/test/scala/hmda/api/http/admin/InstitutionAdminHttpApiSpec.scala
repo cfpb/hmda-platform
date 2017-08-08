@@ -84,7 +84,6 @@ class InstitutionAdminHttpApiSpec
       }
     }
     "return conflict when trying to upload existing entity" in {
-      val id = newInstitution.id
       val jsonRequest = ByteString(newInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
       postRequest ~> institutionAdminRoutes ~> check {
