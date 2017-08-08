@@ -214,51 +214,124 @@ The Filing API will run on `$(docker-machine ip):8080`
 The Public API will run on `$(docker-machine ip):8082`
 
 #### To run the entire platform
-Clone the [HMDA Platform UI](https://github.com/cfpb/hmda-platform-ui) repo and the [HMDA Platform Auth](https://github.com/cfpb/hmda-platform-auth) repo into sibling directories of this one. Your directory structure should look like this:
-```shell
-~/dev/hmda-project$ ls -la
-total 16
-drwxr-xr-x   6 lortone  staff   204B Jul 25 17:44 ./
-drwxr-xr-x   9 lortone  staff   306B Jul 25 17:50 ../
-drwxr-xr-x  22 lortone  staff   748B Jul 27 16:28 hmda-platform/
-drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
-drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
-```
 
-From the _`hmda-platform-ui`'s_ root directory, run `yarn`. (Get yarn [here](https://yarnpkg.com/lang/en/docs/install/) if you don't have it installed.)
+1. Dedicate appropriate resources to your Docker environment.  We've found
+    that for the full stack to run efficiently, you need approximately:
 
-From _`hmda-platform`'s_ root directory, run the following:
+    * 4 CPUs
+    * 6 GB RAM
+    * 80 GB Disk space
 
-```shell
-sbt clean assembly
-docker-compose up
-```
+    Assuming you are using Docker Machine to provision your Docker
+    environment, you can check you current settings with the following 
+    (ignore the second `Memory`):
 
-This will bring up all the HMDA Platform services. The first run may take several minutes.
+        $ docker-machine inspect | grep 'CPU\|Memory\|DiskSize'
+            "CPU": 4,
+            "Memory": 6144,
+            "DiskSize": 81920,
+            "Memory": 0,
 
-Next, find your docker machine's endpoint.
+    If your settings are below these suggestions, you should create a new
+    Docker VM. The following will create a VM named `hmda-platform` with 
+    the appropriate resources:
 
-```shell
-# Typically defaults to 192.168.99.100, which will be used in the following examples
-docker-machine ip dev
-```
+        $ docker-machine create \
+        --driver virtualbox \
+        --virtualbox-disk-size 81920 \
+        --virtualbox-cpu-count 4 \
+        --virtualbox-memory 6144 \
+        hmda-platform
 
-Then, visit the following URLS and click advanced -> proceed. This will bypass self-signed cert errors from your browser when running the app.
+1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui) and 
+    [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth) into the same
+    directory as hmda-platform.
 
-- https://192.168.99.100:8443/
-- https://192.168.99.100:4443/
-- https://192.168.99.100:9443/
+        ~/dev/hmda-project$ ls -l
+        drwxr-xr-x  22 lortone  staff   748B Jul 27 16:28 hmda-platform/
+        drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
+        drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
 
-Visit the app at http://192.168.99.100, click the "Login" button, and click "Register" when redirected to the keycloak login screen.
+1. Build hmda-platform-ui
 
-To use demo data there are two institutions available; Bank 0 and Bank 1. To register for either of these institutions you have to use the corresponding domain:
+        cd hmda-platform-ui && \
+        yarn && \
+        cd ..
 
-- Bank 0 = bank0.com
-- Bank 1 = bank1.com
+    **Note:** This requires [yarn](https://yarnpkg.com/lang/en/docs/install/) to be installed.
 
-Confirm your signup via MailDev by visiting http://192.168.99.100:1080, opening the email, and clicking the verifying link.
+1. Build hmda-platform
 
-You can now interact with the app/begin uploading files, etc.
+        cd hmda-platform && \
+        sbt clean assembly
+
+1. Launch the stack with Docker Compose
+
+        docker-compose up
+
+    This will bring up all the HMDA Platform services. The first run may take several minutes.
+
+1. Discover your Docker host's IP
+
+        echo $DOCKER_HOST
+
+    ...or if using Docker Machine...
+
+        docker-machine ip
+
+    **Note:** Docker Machine generally defaults to `192.168.99.100`.  We reference that
+    IP throught this doc.  If your Docker host IP differs, please adjust these instructions
+    to match the Docker host IP provided by your system.
+
+1. Use it!  Below are steps representing a standard HMDA filing:
+
+    1. Browse to the app at http://192.168.99.100.
+    1. Select the "Login" button.  This will redirect your browser to the Keycloak login screen.
+    1. Select "create and account" on the login screen.
+    1. Enter you account information and select "Register".
+
+        **Note:** You must register with an email address from our whitelist of email domains.
+        For convenience, `bank0.com` and `bank1.com` address should be available automatically.
+
+    1. Browse to the mock email server at https://192.168.99.100:8443/mail/, and select the 
+        verification link in the email found there.  This should take you back to the HMDA
+        filing web app, now logged in.
+
+        **Note:** This "MailDev" services is for development purposes only.  In the case of
+        an actual HMDA filing, you would receive a confirmation to your actual email account.
+
+    1. Submit a HMDA filing.  Several sample files can be found [here](https://github.com/cfpb/hmda-platform/tree/master/parser/jvm/src/test/resources/txt).
+
+##### Updating an existing system
+
+If you've updated any of the hmda-platform services, and would like to see those 
+changes reflected in the Docker Compose setup, the simplest way to do this is to
+rebuild everything from scratch.  The following command should be executed from
+within the `hmda-platform` directory.
+
+    docker-compose stop -t0 && \
+    docker-compose rm -vf && \
+    cd ../hmda-platform-ui && \
+    yarn && \
+    cd ../hmda-platform && \
+    sbt clean assembly && \
+    docker-compose build --no-cache && \
+    docker-compose up
+
+
+##### Service URLs
+
+When running the full stack via Docker Compose, the following services are available:
+
+| Service                | URL                                 |
+|------------------------|-------------------------------------|
+| Filing UI              | https://192.168.99.100              |
+| Filing API (Unsecured) | http://192.168.99.100:8080          |
+| Filing API (Secured)   | https://192.168.99.100:4443/hmda/   |
+| Admin API              | http://192.168.99.100:8081          |
+| Public API             | https://192.168.99.100:4443/public/ |
+| Keycloak               | https://192.168.99.100:8443         |
+| MailDev                | https://192.168.99.100:8443/mail/   |
 
 #### Development conveniences
 
