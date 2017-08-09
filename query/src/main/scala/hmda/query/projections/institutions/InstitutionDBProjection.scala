@@ -22,7 +22,7 @@ object InstitutionDBProjection extends InstitutionComponent {
   def props(): Props = Props(new InstitutionDBProjection())
 
   def createInstitutionDBProjection(system: ActorSystem): ActorRef = {
-    system.actorOf(InstitutionDBProjection.props())
+    system.actorOf(InstitutionDBProjection.props().withDispatcher("query-dispatcher"))
   }
 
 }
