@@ -26,8 +26,7 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
   val log = LoggerFactory.getLogger("hmda")
 
   val config = ConfigFactory.load()
-  val host = config.getString("hmda.adminHost")
-  val port = config.getInt("hmda.adminPort")
+  val url = config.getString("hmda.adminUrl")
 
   def main(args: Array[String]): Unit = {
 
@@ -44,7 +43,6 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
       val response = sendRequest("create")
 
       val source = FileIO.fromPath(file.toPath)
-      val connectionFlow = Http().outgoingConnection(host, port)
 
       response.onComplete(s =>
         if (s.getOrElse("").equals("InstitutionSchemaCreated()")) {
@@ -54,7 +52,7 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
             .drop(1)
             .via(byte2StringFlow)
             .via(stringToHttpFlow)
-            .via(connectionFlow)
+            .via(singleConnectionFlow)
             .runWith(Sink.foreach[HttpResponse](elem => log.info(elem.entity.toString)))
 
           completedF.onComplete(result => {
@@ -70,13 +68,21 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
     })
   }
 
+  private def singleConnectionFlow: Flow[HttpRequest, HttpResponse, NotUsed] =
+    Flow[HttpRequest]
+      .mapAsync[HttpResponse](5)(request => {
+        for {
+          response <- Http().singleRequest(request)
+        } yield response
+      })
+
   private def stringToHttpFlow: Flow[String, HttpRequest, NotUsed] =
     Flow[String]
       .map(x => {
         val payload = ByteString(InstitutionParser(x).toJson.toString)
         HttpRequest(
           HttpMethods.POST,
-          uri = "/institutions",
+          uri = s"$url/institutions",
           entity = HttpEntity(MediaTypes.`application/json`, payload)
         )
       })
@@ -85,7 +91,7 @@ object PanelCsvLoader extends WriteInstitutionProtocol {
     Flow[ByteString].map(bs => bs.utf8String)
 
   private def sendRequest(req: String) = {
-    val request = HttpRequest(HttpMethods.GET, uri = s"http://$host:$port/institutions/$req")
+    val request = HttpRequest(HttpMethods.GET, uri = s"$url/institutions/$req")
     for {
       response <- Http().singleRequest(request)
       content <- Unmarshal(response.entity).to[String]

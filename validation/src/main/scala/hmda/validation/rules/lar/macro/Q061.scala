@@ -20,14 +20,14 @@ object Q061 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
 
-    val firstLienHoepaLoans =
-      count(lars.filter(lar => lar.hoepaStatus == 1 && lar.actionTakenType == 1 && lar.lienStatus == 1 && lar.rateSpread != "NA")
-        .filter(lar => lar.rateSpread.toInt >= 5))
+    val firstLienPropertyLoans =
+      count(lars.filter(lar => lar.loan.propertyType == 1 && lar.actionTakenType == 1 && lar.lienStatus == 1 && lar.rateSpread != "NA")
+        .filter(lar => lar.rateSpread.toDouble > 5.0))
 
     val total = count(lars.filter(lar => lar.actionTakenType == 1))
 
     for {
-      f <- firstLienHoepaLoans
+      f <- firstLienPropertyLoans
       t <- total
     } yield {
       f.toDouble is lessThanOrEqual(t * multiplier)
