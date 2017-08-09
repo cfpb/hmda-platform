@@ -10,9 +10,8 @@ object V326 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V326"
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    when(lar.applicant.coSex is equalTo(5)) {
-      (lar.applicant.coRace1 is equalTo(8)) and
-        (lar.applicant.coEthnicity is equalTo(5))
+    when((lar.applicant.coRace1 is equalTo(8)) or (lar.applicant.coEthnicity is equalTo(5))) {
+      lar.applicant.coSex is equalTo(5)
     }
   }
 }
