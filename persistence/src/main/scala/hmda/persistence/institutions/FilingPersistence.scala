@@ -18,7 +18,7 @@ object FilingPersistence {
   def props(institutionId: String): Props = Props(new FilingPersistence(institutionId))
 
   def createFilings(institutionId: String, system: ActorSystem): ActorRef = {
-    system.actorOf(FilingPersistence.props(institutionId))
+    system.actorOf(FilingPersistence.props(institutionId).withDispatcher("persistence-dispatcher"))
   }
 
   case class FilingState(filings: Seq[Filing] = Nil) {

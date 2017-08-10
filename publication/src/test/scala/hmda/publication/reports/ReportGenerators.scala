@@ -1,7 +1,6 @@
 package hmda.publication.reports
 
 import hmda.model.census.Census
-import hmda.model.publication.reports.MinorityStatusEnum.WhiteNonHispanic
 import hmda.model.publication.reports._
 import org.scalacheck.Gen
 

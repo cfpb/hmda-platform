@@ -19,7 +19,7 @@ object SubmissionPersistence {
   def props(institutionId: String, period: String): Props = Props(new SubmissionPersistence(institutionId, period))
 
   def createSubmissions(institutionId: String, period: String, system: ActorSystem): ActorRef = {
-    system.actorOf(SubmissionPersistence.props(institutionId, period))
+    system.actorOf(SubmissionPersistence.props(institutionId, period).withDispatcher("persistence-dispatcher"))
   }
 
   case class SubmissionState(submissions: Seq[Submission] = Nil) {

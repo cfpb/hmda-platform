@@ -25,7 +25,7 @@ object InstitutionView {
   def props(): Props = Props(new InstitutionView)
 
   def createInstitutionView(system: ActorSystem): ActorRef = {
-    system.actorOf(InstitutionView.props(), "institutions-view")
+    system.actorOf(InstitutionView.props().withDispatcher("query-dispatcher"), "institutions-view")
   }
 
   case class InstitutionViewState(institutions: Set[Institution] = Set.empty[Institution], seqNr: Long = 0L) {
@@ -50,7 +50,9 @@ class InstitutionView extends HmdaPersistentActor {
 
   var counter = 0
 
-  val queryProjector = context.actorOf(InstitutionDBProjection.props(), "institution-projection")
+  val queryProjector = context
+    .actorOf(InstitutionDBProjection.props()
+      .withDispatcher("query-dispatcher"), "institution-projection")
 
   val snapshotCounter = configuration.getInt("hmda.journal.snapshot.counter")
 
