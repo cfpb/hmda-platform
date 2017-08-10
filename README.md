@@ -78,6 +78,16 @@ is used, see the documentation [here](Documents/cluster.md)
 
 ### Interactive
 
+#### Running the Dependencies
+
+Assuming you have Docker-Compose installed, the easiest way to get all of the platform's dependencies up and running with the provided docker-compose dev setup:
+
+`docker-compose -f docker-dev.yml up`
+
+Alternatively, you can start each one individually with the following instructions.
+
+##### Write Journal
+
 * The write side of this system is supported by either a local `leveldb` database or Cassandra. By default, the local `leveldb` is utilized, and some sample data is loaded automatically.
 If using `Cassandra` is desired, the following environment variable needs to be set:
 
@@ -112,6 +122,7 @@ run <full local path to sample file>
 ```
 A sample file is located in the following folder: `panel/src/main/resources/inst_data_2017_dummy.csv`
 
+##### Read Journal
 
 * In order to support the read side, a local PostgreSQL and Cassandra server are needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
 
@@ -121,6 +132,8 @@ export JDBC_URL='jdbc:postgresql://localhost/hmda?user=postgres&password=postgre
 
 where `hmda` is the name of the `PostgreSQL` database, owned by the default user with default password (`postgres`)
 
+**Note: if you are running the backend only through sbt, the database needs to be created manually in advance, see instructions [here](https://www.postgresql.org/docs/9.1/static/manage-ag-createdb.html)**
+
 For Cassandra, the following environment variables need to be set (assuming Cassandra is running on a docker container as described above):
 
 ```shell
@@ -128,7 +141,7 @@ export CASSANDRA_CLUSTER_HOSTS=192.168.99.100
 export CASSANDRA_CLUSTER_PORT=9042
 ```
 
-**Note: if you are running the backend only through sbt, the database needs to be created manually in advance, see instructions [here](https://www.postgresql.org/docs/9.1/static/manage-ag-createdb.html)**
+##### Apache Zookeeper
 
 * The `HMDA Platform` is a distributed system that is meant to be run as a clustered application in production.
 As such, it needs a mechanism for storing configuration information for additional nodes joining the cluster.
@@ -139,18 +152,17 @@ An easy way to satisfy this requirement is to launch a docker container with `Zo
 $ docker run --rm -p 2181:2181 -p 2888:2888 -p 3888:3888 jplock/zookeeper
 ```
 
-* Set the environemnet variables for Zookeper
+* Set the environement variables for Zookeper
 
 ```shell
 export ZOOKEEPER_HOST=192.168.99.100
 export ZOOKEEPER_PORT=2181
 ```
 
-Alternatively, these dependencies (`Cassandra`, `Zookeeper` and `PostgreSQL`) can be started from `docker` providing default resources for the `HMDA Platform`:
 
-`docker-compose -f docker-dev.yml up`
+#### Running the API
 
-* If you want to use the sample files in this repo for testing the app, run the edits in demo mode. Otherwise, edit S025 will trigger for all files.
+* If you want to use the sample files in this repo for testing the app, run the edits in demo mode by adding the following environment variable. Otherwise, edit S025 will trigger for all files.
 
 ```shell
 export EDITS_DEMO_MODE=true
@@ -172,6 +184,9 @@ $ sbt
 ```
 
 Confirm that the platform is up and running by browsing to http://localhost:8080
+
+
+#### Building the Project
 
 * To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
