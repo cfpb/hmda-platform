@@ -129,7 +129,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         List(
           MacroValidationError("Q008"),
           MacroValidationError("Q010"),
-          MacroValidationError("Q016"),
           MacroValidationError("Q023")
         ),
         macroVerified = false

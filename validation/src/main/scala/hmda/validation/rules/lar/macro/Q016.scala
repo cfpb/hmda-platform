@@ -10,6 +10,7 @@ import hmda.validation.rules.AggregateEditCheck
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
 import scala.concurrent.Future
+import scala.util.Try
 
 object Q016 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
@@ -21,7 +22,9 @@ object Q016 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
 
   override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
 
-    val belowIncomeThreshold = count(lars.filter(lar => lar.loan.amount < incomeCap))
+    val belowIncomeThreshold = count(lars
+      .filter(lar => Try(lar.applicant.income.toDouble).isSuccess)
+      .filter(lar => lar.applicant.income.toInt < incomeCap))
 
     val total = count(lars)
 
