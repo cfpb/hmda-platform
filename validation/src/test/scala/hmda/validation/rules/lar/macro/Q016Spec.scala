@@ -17,7 +17,7 @@ class Q016Spec extends MacroSpec {
     lar.copy(applicant = underCapApplicant)
   }
   def overCap(lar: LoanApplicationRegister) = {
-    val overCapApplicant = lar.applicant.copy(income = (incomeCap + 1).toString)
+    val overCapApplicant = lar.applicant.copy(income = incomeCap.toString)
     lar.copy(applicant = overCapApplicant)
   }
 
@@ -26,25 +26,25 @@ class Q016Spec extends MacroSpec {
     lar.copy(applicant = naApplicant)
   }
 
-  property(s"be valid if under cap loans < $multiplier * over cap loans") {
+  property(s"be valid if under cap loans < $multiplier * total loans") {
     val numOfRelevantLars = sampleSizeTarget - 1
     val validLarSource = newLarSource(testLars, numOfRelevantLars, underCap, overCap)
     validLarSource.mustPass
   }
 
-  property(s"be invalid if under cap loans = $multiplier * over cap loans") {
+  property(s"be invalid if under cap loans = $multiplier * total loans") {
     val numOfRelevantLars = sampleSizeTarget
     val validLarSource = newLarSource(testLars, numOfRelevantLars, underCap, overCap)
     validLarSource.mustPass
   }
 
-  property(s"be invalid if under cap loans > $multiplier * over cap loans") {
+  property(s"be invalid if under cap loans > $multiplier * total loans") {
     val numOfRelevantLars = sampleSizeTarget + 1
     val invalidLarSource = newLarSource(testLars, numOfRelevantLars, underCap, overCap)
     invalidLarSource.mustFail
   }
 
-  property(s"be valid if NA loans > $multiplier * over cap loans") {
+  property(s"be valid if NA loans > $multiplier * total loans") {
     val numOfRelevantLars = sampleSizeTarget + 1
     val validLarSource = newLarSource(testLars, numOfRelevantLars, naIncome, overCap)
     validLarSource.mustPass
