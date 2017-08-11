@@ -51,7 +51,7 @@ object HmdaFileValidator {
   def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
 
   def createHmdaFileValidator(system: ActorSystem, id: SubmissionId): ActorRef = {
-    system.actorOf(HmdaFileValidator.props(id))
+    system.actorOf(HmdaFileValidator.props(id).withDispatcher("persistence-dispatcher"))
   }
 
   case class HmdaFileValidationState(

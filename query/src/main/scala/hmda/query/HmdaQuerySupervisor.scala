@@ -36,7 +36,7 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
 
   override protected def createActor(name: String): ActorRef = name match {
     case id @ InstitutionView.name =>
-      val actor = context.actorOf(InstitutionView.props(), id)
+      val actor = context.actorOf(InstitutionView.props().withDispatcher("query-dispatcher"), id)
       supervise(actor, id)
   }
 
@@ -46,7 +46,7 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
 
   private def createHmdaFilingView(period: String)(implicit ec: ExecutionContext): ActorRef = {
     val id = s"${HmdaFilingView.name}-$period"
-    val actor = context.actorOf(HmdaFilingView.props(period), id)
+    val actor = context.actorOf(HmdaFilingView.props(period).withDispatcher("query-dispatcher"), id)
     supervise(actor, id)
   }
 

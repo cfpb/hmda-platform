@@ -32,7 +32,7 @@ object SubmissionManager {
   def props(submissionId: SubmissionId): Props = Props(new SubmissionManager(submissionId))
 
   def createSubmissionManager(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
-    system.actorOf(SubmissionManager.props(submissionId))
+    system.actorOf(SubmissionManager.props(submissionId).withDispatcher("persistence-dispatcher"))
   }
 }
 
@@ -47,11 +47,20 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   val supervisor = context.parent
   val hmdaFilingF = (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
 
-  val submissionLarStats: ActorRef = context.actorOf(SubmissionLarStats.props(submissionId), s"submission-lar-stats-${submissionId.toString}")
-  val submissionFSM: ActorRef = context.actorOf(SubmissionFSM.props(submissionId))
-  val submissionUpload: ActorRef = context.actorOf(HmdaRawFile.props(submissionId))
-  val submissionParser: ActorRef = context.actorOf(HmdaFileParser.props(submissionId))
-  val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator.props(submissionId))
+  val submissionLarStats: ActorRef = context.actorOf(SubmissionLarStats.props(submissionId)
+    .withDispatcher("persistence-dispatcher"), s"submission-lar-stats-${submissionId.toString}")
+  val submissionFSM: ActorRef = context.actorOf(SubmissionFSM
+    .props(submissionId)
+    .withDispatcher("persistence-dispatcher"))
+  val submissionUpload: ActorRef = context.actorOf(HmdaRawFile
+    .props(submissionId)
+    .withDispatcher("persistence-dispatcher"))
+  val submissionParser: ActorRef = context.actorOf(HmdaFileParser
+    .props(submissionId)
+    .withDispatcher("persistence-dispatcher"))
+  val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator
+    .props(submissionId)
+    .withDispatcher("persistence-dispatcher"))
   val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
 
   var uploaded: Int = 0

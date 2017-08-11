@@ -33,7 +33,7 @@ object HmdaFileParser {
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
 
   def createHmdaFileParser(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
-    system.actorOf(HmdaFileParser.props(submissionId))
+    system.actorOf(HmdaFileParser.props(submissionId).withDispatcher("persistence-dispatcher"))
   }
 
   case class PaginatedFileParseState(tsParsingErrors: Seq[String], larParsingErrors: Seq[LarParsingError], totalErroredLines: Int)

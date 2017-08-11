@@ -18,7 +18,7 @@ object SingleLarValidation {
   case object FinishChecks
 
   def createSingleLarValidator(system: ActorSystem): ActorRef = {
-    system.actorOf(SingleLarValidation.props, s"$name")
+    system.actorOf(SingleLarValidation.props.withDispatcher("persistence-dispatcher"), s"$name")
   }
 
 }
