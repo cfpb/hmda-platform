@@ -13,7 +13,7 @@ import hmda.query.repository.filing.LarConverter._
 import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, WordSpec }
 
-import scala.concurrent.Await
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 
 class D51Spec extends WordSpec with MustMatchers with LarGenerators {
@@ -40,11 +40,12 @@ class D51Spec extends WordSpec with MustMatchers with LarGenerators {
   val expectedDispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted, ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
   "Generate a Disclosure 5-1 report" in {
-    val result = Await.result(D51.generate(source, fips, respId), 5.seconds)
+    val result = Await.result(D51.generate(source, fips, respId, Future("Corvallis Test Bank")), 5.seconds)
 
     result.msa mustBe MSAReport("18700", "Corvallis, OR", "OR", "Oregon")
     result.table mustBe "5-1"
     result.respondentId mustBe "98765"
+    result.institutionName mustBe "Corvallis Test Bank"
     result.applicantIncomes.size mustBe 5
 
     val lowestIncome = result.applicantIncomes.head
