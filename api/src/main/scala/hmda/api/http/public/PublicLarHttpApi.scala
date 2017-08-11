@@ -11,8 +11,6 @@ import hmda.api.http.HmdaCustomDirectives
 import hmda.query.DbConfiguration._
 import hmda.query.repository.filing.FilingComponent
 
-import scala.concurrent.ExecutionContext
-
 trait PublicLarHttpApi extends HmdaCustomDirectives with FilingComponent {
 
   implicit val system: ActorSystem

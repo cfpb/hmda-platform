@@ -5,9 +5,9 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
 class V317Spec extends LarEditCheckSpec {
-  property("Succeeds when Co-Applicant race1 is not 8") {
+  property("Succeeds when Co-Applicant sex != 5 and ethnicity !=5") {
     forAll(larGen) { lar =>
-      whenever(lar.applicant.coRace1 != 8) {
+      whenever(lar.applicant.coSex != 5 && lar.applicant.coEthnicity != 5) {
         lar.mustPass
       }
     }
@@ -21,20 +21,20 @@ class V317Spec extends LarEditCheckSpec {
     }
   }
 
-  property("Fails when Co-Applicant race1=8, sex=5, and ethnicity NOT 5") {
+  property("Fails when Co-Applicant sex=5, and race1!=8") {
     forAll(larGen) { lar =>
-      whenever(lar.applicant.coEthnicity != 5) {
-        val invalidApplicant = lar.applicant.copy(coSex = 5, coRace1 = 8)
+      whenever(lar.applicant.coRace1 != 8) {
+        val invalidApplicant = lar.applicant.copy(coSex = 5)
         val invalidLar = lar.copy(applicant = invalidApplicant)
         invalidLar.mustFail
       }
     }
   }
 
-  property("Fails whenever Applicant race1=8, ethnicity=5, and sex NOT 5") {
+  property("Fails whenever Applicant ethnicity=5, and race1!=8") {
     forAll(larGen) { lar =>
-      whenever(lar.applicant.coSex != 5) {
-        val invalidApplicant = lar.applicant.copy(coRace1 = 8, coEthnicity = 5)
+      whenever(lar.applicant.coRace1 != 8) {
+        val invalidApplicant = lar.applicant.copy(coEthnicity = 5)
         val invalidLar = lar.copy(applicant = invalidApplicant)
         invalidLar.mustFail
       }

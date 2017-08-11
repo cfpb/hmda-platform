@@ -9,8 +9,6 @@ import org.scalacheck.Gen
 import org.scalatest.{ Assertion, MustMatchers, WordSpec }
 import org.scalatest.prop.{ PropertyChecks, TableFor1 }
 
-import scala.language.implicitConversions
-
 class Q030Spec extends WordSpec with PropertyChecks with LarGenerators with MustMatchers {
 
   val respondent = Respondent(ExternalId("", UndeterminedExternalId), "some bank", "", "", "")
@@ -190,12 +188,6 @@ class Q030Spec extends WordSpec with PropertyChecks with LarGenerators with Must
               }
             }
           }
-        }
-      }
-
-      def mustFail(implicit geo: Geography, fi: Institution): Unit = {
-        forAll(larGen, actionTaken) { (lar, action) =>
-          lar.copy(actionTakenType = action, geography = geo).mustFail
         }
       }
 

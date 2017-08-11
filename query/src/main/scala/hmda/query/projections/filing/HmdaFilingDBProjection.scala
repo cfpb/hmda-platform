@@ -24,7 +24,7 @@ object HmdaFilingDBProjection extends FilingComponent {
   def props(period: String): Props = Props(new HmdaFilingDBProjection(period))
 
   def createHmdaFilingDBProjection(system: ActorSystem, period: String): ActorRef = {
-    system.actorOf(HmdaFilingDBProjection.props(period))
+    system.actorOf(HmdaFilingDBProjection.props(period).withDispatcher("query-dispatcher"))
   }
 
 }

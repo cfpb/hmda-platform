@@ -7,7 +7,6 @@ import akka.http.scaladsl.server.MethodRejection
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model._
 import hmda.model.fi._
-import hmda.persistence.demo.DemoData
 
 class SubmissionBasePathsSpec extends InstitutionHttpApiSpec {
 

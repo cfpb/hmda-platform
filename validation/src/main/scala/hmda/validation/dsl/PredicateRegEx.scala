@@ -1,6 +1,5 @@
 package hmda.validation.dsl
 
-import scala.language.implicitConversions
 import scala.util.matching.Regex
 
 object PredicateRegEx {

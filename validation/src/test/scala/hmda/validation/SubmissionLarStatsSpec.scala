@@ -1,7 +1,6 @@
 package hmda.validation
 
 import akka.testkit.TestProbe
-import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.{ Geography, LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.CommonMessages.GetState

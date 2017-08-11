@@ -1,10 +1,6 @@
 package hmda.persistence.institutions
 
-import akka.testkit.{ EventFilter, TestProbe }
-import hmda.model.institution.Agency.CFPB
-import hmda.model.institution.ExternalIdType.{ FederalTaxId, RssdId, UndeterminedExternalId }
-import hmda.model.institution.InstitutionType.Bank
-import hmda.model.institution._
+import akka.testkit.TestProbe
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.messages.CommonMessages.GetState

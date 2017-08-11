@@ -1,7 +1,7 @@
 package hmda.validation
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.census.model.{ Msa, MsaMap }
+import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.validation.ValidationStatsEvents._
@@ -55,7 +55,7 @@ object ValidationStats {
   def props(): Props = Props(new ValidationStats)
 
   def createValidationStats(system: ActorSystem): ActorRef = {
-    system.actorOf(ValidationStats.props(), "validation-stats")
+    system.actorOf(ValidationStats.props().withDispatcher("validation-dispatcher"), "validation-stats")
   }
 
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
@@ -107,10 +107,6 @@ class ValidationStats extends HmdaPersistentActor {
   import ValidationStats._
 
   override def persistenceId: String = s"$name"
-
-  override def preStart(): Unit = {
-    log.info(s"Actor started at ${self.path}")
-  }
 
   var state = ValidationStatsState()
 

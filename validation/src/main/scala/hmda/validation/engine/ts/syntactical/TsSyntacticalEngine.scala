@@ -9,7 +9,6 @@ import hmda.validation.engine.ts.TsCommonEngine
 import hmda.validation.rules.ts.syntactical._
 
 import scala.concurrent.Future
-import scalaz.Scalaz._
 
 trait TsSyntacticalEngine extends TsCommonEngine with ValidationApi {
   def checkSyntactical(ts: TransmittalSheet, ctx: ValidationContext): TsValidation = {

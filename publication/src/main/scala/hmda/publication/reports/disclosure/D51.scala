@@ -6,7 +6,6 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.publication.reports._
-import hmda.model.publication.reports.ReportTypeEnum.Disclosure
 import hmda.model.publication.reports._
 import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.DispositionType._

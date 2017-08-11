@@ -7,7 +7,6 @@ import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.`macro`.MacroTestData
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
-import scala.language.postfixOps
 import scalaz.{ Failure, Success }
 
 class LarMacroEngineSpec extends AsyncWordSpec with MustMatchers with LarMacroEngine {

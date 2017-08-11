@@ -3,7 +3,6 @@ package hmda.query
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.ask
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.persistence.model.HmdaSupervisorActor
 import hmda.query.projections.filing.HmdaFilingDBProjection.CreateSchema
 import hmda.query.view.filing.HmdaFilingView
@@ -40,7 +39,7 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
 
   override protected def createActor(name: String): ActorRef = name match {
     case id @ InstitutionView.name =>
-      val actor = context.actorOf(InstitutionView.props(), id)
+      val actor = context.actorOf(InstitutionView.props().withDispatcher("query-dispatcher"), id)
       supervise(actor, id)
   }
 
@@ -50,7 +49,7 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
 
   private def createHmdaFilingView(period: String)(implicit ec: ExecutionContext): ActorRef = {
     val id = s"${HmdaFilingView.name}-$period"
-    val actor = context.actorOf(HmdaFilingView.props(period), id)
+    val actor = context.actorOf(HmdaFilingView.props(period).withDispatcher("query-dispatcher"), id)
     for {
       p <- (actor ? GetProjectionActorRef).mapTo[ActorRef]
     } yield {

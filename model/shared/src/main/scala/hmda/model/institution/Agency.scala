@@ -1,9 +1,6 @@
 package hmda.model.institution
 
 import enumeratum.values.{ IntEnum, IntEnumEntry }
-import DepositoryType._
-import ExternalIdType._
-import enumeratum.EnumEntry
 
 /**
  * An institution's regulating federal agency.

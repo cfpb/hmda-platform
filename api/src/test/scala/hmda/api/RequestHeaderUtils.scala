@@ -5,9 +5,6 @@ import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.model.{ HttpMethods, HttpRequest }
 import hmda.api.headers.{ HmdaInstitutionsHeader, HmdaUsernameHeader }
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.Implicits.global
-
 trait RequestHeaderUtils extends RequestBuilding {
   import HttpMethods._
 
@@ -17,7 +14,7 @@ trait RequestHeaderUtils extends RequestBuilding {
       .addHeader(institutionsHeader)
   }
 
-  def postWithCfpbHeaders[T](path: String, content: T)(implicit m: ToEntityMarshaller[T]) = {
+  def postWithCfpbHeaders[T, ec: EC](path: String, content: T)(implicit m: ToEntityMarshaller[T]) = {
     new RequestBuilder(POST).apply(path, content)
       .addHeader(usernameHeader)
       .addHeader(institutionsHeader)

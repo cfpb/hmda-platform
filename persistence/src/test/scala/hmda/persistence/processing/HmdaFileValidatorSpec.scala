@@ -1,6 +1,6 @@
 package hmda.persistence.processing
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.ActorRef
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
@@ -129,7 +129,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         List(
           MacroValidationError("Q008"),
           MacroValidationError("Q010"),
-          MacroValidationError("Q016"),
           MacroValidationError("Q023")
         ),
         macroVerified = false

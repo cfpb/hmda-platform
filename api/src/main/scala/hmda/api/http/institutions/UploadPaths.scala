@@ -28,7 +28,6 @@ import hmda.persistence.processing.SubmissionManager
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 import hmda.query.projections.filing.HmdaFilingDBProjection.{ CreateSchema, DeleteLars }
 
-import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
 trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with SubmissionProtocol with HmdaCustomDirectives {

@@ -10,7 +10,6 @@ class Q068Spec extends LarEditCheckSpec {
   property("passes when applicant is not a natural person and coapplicant is a natural person") {
     forAll(larGen, Gen.choose(1, 3), Gen.choose(1, 6), Gen.choose(1, 3)) {
       (lar, coEth, coRace, coSex) =>
-        val app = lar.applicant
         val naturalCoApp = lar.applicant.copy(ethnicity = 4, race1 = 7, sex = 4,
           coEthnicity = coEth, coRace1 = coRace, coSex = coSex)
         val validLar = lar.copy(applicant = naturalCoApp)

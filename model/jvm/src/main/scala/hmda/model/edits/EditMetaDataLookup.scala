@@ -9,8 +9,6 @@ object EditMetaDataLookup extends ResourceUtils {
 
     lines.drop(1).map { line =>
       val values = parse(line, '\\', ',', '"').getOrElse(List())
-      val category = values(0)
-      val editType = values(1)
       val editNumber = values(2)
       val editDescription = values(3)
       val userFriendlyEditDescription = values(4)

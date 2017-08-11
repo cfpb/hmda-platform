@@ -4,10 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.persistence.{ RecoveryCompleted, SnapshotOffer }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import com.typesafe.config.ConfigFactory
-import hmda.model.institution.Agency.CFPB
 import hmda.model.institution.Institution
-import hmda.model.institution.InstitutionType.Bank
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
@@ -28,7 +25,7 @@ object InstitutionView {
   def props(): Props = Props(new InstitutionView)
 
   def createInstitutionView(system: ActorSystem): ActorRef = {
-    system.actorOf(InstitutionView.props(), "institutions-view")
+    system.actorOf(InstitutionView.props().withDispatcher("query-dispatcher"), "institutions-view")
   }
 
   case class InstitutionViewState(institutions: Set[Institution] = Set.empty[Institution], seqNr: Long = 0L) {
@@ -53,7 +50,9 @@ class InstitutionView extends HmdaPersistentActor {
 
   var counter = 0
 
-  val queryProjector = context.actorOf(InstitutionDBProjection.props(), "institution-projection")
+  val queryProjector = context
+    .actorOf(InstitutionDBProjection.props()
+      .withDispatcher("query-dispatcher"), "institution-projection")
 
   val snapshotCounter = configuration.getInt("hmda.journal.snapshot.counter")
 

@@ -17,8 +17,6 @@ class Q033Spec extends TsEditCheckSpec {
   private val applicableTypes = Set(Bank, SavingsAndLoan, IndependentMortgageCompany)
   private val otherTypes = InstitutionType.values.toSet -- applicableTypes
 
-  private val boolGen: Gen[Boolean] = Gen.oneOf(true, false)
-
   property("any TS must pass for Institution of type other than bank, savings assn, or independent mortgage company") {
     forAll(tsGen, Gen.oneOf(otherTypes.toList), Gen.alphaStr) { (ts, otherType, eitherWay) =>
       whenInstitution(instType = otherType, eitherWay)

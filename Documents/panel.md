@@ -4,14 +4,19 @@
 The panel loader is designed to read a CSV file and load the data onto the HMDA-Platform.  The CSV file should use the `|` (pipe) delimiter, and should include a header row as the first line.
 
 ## Environment Variables
-There are two environment variables used by the panel loader.  Both must be set correctly in order for the data to be sent to the admin API.
+There is only one environment variable used by the panel loader.  It must be set correctly in order for the data to be sent to the admin API.
 
-For testing locally, no changes need to be made.  The defaults for both of these variables will point to the correct local admin API.
+For testing on an API running in SBT, no changes need to be made.  The default for this variable will point to the correct local admin API.
 
-For loading panel data into a remote system, you'll need to set the following environment variables:
+For loading panel data into a remote system or into a local Docker container, you'll need to set the following environment variable:
 ```shell
-> export HMDA_HTTP_ADMIN_HOST={ip address}
-> export HMDA_HTTP_ADMIN_PORT={port #}
+> export HMDA_HTTP_ADMIN_URL={base URL}
+```
+
+**IMPORTANT NOTE:** The base URL should *include* `http://` or `https://`, but *exclude* any trailing backslash `/`.  For example:
+
+```shell
+> export HMDA_HTTP_ADMIN_URL=http://192.168.99.100:8081
 ```
 
 ## Running the parser
@@ -19,7 +24,9 @@ A small example file is located at `panel/src/main/resources/inst_data_2017_dumm
 
 The real panel file is located at `panel/src/main/resources/inst_data_2017.csv`
 
-In order for the panel data to be loaded locally, the API project must be up and running, along with Docker containers running Cassandra and Zookeper.  Otherwise, no other running services are needed (but make sure your environment variables are set).  In a terminal, execute the following commands:
+In order for the panel data to be loaded locally, the API project must be up and running, along with Docker containers running Cassandra and Zookeper, or run the full `docker-compose` setup.  To load panel data into the cluster, simply find the URL of the admin api (for the release branch: `https://hmda-ops-api.demo.cfpb.gov/admin`).  No other running services are necessary.
+
+In a terminal, execute the following commands:
 
 ```shell
 > sbt

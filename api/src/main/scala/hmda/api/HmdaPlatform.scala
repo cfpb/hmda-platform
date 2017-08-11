@@ -24,7 +24,6 @@ import hmda.query.projections.filing.HmdaFilingDBProjection._
 import hmda.validation.ValidationStats
 import hmda.api.HmdaConfig._
 import hmda.query.HmdaProjectionQuery
-import hmda.query.projections.institutions.InstitutionCassandraProjection
 
 object HmdaPlatform {
 
@@ -35,7 +34,7 @@ object HmdaPlatform {
     val system = ActorSystem(configuration.getString("clustering.name"), configuration)
     val supervisor = createSupervisor(system)
     val querySupervisor = createQuerySupervisor(system)
-    implicit val ec = system.dispatcher
+    implicit val ec = system.dispatchers.lookup("api-dispatcher")
 
     startActors(system, supervisor, querySupervisor)
     startApi(system, querySupervisor)

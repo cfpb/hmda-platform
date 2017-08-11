@@ -16,7 +16,6 @@ object S028 extends EditCheck[TransmittalSheet] {
   //  of this edit check will never fail. (If timestamp is not numeric,
   //  file will not parse.)
   override def apply(ts: TransmittalSheet): Result = {
-    import scala.language.postfixOps
     val timestamp = ts.timestamp
     (timestamp is numeric) and (timestamp.toString is validTimestampFormat)
   }

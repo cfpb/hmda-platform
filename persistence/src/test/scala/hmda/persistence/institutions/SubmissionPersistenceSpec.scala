@@ -1,6 +1,6 @@
 package hmda.persistence.institutions
 
-import akka.testkit.{ EventFilter, TestProbe }
+import akka.testkit.TestProbe
 import hmda.model.fi._
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.demo.DemoData
