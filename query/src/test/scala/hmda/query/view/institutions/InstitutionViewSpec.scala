@@ -58,7 +58,7 @@ class InstitutionViewSpec extends ActorSpec {
     }
 
     "return institution by respondentId" in {
-      probe.send(institutionQuery, GetInstitutionByRespondentId(i1.respondent.externalId.value))
+      probe.send(institutionQuery, GetInstitutionByRespondentId(i1.respondentId))
       probe.expectMsg(i1)
     }
   }
