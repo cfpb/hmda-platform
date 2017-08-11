@@ -11,12 +11,11 @@ import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, MSARepo
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.LarConverter._
 import org.scalacheck.Gen
-import org.scalatest.{ MustMatchers, WordSpec }
+import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
-import scala.concurrent.{ Await, Future }
-import scala.concurrent.duration._
+import scala.concurrent.Future
 
-class D51Spec extends WordSpec with MustMatchers with LarGenerators {
+class D51Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
 
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
@@ -40,27 +39,28 @@ class D51Spec extends WordSpec with MustMatchers with LarGenerators {
   val expectedDispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted, ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
   "Generate a Disclosure 5-1 report" in {
-    val result = Await.result(D51.generate(source, fips, respId, Future("Corvallis Test Bank")), 5.seconds)
+    D51.generate(source, fips, respId, Future("Corvallis Test Bank")).map { result =>
 
-    result.msa mustBe MSAReport("18700", "Corvallis, OR", "OR", "Oregon")
-    result.table mustBe "5-1"
-    result.respondentId mustBe "98765"
-    result.institutionName mustBe "Corvallis Test Bank"
-    result.applicantIncomes.size mustBe 5
+      result.msa mustBe MSAReport("18700", "Corvallis, OR", "OR", "Oregon")
+      result.table mustBe "5-1"
+      result.respondentId mustBe "98765"
+      result.institutionName mustBe "Corvallis Test Bank"
+      result.applicantIncomes.size mustBe 5
 
-    val lowestIncome = result.applicantIncomes.head
-    lowestIncome.applicantIncome mustBe LessThan50PercentOfMSAMedian
+      val lowestIncome = result.applicantIncomes.head
+      lowestIncome.applicantIncome mustBe LessThan50PercentOfMSAMedian
 
-    val races = lowestIncome.borrowerCharacteristics.head.asInstanceOf[RaceBorrowerCharacteristic].races
-    races.size mustBe 8
+      val races = lowestIncome.borrowerCharacteristics.head.asInstanceOf[RaceBorrowerCharacteristic].races
+      races.size mustBe 8
 
-    val ethnicities = lowestIncome.borrowerCharacteristics(1).asInstanceOf[EthnicityBorrowerCharacteristic].ethnicities
-    ethnicities.size mustBe 4
+      val ethnicities = lowestIncome.borrowerCharacteristics(1).asInstanceOf[EthnicityBorrowerCharacteristic].ethnicities
+      ethnicities.size mustBe 4
 
-    val minorityStatuses = lowestIncome.borrowerCharacteristics(2).asInstanceOf[MinorityStatusBorrowerCharacteristic].minoritystatus
-    minorityStatuses.size mustBe 2
+      val minorityStatuses = lowestIncome.borrowerCharacteristics(2).asInstanceOf[MinorityStatusBorrowerCharacteristic].minoritystatus
+      minorityStatuses.size mustBe 2
 
-    races.head.dispositions.map(_.disposition) mustBe expectedDispositions
+      races.head.dispositions.map(_.disposition) mustBe expectedDispositions
+    }
   }
 
 }
