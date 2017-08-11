@@ -111,6 +111,7 @@ class ValidationStats extends HmdaPersistentActor {
   var state = ValidationStatsState()
 
   override def updateState(event: Event): Unit = {
+    log.info("ValidationStats event " + event)
     state = state.updated(event)
   }
 
@@ -134,8 +135,9 @@ class ValidationStats extends HmdaPersistentActor {
       }
 
     case AddIrsStats(map, id) =>
+      log.info("ValidationStats AddIrsStats message received")
       persist(IrsStatsAdded(map, id)) { e =>
-        log.debug(s"Persisted: $e")
+        log.info(s"Persisted: $e")
         updateState(e)
       }
 

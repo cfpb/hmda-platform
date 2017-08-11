@@ -256,9 +256,13 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case CompleteValidation(replyTo, originalSender) =>
       if (state.readyToSign) {
+        log.info("Ready to persist IRS")
         for {
           stat <- statRef
-        } yield stat ! PersistIrs
+        } yield {
+          log.info("Sending IRS persistence message")
+          stat ! PersistIrs
+        }
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(originalSender)
       } else {
