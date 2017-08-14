@@ -4,7 +4,6 @@
 The panel loader is designed to read a CSV file and load the data onto the HMDA-Platform.  The CSV file should use the `|` (pipe) delimiter, and should include a header row as the first line.
 
 ## Environment Variables
-There is only one environment variable used by the panel loader.  It must be set correctly in order for the data to be sent to the admin API.
 
 For testing on an API running in SBT, no changes need to be made.  The default for this variable will point to the correct local admin API.
 
@@ -20,9 +19,9 @@ For loading panel data into a remote system or into a local Docker container, yo
 ```
 
 ## Running the parser
-A small example file is located at `panel/src/main/resources/inst_data_2017_dummy.csv`
+A small example file (~200 institutions) is located at `panel/src/main/resources/inst_data_2017_dummy.csv`
 
-The real panel file is located at `panel/src/main/resources/inst_data_2017.csv`
+The real panel file (~160,000 institutions) is located at `panel/src/main/resources/inst_data_2017.csv`
 
 In order for the panel data to be loaded locally, the API project must be up and running, along with Docker containers running Cassandra and Zookeper, or run the full `docker-compose` setup.  To load panel data into the cluster, simply find the URL of the admin api (for the release branch: `https://hmda-ops-api.demo.cfpb.gov/admin`).  No other running services are necessary.
 
