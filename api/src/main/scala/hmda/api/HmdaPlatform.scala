@@ -3,6 +3,8 @@ package hmda.api
 import java.io.File
 
 import akka.actor._
+import akka.cluster.Cluster
+import akka.cluster.http.management.ClusterHttpManagement
 import akka.pattern.ask
 import akka.util.Timeout
 
@@ -32,6 +34,8 @@ object HmdaPlatform {
   def main(args: Array[String]): Unit = {
 
     val system = ActorSystem(configuration.getString("clustering.name"), configuration)
+    val cluster = Cluster(system)
+    ClusterHttpManagement(cluster).start()
     val supervisor = createSupervisor(system)
     val querySupervisor = createQuerySupervisor(system)
     implicit val ec = system.dispatchers.lookup("api-dispatcher")
