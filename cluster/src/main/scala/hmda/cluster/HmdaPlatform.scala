@@ -7,6 +7,7 @@ import akka.cluster.Cluster
 import akka.cluster.http.management.ClusterHttpManagement
 import com.typesafe.config.ConfigFactory
 import hmda.publication.HmdaPublication
+import hmda.query.HmdaQuerySupervisor
 
 object HmdaPlatform extends App {
 
@@ -15,9 +16,18 @@ object HmdaPlatform extends App {
   val config = ConfigFactory.parseString(clusterRoleConfig).withFallback(configuration)
   val system = ActorSystem(configuration.getString("clustering.name"), config)
   val cluster = Cluster(system)
-  ClusterHttpManagement(cluster).start()
 
-  //Start publication
+  //Start API
+  if (cluster.selfRoles.contains("api")) {
+    ClusterHttpManagement(cluster).start()
+  }
+
+  //Start Query
+  if (cluster.selfRoles.contains("query")) {
+    system.actorOf(Props[HmdaQuerySupervisor], "query-supervisor")
+  }
+
+  //Start Publication
   if (cluster.selfRoles.contains("publication")) {
     system.actorOf(Props[HmdaPublication], "publication")
   }
