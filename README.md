@@ -93,6 +93,8 @@ Alternatively, you can start each one individually by following the instructions
 
 #### Running the API
 
+Once the dependencies (above) are running, follow these steps in a separate terminal session to get the API running with sbt:
+
 * For smoke testing locally, add the following two environment variables:
   * `EDITS_DEMO_MODE`: This will allow you to use the sample files in this repo for testing the app. Otherwise, edit S025 will trigger for all files.
   * `HMDA_IS_DEMO`: This uses configuration files that allow running the app locally, instead of in a cluster.
