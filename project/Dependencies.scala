@@ -15,6 +15,7 @@ object Dependencies {
   val akkaSlf4J = "com.typesafe.akka" %% "akka-slf4j" % Version.akka
   val akka = "com.typesafe.akka" %% "akka-actor" % Version.akka
   val akkaCluster = "com.typesafe.akka" %% "akka-cluster" % Version.akka
+  val akkaClusterManagement = "com.lightbend.akka" %% "akka-management-cluster-http" % Version.akkaClusterManagement
   val akkaTestkit = "com.typesafe.akka" %% "akka-testkit" % Version.akka % "test"
   val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
   val akkaPersistence = "com.typesafe.akka" %% "akka-persistence" % Version.akka

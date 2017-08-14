@@ -72,7 +72,9 @@ In addition, you'll need Scala's interactive build tool [sbt](http://www.scala-s
 
 ## Building and Running
 
-The HMDA Platform uses sbt's multi-project builds, each project representing a specific task.
+The HMDA Platform uses sbt's multi-project builds, each project representing a specific task. The platform is an Akka Cluster
+application that can be deployed on a single node or as a distributed application. For more information on how Akka Cluster 
+is used, see the documentation [here](Documents/cluster.md)
 
 ### Interactive
 
