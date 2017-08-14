@@ -1,4 +1,4 @@
-This project depends on several services, which all need to be running in order for the project to operate fully. 
+This project depends on several services, which all need to be running in order for the project to operate fully.
 
 Assuming you have Docker-Compose installed, the easiest way to get all of the platform's dependencies up and running with the provided docker-compose dev setup:
 
@@ -7,9 +7,15 @@ Assuming you have Docker-Compose installed, the easiest way to get all of the pl
 Alternatively, you can start each one individually with the following instructions.
 
 
-##### Write Journal
+## Write Journal
 
-* The write side of this system is supported by either a local `leveldb` database or Cassandra. By default, the local `leveldb` is utilized, and some sample data is loaded automatically.
+* The write side of this system is supported by either a local `leveldb` database or Cassandra.
+
+### leveldb
+
+`leveldb` is best for local environments and for smoke testing. To use it, set the `HMDA_IS_DEMO` environment variable to `true` in the same session where you run the project in sbt. When that var is set, the platform loads sample data automatically upon startup.
+
+### Cassandra
 
 If using `Cassandra` is desired, set the following environment variable:
 
@@ -44,7 +50,7 @@ run <full local path to sample file>
 ```
 A sample file is located in the following folder: `panel/src/main/resources/inst_data_2017_dummy.csv`
 
-##### Read Journal
+## Read Journal
 
 * In order to support the read side, a local PostgreSQL and Cassandra server are needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
 
@@ -63,7 +69,7 @@ export CASSANDRA_CLUSTER_HOSTS=192.168.99.100
 export CASSANDRA_CLUSTER_PORT=9042
 ```
 
-##### Apache Zookeeper
+## Apache Zookeeper
 
 * The `HMDA Platform` is a distributed system that is meant to be run as a clustered application in production.
 As such, it needs a mechanism for storing configuration information for additional nodes joining the cluster.
