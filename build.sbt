@@ -28,7 +28,7 @@ lazy val hmda = (project in file("."))
   .settings(
     Seq(
       assemblyJarName in assembly := {s"${name.value}.jar"},
-      mainClass in assembly := Some("hmda.api.HmdaPlatform"),
+      mainClass in assembly := Some("hmda.cluster.HmdaPlatform"),
       assemblyMergeStrategy in assembly := {
         case "application.conf" => MergeStrategy.concat
         case "application-dev.conf" => MergeStrategy.concat
@@ -39,7 +39,7 @@ lazy val hmda = (project in file("."))
           oldStrategy(x)
       }
     )
-  ).dependsOn(api)
+  ).dependsOn(cluster)
   .aggregate(
     modelJVM,
     modelJS,
@@ -53,7 +53,23 @@ lazy val hmda = (project in file("."))
     platformTest,
     validation,
     census,
-    publication)
+    publication,
+    cluster)
+
+
+lazy val cluster = (project in file("cluster"))
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= akkaDeps ++ configDeps
+    )
+  )
+  .dependsOn(
+    persistence,
+    api,
+    query,
+    publication
+  )
 
 lazy val model = (crossProject in file("model"))
   .settings(hmdaBuildSettings: _*)
