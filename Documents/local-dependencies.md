@@ -1,23 +1,34 @@
+# Dev Dependencies
+
 This project depends on several services, which all need to be running in order for the project to operate fully.
 
 Assuming you have Docker-Compose installed, the easiest way to get all of the platform's dependencies up and running with the provided docker-compose dev setup:
 
-`docker-compose -f docker-dev.yml up`
+```shell
+docker-compose -f docker-dev.yml up
+```
 
 Alternatively, you can start each one individually with the following instructions.
 
 
 ## Write Journal
 
-* The write side of this system is supported by either a local `leveldb` database or Cassandra.
+The write side of this system is supported by either a local `leveldb` database or Cassandra.
 
-### leveldb
+#### leveldb
 
-`leveldb` is best for local environments and for smoke testing. To use it, set the `HMDA_IS_DEMO` environment variable to `true` in the same session where you run the project in sbt. When that var is set, the platform loads sample data automatically upon startup.
+`leveldb` is best for local environments and for smoke testing. When using `leveldb`, the project automatically loads sample data into the environment when it starts up.
 
-### Cassandra
+To use it, set the following environment variable in the same session where you run the project in sbt:
 
-If using `Cassandra` is desired, set the following environment variable:
+```shell
+export HDMA_IS_DEMO=true
+```
+
+
+#### Cassandra
+
+If using Cassandra is desired, set the following environment variable:
 
 ```shell
 export HDMA_IS_DEMO=false
@@ -52,7 +63,7 @@ A sample file is located in the following folder: `panel/src/main/resources/inst
 
 ## Read Journal
 
-* In order to support the read side, a local PostgreSQL and Cassandra server are needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
+ In order to support the read side, a local PostgreSQL and Cassandra server are needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
 
 ```shell
 export JDBC_URL='jdbc:postgresql://localhost/hmda?user=postgres&password=postgres'
@@ -71,7 +82,7 @@ export CASSANDRA_CLUSTER_PORT=9042
 
 ## Apache Zookeeper
 
-* The `HMDA Platform` is a distributed system that is meant to be run as a clustered application in production.
+The `HMDA Platform` is a distributed system that is meant to be run as a clustered application in production.
 As such, it needs a mechanism for storing configuration information for additional nodes joining the cluster.
 `Apache Zookeeper` is used to store this information. To run the project, zookeeper must be running and available in the local network.
 An easy way to satisfy this requirement is to launch a docker container with `ZooKeeper`, as follows:

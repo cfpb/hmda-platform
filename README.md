@@ -82,7 +82,9 @@ is used, see the documentation [here](Documents/cluster.md)
 
 Assuming you have Docker-Compose installed, the easiest way to get all of the platform's dependencies up and running with the provided docker-compose dev setup:
 
-`docker-compose -f docker-dev.yml up`
+```shell
+docker-compose -f docker-dev.yml up
+```
 
 When finished, use `docker-compose down` to gracefully stop the running containers.
 
