@@ -81,7 +81,7 @@ object HmdaPlatform {
       .mapTo[ActorRef]
 
     //Start Query Projections
-    HmdaProjectionQuery.main(Array.empty[String])
+    HmdaProjectionQuery.startUp(system)
 
     // Start validation stats actor
     system.actorOf(ValidationStats.props(), "validation-stats")

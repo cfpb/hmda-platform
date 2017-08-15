@@ -11,7 +11,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.{ HmdaAdminApi, HmdaFilingApi, HmdaPublicApi }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.publication.HmdaPublication
-import hmda.query.HmdaQuerySupervisor
+import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
 
@@ -38,9 +38,13 @@ object HmdaPlatform extends App {
 
   //Start Query
   if (cluster.selfRoles.contains("query")) {
-    val querySupervisor = system.actorOf(Props[HmdaQuerySupervisor], "query-supervisor")
+    val querySupervisor = system.actorOf(
+      Props[HmdaQuerySupervisor].withDispatcher("query-dispatcher"),
+      "query-supervisor"
+    )
     val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
       .mapTo[ActorRef]
+    HmdaProjectionQuery.startUp(system)
   }
 
   //Start Publication
