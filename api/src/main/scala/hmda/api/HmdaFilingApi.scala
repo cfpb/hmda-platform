@@ -10,7 +10,6 @@ import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, LarHttpApi }
-import hmda.api.HmdaConfig._
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 

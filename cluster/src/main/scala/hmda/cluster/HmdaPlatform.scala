@@ -1,7 +1,8 @@
 package hmda.cluster
 
+import java.io.File
+
 import org.slf4j.LoggerFactory
-import hmda.cluster.HmdaConfig._
 import akka.actor._
 import akka.pattern.ask
 import akka.cluster.Cluster
@@ -17,18 +18,26 @@ import hmda.publication.HmdaPublication
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
+import hmda.query.DbConfiguration._
+import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, _ }
+import hmda.cluster.HmdaConfig._
+import hmda.persistence.demo.DemoData
+import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 
 import scala.concurrent.duration._
+import hmda.query.projections.filing.HmdaFilingDBProjection._
+import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
+import hmda.util.FutureRetry.retry
 
 object HmdaPlatform extends App {
 
   val log = LoggerFactory.getLogger("hmda")
   val clusterRoleConfig = sys.env.get("HMDA_CLUSTER_ROLES").map(roles => s"akka.cluster.roles = [$roles]").getOrElse("")
-  val config = ConfigFactory.parseString(clusterRoleConfig).withFallback(configuration)
-  val system = ActorSystem(configuration.getString("clustering.name"), config)
+  val clusterConfig = ConfigFactory.parseString(clusterRoleConfig).withFallback(configuration)
+  val system = ActorSystem(clusterConfig.getString("clustering.name"), clusterConfig)
   val cluster = Cluster(system)
 
-  val actorTimeout = config.getInt("hmda.actor.timeout")
+  val actorTimeout = clusterConfig.getInt("hmda.actor.timeout")
   implicit val timeout = Timeout(actorTimeout.seconds)
 
   //Start API
@@ -74,19 +83,41 @@ object HmdaPlatform extends App {
     system.actorOf(ValidationStats.props().withDispatcher("validation-dispatcher"), "validation-stats")
   }
 
-  //  private def cleanup(): Unit = {
-  //    // Delete persistence journal
-  //    val file = new File("target/journal")
-  //    if (file.isDirectory) {
-  //      log.info("CLEANING JOURNAL")
-  //      file.listFiles.foreach(f => f.delete())
-  //    }
-  //
-  //    val larRepository = new LarRepository(config)
-  //    val institutionRepository = new InstitutionRepository(config)
-  //
-  //    larRepository.dropSchema()
-  //    institutionRepository.dropSchema()
-  //  }
+  //Load demo data
+  val isDemo = clusterConfig.getBoolean("hmda.isDemo")
+  if (isDemo) {
+    implicit val ec = system.dispatcher
+    cleanup()
+    implicit val scheduler = system.scheduler
+    val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
+    log.info("...LOADING DEMO DATA...")
+
+    val institutionView = system.actorSelection("/user/query-supervisor/institutions-view")
+
+    val institutionCreatedF = for {
+      q <- retry((institutionView ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
+      s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
+    } yield s
+
+    institutionCreatedF.map { x =>
+      log.info(x.toString)
+      DemoData.loadDemoData(system)
+    }
+  }
+
+  private def cleanup(): Unit = {
+    // Delete persistence journal
+    val file = new File("target/journal")
+    if (file.isDirectory) {
+      log.info("CLEANING JOURNAL")
+      file.listFiles.foreach(f => f.delete())
+    }
+
+    val larRepository = new LarRepository(config)
+    val institutionRepository = new InstitutionRepository(config)
+
+    larRepository.dropSchema()
+    institutionRepository.dropSchema()
+  }
 
 }
