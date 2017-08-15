@@ -50,7 +50,7 @@ object HmdaPlatform extends App {
 
   //Start Validation
   if (cluster.selfRoles.contains("validation")) {
-    system.actorOf(ValidationStats.props(), "validation-stats")
+    system.actorOf(ValidationStats.props().withDispatcher("validation-dispatcher"), "validation-stats")
   }
 
 }
