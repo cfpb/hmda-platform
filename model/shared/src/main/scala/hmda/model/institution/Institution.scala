@@ -8,20 +8,23 @@ import hmda.model.institution.InstitutionType.UndeterminedInstitutionType
  * A financial institution, geared towards requirements for filing HMDA data.
  */
 case class Institution(
-  id: String,
-  agency: Agency,
-  activityYear: Int,
-  institutionType: InstitutionType,
-  cra: Boolean,
-  externalIds: Set[ExternalId],
-  emailDomains: Set[String],
-  respondent: Respondent,
-  hmdaFilerFlag: Boolean,
-  parent: Parent,
-  assets: Int,
-  otherLenderCode: Int,
-  topHolder: TopHolder
-)
+    id: String,
+    agency: Agency,
+    activityYear: Int,
+    institutionType: InstitutionType,
+    cra: Boolean,
+    externalIds: Set[ExternalId],
+    emailDomains: Set[String],
+    respondent: Respondent,
+    hmdaFilerFlag: Boolean,
+    parent: Parent,
+    assets: Int,
+    otherLenderCode: Int,
+    topHolder: TopHolder
+) {
+  def respondentId: String = respondent.externalId.value
+}
+
 case object Institution {
   def empty: Institution = Institution(
     "",
