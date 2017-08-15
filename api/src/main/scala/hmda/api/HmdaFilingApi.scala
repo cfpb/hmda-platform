@@ -1,6 +1,6 @@
 package hmda.api
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
@@ -10,15 +10,16 @@ import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, LarHttpApi }
+
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 import HmdaConfig._
 
 object HmdaFilingApi {
-  def props(): Props = Props(new HmdaFilingApi)
+  def props(querySupervisor: ActorRef): Props = Props(new HmdaFilingApi(querySupervisor))
 }
 
-class HmdaFilingApi
+class HmdaFilingApi(querySupervisor: ActorRef)
     extends HttpApi
     with BaseHttpApi
     with LarHttpApi
@@ -40,7 +41,7 @@ class HmdaFilingApi
   implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val paths: Route = routes(s"$name") ~ larRoutes ~ institutionsRoutes
+  val paths: Route = routes(s"$name") ~ institutionsRoutes(querySupervisor) //~ larRoutes
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,

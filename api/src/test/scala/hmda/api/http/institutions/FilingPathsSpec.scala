@@ -10,7 +10,7 @@ import hmda.model.fi.{ Filing, NotStarted }
 class FilingPathsSpec extends InstitutionHttpApiSpec with FilingPaths {
 
   "return a list of filings for a financial institution" in {
-    getWithCfpbHeaders("/institutions/0/filings/2017") ~> institutionsRoutes ~> check {
+    getWithCfpbHeaders("/institutions/0/filings/2017") ~> institutionsRoutes(querySupervisor) ~> check {
       status mustBe StatusCodes.OK
       val filing = Filing("2017", "0", NotStarted, true, 0L, 0L)
       val detail = responseAs[FilingDetail]
@@ -19,13 +19,13 @@ class FilingPathsSpec extends InstitutionHttpApiSpec with FilingPaths {
     }
 
     val path1 = Path("/institutions/0/filings/xxxx")
-    getWithCfpbHeaders(path1.toString) ~> institutionsRoutes ~> check {
+    getWithCfpbHeaders(path1.toString) ~> institutionsRoutes(querySupervisor) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse] mustBe ErrorResponse(404, "xxxx filing not found for institution 0", path1)
     }
 
     val path2 = Path("/institutions/xxxxx/filings/2017")
-    getWithCfpbHeaders(path2.toString) ~> institutionsRoutes ~> check {
+    getWithCfpbHeaders(path2.toString) ~> institutionsRoutes(querySupervisor) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", path2)
     }

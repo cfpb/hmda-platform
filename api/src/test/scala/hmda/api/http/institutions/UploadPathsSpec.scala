@@ -63,7 +63,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
   "Upload Paths" must {
 
     "return proper response when uploading a HMDA file" in {
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes(querySupervisor) ~> check {
         status mustBe StatusCodes.Accepted
         val submission = responseAs[Submission]
         submission.status mustBe Uploaded
@@ -73,7 +73,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
 
     "delete previous submission when re-uploading another HMDA file" in {
       Thread.sleep(5000)
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file2) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file2) ~> institutionsRoutes(querySupervisor) ~> check {
         status mustBe StatusCodes.Accepted
         val submission = responseAs[Submission]
         submission.status mustBe Uploaded
@@ -89,7 +89,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
 
     "return 400 when trying to upload the wrong file" in {
       val id2 = SubmissionId("0", "2017", 3)
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/3", badFile) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/3", badFile) ~> institutionsRoutes(querySupervisor) ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[Submission] mustBe Submission(id2, Failed("Invalid File Format"), 0L, 0L)
       }
@@ -97,7 +97,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
 
     "return a 400 when trying to upload to a non-existant submission" in {
       val path = "/institutions/0/filings/2017/submissions/987654321"
-      postWithCfpbHeaders(path, file) ~> institutionsRoutes ~> check {
+      postWithCfpbHeaders(path, file) ~> institutionsRoutes(querySupervisor) ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[Submission] mustBe Submission(SubmissionId("0", "2017", 987654321), Failed("Submission 987654321 not available for upload"), 0L, 0L)
       }
@@ -113,7 +113,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
         s.getOrElse(Submission()).status mustBe Signed
         val file = multiPartFile("bad file content", "parse-length_4-lars.txt")
         val path = Path("/institutions/0/filings/2017/submissions/1")
-        postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes ~> check {
+        postWithCfpbHeaders(path.toString, file) ~> institutionsRoutes(querySupervisor) ~> check {
           status mustBe StatusCodes.BadRequest
           responseAs[Submission] mustBe Submission(id, Failed("Submission 1 not available for upload"), 0L, 0L)
         }

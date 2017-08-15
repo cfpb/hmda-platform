@@ -23,7 +23,9 @@ import scala.concurrent.duration._
 trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with RequestHeaderUtils with InstitutionsHttpApi with ScalatestRouteTest { suite: Suite =>
   val configuration: Config = ConfigFactory.load()
 
-  val supervisor = system.actorSelection("/user/supervisor")
+  val supervisor = HmdaSupervisor.createSupervisor(system)
+
+  val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
 
   val validationStats = system.actorOf(ValidationStats.props(), "validation-stats")
 
@@ -37,9 +39,7 @@ trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with Reque
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    val supervisor = HmdaSupervisor.createSupervisor(system)
     supervisor ! FindActorByName(InstitutionPersistence.name)
-    val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
     querySupervisor ! FindActorByName(InstitutionView.name)
     DemoData.loadTestData(system)
   }

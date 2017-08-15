@@ -20,14 +20,14 @@ class InstitutionsPathsSpec extends InstitutionHttpApiSpec {
 
       Get("/institutions")
         .addHeader(usernameHeader)
-        .addHeader(RawHeader("CFPB-HMDA-Institutions", "1,2")) ~> institutionsRoutes ~> check {
+        .addHeader(RawHeader("CFPB-HMDA-Institutions", "1,2")) ~> institutionsRoutes(querySupervisor) ~> check {
           status mustBe StatusCodes.OK
           responseAs[Institutions] mustBe Institutions(institutionsWrapped)
         }
     }
 
     "return an institution by id" in {
-      getWithCfpbHeaders("/institutions/0") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0") ~> institutionsRoutes(querySupervisor) ~> check {
         status mustBe StatusCodes.OK
         val institution = DemoData.testInstitutions.head
         val institutionWrapped = InstitutionWrapper(institution.id, institution.respondent.name)
@@ -35,7 +35,7 @@ class InstitutionsPathsSpec extends InstitutionHttpApiSpec {
         responseAs[InstitutionDetail] mustBe InstitutionDetail(institutionWrapped, filings.reverse)
       }
       val path = Path("/institutions/xxxxx")
-      getWithCfpbHeaders(path.toString) ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders(path.toString) ~> institutionsRoutes(querySupervisor) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse] mustBe ErrorResponse(404, "Institution xxxxx not found", path)
       }

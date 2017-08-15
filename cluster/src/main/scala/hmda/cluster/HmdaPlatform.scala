@@ -40,10 +40,15 @@ object HmdaPlatform extends App {
   val actorTimeout = clusterConfig.getInt("hmda.actor.timeout")
   implicit val timeout = Timeout(actorTimeout.seconds)
 
+  val querySupervisor = system.actorOf(
+    Props[HmdaQuerySupervisor].withDispatcher("query-dispatcher"),
+    "query-supervisor"
+  )
+
   //Start API
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
-    system.actorOf(HmdaFilingApi.props().withDispatcher("api-dispatcher"), "hmda-filing-api")
+    system.actorOf(HmdaFilingApi.props(querySupervisor).withDispatcher("api-dispatcher"), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props().withDispatcher("api-dispatcher"), "hmda-admin-api")
     system.actorOf(HmdaPublicApi.props().withDispatcher("api-dispatcher"), "hmda-public-api")
   }
@@ -62,10 +67,7 @@ object HmdaPlatform extends App {
 
   //Start Query
   if (cluster.selfRoles.contains("query")) {
-    val querySupervisor = system.actorOf(
-      Props[HmdaQuerySupervisor].withDispatcher("query-dispatcher"),
-      "query-supervisor"
-    )
+
     implicit val ec = system.dispatchers.lookup("query-dispatcher")
     val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
     institutionViewF.map(actorRef => loadDemoData(actorRef))
@@ -90,7 +92,7 @@ object HmdaPlatform extends App {
       cleanup()
       implicit val scheduler = system.scheduler
       val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
-      log.info("...LOADING DEMO DATA...")
+      log.info("*** LOADING DEMO DATA ***")
 
       val institutionCreatedF = for {
         q <- retry((institutionView ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)

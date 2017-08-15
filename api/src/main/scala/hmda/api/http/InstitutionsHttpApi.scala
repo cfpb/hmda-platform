@@ -1,5 +1,6 @@
 package hmda.api.http
 
+import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.server.Directives._
@@ -31,12 +32,12 @@ trait InstitutionsHttpApi
 
   implicit val timeout: Timeout
 
-  val institutionsRoutes =
+  def institutionsRoutes(querySupervisor: ActorRef) =
     extractExecutionContext { executor =>
       implicit val ec: ExecutionContext = executor
       encodeResponse {
         headerAuthorize {
-          institutionsPath ~
+          institutionsPath(querySupervisor) ~
             pathPrefix("institutions" / Segment) { instId =>
               institutionAuthorize(instId) {
                 institutionByIdPath(instId) ~
