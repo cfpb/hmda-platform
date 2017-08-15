@@ -45,7 +45,7 @@ object HmdaPlatform extends App {
 
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
-    system.actorOf(Props[HmdaPublication], "publication")
+    system.actorOf(Props[HmdaPublication].withDispatcher("publication-dispatcher"), "publication")
   }
 
   //Start Validation
