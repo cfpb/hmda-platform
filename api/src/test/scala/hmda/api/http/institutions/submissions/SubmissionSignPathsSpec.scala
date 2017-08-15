@@ -20,7 +20,7 @@ class SubmissionSignPathsSpec extends InstitutionHttpApiAsyncSpec {
 
   "Submission Sign Paths" must {
     "POST: Return 400 (Bad Request) when attempting to sign a submission that's not ready to sign" in {
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signJson(true)) ~> institutionsRoutes(querySupervisor) ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signJson(true)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.BadRequest
         val err = responseAs[ErrorResponse]
         err.httpStatus mustBe 400
@@ -29,20 +29,20 @@ class SubmissionSignPathsSpec extends InstitutionHttpApiAsyncSpec {
     }
 
     "Set up: get submission to ValidatedWithErrors state" in {
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes(querySupervisor) ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", file) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
         Thread.sleep(5000) // wait for the submission to complete validation
         status mustBe StatusCodes.Accepted
       }
     }
 
     "GET: return an empty receipt when submission hasn't been signed" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign") ~> institutionsRoutes(querySupervisor) ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.OK
         responseAs[Receipt] mustBe Receipt(0L, "", ValidatedWithErrors)
       }
     }
     "POST: Return 400 (Bad Request) when payload contains signed = false" in {
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signJson(false)) ~> institutionsRoutes(querySupervisor) ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signJson(false)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.BadRequest
         val err = responseAs[ErrorResponse]
         err.httpStatus mustBe 400
@@ -53,7 +53,7 @@ class SubmissionSignPathsSpec extends InstitutionHttpApiAsyncSpec {
     var receivedTimestamp: Long = 0L
     def expectedReceipt(time: Long): String = s"0-2017-1-$time"
     "POST: return filled receipt when successfully signing" in {
-      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signJson(true)) ~> institutionsRoutes(querySupervisor) ~> check {
+      postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign", signJson(true)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
         val returnedReceipt = responseAs[Receipt]
         receivedTimestamp = returnedReceipt.timestamp
 
@@ -63,7 +63,7 @@ class SubmissionSignPathsSpec extends InstitutionHttpApiAsyncSpec {
       }
     }
     "GET: return same filled receipt after signature" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign") ~> institutionsRoutes(querySupervisor) ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.OK
         val receipt = responseAs[Receipt]
         receipt.timestamp mustBe receivedTimestamp

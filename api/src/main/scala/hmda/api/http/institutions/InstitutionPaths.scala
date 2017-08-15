@@ -54,7 +54,7 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
     }
 
   // institutions/<institutionId>
-  def institutionByIdPath[_: EC](institutionId: String) =
+  def institutionByIdPath[_: EC](supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String) =
     pathEnd {
       timedGet { uri =>
         val supervisor = system.actorSelection("/user/supervisor")

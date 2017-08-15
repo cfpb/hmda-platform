@@ -14,7 +14,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for institutions path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions").addHeader(`Accept-Encoding`(encoding)) ~>
-        institutionsRoutes(querySupervisor) ~> check {
+        institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -22,7 +22,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for institutionById path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0").addHeader(`Accept-Encoding`(encoding)) ~>
-        institutionsRoutes(querySupervisor) ~> check {
+        institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -30,7 +30,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for filingByPeriod path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017")
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -38,7 +38,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for submission path" in {
       val encoding = encodingChooser
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions")
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -46,7 +46,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for submissionLatest path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/latest")
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -55,7 +55,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
       val encoding = encodingChooser
       val badFile = multiPartFile("bad content", "sample.dat")
       postWithCfpbHeaders("/institutions/0/filings/2017/submissions/1", badFile)
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -63,7 +63,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for submissionEdits path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits")
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -71,7 +71,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for submissionSingleEdit path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/validity")
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -79,7 +79,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for submissionIrs path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs")
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -87,7 +87,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for submissionSign path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/sign")
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }
@@ -95,7 +95,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     "use requested encoding for submissionSummary path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/summary")
-        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(querySupervisor) ~> check {
+        .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
           response.encoding mustBe encoding
         }
     }

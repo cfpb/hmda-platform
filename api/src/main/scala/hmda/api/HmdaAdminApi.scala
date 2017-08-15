@@ -14,7 +14,6 @@ import hmda.api.http.BaseHttpApi
 import hmda.api.http.admin.InstitutionAdminHttpApi
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
-import HmdaConfig._
 
 object HmdaAdminApi {
   def props(): Props = Props(new HmdaAdminApi)

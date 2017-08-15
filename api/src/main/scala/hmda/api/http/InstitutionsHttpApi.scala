@@ -32,7 +32,7 @@ trait InstitutionsHttpApi
 
   implicit val timeout: Timeout
 
-  def institutionsRoutes(querySupervisor: ActorRef) =
+  def institutionsRoutes(supervisor: ActorRef, querySupervisor: ActorRef) =
     extractExecutionContext { executor =>
       implicit val ec: ExecutionContext = executor
       encodeResponse {
@@ -40,7 +40,7 @@ trait InstitutionsHttpApi
           institutionsPath(querySupervisor) ~
             pathPrefix("institutions" / Segment) { instId =>
               institutionAuthorize(instId) {
-                institutionByIdPath(instId) ~
+                institutionByIdPath(supervisor, querySupervisor, instId) ~
                   filingByPeriodPath(instId) ~
                   submissionPath(instId) ~
                   submissionLatestPath(instId) ~

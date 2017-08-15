@@ -40,6 +40,10 @@ object HmdaPlatform extends App {
   val actorTimeout = clusterConfig.getInt("hmda.actor.timeout")
   implicit val timeout = Timeout(actorTimeout.seconds)
 
+  val supervisor = system.actorOf(
+    Props[HmdaSupervisor].withDispatcher("persistence-dispatcher"),
+    "supervisor"
+  )
   val querySupervisor = system.actorOf(
     Props[HmdaQuerySupervisor].withDispatcher("query-dispatcher"),
     "query-supervisor"
@@ -48,14 +52,13 @@ object HmdaPlatform extends App {
   //Start API
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
-    system.actorOf(HmdaFilingApi.props(querySupervisor).withDispatcher("api-dispatcher"), "hmda-filing-api")
+    system.actorOf(HmdaFilingApi.props(supervisor, querySupervisor).withDispatcher("api-dispatcher"), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props().withDispatcher("api-dispatcher"), "hmda-admin-api")
     system.actorOf(HmdaPublicApi.props().withDispatcher("api-dispatcher"), "hmda-public-api")
   }
 
   //Start Persistence
   if (cluster.selfRoles.contains("persistence")) {
-    val supervisor = system.actorOf(HmdaSupervisor.props().withDispatcher("persistence-dispatcher"), "supervisor")
     implicit val ec = system.dispatchers.lookup("persistence-dispatcher")
     (supervisor ? FindActorByName(SingleLarValidation.name))
       .mapTo[ActorRef]
@@ -67,7 +70,6 @@ object HmdaPlatform extends App {
 
   //Start Query
   if (cluster.selfRoles.contains("query")) {
-
     implicit val ec = system.dispatchers.lookup("query-dispatcher")
     val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
     institutionViewF.map(actorRef => loadDemoData(actorRef))

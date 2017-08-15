@@ -19,7 +19,7 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
 
   "Institutions API Authorization and rejection handling" must {
 
-    val sealedRoute = Route.seal(institutionsRoutes(querySupervisor))
+    val sealedRoute = Route.seal(institutionsRoutes(supervisor, querySupervisor))
 
     // Require 'CFPB-HMDA-Username' header
     // Request these endpoints without username header (but with other required headers)
@@ -96,7 +96,7 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
       fInstitutions.map { i =>
         Get(s"/institutions/$institutionLower")
           .addHeader(usernameHeader)
-          .addHeader(instHeader) ~> institutionsRoutes(querySupervisor) ~> check {
+          .addHeader(instHeader) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
             status mustBe StatusCodes.OK
           }
       }
@@ -118,7 +118,7 @@ class InstitutionsAuthSpec extends InstitutionHttpApiSpec {
       val usernameLower = RawHeader("cfpb-hmda-username", "someuser")
       val institutionsUpper = RawHeader("CFPB-HMDA-INSTITUTIONS", "1,2,3")
 
-      Get("/institutions").addHeader(usernameLower).addHeader(institutionsUpper) ~> institutionsRoutes(querySupervisor) ~> check {
+      Get("/institutions").addHeader(usernameLower).addHeader(institutionsUpper) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.OK
       }
     }

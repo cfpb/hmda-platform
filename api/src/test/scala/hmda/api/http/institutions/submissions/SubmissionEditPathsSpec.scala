@@ -41,7 +41,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   val q007info = EditInfo("Q007", q007Description)
 
   "return summary of validation errors" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.OK
       val r = responseAs[SummaryEditResults]
       r.syntactical mustBe EditCollection(Seq(s020info, s010info))
@@ -52,12 +52,12 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   }
 
   "return a list of validation errors for a single type" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.OK
       responseAs[SingleTypeEditResults].edits mustBe Seq(v285info, v280info)
     }
 
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.OK
       responseAs[SingleTypeEditResults].edits mustBe Seq(q007info)
     }
@@ -68,7 +68,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val path = "/institutions/0/filings/2017/submissions/1/edits/S010"
     val expected = EditResult("S010", s010, path, 1, 1)
 
-    getWithCfpbHeaders(path) ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(path) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.OK
       responseAs[EditResult] mustBe expected
     }
@@ -77,7 +77,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   ///// CSV /////
 
   "Return summary edits in CSV format" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/csv") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/csv") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.OK
       responseAs[String] must include("editType, editId, loanId")
       responseAs[String] must include("Syntactical, S020, Transmittal Sheet")
@@ -88,7 +88,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   ///// Verification /////
 
   "Set up: get submission to ValidatedWithErrors state" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file) ~> institutionsRoutes(querySupervisor) ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2", file) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       Thread.sleep(5000) // wait for the submission to complete validation
       status mustBe StatusCodes.Accepted
 
@@ -106,7 +106,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val verification = EditsVerification(true)
     val currentStatus = ValidatedWithErrors
 
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/macro", verification) ~> institutionsRoutes(querySupervisor) ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/macro", verification) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.OK
 
       // test that it responds correctly
@@ -123,7 +123,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val verification = EditsVerification(true)
     val currentStatus = Validated
 
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/quality", verification) ~> institutionsRoutes(querySupervisor) ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/quality", verification) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.OK
 
       // test that it responds correctly
@@ -139,7 +139,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     val verification = EditsVerification(false)
     val currentStatus = ValidatedWithErrors
 
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/quality", verification) ~> institutionsRoutes(querySupervisor) ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/quality", verification) ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.OK
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(false, currentStatus)
     }
@@ -148,13 +148,13 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   ///// 405 (Method Not Allowed) Responses /////
 
   "Edit Type endpoint: return 405 when posting verification to syntactical endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes(querySupervisor)) ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes(supervisor, querySupervisor)) ~> check {
       status mustBe StatusCodes.MethodNotAllowed
     }
   }
 
   "Edit Type endpoint: return 405 when posting verification to validity endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> Route.seal(institutionsRoutes(querySupervisor)) ~> check {
+    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> Route.seal(institutionsRoutes(supervisor, querySupervisor)) ~> check {
       status mustBe StatusCodes.MethodNotAllowed
     }
   }
@@ -162,38 +162,38 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   ///// 404 (Not Found) Responses /////
 
   "Edits endpoint: return 404 for nonexistent institution" in {
-    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
     }
   }
   "Edits endpoint: return 404 for nonexistent filing period" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
     }
   }
   "Edits endpoint: return 404 for nonexistent submission" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
     }
   }
 
   "Edit Type endpoint: return 404 for nonexistent institution" in {
-    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
     }
   }
   "Edit Type endpoint: return 404 for nonexistent filing period" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits/quality") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits/quality") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
     }
   }
   "Edit Type endpoint: return 404 for nonexistent submission" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes(querySupervisor) ~> check {
+    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes(supervisor, querySupervisor) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
     }
