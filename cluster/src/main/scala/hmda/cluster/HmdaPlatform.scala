@@ -67,9 +67,8 @@ object HmdaPlatform extends App {
       "query-supervisor"
     )
     implicit val ec = system.dispatchers.lookup("query-dispatcher")
-    (querySupervisor ? FindActorByName(InstitutionView.name))
-      .mapTo[ActorRef]
-      .map(a => log.info(s"Started institutions view at ${a.path}"))
+    val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+    institutionViewF.map(actorRef => loadDemoData(actorRef))
     HmdaProjectionQuery.startUp(system)
   }
 
@@ -84,24 +83,24 @@ object HmdaPlatform extends App {
   }
 
   //Load demo data
-  val isDemo = clusterConfig.getBoolean("hmda.isDemo")
-  if (isDemo) {
-    implicit val ec = system.dispatcher
-    cleanup()
-    implicit val scheduler = system.scheduler
-    val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
-    log.info("...LOADING DEMO DATA...")
+  def loadDemoData(institutionView: ActorRef): Unit = {
+    val isDemo = clusterConfig.getBoolean("hmda.isDemo")
+    if (isDemo) {
+      implicit val ec = system.dispatcher
+      cleanup()
+      implicit val scheduler = system.scheduler
+      val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
+      log.info("...LOADING DEMO DATA...")
 
-    val institutionView = system.actorSelection("/user/query-supervisor/institutions-view")
+      val institutionCreatedF = for {
+        q <- retry((institutionView ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
+        s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
+      } yield s
 
-    val institutionCreatedF = for {
-      q <- retry((institutionView ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
-      s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
-    } yield s
-
-    institutionCreatedF.map { x =>
-      log.info(x.toString)
-      DemoData.loadDemoData(system)
+      institutionCreatedF.map { x =>
+        log.info(x.toString)
+        DemoData.loadDemoData(system)
+      }
     }
   }
 

@@ -2,7 +2,7 @@ package hmda.api
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.event.Logging
-import akka.pattern.{ pipe, ask }
+import akka.pattern.{ ask, pipe }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Route
@@ -14,6 +14,7 @@ import hmda.api.http.public.{ InstitutionSearchPaths, PublicHttpApi }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.view.institutions.InstitutionView
 import akka.http.scaladsl.server.Directives._
+import hmda.query.HmdaQuerySupervisor
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -42,7 +43,7 @@ class HmdaPublicApi
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val querySupervisor = context.system.actorSelection("/user/query-supervisor")
+  val querySupervisor = system.actorOf(HmdaQuerySupervisor.props(), "api-query-supervisor")
 
   val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
     .mapTo[ActorRef]

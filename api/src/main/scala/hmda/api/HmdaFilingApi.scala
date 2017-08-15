@@ -12,6 +12,7 @@ import akka.util.Timeout
 import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, LarHttpApi }
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
+import HmdaConfig._
 
 object HmdaFilingApi {
   def props(): Props = Props(new HmdaFilingApi)
