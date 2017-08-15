@@ -19,6 +19,7 @@ object InstitutionView {
   val name = "institutions-view"
 
   case class GetInstitutionById(institutionId: String) extends Command
+  case class GetInstitutionByRespondentId(respondentId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
   case class FindInstitutionByPeriodAndDomain(domain: String) extends Command
 
@@ -61,6 +62,12 @@ class InstitutionView extends HmdaPersistentActor {
   override def receiveCommand: Receive = {
     case GetInstitutionById(institutionId) =>
       val institution = state.institutions.find(i => i.id == institutionId).getOrElse(Institution.empty)
+      sender() ! institution
+
+    case GetInstitutionByRespondentId(respondentId) =>
+      val institution = state.institutions.find { i =>
+        i.respondent.externalId.value == respondentId
+      }.getOrElse(Institution.empty)
       sender() ! institution
 
     case GetInstitutionsById(ids) =>
