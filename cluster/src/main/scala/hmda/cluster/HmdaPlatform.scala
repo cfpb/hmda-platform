@@ -8,11 +8,13 @@ import akka.cluster.Cluster
 import akka.cluster.http.management.ClusterHttpManagement
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
+import hmda.api.{ HmdaAdminApi, HmdaFilingApi, HmdaPublicApi }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.publication.HmdaPublication
 import hmda.query.HmdaQuerySupervisor
 import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
+
 import scala.concurrent.duration._
 
 object HmdaPlatform extends App {
@@ -29,6 +31,9 @@ object HmdaPlatform extends App {
   //Start API
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
+    system.actorOf(HmdaFilingApi.props(), "hmda-filing-api")
+    system.actorOf(HmdaAdminApi.props(), "hmda-admin-api")
+    system.actorOf(HmdaPublicApi.props(), "hmda-public-api")
   }
 
   //Start Query

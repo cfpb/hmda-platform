@@ -111,7 +111,7 @@ object HmdaPlatform {
   private def startApi(system: ActorSystem, querySupervisor: ActorRef): Unit = {
     system.actorOf(HmdaFilingApi.props(), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(), "hmda-admin-api")
-    system.actorOf(HmdaPublicApi.props(querySupervisor), "hmda-public-api")
+    system.actorOf(HmdaPublicApi.props(), "hmda-public-api")
   }
 
 }

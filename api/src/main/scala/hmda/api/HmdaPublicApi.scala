@@ -19,10 +19,10 @@ import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaPublicApi {
-  def props(querySupervisor: ActorRef): Props = Props(new HmdaPublicApi(querySupervisor))
+  def props(): Props = Props(new HmdaPublicApi())
 }
 
-class HmdaPublicApi(querySupervisor: ActorRef)
+class HmdaPublicApi
     extends HttpApi
     with BaseHttpApi
     with InstitutionSearchPaths
@@ -41,6 +41,8 @@ class HmdaPublicApi(querySupervisor: ActorRef)
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
+
+  val querySupervisor = context.system.actorSelection("/user/query-supervisor")
 
   val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
     .mapTo[ActorRef]
