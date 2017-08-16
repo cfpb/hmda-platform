@@ -27,7 +27,7 @@ trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with Reque
 
   val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
 
-  val validationStats = system.actorOf(ValidationStats.props(), "validation-stats")
+  val validationStats = ValidationStats.createValidationStats(system)
 
   val duration = 10.seconds
   override val log: LoggingAdapter = NoLogging

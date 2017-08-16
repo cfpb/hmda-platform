@@ -16,10 +16,11 @@ import scala.concurrent.{ ExecutionContext, Future }
 import HmdaConfig._
 
 object HmdaFilingApi {
-  def props(supervisor: ActorRef, querySupervisor: ActorRef): Props = Props(new HmdaFilingApi(supervisor, querySupervisor))
+  def props(supervisor: ActorRef, querySupervisor: ActorRef, validationStats: ActorRef): Props =
+    Props(new HmdaFilingApi(supervisor, querySupervisor, validationStats))
 }
 
-class HmdaFilingApi(supervisor: ActorRef, querySupervisor: ActorRef)
+class HmdaFilingApi(supervisor: ActorRef, querySupervisor: ActorRef, validationStats: ActorRef)
     extends HttpApi
     with BaseHttpApi
     with LarHttpApi
@@ -41,7 +42,7 @@ class HmdaFilingApi(supervisor: ActorRef, querySupervisor: ActorRef)
   implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val paths: Route = routes(s"$name") ~ institutionsRoutes(supervisor, querySupervisor) ~ larRoutes(supervisor)
+  val paths: Route = routes(s"$name") ~ institutionsRoutes(supervisor, querySupervisor, validationStats) ~ larRoutes(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,

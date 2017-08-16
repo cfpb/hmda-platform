@@ -40,6 +40,8 @@ object HmdaPlatform extends App {
   val actorTimeout = clusterConfig.getInt("hmda.actor.timeout")
   implicit val timeout = Timeout(actorTimeout.seconds)
 
+
+  //TODO: make these actors Singletons in the cluster
   val supervisor = system.actorOf(
     Props[HmdaSupervisor].withDispatcher("persistence-dispatcher"),
     "supervisor"
@@ -49,10 +51,15 @@ object HmdaPlatform extends App {
     "query-supervisor"
   )
 
+  val validationStats = system.actorOf(
+    ValidationStats.props().withDispatcher("validation-dispatcher"),
+    "validation-stats"
+  )
+
   //Start API
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
-    system.actorOf(HmdaFilingApi.props(supervisor, querySupervisor).withDispatcher("api-dispatcher"), "hmda-filing-api")
+    system.actorOf(HmdaFilingApi.props(supervisor, querySupervisor, validationStats).withDispatcher("api-dispatcher"), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props().withDispatcher("api-dispatcher"), "hmda-admin-api")
     system.actorOf(HmdaPublicApi.props().withDispatcher("api-dispatcher"), "hmda-public-api")
   }
@@ -79,11 +86,6 @@ object HmdaPlatform extends App {
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
     system.actorOf(Props[HmdaPublication].withDispatcher("publication-dispatcher"), "publication")
-  }
-
-  //Start Validation
-  if (cluster.selfRoles.contains("validation")) {
-    system.actorOf(ValidationStats.props().withDispatcher("validation-dispatcher"), "validation-stats")
   }
 
   //Load demo data

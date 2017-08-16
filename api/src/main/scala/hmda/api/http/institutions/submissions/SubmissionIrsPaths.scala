@@ -1,6 +1,6 @@
 package hmda.api.http.institutions.submissions
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
@@ -30,12 +30,12 @@ trait SubmissionIrsPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs
-  def submissionIrsPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionIrsPath(validationStats: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, seqNr) =>
       timedGet { uri =>
         completeVerified(institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
-            onComplete(getMsa(institutionId, period, seqNr)) {
+            onComplete(getMsa(validationStats, institutionId, period, seqNr)) {
               case Success(msaSeq) =>
                 val irs: IrsResponse = Irs(msaSeq).paginatedResponse(page, uri.path.toString)
                 complete(ToResponseMarshallable(irs))
@@ -47,11 +47,11 @@ trait SubmissionIrsPaths
     }
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs/csv
-  def submissionIrsCsvPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionIrsCsvPath(validationStats: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "irs" / "csv") { (period, seqNr) =>
       timedGet { uri =>
         completeVerified(institutionId, period, seqNr, uri) {
-          onComplete(getMsa(institutionId, period, seqNr)) {
+          onComplete(getMsa(validationStats, institutionId, period, seqNr)) {
             case Success(msaSeq) =>
               val csv = Irs(msaSeq).toCsv
               complete(ToResponseMarshallable(csv))
@@ -61,8 +61,7 @@ trait SubmissionIrsPaths
       }
     }
 
-  private def getMsa(instId: String, period: String, seqNr: Int): Future[Seq[Msa]] = {
-    val validationStats = system.actorSelection("/user/validation-stats")
+  private def getMsa(validationStats: ActorRef, instId: String, period: String, seqNr: Int): Future[Seq[Msa]] = {
     val submissionId = SubmissionId(instId, period, seqNr)
     (validationStats ? FindIrsStats(submissionId)).mapTo[Seq[Msa]]
   }

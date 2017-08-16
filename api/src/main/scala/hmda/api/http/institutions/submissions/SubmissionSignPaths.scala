@@ -39,13 +39,12 @@ trait SubmissionSignPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign
-  def submissionSignPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionSignPath(supervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "sign") { (period, id) =>
-      val supervisor = system.actorSelection("/user/supervisor")
       val submissionId = SubmissionId(institutionId, period, id)
       timedGet { uri =>
         completeVerified(institutionId, period, id, uri) {
-          completeWithSubmissionReceipt(submissionId, uri)
+          completeWithSubmissionReceipt(supervisor, submissionId, uri)
         }
       } ~
         timedPost { uri =>
@@ -60,7 +59,7 @@ trait SubmissionSignPaths
                     s <- actor ? hmda.persistence.processing.ProcessingMessages.Signed
                   } yield s
                   onComplete(fSign) {
-                    case Success(Some(_)) => completeWithSubmissionReceipt(submissionId, uri)
+                    case Success(Some(_)) => completeWithSubmissionReceipt(supervisor, submissionId, uri)
                     case Success(_) =>
                       val errorResponse = ErrorResponse(400, "Illegal State: Submission must be Validated or ValidatedWithErrors to sign", uri.path)
                       complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
@@ -77,8 +76,7 @@ trait SubmissionSignPaths
         }
     }
 
-  private def completeWithSubmissionReceipt(subId: SubmissionId, uri: Uri)(implicit ec: ExecutionContext) = {
-    val supervisor = system.actorSelection("/user/supervisor")
+  private def completeWithSubmissionReceipt(supervisor: ActorRef, subId: SubmissionId, uri: Uri)(implicit ec: ExecutionContext) = {
     val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, subId.institutionId, subId.period)).mapTo[ActorRef]
     val fSubmission = for {
       a <- fSubmissionsActor

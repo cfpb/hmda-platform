@@ -32,7 +32,7 @@ trait InstitutionsHttpApi
 
   implicit val timeout: Timeout
 
-  def institutionsRoutes(supervisor: ActorRef, querySupervisor: ActorRef) =
+  def institutionsRoutes(supervisor: ActorRef, querySupervisor: ActorRef, validationStats: ActorRef) =
     extractExecutionContext { executor =>
       implicit val ec: ExecutionContext = executor
       encodeResponse {
@@ -51,10 +51,10 @@ trait InstitutionsHttpApi
                   submissionSingleEditPath(instId) ~
                   editFailureDetailsPath(instId) ~
                   verifyEditsPath(instId) ~
-                  submissionIrsPath(instId) ~
-                  submissionIrsCsvPath(instId) ~
-                  submissionSignPath(instId) ~
-                  submissionSummaryPath(instId)
+                  submissionIrsPath(validationStats, instId) ~
+                  submissionIrsCsvPath(validationStats, instId) ~
+                  submissionSignPath(supervisor, instId) ~
+                  submissionSummaryPath(supervisor, instId)
               }
             }
         }
