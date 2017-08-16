@@ -14,6 +14,10 @@ For more information on HMDA, checkout the [About HMDA page](http://www.consumer
 
 This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset.
 
+The HMDA Platform uses sbt's multi-project builds, each project representing a specific task. The platform is an Akka Cluster
+application that can be deployed on a single node or as a distributed application. For more information on how Akka Cluster
+is used, see the documentation [here](Documents/cluster.md)
+
 The HMDA Platform is composed of the following modules:
 
 ### Parser (JS/JVM)
@@ -70,17 +74,82 @@ The HMDA Platform is written in [Scala](http://www.scala-lang.org/). To build it
 
 In addition, you'll need Scala's interactive build tool [sbt](http://www.scala-sbt.org/0.13/tutorial/index.html). Please refer to sbt's [installation instructions](http://www.scala-sbt.org/0.13/tutorial/Setup.html) to get started.
 
+### Docker
+
+Though Docker is not a dependency of the Scala project, it is very useful for running and smoke testing locally.
+Use the following steps to prepare a local environment for running the Platform with docker:
+
+First, make sure that you have the [Docker Toolbox](https://www.docker.com/docker-toolbox) installed.
+
+If you don't have a Docker machine created, you can create one with the default parameters using the command below.
+This will be sufficient for running most docker containers (e.g. the dev dependencies for the API), but not for running the entire platform.
+
+```shell
+docker-machine create --driver virtualbox dev
+```
+
+If you wish to run the entire platform using Docker (currently the only way to run the entire platform),
+you'll need to dedicate more resources to the Docker machine.
+We've found that for the full stack to run efficiently, you need approximately:
+
+* 4 CPUs
+* 6 GB RAM
+* 80 GB Disk space
+
+Assuming you are using Docker Machine to provision your Docker
+environment, you can check you current settings with the following
+(ignore the second `Memory`):
+
+```shell
+    $ docker-machine inspect | grep 'CPU\|Memory\|DiskSize'
+        "CPU": 4,
+        "Memory": 6144,
+        "DiskSize": 81920,
+        "Memory": 0,
+```
+
+If your settings are below these suggestions, you should create a new
+Docker VM. The following will create a VM named `hmda-platform` with
+the appropriate resources:
+
+```shell
+    $ docker-machine create \
+    --driver virtualbox \
+    --virtualbox-disk-size 81920 \
+    --virtualbox-cpu-count 4 \
+    --virtualbox-memory 6144 \
+    hmda-platform
+```
+
+After the machine is created, make sure that you connect your shell with the newly created machine
+```shell
+$ eval "(docker-machine env dev)"
+```
+
+
 ## Building and Running
 
-The HMDA Platform uses sbt's multi-project builds, each project representing a specific task. The platform is an Akka Cluster
-application that can be deployed on a single node or as a distributed application. For more information on how Akka Cluster 
-is used, see the documentation [here](Documents/cluster.md)
+### Building the .jar
 
-### Interactive
+* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
+
+```shell
+> clean assembly
+```
+
+This task will create a `fat jar`, which can be executed directly on any JDK8 compliant JVM:
+
+```shell
+java -jar target/scala-2.11/hmda.jar
+```
+
+
+### Running Interactively
 
 #### Running the Dependencies
 
-Assuming you have Docker-Compose installed, the easiest way to get all of the platform's dependencies up and running with the provided docker-compose dev setup:
+Assuming you have Docker-Compose installed (according to the [Docker](#docker) instructions above),
+the easiest way to get all of the platform's dependencies up and running with the provided docker-compose dev setup:
 
 ```shell
 docker-compose -f docker-dev.yml up
@@ -88,7 +157,8 @@ docker-compose -f docker-dev.yml up
 
 When finished, use `docker-compose down` to gracefully stop the running containers.
 
-Alternatively, you can start each one individually by following the instructions in the [Local Dependencies](documents/local-depencencies.md) documentation.
+Alternatively, you can start each one individually by following the instructions in
+the [Local Dependencies](documents/local-depencencies.md) documentation.
 
 
 #### Running the API
@@ -124,39 +194,14 @@ Confirm that the platform is up and running by browsing to http://localhost:8080
 When finished, press enter to get the sbt prompt, then stop the project by entering `reStop`.
 
 
-#### Building the Project
 
-* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
+### Running the Project with Docker
 
-```shell
-> clean assembly
-```
-
-This task will create a `fat jar`, which can be executed directly on any JDK8 compliant JVM:
-
-```shell
-java -jar target/scala-2.11/hmda.jar
-```
-
-
-### Docker
-
-First, make sure that you have the [Docker Toolbox](https://www.docker.com/docker-toolbox) installed.
-
-If you don't have a Docker machine created, you can create one by issuing the following:
-```shell
-docker-machine create --driver virtualbox dev
-```
-
-After the machine is created, make sure that you connect your shell with the newly created machine
-```shell
-$ eval "(docker-machine env dev)"
-```
-
-Ensure there's a compiled jar to create the Docker image with:
+First, ensure there's a compiled jar to create the Docker image with:
 ```shell
 sbt clean assembly
 ```
+
 #### To run only the API
 
 Build the docker image
@@ -174,33 +219,7 @@ The Public API will run on `$(docker-machine ip):8082`
 
 #### To run the entire platform
 
-1. Dedicate appropriate resources to your Docker environment.  We've found
-    that for the full stack to run efficiently, you need approximately:
-
-    * 4 CPUs
-    * 6 GB RAM
-    * 80 GB Disk space
-
-    Assuming you are using Docker Machine to provision your Docker
-    environment, you can check you current settings with the following 
-    (ignore the second `Memory`):
-
-        $ docker-machine inspect | grep 'CPU\|Memory\|DiskSize'
-            "CPU": 4,
-            "Memory": 6144,
-            "DiskSize": 81920,
-            "Memory": 0,
-
-    If your settings are below these suggestions, you should create a new
-    Docker VM. The following will create a VM named `hmda-platform` with 
-    the appropriate resources:
-
-        $ docker-machine create \
-        --driver virtualbox \
-        --virtualbox-disk-size 81920 \
-        --virtualbox-cpu-count 4 \
-        --virtualbox-memory 6144 \
-        hmda-platform
+1. Ensure you have a Docker Machine with sufficient resources, as described in the [Docker](#docker) section above.
 
 1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui) and 
     [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth) into the same
