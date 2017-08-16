@@ -5,7 +5,10 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.publication.reports.ActionTakenTypeEnum.{ ApplicationReceived, LoansOriginated }
+import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, EthnicityCharacteristic }
 import hmda.model.publication.reports.EthnicityEnum._
+import hmda.publication.reports.util.DispositionType.{ OriginatedDisp, ReceivedDisp }
 import hmda.publication.reports.util.EthnicityUtil._
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.LarConverter._
@@ -129,4 +132,25 @@ class EthnicityUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerato
       count(lars).map(_ mustBe 0)
     }
   }
+
+  "ethnicityBorrowerCharacteristic" must {
+    "generate a EthnicityBorrowCharacteristic with all 4 ethnicity categories and the specified dispositions" in {
+      val lars = lar100ListGen.sample.get
+      val dispositions = List(ReceivedDisp, OriginatedDisp)
+
+      val resultF = ethnicityBorrowerCharacteristic(source(lars), dispositions)
+
+      resultF.map { result =>
+        result mustBe a[EthnicityBorrowerCharacteristic]
+
+        result.ethnicities.size mustBe 4
+
+        val firstEthCharacteristic = result.ethnicities.head
+        firstEthCharacteristic mustBe a[EthnicityCharacteristic]
+        firstEthCharacteristic.ethnicity mustBe HispanicOrLatino
+        firstEthCharacteristic.dispositions.map(_.disposition) mustBe List(ApplicationReceived, LoansOriginated)
+      }
+    }
+  }
+
 }
