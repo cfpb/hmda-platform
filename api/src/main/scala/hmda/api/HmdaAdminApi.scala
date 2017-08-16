@@ -1,6 +1,6 @@
 package hmda.api
 
-import akka.actor.{ ActorSystem, Props }
+import akka.actor.{ ActorSystem, Props, ActorRef }
 import akka.event.Logging
 import akka.pattern.pipe
 import akka.http.scaladsl.Http
@@ -16,10 +16,10 @@ import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaAdminApi {
-  def props(): Props = Props(new HmdaAdminApi)
+  def props(supervisor: ActorRef, querySupervisor: ActorRef): Props = Props(new HmdaAdminApi(supervisor, querySupervisor))
 }
 
-class HmdaAdminApi extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi {
+class HmdaAdminApi(supervisor: ActorRef, querySupervisor: ActorRef) extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi {
 
   val config = ConfigFactory.load()
 
@@ -36,7 +36,7 @@ class HmdaAdminApi extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val paths: Route = routes(s"$name") ~ institutionAdminRoutes
+  override val paths: Route = routes(s"$name") ~ institutionAdminRoutes(supervisor, querySupervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,

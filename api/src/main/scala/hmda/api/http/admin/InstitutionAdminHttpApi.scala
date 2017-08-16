@@ -39,12 +39,11 @@ trait InstitutionAdminHttpApi
 
   val log: LoggingAdapter
 
-  val institutionsWritePath =
+  def institutionsWritePath(supervisor: ActorRef) =
     path("institutions") {
       extractExecutionContext { executor =>
         entity(as[Institution]) { institution =>
           implicit val ec: ExecutionContext = executor
-          val supervisor = system.actorSelection("/user/supervisor")
           val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
           val fFilingPersistence = (supervisor ? FindFilings(FilingPersistence.name, institution.id)).mapTo[ActorRef]
 
@@ -87,11 +86,11 @@ trait InstitutionAdminHttpApi
     }
 
   private val cdRegex = new Regex("create|delete")
-  val institutionsSchemaPath =
+
+  def institutionsSchemaPath(querySupervisor: ActorRef) =
     path("institutions" / cdRegex) { command =>
       extractExecutionContext { executor =>
         implicit val ec: ExecutionContext = executor
-        val querySupervisor = system.actorSelection("/user/query-supervisor")
         val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
         val message = command match {
           case "create" => CreateSchema
@@ -112,5 +111,5 @@ trait InstitutionAdminHttpApi
       }
     }
 
-  val institutionAdminRoutes = encodeResponse { institutionsWritePath ~ institutionsSchemaPath }
+  def institutionAdminRoutes(supervisor: ActorRef, querySupervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) ~ institutionsSchemaPath(querySupervisor) }
 }

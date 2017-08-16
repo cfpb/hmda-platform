@@ -60,7 +60,7 @@ object HmdaPlatform extends App {
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
     system.actorOf(HmdaFilingApi.props(supervisor, querySupervisor, validationStats).withDispatcher("api-dispatcher"), "hmda-filing-api")
-    system.actorOf(HmdaAdminApi.props().withDispatcher("api-dispatcher"), "hmda-admin-api")
+    system.actorOf(HmdaAdminApi.props(supervisor, querySupervisor).withDispatcher("api-dispatcher"), "hmda-admin-api")
     system.actorOf(HmdaPublicApi.props().withDispatcher("api-dispatcher"), "hmda-public-api")
   }
 
