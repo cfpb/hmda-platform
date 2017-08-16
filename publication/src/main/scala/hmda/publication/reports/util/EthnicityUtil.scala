@@ -23,11 +23,11 @@ object EthnicityUtil {
         lar.ethnicity == 2 &&
           (lar.coEthnicity == 2 || coapplicantEthnicityNotProvided(lar))
       }
-      case NotAvailable => larSource.filter { lar =>
+      case Joint => larSource.filter { lar =>
         (lar.ethnicity == 1 && lar.coEthnicity == 2) ||
           (lar.ethnicity == 2 && lar.coEthnicity == 1)
       }
-      case Joint => larSource.filter { lar =>
+      case NotAvailable => larSource.filter { lar =>
         lar.ethnicity == 3 || lar.ethnicity == 4
       }
     }
