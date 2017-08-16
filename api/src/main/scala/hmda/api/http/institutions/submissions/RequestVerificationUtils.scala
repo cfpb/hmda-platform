@@ -32,8 +32,8 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
      If the institution, filing, and submission exist, complete the request.
      If any one does not exist, respond with 404 error, including an appropriate message.
    */
-  def completeVerified(institutionId: String, period: String, seqNr: Int, uri: Uri)(completeRequest: Route)(implicit ec: ExecutionContext): Route = {
-    onComplete(verifyRequest(institutionId, period, seqNr)) {
+  def completeVerified(querySupervisor: ActorRef, institutionId: String, period: String, seqNr: Int, uri: Uri)(completeRequest: Route)(implicit ec: ExecutionContext): Route = {
+    onComplete(verifyRequest(querySupervisor, institutionId, period, seqNr)) {
       case Success(None) => completeRequest
       case Success(Some(message)) =>
         val errorResponse = ErrorResponse(404, message, uri.path)
@@ -46,10 +46,10 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
      If the request is legal (i.e. the institution, period, and filing exist), return None.
      If any of the objects does not exist, return Some(message), where message describes the issue.
    */
-  private def verifyRequest(institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
+  private def verifyRequest(querySupervisor: ActorRef, institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
     val submissionId = SubmissionId(institutionId, period, seqNr)
 
-    val inst = fInstitution(submissionId)
+    val inst = fInstitution(querySupervisor, submissionId)
     val fil = fFiling(submissionId)
     val sub = fSubmission(submissionId)
 
@@ -72,8 +72,7 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
     else Some(s"Institution $iid not found")
   }
 
-  private def fInstitution(sid: SubmissionId)(implicit ec: ExecutionContext): Future[Institution] = {
-    val querySupervisor = system.actorSelection("/user/query-supervisor")
+  private def fInstitution(querySupervisor: ActorRef, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Institution] = {
     val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
     fInstitutionsActor.flatMap(ia => ia ? GetInstitutionById(sid.institutionId)).mapTo[Institution]
   }

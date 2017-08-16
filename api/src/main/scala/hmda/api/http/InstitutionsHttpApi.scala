@@ -42,19 +42,19 @@ trait InstitutionsHttpApi
               institutionAuthorize(instId) {
                 institutionByIdPath(supervisor, querySupervisor, instId) ~
                   filingByPeriodPath(supervisor, instId) ~
-                  submissionPath(instId) ~
-                  submissionLatestPath(instId) ~
+                  submissionPath(supervisor, instId) ~
+                  submissionLatestPath(supervisor, instId) ~
                   uploadPath(supervisor, querySupervisor, instId) ~
-                  submissionEditsPath(instId) ~
-                  submissionParseErrorsPath(instId) ~
-                  submissionEditCsvPath(instId) ~
-                  submissionSingleEditPath(instId) ~
-                  editFailureDetailsPath(instId) ~
-                  verifyEditsPath(instId) ~
-                  submissionIrsPath(validationStats, instId) ~
-                  submissionIrsCsvPath(validationStats, instId) ~
-                  submissionSignPath(supervisor, instId) ~
-                  submissionSummaryPath(supervisor, instId)
+                  submissionEditsPath(supervisor, querySupervisor, instId) ~
+                  submissionParseErrorsPath(supervisor, querySupervisor, instId) ~
+                  submissionEditCsvPath(supervisor, querySupervisor, instId) ~
+                  submissionSingleEditPath(supervisor, querySupervisor, instId) ~
+                  editFailureDetailsPath(supervisor, querySupervisor, instId) ~
+                  verifyEditsPath(supervisor, querySupervisor, instId) ~
+                  submissionIrsPath(querySupervisor, validationStats, instId) ~
+                  submissionIrsCsvPath(querySupervisor, validationStats, instId) ~
+                  submissionSignPath(supervisor, querySupervisor, instId) ~
+                  submissionSummaryPath(supervisor, querySupervisor, instId)
               }
             }
         }

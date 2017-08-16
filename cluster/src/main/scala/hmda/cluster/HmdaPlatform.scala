@@ -40,7 +40,6 @@ object HmdaPlatform extends App {
   val actorTimeout = clusterConfig.getInt("hmda.actor.timeout")
   implicit val timeout = Timeout(actorTimeout.seconds)
 
-
   //TODO: make these actors Singletons in the cluster
   val supervisor = system.actorOf(
     Props[HmdaSupervisor].withDispatcher("persistence-dispatcher"),

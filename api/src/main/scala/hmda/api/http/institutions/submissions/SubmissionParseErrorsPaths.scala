@@ -33,11 +33,10 @@ trait SubmissionParseErrorsPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<id>/parseErrors
-  def submissionParseErrorsPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionParseErrorsPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "parseErrors") { (period, seqNr) =>
       timedGet { uri =>
-        val supervisor = system.actorSelection("/user/supervisor")
-        completeVerified(institutionId, period, seqNr, uri) {
+        completeVerified(querySupervisor, institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
             val submissionID = SubmissionId(institutionId, period, seqNr)
             val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]

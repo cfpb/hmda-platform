@@ -39,16 +39,16 @@ trait SubmissionSignPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/sign
-  def submissionSignPath(supervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionSignPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "sign") { (period, id) =>
       val submissionId = SubmissionId(institutionId, period, id)
       timedGet { uri =>
-        completeVerified(institutionId, period, id, uri) {
+        completeVerified(querySupervisor, institutionId, period, id, uri) {
           completeWithSubmissionReceipt(supervisor, submissionId, uri)
         }
       } ~
         timedPost { uri =>
-          completeVerified(institutionId, period, id, uri) {
+          completeVerified(querySupervisor, institutionId, period, id, uri) {
             entity(as[JsObject]) { json =>
               val verified = json.fields("signed").asInstanceOf[JsBoolean]
               verified match {
