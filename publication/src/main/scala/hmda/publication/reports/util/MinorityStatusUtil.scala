@@ -50,7 +50,6 @@ object MinorityStatusUtil {
 
   def minorityStatusBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](
     larSource: Source[LoanApplicationRegisterQuery, NotUsed],
-    applicantIncomeEnum: ApplicantIncomeEnum,
     dispositions: List[DispositionType]
   ): Future[MinorityStatusBorrowerCharacteristic] = {
 

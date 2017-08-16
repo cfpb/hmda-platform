@@ -107,7 +107,7 @@ object RaceUtil {
         (lar.coRace5 != "" && lar.coRace5 != "5"))
   }
 
-  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum, dispositions: List[DispositionType]): Future[RaceBorrowerCharacteristic] = {
+  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], dispositions: List[DispositionType]): Future[RaceBorrowerCharacteristic] = {
 
     val larsAlaskan = filterRace(larSource, AmericanIndianOrAlaskaNative)
     val larsAsian = filterRace(larSource, Asian)
