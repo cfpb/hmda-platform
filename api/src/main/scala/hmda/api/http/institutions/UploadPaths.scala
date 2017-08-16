@@ -19,7 +19,7 @@ import hmda.api.http.HmdaCustomDirectives
 import hmda.persistence.messages.CommonMessages._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.model.fi.{ Created, Failed, Submission, SubmissionId, Uploaded }
-import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
+import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
@@ -49,7 +49,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
         val uploadTimestamp = Instant.now.toEpochMilli
         val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
         val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
-        (supervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
+        (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
         (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
 
         val fUploadSubmission = for {
