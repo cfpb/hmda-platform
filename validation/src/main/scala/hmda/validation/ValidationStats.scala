@@ -111,7 +111,6 @@ class ValidationStats extends HmdaPersistentActor {
   var state = ValidationStatsState()
 
   override def updateState(event: Event): Unit = {
-    log.info("ValidationStats event " + event)
     state = state.updated(event)
   }
 

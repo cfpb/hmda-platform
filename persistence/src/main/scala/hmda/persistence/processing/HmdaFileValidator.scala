@@ -260,7 +260,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
         for {
           stat <- statRef
         } yield {
-          log.info("Sending IRS persistence message")
+          log.info(s"Sending IRS persistence message to SubmissionLarStats: $stat")
           stat ! PersistIrs
         }
         log.debug(s"Validation completed for $submissionId")

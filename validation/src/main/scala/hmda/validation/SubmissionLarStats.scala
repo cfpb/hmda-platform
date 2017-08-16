@@ -94,7 +94,6 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       tallyQ075Lar(lar)
       tallyQ076Lar(lar)
       msaMap = msaMap + lar
-      log.info("Msa Map: " + msaMap)
 
     case CountSubmittedLarsInSubmission =>
       persist(SubmittedLarsUpdated(totalSubmittedLars)) { e =>
@@ -130,11 +129,11 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
 
     case PersistIrs =>
       val msaSeq = msaMap.msas.values.toSeq
-      log.info("SubmissionLarStats PersistIrs message received, about to persist IRS")
+      log.info("PersistIrs message received at SubmissionLarStats, about to persist IRS")
       persist(IrsStatsUpdated(msaSeq)) { e =>
-        log.info(s"Persisted: $msaSeq")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")
+        log.info(s"Persisted: $msaSeq, sending message to ValidationStats: $validationStats")
         validationStats ! AddIrsStats(msaSeq, submissionId)
       }
 
