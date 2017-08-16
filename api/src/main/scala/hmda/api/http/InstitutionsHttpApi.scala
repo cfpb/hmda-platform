@@ -44,7 +44,7 @@ trait InstitutionsHttpApi
                   filingByPeriodPath(instId) ~
                   submissionPath(instId) ~
                   submissionLatestPath(instId) ~
-                  uploadPath(instId) ~
+                  uploadPath(supervisor, querySupervisor, instId) ~
                   submissionEditsPath(instId) ~
                   submissionParseErrorsPath(instId) ~
                   submissionEditCsvPath(instId) ~

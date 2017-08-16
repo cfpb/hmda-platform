@@ -42,13 +42,11 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>
-  def uploadPath[_: EC](institutionId: String) =
+  def uploadPath[_: EC](supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber) { (period, seqNr) =>
       timedPost { uri =>
         val submissionId = SubmissionId(institutionId, period, seqNr)
         val uploadTimestamp = Instant.now.toEpochMilli
-        val supervisor = system.actorSelection("/user/supervisor")
-        val querySupervisor = system.actorSelection("/user/query-supervisor")
         val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
         val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
         (supervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
