@@ -100,11 +100,13 @@ object HmdaPlatform extends App {
       val institutionCreatedF = for {
         q <- retry((institutionView ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
         s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
-      } yield s
+        i <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+      } yield (s, i)
 
-      institutionCreatedF.map { x =>
-        log.info(x.toString)
-        DemoData.loadDemoData(system)
+      institutionCreatedF.map {
+        case (s, i) =>
+          log.info(s.toString)
+          DemoData.loadDemoData(system, i)
       }
     }
   }

@@ -2,6 +2,7 @@ package hmda.api.http
 
 import java.io.File
 
+import akka.actor.ActorRef
 import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, Multipart }
 import akka.http.scaladsl.testkit.ScalatestRouteTest
@@ -19,6 +20,8 @@ import org.iq80.leveldb.util.FileUtils
 import org.scalatest._
 
 import scala.concurrent.duration._
+import akka.pattern.ask
+import scala.concurrent._
 
 trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with RequestHeaderUtils with InstitutionsHttpApi with ScalatestRouteTest { suite: Suite =>
   val configuration: Config = ConfigFactory.load()
@@ -35,13 +38,14 @@ trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with Reque
 
   implicit val flowParallelism: Int = configuration.getInt("hmda.actor-flow-parallelism")
 
-  val ec = system.dispatcher
+  implicit val ec = system.dispatcher
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    supervisor ! FindActorByName(InstitutionPersistence.name)
+    val institutionsActorF = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
     querySupervisor ! FindActorByName(InstitutionView.name)
-    DemoData.loadTestData(system)
+    val institutionsActor = Await.result(institutionsActorF, duration)
+    DemoData.loadTestData(system, institutionsActor)
   }
 
   override def afterAll(): Unit = {
