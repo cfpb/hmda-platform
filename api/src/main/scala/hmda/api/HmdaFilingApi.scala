@@ -41,7 +41,7 @@ class HmdaFilingApi(supervisor: ActorRef, querySupervisor: ActorRef)
   implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val paths: Route = routes(s"$name") ~ institutionsRoutes(supervisor, querySupervisor) ~ larRoutes
+  val paths: Route = routes(s"$name") ~ institutionsRoutes(supervisor, querySupervisor) ~ larRoutes(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
