@@ -65,11 +65,6 @@ object HmdaPlatform extends App {
     )
   )
 
-  //val validationStats = system.actorOf(
-  //  ValidationStats.props().withDispatcher("validation-dispatcher"),
-  //  "validation-stats"
-  //)
-
   //Start API
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()

@@ -113,6 +113,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   var state = HmdaFileValidationState()
 
+  //TODO: Remove supervisor actor selection here
   val supervisor = system.actorSelection("/user/supervisor")
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
   val statRef = for {
