@@ -65,10 +65,16 @@ lazy val cluster = (project in file("cluster"))
     )
   )
   .dependsOn(
-    persistence,
+    modelJVM,
+    parserJVM,
+    apiModel,
     api,
+    persistenceModel,
+    persistence,
     query,
-    publication
+    validation,
+    publication,
+    census
   )
 
 lazy val model = (crossProject in file("model"))
