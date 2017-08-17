@@ -5,6 +5,7 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor
 import hmda.persistence.processing._
+import hmda.persistence.messages.CommonMessages._
 
 object HmdaSupervisor {
 
@@ -37,6 +38,8 @@ class HmdaSupervisor extends HmdaSupervisorActor {
 
     case FindProcessingActor(name, submissionId) =>
       sender() ! findProcessingActor(name, submissionId)
+
+    case Shutdown => context stop self
 
   }
 

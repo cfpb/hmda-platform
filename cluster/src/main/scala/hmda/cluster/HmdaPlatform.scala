@@ -7,6 +7,7 @@ import akka.actor._
 import akka.pattern.ask
 import akka.cluster.Cluster
 import akka.cluster.http.management.ClusterHttpManagement
+import akka.cluster.singleton.{ ClusterSingletonManager, ClusterSingletonManagerSettings, ClusterSingletonProxy, ClusterSingletonProxySettings }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.{ HmdaAdminApi, HmdaFilingApi, HmdaPublicApi }
@@ -23,6 +24,7 @@ import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchem
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
+import hmda.persistence.messages.CommonMessages._
 
 import scala.concurrent.duration._
 import hmda.query.projections.filing.HmdaFilingDBProjection._
@@ -40,14 +42,20 @@ object HmdaPlatform extends App {
   val actorTimeout = clusterConfig.getInt("hmda.actor.timeout")
   implicit val timeout = Timeout(actorTimeout.seconds)
 
-  //TODO: make these actors Singletons in the cluster
-  val supervisor = system.actorOf(
-    Props[HmdaSupervisor].withDispatcher("persistence-dispatcher"),
-    "supervisor"
+  val supervisorProxy = system.actorOf(
+    ClusterSingletonProxy.props(
+      singletonManagerPath = "/user/supervisor",
+      settings = ClusterSingletonProxySettings(system).withRole("persistence")
+    ),
+    name = "supervisorProxy"
   )
-  val querySupervisor = system.actorOf(
-    Props[HmdaQuerySupervisor].withDispatcher("query-dispatcher"),
-    "query-supervisor"
+
+  val querySupervisorProxy = system.actorOf(
+    ClusterSingletonProxy.props(
+      singletonManagerPath = "/user/query-supervisor",
+      settings = ClusterSingletonProxySettings(system).withRole("query")
+    ),
+    name = "querySupervisorProxy"
   )
 
   val validationStats = system.actorOf(
@@ -58,18 +66,29 @@ object HmdaPlatform extends App {
   //Start API
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
-    system.actorOf(HmdaFilingApi.props(supervisor, querySupervisor, validationStats).withDispatcher("api-dispatcher"), "hmda-filing-api")
-    system.actorOf(HmdaAdminApi.props(supervisor, querySupervisor).withDispatcher("api-dispatcher"), "hmda-admin-api")
+    system.actorOf(HmdaFilingApi.props(supervisorProxy, querySupervisorProxy, validationStats).withDispatcher("api-dispatcher"), "hmda-filing-api")
+    system.actorOf(HmdaAdminApi.props(supervisorProxy, querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
     system.actorOf(HmdaPublicApi.props().withDispatcher("api-dispatcher"), "hmda-public-api")
   }
 
   //Start Persistence
   if (cluster.selfRoles.contains("persistence")) {
     implicit val ec = system.dispatchers.lookup("persistence-dispatcher")
-    (supervisor ? FindActorByName(SingleLarValidation.name))
+
+    system.actorOf(
+      ClusterSingletonManager.props(
+        singletonProps = Props(classOf[HmdaSupervisor]),
+        terminationMessage = Shutdown,
+        settings = ClusterSingletonManagerSettings(system).withRole("persistence")
+      ),
+      name = "supervisor"
+    )
+
+    (supervisorProxy ? FindActorByName(SingleLarValidation.name))
       .mapTo[ActorRef]
       .map(a => log.info(s"Started single lar validator at ${a.path}"))
-    (supervisor ? FindActorByName(InstitutionPersistence.name))
+
+    (supervisorProxy ? FindActorByName(InstitutionPersistence.name))
       .mapTo[ActorRef]
       .map(a => log.info(s"Started institutions at ${a.path}"))
   }
@@ -77,8 +96,18 @@ object HmdaPlatform extends App {
   //Start Query
   if (cluster.selfRoles.contains("query")) {
     implicit val ec = system.dispatchers.lookup("query-dispatcher")
-    val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-    institutionViewF.map(actorRef => loadDemoData(actorRef))
+
+    system.actorOf(
+      ClusterSingletonManager.props(
+        singletonProps = Props(classOf[HmdaQuerySupervisor]),
+        terminationMessage = Shutdown,
+        settings = ClusterSingletonManagerSettings(system).withRole("query")
+      ),
+      name = "query-supervisor"
+    )
+
+    val institutionViewF = (querySupervisorProxy ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+    institutionViewF.map(actorRef => loadDemoData(supervisorProxy, actorRef))
     HmdaProjectionQuery.startUp(system)
   }
 
@@ -88,7 +117,7 @@ object HmdaPlatform extends App {
   }
 
   //Load demo data
-  def loadDemoData(institutionView: ActorRef): Unit = {
+  def loadDemoData(supervisor: ActorRef, institutionView: ActorRef): Unit = {
     val isDemo = clusterConfig.getBoolean("hmda.isDemo")
     if (isDemo) {
       implicit val ec = system.dispatcher

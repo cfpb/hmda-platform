@@ -6,7 +6,7 @@ import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
 val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-val akkaDeps = commonDeps ++ Seq(akka, akkaCluster, akkaSlf4J, akkaStream, akkaTestkit, constructr, constructrZookeeper, akkaClusterManagement)
+val akkaDeps = commonDeps ++ Seq(akka, akkaCluster, akkaClusterTools, akkaSlf4J, akkaStream, akkaTestkit, constructr, constructrZookeeper, akkaClusterManagement)
 
 val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence, cassandraPersistence)
 
