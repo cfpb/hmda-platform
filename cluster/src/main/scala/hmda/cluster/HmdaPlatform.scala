@@ -58,15 +58,22 @@ object HmdaPlatform extends App {
     name = "querySupervisorProxy"
   )
 
-  val validationStats = system.actorOf(
-    ValidationStats.props().withDispatcher("validation-dispatcher"),
-    "validation-stats"
+  val validationStatsProxy = system.actorOf(
+    ClusterSingletonProxy.props(
+      singletonManagerPath = "/user/validation-stats",
+      settings = ClusterSingletonProxySettings(system).withRole("validation")
+    )
   )
+
+  //val validationStats = system.actorOf(
+  //  ValidationStats.props().withDispatcher("validation-dispatcher"),
+  //  "validation-stats"
+  //)
 
   //Start API
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
-    system.actorOf(HmdaFilingApi.props(supervisorProxy, querySupervisorProxy, validationStats).withDispatcher("api-dispatcher"), "hmda-filing-api")
+    system.actorOf(HmdaFilingApi.props(supervisorProxy, querySupervisorProxy, validationStatsProxy).withDispatcher("api-dispatcher"), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(supervisorProxy, querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
     system.actorOf(HmdaPublicApi.props().withDispatcher("api-dispatcher"), "hmda-public-api")
   }
@@ -109,6 +116,18 @@ object HmdaPlatform extends App {
     val institutionViewF = (querySupervisorProxy ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
     institutionViewF.map(actorRef => loadDemoData(supervisorProxy, actorRef))
     HmdaProjectionQuery.startUp(system)
+  }
+
+  //Star Validation
+  if (cluster.selfRoles.contains("validation")) {
+    system.actorOf(
+      ClusterSingletonManager.props(
+        singletonProps = Props(classOf[ValidationStats]),
+        terminationMessage = Shutdown,
+        settings = ClusterSingletonManagerSettings(system).withRole("validation")
+      ),
+      name = "validation-stats"
+    )
   }
 
   //Start Publication

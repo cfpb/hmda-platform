@@ -9,7 +9,7 @@ import hmda.query.view.filing.HmdaFilingView
 import hmda.query.view.institutions.InstitutionView
 import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 import hmda.persistence.PersistenceConfig._
-
+import hmda.persistence.messages.CommonMessages._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
@@ -35,6 +35,8 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
   override def receive: Receive = super.receive orElse {
     case FindHmdaFilingView(period) =>
       sender() ! findHmdaFilingView(period)
+    case Shutdown =>
+      context stop self
   }
 
   override protected def createActor(name: String): ActorRef = name match {
