@@ -124,16 +124,16 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
           q075Ratio,
           q076Ratio
         )
+        self ! PersistIrs
         validationStats ! msg
       }
 
     case PersistIrs =>
       val msaSeq = msaMap.msas.values.toSeq
-      log.info("PersistIrs message received at SubmissionLarStats, about to persist IRS")
       persist(IrsStatsUpdated(msaSeq)) { e =>
+        log.debug(s"Persisted: $msaSeq")
         updateState(e)
         val validationStats = context.actorSelection("/user/validation-stats")
-        log.info(s"Persisted: $msaSeq, sending message to ValidationStats: $validationStats")
         validationStats ! AddIrsStats(msaSeq, submissionId)
       }
 

@@ -134,9 +134,8 @@ class ValidationStats extends HmdaPersistentActor {
       }
 
     case AddIrsStats(map, id) =>
-      log.info("ValidationStats AddIrsStats message received")
       persist(IrsStatsAdded(map, id)) { e =>
-        log.info(s"Persisted: $e")
+        log.debug(s"Persisted: $e")
         updateState(e)
       }
 
@@ -147,8 +146,6 @@ class ValidationStats extends HmdaPersistentActor {
       sender ! state.latestStatsFor(id, period).totalValidatedLars
 
     case FindIrsStats(subId) =>
-      log.info(s"Finding IRS Stats for $subId")
-      log.info(s"Current stats are ${state.stats}")
       val stats = state.stats.find(s => s.id == subId).getOrElse(SubmissionStats(subId))
       sender ! stats.msas
 
