@@ -158,7 +158,7 @@ docker-compose -f docker-dev.yml up
 When finished, use `docker-compose down` to gracefully stop the running containers.
 
 Alternatively, you can start each one individually by following the instructions in
-the [Local Dependencies](documents/local-depencencies.md) documentation.
+the [Local Dependencies](Documents/local-depencencies.md) documentation.
 
 
 #### Running the API
@@ -197,12 +197,12 @@ When finished, press enter to get the sbt prompt, then stop the project by enter
 
 ### Running the Project with Docker
 
+#### To run only the API
+
 First, ensure there's a compiled jar to create the Docker image with:
 ```shell
 sbt clean assembly
 ```
-
-#### To run only the API
 
 Build the docker image
 ```shell
