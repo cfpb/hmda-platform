@@ -22,8 +22,11 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators wi
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
-  def larCollection(transformation: (LoanApplicationRegister => LoanApplicationRegister)): List[LoanApplicationRegister] = {
-    lar100ListGen.sample.get.map(transformation)
+  def larCollectionWithApplicant(transformation: (Applicant => Applicant)): List[LoanApplicationRegister] = {
+    lar100ListGen.sample.get.map { lar =>
+      val newApplicant = transformation(lar.applicant)
+      lar.copy(applicant = newApplicant)
+    }
   }
 
   def source(lars: List[LoanApplicationRegister]): Source[LoanApplicationRegisterQuery, NotUsed] = Source
@@ -40,158 +43,147 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators wi
 
   "'American Indian or Alaska Native' race filter" must {
     "include applications that meet 'American Indian or Alaska Native' criteria" in {
-      val lars = larCollection { lar =>
-        val app = lar.applicant
-        val withQualifyingRace = applicantRace3to5Blank(app.copy(race1 = 1, race2 = whiteOrBlank))
-        val withCoApplicant = coApplicantNotWhite(withQualifyingRace)
-        lar.copy(applicant = withCoApplicant)
+      val lars = larCollectionWithApplicant { app =>
+        val withQualifyingCoApp = coApplicantNotWhite(app)
+        applicantRace3to5Blank(withQualifyingCoApp.copy(race1 = 1, race2 = whiteOrBlank))
       }
       val nativeLars = filterRace(source(lars), AmericanIndianOrAlaskaNative)
       count(nativeLars).map(_ mustBe 100)
     }
-    "exclude applications that do not meet 'American Indian or Alaska Native' criteria" in {
-      val larsExcludedByApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(race1 = 1, race2 = "2")
-        lar.copy(applicant = applicant)
-      }
-      val larsExcludedByCoApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(race1 = 1, coRace1 = 5)
-        lar.copy(applicant = applicant)
-      }
-      val nonNativeLars1 = filterRace(source(larsExcludedByApplicant), AmericanIndianOrAlaskaNative)
-      val nonNativeLars2 = filterRace(source(larsExcludedByCoApplicant), AmericanIndianOrAlaskaNative)
-      count(nonNativeLars1).map(_ mustBe 0)
-      count(nonNativeLars2).map(_ mustBe 0)
+    "exclude lars where applicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 1, race2 = "2"))
+      val nonNativeLars = filterRace(source(excludedLars), AmericanIndianOrAlaskaNative)
+      count(nonNativeLars).map(_ mustBe 0)
+    }
+    "exclude lars where coApplicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 1, coRace1 = 5))
+      val nonNativeLars = filterRace(source(excludedLars), AmericanIndianOrAlaskaNative)
+      count(nonNativeLars).map(_ mustBe 0)
     }
   }
 
   "'Asian' race filter" must {
     "include applications that meet 'Asian' criteria" in {
-      val lars = larCollection { lar =>
-        val app = lar.applicant
-        val withQualifyingRace = applicantRace3to5Blank(app.copy(race1 = 2, race2 = whiteOrBlank))
-        val withCoApplicant = coApplicantNotWhite(withQualifyingRace)
-        lar.copy(applicant = withCoApplicant)
+      val lars = larCollectionWithApplicant { app =>
+        val withQualifyingCoApp = coApplicantNotWhite(app)
+        applicantRace3to5Blank(withQualifyingCoApp.copy(race1 = 2, race2 = whiteOrBlank))
       }
       val asianLars = filterRace(source(lars), Asian)
       count(asianLars).map(_ mustBe 100)
     }
-    "exclude applications that do not meet 'Asian' criteria" in {
-      val larsExcludedByApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(race1 = 2, race2 = "3")
-        lar.copy(applicant = applicant)
-      }
-      val larsExcludedByCoApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(race1 = 2, coRace1 = 5)
-        lar.copy(applicant = applicant)
-      }
-      val nonAsianLars1 = filterRace(source(larsExcludedByApplicant), Asian)
-      val nonAsianLars2 = filterRace(source(larsExcludedByCoApplicant), Asian)
-      count(nonAsianLars1).map(_ mustBe 0)
-      count(nonAsianLars2).map(_ mustBe 0)
+    "exclude lars where applicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 2, race2 = "3"))
+      val nonAsianLars = filterRace(source(excludedLars), Asian)
+      count(nonAsianLars).map(_ mustBe 0)
+    }
+    "exclude lars where coApplicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 2, coRace1 = 5))
+      val nonAsianLars = filterRace(source(excludedLars), Asian)
+      count(nonAsianLars).map(_ mustBe 0)
     }
   }
-  /*
+
   "'Black or African American' race filter" must {
     "include applications that meet 'Black or African American' criteria" in {
-      val lars = larCollection { lar =>
+      val lars = larCollectionWithApplicant { app =>
+        val withQualifyingCoApp = coApplicantNotWhite(app)
+        applicantRace3to5Blank(withQualifyingCoApp.copy(race1 = 3, race2 = whiteOrBlank))
       }
-      val nativeLars = filterRace(source(lars), BlackOrAfricanAmerican)
-      count(nativeLars).map(_ mustBe 100)
+      val blackLars = filterRace(source(lars), BlackOrAfricanAmerican)
+      count(blackLars).map(_ mustBe 100)
     }
-    "exclude applications that do not meet 'Black or African American' criteria" in {
-      val larsExcludedByApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 2, coEthnicity = 3)
-        lar.copy(applicant = applicant)
-      }
-      val larsExcludedByCoApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 1, coEthnicity = 2)
-        lar.copy(applicant = applicant)
-      }
-      val nonBlackLars = filterRace(source(lars), BlackOrAfricanAmerican)
+    "exclude lars where applicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 3, race2 = "4"))
+      val nonBlackLars = filterRace(source(excludedLars), BlackOrAfricanAmerican)
+      count(nonBlackLars).map(_ mustBe 0)
+    }
+    "exclude lars where coApplicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 3, coRace1 = 5))
+      val nonBlackLars = filterRace(source(excludedLars), BlackOrAfricanAmerican)
       count(nonBlackLars).map(_ mustBe 0)
     }
   }
+
   "'Hawaiian or Pacific Islander' race filter" must {
     "include applications that meet 'Hawaiian or Pacific Islander' criteria" in {
-      val lars = larCollection { lar =>
+      val lars = larCollectionWithApplicant { app =>
+        val withQualifyingCoApp = coApplicantNotWhite(app)
+        applicantRace3to5Blank(withQualifyingCoApp.copy(race1 = 4, race2 = whiteOrBlank))
       }
-      val hawaiianLars = filterRace(source(lars), HawaiianOrPacific)
-      count(hawaiianLars).map(_ mustBe 100)
+      val blackLars = filterRace(source(lars), HawaiianOrPacific)
+      count(blackLars).map(_ mustBe 100)
     }
-    "exclude applications that do not meet 'Hawaiian or Pacific Islander' criteria" in {
-      val larsExcludedByApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 2, coEthnicity = 3)
-        lar.copy(applicant = applicant)
-      }
-      val larsExcludedByCoApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 1, coEthnicity = 2)
-        lar.copy(applicant = applicant)
-      }
-      val hawaiianLars = filterRace(source(lars), HawaiianOrPacific)
-      count(hawaiianLars).map(_ mustBe 0)
+    "exclude lars where applicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 4, race2 = "3"))
+      val nonBlackLars = filterRace(source(excludedLars), HawaiianOrPacific)
+      count(nonBlackLars).map(_ mustBe 0)
+    }
+    "exclude lars where coApplicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 4, coRace1 = 5))
+      val nonBlackLars = filterRace(source(excludedLars), HawaiianOrPacific)
+      count(nonBlackLars).map(_ mustBe 0)
     }
   }
+
   "'White' race filter" must {
     "include applications that meet 'White' criteria" in {
-      val lars = larCollection { lar =>
+      def nonWhiteCoApp = Gen.oneOf(5, 6, 7, 8).sample.get
+      val lars = larCollectionWithApplicant { app =>
+        val whiteApp = app.copy(race1 = 5, race2 = "", race3 = "", race4 = "", race5 = "")
+        whiteApp.copy(coRace1 = nonWhiteCoApp, coRace2 = "", coRace3 = "", coRace4 = "", coRace5 = "")
       }
       val whiteLars = filterRace(source(lars), White)
       count(whiteLars).map(_ mustBe 100)
     }
-    "exclude applications that do not meet 'White' criteria" in {
-      val larsExcludedByApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 2, coEthnicity = 3)
-        lar.copy(applicant = applicant)
-      }
-      val larsExcludedByCoApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 1, coEthnicity = 2)
-        lar.copy(applicant = applicant)
-      }
-      val nonWhiteLars = filterRace(source(lars), White)
+    "exclude lars where applicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 5, race2 = "3"))
+      val nonWhiteLars = filterRace(source(excludedLars), White)
+      count(nonWhiteLars).map(_ mustBe 0)
+    }
+    "exclude lars where coApplicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 5, coRace1 = 3))
+      val nonWhiteLars = filterRace(source(excludedLars), White)
       count(nonWhiteLars).map(_ mustBe 0)
     }
   }
+
   "'Not Provided' race filter" must {
     "include applications that meet 'Not Provided' criteria" in {
-      val lars = larCollection { lar =>
-      }
+      def notProvided = Gen.oneOf(6, 7).sample.get
+      val lars = larCollectionWithApplicant(_.copy(race1 = notProvided))
       val notProvidedLars = filterRace(source(lars), NotProvided)
       count(notProvidedLars).map(_ mustBe 100)
     }
     "exclude applications that do not meet 'Not Provided' criteria" in {
-      val larsExcludedByApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 2, coEthnicity = 3)
-        lar.copy(applicant = applicant)
-      }
-      val larsExcludedByCoApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 1, coEthnicity = 2)
-        lar.copy(applicant = applicant)
-      }
-      val otherLars = filterRace(source(lars), NotProvided)
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 4))
+      val otherLars = filterRace(source(excludedLars), NotProvided)
       count(otherLars).map(_ mustBe 0)
     }
   }
+
   "'Two Or More Minority' race filter" must {
+    def minority = Gen.oneOf(1, 2, 3, 4).sample.get
+
     "include applications that meet 'Two Or More Minority' criteria" in {
-      val lars = larCollection { lar =>
+      val lars = larCollectionWithApplicant { app =>
+        val withQualifyingCoApp = coApplicantNotWhite(app)
+        withQualifyingCoApp.copy(race1 = minority, race2 = minority.toString, race3 = "", race4 = "", race5 = "")
       }
       val multiMinorityLars = filterRace(source(lars), TwoOrMoreMinority)
       count(multiMinorityLars).map(_ mustBe 100)
     }
-    "exclude applications that do not meet 'Two Or More Minority' criteria" in {
-      val larsExcludedByApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 2, coEthnicity = 3)
-        lar.copy(applicant = applicant)
-      }
-      val larsExcludedByCoApplicant = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 1, coEthnicity = 2)
-        lar.copy(applicant = applicant)
-      }
-      val nonMultiMinority = filterRace(source(lars), TwoOrMoreMinority)
-      count(nonMultiMinority).map(_ mustBe 0)
+    "exclude lars where applicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 2, race2 = "5"))
+      val otherLars = filterRace(source(excludedLars), TwoOrMoreMinority)
+      count(otherLars).map(_ mustBe 0)
+    }
+    "exclude lars where coApplicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 1, race2 = "2", coRace1 = 5))
+      val otherLars = filterRace(source(excludedLars), TwoOrMoreMinority)
+      count(otherLars).map(_ mustBe 0)
     }
   }
+  /*
   "'Joint' race filter" must {
     "include applications that meet 'Joint' criteria" in {
       val lars = larCollection { lar =>
