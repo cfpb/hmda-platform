@@ -49,7 +49,7 @@ object RaceUtil {
 
       case Joint =>
         larSource.filter { lar =>
-          (applicantTwoOrMoreMinorities(lar) || coApplicantTwoOrMoreMinorities(lar)) &&
+          (applicantOneOrMoreMinorities(lar) || coApplicantOneOrMoreMinorities(lar)) &&
             (lar.race1 == 5 || coApplicantWhite(lar))
         }
 
@@ -99,12 +99,19 @@ object RaceUtil {
         (lar.race5 != "" && lar.race5 != "5"))
   }
 
-  private def coApplicantTwoOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
-    lar.coRace1 != 5 &&
-      ((lar.coRace2 != "" && lar.coRace2 != "5") ||
-        (lar.coRace3 != "" && lar.coRace3 != "5") ||
-        (lar.coRace4 != "" && lar.coRace4 != "5") ||
-        (lar.coRace5 != "" && lar.coRace5 != "5"))
+  private def applicantOneOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
+    (lar.race1 == 1 || lar.race1 == 2 || lar.race1 == 3 || lar.race1 == 4) ||
+      (lar.race2 != "" && lar.race2 != "5") ||
+      (lar.race3 != "" && lar.race3 != "5") ||
+      (lar.race4 != "" && lar.race4 != "5") ||
+      (lar.race5 != "" && lar.race5 != "5")
+  }
+  private def coApplicantOneOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
+    (lar.coRace1 == 1 || lar.coRace1 == 2 || lar.coRace1 == 3 || lar.coRace1 == 4) ||
+      (lar.coRace2 != "" && lar.coRace2 != "5") ||
+      (lar.coRace3 != "" && lar.coRace3 != "5") ||
+      (lar.coRace4 != "" && lar.coRace4 != "5") ||
+      (lar.coRace5 != "" && lar.coRace5 != "5")
   }
 
   def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], dispositions: List[DispositionType]): Future[RaceBorrowerCharacteristic] = {
