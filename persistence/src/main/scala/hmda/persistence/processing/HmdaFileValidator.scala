@@ -115,7 +115,7 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   val supervisor = system.actorSelection("/user/supervisor")
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
-  val statRef = for {
+  def statRef = for {
     manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
     stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
   } yield stat
@@ -256,9 +256,6 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case CompleteValidation(replyTo, originalSender) =>
       if (state.readyToSign) {
-        for {
-          stat <- statRef
-        } yield stat ! PersistIrs
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(originalSender)
       } else {

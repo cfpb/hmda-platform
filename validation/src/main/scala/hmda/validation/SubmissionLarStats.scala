@@ -124,6 +124,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
           q075Ratio,
           q076Ratio
         )
+        self ! PersistIrs
         validationStats ! msg
       }
 
