@@ -12,6 +12,7 @@ import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
 class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with ApplicantSpecUtil {
 
+  def minority = Gen.oneOf(1, 2, 3, 4).sample.get
   def nonWhiteRaceGen = Gen.oneOf("1", "2", "3", "4").sample.get
   def coApplicantNotWhite(app: Applicant) = {
     app.copy(coRace1 = nonWhiteRaceGen.toInt, coRace2 = nonWhiteRaceGen, coRace3 = nonWhiteRaceGen,
@@ -141,8 +142,6 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with
   }
 
   "'Two Or More Minority' race filter" must {
-    def minority = Gen.oneOf(1, 2, 3, 4).sample.get
-
     "include applications that meet 'Two Or More Minority' criteria" in {
       val lars = larCollectionWithApplicant { app =>
         val withQualifyingCoApp = coApplicantNotWhite(app)
@@ -164,8 +163,6 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with
   }
 
   "'Joint' race filter" must {
-    def minority = Gen.oneOf(1, 2, 3, 4).sample.get
-
     "include applications with white applicant and minority coApplicant" in {
       val lars = larCollectionWithApplicant { app =>
         app.copy(race1 = 5, race2 = "", race3 = "", race4 = "", race5 = "", coRace1 = minority)
@@ -196,12 +193,9 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with
 
     }
     "exclude lars with only one applicant" in {
-      val excludedLars = larCollectionWithApplicant { app =>
-        app.copy(race1 = minority, coRace1 = 8)
-      }
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = minority, coRace1 = 8))
       val nonJointLars = filterRace(source(excludedLars), Joint)
       count(nonJointLars).map(_ mustBe 0)
-
     }
   }
 
