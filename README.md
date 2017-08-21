@@ -157,9 +157,6 @@ docker-compose -f docker-dev.yml up
 
 When finished, use `docker-compose down` to gracefully stop the running containers.
 
-Alternatively, you can start each one individually by following the instructions in
-the [Local Dependencies](Documents/local-depencencies.md) documentation.
-
 
 #### Running the API
 
@@ -192,7 +189,6 @@ $ sbt
 Confirm that the platform is up and running by browsing to http://localhost:8080
 
 When finished, press enter to get the sbt prompt, then stop the project by entering `reStop`.
-
 
 
 ### Running the Project with Docker
