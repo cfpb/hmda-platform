@@ -2,7 +2,7 @@ package hmda.publication.reports.util
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.model.publication.reports.{ ApplicantIncomeEnum, RaceBorrowerCharacteristic, RaceCharacteristic, RaceEnum }
+import hmda.model.publication.reports.{ RaceBorrowerCharacteristic, RaceCharacteristic, RaceEnum }
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
