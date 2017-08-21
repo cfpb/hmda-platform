@@ -100,7 +100,7 @@ clean
 re-start
 ```
 
-### Running the Loader
+## Running the Loader
 
 In a terminal, execute the following commands:
 
