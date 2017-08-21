@@ -1,52 +1,27 @@
-package hmda.publication.reports
+package hmda.publication.reports.util
 
-import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.publication.reports.ActionTakenTypeEnum.{ ApplicationReceived, LoansOriginated }
-import hmda.model.publication.reports.{ MinorityStatusBorrowerCharacteristic, MinorityStatusCharacteristic }
 import hmda.model.publication.reports.MinorityStatusEnum._
+import hmda.model.publication.reports.{ MinorityStatusBorrowerCharacteristic, MinorityStatusCharacteristic }
 import hmda.publication.reports.util.DispositionType.{ OriginatedDisp, ReceivedDisp }
 import hmda.publication.reports.util.MinorityStatusUtil._
-import hmda.query.model.filing.LoanApplicationRegisterQuery
-import hmda.query.repository.filing.LarConverter._
 import hmda.util.SourceUtils
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
-class MinorityStatusUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators with SourceUtils {
-
-  implicit val system = ActorSystem()
-  implicit val ec = system.dispatcher
-  implicit val materializer = ActorMaterializer()
-
-  def larCollection(transformation: (LoanApplicationRegister => LoanApplicationRegister)): List[LoanApplicationRegister] = {
-    lar100ListGen.sample.get.map(transformation)
-  }
-
-  def source(lars: List[LoanApplicationRegister]): Source[LoanApplicationRegisterQuery, NotUsed] = Source
-    .fromIterator(() => lars.toIterator)
-    .map(lar => toLoanApplicationRegisterQuery(lar))
+class MinorityStatusUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with ApplicantSpecUtil {
 
   "'White Non-Hispanic' minority status filter" must {
     "include applications that meet 'White Non-Hispanic' criteria" in {
-      val lars = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 2, race1 = 5)
-        lar.copy(applicant = applicant)
-      }
-
+      val lars = larCollectionWithApplicant(_.copy(ethnicity = 2, race1 = 5))
       val nonHispanicLars = filterMinorityStatus(source(lars), WhiteNonHispanic)
       count(nonHispanicLars).map(_ mustBe 100)
     }
     "exclude applications that do not meet 'White Non-Hispanic' criteria" in {
       def excludedRace = Gen.oneOf(1, 2, 3, 4, 6, 7).sample.get
       def excludedEthnicity = Gen.oneOf(1, 3, 4).sample.get
-      val excludedLars = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = excludedEthnicity, race1 = excludedRace)
-        lar.copy(applicant = applicant)
-      }
+
+      val excludedLars = larCollectionWithApplicant(_.copy(ethnicity = excludedEthnicity, race1 = excludedRace))
       val excluded = filterMinorityStatus(source(excludedLars), WhiteNonHispanic)
       count(excluded).map(_ mustBe 0)
     }
@@ -56,10 +31,9 @@ class MinorityStatusUtilSpec extends AsyncWordSpec with MustMatchers with LarGen
     "include applications that meet 'Other, Including Hispanic' criteria" in {
       def appRace1 = Gen.oneOf(1, 2, 3, 4).sample.get
       def appRace2to5 = Gen.oneOf("1", "2", "3", "4", "").sample.get
-      val lars = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = 1, race1 = appRace1,
-          race2 = appRace2to5, race3 = appRace2to5, race4 = appRace2to5, race5 = appRace2to5)
-        lar.copy(applicant = applicant)
+      val lars = larCollectionWithApplicant { app =>
+        app.copy(ethnicity = 1, race1 = appRace1, race2 = appRace2to5,
+          race3 = appRace2to5, race4 = appRace2to5, race5 = appRace2to5)
       }
 
       val hispanicLars = filterMinorityStatus(source(lars), OtherIncludingHispanic)
@@ -67,10 +41,7 @@ class MinorityStatusUtilSpec extends AsyncWordSpec with MustMatchers with LarGen
     }
     "exclude applications that do not meet 'Other, Including Hispanic' criteria" in {
       def appEthnicity = Gen.oneOf(2, 3, 4).sample.get
-      val excludedLars = larCollection { lar =>
-        val applicant = lar.applicant.copy(ethnicity = appEthnicity, race1 = 5)
-        lar.copy(applicant = applicant)
-      }
+      val excludedLars = larCollectionWithApplicant(_.copy(ethnicity = appEthnicity, race1 = 5))
       val lars = filterMinorityStatus(source(excludedLars), OtherIncludingHispanic)
       count(lars).map(_ mustBe 0)
     }
