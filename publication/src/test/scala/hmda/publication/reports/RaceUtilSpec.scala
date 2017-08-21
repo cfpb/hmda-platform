@@ -172,12 +172,11 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators wi
       val multiMinorityLars = filterRace(source(lars), TwoOrMoreMinority)
       count(multiMinorityLars).map(_ mustBe 100)
     }
-    /*"exclude lars where applicant does not meet criteria" in {
-      // TODO: Confirm with BAs--can any of the races be 5?
-      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 2, race2 = "5"))
+    "exclude lars where applicant does not meet criteria" in {
+      val excludedLars = larCollectionWithApplicant(_.copy(race2 = "", race3 = "", race4 = "", race5 = ""))
       val otherLars = filterRace(source(excludedLars), TwoOrMoreMinority)
       count(otherLars).map(_ mustBe 0)
-    }*/
+    }
     "exclude lars where coApplicant does not meet criteria" in {
       val excludedLars = larCollectionWithApplicant(_.copy(race1 = 1, race2 = "2", coRace1 = 5))
       val otherLars = filterRace(source(excludedLars), TwoOrMoreMinority)
@@ -185,9 +184,7 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators wi
     }
   }
 
-  /*
   "'Joint' race filter" must {
-    // TODO: Confirm with BAs--how to define "minority" here?
     def minority = Gen.oneOf(1, 2, 3, 4).sample.get
 
     "include applications with white applicant and minority coApplicant" in {
@@ -205,13 +202,15 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators wi
       count(jointLars).map(_ mustBe 100)
     }
     "exclude lars with two white applicants" in {
-      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 5, coRace1 = 5))
+      val excludedLars = larCollectionWithApplicant(_.copy(race1 = 5, coRace1 = 5, race2 = "", coRace2 = "",
+        race3 = "", coRace3 = "", race4 = "", coRace4 = "", race5 = "", coRace5 = ""))
       val nonJointLars = filterRace(source(excludedLars), Joint)
       count(nonJointLars).map(_ mustBe 0)
     }
     "exclude lars with two minority applicants" in {
       val excludedLars = larCollectionWithApplicant { app =>
-        app.copy(race1 = minority, coRace1 = minority)
+        app.copy(race1 = minority, coRace1 = minority, race2 = "", race3 = "", race4 = "",
+          race5 = "", coRace2 = "", coRace3 = "", coRace4 = "", coRace5 = "")
       }
       val nonJointLars = filterRace(source(excludedLars), Joint)
       count(nonJointLars).map(_ mustBe 0)
@@ -226,7 +225,6 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators wi
 
     }
   }
-  */
 
   "raceBorrowerCharacteristic" must {
     "generate a RaceBorrowerCharacteristic with all 4 ethnicity categories and the specified dispositions" in {
