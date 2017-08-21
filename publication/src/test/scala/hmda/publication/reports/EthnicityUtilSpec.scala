@@ -40,18 +40,20 @@ class EthnicityUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerato
       val latinoLars = filterEthnicity(source(lars), HispanicOrLatino)
       count(latinoLars).map(_ mustBe 100)
     }
-    "exclude applications that do not meet 'Hispanic or Latino' criteria" in {
+    "exclude applications where applicant does not meet criteria" in {
       val larsExcludedByApplicant = larCollection { lar =>
         val applicant = lar.applicant.copy(ethnicity = 2, coEthnicity = 3)
         lar.copy(applicant = applicant)
       }
+      val nonLatinoLars1 = filterEthnicity(source(larsExcludedByApplicant), HispanicOrLatino)
+      count(nonLatinoLars1).map(_ mustBe 0)
+    }
+    "exclude applications where coApplicant does not meet criteria" in {
       val larsExcludedByCoApplicant = larCollection { lar =>
         val applicant = lar.applicant.copy(ethnicity = 1, coEthnicity = 2)
         lar.copy(applicant = applicant)
       }
-      val nonLatinoLars1 = filterEthnicity(source(larsExcludedByApplicant), HispanicOrLatino)
       val nonLatinoLars2 = filterEthnicity(source(larsExcludedByCoApplicant), HispanicOrLatino)
-      count(nonLatinoLars1).map(_ mustBe 0)
       count(nonLatinoLars2).map(_ mustBe 0)
     }
   }
@@ -67,18 +69,20 @@ class EthnicityUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerato
       val nonLatinoLars = filterEthnicity(source(lars), NotHispanicOrLatino)
       count(nonLatinoLars).map(_ mustBe 100)
     }
-    "exclude applications that do not meet 'Not Hispanic/Latino' criteria" in {
+    "exclude applications where applicant does not meet criteria" in {
       val larsExcludedByApplicant = larCollection { lar =>
         val applicant = lar.applicant.copy(ethnicity = 1, coEthnicity = 3)
         lar.copy(applicant = applicant)
       }
+      val latinoLars1 = filterEthnicity(source(larsExcludedByApplicant), NotHispanicOrLatino)
+      count(latinoLars1).map(_ mustBe 0)
+    }
+    "exclude applications where coApplicant does not meet criteria" in {
       val larsExcludedByCoApplicant = larCollection { lar =>
         val applicant = lar.applicant.copy(ethnicity = 2, coEthnicity = 1)
         lar.copy(applicant = applicant)
       }
-      val latinoLars1 = filterEthnicity(source(larsExcludedByApplicant), NotHispanicOrLatino)
       val latinoLars2 = filterEthnicity(source(larsExcludedByCoApplicant), NotHispanicOrLatino)
-      count(latinoLars1).map(_ mustBe 0)
       count(latinoLars2).map(_ mustBe 0)
     }
   }
@@ -106,19 +110,20 @@ class EthnicityUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerato
   }
 
   "'Joint' ethnicity filter" must {
-    "include applications that meet 'Joint' criteria" in {
+    "include applications with hispanic applicant and non-hispanic coApplicant" in {
       val lars1 = larCollection { lar =>
         val applicant = lar.applicant.copy(ethnicity = 1, coEthnicity = 2)
         lar.copy(applicant = applicant)
       }
+      val jointLars1 = filterEthnicity(source(lars1), Joint)
+      count(jointLars1).map(_ mustBe 100)
+    }
+    "include applications with non-hispanic applicant and hispanic coApplicant" in {
       val lars2 = larCollection { lar =>
         val applicant = lar.applicant.copy(ethnicity = 2, coEthnicity = 1)
         lar.copy(applicant = applicant)
       }
-
-      val jointLars1 = filterEthnicity(source(lars1), Joint)
       val jointLars2 = filterEthnicity(source(lars2), Joint)
-      count(jointLars1).map(_ mustBe 100)
       count(jointLars2).map(_ mustBe 100)
     }
     "exclude applications that do not meet 'Joint' criteria" in {
