@@ -1,10 +1,19 @@
 package hmda.publication.reports.util
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Source
+import hmda.model.fi.lar.LarGenerators
 import hmda.model.publication.reports.MSAReport
 import hmda.publication.reports.util.ReportUtil._
+import hmda.query.repository.filing.LarConverter._
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
-class ReportUtilSpec extends AsyncWordSpec with MustMatchers {
+class ReportUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators {
+
+  implicit val system = ActorSystem()
+  implicit val ec = system.dispatcher
+  implicit val materializer = ActorMaterializer()
 
   "msaReport" must {
     "get MSA info for given fips code and return MSAReport object" in {
@@ -28,6 +37,17 @@ class ReportUtilSpec extends AsyncWordSpec with MustMatchers {
       def roundTo3(v: Double) = BigDecimal(v).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
       calculateMedianIncomeIntervals(26980) mustBe Array(40.5135, 64.8216, 81.027, 97.2324)
       calculateMedianIncomeIntervals(41100).map(roundTo3) mustBe Array(29.073, 46.516, 58.145, 69.774)
+    }
+  }
+
+  "calculateYear" must {
+    "given a larSource, return the Activity Year for the LARs in it" in {
+      // Activity Year is the same year as Action Taken Date. This is enforced by edit S270
+      val lars = larListGen.sample.get.map(_.copy(actionTakenDate = 20090822))
+      val src = Source.fromIterator(() => lars.toIterator)
+        .map(lar => toLoanApplicationRegisterQuery(lar))
+
+      calculateYear(src).map(_ mustBe 2009)
     }
   }
 
