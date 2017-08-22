@@ -46,7 +46,7 @@ trait SubmissionSummaryPaths
   def submissionSummaryPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "summary") { (period, seqNr) =>
       timedGet { uri =>
-        completeVerified(querySupervisor, institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
           val submissionId = SubmissionId(institutionId, period, seqNr)
           val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
           val validatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]

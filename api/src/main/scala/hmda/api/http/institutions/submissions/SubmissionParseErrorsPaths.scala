@@ -36,7 +36,7 @@ trait SubmissionParseErrorsPaths
   def submissionParseErrorsPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "parseErrors") { (period, seqNr) =>
       timedGet { uri =>
-        completeVerified(querySupervisor, institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
             val submissionID = SubmissionId(institutionId, period, seqNr)
             val fHmdaFileParser = (supervisor ? FindProcessingActor(HmdaFileParser.name, submissionID)).mapTo[ActorRef]

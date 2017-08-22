@@ -30,10 +30,10 @@ trait SubmissionIrsPaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs
-  def submissionIrsPath(querySupervisor: ActorRef, validationStats: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionIrsPath(supervisor: ActorRef, querySupervisor: ActorRef, validationStats: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "irs") { (period, seqNr) =>
       timedGet { uri =>
-        completeVerified(querySupervisor, institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
             onComplete(getMsa(validationStats, institutionId, period, seqNr)) {
               case Success(msaSeq) =>
@@ -47,10 +47,10 @@ trait SubmissionIrsPaths
     }
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/irs/csv
-  def submissionIrsCsvPath(querySupervisor: ActorRef, validationStats: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionIrsCsvPath(supervisor: ActorRef, querySupervisor: ActorRef, validationStats: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "irs" / "csv") { (period, seqNr) =>
       timedGet { uri =>
-        completeVerified(querySupervisor, institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
           onComplete(getMsa(validationStats, institutionId, period, seqNr)) {
             case Success(msaSeq) =>
               val csv = Irs(msaSeq).toCsv

@@ -57,8 +57,6 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
   def institutionByIdPath[_: EC](supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String) =
     pathEnd {
       timedGet { uri =>
-        val supervisor = system.actorSelection("/user/supervisor")
-        val querySupervisor = system.actorSelection("/user/query-supervisor")
         val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
         val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
         val fInstitutionDetails = for {

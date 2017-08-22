@@ -43,12 +43,12 @@ trait SubmissionSignPaths
     path("filings" / Segment / "submissions" / IntNumber / "sign") { (period, id) =>
       val submissionId = SubmissionId(institutionId, period, id)
       timedGet { uri =>
-        completeVerified(querySupervisor, institutionId, period, id, uri) {
+        completeVerified(supervisor, querySupervisor, institutionId, period, id, uri) {
           completeWithSubmissionReceipt(supervisor, submissionId, uri)
         }
       } ~
         timedPost { uri =>
-          completeVerified(querySupervisor, institutionId, period, id, uri) {
+          completeVerified(supervisor, querySupervisor, institutionId, period, id, uri) {
             entity(as[JsObject]) { json =>
               val verified = json.fields("signed").asInstanceOf[JsBoolean]
               verified match {
