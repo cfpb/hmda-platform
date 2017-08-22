@@ -18,4 +18,17 @@ class ReportUtilSpec extends AsyncWordSpec with MustMatchers {
     }
   }
 
+  "calculateMedianIncomeIntervals" must {
+    "get median income info for given fips, convert to thousands" in {
+      calculateMedianIncomeIntervals(10380)(2) mustBe 18.267
+      calculateMedianIncomeIntervals(26980)(2) mustBe 81.027
+      calculateMedianIncomeIntervals(41100)(2) mustBe 58.145
+    }
+    "return array of 50%, 80%, 100%, and 120% levels of median income (in thousands)" in {
+      def roundTo3(v: Double) = BigDecimal(v).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
+      calculateMedianIncomeIntervals(26980) mustBe Array(40.5135, 64.8216, 81.027, 97.2324)
+      calculateMedianIncomeIntervals(41100).map(roundTo3) mustBe Array(29.073, 46.516, 58.145, 69.774)
+    }
+  }
+
 }
