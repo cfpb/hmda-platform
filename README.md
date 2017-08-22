@@ -14,6 +14,10 @@ For more information on HMDA, checkout the [About HMDA page](http://www.consumer
 
 This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset.
 
+The HMDA Platform uses sbt's multi-project builds, each project representing a specific task. The platform is an Akka Cluster
+application that can be deployed on a single node or as a distributed application. For more information on how Akka Cluster
+is used, see the documentation [here](Documents/cluster.md)
+
 The HMDA Platform is composed of the following modules:
 
 ### Parser (JS/JVM)
@@ -70,90 +74,101 @@ The HMDA Platform is written in [Scala](http://www.scala-lang.org/). To build it
 
 In addition, you'll need Scala's interactive build tool [sbt](http://www.scala-sbt.org/0.13/tutorial/index.html). Please refer to sbt's [installation instructions](http://www.scala-sbt.org/0.13/tutorial/Setup.html) to get started.
 
+### Docker
+
+Though Docker is not a dependency of the Scala project, it is very useful for running and smoke testing locally.
+Use the following steps to prepare a local environment for running the Platform with docker:
+
+First, make sure that you have the [Docker Toolbox](https://www.docker.com/docker-toolbox) installed.
+
+If you don't have a Docker machine created, you can create one with the default parameters using the command below.
+This will be sufficient for running most docker containers (e.g. the dev dependencies for the API), but not for running the entire platform.
+
+```shell
+docker-machine create --driver virtualbox dev
+```
+
+If you wish to run the entire platform using Docker (currently the only way to run the entire platform),
+you'll need to dedicate more resources to the Docker machine.
+We've found that for the full stack to run efficiently, you need approximately:
+
+* 4 CPUs
+* 6 GB RAM
+* 80 GB Disk space
+
+Assuming you are using Docker Machine to provision your Docker
+environment, you can check you current settings with the following
+(ignore the second `Memory`):
+
+```shell
+    $ docker-machine inspect | grep 'CPU\|Memory\|DiskSize'
+        "CPU": 4,
+        "Memory": 6144,
+        "DiskSize": 81920,
+        "Memory": 0,
+```
+
+If your settings are below these suggestions, you should create a new
+Docker VM. The following will create a VM named `hmda-platform` with
+the appropriate resources:
+
+```shell
+    $ docker-machine create \
+    --driver virtualbox \
+    --virtualbox-disk-size 81920 \
+    --virtualbox-cpu-count 4 \
+    --virtualbox-memory 6144 \
+    hmda-platform
+```
+
+After the machine is created, make sure that you connect your shell with the newly created machine
+```shell
+$ eval "(docker-machine env dev)"
+```
+
+
 ## Building and Running
 
-The HMDA Platform uses sbt's multi-project builds, each project representing a specific task. The platform is an Akka Cluster
-application that can be deployed on a single node or as a distributed application. For more information on how Akka Cluster 
-is used, see the documentation [here](Documents/cluster.md)
+### Building the .jar
 
-### Interactive
-
-* The write side of this system is supported by either a local `leveldb` database or Cassandra. By default, the local `leveldb` is utilized, and some sample data is loaded automatically.
-If using `Cassandra` is desired, the following environment variable needs to be set:
+* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
 ```shell
-export HDMA_IS_DEMO=false
+> clean assembly
 ```
 
-The easiest way to run a Cassandra server to support this application for testing is to do it through Docker:
+This task will create a `fat jar`, which can be executed directly on any JDK8 compliant JVM:
 
 ```shell
-docker run --name cassandra -p 9042:9042 -p 7000:7000 -p 7199:7199 cassandra:3.10
+java -jar target/scala-2.11/hmda.jar
 ```
 
-If you want to connect to this server, the following `docker` command will give you access to the Cassandra instance started in the previous step:
+
+### Running Interactively
+
+#### Running the Dependencies
+
+Assuming you have Docker-Compose installed (according to the [Docker](#docker) instructions above),
+the easiest way to get all of the platform's dependencies up and running with the provided docker-compose dev setup:
 
 ```shell
-docker run -it --link cassandra:cassandra --rm cassandra cqlsh cassandra
+docker-compose -f docker-dev.yml up
 ```
 
-Once the `Cassandra` server is running, set the following environment variable to the appropriate Cassandra host (in this example, the default local docker host for a machine running MacOs X):
-
-```shell
-export CASSANDRA_CLUSTER_HOSTS=192.168.99.100
-```
-
-To load data into `Cassandra`, you can run the following (the Cassandra server needs to be running and correct environment variables configured as per the previous instructions):
-
-```shell
-$ sbt
-project panel
-run <full local path to sample file>
-```
-A sample file is located in the following folder: `panel/src/main/resources/inst_data_2017_dummy.csv`
+When finished, use `docker-compose down` to gracefully stop the running containers.
 
 
-* In order to support the read side, a local PostgreSQL and Cassandra server are needed. Assuming it runs on the default port, on the same machine as the API, the following environment variable needs to be set:
+#### Running the API
 
-```shell
-export JDBC_URL='jdbc:postgresql://localhost/hmda?user=postgres&password=postgres'
-```
+Once the dependencies (above) are running, follow these steps in a separate terminal session to get the API running with sbt:
 
-where `hmda` is the name of the `PostgreSQL` database, owned by the default user with default password (`postgres`)
-
-For Cassandra, the following environment variables need to be set (assuming Cassandra is running on a docker container as described above):
-
-```shell
-export CASSANDRA_CLUSTER_HOSTS=192.168.99.100
-export CASSANDRA_CLUSTER_PORT=9042
-```
-
-**Note: if you are running the backend only through sbt, the database needs to be created manually in advance, see instructions [here](https://www.postgresql.org/docs/9.1/static/manage-ag-createdb.html)**
-
-* The `HMDA Platform` is a distributed system that is meant to be run as a clustered application in production.
-As such, it needs a mechanism for storing configuration information for additional nodes joining the cluster.
-`Apache Zookeeper` is used to store this information. To run the project, zookeeper must be running and available in the local network.
-An easy way to satisfy this requirement is to launch a docker container with `ZooKeeper`, as follows:
-
-```shell
-$ docker run --rm -p 2181:2181 -p 2888:2888 -p 3888:3888 jplock/zookeeper
-```
-
-* Set the environemnet variables for Zookeper
-
-```shell
-export ZOOKEEPER_HOST=192.168.99.100
-export ZOOKEEPER_PORT=2181
-```
-
-Alternatively, these dependencies (`Cassandra`, `Zookeeper` and `PostgreSQL`) can be started from `docker` providing default resources for the `HMDA Platform`:
-
-`docker-compose -f docker-dev.yml up`
-
-* If you want to use the sample files in this repo for testing the app, run the edits in demo mode. Otherwise, edit S025 will trigger for all files.
+* For smoke testing locally, add the following two environment variables:
+  * `EDITS_DEMO_MODE`: This will allow you to use the sample files in this repo for testing the app. Otherwise, edit S025 will trigger for all files.
+  * `HMDA_IS_DEMO`: This uses configuration files that allow running the app locally, instead of in a cluster.
 
 ```shell
 export EDITS_DEMO_MODE=true
+export HMDA_IS_DEMO=true
 ```
 
 * Start `sbt`
@@ -173,38 +188,17 @@ $ sbt
 
 Confirm that the platform is up and running by browsing to http://localhost:8080
 
-* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
-
-```shell
-> clean assembly
-```
-
-This task will create a `fat jar`, which can be executed directly on any JDK8 compliant JVM:
-
-```shell
-java -jar target/scala-2.11/hmda.jar
-```
+When finished, press enter to get the sbt prompt, then stop the project by entering `reStop`.
 
 
-### Docker
+### Running the Project with Docker
 
-First, make sure that you have the [Docker Toolbox](https://www.docker.com/docker-toolbox) installed.
+#### To run only the API
 
-If you don't have a Docker machine created, you can create one by issuing the following:
-```shell
-docker-machine create --driver virtualbox dev
-```
-
-After the machine is created, make sure that you connect your shell with the newly created machine
-```shell
-$ eval "(docker-machine env dev)"
-```
-
-Ensure there's a compiled jar to create the Docker image with:
+First, ensure there's a compiled jar to create the Docker image with:
 ```shell
 sbt clean assembly
 ```
-#### To run only the API
 
 Build the docker image
 ```shell
@@ -221,33 +215,7 @@ The Public API will run on `$(docker-machine ip):8082`
 
 #### To run the entire platform
 
-1. Dedicate appropriate resources to your Docker environment.  We've found
-    that for the full stack to run efficiently, you need approximately:
-
-    * 4 CPUs
-    * 6 GB RAM
-    * 80 GB Disk space
-
-    Assuming you are using Docker Machine to provision your Docker
-    environment, you can check you current settings with the following 
-    (ignore the second `Memory`):
-
-        $ docker-machine inspect | grep 'CPU\|Memory\|DiskSize'
-            "CPU": 4,
-            "Memory": 6144,
-            "DiskSize": 81920,
-            "Memory": 0,
-
-    If your settings are below these suggestions, you should create a new
-    Docker VM. The following will create a VM named `hmda-platform` with 
-    the appropriate resources:
-
-        $ docker-machine create \
-        --driver virtualbox \
-        --virtualbox-disk-size 81920 \
-        --virtualbox-cpu-count 4 \
-        --virtualbox-memory 6144 \
-        hmda-platform
+1. Ensure you have a Docker Machine with sufficient resources, as described in the [Docker](#docker) section above.
 
 1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui) and 
     [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth) into the same
