@@ -9,7 +9,6 @@ object HmdaProjectionQuery {
 
   def startUp(implicit system: ActorSystem): Unit = {
     implicit val materializer = ActorMaterializer()
-    implicit val ec = system.dispatcher
     val institutionProjection = new InstitutionCassandraProjection(system, materializer)
     institutionProjection.startUp()
 

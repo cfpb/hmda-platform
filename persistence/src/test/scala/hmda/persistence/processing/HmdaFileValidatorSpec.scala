@@ -34,16 +34,16 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   var hmdaFileValidator: ActorRef = _
 
-  val submissionManager = system.actorOf(SubmissionManager.props(submissionId1))
+  val submissionManager = system.actorOf(SubmissionManager.props(validationStats, submissionId1))
 
-  val supervisor = system.actorOf(HmdaSupervisor.props())
+  val supervisor = system.actorOf(HmdaSupervisor.props(validationStats))
 
   val probe = TestProbe()
 
   val lines = fiCSVEditErrors.split("\n")
 
   override def beforeEach(): Unit = {
-    hmdaFileValidator = createHmdaFileValidator(system, supervisor, submissionId1)
+    hmdaFileValidator = createHmdaFileValidator(system, supervisor, validationStats, submissionId1)
   }
 
   override def afterAll(): Unit = {
@@ -95,7 +95,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         probe.send(hmdaFileParser, LarParsed(lar))
         probe.expectMsg(Persisted)
       }
-      val hmdaFileValidator2 = createHmdaFileValidator(system, supervisor, submissionId2)
+      val hmdaFileValidator2 = createHmdaFileValidator(system, supervisor, validationStats, submissionId2)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(5, Nil))
 

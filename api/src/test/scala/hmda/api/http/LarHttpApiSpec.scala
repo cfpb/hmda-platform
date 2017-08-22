@@ -16,6 +16,7 @@ import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
 import hmda.model.parser.LarParsingError
 import hmda.persistence.HmdaSupervisor
+import hmda.validation.ValidationStats
 import spray.json._
 
 import scala.concurrent.ExecutionContext
@@ -32,7 +33,8 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
   implicit val routeTestTimeout: RouteTestTimeout = RouteTestTimeout(5.seconds)
 
   //Start up API Actors
-  val supervisor = HmdaSupervisor.createSupervisor(system)
+  val validationStats = ValidationStats.createValidationStats(system)
+  val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
 
   val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
   val invalidLarCsv = "invalid|0123456789|invalid|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"

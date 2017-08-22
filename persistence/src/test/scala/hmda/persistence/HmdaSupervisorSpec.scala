@@ -8,6 +8,7 @@ import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindProces
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing._
+import hmda.validation.ValidationStats
 import org.scalatest.{ MustMatchers, WordSpec }
 
 import scala.concurrent.Await
@@ -17,7 +18,8 @@ class HmdaSupervisorSpec extends WordSpec with MustMatchers {
 
   val system = ActorSystem()
 
-  val supervisor = system.actorOf(HmdaSupervisor.props(), "supervisor")
+  val validationStats = system.actorOf(ValidationStats.props(), "validation-stats")
+  val supervisor = system.actorOf(HmdaSupervisor.props(validationStats), "supervisor")
 
   implicit val ec = system.dispatcher
   val timeout = 2.seconds

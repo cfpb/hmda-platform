@@ -26,11 +26,10 @@ import scala.concurrent._
 trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with RequestHeaderUtils with InstitutionsHttpApi with ScalatestRouteTest { suite: Suite =>
   val configuration: Config = ConfigFactory.load()
 
-  val supervisor = HmdaSupervisor.createSupervisor(system)
+  val validationStats = ValidationStats.createValidationStats(system)
+  val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
 
   val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
-
-  val validationStats = ValidationStats.createValidationStats(system)
 
   val duration = 10.seconds
   override val log: LoggingAdapter = NoLogging

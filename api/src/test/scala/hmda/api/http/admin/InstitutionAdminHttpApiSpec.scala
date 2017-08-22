@@ -17,6 +17,7 @@ import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
 import hmda.query.HmdaQuerySupervisor
 import hmda.query.projections.institutions.InstitutionDBProjection._
+import hmda.validation.ValidationStats
 
 import scala.concurrent.duration._
 import spray.json._
@@ -33,7 +34,8 @@ class InstitutionAdminHttpApiSpec
   override implicit val timeout: Timeout = Timeout(10.seconds)
   override val log: LoggingAdapter = NoLogging
 
-  val supervisor = HmdaSupervisor.createSupervisor(system)
+  val validationStats = ValidationStats.createValidationStats(system)
+  val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
 
   val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
 
