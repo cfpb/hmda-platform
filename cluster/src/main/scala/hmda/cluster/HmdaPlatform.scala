@@ -61,7 +61,7 @@ object HmdaPlatform extends App {
   val validationStatsProxy = system.actorOf(
     ClusterSingletonProxy.props(
       singletonManagerPath = "/user/validation-stats",
-      settings = ClusterSingletonProxySettings(system).withRole("validation")
+      settings = ClusterSingletonProxySettings(system).withRole("persistence")
     )
   )
 
@@ -79,7 +79,16 @@ object HmdaPlatform extends App {
 
     system.actorOf(
       ClusterSingletonManager.props(
-        singletonProps = Props(classOf[HmdaSupervisor]),
+        singletonProps = Props(classOf[ValidationStats]),
+        terminationMessage = Shutdown,
+        settings = ClusterSingletonManagerSettings(system).withRole("persistence")
+      ),
+      name = "validation-stats"
+    )
+
+    system.actorOf(
+      ClusterSingletonManager.props(
+        singletonProps = HmdaSupervisor.props(validationStatsProxy),
         terminationMessage = Shutdown,
         settings = ClusterSingletonManagerSettings(system).withRole("persistence")
       ),
@@ -111,18 +120,6 @@ object HmdaPlatform extends App {
     val institutionViewF = (querySupervisorProxy ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
     institutionViewF.map(actorRef => loadDemoData(supervisorProxy, actorRef))
     HmdaProjectionQuery.startUp(system)
-  }
-
-  //Star Validation
-  if (cluster.selfRoles.contains("validation")) {
-    system.actorOf(
-      ClusterSingletonManager.props(
-        singletonProps = Props(classOf[ValidationStats]),
-        terminationMessage = Shutdown,
-        settings = ClusterSingletonManagerSettings(system).withRole("validation")
-      ),
-      name = "validation-stats"
-    )
   }
 
   //Start Publication

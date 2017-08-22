@@ -7,6 +7,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.validation._
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
+import hmda.persistence.HmdaSupervisor
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
 import hmda.persistence.model.ActorSpec
@@ -35,12 +36,14 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   val submissionManager = system.actorOf(SubmissionManager.props(submissionId1))
 
+  val supervisor = system.actorOf(HmdaSupervisor.props())
+
   val probe = TestProbe()
 
   val lines = fiCSVEditErrors.split("\n")
 
   override def beforeEach(): Unit = {
-    hmdaFileValidator = createHmdaFileValidator(system, submissionId1)
+    hmdaFileValidator = createHmdaFileValidator(system, supervisor, submissionId1)
   }
 
   override def afterAll(): Unit = {
@@ -92,7 +95,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         probe.send(hmdaFileParser, LarParsed(lar))
         probe.expectMsg(Persisted)
       }
-      val hmdaFileValidator2 = createHmdaFileValidator(system, submissionId2)
+      val hmdaFileValidator2 = createHmdaFileValidator(system, supervisor, submissionId2)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(5, Nil))
 

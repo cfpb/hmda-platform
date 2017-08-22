@@ -14,14 +14,14 @@ object HmdaSupervisor {
   case class FindSubmissions(name: String, institutionId: String, period: String)
   case class FindProcessingActor(name: String, submissionId: SubmissionId)
 
-  def props(): Props = Props(new HmdaSupervisor)
+  def props(validationStats: ActorRef): Props = Props(new HmdaSupervisor(validationStats))
 
-  def createSupervisor(system: ActorSystem): ActorRef = {
-    system.actorOf(HmdaSupervisor.props().withDispatcher("persistence-dispatcher"), "supervisor")
+  def createSupervisor(system: ActorSystem, validationStats: ActorRef): ActorRef = {
+    system.actorOf(HmdaSupervisor.props(validationStats).withDispatcher("persistence-dispatcher"), "supervisor")
   }
 }
 
-class HmdaSupervisor extends HmdaSupervisorActor {
+class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
 
   import HmdaSupervisor._
 
@@ -98,11 +98,11 @@ class HmdaSupervisor extends HmdaSupervisorActor {
       supervise(actor, actorId)
     case id @ HmdaFileValidator.name =>
       val actorId = s"$id-${submissionId.toString}"
-      val actor = context.actorOf(HmdaFileValidator.props(submissionId).withDispatcher("persistence-dispatcher"), actorId)
+      val actor = context.actorOf(HmdaFileValidator.props(self, validationStats, submissionId).withDispatcher("persistence-dispatcher"), actorId)
       supervise(actor, actorId)
     case id @ SubmissionManager.name =>
       val actorId = s"$id-${submissionId.toString}"
-      val actor = context.actorOf(SubmissionManager.props(submissionId).withDispatcher("persistence-dispatcher"), actorId)
+      val actor = context.actorOf(SubmissionManager.props(validationStats, submissionId).withDispatcher("persistence-dispatcher"), actorId)
       supervise(actor, actorId)
   }
 
