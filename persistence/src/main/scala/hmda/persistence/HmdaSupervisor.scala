@@ -81,9 +81,7 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
 
   private def createSubmissions(name: String, institutionId: String, period: String): ActorRef = {
     val sId = s"$name-$institutionId-$period"
-    val actor = context.actorOf(SubmissionPersistence
-      .props(institutionId, period)
-      .withDispatcher("persistence-dispatcher"), sId)
+    val actor = context.actorOf(SubmissionPersistence.props(institutionId, period).withDispatcher("persistence-dispatcher"), sId)
     supervise(actor, sId)
   }
 

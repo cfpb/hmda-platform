@@ -4,11 +4,18 @@ import akka.actor.ActorRef
 import akka.testkit.TestProbe
 import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.HmdaSupervisor
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
 import hmda.validation.ValidationStats
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import akka.pattern.ask
+import akka.util.Timeout
 
 class SubmissionFSMSpec extends ActorSpec {
 
@@ -18,6 +25,15 @@ class SubmissionFSMSpec extends ActorSpec {
 
   val validationStats = ValidationStats.createValidationStats(system)
   val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
+
+  val duration = 5.seconds
+  implicit val timeout = Timeout(duration)
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    val submissionPersistence = system.actorOf(SubmissionPersistence.props(submissionId.institutionId, submissionId.period))
+    Await.result(submissionPersistence ? CreateSubmission, duration)
+  }
 
   "Submission Finite State Machine" must {
     "transition through states" in {

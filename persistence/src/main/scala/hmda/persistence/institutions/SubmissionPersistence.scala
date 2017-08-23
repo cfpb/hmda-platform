@@ -68,6 +68,7 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
       val newSubmission = Submission(submissionId, Created, System.currentTimeMillis(), 0L)
       persist(SubmissionCreated(newSubmission)) { e =>
         updateState(e)
+        log.debug(s"Submission Created with Submission Id: ${submissionId.toString}")
         sender() ! Some(newSubmission)
       }
 
