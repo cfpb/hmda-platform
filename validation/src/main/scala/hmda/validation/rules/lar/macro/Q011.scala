@@ -30,7 +30,10 @@ class Q011 private (institution: Institution, year: Int) extends AggregateEditCh
     val lastYear = year - 1
     val currentLarCount: Future[Int] = count(lars)
 
-    val lastYearCount = (validationStats ? FindTotalValidatedLars(institution.id, lastYear.toString)).mapTo[Int]
+    val lastYearCount = for {
+      actorRef <- validationStats
+      count <- (actorRef ? FindTotalValidatedLars(institution.id, lastYear.toString)).mapTo[Int]
+    } yield count
 
     for {
       c <- currentLarCount

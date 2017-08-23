@@ -23,7 +23,11 @@ class Q012 private (institution: Institution, year: Int) extends AggregateEditCh
   override def name: String = "Q012"
 
   override def apply[as: AS, mat: MAT, ec: EC](input: TransmittalSheet): Future[Result] = {
-    val fLastYearTaxId = (validationStats ? FindTaxId(institution.id, (year - 1).toString)).mapTo[String]
+
+    val fLastYearTaxId = for {
+      actorRef <- validationStats
+      lastYearId <- (actorRef ? FindTaxId(institution.id, (year - 1).toString)).mapTo[String]
+    } yield lastYearId
 
     for {
       l <- fLastYearTaxId
@@ -34,3 +38,4 @@ class Q012 private (institution: Institution, year: Int) extends AggregateEditCh
     }
   }
 }
+

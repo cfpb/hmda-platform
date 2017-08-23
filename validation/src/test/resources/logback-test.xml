@@ -1,10 +1,32 @@
+<!--<configuration>-->
+    <!--<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
+        <!--<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
+            <!--<pattern>%msg%n</pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
+    <!--<root level="OFF">-->
+        <!--<appender-ref ref="CONSOLE"/>-->
+    <!--</root>-->
+<!--</configuration>-->
+
 <configuration>
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%msg%n</pattern>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d][%-5level][%thread] %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="OFF">
-        <appender-ref ref="CONSOLE"/>
+
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="STDOUT" />
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="ASYNC" />
     </root>
+
+    <logger name="slick" level="INFO" />
+    <logger name="com.zaxxer.hikari" level="INFO" />
+    <logger name="com.datastax.driver" level="INFO" />
+    <logger name="org.apache.zookeeper" level="WARN" />
+
 </configuration>
