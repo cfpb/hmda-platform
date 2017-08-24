@@ -45,6 +45,7 @@ trait CassandraRepository[A] {
         .builder
         .addContactPoint(cassandraHost)
         .withPort(cassandraPort)
+        .withCredentials(cassandraUsername, cassandraPassword)
         .withReconnectionPolicy(new ExponentialReconnectionPolicy(100L, 200000L))
         .build
         .connect()

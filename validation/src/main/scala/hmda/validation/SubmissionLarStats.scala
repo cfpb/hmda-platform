@@ -122,6 +122,7 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
           q075Ratio,
           q076Ratio
         )
+        self ! PersistIrs
         validationStats ! msg
       }
 
