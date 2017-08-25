@@ -57,6 +57,9 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
     case UpdateFilingStatus(period, newStatus) =>
       state.filings.find(f => f.period == period) match {
+        case Some(filing) if filing.status == Completed =>
+          sender() ! None
+          log.debug(s"$period Filing for Institution $institutionId is already Completed. Not updating status")
         case Some(filing) =>
           val startTime = if (newStatus == InProgress) System.currentTimeMillis else filing.start
           val endTime = if (newStatus == Completed) System.currentTimeMillis else filing.end

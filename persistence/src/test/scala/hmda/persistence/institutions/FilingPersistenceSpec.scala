@@ -10,7 +10,7 @@ class FilingPersistenceSpec extends ActorSpec {
 
   val filingsActor = createFilings("12345", system)
 
-  val sample1 = Filing("2016", "12345", Completed, filingRequired = true, 1483287071000L, 1514736671000L)
+  val sample1 = Filing("2016", "12345", Cancelled, filingRequired = true, 1483287071000L, 1514736671000L)
   val sample2 = Filing("2017", "12345", NotStarted, filingRequired = true, 0L, 0L)
 
   val probe = TestProbe()
@@ -38,8 +38,8 @@ class FilingPersistenceSpec extends ActorSpec {
 
   "UpdateFilingStatus" must {
     "update status of filing for given period" in {
-      val expected = sample1.copy(status = Cancelled)
-      probe.send(filingsActor, UpdateFilingStatus("2016", Cancelled))
+      val expected = sample1.copy(status = NotStarted)
+      probe.send(filingsActor, UpdateFilingStatus("2016", NotStarted))
       probe.expectMsg(Some(expected))
       probe.send(filingsActor, GetFilingByPeriod("2016"))
       probe.expectMsg(expected)
@@ -61,6 +61,10 @@ class FilingPersistenceSpec extends ActorSpec {
       comp.status mustBe Completed
       comp.start mustBe startTime
       comp.end must be > 0L
+    }
+    "not update if filing status is already 'Completed'" in {
+      probe.send(filingsActor, UpdateFilingStatus("2017", InProgress))
+      probe.expectMsg(None)
     }
   }
 
