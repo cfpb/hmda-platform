@@ -50,7 +50,7 @@ object RaceUtil {
       case Joint =>
         larSource.filter { lar =>
           (applicantOneOrMoreMinorities(lar) || coApplicantOneOrMoreMinorities(lar)) &&
-            (lar.race1 == 5 || coApplicantWhite(lar))
+            (applicantWhite(lar) || coApplicantWhite(lar))
         }
 
       case NotProvided =>
@@ -61,6 +61,14 @@ object RaceUtil {
 
   private def applicantRace2Thru5Blank(lar: LoanApplicationRegisterQuery): Boolean = {
     lar.race2 == "" &&
+      lar.race3 == "" &&
+      lar.race4 == "" &&
+      lar.race5 == ""
+  }
+
+  private def applicantWhite(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.race1 == 5 &&
+      lar.race2 == "" &&
       lar.race3 == "" &&
       lar.race4 == "" &&
       lar.race5 == ""
