@@ -164,11 +164,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   }
 
   private def updateFilingStatus(filingStatus: FilingStatus) = {
-    for {
-      p <- filingPersistence
-    } yield {
-      p ? UpdateFilingStatus(period, filingStatus)
-    }
+    filingPersistence.map(_ ? UpdateFilingStatus(period, filingStatus))
   }
 
 }
