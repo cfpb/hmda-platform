@@ -107,20 +107,13 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
         lars,
-        List(
-          SyntacticalValidationError("38800009923", "S025", true),
-          SyntacticalValidationError("38800009923", "S011", true)
-        ),
+        List(),
         Nil,
         Nil,
         List(
           SyntacticalValidationError("8299422144", "S020", false),
-          SyntacticalValidationError("8299422144", "S025", false),
-          SyntacticalValidationError("9471480396", "S025", false),
           SyntacticalValidationError("2185751599", "S010", false),
-          SyntacticalValidationError("2185751599", "S020", false),
-          SyntacticalValidationError("2185751599", "S025", false),
-          SyntacticalValidationError("4977566612", "S025", false)
+          SyntacticalValidationError("2185751599", "S020", false)
         ),
         List(
           ValidityValidationError("4977566612", "V550", false),
