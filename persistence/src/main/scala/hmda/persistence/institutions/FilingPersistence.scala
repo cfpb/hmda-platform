@@ -12,7 +12,7 @@ object FilingPersistence {
   val name = "filings"
 
   case class CreateFiling(filing: Filing) extends Command
-  case class UpdateFilingStatus(filing: Filing) extends Command
+  case class UpdateFilingStatus(period: String, status: FilingStatus) extends Command
   case class GetFilingByPeriod(period: String) extends Command
 
   def props(institutionId: String): Props = Props(new FilingPersistence(institutionId))
@@ -59,27 +59,20 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
         log.warning(s"Could not create Filing. Filing period ${f.period} already exists for institution $institutionId.")
       }
 
-    case UpdateFilingStatus(modified) =>
-      if (state.filings.map(x => x.period).contains(modified.period)) {
-        val start = if (modified.status == InProgress) {
-          System.currentTimeMillis
-        } else {
-          modified.start
-        }
-        val end = if (modified.status == Completed) {
-          System.currentTimeMillis
-        } else {
-          modified.end
-        }
-        val updatedFiling = modified.copy(start = start, end = end)
-        persist(FilingStatusUpdated(updatedFiling)) { e =>
-          log.debug(s"persisted: $updatedFiling")
-          updateState(e)
-          sender() ! Some(updatedFiling)
-        }
-      } else {
-        sender() ! None
-        log.warning(s"Period does not exist. Could not update $modified")
+    case UpdateFilingStatus(period, newStatus) =>
+      state.filings.find(f => f.period == period) match {
+        case Some(filing) =>
+          val startTime = if (newStatus == InProgress) System.currentTimeMillis else filing.start
+          val endTime = if (newStatus == Completed) System.currentTimeMillis else filing.end
+          val updatedFiling = filing.copy(status = newStatus, start = startTime, end = endTime)
+          persist(FilingStatusUpdated(updatedFiling)) { e =>
+            log.debug(s"persisted: $updatedFiling")
+            updateState(e)
+            sender() ! Some(updatedFiling)
+          }
+        case None =>
+          sender() ! None
+          log.warning(s"Could not update filing status. Institution $institutionId, filing period $period")
       }
 
     case GetFilingByPeriod(period) =>
