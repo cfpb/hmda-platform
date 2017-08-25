@@ -33,6 +33,19 @@ object HmdaPlatform {
 
   def main(args: Array[String]): Unit = {
 
+    log.info(
+      """
+        | #     # #     # ######     #       ######
+        | #     # ##   ## #     #   # #      #     # #        ##   ##### ######  ####  #####  #    #
+        | #     # # # # # #     #  #   #     #     # #       #  #    #   #      #    # #    # ##  ##
+        | ####### #  #  # #     # #     #    ######  #      #    #   #   #####  #    # #    # # ## #
+        | #     # #     # #     # #######    #       #      ######   #   #      #    # #####  #    #
+        | #     # #     # #     # #     #    #       #      #    #   #   #      #    # #   #  #    #
+        | #     # #     # ######  #     #    #       ###### #    #   #   #       ####  #    # #    #
+        |
+      """.stripMargin
+    )
+
     val system = ActorSystem(configuration.getString("clustering.name"), configuration)
     val cluster = Cluster(system)
     ClusterHttpManagement(cluster).start()

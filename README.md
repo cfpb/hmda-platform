@@ -213,6 +213,9 @@ docker run -d -p "8080:8080 -p 8082:8082" hmda-api
 The Filing API will run on `$(docker-machine ip):8080`
 The Public API will run on `$(docker-machine ip):8082`
 
+By default, the `HDMA Platform` runs with a log level of `INFO`. This can be changed by establishing a different log level in the `HMDA_LOGLEVEL` environment variable.
+For the different logging options, see the [reference.conf](https://github.com/akka/akka/blob/master/akka-actor/src/main/resources/reference.conf#L38) default configuration file for `Akka`. 
+
 #### To run the entire platform
 
 1. Ensure you have a Docker Machine with sufficient resources, as described in the [Docker](#docker) section above.
