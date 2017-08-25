@@ -60,6 +60,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
 
         onComplete(fUploadSubmission) {
           case Success((submission, true, processingActor)) =>
+            //TODO: remove this when removing PostgreSQL from project
             val queryProjector = system.actorSelection(s"/user/query-supervisor/HmdaFilingView-$period/queryProjector")
             queryProjector ! CreateSchema
             queryProjector ! DeleteLars(institutionId)
