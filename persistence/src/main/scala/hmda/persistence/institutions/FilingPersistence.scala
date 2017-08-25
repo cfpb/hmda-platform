@@ -1,7 +1,7 @@
 package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.fi.{ Completed, Filing, InProgress, NotStarted }
+import hmda.model.fi._
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.model.HmdaPersistentActor
@@ -48,7 +48,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
     case CreateFiling(f) =>
-      if (!state.filings.contains(f)) {
+      if (!state.filings.map(_.period).contains(f.period)) {
         persist(FilingCreated(f)) { e =>
           log.debug(s"Persisted: $f")
           updateState(e)
@@ -56,7 +56,7 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
         }
       } else {
         sender() ! None
-        log.warning(s"Filing already exists. Could not create $f")
+        log.warning(s"Could not create Filing. Filing period ${f.period} already exists for institution $institutionId.")
       }
 
     case UpdateFilingStatus(modified) =>

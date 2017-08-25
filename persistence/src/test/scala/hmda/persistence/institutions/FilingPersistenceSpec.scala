@@ -11,11 +11,14 @@ class FilingPersistenceSpec extends ActorSpec {
 
   val filingsActor = createFilings("12345", system)
 
+  val sample1 = Filing("2016", "12345", Completed, filingRequired = true, 1483287071000L, 1514736671000L)
+  val sample2 = Filing("2017", "12345", NotStarted, filingRequired = true, 0L, 0L)
+
   val probe = TestProbe()
 
-  "Filings" must {
-    "be created and read back" in {
-      val filings = DemoData.testFilings
+  "CreateFiling" must {
+    "create a filing" in {
+      val filings = Seq(sample1, sample2)
       for (filing <- filings) {
         probe.send(filingsActor, CreateFiling(filing))
         probe.expectMsg(Some(filing))
@@ -32,12 +35,12 @@ class FilingPersistenceSpec extends ActorSpec {
       probe.expectMsg(modified)
     }
 
-    "return None when persisting a filing that already exists" in {
-      val f1 = Filing("2016", "12345", Completed, true, 1483287071000L, 1514736671000L)
+    "return None when persisting a filing period that already exists" in {
+      val f1 = Filing("2018", "12345", Completed, true, 1483287071000L, 1514736671000L)
       probe.send(filingsActor, CreateFiling(f1))
       probe.expectMsg(Some(f1))
 
-      val f2 = Filing("2016", "12345", Completed, true, 1483287071000L, 1514736671000L)
+      val f2 = Filing("2016", "12345", InProgress, true, 1483287071000L, 0L)
       probe.send(filingsActor, CreateFiling(f2))
       probe.expectMsg(None)
     }
