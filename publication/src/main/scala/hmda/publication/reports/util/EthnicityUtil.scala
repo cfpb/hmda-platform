@@ -2,7 +2,7 @@ package hmda.publication.reports.util
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.model.publication.reports.{ ApplicantIncomeEnum, EthnicityBorrowerCharacteristic, EthnicityCharacteristic, EthnicityEnum }
+import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, EthnicityCharacteristic, EthnicityEnum }
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.publication.reports.util.DispositionType.DispositionType
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
@@ -23,11 +23,11 @@ object EthnicityUtil {
         lar.ethnicity == 2 &&
           (lar.coEthnicity == 2 || coapplicantEthnicityNotProvided(lar))
       }
-      case NotAvailable => larSource.filter { lar =>
+      case Joint => larSource.filter { lar =>
         (lar.ethnicity == 1 && lar.coEthnicity == 2) ||
           (lar.ethnicity == 2 && lar.coEthnicity == 1)
       }
-      case Joint => larSource.filter { lar =>
+      case NotAvailable => larSource.filter { lar =>
         lar.ethnicity == 3 || lar.ethnicity == 4
       }
     }
@@ -41,7 +41,6 @@ object EthnicityUtil {
 
   def ethnicityBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](
     larSource: Source[LoanApplicationRegisterQuery, NotUsed],
-    applicantIncomeEnum: ApplicantIncomeEnum,
     dispositions: List[DispositionType]
   ): Future[EthnicityBorrowerCharacteristic] = {
 

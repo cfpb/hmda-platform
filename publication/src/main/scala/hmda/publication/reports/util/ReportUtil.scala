@@ -59,14 +59,17 @@ object ReportUtil extends SourceUtils {
     )
   }
 
-  def borrowerCharacteristicsByIncomeInterval[ec: EC, mat: MAT, as: AS](larsByIncome: Map[ApplicantIncomeEnum, Source[LoanApplicationRegisterQuery, NotUsed]], dispositions: List[DispositionType]): Map[ApplicantIncomeEnum, Future[List[BorrowerCharacteristic]]] = {
+  def borrowerCharacteristicsByIncomeInterval[ec: EC, mat: MAT, as: AS](
+    larsByIncome: Map[ApplicantIncomeEnum, Source[LoanApplicationRegisterQuery, NotUsed]],
+    dispositions: List[DispositionType]
+  ): Map[ApplicantIncomeEnum, Future[List[BorrowerCharacteristic]]] = {
     larsByIncome.map {
       case (income, lars) =>
         val characteristics = Future.sequence(
           List(
-            raceBorrowerCharacteristic(lars, income, dispositions),
-            ethnicityBorrowerCharacteristic(lars, income, dispositions),
-            minorityStatusBorrowerCharacteristic(lars, income, dispositions)
+            raceBorrowerCharacteristic(lars, dispositions),
+            ethnicityBorrowerCharacteristic(lars, dispositions),
+            minorityStatusBorrowerCharacteristic(lars, dispositions)
           )
         )
         income -> characteristics
@@ -77,7 +80,10 @@ object ReportUtil extends SourceUtils {
     collectHeadValue(larSource).map(lar => lar.actionTakenDate.toString.substring(0, 4).toInt)
   }
 
-  def calculateDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed], dispositions: List[DispositionType]): Future[List[Disposition]] = {
+  def calculateDispositions[ec: EC, mat: MAT, as: AS](
+    larSource: Source[LoanApplicationRegisterQuery, NotUsed],
+    dispositions: List[DispositionType]
+  ): Future[List[Disposition]] = {
     Future.sequence(dispositions.map(_.calculateDisposition(larSource)))
   }
 
