@@ -1,7 +1,7 @@
 package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.fi.{ Completed, Filing, InProgress, NotStarted }
+import hmda.model.fi._
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.model.HmdaPersistentActor
@@ -12,7 +12,7 @@ object FilingPersistence {
   val name = "filings"
 
   case class CreateFiling(filing: Filing) extends Command
-  case class UpdateFilingStatus(filing: Filing) extends Command
+  case class UpdateFilingStatus(period: String, status: FilingStatus) extends Command
   case class GetFilingByPeriod(period: String) extends Command
 
   def props(institutionId: String): Props = Props(new FilingPersistence(institutionId))
@@ -48,38 +48,26 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
     case CreateFiling(f) =>
-      if (!state.filings.contains(f)) {
-        persist(FilingCreated(f)) { e =>
-          log.debug(s"Persisted: $f")
-          updateState(e)
-          sender() ! Some(f)
-        }
+      if (!state.filings.map(_.period).contains(f.period)) {
+        persistFilingEvent(FilingCreated(f), f)
       } else {
         sender() ! None
-        log.warning(s"Filing already exists. Could not create $f")
+        log.warning(s"Could not create Filing. Filing period ${f.period} already exists for institution $institutionId.")
       }
 
-    case UpdateFilingStatus(modified) =>
-      if (state.filings.map(x => x.period).contains(modified.period)) {
-        val start = if (modified.status == InProgress) {
-          System.currentTimeMillis
-        } else {
-          modified.start
-        }
-        val end = if (modified.status == Completed) {
-          System.currentTimeMillis
-        } else {
-          modified.end
-        }
-        val updatedFiling = modified.copy(start = start, end = end)
-        persist(FilingStatusUpdated(updatedFiling)) { e =>
-          log.debug(s"persisted: $updatedFiling")
-          updateState(e)
-          sender() ! Some(updatedFiling)
-        }
-      } else {
-        sender() ! None
-        log.warning(s"Period does not exist. Could not update $modified")
+    case UpdateFilingStatus(period, newStatus) =>
+      state.filings.find(f => f.period == period) match {
+        case Some(filing) if filing.status == Completed =>
+          sender() ! None
+          log.debug(s"$period Filing for Institution $institutionId is already Completed. Not updating status")
+        case Some(filing) =>
+          val startTime = if (newStatus == InProgress) System.currentTimeMillis else filing.start
+          val endTime = if (newStatus == Completed) System.currentTimeMillis else filing.end
+          val updatedFiling = filing.copy(status = newStatus, start = startTime, end = endTime)
+          persistFilingEvent(FilingStatusUpdated(updatedFiling), updatedFiling)
+        case None =>
+          sender() ! None
+          log.warning(s"Could not update filing status. Institution $institutionId, filing period $period")
       }
 
     case GetFilingByPeriod(period) =>
@@ -93,5 +81,13 @@ class FilingPersistence(institutionId: String) extends HmdaPersistentActor {
     case GetState =>
       sender() ! state.filings
 
+  }
+
+  private def persistFilingEvent(event: Event, filing: Filing) = {
+    persist(event) { e =>
+      log.debug(s"persisted: $filing")
+      updateState(e)
+      sender() ! Some(filing)
+    }
   }
 }
