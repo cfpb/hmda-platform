@@ -84,7 +84,7 @@ object HmdaPlatform extends App {
     ClusterHttpManagement(cluster).start()
     system.actorOf(HmdaFilingApi.props(supervisorProxy, querySupervisorProxy, validationStatsProxy).withDispatcher("api-dispatcher"), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(supervisorProxy, querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
-    system.actorOf(HmdaPublicApi.props().withDispatcher("api-dispatcher"), "hmda-public-api")
+    system.actorOf(HmdaPublicApi.props(querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-public-api")
   }
 
   //Start Persistence

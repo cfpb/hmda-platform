@@ -14,16 +14,14 @@ import hmda.api.http.public.{ InstitutionSearchPaths, PublicHttpApi }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.view.institutions.InstitutionView
 import akka.http.scaladsl.server.Directives._
-import hmda.query.HmdaQuerySupervisor
-
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaPublicApi {
-  def props(): Props = Props(new HmdaPublicApi())
+  def props(querySupervisor: ActorRef): Props = Props(new HmdaPublicApi(querySupervisor))
 }
 
-class HmdaPublicApi
+class HmdaPublicApi(querySupervisor: ActorRef)
     extends HttpApi
     with BaseHttpApi
     with InstitutionSearchPaths
@@ -42,8 +40,6 @@ class HmdaPublicApi
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
-
-  val querySupervisor = system.actorOf(HmdaQuerySupervisor.props(), "api-query-supervisor")
 
   val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
     .mapTo[ActorRef]
