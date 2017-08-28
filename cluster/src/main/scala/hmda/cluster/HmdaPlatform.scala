@@ -34,6 +34,20 @@ import hmda.util.FutureRetry.retry
 object HmdaPlatform extends App {
 
   val log = LoggerFactory.getLogger("hmda")
+
+  log.info(
+    """
+      | #     # #     # ######     #       ######
+      | #     # ##   ## #     #   # #      #     # #        ##   ##### ######  ####  #####  #    #
+      | #     # # # # # #     #  #   #     #     # #       #  #    #   #      #    # #    # ##  ##
+      | ####### #  #  # #     # #     #    ######  #      #    #   #   #####  #    # #    # # ## #
+      | #     # #     # #     # #######    #       #      ######   #   #      #    # #####  #    #
+      | #     # #     # #     # #     #    #       #      #    #   #   #      #    # #   #  #    #
+      | #     # #     # ######  #     #    #       ###### #    #   #   #       ####  #    # #    #
+      |
+      """.stripMargin
+  )
+
   val clusterRoleConfig = sys.env.get("HMDA_CLUSTER_ROLES").map(roles => s"akka.cluster.roles = [$roles]").getOrElse("")
   val clusterConfig = ConfigFactory.parseString(clusterRoleConfig).withFallback(configuration)
   val system = ActorSystem(clusterConfig.getString("clustering.name"), clusterConfig)

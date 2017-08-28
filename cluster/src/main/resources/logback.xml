@@ -18,5 +18,6 @@
   <logger name="com.zaxxer.hikari" level="INFO" />
   <logger name="com.datastax.driver" level="INFO" />
   <logger name="org.apache.zookeeper" level="WARN" />
+  <logger name="de.heikoseeberger.constructr" level="WARN" />
 
 </configuration>
