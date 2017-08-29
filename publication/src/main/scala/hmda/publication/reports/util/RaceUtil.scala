@@ -2,7 +2,7 @@ package hmda.publication.reports.util
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.model.publication.reports.{ ApplicantIncomeEnum, RaceBorrowerCharacteristic, RaceCharacteristic, RaceEnum }
+import hmda.model.publication.reports.{ RaceBorrowerCharacteristic, RaceCharacteristic, RaceEnum }
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
@@ -49,8 +49,8 @@ object RaceUtil {
 
       case Joint =>
         larSource.filter { lar =>
-          (applicantTwoOrMoreMinorities(lar) || coApplicantTwoOrMoreMinorities(lar)) &&
-            (lar.race1 == 5 || coApplicantWhite(lar))
+          (applicantOneOrMoreMinorities(lar) || coApplicantOneOrMoreMinorities(lar)) &&
+            (applicantWhite(lar) || coApplicantWhite(lar))
         }
 
       case NotProvided =>
@@ -61,6 +61,14 @@ object RaceUtil {
 
   private def applicantRace2Thru5Blank(lar: LoanApplicationRegisterQuery): Boolean = {
     lar.race2 == "" &&
+      lar.race3 == "" &&
+      lar.race4 == "" &&
+      lar.race5 == ""
+  }
+
+  private def applicantWhite(lar: LoanApplicationRegisterQuery): Boolean = {
+    lar.race1 == 5 &&
+      lar.race2 == "" &&
       lar.race3 == "" &&
       lar.race4 == "" &&
       lar.race5 == ""
@@ -99,15 +107,22 @@ object RaceUtil {
         (lar.race5 != "" && lar.race5 != "5"))
   }
 
-  private def coApplicantTwoOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
-    lar.coRace1 != 5 &&
-      ((lar.coRace2 != "" && lar.coRace2 != "5") ||
-        (lar.coRace3 != "" && lar.coRace3 != "5") ||
-        (lar.coRace4 != "" && lar.coRace4 != "5") ||
-        (lar.coRace5 != "" && lar.coRace5 != "5"))
+  private def applicantOneOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
+    (lar.race1 == 1 || lar.race1 == 2 || lar.race1 == 3 || lar.race1 == 4) ||
+      (lar.race2 != "" && lar.race2 != "5") ||
+      (lar.race3 != "" && lar.race3 != "5") ||
+      (lar.race4 != "" && lar.race4 != "5") ||
+      (lar.race5 != "" && lar.race5 != "5")
+  }
+  private def coApplicantOneOrMoreMinorities(lar: LoanApplicationRegisterQuery): Boolean = {
+    (lar.coRace1 == 1 || lar.coRace1 == 2 || lar.coRace1 == 3 || lar.coRace1 == 4) ||
+      (lar.coRace2 != "" && lar.coRace2 != "5") ||
+      (lar.coRace3 != "" && lar.coRace3 != "5") ||
+      (lar.coRace4 != "" && lar.coRace4 != "5") ||
+      (lar.coRace5 != "" && lar.coRace5 != "5")
   }
 
-  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], applicantIncomeEnum: ApplicantIncomeEnum, dispositions: List[DispositionType]): Future[RaceBorrowerCharacteristic] = {
+  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegisterQuery, NotUsed], dispositions: List[DispositionType]): Future[RaceBorrowerCharacteristic] = {
 
     val larsAlaskan = filterRace(larSource, AmericanIndianOrAlaskaNative)
     val larsAsian = filterRace(larSource, Asian)

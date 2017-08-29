@@ -14,28 +14,14 @@ import scala.concurrent.Future
 object MinorityStatusUtil {
 
   def filterMinorityStatus(larSource: Source[LoanApplicationRegisterQuery, NotUsed], minorityStatus: MinorityStatusEnum): Source[LoanApplicationRegisterQuery, NotUsed] = {
-    val relevantLars = larSource.filter { lar =>
-      (lar.ethnicity == 2 && applicantRace1NotProvided(lar)) ||
-        (applicantEthnicityNotProvided(lar) && lar.race1 == 5) ||
-        (applicantEthnicityNotProvided(lar) && applicantRace1NotProvided(lar))
-    }
-
     minorityStatus match {
-      case WhiteNonHispanic => relevantLars.filter { lar =>
-        lar.ethnicity == 2 && lar.race1 == 1
+      case WhiteNonHispanic => larSource.filter { lar =>
+        lar.ethnicity == 2 && lar.race1 == 5
       }
-      case OtherIncludingHispanic => relevantLars.filter { lar =>
+      case OtherIncludingHispanic => larSource.filter { lar =>
         lar.ethnicity == 1 && applicantRacesAllNonWhite(lar)
       }
     }
-  }
-
-  private def applicantEthnicityNotProvided(lar: LoanApplicationRegisterQuery): Boolean = {
-    lar.ethnicity == 3 || lar.ethnicity == 4
-  }
-
-  private def applicantRace1NotProvided(lar: LoanApplicationRegisterQuery): Boolean = {
-    lar.race1 == 6 || lar.race1 == 7
   }
 
   private def applicantRacesAllNonWhite(lar: LoanApplicationRegisterQuery): Boolean = {
@@ -50,7 +36,6 @@ object MinorityStatusUtil {
 
   def minorityStatusBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](
     larSource: Source[LoanApplicationRegisterQuery, NotUsed],
-    applicantIncomeEnum: ApplicantIncomeEnum,
     dispositions: List[DispositionType]
   ): Future[MinorityStatusBorrowerCharacteristic] = {
 

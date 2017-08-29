@@ -66,7 +66,12 @@ object D51 {
   // Loan Type 2,3,4
   // Property Type 1,2
   // Purpose of Loan 1
-  def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed], fipsCode: Int, respId: String): Future[D51] = {
+  def generate[ec: EC, mat: MAT, as: AS](
+    larSource: Source[LoanApplicationRegisterQuery, NotUsed],
+    fipsCode: Int,
+    respId: String,
+    institutionNameF: Future[String]
+  ): Future[D51] = {
 
     val lars = larSource
       .filter(lar => lar.respondentId == respId)
@@ -96,6 +101,7 @@ object D51 {
       lars100To120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(Between100And119PercentOfMSAMedian)
       lars120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(GreaterThan120PercentOfMSAMedian)
 
+      institutionName <- institutionNameF
       date <- dateF
       total <- totalF
     } yield {
@@ -122,7 +128,7 @@ object D51 {
 
       D51(
         respId,
-        "",
+        institutionName,
         date,
         formatDate(Calendar.getInstance().toInstant),
         msa,
