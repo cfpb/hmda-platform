@@ -114,6 +114,10 @@ class ValidationStats extends HmdaPersistentActor {
     state = state.updated(event)
   }
 
+  override def preStart(): Unit = {
+    super.preStart()
+  }
+
   override def receiveCommand: Receive = super.receiveCommand orElse {
     case AddSubmissionSubmittedTotal(total, id) =>
       persist(SubmissionSubmittedTotalsAdded(total, id)) { e =>
