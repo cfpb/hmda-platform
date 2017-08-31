@@ -115,7 +115,8 @@ class ValidationStats extends HmdaPersistentActor {
   }
 
   override def preStart(): Unit = {
-    super.preStart()
+    log.info(s"Actor started at ${self.path}")
+    log.debug("Thread name for actor: " + Thread.currentThread().getName)
   }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
