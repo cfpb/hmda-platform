@@ -181,7 +181,7 @@ $ sbt
 
 ```shell
 
-> project api
+> project cluster
 > clean
 > ~re-start
 ```
