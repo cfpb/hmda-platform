@@ -90,7 +90,7 @@ object InstitutionParser {
       SavingsAndLoan
     } else if (i == "6") {
       CreditUnion
-    } else if (i == "8") {
+    } else if (i == "18") {
       Affiliate
     } else if (i == "14") {
       IndependentMortgageCompany
