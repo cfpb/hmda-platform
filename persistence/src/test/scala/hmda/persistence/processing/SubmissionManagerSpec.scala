@@ -18,6 +18,7 @@ import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persiste
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
 import hmda.persistence.processing.HmdaRawFile.AddLine
+import hmda.validation.ValidationStats
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -30,7 +31,8 @@ class SubmissionManagerSpec extends ActorSpec {
 
   val submissionId = SubmissionId("0", "testPeriod", 1)
 
-  val supervisor = system.actorOf(HmdaSupervisor.props(), "supervisor")
+  val validationStats = system.actorOf(ValidationStats.props(), "validationStats")
+  val supervisor = system.actorOf(HmdaSupervisor.props(validationStats), "supervisor")
   val fFilingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
   val fSubmissionManager = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
   val fSubmissionPersistence = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]

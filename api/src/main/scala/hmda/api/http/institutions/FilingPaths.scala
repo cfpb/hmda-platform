@@ -30,10 +30,9 @@ trait FilingPaths extends InstitutionProtocol with ApiErrorProtocol with HmdaCus
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>
-  def filingByPeriodPath[_: EC](institutionId: String) =
+  def filingByPeriodPath[_: EC](supervisor: ActorRef, institutionId: String) =
     path("filings" / Segment) { period =>
       timedGet { uri =>
-        val supervisor = system.actorSelection("/user/supervisor")
         val fFilings = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
         val fSubmissions = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
 

@@ -21,7 +21,7 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
 
   "Submission Parse Errors Path" must {
     "return no errors for an unparsed submission" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.OK
         val summary = responseAs[ParsingErrorSummary]
         summary.transmittalSheetErrors mustBe Seq.empty
@@ -36,7 +36,7 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
       actor ! LarParsedErrors(errors)
       currentParseState(actor).larParsingErrors.size mustBe 1
 
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.OK
         val summary = responseAs[ParsingErrorSummary]
         summary.transmittalSheetErrors mustBe Seq.empty
@@ -61,7 +61,7 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     }
 
     "return first page (up to 20 errors) if request doesn't include 'page' query param" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.OK
         val summary = responseAs[ParsingErrorSummary]
         summary.transmittalSheetErrors mustBe List("TS 1", "TS 2")
@@ -71,7 +71,7 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     }
 
     "return next 20 errors on page 2" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=2") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=2") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.OK
         val summary = responseAs[ParsingErrorSummary]
         summary.transmittalSheetErrors mustBe List("TS 1", "TS 2")
@@ -81,7 +81,7 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     }
 
     "return last 2 errors on page 3" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=3") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=3") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.OK
         val summary = responseAs[ParsingErrorSummary]
         summary.transmittalSheetErrors mustBe List("TS 1", "TS 2")
@@ -91,7 +91,7 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     }
 
     "include pagination metadata" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=3") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/parseErrors?page=3") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         val summary = responseAs[ParsingErrorSummary]
         summary.path mustBe "/institutions/0/filings/2017/submissions/2/parseErrors"
         summary.currentPage mustBe 3
@@ -102,24 +102,24 @@ class SubmissionParseErrorsPathsSpec extends InstitutionHttpApiSpec {
     ////// "Not Found" Responses /////
 
     "Return 404 for nonexistent institution" in {
-      getWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/xxxxx/filings/2017/submissions/1/parseErrors") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
       }
       // Return same error if other url parameters are also wrong
-      getWithCfpbHeaders("/institutions/xxxxx/filings/1980/submissions/0/parseErrors") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/xxxxx/filings/1980/submissions/0/parseErrors") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
       }
     }
     "Return 404 for nonexistent filing period" in {
-      getWithCfpbHeaders("/institutions/0/filings/1980/submissions/1/parseErrors") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/1980/submissions/1/parseErrors") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
       }
     }
     "Return 404 for nonexistent submission" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/parseErrors") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/parseErrors") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
       }

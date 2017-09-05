@@ -101,15 +101,15 @@ object SubmissionFSM {
     override def get() = None
   }
 
-  def props(id: SubmissionId): Props = Props(new SubmissionFSM(id))
+  def props(supervisor: ActorRef, id: SubmissionId): Props = Props(new SubmissionFSM(supervisor, id))
 
-  def createSubmissionFSM(system: ActorSystem, id: SubmissionId): ActorRef = {
-    system.actorOf(SubmissionFSM.props(id))
+  def createSubmissionFSM(system: ActorSystem, supervisor: ActorRef, id: SubmissionId): ActorRef = {
+    system.actorOf(SubmissionFSM.props(supervisor, id))
   }
 
 }
 
-class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag: ClassTag[SubmissionFSMEvent]) extends PersistentFSM[SubmissionFSMState, SubmissionData, SubmissionFSMEvent] {
+class SubmissionFSM(supervisor: ActorRef, submissionId: SubmissionId)(implicit val domainEventClassTag: ClassTag[SubmissionFSMEvent]) extends PersistentFSM[SubmissionFSMState, SubmissionData, SubmissionFSMEvent] {
 
   val config = ConfigFactory.load()
   val actorTimeout = config.getInt("hmda.actor-lookup-timeout")
@@ -119,7 +119,6 @@ class SubmissionFSM(submissionId: SubmissionId)(implicit val domainEventClassTag
   val institutionId = submissionId.institutionId
   val period = submissionId.period
 
-  val supervisor = context.actorSelection(s"/user/supervisor")
   val submissionPersistenceF = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period))
     .mapTo[ActorRef]
 

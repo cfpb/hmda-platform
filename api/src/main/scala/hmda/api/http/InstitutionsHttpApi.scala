@@ -1,5 +1,6 @@
 package hmda.api.http
 
+import akka.actor.ActorRef
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.server.Directives._
@@ -31,29 +32,29 @@ trait InstitutionsHttpApi
 
   implicit val timeout: Timeout
 
-  val institutionsRoutes =
+  def institutionsRoutes(supervisor: ActorRef, querySupervisor: ActorRef, validationStats: ActorRef) =
     extractExecutionContext { executor =>
       implicit val ec: ExecutionContext = executor
       encodeResponse {
         headerAuthorize {
-          institutionsPath ~
+          institutionsPath(querySupervisor) ~
             pathPrefix("institutions" / Segment) { instId =>
               institutionAuthorize(instId) {
-                institutionByIdPath(instId) ~
-                  filingByPeriodPath(instId) ~
-                  submissionPath(instId) ~
-                  submissionLatestPath(instId) ~
-                  uploadPath(instId) ~
-                  submissionEditsPath(instId) ~
-                  submissionParseErrorsPath(instId) ~
-                  submissionEditCsvPath(instId) ~
-                  submissionSingleEditPath(instId) ~
-                  editFailureDetailsPath(instId) ~
-                  verifyEditsPath(instId) ~
-                  submissionIrsPath(instId) ~
-                  submissionIrsCsvPath(instId) ~
-                  submissionSignPath(instId) ~
-                  submissionSummaryPath(instId)
+                institutionByIdPath(supervisor, querySupervisor, instId) ~
+                  filingByPeriodPath(supervisor, instId) ~
+                  submissionPath(supervisor, instId) ~
+                  submissionLatestPath(supervisor, instId) ~
+                  uploadPath(supervisor, querySupervisor, instId) ~
+                  submissionEditsPath(supervisor, querySupervisor, instId) ~
+                  submissionParseErrorsPath(supervisor, querySupervisor, instId) ~
+                  submissionEditCsvPath(supervisor, querySupervisor, instId) ~
+                  submissionSingleEditPath(supervisor, querySupervisor, instId) ~
+                  editFailureDetailsPath(supervisor, querySupervisor, instId) ~
+                  verifyEditsPath(supervisor, querySupervisor, instId) ~
+                  submissionIrsPath(supervisor, querySupervisor, validationStats, instId) ~
+                  submissionIrsCsvPath(supervisor, querySupervisor, validationStats, instId) ~
+                  submissionSignPath(supervisor, querySupervisor, instId) ~
+                  submissionSummaryPath(supervisor, querySupervisor, instId)
               }
             }
         }

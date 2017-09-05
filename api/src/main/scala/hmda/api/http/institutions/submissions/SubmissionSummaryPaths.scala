@@ -43,13 +43,11 @@ trait SubmissionSummaryPaths
   case class TsLarSummary(ts: Option[TransmittalSheet], larSize: Int, hmdaFileName: String)
 
   // institutions/<institutionId>/filings/<period>/submissions/<submissionId>/summary
-  def submissionSummaryPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionSummaryPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "summary") { (period, seqNr) =>
       timedGet { uri =>
-        completeVerified(institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
           val submissionId = SubmissionId(institutionId, period, seqNr)
-
-          val supervisor = system.actorSelection("/user/supervisor")
           val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
           val validatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
           val hmdaRawF = submissionManagerF.flatMap(actorRef => (actorRef ? GetActorRef(HmdaRawFile.name)).mapTo[ActorRef])

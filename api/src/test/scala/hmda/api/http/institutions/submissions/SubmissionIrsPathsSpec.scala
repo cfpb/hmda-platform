@@ -24,7 +24,7 @@ class SubmissionIrsPathsSpec
 
   "Submission Irs Paths" must {
     "return a 200" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.OK
         val irs = responseAs[IrsResponse]
         irs.currentPage mustBe 1
@@ -34,7 +34,7 @@ class SubmissionIrsPathsSpec
     }
 
     "return a CSV" in {
-      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs/csv") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs/csv") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
         csv must include("MSA/MD, MSA/MD Name, Total LARs, Total Amt. (in thousands), CONV, FHA, VA, FSA/RHS, 1-4 Family, MFD, Multi-Family, Home Purchase, Home Improvement, Refinance")

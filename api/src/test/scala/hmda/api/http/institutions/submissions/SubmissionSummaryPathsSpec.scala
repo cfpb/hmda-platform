@@ -32,7 +32,6 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    val supervisor = system.actorSelection("/user/supervisor")
     val validatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
     val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
     val validator = Await.result(validatorF, duration)
@@ -44,7 +43,7 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
 
   "Submission Summary Paths" must {
     "return a 200" in {
-      getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr/summary") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr/summary") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         val contactSummary = ContactSummary(ts.contact.name, ts.contact.phone, ts.contact.email)
         val respondentSummary = RespondentSummary(ts.respondent.name, ts.respondent.id, ts.taxId, "cfpb", contactSummary)
         val fileSummary = FileSummary(fileName, "2013", lars.size)
@@ -55,19 +54,19 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
       }
     }
     "return 404 for nonexistent institution" in {
-      getWithCfpbHeaders(s"/institutions/xxxxx/filings/$period/submissions/$seqNr/summary") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders(s"/institutions/xxxxx/filings/$period/submissions/$seqNr/summary") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
       }
     }
     "return 404 for nonexistent filing period" in {
-      getWithCfpbHeaders(s"/institutions/$institutionId/filings/1980/submissions/$seqNr/summary") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders(s"/institutions/$institutionId/filings/1980/submissions/$seqNr/summary") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
       }
     }
     "return 404 for nonexistent submission" in {
-      getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/0/summary") ~> institutionsRoutes ~> check {
+      getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/0/summary") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.NotFound
         responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
       }

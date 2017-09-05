@@ -35,10 +35,9 @@ trait SubmissionBasePaths
   implicit val timeout: Timeout
 
   // institutions/<institutionId>/filings/<period>/submissions
-  def submissionPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionPath(supervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions") { period =>
       timedPost { uri =>
-        val supervisor = system.actorSelection("/user/supervisor")
         val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
         val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
 
@@ -73,10 +72,9 @@ trait SubmissionBasePaths
     }
 
   // institutions/<institutionId>/filings/<period>/submissions/latest
-  def submissionLatestPath(institutionId: String)(implicit ec: ExecutionContext) =
+  def submissionLatestPath(supervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / "latest") { period =>
       timedGet { uri =>
-        val supervisor = system.actorSelection("/user/supervisor")
         val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
 
         val fSubmissions = for {

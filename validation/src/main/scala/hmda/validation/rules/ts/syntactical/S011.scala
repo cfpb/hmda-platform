@@ -24,7 +24,10 @@ class S011 private (institution: Institution, year: Int) extends AggregateEditCh
 
   override def apply[as: AS, mat: MAT, ec: EC](input: TransmittalSheet): Future[Result] = {
 
-    val fSubmittedLars = (validationStats ? FindTotalSubmittedLars(institution.id, year.toString)).mapTo[Int]
+    val fSubmittedLars = for {
+      actorRef <- validationStats
+      totalLars <- (actorRef ? FindTotalSubmittedLars(institution.id, year.toString)).mapTo[Int]
+    } yield totalLars
 
     for {
       submitted <- fSubmittedLars

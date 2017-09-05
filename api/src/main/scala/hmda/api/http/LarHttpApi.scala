@@ -47,25 +47,25 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
     }
 
   // lar/validate
-  val validateLarRoute =
+  def validateLarRoute(supervisor: ActorRef) =
     path("validate") {
       parameters('check.as[String] ? "all") { (checkType) =>
         timedPost { uri =>
           entity(as[LoanApplicationRegister]) { lar =>
-            validateRoute(lar, checkType, uri)
+            validateRoute(supervisor, lar, checkType, uri)
           }
         }
       }
     }
 
   // lar/parseAndValidate
-  val parseAndValidateLarRoute =
+  def parseAndValidateLarRoute(supervisor: ActorRef) =
     path("parseAndValidate") {
       parameters('check.as[String] ? "all") { (checkType) =>
         timedPost { uri =>
           entity(as[String]) { s =>
             LarCsvParser(s) match {
-              case Right(lar) => validateRoute(lar, checkType, uri)
+              case Right(lar) => validateRoute(supervisor, lar, checkType, uri)
               case Left(errors) => complete(ToResponseMarshallable(StatusCodes.BadRequest -> errors))
             }
           }
@@ -73,8 +73,7 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
       }
     }
 
-  def validateRoute(lar: LoanApplicationRegister, checkType: String, uri: Uri) = {
-    val supervisor = system.actorSelection("/user/supervisor")
+  def validateRoute(supervisor: ActorRef, lar: LoanApplicationRegister, checkType: String, uri: Uri) = {
     val fLarValidation = (supervisor ? FindActorByName(SingleLarValidation.name)).mapTo[ActorRef]
     val vContext = ValidationContext(None, None)
     val checkMessage = checkType match {
@@ -110,10 +109,10 @@ trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCust
     )
   }
 
-  val larRoutes =
+  def larRoutes(supervisor: ActorRef) =
     encodeResponse {
       pathPrefix("lar") {
-        parseLarRoute ~ validateLarRoute ~ parseAndValidateLarRoute
+        parseLarRoute ~ validateLarRoute(supervisor) ~ parseAndValidateLarRoute(supervisor)
       }
     }
 

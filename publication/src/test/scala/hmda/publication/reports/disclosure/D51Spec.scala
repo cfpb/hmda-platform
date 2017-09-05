@@ -11,15 +11,20 @@ import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, MSARepo
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.filing.LarConverter._
 import org.scalacheck.Gen
-import org.scalatest.{ AsyncWordSpec, MustMatchers }
+import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.Future
 
-class D51Spec extends AsyncWordSpec with MustMatchers with LarGenerators {
+class D51Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
 
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
+
+  override def afterAll(): Unit = {
+    super.afterAll()
+    system.terminate()
+  }
 
   val respId = "98765"
   val fips = 18700 //Corvallis, OR

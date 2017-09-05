@@ -1,21 +1,21 @@
-package hmda.publication.reports
+package hmda.publication
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.stream.ActorMaterializer
 import hmda.persistence.model.HmdaActor
 import hmda.publication.reports.disclosure.DisclosureReports
 
-object AggregateAndDisclosureReports {
+object HmdaPublication {
   case class GenerateDisclosureByMSAReports(respondentId: String, fipsCode: Int)
-  def props(): Props = Props(new AggregateAndDisclosureReports)
+  def props(): Props = Props(new HmdaPublication)
   def createAggregateDisclosureReports(system: ActorSystem): ActorRef = {
-    system.actorOf(AggregateAndDisclosureReports.props().withDispatcher("validation-dispatcher"), "hmda-aggregate-disclosure")
+    system.actorOf(HmdaPublication.props().withDispatcher("validation-dispatcher"), "hmda-aggregate-disclosure")
   }
 }
 
-class AggregateAndDisclosureReports extends HmdaActor {
+class HmdaPublication extends HmdaActor {
 
-  import AggregateAndDisclosureReports._
+  import HmdaPublication._
 
   implicit val system = context.system
   implicit val ec = system.dispatcher

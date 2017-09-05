@@ -16,6 +16,7 @@ import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
 import hmda.model.parser.LarParsingError
 import hmda.persistence.HmdaSupervisor
+import hmda.validation.ValidationStats
 import spray.json._
 
 import scala.concurrent.ExecutionContext
@@ -32,7 +33,8 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
   implicit val routeTestTimeout: RouteTestTimeout = RouteTestTimeout(5.seconds)
 
   //Start up API Actors
-  val supervisor = HmdaSupervisor.createSupervisor(system)
+  val validationStats = ValidationStats.createValidationStats(system)
+  val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
 
   val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
   val invalidLarCsv = "invalid|0123456789|invalid|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
@@ -42,28 +44,28 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
 
   "LAR HTTP Service" must {
     "parse a valid pipe delimited LAR and return JSON representation" in {
-      postWithCfpbHeaders("/lar/parse", larCsv) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parse", larCsv) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[LoanApplicationRegister] mustBe lar
       }
     }
 
     "fail to parse an invalid pipe delimited LAR and return a list of errors" in {
-      postWithCfpbHeaders("/lar/parse", invalidLarCsv) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parse", invalidLarCsv) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.BAD_REQUEST
         responseAs[LarParsingError].errorMessages.length mustBe 2
       }
     }
 
     "fail to parse an valid pipe delimited LAR with too many fields and return an error" in {
-      postWithCfpbHeaders("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.BAD_REQUEST
         responseAs[LarParsingError].errorMessages.length mustBe 1
       }
     }
 
     "return no validation errors for a valid LAR" in {
-      postWithCfpbHeaders("/lar/validate", lar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate", lar) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult] mustBe
           SingleValidationErrorResult(
@@ -76,7 +78,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
 
     "return validation error for invalid LAR (S020, agency code not in valid values domain)" in {
       val badLar = lar.copy(agencyCode = 0)
-      postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
@@ -85,7 +87,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     "filter syntactical, validity, or quality only for invalid LAR with all 3 kinds of errors" in {
       val badLoanType = lar.loan.copy(loanType = 0, amount = 900, propertyType = 2)
       val badLar = lar.copy(agencyCode = 0, loan = badLoanType, purchaserType = 4)
-      postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate", badLar) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
         responseAs[SingleValidationErrorResult].validity.errors.length mustBe 1
@@ -93,24 +95,24 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
 
       }
       //should fail S020
-      postWithCfpbHeaders("/lar/validate?check=syntactical", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate?check=syntactical", badLar) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
       //should fail V220
-      postWithCfpbHeaders("/lar/validate?check=validity", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate?check=validity", badLar) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult].validity.errors.length mustBe 1
       }
       //should fail Q036
-      postWithCfpbHeaders("/lar/validate?check=quality", badLar) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/validate?check=quality", badLar) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult].quality.errors.length mustBe 1
       }
     }
 
     "return no errors when parsing and validating a valid LAR" in {
-      postWithCfpbHeaders("/lar/parseAndValidate", larCsv) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parseAndValidate", larCsv) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult] mustBe
           SingleValidationErrorResult(
@@ -122,7 +124,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     }
 
     "return parsing errors for an invalid LAR" in {
-      postWithCfpbHeaders("/lar/parseAndValidate", invalidLarCsv) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parseAndValidate", invalidLarCsv) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.BAD_REQUEST
         responseAs[LarParsingError].errorMessages.length mustBe 2
       }
@@ -130,7 +132,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
 
     "return a list of validation errors for an invalid LAR" in {
       val badLar = lar.copy(agencyCode = 0)
-      postWithCfpbHeaders("/lar/parseAndValidate", badLar.toCSV) ~> larRoutes ~> check {
+      postWithCfpbHeaders("/lar/parseAndValidate", badLar.toCSV) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors.length mustBe 1
       }
@@ -142,14 +144,14 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     // the same result whether or not the request contains auth headers.
 
     "allow requests without 'CFPB-HMDA-Institutions' header" in {
-      Post("/lar/parse", larCsv).addHeader(usernameHeader) ~> larRoutes ~> check {
+      Post("/lar/parse", larCsv).addHeader(usernameHeader) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[LoanApplicationRegister] mustBe lar
       }
     }
 
     "allow requests without 'CFPB-HMDA-Username' header" in {
-      Post("/lar/validate", lar).addHeader(institutionsHeader) ~> larRoutes ~> check {
+      Post("/lar/validate", lar).addHeader(institutionsHeader) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors mustBe Nil
         responseAs[SingleValidationErrorResult].validity.errors mustBe Nil
@@ -158,7 +160,7 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
     }
 
     "not handle routes that aren't defined in this API" in {
-      getWithCfpbHeaders("/institutions") ~> larRoutes ~> check {
+      getWithCfpbHeaders("/institutions") ~> larRoutes(supervisor) ~> check {
         handled mustBe false
         rejections mustBe List()
       }
@@ -168,13 +170,13 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
 
   "Endpoint Response Encoding" must {
     "use requested encoding" in {
-      Post("/lar/parse", larCsv).addHeader(`Accept-Encoding`(deflate)) ~> larRoutes ~> check {
+      Post("/lar/parse", larCsv).addHeader(`Accept-Encoding`(deflate)) ~> larRoutes(supervisor) ~> check {
         response.encoding mustBe HttpEncodings.deflate
       }
     }
 
     "use 'identity' when no encoding is requested" in {
-      Post("/lar/validate", lar) ~> larRoutes ~> check {
+      Post("/lar/validate", lar) ~> larRoutes(supervisor) ~> check {
         response.encoding mustBe HttpEncodings.identity
       }
     }

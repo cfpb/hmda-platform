@@ -1,6 +1,6 @@
 package hmda.persistence.demo
 
-import akka.actor.ActorSystem
+import akka.actor.{ ActorRef, ActorSystem }
 import akka.util.Timeout
 import akka.pattern.ask
 import hmda.model.fi._
@@ -56,15 +56,15 @@ object DemoData {
 
   implicit val timeout = Timeout(5.seconds)
 
-  def loadDemoData(system: ActorSystem): Unit = {
+  def loadDemoData(system: ActorSystem, institutionsActor: ActorRef): Unit = {
     Thread.sleep(500)
-    loadInstitutions(demoInstitutions, system)
+    loadInstitutions(demoInstitutions, institutionsActor)
     loadFilings(demoFilings, system)
   }
 
-  def loadTestData(system: ActorSystem): Unit = {
+  def loadTestData(system: ActorSystem, institutionsActor: ActorRef): Unit = {
     Thread.sleep(500)
-    loadInstitutions(testInstitutions, system)
+    loadInstitutions(testInstitutions, institutionsActor)
     loadFilings(testFilings, system)
     loadSubmissions(testSubmissions.map(s => ("0", "2017", s)), system)
   }
@@ -75,9 +75,8 @@ object DemoData {
     (institution.id, institution.respondent.name, f.reverse)
   }
 
-  def loadInstitutions(institutions: Set[Institution], system: ActorSystem): Unit = {
-    val institutionsActor = system.actorSelection("/user/supervisor/institutions")
-    institutions.foreach(i => institutionsActor ? CreateInstitution(i))
+  def loadInstitutions(institutions: Set[Institution], institutionsActor: ActorRef): Unit = {
+    institutions.foreach(i => institutionsActor ! CreateInstitution(i))
   }
 
   def loadFilings(filings: Seq[Filing], system: ActorSystem): Unit = {

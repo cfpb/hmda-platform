@@ -33,13 +33,12 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
   val log: LoggingAdapter
 
   // institutions
-  def institutionsPath[_: EC] =
+  def institutionsPath[_: EC](querySupervisor: ActorRef) =
     path("institutions") {
       timedGet { uri =>
         extractRequestContext { ctx =>
           val ids = institutionIdsFromHeader(ctx)
-          val supervisor = system.actorSelection("/user/query-supervisor")
-          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+          val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
           val fInstitutions = for {
             institutionsActor <- fInstitutionsActor
             institutions <- (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
@@ -55,11 +54,9 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
     }
 
   // institutions/<institutionId>
-  def institutionByIdPath[_: EC](institutionId: String) =
+  def institutionByIdPath[_: EC](supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String) =
     pathEnd {
       timedGet { uri =>
-        val supervisor = system.actorSelection("/user/supervisor")
-        val querySupervisor = system.actorSelection("/user/query-supervisor")
         val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
         val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
         val fInstitutionDetails = for {

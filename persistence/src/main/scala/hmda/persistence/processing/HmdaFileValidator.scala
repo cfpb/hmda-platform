@@ -48,10 +48,10 @@ object HmdaFileValidator {
 
   case class GetNamedErrorResultsPaginated(editName: String, page: Int)
 
-  def props(id: SubmissionId): Props = Props(new HmdaFileValidator(id))
+  def props(supervisor: ActorRef, validationStats: ActorRef, id: SubmissionId): Props = Props(new HmdaFileValidator(supervisor, validationStats, id))
 
-  def createHmdaFileValidator(system: ActorSystem, id: SubmissionId): ActorRef = {
-    system.actorOf(HmdaFileValidator.props(id).withDispatcher("persistence-dispatcher"))
+  def createHmdaFileValidator(system: ActorSystem, supervisor: ActorRef, validationStats: ActorRef, id: SubmissionId): ActorRef = {
+    system.actorOf(HmdaFileValidator.props(supervisor, validationStats, id).withDispatcher("persistence-dispatcher"))
   }
 
   case class HmdaFileValidationState(
@@ -96,7 +96,7 @@ object HmdaFileValidator {
   case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)
 }
 
-class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor with TsEngine with LarEngine {
+class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submissionId: SubmissionId) extends HmdaPersistentActor with TsEngine with LarEngine {
 
   import HmdaFileValidator._
 
@@ -113,7 +113,6 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
   var state = HmdaFileValidationState()
 
-  val supervisor = system.actorSelection("/user/supervisor")
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
   def statRef = for {
     manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
@@ -141,8 +140,6 @@ class HmdaFileValidator(submissionId: SubmissionId) extends HmdaPersistentActor 
 
     case BeginValidation(replyTo) =>
       val validationStarted = ValidationStarted(submissionId)
-      val validationStats = context.actorSelection("/user/validation-stats")
-
       sender() ! validationStarted
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])

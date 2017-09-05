@@ -19,7 +19,7 @@ import hmda.api.http.HmdaCustomDirectives
 import hmda.persistence.messages.CommonMessages._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.model.fi.{ Created, Failed, Submission, SubmissionId, Uploaded }
-import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
+import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
@@ -42,16 +42,14 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
   val splitLines = Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>
-  def uploadPath[_: EC](institutionId: String) =
+  def uploadPath[_: EC](supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String) =
     path("filings" / Segment / "submissions" / IntNumber) { (period, seqNr) =>
       timedPost { uri =>
         val submissionId = SubmissionId(institutionId, period, seqNr)
         val uploadTimestamp = Instant.now.toEpochMilli
-        val supervisor = system.actorSelection("/user/supervisor")
-        val querySupervisor = system.actorSelection("/user/query-supervisor")
         val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
         val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
-        (supervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
+        (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
         (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
 
         val fUploadSubmission = for {
@@ -62,6 +60,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
 
         onComplete(fUploadSubmission) {
           case Success((submission, true, processingActor)) =>
+            //TODO: remove this when removing PostgreSQL from project
             val queryProjector = system.actorSelection(s"/user/query-supervisor/HmdaFilingView-$period/queryProjector")
             queryProjector ! CreateSchema
             queryProjector ! DeleteLars(institutionId)

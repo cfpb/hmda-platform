@@ -42,7 +42,10 @@ class Q075 private (institution: Institution, year: Int) extends AggregateEditCh
     val numRelevant = count(relevantLars)
     val numRelevantSold = count(relevantLars.filter(Q075.sold))
 
-    val lastYearStats = (validationStats ? FindQ075(institution.id, (year - 1).toString)).mapTo[Double]
+    val lastYearStats = for {
+      actorRef <- validationStats
+      stats <- (actorRef ? FindQ075(institution.id, (year - 1).toString)).mapTo[Double]
+    } yield stats
 
     for {
       r <- numRelevant

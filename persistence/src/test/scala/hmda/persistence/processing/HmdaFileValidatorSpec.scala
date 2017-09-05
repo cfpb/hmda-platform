@@ -7,6 +7,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.validation._
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
+import hmda.persistence.HmdaSupervisor
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
 import hmda.persistence.model.ActorSpec
@@ -33,14 +34,16 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   var hmdaFileValidator: ActorRef = _
 
-  val submissionManager = system.actorOf(SubmissionManager.props(submissionId1))
+  val submissionManager = system.actorOf(SubmissionManager.props(validationStats, submissionId1))
+
+  val supervisor = system.actorOf(HmdaSupervisor.props(validationStats))
 
   val probe = TestProbe()
 
   val lines = fiCSVEditErrors.split("\n")
 
   override def beforeEach(): Unit = {
-    hmdaFileValidator = createHmdaFileValidator(system, submissionId1)
+    hmdaFileValidator = createHmdaFileValidator(system, supervisor, validationStats, submissionId1)
   }
 
   override def afterAll(): Unit = {
@@ -92,7 +95,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         probe.send(hmdaFileParser, LarParsed(lar))
         probe.expectMsg(Persisted)
       }
-      val hmdaFileValidator2 = createHmdaFileValidator(system, submissionId2)
+      val hmdaFileValidator2 = createHmdaFileValidator(system, supervisor, validationStats, submissionId2)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(5, Nil))
 
@@ -104,20 +107,13 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
         lars,
-        List(
-          SyntacticalValidationError("38800009923", "S025", true),
-          SyntacticalValidationError("38800009923", "S011", true)
-        ),
+        List(),
         Nil,
         Nil,
         List(
           SyntacticalValidationError("8299422144", "S020", false),
-          SyntacticalValidationError("8299422144", "S025", false),
-          SyntacticalValidationError("9471480396", "S025", false),
           SyntacticalValidationError("2185751599", "S010", false),
-          SyntacticalValidationError("2185751599", "S020", false),
-          SyntacticalValidationError("2185751599", "S025", false),
-          SyntacticalValidationError("4977566612", "S025", false)
+          SyntacticalValidationError("2185751599", "S020", false)
         ),
         List(
           ValidityValidationError("4977566612", "V550", false),

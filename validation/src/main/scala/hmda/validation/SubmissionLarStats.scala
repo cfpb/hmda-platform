@@ -18,10 +18,10 @@ object SubmissionLarStats {
   case class CountSubmittedLarsInSubmission() extends Command
   case class PersistIrs() extends Command
 
-  def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
+  def props(validationStats: ActorRef, submissionId: SubmissionId): Props = Props(new SubmissionLarStats(validationStats, submissionId))
 
-  def createSubmissionStats(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
-    system.actorOf(SubmissionLarStats.props(submissionId))
+  def createSubmissionStats(system: ActorSystem, validationStats: ActorRef, submissionId: SubmissionId): ActorRef = {
+    system.actorOf(SubmissionLarStats.props(validationStats, submissionId))
   }
 
   case class SubmissionLarStatsState(
@@ -57,7 +57,7 @@ object SubmissionLarStats {
   }
 }
 
-class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor {
+class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) extends HmdaPersistentActor {
   import SubmissionLarStats._
 
   var totalSubmittedLars = 0
@@ -99,7 +99,6 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       persist(SubmittedLarsUpdated(totalSubmittedLars)) { e =>
         log.debug(s"Persisted: $totalSubmittedLars")
         updateState(e)
-        val validationStats = context.actorSelection("/user/validation-stats")
         validationStats ! AddSubmissionSubmittedTotal(totalSubmittedLars, submissionId)
       }
 
@@ -111,7 +110,6 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       persist(event) { e =>
         log.debug(s"Persisted: $totalValidatedLars")
         updateState(e)
-        val validationStats = context.actorSelection("/user/validation-stats")
         val msg = AddSubmissionMacroStats(
           submissionId,
           totalValidatedLars,
@@ -133,7 +131,6 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       persist(IrsStatsUpdated(msaSeq)) { e =>
         log.debug(s"Persisted: $msaSeq")
         updateState(e)
-        val validationStats = context.actorSelection("/user/validation-stats")
         validationStats ! AddIrsStats(msaSeq, submissionId)
       }
 

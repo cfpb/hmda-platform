@@ -3,7 +3,7 @@ package hmda.validation
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
-import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
+import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shutdown }
 import hmda.persistence.messages.events.validation.ValidationStatsEvents._
 import hmda.persistence.model.HmdaPersistentActor
 
@@ -114,6 +114,11 @@ class ValidationStats extends HmdaPersistentActor {
     state = state.updated(event)
   }
 
+  override def preStart(): Unit = {
+    log.info(s"Actor started at ${self.path}")
+    log.debug("Thread name for actor: " + Thread.currentThread().getName)
+  }
+
   override def receiveCommand: Receive = super.receiveCommand orElse {
     case AddSubmissionSubmittedTotal(total, id) =>
       persist(SubmissionSubmittedTotalsAdded(total, id)) { e =>
@@ -177,6 +182,9 @@ class ValidationStats extends HmdaPersistentActor {
 
     case GetState =>
       sender() ! state
+
+    case Shutdown =>
+      context stop self
   }
 
 }

@@ -17,6 +17,7 @@ import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
 import hmda.query.HmdaQuerySupervisor
 import hmda.query.projections.institutions.InstitutionDBProjection._
+import hmda.validation.ValidationStats
 
 import scala.concurrent.duration._
 import spray.json._
@@ -33,10 +34,12 @@ class InstitutionAdminHttpApiSpec
   override implicit val timeout: Timeout = Timeout(10.seconds)
   override val log: LoggingAdapter = NoLogging
 
-  override def beforeAll(): Unit = {
-    HmdaSupervisor.createSupervisor(system)
-    HmdaQuerySupervisor.createQuerySupervisor(system)
+  val validationStats = ValidationStats.createValidationStats(system)
+  val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
 
+  val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
+
+  override def beforeAll(): Unit = {
     val probe = TestProbe()
     val db = createInstitutionDBProjection(system)
     probe.send(db, CreateSchema)
@@ -66,7 +69,7 @@ class InstitutionAdminHttpApiSpec
     "create a new institution" in {
       val jsonRequest = ByteString(newInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
-      postRequest ~> institutionAdminRoutes ~> check {
+      postRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.Created
         responseAs[Institution] mustBe newInstitution
       }
@@ -74,7 +77,7 @@ class InstitutionAdminHttpApiSpec
     "use requested encoding for institution create/update path" in {
       val jsonRequest = ByteString(sampleInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
-      postRequest.addHeader(`Accept-Encoding`(deflate)) ~> institutionAdminRoutes ~> check {
+      postRequest.addHeader(`Accept-Encoding`(deflate)) ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         response.encoding mustBe HttpEncodings.deflate
       }
     }
@@ -82,14 +85,14 @@ class InstitutionAdminHttpApiSpec
       val badJson = "bad payload".toJson
       val jsonRequest = ByteString(badJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
-      postRequest ~> institutionAdminRoutes ~> check {
+      postRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         rejection mustBe a[MalformedRequestContentRejection]
       }
     }
     "return conflict when trying to upload existing entity" in {
       val jsonRequest = ByteString(newInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
-      postRequest ~> institutionAdminRoutes ~> check {
+      postRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.Conflict
       }
     }
@@ -98,7 +101,7 @@ class InstitutionAdminHttpApiSpec
       val updatedInstitution = newInstitution.copy(cra = true, respondent = updatedInstitutionRespondent)
       val jsonRequest = ByteString(updatedInstitution.toJson.toString)
       val putRequest = createRequest(jsonRequest, HttpMethods.PUT)
-      putRequest ~> institutionAdminRoutes ~> check {
+      putRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[Institution] mustBe updatedInstitution
       }
@@ -108,18 +111,18 @@ class InstitutionAdminHttpApiSpec
       val i1 = sampleInstitution
       val jsonRequest = ByteString(i1.toJson.toString)
       val putRequest = createRequest(jsonRequest, HttpMethods.PUT)
-      putRequest ~> institutionAdminRoutes ~> check {
+      putRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.NotFound
       }
     }
     "delete institution schema" in {
-      HttpRequest(HttpMethods.GET, uri = "/institutions/delete") ~> institutionAdminRoutes ~> check {
+      HttpRequest(HttpMethods.GET, uri = "/institutions/delete") ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[String] mustBe "InstitutionSchemaDeleted()"
       }
     }
     "create institution schema" in {
-      HttpRequest(HttpMethods.GET, uri = "/institutions/create") ~> institutionAdminRoutes ~> check {
+      HttpRequest(HttpMethods.GET, uri = "/institutions/create") ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[String] mustBe "InstitutionSchemaCreated()"
       }

@@ -29,14 +29,14 @@ object SubmissionManager {
 
   case class GetActorRef(name: String) extends Command
 
-  def props(submissionId: SubmissionId): Props = Props(new SubmissionManager(submissionId))
+  def props(validationStats: ActorRef, submissionId: SubmissionId): Props = Props(new SubmissionManager(validationStats, submissionId))
 
-  def createSubmissionManager(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
-    system.actorOf(SubmissionManager.props(submissionId).withDispatcher("persistence-dispatcher"))
+  def createSubmissionManager(system: ActorSystem, validationStats: ActorRef, submissionId: SubmissionId): ActorRef = {
+    system.actorOf(SubmissionManager.props(validationStats, submissionId).withDispatcher("persistence-dispatcher"))
   }
 }
 
-class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
+class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) extends HmdaActor {
 
   val config = ConfigFactory.load()
   val duration = config.getInt("hmda.actor-lookup-timeout").seconds
@@ -47,10 +47,10 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
   val supervisor = context.parent
   val hmdaFilingF = (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
 
-  val submissionLarStats: ActorRef = context.actorOf(SubmissionLarStats.props(submissionId)
+  val submissionLarStats: ActorRef = context.actorOf(SubmissionLarStats.props(validationStats, submissionId)
     .withDispatcher("persistence-dispatcher"), s"submission-lar-stats-${submissionId.toString}")
   val submissionFSM: ActorRef = context.actorOf(SubmissionFSM
-    .props(submissionId)
+    .props(supervisor, submissionId)
     .withDispatcher("persistence-dispatcher"))
   val submissionUpload: ActorRef = context.actorOf(HmdaRawFile
     .props(submissionId)
@@ -59,7 +59,7 @@ class SubmissionManager(submissionId: SubmissionId) extends HmdaActor {
     .props(submissionId)
     .withDispatcher("persistence-dispatcher"))
   val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator
-    .props(submissionId)
+    .props(supervisor, validationStats, submissionId)
     .withDispatcher("persistence-dispatcher"))
   val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
 
