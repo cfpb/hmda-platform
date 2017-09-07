@@ -42,7 +42,7 @@ trait SubmissionProtocol extends ValidationResultProtocol {
   }
 
   implicit val submissionIdProtocol = jsonFormat3(SubmissionId.apply)
-  implicit val submissionFormat = jsonFormat5(Submission.apply)
+  implicit val submissionFormat = jsonFormat6(Submission.apply)
   implicit val submissionsFormat = jsonFormat1(Submissions.apply)
   implicit val receiptFormat = jsonFormat3(Receipt.apply)
 

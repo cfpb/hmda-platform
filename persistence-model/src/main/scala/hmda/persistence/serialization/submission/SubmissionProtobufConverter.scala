@@ -38,7 +38,8 @@ object SubmissionProtobufConverter {
       status = Some(submissionStatusToProtobuf(obj.status)),
       start = obj.start,
       end = obj.end,
-      receipt = obj.receipt
+      receipt = obj.receipt,
+      filename = obj.filename
     )
   }
 
@@ -48,7 +49,8 @@ object SubmissionProtobufConverter {
       status = submissionStatusFromProtobuf(msg.status.getOrElse(SubmissionStatusMessage())),
       start = msg.start,
       end = msg.end,
-      receipt = msg.receipt
+      receipt = msg.receipt,
+      filename = msg.filename
     )
   }
 

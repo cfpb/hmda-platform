@@ -72,5 +72,6 @@ case class Submission(
   status: SubmissionStatus = Created,
   start: Long = 0L,
   end: Long = 0L,
+  filename: String = "",
   receipt: String = ""
 )
