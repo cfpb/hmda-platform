@@ -11,9 +11,9 @@ object V280 extends EditCheck[LoanApplicationRegister] {
 
   val cbsaTracts = CBSATractLookup.values
 
-  val validMSAs = cbsaTracts.map(cbsa => cbsa.geoIdMsa).toSet
+  val validMSAs = cbsaTracts.map(cbsa => cbsa.geoIdMsa).filterNot(msa => msa.isEmpty).toSet
 
-  val validMDs = cbsaTracts.map(cbsa => cbsa.metDivFp).toSet
+  val validMDs = cbsaTracts.map(cbsa => cbsa.metDivFp).filterNot(md => md.isEmpty).toSet
 
   override def name: String = "V280"
 
