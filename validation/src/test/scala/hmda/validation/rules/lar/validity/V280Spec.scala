@@ -38,5 +38,13 @@ class V280Spec extends LarEditCheckSpec {
     }
   }
 
+  property("Fails for a blank MSA code") {
+    forAll(larGen) { lar =>
+      val inValidGeography = lar.geography.copy(msa = "")
+      val inValidLar = lar.copy(geography = inValidGeography)
+      inValidLar.mustFail
+    }
+  }
+
   override def check: EditCheck[LoanApplicationRegister] = V280
 }
