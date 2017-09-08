@@ -32,3 +32,8 @@ message SubmissionStatusUpdatedMessage {
     SubmissionIdMessage id = 1;
     SubmissionStatusMessage status = 2;
 }
+
+message SubmissionFileNameAddedMessage {
+    SubmissionIdMessage id = 1;
+    string fileName = 2;
+}

@@ -1,7 +1,7 @@
 package hmda.persistence.serialization.submission
 
-import hmda.model.fi.{ Submission, SubmissionId, SubmissionStatus, Created, Uploading, Uploaded, Parsing, Parsed, ParsedWithErrors, Validating, ValidatedWithErrors, Validated, Signed, Failed }
-import hmda.persistence.messages.events.institutions.SubmissionEvents.{ SubmissionCreated, SubmissionStatusUpdated }
+import hmda.model.fi.{ Created, Failed, Parsed, ParsedWithErrors, Parsing, Signed, Submission, SubmissionId, SubmissionStatus, Uploaded, Uploading, Validated, ValidatedWithErrors, Validating }
+import hmda.persistence.messages.events.institutions.SubmissionEvents._
 import hmda.persistence.model.serialization.SubmissionEvents._
 
 object SubmissionProtobufConverter {
@@ -29,6 +29,20 @@ object SubmissionProtobufConverter {
     SubmissionStatusUpdated(
       id = submissionIdFromProtobuf(msg.id.getOrElse(SubmissionIdMessage())),
       status = submissionStatusFromProtobuf(msg.status.getOrElse(SubmissionStatusMessage()))
+    )
+  }
+
+  def submissionFileNameAddedToProtobuf(obj: SubmissionFileNameAdded): SubmissionFileNameAddedMessage = {
+    SubmissionFileNameAddedMessage(
+      id = Some(submissionIdToProtobuf(obj.id)),
+      fileName = obj.fileName
+    )
+  }
+
+  def submissionFileNameAddedFromProtobuf(msg: SubmissionFileNameAddedMessage): SubmissionFileNameAdded = {
+    SubmissionFileNameAdded(
+      id = submissionIdFromProtobuf(msg.id.getOrElse(SubmissionIdMessage())),
+      fileName = msg.fileName
     )
   }
 

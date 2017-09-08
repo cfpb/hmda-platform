@@ -1,9 +1,10 @@
 package hmda.persistence.serialization.submission
 
-import org.scalatest.{ MustMatchers, PropSpec }
+import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.model.institution.SubmissionGenerators._
-import hmda.persistence.messages.events.institutions.SubmissionEvents.{ SubmissionCreated, SubmissionStatusUpdated }
+import hmda.persistence.messages.events.institutions.SubmissionEvents._
+import org.scalacheck.Gen
 
 class SubmissionProtobufSerializerSpec extends PropSpec with PropertyChecks with MustMatchers {
   val serializer = new SubmissionProtobufSerializer()
@@ -21,6 +22,14 @@ class SubmissionProtobufSerializerSpec extends PropSpec with PropertyChecks with
       val msg = SubmissionStatusUpdated(submissionId, submissionStatus)
       val bytes = serializer.toBinary(msg)
       serializer.fromBinary(bytes, serializer.SubmissionStatusUpdatedManifest) mustBe msg
+    }
+  }
+
+  property("Submission File Name Added messages must be serialized to binary and back") {
+    forAll(submissionIdGen, Gen.alphaStr) { (submissionId, fileName) =>
+      val msg = SubmissionFileNameAdded(submissionId, fileName)
+      val bytes = serializer.toBinary(msg)
+      serializer.fromBinary(bytes, serializer.SubmissionFileNameAddedManifest) mustBe msg
     }
   }
 }
