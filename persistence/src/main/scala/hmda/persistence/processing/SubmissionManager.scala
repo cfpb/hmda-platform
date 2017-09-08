@@ -7,9 +7,10 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.{ Signed => _, _ }
-import hmda.persistence.institutions.FilingPersistence
+import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
-import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling }
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindSubmissions }
+import hmda.persistence.institutions.SubmissionPersistence.AddSubmissionFileName
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
@@ -62,6 +63,7 @@ class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) e
     .props(supervisor, validationStats, submissionId)
     .withDispatcher("persistence-dispatcher"))
   val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
+  val submissionPersistence = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
 
   var uploaded: Int = 0
 
@@ -75,7 +77,7 @@ class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) e
   override def receive: Receive = {
 
     case AddFileName(name) =>
-      submissionUpload ! AddFileName(name)
+      submissionPersistence.map(_ ! AddSubmissionFileName(submissionId, name))
 
     case StartUpload =>
       log.info(s"Start upload for submission: ${submissionId.toString}")
