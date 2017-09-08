@@ -53,7 +53,7 @@ object SubmissionProtobufConverter {
       start = obj.start,
       end = obj.end,
       receipt = obj.receipt,
-      filename = obj.filename
+      fileName = obj.fileName
     )
   }
 
@@ -64,7 +64,7 @@ object SubmissionProtobufConverter {
       start = msg.start,
       end = msg.end,
       receipt = msg.receipt,
-      filename = msg.filename
+      fileName = msg.fileName
     )
   }
 

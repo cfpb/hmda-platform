@@ -1,6 +1,6 @@
 package hmda.persistence.serialization.submission
 
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import hmda.model.institution.SubmissionGenerators._
 import hmda.persistence.messages.events.institutions.SubmissionEvents._
