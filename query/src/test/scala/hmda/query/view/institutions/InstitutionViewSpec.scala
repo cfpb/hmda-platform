@@ -2,7 +2,7 @@ package hmda.query.view.institutions
 
 import akka.actor.ActorRef
 import akka.testkit.TestProbe
-import hmda.model.institution.InstitutionGenerators
+import hmda.model.institution.{ Institution, InstitutionGenerators }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.ActorSpec
@@ -17,6 +17,10 @@ class InstitutionViewSpec extends ActorSpec {
   val i3 = InstitutionGenerators.sampleInstitution
   val i4 = i3.copy(cra = true)
 
+  val e1 = Institution.empty.copy(id = "1", emailDomains = Set("test.com", "", ""))
+  val e2 = Institution.empty.copy(id = "2", emailDomains = Set("", "", ""))
+  val e3 = Institution.empty.copy(id = "3", emailDomains = Set("test.com", "", ""))
+
   val institutionQuery = createInstitutionView(system)
 
   implicit val ec = system.dispatcher
@@ -29,6 +33,9 @@ class InstitutionViewSpec extends ActorSpec {
     institutionQuery ! EventWithSeqNr(2, InstitutionCreated(i2))
     institutionQuery ! EventWithSeqNr(3, InstitutionCreated(i3))
     institutionQuery ! EventWithSeqNr(4, InstitutionModified(i4))
+    institutionQuery ! EventWithSeqNr(5, InstitutionCreated(e1))
+    institutionQuery ! EventWithSeqNr(6, InstitutionCreated(e2))
+    institutionQuery ! EventWithSeqNr(7, InstitutionCreated(e3))
   }
 
   "Institutions View" must {
@@ -50,7 +57,7 @@ class InstitutionViewSpec extends ActorSpec {
     }
     "return full list of institutions" in {
       probe.send(institutionQuery, GetState)
-      probe.expectMsg(Set(i1, i2, i4))
+      probe.expectMsg(Set(i1, i2, i4, e1, e2, e3))
     }
     "return reference to institution query projector" in {
       probe.send(institutionQuery, GetProjectionActorRef)
@@ -60,6 +67,21 @@ class InstitutionViewSpec extends ActorSpec {
     "return institution by respondentId" in {
       probe.send(institutionQuery, GetInstitutionByRespondentId(i1.respondentId))
       probe.expectMsg(i1)
+    }
+
+    "return a set of institutions that match a domain" in {
+      probe.send(institutionQuery, FindInstitutionByPeriodAndDomain("test.com"))
+      probe.expectMsg(Set(e1, e3))
+    }
+
+    "return an empty set when requesting a domain that doesn't exist" in {
+      probe.send(institutionQuery, FindInstitutionByPeriodAndDomain("notest.com"))
+      probe.expectMsg(Set())
+    }
+
+    "return an empty set when requesting a blank domain" in {
+      probe.send(institutionQuery, FindInstitutionByPeriodAndDomain(""))
+      probe.expectMsg(Set())
     }
   }
 

@@ -93,8 +93,11 @@ class InstitutionView extends HmdaPersistentActor {
       sender() ! state.institutions
 
     case FindInstitutionByPeriodAndDomain(domain) =>
-      sender() ! state.institutions.filter(i => i.emailDomains.map(e => extractDomain(e)).contains(domain.toLowerCase))
-
+      if (domain.isEmpty) {
+        sender() ! Set.empty[Institution]
+      } else {
+        sender() ! state.institutions.filter(i => i.emailDomains.map(e => extractDomain(e)).contains(domain.toLowerCase))
+      }
   }
 
   override def receiveRecover: Receive = super.receiveRecover orElse {
