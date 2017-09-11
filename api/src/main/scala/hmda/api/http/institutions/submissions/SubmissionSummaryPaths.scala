@@ -13,15 +13,15 @@ import hmda.api.http.ValidationErrorConverter
 import hmda.api.model.ErrorResponse
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
-import hmda.model.fi.SubmissionId
+import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Agency
-import hmda.persistence.HmdaSupervisor.FindProcessingActor
+import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.messages.CommonMessages.GetState
-import hmda.persistence.processing.{ HmdaFileValidator, HmdaRawFile, SubmissionManager }
+import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.persistence.processing.SubmissionManager.GetActorRef
-import hmda.persistence.processing.HmdaRawFile.HmdaRawFileState
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success, Try }
@@ -48,19 +48,15 @@ trait SubmissionSummaryPaths
       timedGet { uri =>
         completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
           val submissionId = SubmissionId(institutionId, period, seqNr)
-          val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
           val validatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
-          val hmdaRawF = submissionManagerF.flatMap(actorRef => (actorRef ? GetActorRef(HmdaRawFile.name)).mapTo[ActorRef])
+          val submissionPersistenceF = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
 
           val tsF = for {
             validator <- validatorF
-            hmdaRaw <- hmdaRawF
-            u <- (hmdaRaw ? GetState).mapTo[HmdaRawFileState]
+            submissions <- submissionPersistenceF
             s <- (validator ? GetState).mapTo[HmdaFileValidationState]
-            fileDetails = u.fileName
-            larSize = s.lars.size
-            ts = s.ts
-            tsLarSummary = TsLarSummary(ts, larSize, fileDetails)
+            sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
+            tsLarSummary = TsLarSummary(s.ts, s.lars.size, sub.fileName)
           } yield tsLarSummary
 
           onComplete(tsF) {
