@@ -7,8 +7,3 @@ message LineAddedMessage {
     int64 timestamp = 1;
     string data = 2;
 }
-
-message FileNameAddedMessage {
-    string fileName = 1;
-}
-

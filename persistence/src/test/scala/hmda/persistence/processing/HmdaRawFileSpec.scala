@@ -31,7 +31,7 @@ class HmdaRawFileSpec extends ActorSpec {
         probe.expectMsg(Persisted)
       }
       probe.send(hmdaFileUpload, GetState)
-      probe.expectMsg(HmdaRawFileState(4, ""))
+      probe.expectMsg(HmdaRawFileState(4))
     }
     "recover with event" in {
       probe.send(hmdaFileUpload, Shutdown)
@@ -39,7 +39,7 @@ class HmdaRawFileSpec extends ActorSpec {
       val secondHmdaFileUpload = createHmdaRawFile(system, submissionId)
 
       probe.send(secondHmdaFileUpload, GetState)
-      probe.expectMsg(HmdaRawFileState(4, ""))
+      probe.expectMsg(HmdaRawFileState(4))
       probe.send(secondHmdaFileUpload, Shutdown)
     }
   }

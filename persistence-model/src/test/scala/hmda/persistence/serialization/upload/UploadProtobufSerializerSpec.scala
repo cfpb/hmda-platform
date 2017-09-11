@@ -1,6 +1,6 @@
 package hmda.persistence.serialization.upload
 
-import hmda.persistence.messages.events.processing.FileUploadEvents.{ FileNameAdded, LineAdded }
+import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
 import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
@@ -16,11 +16,4 @@ class UploadProtobufSerializerSpec extends PropSpec with PropertyChecks with Mus
     }
   }
 
-  property("File Name Added messages must be serialized to binary and back") {
-    forAll(Gen.alphaStr) { fileName =>
-      val msg = FileNameAdded(fileName)
-      val bytes = serializer.toBinary(msg)
-      serializer.fromBinary(bytes, serializer.FileNameAddedManifest) mustBe msg
-    }
-  }
 }
