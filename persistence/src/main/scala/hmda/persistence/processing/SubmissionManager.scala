@@ -8,17 +8,17 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.{ Signed => _, _ }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
-import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
+import hmda.persistence.institutions.FilingPersistence.UpdateFilingStatus
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence.AddSubmissionFileName
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
-import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
+import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
-import hmda.persistence.processing.SubmissionManager.GetActorRef
+import hmda.persistence.processing.SubmissionManager.{ AddFileName, GetActorRef }
 import hmda.validation.SubmissionLarStats
 
 import scala.concurrent.Future
@@ -29,6 +29,7 @@ object SubmissionManager {
   val name = "SubmissionManager"
 
   case class GetActorRef(name: String) extends Command
+  case class AddFileName(fileName: String) extends Command
 
   def props(validationStats: ActorRef, submissionId: SubmissionId): Props = Props(new SubmissionManager(validationStats, submissionId))
 

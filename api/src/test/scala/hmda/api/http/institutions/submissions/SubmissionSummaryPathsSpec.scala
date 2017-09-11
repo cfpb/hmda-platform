@@ -10,9 +10,9 @@ import hmda.model.fi.SubmissionId
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
-import hmda.persistence.processing.HmdaRawFile.AddFileName
 import hmda.api.model.ErrorResponse
 import hmda.parser.fi.lar.LarCsvParser
+import hmda.persistence.processing.SubmissionManager.AddFileName
 import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.Await

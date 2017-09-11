@@ -17,7 +17,8 @@ import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetSubmissionById }
-import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
+import hmda.persistence.processing.HmdaRawFile.AddLine
+import hmda.persistence.processing.SubmissionManager.AddFileName
 import hmda.validation.ValidationStats
 
 import scala.concurrent.Await
