@@ -56,8 +56,7 @@ trait SubmissionSummaryPaths
             submissions <- submissionPersistenceF
             s <- (validator ? GetState).mapTo[HmdaFileValidationState]
             sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
-            tsLarSummary = TsLarSummary(s.ts, s.lars.size, sub.fileName)
-          } yield tsLarSummary
+          } yield TsLarSummary(s.ts, s.lars.size, sub.fileName)
 
           onComplete(tsF) {
             case Success(x) => x.ts match {

@@ -1,58 +1,63 @@
 package hmda.api.http.institutions.submissions
 
-import akka.actor.ActorRef
-import akka.pattern.ask
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
-import hmda.model.fi.SubmissionId
-import hmda.parser.fi.ts.TsCsvParser
-import hmda.persistence.HmdaSupervisor.FindProcessingActor
-import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
+import hmda.model.fi.Submission
 import hmda.api.model.ErrorResponse
-import hmda.parser.fi.lar.LarCsvParser
-import hmda.persistence.processing.SubmissionManager.AddFileName
 import org.scalatest.BeforeAndAfterAll
 
-import scala.concurrent.Await
-
 class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAfterAll {
-  import hmda.model.util.FITestData._
 
   val institutionId = "0"
   val period = "2017"
-  val seqNr = 1
-  val submissionId = SubmissionId(institutionId, period, seqNr)
+  var seqNr = 1
 
-  val fileName = "lars.dat"
-  val lines = fiCSV.split("\n")
-  val ts = TsCsvParser(lines(0)).right.get
-  val lars = lines.tail.map(line => LarCsvParser(line).right.get)
+  val csv = "1|externalTest0|3|201502221111|2017|35-0704860|10|Passes Bank|555 Passes Court|Passes City|CA|92130|Passes Bank Parent|555 Passes Court Parent|Passes City|CA|92130|Passes Person|555-555-5555|555-555-5555|pperson@passes.com\n" +
+    "2|externalTest0|3|10164 |20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1\n" +
+    "2|externalTest0|3|10174 |20170224|1|1|2|1|60|3|1|20170402|45460|18|153|0503.00|2|2|5| | | | |5| | | | |1|2|210|0| | | |NA   |2|2\n" +
+    "2|externalTest0|3|10370 |20170228|1|1|3|1|73|3|3|20170326|45460|18|153|0505.00|2|2|5| | | | |5| | | | |1|2|89|0|4| | |NA   |2|1"
+
+  val fileName = "2017_lars_bank_1.txt"
+  val file = multiPartFile(csv, fileName)
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    val validatorF = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
-    val submissionManagerF = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
-    val validator = Await.result(validatorF, duration)
-    val submissionManager = Await.result(submissionManagerF, duration)
-    validator ! ts
-    lars.foreach(lar => validator ! lar)
-    submissionManager ! AddFileName(fileName)
   }
 
   "Submission Summary Paths" must {
+
+    "Set up: create a submission, upload a file" in {
+      postWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
+        val submission = responseAs[Submission]
+        seqNr = submission.id.sequenceNumber
+
+        postWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr", file) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
+          status mustBe StatusCodes.Accepted
+
+          Thread.sleep(2000)
+          getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/latest") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
+            status mustBe StatusCodes.OK
+            val response = responseAs[Submission]
+            response.status.code must be > 7
+          }
+        }
+      }
+    }
+
     "return a 200" in {
       getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr/summary") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-        val contactSummary = ContactSummary(ts.contact.name, ts.contact.phone, ts.contact.email)
-        val respondentSummary = RespondentSummary(ts.respondent.name, ts.respondent.id, ts.taxId, "cfpb", contactSummary)
-        val fileSummary = FileSummary(fileName, "2013", lars.size)
+        val contactSummary = ContactSummary("Passes Person", "555-555-5555", "pperson@passes.com")
+        val respondentSummary = RespondentSummary("Passes Bank", "externalTest0", "35-0704860", "fdic", contactSummary)
+        val fileSummary = FileSummary(name = fileName, year = "2017", totalLARS = 3)
         val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
 
         status mustBe StatusCodes.OK
         responseAs[SubmissionSummary] mustBe submissionSummary
       }
     }
+
     "return 404 for nonexistent institution" in {
       getWithCfpbHeaders(s"/institutions/xxxxx/filings/$period/submissions/$seqNr/summary") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         status mustBe StatusCodes.NotFound
