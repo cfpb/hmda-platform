@@ -12,7 +12,7 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
 
   val institutionId = "0"
   val period = "2017"
-  var seqNr = 1
+  val seqNr = 1
 
   val csv = "1|externalTest0|3|201502221111|2017|35-0704860|10|Passes Bank|555 Passes Court|Passes City|CA|92130|Passes Bank Parent|555 Passes Court Parent|Passes City|CA|92130|Passes Person|555-555-5555|555-555-5555|pperson@passes.com\n" +
     "2|externalTest0|3|10164 |20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1\n" +
@@ -28,21 +28,10 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
 
   "Submission Summary Paths" must {
 
-    "Set up: create a submission, upload a file" in {
-      postWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-        val submission = responseAs[Submission]
-        seqNr = submission.id.sequenceNumber
-
-        postWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr", file) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-          status mustBe StatusCodes.Accepted
-
-          Thread.sleep(2000)
-          getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/latest") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-            status mustBe StatusCodes.OK
-            val response = responseAs[Submission]
-            response.status.code must be > 7
-          }
-        }
+    "Set up: upload a file" in {
+      postWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr", file) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
+        Thread.sleep(5000) // wait for the submission to complete validation
+        status mustBe StatusCodes.Accepted
       }
     }
 
