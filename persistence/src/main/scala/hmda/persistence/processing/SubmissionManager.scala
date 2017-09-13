@@ -8,7 +8,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.{ Signed => _, _ }
 import hmda.persistence.institutions.FilingPersistence
-import hmda.persistence.institutions.FilingPersistence.{ GetFilingByPeriod, UpdateFilingStatus }
+import hmda.persistence.institutions.FilingPersistence.UpdateFilingStatus
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling }
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.model.HmdaActor
