@@ -4,7 +4,8 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
-import hmda.api.model.ErrorResponse
+import hmda.api.model.{ ErrorResponse, FilingDetail }
+import hmda.model.fi.{ Submission, ValidatedWithErrors }
 import org.scalatest.BeforeAndAfterAll
 
 class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAfterAll {
@@ -31,6 +32,14 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
       postWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr", file) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         Thread.sleep(5000) // wait for the submission to complete validation
         status mustBe StatusCodes.Accepted
+      }
+    }
+
+    "Set up: must have uploaded" in {
+      getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
+        val subs = responseAs[FilingDetail].submissions
+        val sub: Submission = subs.find(_.id.sequenceNumber == seqNr).get
+        sub.status mustBe ValidatedWithErrors
       }
     }
 
