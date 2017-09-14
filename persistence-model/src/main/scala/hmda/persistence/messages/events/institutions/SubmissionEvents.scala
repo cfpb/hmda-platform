@@ -7,4 +7,5 @@ object SubmissionEvents {
   trait SubmissionEvent extends Event
   case class SubmissionCreated(submission: Submission) extends SubmissionEvent
   case class SubmissionStatusUpdated(id: SubmissionId, status: SubmissionStatus) extends SubmissionEvent
+  case class SubmissionFileNameAdded(id: SubmissionId, fileName: String) extends Event
 }

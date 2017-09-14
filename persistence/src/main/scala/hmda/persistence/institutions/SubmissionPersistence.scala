@@ -13,6 +13,7 @@ object SubmissionPersistence {
 
   case object CreateSubmission extends Command
   case class UpdateSubmissionStatus(id: SubmissionId, status: SubmissionStatus) extends Command
+  case class AddSubmissionFileName(id: SubmissionId, fileName: String) extends Command
   case class GetSubmissionById(id: SubmissionId) extends Command
   case object GetLatestSubmission extends Command
 
@@ -40,6 +41,12 @@ object SubmissionPersistence {
           }
 
           SubmissionState(submissions.updated(i, updatedSub))
+
+        case SubmissionFileNameAdded(id, fileName) =>
+          val sub = submissions.find(_.id == id).getOrElse(Submission())
+          val index = submissions.indexOf(sub)
+          val updated = sub.copy(fileName = fileName)
+          SubmissionState(submissions.updated(index, updated))
       }
     }
 
@@ -80,6 +87,17 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
         }
       } else {
         log.warning(s"Submission does not exist. Could not update submission with id $id")
+        sender() ! None
+      }
+
+    case AddSubmissionFileName(id, fileName) =>
+      if (state.submissions.map(_.id).contains(id)) {
+        persist(SubmissionFileNameAdded(id, fileName)) { e =>
+          updateState(e)
+          sender() ! Some(Submission(id, fileName = fileName))
+        }
+      } else {
+        log.warning(s"Submission does not exist. Could not add filename for submission with id $id")
         sender() ! None
       }
 

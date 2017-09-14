@@ -141,6 +141,8 @@ Example response:
         "message": "created",
         "description": "The filing period is now open and available to accept HMDA data."
       },
+      "fileName": "bank1_hmda_2017.txt",
+      "receipt": "",
       "start": 1483287071000,
       "end": 0
     },
@@ -155,6 +157,8 @@ Example response:
         "message": "created",
         "description": "The filing period is now open and available to accept HMDA data."
       },
+      "fileName": "bank1_lars_2017.txt",
+      "receipt": "",
       "start": 1483287071000,
       "end": 0
     },
@@ -169,6 +173,8 @@ Example response:
         "message": "created",
         "description": "The filing period is now open and available to accept HMDA data."
       },
+      "fileName": "bank1_lars_2017.txt",
+      "receipt": "",
       "start": 1483287071000,
       "end": 0
     }
@@ -196,6 +202,8 @@ Example response, with HTTP code 201:
     "message": "created",
     "description": "The filing period is now open and available to accept HMDA data."
   },
+  "fileName": "bank1_lars_2017.txt",
+  "receipt": "",
   "start": 1483287071000,
   "end": 0
 }
@@ -221,6 +229,8 @@ Example response:
     "message": "created",
     "description": "The filing period is now open and available to accept HMDA data."
   },
+  "fileName": "bank1_lars_2017.txt",
+  "receipt": "",
   "start": 1483287071000,
   "end": 1514736671000
 }
@@ -245,7 +255,11 @@ Example response:
     "code": 3,
     "message": "uploaded",
     "description": "The data have finished uploading and are ready to be analyzed."
-  }
+  },
+  "fileName": "bank1_lars_2017.txt",
+  "receipt": "",
+  "start": 1505142349962,
+  "end": 0
 }
 ```
 
@@ -262,7 +276,11 @@ Example response, with HTTP code 400:
     "code": -1,
     "message": "Submission 4848484 not available for upload",
     "description": "An error occurred during the process of submitting the data. Please re-upload your file."
-  }
+  },
+  "fileName": "",
+  "receipt": "",
+  "start": 0,
+  "end": 0
 }
 ```
 

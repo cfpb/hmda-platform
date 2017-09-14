@@ -22,9 +22,10 @@ import hmda.model.fi.{ Created, Failed, Submission, SubmissionId, Uploaded }
 import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.processing.HmdaRawFile.{ AddFileName, AddLine }
+import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.processing.SubmissionManager
+import hmda.persistence.processing.SubmissionManager.AddFileName
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 import hmda.query.projections.filing.HmdaFilingDBProjection.{ CreateSchema, DeleteLars }
 

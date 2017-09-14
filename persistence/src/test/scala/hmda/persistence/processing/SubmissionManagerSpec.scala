@@ -16,8 +16,9 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.institutions.FilingPersistence._
-import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
+import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetSubmissionById }
 import hmda.persistence.processing.HmdaRawFile.AddLine
+import hmda.persistence.processing.SubmissionManager.AddFileName
 import hmda.validation.ValidationStats
 
 import scala.concurrent.Await
@@ -95,6 +96,14 @@ class SubmissionManagerSpec extends ActorSpec {
       Thread.sleep(4000) //TODO: can this be avoided?
       probe.send(submissionManager, GetState)
       probe.expectMsg(ValidatedWithErrors)
+    }
+
+    "add filename for submission" in {
+      probe.send(submissionManager, AddFileName("my_file_name2.txt"))
+      Thread.sleep(1000)
+      probe.send(submissionPersistence, GetSubmissionById(submissionId))
+      val sub = probe.receiveOne(5.seconds).asInstanceOf[Submission]
+      sub.fileName mustBe "my_file_name2.txt"
     }
 
     "have Filing status 'completed' after signature" in {

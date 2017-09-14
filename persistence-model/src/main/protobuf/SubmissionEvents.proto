@@ -21,6 +21,7 @@ message SubmissionMessage {
     int64 start = 3;
     int64 end = 4;
     string receipt = 5;
+    string fileName = 6;
 }
 
 message SubmissionCreatedMessage {
@@ -30,4 +31,9 @@ message SubmissionCreatedMessage {
 message SubmissionStatusUpdatedMessage {
     SubmissionIdMessage id = 1;
     SubmissionStatusMessage status = 2;
+}
+
+message SubmissionFileNameAddedMessage {
+    SubmissionIdMessage id = 1;
+    string fileName = 2;
 }
