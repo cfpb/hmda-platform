@@ -40,7 +40,7 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
       getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         val subs = responseAs[FilingDetail].submissions
         val sub: Submission = subs.find(_.id.sequenceNumber == seqNr).get
-        println("........... checked file name and status")
+        println(s"........... checked file name (${sub.fileName}) and status ${sub.status}")
         sub.fileName mustBe fileName
         sub.status mustBe ValidatedWithErrors
       }
@@ -53,9 +53,9 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
         val fileSummary = FileSummary(name = fileName, year = "2017", totalLARS = 3)
         val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
 
-        status mustBe StatusCodes.OK
         println("........... requested file summary")
         println(response)
+        status mustBe StatusCodes.OK
         responseAs[SubmissionSummary] mustBe submissionSummary
       }
     }
