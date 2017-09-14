@@ -14,7 +14,7 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
   val period = "2017"
   val seqNr = 1
 
-  val csv = "1|externalTest0|3|201502221111|2017|35-0704860|10|Passes Bank|555 Passes Court|Passes City|CA|92130|Passes Bank Parent|555 Passes Court Parent|Passes City|CA|92130|Passes Person|555-555-5555|555-555-5555|pperson@passes.com\n" +
+  val csv = "1|bflexternalTest0|3|201502221111|2017|35-0704860|10|Passes Bank|555 Passes Court|Passes City|CA|92130|Passes Bank Parent|555 Passes Court Parent|Passes City|CA|92130|Passes Person|555-555-5555|555-555-5555|pperson@passes.com\n" +
     "2|externalTest0|3|10164 |20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1\n" +
     "2|externalTest0|3|10174 |20170224|1|1|2|1|60|3|1|20170402|45460|18|153|0503.00|2|2|5| | | | |5| | | | |1|2|210|0| | | |NA   |2|2\n" +
     "2|externalTest0|3|10370 |20170228|1|1|3|1|73|3|3|20170326|45460|18|153|0505.00|2|2|5| | | | |5| | | | |1|2|89|0|4| | |NA   |2|1"
@@ -31,7 +31,6 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
     "Set up: upload a file" in {
       postWithCfpbHeaders(s"/institutions/$institutionId/filings/$period/submissions/$seqNr", file) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         Thread.sleep(5000) // wait for the submission to complete validation
-        println("........... uploaded the file")
         status mustBe StatusCodes.Accepted
       }
     }
@@ -40,7 +39,6 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
       getWithCfpbHeaders(s"/institutions/$institutionId/filings/$period") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
         val subs = responseAs[FilingDetail].submissions
         val sub: Submission = subs.find(_.id.sequenceNumber == seqNr).get
-        println(s"........... checked file name (${sub.fileName}) and status ${sub.status}")
         sub.fileName mustBe fileName
         sub.status mustBe ValidatedWithErrors
       }
@@ -53,7 +51,6 @@ class SubmissionSummaryPathsSpec extends InstitutionHttpApiSpec with BeforeAndAf
         val fileSummary = FileSummary(name = fileName, year = "2017", totalLARS = 3)
         val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
 
-        println("........... requested file summary")
         println(response)
         status mustBe StatusCodes.OK
         responseAs[SubmissionSummary] mustBe submissionSummary
