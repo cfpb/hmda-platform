@@ -72,12 +72,12 @@ trait SubmissionSummaryPaths
                 val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
                 complete(ToResponseMarshallable(submissionSummary))
               case None =>
+                println(s",,,,,,,,, SubmissionSummary didn't get a TS. error: $error")
                 val errorResponse = ErrorResponse(404, s"submission $submissionId not found", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
             }
 
             case Failure(error) =>
-              println(s",,,,,,,,, SubmissionSummary didn't get a TS. error: $error")
               completeWithInternalError(uri, error)
           }
         }
