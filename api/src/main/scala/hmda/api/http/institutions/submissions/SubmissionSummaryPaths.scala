@@ -57,7 +57,7 @@ trait SubmissionSummaryPaths
             s <- (validator ? GetState).mapTo[HmdaFileValidationState]
             sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
           } yield {
-            println(",,,,,,,, validation state: $s")
+            println(s",,,,,,,, validation state: $s")
             TsLarSummary(s.ts, s.lars.size, sub.fileName)
           }
 
