@@ -144,16 +144,13 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
         .map(e => e.asInstanceOf[TsParsed].ts)
-        .map(ts => (ts, validateTs(ts, ctx).toEither))
+        .map { ts =>
+          validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
+          self ! ValidateAggregate(ts)
+          validateTs(ts, ctx).toEither
+        }
         .map {
-          case (_, Right(ts)) =>
-            if (ts.respondentId == "bflsummarytestD:") println(s",,, in BeginValidation. TS is valid. here's the ts: $ts")
-            validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
-            ValidateAggregate(ts)
-          case (ts, Left(errors)) =>
-            if (ts.respondentId == "bflsummarytestD:") println(s",,, in BeginValidation. Ts NOT valid. here's the ts: $ts")
-            validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
-            self ! ValidateAggregate(ts)
+          case Left(errors) =>
             TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
@@ -162,11 +159,11 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
 
-      larSource.map(lar => (lar, validateLar(lar, ctx).toEither))
-        .map {
-          case (_, Right(l)) => l
+      larSource.map { lar =>
+        self ! lar
+        (lar, validateLar(lar, ctx).toEither)
+      }.map {
           case (lar, Left(errors)) => {
-            self ! lar
             LarValidationErrors(errors.list.toList)
           }
         }
@@ -174,12 +171,12 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
     case ValidateAggregate(ts) =>
       performAsyncChecks(ts, ctx)
-        .map(validations => validations.toEither)
-        .map {
-          case Right(_) => self ! ts
+        .map { validations =>
+          self ! ts
+          validations.toEither
+        }.map {
           case Left(errors) =>
-            if (ts.respondentId == "bflsummarytestD:") println(s",,, we got to ValidateAggregate. here's the ts: $ts")
-            self ! ts
+            if (ts.respondentId == "bflsummarytestD:") println(s"!!!!!!!! we got to ValidateAggregate. here's the ts: $ts")
             self ! TsValidationErrors(errors.list.toList)
         }
 
