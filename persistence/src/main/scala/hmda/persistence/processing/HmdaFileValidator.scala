@@ -147,9 +147,11 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         .map(ts => (ts, validateTs(ts, ctx).toEither))
         .map {
           case (_, Right(ts)) =>
+            if (ts.respondentId == "bflsummarytestD:") println(s",,, in BeginValidation. TS is valid. here's the ts: $ts")
             validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
             ValidateAggregate(ts)
           case (ts, Left(errors)) =>
+            if (ts.respondentId == "bflsummarytestD:") println(s",,, in BeginValidation. Ts NOT valid. here's the ts: $ts")
             validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
             self ! ValidateAggregate(ts)
             TsValidationErrors(errors.list.toList)
@@ -176,8 +178,9 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         .map {
           case Right(_) => self ! ts
           case Left(errors) =>
-            self ! TsValidationErrors(errors.list.toList)
+            if (ts.respondentId == "bflsummarytestD:") println(s",,, we got to ValidateAggregate. here's the ts: $ts")
             self ! ts
+            self ! TsValidationErrors(errors.list.toList)
         }
 
     case ts: TransmittalSheet =>
