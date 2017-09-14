@@ -145,13 +145,14 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         .filter(x => x.isInstanceOf[TsParsed])
         .map(e => e.asInstanceOf[TsParsed].ts)
         .map { ts =>
+          self ! ts
           validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
           self ! ValidateAggregate(ts)
           validateTs(ts, ctx).toEither
         }
         .map {
-          case Left(errors) =>
-            TsValidationErrors(errors.list.toList)
+          case Right(_) => // do nothing
+          case Left(errors) => TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
@@ -161,23 +162,22 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
       larSource.map { lar =>
         self ! lar
-        (lar, validateLar(lar, ctx).toEither)
-      }.map {
-          case (lar, Left(errors)) => {
-            LarValidationErrors(errors.list.toList)
-          }
+        validateLar(lar, ctx).toEither
+      }
+        .map {
+          case Right(_) => // do nothing
+          case Left(errors) => LarValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
 
     case ValidateAggregate(ts) =>
       performAsyncChecks(ts, ctx)
         .map { validations =>
-          self ! ts
           validations.toEither
-        }.map {
-          case Left(errors) =>
-            if (ts.respondentId == "bflsummarytestD:") println(s"!!!!!!!! we got to ValidateAggregate. here's the ts: $ts")
-            self ! TsValidationErrors(errors.list.toList)
+        }
+        .map {
+          case Right(_) => // do nothing
+          case Left(errors) => self ! TsValidationErrors(errors.list.toList)
         }
 
     case ts: TransmittalSheet =>
