@@ -146,15 +146,23 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
       }
 
     case FinishParsingTS(replyTo) =>
+      println("**** TS finished parsing!")
       tsParsingDone = true
       if (larParsingDone) {
+        println("*** and LARs were done too! finishing...")
         self ! FinishParsing(replyTo)
+      } else {
+        println("**** ... but LARs weren't done")
       }
 
     case FinishParsingLARs(replyTo) =>
+      println("**** LARs finished parsing!")
       larParsingDone = true
       if (tsParsingDone) {
+        println("*** and TS was done too! finishing...")
         self ! FinishParsing(replyTo)
+      } else {
+        println("**** ... but TS wasn't done")
       }
 
     case FinishParsing(replyTo) =>
