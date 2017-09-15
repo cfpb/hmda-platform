@@ -140,13 +140,12 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
     case BeginValidation(replyTo) =>
       println(s"(((HmdaFileValidator))) BeginValidation for $submissionId. ")
-      val validationStarted = ValidationStarted(submissionId)
-      sender() ! validationStarted
+      sender() ! ValidationStarted(submissionId)
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
         .map(e => e.asInstanceOf[TsParsed].ts)
         .map { ts =>
-          println(s"!!!!!! (((HmdaFileValidator))) Sending TS to be persisted. respondentId: ${ts.respondentId}")
+          println(s"&&&&&&&&&& (((HmdaFileValidator))) Sending TS to be persisted. respondentId: ${ts.respondentId}")
           self ! ts
           validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
           self ! ValidateAggregate(ts)
