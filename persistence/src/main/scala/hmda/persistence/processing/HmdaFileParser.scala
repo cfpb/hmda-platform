@@ -64,11 +64,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
   val manager = context.parent
-  val statRef = for {
-    stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
-  } yield {
-    stat
-  }
+  val statRef = (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
 
   var tsParsingDone: Boolean = false
   var larParsingDone: Boolean = false
@@ -104,7 +100,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         .zip(Source.fromIterator(() => Iterator.from(2)))
         .map {
           case (lar, index) =>
-            sendLar(lar)
+            statRef.map(_ ! lar)
             LarCsvParser(lar, index)
         }
         .map {
@@ -172,12 +168,6 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
     case Shutdown =>
       context stop self
 
-  }
-
-  private def sendLar(s: String) {
-    for {
-      stat <- statRef
-    } yield stat ! s
   }
 }
 
