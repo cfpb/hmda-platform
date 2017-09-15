@@ -62,11 +62,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
   val manager = context.parent
-  val statRef = for {
-    stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
-  } yield {
-    stat
-  }
+  val statRef = (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
