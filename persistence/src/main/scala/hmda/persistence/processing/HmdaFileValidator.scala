@@ -145,7 +145,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         .filter(x => x.isInstanceOf[TsParsed])
         .map(e => e.asInstanceOf[TsParsed].ts)
         .map { ts =>
-          println(s"!!!!!! Sending TS to be persisted. respondentId: ${ts.respondentId}")
+          println(s"!!!!!! (((HmdaFileValidator))) Sending TS to be persisted. respondentId: ${ts.respondentId}")
           self ! ts
           validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
           self ! ValidateAggregate(ts)
@@ -180,11 +180,11 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         }
 
     case ts: TransmittalSheet =>
-      println(s"!!!!!! persisting TS. respondentId: ${ts.respondentId}")
+      println(s"!!!!!! (((HmdaFileValidator))) persisting TS. respondentId: ${ts.respondentId}")
       persist(TsValidated(ts)) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
-        println(s"!!!!!! should have just updated state. state.ts: ${state.ts}")
+        println(s"!!!!!! (((HmdaFileValidator))) should have just updated state. state.ts: ${state.ts}")
       }
 
     case lar: LoanApplicationRegister =>

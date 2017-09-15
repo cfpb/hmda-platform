@@ -77,7 +77,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
   override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId, replyTo: ActorRef) =>
-
+      if (submissionId == SubmissionId("0", "2017", 1)) println(s"(((HmdaFileParser))) Starting to parse sub 0-2017-1!")
       val parsedTs = events(persistenceId)
         .filter { x => x.isInstanceOf[LineAdded] }
         .map { case LineAdded(_, data) => data }
@@ -87,7 +87,9 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
           case Left(errors) =>
             encounteredParsingErrors = true
             TsParsedErrors(errors)
-          case Right(ts) => TsParsed(ts)
+          case Right(ts) =>
+            if (submissionId == SubmissionId("0", "2017", 1)) println(s"(((HmdaFileParser))) Parsing was successful! ${ts.respondentId}")
+            TsParsed(ts)
         }
 
       parsedTs
@@ -115,6 +117,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         .runWith(Sink.actorRef(self, FinishParsing(replyTo)))
 
     case tp @ TsParsed(ts) =>
+      if (submissionId == SubmissionId("0", "2017", 1)) println(s"(((HmdaFileParser))) persisting that TS ${ts.respondentId}")
       persist(tp) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
