@@ -144,6 +144,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
       }
 
     case FinishParsing(replyTo) =>
+      println(s"(((HmdaFileParser))) running FinishParsing! errors? $encounteredParsingErrors. submission $submissionId")
       for {
         stat <- statRef
       } yield stat ! CountSubmittedLarsInSubmission
