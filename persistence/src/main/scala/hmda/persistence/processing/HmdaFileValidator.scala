@@ -152,7 +152,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
           validateTs(ts, ctx).toEither
         }
         .map {
-          case Right(_) => // do nothing
+          case Right(ts) => ts
           case Left(errors) => TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
