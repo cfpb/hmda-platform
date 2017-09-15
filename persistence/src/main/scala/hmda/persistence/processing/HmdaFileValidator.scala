@@ -143,7 +143,10 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       sender() ! ValidationStarted(submissionId)
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
-        .map(e => e.asInstanceOf[TsParsed].ts)
+        .map{e =>
+          println("Found an instance of TSParsed! Now we can persist a TS")
+          e.asInstanceOf[TsParsed].ts
+        }
         .map { ts =>
           println(s"&&&&&&&&&& (((HmdaFileValidator))) Sending TS to be persisted. respondentId: ${ts.respondentId}")
           self ! ts
@@ -152,7 +155,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
           validateTs(ts, ctx).toEither
         }
         .map {
-          case Right(ts) => ts
+          case Right(_) => // do nothing
           case Left(errors) => TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
