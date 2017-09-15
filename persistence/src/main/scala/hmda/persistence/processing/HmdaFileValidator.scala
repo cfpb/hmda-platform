@@ -143,7 +143,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       sender() ! ValidationStarted(submissionId)
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
-        .map{e =>
+        .map { e =>
           println("Found an instance of TSParsed! Now we can persist a TS")
           e.asInstanceOf[TsParsed].ts
         }
