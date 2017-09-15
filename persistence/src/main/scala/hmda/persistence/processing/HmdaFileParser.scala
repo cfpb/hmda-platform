@@ -28,6 +28,8 @@ object HmdaFileParser {
 
   case class ReadHmdaRawFile(persistenceId: String, replyTo: ActorRef) extends Command
   case class FinishParsing(replyTo: ActorRef) extends Command
+  case class FinishParsingTS(replyTo: ActorRef) extends Command
+  case class FinishParsingLARs(replyTo: ActorRef) extends Command
   case class GetStatePaginated(page: Int)
 
   def props(id: SubmissionId): Props = Props(new HmdaFileParser(id))
@@ -62,11 +64,10 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
   var state = HmdaFileParseState()
   var encounteredParsingErrors: Boolean = false
   val manager = context.parent
-  val statRef = for {
-    stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
-  } yield {
-    stat
-  }
+  val statRef = (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
+
+  var tsParsingDone: Boolean = false
+  var larParsingDone: Boolean = false
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -77,7 +78,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
   override def receiveCommand: Receive = {
 
     case ReadHmdaRawFile(persistenceId, replyTo: ActorRef) =>
-
+      if (submissionId == SubmissionId("0", "2017", 1)) println(s"(((HmdaFileParser))) Starting to parse sub 0-2017-1!")
       val parsedTs = events(persistenceId)
         .filter { x => x.isInstanceOf[LineAdded] }
         .map { case LineAdded(_, data) => data }
@@ -87,11 +88,14 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
           case Left(errors) =>
             encounteredParsingErrors = true
             TsParsedErrors(errors)
-          case Right(ts) => TsParsed(ts)
+          case Right(ts) =>
+            if (submissionId == SubmissionId("0", "2017", 1)) println(s"(((HmdaFileParser))) Parsing was successful! ${ts.respondentId}")
+            TsParsed(ts)
         }
 
       parsedTs
-        .runForeach(pTs => self ! pTs)
+        .runWith(Sink.actorRef(self, FinishParsingTS(replyTo)))
+      //.runForeach(pTs => self ! pTs)
 
       val parsedLar = events(persistenceId)
         .filter { x => x.isInstanceOf[LineAdded] }
@@ -100,7 +104,7 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         .zip(Source.fromIterator(() => Iterator.from(2)))
         .map {
           case (lar, index) =>
-            sendLar(lar)
+            statRef.map(_ ! lar)
             LarCsvParser(lar, index)
         }
         .map {
@@ -112,9 +116,10 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
 
       parsedLar
         .mapAsync(parallelism = flowParallelism)(x => (self ? x).mapTo[Persisted.type])
-        .runWith(Sink.actorRef(self, FinishParsing(replyTo)))
+        .runWith(Sink.actorRef(self, FinishParsingLARs(replyTo)))
 
     case tp @ TsParsed(ts) =>
+      if (submissionId == SubmissionId("0", "2017", 1)) println(s"(((HmdaFileParser))) persisting that TS ${ts.respondentId}")
       persist(tp) { e =>
         log.debug(s"Persisted: $e")
         updateState(e)
@@ -140,11 +145,29 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
         sender() ! Persisted
       }
 
-    case FinishParsing(replyTo) =>
-      for {
-        stat <- statRef
-      } yield stat ! CountSubmittedLarsInSubmission
+    case FinishParsingTS(replyTo) =>
+      println("**** TS finished parsing!")
+      tsParsingDone = true
+      if (larParsingDone) {
+        println("*** and LARs were done too! finishing...")
+        self ! FinishParsing(replyTo)
+      } else {
+        println("**** ... but LARs weren't done")
+      }
 
+    case FinishParsingLARs(replyTo) =>
+      println("**** LARs finished parsing!")
+      larParsingDone = true
+      if (tsParsingDone) {
+        println("*** and TS was done too! finishing...")
+        self ! FinishParsing(replyTo)
+      } else {
+        println("**** ... but TS wasn't done")
+      }
+
+    case FinishParsing(replyTo) =>
+      println(s"(((HmdaFileParser))) running FinishParsing! errors? $encounteredParsingErrors. submission $submissionId")
+      statRef.map(_ ! CountSubmittedLarsInSubmission)
       if (encounteredParsingErrors)
         replyTo ! ParsingCompletedWithErrors(submissionId)
       else
@@ -163,12 +186,6 @@ class HmdaFileParser(submissionId: SubmissionId) extends HmdaPersistentActor {
     case Shutdown =>
       context stop self
 
-  }
-
-  private def sendLar(s: String) {
-    for {
-      stat <- statRef
-    } yield stat ! s
   }
 }
 

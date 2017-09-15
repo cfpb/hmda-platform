@@ -56,7 +56,10 @@ trait SubmissionSummaryPaths
             submissions <- submissionPersistenceF
             s <- (validator ? GetState).mapTo[HmdaFileValidationState]
             sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
-          } yield TsLarSummary(s.ts, s.lars.size, sub.fileName)
+          } yield {
+            println(s",,,,,,,, ((SubmissionSummaryPath)) validation state: $s")
+            TsLarSummary(s.ts, s.lars.size, sub.fileName)
+          }
 
           onComplete(tsF) {
             case Success(x) => x.ts match {
@@ -69,6 +72,7 @@ trait SubmissionSummaryPaths
                 val submissionSummary = SubmissionSummary(respondentSummary, fileSummary)
                 complete(ToResponseMarshallable(submissionSummary))
               case None =>
+                println(s",,,,,,,,, ((SubmissionSummaryPath)) SubmissionSummary didn't get a TS.")
                 val errorResponse = ErrorResponse(404, s"submission $submissionId not found", uri.path)
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
             }

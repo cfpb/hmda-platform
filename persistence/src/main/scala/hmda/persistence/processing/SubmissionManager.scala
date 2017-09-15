@@ -102,6 +102,7 @@ class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) e
       submissionParser ! ReadHmdaRawFile(persistenceId, self)
 
     case ParsingCompleted(sId) =>
+      println(s"(((SubmissionManager)) - ParsingCompleted for $sId. starting validation")
       log.info(s"Completed parsing for submission: ${sId.toString}")
       submissionFSM ! CompleteParsing
       submissionValidator ! BeginValidation(self)
