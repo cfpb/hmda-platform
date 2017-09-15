@@ -139,6 +139,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   override def receiveCommand: Receive = {
 
     case BeginValidation(replyTo) =>
+      println(s"(((HmdaFileValidator))) BeginValidation for $submissionId. ")
       val validationStarted = ValidationStarted(submissionId)
       sender() ! validationStarted
       events(parserPersistenceId)
