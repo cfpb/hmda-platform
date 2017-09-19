@@ -10,7 +10,7 @@ import hmda.persistence.messages.CommonMessages._
 
 object HmdaQuery {
 
-  type RJ = ReadJournal with AllPersistenceIdsQuery with CurrentPersistenceIdsQuery with EventsByPersistenceIdQuery with CurrentEventsByPersistenceIdQuery with EventsByTagQuery2 with CurrentEventsByTagQuery2
+  type RJ = ReadJournal with PersistenceIdsQuery with CurrentPersistenceIdsQuery with EventsByPersistenceIdQuery with CurrentEventsByPersistenceIdQuery with EventsByTagQuery2 with CurrentEventsByTagQuery2
 
   case class EventWithSeqNr(seqNr: Long, event: Event)
 
