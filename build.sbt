@@ -211,7 +211,7 @@ lazy val api = (project in file("api"))
           oldStrategy(x)
       },
       parallelExecution in Test := false,
-      libraryDependencies ++= httpDeps
+      libraryDependencies ++= httpDeps ++ Seq(javaMail)
     )
   )
   .dependsOn(persistenceModel % "compile->compile;test->test")

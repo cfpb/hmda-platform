@@ -14,14 +14,27 @@ import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.model.fi.{ Submission, SubmissionId }
+import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
-import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.InstitutionPersistence.GetInstitution
+import hmda.persistence.institutions.{ InstitutionPersistence, SubmissionPersistence }
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager
 import spray.json.{ JsBoolean, JsFalse, JsObject, JsTrue }
 
 import scala.util.{ Failure, Success }
 import scala.concurrent.{ ExecutionContext, Future }
+import javax.mail._
+import javax.mail.internet.{ InternetAddress, MimeMessage }
+
+/*
+Questions
+- Which email library to use (Javax)?
+- Which email/port to send from (no-reply)?
+- Send all emails using CC/BCC, or separate (separate)?
+- Strategy of using Institution Persistance to retrieve emails (it's ok)?
+ */
 
 trait SubmissionSignPaths
     extends InstitutionProtocol
@@ -85,8 +98,36 @@ trait SubmissionSignPaths
 
     onComplete(fSubmission) {
       case Success(sub) =>
+        emailSignature(supervisor, sub)
         complete(ToResponseMarshallable(Receipt(sub.end, sub.receipt, sub.status)))
       case Failure(error) => completeWithInternalError(uri, error)
     }
+  }
+
+  private def emailSignature(supervisor: ActorRef, submission: Submission)(implicit ec: ExecutionContext) = {
+    /*
+      TODO: Get email addresses!!!!
+     */
+    val address = "PLACEHOLDER"
+    sendMail(address, submission)
+
+  private def sendMail(address: String, submission: Submission) = {
+    val properties = System.getProperties
+    properties.put("mail.smtp.host", "localhost")
+    val session = Session.getDefaultInstance(properties)
+    val message = new MimeMessage(session)
+
+    val date = submission.end
+    val text = s"Congratulations, you've completed filing your HMDA data for filing period ${submission.id.period}.\n" +
+      s"We received your filing on: ${submission.end}\n" +
+      s"Your receipt is:${submission.receipt}"
+    message.setFrom(new InternetAddress("test@test.com"))
+    message.setRecipients(Message.RecipientType.TO, address)
+    message.setSubject("HMDA Filing Successful")
+    message.setText(text)
+
+    log.info(s"Sending message to $address with the message \n$text")
+
+    //Transport.send(message)
   }
 }
