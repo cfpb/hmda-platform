@@ -12,7 +12,7 @@ object Version {
   val cassandra  = "0.28"
   val config     = "1.3.1"
   val enumeratum = "1.5.12"
-  val inMemoryPersistence = "2.4.17.1"
+  val inMemoryPersistence = "2.5.1.1"
   val slick      = "3.2.0"
   val h2         = "1.4.193"
   val postgresql = "42.0.0.jre7"
