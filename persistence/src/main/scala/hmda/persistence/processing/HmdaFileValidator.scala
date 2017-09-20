@@ -139,20 +139,19 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   override def receiveCommand: Receive = {
 
     case BeginValidation(replyTo) =>
-      val validationStarted = ValidationStarted(submissionId)
-      sender() ! validationStarted
+      sender() ! ValidationStarted(submissionId)
       events(parserPersistenceId)
         .filter(x => x.isInstanceOf[TsParsed])
-        .map(e => e.asInstanceOf[TsParsed].ts)
-        .map(ts => (ts, validateTs(ts, ctx).toEither))
+        .map { e => e.asInstanceOf[TsParsed].ts }
+        .map { ts =>
+          self ! ts
+          validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
+          self ! ValidateAggregate(ts)
+          validateTs(ts, ctx).toEither
+        }
         .map {
-          case (_, Right(ts)) =>
-            validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
-            ValidateAggregate(ts)
-          case (ts, Left(errors)) =>
-            validationStats ! AddSubmissionTaxId(ts.taxId, submissionId)
-            self ! ValidateAggregate(ts)
-            TsValidationErrors(errors.list.toList)
+          case Right(_) => // do nothing
+          case Left(errors) => TsValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, NotUsed))
 
@@ -160,13 +159,13 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
 
-      larSource.map(lar => (lar, validateLar(lar, ctx).toEither))
+      larSource.map { lar =>
+        self ! lar
+        validateLar(lar, ctx).toEither
+      }
         .map {
-          case (_, Right(l)) => l
-          case (lar, Left(errors)) => {
-            self ! lar
-            LarValidationErrors(errors.list.toList)
-          }
+          case Right(_) => // do nothing
+          case Left(errors) => LarValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
 
@@ -174,10 +173,8 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       performAsyncChecks(ts, ctx)
         .map(validations => validations.toEither)
         .map {
-          case Right(_) => self ! ts
-          case Left(errors) =>
-            self ! TsValidationErrors(errors.list.toList)
-            self ! ts
+          case Right(_) => // do nothing
+          case Left(errors) => self ! TsValidationErrors(errors.list.toList)
         }
 
     case ts: TransmittalSheet =>
