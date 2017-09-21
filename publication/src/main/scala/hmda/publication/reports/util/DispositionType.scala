@@ -67,7 +67,7 @@ object DispositionType {
     override def filter(lar: LoanApplicationRegisterQuery): Boolean = lar.actionTakenType == 7
     override def actionTaken: ActionTakenTypeEnum = PreapprovalDenied
   }
-  object PreapprovalAcceptedDisp extends DispositionType {
+  object PreapprovalApprovedDisp extends DispositionType {
     override def filter(lar: LoanApplicationRegisterQuery): Boolean = lar.actionTakenType == 8
     override def actionTaken: ActionTakenTypeEnum = PreapprovalApprovedButNotAccepted
   }
