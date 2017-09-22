@@ -8,6 +8,12 @@ object ReportTypeEnum extends Enum[ReportTypeEnum] {
 
   val values = findValues
 
+  val byName: Map[String, ReportTypeEnum] = Map(
+    "disclosure" -> Disclosure,
+    "aggregate" -> Aggregate,
+    "national aggregate" -> NationalAggregate
+  )
+
   case object Disclosure extends ReportTypeEnum
   case object Aggregate extends ReportTypeEnum
   case object NationalAggregate extends ReportTypeEnum

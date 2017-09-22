@@ -13,6 +13,20 @@ import scala.util.Try
 
 object DispositionType {
 
+  val byName: Map[String, DispositionType] = {
+    Map(
+      "received" -> ReceivedDisp,
+      "originated" -> OriginatedDisp,
+      "approvedbutnotaccepted" -> ApprovedButNotAcceptedDisp,
+      "denied" -> DeniedDisp,
+      "withdrawn" -> WithdrawnDisp,
+      "closed" -> ClosedDisp,
+      "purchased" -> PurchasedDisp,
+      "preapprovaldenied" -> PreapprovalDeniedDisp,
+      "preapprovalapproved" -> PreapprovalApprovedDisp
+    )
+  }
+
   sealed trait DispositionType extends SourceUtils {
     def filter(lar: LoanApplicationRegisterQuery): Boolean
 
