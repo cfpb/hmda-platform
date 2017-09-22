@@ -39,7 +39,7 @@ class A52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
 
   val expectedDispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted, ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
-  "Generate a Disclosure 5-1 report" in {
+  "Generate an Aggregate 5-2 report" in {
     A52.generate(source, fips).map { result =>
 
       result.msa mustBe MSAReport("18700", "Corvallis, OR", "OR", "Oregon")
