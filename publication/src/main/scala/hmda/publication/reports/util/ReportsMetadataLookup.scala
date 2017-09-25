@@ -3,8 +3,7 @@ package hmda.publication.reports.util
 import com.github.tototoshi.csv.CSVParser.parse
 import hmda.model.ResourceUtils
 import hmda.model.publication.reports.ReportTypeEnum
-import hmda.model.publication.reports.ReportTypeEnum.Disclosure
-import hmda.publication.reports.util.DispositionType.{ DispositionType, ReceivedDisp }
+import hmda.publication.reports.util.DispositionType.DispositionType
 
 object ReportsMetaDataLookup extends ResourceUtils {
 
@@ -30,12 +29,12 @@ case object ReportMetaData {
   def fromString(line: String): ReportMetaData = {
     val values = parse(line, '\\', ',', '"').getOrElse(List())
     val reportId = values.head
-    val reportType = ReportTypeEnum.byName.getOrElse(values(1).toLowerCase, Disclosure)
+    val reportType = ReportTypeEnum.byName(values(1).toLowerCase)
     val reportNumber = values(2)
     val description = values(4)
     val dispositions =
       values(3).split(";").filter(_.nonEmpty).map { d =>
-        DispositionType.byName.getOrElse(d.toLowerCase, ReceivedDisp)
+        DispositionType.byName(d.toLowerCase)
       }.toList
 
     ReportMetaData(
