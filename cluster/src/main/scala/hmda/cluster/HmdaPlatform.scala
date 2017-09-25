@@ -19,17 +19,11 @@ import hmda.publication.HmdaPublication
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
-import hmda.query.DbConfiguration._
-import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, _ }
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
-import hmda.persistence.messages.events.institutions.InstitutionEvents.InstitutionSchemaCreated
 import hmda.persistence.messages.CommonMessages._
 
 import scala.concurrent.duration._
-import hmda.query.projections.filing.HmdaFilingDBProjection._
-import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
-import hmda.util.FutureRetry.retry
 
 object HmdaPlatform extends App {
 
@@ -147,19 +141,14 @@ object HmdaPlatform extends App {
     if (isDemo) {
       implicit val ec = system.dispatcher
       cleanup()
-      implicit val scheduler = system.scheduler
-      val retries = List(200.millis, 200.millis, 500.millis, 1.seconds, 2.seconds)
       log.info("*** LOADING DEMO DATA ***")
 
       val institutionCreatedF = for {
-        q <- retry((institutionView ? GetProjectionActorRef).mapTo[ActorRef], retries, 10, 300.millis)
-        s <- (q ? CreateSchema).mapTo[InstitutionSchemaCreated]
         i <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-      } yield (s, i)
+      } yield i
 
       institutionCreatedF.map {
-        case (s, i) =>
-          log.info(s.toString)
+        case i =>
           DemoData.loadDemoData(system, i)
       }
     }
@@ -172,12 +161,6 @@ object HmdaPlatform extends App {
       log.info("CLEANING JOURNAL")
       file.listFiles.foreach(f => f.delete())
     }
-
-    val larRepository = new LarRepository(config)
-    val institutionRepository = new InstitutionRepository(config)
-
-    larRepository.dropSchema()
-    institutionRepository.dropSchema()
   }
 
 }
