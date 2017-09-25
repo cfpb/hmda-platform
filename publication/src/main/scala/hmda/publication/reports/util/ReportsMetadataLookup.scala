@@ -10,14 +10,12 @@ object ReportsMetaDataLookup extends ResourceUtils {
   private val lines = resourceLines("/reports-metadata.txt")
 
   val values: Map[String, ReportMetaData] = lines.drop(1).map { line =>
-    val data = ReportMetaData.fromString(line)
-    data.reportId -> data
+    ReportMetaData.fromString(line)
   }.toMap
 
 }
 
 case class ReportMetaData(
-  reportId: String,
   reportType: ReportTypeEnum,
   reportTable: String,
   dispositions: List[DispositionType],
@@ -26,7 +24,7 @@ case class ReportMetaData(
 
 case object ReportMetaData {
 
-  def fromString(line: String): ReportMetaData = {
+  def fromString(line: String): (String, ReportMetaData) = {
     val values = parse(line, '\\', ',', '"').getOrElse(List())
     val reportId = values.head
     val reportType = ReportTypeEnum.byName(values(1).toLowerCase)
@@ -37,12 +35,13 @@ case object ReportMetaData {
         DispositionType.byName(d.toLowerCase)
       }.toList
 
-    ReportMetaData(
-      reportId,
+    val data = ReportMetaData(
       reportType,
       reportNumber,
       dispositions,
       description
     )
+
+    (reportId, data)
   }
 }
