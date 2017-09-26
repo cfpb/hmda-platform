@@ -39,10 +39,10 @@ object A52Protocol
         case Seq(table, reportType, description, year, reportDate, msa, applicantIncomes, total) =>
           A52(
             year.convertTo[Int],
-            reportDate.convertTo[String],
             msa.convertTo[MSAReport],
             applicantIncomes.convertTo[List[ApplicantIncome]],
-            total.convertTo[List[Disposition]]
+            total.convertTo[List[Disposition]],
+            reportDate.convertTo[String]
           )
       }
   }

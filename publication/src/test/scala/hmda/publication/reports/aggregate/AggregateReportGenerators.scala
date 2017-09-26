@@ -14,6 +14,6 @@ object AggregateReportGenerators {
       reportDate = formatDate(Calendar.getInstance().toInstant)
       applicantIncomes <- Gen.listOfN(5, applicantIncomeGen)
       total <- totalDispositionGen
-    } yield A52(year, reportDate, msa, applicantIncomes, total)
+    } yield A52(year, msa, applicantIncomes, total, reportDate)
   }
 }

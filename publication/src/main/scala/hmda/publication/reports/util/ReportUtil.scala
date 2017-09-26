@@ -1,11 +1,14 @@
 package hmda.publication.reports.util
 
+import java.util.Calendar
+
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model._
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
 import hmda.publication.reports.{ AS, EC, MAT }
+import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.RaceUtil.raceBorrowerCharacteristic
 import hmda.publication.reports.util.EthnicityUtil.ethnicityBorrowerCharacteristic
@@ -16,6 +19,10 @@ import hmda.util.SourceUtils
 import scala.concurrent.Future
 
 object ReportUtil extends SourceUtils {
+
+  def formattedCurrentDate: String = {
+    formatDate(Calendar.getInstance().toInstant)
+  }
 
   def msaReport(fipsCode: String): MSAReport = {
     CbsaLookup.values.find(x => x.cbsa == fipsCode) match {

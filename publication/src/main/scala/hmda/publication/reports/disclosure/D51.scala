@@ -1,12 +1,9 @@
 package hmda.publication.reports.disclosure
 
-import java.util.Calendar
-
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.publication.reports._
 import hmda.model.publication.reports._
-import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.query.model.filing.LoanApplicationRegisterQuery
@@ -17,10 +14,10 @@ case class D51(
   respondentId: String,
   institutionName: String,
   year: Int,
-  reportDate: String,
   msa: MSAReport,
   applicantIncomes: List[ApplicantIncome],
   total: List[Disposition],
+  reportDate: String = formattedCurrentDate,
   table: String = D51.metaData.reportTable,
   description: String = D51.metaData.description
 ) extends DisclosureReport
@@ -70,7 +67,6 @@ object D51 {
         respondentId,
         institutionName,
         year,
-        formatDate(Calendar.getInstance().toInstant),
         msa,
         applicantIncomes,
         total

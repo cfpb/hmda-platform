@@ -1,12 +1,9 @@
 package hmda.publication.reports.aggregate
 
-import java.util.Calendar
-
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
 import hmda.publication.reports._
-import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.query.model.filing.LoanApplicationRegisterQuery
@@ -15,10 +12,10 @@ import scala.concurrent.Future
 
 case class A52(
   year: Int,
-  reportDate: String,
   msa: MSAReport,
   applicantIncomes: List[ApplicantIncome],
   total: List[Disposition],
+  reportDate: String = formattedCurrentDate,
   table: String = A52.metaData.reportTable,
   description: String = A52.metaData.description
 ) extends AggregateReport
@@ -62,7 +59,6 @@ object A52 {
 
       A52(
         year,
-        formatDate(Calendar.getInstance().toInstant),
         msa,
         applicantIncomes,
         total
