@@ -10,9 +10,9 @@ services:
     volumes:
       - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
     depends_on:
-      - cassandra
       - zookeeper
-      - query_db
+      - keycloak_db
+      - cassandra
     environment:
       JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
       ZOOKEEPER_HOST: zookeeper
@@ -116,15 +116,6 @@ services:
       VIRTUAL_HOST_WEIGHT: 1
       EXCLUDE_PORTS: '25' # don't proxy SMTP port
       EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /mail//?(.*)" "\1\ /\2"'
-
-  query_db:
-    image: postgres:9.6.1
-    ports:
-      - '54321:5432'
-    environment:
-      POSTGRES_DB: hmda
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
 
   zookeeper:
     image: jplock/zookeeper

@@ -18,14 +18,9 @@ import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, ModifyInstitution }
-import hmda.persistence.messages.CommonMessages.Event
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.projections.institutions.InstitutionDBProjection.{ CreateSchema, DeleteSchema }
-import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.messages.CommonViewMessages.GetProjectionActorRef
 
 import scala.concurrent.ExecutionContext
-import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
 trait InstitutionAdminHttpApi
@@ -85,31 +80,5 @@ trait InstitutionAdminHttpApi
       }
     }
 
-  private val cdRegex = new Regex("create|delete")
-
-  def institutionsSchemaPath(querySupervisor: ActorRef) =
-    path("institutions" / cdRegex) { command =>
-      extractExecutionContext { executor =>
-        implicit val ec: ExecutionContext = executor
-        val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-        val message = command match {
-          case "create" => CreateSchema
-          case "delete" => DeleteSchema
-        }
-        timedGet { uri =>
-          val event = for {
-            instAct <- fInstitutionsActor
-            dbAct <- (instAct ? GetProjectionActorRef).mapTo[ActorRef]
-            cd <- (dbAct ? message).mapTo[Event]
-          } yield cd
-
-          onComplete(event) {
-            case Success(response) => complete(ToResponseMarshallable(StatusCodes.Accepted -> response.toString))
-            case Failure(error) => completeWithInternalError(uri, error)
-          }
-        }
-      }
-    }
-
-  def institutionAdminRoutes(supervisor: ActorRef, querySupervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) ~ institutionsSchemaPath(querySupervisor) }
+  def institutionAdminRoutes(supervisor: ActorRef, querySupervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) }
 }
