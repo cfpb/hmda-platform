@@ -1,0 +1,2 @@
+ReportId,Type,ReportNumber,Dispositions,Description
+D51,Disclosure,5-1,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4-family and manufactured home dwellings, by income, race and ethnicity of applicant"

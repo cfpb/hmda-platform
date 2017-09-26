@@ -13,6 +13,20 @@ import scala.util.Try
 
 object DispositionType {
 
+  val byName: Map[String, DispositionType] = {
+    Map(
+      "received" -> ReceivedDisp,
+      "originated" -> OriginatedDisp,
+      "approvedbutnotaccepted" -> ApprovedButNotAcceptedDisp,
+      "denied" -> DeniedDisp,
+      "withdrawn" -> WithdrawnDisp,
+      "closed" -> ClosedDisp,
+      "purchased" -> PurchasedDisp,
+      "preapprovaldenied" -> PreapprovalDeniedDisp,
+      "preapprovalapproved" -> PreapprovalApprovedDisp
+    )
+  }
+
   sealed trait DispositionType extends SourceUtils {
     def filter(lar: LoanApplicationRegisterQuery): Boolean
 
@@ -67,7 +81,7 @@ object DispositionType {
     override def filter(lar: LoanApplicationRegisterQuery): Boolean = lar.actionTakenType == 7
     override def actionTaken: ActionTakenTypeEnum = PreapprovalDenied
   }
-  object PreapprovalAcceptedDisp extends DispositionType {
+  object PreapprovalApprovedDisp extends DispositionType {
     override def filter(lar: LoanApplicationRegisterQuery): Boolean = lar.actionTakenType == 8
     override def actionTaken: ActionTakenTypeEnum = PreapprovalApprovedButNotAccepted
   }
