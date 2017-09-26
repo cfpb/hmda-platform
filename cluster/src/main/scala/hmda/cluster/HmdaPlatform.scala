@@ -142,15 +142,8 @@ object HmdaPlatform extends App {
       implicit val ec = system.dispatcher
       cleanup()
       log.info("*** LOADING DEMO DATA ***")
-
-      val institutionCreatedF = for {
-        i <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-      } yield i
-
-      institutionCreatedF.map {
-        case i =>
-          DemoData.loadDemoData(system, i)
-      }
+      val institutionCreatedF = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+      institutionCreatedF.map(i => DemoData.loadDemoData(system, i))
     }
   }
 
