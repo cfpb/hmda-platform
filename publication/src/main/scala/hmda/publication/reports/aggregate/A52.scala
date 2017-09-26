@@ -8,53 +8,25 @@ import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
 import hmda.publication.reports._
 import hmda.publication.reports.util.DateUtil._
-import hmda.publication.reports.util.DispositionType.{ ClosedDisp, WithdrawnDisp, _ }
 import hmda.publication.reports.util.ReportUtil._
+import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 
 import scala.concurrent.Future
 
 case class A52(
-  table: String,
-  description: String,
   year: Int,
   reportDate: String,
   msa: MSAReport,
   applicantIncomes: List[ApplicantIncome],
-  total: List[Disposition]
+  total: List[Disposition],
+  table: String = A52.metaData.reportTable,
+  description: String = A52.metaData.description
 ) extends AggregateReport
 
 object A52 {
-  def apply(
-    year: Int,
-    reportDate: String,
-    msa: MSAReport,
-    applicantIncomes: List[ApplicantIncome],
-    total: List[Disposition]
-  ): A52 = {
-
-    val description = "Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
-
-    A52(
-      "5-2",
-      description,
-      year,
-      reportDate,
-      msa,
-      applicantIncomes,
-      total
-    )
-  }
-
-  val dispositions: List[DispositionType] =
-    List(
-      ReceivedDisp,
-      OriginatedDisp,
-      ApprovedButNotAcceptedDisp,
-      DeniedDisp,
-      WithdrawnDisp,
-      ClosedDisp
-    )
+  val metaData = ReportsMetaDataLookup.values("A52")
+  val dispositions = metaData.dispositions
 
   // Table filters:
   // Loan Type 1
@@ -82,7 +54,7 @@ object A52 {
     val larsByIncome = larsByIncomeInterval(larsWithIncome, incomeIntervals)
     val borrowerCharacteristicsByIncomeF = borrowerCharacteristicsByIncomeInterval(larsByIncome, dispositions)
 
-    val dateF = calculateYear(larSource)
+    val yearF = calculateYear(larSource)
     val totalF = calculateDispositions(lars, dispositions)
 
     for {
@@ -92,7 +64,7 @@ object A52 {
       lars100To120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(Between100And119PercentOfMSAMedian)
       lars120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(GreaterThan120PercentOfMSAMedian)
 
-      date <- dateF
+      year <- yearF
       total <- totalF
     } yield {
       val income50 = ApplicantIncome(
@@ -116,17 +88,19 @@ object A52 {
         lars120BorrowerCharacteristics
       )
 
+      val applicantIncomes = List(
+        income50,
+        income50To79,
+        income80To99,
+        income100To120,
+        income120
+      )
+
       A52(
-        date,
+        year,
         formatDate(Calendar.getInstance().toInstant),
         msa,
-        List(
-          income50,
-          income50To79,
-          income80To99,
-          income100To120,
-          income120
-        ),
+        applicantIncomes,
         total
       )
     }
