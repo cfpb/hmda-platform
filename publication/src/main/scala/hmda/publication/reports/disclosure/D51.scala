@@ -8,8 +8,8 @@ import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.publication.reports._
 import hmda.model.publication.reports._
 import hmda.publication.reports.util.DateUtil._
-import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.ReportUtil._
+import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 
 import scala.concurrent.Future
@@ -17,50 +17,18 @@ import scala.concurrent.Future
 case class D51(
   respondentId: String,
   institutionName: String,
-  table: String,
-  description: String,
   year: Int,
   reportDate: String,
   msa: MSAReport,
   applicantIncomes: List[ApplicantIncome],
-  total: List[Disposition]
+  total: List[Disposition],
+  table: String = D51.metaData.reportTable,
+  description: String = D51.metaData.description
 ) extends DisclosureReport
 
 object D51 {
-  def apply(
-    respondentId: String,
-    institutionName: String,
-    year: Int,
-    reportDate: String,
-    msa: MSAReport,
-    applicantIncomes: List[ApplicantIncome],
-    total: List[Disposition]
-  ): D51 = {
-
-    val description = "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4-family and manufactured home dwellings, by income, race and ethnicity of applicant"
-
-    D51(
-      respondentId,
-      institutionName,
-      "5-1",
-      description,
-      year,
-      reportDate,
-      msa,
-      applicantIncomes,
-      total
-    )
-  }
-
-  val dispositions: List[DispositionType] =
-    List(
-      ReceivedDisp,
-      OriginatedDisp,
-      ApprovedButNotAcceptedDisp,
-      DeniedDisp,
-      WithdrawnDisp,
-      ClosedDisp
-    )
+  val metaData = ReportsMetaDataLookup.values("D51")
+  val dispositions = metaData.dispositions
 
   // Table filters:
   // Loan Type 2,3,4
@@ -69,12 +37,12 @@ object D51 {
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegisterQuery, NotUsed],
     fipsCode: Int,
-    respId: String,
+    respondentId: String,
     institutionNameF: Future[String]
   ): Future[D51] = {
 
     val lars = larSource
-      .filter(lar => lar.respondentId == respId)
+      .filter(lar => lar.respondentId == respondentId)
       .filter(lar => lar.msa != "NA")
       .filter(lar => lar.msa.toInt == fipsCode)
       .filter { lar =>
@@ -91,7 +59,7 @@ object D51 {
     val larsByIncome = larsByIncomeInterval(larsWithIncome, incomeIntervals)
     val borrowerCharacteristicsByIncomeF = borrowerCharacteristicsByIncomeInterval(larsByIncome, dispositions)
 
-    val dateF = calculateYear(larSource)
+    val yearF = calculateYear(larSource)
     val totalF = calculateDispositions(lars, dispositions)
 
     for {
@@ -102,7 +70,7 @@ object D51 {
       lars120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(GreaterThan120PercentOfMSAMedian)
 
       institutionName <- institutionNameF
-      date <- dateF
+      year <- yearF
       total <- totalF
     } yield {
       val income50 = ApplicantIncome(
@@ -126,19 +94,21 @@ object D51 {
         lars120BorrowerCharacteristics
       )
 
+      val applicantIncomes = List(
+        income50,
+        income50To79,
+        income80To99,
+        income100To120,
+        income120
+      )
+
       D51(
-        respId,
+        respondentId,
         institutionName,
-        date,
+        year,
         formatDate(Calendar.getInstance().toInstant),
         msa,
-        List(
-          income50,
-          income50To79,
-          income80To99,
-          income100To120,
-          income120
-        ),
+        applicantIncomes,
         total
       )
     }
