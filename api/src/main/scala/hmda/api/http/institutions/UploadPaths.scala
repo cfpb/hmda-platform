@@ -27,7 +27,6 @@ import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persiste
 import hmda.persistence.processing.SubmissionManager
 import hmda.persistence.processing.SubmissionManager.AddFileName
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
-import hmda.query.projections.filing.HmdaFilingDBProjection.{ CreateSchema, DeleteLars }
 
 import scala.util.{ Failure, Success }
 
@@ -61,10 +60,6 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
 
         onComplete(fUploadSubmission) {
           case Success((submission, true, processingActor)) =>
-            //TODO: remove this when removing PostgreSQL from project
-            val queryProjector = system.actorSelection(s"/user/query-supervisor/HmdaFilingView-$period/queryProjector")
-            queryProjector ! CreateSchema
-            queryProjector ! DeleteLars(institutionId)
             uploadFile(processingActor, uploadTimestamp, uri.path, submission)
           case Success((_, false, _)) =>
             val errorResponse = Failed(s"Submission $seqNr not available for upload")

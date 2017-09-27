@@ -10,8 +10,6 @@ import hmda.persistence.messages.events.institutions.InstitutionEvents._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.HmdaQuery._
 import hmda.query.model.ViewMessages.StreamCompleted
-import hmda.query.projections.institutions.InstitutionDBProjection
-import hmda.query.view.messages.CommonViewMessages._
 import hmda.persistence.PersistenceConfig._
 
 object InstitutionView {
@@ -51,10 +49,6 @@ class InstitutionView extends HmdaPersistentActor {
 
   var counter = 0
 
-  val queryProjector = context
-    .actorOf(InstitutionDBProjection.props()
-      .withDispatcher("query-dispatcher"), "institution-projection")
-
   val snapshotCounter = configuration.getInt("hmda.journal.snapshot.counter")
 
   override def persistenceId: String = name
@@ -86,9 +80,6 @@ class InstitutionView extends HmdaPersistentActor {
           updateState(event)
       }
 
-    case GetProjectionActorRef =>
-      sender() ! queryProjector
-
     case GetState =>
       sender() ! state.institutions
 
@@ -114,7 +105,6 @@ class InstitutionView extends HmdaPersistentActor {
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
     counter += 1
-    queryProjector ! event
   }
 
   private def extractDomain(email: String): String = {
