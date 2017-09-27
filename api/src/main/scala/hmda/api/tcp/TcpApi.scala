@@ -2,13 +2,13 @@ package hmda.api.tcp
 
 import java.net.InetSocketAddress
 
-import akka.actor.{Actor, ActorSystem, Status}
+import akka.actor.{ Actor, ActorSystem, Status }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Tcp
 import akka.stream.scaladsl.Tcp.ServerBinding
 import hmda.persistence.model.HmdaActor
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 abstract class TcpApi extends HmdaActor {
 
