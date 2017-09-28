@@ -44,7 +44,7 @@ services:
       APP_URL: https://192.168.99.100
       HMDA_API: https://192.168.99.100:4443/hmda
       KEYCLOAK_URL: https://192.168.99.100:8443/auth/realms/hmda
-      # lb settings 
+      # lb settings
       VIRTUAL_HOST: 'http://*:80/*, https://*:443/*'
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
@@ -81,6 +81,8 @@ services:
 
   keycloak_db:
     image: postgres:9.6.1
+    ports:
+          - '5433:5432'
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak

@@ -28,12 +28,13 @@ import scala.concurrent.{ ExecutionContext, Future }
 import javax.mail._
 import javax.mail.internet.{ InternetAddress, MimeMessage }
 
+import com.typesafe.config.ConfigFactory
+import hmda.query.repository.KeyCloakRepository
 /*
 Questions
 - Which email library to use (Javax)?
 - Which email/port to send from (no-reply)?
 - Send all emails using CC/BCC, or separate (separate)?
-- Strategy of using Institution Persistance to retrieve emails (it's ok)?
  */
 
 trait SubmissionSignPaths
@@ -43,7 +44,8 @@ trait SubmissionSignPaths
     with EditResultsProtocol
     with HmdaCustomDirectives
     with RequestVerificationUtils
-    with ValidationErrorConverter {
+    with ValidationErrorConverter
+    with KeyCloakRepository {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -98,36 +100,45 @@ trait SubmissionSignPaths
 
     onComplete(fSubmission) {
       case Success(sub) =>
-        emailSignature(supervisor, sub)
+        if (sub.status.code == 10) {
+          emailSignature(supervisor, sub)
+        }
         complete(ToResponseMarshallable(Receipt(sub.end, sub.receipt, sub.status)))
       case Failure(error) => completeWithInternalError(uri, error)
     }
   }
 
   private def emailSignature(supervisor: ActorRef, submission: Submission)(implicit ec: ExecutionContext) = {
-    /*
-      TODO: Get email addresses!!!!
-     */
-    val address = "PLACEHOLDER"
-    sendMail(address, submission)
+    val emails = findEmailsById(submission.id.institutionId)
+    emails.map(emailSeq => {
+      emailSeq.foreach(t => {
+        val username = t._1 + " " + t._2
+        sendMail(t._3, username, submission)
+      })
+    })
+  }
 
-  private def sendMail(address: String, submission: Submission) = {
+  private def sendMail(address: String, username: String, submission: Submission) = {
+    val config = ConfigFactory.load()
+    val host = config.getString("hmda.mail.host")
+    val port = config.getString("hmda.mail.port")
+
     val properties = System.getProperties
-    properties.put("mail.smtp.host", "localhost")
+    properties.put("mail.smtp.host", host)
+    properties.put("mail.smtp.port", port)
+
     val session = Session.getDefaultInstance(properties)
     val message = new MimeMessage(session)
 
-    val date = submission.end
-    val text = s"Congratulations, you've completed filing your HMDA data for filing period ${submission.id.period}.\n" +
+    val text = s"$username,\nCongratulations, you've completed filing your HMDA data for filing period ${submission.id.period}.\n" +
       s"We received your filing on: ${submission.end}\n" +
       s"Your receipt is:${submission.receipt}"
-    message.setFrom(new InternetAddress("test@test.com"))
+    message.setFrom(new InternetAddress("no-reply@test.com"))
     message.setRecipients(Message.RecipientType.TO, address)
     message.setSubject("HMDA Filing Successful")
     message.setText(text)
 
     log.info(s"Sending message to $address with the message \n$text")
-
-    //Transport.send(message)
+    Transport.send(message)
   }
 }
