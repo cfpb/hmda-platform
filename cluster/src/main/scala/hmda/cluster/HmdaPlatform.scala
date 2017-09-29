@@ -10,6 +10,7 @@ import akka.cluster.http.management.ClusterHttpManagement
 import akka.cluster.singleton.{ ClusterSingletonManager, ClusterSingletonManagerSettings, ClusterSingletonProxy, ClusterSingletonProxySettings }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
+import hmda.api.tcp.admin.InstitutionAdminTcpApi
 import hmda.api.{ HmdaAdminApi, HmdaFilingApi, HmdaPublicApi }
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.institutions.InstitutionPersistence
@@ -79,6 +80,7 @@ object HmdaPlatform extends App {
     system.actorOf(HmdaFilingApi.props(supervisorProxy, querySupervisorProxy, validationStatsProxy).withDispatcher("api-dispatcher"), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(supervisorProxy, querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
     system.actorOf(HmdaPublicApi.props(querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-public-api")
+    system.actorOf(InstitutionAdminTcpApi.props(supervisorProxy), "panel-loader-tcp")
   }
 
   //Start Persistence
