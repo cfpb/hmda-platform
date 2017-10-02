@@ -1,5 +1,7 @@
 package hmda.api.http.institutions.submissions
 
+import java.time.{ ZoneOffset, ZonedDateTime }
+
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.pattern.ask
@@ -130,9 +132,11 @@ trait SubmissionSignPaths
     val session = Session.getDefaultInstance(properties)
     val message = new MimeMessage(session)
 
-    val text = s"$username,\nCongratulations, you've completed filing your HMDA data for filing period ${submission.id.period}.\n" +
-      s"We received your filing on: ${submission.end}\n" +
-      s"Your receipt is:${submission.receipt}"
+    val date = getFormattedDate
+
+    val text = s"$username,\n\nCongratulations, you've completed filing your HMDA data for filing period ${submission.id.period}.\n" +
+      s"We received your filing on: $date\n" +
+      s"Your receipt is: ${submission.receipt}"
     message.setFrom(new InternetAddress("no-reply@test.com"))
     message.setRecipients(Message.RecipientType.TO, address)
     message.setSubject("HMDA Filing Successful")
@@ -140,5 +144,16 @@ trait SubmissionSignPaths
 
     log.info(s"Sending message to $address with the message \n$text")
     Transport.send(message)
+  }
+
+  private def getFormattedDate: String = {
+    val offset = ZoneOffset.ofHours(-5)
+    val zonedTime = ZonedDateTime.now(offset)
+
+    val day = zonedTime.getDayOfMonth
+    val month = zonedTime.getMonthValue
+    val year = zonedTime.getYear
+
+    s"$month/$day/$year"
   }
 }
