@@ -4,13 +4,13 @@ import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import slick.jdbc.H2Profile.api._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.Future
 
 trait KeyCloakRepository {
   val dbConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
   val db = dbConfig.db
 
-  def findEmailsById(id: String)(implicit ec: ExecutionContext): Future[Seq[(String, String, String)]] = {
+  def findEmailsById(id: String): Future[Seq[(String, String, String)]] = {
     val query =
       sql"""SELECT ue.first_name, ue.last_name, ue.email
          FROM user_entity AS ue

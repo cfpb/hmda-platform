@@ -16,12 +16,9 @@ import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
 import hmda.model.fi.{ Submission, SubmissionId }
-import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
-import hmda.persistence.institutions.InstitutionPersistence.GetInstitution
-import hmda.persistence.institutions.{ InstitutionPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager
 import spray.json.{ JsBoolean, JsFalse, JsObject, JsTrue }
 
@@ -32,12 +29,6 @@ import javax.mail.internet.{ InternetAddress, MimeMessage }
 
 import com.typesafe.config.ConfigFactory
 import hmda.query.repository.KeyCloakRepository
-/*
-Questions
-- Which email library to use (Javax)?
-- Which email/port to send from (no-reply)?
-- Send all emails using CC/BCC, or separate (separate)?
- */
 
 trait SubmissionSignPaths
     extends InstitutionProtocol
