@@ -52,7 +52,7 @@ trait SubmissionSignPaths
       val submissionId = SubmissionId(institutionId, period, id)
       timedGet { uri =>
         completeVerified(supervisor, querySupervisor, institutionId, period, id, uri) {
-          completeWithSubmissionReceipt(supervisor, submissionId, uri)
+          completeWithSubmissionReceipt(supervisor, submissionId, uri, signed = false)
         }
       } ~
         timedPost { uri =>
@@ -67,7 +67,7 @@ trait SubmissionSignPaths
                     s <- actor ? hmda.persistence.processing.ProcessingMessages.Signed
                   } yield s
                   onComplete(fSign) {
-                    case Success(Some(_)) => completeWithSubmissionReceipt(supervisor, submissionId, uri)
+                    case Success(Some(_)) => completeWithSubmissionReceipt(supervisor, submissionId, uri, signed = true)
                     case Success(_) =>
                       val errorResponse = ErrorResponse(400, "Illegal State: Submission must be Validated or ValidatedWithErrors to sign", uri.path)
                       complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
@@ -84,7 +84,7 @@ trait SubmissionSignPaths
         }
     }
 
-  private def completeWithSubmissionReceipt(supervisor: ActorRef, subId: SubmissionId, uri: Uri)(implicit ec: ExecutionContext) = {
+  private def completeWithSubmissionReceipt(supervisor: ActorRef, subId: SubmissionId, uri: Uri, signed: Boolean)(implicit ec: ExecutionContext) = {
     val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, subId.institutionId, subId.period)).mapTo[ActorRef]
     val fSubmission = for {
       a <- fSubmissionsActor
@@ -93,7 +93,7 @@ trait SubmissionSignPaths
 
     onComplete(fSubmission) {
       case Success(sub) =>
-        if (sub.status == Signed) {
+        if (signed) {
           emailSignature(supervisor, sub)
         }
         complete(ToResponseMarshallable(Receipt(sub.end, sub.receipt, sub.status)))
