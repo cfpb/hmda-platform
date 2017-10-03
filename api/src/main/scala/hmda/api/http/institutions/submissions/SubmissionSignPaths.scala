@@ -15,7 +15,7 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
-import hmda.model.fi.{ Signed, Submission, SubmissionId }
+import hmda.model.fi.{ Submission, SubmissionId }
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
@@ -32,7 +32,7 @@ import hmda.model.institution.Institution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.repository.KeyCloakRepository
 import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.institutions.InstitutionView.{ GetInstitutionById, GetInstitutionByRespondentId }
+import hmda.query.view.institutions.InstitutionView.GetInstitutionById
 
 trait SubmissionSignPaths
     extends InstitutionProtocol
