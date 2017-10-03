@@ -157,6 +157,11 @@ docker-compose -f docker-dev.yml up
 
 When finished, use `docker-compose down` to gracefully stop the running containers.
 
+In order to not get Postgres connection error upon signing a submission, you may want to start up the keycloak image as well.
+```shell
+docker-compose up keycloak
+```
+Not having the keycloak image running will produce an error in the console, but will not cause the platform to crash.
 
 #### Running the API
 
@@ -214,13 +219,13 @@ The Filing API will run on `$(docker-machine ip):8080`
 The Public API will run on `$(docker-machine ip):8082`
 
 By default, the `HDMA Platform` runs with a log level of `INFO`. This can be changed by establishing a different log level in the `HMDA_LOGLEVEL` environment variable.
-For the different logging options, see the [reference.conf](https://github.com/akka/akka/blob/master/akka-actor/src/main/resources/reference.conf#L38) default configuration file for `Akka`. 
+For the different logging options, see the [reference.conf](https://github.com/akka/akka/blob/master/akka-actor/src/main/resources/reference.conf#L38) default configuration file for `Akka`.
 
 #### To run the entire platform
 
 1. Ensure you have a Docker Machine with sufficient resources, as described in the [Docker](#docker) section above.
 
-1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui) and 
+1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui) and
     [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth) into the same
     directory as hmda-platform.
 
@@ -270,7 +275,7 @@ For the different logging options, see the [reference.conf](https://github.com/a
         **Note:** You must register with an email address from our whitelist of email domains.
         For convenience, `bank0.com` and `bank1.com` address should be available automatically.
 
-    1. Browse to the mock email server at https://192.168.99.100:8443/mail/, and select the 
+    1. Browse to the mock email server at https://192.168.99.100:8443/mail/, and select the
         verification link in the email found there.  This should take you back to the HMDA
         filing web app, now logged in.
 
@@ -281,7 +286,7 @@ For the different logging options, see the [reference.conf](https://github.com/a
 
 ##### Updating an existing system
 
-If you've updated any of the hmda-platform services, and would like to see those 
+If you've updated any of the hmda-platform services, and would like to see those
 changes reflected in the Docker Compose setup, the simplest way to do this is to
 rebuild everything from scratch.  The following command should be executed from
 within the `hmda-platform` directory.

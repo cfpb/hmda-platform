@@ -22,4 +22,5 @@ object Version {
   val cassandraUnit = "3.1.3.2"
   val alpakka = "0.9"
   val cassandraDriver = "3.2.0"
+  val javaMail = "1.4.7"
 }
