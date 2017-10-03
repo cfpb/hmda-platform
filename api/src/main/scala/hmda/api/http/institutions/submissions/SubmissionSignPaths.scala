@@ -28,7 +28,11 @@ import javax.mail._
 import javax.mail.internet.{ InternetAddress, MimeMessage }
 
 import com.typesafe.config.ConfigFactory
+import hmda.model.institution.Institution
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.repository.KeyCloakRepository
+import hmda.query.view.institutions.InstitutionView
+import hmda.query.view.institutions.InstitutionView.{ GetInstitutionById, GetInstitutionByRespondentId }
 
 trait SubmissionSignPaths
     extends InstitutionProtocol
@@ -103,15 +107,25 @@ trait SubmissionSignPaths
 
   private def emailSignature(supervisor: ActorRef, submission: Submission)(implicit ec: ExecutionContext) = {
     val emails = findEmailsById(submission.id.institutionId)
-    emails.map(emailSeq => {
-      emailSeq.foreach(t => {
-        val username = t._1 + " " + t._2
-        sendMail(t._3, username, submission)
-      })
+    val querySupervisor = system.actorSelection("/user/query-supervisor/singleton")
+    val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+    val fName = for {
+      a <- fInstitutionsActor
+      i <- (a ? GetInstitutionById(submission.id.institutionId)).mapTo[Institution]
+      e <- emails
+    } yield (i.respondent.name, e)
+
+    fName.onComplete({
+      case Success((instName, emailSeq)) =>
+        emailSeq.foreach(t => {
+          val username = t._1 + " " + t._2
+          sendMail(t._3, username, submission, instName)
+        })
+      case Failure(error) => log.error(error, s"An error has occured retrieving the institution name for ID ${submission.id.institutionId}")
     })
   }
 
-  private def sendMail(address: String, username: String, submission: Submission) = {
+  private def sendMail(address: String, username: String, submission: Submission, instName: String) = {
     val config = ConfigFactory.load()
     val host = config.getString("hmda.mail.host")
     val port = config.getString("hmda.mail.port")
@@ -126,7 +140,7 @@ trait SubmissionSignPaths
 
     val date = getFormattedDate
 
-    val text = s"$username,\n\nCongratulations, you've completed filing your HMDA data for filing period ${submission.id.period}.\n" +
+    val text = s"$username,\n\nCongratulations, you've completed filing your HMDA data for $instName for filing period ${submission.id.period}.\n" +
       s"We received your filing on: $date\n" +
       s"Your receipt is: ${submission.receipt}"
     message.setFrom(new InternetAddress(senderAddress))
