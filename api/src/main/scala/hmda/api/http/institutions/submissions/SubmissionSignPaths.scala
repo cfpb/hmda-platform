@@ -15,7 +15,7 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol, SubmissionProtocol }
-import hmda.model.fi.{ Submission, SubmissionId }
+import hmda.model.fi.{ Signed, Submission, SubmissionId }
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
@@ -93,7 +93,7 @@ trait SubmissionSignPaths
 
     onComplete(fSubmission) {
       case Success(sub) =>
-        if (sub.status.code == 10) {
+        if (sub.status == Signed) {
           emailSignature(supervisor, sub)
         }
         complete(ToResponseMarshallable(Receipt(sub.end, sub.receipt, sub.status)))
@@ -115,6 +115,7 @@ trait SubmissionSignPaths
     val config = ConfigFactory.load()
     val host = config.getString("hmda.mail.host")
     val port = config.getString("hmda.mail.port")
+    val senderAddress = config.getString("hmda.mail.senderAddress")
 
     val properties = System.getProperties
     properties.put("mail.smtp.host", host)
@@ -128,7 +129,7 @@ trait SubmissionSignPaths
     val text = s"$username,\n\nCongratulations, you've completed filing your HMDA data for filing period ${submission.id.period}.\n" +
       s"We received your filing on: $date\n" +
       s"Your receipt is: ${submission.receipt}"
-    message.setFrom(new InternetAddress("no-reply@test.com"))
+    message.setFrom(new InternetAddress(senderAddress))
     message.setRecipients(Message.RecipientType.TO, address)
     message.setSubject("HMDA Filing Successful")
     message.setText(text)
