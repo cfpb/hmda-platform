@@ -67,7 +67,7 @@ lazy val cluster = (project in file("cluster"))
     )
   )
   .dependsOn(
-    modelJVM,
+    modelJVM % "compile->compile;test->test",
     parserJVM,
     apiModel,
     api,
