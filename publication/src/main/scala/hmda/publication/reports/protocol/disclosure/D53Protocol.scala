@@ -34,16 +34,13 @@ object D53Protocol
     override def read(json: JsValue): D53 = json.asJsObject.getFields(
       "respondentId",
       "institutionName",
-      "table",
-      "type",
-      "desc",
       "year",
       "reportDate",
       "msa",
       "applicantIncomes",
       "total"
     ) match {
-        case Seq(respondentId, institutionName, table, reportType, description, year, reportDate, msa, applicantIncomes, total) =>
+        case Seq(respondentId, institutionName, year, reportDate, msa, applicantIncomes, total) =>
           D53(
             respondentId.convertTo[String],
             institutionName.convertTo[String],
