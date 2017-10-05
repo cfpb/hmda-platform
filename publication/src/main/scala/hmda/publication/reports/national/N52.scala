@@ -1,16 +1,12 @@
-package hmda.publication.reports.aggregate
-
-import java.util.Calendar
+package hmda.publication.reports.national
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model.MsaIncomeLookup
 import hmda.model.publication.reports.ApplicantIncomeEnum._
-import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
+import hmda.model.publication.reports._
 import hmda.publication.reports._
-import hmda.publication.reports.national.NationalAggregateReport
-import hmda.publication.reports.util.DateUtil._
-import hmda.publication.reports.util.ReportUtil._
+import hmda.publication.reports.aggregate.A52
 import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.query.model.filing.LoanApplicationRegisterQuery
 
@@ -25,7 +21,31 @@ case class N52(
                 description: String = N52.metaData.description
               ) extends NationalAggregateReport {
   def +(a52: A52): N52 = {
+    val combinedIncomes = a52.applicantIncomes.map(income => {
+      val bc = applicantIncomes.find(i => i.applicantIncome == income.applicantIncome).get.borrowerCharacteristics
 
+      val originalRc = bc.find(_.isInstanceOf[RaceBorrowerCharacteristic]).get.asInstanceOf[RaceBorrowerCharacteristic]
+      val additionalRc = income.borrowerCharacteristics.find(_.isInstanceOf[RaceBorrowerCharacteristic]).get.asInstanceOf[RaceBorrowerCharacteristic]
+
+      val originalEc = bc.find(_.isInstanceOf[EthnicityBorrowerCharacteristic]).get.asInstanceOf[EthnicityBorrowerCharacteristic]
+      val additionalEc = income.borrowerCharacteristics.find(_.isInstanceOf[EthnicityBorrowerCharacteristic]).get.asInstanceOf[EthnicityBorrowerCharacteristic]
+
+      val originalMsc = bc.find(_.isInstanceOf[MinorityStatusBorrowerCharacteristic]).get.asInstanceOf[MinorityStatusBorrowerCharacteristic]
+      val additionalMsc = income.borrowerCharacteristics.find(_.isInstanceOf[MinorityStatusBorrowerCharacteristic]).get.asInstanceOf[MinorityStatusBorrowerCharacteristic]
+
+      ApplicantIncome(income.applicantIncome, List(
+        originalRc + additionalRc,
+        originalEc + additionalEc,
+        originalMsc + additionalMsc
+      ))
+    })
+
+    val combinedDispositions = a52.total.map(disposition => {
+      val originalDisposition = total.find(d => d.disposition == disposition.disposition).get
+      disposition + originalDisposition
+    })
+
+    N52(year, reportDate, combinedIncomes, combinedDispositions, table, description)
   }
 }
 
@@ -38,67 +58,11 @@ object N52 {
   // Property Type 1,2
   // Purpose of Loan 1
   def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[N52] = {
-    val lars = larSource
-      .filter { lar =>
-        (lar.loanType == 1) &&
-          (lar.propertyType == 1 || lar.propertyType == 2) &&
-          (lar.purpose == 1)
-      }
-    val larsWithIncome = lars.filter(lar => lar.income != "NA")
-
     val fipsList = MsaIncomeLookup.values.map(_.fips)
-    val yearF = calculateYear(larSource)
-    val totalF = calculateDispositions(lars, dispositions)
 
-
-    fipsList.foreach(fipsCode => {
-      val incomeIntervals = calculateMedianIncomeIntervals(fipsCode)
-      val larsByIncome = larsByIncomeInterval(larsWithIncome, incomeIntervals)
-      val borrowerCharacteristicsByIncomeF = borrowerCharacteristicsByIncomeInterval(larsByIncome, dispositions)
-
-      for {
-        lars50BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(LessThan50PercentOfMSAMedian)
-        lars50To79BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(Between50And79PercentOfMSAMedian)
-        lars80To99BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(Between80And99PercentOfMSAMedian)
-        lars100To120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(Between100And119PercentOfMSAMedian)
-        lars120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(GreaterThan120PercentOfMSAMedian)
-      } yield {
-        val income50 = ApplicantIncome(
-          LessThan50PercentOfMSAMedian,
-          lars50BorrowerCharacteristics
-        )
-        val income50To79 = ApplicantIncome(
-          Between50And79PercentOfMSAMedian,
-          lars50To79BorrowerCharacteristics
-        )
-        val income80To99 = ApplicantIncome(
-          Between80And99PercentOfMSAMedian,
-          lars80To99BorrowerCharacteristics
-        )
-        val income100To120 = ApplicantIncome(
-          Between100And119PercentOfMSAMedian,
-          lars100To120BorrowerCharacteristics
-        )
-        val income120 = ApplicantIncome(
-          GreaterThan120PercentOfMSAMedian,
-          lars120BorrowerCharacteristics
-        )
-
-        val applicantIncomes = List(
-          income50,
-          income50To79,
-          income80To99,
-          income100To120,
-          income120
-        )
-
-        N52(
-          year,
-          formatDate(Calendar.getInstance().toInstant),
-          applicantIncomes,
-          total
-        )
-      }
+    fipsList.foldLeft(N52())((n, f) => {
+      val a52 = A52.generate(larSource, f)
+      a52.map{report => n + report}
     })
   }
 }
