@@ -1,11 +1,14 @@
 package hmda.publication.reports.util
 
+import java.util.Calendar
+
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model._
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
 import hmda.publication.reports.{ AS, EC, MAT }
+import hmda.publication.reports.util.DateUtil._
 import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.RaceUtil.raceBorrowerCharacteristic
 import hmda.publication.reports.util.EthnicityUtil.ethnicityBorrowerCharacteristic
@@ -16,6 +19,10 @@ import hmda.util.SourceUtils
 import scala.concurrent.Future
 
 object ReportUtil extends SourceUtils {
+
+  def formattedCurrentDate: String = {
+    formatDate(Calendar.getInstance().toInstant)
+  }
 
   def msaReport(fipsCode: String): MSAReport = {
     CbsaLookup.values.find(x => x.cbsa == fipsCode) match {
@@ -60,6 +67,52 @@ object ReportUtil extends SourceUtils {
       Between100And119PercentOfMSAMedian -> lars100To120,
       GreaterThan120PercentOfMSAMedian -> lars120
     )
+  }
+
+  def applicantIncomesWithBorrowerCharacteristics[ec: EC, mat: MAT, as: AS](
+    larSource: Source[LoanApplicationRegisterQuery, NotUsed],
+    incomeIntervals: Array[Double],
+    dispositions: List[DispositionType]
+  ): Future[List[ApplicantIncome]] = {
+    val larsByIncome = larsByIncomeInterval(larSource, incomeIntervals)
+    val borrowerCharacteristicsByIncomeF = borrowerCharacteristicsByIncomeInterval(larsByIncome, dispositions)
+
+    for {
+      lars50BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(LessThan50PercentOfMSAMedian)
+      lars50To79BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(Between50And79PercentOfMSAMedian)
+      lars80To99BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(Between80And99PercentOfMSAMedian)
+      lars100To120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(Between100And119PercentOfMSAMedian)
+      lars120BorrowerCharacteristics <- borrowerCharacteristicsByIncomeF(GreaterThan120PercentOfMSAMedian)
+    } yield {
+      val income50 = ApplicantIncome(
+        LessThan50PercentOfMSAMedian,
+        lars50BorrowerCharacteristics
+      )
+      val income50To79 = ApplicantIncome(
+        Between50And79PercentOfMSAMedian,
+        lars50To79BorrowerCharacteristics
+      )
+      val income80To99 = ApplicantIncome(
+        Between80And99PercentOfMSAMedian,
+        lars80To99BorrowerCharacteristics
+      )
+      val income100To120 = ApplicantIncome(
+        Between100And119PercentOfMSAMedian,
+        lars100To120BorrowerCharacteristics
+      )
+      val income120 = ApplicantIncome(
+        GreaterThan120PercentOfMSAMedian,
+        lars120BorrowerCharacteristics
+      )
+
+      List(
+        income50,
+        income50To79,
+        income80To99,
+        income100To120,
+        income120
+      )
+    }
   }
 
   def borrowerCharacteristicsByIncomeInterval[ec: EC, mat: MAT, as: AS](
