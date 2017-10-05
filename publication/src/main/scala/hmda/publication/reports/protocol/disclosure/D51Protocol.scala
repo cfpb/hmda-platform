@@ -47,10 +47,10 @@ object D51Protocol
             respondentId.convertTo[String],
             institutionName.convertTo[String],
             year.convertTo[Int],
-            reportDate.convertTo[String],
             msa.convertTo[MSAReport],
             applicantIncomes.convertTo[List[ApplicantIncome]],
-            total.convertTo[List[Disposition]]
+            total.convertTo[List[Disposition]],
+            reportDate.convertTo[String]
           )
       }
   }

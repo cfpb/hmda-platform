@@ -7,12 +7,13 @@ services:
       - '8080:8080'
       - '8081:8081'
       - '8082:8082'
+      - '8888:8888'
     volumes:
       - ./target/scala-2.12/hmda.jar:/opt/hmda.jar
     depends_on:
-      - cassandra
       - zookeeper
-      - query_db
+      - keycloak_db
+      - cassandra
     environment:
       JDBC_URL: jdbc:postgresql://192.168.99.100:54321/hmda?user=postgres&password=postgres
       ZOOKEEPER_HOST: zookeeper
@@ -44,7 +45,7 @@ services:
       APP_URL: https://192.168.99.100
       HMDA_API: https://192.168.99.100:4443/hmda
       KEYCLOAK_URL: https://192.168.99.100:8443/auth/realms/hmda
-      # lb settings 
+      # lb settings
       VIRTUAL_HOST: 'http://*:80/*, https://*:443/*'
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
@@ -81,6 +82,8 @@ services:
 
   keycloak_db:
     image: postgres:9.6.1
+    ports:
+          - '5433:5432'
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
@@ -116,15 +119,6 @@ services:
       VIRTUAL_HOST_WEIGHT: 1
       EXCLUDE_PORTS: '25' # don't proxy SMTP port
       EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /mail//?(.*)" "\1\ /\2"'
-
-  query_db:
-    image: postgres:9.6.1
-    ports:
-      - '54321:5432'
-    environment:
-      POSTGRES_DB: hmda
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
 
   zookeeper:
     image: jplock/zookeeper

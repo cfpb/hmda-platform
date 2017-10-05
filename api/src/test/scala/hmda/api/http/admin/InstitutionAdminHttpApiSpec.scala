@@ -10,13 +10,11 @@ import hmda.api.model.{ ModelGenerators, Status }
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.MalformedRequestContentRejection
-import akka.testkit.TestProbe
 import hmda.api.http.BaseHttpApi
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
 import hmda.query.HmdaQuerySupervisor
-import hmda.query.projections.institutions.InstitutionDBProjection._
 import hmda.validation.ValidationStats
 
 import scala.concurrent.duration._
@@ -38,12 +36,6 @@ class InstitutionAdminHttpApiSpec
   val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
 
   val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
-
-  override def beforeAll(): Unit = {
-    val probe = TestProbe()
-    val db = createInstitutionDBProjection(system)
-    probe.send(db, CreateSchema)
-  }
 
   override def afterAll(): Unit = {
     super.afterAll()
@@ -113,18 +105,6 @@ class InstitutionAdminHttpApiSpec
       val putRequest = createRequest(jsonRequest, HttpMethods.PUT)
       putRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.NotFound
-      }
-    }
-    "delete institution schema" in {
-      HttpRequest(HttpMethods.GET, uri = "/institutions/delete") ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
-        status mustBe StatusCodes.Accepted
-        responseAs[String] mustBe "InstitutionSchemaDeleted()"
-      }
-    }
-    "create institution schema" in {
-      HttpRequest(HttpMethods.GET, uri = "/institutions/create") ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
-        status mustBe StatusCodes.Accepted
-        responseAs[String] mustBe "InstitutionSchemaCreated()"
       }
     }
   }

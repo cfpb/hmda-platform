@@ -126,13 +126,13 @@ lazy val validation = (project in file("validation"))
   ).dependsOn(parserJVM % "compile->compile;test->test")
   .dependsOn(persistenceModel % "compile->compile;test->test")
 
-lazy val panel = (project in file("panel"))
+lazy val loader = (project in file("loader"))
   .settings(hmdaBuildSettings: _*)
   .settings(Revolver.settings:_*)
   .settings(
     Seq(
       assemblyJarName in assembly := {s"${name.value}.jar"},
-      mainClass in assembly := Some("hmda.panel.PanelCsvLoader"),
+      mainClass in assembly := Some("hmda.loader.panel.PanelCsvLoader"),
       assemblyMergeStrategy in assembly := {
         case "application.conf" => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
@@ -211,7 +211,7 @@ lazy val api = (project in file("api"))
           oldStrategy(x)
       },
       parallelExecution in Test := false,
-      libraryDependencies ++= httpDeps
+      libraryDependencies ++= httpDeps ++ Seq(javaMail)
     )
   )
   .dependsOn(persistenceModel % "compile->compile;test->test")

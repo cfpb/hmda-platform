@@ -40,4 +40,5 @@ object Dependencies {
   val cassandraUnit = "org.cassandraunit" % "cassandra-unit" % Version.cassandraUnit
   val alpakkaCassandra = "com.lightbend.akka" %% "akka-stream-alpakka-cassandra" % Version.alpakka
   val cassandraDriver = "com.datastax.cassandra" % "cassandra-driver-core" % Version.cassandraDriver
+  val javaMail = "javax.mail" % "mail" % Version.javaMail
 }

@@ -1,22 +1,27 @@
-package hmda.publication.reports.protocol.aggregate
+package hmda.publication.reports.protocol.disclosure
 
 import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
-import hmda.model.publication.reports.ReportTypeEnum._
-import hmda.publication.reports.aggregate.A52
+import hmda.model.publication.reports.ReportTypeEnum.Disclosure
+import hmda.publication.reports.disclosure.D53
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
-import spray.json._
 
-object A52Protocol
+import spray.json._
+import spray.json.DefaultJsonProtocol
+
+object D53Protocol
     extends DefaultJsonProtocol
     with ReportTypeEnumProtocol
     with MSAReportProtocol
     with ApplicantIncomeProtocol {
 
-  implicit object A52Format extends RootJsonFormat[A52] {
-    override def write(obj: A52): JsValue = {
+  implicit object D53Format extends RootJsonFormat[D53] {
+
+    override def write(obj: D53): JsValue = {
       JsObject(
-        "table" -> JsString("5-2"),
-        "type" -> JsString(Aggregate.toString),
+        "respondentId" -> JsString(obj.respondentId),
+        "institutionName" -> JsString(obj.institutionName),
+        "table" -> JsString("5-3"),
+        "type" -> JsString(Disclosure.toString),
         "desc" -> JsString(obj.description),
         "year" -> JsNumber(obj.year),
         "reportDate" -> JsString(obj.reportDate),
@@ -26,7 +31,9 @@ object A52Protocol
       )
     }
 
-    override def read(json: JsValue): A52 = json.asJsObject.getFields(
+    override def read(json: JsValue): D53 = json.asJsObject.getFields(
+      "respondentId",
+      "institutionName",
       "table",
       "type",
       "desc",
@@ -36,8 +43,10 @@ object A52Protocol
       "applicantIncomes",
       "total"
     ) match {
-        case Seq(table, reportType, description, year, reportDate, msa, applicantIncomes, total) =>
-          A52(
+        case Seq(respondentId, institutionName, table, reportType, description, year, reportDate, msa, applicantIncomes, total) =>
+          D53(
+            respondentId.convertTo[String],
+            institutionName.convertTo[String],
             year.convertTo[Int],
             msa.convertTo[MSAReport],
             applicantIncomes.convertTo[List[ApplicantIncome]],
@@ -46,5 +55,4 @@ object A52Protocol
           )
       }
   }
-
 }
