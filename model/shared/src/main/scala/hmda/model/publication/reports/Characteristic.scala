@@ -20,7 +20,6 @@ case class EthnicityCharacteristic(ethnicity: EthnicityEnum, dispositions: List[
   }
 }
 
-
 case class MinorityStatusCharacteristic(minorityStatus: MinorityStatusEnum, dispositions: List[Disposition]) extends Characteristic {
   def +(msc: MinorityStatusCharacteristic) = {
     val combined = dispositions.map(d =>
