@@ -1,11 +1,7 @@
 package hmda.publication.reports.protocol
 
-import hmda.model.publication.reports.{ ApplicantIncome, Characteristics }
+import hmda.model.publication.reports.ApplicantIncome
 
-trait ApplicantIncomeProtocol extends ApplicantIncomeEnumProtocol with CharacteristicsProtocol {
+trait ApplicantIncomeProtocol extends ApplicantIncomeEnumProtocol with BorrowerCharacteristicProtocol {
   implicit val applicantIncomeFormat = jsonFormat2(ApplicantIncome.apply)
-}
-
-trait CharacteristicsProtocol extends BorrowerCharacteristicProtocol {
-  implicit val characteristicsProtocol = jsonFormat3(Characteristics.apply)
 }

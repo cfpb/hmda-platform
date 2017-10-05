@@ -23,10 +23,22 @@ case class N52(
   def +(a52: A52): N52 = {
 
     val combinedIncomes = a52.applicantIncomes.map(income => {
-      val newC = applicantIncomes.find(i => i.applicantIncome == income.applicantIncome).get.characteristics
-      val originalC = income.characteristics
+      val newC = applicantIncomes.find(i => i.applicantIncome == income.applicantIncome).get.borrowerCharacteristics
+      val originalC = income.borrowerCharacteristics
 
-      ApplicantIncome(income.applicantIncome, newC + originalC)
+      val nR = newC.find(_.isInstanceOf[RaceBorrowerCharacteristic]).get.asInstanceOf[RaceBorrowerCharacteristic]
+      val oR = originalC.find(_.isInstanceOf[RaceBorrowerCharacteristic]).get.asInstanceOf[RaceBorrowerCharacteristic]
+      val cR = oR + nR
+
+      val nE = newC.find(_.isInstanceOf[EthnicityBorrowerCharacteristic]).get.asInstanceOf[EthnicityBorrowerCharacteristic]
+      val oE = originalC.find(_.isInstanceOf[EthnicityBorrowerCharacteristic]).get.asInstanceOf[EthnicityBorrowerCharacteristic]
+      val cE = oE + nE
+
+      val nM = newC.find(_.isInstanceOf[MinorityStatusBorrowerCharacteristic]).get.asInstanceOf[MinorityStatusBorrowerCharacteristic]
+      val oM = originalC.find(_.isInstanceOf[MinorityStatusBorrowerCharacteristic]).get.asInstanceOf[MinorityStatusBorrowerCharacteristic]
+      val cM = oM + nM
+
+      ApplicantIncome(income.applicantIncome, List(cR, cE, cM))
     })
 
     val combinedDispositions = a52.total.map(disposition => {

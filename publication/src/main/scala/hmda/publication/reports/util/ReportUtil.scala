@@ -118,15 +118,16 @@ object ReportUtil extends SourceUtils {
   def borrowerCharacteristicsByIncomeInterval[ec: EC, mat: MAT, as: AS](
     larsByIncome: Map[ApplicantIncomeEnum, Source[LoanApplicationRegisterQuery, NotUsed]],
     dispositions: List[DispositionType]
-  ): Map[ApplicantIncomeEnum, Future[Characteristics]] = {
+  ): Map[ApplicantIncomeEnum, Future[List[BorrowerCharacteristic]]] = {
     larsByIncome.map {
       case (income, lars) =>
-        val characteristics =
-          for {
-            r <- raceBorrowerCharacteristic(lars, dispositions)
-            e <- ethnicityBorrowerCharacteristic(lars, dispositions)
-            m <- minorityStatusBorrowerCharacteristic(lars, dispositions)
-          } yield Characteristics(r, e, m)
+        val characteristics = Future.sequence(
+          List(
+            raceBorrowerCharacteristic(lars, dispositions),
+            ethnicityBorrowerCharacteristic(lars, dispositions),
+            minorityStatusBorrowerCharacteristic(lars, dispositions)
+          )
+        )
         income -> characteristics
     }
   }
