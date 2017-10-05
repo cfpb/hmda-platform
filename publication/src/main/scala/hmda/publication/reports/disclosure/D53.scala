@@ -41,9 +41,8 @@ object D53 {
       .filter(lar => lar.msa != "NA")
       .filter(lar => lar.msa.toInt == fipsCode)
       .filter { lar =>
-        (lar.loanType == 2 || lar.loanType == 3 || lar.loanType == 4) &&
-          (lar.propertyType == 1 || lar.propertyType == 2) &&
-          (lar.purpose == 1)
+        (lar.propertyType == 1 || lar.propertyType == 2) &&
+          (lar.purpose == 3)
       }
     val larsWithIncome = lars.filter(lar => lar.income != "NA")
 
