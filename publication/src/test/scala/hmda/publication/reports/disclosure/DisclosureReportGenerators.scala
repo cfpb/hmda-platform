@@ -7,7 +7,7 @@ import hmda.publication.reports.util.DateUtil._
 
 object DisclosureReportGenerators {
 
-  implicit def d51Gen: Gen[D51] = {
+  def d51Gen: Gen[D51] = {
     for {
       respId <- Gen.alphaStr
       instName <- Gen.alphaStr
@@ -19,7 +19,7 @@ object DisclosureReportGenerators {
     } yield D51(respId, instName, year, msa, applicantIncomes, total, reportDate)
   }
 
-  implicit def d53Gen: Gen[D53] = {
+  def d53Gen: Gen[D53] = {
     for {
       respId <- Gen.alphaStr
       instName <- Gen.alphaStr
