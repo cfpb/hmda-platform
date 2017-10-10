@@ -7,7 +7,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.institution.Institution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.publication.reports.protocol.disclosure.D51Protocol._
+import hmda.publication.reports.protocol.disclosure.D5XProtocol._
 import hmda.query.repository.filing.FilingCassandraRepository
 import hmda.query.view.institutions.InstitutionView
 import hmda.query.view.institutions.InstitutionView.GetInstitutionByRespondentId
