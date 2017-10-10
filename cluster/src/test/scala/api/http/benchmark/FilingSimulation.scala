@@ -2,14 +2,11 @@ package api.http.benchmark
 
 import com.typesafe.config.ConfigFactory
 import hmda.api.protocol.admin.WriteInstitutionProtocol
-import hmda.model.institution.Institution
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 
-import scala.concurrent.duration._
 import scala.language.postfixOps
 import spray.json._
-import hmda.model.institution.InstitutionGenerators._
 
 class FilingSimulation extends Simulation with WriteInstitutionProtocol {
 
