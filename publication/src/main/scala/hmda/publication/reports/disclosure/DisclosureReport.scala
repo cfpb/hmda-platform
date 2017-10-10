@@ -25,7 +25,7 @@ trait DisclosureReport {
 
 }
 
-case class Series5DisclosureReport(
+case class D5X(
   respondentId: String,
   institutionName: String,
   year: Int,
@@ -45,7 +45,7 @@ object D5X {
     fipsCode: Int,
     respondentId: String,
     institutionNameF: Future[String]
-  ): Future[Series5DisclosureReport] = {
+  ): Future[D5X] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
     val dispositions = metaData.dispositions
@@ -73,7 +73,7 @@ object D5X {
       total <- totalF
     } yield {
 
-      Series5DisclosureReport(
+      D5X(
         respondentId,
         institutionName,
         year,

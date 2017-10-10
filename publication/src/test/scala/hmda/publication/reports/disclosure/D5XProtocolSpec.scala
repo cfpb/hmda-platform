@@ -10,7 +10,7 @@ class D5XProtocolSpec extends PropSpec with PropertyChecks with MustMatchers {
 
   property("D5X Report must convert to and from JSON") {
     forAll(d5XGen) { d5X =>
-      d5X.toJson.convertTo[Series5DisclosureReport] mustBe d5X
+      d5X.toJson.convertTo[D5X] mustBe d5X
     }
   }
 

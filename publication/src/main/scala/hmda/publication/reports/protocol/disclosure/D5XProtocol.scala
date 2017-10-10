@@ -2,7 +2,7 @@ package hmda.publication.reports.protocol.disclosure
 
 import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
-import hmda.publication.reports.disclosure.Series5DisclosureReport
+import hmda.publication.reports.disclosure.D5X
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
 import spray.json._
 import spray.json.DefaultJsonProtocol
@@ -13,9 +13,9 @@ object D5XProtocol
     with MSAReportProtocol
     with ApplicantIncomeProtocol {
 
-  implicit object D5XFormat extends RootJsonFormat[Series5DisclosureReport] {
+  implicit object D5XFormat extends RootJsonFormat[D5X] {
 
-    override def write(obj: Series5DisclosureReport): JsValue = {
+    override def write(obj: D5X): JsValue = {
       JsObject(
         "respondentId" -> JsString(obj.respondentId),
         "institutionName" -> JsString(obj.institutionName),
@@ -30,7 +30,7 @@ object D5XProtocol
       )
     }
 
-    override def read(json: JsValue): Series5DisclosureReport = json.asJsObject.getFields(
+    override def read(json: JsValue): D5X = json.asJsObject.getFields(
       "respondentId",
       "institutionName",
       "year",
@@ -42,7 +42,7 @@ object D5XProtocol
       "desc"
     ) match {
         case Seq(respondentId, institutionName, year, reportDate, msa, applicantIncomes, total, table, desc) =>
-          Series5DisclosureReport(
+          D5X(
             respondentId.convertTo[String],
             institutionName.convertTo[String],
             year.convertTo[Int],

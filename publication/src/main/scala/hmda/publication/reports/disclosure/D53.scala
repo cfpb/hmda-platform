@@ -19,7 +19,7 @@ object D53 {
     fipsCode: Int,
     respondentId: String,
     institutionNameF: Future[String]
-  ): Future[Series5DisclosureReport] = {
+  ): Future[D5X] = {
 
     D5X.generate("D53", filters, larSource, fipsCode, respondentId, institutionNameF)
 
