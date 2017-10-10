@@ -16,16 +16,15 @@ The real panel file (~160,000 institutions) is located at `panel/src/main/resour
 For loading panel data into a remote system or into a local Docker container, you don't need to have any services running on your local environment as dependencies. You will need to set the `HMDA_HTTP_ADMIN_URL` environment variable.
 
 ```shell
-> export HMDA_HTTP_ADMIN_URL={admin URL}
+> export HMDA_PANEL_LOADER_HOST={TCP host}
+> export HMDA_PANEL_LOADER_PORT={TCP port}
 ```
 
-**IMPORTANT NOTE:** The base URL should *include* `http://` or `https://`, but *exclude* any trailing backslash `/`.  For example:
+To load panel data into the cluster, simply find the IP of the admin API.  The port will default to `8888` unless overriden.
 
-To load panel data into the cluster, simply find the URL of the admin API (for the release branch: `https://hmda-ops-api.demo.cfpb.gov/admin`).
-
-To load panel data into a Docker container running locally, the URL will depend on your Docker Machine's IP. If it uses the default IP, this will be the admin API URL:
+To load panel data into a Docker container running locally, the URL will depend on your Docker Machine's IP. If it uses the default IP, this will be the correct setting (port doesn't need to change):
 ```shell
-> export HMDA_HTTP_ADMIN_URL=http://192.168.99.100:8081
+> export HMDA_PANEL_LOADER_HOST=192.168.99.100
 ```
 
 Once that variable is set, use the instructions in [Running the Loader](#running-the-loader) to load the data.
@@ -119,13 +118,11 @@ Then the panel loader can be run with `java -jar  panel/target/scala-2.12/panel.
 
 
 ## Error codes
-There are four ways the panel loader can fail.  The exit code and error message should tell you what happened.
+There are three ways the panel loader can fail.  The exit code and error message should tell you what happened.
 
 1. There were no command line arguments passed to the loader
 2. The path passed to the loader didn't point to a file
-3. The call to `institutions/create` didn't return the correct response.  This can indicate that you don't have the correct environment variables set, or that something is wrong with the hmda-platform.
-4. The loader didn't finish processing all the institutions.  This will happen when running the real panel file, but unsure as to why this happens.
-
+3. If the TCP Host or Port arguments are incorrect, the program will exit successfully.  The only way to troubleshoot this error is to watch the API logs for the actor creations.  A successful run of the loader will create two actors for every institution, which will appear in the logs.
 
 ## Testing
 
