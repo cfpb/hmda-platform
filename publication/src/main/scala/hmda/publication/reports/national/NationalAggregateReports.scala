@@ -5,12 +5,13 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.query.repository.filing.FilingCassandraRepository
+import hmda.publication.reports.protocol.national.N52Protocol._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import spray.json._
 
-class NationalAggregateReports (val sys: ActorSystem, val mat: ActorMaterializer) extends FilingCassandraRepository {
+class NationalAggregateReports(val sys: ActorSystem, val mat: ActorMaterializer) extends FilingCassandraRepository {
   override implicit def system: ActorSystem = sys
   override implicit def materializer: ActorMaterializer = mat
   val config = ConfigFactory.load()
