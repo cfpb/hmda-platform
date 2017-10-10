@@ -2,6 +2,7 @@ package api.http.benchmark
 
 import com.typesafe.config.ConfigFactory
 import hmda.api.protocol.admin.WriteInstitutionProtocol
+import hmda.model.institution.Institution
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 
@@ -43,97 +44,29 @@ class FilingSimulation extends Simulation with WriteInstitutionProtocol {
       exec(http("Create Institution")
         .post(s"http://$host:$adminPort/institutions")
         .body(StringBody(
-          s"""
-              {
-                  "otherLenderCode": 0,
-                  "parent": {
-                      "respondentId": "-1",
-                      "city": "",
-                      "name": "",
-                      "state": "",
-                      "idRssd": -1
-                  },
-                  "activityYear": 2017,
-                  "cra": false,
-                  "assets": 35788,
-                  "agency": "ncua",
-                  "hmdaFilerFlag": false,
-                  "respondent": {
-                      "city": "HONOLULU",
-                      "name": "HAWAIIAN ELECTRIC EMPLOYEES FEDERAL CREDIT UNION",
-                      "externalId": {
-                          "value": "1869",
-                          "externalIdType": {
-                              "code": "ncua-charter-id",
-                              "name": "NCUA Charter Number"
-                          }
-                      },
-                      "state": "HI",
-                      "fipsStateNumber": "15"
-                  },
-                  "topHolder": {
-                      "city": "",
-                      "name": "",
-                      "state": "",
-                      "country": "",
-                      "idRssd": -1
-                  },
-                  "externalIds": [
-                      {
-                          "value": ${JsString(institutionId)},
-                          "externalIdType": {
-                              "code": "rssd-id",
-                              "name": "RSSD ID"
-                          }
-                      },
-                      {
-                          "value": "0",
-                          "externalIdType": {
-                              "code": "fdic-certificate-number",
-                              "name": "FDIC Certificate Number"
-                          }
-                      },
-                      {
-                          "value": "1869",
-                          "externalIdType": {
-                              "code": "ncua-charter-id",
-                              "name": "NCUA Charter Number"
-                          }
-                      },
-                      {
-                          "value": "0",
-                          "externalIdType": {
-                              "code": "occ-charter-id",
-                              "name": "OCC Charter Number"
-                          }
-                      },
-                      {
-                          "value": "990073423",
-                          "externalIdType": {
-                              "code": "federal-tax-id",
-                              "name": "Federal Tax ID"
-                          }
-                      }
-                  ],
-                  "id": ${JsString(institutionId)},
-                  "emailDomains": [
-                      ""
-                  ],
-                  "institutionType": "credit-union"
-              }
-            """.stripMargin
-        )).asJSON)
+          Institution.empty.copy(id = institutionId, activityYear = 2017).toJson.toString
+        )).asJSON
+        .check(status is 201))
+    }
+
+    def filings(institutionId: String) = {
+      exec(http("List Filings")
+        .get(s"/institutions/$institutionId/filings/2017")
+        .header("cfpb-hmda-institutions", institutionId)
+        .check(status is 200))
     }
   }
 
   val listInstitutions = scenario("List Institutions").exec(InstitutionScenario.list("4277"))
   val createInstitutions = scenario("Create Institutions").exec(InstitutionScenario.create("4277"))
+  val listFilings = scenario("List Filings").exec(InstitutionScenario.filings("4277"))
 
   setUp(
     listInstitutions.inject(
       atOnceUsers(1)
-    ),
-    createInstitutions.inject(atOnceUsers(1))
+    ).protocols(httpProtocol),
+    createInstitutions.inject(atOnceUsers(1)).protocols(httpProtocol),
+    listFilings.inject(atOnceUsers(1))
       .protocols(httpProtocol)
   )
 
