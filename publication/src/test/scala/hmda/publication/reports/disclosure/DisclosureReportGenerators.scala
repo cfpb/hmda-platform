@@ -14,7 +14,9 @@ object DisclosureReportGenerators {
       msa <- msaReportGen
       applicantIncomes <- Gen.listOfN(5, applicantIncomeGen)
       total <- totalDispositionGen
-    } yield D5X(respId, instName, year, msa, applicantIncomes, total, "D5-X", "description")
+      table <- Gen.alphaStr
+      description <- Gen.alphaStr
+    } yield D5X(respId, instName, year, msa, applicantIncomes, total, table, description)
   }
 
 }

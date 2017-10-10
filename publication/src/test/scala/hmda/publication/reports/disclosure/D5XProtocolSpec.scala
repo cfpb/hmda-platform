@@ -19,9 +19,9 @@ class D5XProtocolSpec extends PropSpec with PropertyChecks with MustMatchers {
       d5X.toJson mustBe JsObject(
         "respondentId" -> JsString(d5X.respondentId),
         "institutionName" -> JsString(d5X.institutionName),
-        "table" -> JsString("D5-X"),
+        "table" -> JsString(d5X.table),
         "type" -> JsString("Disclosure"),
-        "desc" -> JsString("description"),
+        "desc" -> JsString(d5X.description),
         "year" -> JsNumber(d5X.year),
         "reportDate" -> JsString(d5X.reportDate),
         "msa" -> d5X.msa.toJson,
