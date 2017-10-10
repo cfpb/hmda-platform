@@ -60,10 +60,10 @@ object D5X {
 
     val msa = msaReport(fipsCode.toString)
 
-    val incomeIntervals = incomeIntervalsForMsa(fipsCode)
-    val applicantIncomesF = applicantIncomesByInterval(larsWithIncome, incomeIntervals, dispositions)
+    val incomeIntervals = calculateMedianIncomeIntervals(fipsCode)
+    val applicantIncomesF = applicantIncomesWithBorrowerCharacteristics(larsWithIncome, incomeIntervals, dispositions)
 
-    val yearF = reportYear(larSource)
+    val yearF = calculateYear(larSource)
     val totalF = calculateDispositions(lars, dispositions)
 
     for {
