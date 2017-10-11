@@ -45,13 +45,18 @@ class FilingSimulation extends Simulation {
           .get("/institutions/${institutionId}/filings/2017")
           .header("cfpb-hmda-institutions", "${institutionId}")
           .check(status is 200))
-        .pause(2)
+        .pause(1)
         .exec(http("Create Submission")
           .post("/institutions/${institutionId}/filings/2017/submissions")
           .header("cfpb-hmda-institutions", "${institutionId}")
           .check(status is 201)
           .check(jsonPath("$.id.sequenceNumber").saveAs("submissionId")))
         .pause(1)
+        .exec(http("Upload file")
+          .post("/institutions/${institutionId}/filings/2017/submissions/${submissionId}")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .bodyPart(RawFileBodyPart("file", "${fileName}"))
+          .check(status is 202))
 
   }
 
