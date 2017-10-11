@@ -14,7 +14,7 @@ class FilingSimulation extends Simulation {
   val adminPort = config.getInt("hmda.benchmark.adminPort")
   val nrOfUsers = config.getInt("hmda.benchmark.nrOfUsers")
   val rampUpTime = config.getInt("hmda.benchmark.rampUpTime")
-  val feeder = csv(config.getString("hmda.benchmark.feederFile"))
+  val feeder = csv(config.getString("hmda.benchmark.feederFile")).random
 
   val httpProtocol = http
     .baseURL(s"http://$host:$port")
@@ -51,7 +51,7 @@ class FilingSimulation extends Simulation {
           .header("cfpb-hmda-institutions", "${institutionId}")
           .check(status is 201)
           .check(jsonPath("$.id.sequenceNumber").saveAs("submissionId")))
-        .pause(1)
+        .pause(2)
         .exec(http("Upload file")
           .post("/institutions/${institutionId}/filings/2017/submissions/${submissionId}")
           .header("cfpb-hmda-institutions", "${institutionId}")
@@ -79,8 +79,19 @@ class FilingSimulation extends Simulation {
         .exec(http("Get Summary")
           .get("/institutions/${institutionId}/filings/2017/submissions/${submissionId}/summary")
           .header("cfpb-hmda-institutions", "${institutionId}")
+          .check(status is 200))
+        .pause(1)
+        .exec(http("IRS Report")
+          .get("/institutions/${institutionId}/filings/2017/submissions/${submissionId}/irs")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .check(status is 200))
+        .pause(1)
+        .exec(http("Sign Submission")
+          .post("/institutions/${institutionId}/filings/2017/submissions/${submissionId}/sign")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .body(StringBody(""" { "signed": true } """)).asJSON
           .check(status is 200)
-          .check(jsonPath("$.file.totalLARS") is "164"))
+          .check(jsonPath("$.status.code") is "10"))
 
   }
 
