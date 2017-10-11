@@ -57,6 +57,12 @@ class FilingSimulation extends Simulation {
           .header("cfpb-hmda-institutions", "${institutionId}")
           .bodyPart(RawFileBodyPart("file", "${fileName}"))
           .check(status is 202))
+        .pause(10)
+        .exec(http("View edits")
+          .get("/institutions/${institutionId}/filings/2017/submissions/${submissionId}/edits")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .check(status is 200)
+          .check(jsonPath("$.status.code") is "8"))
 
   }
 
