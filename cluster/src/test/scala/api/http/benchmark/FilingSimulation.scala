@@ -63,6 +63,24 @@ class FilingSimulation extends Simulation {
           .header("cfpb-hmda-institutions", "${institutionId}")
           .check(status is 200)
           .check(jsonPath("$.status.code") is "8"))
+        .pause(5)
+        .exec(http("Validate Quality Edits")
+          .post("/institutions/${institutionId}/filings/2017/submissions/${submissionId}/edits/quality")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .body(StringBody("""{ "verified": true }""")).asJSON
+          .check(status is 200))
+        .pause(1)
+        .exec(http("Validate Macro Edits")
+          .post("/institutions/${institutionId}/filings/2017/submissions/${submissionId}/edits/macro")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .body(StringBody("""{ "verified": true }""")).asJSON
+          .check(status is 200))
+        .pause(1)
+        .exec(http("Get Summary")
+          .get("/institutions/${institutionId}/filings/2017/submissions/${submissionId}/summary")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .check(status is 200)
+          .check(jsonPath("$.file.totalLARS") is "164"))
 
   }
 
