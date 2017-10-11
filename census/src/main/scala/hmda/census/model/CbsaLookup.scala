@@ -10,7 +10,7 @@ import com.github.tototoshi.csv.CSVParser.parse
 object CbsaLookup extends CbsaResourceUtils {
   val values: Seq[Cbsa] = {
     val lines = resourceLines("/jul_2015_cbsa.csv", "ISO-8859-1")
-    lines.map { line =>
+    lines.drop(3).map { line =>
       val values = parse(line, '\\', ',', '"').getOrElse(List())
       val cbsaCode = values(0)
       val metroDivCode = values(1)

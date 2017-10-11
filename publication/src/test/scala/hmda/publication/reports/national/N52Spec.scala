@@ -25,7 +25,7 @@ class N52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
     system.terminate()
   }
 
-  val fips = CbsaLookup.values.map(_.cbsa)
+  val fips = CbsaLookup.values.map(_.cbsa).filterNot(_.isEmpty)
   val fipsGen = Gen.oneOf(fips)
   def propType = Gen.oneOf(1, 2).sample.get
 
