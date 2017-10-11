@@ -24,8 +24,8 @@ import spray.json.{ JsBoolean, JsFalse, JsObject, JsTrue }
 
 import scala.util.{ Failure, Success }
 import scala.concurrent.{ ExecutionContext, Future }
-import javax.mail._
-import javax.mail.internet.{ InternetAddress, MimeMessage }
+//import javax.mail._
+//import javax.mail.internet.{ InternetAddress, MimeMessage }
 
 import com.typesafe.config.ConfigFactory
 import hmda.model.institution.Institution
@@ -97,15 +97,13 @@ trait SubmissionSignPaths
 
     onComplete(fSubmission) {
       case Success(sub) =>
-        if (signed) {
-          emailSignature(supervisor, sub)
-        }
+        //if (signed) emailSignature(supervisor, sub)
         complete(ToResponseMarshallable(Receipt(sub.end, sub.receipt, sub.status)))
       case Failure(error) => completeWithInternalError(uri, error)
     }
   }
 
-  private def emailSignature(supervisor: ActorRef, submission: Submission)(implicit ec: ExecutionContext) = {
+  /*private def emailSignature(supervisor: ActorRef, submission: Submission)(implicit ec: ExecutionContext) = {
     val emails = findEmailsById(submission.id.institutionId)
     val querySupervisor = system.actorSelection("/user/query-supervisor/singleton")
     val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
@@ -161,5 +159,5 @@ trait SubmissionSignPaths
     val year = zonedTime.getYear
 
     s"$month/$day/$year"
-  }
+  }*/
 }
