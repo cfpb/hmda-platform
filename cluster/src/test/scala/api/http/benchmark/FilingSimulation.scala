@@ -1,15 +1,12 @@
 package api.http.benchmark
 
 import com.typesafe.config.ConfigFactory
-import hmda.api.protocol.admin.WriteInstitutionProtocol
-import hmda.model.institution.Institution
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
-
+import scala.concurrent.duration._
 import scala.language.postfixOps
-import spray.json._
 
-class FilingSimulation extends Simulation with WriteInstitutionProtocol {
+class FilingSimulation extends Simulation {
 
   val config = ConfigFactory.load()
   val host = config.getString("hmda.benchmark.host")
@@ -17,6 +14,7 @@ class FilingSimulation extends Simulation with WriteInstitutionProtocol {
   val adminPort = config.getInt("hmda.benchmark.adminPort")
   val nrOfUsers = config.getInt("hmda.benchmark.nrOfUsers")
   val rampUpTime = config.getInt("hmda.benchmark.rampUpTime")
+  val feeder = csv(config.getString("hmda.benchmark.feederFile"))
 
   val institutionIds = (1 to nrOfUsers).toList
 
@@ -31,23 +29,19 @@ class FilingSimulation extends Simulation with WriteInstitutionProtocol {
     //.header("cfpb-hmda-institutions", institutionIds.mkString(","))
     .disableCaching
 
-  object InstitutionScenario {
+  object Institutions {
 
-    def list(institutionId: String) = {
-      exec(http("Institutions")
-        .get("/institutions")
-        .header("cfpb-hmda-institutions", institutionId)
-        .check(status is 200))
-    }
-
-    def create(institutionId: String) = {
-      exec(http("Create Institution")
-        .post(s"http://$host:$adminPort/institutions")
-        .body(StringBody(
-          Institution.empty.copy(id = institutionId, activityYear = 2017).toJson.toString
-        )).asJSON
-        .check(status is 201))
-    }
+    val hmdaFiling =
+      feed(feeder)
+        .exec(http("Search")
+          .get("/institutions")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .check(status is 200))
+        .pause(1)
+        .exec(http("List Filings")
+          .get("/institutions/${institutionId}/filings/2017")
+          .header("cfpb-hmda-institutions", "${institutionId}")
+          .check(status is 200))
 
     def filings(institutionId: String) = {
       exec(http("List Filings")
@@ -55,19 +49,14 @@ class FilingSimulation extends Simulation with WriteInstitutionProtocol {
         .header("cfpb-hmda-institutions", institutionId)
         .check(status is 200))
     }
+
   }
 
-  val listInstitutions = scenario("List Institutions").exec(InstitutionScenario.list("4277"))
-  val createInstitutions = scenario("Create Institutions").exec(InstitutionScenario.create("4277"))
-  val listFilings = scenario("List Filings").exec(InstitutionScenario.filings("4277"))
+  val user = scenario("HMDA User")
+    .exec(Institutions.hmdaFiling)
 
   setUp(
-    listInstitutions.inject(
-      atOnceUsers(1)
-    ).protocols(httpProtocol),
-    createInstitutions.inject(atOnceUsers(1)).protocols(httpProtocol),
-    listFilings.inject(atOnceUsers(1))
-      .protocols(httpProtocol)
+    user.inject(rampUsers(nrOfUsers) over (rampUpTime seconds)).protocols(httpProtocol)
   )
 
 }
