@@ -1,7 +1,5 @@
 package hmda.api.http.institutions.submissions
 
-import java.time.{ ZoneOffset, ZonedDateTime }
-
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.pattern.ask
@@ -20,19 +18,20 @@ import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.SubmissionManager
+import hmda.query.repository.KeyCloakRepository
 import spray.json.{ JsBoolean, JsFalse, JsObject, JsTrue }
 
 import scala.util.{ Failure, Success }
 import scala.concurrent.{ ExecutionContext, Future }
-import javax.mail._
+/*import javax.mail._
 import javax.mail.internet.{ InternetAddress, MimeMessage }
 
 import com.typesafe.config.ConfigFactory
 import hmda.model.institution.Institution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.repository.KeyCloakRepository
 import hmda.query.view.institutions.InstitutionView
 import hmda.query.view.institutions.InstitutionView.GetInstitutionById
+import java.time.{ ZoneOffset, ZonedDateTime }*/
 
 trait SubmissionSignPaths
     extends InstitutionProtocol
@@ -97,15 +96,13 @@ trait SubmissionSignPaths
 
     onComplete(fSubmission) {
       case Success(sub) =>
-        if (signed) {
-          emailSignature(supervisor, sub)
-        }
+        //if (signed) emailSignature(supervisor, sub)
         complete(ToResponseMarshallable(Receipt(sub.end, sub.receipt, sub.status)))
       case Failure(error) => completeWithInternalError(uri, error)
     }
   }
 
-  private def emailSignature(supervisor: ActorRef, submission: Submission)(implicit ec: ExecutionContext) = {
+  /*private def emailSignature(supervisor: ActorRef, submission: Submission)(implicit ec: ExecutionContext) = {
     val emails = findEmailsById(submission.id.institutionId)
     val querySupervisor = system.actorSelection("/user/query-supervisor/singleton")
     val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
@@ -161,5 +158,5 @@ trait SubmissionSignPaths
     val year = zonedTime.getYear
 
     s"$month/$day/$year"
-  }
+  }*/
 }
