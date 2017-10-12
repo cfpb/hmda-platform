@@ -11,6 +11,7 @@ trait DisclosureReport {
   val table: String
   val year: Int
   val msa: MSAReport
+  val reportDate: String
 
   val reportType: ReportTypeEnum = Disclosure
 

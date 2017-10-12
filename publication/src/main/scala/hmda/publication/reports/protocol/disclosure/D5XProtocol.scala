@@ -2,25 +2,24 @@ package hmda.publication.reports.protocol.disclosure
 
 import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
-import hmda.publication.reports.disclosure.D53
+import hmda.publication.reports.disclosure.D5X
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
-
 import spray.json._
 import spray.json.DefaultJsonProtocol
 
-object D53Protocol
+object D5XProtocol
     extends DefaultJsonProtocol
     with ReportTypeEnumProtocol
     with MSAReportProtocol
     with ApplicantIncomeProtocol {
 
-  implicit object D53Format extends RootJsonFormat[D53] {
+  implicit object D5XFormat extends RootJsonFormat[D5X] {
 
-    override def write(obj: D53): JsValue = {
+    override def write(obj: D5X): JsValue = {
       JsObject(
         "respondentId" -> JsString(obj.respondentId),
         "institutionName" -> JsString(obj.institutionName),
-        "table" -> JsString("5-3"),
+        "table" -> JsString(obj.table),
         "type" -> JsString(Disclosure.toString),
         "desc" -> JsString(obj.description),
         "year" -> JsNumber(obj.year),
@@ -31,26 +30,27 @@ object D53Protocol
       )
     }
 
-    override def read(json: JsValue): D53 = json.asJsObject.getFields(
+    override def read(json: JsValue): D5X = json.asJsObject.getFields(
       "respondentId",
       "institutionName",
-      "table",
-      "type",
-      "desc",
       "year",
       "reportDate",
       "msa",
       "applicantIncomes",
-      "total"
+      "total",
+      "table",
+      "desc"
     ) match {
-        case Seq(respondentId, institutionName, table, reportType, description, year, reportDate, msa, applicantIncomes, total) =>
-          D53(
+        case Seq(respondentId, institutionName, year, reportDate, msa, applicantIncomes, total, table, desc) =>
+          D5X(
             respondentId.convertTo[String],
             institutionName.convertTo[String],
             year.convertTo[Int],
             msa.convertTo[MSAReport],
             applicantIncomes.convertTo[List[ApplicantIncome]],
             total.convertTo[List[Disposition]],
+            table.convertTo[String],
+            desc.convertTo[String],
             reportDate.convertTo[String]
           )
       }

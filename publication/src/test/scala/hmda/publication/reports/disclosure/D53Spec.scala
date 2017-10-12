@@ -28,12 +28,11 @@ class D53Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
 
   val respId = "98765"
   val fips = 18700 //Corvallis, OR
-  def loanType = Gen.oneOf(2, 3, 4).sample.get
   def propType = Gen.oneOf(1, 2).sample.get
 
   val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
     val geo = lar.geography.copy(msa = fips.toString)
-    val loan = lar.loan.copy(loanType = loanType, propertyType = propType, purpose = 1)
+    val loan = lar.loan.copy(propertyType = propType, purpose = 3)
     lar.copy(respondentId = respId, geography = geo, loan = loan)
   }
 
