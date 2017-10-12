@@ -32,6 +32,10 @@ Module responsible for validating incoming data by executing validation rules as
 
 Module responsible for persisting information into the system. It becomes the system of record for HMDA data
 
+### Cluster
+
+Module responsible for managing the various cluster roles, as well as starting the Hmda Platform
+
 ### API
 
 This module contains both public APIs for HMDA data for general use by third party clients and web applications, as well as endpoints for receiving data and providing information about the filing process for Financial Institutions
