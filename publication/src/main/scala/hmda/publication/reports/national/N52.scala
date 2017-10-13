@@ -48,7 +48,7 @@ case class N52(
         disposition + originalDisposition
       })
 
-      N52(year, reportDate, combinedIncomes, combinedDispositions, table, description)
+      N52(year, reportDate, combinedIncomes, combinedDispositions)
     }
   }
 }
