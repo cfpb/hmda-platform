@@ -15,7 +15,7 @@ import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 class N52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
-
+  /*
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
@@ -62,5 +62,5 @@ class N52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
       races.head.dispositions.map(_.disposition) mustBe expectedDispositions
     }
   }
-
+*/
 }
