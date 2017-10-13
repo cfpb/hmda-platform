@@ -15,7 +15,7 @@ import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 class N52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
-  /*
+
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
@@ -29,7 +29,7 @@ class N52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   val fipsGen = Gen.oneOf(fips)
   def propType = Gen.oneOf(1, 2).sample.get
 
-  val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
+  val lars = larListGen.sample.get.map { lar: LoanApplicationRegister =>
     val geo = lar.geography.copy(msa = fipsGen.sample.get)
     val loan = lar.loan.copy(loanType = 1, propertyType = propType, purpose = 1)
     lar.copy(geography = geo, loan = loan)
@@ -62,5 +62,5 @@ class N52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
       races.head.dispositions.map(_.disposition) mustBe expectedDispositions
     }
   }
-*/
+
 }
