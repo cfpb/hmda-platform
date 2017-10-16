@@ -62,7 +62,7 @@ object N52 {
   // Property Type 1,2
   // Purpose of Loan 1
   def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[N52] = {
-    val fipsList = MsaIncomeLookup.values.map(_.fips)
+    val fipsList = MsaIncomeLookup.values.map(_.fips).filterNot(_ == 99999)
 
     val a52List = fipsList.map(fipsCode => A52.generate(larSource, fipsCode))
     val n52f = Future.sequence(a52List).map(seq => {
