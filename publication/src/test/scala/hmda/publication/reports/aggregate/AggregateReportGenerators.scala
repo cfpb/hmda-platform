@@ -17,13 +17,15 @@ object AggregateReportGenerators {
     } yield A52(year, msa, applicantIncomes, total, reportDate)
   }
 
-  implicit def a53Gen: Gen[A53] = {
+  implicit def a5XGen: Gen[A5X] = {
     for {
       msa <- msaReportGen
       year = Calendar.getInstance().get(Calendar.YEAR)
       reportDate = formatDate(Calendar.getInstance().toInstant)
       applicantIncomes <- Gen.listOfN(5, applicantIncomeGen)
+      table <- Gen.alphaStr
+      description <- Gen.alphaStr
       total <- totalDispositionGen
-    } yield A53(year, msa, applicantIncomes, total, reportDate)
+    } yield A5X(year, msa, applicantIncomes, total, table, description, reportDate)
   }
 }

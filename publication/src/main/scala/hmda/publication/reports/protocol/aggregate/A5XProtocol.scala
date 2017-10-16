@@ -2,20 +2,20 @@ package hmda.publication.reports.protocol.aggregate
 
 import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
 import hmda.model.publication.reports.ReportTypeEnum._
-import hmda.publication.reports.aggregate.A53
+import hmda.publication.reports.aggregate.A5X
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
 import spray.json._
 
-object A53Protocol
+object A5XProtocol
     extends DefaultJsonProtocol
     with ReportTypeEnumProtocol
     with MSAReportProtocol
     with ApplicantIncomeProtocol {
 
-  implicit object A53Format extends RootJsonFormat[A53] {
-    override def write(obj: A53): JsValue = {
+  implicit object A5XFormat extends RootJsonFormat[A5X] {
+    override def write(obj: A5X): JsValue = {
       JsObject(
-        "table" -> JsString("5-3"),
+        "table" -> JsString(obj.table),
         "type" -> JsString(Aggregate.toString),
         "desc" -> JsString(obj.description),
         "year" -> JsNumber(obj.year),
@@ -26,7 +26,7 @@ object A53Protocol
       )
     }
 
-    override def read(json: JsValue): A53 = json.asJsObject.getFields(
+    override def read(json: JsValue): A5X = json.asJsObject.getFields(
       "table",
       "type",
       "desc",
@@ -37,11 +37,13 @@ object A53Protocol
       "total"
     ) match {
         case Seq(table, reportType, description, year, reportDate, msa, applicantIncomes, total) =>
-          A53(
+          A5X(
             year.convertTo[Int],
             msa.convertTo[MSAReport],
             applicantIncomes.convertTo[List[ApplicantIncome]],
             total.convertTo[List[Disposition]],
+            table.convertTo[String],
+            description.convertTo[String],
             reportDate.convertTo[String]
           )
       }
