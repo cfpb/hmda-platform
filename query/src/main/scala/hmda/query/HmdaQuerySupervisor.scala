@@ -1,12 +1,14 @@
 package hmda.query
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.cluster.client.ClusterClientReceptionist
 import akka.util.Timeout
 import hmda.persistence.model.HmdaSupervisorActor
 import hmda.query.view.filing.HmdaFilingView
 import hmda.query.view.institutions.InstitutionView
 import hmda.persistence.PersistenceConfig._
 import hmda.persistence.messages.CommonMessages._
+
 import scala.concurrent.duration._
 
 object HmdaQuerySupervisor {
@@ -27,6 +29,8 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
 
   implicit val timeout = Timeout(duration.seconds)
   implicit val ec = context.dispatcher
+
+  ClusterClientReceptionist(context.system).registerService(self)
 
   override def receive: Receive = super.receive orElse {
     case FindHmdaFilingView(period) =>

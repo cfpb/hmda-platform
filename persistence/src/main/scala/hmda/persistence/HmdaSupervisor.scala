@@ -1,6 +1,7 @@
 package hmda.persistence
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.cluster.client.ClusterClientReceptionist
 import hmda.model.fi.SubmissionId
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor
@@ -24,6 +25,8 @@ object HmdaSupervisor {
 class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
 
   import HmdaSupervisor._
+
+  ClusterClientReceptionist(context.system).registerService(self)
 
   override def receive: Receive = super.receive orElse {
 
