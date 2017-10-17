@@ -5,7 +5,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.query.repository.filing.FilingCassandraRepository
-import hmda.publication.reports.protocol.aggregate.A52Protocol._
+import hmda.publication.reports.protocol.aggregate.A5XProtocol._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -27,5 +27,7 @@ class AggregateReports(val sys: ActorSystem, val mat: ActorMaterializer) extends
     a52F.map { a52 =>
       println(a52.toJson.prettyPrint)
     }
+
+    // A53.generate(larSource, fipsCode)
   }
 }

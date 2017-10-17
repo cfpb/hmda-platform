@@ -5,7 +5,7 @@ import akka.stream.scaladsl.Source
 import hmda.census.model.MsaIncomeLookup
 import hmda.model.publication.reports._
 import hmda.publication.reports._
-import hmda.publication.reports.aggregate.A52
+import hmda.publication.reports.aggregate.{ A52, A5X }
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.query.model.filing.LoanApplicationRegisterQuery
@@ -20,11 +20,11 @@ case class N52(
     table: String = N52.metaData.reportTable,
     description: String = N52.metaData.description
 ) extends NationalAggregateReport {
-  def +(a52: A52): N52 = {
+  def +(a5X: A5X): N52 = {
     if (applicantIncomes.isEmpty) {
-      N52(a52.year, a52.reportDate, a52.applicantIncomes, a52.total)
+      N52(a5X.year, a5X.reportDate, a5X.applicantIncomes, a5X.total)
     } else {
-      val combinedIncomes = a52.applicantIncomes.map(income => {
+      val combinedIncomes = a5X.applicantIncomes.map(income => {
         val newC = applicantIncomes.find(i => i.applicantIncome == income.applicantIncome).get.borrowerCharacteristics
         val originalC = income.borrowerCharacteristics
 
@@ -43,7 +43,7 @@ case class N52(
         ApplicantIncome(income.applicantIncome, List(cR, cE, cM))
       })
 
-      val combinedDispositions = a52.total.map(disposition => {
+      val combinedDispositions = a5X.total.map(disposition => {
         val originalDisposition = total.find(d => d.disposition == disposition.disposition).get
         disposition + originalDisposition
       })
