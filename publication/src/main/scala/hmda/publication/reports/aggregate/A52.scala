@@ -56,7 +56,6 @@ object A52 {
       year <- yearF
       total <- totalF
     } yield {
-
       A52(
         year,
         msa,
