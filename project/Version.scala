@@ -23,4 +23,5 @@ object Version {
   val alpakka = "0.13"
   val cassandraDriver = "3.2.0"
   val javaMail = "1.4.7"
+  val gatling = "2.3.0"
 }

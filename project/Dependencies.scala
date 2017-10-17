@@ -41,4 +41,7 @@ object Dependencies {
   val alpakkaCassandra = "com.lightbend.akka" %% "akka-stream-alpakka-cassandra" % Version.alpakka
   val cassandraDriver = "com.datastax.cassandra" % "cassandra-driver-core" % Version.cassandraDriver
   val javaMail = "javax.mail" % "mail" % Version.javaMail
+  val gatlingHighcharts = "io.gatling.highcharts" % "gatling-charts-highcharts" % Version.gatling % "test"
+  val gatling = "io.gatling" % "gatling-test-framework" % Version.gatling % "test"
+
 }
