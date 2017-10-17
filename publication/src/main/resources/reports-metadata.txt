@@ -1,5 +1,6 @@
 ReportId,Type,ReportTable,Dispositions,Description
 A52,Aggregate,5-2,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
 D51,Disclosure,5-1,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4-family and manufactured home dwellings, by income, race and ethnicity of applicant"
+D52,Disclosure,5-2,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
 D53,Disclosure,5-3,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications to Refinance Loans on 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
 N52,National Aggregate,5-2,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
