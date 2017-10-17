@@ -2,20 +2,20 @@ package hmda.publication.reports.protocol.national
 
 import hmda.model.publication.reports.ReportTypeEnum._
 import hmda.model.publication.reports.{ ApplicantIncome, Disposition }
-import hmda.publication.reports.national.N52
+import hmda.publication.reports.national.N5X
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
 import spray.json._
 
-object N52Protocol
+object N5XProtocol
     extends DefaultJsonProtocol
     with ReportTypeEnumProtocol
     with MSAReportProtocol
     with ApplicantIncomeProtocol {
 
-  implicit object N52Format extends RootJsonFormat[N52] {
-    override def write(obj: N52): JsValue = {
+  implicit object N5XFormat extends RootJsonFormat[N5X] {
+    override def write(obj: N5X): JsValue = {
       JsObject(
-        "table" -> JsString("5-2"),
+        "table" -> JsString(obj.table),
         "type" -> JsString(NationalAggregate.toString),
         "desc" -> JsString(obj.description),
         "year" -> JsNumber(obj.year),
@@ -25,7 +25,7 @@ object N52Protocol
       )
     }
 
-    override def read(json: JsValue): N52 = json.asJsObject.getFields(
+    override def read(json: JsValue): N5X = json.asJsObject.getFields(
       "table",
       "type",
       "desc",
@@ -35,11 +35,13 @@ object N52Protocol
       "total"
     ) match {
         case Seq(table, reportType, description, year, reportDate, applicantIncomes, total) =>
-          N52(
+          N5X(
             year.convertTo[Int],
-            reportDate.convertTo[String],
             applicantIncomes.convertTo[List[ApplicantIncome]],
-            total.convertTo[List[Disposition]]
+            total.convertTo[List[Disposition]],
+            table.convertTo[String],
+            description.convertTo[String],
+            reportDate.convertTo[String]
           )
       }
   }

@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.query.repository.filing.FilingCassandraRepository
-import hmda.publication.reports.protocol.national.N52Protocol._
+import hmda.publication.reports.protocol.national.N5XProtocol._
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
