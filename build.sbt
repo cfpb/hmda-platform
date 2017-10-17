@@ -3,8 +3,9 @@ import Dependencies._
 import sbtassembly.AssemblyPlugin.autoImport._
 import spray.revolver.RevolverPlugin.autoImport.Revolver
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import io.gatling.sbt.GatlingPlugin
 
-val commonDeps = Seq(logback, scalaTest, scalaCheck)
+val commonDeps = Seq(logback, scalaTest, scalaCheck, gatling, gatlingHighcharts)
 
 val akkaDeps = commonDeps ++ Seq(akka, akkaCluster, akkaClusterTools, akkaSlf4J, akkaStream, akkaTestkit, constructr, constructrZookeeper, akkaClusterManagement)
 
@@ -58,6 +59,7 @@ lazy val hmda = (project in file("."))
 
 
 lazy val cluster = (project in file("cluster"))
+  .enablePlugins(GatlingPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -65,7 +67,7 @@ lazy val cluster = (project in file("cluster"))
     )
   )
   .dependsOn(
-    modelJVM,
+    modelJVM % "compile->compile;test->test",
     parserJVM,
     apiModel,
     api,
