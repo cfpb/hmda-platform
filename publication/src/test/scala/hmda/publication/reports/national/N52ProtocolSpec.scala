@@ -19,7 +19,7 @@ class N52ProtocolSpec extends PropSpec with PropertyChecks with MustMatchers {
       n52.toJson mustBe JsObject(
         "table" -> JsString("5-2"),
         "type" -> JsString("NationalAggregate"),
-        "desc" -> JsString("Disposition of applications for conventional home purchase loans on 1-to-4 family and manufactured home dwellings"),
+        "desc" -> JsString("Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"),
         "year" -> JsNumber(n52.year),
         "reportDate" -> JsString(n52.reportDate),
         "applicantIncomes" -> n52.applicantIncomes.toJson,
