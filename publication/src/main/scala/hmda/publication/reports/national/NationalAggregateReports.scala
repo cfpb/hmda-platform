@@ -24,5 +24,8 @@ class NationalAggregateReports(val sys: ActorSystem, val mat: ActorMaterializer)
     n52F.map { n52 =>
       println(n52.toJson.prettyPrint)
     }
+
+    val n53F = N53.generate(larSource)
+    n53F.map(report => println(report.toJson.prettyPrint))
   }
 }
