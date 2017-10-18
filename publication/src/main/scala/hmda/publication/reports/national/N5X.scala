@@ -7,20 +7,21 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports._
 import hmda.publication.reports._
 import hmda.publication.reports.aggregate.{ A5X, A5XReportCreator }
-import hmda.publication.reports.util.ReportUtil._
 
 import scala.concurrent.Future
 
 case class N5X(
-    year: Int = 0,
-    applicantIncomes: List[ApplicantIncome] = List(),
-    total: List[Disposition] = List(),
-    table: String = "5-X",
-    description: String = "description",
-    reportDate: String = formattedCurrentDate
+    year: Int,
+    applicantIncomes: List[ApplicantIncome],
+    total: List[Disposition],
+    table: String,
+    description: String,
+    reportDate: String
 ) extends NationalAggregateReport {
 
   def +(a5X: A5X): N5X = {
+    if (table != a5X.table) throw new IllegalArgumentException
+
     val incomes: List[ApplicantIncome] =
       if (applicantIncomes.isEmpty) a5X.applicantIncomes else combinedIncomes(a5X.applicantIncomes)
 
@@ -71,7 +72,9 @@ object N5X {
     val agReports = fipsList.map(fipsCode => report.generate(larSource, fipsCode))
 
     Future.sequence(agReports).map(seq => {
-      seq.foldLeft(N5X())((n5X, a5X) => n5X + a5X)
+      val a = seq.head
+      val initialN = N5X(a.year, a.applicantIncomes, a.total, a.table, a.description, a.reportDate)
+      seq.tail.foldLeft(initialN)((n5X, a5X) => n5X + a5X)
     })
   }
 }
