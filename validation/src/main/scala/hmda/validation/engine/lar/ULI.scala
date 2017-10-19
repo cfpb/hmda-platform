@@ -46,7 +46,7 @@ object ULI {
     i % 97
   }
 
-  def calculateCheckDigit(i: BigInt) = {
+  def calculateCheckDigit(i: BigInt): BigInt = {
     98 - i
   }
 
