@@ -13,8 +13,8 @@ class ULISpec extends WordSpec with MustMatchers {
       ULI.generateULI(validULI) mustBe "10Bx939c5543TqA1144M999143X38"
     }
     "Validate ULI" in {
-      ULI.validate(validULI + "38") mustBe true
-      ULI.validate(invalidULI) mustBe false
+      ULI.validateULI(validULI + "38") mustBe true
+      ULI.validateULI(invalidULI) mustBe false
     }
   }
 }

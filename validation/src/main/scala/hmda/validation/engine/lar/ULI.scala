@@ -58,7 +58,7 @@ object ULI {
     uli + checkDigit(uli).toString()
   }
 
-  def validate(uli: String): Boolean = {
+  def validateULI(uli: String): Boolean = {
     calculateMod(BigInt(convert(uli))) == 1
   }
 
