@@ -7,14 +7,14 @@ import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
 import akka.http.scaladsl.server.Directives._
 import hmda.api.model.public.ULIModel.{ Loan, ULI, ULICheck, ULIValidated }
-import hmda.api.protocol.public.ULIProtocol._
 import hmda.validation.engine.lar.ULI._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import hmda.api.protocol.public.ULIProtocol
 
 import scala.concurrent.ExecutionContext
 
-trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives {
+trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ULIProtocol {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val timeout: Timeout
