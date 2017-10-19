@@ -2,7 +2,7 @@ package hmda.validation.engine.lar
 
 //See https://www.consumerfinance.gov/eregulations/1003-C/2015-26607_20180101#1003-C-1
 
-object ULIValidation {
+object ULI {
 
   val conversionTable = Map(
     "a" -> 10,
