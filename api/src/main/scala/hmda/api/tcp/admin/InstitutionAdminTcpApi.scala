@@ -46,7 +46,7 @@ class InstitutionAdminTcpApi(supervisor: ActorRef) extends TcpApi with FlowUtils
       .via(byte2StringFlow)
       .map(x => InstitutionParser(x))
       .mapAsync(parallelism = buffer)(i => createInstitution(i))
-      .mapAsync(parallelism = buffer)(i => createFiling(i))
+      .mapAsync(parallelism = buffer)(i => createFilings(i))
       .map(e => ByteString(e.toString))
 
   override val tcp: Future[Tcp.ServerBinding] = Tcp().bindAndHandle(
@@ -67,11 +67,15 @@ class InstitutionAdminTcpApi(supervisor: ActorRef) extends TcpApi with FlowUtils
     } yield i
   }
 
-  private def createFiling(institution: Institution): Future[Filing] = {
+  private def createFilings(institution: Institution): Future[Filing] = {
     val fFilingPersistence = (supervisor ? FindFilings(FilingPersistence.name, institution.id)).mapTo[ActorRef]
     for {
       actor <- fFilingPersistence
       f <- (actor ? CreateFiling(Filing(institution.activityYear.toString, institution.id)))
+        .mapTo[Option[Filing]]
+        .map(x => x.getOrElse(Filing()))
+
+      _ <- (actor ? CreateFiling(Filing((institution.activityYear - 1).toString, institution.id)))
         .mapTo[Option[Filing]]
         .map(x => x.getOrElse(Filing()))
     } yield f

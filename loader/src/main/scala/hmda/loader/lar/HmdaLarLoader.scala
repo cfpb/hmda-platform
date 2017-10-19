@@ -1,24 +1,30 @@
 package hmda.loader.lar
 
 import java.io.File
+import java.time.Instant
 
-import akka.actor.{ActorPath, ActorRef, ActorSystem}
+import akka.actor.{ ActorPath, ActorRef, ActorSystem }
 import akka.pattern.ask
-import akka.cluster.client.{ClusterClient, ClusterClientSettings}
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{FileIO, Sink}
-import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
+import akka.cluster.client.{ ClusterClient, ClusterClientSettings }
+import akka.stream.{ ActorMaterializer, IOResult }
+import akka.stream.scaladsl.{ FileIO, Sink, Source }
+import akka.util.{ ByteString, Timeout }
 import hmda.api.util.FlowUtils
-import hmda.model.fi.{Created, Submission, SubmissionId}
-import hmda.persistence.HmdaSupervisor.{FindProcessingActor, FindSubmissions}
+import hmda.model.fi.{ Created, Submission }
+import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
-import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
+import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
+import hmda.persistence.processing.HmdaRawFile.AddLine
+import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.processing.SubmissionManager
+import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.processing.SubmissionManager.AddFileName
+import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 import org.slf4j.LoggerFactory
 
+import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.{ Failure, Success }
 
 object HmdaLarLoader extends FlowUtils {
 
@@ -29,6 +35,7 @@ object HmdaLarLoader extends FlowUtils {
   val hmdaClusterIP = config.getString("hmda.lar.host")
   val hmdaClusterPort = config.getInt("hmda.lar.port")
   val actorTimeout = config.getInt("hmda.actorTimeout")
+  val flowParallelism = config.getInt("hmda.lar.parallelism")
 
   implicit val timeout = Timeout(actorTimeout.seconds)
 
@@ -54,48 +61,44 @@ object HmdaLarLoader extends FlowUtils {
       exitSys(log, "File does not exist", 2)
     }
 
-    val source = FileIO.fromPath(file.toPath)
-
-    source.take(1)
-        .runWith(Sink.foreach(println))
-
-
-
-
-
-    val institutionId = "institutionID"
-    val period = "2017"
-
-    //processLars(institutionId, period)
+    val fileName = file.getName
+    val parts = fileName.split("_")
+    val institutionId = parts.head
+    val finalPart = parts.tail.head
+    val period = finalPart.substring(0, finalPart.indexOf("."))
+    processLars(file, fileName, institutionId, period)
 
   }
 
-  private def processLars(institutionId: String, period: String) = {
-    val submissionId = SubmissionId(institutionId, period)
+  private def processLars(file: File, fileName: String, institutionId: String, period: String) = {
+    val uploadTimestamp = Instant.now.toEpochMilli
+    val source = FileIO.fromPath(file.toPath)
 
-    val message = FindProcessingActor(SubmissionManager.name, submissionId)
-
-    val fProcessingActor = (clusterClient ? ClusterClient.Send("/user/supervisor/singleton", message, localAffinity = true)).mapTo[ActorRef]
     val fSubmissionsActor = (clusterClient ? ClusterClient
-      .Send("/user/supervisor/singleton",
+      .Send(
+        "/user/supervisor/singleton",
         FindSubmissions(SubmissionPersistence.name, institutionId, period),
-        localAffinity = true)).mapTo[ActorRef]
+        localAffinity = true
+      )).mapTo[ActorRef]
 
-    //TODO: Do we need this to load previous year's data?
-    //(clusterClient ? ClusterClient.Send("/user/supervisor/singleton", FindHmdaFiling(period), localAffinity = true)).mapTo[ActorRef]
-    //(clusterClient ? ClusterClient.Send("/user/query-supervisor", FindHmdaFilingView(period), localAffinity = true)).mapTo[ActorRef]
+    (clusterClient ? ClusterClient.Send("/user/supervisor/singleton", FindHmdaFiling(period), localAffinity = true)).mapTo[ActorRef]
+    (clusterClient ? ClusterClient.Send("/user/query-supervisor", FindHmdaFilingView(period), localAffinity = true)).mapTo[ActorRef]
 
     val fUploadSubmission = for {
-      p <- fProcessingActor
       s <- fSubmissionsActor
-      fSubmission <- (s ? GetSubmissionById(submissionId)).mapTo[Submission]
-    } yield (fSubmission, fSubmission.status == Created, p)
+      fSubmission <- (s ? CreateSubmission).mapTo[Option[Submission]]
+      submission = fSubmission.getOrElse(Submission())
+    } yield (submission, submission.status == Created)
 
     fUploadSubmission.onComplete {
-      case Success((submission, true, processingActor)) =>
-        uploadData(processingActor, 0L, submission)
+      case Success((submission, true)) =>
+        val message = FindProcessingActor(SubmissionManager.name, submission.id)
+        val fProcessingActor = (clusterClient ? ClusterClient.Send("/user/supervisor/singleton", message, localAffinity = true)).mapTo[ActorRef]
+        fProcessingActor.onComplete { processingActor =>
+          uploadData(processingActor.getOrElse(ActorRef.noSender), uploadTimestamp, fileName, submission, source)
+        }
 
-      case Success((_, false, _)) =>
+      case Success((_, false)) =>
         log.error("submission not available for upload")
         sys.exit(0)
 
@@ -106,6 +109,23 @@ object HmdaLarLoader extends FlowUtils {
     }
   }
 
-  private def uploadData(processingActor: ActorRef, uploadTimestamp: Long, submission:Submission ): Unit = ???
+  private def uploadData(processingActor: ActorRef, uploadTimestamp: Long, fileName: String, submission: Submission, source: Source[ByteString, Future[IOResult]]): Unit = {
+    processingActor ! AddFileName(fileName)
+    processingActor ! StartUpload
+    val uploadedF = source
+      .via(framing)
+      .map(_.utf8String)
+      .mapAsync(parallelism = flowParallelism)(line => (processingActor ? AddLine(uploadTimestamp, line)).mapTo[Persisted.type])
+      .runWith(Sink.ignore)
+
+    uploadedF.onComplete {
+      case Success(_) =>
+        processingActor ! CompleteUpload
+
+      case Failure(error) =>
+        processingActor ! Shutdown
+        log.error(error.getLocalizedMessage)
+    }
+  }
 
 }
