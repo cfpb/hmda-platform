@@ -33,27 +33,33 @@ object ULI {
     "z" -> 35
   )
 
-  private def convert(uli: String): String = uli
+  def convert(loanId: String): String = loanId
     .map(_.toLower)
     .map { c =>
       if (!c.isDigit)
         conversionTable(c.toString).toString
       else
         c
-    }.mkString("") + "00"
+    }.mkString("")
 
-  private def calculateMod(i: BigInt): BigInt = {
+  def calculateMod(i: BigInt): BigInt = {
     i % 97
   }
 
-  private def calculateCheckDigit(i: BigInt) = {
+  def calculateCheckDigit(i: BigInt) = {
     98 - i
   }
 
-  def checkDigit(uli: String): String = {
-    val checkDigit =
-      calculateCheckDigit(calculateMod(BigInt(convert(uli))))
-    uli + checkDigit.toString
+  def checkDigit(uli: String): BigInt = {
+    calculateCheckDigit(calculateMod(BigInt(convert(uli) ++ "00")))
+  }
+
+  def generateULI(uli: String): String = {
+    uli + checkDigit(uli).toString()
+  }
+
+  def validate(uli: String): Boolean = {
+    calculateMod(BigInt(convert(uli))) == 1
   }
 
 }
