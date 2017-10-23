@@ -10,9 +10,10 @@ import akka.stream.{ ActorMaterializer, IOResult }
 import akka.stream.scaladsl.{ FileIO, Sink, Source }
 import akka.util.{ ByteString, Timeout }
 import hmda.api.util.FlowUtils
-import hmda.model.fi.{ Created, Submission }
-import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor, FindSubmissions }
-import hmda.persistence.institutions.SubmissionPersistence
+import hmda.model.fi.{ Created, Filing, Submission }
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindProcessingActor, FindSubmissions }
+import hmda.persistence.institutions.FilingPersistence.CreateFiling
+import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
@@ -92,10 +93,17 @@ object HmdaLarLoader extends FlowUtils {
 
     fUploadSubmission.onComplete {
       case Success((submission, true)) =>
-        val message = FindProcessingActor(SubmissionManager.name, submission.id)
-        val fProcessingActor = (clusterClient ? ClusterClient.Send("/user/supervisor/singleton", message, localAffinity = true)).mapTo[ActorRef]
-        fProcessingActor.onComplete { processingActor =>
-          uploadData(processingActor.getOrElse(ActorRef.noSender), uploadTimestamp, fileName, submission, source)
+        val findSubmissionManager = FindProcessingActor(SubmissionManager.name, submission.id)
+        val findFilingPersistence = FindFilings(FilingPersistence.name, institutionId)
+        val fProcessingActor = (clusterClient ? ClusterClient.Send("/user/supervisor/singleton", findSubmissionManager, localAffinity = true)).mapTo[ActorRef]
+        val fFilingPersistence = (clusterClient ? ClusterClient.Send("/user/supervisor/singleton", findFilingPersistence, localAffinity = true)).mapTo[ActorRef]
+
+        for {
+          f <- fFilingPersistence
+          p <- fProcessingActor
+          _ <- (f ? CreateFiling(Filing(period, institutionId))).mapTo[Option[Filing]]
+        } yield {
+          uploadData(p, uploadTimestamp, fileName, submission, source)
         }
 
       case Success((_, false)) =>
