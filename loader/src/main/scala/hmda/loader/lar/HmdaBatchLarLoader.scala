@@ -3,8 +3,8 @@ package hmda.loader.lar
 import java.io.File
 import java.time.Instant
 
-import akka.actor.{ ActorPath, ActorRef, ActorSystem }
 import akka.pattern.ask
+import akka.actor.{ ActorPath, ActorRef, ActorSystem }
 import akka.cluster.client.{ ClusterClient, ClusterClientSettings }
 import akka.stream.{ ActorMaterializer, IOResult }
 import akka.stream.scaladsl.{ FileIO, Sink, Source }
@@ -13,8 +13,8 @@ import hmda.api.util.FlowUtils
 import hmda.model.fi.{ Created, Filing, Submission }
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
-import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
+import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.processing.SubmissionManager
@@ -23,15 +23,16 @@ import hmda.persistence.processing.SubmissionManager.AddFileName
 import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 import org.slf4j.LoggerFactory
 
-import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
-object HmdaLarLoader extends FlowUtils {
+object HmdaBatchLarLoader extends FlowUtils {
 
-  override implicit val system = ActorSystem("hmda-cluster-client")
-  override implicit val materializer = ActorMaterializer()
-  override implicit val ec = system.dispatcher
+  override implicit val system: ActorSystem = ActorSystem("hmda-cluster-client")
+  override implicit val materializer: ActorMaterializer = ActorMaterializer()
+  override implicit val ec: ExecutionContext = system.dispatcher
+
   val hmdaClusterName = config.getString("hmda.clusterName")
   val hmdaClusterIP = config.getString("hmda.lar.host")
   val hmdaClusterPort = config.getInt("hmda.lar.port")
@@ -53,21 +54,21 @@ object HmdaLarLoader extends FlowUtils {
 
   def main(args: Array[String]): Unit = {
 
-    if (args.length < 1) {
-      exitSys(log, "No File argument provided", 1)
+    if (args.length < 2) {
+      exitSys(log, "Please provide a directory containing files with LAR data and period to process", 1)
     }
 
-    val file = new File(args(0))
-    if (!file.exists() || !file.isFile) {
-      exitSys(log, "File does not exist", 2)
+    val path = new File(args(0))
+    if (!path.isDirectory) {
+      exitSys(log, "Argument must be the full path to a directory containing files with LAR data", 2)
     }
 
-    val fileName = file.getName
-    val parts = fileName.split("_")
-    val institutionId = parts.head
-    val finalPart = parts.tail.head
-    val period = finalPart.substring(0, finalPart.indexOf("."))
-    processLars(file, fileName, institutionId, period)
+    val period = args(1)
+
+    val fileList = path.listFiles().toSet
+    val fileNames = fileList.map(file => file.getName).filter(name => name.endsWith(".txt"))
+
+    fileNames.foreach(fileName => processLars(new File(s"$path/$fileName"), s"$fileName", s"${fileName.substring(0, fileName.indexOf("."))}", period))
 
   }
 
