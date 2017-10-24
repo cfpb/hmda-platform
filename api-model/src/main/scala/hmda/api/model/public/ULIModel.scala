@@ -6,6 +6,8 @@ object ULIModel {
   case class ULI(loanId: String, checkDigit: Int, uli: String)
   case class ULICheck(uli: String)
   case class ULIValidated(isValid: Boolean)
-  case class ULIBatchValidated(uli: String, isValid: Boolean)
+  case class ULIBatchValidated(uli: String, isValid: Boolean) {
+    def toCSV: String = s"$uli,$isValid"
+  }
   case class ULIBatchValidatedResponse(ulis: Seq[ULIBatchValidated])
 }
