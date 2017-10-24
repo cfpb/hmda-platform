@@ -1,5 +1,8 @@
 package hmda.validation.engine.lar
 
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+
 //See https://www.consumerfinance.gov/eregulations/1003-C/2015-26607_20180101#1003-C-1
 
 object ULI {
@@ -60,6 +63,11 @@ object ULI {
 
   def validateULI(uli: String): Boolean = {
     calculateMod(BigInt(convert(uli))) == 1
+  }
+
+  def validateULISource(uliSource: Source[String, NotUsed]): Source[(String, Boolean), NotUsed] = {
+    uliSource
+      .map(uli => (uli, validateULI(uli)))
   }
 
 }
