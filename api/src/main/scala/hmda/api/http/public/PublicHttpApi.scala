@@ -16,6 +16,7 @@ import akka.stream.scaladsl.{ Sink, Source }
 import hmda.api.protocol.processing.ApiErrorProtocol
 import hmda.api.protocol.public.ULIProtocol
 import hmda.api.util.FlowUtils
+
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
@@ -41,9 +42,39 @@ trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiE
                   val check = checkDigit(loanId)
                   val uli = ULI(loanId, check.toInt, loanId + check)
                   complete(ToResponseMarshallable(uli))
-                }
+                } ~
+                  fileUpload("file") {
+                    case (_, byteSource) =>
+                      val checkDigitF = processLoanIdFile(byteSource).runWith(Sink.seq)
+                      onComplete(checkDigitF) {
+                        case Success(checkDigits) => {
+                          complete(ToResponseMarshallable(LoanCheckDigitResponse(checkDigits)))
+                        }
+                        case Failure(error) =>
+                          log.error(error.getLocalizedMessage)
+                          complete(ToResponseMarshallable(StatusCodes.InternalServerError))
+                      }
+                    case _ =>
+                      complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                  }
               }
             } ~
+              path("check-digit" / "csv") {
+                timedPost { _ =>
+                  fileUpload("file") {
+                    case (_, byteSource) =>
+                      val checkDigit = processLoanIdFile(byteSource)
+                        .map(l => l.toCSV)
+                        .map(l => l + "\n")
+                        .map(s => ByteString(s))
+
+                      complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), checkDigit))
+
+                    case _ =>
+                      complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                  }
+                }
+              } ~
               path("validate") {
                 timedPost { _ =>
                   entity(as[ULICheck]) { uc =>
@@ -87,6 +118,13 @@ trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiE
           }
       }
     }
+
+  private def processLoanIdFile(byteSource: Source[ByteString, Any]) = {
+    byteSource
+      .via(framing)
+      .map(_.utf8String)
+      .map(loanId => ULI(loanId, checkDigit(loanId).toInt, loanId + checkDigit(loanId)))
+  }
 
   private def processUliFile(byteSource: Source[ByteString, Any]) = {
     byteSource

@@ -32,6 +32,9 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
     "10Bx939c5543TqA1144M999143X38\n" +
     "10Bx939c5543TqA1144M999133X38\n"
 
+  val loanTxt = "10Bx939c5543TqA1144M999143X\n" +
+    "10Cx939c5543TqA1144M999143X"
+
   "Modified LAR Http API" must {
     "return list of modified LARs in proper format" in {
       Get("/institutions/0/filings/2017/lar") ~> publicHttpRoutes ~> check {
@@ -45,6 +48,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
 
   "ULI API" must {
     val uliFile = multiPartFile(uliTxt, "ulis.txt")
+    val loanFile = multiPartFile(loanTxt, "loanIds.txt")
     val loanId = "10Bx939c5543TqA1144M999143X"
     val checkDigit = 38
     val uli = "10Bx939c5543TqA1144M999143X" + checkDigit
@@ -54,6 +58,23 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
     "return check digit and ULI from loan id" in {
       Post("/uli/check-digit", loan) ~> publicHttpRoutes ~> check {
         responseAs[ULI] mustBe ULI(loanId, checkDigit, uli)
+      }
+    }
+    "return check digit and ULI from file of loan ids" in {
+      Post("/uli/check-digit", loanFile) ~> publicHttpRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[LoanCheckDigitResponse].loanIds mustBe Seq(
+          ULI("10Bx939c5543TqA1144M999143X", 38, "10Bx939c5543TqA1144M999143X38"),
+          ULI("10Cx939c5543TqA1144M999143X", 10, "10Cx939c5543TqA1144M999143X10")
+        )
+      }
+    }
+    "return csv with check digit and ULI from file of loan ids" in {
+      Post("/uli/check-digit/csv", loanFile) ~> publicHttpRoutes ~> check {
+        status mustBe StatusCodes.OK
+        val csv = responseAs[String]
+        csv must include("10Bx939c5543TqA1144M999143X,38,10Bx939c5543TqA1144M999143X38")
+        csv must include("10Cx939c5543TqA1144M999143X,10,10Cx939c5543TqA1144M999143X10")
       }
     }
     "Validate ULI" in {
