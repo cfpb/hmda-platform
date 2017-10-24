@@ -55,7 +55,6 @@ trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiE
                     fileUpload("file") {
                       case (_, byteSource) =>
                         val validatedF = processUliFile(byteSource).runWith(Sink.seq)
-
                         onComplete(validatedF) {
                           case Success(validated) =>
                             complete(ToResponseMarshallable(ULIBatchValidatedResponse(validated)))
