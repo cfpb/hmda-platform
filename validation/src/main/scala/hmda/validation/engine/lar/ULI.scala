@@ -53,19 +53,24 @@ object ULI {
     98 - i
   }
 
-  def checkDigit(uli: String): BigInt = {
-    calculateCheckDigit(calculateMod(BigInt(convert(uli) ++ "00")))
+  def checkDigit(loanId: String): BigInt = {
+    calculateCheckDigit(calculateMod(BigInt(convert(loanId) ++ "00")))
   }
 
-  def generateULI(uli: String): String = {
-    uli + checkDigit(uli).toString()
+  def generateULI(loanId: String): String = {
+    loanId + checkDigit(loanId).toString()
+  }
+
+  def checkDigitBatch(loanIdSource: Source[String, NotUsed]): Source[(String, BigInt), NotUsed] = {
+    loanIdSource
+      .map(loanId => (loanId, checkDigit(loanId)))
   }
 
   def validateULI(uli: String): Boolean = {
     calculateMod(BigInt(convert(uli))) == 1
   }
 
-  def validateULISource(uliSource: Source[String, NotUsed]): Source[(String, Boolean), NotUsed] = {
+  def validateULIBatch(uliSource: Source[String, NotUsed]): Source[(String, Boolean), NotUsed] = {
     uliSource
       .map(uli => (uli, validateULI(uli)))
   }

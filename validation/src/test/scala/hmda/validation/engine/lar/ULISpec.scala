@@ -34,10 +34,19 @@ class ULISpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
       ULI.validateULI(validULI2) mustBe true
       ULI.validateULI(invalidULI) mustBe false
     }
+    "produce valid check digits in batch" in {
+      val loanIt = List(loan1, loan2).toIterator
+      val loanSource = Source.fromIterator(() => loanIt)
+      val checkDigitF = ULI.checkDigitBatch(loanSource).runWith(Sink.seq)
+      checkDigitF.map { checkDigit =>
+        checkDigit.head._2 mustBe 38
+        checkDigit.tail.head._2 mustBe 10
+      }
+    }
     "Validate a list of ULIs" in {
       val uliIt = List(validULI1, invalidULI).toIterator
       val uliSource = Source.fromIterator(() => uliIt)
-      val validatedF = ULI.validateULISource(uliSource).runWith(Sink.seq)
+      val validatedF = ULI.validateULIBatch(uliSource).runWith(Sink.seq)
       validatedF.map { validated =>
         validated.head._2 mustBe true
         validated.tail.head._2 mustBe false
