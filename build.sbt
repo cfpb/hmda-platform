@@ -147,6 +147,7 @@ lazy val loader = (project in file("loader"))
     )
   ).dependsOn(parserJVM % "compile->compile;test->test")
   .dependsOn(apiModel % "compile->compile;test->test")
+  .dependsOn(query)
 
 lazy val persistenceModel = (project in file("persistence-model"))
   .settings(hmdaBuildSettings:_*)
