@@ -18,7 +18,7 @@ The persistence cluster role needs to be active, and its dependencies (`Zookeepe
 $ export HMDA_CLUSTER_PORT=2551
 $ sbt
 > project loader
-> run /tmp/sample_lar.txt 2016
+> run /tmp/sample_lar 2016
 ```
 
 This will connect to the running cluster and send the contents of each file in the directory to the appropriate Actor responsible for storing `LARs` in the 2016 period.
