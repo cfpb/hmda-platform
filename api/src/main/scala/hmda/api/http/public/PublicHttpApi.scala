@@ -35,7 +35,7 @@ trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiE
           modifiedLar(instId)
         } ~
           pathPrefix("uli") {
-            path("check-digit") {
+            path("checkDigit") {
               timedPost { _ =>
                 entity(as[Loan]) { loan =>
                   val loanId = loan.loanId
@@ -59,7 +59,7 @@ trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiE
                   }
               }
             } ~
-              path("check-digit" / "csv") {
+              path("checkDigit" / "csv") {
                 timedPost { _ =>
                   fileUpload("file") {
                     case (_, byteSource) =>

@@ -56,12 +56,12 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
     val uliCheck = ULICheck(uli)
 
     "return check digit and ULI from loan id" in {
-      Post("/uli/check-digit", loan) ~> publicHttpRoutes ~> check {
+      Post("/uli/checkDigit", loan) ~> publicHttpRoutes ~> check {
         responseAs[ULI] mustBe ULI(loanId, checkDigit, uli)
       }
     }
     "return check digit and ULI from file of loan ids" in {
-      Post("/uli/check-digit", loanFile) ~> publicHttpRoutes ~> check {
+      Post("/uli/checkDigit", loanFile) ~> publicHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[LoanCheckDigitResponse].loanIds mustBe Seq(
           ULI("10Bx939c5543TqA1144M999143X", 38, "10Bx939c5543TqA1144M999143X38"),
@@ -70,7 +70,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
       }
     }
     "return csv with check digit and ULI from file of loan ids" in {
-      Post("/uli/check-digit/csv", loanFile) ~> publicHttpRoutes ~> check {
+      Post("/uli/checkDigit/csv", loanFile) ~> publicHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
         csv must include("10Bx939c5543TqA1144M999143X,38,10Bx939c5543TqA1144M999143X38")
