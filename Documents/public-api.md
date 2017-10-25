@@ -152,6 +152,7 @@ Example file contents:
 Example response in `CSV` format:
 
 ```csv
+loanId,checkDigit,uli
 10Bx939c5543TqA1144M999143X,38,10Bx939c5543TqA1144M999143X38
 10Cx939c5543TqA1144M999143X,10,10Cx939c5543TqA1144M999143X10
 ```
@@ -224,6 +225,7 @@ Example file contents:
 Example response in `CSV` format:
 
 ```csv
+uli,isValid
 10Cx939c5543TqA1144M999143X10,true
 10Bx939c5543TqA1144M999143X38,true
 10Bx939c5543TqA1144M999133X38,false

@@ -63,12 +63,14 @@ trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiE
                 timedPost { _ =>
                   fileUpload("file") {
                     case (_, byteSource) =>
+                      val headerSource = Source.fromIterator(() => List("loanId,checkDigit,uli\n").toIterator)
                       val checkDigit = processLoanIdFile(byteSource)
                         .map(l => l.toCSV)
                         .map(l => l + "\n")
                         .map(s => ByteString(s))
 
-                      complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), checkDigit))
+                      val csv = headerSource.map(s => ByteString(s)).concat(checkDigit)
+                      complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
 
                     case _ =>
                       complete(ToResponseMarshallable(StatusCodes.BadRequest))
@@ -103,12 +105,14 @@ trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiE
                 timedPost { _ =>
                   fileUpload("file") {
                     case (_, byteSource) =>
+                      val headerSource = Source.fromIterator(() => List("uli,isValid\n").toIterator)
                       val validated = processUliFile(byteSource)
                         .map(u => u.toCSV)
                         .map(l => l + "\n")
                         .map(s => ByteString(s))
 
-                      complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), validated))
+                      val csv = headerSource.map(s => ByteString(s)).concat(validated)
+                      complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
 
                     case _ =>
                       complete(ToResponseMarshallable(StatusCodes.BadRequest))

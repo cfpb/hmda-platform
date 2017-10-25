@@ -73,6 +73,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
       Post("/uli/checkDigit/csv", loanFile) ~> publicHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
+        csv must include("loanId,checkDigit,uli")
         csv must include("10Bx939c5543TqA1144M999143X,38,10Bx939c5543TqA1144M999143X38")
         csv must include("10Cx939c5543TqA1144M999143X,10,10Cx939c5543TqA1144M999143X10")
       }
@@ -86,6 +87,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
       Post("/uli/validate/csv", uliFile) ~> publicHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
+        csv must include("uli,isValid")
         csv must include("10Cx939c5543TqA1144M999143X10,true")
         csv must include("10Bx939c5543TqA1144M999143X38,true")
         csv must include("10Bx939c5543TqA1144M999133X38,false")
