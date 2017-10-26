@@ -23,7 +23,7 @@ import scala.concurrent.duration._
 import akka.pattern.ask
 import scala.concurrent._
 
-trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with RequestHeaderUtils with InstitutionsHttpApi with ScalatestRouteTest { suite: Suite =>
+trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with RequestHeaderUtils with InstitutionsHttpApi with FileUploadUtils with ScalatestRouteTest { suite: Suite =>
   val configuration: Config = ConfigFactory.load()
 
   val validationStats = ValidationStats.createValidationStats(system)
@@ -54,12 +54,5 @@ trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with Reque
     val snapshotStore = new File(config.getString("akka.persistence.snapshot-store.local.dir"))
     FileUtils.deleteRecursively(snapshotStore)
   }
-
-  def multiPartFile(contents: String, fileName: String) =
-    Multipart.FormData(Multipart.FormData.BodyPart.Strict(
-      "file",
-      HttpEntity(ContentTypes.`text/plain(UTF-8)`, contents),
-      Map("filename" -> fileName)
-    ))
 
 }
