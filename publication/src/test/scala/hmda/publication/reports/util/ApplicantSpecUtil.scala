@@ -5,8 +5,6 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ Applicant, LarGenerators, LoanApplicationRegister }
-import hmda.query.model.filing.LoanApplicationRegisterQuery
-import hmda.query.repository.filing.LarConverter._
 
 trait ApplicantSpecUtil extends LarGenerators {
 
@@ -21,8 +19,7 @@ trait ApplicantSpecUtil extends LarGenerators {
     }
   }
 
-  def source(lars: List[LoanApplicationRegister]): Source[LoanApplicationRegisterQuery, NotUsed] = Source
+  def source(lars: List[LoanApplicationRegister]): Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
-    .map(lar => toLoanApplicationRegisterQuery(lar))
 
 }

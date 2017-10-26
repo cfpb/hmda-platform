@@ -4,7 +4,6 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.model.institution.Institution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.publication.reports.protocol.disclosure.D5XProtocol._
@@ -20,7 +19,6 @@ class DisclosureReports(val sys: ActorSystem, val mat: ActorMaterializer) extend
 
   override implicit def system: ActorSystem = sys
   override implicit def materializer: ActorMaterializer = mat
-  val config = ConfigFactory.load()
   val duration = config.getInt("hmda.actor-lookup-timeout")
   implicit val timeout = Timeout(duration.seconds)
 

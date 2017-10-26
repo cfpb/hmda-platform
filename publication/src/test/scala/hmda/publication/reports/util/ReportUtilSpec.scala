@@ -6,7 +6,6 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LarGenerators
 import hmda.model.publication.reports.MSAReport
 import hmda.publication.reports.util.ReportUtil._
-import hmda.query.repository.filing.LarConverter._
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
 class ReportUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators {
@@ -45,8 +44,6 @@ class ReportUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators 
       // Activity Year is the same year as Action Taken Date. This is enforced by edit S270
       val lars = larListGen.sample.get.map(_.copy(actionTakenDate = 20090822))
       val src = Source.fromIterator(() => lars.toIterator)
-        .map(lar => toLoanApplicationRegisterQuery(lar))
-
       calculateYear(src).map(_ mustBe 2009)
     }
   }

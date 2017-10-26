@@ -2,20 +2,20 @@ package hmda.publication.reports.disclosure
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.publication.reports._
-import hmda.query.model.filing.LoanApplicationRegisterQuery
 
 import scala.concurrent.Future
 
 object D53 {
 
-  def filters(lar: LoanApplicationRegisterQuery): Boolean = {
-    (lar.propertyType == 1 || lar.propertyType == 2) &&
-      (lar.purpose == 3)
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
+      (lar.loan.purpose == 3)
   }
 
   def generate[ec: EC, mat: MAT, as: AS](
-    larSource: Source[LoanApplicationRegisterQuery, NotUsed],
+    larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
     respondentId: String,
     institutionNameF: Future[String]

@@ -5,6 +5,7 @@ import java.util.Calendar
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model._
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
 import hmda.publication.reports.{ AS, EC, MAT }
@@ -13,7 +14,6 @@ import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.RaceUtil.raceBorrowerCharacteristic
 import hmda.publication.reports.util.EthnicityUtil.ethnicityBorrowerCharacteristic
 import hmda.publication.reports.util.MinorityStatusUtil.minorityStatusBorrowerCharacteristic
-import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
@@ -44,21 +44,21 @@ object ReportUtil extends SourceUtils {
     Array(i50, i80, i100, i120)
   }
 
-  def larsByIncomeInterval(larSource: Source[LoanApplicationRegisterQuery, NotUsed], incomeIntervals: Array[Double]): Map[ApplicantIncomeEnum, Source[LoanApplicationRegisterQuery, NotUsed]] = {
+  def larsByIncomeInterval(larSource: Source[LoanApplicationRegister, NotUsed], incomeIntervals: Array[Double]): Map[ApplicantIncomeEnum, Source[LoanApplicationRegister, NotUsed]] = {
     val lars50 = larSource
-      .filter(lar => lar.income.toInt < incomeIntervals(0))
+      .filter(lar => lar.applicant.income.toInt < incomeIntervals(0))
 
     val lars50To79 = larSource
-      .filter(lar => lar.income.toInt >= incomeIntervals(0) && lar.income.toInt < incomeIntervals(1))
+      .filter(lar => lar.applicant.income.toInt >= incomeIntervals(0) && lar.applicant.income.toInt < incomeIntervals(1))
 
     val lars80To99 = larSource
-      .filter(lar => lar.income.toInt >= incomeIntervals(1) && lar.income.toInt < incomeIntervals(2))
+      .filter(lar => lar.applicant.income.toInt >= incomeIntervals(1) && lar.applicant.income.toInt < incomeIntervals(2))
 
     val lars100To120 = larSource
-      .filter(lar => lar.income.toInt >= incomeIntervals(2) && lar.income.toInt < incomeIntervals(3))
+      .filter(lar => lar.applicant.income.toInt >= incomeIntervals(2) && lar.applicant.income.toInt < incomeIntervals(3))
 
     val lars120 = larSource
-      .filter(lar => lar.income.toInt >= incomeIntervals(3))
+      .filter(lar => lar.applicant.income.toInt >= incomeIntervals(3))
 
     Map(
       LessThan50PercentOfMSAMedian -> lars50,
@@ -70,7 +70,7 @@ object ReportUtil extends SourceUtils {
   }
 
   def applicantIncomesWithBorrowerCharacteristics[ec: EC, mat: MAT, as: AS](
-    larSource: Source[LoanApplicationRegisterQuery, NotUsed],
+    larSource: Source[LoanApplicationRegister, NotUsed],
     incomeIntervals: Array[Double],
     dispositions: List[DispositionType]
   ): Future[List[ApplicantIncome]] = {
@@ -116,7 +116,7 @@ object ReportUtil extends SourceUtils {
   }
 
   def borrowerCharacteristicsByIncomeInterval[ec: EC, mat: MAT, as: AS](
-    larsByIncome: Map[ApplicantIncomeEnum, Source[LoanApplicationRegisterQuery, NotUsed]],
+    larsByIncome: Map[ApplicantIncomeEnum, Source[LoanApplicationRegister, NotUsed]],
     dispositions: List[DispositionType]
   ): Map[ApplicantIncomeEnum, Future[List[BorrowerCharacteristic]]] = {
     larsByIncome.map {
@@ -132,12 +132,12 @@ object ReportUtil extends SourceUtils {
     }
   }
 
-  def calculateYear[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[Int] = {
+  def calculateYear[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[Int] = {
     collectHeadValue(larSource).map(lar => lar.actionTakenDate.toString.substring(0, 4).toInt)
   }
 
   def calculateDispositions[ec: EC, mat: MAT, as: AS](
-    larSource: Source[LoanApplicationRegisterQuery, NotUsed],
+    larSource: Source[LoanApplicationRegister, NotUsed],
     dispositions: List[DispositionType]
   ): Future[List[Disposition]] = {
     Future.sequence(dispositions.map(_.calculateDisposition(larSource)))
