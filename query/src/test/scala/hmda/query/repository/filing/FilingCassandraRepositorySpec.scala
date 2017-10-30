@@ -3,13 +3,11 @@ package hmda.query.repository.filing
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
-import hmda.model.fi.lar.LarGenerators
+import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.institution.Agency
-import hmda.query.model.filing.LoanApplicationRegisterQuery
 import hmda.query.repository.CassandraRepositorySpec
-import hmda.query.repository.filing.LarConverter._
 
-class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicationRegisterQuery] with FilingCassandraRepository with LarGenerators {
+class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicationRegister] with FilingCassandraRepository with LarGenerators {
 
   override def beforeAll(): Unit = {
     createKeyspace()
@@ -28,7 +26,6 @@ class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicat
       val lars = lar100ListGen.sample.get.map(x => x.copy(agencyCode = 9))
       val source = Source
         .fromIterator(() => lars.toIterator)
-        .map(lar => toLoanApplicationRegisterQuery(lar))
       insertData(source)
       val readF = readData(100).runWith(Sink.seq)
       readF.map { lars =>

@@ -2,45 +2,45 @@ package hmda.publication.reports.util
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, EthnicityCharacteristic, EthnicityEnum }
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.publication.reports.util.DispositionType.DispositionType
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
 import hmda.publication.reports.{ AS, EC, MAT }
-import hmda.query.model.filing.LoanApplicationRegisterQuery
 
 import scala.concurrent.Future
 
 object EthnicityUtil {
 
-  def filterEthnicity(larSource: Source[LoanApplicationRegisterQuery, NotUsed], ethnicity: EthnicityEnum): Source[LoanApplicationRegisterQuery, NotUsed] = {
+  def filterEthnicity(larSource: Source[LoanApplicationRegister, NotUsed], ethnicity: EthnicityEnum): Source[LoanApplicationRegister, NotUsed] = {
     ethnicity match {
       case HispanicOrLatino => larSource.filter { lar =>
-        lar.ethnicity == 1 &&
-          (lar.coEthnicity == 1 || coapplicantEthnicityNotProvided(lar))
+        lar.applicant.ethnicity == 1 &&
+          (lar.applicant.coEthnicity == 1 || coapplicantEthnicityNotProvided(lar))
       }
       case NotHispanicOrLatino => larSource.filter { lar =>
-        lar.ethnicity == 2 &&
-          (lar.coEthnicity == 2 || coapplicantEthnicityNotProvided(lar))
+        lar.applicant.ethnicity == 2 &&
+          (lar.applicant.coEthnicity == 2 || coapplicantEthnicityNotProvided(lar))
       }
       case Joint => larSource.filter { lar =>
-        (lar.ethnicity == 1 && lar.coEthnicity == 2) ||
-          (lar.ethnicity == 2 && lar.coEthnicity == 1)
+        (lar.applicant.ethnicity == 1 && lar.applicant.coEthnicity == 2) ||
+          (lar.applicant.ethnicity == 2 && lar.applicant.coEthnicity == 1)
       }
       case NotAvailable => larSource.filter { lar =>
-        lar.ethnicity == 3 || lar.ethnicity == 4
+        lar.applicant.ethnicity == 3 || lar.applicant.ethnicity == 4
       }
     }
   }
 
-  def coapplicantEthnicityNotProvided(lar: LoanApplicationRegisterQuery): Boolean = {
-    lar.coEthnicity == 3 ||
-      lar.coEthnicity == 4 ||
-      lar.coEthnicity == 5
+  def coapplicantEthnicityNotProvided(lar: LoanApplicationRegister): Boolean = {
+    lar.applicant.coEthnicity == 3 ||
+      lar.applicant.coEthnicity == 4 ||
+      lar.applicant.coEthnicity == 5
   }
 
   def ethnicityBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](
-    larSource: Source[LoanApplicationRegisterQuery, NotUsed],
+    larSource: Source[LoanApplicationRegister, NotUsed],
     dispositions: List[DispositionType]
   ): Future[EthnicityBorrowerCharacteristic] = {
 

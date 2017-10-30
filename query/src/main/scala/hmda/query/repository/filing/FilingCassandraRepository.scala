@@ -4,15 +4,17 @@ import akka.{ Done, NotUsed }
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.stream.scaladsl.{ Flow, Source }
 import com.datastax.driver.core._
-import hmda.query.model.filing.LoanApplicationRegisterQuery
+import com.typesafe.config.ConfigFactory
+import hmda.model.fi.lar._
 import hmda.query.projections.ProjectionRuntime
 import hmda.query.repository.CassandraRepository
 
 import scala.concurrent.Future
 
-trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegisterQuery] with ProjectionRuntime {
+trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegister] with ProjectionRuntime {
 
-  override val table = "lars2017"
+  val config = ConfigFactory.load()
+  val table = config.getString("hmda.lar.table")
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.$table" +
@@ -59,44 +61,44 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
   }
 
-  val statementBinder = (lar: LoanApplicationRegisterQuery, statement: PreparedStatement) =>
+  val statementBinder = (lar: LoanApplicationRegister, statement: PreparedStatement) =>
     statement.bind(
-      lar.id,
+      lar.id.toString,
       lar.respondentId,
       new Integer(lar.agencyCode),
-      lar.loanId,
-      lar.applicationDate,
-      new Integer(lar.loanType),
-      new Integer(lar.propertyType),
-      new Integer(lar.purpose),
-      new Integer(lar.occupancy),
-      new Integer(lar.amount),
+      lar.loan.id,
+      lar.loan.applicationDate,
+      new Integer(lar.loan.loanType),
+      new Integer(lar.loan.propertyType),
+      new Integer(lar.loan.purpose),
+      new Integer(lar.loan.occupancy),
+      new Integer(lar.loan.amount),
       new Integer(lar.preapprovals),
       new Integer(lar.actionTakenType),
       new Integer(lar.actionTakenDate),
-      lar.msa,
-      lar.state,
-      lar.county,
-      lar.tract,
-      new Integer(lar.ethnicity),
-      new Integer(lar.coEthnicity),
-      new Integer(lar.race1),
-      lar.race2,
-      lar.race3,
-      lar.race4,
-      lar.race5,
-      new Integer(lar.coRace1),
-      lar.coRace2,
-      lar.coRace3,
-      lar.coRace4,
-      lar.coRace5,
-      new Integer(lar.sex),
-      new Integer(lar.coSex),
-      lar.income,
+      lar.geography.msa,
+      lar.geography.state,
+      lar.geography.county,
+      lar.geography.tract,
+      new Integer(lar.applicant.ethnicity),
+      new Integer(lar.applicant.coEthnicity),
+      new Integer(lar.applicant.race1),
+      lar.applicant.race2,
+      lar.applicant.race3,
+      lar.applicant.race4,
+      lar.applicant.race5,
+      new Integer(lar.applicant.coRace1),
+      lar.applicant.coRace2,
+      lar.applicant.coRace3,
+      lar.applicant.coRace4,
+      lar.applicant.coRace5,
+      new Integer(lar.applicant.sex),
+      new Integer(lar.applicant.coSex),
+      lar.applicant.income,
       new Integer(lar.purchaserType),
-      lar.denialReason1,
-      lar.denialReason2,
-      lar.denialReason3,
+      lar.denial.reason1,
+      lar.denial.reason2,
+      lar.denial.reason3,
       lar.rateSpread,
       new Integer(lar.hoepaStatus),
       new Integer(lar.lienStatus)
@@ -160,12 +162,12 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
     session.execute(query)
   }
 
-  override def insertData(source: Source[LoanApplicationRegisterQuery, NotUsed]): Future[Done] = {
-    val sink = CassandraSink[LoanApplicationRegisterQuery](parallelism = 2, preparedStatement, statementBinder)
+  override def insertData(source: Source[LoanApplicationRegister, NotUsed]): Future[Done] = {
+    val sink = CassandraSink[LoanApplicationRegister](parallelism = 2, preparedStatement, statementBinder)
     source.runWith(sink)
   }
 
-  override protected def parseRows: Flow[Row, LoanApplicationRegisterQuery, NotUsed] = {
+  override protected def parseRows: Flow[Row, LoanApplicationRegister, NotUsed] = {
     Flow[Row].map { row =>
       val id = row.getString("id")
       val respId = row.getString("respondent_id")
@@ -207,28 +209,9 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       val hoepaStatus = row.getInt("hoepa_status")
       val lienStatus = row.getInt("lien_status")
 
-      LoanApplicationRegisterQuery(
-        id,
-        respId,
-        agencyCode,
-        preapprovals,
-        actionTakenType,
-        actionTakenDate,
-        purchaserType,
-        rateSpread,
-        hoepaStatus,
-        lienStatus,
-        loanId,
-        applicatioDate,
-        loanType,
-        propertyType,
-        purpose,
-        occupancy,
-        amount,
-        msa,
-        state,
-        county,
-        tract,
+      val loan = Loan(loanId, applicatioDate, loanType, propertyType, purpose, occupancy, amount)
+      val geography = Geography(msa, state, county, tract)
+      val applicant = Applicant(
         ethnicity,
         coEthnicity,
         race1,
@@ -243,12 +226,26 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
         coRace5,
         sex,
         coSex,
-        income,
-        denial1,
-        denial2,
-        denial3,
-        "",
-        "2017"
+        income
+      )
+
+      val denial = Denial(denial1, denial2, denial3)
+
+      LoanApplicationRegister(
+        id.toInt,
+        respId,
+        agencyCode,
+        loan,
+        preapprovals,
+        actionTakenType,
+        actionTakenDate,
+        geography,
+        applicant,
+        purchaserType,
+        denial,
+        rateSpread,
+        hoepaStatus,
+        lienStatus
       )
     }
   }

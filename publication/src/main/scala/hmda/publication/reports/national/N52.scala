@@ -3,12 +3,12 @@ package hmda.publication.reports.national
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model.MsaIncomeLookup
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports._
 import hmda.publication.reports._
 import hmda.publication.reports.aggregate.{ A52, A5X }
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
-import hmda.query.model.filing.LoanApplicationRegisterQuery
 
 import scala.concurrent.Future
 
@@ -61,7 +61,7 @@ object N52 {
   // Loan Type 1
   // Property Type 1,2
   // Purpose of Loan 1
-  def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegisterQuery, NotUsed]): Future[N52] = {
+  def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[N52] = {
     val fipsList = MsaIncomeLookup.values.map(_.fips).filterNot(_ == 99999)
 
     val a52List = fipsList.map(fipsCode => A52.generate(larSource, fipsCode))

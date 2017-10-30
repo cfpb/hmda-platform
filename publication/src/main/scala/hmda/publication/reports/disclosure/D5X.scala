@@ -5,8 +5,8 @@ import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.publication.reports.util.ReportUtil._
 import akka.NotUsed
 import akka.stream.scaladsl.Source
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.publication.reports._
-import hmda.query.model.filing.LoanApplicationRegisterQuery
 
 import scala.concurrent.Future
 
@@ -25,8 +25,8 @@ case class D5X(
 object D5X {
   def generate[ec: EC, mat: MAT, as: AS](
     reportId: String,
-    filters: LoanApplicationRegisterQuery => Boolean,
-    larSource: Source[LoanApplicationRegisterQuery, NotUsed],
+    filters: LoanApplicationRegister => Boolean,
+    larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
     respondentId: String,
     institutionNameF: Future[String]
@@ -37,11 +37,11 @@ object D5X {
 
     val lars = larSource
       .filter(lar => lar.respondentId == respondentId)
-      .filter(lar => lar.msa != "NA")
-      .filter(lar => lar.msa.toInt == fipsCode)
+      .filter(lar => lar.geography.msa != "NA")
+      .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
 
-    val larsWithIncome = lars.filter(lar => lar.income != "NA")
+    val larsWithIncome = lars.filter(lar => lar.applicant.income != "NA")
 
     val msa = msaReport(fipsCode.toString)
 

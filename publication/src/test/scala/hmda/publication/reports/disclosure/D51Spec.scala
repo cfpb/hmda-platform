@@ -8,8 +8,6 @@ import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.publication.reports.ActionTakenTypeEnum._
 import hmda.model.publication.reports.ApplicantIncomeEnum.LessThan50PercentOfMSAMedian
 import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, MSAReport, MinorityStatusBorrowerCharacteristic, RaceBorrowerCharacteristic }
-import hmda.query.model.filing.LoanApplicationRegisterQuery
-import hmda.query.repository.filing.LarConverter._
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
@@ -37,9 +35,8 @@ class D51Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
     lar.copy(respondentId = respId, geography = geo, loan = loan)
   }
 
-  val source: Source[LoanApplicationRegisterQuery, NotUsed] = Source
+  val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
-    .map(lar => toLoanApplicationRegisterQuery(lar))
 
   val expectedDispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted, ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
