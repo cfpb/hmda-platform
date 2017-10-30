@@ -22,6 +22,6 @@ object D52 {
     institutionNameF: Future[String]
   ): Future[D5X] = {
 
-    D5X.generate("D52", filters, larSource, fipsCode, respondentId, institutionNameF)
+    D5X.generateD5X("D52", filters, larSource, fipsCode, respondentId, institutionNameF)
   }
 }

@@ -62,7 +62,7 @@ case class N5X(
 
 object N5X {
 
-  def generate[ec: EC, mat: MAT, as: AS](
+  def generateN5X[ec: EC, mat: MAT, as: AS](
     report: A5XReportCreator,
     larSource: Source[LoanApplicationRegister, NotUsed]
   ): Future[N5X] = {

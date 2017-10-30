@@ -10,5 +10,5 @@ import scala.concurrent.Future
 
 object N52 {
   def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[N5X] =
-    N5X.generate(A52, larSource)
+    N5X.generateN5X(A52, larSource)
 }
