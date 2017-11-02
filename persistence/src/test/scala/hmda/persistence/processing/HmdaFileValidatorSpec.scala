@@ -4,6 +4,7 @@ import akka.actor.ActorRef
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
+import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.validation._
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
@@ -246,6 +247,12 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       val fields2 = Seq("Activity Year")
       probe.send(hmdaFileValidator2, GetFieldValues(error2, fields2))
       probe.expectMsg(JsObject("Activity Year" -> JsNumber(2017)))
+    }
+
+    "get ts" in {
+      probe.send(hmdaFileValidator2, GetTs)
+      val ts = probe.expectMsgType[Option[TransmittalSheet]]
+      ts.getOrElse(TransmittalSheet()).respondent.id mustBe "8800009923"
     }
 
   }
