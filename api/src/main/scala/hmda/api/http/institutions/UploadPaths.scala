@@ -50,7 +50,8 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
         val fProcessingActor = (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
         val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, period)).mapTo[ActorRef]
         (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
-        (querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
+        //TODO: turn back on when #1282 is done
+        //(querySupervisor ? FindHmdaFilingView(period)).mapTo[ActorRef]
 
         val fUploadSubmission = for {
           p <- fProcessingActor
