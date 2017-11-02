@@ -48,6 +48,7 @@ object HmdaFileValidator {
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
   case class GetFieldValues(error: ValidationError, fieldNames: Seq[String]) extends Command
+  case class GetTs() extends Command
 
   case class GetNamedErrorResultsPaginated(editName: String, page: Int)
 
@@ -285,6 +286,8 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       })
       val jsObject = JsObject(mapping: _*)
       sender() ! jsObject
+
+    case GetTs => sender() ! state.ts
 
     case GetNamedErrorResultsPaginated(editName, page) =>
       val allFailures = state.allErrors.filter(e => e.ruleName == editName)

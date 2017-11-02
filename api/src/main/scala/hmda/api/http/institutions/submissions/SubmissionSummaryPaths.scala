@@ -8,7 +8,6 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.util.Timeout
 import hmda.api.http.ValidationErrorConverter
 import hmda.api.model.ErrorResponse
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
@@ -55,11 +54,11 @@ trait SubmissionSummaryPaths
           val tsF = for {
             validator <- validatorF
             submissions <- submissionPersistenceF
-            s <- (validator ? GetState).mapTo[HmdaFileValidationState]
+            ts <- (validator ? GetTs).mapTo[Option[TransmittalSheet]]
             sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
             actorRef <- validationStats
             totalLars <- (actorRef ? FindTotalSubmittedLars(sub.id.institutionId, period)).mapTo[Int]
-          } yield TsLarSummary(s.ts, totalLars, sub.fileName)
+          } yield TsLarSummary(ts, totalLars, sub.fileName)
 
           onComplete(tsF) {
             case Success(x) => x.ts match {

@@ -1,9 +1,7 @@
 package hmda.api.http
 
-import akka.actor.{ ActorRef, ActorSystem }
-import akka.event.LoggingAdapter
+import akka.actor.ActorRef
 import akka.pattern.ask
-import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.model._
 import hmda.model.edits.EditMetaDataLookup
