@@ -98,14 +98,13 @@ trait SubmissionEditPaths
         completeVerified(supervisor, querySupervisor: ActorRef, institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
             val fValidator: Future[ActorRef] = fHmdaFileValidator(supervisor, SubmissionId(institutionId, period, seqNr))
-            val fPaginatedErrors: Future[(ActorRef, PaginatedErrors, HmdaFileValidationState)] = for {
+            val fPaginatedErrors: Future[(ActorRef, PaginatedErrors)] = for {
               va <- fValidator
-              vs <- (va ? GetState).mapTo[HmdaFileValidationState]
               p <- (va ? GetNamedErrorResultsPaginated(editName, page)).mapTo[PaginatedErrors]
-            } yield (va, p, vs)
+            } yield (va, p)
 
             onComplete(fPaginatedErrors) {
-              case Success((hfvRef, errorCollection, vs)) =>
+              case Success((hfvRef, errorCollection)) =>
                 val rows: Seq[Future[EditResultRow]] = errorCollection.errors.map(validationErrorToResultRow(_, hfvRef))
                 onComplete(Future.sequence(rows)) {
                   case Success(r) =>
