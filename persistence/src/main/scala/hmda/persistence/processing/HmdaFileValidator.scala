@@ -275,8 +275,6 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         lars.find(lar => lar.loan.id == error.errorId).getOrElse(HmdaRowError())
       }
 
-      println(row)
-
       val mapping = fieldNames.map(field => {
         val fieldValue = if (field == "Metropolitan Statistical Area / Metropolitan Division Name") {
           CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
