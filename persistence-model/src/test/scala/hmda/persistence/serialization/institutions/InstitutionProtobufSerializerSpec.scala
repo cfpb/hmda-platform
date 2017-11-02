@@ -25,4 +25,11 @@ class InstitutionProtobufSerializerSpec extends PropSpec with PropertyChecks wit
     }
   }
 
+  property("Institution messages must be serialized to binary and back") {
+    forAll(institutionGen) { institution =>
+      val bytes = serializer.toBinary(institution)
+      serializer.fromBinary(bytes, serializer.InstitutionManifest) mustBe institution
+    }
+  }
+
 }
