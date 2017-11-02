@@ -1,12 +1,17 @@
 package hmda.api.http
 
+import akka.actor.ActorRef
+import akka.pattern.ask
 import hmda.api.model._
 import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
 import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.model.validation.ValidationError
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
-import spray.json.{ JsNumber, JsObject, JsString, JsValue }
+import hmda.persistence.processing.HmdaFileValidator.{ GetFieldValues, HmdaFileValidationState }
+import spray.json.{ JsObject, JsValue }
+
+import scala.concurrent.Future
+import scala.util.{ Success, Failure }
 
 trait ValidationErrorConverter {
 
@@ -35,8 +40,9 @@ trait ValidationErrorConverter {
     "editType, editId, loanId\n" + rows.mkString("\n")
   }
 
-  def validationErrorToResultRow(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
-    EditResultRow(RowId(err.publicErrorId), relevantFields(err, vs))
+  def validationErrorToResultRow(err: ValidationError, validator: ActorRef): EditResultRow = {
+    val releventFields = releventFields(err, validator)
+    EditResultRow(RowId(err.publicErrorId), relevantFields(err, validator))
   }
 
   //// Helper methods
@@ -45,33 +51,15 @@ trait ValidationErrorConverter {
     EditMetaDataLookup.forEdit(editName).editDescription
   }
 
-  private def relevantFields(err: ValidationError, vs: HmdaFileValidationState): JsObject = {
+  private def relevantFields(err: ValidationError, validator: ActorRef): Future[JsObject] = {
     val fieldNames: Seq[String] = EditMetaDataLookup.forEdit(err.ruleName).fieldNames
 
-    val jsVals: Seq[(String, JsValue)] = fieldNames.map { fieldName =>
-      val row = relevantRow(err, vs)
-      val fieldValue = if (fieldName == "Metropolitan Statistical Area / Metropolitan Division Name") {
-        CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
-      } else {
-        row.valueOf(fieldName)
-      }
-      (fieldName, toJsonVal(fieldValue))
-    }
+    val mapping = for {
+      jsMapping <- (validator ? GetFieldValues(err, fieldNames)).mapTo[Seq[(String, JsValue)]]
+    } yield jsMapping
 
-    JsObject(jsVals: _*)
+    mapping.onComplete({
+      case Success(Seq[(String, )]) =>
+    })
   }
-
-  private def relevantRow(err: ValidationError, vs: HmdaFileValidationState): HmdaFileRow = {
-    if (err.ts) vs.ts.getOrElse(HmdaRowError())
-    else vs.lars.find(lar => lar.loan.id == err.errorId).getOrElse(HmdaRowError())
-  }
-
-  private def toJsonVal(value: Any) = {
-    value match {
-      case i: Int => JsNumber(i)
-      case l: Long => JsNumber(l)
-      case s: String => JsString(s)
-    }
-  }
-
 }

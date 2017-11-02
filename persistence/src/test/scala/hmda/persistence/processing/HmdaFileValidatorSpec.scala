@@ -18,6 +18,7 @@ import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
 import hmda.validation.ValidationStats._
+import spray.json.{ JsNumber, JsString }
 
 class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
@@ -33,6 +34,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   val validationStats = createValidationStats(system)
 
   var hmdaFileValidator: ActorRef = _
+  var hmdaFileValidator2: ActorRef = _
 
   val submissionManager = system.actorOf(SubmissionManager.props(validationStats, submissionId1))
 
@@ -61,11 +63,11 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
   "HMDA File Validator" must {
 
-    "persist LARs and TS" in {
+    "persist TS" in {
       probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(Some(ts), lars.toSeq, Nil, Nil, Nil))
+      probe.expectMsg(HmdaFileValidationState(Some(ts), Nil, Nil, Nil))
     }
 
     "persist validation errors" in {
@@ -76,7 +78,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
-        lars,
         Seq(e1),
         Seq(e2),
         Seq(e3),
@@ -95,7 +96,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
         probe.send(hmdaFileParser, LarParsed(lar))
         probe.expectMsg(Persisted)
       }
-      val hmdaFileValidator2 = createHmdaFileValidator(system, supervisor, validationStats, submissionId2)
+      hmdaFileValidator2 = createHmdaFileValidator(system, supervisor, validationStats, submissionId2)
       probe.send(hmdaFileParser, GetState)
       probe.expectMsg(HmdaFileParseState(5, Nil))
 
@@ -106,7 +107,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator2, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
-        lars,
         List(),
         Nil,
         Nil,
@@ -116,6 +116,8 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
           SyntacticalValidationError("2185751599", "S020", false)
         ),
         List(
+          ValidityValidationError("4977566612", "V290", false),
+          ValidityValidationError("4977566612", "V300", false),
           ValidityValidationError("4977566612", "V550", false),
           ValidityValidationError("4977566612", "V555", false),
           ValidityValidationError("4977566612", "V560", false)
@@ -137,7 +139,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
-        lars,
         Seq(e1),
         Seq(e2),
         Seq(e3),
@@ -156,7 +157,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
-        lars,
         Seq(e1),
         Seq(e2),
         Seq(e3),
@@ -174,7 +174,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
-        lars,
         Seq(e1),
         Seq(e2),
         Seq(e3),
@@ -193,7 +192,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, GetState)
       probe.expectMsg(HmdaFileValidationState(
         Some(ts),
-        lars,
         Seq(e1),
         Seq(e2),
         Seq(e3),
@@ -232,6 +230,22 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, GetNamedErrorResultsPaginated("S987", 3))
       val pg3 = probe.expectMsgType[PaginatedErrors]
       pg3.errors.size mustBe 3
+    }
+
+    "get field values for an error" in {
+      val error = ValidityValidationError("4977566612", "V550", false)
+      val fields = Seq("Lien Status", "Metropolitan Statistical Area / Metropolitan Division Name")
+
+      probe.send(hmdaFileValidator2, GetFieldValues(error, fields))
+      probe.expectMsg(Seq(
+        ("Lien Status", JsNumber(77)),
+        ("Metropolitan Statistical Area / Metropolitan Division Name", JsString("Blacksburg-Christiansburg-Radford, VA"))
+      ))
+
+      val error2 = ValidityValidationError("4977566612", "V999", true)
+      val fields2 = Seq("Activity Year")
+      probe.send(hmdaFileValidator2, GetFieldValues(error2, fields2))
+      probe.expectMsg(Seq(("Activity Year", JsNumber(2017))))
     }
 
   }

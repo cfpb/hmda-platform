@@ -6,7 +6,8 @@ import akka.pattern.{ ask, pipe }
 import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.model.fi.SubmissionId
+import hmda.census.model.CbsaLookup
+import hmda.model.fi.{ HmdaRowError, SubmissionId }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
@@ -32,6 +33,7 @@ import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.SubmissionLarStats
 import hmda.validation.SubmissionLarStats.PersistStatsForMacroEdits
 import hmda.validation.ValidationStats.AddSubmissionTaxId
+import spray.json.{ JsNumber, JsString }
 
 import scala.util.Try
 import scala.concurrent.duration._
@@ -45,6 +47,7 @@ object HmdaFileValidator {
   case class ValidateAggregate(ts: TransmittalSheet) extends Command
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
+  case class GetFieldValues(error: ValidationError, fieldNames: Seq[String]) extends Command
 
   case class GetNamedErrorResultsPaginated(editName: String, page: Int)
 
@@ -56,7 +59,6 @@ object HmdaFileValidator {
 
   case class HmdaFileValidationState(
       ts: Option[TransmittalSheet] = None,
-      lars: Seq[LoanApplicationRegister] = Nil,
       tsSyntactical: Seq[ValidationError] = Nil,
       tsValidity: Seq[ValidationError] = Nil,
       tsQuality: Seq[ValidationError] = Nil,
@@ -69,7 +71,6 @@ object HmdaFileValidator {
   ) {
     def updated(event: Event): HmdaFileValidationState = event match {
       case tsValidated @ TsValidated(newTs) => this.copy(ts = Some(newTs))
-      case larValidated @ LarValidated(lar, _) => this.copy(lars = lars :+ lar)
       case TsSyntacticalError(e) => this.copy(tsSyntactical = tsSyntactical :+ e)
       case TsValidityError(e) => this.copy(tsValidity = tsValidity :+ e)
       case TsQualityError(e) => this.copy(tsQuality = tsQuality :+ e)
@@ -112,6 +113,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   def ctx: ValidationContext = ValidationContext(institution, Try(Some(submissionId.period.toInt)).getOrElse(None))
 
   var state = HmdaFileValidationState()
+  var lars: Seq[LoanApplicationRegister] = Nil
 
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
   def statRef = for {
@@ -185,16 +187,13 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
     case lar: LoanApplicationRegister =>
       val validated = LarValidated(lar, submissionId)
-      persist(validated) { e =>
-        log.debug(s"Persisted: $e")
-        updateState(e)
-        for {
-          f <- fHmdaFiling
-          stat <- statRef
-        } yield {
-          f ! validated
-          stat ! validated
-        }
+      lars = lars :+ lar
+      for {
+        f <- fHmdaFiling
+        stat <- statRef
+      } yield {
+        f ! validated
+        stat ! validated
       }
 
     case ValidateMacro(larSource, replyTo) =>
@@ -269,6 +268,26 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     case GetState =>
       sender() ! state
 
+    case GetFieldValues(error, fieldNames) =>
+      val row = if (error.ts) {
+        state.ts.getOrElse(HmdaRowError())
+      } else {
+        lars.find(lar => lar.loan.id == error.errorId).getOrElse(HmdaRowError())
+      }
+
+      println(row)
+
+      val mapping = fieldNames.map(field => {
+        val fieldValue = if (field == "Metropolitan Statistical Area / Metropolitan Division Name") {
+          CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
+        } else {
+          row.valueOf(field)
+        }
+        (field, toJsonVal(fieldValue))
+      })
+      println(mapping)
+      sender() ! mapping
+
     case GetNamedErrorResultsPaginated(editName, page) =>
       val allFailures = state.allErrors.filter(e => e.ruleName == editName)
       val totalSize = allFailures.size
@@ -292,5 +311,13 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
   private def errorsOfType(errors: Seq[ValidationError], errorType: ValidationErrorType): Seq[ValidationError] = {
     errors.filter(_.errorType == errorType)
+  }
+
+  private def toJsonVal(value: Any) = {
+    value match {
+      case i: Int => JsNumber(i)
+      case l: Long => JsNumber(l)
+      case s: String => JsString(s)
+    }
   }
 }
