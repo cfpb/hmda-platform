@@ -4,7 +4,7 @@ import hmda.model.institution.ExternalIdType._
 import hmda.model.institution._
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.serialization.InstitutionEvents._
-import hmda.persistence.messages.commands.commands.InstitutionCommands._
+import hmda.persistence.messages.commands.institutions.InstitutionCommands._
 import hmda.persistence.model.serialization.InstitutionCommands.{ CreateInstitutionMessage, ModifyInstitutionMessage }
 
 object InstitutionProtobufConverter {

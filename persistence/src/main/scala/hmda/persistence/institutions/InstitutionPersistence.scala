@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.institution.Institution
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.messages.commands.commands.InstitutionCommands._
+import hmda.persistence.messages.commands.institutions.InstitutionCommands._
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.HmdaPersistentActor
 

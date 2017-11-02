@@ -1,7 +1,7 @@
 package hmda.persistence.serialization.institutions
 
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.messages.commands.commands.InstitutionCommands.{ CreateInstitution, ModifyInstitution }
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, ModifyInstitution }
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }

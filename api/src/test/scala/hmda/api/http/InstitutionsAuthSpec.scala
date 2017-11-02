@@ -10,7 +10,7 @@ import hmda.model.institution.ExternalIdType.UndeterminedExternalId
 import hmda.model.institution.InstitutionType.MBS
 import hmda.model.institution._
 import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.messages.commands.commands.InstitutionCommands._
+import hmda.persistence.messages.commands.institutions.InstitutionCommands._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.Future

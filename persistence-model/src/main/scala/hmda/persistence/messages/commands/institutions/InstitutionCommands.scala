@@ -1,4 +1,4 @@
-package hmda.persistence.messages.commands.commands
+package hmda.persistence.messages.commands.institutions
 
 import hmda.model.institution.Institution
 import hmda.persistence.messages.CommonMessages.Command
