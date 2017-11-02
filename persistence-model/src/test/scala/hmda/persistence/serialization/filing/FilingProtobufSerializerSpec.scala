@@ -24,4 +24,11 @@ class FilingProtobufSerializerSpec extends PropSpec with PropertyChecks with Mus
       serializer.fromBinary(bytes, serializer.FilingStatusUpdatedManifest) mustBe msg
     }
   }
+
+  property("Filing messages must be serialized to binary and back") {
+    forAll(filingGen) { filing =>
+      val bytes = serializer.toBinary(filing)
+      serializer.fromBinary(bytes, serializer.FilingManifest) mustBe filing
+    }
+  }
 }
