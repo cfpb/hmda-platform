@@ -12,7 +12,7 @@ import hmda.model.fi.Filing
 import hmda.model.institution.Institution
 import hmda.parser.fi.InstitutionParser
 import hmda.persistence.HmdaSupervisor.FindFilings
-import hmda.persistence.institutions.FilingPersistence.CreateFiling
+import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.messages.commands.institutions.InstitutionCommands._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName

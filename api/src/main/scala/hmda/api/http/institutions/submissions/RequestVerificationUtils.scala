@@ -13,7 +13,7 @@ import hmda.api.model.ErrorResponse
 import hmda.model.fi.{ Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
-import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
+import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName

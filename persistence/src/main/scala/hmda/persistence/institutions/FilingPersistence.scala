@@ -6,14 +6,11 @@ import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.messages.events.institutions.FilingEvents._
+import hmda.persistence.messages.commands.filing.FilingCommands._
 
 object FilingPersistence {
 
   val name = "filings"
-
-  case class CreateFiling(filing: Filing) extends Command
-  case class UpdateFilingStatus(period: String, status: FilingStatus) extends Command
-  case class GetFilingByPeriod(period: String) extends Command
 
   def props(institutionId: String): Props = Props(new FilingPersistence(institutionId))
 
