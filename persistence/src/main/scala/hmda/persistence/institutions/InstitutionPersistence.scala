@@ -4,16 +4,13 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.institution.Institution
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.messages.commands.commands.InstitutionCommands._
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.HmdaPersistentActor
 
 object InstitutionPersistence {
 
   val name = "institutions"
-
-  case class CreateInstitution(i: Institution) extends Command
-  case class ModifyInstitution(i: Institution) extends Command
-  case class GetInstitution(id: String) extends Command
 
   def props: Props = Props(new InstitutionPersistence)
 

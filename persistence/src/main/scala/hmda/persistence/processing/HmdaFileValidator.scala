@@ -13,7 +13,7 @@ import hmda.model.institution.Institution
 import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor }
 import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.institutions.InstitutionPersistence.GetInstitution
+import hmda.persistence.messages.commands.commands.InstitutionCommands._
 import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor

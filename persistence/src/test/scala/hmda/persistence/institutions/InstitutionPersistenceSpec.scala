@@ -4,6 +4,7 @@ import akka.testkit.TestProbe
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.messages.commands.commands.InstitutionCommands.{ CreateInstitution, GetInstitution, ModifyInstitution }
 import hmda.persistence.model.ActorSpec
 
 class InstitutionPersistenceSpec extends ActorSpec {

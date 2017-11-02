@@ -4,8 +4,34 @@ import hmda.model.institution.ExternalIdType._
 import hmda.model.institution._
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.serialization.InstitutionEvents._
+import hmda.persistence.messages.commands.commands.InstitutionCommands._
+import hmda.persistence.model.serialization.InstitutionCommands.{ CreateInstitutionMessage, ModifyInstitutionMessage }
 
 object InstitutionProtobufConverter {
+
+  def createInstitutionToProtobuf(cmd: CreateInstitution): CreateInstitutionMessage = {
+    CreateInstitutionMessage(
+      institution = Some(institutionToProtobuf(cmd.i))
+    )
+  }
+
+  def createInstitutionFromProtobuf(msg: CreateInstitutionMessage): CreateInstitution = {
+    CreateInstitution(
+      i = institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
+    )
+  }
+
+  def modifyInstitutionToProtobuf(cmd: ModifyInstitution): ModifyInstitutionMessage = {
+    ModifyInstitutionMessage(
+      institution = Some(institutionToProtobuf(cmd.i))
+    )
+  }
+
+  def modifyInstitutionFromProtobuf(msg: ModifyInstitutionMessage): ModifyInstitution = {
+    ModifyInstitution(
+      i = institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
+    )
+  }
 
   def institutionCreatedToProtobuf(evt: InstitutionCreated): InstitutionCreatedMessage = {
     InstitutionCreatedMessage(

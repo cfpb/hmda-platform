@@ -14,7 +14,7 @@ import hmda.parser.fi.InstitutionParser
 import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
-import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
+import hmda.persistence.messages.commands.commands.InstitutionCommands._
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.{ ExecutionContext, Future }
