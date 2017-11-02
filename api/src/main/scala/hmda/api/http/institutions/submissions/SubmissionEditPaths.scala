@@ -106,9 +106,13 @@ trait SubmissionEditPaths
 
             onComplete(fPaginatedErrors) {
               case Success((hfvRef, errorCollection, vs)) =>
-                val rows: Seq[EditResultRow] = errorCollection.errors.map(validationErrorToResultRow(_, hfvRef))
-                val result = EditResult(editName, rows, uri.path.toString, page, errorCollection.totalErrors)
-                complete(ToResponseMarshallable(result))
+                val rows: Seq[Future[EditResultRow]] = errorCollection.errors.map(validationErrorToResultRow(_, hfvRef))
+                onComplete(Future.sequence(rows)) {
+                  case Success(r) =>
+                    val result = EditResult(editName, r, uri.path.toString, page, errorCollection.totalErrors)
+                    complete(ToResponseMarshallable(result))
+                  case Failure(e) => completeWithInternalError(uri, e)
+                }
               case Failure(error) => completeWithInternalError(uri, error)
             }
           }

@@ -18,7 +18,7 @@ import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
 import hmda.validation.ValidationStats._
-import spray.json.{ JsNumber, JsString }
+import spray.json.{ JsNumber, JsObject, JsString }
 
 class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
   import hmda.model.util.FITestData._
@@ -237,15 +237,15 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       val fields = Seq("Lien Status", "Metropolitan Statistical Area / Metropolitan Division Name")
 
       probe.send(hmdaFileValidator2, GetFieldValues(error, fields))
-      probe.expectMsg(Seq(
-        ("Lien Status", JsNumber(77)),
-        ("Metropolitan Statistical Area / Metropolitan Division Name", JsString("Blacksburg-Christiansburg-Radford, VA"))
+      probe.expectMsg(JsObject(
+        "Lien Status" -> JsNumber(77),
+        "Metropolitan Statistical Area / Metropolitan Division Name" -> JsString("Blacksburg-Christiansburg-Radford, VA")
       ))
 
       val error2 = ValidityValidationError("4977566612", "V999", true)
       val fields2 = Seq("Activity Year")
       probe.send(hmdaFileValidator2, GetFieldValues(error2, fields2))
-      probe.expectMsg(Seq(("Activity Year", JsNumber(2017))))
+      probe.expectMsg(JsObject("Activity Year" -> JsNumber(2017)))
     }
 
   }

@@ -1,19 +1,20 @@
 package hmda.api.http
 
-import akka.actor.ActorRef
+import akka.actor.{ ActorRef, ActorSystem }
+import akka.event.LoggingAdapter
 import akka.pattern.ask
+import akka.stream.ActorMaterializer
+import akka.util.Timeout
 import hmda.api.model._
-import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
-import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.model.validation.ValidationError
 import hmda.persistence.processing.HmdaFileValidator.{ GetFieldValues, HmdaFileValidationState }
-import spray.json.{ JsObject, JsValue }
+import spray.json.JsObject
 
-import scala.concurrent.Future
-import scala.util.{ Success, Failure }
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait ValidationErrorConverter {
+  implicit val timeout: Timeout
 
   def editsOfType(errType: String, vs: HmdaFileValidationState): Seq[ValidationError] = {
     errType.toLowerCase match {
@@ -40,9 +41,10 @@ trait ValidationErrorConverter {
     "editType, editId, loanId\n" + rows.mkString("\n")
   }
 
-  def validationErrorToResultRow(err: ValidationError, validator: ActorRef): EditResultRow = {
-    val releventFields = releventFields(err, validator)
-    EditResultRow(RowId(err.publicErrorId), relevantFields(err, validator))
+  def validationErrorToResultRow(err: ValidationError, validator: ActorRef)(implicit ec: ExecutionContext): Future[EditResultRow] = {
+    for {
+      fields <- relevantFields(err, validator)
+    } yield EditResultRow(RowId(err.publicErrorId), fields)
   }
 
   //// Helper methods
@@ -51,15 +53,11 @@ trait ValidationErrorConverter {
     EditMetaDataLookup.forEdit(editName).editDescription
   }
 
-  private def relevantFields(err: ValidationError, validator: ActorRef): Future[JsObject] = {
+  private def relevantFields(err: ValidationError, validator: ActorRef)(implicit ec: ExecutionContext): Future[JsObject] = {
     val fieldNames: Seq[String] = EditMetaDataLookup.forEdit(err.ruleName).fieldNames
 
-    val mapping = for {
-      jsMapping <- (validator ? GetFieldValues(err, fieldNames)).mapTo[Seq[(String, JsValue)]]
+    for {
+      jsMapping <- (validator ? GetFieldValues(err, fieldNames)).mapTo[JsObject]
     } yield jsMapping
-
-    mapping.onComplete({
-      case Success(Seq[(String, )]) =>
-    })
   }
 }

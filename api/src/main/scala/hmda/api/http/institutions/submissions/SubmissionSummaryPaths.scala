@@ -22,6 +22,8 @@ import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator._
+import hmda.validation.ValidationStats.FindTotalSubmittedLars
+import hmda.validation.rules.StatsLookup
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success, Try }
@@ -32,13 +34,12 @@ trait SubmissionSummaryPaths
     with ApiErrorProtocol
     with EditResultsProtocol
     with RequestVerificationUtils
-    with ValidationErrorConverter {
+    with ValidationErrorConverter
+    with StatsLookup {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
-
-  implicit val timeout: Timeout
 
   case class TsLarSummary(ts: Option[TransmittalSheet], larSize: Int, hmdaFileName: String)
 
@@ -56,7 +57,9 @@ trait SubmissionSummaryPaths
             submissions <- submissionPersistenceF
             s <- (validator ? GetState).mapTo[HmdaFileValidationState]
             sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
-          } yield TsLarSummary(s.ts, s.lars.size, sub.fileName)
+            actorRef <- validationStats
+            totalLars <- (actorRef ? FindTotalSubmittedLars(sub.id.institutionId, period)).mapTo[Int]
+          } yield TsLarSummary(s.ts, totalLars, sub.fileName)
 
           onComplete(tsF) {
             case Success(x) => x.ts match {

@@ -33,7 +33,7 @@ import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.SubmissionLarStats
 import hmda.validation.SubmissionLarStats.PersistStatsForMacroEdits
 import hmda.validation.ValidationStats.AddSubmissionTaxId
-import spray.json.{ JsNumber, JsString }
+import spray.json.{ JsNumber, JsObject, JsString }
 
 import scala.util.Try
 import scala.concurrent.duration._
@@ -285,8 +285,8 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         }
         (field, toJsonVal(fieldValue))
       })
-      println(mapping)
-      sender() ! mapping
+      val jsObject = JsObject(mapping: _*)
+      sender() ! jsObject
 
     case GetNamedErrorResultsPaginated(editName, page) =>
       val allFailures = state.allErrors.filter(e => e.ruleName == editName)
