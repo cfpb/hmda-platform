@@ -107,11 +107,11 @@ object HmdaPlatform extends App {
 
     (supervisorProxy ? FindActorByName(SingleLarValidation.name))
       .mapTo[ActorRef]
-      .map(a => log.debug(s"Started single lar validator at ${a.path}"))
+      .map(a => log.info(s"Started single lar validator at ${a.path}"))
 
     (supervisorProxy ? FindActorByName(InstitutionPersistence.name))
       .mapTo[ActorRef]
-      .map(a => log.debug(s"Started institutions at ${a.path}"))
+      .map(a => log.info(s"Started institutions at ${a.path}"))
   }
 
   //Start Query

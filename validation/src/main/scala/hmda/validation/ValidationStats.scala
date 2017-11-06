@@ -115,7 +115,7 @@ class ValidationStats extends HmdaPersistentActor {
   }
 
   override def preStart(): Unit = {
-    log.debug(s"Actor started at ${self.path}")
+    log.info(s"Actor started at ${self.path}")
     log.debug("Thread name for actor: " + Thread.currentThread().getName)
   }
 
