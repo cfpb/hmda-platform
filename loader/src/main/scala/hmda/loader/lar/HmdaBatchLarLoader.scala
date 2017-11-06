@@ -84,7 +84,8 @@ object HmdaBatchLarLoader extends FlowUtils {
       )).mapTo[ActorRef]
 
     (clusterClient ? ClusterClient.Send("/user/supervisor/singleton", FindHmdaFiling(period), localAffinity = true)).mapTo[ActorRef]
-    (clusterClient ? ClusterClient.Send("/user/query-supervisor", FindHmdaFilingView(period), localAffinity = true)).mapTo[ActorRef]
+    //TODO: turn back on when #1282 is done
+    //(clusterClient ? ClusterClient.Send("/user/query-supervisor", FindHmdaFilingView(period), localAffinity = true)).mapTo[ActorRef]
 
     val fUploadSubmission = for {
       s <- fSubmissionsActor

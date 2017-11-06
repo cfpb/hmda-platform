@@ -15,7 +15,7 @@ class SubmissionCassandraProjection(sys: ActorSystem, mat: ActorMaterializer) ex
   def startUp(): Unit = {
     createKeyspace()
     createTable()
-    projectLarData()
+    //projectLarData()
   }
 
   def projectLarData(): Unit = {
