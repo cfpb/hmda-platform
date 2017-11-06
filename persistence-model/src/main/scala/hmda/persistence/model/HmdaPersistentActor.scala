@@ -25,7 +25,7 @@ abstract class HmdaPersistentActor extends PersistentActor with HmdaActor {
 
   override def receiveCommand: Receive = {
     case ReceiveTimeout => {
-      log.info("Received Timeout, sending Shutdown message. Thread: " + Thread.currentThread().getName)
+      log.debug("Received Timeout, sending Shutdown message. Thread: " + Thread.currentThread().getName)
       self ! Shutdown
     }
 

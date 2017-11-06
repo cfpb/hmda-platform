@@ -17,7 +17,7 @@ abstract class HmdaSupervisorActor extends HmdaActor {
       sender() ! findActorByName(name)
 
     case Terminated(ref) =>
-      log.info(s"actor ${ref.path} terminated")
+      log.debug(s"actor ${ref.path} terminated")
       actors = actors.filterNot { case (_, value) => value == ref }
   }
 
