@@ -23,6 +23,8 @@ import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
+import hmda.query.HmdaQuerySupervisor.FindSignedEventQuerySubscriber
+import hmda.query.projections.filing.SubmissionSignedEventQuerySubscriber
 
 import scala.concurrent.duration._
 
@@ -130,6 +132,11 @@ object HmdaPlatform extends App {
     val institutionViewF = (querySupervisorProxy ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
     institutionViewF.map(actorRef => loadDemoData(supervisorProxy, actorRef))
     //HmdaProjectionQuery.startUp(system)
+
+    (querySupervisorProxy ? FindSignedEventQuerySubscriber)
+      .mapTo[ActorRef]
+      .map(a => log.info(s"Started submission signed event subscriber validator at ${a.path}"))
+
   }
 
   //Start Publication
