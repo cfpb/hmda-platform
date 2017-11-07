@@ -4,28 +4,27 @@ import java.io.File
 import java.time.Instant
 
 import akka.pattern.ask
-import akka.actor.{ ActorPath, ActorRef, ActorSystem }
-import akka.cluster.client.{ ClusterClient, ClusterClientSettings }
-import akka.stream.{ ActorMaterializer, IOResult }
-import akka.stream.scaladsl.{ FileIO, Sink, Source }
-import akka.util.{ ByteString, Timeout }
+import akka.actor.{ActorPath, ActorRef, ActorSystem}
+import akka.cluster.client.{ClusterClient, ClusterClientSettings}
+import akka.stream.{ActorMaterializer, IOResult}
+import akka.stream.scaladsl.{FileIO, Sink, Source}
+import akka.util.{ByteString, Timeout}
 import hmda.api.util.FlowUtils
-import hmda.model.fi.{ Created, Filing, Submission }
-import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindProcessingActor, FindSubmissions }
-import hmda.persistence.institutions.FilingPersistence.CreateFiling
+import hmda.model.fi.{Created, Filing, Submission}
+import hmda.persistence.HmdaSupervisor.{FindFilings, FindHmdaFiling, FindProcessingActor, FindSubmissions}
 import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
-import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.{FilingPersistence, SubmissionPersistence}
 import hmda.persistence.processing.HmdaRawFile.AddLine
-import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
+import hmda.persistence.processing.ProcessingMessages.{CompleteUpload, Persisted, StartUpload}
 import hmda.persistence.processing.SubmissionManager
 import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.messages.commands.filing.FilingCommands.CreateFiling
 import hmda.persistence.processing.SubmissionManager.AddFileName
-import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 object HmdaBatchLarLoader extends FlowUtils {
 
