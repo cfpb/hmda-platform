@@ -120,11 +120,56 @@ This API is for internal use only. The following endpoints are available
 
     Response is the same object that has been modified, with code 202
 
-* `/institutions/create|delete`
-    * `GET` - Creates or deletes the instutition schema
+* `/institutions/<institutionID>`
 
-    Example response, with HTTP code 202
+    * `GET`
 
+    Retrieves the details of an institution.
+
+    Example Response, in `JSON` format:
+
+    ```json
+        {
+          "id": "123",
+          "agency": "CFPB",
+          "activityYear": "2017",
+          "institutionType": "bank",
+          "cra": false,
+          "externalIds": [{
+            "id": "bank-id",
+            "idType": "fdic-certificate-number"
+          }],
+          "emailDomains": [
+            "email1",
+            "email2"
+          ],
+          "respondent": {
+            "externalId": {
+                "id": "bank-id",
+                "idType": "fdic-certificate-number"
+            },
+            "name": "bank 0",
+            "state": "VA",
+            "city": "City Name",
+            "fipsStateNumber": "2"
+          },
+          "hmdaFilerFlag": true,
+          "parent": {
+            "respondentId": "12-3",
+            "idRssd": 3,
+            "name": "parent name",
+            "city": "parent city",
+            "state": "VA"
+          },
+          "assets": 123,
+          "otherLenderCode": 0,
+          "topHolder": {
+            "idRssd": 4,
+            "name": "top holder name",
+            "city": "top holder city",
+            "state": "VA",
+            "country": "USA"
+      }
+    }
     ```
-    InstitutionSchemaDeleted()
-    ```
+
