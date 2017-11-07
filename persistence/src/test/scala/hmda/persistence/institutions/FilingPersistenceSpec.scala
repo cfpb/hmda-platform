@@ -5,6 +5,7 @@ import hmda.model.fi._
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.institutions.FilingPersistence._
 import hmda.persistence.model.ActorSpec
+import hmda.persistence.messages.commands.filing.FilingCommands._
 
 class FilingPersistenceSpec extends ActorSpec {
 
