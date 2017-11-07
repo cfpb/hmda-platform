@@ -131,7 +131,6 @@ object HmdaPlatform extends App {
 
     val institutionViewF = (querySupervisorProxy ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
     institutionViewF.map(actorRef => loadDemoData(supervisorProxy, actorRef))
-    //HmdaProjectionQuery.startUp(system)
 
     (querySupervisorProxy ? FindSignedEventQuerySubscriber)
       .mapTo[ActorRef]
