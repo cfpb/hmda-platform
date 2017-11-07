@@ -17,7 +17,7 @@ import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.institutions.FilingPersistence.CreateFiling
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
-import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, ModifyInstitution }
+import hmda.persistence.institutions.InstitutionPersistence.{ CreateInstitution, GetInstitution, ModifyInstitution }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.ExecutionContext
@@ -80,5 +80,21 @@ trait InstitutionAdminHttpApi
       }
     }
 
-  def institutionAdminRoutes(supervisor: ActorRef, querySupervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) }
+  def institutionReadPath(supervisor: ActorRef) =
+    path("institutions" / Segment) { institutionId =>
+      extractExecutionContext { executor =>
+        implicit val ec: ExecutionContext = executor
+        val institutionF = for {
+          a <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+          o <- (a ? GetInstitution(institutionId)).mapTo[Option[Institution]]
+          i = o.getOrElse(Institution.empty)
+        } yield i
+
+        onComplete(institutionF) { institution =>
+          complete(ToResponseMarshallable(institution))
+        }
+      }
+    }
+
+  def institutionAdminRoutes(supervisor: ActorRef, querySupervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) ~ institutionReadPath(supervisor) }
 }
