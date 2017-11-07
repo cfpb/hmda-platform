@@ -16,7 +16,7 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Filing, Submission }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
-import hmda.persistence.institutions.FilingPersistence.GetFilingByPeriod
+import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 
 import scala.concurrent.Future

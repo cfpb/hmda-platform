@@ -15,7 +15,7 @@ import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence 
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
-import hmda.persistence.institutions.FilingPersistence._
+import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetSubmissionById }
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.SubmissionManager.AddFileName

@@ -1,7 +1,9 @@
 package hmda.persistence.serialization.institutions
 
 import hmda.model.institution.InstitutionGenerators._
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, ModifyInstitution }
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
+import hmda.persistence.model.serialization.InstitutionCommands.{ CreateInstitutionMessage, ModifyInstitutionMessage }
 import hmda.persistence.model.serialization.InstitutionEvents._
 import hmda.persistence.serialization.institutions.InstitutionProtobufConverter._
 import org.scalatest.prop.PropertyChecks
@@ -75,6 +77,20 @@ class InstitutionProtobufConverterSpec extends PropSpec with PropertyChecks with
     forAll(institutionGen) { institution =>
       val protobuf = institutionModifiedToProtobuf(InstitutionModified(institution)).toByteArray
       institutionModifiedFromProtobuf(InstitutionModifiedMessage.parseFrom(protobuf)) mustBe InstitutionModified(institution)
+    }
+  }
+
+  property("Create Institution must serialize to protobuf and back") {
+    forAll(institutionGen) { institution =>
+      val protobuf = createInstitutionToProtobuf(CreateInstitution(institution)).toByteArray
+      createInstitutionFromProtobuf(CreateInstitutionMessage.parseFrom(protobuf)) mustBe CreateInstitution(institution)
+    }
+  }
+
+  property("Modify Institution must serialize to protobuf and back") {
+    forAll(institutionGen) { institution =>
+      val protobuf = modifyInstitutionToProtobuf(ModifyInstitution(institution)).toByteArray
+      modifyInstitutionFromProtobuf(ModifyInstitutionMessage.parseFrom(protobuf)) mustBe ModifyInstitution(institution)
     }
   }
 
