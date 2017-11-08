@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+import "SubmissionEvents.proto";
+
+message SubmissionSignedPubSubMessage {
+    SubmissionIdMessage submissionId = 1;
+}
