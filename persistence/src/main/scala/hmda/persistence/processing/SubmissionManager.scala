@@ -14,7 +14,7 @@ import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence.AddSubmissionFileName
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
-import hmda.persistence.messages.events.processing.PubSubEvents.SubmissionSigned
+import hmda.persistence.messages.events.processing.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
@@ -136,7 +136,7 @@ class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) e
       result.map { r =>
         if (r.isDefined) updateFilingStatus(Completed)
         originalSender ! r
-        mediator ! Publish(PubSubTopics.submissionSigned, SubmissionSigned(submissionId))
+        mediator ! Publish(PubSubTopics.submissionSigned, SubmissionSignedPubSub(submissionId))
       }
 
     case GetActorRef(name) => name match {

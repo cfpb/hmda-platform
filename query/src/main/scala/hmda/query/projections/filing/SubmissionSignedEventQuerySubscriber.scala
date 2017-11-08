@@ -6,7 +6,7 @@ import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
 import akka.stream.ActorMaterializer
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
-import hmda.persistence.messages.events.processing.PubSubEvents.SubmissionSigned
+import hmda.persistence.messages.events.processing.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.PubSubTopics
 import hmda.persistence.processing.HmdaQuery._
@@ -34,7 +34,7 @@ class SubmissionSignedEventQuerySubscriber() extends HmdaActor with FilingCassan
     case SubscribeAck(Subscribe(PubSubTopics.submissionSigned, None, `self`)) =>
       repositoryLog.info(s"Subscribed to ${PubSubTopics.submissionSigned}")
 
-    case SubmissionSigned(submissionId) =>
+    case SubmissionSignedPubSub(submissionId) =>
       repositoryLog.info(s"Received submission signed event with submission id: ${submissionId.toString}")
       val persistenceId = s"HmdaFileValidator-$submissionId"
       val larSource = events(persistenceId).map {
