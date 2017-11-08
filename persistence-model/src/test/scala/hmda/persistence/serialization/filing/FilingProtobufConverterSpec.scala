@@ -3,7 +3,9 @@ package hmda.persistence.serialization.filing
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 import hmda.model.institution.FilingGenerators._
+import hmda.persistence.messages.commands.filing.FilingCommands.{ CreateFiling, GetFilingByPeriod, UpdateFilingStatus }
 import hmda.persistence.messages.events.institutions.FilingEvents.{ FilingCreated, FilingStatusUpdated }
+import hmda.persistence.model.serialization.FilingCommands.{ CreateFilingMessage, GetFilingByPeriodMessage, UpdateFilingStatusMessage }
 import hmda.persistence.model.serialization.FilingEvents.{ FilingCreatedMessage, FilingMessage, FilingStatusMessage, FilingStatusUpdatedMessage }
 import hmda.persistence.serialization.filing.FilingProtobufConverter._
 
@@ -39,4 +41,27 @@ class FilingProtobufConverterSpec extends PropSpec with PropertyChecks with Must
     }
   }
 
+  property("Create Filing must serialize to protobuf and back") {
+    forAll(filingGen) { filing =>
+      val createFiling = CreateFiling(filing)
+      val protobuf = createFilingToProtobuf(createFiling).toByteArray
+      createFilingFromProtobuf(CreateFilingMessage.parseFrom(protobuf)) mustBe createFiling
+    }
+  }
+
+  property("Update Status must serialize to protobuf and back") {
+    forAll(filingGen) { filing =>
+      val updateFilingStatus = UpdateFilingStatus(filing.period, filing.status)
+      val protobuf = updateFilingStatusToProtobuf(updateFilingStatus).toByteArray
+      updateFilingStatusFromProtobuf(UpdateFilingStatusMessage.parseFrom(protobuf)) mustBe updateFilingStatus
+    }
+  }
+
+  property("Get Filing by period must serialize to protobuf and back") {
+    forAll(filingGen) { filing =>
+      val getFilingByPeriod = GetFilingByPeriod(filing.period)
+      val protobuf = getFilingByPeriodToProtobuf(getFilingByPeriod).toByteArray
+      getFilingByPeriodFromProtobuf(GetFilingByPeriodMessage.parseFrom(protobuf)) mustBe getFilingByPeriod
+    }
+  }
 }

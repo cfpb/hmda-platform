@@ -58,11 +58,15 @@ class InstitutionAdminHttpApiSpec
       }
     }
 
-    "create a new institution" in {
+    "create a new institution and get its details" in {
       val jsonRequest = ByteString(newInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
       postRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
         status mustBe StatusCodes.Created
+        responseAs[Institution] mustBe newInstitution
+      }
+      Get(s"/institutions/${newInstitution.id}") ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
+        status mustBe StatusCodes.OK
         responseAs[Institution] mustBe newInstitution
       }
     }
@@ -97,7 +101,6 @@ class InstitutionAdminHttpApiSpec
         status mustBe StatusCodes.Accepted
         responseAs[Institution] mustBe updatedInstitution
       }
-
     }
     "return not found when modifying non existing institution" in {
       val i1 = sampleInstitution
