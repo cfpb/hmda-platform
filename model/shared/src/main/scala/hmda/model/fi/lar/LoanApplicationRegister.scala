@@ -22,6 +22,24 @@ case class LoanApplicationRegister(
     lienStatus: Int = 0
 ) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
 
+  def isEmpty: Boolean = {
+    this.id == 0 &&
+      this.respondentId == "" &&
+      this.agencyCode == 0 &&
+      this.loan == Loan("", "", 0, 0, 0, 0, 0) &&
+      this.preapprovals == 0 &&
+      this.actionTakenType == 0 &&
+      this.actionTakenDate == 0 &&
+      this.geography == Geography("", "", "", "") &&
+      this.applicant == Applicant(0, 0, 0, "", "", "", "", 0, "", "", "", "", 0, 0, "") &&
+      this.purchaserType == 0 &&
+      this.denial == Denial("", "", "") &&
+      this.rateSpread == "" &&
+      this.hoepaStatus == 0 &&
+      this.lienStatus == 0
+
+  }
+
   override def valueOf(field: String): Any = {
     LarFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")
   }

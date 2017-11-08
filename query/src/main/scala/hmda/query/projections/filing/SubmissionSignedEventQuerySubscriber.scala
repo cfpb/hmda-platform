@@ -24,6 +24,8 @@ class SubmissionSignedEventQuerySubscriber() extends HmdaActor with FilingCassan
 
   mediator ! Subscribe(PubSubTopics.submissionSigned, self)
 
+  val sink = CassandraSink[LoanApplicationRegister](parallelism = 2, preparedStatement, statementBinder)
+
   def receive: Receive = {
 
     case s: String =>
@@ -37,12 +39,13 @@ class SubmissionSignedEventQuerySubscriber() extends HmdaActor with FilingCassan
       val persistenceId = s"HmdaFileValidator-$submissionId"
       val larSource = events(persistenceId).map {
         case LarValidated(lar, _) => lar
+        case _ => LoanApplicationRegister()
       }
 
-      val sink = CassandraSink[LoanApplicationRegister](parallelism = 2, preparedStatement, statementBinder)
       larSource
-        .map { lar => repositoryLog.info(lar.toCSV); lar }
-        .to(sink).run()
+        .filter(lar => !lar.isEmpty)
+        .map { lar => repositoryLog.debug(s"Inserted: ${lar.toString}"); lar }
+        .runWith(sink)
 
     case _ => //do nothing
   }

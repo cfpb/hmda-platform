@@ -132,6 +132,8 @@ object HmdaPlatform extends App {
     val institutionViewF = (querySupervisorProxy ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
     institutionViewF.map(actorRef => loadDemoData(supervisorProxy, actorRef))
 
+    HmdaProjectionQuery.startUp(system)
+
     (querySupervisorProxy ? FindSignedEventQuerySubscriber)
       .mapTo[ActorRef]
       .map(a => log.info(s"Started submission signed event subscriber validator at ${a.path}"))
