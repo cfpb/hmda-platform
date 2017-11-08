@@ -1,4 +1,4 @@
-package hmda.persistence.messages.events.processing
+package hmda.persistence.messages.events.pubsub
 
 import hmda.model.fi.SubmissionId
 

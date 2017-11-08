@@ -3,7 +3,7 @@ package hmda.persistence.serialization.pubsub
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import hmda.model.institution.SubmissionGenerators._
-import hmda.persistence.messages.events.processing.PubSubEvents.SubmissionSignedPubSub
+import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.serialization.PubSubEvents.SubmissionSignedPubSubMessage
 import hmda.persistence.serialization.pubsub.PubSubEventsProtobufConverter._
 

@@ -1,6 +1,6 @@
 package hmda.persistence.serialization.pubsub
 
-import hmda.persistence.messages.events.processing.PubSubEvents.SubmissionSignedPubSub
+import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.serialization.PubSubEvents.SubmissionSignedPubSubMessage
 import hmda.persistence.model.serialization.SubmissionEvents.SubmissionIdMessage
 import hmda.persistence.serialization.submission.SubmissionProtobufConverter._

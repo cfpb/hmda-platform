@@ -1,7 +1,7 @@
 package hmda.persistence.serialization.pubsub
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.persistence.messages.events.processing.PubSubEvents.SubmissionSignedPubSub
+import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.serialization.PubSubEvents.SubmissionSignedPubSubMessage
 import hmda.persistence.serialization.pubsub.PubSubEventsProtobufConverter._
 

@@ -6,7 +6,7 @@ import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
 import akka.stream.ActorMaterializer
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
-import hmda.persistence.messages.events.processing.PubSubEvents.SubmissionSignedPubSub
+import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.PubSubTopics
 import hmda.persistence.processing.HmdaQuery._
