@@ -21,7 +21,7 @@ trait CassandraRepository[A] {
   implicit val ec: ExecutionContext
   implicit val scheduler: Scheduler
 
-  val log = LoggerFactory.getLogger("CassandraRepository")
+  val repositoryLog = LoggerFactory.getLogger("CassandraRepository")
 
   val keyspace = cassandraKeyspace
 
@@ -29,7 +29,7 @@ trait CassandraRepository[A] {
 
   @tailrec
   private def retry[T](n: Int)(fn: => T): Try[T] = {
-    log.info("*********ATTEMPTING CONNECTION TO CASSANDRA QUERY CLUSTER********")
+    repositoryLog.info("*********ATTEMPTING CONNECTION TO CASSANDRA QUERY CLUSTER********")
     Try { fn } match {
       case x: Success[T] => x
       case _ if n > 1 =>

@@ -63,7 +63,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
 
   val statementBinder = (lar: LoanApplicationRegister, statement: PreparedStatement) =>
     statement.bind(
-      lar.id.toString,
+      lar.loan.id + lar.respondentId + lar.agencyCode,
       lar.respondentId,
       new Integer(lar.agencyCode),
       lar.loan.id,

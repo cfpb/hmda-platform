@@ -3,6 +3,8 @@ package hmda.persistence.processing
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
+import akka.cluster.pubsub.DistributedPubSub
+import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import akka.pattern.ask
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
@@ -12,6 +14,7 @@ import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence.AddSubmissionFileName
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
+import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.HmdaFileParser.ReadHmdaRawFile
 import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
@@ -65,6 +68,8 @@ class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) e
     .withDispatcher("persistence-dispatcher"))
   val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
   val submissionPersistence = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
+
+  val mediator = DistributedPubSub(context.system).mediator
 
   var uploaded: Int = 0
 
@@ -131,6 +136,7 @@ class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) e
       result.map { r =>
         if (r.isDefined) updateFilingStatus(Completed)
         originalSender ! r
+        mediator ! Publish(PubSubTopics.submissionSigned, SubmissionSignedPubSub(submissionId))
       }
 
     case GetActorRef(name) => name match {

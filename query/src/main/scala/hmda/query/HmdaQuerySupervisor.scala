@@ -8,12 +8,14 @@ import hmda.query.view.filing.HmdaFilingView
 import hmda.query.view.institutions.InstitutionView
 import hmda.persistence.PersistenceConfig._
 import hmda.persistence.messages.CommonMessages._
+import hmda.query.projections.filing.SubmissionSignedEventQuerySubscriber
 
 import scala.concurrent.duration._
 
 object HmdaQuerySupervisor {
 
   case class FindHmdaFilingView(period: String)
+  case object FindSignedEventQuerySubscriber
 
   def props(): Props = Props(new HmdaQuerySupervisor)
 
@@ -35,6 +37,8 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
   override def receive: Receive = super.receive orElse {
     case FindHmdaFilingView(period) =>
       sender() ! findHmdaFilingView(period)
+    case FindSignedEventQuerySubscriber =>
+      sender() ! findSignedEventQuerySubscriber()
     case Shutdown =>
       context stop self
   }
@@ -52,6 +56,16 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
   private def createHmdaFilingView(period: String): ActorRef = {
     val id = s"${HmdaFilingView.name}-$period"
     val actor = context.actorOf(HmdaFilingView.props(period).withDispatcher("query-dispatcher"), id)
+    supervise(actor, id)
+  }
+
+  private def findSignedEventQuerySubscriber(): ActorRef = {
+    actors.getOrElse(SubmissionSignedEventQuerySubscriber.name, createSignedEventQuerySubscriber())
+  }
+
+  def createSignedEventQuerySubscriber(): ActorRef = {
+    val id = SubmissionSignedEventQuerySubscriber.name
+    val actor = context.actorOf(SubmissionSignedEventQuerySubscriber.props())
     supervise(actor, id)
   }
 
