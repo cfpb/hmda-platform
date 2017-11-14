@@ -1,6 +1,6 @@
 package hmda.validation.rules.lar.`macro`
 
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 trait RateSpreadUtils {
 
