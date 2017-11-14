@@ -5,6 +5,7 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.{ Geography, LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.MacroStatsUpdated
 import hmda.persistence.model.{ ActorSpec, MsaGenerators }
 import hmda.validation.SubmissionLarStats._
 import hmda.validation.rules.lar.`macro`._
@@ -38,6 +39,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
         probe.send(submissionLarStats, LarValidated(lar, submissionId))
       }
       probe.send(submissionLarStats, PersistStatsForMacroEdits)
+      probe.expectMsgType[MacroStatsUpdated]
       probe.send(submissionLarStats, GetState)
       val stats = probe.expectMsgType[SubmissionLarStatsState]
       stats.totalSubmitted mustBe 10
@@ -58,6 +60,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
       }
 
       probe.send(submissionLarStats2, PersistStatsForMacroEdits)
+      probe.expectMsgType[MacroStatsUpdated]
       probe.send(submissionLarStats2, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 11 + 12 + 13
@@ -79,6 +82,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
       }
 
       probe.send(submissionLarStats3, PersistStatsForMacroEdits)
+      probe.expectMsgType[MacroStatsUpdated]
       probe.send(submissionLarStats3, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 5 + 6 + 7
@@ -100,6 +104,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
       }
 
       probe.send(submissionLarStats, PersistStatsForMacroEdits)
+      probe.expectMsgType[MacroStatsUpdated]
       probe.send(submissionLarStats, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 9 + 8 + 7
@@ -121,6 +126,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
       }
 
       probe.send(submissionLarStats, PersistStatsForMacroEdits)
+      probe.expectMsgType[MacroStatsUpdated]
       probe.send(submissionLarStats, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 6 + 5 + 4
@@ -141,6 +147,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
       }
 
       probe.send(submissionLarStats, PersistStatsForMacroEdits)
+      probe.expectMsgType[MacroStatsUpdated]
       probe.send(submissionLarStats, GetState)
       val st = probe.expectMsgType[SubmissionLarStatsState]
       st.totalValidated mustBe 11 + 13 + 15

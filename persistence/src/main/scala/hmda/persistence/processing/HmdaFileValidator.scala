@@ -27,6 +27,7 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.MacroStatsUpdated
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.SubmissionLarStats
@@ -201,16 +202,18 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       log.debug("Quality Validation completed")
       for {
         stat <- statRef
-      } stat ! PersistStatsForMacroEdits
-      val fMacro = checkMacro(larSource, ctx)
-        .mapTo[LarSourceValidation]
-        .map(larSourceValidation => larSourceValidation.toEither)
-        .map {
-          case Right(source) => CompleteValidation(replyTo)
-          case Left(errors) => CompleteMacroValidation(LarValidationErrors(errors.list.toList), replyTo)
-        }
+        _ <- (stat ? PersistStatsForMacroEdits).mapTo[MacroStatsUpdated]
+        fMacro = checkMacro(larSource, ctx)
+          .mapTo[LarSourceValidation]
+          .map(larSourceValidation => larSourceValidation.toEither)
+          .map {
+            case Right(_) => CompleteValidation(replyTo)
+            case Left(errors) => CompleteMacroValidation(LarValidationErrors(errors.list.toList), replyTo)
+          }
 
-      fMacro pipeTo self
+      } yield {
+        fMacro pipeTo self
+      }
 
     case tsErrors: TsValidationErrors =>
       val errors = tsErrors.errors

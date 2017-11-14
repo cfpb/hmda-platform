@@ -124,6 +124,7 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
         )
         self ! PersistIrs
         validationStats ! msg
+        sender() ! e
       }
 
     case PersistIrs =>
