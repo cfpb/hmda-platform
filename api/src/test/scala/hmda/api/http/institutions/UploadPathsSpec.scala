@@ -22,7 +22,7 @@ class UploadPathsSpec extends InstitutionHttpApiAsyncSpec with SubmissionProtoco
     "2|0123456789|8|JKL|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
     "2|0123456789|8|MNO|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4\n" +
     "2|0123456789|8|PQR|20130117|4|3|2|1|10000|1|5|20130119|06920|06|034|0100.01|4|5|7|4|3|2|1|8|7|6|5|4|1|2|9000|0|9|8|7|01.05|2|4"
-  val file = multiPartFile(csv, "parse-length_4-lars.txt")
+  val file = multiPartFile(csv, "parse-length_4-lars.TXT")
   val file2 = multiPartFile(csv2, "parse-length_5-lars.txt")
 
   val badContent = "qdemd"

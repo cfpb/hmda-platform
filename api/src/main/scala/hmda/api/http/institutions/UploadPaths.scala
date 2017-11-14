@@ -73,7 +73,7 @@ trait UploadPaths extends InstitutionProtocol with ApiErrorProtocol with Submiss
 
   private def uploadFile(processingActor: ActorRef, uploadTimestamp: Long, path: Path, submission: Submission): Route = {
     fileUpload("file") {
-      case (metadata, byteSource) if metadata.fileName.endsWith(".txt") =>
+      case (metadata, byteSource) if metadata.fileName.toLowerCase.endsWith(".txt") =>
         processingActor ! AddFileName(metadata.fileName)
         processingActor ! StartUpload
         val uploadedF = byteSource
