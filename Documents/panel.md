@@ -6,9 +6,9 @@ The panel loader is designed to read a CSV file of institution data and load the
 
 The CSV file should use the `|` (pipe) delimiter, and should include a header row as the first line.
 
-A small example file (~200 institutions) is located at `panel/src/main/resources/inst_data_2017_dummy.csv`
+A small example file (~200 institutions) is located at `loader/src/main/resources/inst_data_2017_dummy.csv`
 
-The real panel file (~160,000 institutions) is located at `panel/src/main/resources/inst_data_2017.csv`
+The real panel file (~160,000 institutions) is located at `loader/src/main/resources/inst_data_2017.csv`
 
 
 ## Loading Institutions Remotely
@@ -105,16 +105,18 @@ In a terminal, execute the following commands:
 
 ```shell
 > sbt
-sbt> project panel
+sbt> project loader
 sbt> run /path/to/panelData.csv
 ```
+
+At the `Multiple main classes detected` prompt, choose `2`, for `hmda.loader.panel.PanelCsvLoader`.
 
 The project can also be run as a java `.jar` file.  While running `sbt` and in the panel project, run the following commands:
 ```shell
 sbt> clean
 sbt> assembly
 ```
-Then the panel loader can be run with `java -jar  panel/target/scala-2.12/panel.jar path/to/institution_file.csv`
+Then the panel loader can be run with `java -jar  loader/target/scala-2.12/panel.jar path/to/institution_file.csv`
 
 
 ## Error codes
