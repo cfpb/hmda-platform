@@ -23,7 +23,7 @@ case class D5X(
 ) extends DisclosureReport
 
 object D5X {
-  def generate[ec: EC, mat: MAT, as: AS](
+  def generateD5X[ec: EC, mat: MAT, as: AS](
     reportId: String,
     filters: LoanApplicationRegister => Boolean,
     larSource: Source[LoanApplicationRegister, NotUsed],

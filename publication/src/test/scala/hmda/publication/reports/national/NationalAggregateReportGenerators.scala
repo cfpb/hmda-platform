@@ -7,12 +7,14 @@ import hmda.publication.reports.util.DateUtil._
 import org.scalacheck.Gen
 
 object NationalAggregateReportGenerators {
-  implicit def n52Gen: Gen[N52] = {
+  implicit def n5XGen: Gen[N5X] = {
     for {
       total <- totalDispositionGen
       year = Calendar.getInstance().get(Calendar.YEAR)
       reportDate = formatDate(Calendar.getInstance().toInstant)
       applicantIncomes <- Gen.listOfN(5, applicantIncomeGen)
-    } yield N52(year, reportDate, applicantIncomes, total)
+      table <- Gen.alphaStr
+      description <- Gen.alphaStr
+    } yield N5X(year, applicantIncomes, total, table, description, reportDate)
   }
 }

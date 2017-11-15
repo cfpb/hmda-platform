@@ -7,7 +7,7 @@ import hmda.publication.reports._
 
 import scala.concurrent.Future
 
-object A52 {
+object A52 extends A5XReportCreator {
 
   def filters(lar: LoanApplicationRegister): Boolean = {
     (lar.loan.loanType == 1) &&
@@ -18,5 +18,5 @@ object A52 {
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int
-  ): Future[A5X] = A5X.generate("A52", larSource, fipsCode, filters)
+  ): Future[A5X] = A5X.generateA5X("A52", larSource, fipsCode, filters)
 }

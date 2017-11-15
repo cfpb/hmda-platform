@@ -21,7 +21,7 @@ case class A5X(
 ) extends AggregateReport
 
 object A5X {
-  def generate[ec: EC, mat: MAT, as: AS](
+  def generateA5X[ec: EC, mat: MAT, as: AS](
     reportId: String,
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
