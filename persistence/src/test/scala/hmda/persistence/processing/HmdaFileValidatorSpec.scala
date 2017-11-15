@@ -120,7 +120,12 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
           ValidityValidationError("4977566612", "V555", false),
           ValidityValidationError("4977566612", "V560", false)
         ),
-        Nil,
+        List(
+          QualityValidationError("8299422144", "Q030", false),
+          QualityValidationError("9471480396", "Q030", false),
+          QualityValidationError("2185751599", "Q030", false),
+          QualityValidationError("4977566612", "Q030", false)
+        ),
         qualityVerified = false,
         List(
           MacroValidationError("Q008"),
