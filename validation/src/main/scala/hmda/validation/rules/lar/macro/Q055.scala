@@ -10,9 +10,8 @@ import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success, Try }
 
-object Q055 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] with RateSpreadUtils {
+object Q055 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplicationRegister] {
 
   val config = ConfigFactory.load()
   val multiplier = config.getDouble("hmda.validation.macro.Q055.numOfLarsMultiplier")
@@ -22,9 +21,8 @@ object Q055 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
   override def apply[as: AS, mat: MAT, ec: EC](lars: LoanApplicationRegisterSource): Future[Result] = {
 
     val hoepaLoans =
-      count(lars
-        .filter(lar => lar.hoepaStatus == 1 && lar.actionTakenType == 1 && lar.rateSpread != "NA")
-        .filter(lar => rateSpreatToInt(lar.rateSpread) >= 5))
+      count(lars.filter(lar => lar.hoepaStatus == 1 && lar.actionTakenType == 1 && lar.rateSpread != "NA")
+        .filter(lar => lar.rateSpread.toDouble.toInt >= 5))
 
     val total = count(lars.filter(lar => lar.actionTakenType == 1))
 
@@ -32,6 +30,7 @@ object Q055 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
       h <- hoepaLoans
       t <- total
     } yield {
+      println(h.toDouble + " <= " + t * multiplier)
       h.toDouble is lessThanOrEqual(t * multiplier)
     }
   }
