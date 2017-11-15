@@ -22,9 +22,17 @@ class Q030Spec extends LarEditCheckSpec {
   }
 
   property("fails when action taken is in range and geography is NA") {
-    forAll(larGen, Gen.choose(1, 6)) { (lar, i) =>
-      val invalidGeo = Geography("NA", "NA", "NA", "NA")
-      val invalidLar = lar.copy(actionTakenType = i, geography = invalidGeo)
+    val geoGen = Gen.oneOf[Geography](
+      Geography("NA", "NA", "NA", "NA"),
+      Geography("NA", "NA", "NA", "1"),
+      Geography("NA", "NA", "1", "2"),
+      Geography("NA", "1", "2", "3"),
+      Geography("1", "NA", "2", "3"),
+      Geography("1", "2", "NA", "3"),
+      Geography("1", "2", "3", "NA")
+    )
+    forAll(larGen, Gen.choose(1, 6), geoGen) { (lar, i, g) =>
+      val invalidLar = lar.copy(actionTakenType = i, geography = g)
       invalidLar.mustFail
     }
   }
