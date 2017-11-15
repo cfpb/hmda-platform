@@ -170,7 +170,9 @@ object LarCsvParser {
   }
 
   def checkNA(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
-    if (value == "NA" || value == "") {
+    if (value == "") {
+      s"$fieldName cannot have empty value".failure.toValidationNel
+    } else if (value == "NA") {
       List(0).success
     } else {
       val dot = value.indexOf(".")

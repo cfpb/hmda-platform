@@ -30,7 +30,6 @@ object Q055 extends AggregateEditCheck[LoanApplicationRegisterSource, LoanApplic
       h <- hoepaLoans
       t <- total
     } yield {
-      println(h.toDouble + " <= " + t * multiplier)
       h.toDouble is lessThanOrEqual(t * multiplier)
     }
   }
