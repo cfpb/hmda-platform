@@ -23,7 +23,7 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q025,
       Q027,
       Q029,
-      Q030.inContext(ctx),
+      Q030,
       Q032,
       Q035,
       Q036,
