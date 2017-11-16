@@ -1,5 +1,6 @@
 year|rid|agency|inst_type|cra_filer|id_tax|id_rssd|id_fdic_cert|id_ncua|id_occ|domain_2017|domain_2014|domain_2013|nm_lgl|state_abbr_nm|city|state_cd|hmda_filer|p_rid|p_rssd|p_name|p_city|p_state|assets|olc|top_holder|top_holder_name|top_holder_city|top_holder_state|top_holder_country
 2017|Bank0_RID|9|1|1|b0-testtaxid|6999998|7999998|8999998|9999998|bank0.com|bank0.com|bank0.com|bank-0 National Association|CA|Davis|06|1|Bank0_Parent_RID|6999988.0|Bank0-parent|Somewhereville|CA|100000|0|-1||||
+2017|Bank0-0_RID|9|1|1|b0-0-testtaxid|6999997|7999997|8999997|9999997|bank0.com|bank0.com|bank0.com|bank-0-0 National Association|CA|Davis|06|1|Bank0-0_Parent_RID|6999987.0|Bank0-0-parent|Somewhereville|CA|100001|0|-1||||
 2017|Bank1_RID|9|1|1|b1-testtaxid|6999999|7999999|8999999|9999999|bank1.com|bank1.com|bank1.com|bank-1 Mortgage Lending|DC|Washington|11|1|Bank1_Parent_RID|6999989.0|Bank1-parent|Elsewheretown|DC|200000|0|-1||||
 2017|8229|1|1|-1|610153455|718547|2736|0|8229||||FIRST NATIONAL BANK OF MUHLENBERG COUNTY, KENTUCKY|KY|CENTRAL CITY|21|1|-1|1096493.0|FIRST UNITED, INC.|CENTRAL CITY|KY|148317|0|-1||||
 2017|12955|1|1|-1|430216490|870650|4549|0|12955|CNBSTL.COM|CNBSTL.COM|CNBSTL.COM|CITIZENS NATIONAL BANK OF GREATER ST. LOUIS|MO|MAPLEWOOD|29|1|-1|1140930.0|CARDINAL BANCORP, INC.|MAPLEWOOD|MO|418859|0|-1||||
