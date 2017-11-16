@@ -2,7 +2,6 @@ package hmda.validation.engine.lar
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{ Sink, Source }
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 class ULISpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {

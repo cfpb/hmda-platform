@@ -26,7 +26,6 @@ import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages.{ CompleteUpload, Persisted, StartUpload }
 import hmda.persistence.processing.SubmissionManager
 import hmda.persistence.processing.SubmissionManager.AddFileName
-import hmda.query.HmdaQuerySupervisor.FindHmdaFilingView
 
 import scala.util.{ Failure, Success }
 
