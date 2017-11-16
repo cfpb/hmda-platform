@@ -14,13 +14,15 @@ import scala.concurrent.duration._
 
 object HmdaQuerySupervisor {
 
-  case class FindHmdaFilingView(period: String)
-  case object FindSignedEventQuerySubscriber
+  val name = "query-supervisor"
+
+  case class FindHmdaFilingView(period: String) extends Command
+  case object FindSignedEventQuerySubscriber extends Command
 
   def props(): Props = Props(new HmdaQuerySupervisor)
 
   def createQuerySupervisor(system: ActorSystem): ActorRef = {
-    system.actorOf(HmdaQuerySupervisor.props(), "query-supervisor")
+    system.actorOf(HmdaQuerySupervisor.props(), name)
   }
 }
 
@@ -47,6 +49,9 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
     case id @ InstitutionView.name =>
       val actor = context.actorOf(InstitutionView.props().withDispatcher("query-dispatcher"), id)
       supervise(actor, id)
+    case id @ SubmissionSignedEventQuerySubscriber.name =>
+      val actor = context.actorOf(SubmissionSignedEventQuerySubscriber.props().withDispatcher("query-dispatcher"))
+      supervise(actor, id)
   }
 
   private def findHmdaFilingView(period: String): ActorRef = {
@@ -60,13 +65,7 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
   }
 
   private def findSignedEventQuerySubscriber(): ActorRef = {
-    actors.getOrElse(SubmissionSignedEventQuerySubscriber.name, createSignedEventQuerySubscriber())
-  }
-
-  def createSignedEventQuerySubscriber(): ActorRef = {
-    val id = SubmissionSignedEventQuerySubscriber.name
-    val actor = context.actorOf(SubmissionSignedEventQuerySubscriber.props())
-    supervise(actor, id)
+    actors.getOrElse(SubmissionSignedEventQuerySubscriber.name, createActor(SubmissionSignedEventQuerySubscriber.name))
   }
 
 }

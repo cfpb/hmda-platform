@@ -16,15 +16,15 @@ import hmda.persistence.HmdaSupervisor
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.publication.HmdaPublication
+import hmda.publication.{ HmdaPublication, HmdaPublicationSupervisor }
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
+import hmda.publication.HmdaPublicationSupervisor.FindModifiedLarSubscriber
 import hmda.query.HmdaQuerySupervisor.FindSignedEventQuerySubscriber
-import hmda.query.projections.filing.SubmissionSignedEventQuerySubscriber
 
 import scala.concurrent.duration._
 
@@ -67,6 +67,13 @@ object HmdaPlatform extends App {
       settings = ClusterSingletonProxySettings(system).withRole("query")
     ),
     name = "querySupervisorProxy"
+  )
+
+  val publicationSupervisorProxy = system.actorOf(
+    ClusterSingletonProxy.props(
+      singletonManagerPath = "/user/publication-supervisor",
+      settings = ClusterSingletonProxySettings(system).withRole("publication")
+    )
   )
 
   val validationStatsProxy = system.actorOf(
@@ -136,12 +143,27 @@ object HmdaPlatform extends App {
 
     (querySupervisorProxy ? FindSignedEventQuerySubscriber)
       .mapTo[ActorRef]
-      .map(a => log.info(s"Started submission signed event subscriber validator at ${a.path}"))
+      .map(a => log.info(s"Started submission signed event subscriber at ${a.path}"))
 
   }
 
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
+    implicit val ec = system.dispatchers.lookup("publication-dispatcher")
+
+    system.actorOf(
+      ClusterSingletonManager.props(
+        singletonProps = Props(classOf[HmdaPublicationSupervisor]),
+        terminationMessage = Shutdown,
+        settings = ClusterSingletonManagerSettings(system).withRole("publication")
+      ),
+      "publication-supervisor"
+    )
+
+    (publicationSupervisorProxy ? FindModifiedLarSubscriber)
+      .mapTo[ActorRef]
+      .map(a => log.info(s"Started modified lar event subscriber at ${a.path}"))
+
     system.actorOf(Props[HmdaPublication].withDispatcher("publication-dispatcher"), "publication")
   }
 
