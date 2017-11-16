@@ -1,7 +1,7 @@
 package hmda.query.repository.filing
 
 import akka.{ Done, NotUsed }
-import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
+import akka.stream.alpakka.cassandra.scaladsl.{ CassandraSink, CassandraSource }
 import akka.stream.scaladsl.{ Flow, Source }
 import com.datastax.driver.core._
 import com.typesafe.config.ConfigFactory
@@ -248,6 +248,13 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
         lienStatus
       )
     }
+  }
+
+  def larByRespondentId(fetchSize: Int, respId: String): Source[LoanApplicationRegister, NotUsed] = {
+    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.$table WHERE respondent_id = $respId").setFetchSize(fetchSize)
+    val rowSource = CassandraSource(statement)
+    val entitySource = rowSource.via(parseRows)
+    entitySource
   }
 
 }

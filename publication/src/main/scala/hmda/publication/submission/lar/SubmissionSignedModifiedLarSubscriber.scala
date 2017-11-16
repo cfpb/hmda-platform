@@ -29,5 +29,6 @@ class SubmissionSignedModifiedLarSubscriber extends HmdaActor {
 
     case SubmissionLarProjectedPubSub(submissionId) =>
       log.info("Received submission lar projected event with submission id: {}", submissionId.toString)
+
   }
 }
