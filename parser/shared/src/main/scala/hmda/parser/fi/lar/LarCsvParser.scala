@@ -151,6 +151,7 @@ object LarCsvParser {
         "State" -> fields(14),
         "County" -> fields(15),
         "Census Tract" -> fields(16),
+        "Applicant Income" -> fields(31),
         "Rate Spread" -> fields(36)
       )
 
@@ -175,16 +176,7 @@ object LarCsvParser {
     } else if (value == "NA") {
       List(0).success
     } else {
-      val dot = value.indexOf(".")
-      val digits: String = if (dot != -1) {
-        val d1 = value.substring(0, dot)
-        val d2 = value.substring(dot + 1, value.length)
-        d1 + d2
-      } else {
-        value
-      }
-
-      Try(digits.toInt) match {
+      Try(value.toDouble.toInt) match {
         case Success(result) => List(result).success
         case Failure(_) => s"$fieldName is not numeric or NA".failure.toValidationNel
       }
