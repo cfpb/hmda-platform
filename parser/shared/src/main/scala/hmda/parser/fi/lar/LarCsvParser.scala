@@ -145,7 +145,19 @@ object LarCsvParser {
         "Lien Status" -> fields(38)
       )
 
-      val validationList = numericFields.map { case (key, value) => toIntOrFail(value, key) }
+      val NAFields = ListMap(
+        "Date Application Received" -> fields(4),
+        "MSA" -> fields(13),
+        "State" -> fields(14),
+        "County" -> fields(15),
+        "Census Tract" -> fields(16),
+        "Applicant Income" -> fields(31),
+        "Rate Spread" -> fields(36)
+      )
+
+      val numericValidationList = numericFields.map { case (key, value) => toIntOrFail(value, key) }
+      val naValidationList = NAFields.map { case (key, value) => checkNA(value, key) }
+      val validationList = numericValidationList ++ naValidationList
 
       validationList.reduce(_ +++ _)
     }
@@ -153,8 +165,21 @@ object LarCsvParser {
 
   def toIntOrFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
     Try(value.toInt) match {
-      case Failure(result) => s"$fieldName is not an integer".failure.toValidationNel
+      case Failure(_) => s"$fieldName is not an integer".failure.toValidationNel
       case Success(result) => List(result).success
+    }
+  }
+
+  def checkNA(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
+    if (value == "") {
+      s"$fieldName cannot have empty value".failure.toValidationNel
+    } else if (value == "NA") {
+      List(0).success
+    } else {
+      Try(value.toDouble.toInt) match {
+        case Success(result) => List(result).success
+        case Failure(_) => s"$fieldName is not numeric or NA".failure.toValidationNel
+      }
     }
   }
 }

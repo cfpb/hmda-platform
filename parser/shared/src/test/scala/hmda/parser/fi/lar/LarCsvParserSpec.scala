@@ -42,4 +42,17 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers wi
   property("Must return only length error on too short csv") {
     LarCsvParser(unparsableLarCsvTwoFieldsTooShort).left.get mustBe LarParsingError(0, List("An incorrect number of data fields were reported: 38 data fields were found, when 39 data fields were expected."))
   }
+
+  property("Fail parsing when NA is not properly spelled") {
+    forAll(larGen) { lar =>
+      val na = lar.copy(rateSpread = "na")
+      LarCsvParser(na.toCSV).left.get mustBe LarParsingError(0, List("Rate Spread is not numeric or NA"))
+
+      val notApplicable = lar.copy(geography = geographyGen.sample.get.copy(msa = "Not Applicable"))
+      LarCsvParser(notApplicable.toCSV).left.get mustBe LarParsingError(0, List("MSA is not numeric or NA"))
+
+      val na2 = lar.copy(rateSpread = "N/A")
+      LarCsvParser(na2.toCSV).left.get mustBe LarParsingError(0, List("Rate Spread is not numeric or NA"))
+    }
+  }
 }
