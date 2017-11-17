@@ -12,7 +12,7 @@ object GenderUtil {
     genderEnum match {
       case Male => larSource.filter(isMale)
       case Female => larSource.filter(isFemale)
-      case Joint => larSource.filter(isJoint)
+      case JointGender => larSource.filter(isJoint)
     }
   }
 

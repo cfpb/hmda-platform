@@ -50,22 +50,22 @@ class GenderUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils wi
   "'Joint' gender filter" must {
     "include applications with female applicant and male coapplicant" in {
       val lars = larCollectionWithApplicant(_.copy(sex = 2, coSex = 1))
-      val jointLars = filterGender(source(lars), Joint)
+      val jointLars = filterGender(source(lars), JointGender)
       count(jointLars).map(_ mustBe 100)
     }
     "include applications with male applicant and female coapplicant" in {
       val lars = larCollectionWithApplicant(_.copy(sex = 1, coSex = 2))
-      val jointLars = filterGender(source(lars), Joint)
+      val jointLars = filterGender(source(lars), JointGender)
       count(jointLars).map(_ mustBe 100)
     }
     "exclude lars where applicant is female and coapplicant not male" in {
       val excludedLars = larCollectionWithApplicant(_.copy(sex = 2, coSex = notMale))
-      val nonJointLars = filterGender(source(excludedLars), Joint)
+      val nonJointLars = filterGender(source(excludedLars), JointGender)
       count(nonJointLars).map(_ mustBe 0)
     }
     "exclude lars where applicant is male and coapplicant not female" in {
       val excludedLars = larCollectionWithApplicant(_.copy(sex = 1, coSex = notFemale))
-      val nonJointLars = filterGender(source(excludedLars), Joint)
+      val nonJointLars = filterGender(source(excludedLars), JointGender)
       count(nonJointLars).map(_ mustBe 0)
     }
 
