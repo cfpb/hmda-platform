@@ -167,20 +167,20 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with
       val lars = larCollectionWithApplicant { app =>
         app.copy(race1 = 5, race2 = "", race3 = "", race4 = "", race5 = "", coRace1 = minority)
       }
-      val jointLars = filterRace(source(lars), Joint)
+      val jointLars = filterRace(source(lars), JointRace)
       count(jointLars).map(_ mustBe 100)
     }
     "include applications with minority applicant and white coApplicant" in {
       val lars = larCollectionWithApplicant { app =>
         app.copy(race1 = minority, coRace1 = 5, coRace2 = "", coRace3 = "", coRace4 = "", coRace5 = "")
       }
-      val jointLars = filterRace(source(lars), Joint)
+      val jointLars = filterRace(source(lars), JointRace)
       count(jointLars).map(_ mustBe 100)
     }
     "exclude lars with two white applicants" in {
       val excludedLars = larCollectionWithApplicant(_.copy(race1 = 5, coRace1 = 5, race2 = "", coRace2 = "",
         race3 = "", coRace3 = "", race4 = "", coRace4 = "", race5 = "", coRace5 = ""))
-      val nonJointLars = filterRace(source(excludedLars), Joint)
+      val nonJointLars = filterRace(source(excludedLars), JointRace)
       count(nonJointLars).map(_ mustBe 0)
     }
     "exclude lars with two minority applicants" in {
@@ -188,13 +188,13 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with
         app.copy(race1 = minority, coRace1 = minority, race2 = "", race3 = "", race4 = "",
           race5 = "", coRace2 = "", coRace3 = "", coRace4 = "", coRace5 = "")
       }
-      val nonJointLars = filterRace(source(excludedLars), Joint)
+      val nonJointLars = filterRace(source(excludedLars), JointRace)
       count(nonJointLars).map(_ mustBe 0)
 
     }
     "exclude lars with only one applicant" in {
       val excludedLars = larCollectionWithApplicant(_.copy(race1 = minority, coRace1 = 8))
-      val nonJointLars = filterRace(source(excludedLars), Joint)
+      val nonJointLars = filterRace(source(excludedLars), JointRace)
       count(nonJointLars).map(_ mustBe 0)
     }
   }
