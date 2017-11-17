@@ -1,6 +1,6 @@
 package hmda.publication.reports.util
 
-import hmda.model.publication.reports.ActionTakenTypeEnum.{ ApplicationReceived, LoansOriginated }
+import hmda.model.publication.reports.DispositionEnum.{ ApplicationReceived, LoansOriginated }
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, EthnicityCharacteristic }
 import hmda.publication.reports.util.DispositionType.{ OriginatedDisp, ReceivedDisp }

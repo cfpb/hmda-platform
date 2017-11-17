@@ -6,7 +6,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.census.model.CbsaLookup
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.model.publication.reports.ActionTakenTypeEnum._
+import hmda.model.publication.reports.DispositionEnum._
 import hmda.model.publication.reports.ApplicantIncomeEnum.LessThan50PercentOfMSAMedian
 import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, MinorityStatusBorrowerCharacteristic, RaceBorrowerCharacteristic }
 import org.scalacheck.Gen

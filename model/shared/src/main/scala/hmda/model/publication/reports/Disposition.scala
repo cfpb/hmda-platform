@@ -1,7 +1,7 @@
 package hmda.model.publication.reports
 
 case class Disposition(
-    disposition: ActionTakenTypeEnum,
+    disposition: DispositionEnum,
     count: Int,
     value: Int
 ) {

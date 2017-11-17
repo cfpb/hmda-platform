@@ -1,6 +1,6 @@
 package hmda.publication.reports.protocol
 
-import hmda.model.publication.reports.ActionTakenTypeEnum
+import hmda.model.publication.reports.DispositionEnum
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import hmda.publication.reports.ReportGenerators._
@@ -10,7 +10,7 @@ class ActionTakenTypeEnumProtocolSpec extends PropSpec with PropertyChecks with 
 
   property("Action Taken Type must convert to and from JSON") {
     forAll(actionTakenTypeEnumGen) { a =>
-      a.toJson.convertTo[ActionTakenTypeEnum] mustBe a
+      a.toJson.convertTo[DispositionEnum] mustBe a
     }
   }
 
