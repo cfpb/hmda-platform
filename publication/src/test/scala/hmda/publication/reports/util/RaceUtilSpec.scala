@@ -1,10 +1,9 @@
 package hmda.publication.reports.util
 
 import hmda.model.fi.lar.Applicant
-import hmda.model.publication.reports.DispositionEnum.{ ApplicationReceived, LoansOriginated }
 import hmda.model.publication.reports.RaceEnum._
 import hmda.model.publication.reports.{ RaceBorrowerCharacteristic, RaceCharacteristic }
-import hmda.publication.reports.util.DispositionType.{ OriginatedDisp, ReceivedDisp }
+import hmda.publication.reports.util.DispositionType.{ LoansOriginated, ApplicationReceived }
 import hmda.publication.reports.util.RaceUtil._
 import hmda.util.SourceUtils
 import org.scalacheck.Gen
@@ -202,7 +201,7 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with
   "raceBorrowerCharacteristic" must {
     "generate a RaceBorrowerCharacteristic with all 4 ethnicity categories and the specified dispositions" in {
       val lars = lar100ListGen.sample.get
-      val dispositions = List(ReceivedDisp, OriginatedDisp)
+      val dispositions = List(ApplicationReceived, LoansOriginated)
 
       val resultF = raceBorrowerCharacteristic(source(lars), dispositions)
 
@@ -214,7 +213,8 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with
         val firstEthCharacteristic = result.races.head
         firstEthCharacteristic mustBe a[RaceCharacteristic]
         firstEthCharacteristic.race mustBe AmericanIndianOrAlaskaNative
-        firstEthCharacteristic.dispositions.map(_.disposition) mustBe List(ApplicationReceived, LoansOriginated)
+        firstEthCharacteristic.dispositions.map(_.dispositionName) mustBe
+          List(ApplicationReceived.value, LoansOriginated.value)
       }
     }
   }

@@ -29,7 +29,7 @@ case class N5X(
       if (applicantIncomes.isEmpty) a5X.total else {
 
         a5X.total.map(disposition => {
-          val originalDisposition = total.find(d => d.disposition == disposition.disposition).get
+          val originalDisposition = total.find(d => d.dispositionName == disposition.dispositionName).get
           disposition + originalDisposition
         })
       }

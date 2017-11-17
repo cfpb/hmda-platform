@@ -7,7 +7,6 @@ import hmda.model.publication.reports.{ RaceBorrowerCharacteristic, RaceCharacte
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
-import hmda.publication.reports.util.DispositionType.DispositionType
 
 import scala.concurrent.Future
 

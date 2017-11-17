@@ -12,12 +12,12 @@ class ReportsMetaDataLookupSpec extends WordSpec with MustMatchers {
     d51.reportType mustBe Disclosure
     d51.reportTable mustBe "5-1"
     d51.dispositions mustBe List(
-      ReceivedDisp,
-      OriginatedDisp,
-      ApprovedButNotAcceptedDisp,
-      DeniedDisp,
-      WithdrawnDisp,
-      ClosedDisp
+      ApplicationReceived,
+      LoansOriginated,
+      ApprovedButNotAccepted,
+      ApplicationsDenied,
+      ApplicationsWithdrawn,
+      ClosedForIncompleteness
     )
   }
 
