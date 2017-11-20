@@ -8,14 +8,14 @@ import hmda.model.publication.reports.EthnicityEnum._
 import hmda.model.publication.reports.GenderEnum.{ Female, JointGender, Male }
 //import hmda.model.publication.reports.ApplicantIncomeEnum._
 //import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
-//import hmda.model.publication.reports.MinorityStatusEnum._
+import hmda.model.publication.reports.MinorityStatusEnum._
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
-import hmda.publication.reports.util.GenderUtil.filterGender
-import hmda.publication.reports.util.RaceUtil.filterRace
-import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
-//import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
 import hmda.publication.reports.util.DispositionType._
+import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
+import hmda.publication.reports.util.GenderUtil.filterGender
+import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
+import hmda.publication.reports.util.RaceUtil.filterRace
 import hmda.publication.reports.util.ReportUtil._
 
 import scala.concurrent.Future
@@ -56,12 +56,17 @@ object A42 {
       r4g <- dispositionsByGender(filterRace(larSource, HawaiianOrPacific))
       r5 <- dispositionsOutput(filterRace(larSource, White))
       r5g <- dispositionsByGender(filterRace(larSource, White))
-      r6 <- dispositionsOutput(filterRace(larSource, NotProvided))
-      r6g <- dispositionsByGender(filterRace(larSource, NotProvided))
-      r7 <- dispositionsOutput(filterRace(larSource, TwoOrMoreMinority))
-      r7g <- dispositionsByGender(filterRace(larSource, TwoOrMoreMinority))
-      r8 <- dispositionsOutput(filterRace(larSource, JointRace))
-      r8g <- dispositionsByGender(filterRace(larSource, JointRace))
+      r6 <- dispositionsOutput(filterRace(larSource, TwoOrMoreMinority))
+      r6g <- dispositionsByGender(filterRace(larSource, TwoOrMoreMinority))
+      r7 <- dispositionsOutput(filterRace(larSource, JointRace))
+      r7g <- dispositionsByGender(filterRace(larSource, JointRace))
+      r8 <- dispositionsOutput(filterRace(larSource, NotProvided))
+      r8g <- dispositionsByGender(filterRace(larSource, NotProvided))
+
+      m1 <- dispositionsOutput(filterMinorityStatus(larSource, WhiteNonHispanic))
+      m1g <- dispositionsByGender(filterMinorityStatus(larSource, WhiteNonHispanic))
+      m2 <- dispositionsOutput(filterMinorityStatus(larSource, OtherIncludingHispanic))
+      m2g <- dispositionsByGender(filterMinorityStatus(larSource, OtherIncludingHispanic))
 
       total <- dispositionsOutput(larSource)
     } yield {
@@ -137,6 +142,18 @@ object A42 {
          |            "genders": $r8g
          |        }
          |    ],
+         |    "minorityStatuses": [
+         |        {
+         |            "minorityStatus": "White Non-Hispanic",
+         |            "dispositions": $m1,
+         |            "genders": $m1g
+         |        },
+         |        {
+         |            "minorityStatus": "Others, Including Hispanic",
+         |            "dispositions": $m2,
+         |            "genders": $m2g
+         |        }
+         |    ],
          |    "total": $total
          |}
          |
@@ -186,19 +203,6 @@ object A42 {
 }
 
 /*
-
-         |    "minorityStatuses": [
-         |        {
-         |            "minorityStatus": "White Non-Hispanic",
-         |            "dispositions": $m1,
-         |            "genders": $m1g
-         |        },
-         |        {
-         |            "minorityStatus": "Others, Including Hispanic",
-         |            "dispositions": $m2,
-         |            "genders": $m2g
-         |        }
-         |    ],
          |    "incomes": [
          |        {
          |            "income": "Less than 50% of MSA/MD median",
