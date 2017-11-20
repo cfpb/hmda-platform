@@ -9,10 +9,10 @@ import hmda.model.publication.reports.GenderEnum.{ Female, JointGender, Male }
 //import hmda.model.publication.reports.ApplicantIncomeEnum._
 //import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
 //import hmda.model.publication.reports.MinorityStatusEnum._
-//import hmda.model.publication.reports.RaceEnum._
+import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
 import hmda.publication.reports.util.GenderUtil.filterGender
-//import hmda.publication.reports.util.RaceUtil.filterRace
+import hmda.publication.reports.util.RaceUtil.filterRace
 import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
 //import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
 import hmda.publication.reports.util.DispositionType._
@@ -45,6 +45,25 @@ object A42 {
       e3g <- dispositionsByGender(filterEthnicity(larSource, JointEthnicity))
       e4 <- dispositionsOutput(filterEthnicity(larSource, NotAvailable))
       e4g <- dispositionsByGender(filterEthnicity(larSource, NotAvailable))
+
+      r1 <- dispositionsOutput(filterRace(larSource, AmericanIndianOrAlaskaNative))
+      r1g <- dispositionsByGender(filterRace(larSource, AmericanIndianOrAlaskaNative))
+      r2 <- dispositionsOutput(filterRace(larSource, Asian))
+      r2g <- dispositionsByGender(filterRace(larSource, Asian))
+      r3 <- dispositionsOutput(filterRace(larSource, BlackOrAfricanAmerican))
+      r3g <- dispositionsByGender(filterRace(larSource, BlackOrAfricanAmerican))
+      r4 <- dispositionsOutput(filterRace(larSource, HawaiianOrPacific))
+      r4g <- dispositionsByGender(filterRace(larSource, HawaiianOrPacific))
+      r5 <- dispositionsOutput(filterRace(larSource, White))
+      r5g <- dispositionsByGender(filterRace(larSource, White))
+      r6 <- dispositionsOutput(filterRace(larSource, NotProvided))
+      r6g <- dispositionsByGender(filterRace(larSource, NotProvided))
+      r7 <- dispositionsOutput(filterRace(larSource, TwoOrMoreMinority))
+      r7g <- dispositionsByGender(filterRace(larSource, TwoOrMoreMinority))
+      r8 <- dispositionsOutput(filterRace(larSource, JointRace))
+      r8g <- dispositionsByGender(filterRace(larSource, JointRace))
+
+      total <- dispositionsOutput(larSource)
     } yield {
       s"""
          |{
@@ -76,7 +95,49 @@ object A42 {
          |            "genders": $e4g
          |        }
          |    ],
-         |    "total": 555555
+         |    "races": [
+         |        {
+         |            "race": "American Indian/Alaska Native",
+         |            "dispositions": $r1,
+         |            "genders": $r1g
+         |        },
+         |        {
+         |            "race": "Asian",
+         |            "dispositions": $r2,
+         |            "genders": $r2g
+         |        },
+         |        {
+         |            "race": "Black or African American",
+         |            "dispositions": $r3,
+         |            "genders": $r3g
+         |        },
+         |        {
+         |            "race": "Native Hawaiian or Other Pacific Islander",
+         |            "dispositions": $r4,
+         |            "genders": $r4g
+         |        },
+         |        {
+         |            "race": "White",
+         |            "dispositions": $r5,
+         |            "genders": $r5g
+         |        },
+         |        {
+         |            "race": "2 or more minority races",
+         |            "dispositions": $r6,
+         |            "genders": $r6g
+         |        },
+         |        {
+         |            "race": "Joint (White/Minority Race)",
+         |            "dispositions": $r7,
+         |            "genders": $r7g
+         |        },
+         |        {
+         |            "race": "Race Not Available",
+         |            "dispositions": $r8,
+         |            "genders": $r8g
+         |        }
+         |    ],
+         |    "total": $total
          |}
          |
        """.stripMargin.parseJson
@@ -126,58 +187,16 @@ object A42 {
 
 /*
 
-         |    "races": [
-         |        {
-         |            "race": "American Indian/Alaska Native",
-         |            "dispositions": $r1,
-         |            "genders": $r1byg
-         |        },
-         |        {
-         |            "race": "Asian",
-         |            "dispositions": $r2,
-         |            "genders": $r2byg
-         |        },
-         |        {
-         |            "race": "Black or African American",
-         |            "dispositions": $r3,
-         |            "genders": $r3byg
-         |        },
-         |        {
-         |            "race": "Native Hawaiian or Other Pacific Islander",
-         |            "dispositions": $r4,
-         |            "genders": $r4byg
-         |        },
-         |        {
-         |            "race": "White",
-         |            "dispositions": $r5,
-         |            "genders": $r5byg
-         |        },
-         |        {
-         |            "race": "2 or more minority races",
-         |            "dispositions": $r6,
-         |            "genders": $r6byg
-         |        },
-         |        {
-         |            "race": "Joint (White/Minority Race)",
-         |            "dispositions": $r7,
-         |            "genders": $r7byg
-         |        },
-         |        {
-         |            "race": "Race Not Available",
-         |            "dispositions": $r8,
-         |            "genders": $r8byg
-         |        }
-         |    ],
          |    "minorityStatuses": [
          |        {
          |            "minorityStatus": "White Non-Hispanic",
          |            "dispositions": $m1,
-         |            "genders": $m1byg
+         |            "genders": $m1g
          |        },
          |        {
          |            "minorityStatus": "Others, Including Hispanic",
          |            "dispositions": $m2,
-         |            "genders": $m2byg
+         |            "genders": $m2g
          |        }
          |    ],
          |    "incomes": [
