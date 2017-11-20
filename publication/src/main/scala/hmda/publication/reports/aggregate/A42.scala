@@ -3,28 +3,33 @@ package hmda.publication.reports.aggregate
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.publication.reports.Disposition
+import hmda.model.publication.reports.EthnicityEnum._
+import hmda.model.publication.reports.GenderEnum.{Female, JointGender, Male}
 //import hmda.model.publication.reports.ApplicantIncomeEnum._
-//import hmda.model.publication.reports.EthnicityEnum._
 //import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
 //import hmda.model.publication.reports.MinorityStatusEnum._
 //import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
+import hmda.publication.reports.util.GenderUtil.filterGender
 //import hmda.publication.reports.util.RaceUtil.filterRace
-//import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
+import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
 //import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
-//import hmda.publication.reports.util.DispositionType._
+import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.ReportUtil._
 
 import scala.concurrent.Future
 import spray.json._
 
 object A42 {
+  val dispositions = List(ApplicationReceived, LoansOriginated)
+  val genders = List(Male, Female, JointGender)
+
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int
   ): Future[JsValue] = {
 
-    val dispositions = List()
 
     val incomeIntervals = larsByIncomeInterval(larSource.filter(lar => lar.applicant.income != "NA"), calculateMedianIncomeIntervals(fipsCode))
     val msa = msaReport(fipsCode.toString).toJsonFormat
@@ -33,6 +38,14 @@ object A42 {
 
     for {
       year <- yearF
+      e1 <- dispositions(filterEthnicity(larSource, HispanicOrLatino))
+      e1g <- dispositionsByGender(filterEthnicity(larSource, HispanicOrLatino))
+      e2 <- dispositions(filterEthnicity(larSource, NotHispanicOrLatino))
+      e2g <- dispositionsByGender(filterEthnicity(larSource, NotHispanicOrLatino))
+      e3 <- dispositions(filterEthnicity(larSource, JointEthnicity))
+      e3g <- dispositionsByGender(filterEthnicity(larSource, JointEthnicity))
+      e4 <- dispositions(filterEthnicity(larSource, NotAvailable))
+      e4g <- dispositionsByGender(filterEthnicity(larSource, NotAvailable))
     } yield {
       s"""
          |{
@@ -42,12 +55,69 @@ object A42 {
          |    "year": "$year",
          |    "reportDate": "$reportDate",
          |    "msa": $msa,
+         |    "ethnicities": [
+         |        {
+         |            "ethnicity": "Hispanic or Latino",
+         |            "dispositions": $e1,
+         |            "genders": $e1g
+         |        },
+         |        {
+         |            "ethnicity": "Not Hispanic or Latino",
+         |            "dispositions": $e2,
+         |            "genders": $e2g
+         |        },
+         |        {
+         |            "ethnicity": "Joint (Hispanic or Latino/Not Hispanic or Latino)",
+         |            "dispositions": $e3,
+         |            "genders": $e3g
+         |        },
+         |        {
+         |            "ethnicity": "Ethnicity Not Available",
+         |            "dispositions": $e4,
+         |            "genders": $e4g
+         |        }
+         |    ],
          |    "total": 555555
          |}
          |
        """.stripMargin.parseJson
     }
   }
+
+  private def dispositions(larSource: Source[LoanApplicationRegister, NotUsed]): String = {
+    val calculatedDispositions: Future[List[Disposition]] = Future.sequence(
+      dispositions.map(_.calculateDisposition(larSource))
+    )
+
+    val dispString: Future[List[String]] = calculatedDispositions.map(list => list.map(disp => disp.toJsonFormat).join(","))
+  }
+
+  private def dispositionsByGender(larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+    for {
+      male <- dispositions(filterGender(larSource, Male))
+      female <- dispositions(filterGender(larSource, Female))
+      joint <- dispositions(filterGender(larSource, JointGender))
+    } yield {
+
+      s"""
+       |[
+       | {
+       |     "gender": "Male",
+       |     "dispositions": $male
+       | },
+       | {
+       |     "gender": "Female",
+       |     "dispositions": $female
+       | },
+       | {
+       |     "gender": "Joint (Male/Female)",
+       |     "dispositions": $joint
+       | }
+       |]
+       |
+     """.stripMargin
+
+      }
 
 }
 
@@ -93,28 +163,6 @@ object A42 {
          |            "race": "Race Not Available",
          |            "dispositions": $r8,
          |            "genders": $r8byg
-         |        }
-         |    ],
-         |    "ethnicities": [
-         |        {
-         |            "ethnicity": "Hispanic or Latino",
-         |            "dispositions": $e1,
-         |            "genders": $e1byg
-         |        },
-         |        {
-         |            "ethnicity": "Not Hispanic or Latino",
-         |            "dispositions": $e2,
-         |            "genders": $e2byg
-         |        },
-         |        {
-         |            "ethnicity": "Joint (Hispanic or Latino/Not Hispanic or Latino)",
-         |            "dispositions": $e3,
-         |            "genders": $e3byg
-         |        },
-         |        {
-         |            "ethnicity": "Ethnicity Not Available",
-         |            "dispositions": $e4,
-         |            "genders": $e4byg
          |        }
          |    ],
          |    "minorityStatuses": [
