@@ -6,8 +6,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.Disposition
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.model.publication.reports.GenderEnum.{ Female, JointGender, Male }
-//import hmda.model.publication.reports.ApplicantIncomeEnum._
-//import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
+import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports.MinorityStatusEnum._
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
@@ -22,53 +21,67 @@ import scala.concurrent.Future
 import spray.json._
 
 object A42 {
-  val dispositions = List(ApplicationReceived, LoansOriginated)
-  val genders = List(Male, Female, JointGender)
+  val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
+    ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
+
+  def reportFilters(lar: LoanApplicationRegister): Boolean = {
+    lar.loan.loanType == 1 &&
+      (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
+      (lar.loan.purpose == 1)
+  }
 
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int
   ): Future[JsValue] = {
 
-    val incomeIntervals = larsByIncomeInterval(larSource.filter(lar => lar.applicant.income != "NA"), calculateMedianIncomeIntervals(fipsCode))
+    val lars = larSource.filter(reportFilters)
+    val incomeIntervals = larsByIncomeInterval(lars.filter(lar => lar.applicant.income != "NA"), calculateMedianIncomeIntervals(fipsCode))
     val msa = msaReport(fipsCode.toString).toJsonFormat
     val reportDate = formattedCurrentDate
-    val yearF = calculateYear(larSource)
+    val yearF = calculateYear(lars)
 
     for {
       year <- yearF
-      e1 <- dispositionsOutput(filterEthnicity(larSource, HispanicOrLatino))
-      e1g <- dispositionsByGender(filterEthnicity(larSource, HispanicOrLatino))
-      e2 <- dispositionsOutput(filterEthnicity(larSource, NotHispanicOrLatino))
-      e2g <- dispositionsByGender(filterEthnicity(larSource, NotHispanicOrLatino))
-      e3 <- dispositionsOutput(filterEthnicity(larSource, JointEthnicity))
-      e3g <- dispositionsByGender(filterEthnicity(larSource, JointEthnicity))
-      e4 <- dispositionsOutput(filterEthnicity(larSource, NotAvailable))
-      e4g <- dispositionsByGender(filterEthnicity(larSource, NotAvailable))
+      e1 <- dispositionsOutput(filterEthnicity(lars, HispanicOrLatino))
+      e1g <- dispositionsByGender(filterEthnicity(lars, HispanicOrLatino))
+      e2 <- dispositionsOutput(filterEthnicity(lars, NotHispanicOrLatino))
+      e2g <- dispositionsByGender(filterEthnicity(lars, NotHispanicOrLatino))
+      e3 <- dispositionsOutput(filterEthnicity(lars, JointEthnicity))
+      e3g <- dispositionsByGender(filterEthnicity(lars, JointEthnicity))
+      e4 <- dispositionsOutput(filterEthnicity(lars, NotAvailable))
+      e4g <- dispositionsByGender(filterEthnicity(lars, NotAvailable))
 
-      r1 <- dispositionsOutput(filterRace(larSource, AmericanIndianOrAlaskaNative))
-      r1g <- dispositionsByGender(filterRace(larSource, AmericanIndianOrAlaskaNative))
-      r2 <- dispositionsOutput(filterRace(larSource, Asian))
-      r2g <- dispositionsByGender(filterRace(larSource, Asian))
-      r3 <- dispositionsOutput(filterRace(larSource, BlackOrAfricanAmerican))
-      r3g <- dispositionsByGender(filterRace(larSource, BlackOrAfricanAmerican))
-      r4 <- dispositionsOutput(filterRace(larSource, HawaiianOrPacific))
-      r4g <- dispositionsByGender(filterRace(larSource, HawaiianOrPacific))
-      r5 <- dispositionsOutput(filterRace(larSource, White))
-      r5g <- dispositionsByGender(filterRace(larSource, White))
-      r6 <- dispositionsOutput(filterRace(larSource, TwoOrMoreMinority))
-      r6g <- dispositionsByGender(filterRace(larSource, TwoOrMoreMinority))
-      r7 <- dispositionsOutput(filterRace(larSource, JointRace))
-      r7g <- dispositionsByGender(filterRace(larSource, JointRace))
-      r8 <- dispositionsOutput(filterRace(larSource, NotProvided))
-      r8g <- dispositionsByGender(filterRace(larSource, NotProvided))
+      r1 <- dispositionsOutput(filterRace(lars, AmericanIndianOrAlaskaNative))
+      r1g <- dispositionsByGender(filterRace(lars, AmericanIndianOrAlaskaNative))
+      r2 <- dispositionsOutput(filterRace(lars, Asian))
+      r2g <- dispositionsByGender(filterRace(lars, Asian))
+      r3 <- dispositionsOutput(filterRace(lars, BlackOrAfricanAmerican))
+      r3g <- dispositionsByGender(filterRace(lars, BlackOrAfricanAmerican))
+      r4 <- dispositionsOutput(filterRace(lars, HawaiianOrPacific))
+      r4g <- dispositionsByGender(filterRace(lars, HawaiianOrPacific))
+      r5 <- dispositionsOutput(filterRace(lars, White))
+      r5g <- dispositionsByGender(filterRace(lars, White))
+      r6 <- dispositionsOutput(filterRace(lars, TwoOrMoreMinority))
+      r6g <- dispositionsByGender(filterRace(lars, TwoOrMoreMinority))
+      r7 <- dispositionsOutput(filterRace(lars, JointRace))
+      r7g <- dispositionsByGender(filterRace(lars, JointRace))
+      r8 <- dispositionsOutput(filterRace(lars, NotProvided))
+      r8g <- dispositionsByGender(filterRace(lars, NotProvided))
 
-      m1 <- dispositionsOutput(filterMinorityStatus(larSource, WhiteNonHispanic))
-      m1g <- dispositionsByGender(filterMinorityStatus(larSource, WhiteNonHispanic))
-      m2 <- dispositionsOutput(filterMinorityStatus(larSource, OtherIncludingHispanic))
-      m2g <- dispositionsByGender(filterMinorityStatus(larSource, OtherIncludingHispanic))
+      m1 <- dispositionsOutput(filterMinorityStatus(lars, WhiteNonHispanic))
+      m1g <- dispositionsByGender(filterMinorityStatus(lars, WhiteNonHispanic))
+      m2 <- dispositionsOutput(filterMinorityStatus(lars, OtherIncludingHispanic))
+      m2g <- dispositionsByGender(filterMinorityStatus(lars, OtherIncludingHispanic))
 
-      total <- dispositionsOutput(larSource)
+      i1 <- dispositionsOutput(incomeIntervals(LessThan50PercentOfMSAMedian))
+      i2 <- dispositionsOutput(incomeIntervals(Between50And79PercentOfMSAMedian))
+      i3 <- dispositionsOutput(incomeIntervals(Between80And99PercentOfMSAMedian))
+      i4 <- dispositionsOutput(incomeIntervals(Between100And119PercentOfMSAMedian))
+      i5 <- dispositionsOutput(incomeIntervals(GreaterThan120PercentOfMSAMedian))
+      i6 <- dispositionsOutput(lars.filter(lar => lar.applicant.income == "NA"))
+
+      total <- dispositionsOutput(lars)
     } yield {
       s"""
          |{
@@ -154,6 +167,32 @@ object A42 {
          |            "genders": $m2g
          |        }
          |    ],
+         |    "incomes": [
+         |        {
+         |            "income": "Less than 50% of MSA/MD median",
+         |            "dispositions": $i1
+         |        },
+         |        {
+         |            "income": "50-79% of MSA/MD median",
+         |            "dispositions": $i2
+         |        },
+         |        {
+         |            "income": "80-99% of MSA/MD median",
+         |            "dispositions": $i3
+         |        },
+         |        {
+         |            "income": "100-119% of MSA/MD median",
+         |            "dispositions": $i4
+         |        },
+         |        {
+         |            "income": "120% or more of MSA/MD median",
+         |            "dispositions": $i5
+         |        },
+         |        {
+         |            "income": "Income Not Available",
+         |            "dispositions": $i6
+         |        }
+         |    ],
          |    "total": $total
          |}
          |
@@ -201,32 +240,3 @@ object A42 {
   }
 
 }
-
-/*
-         |    "incomes": [
-         |        {
-         |            "income": "Less than 50% of MSA/MD median",
-         |            "dispositions": $i1
-         |        },
-         |        {
-         |            "income": "50-79% of MSA/MD median",
-         |            "dispositions": $i2
-         |        },
-         |        {
-         |            "income": "80-99% of MSA/MD median",
-         |            "dispositions": $i3
-         |        },
-         |        {
-         |            "income": "100-119% of MSA/MD median",
-         |            "dispositions": $i4
-         |        },
-         |        {
-         |            "income": "120% or more of MSA/MD median",
-         |            "dispositions": $i5
-         |        },
-         |        {
-         |            "income": "Income Not Available",
-         |            "dispositions": $i6
-         |        }
-         |    ],
- */
