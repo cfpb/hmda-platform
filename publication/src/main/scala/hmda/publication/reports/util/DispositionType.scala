@@ -51,7 +51,7 @@ object DispositionType {
   //////////////////////////////////
 
   case object ApplicationReceived extends DispositionType(
-    "Application Received",
+    "Applications Received",
     lar => lar.actionTakenType == 1 || lar.actionTakenType == 2 || lar.actionTakenType == 3 ||
       lar.actionTakenType == 4 || lar.actionTakenType == 5
   )

@@ -11,7 +11,7 @@ case class MSAReport(
        "id": "$id",
        "name": "$name",
        "state": "$state",
-       "state_name": "$stateName"
+       "stateName": "$stateName"
      }"""
   }
 }

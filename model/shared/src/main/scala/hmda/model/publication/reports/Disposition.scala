@@ -13,7 +13,7 @@ case class Disposition(
     s"""
        |
        |{
-       |  "name": "$dispositionName",
+       |  "disposition": "$dispositionName",
        |  "count": $count,
        |  "value": $value
        |}
