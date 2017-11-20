@@ -5,7 +5,7 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.Disposition
 import hmda.model.publication.reports.EthnicityEnum._
-import hmda.model.publication.reports.GenderEnum.{Female, JointGender, Male}
+import hmda.model.publication.reports.GenderEnum.{ Female, JointGender, Male }
 //import hmda.model.publication.reports.ApplicantIncomeEnum._
 //import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
 //import hmda.model.publication.reports.MinorityStatusEnum._
@@ -30,7 +30,6 @@ object A42 {
     fipsCode: Int
   ): Future[JsValue] = {
 
-
     val incomeIntervals = larsByIncomeInterval(larSource.filter(lar => lar.applicant.income != "NA"), calculateMedianIncomeIntervals(fipsCode))
     val msa = msaReport(fipsCode.toString).toJsonFormat
     val reportDate = formattedCurrentDate
@@ -38,13 +37,13 @@ object A42 {
 
     for {
       year <- yearF
-      e1 <- dispositions(filterEthnicity(larSource, HispanicOrLatino))
+      e1 <- dispositionsOutput(filterEthnicity(larSource, HispanicOrLatino))
       e1g <- dispositionsByGender(filterEthnicity(larSource, HispanicOrLatino))
-      e2 <- dispositions(filterEthnicity(larSource, NotHispanicOrLatino))
+      e2 <- dispositionsOutput(filterEthnicity(larSource, NotHispanicOrLatino))
       e2g <- dispositionsByGender(filterEthnicity(larSource, NotHispanicOrLatino))
-      e3 <- dispositions(filterEthnicity(larSource, JointEthnicity))
+      e3 <- dispositionsOutput(filterEthnicity(larSource, JointEthnicity))
       e3g <- dispositionsByGender(filterEthnicity(larSource, JointEthnicity))
-      e4 <- dispositions(filterEthnicity(larSource, NotAvailable))
+      e4 <- dispositionsOutput(filterEthnicity(larSource, NotAvailable))
       e4g <- dispositionsByGender(filterEthnicity(larSource, NotAvailable))
     } yield {
       s"""
@@ -84,22 +83,25 @@ object A42 {
     }
   }
 
-  private def dispositions(larSource: Source[LoanApplicationRegister, NotUsed]): String = {
+  private def dispositionsOutput[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
     val calculatedDispositions: Future[List[Disposition]] = Future.sequence(
       dispositions.map(_.calculateDisposition(larSource))
     )
 
-    val dispString: Future[List[String]] = calculatedDispositions.map(list => list.map(disp => disp.toJsonFormat).join(","))
+    calculatedDispositions.map { list =>
+      list.map(disp => disp.toJsonFormat).mkString("[", ",", "]")
+    }
   }
 
-  private def dispositionsByGender(larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+  private def dispositionsByGender[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
     for {
-      male <- dispositions(filterGender(larSource, Male))
-      female <- dispositions(filterGender(larSource, Female))
-      joint <- dispositions(filterGender(larSource, JointGender))
+      male <- dispositionsOutput(filterGender(larSource, Male))
+      female <- dispositionsOutput(filterGender(larSource, Female))
+      joint <- dispositionsOutput(filterGender(larSource, JointGender))
     } yield {
 
       s"""
+       |
        |[
        | {
        |     "gender": "Male",
@@ -117,7 +119,8 @@ object A42 {
        |
      """.stripMargin
 
-      }
+    }
+  }
 
 }
 

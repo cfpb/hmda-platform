@@ -8,4 +8,16 @@ case class Disposition(
   def +(disp: Disposition): Disposition = {
     Disposition(dispositionName, count + disp.count, value + disp.value)
   }
+
+  def toJsonFormat: String = {
+    s"""
+       |
+       |{
+       |  "name": "$dispositionName",
+       |  "count": $count,
+       |  "value": $value
+       |}
+       |
+        """
+  }
 }
