@@ -2,11 +2,11 @@ package hmda.query.projections.filing
 
 import akka.actor.{ ActorSystem, Props }
 import akka.cluster.pubsub.DistributedPubSub
-import akka.cluster.pubsub.DistributedPubSubMediator.{ Publish, Subscribe, SubscribeAck }
+import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
 import akka.stream.ActorMaterializer
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
-import hmda.persistence.messages.events.pubsub.PubSubEvents.{ SubmissionLarProjectedPubSub, SubmissionSignedPubSub }
+import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.PubSubTopics
 import hmda.persistence.processing.HmdaQuery._
@@ -35,7 +35,7 @@ class SubmissionSignedEventQuerySubscriber() extends HmdaActor with FilingCassan
       repositoryLog.info(s"Subscribed to ${PubSubTopics.submissionSigned}")
 
     case SubmissionSignedPubSub(submissionId) =>
-      repositoryLog.info(s"Received submission signed event with submission id: ${submissionId.toString}")
+      repositoryLog.info(s"${self.path} received submission signed event with submission id: ${submissionId.toString}")
       val persistenceId = s"HmdaFileValidator-$submissionId"
       val larSource = events(persistenceId).map {
         case LarValidated(lar, _) => lar
@@ -46,7 +46,6 @@ class SubmissionSignedEventQuerySubscriber() extends HmdaActor with FilingCassan
         .filter(lar => !lar.isEmpty)
         .map { lar => repositoryLog.debug(s"Inserted: ${lar.toString}"); lar }
         .runWith(sink)
-        .onComplete(_ => mediator ! Publish(PubSubTopics.submissionLarProjected, SubmissionLarProjectedPubSub(submissionId)))
 
     case _ => //do nothing
   }

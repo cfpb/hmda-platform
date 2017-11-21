@@ -16,14 +16,13 @@ import hmda.persistence.HmdaSupervisor
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.publication.{ HmdaPublication, HmdaPublicationSupervisor }
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
-import hmda.publication.HmdaPublicationSupervisor.FindModifiedLarSubscriber
+import hmda.publication.submission.lar.SubmissionSignedModifiedLarSubscriber
 import hmda.query.HmdaQuerySupervisor.FindSignedEventQuerySubscriber
 
 import scala.concurrent.duration._
@@ -67,13 +66,6 @@ object HmdaPlatform extends App {
       settings = ClusterSingletonProxySettings(system).withRole("query")
     ),
     name = "querySupervisorProxy"
-  )
-
-  val publicationSupervisorProxy = system.actorOf(
-    ClusterSingletonProxy.props(
-      singletonManagerPath = "/user/publication-supervisor",
-      settings = ClusterSingletonProxySettings(system).withRole("publication")
-    )
   )
 
   val validationStatsProxy = system.actorOf(
@@ -150,21 +142,8 @@ object HmdaPlatform extends App {
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
     implicit val ec = system.dispatchers.lookup("publication-dispatcher")
-
-    system.actorOf(
-      ClusterSingletonManager.props(
-        singletonProps = Props(classOf[HmdaPublicationSupervisor]),
-        terminationMessage = Shutdown,
-        settings = ClusterSingletonManagerSettings(system).withRole("publication")
-      ),
-      "publication-supervisor"
-    )
-
-    (publicationSupervisorProxy ? FindModifiedLarSubscriber)
-      .mapTo[ActorRef]
-      .map(a => log.info(s"Started modified lar event subscriber at ${a.path}"))
-
-    system.actorOf(Props[HmdaPublication].withDispatcher("publication-dispatcher"), "publication")
+    system.actorOf(SubmissionSignedModifiedLarSubscriber.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-subscriber")
+    //system.actorOf(Props[HmdaReportsPublication].withDispatcher("publication-dispatcher"), "publication")
   }
 
   //Load demo data

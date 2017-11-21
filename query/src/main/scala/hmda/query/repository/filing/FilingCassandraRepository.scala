@@ -1,7 +1,7 @@
 package hmda.query.repository.filing
 
 import akka.{ Done, NotUsed }
-import akka.stream.alpakka.cassandra.scaladsl.{ CassandraSink, CassandraSource }
+import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.stream.scaladsl.{ Flow, Source }
 import com.datastax.driver.core._
 import com.typesafe.config.ConfigFactory
@@ -173,7 +173,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       val respId = row.getString("respondent_id")
       val agencyCode = row.getInt("agency_code")
       val loanId = row.getString("loan_id")
-      val applicatioDate = row.getString("application_date")
+      val applicationDate = row.getString("application_date")
       val loanType = row.getInt("loan_type")
       val propertyType = row.getInt("property_type")
       val purpose = row.getInt("purpose")
@@ -209,7 +209,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       val hoepaStatus = row.getInt("hoepa_status")
       val lienStatus = row.getInt("lien_status")
 
-      val loan = Loan(loanId, applicatioDate, loanType, propertyType, purpose, occupancy, amount)
+      val loan = Loan(loanId, applicationDate, loanType, propertyType, purpose, occupancy, amount)
       val geography = Geography(msa, state, county, tract)
       val applicant = Applicant(
         ethnicity,
@@ -232,7 +232,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       val denial = Denial(denial1, denial2, denial3)
 
       LoanApplicationRegister(
-        id.toInt,
+        2,
         respId,
         agencyCode,
         loan,
@@ -248,13 +248,6 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
         lienStatus
       )
     }
-  }
-
-  def larByRespondentId(fetchSize: Int, respId: String): Source[LoanApplicationRegister, NotUsed] = {
-    val statement = new SimpleStatement(s"SELECT * FROM $keyspace.$table WHERE respondent_id = $respId").setFetchSize(fetchSize)
-    val rowSource = CassandraSource(statement)
-    val entitySource = rowSource.via(parseRows)
-    entitySource
   }
 
 }
