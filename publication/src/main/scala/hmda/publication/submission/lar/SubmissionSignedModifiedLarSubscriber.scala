@@ -60,7 +60,7 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
     case SubmissionSignedPubSub(submissionId) =>
       val institutionId = submissionId.institutionId
       val fileName = s"$institutionId.csv"
-      val s3Sink = s3Client.multipartUpload(bucket, fileName)
+      val s3Sink = s3Client.multipartUpload(bucket, s"lar/$fileName")
       log.info(s"${self.path} received submission signed event with submission id: ${submissionId.toString}")
       val persistenceId = s"HmdaFileValidator-$submissionId"
       val larSource = events(persistenceId).map {
