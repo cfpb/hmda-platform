@@ -6,8 +6,7 @@ import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.Sink
-import akka.util.Timeout
+import akka.util.{ ByteString, Timeout }
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
@@ -43,6 +42,7 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
   val accessKeyId = config.getString("hmda.publication.aws.access-key-id")
   val secretAccess = config.getString("hmda.publication.aws.secret-access-key ")
   val region = config.getString("hmda.publication.aws.region")
+  val bucket = config.getString("hmda.publication.aws.public-bucket")
 
   val awsCredentials = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess)
@@ -58,6 +58,9 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
       log.info("Subscribed to {}", PubSubTopics.submissionSigned)
 
     case SubmissionSignedPubSub(submissionId) =>
+      val institutionId = submissionId.institutionId
+      val fileName = s"$institutionId.csv"
+      val s3Sink = s3Client.multipartUpload(bucket, fileName)
       log.info(s"${self.path} received submission signed event with submission id: ${submissionId.toString}")
       val persistenceId = s"HmdaFileValidator-$submissionId"
       val larSource = events(persistenceId).map {
@@ -68,8 +71,9 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
       larSource
         .filter(lar => !lar.isEmpty)
         .map(lar => toLoanApplicationRegisterQuery(lar))
-        .map(mLar => mLar.toCSV)
-        .runWith(Sink.foreach(println))
+        .map(mLar => mLar.toCSV + "\n")
+        .map(s => ByteString(s))
+        .runWith(s3Sink)
 
     case _ => //do nothing
 
