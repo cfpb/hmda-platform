@@ -2,6 +2,8 @@ package hmda.model.census
 
 import hmda.model.ResourceUtils
 
+import scala.util.Try
+
 object CBSATractLookup extends ResourceUtils {
   val values: Seq[CBSATract] = {
     val lines = resourceLines("/tract_to_cbsa_2015.txt")
@@ -16,7 +18,7 @@ object CBSATractLookup extends ResourceUtils {
       val tracts = values(5)
       val geoIdMsa = values(6)
       val metDivFp = values(7)
-      val smallCounty = values(8).toInt
+      val smallCounty = Try(values(8).toInt).getOrElse(0)
       val stateCode = values(9)
       val tractDecimal = values(10)
 

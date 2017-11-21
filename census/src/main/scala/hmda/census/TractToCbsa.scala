@@ -3,7 +3,7 @@ package hmda.census
 import model._
 import java.io._
 
-object TractToCbsa extends App with CbsaResourceUtils {
+object TractToCbsa extends App {
 
   val prPop = PrPopLookup.values
   val statesPop = StatesPopLookup.values
