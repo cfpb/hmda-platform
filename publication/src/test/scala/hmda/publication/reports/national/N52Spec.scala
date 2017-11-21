@@ -6,9 +6,9 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.census.model.CbsaLookup
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.model.publication.reports.ActionTakenTypeEnum._
 import hmda.model.publication.reports.ApplicantIncomeEnum.LessThan50PercentOfMSAMedian
 import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, MinorityStatusBorrowerCharacteristic, RaceBorrowerCharacteristic }
+import hmda.publication.reports.util.DispositionType._
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
@@ -36,7 +36,9 @@ class N52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
-  val expectedDispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted, ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
+  val expectedDispositionNames =
+    List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted, ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
+      .map(_.value)
 
   "Generate an National Aggregate 5-2 report" in {
     N52.generate(source).map { result =>
@@ -56,7 +58,7 @@ class N52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
       val minorityStatuses = lowestIncome.borrowerCharacteristics(2).asInstanceOf[MinorityStatusBorrowerCharacteristic].minoritystatus
       minorityStatuses.size mustBe 2
 
-      races.head.dispositions.map(_.disposition) mustBe expectedDispositions
+      races.head.dispositions.map(_.dispositionName) mustBe expectedDispositionNames
     }
   }
 

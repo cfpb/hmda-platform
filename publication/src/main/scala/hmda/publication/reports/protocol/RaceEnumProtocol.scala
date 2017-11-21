@@ -19,7 +19,7 @@ trait RaceEnumProtocol extends DefaultJsonProtocol {
         case White.description => White
         case NotProvided.description => NotProvided
         case TwoOrMoreMinority.description => TwoOrMoreMinority
-        case Joint.description => Joint
+        case JointRace.description => JointRace
         case _ => throw DeserializationException(s"Unable to translate JSON string into valid Action Type value: $description")
       }
 

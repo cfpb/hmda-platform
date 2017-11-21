@@ -5,7 +5,6 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, EthnicityCharacteristic, EthnicityEnum }
 import hmda.model.publication.reports.EthnicityEnum._
-import hmda.publication.reports.util.DispositionType.DispositionType
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
 import hmda.publication.reports.{ AS, EC, MAT }
 
@@ -23,7 +22,7 @@ object EthnicityUtil {
         lar.applicant.ethnicity == 2 &&
           (lar.applicant.coEthnicity == 2 || coapplicantEthnicityNotProvided(lar))
       }
-      case Joint => larSource.filter { lar =>
+      case JointEthnicity => larSource.filter { lar =>
         (lar.applicant.ethnicity == 1 && lar.applicant.coEthnicity == 2) ||
           (lar.applicant.ethnicity == 2 && lar.applicant.coEthnicity == 1)
       }
@@ -47,7 +46,7 @@ object EthnicityUtil {
     val larsHispanic = filterEthnicity(larSource, HispanicOrLatino)
     val larsNotHispanic = filterEthnicity(larSource, NotHispanicOrLatino)
     val larsNotAvailable = filterEthnicity(larSource, NotAvailable)
-    val larsJoint = filterEthnicity(larSource, Joint)
+    val larsJoint = filterEthnicity(larSource, JointEthnicity)
 
     val dispHispanicF = calculateDispositions(larsHispanic, dispositions)
     val dispNotHispanicF = calculateDispositions(larsNotHispanic, dispositions)
@@ -66,7 +65,7 @@ object EthnicityUtil {
           EthnicityCharacteristic(HispanicOrLatino, hispanicDispositions),
           EthnicityCharacteristic(NotHispanicOrLatino, notHispanicDispositions),
           EthnicityCharacteristic(NotAvailable, notAvailableDispositions),
-          EthnicityCharacteristic(Joint, jointDispositions)
+          EthnicityCharacteristic(JointEthnicity, jointDispositions)
         )
       )
 

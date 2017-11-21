@@ -3,7 +3,6 @@ package hmda.publication.reports.util
 import com.github.tototoshi.csv.CSVParser.parse
 import hmda.model.ResourceUtils
 import hmda.model.publication.reports.ReportTypeEnum
-import hmda.publication.reports.util.DispositionType.DispositionType
 
 object ReportsMetaDataLookup extends ResourceUtils {
 

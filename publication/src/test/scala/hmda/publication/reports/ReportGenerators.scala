@@ -10,10 +10,6 @@ object ReportGenerators {
     Gen.oneOf(ReportTypeEnum.values)
   }
 
-  implicit def actionTakenTypeEnumGen: Gen[ActionTakenTypeEnum] = {
-    Gen.oneOf(ActionTakenTypeEnum.values)
-  }
-
   implicit def raceEnumGen: Gen[RaceEnum] = {
     Gen.oneOf(RaceEnum.values)
   }
@@ -44,19 +40,10 @@ object ReportGenerators {
 
   implicit def dispositionGen: Gen[Disposition] = {
     for {
-      actionTakenType <- Gen.oneOf(ActionTakenTypeEnum.values)
+      dispositionName <- Gen.alphaStr
       count <- Gen.choose(0, Int.MaxValue)
       value <- Gen.choose(0, Int.MaxValue)
-    } yield Disposition(actionTakenType, count, value)
-  }
-
-  implicit def totalDispositionGen: Gen[List[Disposition]] = {
-    ActionTakenTypeEnum.values.map { actionTakenType =>
-      for {
-        count <- Gen.choose(0, Int.MaxValue)
-        value <- Gen.choose(0, Int.MaxValue)
-      } yield Disposition(actionTakenType, count, value)
-    }.map(g => g.sample.getOrElse(Disposition(ActionTakenTypeEnum.LoansOriginated, 0, 0))).toList
+    } yield Disposition(dispositionName, count, value)
   }
 
   implicit def raceCharacteristicGen: Gen[RaceCharacteristic] = {

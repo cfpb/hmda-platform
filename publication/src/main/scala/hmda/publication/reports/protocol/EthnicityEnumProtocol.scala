@@ -1,7 +1,7 @@
 package hmda.publication.reports.protocol
 
 import hmda.model.publication.reports.EthnicityEnum
-import hmda.model.publication.reports.EthnicityEnum.{ HispanicOrLatino, Joint, NotAvailable, NotHispanicOrLatino }
+import hmda.model.publication.reports.EthnicityEnum.{ HispanicOrLatino, JointEthnicity, NotAvailable, NotHispanicOrLatino }
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat }
 
 trait EthnicityEnumProtocol extends DefaultJsonProtocol {
@@ -15,7 +15,7 @@ trait EthnicityEnumProtocol extends DefaultJsonProtocol {
         case HispanicOrLatino.description => HispanicOrLatino
         case NotHispanicOrLatino.description => NotHispanicOrLatino
         case NotAvailable.description => NotAvailable
-        case Joint.description => Joint
+        case JointEthnicity.description => JointEthnicity
         case _ => throw DeserializationException(s"Unable to translate JSON string into valid Action Type value: $description")
       }
       case _ => throw DeserializationException("Unable to deserialize")

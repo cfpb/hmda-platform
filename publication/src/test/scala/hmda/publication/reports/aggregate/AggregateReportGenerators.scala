@@ -15,7 +15,7 @@ object AggregateReportGenerators {
       applicantIncomes <- Gen.listOfN(5, applicantIncomeGen)
       table <- Gen.alphaStr
       description <- Gen.alphaStr
-      total <- totalDispositionGen
+      total <- Gen.listOfN(4, dispositionGen)
     } yield A5X(year, msa, applicantIncomes, total, table, description, reportDate)
   }
 }

@@ -1,11 +1,23 @@
 package hmda.model.publication.reports
 
 case class Disposition(
-    disposition: ActionTakenTypeEnum,
+    dispositionName: String,
     count: Int,
     value: Int
 ) {
   def +(disp: Disposition): Disposition = {
-    Disposition(disposition, count + disp.count, value + disp.value)
+    Disposition(dispositionName, count + disp.count, value + disp.value)
+  }
+
+  def toJsonFormat: String = {
+    s"""
+       |
+       |{
+       |  "disposition": "$dispositionName",
+       |  "count": $count,
+       |  "value": $value
+       |}
+       |
+        """
   }
 }

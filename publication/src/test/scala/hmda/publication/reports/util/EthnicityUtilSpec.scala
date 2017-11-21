@@ -1,9 +1,8 @@
 package hmda.publication.reports.util
 
-import hmda.model.publication.reports.ActionTakenTypeEnum.{ ApplicationReceived, LoansOriginated }
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.model.publication.reports.{ EthnicityBorrowerCharacteristic, EthnicityCharacteristic }
-import hmda.publication.reports.util.DispositionType.{ OriginatedDisp, ReceivedDisp }
+import hmda.publication.reports.util.DispositionType.{ LoansOriginated, ApplicationReceived }
 import hmda.publication.reports.util.EthnicityUtil._
 import hmda.util.SourceUtils
 import org.scalacheck.Gen
@@ -68,12 +67,12 @@ class EthnicityUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils
   "'Joint' ethnicity filter" must {
     "include applications with hispanic applicant and non-hispanic coApplicant" in {
       val lars1 = larCollectionWithApplicant(_.copy(ethnicity = 1, coEthnicity = 2))
-      val jointLars1 = filterEthnicity(source(lars1), Joint)
+      val jointLars1 = filterEthnicity(source(lars1), JointEthnicity)
       count(jointLars1).map(_ mustBe 100)
     }
     "include applications with non-hispanic applicant and hispanic coApplicant" in {
       val lars2 = larCollectionWithApplicant(_.copy(ethnicity = 2, coEthnicity = 1))
-      val jointLars2 = filterEthnicity(source(lars2), Joint)
+      val jointLars2 = filterEthnicity(source(lars2), JointEthnicity)
       count(jointLars2).map(_ mustBe 100)
     }
     "exclude applications that do not meet 'Joint' criteria" in {
@@ -82,7 +81,7 @@ class EthnicityUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils
         val eth = ethnicity
         app.copy(ethnicity = eth, coEthnicity = eth)
       }
-      val lars = filterEthnicity(source(larsWithSameEthnicity), Joint)
+      val lars = filterEthnicity(source(larsWithSameEthnicity), JointEthnicity)
       count(lars).map(_ mustBe 0)
     }
   }
@@ -90,7 +89,7 @@ class EthnicityUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils
   "ethnicityBorrowerCharacteristic" must {
     "generate a EthnicityBorrowCharacteristic with all 4 ethnicity categories and the specified dispositions" in {
       val lars = lar100ListGen.sample.get
-      val dispositions = List(ReceivedDisp, OriginatedDisp)
+      val dispositions = List(ApplicationReceived, LoansOriginated)
 
       val resultF = ethnicityBorrowerCharacteristic(source(lars), dispositions)
 
@@ -102,7 +101,8 @@ class EthnicityUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils
         val firstEthCharacteristic = result.ethnicities.head
         firstEthCharacteristic mustBe a[EthnicityCharacteristic]
         firstEthCharacteristic.ethnicity mustBe HispanicOrLatino
-        firstEthCharacteristic.dispositions.map(_.disposition) mustBe List(ApplicationReceived, LoansOriginated)
+        firstEthCharacteristic.dispositions.map(_.dispositionName) mustBe
+          List(ApplicationReceived.value, LoansOriginated.value)
       }
     }
   }

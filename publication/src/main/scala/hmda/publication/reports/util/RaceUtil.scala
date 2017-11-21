@@ -7,7 +7,6 @@ import hmda.model.publication.reports.{ RaceBorrowerCharacteristic, RaceCharacte
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
-import hmda.publication.reports.util.DispositionType.DispositionType
 
 import scala.concurrent.Future
 
@@ -47,7 +46,7 @@ object RaceUtil {
       case TwoOrMoreMinority =>
         larSource.filter(lar => applicantTwoOrMoreMinorities(lar) && coApplicantNonWhite(lar))
 
-      case Joint =>
+      case JointRace =>
         larSource.filter { lar =>
           (applicantOneOrMoreMinorities(lar) || coApplicantOneOrMoreMinorities(lar)) &&
             (applicantWhite(lar) || coApplicantWhite(lar))
@@ -130,7 +129,7 @@ object RaceUtil {
     val larsHawaiian = filterRace(larSource, HawaiianOrPacific)
     val larsWhite = filterRace(larSource, White)
     val larsTwoMinorities = filterRace(larSource, TwoOrMoreMinority)
-    val larsJoint = filterRace(larSource, Joint)
+    val larsJoint = filterRace(larSource, JointRace)
     val larsNotProvided = filterRace(larSource, NotProvided)
 
     val dispAlaskanF = calculateDispositions(larsAlaskan, dispositions)
@@ -158,7 +157,7 @@ object RaceUtil {
       val hawaiianCharacteristic = RaceCharacteristic(HawaiianOrPacific, dispHawaiian)
       val whiteCharacteristic = RaceCharacteristic(White, dispWhite)
       val twoOrMoreMinorityCharacteristic = RaceCharacteristic(TwoOrMoreMinority, dispTwoMinorities)
-      val jointCharacteristic = RaceCharacteristic(Joint, dispJoint)
+      val jointCharacteristic = RaceCharacteristic(JointRace, dispJoint)
       val notProvidedCharacteristic = RaceCharacteristic(NotProvided, dispNotProvided)
 
       RaceBorrowerCharacteristic(

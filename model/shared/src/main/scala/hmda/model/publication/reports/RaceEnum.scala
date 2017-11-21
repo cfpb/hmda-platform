@@ -18,5 +18,5 @@ object RaceEnum extends IntEnum[RaceEnum] {
   case object White extends RaceEnum(5, "White")
   case object NotProvided extends RaceEnum(6, "Race Not Available")
   case object TwoOrMoreMinority extends RaceEnum(7, "2 or more minority races")
-  case object Joint extends RaceEnum(8, "Joint (White/Minority Race)")
+  case object JointRace extends RaceEnum(8, "Joint (White/Minority Race)")
 }

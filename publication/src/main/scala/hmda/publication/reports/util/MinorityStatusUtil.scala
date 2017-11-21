@@ -5,7 +5,6 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports._
 import hmda.model.publication.reports.MinorityStatusEnum.{ OtherIncludingHispanic, WhiteNonHispanic }
-import hmda.publication.reports.util.DispositionType.DispositionType
 import hmda.publication.reports.util.ReportUtil.calculateDispositions
 import hmda.publication.reports.{ AS, EC, MAT }
 

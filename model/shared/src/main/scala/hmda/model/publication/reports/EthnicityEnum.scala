@@ -14,5 +14,5 @@ object EthnicityEnum extends IntEnum[EthnicityEnum] {
   case object HispanicOrLatino extends EthnicityEnum(1, "Hispanic or Latino")
   case object NotHispanicOrLatino extends EthnicityEnum(2, "Not Hispanic or Latino")
   case object NotAvailable extends EthnicityEnum(3, "Ethnicity not available")
-  case object Joint extends EthnicityEnum(0, "Joint (Hispanic or Latino/Not Hispanic or Latino")
+  case object JointEthnicity extends EthnicityEnum(0, "Joint (Hispanic or Latino/Not Hispanic or Latino")
 }
