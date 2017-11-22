@@ -3,8 +3,8 @@ package hmda.census.model
 import com.github.tototoshi.csv.CSVParser._
 
 // The file contains a list of all census tracts and what county and state they are in
-// site: https://www.census.gov/geo/maps-data/data/relationship.html
-// file: http://www2.census.gov/geo/docs/maps-data/data/rel/trf_txt/us2010trf.txt
+// site: https://www.ffiec.gov/censusapp.htm
+// file: FFIEC Census flat file for the 2017 HMDA collection year
 
 object TractLookup extends CbsaResourceUtils {
   val values: Set[Tract] = {
