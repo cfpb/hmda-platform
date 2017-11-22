@@ -68,7 +68,7 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
 
       larSource
         .filter(lar => !lar.isEmpty)
-        .map(lar => toLoanApplicationRegisterQuery(lar))
+        .map(lar => toModifiedLar(lar))
         .map(mLar => mLar.toCSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
