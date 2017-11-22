@@ -18,7 +18,7 @@ class TractLookupSpec extends WordSpec with MustMatchers {
 
     "have the correct number of tracts" in {
       val lookup = TractLookup.values
-      lookup.size mustBe 74002
+      lookup.size mustBe 75883
     }
   }
 }
