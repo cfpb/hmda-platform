@@ -2,14 +2,14 @@ package hmda.publication
 
 import java.time.LocalDateTime
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.javadsl.S3Client
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.stream.scaladsl.Sink
 import akka.util.ByteString
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.persistence.model.HmdaActor
 import hmda.publication.reports.disclosure.DisclosureReports
@@ -61,7 +61,7 @@ class HmdaPublication extends HmdaActor with FilingCassandraRepository {
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"lar-$now"
+      val fileName = s"lar-$now.txt"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(bucket, s"lar/$fileName")
       readData(fetchSize)
