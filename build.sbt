@@ -194,7 +194,7 @@ lazy val query = (project in file("query"))
     },
     parallelExecution in Test := false,
     fork in Test := false,
-    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps ++ Seq(cassandraDriver, cassandraUnit, alpakkaCassandra)
+    libraryDependencies ++= configDeps ++ akkaPersistenceDeps ++ slickDeps ++ Seq(cassandraDriver, cassandraUnit, alpakkaCassandra, alpakkaS3)
   )
   .dependsOn(modelJVM % "compile->compile;test->test")
   .dependsOn(persistenceModel % "compile->compile;test->test")
@@ -265,3 +265,4 @@ lazy val publication = (project in file("publication"))
       libraryDependencies ++= akkaPersistenceDeps ++ Seq(akkaHttpJson)
     )
   ).dependsOn(query % "compile->compile;test->test")
+   .dependsOn(persistence % "compile->compile;test->test")

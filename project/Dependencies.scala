@@ -44,6 +44,6 @@ object Dependencies {
   val gatlingHighcharts = "io.gatling.highcharts" % "gatling-charts-highcharts" % Version.gatling % "test"
   val gatling = "io.gatling" % "gatling-test-framework" % Version.gatling % "test"
   val akkaQuartzSceduler = "com.enragedginger" %% "akka-quartz-scheduler" % Version.akkaQuartzScheduler
-
+  val alpakkaS3 = "com.lightbend.akka" %% "akka-stream-alpakka-s3" % Version.alpakka exclude("commons-logging", "commons-logging")
 
 }

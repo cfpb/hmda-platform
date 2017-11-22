@@ -14,7 +14,7 @@ class HmdaQuerySupervisorSpec extends WordSpec with MustMatchers {
 
   val system = ActorSystem()
 
-  val querySupervisor = system.actorOf(HmdaQuerySupervisor.props(), "query-supervisor")
+  val querySupervisor = system.actorOf(HmdaQuerySupervisor.props(), HmdaQuerySupervisor.name)
 
   implicit val ec = system.dispatcher
   val timeout = 2.seconds
@@ -23,7 +23,7 @@ class HmdaQuerySupervisorSpec extends WordSpec with MustMatchers {
   "The HMDA Query Supervisor" must {
 
     "Find or create institutions query" in {
-      val path = "akka://default/user/query-supervisor/institutions-view"
+      val path = s"akka://default/user/${HmdaQuerySupervisor.name}/institutions-view"
       val fQueryInstitution = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
       val queryInstitution = Await.result(fQueryInstitution, timeout)
       queryInstitution.path.toString mustBe path

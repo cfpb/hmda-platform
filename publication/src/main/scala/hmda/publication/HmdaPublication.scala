@@ -13,6 +13,7 @@ object HmdaPublication {
   case class GenerateDisclosureByMSAReports(respondentId: String, fipsCode: Int)
   case object PublishRegulatorData
   def props(): Props = Props(new HmdaPublication)
+
   def createAggregateDisclosureReports(system: ActorSystem): ActorRef = {
     system.actorOf(HmdaPublication.props().withDispatcher("validation-dispatcher"), "hmda-aggregate-disclosure")
   }
