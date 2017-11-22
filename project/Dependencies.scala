@@ -43,5 +43,7 @@ object Dependencies {
   val javaMail = "javax.mail" % "mail" % Version.javaMail
   val gatlingHighcharts = "io.gatling.highcharts" % "gatling-charts-highcharts" % Version.gatling % "test"
   val gatling = "io.gatling" % "gatling-test-framework" % Version.gatling % "test"
+  val akkaQuartzSceduler = "com.enragedginger" %% "akka-quartz-scheduler" % Version.akkaQuartzScheduler
+
 
 }

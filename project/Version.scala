@@ -24,4 +24,5 @@ object Version {
   val cassandraDriver = "3.2.0"
   val javaMail = "1.4.7"
   val gatling = "2.3.0"
+  val akkaQuartzScheduler = "1.6.1-akka-2.5.x"
 }

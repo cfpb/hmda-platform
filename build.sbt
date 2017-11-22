@@ -7,7 +7,7 @@ import io.gatling.sbt.GatlingPlugin
 
 val commonDeps = Seq(logback, scalaTest, scalaCheck, gatling, gatlingHighcharts)
 
-val akkaDeps = commonDeps ++ Seq(akka, akkaCluster, akkaClusterTools, akkaSlf4J, akkaStream, akkaTestkit, constructr, constructrZookeeper, akkaClusterManagement)
+val akkaDeps = commonDeps ++ Seq(akka, akkaCluster, akkaClusterTools, akkaSlf4J, akkaStream, akkaTestkit, constructr, constructrZookeeper, akkaClusterManagement, akkaQuartzSceduler)
 
 val akkaPersistenceDeps = akkaDeps ++ Seq(akkaPersistence, akkaStream, leveldb, leveldbjni, akkaPersistenceQuery, inMemoryPersistence, cassandraPersistence)
 
