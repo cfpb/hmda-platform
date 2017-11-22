@@ -232,7 +232,7 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
       val denial = Denial(denial1, denial2, denial3)
 
       LoanApplicationRegister(
-        id.toInt,
+        2,
         respId,
         agencyCode,
         loan,

@@ -1,10 +1,13 @@
 package hmda.publication
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.stream.ActorMaterializer
+import akka.stream.Supervision.Decider
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
+import akka.stream.scaladsl.Sink
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.persistence.model.HmdaActor
 import hmda.publication.reports.disclosure.DisclosureReports
+import hmda.query.repository.filing.FilingCassandraRepository
 
 object HmdaPublication {
   case class GenerateDisclosureByMSAReports(respondentId: String, fipsCode: Int)
@@ -15,13 +18,21 @@ object HmdaPublication {
   }
 }
 
-class HmdaPublication extends HmdaActor {
+class HmdaPublication extends HmdaActor with FilingCassandraRepository {
 
   import HmdaPublication._
 
-  implicit val system = context.system
-  implicit val ec = system.dispatcher
-  implicit val materializer = ActorMaterializer()
+  val decider: Decider = { e =>
+    repositoryLog.error("Unhandled error in stream", e)
+    Supervision.Resume
+  }
+
+  override implicit def system = context.system
+  val materializerSettings = ActorMaterializerSettings(system).withSupervisionStrategy(decider)
+  override implicit def materializer: ActorMaterializer = ActorMaterializer(materializerSettings)(system)
+  override implicit val ec = context.dispatcher
+
+  val fetchSize = config.getInt("hmda.query.fetch.size")
 
   QuartzSchedulerExtension(system).schedule("Every30Seconds", self, PublishRegulatorData)
 
@@ -32,5 +43,8 @@ class HmdaPublication extends HmdaActor {
 
     case PublishRegulatorData =>
       log.info(s"Received tick at ${java.time.Instant.now().toEpochMilli}")
+      readData(fetchSize)
+        .map(lar => lar.toCSV + "\n")
+        .runWith(Sink.foreach(println))
   }
 }
