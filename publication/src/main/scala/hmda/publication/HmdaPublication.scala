@@ -1,9 +1,15 @@
 package hmda.publication
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import java.time.LocalDateTime
+
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.stream.Supervision.Decider
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
+import akka.stream.alpakka.s3.javadsl.S3Client
+import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.stream.scaladsl.Sink
+import akka.util.ByteString
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.persistence.model.HmdaActor
 import hmda.publication.reports.disclosure.DisclosureReports
@@ -23,6 +29,8 @@ class HmdaPublication extends HmdaActor with FilingCassandraRepository {
 
   import HmdaPublication._
 
+  QuartzSchedulerExtension(system).schedule("Every30Seconds", self, PublishRegulatorData)
+
   val decider: Decider = { e =>
     repositoryLog.error("Unhandled error in stream", e)
     Supervision.Resume
@@ -35,7 +43,16 @@ class HmdaPublication extends HmdaActor with FilingCassandraRepository {
 
   val fetchSize = config.getInt("hmda.query.fetch.size")
 
-  QuartzSchedulerExtension(system).schedule("Every30Seconds", self, PublishRegulatorData)
+  val accessKeyId = config.getString("hmda.publication.aws.access-key-id")
+  val secretAccess = config.getString("hmda.publication.aws.secret-access-key ")
+  val region = config.getString("hmda.publication.aws.region")
+  val bucket = config.getString("hmda.publication.aws.private-bucket")
+
+  val awsCredentials = new AWSStaticCredentialsProvider(
+    new BasicAWSCredentials(accessKeyId, secretAccess)
+  )
+  val awsSettings = new S3Settings(MemoryBufferType, None, awsCredentials, region, false)
+  val s3Client = new S3Client(awsSettings, context.system, materializer)
 
   override def receive: Receive = {
     case GenerateDisclosureByMSAReports(respId, fipsCode) =>
@@ -43,9 +60,15 @@ class HmdaPublication extends HmdaActor with FilingCassandraRepository {
       disclosureReports.generateReports(fipsCode, respId)
 
     case PublishRegulatorData =>
-      log.info(s"Received tick at ${java.time.Instant.now().toEpochMilli}")
+      val now = LocalDateTime.now()
+      val fileName = s"lar-$now"
+      log.info(s"Uploading $fileName to S3")
+      val s3Sink = s3Client.multipartUpload(bucket, s"lar/$fileName")
       readData(fetchSize)
         .map(lar => lar.toCSV + "\n")
-        .runWith(Sink.foreach(println))
+        .map(s => ByteString(s))
+        .runWith(s3Sink)
+
+    case _ => //do nothing
   }
 }

@@ -51,8 +51,6 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
   def receive: Receive = {
-    case s: String =>
-      log.info("Got {}", s)
 
     case SubscribeAck(Subscribe(PubSubTopics.submissionSigned, None, `self`)) =>
       log.info("Subscribed to {}", PubSubTopics.submissionSigned)
