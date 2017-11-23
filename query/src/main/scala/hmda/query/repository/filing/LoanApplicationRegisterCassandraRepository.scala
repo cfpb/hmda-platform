@@ -14,7 +14,7 @@ import scala.concurrent.Future
 trait LoanApplicationRegisterCassandraRepository extends CassandraRepository[LoanApplicationRegister] with ProjectionRuntime {
 
   val config = ConfigFactory.load()
-  val table = config.getString("hmda.lar.table")
+  val table = config.getString("hmda.table.lar")
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.$table" +
@@ -148,15 +148,6 @@ trait LoanApplicationRegisterCassandraRepository extends CassandraRepository[Loa
          |      hoepa_status int,
          |      lien_status int
          |);
-       """.stripMargin
-
-    session.execute(query)
-  }
-
-  override def dropTable(): ResultSet = {
-    val query =
-      s"""
-         |DROP TABLE IF EXISTS $keyspace.$table;
        """.stripMargin
 
     session.execute(query)

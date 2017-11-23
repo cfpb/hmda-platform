@@ -12,8 +12,8 @@ object HmdaProjectionQuery {
     val institutionProjection = new InstitutionCassandraProjection(system, materializer)
     institutionProjection.startUp()
 
-    val filingProjection = new SubmissionCassandraProjection(system, materializer)
-    filingProjection.startUp()
+    val larProjection = new SubmissionCassandraProjection(system, materializer)
+    larProjection.startUp()
   }
 
 }
