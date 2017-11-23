@@ -2,16 +2,16 @@ package hmda.publication
 
 import java.time.LocalDateTime
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.http.scaladsl.model.{ ContentType, ContentTypes, MediaTypes }
+import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpCharsets, MediaTypes}
 import akka.stream.Supervision.Decider
-import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
+import akka.stream.alpakka.s3.impl.{S3Headers, ServerSideEncryption}
 import akka.stream.alpakka.s3.javadsl.S3Client
-import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
+import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.stream.scaladsl.Compression
 import akka.util.ByteString
-import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.persistence.model.HmdaActor
 import hmda.publication.reports.disclosure.DisclosureReports
@@ -63,18 +63,17 @@ class HmdaPublication extends HmdaActor with FilingCassandraRepository {
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"lar-$now.gz"
+      val fileName = s"lar-$now.csv"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,
         s"lar/$fileName",
-        ContentType(MediaTypes.`application/x-gzip`),
+        ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
         S3Headers(ServerSideEncryption.AES256)
       )
       readData(fetchSize)
         .map(lar => lar.toCSV + "\n")
         .map(s => ByteString(s))
-        .via(Compression.gzip)
         .runWith(s3Sink)
 
     case _ => //do nothing
