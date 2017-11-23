@@ -2,16 +2,15 @@ package hmda.publication
 
 import java.time.LocalDateTime
 
-import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpCharsets, MediaTypes}
+import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
 import akka.stream.Supervision.Decider
-import akka.stream.alpakka.s3.impl.{S3Headers, ServerSideEncryption}
+import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
-import akka.stream.scaladsl.Compression
+import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.persistence.model.HmdaActor
 import hmda.publication.reports.disclosure.DisclosureReports
