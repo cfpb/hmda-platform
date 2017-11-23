@@ -6,6 +6,10 @@ import org.scalacheck.Gen
 
 trait TsGenerators extends FIGenerators {
 
+  implicit def ts100ListGen: Gen[List[TransmittalSheet]] = {
+    Gen.listOfN(100, tsGen)
+  }
+
   implicit def tsGen: Gen[TransmittalSheet] = {
     for {
       code <- agencyCodeGen
