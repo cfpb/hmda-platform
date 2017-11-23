@@ -7,7 +7,7 @@ import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.institution.Agency
 import hmda.query.repository.CassandraRepositorySpec
 
-class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicationRegister] with FilingCassandraRepository with LarGenerators {
+class LoanApplicationRegisterCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicationRegister] with LoanApplicationRegisterCassandraRepository with LarGenerators {
 
   override def beforeAll(): Unit = {
     createKeyspace()
@@ -22,8 +22,6 @@ class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicat
     "Drop the table if it exists, create it again and populate it with some data that can be read back" in {
       dropTable()
       createTable()
-
-      val respId = "respId"
 
       val lars = lar100ListGen.sample.get.map(x => x.copy(agencyCode = 9))
       val source = Source

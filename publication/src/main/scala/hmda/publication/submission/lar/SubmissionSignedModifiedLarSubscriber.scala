@@ -13,7 +13,7 @@ import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.Lar
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.PubSubTopics
-import hmda.query.repository.filing.FilingCassandraRepository
+import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import hmda.persistence.processing.HmdaQuery._
 import hmda.query.repository.filing.LarConverter._
 
@@ -24,7 +24,7 @@ object SubmissionSignedModifiedLarSubscriber {
   def props(supervisor: ActorRef): Props = Props(new SubmissionSignedModifiedLarSubscriber(supervisor))
 }
 
-class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaActor with FilingCassandraRepository {
+class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   override implicit def system: ActorSystem = context.system
 

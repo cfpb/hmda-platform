@@ -11,14 +11,14 @@ import hmda.persistence.model.HmdaActor
 import hmda.persistence.processing.PubSubTopics
 import hmda.persistence.processing.HmdaQuery._
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
-import hmda.query.repository.filing.FilingCassandraRepository
+import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 
 object SubmissionSignedEventQuerySubscriber {
   val name = "SubmissionSignedEventQuerySubscriber"
   def props(): Props = Props(new SubmissionSignedEventQuerySubscriber())
 }
 
-class SubmissionSignedEventQuerySubscriber() extends HmdaActor with FilingCassandraRepository {
+class SubmissionSignedEventQuerySubscriber() extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   val mediator = DistributedPubSub(context.system).mediator
 

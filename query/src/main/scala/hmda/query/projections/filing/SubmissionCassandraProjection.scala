@@ -2,9 +2,9 @@ package hmda.query.projections.filing
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import hmda.query.repository.filing.FilingCassandraRepository
+import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 
-class SubmissionCassandraProjection(sys: ActorSystem, mat: ActorMaterializer) extends FilingCassandraRepository {
+class SubmissionCassandraProjection(sys: ActorSystem, mat: ActorMaterializer) extends LoanApplicationRegisterCassandraRepository {
 
   def startUp(): Unit = {
     createKeyspace()

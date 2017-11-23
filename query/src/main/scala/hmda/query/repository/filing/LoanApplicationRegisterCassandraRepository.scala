@@ -11,7 +11,7 @@ import hmda.query.repository.CassandraRepository
 
 import scala.concurrent.Future
 
-trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegister] with ProjectionRuntime {
+trait LoanApplicationRegisterCassandraRepository extends CassandraRepository[LoanApplicationRegister] with ProjectionRuntime {
 
   val config = ConfigFactory.load()
   val table = config.getString("hmda.lar.table")

@@ -7,7 +7,7 @@ import akka.util.Timeout
 import hmda.model.institution.Institution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.publication.reports.protocol.disclosure.D5XProtocol._
-import hmda.query.repository.filing.FilingCassandraRepository
+import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import hmda.query.view.institutions.InstitutionView
 import hmda.query.view.institutions.InstitutionView.GetInstitutionByRespondentId
 
@@ -15,7 +15,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import spray.json._
 
-class DisclosureReports(val sys: ActorSystem, val mat: ActorMaterializer) extends FilingCassandraRepository {
+class DisclosureReports(val sys: ActorSystem, val mat: ActorMaterializer) extends LoanApplicationRegisterCassandraRepository {
 
   override implicit def system: ActorSystem = sys
   override implicit def materializer: ActorMaterializer = mat

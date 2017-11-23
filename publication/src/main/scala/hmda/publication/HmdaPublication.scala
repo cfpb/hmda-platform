@@ -14,7 +14,7 @@ import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.persistence.model.HmdaActor
 import hmda.publication.reports.disclosure.DisclosureReports
-import hmda.query.repository.filing.FilingCassandraRepository
+import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 
 object HmdaPublication {
   case class GenerateDisclosureByMSAReports(respondentId: String, fipsCode: Int)
@@ -26,7 +26,7 @@ object HmdaPublication {
   }
 }
 
-class HmdaPublication extends HmdaActor with FilingCassandraRepository {
+class HmdaPublication extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   import HmdaPublication._
 
