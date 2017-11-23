@@ -31,7 +31,7 @@ class HmdaPublication extends HmdaActor with FilingCassandraRepository {
 
   import HmdaPublication._
 
-  QuartzSchedulerExtension(system).schedule("Every30Seconds", self, PublishRegulatorData)
+  QuartzSchedulerExtension(system).schedule("Daily10PM", self, PublishRegulatorData)
 
   val decider: Decider = { e =>
     repositoryLog.error("Unhandled error in stream", e)
