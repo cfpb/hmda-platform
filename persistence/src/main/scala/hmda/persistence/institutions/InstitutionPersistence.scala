@@ -15,7 +15,7 @@ object InstitutionPersistence {
   def props: Props = Props(new InstitutionPersistence)
 
   def createInstitutions(system: ActorSystem): ActorRef = {
-    system.actorOf(InstitutionPersistence.props.withDispatcher("persistence-dispatcher"), "institutions")
+    system.actorOf(InstitutionPersistence.props.withDispatcher("persistence-dispatcher"), name)
   }
 
   case class InstitutionPersistenceState(institutions: Set[Institution] = Set.empty[Institution]) {

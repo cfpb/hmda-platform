@@ -22,8 +22,8 @@ import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
-import hmda.publication.HmdaPublication
-import hmda.publication.submission.lar.SubmissionSignedModifiedLarSubscriber
+import hmda.publication.regulator.lar.{ RegulatorLarPublisher, ModifiedLarPublisher }
+import hmda.publication.regulator.ts.RegulatorTsPublisher
 import hmda.query.HmdaQuerySupervisor.{ FindSignedEventLARSubscriber, FindSignedEventTSSubscriber }
 
 import scala.concurrent.duration._
@@ -55,7 +55,7 @@ object HmdaPlatform extends App {
 
   val supervisorProxy = system.actorOf(
     ClusterSingletonProxy.props(
-      singletonManagerPath = "/user/supervisor",
+      singletonManagerPath = s"/user/${HmdaSupervisor.name}",
       settings = ClusterSingletonProxySettings(system).withRole("persistence")
     ),
     name = "supervisorProxy"
@@ -63,7 +63,7 @@ object HmdaPlatform extends App {
 
   val querySupervisorProxy = system.actorOf(
     ClusterSingletonProxy.props(
-      singletonManagerPath = "/user/query-supervisor",
+      singletonManagerPath = s"/user/${HmdaQuerySupervisor.name}",
       settings = ClusterSingletonProxySettings(system).withRole("query")
     ),
     name = "querySupervisorProxy"
@@ -71,7 +71,7 @@ object HmdaPlatform extends App {
 
   val validationStatsProxy = system.actorOf(
     ClusterSingletonProxy.props(
-      singletonManagerPath = "/user/validation-stats",
+      singletonManagerPath = s"/user/${ValidationStats.name}",
       settings = ClusterSingletonProxySettings(system).withRole("persistence")
     )
   )
@@ -91,11 +91,11 @@ object HmdaPlatform extends App {
 
     system.actorOf(
       ClusterSingletonManager.props(
-        singletonProps = Props(classOf[ValidationStats]),
+        singletonProps = ValidationStats.props(),
         terminationMessage = Shutdown,
         settings = ClusterSingletonManagerSettings(system).withRole("persistence")
       ),
-      name = "validation-stats"
+      name = ValidationStats.name
     )
 
     system.actorOf(
@@ -104,7 +104,7 @@ object HmdaPlatform extends App {
         terminationMessage = Shutdown,
         settings = ClusterSingletonManagerSettings(system).withRole("persistence")
       ),
-      name = "supervisor"
+      name = HmdaSupervisor.name
     )
 
     (supervisorProxy ? FindActorByName(SingleLarValidation.name))
@@ -126,7 +126,7 @@ object HmdaPlatform extends App {
         terminationMessage = Shutdown,
         settings = ClusterSingletonManagerSettings(system).withRole("query")
       ),
-      name = "query-supervisor"
+      name = HmdaQuerySupervisor.name
     )
 
     val institutionViewF = (querySupervisorProxy ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
@@ -146,8 +146,9 @@ object HmdaPlatform extends App {
 
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
-    system.actorOf(SubmissionSignedModifiedLarSubscriber.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-subscriber")
-    system.actorOf(Props[HmdaPublication].withDispatcher("publication-dispatcher"), "publication")
+    system.actorOf(ModifiedLarPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-publisher")
+    system.actorOf(RegulatorTsPublisher.props().withDispatcher("publication-dispatcher"), "regulator-ts-publisher")
+    system.actorOf(RegulatorLarPublisher.props().withDispatcher("publication-dispatcher"), "regulator-lar-publisher")
   }
 
   //Load demo data

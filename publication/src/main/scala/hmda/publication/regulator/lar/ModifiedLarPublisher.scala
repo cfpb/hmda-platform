@@ -1,31 +1,31 @@
-package hmda.publication.submission.lar
+package hmda.publication.regulator.lar
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.{ ByteString, Timeout }
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
-import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.PubSubTopics
 import hmda.query.repository.filing.LarConverter._
+import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 
 import scala.concurrent.duration._
 
-object SubmissionSignedModifiedLarSubscriber {
+object ModifiedLarPublisher {
   val name = "SubmissionSignedModifiedLarSubscriber"
-  def props(supervisor: ActorRef): Props = Props(new SubmissionSignedModifiedLarSubscriber(supervisor))
+  def props(supervisor: ActorRef): Props = Props(new ModifiedLarPublisher(supervisor))
 }
 
-class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
+class ModifiedLarPublisher(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   val decider: Decider = { e =>
     repositoryLog.error("Unhandled error in stream", e)

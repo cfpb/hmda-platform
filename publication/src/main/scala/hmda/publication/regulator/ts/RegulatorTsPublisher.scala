@@ -1,46 +1,37 @@
-package hmda.publication
+package hmda.publication.regulator.ts
 
 import java.time.LocalDateTime
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
+import akka.actor.{ ActorSystem, Props }
+import akka.http.scaladsl.model.{ ContentType, ContentTypes, HttpCharsets, MediaTypes }
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.persistence.model.HmdaActor
-import hmda.publication.reports.disclosure.DisclosureReports
-import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
+import hmda.publication.regulator.messages.PublishRegulatorData
+import hmda.query.repository.filing.TransmittalSheetCassandraRepository
 
-object HmdaPublication {
-  case class GenerateDisclosureByMSAReports(respondentId: String, fipsCode: Int)
-  case object PublishRegulatorData
-  def props(): Props = Props(new HmdaPublication)
-
-  def createAggregateDisclosureReports(system: ActorSystem): ActorRef = {
-    system.actorOf(HmdaPublication.props().withDispatcher("validation-dispatcher"), "hmda-aggregate-disclosure")
-  }
+object RegulatorTsPublisher {
+  def props(): Props = Props(new RegulatorTsPublisher)
 }
 
-class HmdaPublication extends HmdaActor with LoanApplicationRegisterCassandraRepository {
+class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepository {
 
-  import HmdaPublication._
-
-  QuartzSchedulerExtension(system).schedule("Daily10PM", self, PublishRegulatorData)
+  QuartzSchedulerExtension(system).schedule("TSRegulator", self, PublishRegulatorData)
 
   val decider: Decider = { e =>
-    repositoryLog.error("Unhandled error in stream", e)
+    log.error("Unhandled error in stream", e)
     Supervision.Resume
   }
 
-  override implicit def system = context.system
+  override implicit def system: ActorSystem = context.system
   val materializerSettings = ActorMaterializerSettings(system).withSupervisionStrategy(decider)
   override implicit def materializer: ActorMaterializer = ActorMaterializer(materializerSettings)(system)
-  override implicit val ec = context.dispatcher
 
   val fetchSize = config.getInt("hmda.query.fetch.size")
 
@@ -56,25 +47,24 @@ class HmdaPublication extends HmdaActor with LoanApplicationRegisterCassandraRep
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
   override def receive: Receive = {
-    case GenerateDisclosureByMSAReports(respId, fipsCode) =>
-      val disclosureReports = new DisclosureReports(system, materializer)
-      disclosureReports.generateReports(fipsCode, respId)
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"lar-$now.csv"
+      val fileName = s"ts-$now.csv"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,
-        s"lar/$fileName",
+        s"ts/$fileName",
         ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
         S3Headers(ServerSideEncryption.AES256)
       )
+
       readData(fetchSize)
-        .map(lar => lar.toCSV + "\n")
+        .map(ts => ts.toCSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
 
     case _ => //do nothing
   }
+
 }
