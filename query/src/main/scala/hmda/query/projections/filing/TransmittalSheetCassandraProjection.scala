@@ -6,7 +6,6 @@ import hmda.query.repository.filing.TransmittalSheetCassandraRepository
 
 class TransmittalSheetCassandraProjection(sys: ActorSystem, mat: ActorMaterializer) extends TransmittalSheetCassandraRepository {
 
-
   def startup(): Unit = {
     createKeyspace()
     createTable()

@@ -8,7 +8,7 @@ import scala.scalajs.js.annotation.JSExportAll
 case class TransmittalSheet(
     id: Int = 0,
     agencyCode: Int = 0,
-    timestamp: Long = 0,
+    timestamp: Long = 0L,
     activityYear: Int = 0,
     taxId: String = "",
     totalLines: Int = 0,
@@ -16,6 +16,30 @@ case class TransmittalSheet(
     parent: Parent = Parent("", "", "", "", ""),
     contact: Contact = Contact("", "", "", "")
 ) extends HasControlNumber with HmdaFileRow with StringPaddingUtils {
+
+  def isEmpty: Boolean = {
+    this.id == 0 &&
+      this.agencyCode == 0 &&
+      this.timestamp == 0L &&
+      this.activityYear == 0 &&
+      this.taxId == "" &&
+      this.totalLines == 0 &&
+      this.respondent.id == "" &&
+      this.respondent.zipCode == "" &&
+      this.respondent.state == "" &&
+      this.respondent.city == "" &&
+      this.respondent.address == "" &&
+      this.respondent.name == "" &&
+      this.parent.zipCode == "" &&
+      this.parent.state == "" &&
+      this.parent.city == "" &&
+      this.parent.address == "" &&
+      this.parent.name == "" &&
+      this.contact.email == "" &&
+      this.contact.fax == "" &&
+      this.contact.phone == "" &&
+      this.contact.name == ""
+  }
 
   override def valueOf(field: String): Any = {
     TsFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")

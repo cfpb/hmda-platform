@@ -3,7 +3,8 @@ package hmda.publication.submission.lar
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
-import akka.stream.ActorMaterializer
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
+import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
 import akka.util.{ ByteString, Timeout }
@@ -12,9 +13,9 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
-import hmda.persistence.processing.PubSubTopics
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import hmda.persistence.processing.HmdaQuery._
+import hmda.persistence.processing.PubSubTopics
 import hmda.query.repository.filing.LarConverter._
 
 import scala.concurrent.duration._
@@ -26,9 +27,14 @@ object SubmissionSignedModifiedLarSubscriber {
 
 class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
-  override implicit def system: ActorSystem = context.system
+  val decider: Decider = { e =>
+    repositoryLog.error("Unhandled error in stream", e)
+    Supervision.Resume
+  }
 
-  override implicit def materializer: ActorMaterializer = ActorMaterializer()
+  override implicit def system: ActorSystem = context.system
+  val materializerSettings = ActorMaterializerSettings(system).withSupervisionStrategy(decider)
+  override implicit def materializer: ActorMaterializer = ActorMaterializer(materializerSettings)(system)
 
   val mediator = DistributedPubSub(context.system).mediator
 
@@ -50,10 +56,10 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
   val awsSettings = new S3Settings(MemoryBufferType, None, awsCredentials, region, false)
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
-  def receive: Receive = {
+  override def receive: Receive = {
 
     case SubscribeAck(Subscribe(PubSubTopics.submissionSigned, None, `self`)) =>
-      log.info("Subscribed to {}", PubSubTopics.submissionSigned)
+      log.info(s"${self.path} subscribed to ${PubSubTopics.submissionSigned}")
 
     case SubmissionSignedPubSub(submissionId) =>
       val institutionId = submissionId.institutionId

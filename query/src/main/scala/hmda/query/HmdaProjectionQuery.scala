@@ -2,7 +2,7 @@ package hmda.query
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import hmda.query.projections.filing.{LoanApplicationRegisterCassandraProjection, TransmittalSheetCassandraProjection}
+import hmda.query.projections.filing.{ LoanApplicationRegisterCassandraProjection, TransmittalSheetCassandraProjection }
 import hmda.query.projections.institutions.InstitutionCassandraProjection
 
 object HmdaProjectionQuery {

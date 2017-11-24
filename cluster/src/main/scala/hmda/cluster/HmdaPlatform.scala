@@ -24,7 +24,7 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
 import hmda.publication.HmdaPublication
 import hmda.publication.submission.lar.SubmissionSignedModifiedLarSubscriber
-import hmda.query.HmdaQuerySupervisor.FindSignedEventQuerySubscriber
+import hmda.query.HmdaQuerySupervisor.{ FindSignedEventLARSubscriber, FindSignedEventTSSubscriber }
 
 import scala.concurrent.duration._
 
@@ -134,15 +134,18 @@ object HmdaPlatform extends App {
 
     HmdaProjectionQuery.startUp(system)
 
-    (querySupervisorProxy ? FindSignedEventQuerySubscriber)
+    (querySupervisorProxy ? FindSignedEventLARSubscriber)
       .mapTo[ActorRef]
-      .map(a => log.info(s"Started submission signed event subscriber at ${a.path}"))
+      .map(a => log.info(s"Started submission signed event LAR subscriber at ${a.path}"))
+
+    (querySupervisorProxy ? FindSignedEventTSSubscriber)
+      .mapTo[ActorRef]
+      .map(a => log.info(s"Started submission signed event TS subscriber at ${a.path}"))
 
   }
 
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
-    implicit val ec = system.dispatchers.lookup("publication-dispatcher")
     system.actorOf(SubmissionSignedModifiedLarSubscriber.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-subscriber")
     system.actorOf(Props[HmdaPublication].withDispatcher("publication-dispatcher"), "publication")
   }
