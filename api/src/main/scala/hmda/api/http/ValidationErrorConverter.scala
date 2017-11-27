@@ -23,10 +23,12 @@ trait ValidationErrorConverter {
   def editInfos(edits: Seq[ValidationError]): Seq[EditInfo] = {
     val errsByEdit: Map[String, Seq[ValidationError]] = edits.groupBy(_.ruleName)
 
-    errsByEdit.map {
+    val info = errsByEdit.map {
       case (editName: String, _) =>
         EditInfo(editName, editDescription(editName))
     }.toSeq
+
+    info.sortBy(_.edit)
   }
 
   def validationErrorsToCsvResults(vs: HmdaFileValidationState): String = {

@@ -44,8 +44,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
       status mustBe StatusCodes.OK
       val r = responseAs[SummaryEditResults]
-      r.syntactical mustBe EditCollection(Seq(s020info, s010info))
-      r.validity mustBe EditCollection(Seq(v285info, v280info))
+      r.syntactical mustBe EditCollection(Seq(s010info, s020info))
+      r.validity mustBe EditCollection(Seq(v280info, v285info))
       r.quality mustBe VerifiableEditCollection(verified = false, Seq())
       r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info))
     }
@@ -54,7 +54,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   "return a list of validation errors for a single type" in {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
       status mustBe StatusCodes.OK
-      responseAs[SingleTypeEditResults].edits mustBe Seq(v285info, v280info)
+      responseAs[SingleTypeEditResults].edits mustBe Seq(v280info, v285info)
     }
 
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
