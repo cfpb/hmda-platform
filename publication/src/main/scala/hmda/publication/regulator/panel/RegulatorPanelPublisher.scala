@@ -2,26 +2,26 @@ package hmda.publication.regulator.panel
 
 import java.time.LocalDateTime
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.{ContentType, HttpCharsets, MediaTypes}
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.actor.{ ActorSystem, Props }
+import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.stream.Supervision.Decider
-import akka.stream.alpakka.s3.impl.{S3Headers, ServerSideEncryption}
+import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
+import akka.util.ByteString
+import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages.PublishRegulatorData
 import hmda.query.repository.institutions.InstitutionCassandraRepository
 
-
-object PanelRegulatorPublisher {
-
+object RegulatorPanelPublisher {
+  def props(): Props = Props(new RegulatorPanelPublisher)
 }
 
-class PanelRegulatorPublisher extends HmdaActor with InstitutionCassandraRepository {
+class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraRepository {
 
   QuartzSchedulerExtension(system).schedule("PanelRegulator", self, PublishRegulatorData)
 
@@ -62,7 +62,10 @@ class PanelRegulatorPublisher extends HmdaActor with InstitutionCassandraReposit
       )
 
       readData(fetchSize)
-        .map(institution => institution.toCSV)
+        .filter(i => i.hmdaFilerFlag)
+        .map(institution => institution.toCSV + "\n")
+        .map(s => ByteString(s))
+        .runWith(s3Sink)
   }
 
 }

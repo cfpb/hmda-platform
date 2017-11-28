@@ -22,7 +22,8 @@ import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
-import hmda.publication.regulator.lar.{ RegulatorLarPublisher, ModifiedLarPublisher }
+import hmda.publication.regulator.lar.{ ModifiedLarPublisher, RegulatorLarPublisher }
+import hmda.publication.regulator.panel.RegulatorPanelPublisher
 import hmda.publication.regulator.ts.RegulatorTsPublisher
 import hmda.query.HmdaQuerySupervisor.{ FindSignedEventLARSubscriber, FindSignedEventTSSubscriber }
 
@@ -149,6 +150,7 @@ object HmdaPlatform extends App {
     system.actorOf(ModifiedLarPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-publisher")
     system.actorOf(RegulatorTsPublisher.props().withDispatcher("publication-dispatcher"), "regulator-ts-publisher")
     system.actorOf(RegulatorLarPublisher.props().withDispatcher("publication-dispatcher"), "regulator-lar-publisher")
+    system.actorOf(RegulatorPanelPublisher.props().withDispatcher("publication-dispatcher"), "regulator-panel-publisher")
   }
 
   //Load demo data
