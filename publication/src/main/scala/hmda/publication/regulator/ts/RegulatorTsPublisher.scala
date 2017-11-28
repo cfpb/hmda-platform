@@ -3,7 +3,7 @@ package hmda.publication.regulator.ts
 import java.time.LocalDateTime
 
 import akka.actor.{ ActorSystem, Props }
-import akka.http.scaladsl.model.{ ContentType, ContentTypes, HttpCharsets, MediaTypes }
+import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }

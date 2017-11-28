@@ -1,5 +1,7 @@
 package hmda.query.repository.filing
 
+import java.time.LocalDateTime
+
 import akka.stream.alpakka.cassandra.scaladsl.CassandraSink
 import akka.{ Done, NotUsed }
 import akka.stream.scaladsl.{ Flow, Source }
@@ -8,10 +10,11 @@ import hmda.model.fi.ts.{ Contact, Parent, Respondent, TransmittalSheet }
 import hmda.query.projections.ProjectionRuntime
 import hmda.query.repository.CassandraRepository
 import com.datastax.driver.core._
+import hmda.query.model.filing.TransmittalSheetWithTimestamp
 
 import scala.concurrent.Future
 
-trait TransmittalSheetCassandraRepository extends CassandraRepository[TransmittalSheet] with ProjectionRuntime {
+trait TransmittalSheetCassandraRepository extends CassandraRepository[TransmittalSheetWithTimestamp] with ProjectionRuntime {
 
   val config = ConfigFactory.load()
   val table = config.getString("hmda.table.ts")
@@ -38,34 +41,36 @@ trait TransmittalSheetCassandraRepository extends CassandraRepository[Transmitta
       "contact_name," +
       "contact_phone," +
       "contact_fax," +
-      "contact_email)" +
+      "contact_email," +
+      "submission_timestamp)" +
       " VALUES " +
-      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
+      "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)")
   }
 
-  val statementBinder = (ts: TransmittalSheet, statement: PreparedStatement) =>
+  val statementBinder = (t: TransmittalSheetWithTimestamp, statement: PreparedStatement) =>
     statement.bind(
-      ts.respondentId + ts.agencyCode + ts.activityYear,
-      new Integer(ts.agencyCode),
-      new java.lang.Long(ts.timestamp),
-      new Integer(ts.activityYear),
-      ts.taxId,
-      new Integer(ts.totalLines),
-      ts.respondentId,
-      ts.respondent.name,
-      ts.respondent.address,
-      ts.respondent.city,
-      ts.respondent.state,
-      ts.respondent.zipCode,
-      ts.parent.name,
-      ts.parent.address,
-      ts.parent.city,
-      ts.parent.state,
-      ts.parent.zipCode,
-      ts.contact.name,
-      ts.contact.phone,
-      ts.contact.fax,
-      ts.contact.email
+      t.ts.respondentId + t.ts.agencyCode + t.ts.activityYear,
+      new Integer(t.ts.agencyCode),
+      new java.lang.Long(t.ts.timestamp),
+      new Integer(t.ts.activityYear),
+      t.ts.taxId,
+      new Integer(t.ts.totalLines),
+      t.ts.respondentId,
+      t.ts.respondent.name,
+      t.ts.respondent.address,
+      t.ts.respondent.city,
+      t.ts.respondent.state,
+      t.ts.respondent.zipCode,
+      t.ts.parent.name,
+      t.ts.parent.address,
+      t.ts.parent.city,
+      t.ts.parent.state,
+      t.ts.parent.zipCode,
+      t.ts.contact.name,
+      t.ts.contact.phone,
+      t.ts.contact.fax,
+      t.ts.contact.email,
+      LocalDateTime.now().toString
     )
 
   override def createTable(): ResultSet = {
@@ -92,19 +97,20 @@ trait TransmittalSheetCassandraRepository extends CassandraRepository[Transmitta
          |  contact_name varchar,
          |  contact_phone varchar,
          |  contact_fax varchar,
-         |  contact_email varchar
+         |  contact_email varchar,
+         |  submission_timestamp varchar
          |);
        """.stripMargin
 
     session.execute(query)
   }
 
-  override def insertData(source: Source[TransmittalSheet, NotUsed]): Future[Done] = {
-    val sink = CassandraSink[TransmittalSheet](parallelism = 2, preparedStatement, statementBinder)
+  override def insertData(source: Source[TransmittalSheetWithTimestamp, NotUsed]): Future[Done] = {
+    val sink = CassandraSink[TransmittalSheetWithTimestamp](parallelism = 2, preparedStatement, statementBinder)
     source.runWith(sink)
   }
 
-  override protected def parseRows: Flow[Row, TransmittalSheet, NotUsed] = {
+  override protected def parseRows: Flow[Row, TransmittalSheetWithTimestamp, NotUsed] = {
     Flow[Row].map { row =>
       val agencyCode = row.getInt("agency_code")
       val timestamp = row.getLong("timestamp")
@@ -126,6 +132,7 @@ trait TransmittalSheetCassandraRepository extends CassandraRepository[Transmitta
       val contactPhone = row.getString("contact_phone")
       val contactFax = row.getString("contact_fax")
       val contactEmail = row.getString("contact_email")
+      val submission_timestamp = row.getString("submission_timestamp")
 
       val respondent = Respondent(
         respondentId,
@@ -151,7 +158,7 @@ trait TransmittalSheetCassandraRepository extends CassandraRepository[Transmitta
         contactEmail
       )
 
-      TransmittalSheet(
+      val ts = TransmittalSheet(
         1,
         agencyCode,
         timestamp,
@@ -162,6 +169,7 @@ trait TransmittalSheetCassandraRepository extends CassandraRepository[Transmitta
         parent,
         contact
       )
+      TransmittalSheetWithTimestamp(ts, submission_timestamp)
     }
   }
 

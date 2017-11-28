@@ -1,5 +1,7 @@
 package hmda.query.projections.filing
 
+import java.time.LocalDateTime
+
 import akka.actor.{ ActorSystem, Props }
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
@@ -13,6 +15,7 @@ import hmda.persistence.model.HmdaActor
 import hmda.query.repository.filing.TransmittalSheetCassandraRepository
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.processing.PubSubTopics
+import hmda.query.model.filing.TransmittalSheetWithTimestamp
 
 object TransmittalSheetSignedEventSubscriber {
   val name = "TransmittalSheetSignedEventSubscriber"
@@ -34,7 +37,7 @@ class TransmittalSheetSignedEventSubscriber extends HmdaActor with TransmittalSh
 
   mediator ! Subscribe(PubSubTopics.submissionSigned, self)
 
-  val sink = CassandraSink[TransmittalSheet](parallelism = 2, preparedStatement, statementBinder)
+  val sink = CassandraSink[TransmittalSheetWithTimestamp](parallelism = 2, preparedStatement, statementBinder)
 
   override def receive: Receive = {
 
@@ -52,6 +55,7 @@ class TransmittalSheetSignedEventSubscriber extends HmdaActor with TransmittalSh
       tsSource
         .filter(ts => !ts.isEmpty)
         .map { ts => log.info(s"Inserted: ${ts.toString}"); ts }
+        .map(ts => TransmittalSheetWithTimestamp(ts, LocalDateTime.now().toString))
         .runWith(sink)
 
     case _ => //do nothing
