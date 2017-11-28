@@ -8,6 +8,7 @@ import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
+import akka.stream.scaladsl.Source
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
@@ -62,10 +63,57 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
         ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
         S3Headers(ServerSideEncryption.AES256)
       )
-      readData(fetchSize)
+
+      val headerSource = Source.fromIterator(() =>
+        List(
+          "id|" +
+            "respondent_id|" +
+            "agency_code|" +
+            "loan_id|" +
+            "application_date|" +
+            "loan_type|" +
+            "property_type|" +
+            "purpose|" +
+            "occupancy|" +
+            "amount|" +
+            "preapprovals|" +
+            "action_taken_type|" +
+            "action_taken_date|" +
+            "msa|" +
+            "state|" +
+            "county|" +
+            "tract|" +
+            "ethnicity|" +
+            "co_ethnicity|" +
+            "race1|" +
+            "race2|" +
+            "race3|" +
+            "race4|" +
+            "race5|" +
+            "co_race1|" +
+            "co_race2|" +
+            "co_race3|" +
+            "co_race4|" +
+            "co_race5|" +
+            "sex|" +
+            "co_sex|" +
+            "income|" +
+            "purchaser_type|" +
+            "denial1|" +
+            "denial2|" +
+            "denial3|" +
+            "rate_spread|" +
+            "hoepa_status|" +
+            "lien_status\n"
+        ).toIterator).map(s => ByteString(s))
+
+      val larSource = readData(fetchSize)
         .map(lar => lar.toCSV + "\n")
         .map(s => ByteString(s))
-        .runWith(s3Sink)
+
+      val source = headerSource.concat(larSource)
+
+      source.runWith(s3Sink)
 
     case _ => //do nothing
   }

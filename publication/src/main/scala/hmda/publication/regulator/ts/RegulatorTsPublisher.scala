@@ -9,6 +9,7 @@ import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
@@ -59,10 +60,38 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
         S3Headers(ServerSideEncryption.AES256)
       )
 
-      readData(fetchSize)
+      val headerSource = Source.fromIterator(() =>
+        List(
+          "id|" +
+            "agency_code|" +
+            "timestamp|" +
+            "activity_year|" +
+            "tax_id|" +
+            "total_lines|" +
+            "respondent_id|" +
+            "respondent_name|" +
+            "respondent_address|" +
+            "respondent_city|" +
+            "respondent_state|" +
+            "respondent_zipcode|" +
+            "parent_name|" +
+            "parent_address|" +
+            "parent_city|" +
+            "parent_state|" +
+            "parent_zipcode|" +
+            "contact_name|" +
+            "contact_phone|" +
+            "contact_fax|" +
+            "contact_email|" +
+            "submission_timestamp\n"
+        ).toIterator).map(s => ByteString(s))
+
+      val tsSource = readData(fetchSize)
         .map(ts => ts.toCSV + "\n")
         .map(s => ByteString(s))
-        .runWith(s3Sink)
+
+      val source = headerSource.concat(tsSource)
+      source.runWith(s3Sink)
 
     case _ => //do nothing
   }

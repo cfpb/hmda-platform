@@ -9,6 +9,7 @@ import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
@@ -61,11 +62,44 @@ class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraReposit
         S3Headers(ServerSideEncryption.AES256)
       )
 
-      readData(fetchSize)
+      val headerSource = Source.fromIterator(() =>
+        List(
+          "id|" +
+            "agency|" +
+            "filing_period|" +
+            "activity_year|" +
+            "respondent_id|" +
+            "institution_type|" +
+            "cra|" +
+            "email_domain_1|" +
+            "email_domain_2|" +
+            "email_domain_3|" +
+            "respondent_name|" +
+            "respondent_state|" +
+            "respondent_city|" +
+            "respondent_fips_state_number|" +
+            "hmda_filer_flag|" +
+            "parent_respondent_id|" +
+            "parent_id_rssd|" +
+            "parent_name|" +
+            "parent_city|" +
+            "parent_state|" +
+            "assets|" +
+            "other_lender_code|" +
+            "top_holder_id_rssd|" +
+            "top_holder_name|" +
+            "top_holder_city|" +
+            "top_holder_state|" +
+            "top_holder_country\n"
+        ).toIterator)
+
+      val panelSource = readData(fetchSize)
         .filter(i => i.hmdaFilerFlag)
         .map(institution => institution.toCSV + "\n")
         .map(s => ByteString(s))
-        .runWith(s3Sink)
+
+      val source = headerSource.map(s => ByteString(s)).concat(panelSource)
+      source.runWith(s3Sink)
   }
 
 }
