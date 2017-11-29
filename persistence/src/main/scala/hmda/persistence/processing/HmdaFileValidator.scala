@@ -13,8 +13,8 @@ import hmda.model.institution.Institution
 import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor }
 import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.messages.commands.institutions.InstitutionCommands._
 import hmda.persistence.PaginatedResource
+import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors }
@@ -125,7 +125,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     val fInstitutions = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
     for {
       a <- fInstitutions
-      i <- (a ? GetInstitution(submissionId.institutionId)).mapTo[Option[Institution]]
+      i <- (a ? GetInstitutionById(submissionId.institutionId)).mapTo[Option[Institution]]
     } yield {
       institution = i
     }
