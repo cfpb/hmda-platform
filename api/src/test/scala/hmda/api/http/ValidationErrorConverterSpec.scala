@@ -54,6 +54,33 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       s020 mustBe EditInfo("S020", s020Desc)
     }
 
+    "order edit info entries by rule name" in {
+      val errors: Seq[ValidationError] = Seq(
+        SyntacticalValidationError("", "S610", true),
+        SyntacticalValidationError("", "S010", false),
+        SyntacticalValidationError("", "S310", true),
+        SyntacticalValidationError("", "S110", false),
+        QualityValidationError("", "Q012", false),
+        QualityValidationError("", "Q010", true),
+        QualityValidationError("", "Q440", false),
+        MacroValidationError("M000")
+      )
+
+      val result = editInfos(errors)
+
+      result.map(_.edit) mustBe Seq(
+        "M000",
+        "Q010",
+        "Q012",
+        "Q440",
+        "S010",
+        "S110",
+        "S310",
+        "S610"
+      )
+
+    }
+
     "get edit info for validationErrors" in {
       val infos = editInfos(tsErrors)
       infos.size mustBe tsErrors.size
