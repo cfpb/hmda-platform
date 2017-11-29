@@ -1,25 +1,23 @@
 package hmda.query.repository.filing
 
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.query.model.filing.LoanApplicationRegisterQuery
+import hmda.query.model.filing.ModifiedLoanApplicationRegister
+
 import scala.language.implicitConversions
 
 object LarConverter {
 
-  implicit def toLoanApplicationRegisterQuery(lar: LoanApplicationRegister) = {
-    LoanApplicationRegisterQuery(
-      lar.respondentId + lar.agencyCode + lar.loan.id,
+  implicit def toModifiedLar(lar: LoanApplicationRegister):ModifiedLoanApplicationRegister = {
+    ModifiedLoanApplicationRegister(
+      2,
       lar.respondentId,
       lar.agencyCode,
       lar.preapprovals,
       lar.actionTakenType,
-      lar.actionTakenDate,
       lar.purchaserType,
       lar.rateSpread,
       lar.hoepaStatus,
       lar.lienStatus,
-      lar.loan.id,
-      lar.loan.applicationDate,
       lar.loan.loanType,
       lar.loan.propertyType,
       lar.loan.purpose,
@@ -47,8 +45,7 @@ object LarConverter {
       lar.denial.reason1,
       lar.denial.reason2,
       lar.denial.reason3,
-      "",
-      ""
+      lar.actionTakenDate.toString.substring(0, 4)
     )
   }
 }

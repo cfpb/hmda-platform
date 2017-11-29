@@ -8,7 +8,6 @@ import hmda.api.RequestHeaderUtils
 import hmda.api.model.public.ULIModel._
 import hmda.api.protocol.public.ULIProtocol
 import hmda.model.fi.lar.LarGenerators
-import hmda.query.repository.filing.LarConverter._
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.FileUploadUtils
@@ -25,8 +24,6 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
   override implicit val timeout = Timeout(duration)
 
   val p = "2017"
-  val l1 = toLoanApplicationRegisterQuery(sampleLar).copy(period = p, institutionId = "0")
-  val l2 = toLoanApplicationRegisterQuery(sampleLar).copy(period = p, institutionId = "0")
 
   val uliTxt = "10Cx939c5543TqA1144M999143X10\n" +
     "10Bx939c5543TqA1144M999143X38\n" +

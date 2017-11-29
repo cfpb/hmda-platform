@@ -35,7 +35,7 @@ class SubmissionSignedEventQuerySubscriber() extends HmdaActor with FilingCassan
       repositoryLog.info(s"Subscribed to ${PubSubTopics.submissionSigned}")
 
     case SubmissionSignedPubSub(submissionId) =>
-      repositoryLog.info(s"Received submission signed event with submission id: ${submissionId.toString}")
+      repositoryLog.info(s"${self.path} received submission signed event with submission id: ${submissionId.toString}")
       val persistenceId = s"HmdaFileValidator-$submissionId"
       val larSource = events(persistenceId).map {
         case LarValidated(lar, _) => lar
