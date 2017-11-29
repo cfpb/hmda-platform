@@ -42,6 +42,7 @@ class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraReposit
   val secretAccess = config.getString("hmda.publication.aws.secret-access-key ")
   val region = config.getString("hmda.publication.aws.region")
   val bucket = config.getString("hmda.publication.aws.private-bucket")
+  val environment = config.getString("hmda.publication.aws.environment")
 
   val awsCredentials = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess)
@@ -57,7 +58,7 @@ class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraReposit
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,
-        s"panel/$fileName",
+        s"$environment/panel/$fileName",
         ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
         S3Headers(ServerSideEncryption.AES256)
       )
