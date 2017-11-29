@@ -51,15 +51,13 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
   def receive: Receive = {
-    case s: String =>
-      log.info("Got {}", s)
 
     case SubscribeAck(Subscribe(PubSubTopics.submissionSigned, None, `self`)) =>
       log.info("Subscribed to {}", PubSubTopics.submissionSigned)
 
     case SubmissionSignedPubSub(submissionId) =>
       val institutionId = submissionId.institutionId
-      val fileName = s"$institutionId.csv"
+      val fileName = s"$institutionId.txt"
       val s3Sink = s3Client.multipartUpload(bucket, s"lar/$fileName")
       log.info(s"${self.path} received submission signed event with submission id: ${submissionId.toString}")
       val persistenceId = s"HmdaFileValidator-$submissionId"
@@ -70,7 +68,7 @@ class SubmissionSignedModifiedLarSubscriber(supervisor: ActorRef) extends HmdaAc
 
       larSource
         .filter(lar => !lar.isEmpty)
-        .map(lar => toLoanApplicationRegisterQuery(lar))
+        .map(lar => toModifiedLar(lar))
         .map(mLar => mLar.toCSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
