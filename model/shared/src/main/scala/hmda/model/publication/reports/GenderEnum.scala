@@ -14,4 +14,5 @@ object GenderEnum extends IntEnum[GenderEnum] {
   case object Male extends GenderEnum(1, "Male")
   case object Female extends GenderEnum(2, "Female")
   case object JointGender extends GenderEnum(3, "Joint (Male/Female)")
+  case object GenderNotAvailable extends GenderEnum(4, "Gender Not Available")
 }
