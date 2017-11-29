@@ -13,7 +13,7 @@ import hmda.api.model.ErrorResponse
 import hmda.api.model.public.{ InstitutionSearch, InstitutionSearchResults }
 import hmda.api.protocol.public.InstitutionSearchProtocol
 import hmda.model.institution.Institution
-import hmda.query.view.institutions.InstitutionView.FindInstitutionByPeriodAndDomain
+import hmda.persistence.institutions.InstitutionPersistence.FindInstitutionByPeriodAndDomain
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -26,13 +26,13 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
   implicit val ec: ExecutionContext
 
   // institutions?domain=<domain>
-  def institutionSearchPath(institutionViewF: Future[ActorRef]) = {
+  def institutionSearchPath(institutionPersistenceF: Future[ActorRef]) = {
     path("institutions") {
       encodeResponse {
         timedGet { uri =>
           parameter('domain.as[String]) { domain =>
             val institutionsF = for {
-              v <- institutionViewF
+              v <- institutionPersistenceF
               institutions <- (v ? FindInstitutionByPeriodAndDomain(domain)).mapTo[Set[Institution]]
             } yield institutions
             onComplete(institutionsF) {

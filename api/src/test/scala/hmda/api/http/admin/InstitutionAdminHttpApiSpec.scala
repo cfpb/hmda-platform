@@ -14,7 +14,6 @@ import hmda.api.http.BaseHttpApi
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
-import hmda.query.HmdaQuerySupervisor
 import hmda.validation.ValidationStats
 
 import scala.concurrent.duration._
@@ -34,8 +33,6 @@ class InstitutionAdminHttpApiSpec
 
   val validationStats = ValidationStats.createValidationStats(system)
   val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
-
-  val querySupervisor = HmdaQuerySupervisor.createQuerySupervisor(system)
 
   override def afterAll(): Unit = {
     super.afterAll()
@@ -61,11 +58,11 @@ class InstitutionAdminHttpApiSpec
     "create a new institution and get its details" in {
       val jsonRequest = ByteString(newInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
-      postRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
+      postRequest ~> institutionAdminRoutes(supervisor) ~> check {
         status mustBe StatusCodes.Created
         responseAs[Institution] mustBe newInstitution
       }
-      Get(s"/institutions/${newInstitution.id}") ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
+      Get(s"/institutions/${newInstitution.id}") ~> institutionAdminRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
         responseAs[Institution] mustBe newInstitution
       }
@@ -73,7 +70,7 @@ class InstitutionAdminHttpApiSpec
     "use requested encoding for institution create/update path" in {
       val jsonRequest = ByteString(sampleInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
-      postRequest.addHeader(`Accept-Encoding`(deflate)) ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
+      postRequest.addHeader(`Accept-Encoding`(deflate)) ~> institutionAdminRoutes(supervisor) ~> check {
         response.encoding mustBe HttpEncodings.deflate
       }
     }
@@ -81,14 +78,14 @@ class InstitutionAdminHttpApiSpec
       val badJson = "bad payload".toJson
       val jsonRequest = ByteString(badJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
-      postRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
+      postRequest ~> institutionAdminRoutes(supervisor) ~> check {
         rejection mustBe a[MalformedRequestContentRejection]
       }
     }
     "return conflict when trying to upload existing entity" in {
       val jsonRequest = ByteString(newInstitution.toJson.toString)
       val postRequest = createRequest(jsonRequest, HttpMethods.POST)
-      postRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
+      postRequest ~> institutionAdminRoutes(supervisor) ~> check {
         status mustBe StatusCodes.Conflict
       }
     }
@@ -97,7 +94,7 @@ class InstitutionAdminHttpApiSpec
       val updatedInstitution = newInstitution.copy(cra = true, respondent = updatedInstitutionRespondent)
       val jsonRequest = ByteString(updatedInstitution.toJson.toString)
       val putRequest = createRequest(jsonRequest, HttpMethods.PUT)
-      putRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
+      putRequest ~> institutionAdminRoutes(supervisor) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[Institution] mustBe updatedInstitution
       }
@@ -106,7 +103,7 @@ class InstitutionAdminHttpApiSpec
       val i1 = sampleInstitution
       val jsonRequest = ByteString(i1.toJson.toString)
       val putRequest = createRequest(jsonRequest, HttpMethods.PUT)
-      putRequest ~> institutionAdminRoutes(supervisor, querySupervisor) ~> check {
+      putRequest ~> institutionAdminRoutes(supervisor) ~> check {
         status mustBe StatusCodes.NotFound
       }
     }

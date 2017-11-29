@@ -26,7 +26,7 @@ class InstitutionPersistenceSpec extends ActorSpec {
 
     "get institution by id" in {
       val institution = DemoData.testInstitutions.head
-      probe.send(institutionsActor, GetInstitution(institution.id))
+      probe.send(institutionsActor, GetInstitutionById(institution.id))
       probe.expectMsg(Some(institution))
     }
 
