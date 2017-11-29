@@ -141,7 +141,6 @@ object HmdaPlatform extends App {
 
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
-    implicit val ec = system.dispatchers.lookup("publication-dispatcher")
     system.actorOf(SubmissionSignedModifiedLarSubscriber.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-subscriber")
     //system.actorOf(Props[HmdaReportsPublication].withDispatcher("publication-dispatcher"), "publication")
   }

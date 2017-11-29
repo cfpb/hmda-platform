@@ -23,8 +23,6 @@ class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicat
       dropTable()
       createTable()
 
-      val respId = "respId"
-
       val lars = lar100ListGen.sample.get.map(x => x.copy(agencyCode = 9))
       val source = Source
         .fromIterator(() => lars.toIterator)

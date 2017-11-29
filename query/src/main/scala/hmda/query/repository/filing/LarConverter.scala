@@ -7,7 +7,7 @@ import scala.language.implicitConversions
 
 object LarConverter {
 
-  implicit def toLoanApplicationRegisterQuery(lar: LoanApplicationRegister) = {
+  implicit def toLoanApplicationRegisterQuery(lar: LoanApplicationRegister): ModifiedLoanApplicationRegister = {
 
     ModifiedLoanApplicationRegister(
       2,
@@ -44,7 +44,7 @@ object LarConverter {
       lar.applicant.coSex,
       lar.applicant.income,
       lar.denial.reason1,
-      lar.denial.reason3,
+      lar.denial.reason2,
       lar.denial.reason3,
       lar.actionTakenDate.toString.substring(0, 4)
     )
