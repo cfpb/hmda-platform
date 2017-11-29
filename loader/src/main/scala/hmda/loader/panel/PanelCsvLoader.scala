@@ -12,8 +12,6 @@ import scala.concurrent.duration._
 
 object PanelCsvLoader extends FlowUtils {
   val httpTimeout = config.getInt("hmda.httpTimeout")
-  val adminUrl = config.getString("hmda.adminUrl")
-  val url = s"$adminUrl/institutions"
   val duration = httpTimeout.seconds
   override implicit val system: ActorSystem = ActorSystem("hmda-loader")
   override implicit val materializer = ActorMaterializer()
