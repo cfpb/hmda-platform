@@ -1,14 +1,15 @@
 package hmda.publication.regulator.lar
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.cluster.pubsub.DistributedPubSub
-import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
+import akka.cluster.pubsub.DistributedPubSubMediator.{Subscribe, SubscribeAck}
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.javadsl.S3Client
-import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
-import akka.util.{ ByteString, Timeout }
-import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
+import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.scaladsl.Source
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.util.{ByteString, Timeout}
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
@@ -73,12 +74,57 @@ class ModifiedLarPublisher(supervisor: ActorRef) extends HmdaActor with LoanAppl
         case _ => LoanApplicationRegister()
       }
 
-      larSource
+      val headSource = Source.fromIterator(() =>
+        List(
+          "id|" +
+            "respondentId|" +
+            "agencyCode|" +
+            "preapprovals|" +
+            "actionTakenType|" +
+            "purchaserType|" +
+            "rateSpread|" +
+            "hoepaStatus|" +
+            "lienStatus|" +
+            "loanType|" +
+            "propertyType|" +
+            "purpose|" +
+            "occupancy|" +
+            "amount|" +
+            "msa|" +
+            "state|" +
+            "county|" +
+            "tract|" +
+            "ethnicity|" +
+            "coEthnicity|" +
+            "race1|" +
+            "race2|" +
+            "race3|" +
+            "race4|" +
+            "race5|" +
+            "coRace1|" +
+            "coRace2|" +
+            "coRace3|" +
+            "coRace4|" +
+            "coRace5|" +
+            "sex|" +
+            "coSex|" +
+            "income|" +
+            "denialReason1|" +
+            "denialReason2|" +
+            "denialReason3|" +
+            "period"
+        ).toIterator
+      )
+
+      val mlarSource = larSource
         .filter(lar => !lar.isEmpty)
         .map(lar => toModifiedLar(lar))
         .map(mLar => mLar.toCSV + "\n")
         .map(s => ByteString(s))
-        .runWith(s3Sink)
+
+      val source = headSource.concat(mlarSource)
+
+      mlarSource.runWith(s3Sink)
 
     case _ => //do nothing
 
