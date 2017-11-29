@@ -16,10 +16,7 @@ object InstitutionView {
 
   val name = "institutions-view"
 
-  case class GetInstitutionById(institutionId: String) extends Command
   case class GetInstitutionByRespondentId(respondentId: String) extends Command
-  case class GetInstitutionsById(ids: List[String]) extends Command
-  case class FindInstitutionByPeriodAndDomain(domain: String) extends Command
 
   def props(): Props = Props(new InstitutionView)
 
@@ -54,19 +51,12 @@ class InstitutionView extends HmdaPersistentActor {
   override def persistenceId: String = name
 
   override def receiveCommand: Receive = {
-    case GetInstitutionById(institutionId) =>
-      val institution = state.institutions.find(i => i.id == institutionId).getOrElse(Institution.empty)
-      sender() ! institution
 
     case GetInstitutionByRespondentId(respondentId) =>
       val institution = state.institutions.find { i =>
         i.respondent.externalId.value == respondentId
       }.getOrElse(Institution.empty)
       sender() ! institution
-
-    case GetInstitutionsById(ids) =>
-      val institutions = state.institutions.filter(i => ids.contains(i.id))
-      sender() ! institutions
 
     case EventWithSeqNr(_, event) =>
       if (counter >= snapshotCounter) {
@@ -82,13 +72,6 @@ class InstitutionView extends HmdaPersistentActor {
 
     case GetState =>
       sender() ! state.institutions
-
-    case FindInstitutionByPeriodAndDomain(domain) =>
-      if (domain.isEmpty) {
-        sender() ! Set.empty[Institution]
-      } else {
-        sender() ! state.institutions.filter(i => i.emailDomains.map(e => extractDomain(e)).contains(domain.toLowerCase))
-      }
   }
 
   override def receiveRecover: Receive = super.receiveRecover orElse {

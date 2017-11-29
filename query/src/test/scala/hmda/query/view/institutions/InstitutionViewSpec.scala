@@ -37,22 +37,6 @@ class InstitutionViewSpec extends ActorSpec {
   }
 
   "Institutions View" must {
-    "return institution by id" in {
-      probe.send(institutionQuery, GetInstitutionById(i1.id))
-      probe.expectMsg(i1)
-    }
-    "return modified institution" in {
-      probe.send(institutionQuery, GetInstitutionById(i3.id))
-      probe.expectMsg(i4)
-    }
-    "return a set of institutions matching a list of ids" in {
-      probe.send(institutionQuery, GetInstitutionsById(List(i1.id, i2.id)))
-      probe.expectMsg(Set(i1, i2))
-    }
-    "return an empty set when requesting nonexistent institutions" in {
-      probe.send(institutionQuery, GetInstitutionsById(List("a", "b")))
-      probe.expectMsg(Set())
-    }
     "return full list of institutions" in {
       probe.send(institutionQuery, GetState)
       probe.expectMsg(Set(i1, i2, i4, e1, e2, e3))
@@ -61,21 +45,6 @@ class InstitutionViewSpec extends ActorSpec {
     "return institution by respondentId" in {
       probe.send(institutionQuery, GetInstitutionByRespondentId(i1.respondentId))
       probe.expectMsg(i1)
-    }
-
-    "return a set of institutions that match a domain" in {
-      probe.send(institutionQuery, FindInstitutionByPeriodAndDomain("test.com"))
-      probe.expectMsg(Set(e1, e3))
-    }
-
-    "return an empty set when requesting a domain that doesn't exist" in {
-      probe.send(institutionQuery, FindInstitutionByPeriodAndDomain("notest.com"))
-      probe.expectMsg(Set())
-    }
-
-    "return an empty set when requesting a blank domain" in {
-      probe.send(institutionQuery, FindInstitutionByPeriodAndDomain(""))
-      probe.expectMsg(Set())
     }
   }
 
