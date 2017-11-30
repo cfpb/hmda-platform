@@ -13,7 +13,6 @@ object InstitutionPersistence {
   val name = "institutions"
 
   case class GetInstitutionById(institutionId: String) extends Command
-  case class GetInstitutionByRespondentId(respondentId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
   case class FindInstitutionByPeriodAndDomain(domain: String) extends Command
 
