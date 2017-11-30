@@ -85,7 +85,7 @@ object D87 extends D8X {
 object D8X {
   val dispositions = List(DebtToIncomeRatio, EmploymentHistory, CreditHistory,
     Collateral, InsufficientCash, UnverifiableInformation, CreditAppIncomplete,
-    MortgageInsuranceDenied, OtherDenialReason, TotalDenied)
+    MortgageInsuranceDenied, OtherDenialReason)
 
   def generate[ec: EC, mat: MAT, as: AS](
     report: D8X,

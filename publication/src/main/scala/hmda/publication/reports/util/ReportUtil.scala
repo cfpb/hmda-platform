@@ -160,7 +160,8 @@ object ReportUtil extends SourceUtils {
         val percentage = if (d.count == 0) 0 else (d.count * 100 / totalCount)
         d.copy(percentage = percentage)
       }
-      val total = PercentageDisposition(totalDisp.value, totalCount, 100)
+      val totalPercent = if (totalCount == 0) 0 else 100
+      val total = PercentageDisposition(totalDisp.value, totalCount, totalPercent)
 
       withPercentages :+ total
     }

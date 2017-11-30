@@ -52,12 +52,20 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   "Include correct applicant Characteristics" in {
     D8X.generate(D85, source, fips, respId, Future("Bemidji Test Bank")).map { result =>
       result.asJsObject.getFields("applicantCharacteristics") match {
+
         case Seq(JsArray(characteristics)) =>
           characteristics must have size 5
           characteristics.head.asJsObject.getFields("characteristic", "races") match {
+
             case Seq(JsString(char), JsArray(races)) =>
               char mustBe "race"
               races must have size 8
+              races.head.asJsObject.getFields("race", "denialReasons") match {
+
+                case Seq(JsString(race), JsArray(reasons)) =>
+                  race mustBe "American Indian/Alaska Native"
+                  reasons must have size 10
+              }
           }
       }
     }
