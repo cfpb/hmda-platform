@@ -16,12 +16,12 @@ import hmda.persistence.HmdaSupervisor
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.publication.HmdaPublication
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
+import hmda.publication.submission.lar.SubmissionSignedModifiedLarSubscriber
 import hmda.query.HmdaQuerySupervisor.FindSignedEventQuerySubscriber
 
 import scala.concurrent.duration._
@@ -133,13 +133,14 @@ object HmdaPlatform extends App {
 
     (querySupervisorProxy ? FindSignedEventQuerySubscriber)
       .mapTo[ActorRef]
-      .map(a => log.info(s"Started submission signed event subscriber validator at ${a.path}"))
+      .map(a => log.info(s"Started submission signed event subscriber at ${a.path}"))
 
   }
 
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
-    system.actorOf(Props[HmdaPublication].withDispatcher("publication-dispatcher"), "publication")
+    system.actorOf(SubmissionSignedModifiedLarSubscriber.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-subscriber")
+    //system.actorOf(Props[HmdaReportsPublication].withDispatcher("publication-dispatcher"), "publication")
   }
 
   //Load demo data

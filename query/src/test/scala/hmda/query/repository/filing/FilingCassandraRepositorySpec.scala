@@ -27,6 +27,7 @@ class FilingCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicat
       val source = Source
         .fromIterator(() => lars.toIterator)
       insertData(source)
+
       val readF = readData(100).runWith(Sink.seq)
       readF.map { lars =>
         lars.map(lar => lar.agencyCode mustBe Agency.CFPB.value)

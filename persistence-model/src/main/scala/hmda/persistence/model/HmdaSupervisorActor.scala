@@ -29,7 +29,8 @@ abstract class HmdaSupervisorActor extends HmdaActor {
     actorRef
   }
 
-  protected def findActorByName(name: String): ActorRef =
+  protected def findActorByName(name: String): ActorRef = {
     actors.getOrElse(name, createActor(name))
+  }
 
 }
