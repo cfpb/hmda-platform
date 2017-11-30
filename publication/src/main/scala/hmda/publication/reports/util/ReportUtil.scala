@@ -139,7 +139,7 @@ object ReportUtil extends SourceUtils {
     larSource: Source[LoanApplicationRegister, NotUsed],
     dispositions: List[DispositionType]
   ): Future[List[Disposition]] = {
-    Future.sequence(dispositions.map(_.calculateDisposition(larSource)))
+    Future.sequence(dispositions.map(_.calculateValueDisposition(larSource)))
   }
 
 }

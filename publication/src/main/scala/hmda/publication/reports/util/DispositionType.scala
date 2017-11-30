@@ -15,7 +15,7 @@ sealed abstract class DispositionType(
     val filter: LoanApplicationRegister => Boolean
 ) extends SourceUtils {
 
-  def calculateDisposition[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[Disposition] = {
+  def calculateValueDisposition[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[Disposition] = {
     val loansFiltered = larSource.filter(filter)
     val loanCountF = count(loansFiltered)
     val incomeF = sum(loansFiltered, incomeSum)

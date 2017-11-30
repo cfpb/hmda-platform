@@ -287,7 +287,7 @@ object D8X {
 
   private def dispositionsOutput[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
     val calculatedDispositions: Future[List[Disposition]] = Future.sequence(
-      dispositions.map(_.calculateDisposition(larSource))
+      dispositions.map(_.calculateValueDisposition(larSource))
     )
 
     calculatedDispositions.map { list =>
