@@ -87,10 +87,9 @@ trait InstitutionAdminHttpApi
         implicit val ec: ExecutionContext = executor
         val institutionF = for {
           a <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-          i <- (a ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
-        } yield {
-          i.getOrElse(Institution.empty)
-        }
+          o <- (a ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
+          i = o.getOrElse(Institution.empty)
+        } yield i
 
         onComplete(institutionF) { institution =>
           complete(ToResponseMarshallable(institution))

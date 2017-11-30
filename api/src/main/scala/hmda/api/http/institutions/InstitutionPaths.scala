@@ -79,14 +79,11 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
     }
 
   private def institutionDetails[_: EC](institutionId: String, institutionsActor: ActorRef, filingsActor: ActorRef): Future[InstitutionDetail] = {
-    println(s"got actor $institutionsActor")
     val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
     for {
-      i <- fInstitution
+      inst <- fInstitution
       filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
-    } yield {
-      val inst = i.getOrElse(Institution.empty)
-      InstitutionDetail(InstitutionWrapper(inst.id, inst.respondent.name), filings)
-    }
+      i = inst.getOrElse(Institution.empty)
+    } yield InstitutionDetail(InstitutionWrapper(i.id, i.respondent.name), filings)
   }
 }
