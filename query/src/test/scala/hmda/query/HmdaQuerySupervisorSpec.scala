@@ -1,13 +1,9 @@
 package hmda.query
 
-import akka.actor.{ ActorRef, ActorSystem }
-import akka.pattern.ask
+import akka.actor.ActorSystem
 import akka.util.Timeout
-import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.view.institutions.InstitutionView
 import org.scalatest.{ MustMatchers, WordSpec }
 
-import scala.concurrent.Await
 import scala.concurrent.duration._
 
 class HmdaQuerySupervisorSpec extends WordSpec with MustMatchers {
@@ -21,13 +17,6 @@ class HmdaQuerySupervisorSpec extends WordSpec with MustMatchers {
   implicit val akkaTimeout = Timeout(timeout)
 
   "The HMDA Query Supervisor" must {
-
-    "Find or create institutions query" in {
-      val path = "akka://default/user/query-supervisor/institutions-view"
-      val fQueryInstitution = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-      val queryInstitution = Await.result(fQueryInstitution, timeout)
-      queryInstitution.path.toString mustBe path
-    }
 
     "terminate ActorSystem" in {
       Thread.sleep(2000)

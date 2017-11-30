@@ -14,7 +14,7 @@ object InstitutionPersistence {
 
   case class GetInstitutionById(institutionId: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
-  case class FindInstitutionByPeriodAndDomain(domain: String) extends Command
+  case class FindInstitutionByDomain(domain: String) extends Command
 
   def props: Props = Props(new InstitutionPersistence)
 
@@ -86,7 +86,7 @@ class InstitutionPersistence extends HmdaPersistentActor {
       }.getOrElse(Institution.empty)
       sender() ! institution
 
-    case FindInstitutionByPeriodAndDomain(domain) =>
+    case FindInstitutionByDomain(domain) =>
       if (domain.isEmpty) {
         sender() ! Set.empty[Institution]
       } else {

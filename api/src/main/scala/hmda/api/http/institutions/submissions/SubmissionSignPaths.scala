@@ -29,8 +29,6 @@ import javax.mail.internet.{ InternetAddress, MimeMessage }
 import com.typesafe.config.ConfigFactory
 import hmda.model.institution.Institution
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.institutions.InstitutionView.GetInstitutionById
 import java.time.{ ZoneOffset, ZonedDateTime }*/
 
 trait SubmissionSignPaths
@@ -104,8 +102,7 @@ trait SubmissionSignPaths
 
   /*private def emailSignature(supervisor: ActorRef, submission: Submission)(implicit ec: ExecutionContext) = {
     val emails = findEmailsById(submission.id.institutionId)
-    val querySupervisor = system.actorSelection("/user/query-supervisor/singleton")
-    val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+    val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
     val fName = for {
       a <- fInstitutionsActor
       i <- (a ? GetInstitutionById(submission.id.institutionId)).mapTo[Institution]

@@ -13,7 +13,7 @@ import hmda.api.model.ErrorResponse
 import hmda.api.model.public.{ InstitutionSearch, InstitutionSearchResults }
 import hmda.api.protocol.public.InstitutionSearchProtocol
 import hmda.model.institution.Institution
-import hmda.persistence.institutions.InstitutionPersistence.FindInstitutionByPeriodAndDomain
+import hmda.persistence.institutions.InstitutionPersistence.FindInstitutionByDomain
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -33,7 +33,7 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
           parameter('domain.as[String]) { domain =>
             val institutionsF = for {
               v <- institutionPersistenceF
-              institutions <- (v ? FindInstitutionByPeriodAndDomain(domain)).mapTo[Set[Institution]]
+              institutions <- (v ? FindInstitutionByDomain(domain)).mapTo[Set[Institution]]
             } yield institutions
             onComplete(institutionsF) {
               case Success(institutions) =>
