@@ -3,7 +3,7 @@ package hmda.publication.reports.disclosure
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.publication.reports.ValueDisposition
+import hmda.model.publication.reports.PercentageDisposition
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.model.publication.reports.GenderEnum._
 import hmda.model.publication.reports.ApplicantIncomeEnum._
@@ -286,12 +286,8 @@ object D8X {
   }
 
   private def dispositionsOutput[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
-    val calculatedDispositions: Future[List[ValueDisposition]] = Future.sequence(
-      dispositions.map(_.calculateValueDisposition(larSource))
-    )
-
-    calculatedDispositions.map { list =>
-      list.map(disp => disp.toJsonFormat).mkString("[", ",", "]")
+    calculatePercentageDispositions(larSource, dispositions, TotalDenied).map { list =>
+      PercentageDisposition.collectionJson(list)
     }
   }
 
