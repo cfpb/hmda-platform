@@ -135,73 +135,43 @@ object DispositionType {
 
   case object DebtToIncomeRatio extends DispositionType(
     "Debt-to-Income Ratio",
-    lar =>
-      lar.denial.reason1 == "1" ||
-        lar.denial.reason2 == "1" ||
-        lar.denial.reason3 == "1"
+    _.denial.reason1 == "1"
   )
   case object EmploymentHistory extends DispositionType(
     "Employment History",
-    lar =>
-      lar.denial.reason1 == "2" ||
-        lar.denial.reason2 == "2" ||
-        lar.denial.reason3 == "2"
+    _.denial.reason1 == "2"
   )
   case object CreditHistory extends DispositionType(
     "Credit History",
-    lar =>
-      lar.denial.reason1 == "3" ||
-        lar.denial.reason2 == "3" ||
-        lar.denial.reason3 == "3"
+    _.denial.reason1 == "3"
   )
   case object Collateral extends DispositionType(
     "Collateral",
-    lar =>
-      lar.denial.reason1 == "4" ||
-        lar.denial.reason2 == "4" ||
-        lar.denial.reason3 == "4"
+    _.denial.reason1 == "4"
   )
   case object InsufficientCash extends DispositionType(
     "Insufficient Cash",
-    lar =>
-      lar.denial.reason1 == "5" ||
-        lar.denial.reason2 == "5" ||
-        lar.denial.reason3 == "5"
+    _.denial.reason1 == "5"
   )
   case object UnverifiableInformation extends DispositionType(
     "Unverifiable Information",
-    lar =>
-      lar.denial.reason1 == "6" ||
-        lar.denial.reason2 == "6" ||
-        lar.denial.reason3 == "6"
+    _.denial.reason1 == "6"
   )
   case object CreditAppIncomplete extends DispositionType(
     "Credit App. Incomplete",
-    lar =>
-      lar.denial.reason1 == "7" ||
-        lar.denial.reason2 == "7" ||
-        lar.denial.reason3 == "7"
+    _.denial.reason1 == "7"
   )
   case object MortgageInsuranceDenied extends DispositionType(
     "Mortgage Insurance Denied",
-    lar =>
-      lar.denial.reason1 == "8" ||
-        lar.denial.reason2 == "8" ||
-        lar.denial.reason3 == "8"
+    _.denial.reason1 == "8"
   )
   case object OtherDenialReason extends DispositionType(
     "Other",
-    lar =>
-      lar.denial.reason1 == "9" ||
-        lar.denial.reason2 == "9" ||
-        lar.denial.reason3 == "9"
+    _.denial.reason1 == "9"
   )
   case object TotalDenied extends DispositionType(
     "Total",
-    lar =>
-      lar.denial.reason1 != "" ||
-        lar.denial.reason2 != "" ||
-        lar.denial.reason3 != ""
+    _.denial.reason1 != ""
   )
 
 }
