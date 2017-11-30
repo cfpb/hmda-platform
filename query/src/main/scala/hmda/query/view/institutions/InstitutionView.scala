@@ -90,12 +90,4 @@ class InstitutionView extends HmdaPersistentActor {
     counter += 1
   }
 
-  private def extractDomain(email: String): String = {
-    val parts = email.split("@")
-    if (parts.length > 1)
-      parts(1).toLowerCase
-    else
-      parts(0).toLowerCase
-  }
-
 }

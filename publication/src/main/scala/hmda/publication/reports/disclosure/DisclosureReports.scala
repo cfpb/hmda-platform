@@ -5,6 +5,7 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.model.institution.Institution
+import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionByRespondentId
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.publication.reports.protocol.disclosure.D5XProtocol._
 import hmda.query.repository.filing.FilingCassandraRepository
