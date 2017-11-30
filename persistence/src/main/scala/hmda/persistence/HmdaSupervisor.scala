@@ -3,6 +3,7 @@ package hmda.persistence
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.client.ClusterClientReceptionist
 import hmda.model.fi.SubmissionId
+import hmda.persistence.apor.HmdaAPORPersistence
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor
 import hmda.persistence.processing._
@@ -12,10 +13,11 @@ object HmdaSupervisor {
 
   val name = "supervisor"
 
-  case class FindHmdaFiling(filingPeriod: String)
-  case class FindFilings(name: String, institutionId: String)
-  case class FindSubmissions(name: String, institutionId: String, period: String)
-  case class FindProcessingActor(name: String, submissionId: SubmissionId)
+  case class FindHmdaFiling(filingPeriod: String) extends Command
+  case class FindFilings(name: String, institutionId: String) extends Command
+  case class FindSubmissions(name: String, institutionId: String, period: String) extends Command
+  case class FindProcessingActor(name: String, submissionId: SubmissionId) extends Command
+  case class FindAPORPersistence(name: String) extends Command
 
   def props(validationStats: ActorRef): Props = Props(new HmdaSupervisor(validationStats))
 
@@ -44,6 +46,9 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
     case FindProcessingActor(name, submissionId) =>
       sender() ! findProcessingActor(name, submissionId)
 
+    case FindAPORPersistence(aporName) =>
+      sender() ! findAPORPersistence(aporName)
+
     case Shutdown => context stop self
 
   }
@@ -59,6 +64,9 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
 
   private def findProcessingActor(name: String, submissionId: SubmissionId): ActorRef =
     actors.getOrElse(s"$name-${submissionId.toString}", createProcessingActor(name, submissionId))
+
+  private def findAPORPersistence(name: String): ActorRef =
+    actors.getOrElse(s"name", createAPORPersistence(name))
 
   override def createActor(name: String): ActorRef = name match {
     case id @ SingleLarValidation.name =>
@@ -88,6 +96,12 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
     val sId = s"$name-$institutionId-$period"
     val actor = context.actorOf(SubmissionPersistence.props(institutionId, period).withDispatcher("persistence-dispatcher"), sId)
     supervise(actor, sId)
+  }
+
+  private def createAPORPersistence(name: String): ActorRef = {
+    val apor = HmdaAPORPersistence.name
+    val actor = context.actorOf(HmdaAPORPersistence.props().withDispatcher("persistence-dispatcher"), apor)
+    supervise(actor, apor)
   }
 
   private def createProcessingActor(name: String, submissionId: SubmissionId): ActorRef = name match {

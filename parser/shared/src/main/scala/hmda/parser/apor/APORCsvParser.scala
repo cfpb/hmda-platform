@@ -2,7 +2,7 @@ package hmda.parser.apor
 
 import java.time.{ LocalDate, Month }
 
-import hmda.model.util.APOR
+import hmda.model.apor.APOR
 
 import scala.util.Try
 
