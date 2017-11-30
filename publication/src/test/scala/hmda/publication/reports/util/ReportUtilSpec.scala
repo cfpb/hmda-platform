@@ -1,10 +1,12 @@
 package hmda.publication.reports.util
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import hmda.model.fi.lar.LarGenerators
-import hmda.model.publication.reports.MSAReport
+import hmda.model.fi.lar.{ Denial, LarGenerators, LoanApplicationRegister }
+import hmda.model.publication.reports.{ MSAReport, PercentageDisposition }
+import hmda.publication.reports.util.DispositionType.{ CreditHistory, DebtToIncomeRatio, EmploymentHistory, TotalDenied }
 import hmda.publication.reports.util.ReportUtil._
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
 
@@ -46,6 +48,43 @@ class ReportUtilSpec extends AsyncWordSpec with MustMatchers with LarGenerators 
       val src = Source.fromIterator(() => lars.toIterator)
       calculateYear(src).map(_ mustBe 2009)
     }
+  }
+
+  "calculatePercentageDispositions" must {
+    val denial1 = Denial("1", "", "")
+    val denial2 = Denial("2", "", "")
+    val notDenied = Denial("", "", "")
+
+    val lars = List(
+      LoanApplicationRegister(denial = denial1),
+      LoanApplicationRegister(denial = denial1),
+      LoanApplicationRegister(denial = denial1),
+      LoanApplicationRegister(denial = denial1),
+      LoanApplicationRegister(denial = denial2),
+      LoanApplicationRegister(denial = denial2),
+      LoanApplicationRegister(denial = notDenied),
+      LoanApplicationRegister(denial = notDenied),
+      LoanApplicationRegister(denial = notDenied)
+    )
+
+    val source: Source[LoanApplicationRegister, NotUsed] = Source
+      .fromIterator(() => lars.toIterator)
+
+    val dispositions = List(DebtToIncomeRatio, EmploymentHistory, CreditHistory)
+
+    "calculate correct total disposition of denied lars" in {
+      calculatePercentageDispositions(source, dispositions, TotalDenied).map { result =>
+        result.last mustBe PercentageDisposition("Total", 6, 100)
+      }
+    }
+    "assign correct percentages to each disposition" in {
+      calculatePercentageDispositions(source, dispositions, TotalDenied).map { result =>
+        result.head mustBe PercentageDisposition("Debt-to-Income Ratio", 4, 66)
+        result(1) mustBe PercentageDisposition("Employment History", 2, 33)
+        result(2) mustBe PercentageDisposition("Credit History", 0, 0)
+      }
+    }
+
   }
 
 }

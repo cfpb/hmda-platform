@@ -27,6 +27,14 @@ sealed abstract class DispositionType(
     }
   }
 
+  def calculatePercentageDisposition[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[PercentageDisposition] = {
+    val loansFiltered = larSource.filter(filter)
+    val loanCountF = count(loansFiltered)
+    loanCountF.map { count =>
+      PercentageDisposition(value, count, 0)
+    }
+  }
+
   private def incomeSum(lar: LoanApplicationRegister): Int = Try(lar.applicant.income.toInt).getOrElse(0)
 }
 
