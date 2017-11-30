@@ -138,7 +138,7 @@ object ReportUtil extends SourceUtils {
   def calculateDispositions[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     dispositions: List[DispositionType]
-  ): Future[List[Disposition]] = {
+  ): Future[List[ValueDisposition]] = {
     Future.sequence(dispositions.map(_.calculateValueDisposition(larSource)))
   }
 

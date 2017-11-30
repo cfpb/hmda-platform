@@ -3,7 +3,7 @@ package hmda.publication.reports.aggregate
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.publication.reports.Disposition
+import hmda.model.publication.reports.ValueDisposition
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.model.publication.reports.GenderEnum.{ Female, JointGender, Male }
 import hmda.model.publication.reports.ApplicantIncomeEnum._
@@ -201,7 +201,7 @@ object A42 {
   }
 
   private def dispositionsOutput[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
-    val calculatedDispositions: Future[List[Disposition]] = Future.sequence(
+    val calculatedDispositions: Future[List[ValueDisposition]] = Future.sequence(
       dispositions.map(_.calculateValueDisposition(larSource))
     )
 

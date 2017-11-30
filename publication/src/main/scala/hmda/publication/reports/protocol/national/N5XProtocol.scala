@@ -1,7 +1,7 @@
 package hmda.publication.reports.protocol.national
 
 import hmda.model.publication.reports.ReportTypeEnum._
-import hmda.model.publication.reports.{ ApplicantIncome, Disposition }
+import hmda.model.publication.reports.{ ApplicantIncome, ValueDisposition }
 import hmda.publication.reports.national.N5X
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
 import spray.json._
@@ -38,7 +38,7 @@ object N5XProtocol
           N5X(
             year.convertTo[Int],
             applicantIncomes.convertTo[List[ApplicantIncome]],
-            total.convertTo[List[Disposition]],
+            total.convertTo[List[ValueDisposition]],
             table.convertTo[String],
             description.convertTo[String],
             reportDate.convertTo[String]

@@ -1,6 +1,6 @@
 package hmda.publication.reports.protocol.disclosure
 
-import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
+import hmda.model.publication.reports.{ ApplicantIncome, ValueDisposition, MSAReport }
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
 import hmda.publication.reports.disclosure.D5X
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
@@ -48,7 +48,7 @@ object D5XProtocol
             year.convertTo[Int],
             msa.convertTo[MSAReport],
             applicantIncomes.convertTo[List[ApplicantIncome]],
-            total.convertTo[List[Disposition]],
+            total.convertTo[List[ValueDisposition]],
             table.convertTo[String],
             desc.convertTo[String],
             reportDate.convertTo[String]

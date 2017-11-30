@@ -1,6 +1,6 @@
 package hmda.publication.reports.protocol.aggregate
 
-import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
+import hmda.model.publication.reports.{ ApplicantIncome, ValueDisposition, MSAReport }
 import hmda.model.publication.reports.ReportTypeEnum._
 import hmda.publication.reports.aggregate.A5X
 import hmda.publication.reports.protocol.{ ApplicantIncomeProtocol, MSAReportProtocol, ReportTypeEnumProtocol }
@@ -41,7 +41,7 @@ object A5XProtocol
             year.convertTo[Int],
             msa.convertTo[MSAReport],
             applicantIncomes.convertTo[List[ApplicantIncome]],
-            total.convertTo[List[Disposition]],
+            total.convertTo[List[ValueDisposition]],
             table.convertTo[String],
             description.convertTo[String],
             reportDate.convertTo[String]

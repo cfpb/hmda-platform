@@ -38,32 +38,32 @@ object ReportGenerators {
     } yield MSAReport(id, name, state, Census.states.getOrElse(state, "Alabama"))
   }
 
-  implicit def dispositionGen: Gen[Disposition] = {
+  implicit def valueDispositionGen: Gen[ValueDisposition] = {
     for {
       dispositionName <- Gen.alphaStr
       count <- Gen.choose(0, Int.MaxValue)
       value <- Gen.choose(0, Int.MaxValue)
-    } yield Disposition(dispositionName, count, value)
+    } yield ValueDisposition(dispositionName, count, value)
   }
 
   implicit def raceCharacteristicGen: Gen[RaceCharacteristic] = {
     for {
       race <- raceEnumGen
-      dispositions <- Gen.listOfN(6, dispositionGen)
+      dispositions <- Gen.listOfN(6, valueDispositionGen)
     } yield RaceCharacteristic(race, dispositions)
   }
 
   implicit def ethnicityCharacteristicGen: Gen[EthnicityCharacteristic] = {
     for {
       ethnicity <- ethnicityEnumGen
-      dispositions <- Gen.listOfN(6, dispositionGen)
+      dispositions <- Gen.listOfN(6, valueDispositionGen)
     } yield EthnicityCharacteristic(ethnicity, dispositions)
   }
 
   implicit def minorityCharacteristicGen: Gen[MinorityStatusCharacteristic] = {
     for {
       minorityStatus <- minorityStatusEnumGen
-      dispositions <- Gen.listOfN(6, dispositionGen)
+      dispositions <- Gen.listOfN(6, valueDispositionGen)
     } yield MinorityStatusCharacteristic(minorityStatus, dispositions)
   }
 

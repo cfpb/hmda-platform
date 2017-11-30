@@ -13,7 +13,7 @@ import scala.concurrent.Future
 case class N5X(
     year: Int,
     applicantIncomes: List[ApplicantIncome],
-    total: List[Disposition],
+    total: List[ValueDisposition],
     table: String,
     description: String,
     reportDate: String
@@ -25,7 +25,7 @@ case class N5X(
     val incomes: List[ApplicantIncome] =
       if (applicantIncomes.isEmpty) a5X.applicantIncomes else combinedIncomes(a5X.applicantIncomes)
 
-    val totals: List[Disposition] =
+    val totals: List[ValueDisposition] =
       if (applicantIncomes.isEmpty) a5X.total else {
 
         a5X.total.map(disposition => {
