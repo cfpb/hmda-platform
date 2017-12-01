@@ -5,9 +5,8 @@ import org.scalatest.prop.PropertyChecks
 import hmda.model.apor.APORGenerator._
 import hmda.persistence.messages.commands.apor.APORCommands.CreateApor
 import hmda.persistence.messages.events.apor.APOREvents.AporCreated
-import hmda.persistence.serialization.apor.CalculateRateSpreadGenerator._
 
-class APORProtobufSerializerSpec extends PropSpec with PropertyChecks with MustMatchers {
+class APORProtobufSerializerSpec extends PropSpec with PropertyChecks with CalculateRateSpreadGenerator with MustMatchers {
   val serializer = new APORProtobufSerializer()
 
   property("Create APOR messages must be serialized to binary and back") {

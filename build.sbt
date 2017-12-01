@@ -248,7 +248,7 @@ lazy val apiModel = (project in file("api-model"))
   .settings(
     libraryDependencies ++= commonDeps ++ httpDeps
   ).dependsOn(modelJVM % "compile->compile;test->test")
-  .dependsOn(persistence % "compile->compile")
+  .dependsOn(persistence % "compile->compile;test->test")
 
 lazy val publication = (project in file("publication"))
   .settings(hmdaBuildSettings: _*)

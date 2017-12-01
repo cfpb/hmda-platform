@@ -4,8 +4,8 @@ import hmda.model.apor.APORGenerator.{ localDateGen, rateTypeGen }
 import hmda.persistence.messages.commands.apor.APORCommands.CalculateRateSpread
 import org.scalacheck.Gen
 
-object CalculateRateSpreadGenerator {
-  def calculateRateSpreadGen: Gen[CalculateRateSpread] = {
+trait CalculateRateSpreadGenerator {
+  implicit def calculateRateSpreadGen: Gen[CalculateRateSpread] = {
     for {
       actionTakenType <- Gen.oneOf(1, 2, 8)
       amortizationType <- Gen.choose(1, 50)

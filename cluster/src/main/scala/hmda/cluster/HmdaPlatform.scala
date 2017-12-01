@@ -7,16 +7,16 @@ import akka.actor._
 import akka.pattern.ask
 import akka.cluster.Cluster
 import akka.cluster.http.management.ClusterHttpManagement
-import akka.cluster.singleton.{ClusterSingletonManager, ClusterSingletonManagerSettings, ClusterSingletonProxy, ClusterSingletonProxySettings}
+import akka.cluster.singleton.{ ClusterSingletonManager, ClusterSingletonManagerSettings, ClusterSingletonProxy, ClusterSingletonProxySettings }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.tcp.admin.InstitutionAdminTcpApi
-import hmda.api.{HmdaAdminApi, HmdaFilingApi, HmdaPublicApi}
+import hmda.api.{ HmdaAdminApi, HmdaFilingApi, HmdaPublicApi }
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
-import hmda.query.{HmdaProjectionQuery, HmdaQuerySupervisor}
+import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
@@ -24,10 +24,10 @@ import hmda.persistence.HmdaSupervisor.FindAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
-import hmda.publication.regulator.lar.{ModifiedLarPublisher, RegulatorLarPublisher}
+import hmda.publication.regulator.lar.{ ModifiedLarPublisher, RegulatorLarPublisher }
 import hmda.publication.regulator.panel.RegulatorPanelPublisher
 import hmda.publication.regulator.ts.RegulatorTsPublisher
-import hmda.query.HmdaQuerySupervisor.{FindSignedEventLARSubscriber, FindSignedEventTSSubscriber}
+import hmda.query.HmdaQuerySupervisor.{ FindSignedEventLARSubscriber, FindSignedEventTSSubscriber }
 
 import scala.concurrent.duration._
 
@@ -84,7 +84,7 @@ object HmdaPlatform extends App {
     ClusterHttpManagement(cluster).start()
     system.actorOf(HmdaFilingApi.props(supervisorProxy, querySupervisorProxy, validationStatsProxy).withDispatcher("api-dispatcher"), "hmda-filing-api")
     system.actorOf(HmdaAdminApi.props(supervisorProxy, querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
-    system.actorOf(HmdaPublicApi.props(querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-public-api")
+    system.actorOf(HmdaPublicApi.props(supervisorProxy, querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-public-api")
     system.actorOf(InstitutionAdminTcpApi.props(supervisorProxy), "panel-loader-tcp")
   }
 

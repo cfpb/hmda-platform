@@ -9,9 +9,8 @@ import hmda.persistence.model.serialization.APOR.APORMessage
 import hmda.persistence.model.serialization.APORCommands.{ CalculateRateSpreadMessage, CreateAPORMessage }
 import hmda.persistence.model.serialization.APOREvents.APORCreatedMessage
 import hmda.persistence.serialization.apor.APORProtobufConverter._
-import hmda.persistence.serialization.apor.CalculateRateSpreadGenerator._
 
-class APORProtobufConverterSpec extends PropSpec with PropertyChecks with MustMatchers {
+class APORProtobufConverterSpec extends PropSpec with PropertyChecks with CalculateRateSpreadGenerator with MustMatchers {
 
   property("APOR must serialize to protobuf and back") {
     forAll(APORGen) { apor =>
