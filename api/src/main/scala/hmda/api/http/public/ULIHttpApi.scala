@@ -17,10 +17,9 @@ import hmda.api.protocol.processing.ApiErrorProtocol
 import hmda.api.protocol.public.ULIProtocol
 import hmda.api.util.FlowUtils
 
-import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
-trait ULIHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiErrorProtocol with ULIProtocol with FlowUtils {
+trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProtocol with FlowUtils {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val timeout: Timeout
@@ -28,97 +27,91 @@ trait ULIHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiErro
   val log: LoggingAdapter
 
   val uliHttpRoutes =
-    extractExecutionContext { executor =>
-      implicit val ec: ExecutionContext = executor
-      encodeResponse {
-        pathPrefix("institutions" / Segment) { instId =>
-          modifiedLar(instId)
-        } ~
-          pathPrefix("uli") {
-            path("checkDigit") {
-              timedPost { _ =>
-                entity(as[Loan]) { loan =>
-                  val loanId = loan.loanId
-                  val check = checkDigit(loanId)
-                  val uli = ULI(loanId, check.toInt, loanId + check)
-                  complete(ToResponseMarshallable(uli))
-                } ~
-                  fileUpload("file") {
-                    case (_, byteSource) =>
-                      val checkDigitF = processLoanIdFile(byteSource).runWith(Sink.seq)
-                      onComplete(checkDigitF) {
-                        case Success(checkDigits) => {
-                          complete(ToResponseMarshallable(LoanCheckDigitResponse(checkDigits)))
-                        }
-                        case Failure(error) =>
-                          log.error(error.getLocalizedMessage)
-                          complete(ToResponseMarshallable(StatusCodes.InternalServerError))
-                      }
-                    case _ =>
-                      complete(ToResponseMarshallable(StatusCodes.BadRequest))
-                  }
-              }
+    encodeResponse {
+      pathPrefix("uli") {
+        path("checkDigit") {
+          timedPost { _ =>
+            entity(as[Loan]) { loan =>
+              val loanId = loan.loanId
+              val check = checkDigit(loanId)
+              val uli = ULI(loanId, check.toInt, loanId + check)
+              complete(ToResponseMarshallable(uli))
             } ~
-              path("checkDigit" / "csv") {
-                timedPost { _ =>
-                  fileUpload("file") {
-                    case (_, byteSource) =>
-                      val headerSource = Source.fromIterator(() => List("loanId,checkDigit,uli\n").toIterator)
-                      val checkDigit = processLoanIdFile(byteSource)
-                        .map(l => l.toCSV)
-                        .map(l => l + "\n")
-                        .map(s => ByteString(s))
-
-                      val csv = headerSource.map(s => ByteString(s)).concat(checkDigit)
-                      complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
-
-                    case _ =>
-                      complete(ToResponseMarshallable(StatusCodes.BadRequest))
-                  }
-                }
-              } ~
-              path("validate") {
-                timedPost { _ =>
-                  entity(as[ULICheck]) { uc =>
-                    val uli = uc.uli
-                    val isValid = validateULI(uli)
-                    val validated = ULIValidated(isValid)
-                    complete(ToResponseMarshallable(validated))
-                  } ~
-                    fileUpload("file") {
-                      case (_, byteSource) =>
-                        val validatedF = processUliFile(byteSource).runWith(Sink.seq)
-                        onComplete(validatedF) {
-                          case Success(validated) =>
-                            complete(ToResponseMarshallable(ULIBatchValidatedResponse(validated)))
-                          case Failure(error) =>
-                            log.error(error.getLocalizedMessage)
-                            complete(ToResponseMarshallable(StatusCodes.InternalServerError))
-                        }
-
-                      case _ =>
-                        complete(ToResponseMarshallable(StatusCodes.BadRequest))
+              fileUpload("file") {
+                case (_, byteSource) =>
+                  val checkDigitF = processLoanIdFile(byteSource).runWith(Sink.seq)
+                  onComplete(checkDigitF) {
+                    case Success(checkDigits) => {
+                      complete(ToResponseMarshallable(LoanCheckDigitResponse(checkDigits)))
                     }
-                }
-              } ~
-              path("validate" / "csv") {
-                timedPost { _ =>
-                  fileUpload("file") {
-                    case (_, byteSource) =>
-                      val headerSource = Source.fromIterator(() => List("uli,isValid\n").toIterator)
-                      val validated = processUliFile(byteSource)
-                        .map(u => u.toCSV)
-                        .map(l => l + "\n")
-                        .map(s => ByteString(s))
-
-                      val csv = headerSource.map(s => ByteString(s)).concat(validated)
-                      complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
-
-                    case _ =>
-                      complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                    case Failure(error) =>
+                      log.error(error.getLocalizedMessage)
+                      complete(ToResponseMarshallable(StatusCodes.InternalServerError))
                   }
-                }
+                case _ =>
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest))
               }
+          }
+        } ~
+          path("checkDigit" / "csv") {
+            timedPost { _ =>
+              fileUpload("file") {
+                case (_, byteSource) =>
+                  val headerSource = Source.fromIterator(() => List("loanId,checkDigit,uli\n").toIterator)
+                  val checkDigit = processLoanIdFile(byteSource)
+                    .map(l => l.toCSV)
+                    .map(l => l + "\n")
+                    .map(s => ByteString(s))
+
+                  val csv = headerSource.map(s => ByteString(s)).concat(checkDigit)
+                  complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
+
+                case _ =>
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest))
+              }
+            }
+          } ~
+          path("validate") {
+            timedPost { _ =>
+              entity(as[ULICheck]) { uc =>
+                val uli = uc.uli
+                val isValid = validateULI(uli)
+                val validated = ULIValidated(isValid)
+                complete(ToResponseMarshallable(validated))
+              } ~
+                fileUpload("file") {
+                  case (_, byteSource) =>
+                    val validatedF = processUliFile(byteSource).runWith(Sink.seq)
+                    onComplete(validatedF) {
+                      case Success(validated) =>
+                        complete(ToResponseMarshallable(ULIBatchValidatedResponse(validated)))
+                      case Failure(error) =>
+                        log.error(error.getLocalizedMessage)
+                        complete(ToResponseMarshallable(StatusCodes.InternalServerError))
+                    }
+
+                  case _ =>
+                    complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                }
+            }
+          } ~
+          path("validate" / "csv") {
+            timedPost { _ =>
+              fileUpload("file") {
+                case (_, byteSource) =>
+                  val headerSource = Source.fromIterator(() => List("uli,isValid\n").toIterator)
+                  val validated = processUliFile(byteSource)
+                    .map(u => u.toCSV)
+                    .map(l => l + "\n")
+                    .map(s => ByteString(s))
+
+                  val csv = headerSource.map(s => ByteString(s)).concat(validated)
+                  complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
+
+                case _ =>
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest))
+              }
+            }
           }
       }
     }

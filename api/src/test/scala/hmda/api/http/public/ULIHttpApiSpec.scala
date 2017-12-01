@@ -32,17 +32,6 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
   val loanTxt = "10Bx939c5543TqA1144M999143X\n" +
     "10Cx939c5543TqA1144M999143X"
 
-  "Modified LAR Http API" must {
-    "return list of modified LARs in proper format" in {
-      Get("/institutions/0/filings/2017/lar") ~> uliHttpRoutes ~> check {
-        status mustBe StatusCodes.OK
-        //TODO: update when modified lar is reimplemented
-        //contentType mustBe ContentTypes.`text/csv(UTF-8)`
-        //responseAs[String].split("\n") must have size 2
-      }
-    }
-  }
-
   "ULI API" must {
     val uliFile = multiPartFile(uliTxt, "ulis.txt")
     val loanFile = multiPartFile(loanTxt, "loanIds.txt")
