@@ -37,6 +37,7 @@ object APORProtobufConverter {
     msg match {
       case RateTypeMessage.FIXED => FixedRate
       case RateTypeMessage.VARIABLE => VariableRate
+      case _ => throw new RuntimeException("Cannot convert this rate type to protobuf")
     }
   }
 
