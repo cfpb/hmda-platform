@@ -5,8 +5,10 @@ import akka.testkit.TestProbe
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.apor.HmdaAPORPersistence._
 import hmda.model.apor.APORGenerator._
-import hmda.model.apor.{ FixedRate, VariableRate }
+import hmda.model.apor.{FixedRate, VariableRate}
 import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.messages.commands.apor.APORCommands.CreateApor
+import hmda.persistence.messages.events.apor.APOREvents.AporCreated
 
 class HmdaAPORPersistenceSpec extends ActorSpec {
 

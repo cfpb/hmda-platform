@@ -1,8 +1,10 @@
 package hmda.persistence.apor
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.apor.{ APOR, FixedRate, RateType, VariableRate }
+import hmda.model.apor.{ APOR, FixedRate, VariableRate }
 import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.messages.commands.apor.APORCommands.CreateApor
+import hmda.persistence.messages.events.apor.APOREvents.AporCreated
 import hmda.persistence.model.HmdaPersistentActor
 
 object HmdaAPORPersistence {
@@ -12,9 +14,6 @@ object HmdaAPORPersistence {
   def createAPORPersistence(system: ActorSystem): ActorRef = {
     system.actorOf(HmdaAPORPersistence.props(), name)
   }
-
-  case class CreateApor(apor: APOR, rateType: RateType) extends Command
-  case class AporCreated(apor: APOR, rateType: RateType) extends Event
 
   case class HmdaAPORState(fixedRate: List[APOR] = Nil, variableRate: List[APOR] = Nil) {
     def update(event: Event): HmdaAPORState = event match {

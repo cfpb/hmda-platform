@@ -13,6 +13,10 @@ object APORGenerator {
     } yield APOR(date, aporList)
   }
 
+  def rateTypeGen: Gen[RateType] = {
+    Gen.oneOf(FixedRate, VariableRate)
+  }
+
   private def localDateGen: Gen[LocalDate] = {
     val minDate = LocalDate.of(2000, 1, 1).toEpochDay
     val currentYear = LocalDate.now().getYear

@@ -2,7 +2,7 @@ package hmda.model.apor
 
 import java.time.LocalDate
 
-case class APOR(loanTerm: LocalDate, values: Seq[Double]) {
+case class APOR(loanTerm: LocalDate = LocalDate.now(), values: Seq[Double] = Nil) {
   def toCSV: String = {
     val year = loanTerm.getYear
     val month = loanTerm.getMonthValue
