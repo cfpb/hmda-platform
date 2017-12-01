@@ -20,14 +20,14 @@ import hmda.api.util.FlowUtils
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
-trait PublicHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiErrorProtocol with ULIProtocol with FlowUtils {
+trait ULIHttpApi extends PublicLarHttpApi with HmdaCustomDirectives with ApiErrorProtocol with ULIProtocol with FlowUtils {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val timeout: Timeout
 
   val log: LoggingAdapter
 
-  val publicHttpRoutes =
+  val uliHttpRoutes =
     extractExecutionContext { executor =>
       implicit val ec: ExecutionContext = executor
       encodeResponse {
