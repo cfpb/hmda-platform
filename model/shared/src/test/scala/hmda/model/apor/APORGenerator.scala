@@ -17,14 +17,14 @@ object APORGenerator {
     Gen.oneOf(FixedRate, VariableRate)
   }
 
-  private def localDateGen: Gen[LocalDate] = {
-    val minDate = LocalDate.of(2000, 1, 1).toEpochDay
+  def localDateGen: Gen[LocalDate] = {
+    val minDate = LocalDate.of(2000, 1, 3).toEpochDay
     val currentYear = LocalDate.now().getYear
     val maxDate = LocalDate.of(currentYear, 1, 1).toEpochDay
     Gen.choose(minDate, maxDate).map(i => LocalDate.ofEpochDay(i))
   }
 
-  private def aporListGen: Gen[Seq[Double]] = {
+  def aporListGen: Gen[Seq[Double]] = {
     Gen.listOfN(50, Gen.choose(0, Double.MaxValue))
   }
 

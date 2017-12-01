@@ -4,10 +4,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import hmda.model.apor.{ APOR, FixedRate, RateType, VariableRate }
-import hmda.persistence.messages.commands.apor.APORCommands.CreateApor
+import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor }
 import hmda.persistence.messages.events.apor.APOREvents._
 import hmda.persistence.model.serialization.APOR.{ APORMessage, RateTypeMessage }
-import hmda.persistence.model.serialization.APORCommands.CreateAPORMessage
+import hmda.persistence.model.serialization.APORCommands.{ CalculateRateSpreadMessage, CreateAPORMessage }
 import hmda.persistence.model.serialization.APOREvents._
 
 object APORProtobufConverter {
@@ -66,6 +66,28 @@ object APORProtobufConverter {
     AporCreated(
       aporFromProtobuf(msg.apor.getOrElse(APORMessage())),
       rateType = rateTypeFromProtobuf(msg.rateType)
+    )
+  }
+
+  def calculateRateSpreadToProtobuf(obj: CalculateRateSpread): CalculateRateSpreadMessage = {
+    CalculateRateSpreadMessage(
+      obj.actionTakenType,
+      obj.amortizationType,
+      rateTypeToProtobuf(obj.rateType),
+      obj.apr,
+      obj.lockinDate.toString,
+      obj.reverseMortgage
+    )
+  }
+
+  def calculateRateSpreadFromProtobuf(msg: CalculateRateSpreadMessage): CalculateRateSpread = {
+    CalculateRateSpread(
+      msg.actionTakenType,
+      msg.amortizationType,
+      rateTypeFromProtobuf(msg.rateType),
+      msg.apr,
+      LocalDate.parse(msg.lockinDate, DateTimeFormatter.ISO_LOCAL_DATE),
+      msg.reverseMortgage
     )
   }
 
