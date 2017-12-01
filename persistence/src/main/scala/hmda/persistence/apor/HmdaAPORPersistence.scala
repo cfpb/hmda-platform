@@ -16,11 +16,11 @@ object HmdaAPORPersistence {
   case class CreateApor(apor: APOR, rateType: RateType) extends Command
   case class AporCreated(apor: APOR, rateType: RateType) extends Event
 
-  case class HmdaAPORState(fixedRate: Seq[APOR] = Nil, variableRate: Seq[APOR] = Nil) {
+  case class HmdaAPORState(fixedRate: List[APOR] = Nil, variableRate: List[APOR] = Nil) {
     def update(event: Event): HmdaAPORState = event match {
       case AporCreated(apor, rateType) => rateType match {
-        case FixedRate => HmdaAPORState(fixedRate :+ apor, variableRate)
-        case VariableRate => HmdaAPORState(fixedRate, variableRate :+ apor)
+        case FixedRate => HmdaAPORState(apor :: fixedRate, variableRate)
+        case VariableRate => HmdaAPORState(fixedRate, apor :: variableRate)
       }
     }
   }
@@ -34,7 +34,7 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
   override def persistenceId: String = s"$name"
 
   override def updateState(event: Event): Unit =
-    state.update(event)
+    state = state.update(event)
 
   override def receiveCommand: Receive = {
     case CreateApor(apor, rateType) =>
