@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, LarHttpApi }
+import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, SingleLarValidationHttpApi }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -23,7 +23,7 @@ object HmdaFilingApi {
 class HmdaFilingApi(supervisor: ActorRef, querySupervisor: ActorRef, validationStats: ActorRef)
     extends HttpApi
     with BaseHttpApi
-    with LarHttpApi
+    with SingleLarValidationHttpApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
 

@@ -22,8 +22,8 @@ import spray.json._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
-    with LarHttpApi with RequestHeaderUtils {
+class SingleLarValidationHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
+    with SingleLarValidationHttpApi with RequestHeaderUtils {
 
   override val log: LoggingAdapter = NoLogging
   override implicit val timeout: Timeout = Timeout(5.seconds)
@@ -152,6 +152,15 @@ class LarHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest
 
     "allow requests without 'CFPB-HMDA-Username' header" in {
       Post("/lar/validate", lar).addHeader(institutionsHeader) ~> larRoutes(supervisor) ~> check {
+        status mustEqual StatusCodes.OK
+        responseAs[SingleValidationErrorResult].syntactical.errors mustBe Nil
+        responseAs[SingleValidationErrorResult].validity.errors mustBe Nil
+        responseAs[SingleValidationErrorResult].quality.errors mustBe Nil
+      }
+    }
+
+    "allow requests without 'CFPB-HMDA-Username' or 'CFPB-HMDA-Institutions' headers" in {
+      Post("/lar/parseAndValidate", larCsv) ~> larRoutes(supervisor) ~> check {
         status mustEqual StatusCodes.OK
         responseAs[SingleValidationErrorResult].syntactical.errors mustBe Nil
         responseAs[SingleValidationErrorResult].validity.errors mustBe Nil
