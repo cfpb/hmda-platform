@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi, SingleLarValidationHttpApi }
+import hmda.api.http.{ BaseHttpApi, HmdaCustomDirectives, InstitutionsHttpApi }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -23,7 +23,6 @@ object HmdaFilingApi {
 class HmdaFilingApi(supervisor: ActorRef, querySupervisor: ActorRef, validationStats: ActorRef)
     extends HttpApi
     with BaseHttpApi
-    with SingleLarValidationHttpApi
     with InstitutionsHttpApi
     with HmdaCustomDirectives {
 
@@ -42,7 +41,7 @@ class HmdaFilingApi(supervisor: ActorRef, querySupervisor: ActorRef, validationS
   implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val paths: Route = routes(s"$name") ~ institutionsRoutes(supervisor, querySupervisor, validationStats) ~ larRoutes(supervisor)
+  val paths: Route = routes(s"$name") ~ institutionsRoutes(supervisor, querySupervisor, validationStats)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
