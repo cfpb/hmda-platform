@@ -1,8 +1,8 @@
 package hmda.parser.apor
 
-import org.scalatest.{ MustMatchers, PropSpec }
-import org.scalatest.prop.PropertyChecks
 import hmda.model.apor.APORGenerator._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{ MustMatchers, PropSpec }
 
 class APORCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
 
