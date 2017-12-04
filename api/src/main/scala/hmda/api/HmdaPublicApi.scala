@@ -10,7 +10,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.BaseHttpApi
-import hmda.api.http.public.{ InstitutionSearchPaths, PublicHttpApi }
+import hmda.api.http.public.{ InstitutionSearchPaths, ULIHttpApi }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import akka.http.scaladsl.server.Directives._
 import hmda.persistence.institutions.InstitutionPersistence
@@ -26,7 +26,7 @@ class HmdaPublicApi(supervisor: ActorRef)
     extends HttpApi
     with BaseHttpApi
     with InstitutionSearchPaths
-    with PublicHttpApi {
+    with ULIHttpApi {
 
   val configuration = ConfigFactory.load()
 
@@ -45,7 +45,7 @@ class HmdaPublicApi(supervisor: ActorRef)
   val institutionPersistenceF = (supervisor ? FindActorByName(InstitutionPersistence.name))
     .mapTo[ActorRef]
 
-  override val paths: Route = routes(s"$name") ~ institutionSearchPath(institutionPersistenceF) ~ publicHttpRoutes
+  override val paths: Route = routes(s"$name") ~ institutionSearchPath(institutionPersistenceF) ~ uliHttpRoutes
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
