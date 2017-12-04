@@ -26,17 +26,17 @@ class HmdaPublicApi(supervisor: ActorRef, querySupervisor: ActorRef)
     extends HttpApi
     with BaseHttpApi
     with InstitutionSearchPaths
-    with RateSpreadHttpApi
+    //with RateSpreadHttpApi
     with ULIHttpApi {
 
-  val configuration = ConfigFactory.load()
+  override val config = ConfigFactory.load()
 
-  lazy val httpTimeout = configuration.getInt("hmda.http.timeout")
+  lazy val httpTimeout = config.getInt("hmda.http.timeout")
   override implicit val timeout = Timeout(httpTimeout.seconds)
 
   override val name: String = "hmda-public-api"
-  override val host: String = configuration.getString("hmda.http.publicHost")
-  override val port: Int = configuration.getInt("hmda.http.publicPort")
+  override val host: String = config.getString("hmda.http.publicHost")
+  override val port: Int = config.getInt("hmda.http.publicPort")
 
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -48,9 +48,9 @@ class HmdaPublicApi(supervisor: ActorRef, querySupervisor: ActorRef)
 
   override val paths: Route =
     routes(s"$name") ~
-      institutionSearchPath(institutionViewF) ~
-      uliHttpRoutes ~
-      rateSpreadRoutes
+      institutionSearchPath(institutionViewF) //~
+  //uliHttpRoutes //~
+  //rateSpreadRoutes(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,

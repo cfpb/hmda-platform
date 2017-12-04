@@ -41,6 +41,7 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
   override def receiveCommand: Receive = {
     case CreateApor(apor, rateType) =>
       persist(AporCreated(apor, rateType)) { e =>
+        log.debug(s"APOR Persisted: $e")
         updateState(e)
         sender() ! e
       }
