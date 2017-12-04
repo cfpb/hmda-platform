@@ -66,7 +66,7 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
     actors.getOrElse(s"$name-${submissionId.toString}", createProcessingActor(name, submissionId))
 
   private def findAPORPersistence(name: String): ActorRef =
-    actors.getOrElse(s"name", createAPORPersistence(name))
+    actors.getOrElse(s"$name", createAPORPersistence(name))
 
   override def createActor(name: String): ActorRef = name match {
     case id @ SingleLarValidation.name =>

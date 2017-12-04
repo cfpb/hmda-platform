@@ -6,6 +6,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Flow, Tcp }
 import akka.util.{ ByteString, Timeout }
+import com.typesafe.config.ConfigFactory
 import hmda.api.tcp.TcpApi
 import hmda.api.util.FlowUtils
 import hmda.model.fi.Filing
@@ -33,6 +34,8 @@ class InstitutionAdminTcpApi(supervisor: ActorRef) extends TcpApi with FlowUtils
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = context.dispatcher
 
+  val config = ConfigFactory.load()
+  override val parallelism = config.getInt("hmda.connectionFlowParallelism")
   override val host: String = config.getString("hmda.panel.tcp.host")
   override val port: Int = config.getInt("hmda.panel.tcp.port")
   val duration = config.getInt("hmda.panel.tcp.timeout").seconds

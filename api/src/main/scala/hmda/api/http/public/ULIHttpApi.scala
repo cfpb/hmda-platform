@@ -13,6 +13,7 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ HttpCharsets, HttpEntity, StatusCodes }
 import akka.http.scaladsl.model.MediaTypes.`text/csv`
 import akka.stream.scaladsl.{ Sink, Source }
+import com.typesafe.config.ConfigFactory
 import hmda.api.protocol.processing.ApiErrorProtocol
 import hmda.api.protocol.public.ULIProtocol
 import hmda.api.util.FlowUtils
@@ -25,7 +26,6 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
   implicit val materializer: ActorMaterializer
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
-
   val log: LoggingAdapter
 
   val uliHttpRoutes =

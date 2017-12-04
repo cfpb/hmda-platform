@@ -26,10 +26,11 @@ class HmdaPublicApi(supervisor: ActorRef, querySupervisor: ActorRef)
     extends HttpApi
     with BaseHttpApi
     with InstitutionSearchPaths
-    //with RateSpreadHttpApi
+    with RateSpreadHttpApi
     with ULIHttpApi {
 
-  override val config = ConfigFactory.load()
+  val config = ConfigFactory.load()
+  override val parallelism = config.getInt("hmda.connectionFlowParallelism")
 
   lazy val httpTimeout = config.getInt("hmda.http.timeout")
   override implicit val timeout = Timeout(httpTimeout.seconds)
@@ -48,9 +49,7 @@ class HmdaPublicApi(supervisor: ActorRef, querySupervisor: ActorRef)
 
   override val paths: Route =
     routes(s"$name") ~
-      institutionSearchPath(institutionViewF) //~
-  //uliHttpRoutes //~
-  //rateSpreadRoutes(supervisor)
+      institutionSearchPath(institutionViewF) ~ uliHttpRoutes ~ rateSpreadRoutes(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
