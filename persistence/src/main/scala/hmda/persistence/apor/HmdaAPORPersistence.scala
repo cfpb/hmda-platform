@@ -52,11 +52,9 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
 
     case CalculateRateSpread(actionTakenType, amortizationType, rateType, apr, lockinDate, reverseMortgage) =>
       val amortizationTypes = (1 to 50).toList
-      val firstDate = LocalDate.of(2000, 1, 3)
       val apor = if (List(1, 2, 8).contains(actionTakenType) &&
         amortizationTypes.contains(amortizationType) &&
-        reverseMortgage == 2 &&
-        lockinDate.isAfter(firstDate)) {
+        reverseMortgage == 2) {
         Some(findApor(amortizationType, rateType, apr, lockinDate))
       } else {
         None
