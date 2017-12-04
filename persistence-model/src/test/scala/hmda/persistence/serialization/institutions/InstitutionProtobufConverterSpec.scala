@@ -1,9 +1,9 @@
 package hmda.persistence.serialization.institutions
 
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, ModifyInstitution }
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, GetInstitutionByRespondentId, ModifyInstitution }
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
-import hmda.persistence.model.serialization.InstitutionCommands.{ CreateInstitutionMessage, ModifyInstitutionMessage }
+import hmda.persistence.model.serialization.InstitutionCommands.{ CreateInstitutionMessage, ModifyInstitutionMessage, GetInstitutionByRespondentIdMessage }
 import hmda.persistence.model.serialization.InstitutionEvents._
 import hmda.persistence.serialization.institutions.InstitutionProtobufConverter._
 import org.scalatest.prop.PropertyChecks
@@ -91,6 +91,13 @@ class InstitutionProtobufConverterSpec extends PropSpec with PropertyChecks with
     forAll(institutionGen) { institution =>
       val protobuf = modifyInstitutionToProtobuf(ModifyInstitution(institution)).toByteArray
       modifyInstitutionFromProtobuf(ModifyInstitutionMessage.parseFrom(protobuf)) mustBe ModifyInstitution(institution)
+    }
+  }
+
+  property("Get Institution By Respondent ID must serialize to protobuf and back") {
+    forAll(institutionGen) { institution =>
+      val protobuf = getInstitutionByRespondentIdToProtobuf(GetInstitutionByRespondentId(institution.id)).toByteArray
+      getInstitutionByRespondentIdFromProtobuf(GetInstitutionByRespondentIdMessage.parseFrom(protobuf)) mustBe GetInstitutionByRespondentId(institution.id)
     }
   }
 

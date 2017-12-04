@@ -12,3 +12,7 @@ message CreateInstitutionMessage {
 message ModifyInstitutionMessage {
     InstitutionMessage institution = 1;
 }
+
+message GetInstitutionByRespondentIdMessage {
+    string id = 1;
+}
