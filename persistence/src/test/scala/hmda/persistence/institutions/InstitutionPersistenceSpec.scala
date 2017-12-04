@@ -1,6 +1,7 @@
 package hmda.persistence.institutions
 
 import akka.testkit.TestProbe
+import hmda.model.institution.Institution
 import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.messages.CommonMessages.GetState
@@ -37,15 +38,30 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.expectMsg(DemoData.testInstitutions)
     }
 
+    "return an empty set when requesting non-existant ids" in {
+      probe.send(institutionsActor, GetInstitutionsById(List("a", "b")))
+      probe.expectMsg(Set())
+    }
+
     "get institution by respondent id" in {
       val respondentId = headInst.respondent.externalId.value
       probe.send(institutionsActor, GetInstitutionByRespondentId(respondentId))
       probe.expectMsg(headInst)
     }
 
+    "return an empty institution for a non-existent respondent id" in {
+      probe.send(institutionsActor, GetInstitutionByRespondentId("fakeId"))
+      probe.expectMsg(Institution.empty)
+    }
+
     "find institution by email domain" in {
       probe.send(institutionsActor, FindInstitutionByDomain("bank0.com"))
       probe.expectMsg(Set(headInst))
+    }
+
+    "return an empty set when requesting a domain that doesn't exist" in {
+      probe.send(institutionsActor, FindInstitutionByDomain("fake.com"))
+      probe.expectMsg(Set())
     }
 
     "be created, modified and read back" in {
