@@ -82,15 +82,25 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
       val s3FixedSource = s3Client.download(bucket, fixedBucketKey)
       s3FixedSource
         .via(framing)
+        .drop(1)
         .map(s => s.utf8String)
         .map(s => APORCsvParser(s))
         .mapAsync(parallelism)(apor => self ? CreateApor(apor, FixedRate))
         .runWith(Sink.ignore)
-    //.runWith(Sink.foreach(println))
+
+      val variableBucketKey = s"$environment/apor/$variableRateFileName"
+      val s3VariableSource = s3Client.download(bucket, variableBucketKey)
+      s3VariableSource
+        .via(framing)
+        .drop(1)
+        .map(s => s.utf8String)
+        .map(s => APORCsvParser(s))
+        .mapAsync(parallelism)(apor => self ? CreateApor(apor, VariableRate))
+        .runWith(Sink.ignore)
 
     case CreateApor(apor, rateType) =>
       if (state.fixedRate.contains(apor) || state.variableRate.contains(apor)) {
-        log.debug(s"$apor already exists, skipping")
+        log.debug(s"$apor for ${apor.loanTerm.toString} already exists, skipping")
         sender() ! AporCreated(apor, rateType)
       } else {
         persist(AporCreated(apor, rateType)) { e =>
