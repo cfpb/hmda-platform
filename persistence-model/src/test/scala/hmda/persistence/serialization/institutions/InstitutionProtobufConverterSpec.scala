@@ -1,11 +1,12 @@
 package hmda.persistence.serialization.institutions
 
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, GetInstitutionByRespondentId, ModifyInstitution }
+import hmda.persistence.messages.commands.institutions.InstitutionCommands._
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
-import hmda.persistence.model.serialization.InstitutionCommands.{ CreateInstitutionMessage, ModifyInstitutionMessage, GetInstitutionByRespondentIdMessage }
+import hmda.persistence.model.serialization.InstitutionCommands._
 import hmda.persistence.model.serialization.InstitutionEvents._
 import hmda.persistence.serialization.institutions.InstitutionProtobufConverter._
+import org.scalacheck.Gen
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{ MustMatchers, PropSpec }
 
@@ -98,6 +99,27 @@ class InstitutionProtobufConverterSpec extends PropSpec with PropertyChecks with
     forAll(institutionGen) { institution =>
       val protobuf = getInstitutionByRespondentIdToProtobuf(GetInstitutionByRespondentId(institution.id)).toByteArray
       getInstitutionByRespondentIdFromProtobuf(GetInstitutionByRespondentIdMessage.parseFrom(protobuf)) mustBe GetInstitutionByRespondentId(institution.id)
+    }
+  }
+
+  property("Get Institution By ID must serialize to protobuf and back") {
+    forAll(institutionGen) { institution =>
+      val protobuf = getInstitutionByIdToProtobuf(GetInstitutionById(institution.id)).toByteArray
+      getInstitutionByIdFromProtobuf(GetInstitutionByIdMessage.parseFrom(protobuf)) mustBe GetInstitutionById(institution.id)
+    }
+  }
+
+  property("Get Institutions By ID must serialize to protobuf and back") {
+    forAll(Gen.listOfN(5, Gen.alphaStr)) { list =>
+      val protobuf = getInstitutionsByIdToProtobuf(GetInstitutionsById(list)).toByteArray
+      getInstitutionsByIdFromProtobuf(GetInstitutionsByIdMessage.parseFrom(protobuf)) mustBe GetInstitutionsById(list)
+    }
+  }
+
+  property("Find Institutions By Domain must serialize to protobuf and back") {
+    forAll(Gen.alphaStr) { domain =>
+      val protobuf = findInstitutionByDomainToProtobuf(FindInstitutionByDomain(domain)).toByteArray
+      findInstitutionByDomainFromProtobuf(FindInstitutionByDomainMessage.parseFrom(protobuf)) mustBe FindInstitutionByDomain(domain)
     }
   }
 

@@ -14,8 +14,8 @@ import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor }
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.PaginatedResource
-import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionById
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors }
 import hmda.validation.context.ValidationContext
