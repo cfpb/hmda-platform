@@ -40,10 +40,14 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
 
   override def receiveCommand: Receive = {
     case CreateApor(apor, rateType) =>
-      persist(AporCreated(apor, rateType)) { e =>
-        log.debug(s"APOR Persisted: $e")
-        updateState(e)
-        sender() ! e
+      if (state.fixedRate.contains(apor) || state.variableRate.contains(apor)) {
+        sender() ! AporCreated(apor, rateType)
+      } else {
+        persist(AporCreated(apor, rateType)) { e =>
+          log.debug(s"APOR Persisted: $e")
+          updateState(e)
+          sender() ! e
+        }
       }
 
     case CalculateRateSpread(actionTakenType, amortizationType, rateType, apr, lockinDate, reverseMortgage) =>

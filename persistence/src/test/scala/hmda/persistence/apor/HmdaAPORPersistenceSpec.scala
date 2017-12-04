@@ -31,6 +31,9 @@ class HmdaAPORPersistenceSpec extends ActorSpec {
       probe.expectMsg(AporCreated(apor2, FixedRate))
       probe.send(aporPersistence, CreateApor(apor3, VariableRate))
       probe.expectMsg(AporCreated(apor3, VariableRate))
+      probe.send(aporPersistence, CreateApor(apor3, VariableRate))
+      probe.expectMsg(AporCreated(apor3, VariableRate))
+
     }
     "Retrieve current state" in {
       probe.send(aporPersistence, GetState)
