@@ -13,7 +13,7 @@ import hmda.api.model.ErrorResponse
 import hmda.api.model.public.{ InstitutionSearch, InstitutionSearchResults }
 import hmda.api.protocol.public.InstitutionSearchProtocol
 import hmda.model.institution.Institution
-import hmda.persistence.institutions.InstitutionPersistence.FindInstitutionByDomain
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.FindInstitutionByDomain
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }

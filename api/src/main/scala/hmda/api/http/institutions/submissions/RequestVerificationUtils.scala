@@ -13,10 +13,10 @@ import hmda.api.model.ErrorResponse
 import hmda.model.fi.{ Filing, Submission, SubmissionId }
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
-import hmda.persistence.institutions.InstitutionPersistence.GetInstitutionById
 import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionById
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.{ ExecutionContext, Future }
