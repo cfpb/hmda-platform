@@ -3,15 +3,28 @@ package hmda.persistence.apor
 import java.time.temporal.IsoFields
 import java.time.{ LocalDate, ZoneId }
 
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.pattern.ask
+import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
+import akka.stream.alpakka.s3.scaladsl.S3Client
+import akka.stream.scaladsl.{ Flow, Framing, Sink }
+import akka.util.{ ByteString, Timeout }
+import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
+import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import com.typesafe.config.ConfigFactory
 import hmda.model.apor.{ APOR, FixedRate, RateType, VariableRate }
+import hmda.parser.apor.APORCsvParser
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor }
 import hmda.persistence.messages.events.apor.APOREvents.AporCreated
 import hmda.persistence.model.HmdaPersistentActor
+import scala.concurrent.duration._
 
 object HmdaAPORPersistence {
   val name = "hmda-apor-persistence"
+
+  case object LoadAporDataFromS3
 
   def props(): Props = Props(new HmdaAPORPersistence)
   def createAPORPersistence(system: ActorSystem): ActorRef = {
@@ -31,16 +44,53 @@ object HmdaAPORPersistence {
 class HmdaAPORPersistence extends HmdaPersistentActor {
   import HmdaAPORPersistence._
 
+  QuartzSchedulerExtension(system).schedule("AporCalculator", self, LoadAporDataFromS3)
+
   var state = HmdaAPORState()
 
   override def persistenceId: String = s"$name"
+
+  val config = ConfigFactory.load()
+  val accessKeyId = config.getString("hmda.persistence.aws.access-key-id")
+  val secretAccess = config.getString("hmda.persistence.aws.secret-access-key")
+  val region = config.getString("hmda.persistence.aws.region")
+  val bucket = config.getString("hmda.persistence.aws.public-bucket")
+  val environment = config.getString("hmda.persistence.aws.environment")
+  val fixedRateFileName = config.getString("hmda.apor.fixed.rate.fileName")
+  val variableRateFileName = config.getString("hmda.apor.variable.rate.fileName")
+  val parallelism = config.getInt("hmda.actor-flow-parallelism")
+  val timeoutDuration = config.getInt("hmda.actor.timeout")
+  implicit val timeout = Timeout(timeoutDuration.seconds)
+
+  val awsCredentials = new AWSStaticCredentialsProvider(
+    new BasicAWSCredentials(accessKeyId, secretAccess)
+  )
+  val awsSettings = new S3Settings(MemoryBufferType, None, awsCredentials, region, false)
+  val s3Client = new S3Client(awsSettings)
+
+  def framing: Flow[ByteString, ByteString, NotUsed] = {
+    Framing.delimiter(ByteString("\n"), maximumFrameLength = 65536, allowTruncation = true)
+  }
 
   override def updateState(event: Event): Unit =
     state = state.update(event)
 
   override def receiveCommand: Receive = {
+    case LoadAporDataFromS3 =>
+      log.info("Loading APOR data from S3")
+      val fixedBucketKey = s"$environment/apor/$fixedRateFileName"
+      val s3FixedSource = s3Client.download(bucket, fixedBucketKey)
+      s3FixedSource
+        .via(framing)
+        .map(s => s.utf8String)
+        .map(s => APORCsvParser(s))
+        .mapAsync(parallelism)(apor => self ? CreateApor(apor, FixedRate))
+        .runWith(Sink.ignore)
+    //.runWith(Sink.foreach(println))
+
     case CreateApor(apor, rateType) =>
       if (state.fixedRate.contains(apor) || state.variableRate.contains(apor)) {
+        log.debug(s"$apor already exists, skipping")
         sender() ! AporCreated(apor, rateType)
       } else {
         persist(AporCreated(apor, rateType)) { e =>

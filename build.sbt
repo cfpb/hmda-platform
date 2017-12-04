@@ -178,7 +178,7 @@ lazy val persistence = (project in file("persistence"))
           oldStrategy(x)
       },
       parallelExecution in Test := false,
-      libraryDependencies ++= akkaPersistenceDeps
+      libraryDependencies ++= akkaPersistenceDeps ++ Seq(alpakkaS3)
     )
   )
   .dependsOn(validation % "compile->compile;test->test")
