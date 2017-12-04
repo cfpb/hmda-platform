@@ -7,4 +7,7 @@ object InstitutionCommands {
   case class CreateInstitution(i: Institution) extends Command
   case class ModifyInstitution(i: Institution) extends Command
   case class GetInstitutionByRespondentId(id: String) extends Command
+  case class GetInstitutionById(institutionId: String) extends Command
+  case class GetInstitutionsById(ids: List[String]) extends Command
+  case class FindInstitutionByDomain(domain: String) extends Command
 }

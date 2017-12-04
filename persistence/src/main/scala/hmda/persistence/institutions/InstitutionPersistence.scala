@@ -12,10 +12,6 @@ object InstitutionPersistence {
 
   val name = "institutions"
 
-  case class GetInstitutionById(institutionId: String) extends Command
-  case class GetInstitutionsById(ids: List[String]) extends Command
-  case class FindInstitutionByDomain(domain: String) extends Command
-
   def props: Props = Props(new InstitutionPersistence)
 
   def createInstitutions(system: ActorSystem): ActorRef = {
