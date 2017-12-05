@@ -9,7 +9,6 @@ import hmda.api.http.HmdaCustomDirectives
 import hmda.api.protocol.processing.ApiErrorProtocol
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.api.model.public.RateSpreadModel.RateSpreadResponse
 import hmda.api.protocol.apor.RateSpreadProtocol._
 import hmda.persistence.HmdaSupervisor.FindAPORPersistence
@@ -17,17 +16,16 @@ import hmda.persistence.apor.HmdaAPORPersistence
 import hmda.persistence.messages.commands.apor.APORCommands.CalculateRateSpread
 
 import scala.util.{ Failure, Success }
-import scala.concurrent.duration._
 
 trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol {
 
   implicit def timeout: Timeout
 
   def rateSpreadRoutes(supervisor: ActorRef) =
-    extractExecutionContext { executor =>
-      implicit val ec = executor
-      encodeResponse {
-        path("rate-spread") {
+    path("rateSpread") {
+      extractExecutionContext { executor =>
+        implicit val ec = executor
+        encodeResponse {
           entity(as[CalculateRateSpread]) { calculateRateSpread =>
             val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
             val fRateSpread = for {

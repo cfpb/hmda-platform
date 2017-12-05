@@ -231,4 +231,33 @@ uli,isValid
 10Bx939c5543TqA1144M999133X38,false
 ```
 
+### Rate Spread Calculator
 
+* `rateSpread`
+
+    * `POST` - Calculate Rate Spread
+
+
+Example payload, in `JSON` format:
+
+```json
+{
+  "actionTakenType": 1,
+  "amortizationType:": Int,
+  "rateType": "FixedRate",
+  "apr": 6.0,
+  "lockinDate": "2017-11-20",
+  "reverseMortgage": 2
+```
+
+`RateType` can take the following values: `FixedRate` and `VariableRate`
+
+Example Response, in `JSON` format:
+
+```json
+{
+  rateSpread: "2.01"
+}
+```
+
+The response is either a number representing the Rate Spread or "NA"

@@ -25,9 +25,12 @@ object RateSpreadProtocol extends DefaultJsonProtocol {
   }
 
   implicit object LocalDateFormat extends RootJsonFormat[LocalDate] {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    override def read(json: JsValue): LocalDate = {
-      LocalDate.parse(json.toString().replace("\"", ""), formatter)
+    val formatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+    override def read(json: JsValue): LocalDate = json match {
+      case JsString(s) =>
+        LocalDate.parse(s, formatter)
+      case msg => throw new DeserializationException(s"Cannot deserialize $msg")
     }
 
     override def write(localDate: LocalDate): JsValue = {

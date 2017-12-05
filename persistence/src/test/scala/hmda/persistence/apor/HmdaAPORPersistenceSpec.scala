@@ -57,11 +57,5 @@ class HmdaAPORPersistenceSpec extends ActorSpec {
       probe.send(aporPersistence, failAmortizationType)
       probe.expectMsg(None)
     }
-    "Recover state after actor is killed" in {
-      probe.send(aporPersistence, Shutdown)
-      val aporPersistence2 = system.actorOf(Props(new HmdaAPORPersistence))
-      probe.send(aporPersistence2, GetState)
-      probe.expectMsg(state)
-    }
   }
 }
