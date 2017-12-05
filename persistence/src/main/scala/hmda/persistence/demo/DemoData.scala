@@ -27,8 +27,8 @@ object DemoData {
   val topHolder = TopHolder(0, "", "", "", "")
 
   val testInstitutions = {
-    val i0 = Institution("0", FDIC, 2017, Bank, cra = false, Set(externalId0), Set(), respondent = Respondent(externalId0, "Bank 0", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
-    val i1 = Institution("1", CFPB, 2017, CreditUnion, cra = false, Set(externalId1), Set(), respondent = Respondent(externalId1, "Bank 1", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
+    val i0 = Institution("0", FDIC, 2017, Bank, cra = false, Set(externalId0), Set("bank0.com"), respondent = Respondent(externalId0, "Bank 0", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
+    val i1 = Institution("1", CFPB, 2017, CreditUnion, cra = false, Set(externalId1), Set("test@bank1.com"), respondent = Respondent(externalId1, "Bank 1", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
     val i2 = Institution("2", OCC, 2017, CreditUnion, cra = false, Set(externalId2), Set(), respondent = Respondent(externalId2, "Bank 2", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
     val i3 = Institution("3", HUD, 2017, CreditUnion, cra = false, Set(externalId3), Set(), respondent = Respondent(externalId3, "Bank 3", "", "", ""), hmdaFilerFlag = true, parent = parent, assets = 0, otherLenderCode = 0, topHolder = topHolder)
     Set(i0, i1, i2, i3)

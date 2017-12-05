@@ -16,11 +16,10 @@ import hmda.api.protocol.processing.{ ApiErrorProtocol, InstitutionProtocol }
 import hmda.model.fi.Filing
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings
-import hmda.persistence.institutions.FilingPersistence
+import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
 import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ GetInstitutionById, GetInstitutionsById }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.institutions.InstitutionView.{ GetInstitutionById, GetInstitutionsById }
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
@@ -33,12 +32,12 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
   val log: LoggingAdapter
 
   // institutions
-  def institutionsPath[_: EC](querySupervisor: ActorRef) =
+  def institutionsPath[_: EC](supervisor: ActorRef) =
     path("institutions") {
       timedGet { uri =>
         extractRequestContext { ctx =>
           val ids = institutionIdsFromHeader(ctx)
-          val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+          val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
           val fInstitutions = for {
             institutionsActor <- fInstitutionsActor
             institutions <- (institutionsActor ? GetInstitutionsById(ids)).mapTo[Set[Institution]]
@@ -54,10 +53,10 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
     }
 
   // institutions/<institutionId>
-  def institutionByIdPath[_: EC](supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String) =
+  def institutionByIdPath[_: EC](supervisor: ActorRef, institutionId: String) =
     pathEnd {
       timedGet { uri =>
-        val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+        val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
         val fFilingsActor = (supervisor ? FindFilings(FilingPersistence.name, institutionId)).mapTo[ActorRef]
         val fInstitutionDetails = for {
           i <- fInstitutionsActor
@@ -80,10 +79,11 @@ trait InstitutionPaths extends InstitutionProtocol with ApiErrorProtocol with Hm
     }
 
   private def institutionDetails[_: EC](institutionId: String, institutionsActor: ActorRef, filingsActor: ActorRef): Future[InstitutionDetail] = {
-    val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Institution]
+    val fInstitution = (institutionsActor ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
     for {
-      i <- fInstitution
+      inst <- fInstitution
       filings <- (filingsActor ? GetState).mapTo[Seq[Filing]]
+      i = inst.getOrElse(Institution.empty)
     } yield InstitutionDetail(InstitutionWrapper(i.id, i.respondent.name), filings)
   }
 }

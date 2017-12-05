@@ -37,10 +37,10 @@ trait InstitutionsHttpApi
       implicit val ec: ExecutionContext = executor
       encodeResponse {
         headerAuthorize {
-          institutionsPath(querySupervisor) ~
+          institutionsPath(supervisor) ~
             pathPrefix("institutions" / Segment) { instId =>
               institutionAuthorize(instId) {
-                institutionByIdPath(supervisor, querySupervisor, instId) ~
+                institutionByIdPath(supervisor, instId) ~
                   filingByPeriodPath(supervisor, instId) ~
                   submissionPath(supervisor, instId) ~
                   submissionLatestPath(supervisor, instId) ~
