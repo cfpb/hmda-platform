@@ -11,6 +11,7 @@ object SubmissionStatusMessage {
   val validatedWithErrorsMsg = "Your data has edits that need to be reviewed."
   val validatedMsg = "Your data is ready for submission."
   val signedMsg = "Your submission has been accepted."
+  val failedMsg = "An error occurred while submitting the data."
 
   val createdDescription = "The filing period is open and available to accept HMDA data. Make sure your data is in a pipe-delimited text file."
   val uploadingDescription = "Your file is currently being uploaded to the HMDA Platform."
