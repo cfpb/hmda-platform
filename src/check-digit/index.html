@@ -28,6 +28,7 @@
                 <li><a href="#generation">Generation</a></li>
                 <li><a href="#generation-batch">Batch Generation</a></li>
                 <li><a href="#validation">Validation</a></li>
+                <li><a href="#validation-batch">Batch Validation</a></li>
               </ul>
             </li>
           </ul>
@@ -104,9 +105,10 @@
       <h5>Allowed Methods</h5>
       <code>POST</code>
 
-      <h5>Example file conents</h5>
+      <h5>Example</h5>
       <pre><code class="language-bash">POST /uli/checkDigit/csv</code></pre>
-      <h5>Example payload</h5>
+
+      <h5>Example file contents</h5>
       <section class="code-block">
         <pre><code class="language-bash">10Cx939c5543TqA1144M999143X
 10Bx939c5543TqA1144M999143X</code></pre>
@@ -165,6 +167,34 @@
 }</code></pre>
       </section>
 
+      <hgroup>
+        <h2 id="validation-batch">Batch Validation</h2>
+        <h3>Validates that a batch of ULIs have the correct check digit.</h3>
+        <h4>Using the <code>/uli/validate/csv</code> endpoint you can provide a list of ULIs and get the response of valid or not for each.</h4>
+      </hgroup>
+
+      <h5>Allowed Methods</h5>
+      <code>POST</code>
+
+      <h5>Example</h5>
+      <pre><code class="language-bash">POST /uli/validate/csv</code></pre>
+
+      <h5>Example file content</h5>
+      <section class="code-block">
+        <pre><code class="language-bash">10Cx939c5543TqA1144M999143X10
+10Bx939c5543TqA1144M999143X38
+10Bx939c5543TqA1144M999133X38</code></pre>
+      </section>
+
+      <h5>Example Response in <code>CSV</code> format</h5>
+      <section class="code-block">
+        <code>CSV</code>
+        <pre><code class="language-bash">uli,isValid
+10Cx939c5543TqA1144M999143X10,true
+10Bx939c5543TqA1144M999143X38,true
+10Bx939c5543TqA1144M999133X38,false</code></pre>
+      </section>
+
       <footer class="usa-footer usa-footer-medium" role="contentinfo">
         <div class="usa-footer-return-to-top">
           <a href="#top">Return to top</a>
@@ -181,7 +211,7 @@
       </footer>
     </main>
   </div>
-  <script src="js/highlight.pack.js"></script>
+  <script src="../js/highlight.pack.js"></script>
   <script>hljs.initHighlightingOnLoad();</script>
 </body>
 </html>
