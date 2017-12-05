@@ -1,0 +1,43 @@
+{
+  "name": "hmda-platform-api",
+  "version": "0.0.0",
+  "description": "Documentation for the HMDA Platform public API.",
+  "main": "",
+  "engines": {
+    "node": ">=7.x"
+  },
+  "scripts": {
+    "postinstall": "yarn run clearDist && yarn run build",
+    "clearDist": "rimraf ./dist && mkdirp ./dist ./dist/js ./dist/css ./dist/fonts ./dist/img",
+    "build": "yarn run sass && yarn run html && yarn run img",
+    "html": "html-minifier --collapse-whitespace --file-ext html --input-dir ./src --output-dir ./dist",
+    "sass": "node-sass --quiet --output-style=compressed --source-map=./dist/css/ ./src/sass/app.scss ./dist/css/app.min.css && cp node_modules/uswds/src/fonts/sourcesanspro-* ./dist/fonts && yarn run sass:prefix",
+    "sass:prefix": "postcss -u autoprefixer -r ./dist/css/*.css",
+    "watch:sass": "node-sass --watch --quiet --output-style=compressed --source-map=./dist/css/ ./src/sass/app.scss ./dist/css/app.min.css",
+    "img": "cp ./src/img/* ./dist/img && cp -r ./node_modules/uswds/dist/img/* ./dist/img",
+    "js": "cp -r ./src/js/*.js ./dist/js",
+    "css": "cp -r ./src/sass/prism.css ./dist/css"
+  },
+  "repository": {
+    "type": "git"
+  },
+  "keywords": [
+    "HMDA",
+    "API"
+  ],
+  "author": "Consumer Financial Protection Bureau",
+  "license": "CC0-1.0",
+  "bugs": {},
+  "homepage": "",
+  "devDependencies": {
+    "autoprefixer": "^7.1.6",
+    "mkdirp": "^0.5.1",
+    "node-sass": "^4.7.2",
+    "postcss-cli": "^4.1.1",
+    "rimraf": "^2.6.2"
+  },
+  "dependencies": {
+    "html-minifier": "^3.5.7",
+    "uswds": "1.4.1"
+  }
+}

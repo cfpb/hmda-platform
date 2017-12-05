@@ -1,0 +1,2 @@
+source: dist
+exclude: [src, npm-packages-offline-cache]
