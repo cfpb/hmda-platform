@@ -1,6 +1,7 @@
 package hmda.api.protocol.processing
 
 import hmda.model.fi._
+import hmda.model.fi.SubmissionStatusMessage.failedMsg
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
 import hmda.api.model.{ Receipt, Submissions }
 import hmda.api.protocol.validation.ValidationResultProtocol
@@ -10,9 +11,14 @@ trait SubmissionProtocol extends ValidationResultProtocol {
 
   implicit object SubmissionStatusJsonFormat extends RootJsonFormat[SubmissionStatus] {
     override def write(status: SubmissionStatus): JsValue = {
+      val msg = status match {
+        case Failed(_) => failedMsg
+        case _ => status.message
+      }
+
       JsObject(
         "code" -> JsNumber(status.code),
-        "message" -> JsString(status.message),
+        "message" -> JsString(msg),
         "description" -> JsString(status.description)
       )
     }
