@@ -144,7 +144,8 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
     val dateTime = lockinDate.atStartOfDay(zoneId)
     val week = dateTime.get(weekField)
     val aporObj = aporList.find(apor => apor.loanTerm.get(weekField) == week).getOrElse(APOR())
-    val apor = aporObj.values(amortizationType)
+    val values = aporObj.values
+    val apor = if (values.nonEmpty) values(amortizationType) else 0
     apr - apor
   }
 

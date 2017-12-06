@@ -9,6 +9,8 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
+import hmda.api.http.FileUploadUtils
 import hmda.api.model.public.RateSpreadModel.RateSpreadResponse
 import hmda.model.apor.{ APOR, FixedRate, VariableRate }
 import hmda.persistence.HmdaSupervisor
@@ -19,15 +21,18 @@ import hmda.api.protocol.apor.RateSpreadProtocol._
 import hmda.persistence.HmdaSupervisor.FindAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence
 
-import scala.concurrent.Await
+import scala.concurrent.{ Await, ExecutionContext }
 import scala.concurrent.duration._
 
 class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
-    with ScalatestRouteTest with RateSpreadHttpApi {
+    with ScalatestRouteTest with RateSpreadHttpApi with FileUploadUtils {
 
   val duration = 10.seconds
   override implicit val timeout: Timeout = Timeout(duration)
   override val log: LoggingAdapter = NoLogging
+  override val ec: ExecutionContext = system.dispatcher
+  val config = ConfigFactory.load()
+  override val parallelism = config.getInt("hmda.connectionFlowParallelism")
 
   val validationStats = ValidationStats.createValidationStats(system)
   val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
@@ -43,9 +48,13 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
   }
 
   "APOR Calculator" must {
-
+    val calculateFixedRateSpread = CalculateRateSpread(1, 30, FixedRate, 6.0, LocalDate.of(2017, 11, 20), 2)
+    val calculateVariableRateSpread = CalculateRateSpread(1, 30, VariableRate, 6.0, LocalDate.of(2017, 11, 20), 2)
+    val calculateBatchTxt = calculateFixedRateSpread.toCSV + "\n" +
+      calculateVariableRateSpread.toCSV
+    val rateSpreadFile = multiPartFile(calculateBatchTxt, "apor.txt")
     "Calculate Rate Spread for Fixed term loan" in {
-      val calculateFixedRateSpread = CalculateRateSpread(1, 30, FixedRate, 6.0, LocalDate.of(2017, 11, 20), 2)
+
       Post("/rateSpread", calculateFixedRateSpread) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
         responseAs[RateSpreadResponse].rateSpread mustBe "2.01"
@@ -53,7 +62,7 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
 
     }
     "Calculate Rate Spread for Variable term loan" in {
-      val calculateVariableRateSpread = CalculateRateSpread(1, 30, VariableRate, 6.0, LocalDate.of(2017, 11, 20), 2)
+
       Post("/rateSpread", calculateVariableRateSpread) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
         responseAs[RateSpreadResponse].rateSpread mustBe "2.15"
@@ -76,6 +85,16 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
           status mustBe StatusCodes.OK
           responseAs[RateSpreadResponse].rateSpread mustBe "NA"
         }
+      }
+    }
+    "Perform batch rate spread calculation on a file" in {
+      Post("/rateSpread/csv", rateSpreadFile) ~> rateSpreadRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.OK
+        val csv = responseAs[String]
+        csv must include("action_taken_type,amortization_type,rate_type,apr,lockin_date,reverse_mortgage")
+        csv must include(s"${calculateFixedRateSpread.toCSV},2.01")
+        csv must include(s"${calculateVariableRateSpread.toCSV},2.15")
+
       }
     }
   }
