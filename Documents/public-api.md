@@ -261,3 +261,24 @@ Example Response, in `JSON` format:
 ```
 
 The response is either a number representing the Rate Spread or "NA"
+
+* `rateSpread/csv`
+
+    * `POST` - Batch Rate Spread calculator
+
+Example file contents:
+
+```
+1,30,FixedRate,6.0,2017-11-20,2
+1,30,VariableRate,6.0,2017-11-20,2
+```
+
+The contents of this file include the `Action Taken Type` (values 1,2,8), `Amortization Term` (1 - 50 years), `Rate Type`, `APR`, `Lockin Date` and `Reverse Mortgage` (values 1 or 2)
+
+Example response in `CSV` format:
+
+```csv
+action_taken_type,amortization_type,rate_type,apr,lockin_date,reverse_mortgage,rate_spread
+1,30,FixedRate,6.0,2017-11-20,2,2.01
+1,30,VariableRate,6.0,2017-11-20,2,2.15
+```
