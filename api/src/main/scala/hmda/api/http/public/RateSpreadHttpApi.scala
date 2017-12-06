@@ -9,7 +9,7 @@ import akka.pattern.ask
 import hmda.api.http.HmdaCustomDirectives
 import hmda.api.protocol.processing.ApiErrorProtocol
 import akka.http.scaladsl.server.Directives._
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.Source
 import akka.util.{ ByteString, Timeout }
 import hmda.api.model.public.RateSpreadModel.RateSpreadResponse
 import hmda.api.protocol.apor.RateSpreadProtocol._
@@ -27,19 +27,16 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
 
   def rateSpreadRoutes(supervisor: ActorRef) = {
     path("rateSpread") {
-      extractExecutionContext { executor =>
-        implicit val ec = executor
-        encodeResponse {
-          timedPost { _ =>
-            entity(as[CalculateRateSpread]) { calculateRateSpread =>
-              val fRateSpread = calculateSpread(supervisor, calculateRateSpread)
-              onComplete(fRateSpread) {
-                case Success(rateSpread) =>
-                  complete(ToResponseMarshallable(RateSpreadResponse(rateSpread)))
-                case Failure(error) =>
-                  log.error(error.getLocalizedMessage)
-                  complete(ToResponseMarshallable(StatusCodes.InternalServerError))
-              }
+      encodeResponse {
+        timedPost { _ =>
+          entity(as[CalculateRateSpread]) { calculateRateSpread =>
+            val fRateSpread = calculateSpread(supervisor, calculateRateSpread)
+            onComplete(fRateSpread) {
+              case Success(rateSpread) =>
+                complete(ToResponseMarshallable(RateSpreadResponse(rateSpread)))
+              case Failure(error) =>
+                log.error(error.getLocalizedMessage)
+                complete(ToResponseMarshallable(StatusCodes.InternalServerError))
             }
           }
         }
@@ -56,7 +53,8 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
                   "rate_type,",
                   "apr,",
                   "lockin_date,",
-                  "reverse_mortgage\n"
+                  "reverse_mortgage," +
+                    "rate_spread\n"
                 ).toIterator)
 
               val rateSpread = processRateSpreadFile(supervisor, byteSource)
@@ -70,7 +68,6 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
   }
 
   private def processRateSpreadFile(supervisor: ActorRef, byteSource: Source[ByteString, Any]) = {
-    val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
     byteSource
       .via(framing)
       .map(_.utf8String)
