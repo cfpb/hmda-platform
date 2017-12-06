@@ -243,11 +243,12 @@ Example payload, in `JSON` format:
 ```json
 {
   "actionTakenType": 1,
-  "amortizationType:": Int,
+  "amortizationType:": 30,
   "rateType": "FixedRate",
   "apr": 6.0,
   "lockinDate": "2017-11-20",
   "reverseMortgage": 2
+}
 ```
 
 `RateType` can take the following values: `FixedRate` and `VariableRate`
