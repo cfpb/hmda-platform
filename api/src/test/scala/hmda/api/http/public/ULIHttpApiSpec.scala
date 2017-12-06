@@ -14,8 +14,8 @@ import hmda.api.http.FileUploadUtils
 
 import scala.concurrent.duration._
 
-class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
-    with ScalatestRouteTest with RequestHeaderUtils with PublicHttpApi with FileUploadUtils with LarGenerators with ULIProtocol {
+class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
+    with ScalatestRouteTest with RequestHeaderUtils with ULIHttpApi with FileUploadUtils with LarGenerators with ULIProtocol {
 
   override val log: LoggingAdapter = NoLogging
   implicit val ec = system.dispatcher
@@ -32,17 +32,6 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
   val loanTxt = "10Bx939c5543TqA1144M999143X\n" +
     "10Cx939c5543TqA1144M999143X"
 
-  "Modified LAR Http API" must {
-    "return list of modified LARs in proper format" in {
-      Get("/institutions/0/filings/2017/lar") ~> publicHttpRoutes ~> check {
-        status mustBe StatusCodes.OK
-        //TODO: update when modified lar is reimplemented
-        //contentType mustBe ContentTypes.`text/csv(UTF-8)`
-        //responseAs[String].split("\n") must have size 2
-      }
-    }
-  }
-
   "ULI API" must {
     val uliFile = multiPartFile(uliTxt, "ulis.txt")
     val loanFile = multiPartFile(loanTxt, "loanIds.txt")
@@ -53,12 +42,12 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
     val uliCheck = ULICheck(uli)
 
     "return check digit and ULI from loan id" in {
-      Post("/uli/checkDigit", loan) ~> publicHttpRoutes ~> check {
+      Post("/uli/checkDigit", loan) ~> uliHttpRoutes ~> check {
         responseAs[ULI] mustBe ULI(loanId, checkDigit, uli)
       }
     }
     "return check digit and ULI from file of loan ids" in {
-      Post("/uli/checkDigit", loanFile) ~> publicHttpRoutes ~> check {
+      Post("/uli/checkDigit", loanFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[LoanCheckDigitResponse].loanIds mustBe Seq(
           ULI("10Bx939c5543TqA1144M999143X", 38, "10Bx939c5543TqA1144M999143X38"),
@@ -67,7 +56,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
       }
     }
     "return csv with check digit and ULI from file of loan ids" in {
-      Post("/uli/checkDigit/csv", loanFile) ~> publicHttpRoutes ~> check {
+      Post("/uli/checkDigit/csv", loanFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
         csv must include("loanId,checkDigit,uli")
@@ -76,12 +65,12 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
       }
     }
     "Validate ULI" in {
-      Post("/uli/validate", uliCheck) ~> publicHttpRoutes ~> check {
+      Post("/uli/validate", uliCheck) ~> uliHttpRoutes ~> check {
         responseAs[ULIValidated] mustBe ULIValidated(true)
       }
     }
     "validate a file of ULIs and return csv" in {
-      Post("/uli/validate/csv", uliFile) ~> publicHttpRoutes ~> check {
+      Post("/uli/validate/csv", uliFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
         csv must include("uli,isValid")
@@ -91,7 +80,7 @@ class PublicHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAl
       }
     }
     "validate a file of ULIs" in {
-      Post("/uli/validate", uliFile) ~> publicHttpRoutes ~> check {
+      Post("/uli/validate", uliFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[ULIBatchValidatedResponse].ulis mustBe Seq(
           ULIBatchValidated("10Cx939c5543TqA1144M999143X10", true),

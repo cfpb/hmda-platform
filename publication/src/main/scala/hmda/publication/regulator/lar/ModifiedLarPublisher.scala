@@ -1,15 +1,15 @@
 package hmda.publication.regulator.lar
 
-import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.pubsub.DistributedPubSub
-import akka.cluster.pubsub.DistributedPubSubMediator.{Subscribe, SubscribeAck}
+import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.javadsl.S3Client
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
 import akka.stream.scaladsl.Source
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
-import akka.util.{ByteString, Timeout}
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
+import akka.util.{ ByteString, Timeout }
+import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
@@ -113,8 +113,7 @@ class ModifiedLarPublisher(supervisor: ActorRef) extends HmdaActor with LoanAppl
             "denialReason2|" +
             "denialReason3|" +
             "period"
-        ).toIterator
-      )
+        ).toIterator)
 
       val mlarSource = larSource
         .filter(lar => !lar.isEmpty)

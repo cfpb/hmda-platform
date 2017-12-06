@@ -12,3 +12,19 @@ message CreateInstitutionMessage {
 message ModifyInstitutionMessage {
     InstitutionMessage institution = 1;
 }
+
+message GetInstitutionByRespondentIdMessage {
+    string id = 1;
+}
+
+message GetInstitutionByIdMessage {
+    string institutionId = 1;
+}
+
+message GetInstitutionsByIdMessage {
+    repeated string ids = 1;
+}
+
+message FindInstitutionByDomainMessage {
+    string domain = 1;
+}

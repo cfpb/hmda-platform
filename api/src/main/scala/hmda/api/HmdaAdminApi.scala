@@ -16,10 +16,10 @@ import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaAdminApi {
-  def props(supervisor: ActorRef, querySupervisor: ActorRef): Props = Props(new HmdaAdminApi(supervisor, querySupervisor))
+  def props(supervisor: ActorRef): Props = Props(new HmdaAdminApi(supervisor))
 }
 
-class HmdaAdminApi(supervisor: ActorRef, querySupervisor: ActorRef) extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi {
+class HmdaAdminApi(supervisor: ActorRef) extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi {
 
   val config = ConfigFactory.load()
 
@@ -36,7 +36,7 @@ class HmdaAdminApi(supervisor: ActorRef, querySupervisor: ActorRef) extends Http
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val paths: Route = routes(s"$name") ~ institutionAdminRoutes(supervisor, querySupervisor)
+  override val paths: Route = routes(s"$name") ~ institutionAdminRoutes(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,

@@ -17,7 +17,7 @@ import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
-import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, GetInstitution, ModifyInstitution }
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, GetInstitutionById, ModifyInstitution }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.ExecutionContext
@@ -86,7 +86,7 @@ trait InstitutionAdminHttpApi
         implicit val ec: ExecutionContext = executor
         val institutionF = for {
           a <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-          o <- (a ? GetInstitution(institutionId)).mapTo[Option[Institution]]
+          o <- (a ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
           i = o.getOrElse(Institution.empty)
         } yield i
 
@@ -96,5 +96,5 @@ trait InstitutionAdminHttpApi
       }
     }
 
-  def institutionAdminRoutes(supervisor: ActorRef, querySupervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) ~ institutionReadPath(supervisor) }
+  def institutionAdminRoutes(supervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) ~ institutionReadPath(supervisor) }
 }

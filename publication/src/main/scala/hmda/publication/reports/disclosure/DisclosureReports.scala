@@ -5,11 +5,10 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.model.institution.Institution
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionByRespondentId
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.publication.reports.protocol.disclosure.D5XProtocol._
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
-import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.institutions.InstitutionView.GetInstitutionByRespondentId
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -36,8 +35,8 @@ class DisclosureReports(val sys: ActorSystem, val mat: ActorMaterializer) extend
   }
 
   private def institutionName(respondentId: String): Future[String] = {
-    val querySupervisor = system.actorSelection("/user/query-supervisor")
-    val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
+    val supervisor = system.actorSelection("/user/supervisor")
+    val fInstitutionsActor = (supervisor ? FindActorByName("institutions")).mapTo[ActorRef]
     for {
       a <- fInstitutionsActor
       i <- (a ? GetInstitutionByRespondentId(respondentId)).mapTo[Institution]

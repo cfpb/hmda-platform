@@ -17,7 +17,6 @@ import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
-import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
@@ -81,8 +80,8 @@ object HmdaPlatform extends App {
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
     system.actorOf(HmdaFilingApi.props(supervisorProxy, querySupervisorProxy, validationStatsProxy).withDispatcher("api-dispatcher"), "hmda-filing-api")
-    system.actorOf(HmdaAdminApi.props(supervisorProxy, querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
-    system.actorOf(HmdaPublicApi.props(querySupervisorProxy).withDispatcher("api-dispatcher"), "hmda-public-api")
+    system.actorOf(HmdaAdminApi.props(supervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
+    system.actorOf(HmdaPublicApi.props(supervisorProxy).withDispatcher("api-dispatcher"), "hmda-public-api")
     system.actorOf(InstitutionAdminTcpApi.props(supervisorProxy), "panel-loader-tcp")
   }
 
@@ -130,8 +129,7 @@ object HmdaPlatform extends App {
       name = HmdaQuerySupervisor.name
     )
 
-    val institutionViewF = (querySupervisorProxy ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-    institutionViewF.map(actorRef => loadDemoData(supervisorProxy, actorRef))
+    loadDemoData(supervisorProxy)
 
     HmdaProjectionQuery.startUp(system)
 
@@ -154,7 +152,7 @@ object HmdaPlatform extends App {
   }
 
   //Load demo data
-  def loadDemoData(supervisor: ActorRef, institutionView: ActorRef): Unit = {
+  def loadDemoData(supervisor: ActorRef): Unit = {
     val isDemo = clusterConfig.getBoolean("hmda.isDemo")
     if (isDemo) {
       implicit val ec = system.dispatcher
