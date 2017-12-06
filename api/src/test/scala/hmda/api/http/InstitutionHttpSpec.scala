@@ -13,7 +13,6 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.HmdaQuerySupervisor
-import hmda.query.view.institutions.InstitutionView
 import hmda.validation.ValidationStats
 import org.iq80.leveldb.util.FileUtils
 import org.scalatest._
@@ -41,7 +40,6 @@ trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with Reque
   override def beforeAll(): Unit = {
     super.beforeAll()
     val institutionsActorF = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-    querySupervisor ! FindActorByName(InstitutionView.name)
     val institutionsActor = Await.result(institutionsActorF, duration)
     DemoData.loadTestData(system, institutionsActor)
   }

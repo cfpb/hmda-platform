@@ -41,7 +41,7 @@ trait SubmissionEditPaths
   def submissionEditsPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "edits") { (period, seqNr) =>
       timedGet { uri =>
-        completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, institutionId, period, seqNr, uri) {
           val fState = getStatusAndValidationState(supervisor, SubmissionId(institutionId, period, seqNr))
           onComplete(fState) {
             case Success((vs, status)) =>
@@ -60,7 +60,7 @@ trait SubmissionEditPaths
   def submissionEditCsvPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / "csv") { (period, seqNr) =>
       timedGet { uri =>
-        completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, institutionId, period, seqNr, uri) {
           val fValidationState = getValidationState(supervisor, institutionId, period, seqNr)
           onComplete(fValidationState) {
             case Success(validationState) =>
@@ -77,7 +77,7 @@ trait SubmissionEditPaths
   def submissionSingleEditPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / svqmRegex) { (period, seqNr, editType) =>
       timedGet { uri =>
-        completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, institutionId, period, seqNr, uri) {
           val fState = getStatusAndValidationState(supervisor, SubmissionId(institutionId, period, seqNr))
           onComplete(fState) {
             case Success((vs, status)) =>
@@ -95,7 +95,7 @@ trait SubmissionEditPaths
   def editFailureDetailsPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
     path("filings" / Segment / "submissions" / IntNumber / "edits" / editNameRegex) { (period, seqNr, editName) =>
       timedGet { uri =>
-        completeVerified(supervisor, querySupervisor: ActorRef, institutionId, period, seqNr, uri) {
+        completeVerified(supervisor, institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
             val fValidator: Future[ActorRef] = fHmdaFileValidator(supervisor, SubmissionId(institutionId, period, seqNr))
             val fPaginatedErrors: Future[(PaginatedErrors, HmdaFileValidationState)] = for {
@@ -122,7 +122,7 @@ trait SubmissionEditPaths
     path("filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) { (period, seqNr, verificationType) =>
       timedPost { uri =>
         entity(as[EditsVerification]) { verification =>
-          completeVerified(supervisor, querySupervisor, institutionId, period, seqNr, uri) {
+          completeVerified(supervisor, institutionId, period, seqNr, uri) {
             val verified = verification.verified
             val fSubmissionManager = (supervisor ? FindProcessingActor(SubmissionManager.name, SubmissionId(institutionId, period, seqNr))).mapTo[ActorRef]
             val subId = SubmissionId(institutionId, period, seqNr)

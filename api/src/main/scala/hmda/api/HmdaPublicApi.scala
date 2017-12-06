@@ -12,17 +12,17 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.http.{ BaseHttpApi, SingleLarValidationHttpApi }
 import hmda.api.http.public.{ InstitutionSearchPaths, ULIHttpApi }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.view.institutions.InstitutionView
 import akka.http.scaladsl.server.Directives._
+import hmda.persistence.institutions.InstitutionPersistence
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
 object HmdaPublicApi {
-  def props(supervisor: ActorRef, querySupervisor: ActorRef): Props = Props(new HmdaPublicApi(supervisor, querySupervisor))
+  def props(supervisor: ActorRef): Props = Props(new HmdaPublicApi(supervisor))
 }
 
-class HmdaPublicApi(supervisor: ActorRef, querySupervisor: ActorRef)
+class HmdaPublicApi(supervisor: ActorRef)
     extends HttpApi
     with BaseHttpApi
     with InstitutionSearchPaths
@@ -43,12 +43,12 @@ class HmdaPublicApi(supervisor: ActorRef, querySupervisor: ActorRef)
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val institutionViewF = (querySupervisor ? FindActorByName(InstitutionView.name))
+  val institutionPersistenceF = (supervisor ? FindActorByName(InstitutionPersistence.name))
     .mapTo[ActorRef]
 
   override val paths: Route =
     routes(s"$name") ~
-      institutionSearchPath(institutionViewF) ~
+      institutionSearchPath(institutionPersistenceF) ~
       uliHttpRoutes ~
       larRoutes(supervisor)
 
