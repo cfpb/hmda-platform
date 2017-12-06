@@ -9,13 +9,14 @@
   "scripts": {
     "postinstall": "yarn run clearDist && yarn run build",
     "clearDist": "rimraf ./api ./api/js ./api/css ./api/fonts ./api/img && mkdirp ./api ./api/js ./api/css ./api/fonts ./api/img",
-    "build": "yarn run sass && yarn run html && yarn run img && yarn run js",
+    "build": "yarn run sass && yarn run html && yarn run img && yarn run js && yarn css",
     "html": "html-minifier --collapse-whitespace --file-ext html --input-dir ./src --output-dir ./api",
     "sass": "node-sass --quiet --output-style=compressed --source-map=./api/css/ ./src/sass/app.scss ./api/css/app.min.css && cp node_modules/uswds/src/fonts/sourcesanspro-* ./api/fonts && yarn run sass:prefix",
     "sass:prefix": "postcss -u autoprefixer -r ./api/css/*.css",
     "watch:sass": "node-sass --watch --quiet --output-style=compressed --source-map=./api/css/ ./src/sass/app.scss ./api/css/app.min.css",
     "img": "cp ./src/img/* ./api/img && cp -r ./node_modules/uswds/dist/img/* ./api/img",
-    "js": "cp -r ./src/js/*.js ./api/js"
+    "js": "cp -r ./src/js/*.js ./api/js",
+    "css": "cp ./src/sass/default.css ./api/css"
   },
   "repository": {
     "type": "git"
