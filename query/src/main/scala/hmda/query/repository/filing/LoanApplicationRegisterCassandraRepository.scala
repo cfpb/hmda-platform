@@ -11,10 +11,10 @@ import hmda.query.repository.CassandraRepository
 
 import scala.concurrent.Future
 
-trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegister] with ProjectionRuntime {
+trait LoanApplicationRegisterCassandraRepository extends CassandraRepository[LoanApplicationRegister] with ProjectionRuntime {
 
   val config = ConfigFactory.load()
-  val table = config.getString("hmda.lar.table")
+  val table = config.getString("hmda.table.lar")
 
   def preparedStatement(implicit session: Session): PreparedStatement = {
     session.prepare(s"INSERT INTO $keyspace.$table" +
@@ -153,15 +153,6 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
     session.execute(query)
   }
 
-  override def dropTable(): ResultSet = {
-    val query =
-      s"""
-         |DROP TABLE IF EXISTS $keyspace.$table;
-       """.stripMargin
-
-    session.execute(query)
-  }
-
   override def insertData(source: Source[LoanApplicationRegister, NotUsed]): Future[Done] = {
     val sink = CassandraSink[LoanApplicationRegister](parallelism = 2, preparedStatement, statementBinder)
     source.runWith(sink)
@@ -169,7 +160,6 @@ trait FilingCassandraRepository extends CassandraRepository[LoanApplicationRegis
 
   override protected def parseRows: Flow[Row, LoanApplicationRegister, NotUsed] = {
     Flow[Row].map { row =>
-      val id = row.getString("id")
       val respId = row.getString("respondent_id")
       val agencyCode = row.getInt("agency_code")
       val loanId = row.getString("loan_id")

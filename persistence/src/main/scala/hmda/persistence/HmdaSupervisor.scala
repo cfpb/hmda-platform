@@ -10,6 +10,8 @@ import hmda.persistence.messages.CommonMessages._
 
 object HmdaSupervisor {
 
+  val name = "supervisor"
+
   case class FindHmdaFiling(filingPeriod: String)
   case class FindFilings(name: String, institutionId: String)
   case class FindSubmissions(name: String, institutionId: String, period: String)

@@ -71,7 +71,14 @@ trait CassandraRepository[A] {
     session.execute(query)
   }
   def createTable(): ResultSet
-  def dropTable(): ResultSet
+  def dropTable(): ResultSet = {
+    val query =
+      s"""
+         |DROP TABLE IF EXISTS $keyspace.$table;
+       """.stripMargin
+
+    session.execute(query)
+  }
   def insertData(source: Source[A, NotUsed]): Future[Done]
   def readData(fetchSize: Int): Source[A, NotUsed] = {
     val statement = new SimpleStatement(s"SELECT * FROM $keyspace.$table").setFetchSize(fetchSize)

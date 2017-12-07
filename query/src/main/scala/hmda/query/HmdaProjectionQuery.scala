@@ -2,7 +2,7 @@ package hmda.query
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import hmda.query.projections.filing.SubmissionCassandraProjection
+import hmda.query.projections.filing.{ LoanApplicationRegisterCassandraProjection, TransmittalSheetCassandraProjection }
 import hmda.query.projections.institutions.InstitutionCassandraProjection
 
 object HmdaProjectionQuery {
@@ -12,8 +12,11 @@ object HmdaProjectionQuery {
     val institutionProjection = new InstitutionCassandraProjection(system, materializer)
     institutionProjection.startUp()
 
-    val filingProjection = new SubmissionCassandraProjection(system, materializer)
-    filingProjection.startUp()
+    val larProjection = new LoanApplicationRegisterCassandraProjection(system, materializer)
+    larProjection.startUp()
+
+    val tsProjection = new TransmittalSheetCassandraProjection(system, materializer)
+    tsProjection.startup()
   }
 
 }

@@ -21,8 +21,10 @@ import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
-import hmda.publication.submission.lar.SubmissionSignedModifiedLarSubscriber
-import hmda.query.HmdaQuerySupervisor.FindSignedEventQuerySubscriber
+import hmda.publication.regulator.lar.{ ModifiedLarPublisher, RegulatorLarPublisher }
+import hmda.publication.regulator.panel.RegulatorPanelPublisher
+import hmda.publication.regulator.ts.RegulatorTsPublisher
+import hmda.query.HmdaQuerySupervisor.{ FindSignedEventLARSubscriber, FindSignedEventTSSubscriber }
 
 import scala.concurrent.duration._
 
@@ -53,7 +55,7 @@ object HmdaPlatform extends App {
 
   val supervisorProxy = system.actorOf(
     ClusterSingletonProxy.props(
-      singletonManagerPath = "/user/supervisor",
+      singletonManagerPath = s"/user/${HmdaSupervisor.name}",
       settings = ClusterSingletonProxySettings(system).withRole("persistence")
     ),
     name = "supervisorProxy"
@@ -61,7 +63,7 @@ object HmdaPlatform extends App {
 
   val querySupervisorProxy = system.actorOf(
     ClusterSingletonProxy.props(
-      singletonManagerPath = "/user/query-supervisor",
+      singletonManagerPath = s"/user/${HmdaQuerySupervisor.name}",
       settings = ClusterSingletonProxySettings(system).withRole("query")
     ),
     name = "querySupervisorProxy"
@@ -69,7 +71,7 @@ object HmdaPlatform extends App {
 
   val validationStatsProxy = system.actorOf(
     ClusterSingletonProxy.props(
-      singletonManagerPath = "/user/validation-stats",
+      singletonManagerPath = s"/user/${ValidationStats.name}",
       settings = ClusterSingletonProxySettings(system).withRole("persistence")
     )
   )
@@ -89,11 +91,11 @@ object HmdaPlatform extends App {
 
     system.actorOf(
       ClusterSingletonManager.props(
-        singletonProps = Props(classOf[ValidationStats]),
+        singletonProps = ValidationStats.props(),
         terminationMessage = Shutdown,
         settings = ClusterSingletonManagerSettings(system).withRole("persistence")
       ),
-      name = "validation-stats"
+      name = ValidationStats.name
     )
 
     system.actorOf(
@@ -102,7 +104,7 @@ object HmdaPlatform extends App {
         terminationMessage = Shutdown,
         settings = ClusterSingletonManagerSettings(system).withRole("persistence")
       ),
-      name = "supervisor"
+      name = HmdaSupervisor.name
     )
 
     (supervisorProxy ? FindActorByName(SingleLarValidation.name))
@@ -124,23 +126,29 @@ object HmdaPlatform extends App {
         terminationMessage = Shutdown,
         settings = ClusterSingletonManagerSettings(system).withRole("query")
       ),
-      name = "query-supervisor"
+      name = HmdaQuerySupervisor.name
     )
 
     loadDemoData(supervisorProxy)
 
     HmdaProjectionQuery.startUp(system)
 
-    (querySupervisorProxy ? FindSignedEventQuerySubscriber)
+    (querySupervisorProxy ? FindSignedEventLARSubscriber)
       .mapTo[ActorRef]
-      .map(a => log.info(s"Started submission signed event subscriber at ${a.path}"))
+      .map(a => log.info(s"Started submission signed event LAR subscriber at ${a.path}"))
+
+    (querySupervisorProxy ? FindSignedEventTSSubscriber)
+      .mapTo[ActorRef]
+      .map(a => log.info(s"Started submission signed event TS subscriber at ${a.path}"))
 
   }
 
   //Start Publication
   if (cluster.selfRoles.contains("publication")) {
-    system.actorOf(SubmissionSignedModifiedLarSubscriber.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-subscriber")
-    //system.actorOf(Props[HmdaReportsPublication].withDispatcher("publication-dispatcher"), "publication")
+    system.actorOf(ModifiedLarPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-publisher")
+    system.actorOf(RegulatorTsPublisher.props().withDispatcher("publication-dispatcher"), "regulator-ts-publisher")
+    system.actorOf(RegulatorLarPublisher.props().withDispatcher("publication-dispatcher"), "regulator-lar-publisher")
+    system.actorOf(RegulatorPanelPublisher.props().withDispatcher("publication-dispatcher"), "regulator-panel-publisher")
   }
 
   //Load demo data
