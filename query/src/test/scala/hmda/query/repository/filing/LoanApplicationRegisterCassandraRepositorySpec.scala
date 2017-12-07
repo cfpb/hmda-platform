@@ -7,6 +7,9 @@ import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.institution.Agency
 import hmda.query.repository.CassandraRepositorySpec
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 class LoanApplicationRegisterCassandraRepositorySpec extends CassandraRepositorySpec[LoanApplicationRegister] with LoanApplicationRegisterCassandraRepository with LarGenerators {
 
   override def beforeAll(): Unit = {
@@ -26,13 +29,15 @@ class LoanApplicationRegisterCassandraRepositorySpec extends CassandraRepository
       val lars = lar100ListGen.sample.get.map(x => x.copy(agencyCode = 9))
       val source = Source
         .fromIterator(() => lars.toIterator)
-      insertData(source)
 
-      val readF = readData(100).runWith(Sink.seq)
-      readF.map { lars =>
-        lars.map(lar => lar.agencyCode mustBe Agency.CFPB.value)
-        lars.size mustBe 100
-      }
+      val readF = for {
+        _ <- insertData(source)
+        data <- readData(100).runWith(Sink.seq)
+      } yield data
+
+      val xs = Await.result(readF, 20.seconds)
+      xs.map(lar => lar.agencyCode mustBe Agency.CFPB.value)
+      xs.size mustBe 100
     }
   }
 
