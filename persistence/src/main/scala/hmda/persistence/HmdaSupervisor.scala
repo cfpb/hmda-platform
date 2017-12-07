@@ -99,9 +99,8 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
   }
 
   private def createAPORPersistence(name: String): ActorRef = {
-    val apor = HmdaAPORPersistence.name
-    val actor = context.actorOf(HmdaAPORPersistence.props().withDispatcher("persistence-dispatcher"), apor)
-    supervise(actor, apor)
+    val actor = context.actorOf(HmdaAPORPersistence.props().withDispatcher("persistence-dispatcher"), name)
+    supervise(actor, name)
   }
 
   private def createProcessingActor(name: String, submissionId: SubmissionId): ActorRef = name match {
