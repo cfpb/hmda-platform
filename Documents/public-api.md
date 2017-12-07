@@ -283,3 +283,185 @@ action_taken_type,amortization_type,rate_type,apr,lockin_date,reverse_mortgage,r
 1,30,FixedRate,6.0,2017-11-20,2,2.01
 1,30,VariableRate,6.0,2017-11-20,2,2.15
 ```
+
+## LAR Parsing and Valiation
+
+### Parsing
+`/lar/parse`
+
+`POST` - Returns a JSON representation of a LAR, or a list of errors if the LAR fails to parse
+
+Example body:
+```json
+2|0|1|10164                    |20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1
+```
+
+Example reponse
+```
+{
+    "respondentId": "0",
+    "applicant": {
+        "coSex": 2,
+        "coRace5": "",
+        "coEthnicity": 2,
+        "race2": "",
+        "coRace2": "",
+        "coRace1": 5,
+        "race4": "",
+        "race3": "",
+        "race1": 5,
+        "sex": 1,
+        "coRace3": "",
+        "income": "31",
+        "coRace4": "",
+        "ethnicity": 2,
+        "race5": ""
+    },
+    "hoepaStatus": 2,
+    "agencyCode": 1,
+    "actionTakenType": 1,
+    "denial": {
+        "reason1": "",
+        "reason2": "",
+        "reason3": ""
+    },
+    "rateSpread": "NA",
+    "loan": {
+        "applicationDate": "20170224",
+        "propertyType": 1,
+        "amount": 21,
+        "purpose": 3,
+        "id": "10164",
+        "occupancy": 1,
+        "loanType": 1
+    },
+    "id": 2,
+    "actionTakenDate": 20170326,
+    "geography": {
+        "msa": "45460",
+        "state": "18",
+        "county": "153",
+        "tract": "0501.00"
+    },
+    "lienStatus": 1,
+    "preapprovals": 3,
+    "purchaserType": 0
+}
+```
+
+Example error response
+```json
+{
+    "lineNumber": 0,
+    "errorMessages": [
+        "An incorrect number of data fields were reported: 38 data fields were found, when 39 data fields were expected."
+    ]
+}
+```
+
+### Validation
+`/lar/validate`
+
+`POST` - Returns a list of syntactical, validity and/or quality errors.  This endpoint omits certain edits that are not relevant to a single LAR.  Edits that are omitted: macro edits, TS-only edits (e.g. Q130), and the following: Q022, S025, S270.
+
+| Query parameter | Description |
+| --------------- | ----------- |
+| check | String. Valid entries are: "syntactical", "validity", "quality".  If left blank or any other text is entered, will default to all checks. |
+
+Example body:
+```json
+{
+    "respondentId": "0",
+    "applicant": {
+        "coSex": 2,
+        "coRace5": "",
+        "coEthnicity": 2,
+        "race2": "",
+        "coRace2": "",
+        "coRace1": 5,
+        "race4": "",
+        "race3": "",
+        "race1": 5,
+        "sex": 1,
+        "coRace3": "",
+        "income": "31",
+        "coRace4": "",
+        "ethnicity": 2,
+        "race5": ""
+    },
+    "hoepaStatus": 2,
+    "agencyCode": 1,
+    "actionTakenType": 1,
+    "denial": {
+        "reason1": "",
+        "reason2": "",
+        "reason3": ""
+    },
+    "rateSpread": "NA",
+    "loan": {
+        "applicationDate": "20170224",
+        "propertyType": 1,
+        "amount": 21,
+        "purpose": 3,
+        "id": "10164",
+        "occupancy": 1,
+        "loanType": 1
+    },
+    "id": 2,
+    "actionTakenDate": 20170326,
+    "geography": {
+        "msa": "45460",
+        "state": "18",
+        "county": "153",
+        "tract": "0501.00"
+    },
+    "lienStatus": 1,
+    "preapprovals": 3,
+    "purchaserType": 0
+}
+```
+
+Example response:
+```json
+{
+    "syntactical": {
+        "errors": []
+    },
+    "validity": {
+        "errors": []
+    },
+    "quality": {
+        "errors": []
+    }
+}
+```
+
+### Parse and Validate
+
+`/lar/parseAndValidate`
+
+`POST` - Returns a list of syntactical, validity and/or quality errors. This endpoint omits certain edits that are not relevant to a single LAR.  Edits that are omitted: macro edits, TS-only edits (e.g. Q130), and the following: Q022, S025, S270.
+
+| Query parameter | Description |
+| --------------- | ----------- |
+| check | String. Valid entries are: "syntactical", "validity", "quality".  If left blank or any other text is entered, will default to all checks. |
+
+Example body:
+```json
+2|0|1|10164                    |20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1
+```
+
+Example response:
+```json
+{
+    "syntactical": {
+        "errors": []
+    },
+    "validity": {
+        "errors": []
+    },
+    "quality": {
+        "errors": []
+    }
+}
+```
