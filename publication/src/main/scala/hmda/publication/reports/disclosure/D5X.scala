@@ -1,6 +1,6 @@
 package hmda.publication.reports.disclosure
 
-import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
+import hmda.model.publication.reports.{ ApplicantIncome, ValueDisposition, MSAReport }
 import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.publication.reports.util.ReportUtil._
 import akka.NotUsed
@@ -16,7 +16,7 @@ case class D5X(
   year: Int,
   msa: MSAReport,
   applicantIncomes: List[ApplicantIncome],
-  total: List[Disposition],
+  total: List[ValueDisposition],
   table: String,
   description: String,
   reportDate: String = formattedCurrentDate

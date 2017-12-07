@@ -1,8 +1,8 @@
 package hmda.publication.reports.protocol
 
-import hmda.model.publication.reports.Disposition
+import hmda.model.publication.reports.ValueDisposition
 import spray.json.DefaultJsonProtocol
 
 trait DispositionProtocol extends DefaultJsonProtocol {
-  implicit val dispositionFormat = jsonFormat3(Disposition.apply)
+  implicit val dispositionFormat = jsonFormat3(ValueDisposition.apply)
 }

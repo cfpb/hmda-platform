@@ -9,7 +9,7 @@ import org.scalacheck.Gen
 object NationalAggregateReportGenerators {
   implicit def n5XGen: Gen[N5X] = {
     for {
-      total <- Gen.listOfN(4, dispositionGen)
+      total <- Gen.listOfN(4, valueDispositionGen)
       year = Calendar.getInstance().get(Calendar.YEAR)
       reportDate = formatDate(Calendar.getInstance().toInstant)
       applicantIncomes <- Gen.listOfN(5, applicantIncomeGen)

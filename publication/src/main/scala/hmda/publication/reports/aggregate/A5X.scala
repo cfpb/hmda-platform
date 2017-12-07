@@ -3,7 +3,7 @@ package hmda.publication.reports.aggregate
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.publication.reports.{ ApplicantIncome, Disposition, MSAReport }
+import hmda.model.publication.reports.{ ApplicantIncome, ValueDisposition, MSAReport }
 import hmda.publication.reports._
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
@@ -14,7 +14,7 @@ case class A5X(
   year: Int,
   msa: MSAReport,
   applicantIncomes: List[ApplicantIncome],
-  total: List[Disposition],
+  total: List[ValueDisposition],
   table: String,
   description: String,
   reportDate: String = formattedCurrentDate

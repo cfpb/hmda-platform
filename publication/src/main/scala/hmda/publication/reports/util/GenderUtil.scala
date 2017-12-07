@@ -13,6 +13,7 @@ object GenderUtil {
       case Male => larSource.filter(isMale)
       case Female => larSource.filter(isFemale)
       case JointGender => larSource.filter(isJoint)
+      case GenderNotAvailable => larSource.filter(isNotAvailable)
     }
   }
 
@@ -25,5 +26,8 @@ object GenderUtil {
   private def isJoint(lar: LoanApplicationRegister): Boolean =
     (lar.applicant.sex == 1 && lar.applicant.coSex == 2) ||
       (lar.applicant.sex == 2 && lar.applicant.coSex == 1)
+
+  private def isNotAvailable(lar: LoanApplicationRegister): Boolean =
+    lar.applicant.sex == 3
 
 }

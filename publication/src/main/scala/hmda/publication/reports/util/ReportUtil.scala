@@ -138,8 +138,33 @@ object ReportUtil extends SourceUtils {
   def calculateDispositions[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     dispositions: List[DispositionType]
-  ): Future[List[Disposition]] = {
-    Future.sequence(dispositions.map(_.calculateDisposition(larSource)))
+  ): Future[List[ValueDisposition]] = {
+    Future.sequence(dispositions.map(_.calculateValueDisposition(larSource)))
+  }
+
+  def calculatePercentageDispositions[ec: EC, mat: MAT, as: AS](
+    larSource: Source[LoanApplicationRegister, NotUsed],
+    dispositions: List[DispositionType],
+    totalDisp: DispositionType
+  ): Future[List[PercentageDisposition]] = {
+
+    val calculatedDispositionsF: Future[List[PercentageDisposition]] =
+      Future.sequence(dispositions.map(_.calculatePercentageDisposition(larSource)))
+
+    for {
+      calculatedDispositions <- calculatedDispositionsF
+      totalCount <- count(larSource.filter(totalDisp.filter))
+    } yield {
+
+      val withPercentages: List[PercentageDisposition] = calculatedDispositions.map { d =>
+        val percentage = if (d.count == 0) 0 else (d.count * 100 / totalCount)
+        d.copy(percentage = percentage)
+      }
+      val totalPercent = if (totalCount == 0) 0 else 100
+      val total = PercentageDisposition(totalDisp.value, totalCount, totalPercent)
+
+      withPercentages :+ total
+    }
   }
 
 }

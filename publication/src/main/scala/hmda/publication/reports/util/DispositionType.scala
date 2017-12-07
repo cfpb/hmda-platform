@@ -15,7 +15,7 @@ sealed abstract class DispositionType(
     val filter: LoanApplicationRegister => Boolean
 ) extends SourceUtils {
 
-  def calculateDisposition[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[Disposition] = {
+  def calculateValueDisposition[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[ValueDisposition] = {
     val loansFiltered = larSource.filter(filter)
     val loanCountF = count(loansFiltered)
     val incomeF = sum(loansFiltered, incomeSum)
@@ -23,7 +23,15 @@ sealed abstract class DispositionType(
       count <- loanCountF
       income <- incomeF
     } yield {
-      Disposition(value, count, income)
+      ValueDisposition(value, count, income)
+    }
+  }
+
+  def calculatePercentageDisposition[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[PercentageDisposition] = {
+    val loansFiltered = larSource.filter(filter)
+    val loanCountF = count(loansFiltered)
+    loanCountF.map { count =>
+      PercentageDisposition(value, count, 0)
     }
   }
 
@@ -128,4 +136,50 @@ object DispositionType {
     "Other",
     _.purchaserType == 9
   )
+
+  //////////////////////////////////
+  // Denial Reason Dispositions
+  //////////////////////////////////
+
+  case object DebtToIncomeRatio extends DispositionType(
+    "Debt-to-Income Ratio",
+    _.denial.reason1 == "1"
+  )
+  case object EmploymentHistory extends DispositionType(
+    "Employment History",
+    _.denial.reason1 == "2"
+  )
+  case object CreditHistory extends DispositionType(
+    "Credit History",
+    _.denial.reason1 == "3"
+  )
+  case object Collateral extends DispositionType(
+    "Collateral",
+    _.denial.reason1 == "4"
+  )
+  case object InsufficientCash extends DispositionType(
+    "Insufficient Cash",
+    _.denial.reason1 == "5"
+  )
+  case object UnverifiableInformation extends DispositionType(
+    "Unverifiable Information",
+    _.denial.reason1 == "6"
+  )
+  case object CreditAppIncomplete extends DispositionType(
+    "Credit App. Incomplete",
+    _.denial.reason1 == "7"
+  )
+  case object MortgageInsuranceDenied extends DispositionType(
+    "Mortgage Insurance Denied",
+    _.denial.reason1 == "8"
+  )
+  case object OtherDenialReason extends DispositionType(
+    "Other",
+    _.denial.reason1 == "9"
+  )
+  case object TotalDenied extends DispositionType(
+    "Total",
+    _.denial.reason1 != ""
+  )
+
 }
