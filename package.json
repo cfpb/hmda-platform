@@ -8,10 +8,10 @@
   },
   "scripts": {
     "postinstall": "yarn run build",
-    "build": "yarn run img && yarn run fonts",
-    "img": "cp -r ./node_modules/uswds/dist/img/* ./img",
-    "fonts": "cp -r ./node_modules/uswds/dist/fonts/sourcesanspro* ./fonts",
-    "uswds": "cp -r ./node_modules/uswds/src/stylesheets/* ./_sass"
+    "build": "yarn run uswds:img && yarn run uswds:fonts && yarn run uswds:sass",
+    "uswds:img": "cp -r ./node_modules/uswds/src/img/* ./img",
+    "uswds:fonts": "cp -r ./node_modules/uswds/src/fonts/sourcesanspro* ./fonts",
+    "uswds:sass": "cp -r ./node_modules/uswds/src/stylesheets/* ./_sass"
   },
   "repository": {
     "type": "git"
@@ -24,15 +24,8 @@
   "license": "CC0-1.0",
   "bugs": {},
   "homepage": "",
-  "devDependencies": {
-    "autoprefixer": "^7.1.6",
-    "mkdirp": "^0.5.1",
-    "node-sass": "^4.7.2",
-    "postcss-cli": "^4.1.1",
-    "rimraf": "^2.6.2"
-  },
+  "devDependencies": {},
   "dependencies": {
-    "html-minifier": "^3.5.7",
     "uswds": "1.4.1"
   }
 }
