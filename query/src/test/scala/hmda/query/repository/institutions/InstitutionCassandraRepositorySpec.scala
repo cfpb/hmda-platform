@@ -7,6 +7,8 @@ import hmda.model.institution.{ Agency, InstitutionGenerators }
 import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.CassandraRepositorySpec
 import hmda.query.repository.institutions.InstitutionConverter._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 class InstitutionCassandraRepositorySpec extends CassandraRepositorySpec[InstitutionQuery] with InstitutionCassandraRepository {
 
@@ -31,12 +33,15 @@ class InstitutionCassandraRepositorySpec extends CassandraRepositorySpec[Institu
       )
 
       val source = Source.fromIterator(() => institutions.toIterator)
-      insertData(source)
-      val readF = readData(20).runWith(Sink.seq)
-      readF.map { institutions =>
-        institutions.map(i => i.agency mustBe Agency.CFPB.value)
-        institutions.size mustBe 3
-      }
+
+      val readF = for {
+        _ <- insertData(source)
+        data <- readData(20).runWith(Sink.seq)
+      } yield data
+
+      val xs = Await.result(readF, 20.seconds)
+      xs.map(i => i.agency mustBe Agency.CFPB.value)
+      xs.size mustBe 3
     }
   }
 
