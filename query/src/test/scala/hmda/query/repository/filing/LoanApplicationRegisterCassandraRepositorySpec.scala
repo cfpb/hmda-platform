@@ -26,7 +26,11 @@ class LoanApplicationRegisterCassandraRepositorySpec extends CassandraRepository
       dropTable()
       createTable()
 
-      val lars = lar100ListGen.sample.get.map(x => x.copy(agencyCode = 9))
+      val lar = larGen.sample.getOrElse(LoanApplicationRegister())
+
+      val lars = lar100ListGen.sample.getOrElse(List(lar))
+        .map(x => x.copy(agencyCode = 9))
+
       val source = Source
         .fromIterator(() => lars.toIterator)
 
@@ -37,7 +41,7 @@ class LoanApplicationRegisterCassandraRepositorySpec extends CassandraRepository
 
       val xs = Await.result(readF, 20.seconds)
       xs.map(lar => lar.agencyCode mustBe Agency.CFPB.value)
-      xs.size mustBe 100
+      xs.size mustBe lars.size
     }
   }
 

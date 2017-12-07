@@ -26,11 +26,12 @@ class InstitutionCassandraRepositorySpec extends CassandraRepositorySpec[Institu
       dropTable()
       createTable()
 
-      val institutions = List(
-        toInstitutionQuery(InstitutionGenerators.sampleInstitution.copy(agency = Agency.CFPB)),
-        toInstitutionQuery(InstitutionGenerators.sampleInstitution.copy(agency = Agency.CFPB)),
-        toInstitutionQuery(InstitutionGenerators.sampleInstitution.copy(agency = Agency.CFPB))
-      )
+      val institution = InstitutionGenerators.sampleInstitution
+
+      val institutions = InstitutionGenerators
+        .institution100ListGen
+        .sample.getOrElse(List(institution))
+        .map(i => toInstitutionQuery(i))
 
       val source = Source.fromIterator(() => institutions.toIterator)
 
@@ -39,9 +40,9 @@ class InstitutionCassandraRepositorySpec extends CassandraRepositorySpec[Institu
         data <- readData(20).runWith(Sink.seq)
       } yield data
 
-      val xs = Await.result(readF, 10.seconds)
+      val xs = Await.result(readF, 20.seconds)
       xs.map(i => i.agency mustBe Agency.CFPB.value)
-      xs.size mustBe 3
+      xs.size mustBe institutions.size
     }
   }
 
