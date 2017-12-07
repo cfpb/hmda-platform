@@ -24,8 +24,6 @@ object SubmissionFSM {
 
   val name = "SubmissionFSM"
 
-  val failedMsg = "Submission status update failed"
-
   //Commands
   case object Create extends Command
 

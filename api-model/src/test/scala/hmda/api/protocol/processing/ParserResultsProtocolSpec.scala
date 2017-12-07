@@ -35,8 +35,8 @@ class ParserResultsProtocolSpec extends PropSpec with PropertyChecks with MustMa
       ("total", JsNumber(315)),
       ("status", JsObject(
         ("code", JsNumber(5)),
-        ("message", JsString("parsed with errors")),
-        ("description", JsString("The data are not formatted according to certain formatting requirements specified in the Filing Instructions Guide. The filing process may not proceed until the data have been corrected and the file has been reuploaded."))
+        ("message", JsString("Your data has formatting errors.")),
+        ("description", JsString("Review these errors and update your file. Then, upload the corrected file."))
       )),
       ("_links", JsObject(
         ("href", JsString("uri/path/{rel}")),

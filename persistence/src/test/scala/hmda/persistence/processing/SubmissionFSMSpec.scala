@@ -3,6 +3,7 @@ package hmda.persistence.processing
 import akka.actor.ActorRef
 import akka.testkit.TestProbe
 import hmda.model.fi.{ Submission, SubmissionId }
+import hmda.model.fi.SubmissionStatusMessage.failedMsg
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.CreateSubmission
@@ -114,7 +115,7 @@ class SubmissionFSMSpec extends ActorSpec {
 
       probe.send(fsm, None)
       probe.send(fsm, GetState)
-      probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Failed(SubmissionFSM.failedMsg))))
+      probe.expectMsg(NonEmptySubmissionData(Submission(submissionId, hmda.model.fi.Failed(failedMsg))))
     }
   }
 
