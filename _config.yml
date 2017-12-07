@@ -1,2 +1,4 @@
-source: dist
-exclude: [src, npm-packages-offline-cache]
+exclude: [npm-packages-offline-cache, node_modules, Gemfile, Gemfile.lock, package.json, yarn.loc]
+
+sass:
+  sass_dir: _sass

@@ -1,0 +1,19 @@
+- title: "Institutions"
+  href: "/institutions/"
+  sub:
+    - title: "Search"
+      href: "/institutions/#search"
+    - title: "Modified LAR"
+      href: "/institutions/#modified-lar"
+
+- title: "Check Digit"
+  href: "/check-digit/"
+  sub:
+    - title: "Generate"
+      href: "/check-digit/#generate"
+    - title: "Generate Batch"
+      href: "/check-digit/#generate-batch"
+    - title: "Validate"
+      href: "/check-digit/#validate"
+    - title: "Validate Batch"
+      href: "/check-digit/#validate-batch"
