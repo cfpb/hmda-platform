@@ -10,7 +10,6 @@ import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports._
 import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.publication.reports.util.DateUtil._
-import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.RaceUtil.raceBorrowerCharacteristic
 import hmda.publication.reports.util.EthnicityUtil.ethnicityBorrowerCharacteristic
 import hmda.publication.reports.util.MinorityStatusUtil.minorityStatusBorrowerCharacteristic

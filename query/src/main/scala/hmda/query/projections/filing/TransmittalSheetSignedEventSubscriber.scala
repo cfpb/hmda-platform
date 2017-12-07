@@ -46,8 +46,8 @@ class TransmittalSheetSignedEventSubscriber extends HmdaActor with TransmittalSh
 
     case SubmissionSignedPubSub(submissionId) =>
       log.info(s"${self.path} received submission signed event with submission id: ${submissionId.toString}")
-      val perssitenceId = s"HmdaFileValidator-$submissionId"
-      val tsSource = events(perssitenceId).map {
+      val persitenceId = s"HmdaFileValidator-$submissionId"
+      val tsSource = events(persitenceId).map {
         case TsValidated(ts) => ts
         case _ => TransmittalSheet()
       }

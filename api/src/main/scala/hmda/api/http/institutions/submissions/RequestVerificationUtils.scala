@@ -15,10 +15,9 @@ import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindSubmissions }
 import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionById
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-import hmda.query.view.institutions.InstitutionView
-import hmda.query.view.institutions.InstitutionView.GetInstitutionById
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
@@ -32,8 +31,8 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
      If the institution, filing, and submission exist, complete the request.
      If any one does not exist, respond with 404 error, including an appropriate message.
    */
-  def completeVerified(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String, period: String, seqNr: Int, uri: Uri)(completeRequest: Route)(implicit ec: ExecutionContext): Route = {
-    onComplete(verifyRequest(supervisor, querySupervisor, institutionId, period, seqNr)) {
+  def completeVerified(supervisor: ActorRef, institutionId: String, period: String, seqNr: Int, uri: Uri)(completeRequest: Route)(implicit ec: ExecutionContext): Route = {
+    onComplete(verifyRequest(supervisor, institutionId, period, seqNr)) {
       case Success(None) => completeRequest
       case Success(Some(message)) =>
         val errorResponse = ErrorResponse(404, message, uri.path)
@@ -46,10 +45,10 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
      If the request is legal (i.e. the institution, period, and filing exist), return None.
      If any of the objects does not exist, return Some(message), where message describes the issue.
    */
-  private def verifyRequest(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
+  private def verifyRequest(supervisor: ActorRef, institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[Option[String]] = {
     val submissionId = SubmissionId(institutionId, period, seqNr)
 
-    val inst = fInstitution(querySupervisor, submissionId)
+    val inst = fInstitution(supervisor, submissionId)
     val fil = fFiling(supervisor, submissionId)
     val sub = fSubmission(supervisor, submissionId)
 
@@ -61,10 +60,10 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
     } yield msg
   }
 
-  private def getErrorMessage(i: Institution, f: Filing, s: Submission, iid: String, p: String, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Option[String]] = Future {
+  private def getErrorMessage(i: Option[Institution], f: Filing, s: Submission, iid: String, p: String, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Option[String]] = Future {
     val submissionFound: Boolean = s.id == sid
     val filingFound: Boolean = f.period == p
-    val institutionFound: Boolean = i.id == iid
+    val institutionFound: Boolean = i.getOrElse(Institution.empty).id == iid
 
     if (submissionFound && filingFound && institutionFound) None
     else if (filingFound && institutionFound) Some(s"Submission ${sid.sequenceNumber} not found for $p filing period")
@@ -72,9 +71,9 @@ trait RequestVerificationUtils extends HmdaCustomDirectives {
     else Some(s"Institution $iid not found")
   }
 
-  private def fInstitution(querySupervisor: ActorRef, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Institution] = {
-    val fInstitutionsActor = (querySupervisor ? FindActorByName(InstitutionView.name)).mapTo[ActorRef]
-    fInstitutionsActor.flatMap(ia => ia ? GetInstitutionById(sid.institutionId)).mapTo[Institution]
+  private def fInstitution(supervisor: ActorRef, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Option[Institution]] = {
+    val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+    fInstitutionsActor.flatMap(ia => ia ? GetInstitutionById(sid.institutionId)).mapTo[Option[Institution]]
   }
 
   private def fFiling(supervisor: ActorRef, sid: SubmissionId)(implicit ec: ExecutionContext): Future[Filing] = {

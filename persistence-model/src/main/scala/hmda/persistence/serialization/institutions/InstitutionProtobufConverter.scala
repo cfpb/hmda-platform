@@ -5,7 +5,7 @@ import hmda.model.institution._
 import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
 import hmda.persistence.model.serialization.InstitutionEvents._
 import hmda.persistence.messages.commands.institutions.InstitutionCommands._
-import hmda.persistence.model.serialization.InstitutionCommands.{ CreateInstitutionMessage, ModifyInstitutionMessage }
+import hmda.persistence.model.serialization.InstitutionCommands._
 
 object InstitutionProtobufConverter {
 
@@ -31,6 +31,38 @@ object InstitutionProtobufConverter {
     ModifyInstitution(
       i = institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
     )
+  }
+
+  def getInstitutionByRespondentIdToProtobuf(cmd: GetInstitutionByRespondentId): GetInstitutionByRespondentIdMessage = {
+    GetInstitutionByRespondentIdMessage(id = cmd.id)
+  }
+
+  def getInstitutionByRespondentIdFromProtobuf(msg: GetInstitutionByRespondentIdMessage): GetInstitutionByRespondentId = {
+    GetInstitutionByRespondentId(id = msg.id)
+  }
+
+  def getInstitutionByIdToProtobuf(cmd: GetInstitutionById): GetInstitutionByIdMessage = {
+    GetInstitutionByIdMessage(institutionId = cmd.institutionId)
+  }
+
+  def getInstitutionByIdFromProtobuf(msg: GetInstitutionByIdMessage): GetInstitutionById = {
+    GetInstitutionById(institutionId = msg.institutionId)
+  }
+
+  def getInstitutionsByIdToProtobuf(cmd: GetInstitutionsById): GetInstitutionsByIdMessage = {
+    GetInstitutionsByIdMessage(ids = cmd.ids)
+  }
+
+  def getInstitutionsByIdFromProtobuf(msg: GetInstitutionsByIdMessage): GetInstitutionsById = {
+    GetInstitutionsById(msg.ids.toList)
+  }
+
+  def findInstitutionByDomainToProtobuf(cmd: FindInstitutionByDomain): FindInstitutionByDomainMessage = {
+    FindInstitutionByDomainMessage(domain = cmd.domain)
+  }
+
+  def findInstitutionByDomainFromProtobuf(msg: FindInstitutionByDomainMessage): FindInstitutionByDomain = {
+    FindInstitutionByDomain(domain = msg.domain)
   }
 
   def institutionCreatedToProtobuf(evt: InstitutionCreated): InstitutionCreatedMessage = {

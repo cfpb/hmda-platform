@@ -5,7 +5,6 @@ import akka.cluster.client.ClusterClientReceptionist
 import akka.util.Timeout
 import hmda.persistence.model.HmdaSupervisorActor
 import hmda.query.view.filing.HmdaFilingView
-import hmda.query.view.institutions.InstitutionView
 import hmda.persistence.PersistenceConfig._
 import hmda.persistence.messages.CommonMessages._
 import hmda.query.projections.filing.{ LoanApplicationRegisterSignedEventSubscriber, TransmittalSheetSignedEventSubscriber }
@@ -49,9 +48,6 @@ class HmdaQuerySupervisor extends HmdaSupervisorActor {
   }
 
   override protected def createActor(name: String): ActorRef = name match {
-    case id @ InstitutionView.name =>
-      val actor = context.actorOf(InstitutionView.props().withDispatcher("query-dispatcher"), id)
-      supervise(actor, id)
     case id @ LoanApplicationRegisterSignedEventSubscriber.name =>
       val actor = context.actorOf(LoanApplicationRegisterSignedEventSubscriber.props().withDispatcher("query-dispatcher"), id)
       supervise(actor, id)

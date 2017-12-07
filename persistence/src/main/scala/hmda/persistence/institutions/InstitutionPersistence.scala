@@ -68,14 +68,39 @@ class InstitutionPersistence extends HmdaPersistentActor {
         log.warning(s"Institution does not exist. Could not update $i")
       }
 
-    case GetInstitution(id) =>
+    case GetInstitutionById(id) =>
       val i = state.institutions.find(x => x.id == id)
       sender() ! i
+
+    case GetInstitutionsById(ids) =>
+      val institutions = state.institutions.filter(i => ids.contains(i.id))
+      sender() ! institutions
+
+    case GetInstitutionByRespondentId(respondentId) =>
+      val institution = state.institutions.find { i =>
+        i.respondent.externalId.value == respondentId
+      }.getOrElse(Institution.empty)
+      sender() ! institution
+
+    case FindInstitutionByDomain(domain) =>
+      if (domain.isEmpty) {
+        sender() ! Set.empty[Institution]
+      } else {
+        sender() ! state.institutions.filter(i => i.emailDomains.map(e => extractDomain(e)).contains(domain.toLowerCase))
+      }
 
     case GetState =>
       sender() ! state.institutions
 
     case Shutdown => context stop self
+  }
+
+  private def extractDomain(email: String): String = {
+    val parts = email.toLowerCase.split("@")
+    if (parts.length > 1)
+      parts(1)
+    else
+      parts(0)
   }
 
 }
