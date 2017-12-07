@@ -10,7 +10,8 @@
     "postinstall": "yarn run build",
     "build": "yarn run img && yarn run fonts",
     "img": "cp -r ./node_modules/uswds/dist/img/* ./img",
-    "fonts": "cp -r ./node_modules/uswds/dist/fonts/sourcesanspro* ./fonts"
+    "fonts": "cp -r ./node_modules/uswds/dist/fonts/sourcesanspro* ./fonts",
+    "uswds": "cp -r ./node_modules/uswds/src/stylesheets/* ./_sass"
   },
   "repository": {
     "type": "git"
