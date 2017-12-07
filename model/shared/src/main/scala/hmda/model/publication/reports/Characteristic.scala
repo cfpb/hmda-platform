@@ -1,10 +1,10 @@
 package hmda.model.publication.reports
 
 sealed trait Characteristic {
-  def dispositions: List[Disposition]
+  def dispositions: List[ValueDisposition]
 }
 
-case class RaceCharacteristic(race: RaceEnum, dispositions: List[Disposition]) extends Characteristic {
+case class RaceCharacteristic(race: RaceEnum, dispositions: List[ValueDisposition]) extends Characteristic {
   def +(rc: RaceCharacteristic) = {
     val combined = dispositions.map(d =>
       d + rc.dispositions.find(_.dispositionName == d.dispositionName).get)
@@ -12,7 +12,7 @@ case class RaceCharacteristic(race: RaceEnum, dispositions: List[Disposition]) e
   }
 }
 
-case class EthnicityCharacteristic(ethnicity: EthnicityEnum, dispositions: List[Disposition]) extends Characteristic {
+case class EthnicityCharacteristic(ethnicity: EthnicityEnum, dispositions: List[ValueDisposition]) extends Characteristic {
   def +(ec: EthnicityCharacteristic) = {
     val combined = dispositions.map(d =>
       d + ec.dispositions.find(_.dispositionName == d.dispositionName).get)
@@ -20,7 +20,7 @@ case class EthnicityCharacteristic(ethnicity: EthnicityEnum, dispositions: List[
   }
 }
 
-case class MinorityStatusCharacteristic(minorityStatus: MinorityStatusEnum, dispositions: List[Disposition]) extends Characteristic {
+case class MinorityStatusCharacteristic(minorityStatus: MinorityStatusEnum, dispositions: List[ValueDisposition]) extends Characteristic {
   def +(msc: MinorityStatusCharacteristic) = {
     val combined = dispositions.map(d =>
       d + msc.dispositions.find(_.dispositionName == d.dispositionName).get)

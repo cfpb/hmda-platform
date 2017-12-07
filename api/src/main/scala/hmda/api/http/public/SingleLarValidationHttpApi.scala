@@ -25,7 +25,7 @@ import hmda.validation.engine._
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success }
 
-trait LarHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCustomDirectives with ParserResultsProtocol {
+trait SingleLarValidationHttpApi extends LarProtocol with ValidationResultProtocol with HmdaCustomDirectives with ParserResultsProtocol {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer

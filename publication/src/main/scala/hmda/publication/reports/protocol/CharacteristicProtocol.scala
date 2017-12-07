@@ -22,7 +22,7 @@ trait CharacteristicProtocol
       case JsObject(fields) =>
         RaceCharacteristic(
           fields("race").convertTo[RaceEnum],
-          fields("dispositions").convertTo[List[Disposition]]
+          fields("dispositions").convertTo[List[ValueDisposition]]
         )
       case _ => throw DeserializationException("Cannot deserialize JSON structure")
     }
@@ -42,7 +42,7 @@ trait CharacteristicProtocol
       case JsObject(fields) =>
         EthnicityCharacteristic(
           fields("ethnicity").convertTo[EthnicityEnum],
-          fields("dispositions").convertTo[List[Disposition]]
+          fields("dispositions").convertTo[List[ValueDisposition]]
         )
       case _ => throw DeserializationException("Cannot deserialize JSON structure")
     }
@@ -62,7 +62,7 @@ trait CharacteristicProtocol
       case JsObject(fields) =>
         MinorityStatusCharacteristic(
           fields("minorityStatus").convertTo[MinorityStatusEnum],
-          fields("dispositions").convertTo[List[Disposition]]
+          fields("dispositions").convertTo[List[ValueDisposition]]
         )
       case _ => throw DeserializationException("Cannot deserialize JSON structure")
     }
@@ -93,17 +93,17 @@ trait CharacteristicProtocol
       case JsObject(fields) if fields.isDefinedAt("race") =>
         RaceCharacteristic(
           fields("race").convertTo[RaceEnum],
-          fields("dispositions").convertTo[List[Disposition]]
+          fields("dispositions").convertTo[List[ValueDisposition]]
         )
       case JsObject(fields) if fields.isDefinedAt("ethnicity") =>
         EthnicityCharacteristic(
           fields("ethnicity").convertTo[EthnicityEnum],
-          fields("dispositions").convertTo[List[Disposition]]
+          fields("dispositions").convertTo[List[ValueDisposition]]
         )
       case JsObject(fields) if fields.isDefinedAt("minorityStatus") =>
         MinorityStatusCharacteristic(
           fields("minorityStatus").convertTo[MinorityStatusEnum],
-          fields("dispositions").convertTo[List[Disposition]]
+          fields("dispositions").convertTo[List[ValueDisposition]]
         )
     }
 
