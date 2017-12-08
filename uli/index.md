@@ -3,17 +3,29 @@ layout: default
 title: "HMDA Platform API - Check Digit"
 ---
 
-<h1>Check digit</h1>
 <hgroup>
-  <h2 id="generate">Generate</h2>
-  <h3>Generate a check digit and full ULI from a loan id.</h3>
-  <h4>Using the <code>/uli/checkDigit</code> endpoint provide a loan id and get the check digit and full ULI in a response.</h4>
+  <h1>ULI</h1>
+  <h2>Create a check digit and validate a ULI.</h2>
+  <p class="usa-font-lead">The <code>/uli</code> endpoint allows for the creation of a check digit and validation of a ULI. These endpoints help to ensure you are submitting valid HMDA data.</p>
 </hgroup>
 
-<h5>Allowed Methods</h5>
+---
+
+<hgroup>
+  <h3 id="generate">Generate a check digit</h3>
+  <p class="usa-font-lead">Generate a check digit and full ULI from an application/loan id.</p>
+  <p>Using the <code>/uli/checkDigit</code> endpoint provide an application/loan id and get the check digit and full ULI in a response.</p>
+</hgroup>
+
+<h4>Example</h4>
+{% highlight PowerShell %}
+POST /uli/checkDigit
+{% endhighlight %}
+
+<h4>Allowed Methods</h4>
 <code>POST</code>
 
-<h5>Parameters</h5>
+<h4>Parameters</h4>
 <table>
   <thead>
     <tr>
@@ -31,12 +43,7 @@ title: "HMDA Platform API - Check Digit"
   </tbody>
 </table>
 
-<h5>Example</h5>
-{% highlight PowerShell %}
-POST /uli/checkDigit
-{% endhighlight %}
-
-<h5>Example payload</h5>
+<h4>Example payload</h4>
 <section class="code-block">
 <code>JSON</code>
 {% highlight json %}
@@ -46,7 +53,7 @@ POST /uli/checkDigit
 {% endhighlight %}
 </section>
 
-<h5>Example Response</h5>
+<h4>Example Response</h4>
 <section class="code-block">
 <code>JSON</code>
 {% highlight json %}
@@ -58,21 +65,23 @@ POST /uli/checkDigit
 {% endhighlight %}
 </section>
 
+---
+
 <hgroup>
-  <h2 id="generate-batch">Generate Batch</h2>
-  <h3>Generate batch check digits and full ULIs from a file.</h3>
-  <h4>Using the <code>/uli/checkDigit/csv</code> endpoint provide a file with a list of loan ids, each on a new line.</h4>
+  <h3 id="generate-batch">Generate Batch</h3>
+  <p class="usa-font-lead">Generate batch check digits and full ULIs from a file.</p>
+  <p>Using the <code>/uli/checkDigit/csv</code> endpoint provide a file with a list of loan ids, each on a new line.</p>
 </hgroup>
 
-<h5>Allowed Methods</h5>
-<code>POST</code>
-
-<h5>Example</h5>
+<h4>Example</h4>
 {% highlight PowerShell %}
 POST /uli/checkDigit/csv
 {% endhighlight %}
 
-<h5>Example file contents</h5>
+<h4>Allowed Methods</h4>
+<code>POST</code>
+
+<h4>Example file contents</h4>
 <section class="code-block">
 {% highlight PowerShell %}
 10Cx939c5543TqA1144M999143X
@@ -80,7 +89,7 @@ POST /uli/checkDigit/csv
 {% endhighlight %}
 </section>
 
-<h5>Example Response in <code>CSV</code> format</h5>
+<h4>Example Response in <code>CSV</code> format</h4>
 <section class="code-block">
 <code>CSV</code>
 {% highlight PowerShell %}
@@ -90,16 +99,23 @@ loanId,checkDigit,uli
 {% endhighlight %}
 </section>
 
+---
+
 <hgroup>
-  <h2 id="validate">Validate</h2>
-  <h3>Validates that a ULI has the correct check digit.</h3>
-  <h4>Using the <code>/uli/validate</code> endpoint you can provide a ULI and get the response of valid or not.</h4>
+  <h3 id="validate">Validate</h3>
+  <p class="usa-font-lead">Validates that a ULI has the correct check digit.</p>
+  <p>Using the <code>/uli/validate</code> endpoint you can provide a ULI and get the response of valid or not.</p>
 </hgroup>
 
-<h5>Allowed Methods</h5>
+<h4>Example</h4>
+{% highlight PowerShell %}
+POST /uli/validate
+{% endhighlight %}
+
+<h4>Allowed Methods</h4>
 <code>POST</code>
 
-<h5>Parameters</h5>
+<h4>Parameters</h4>
 <table>
   <thead>
     <tr>
@@ -117,12 +133,7 @@ loanId,checkDigit,uli
   </tbody>
 </table>
 
-<h5>Example</h5>
-{% highlight PowerShell %}
-POST /uli/validate
-{% endhighlight %}
-
-<h5>Example payload</h5>
+<h4>Example payload</h4>
 <section class="code-block">
 <code>JSON</code>
 {% highlight json %}
@@ -130,8 +141,9 @@ POST /uli/validate
   "uli": "10Bx939c5543TqA1144M999143X38"
 }
 {% endhighlight %}
+</section>
 
-<h5>Example Response</h5>
+<h4>Example Response</h4>
 <section class="code-block">
 <code>JSON</code>
 {% highlight json %}
@@ -141,21 +153,23 @@ POST /uli/validate
 {% endhighlight %}
 </section>
 
+---
+
 <hgroup>
-  <h2 id="validate-batch">Validate Batch</h2>
-  <h3>Validates that a batch of ULIs have the correct check digit.</h3>
-  <h4>Using the <code>/uli/validate/csv</code> endpoint you can provide a list of ULIs and get the response of valid or not for each.</h4>
+  <h3 id="validate-batch">Validate Batch</h3>
+  <p class="usa-font-lead">Validates that a batch of ULIs have the correct check digit.</p>
+  <p>Using the <code>/uli/validate/csv</code> endpoint you can provide a list of ULIs and get the response of valid or not for each.</p>
 </hgroup>
 
-<h5>Allowed Methods</h5>
-<code>POST</code>
-
-<h5>Example</h5>
+<h4>Example</h4>
 {% highlight PowerShell %}
 POST /uli/validate/csv
 {% endhighlight %}
 
-<h5>Example file content</h5>
+<h4>Allowed Methods</h4>
+<code>POST</code>
+
+<h4>Example file content</h4>
 <section class="code-block">
 {% highlight PowerShell %}
 10Cx939c5543TqA1144M999143X10
@@ -164,7 +178,7 @@ POST /uli/validate/csv
 {% endhighlight %}
 </section>
 
-<h5>Example Response in <code>CSV</code> format</h5>
+<h4>Example Response in <code>CSV</code> format</h4>
 <section class="code-block">
 <code>CSV</code>
 {% highlight PowerShell %}

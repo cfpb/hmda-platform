@@ -23,6 +23,7 @@ pre {
 code {
   border-radius: 3px;
   padding: 3px;
+  vertical-align: middle;
 }
 
 .code-block {
@@ -35,5 +36,11 @@ code {
     position: absolute;
     right: 0;
     top: -20px;
+  }
+}
+
+.usa-font-lead {
+  code {
+    font-size: .7em;
   }
 }

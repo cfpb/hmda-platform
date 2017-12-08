@@ -1,3 +1,10 @@
+- title: "LAR"
+  href: "/lar/"
+  sub:
+    - title: "Parse"
+      href: "/lar/#parse"
+    - title: "Validate"
+      href: "/lar/validate"
 - title: "Institutions"
   href: "/institutions/"
   sub:
@@ -6,14 +13,16 @@
     - title: "Modified LAR"
       href: "/institutions/#modified-lar"
 
-- title: "Check Digit"
-  href: "/check-digit/"
+- title: "ULI"
+  href: "/uli/"
   sub:
-    - title: "Generate"
-      href: "/check-digit/#generate"
-    - title: "Generate Batch"
-      href: "/check-digit/#generate-batch"
-    - title: "Validate"
-      href: "/check-digit/#validate"
-    - title: "Validate Batch"
-      href: "/check-digit/#validate-batch"
+    - title: "Generate check digit"
+      href: "/uli/#generate"
+      sub:
+      - title: "Batch"
+        href: "/uli/#generate-batch"
+    - title: "Validate check digit"
+      href: "/uli/#validate"
+      sub:
+      - title: "Batch"
+        href: "/uli/#validate-batch"
