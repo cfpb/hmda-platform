@@ -10,6 +10,7 @@ import hmda.api.protocol.public.ULIProtocol
 import hmda.model.fi.lar.LarGenerators
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import com.typesafe.config.ConfigFactory
 import hmda.api.http.FileUploadUtils
 
 import scala.concurrent.duration._
@@ -19,6 +20,9 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
 
   override val log: LoggingAdapter = NoLogging
   implicit val ec = system.dispatcher
+
+  val config = ConfigFactory.load()
+  override val parallelism = config.getInt("hmda.connectionFlowParallelism")
 
   val duration = 10.seconds
   override implicit val timeout = Timeout(duration)

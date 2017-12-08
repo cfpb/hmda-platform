@@ -178,7 +178,7 @@ lazy val persistence = (project in file("persistence"))
           oldStrategy(x)
       },
       parallelExecution in Test := false,
-      libraryDependencies ++= akkaPersistenceDeps
+      libraryDependencies ++= akkaPersistenceDeps ++ Seq(alpakkaS3)
     )
   )
   .dependsOn(validation % "compile->compile;test->test")
@@ -248,7 +248,7 @@ lazy val apiModel = (project in file("api-model"))
   .settings(
     libraryDependencies ++= commonDeps ++ httpDeps
   ).dependsOn(modelJVM % "compile->compile;test->test")
-  .dependsOn(persistence % "compile->compile")
+  .dependsOn(persistence % "compile->compile;test->test")
 
 lazy val publication = (project in file("publication"))
   .settings(hmdaBuildSettings: _*)

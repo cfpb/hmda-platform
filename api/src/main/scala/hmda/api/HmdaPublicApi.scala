@@ -9,12 +9,12 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
+import hmda.api.http.public.RateSpreadHttpApi
 import hmda.api.http.{ BaseHttpApi, SingleLarValidationHttpApi }
 import hmda.api.http.public.{ InstitutionSearchPaths, ULIHttpApi }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import akka.http.scaladsl.server.Directives._
 import hmda.persistence.institutions.InstitutionPersistence
-
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -26,17 +26,19 @@ class HmdaPublicApi(supervisor: ActorRef)
     extends HttpApi
     with BaseHttpApi
     with InstitutionSearchPaths
+    with RateSpreadHttpApi
     with SingleLarValidationHttpApi
     with ULIHttpApi {
 
-  val configuration = ConfigFactory.load()
+  val config = ConfigFactory.load()
+  override val parallelism = config.getInt("hmda.connectionFlowParallelism")
 
-  lazy val httpTimeout = configuration.getInt("hmda.http.timeout")
+  lazy val httpTimeout = config.getInt("hmda.http.timeout")
   override implicit val timeout = Timeout(httpTimeout.seconds)
 
   override val name: String = "hmda-public-api"
-  override val host: String = configuration.getString("hmda.http.publicHost")
-  override val port: Int = configuration.getInt("hmda.http.publicPort")
+  override val host: String = config.getString("hmda.http.publicHost")
+  override val port: Int = config.getInt("hmda.http.publicPort")
 
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -50,7 +52,8 @@ class HmdaPublicApi(supervisor: ActorRef)
     routes(s"$name") ~
       institutionSearchPath(institutionPersistenceF) ~
       uliHttpRoutes ~
-      larRoutes(supervisor)
+      larRoutes(supervisor) ~
+      rateSpreadRoutes(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,

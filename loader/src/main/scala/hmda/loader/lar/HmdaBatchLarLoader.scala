@@ -9,6 +9,7 @@ import akka.cluster.client.{ ClusterClient, ClusterClientSettings }
 import akka.stream.{ ActorMaterializer, IOResult }
 import akka.stream.scaladsl.{ FileIO, Sink, Source }
 import akka.util.{ ByteString, Timeout }
+import com.typesafe.config.ConfigFactory
 import hmda.api.util.FlowUtils
 import hmda.model.fi.{ Created, Filing, Submission }
 import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindProcessingActor, FindSubmissions }
@@ -32,6 +33,8 @@ object HmdaBatchLarLoader extends FlowUtils {
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = system.dispatcher
 
+  val config = ConfigFactory.load()
+  implicit val parallelism = config.getInt("hmda.connectionFlowParallelism")
   val hmdaClusterName = config.getString("hmda.clusterName")
   val hmdaClusterIP = config.getString("hmda.lar.host")
   val hmdaClusterPort = config.getInt("hmda.lar.port")

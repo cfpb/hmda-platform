@@ -8,7 +8,6 @@ import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Flow, Framing }
 import akka.util.ByteString
-import com.typesafe.config.ConfigFactory
 import org.slf4j.Logger
 import scala.concurrent.ExecutionContext
 
@@ -17,8 +16,7 @@ trait FlowUtils {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val ec: ExecutionContext
-  val config = ConfigFactory.load()
-  val parallelism = config.getInt("hmda.connectionFlowParallelism")
+  def parallelism: Int
 
   def singleConnectionFlow: Flow[HttpRequest, HttpResponse, NotUsed] =
     Flow[HttpRequest]

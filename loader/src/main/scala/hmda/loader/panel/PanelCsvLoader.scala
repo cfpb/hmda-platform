@@ -5,12 +5,15 @@ import java.io.File
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ FileIO, Sink, Tcp }
+import com.typesafe.config.ConfigFactory
 import org.slf4j.LoggerFactory
 import hmda.api.util.FlowUtils
 
 import scala.concurrent.duration._
 
 object PanelCsvLoader extends FlowUtils {
+  val config = ConfigFactory.load()
+  override val parallelism = config.getInt("hmda.connectionFlowParallelism")
   val httpTimeout = config.getInt("hmda.httpTimeout")
   val duration = httpTimeout.seconds
   override implicit val system: ActorSystem = ActorSystem("hmda-loader")

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+import "APOR.proto";
+
+message CreateAPORMessage {
+    APORMessage apor = 1;
+    RateTypeMessage rateType = 2;
+}
+
+message CalculateRateSpreadMessage {
+    int32 actionTakenType = 1;
+    int32 amortizationType = 2;
+    RateTypeMessage rateType = 3;
+    double apr = 4;
+    string lockinDate = 5;
+    int32 reverseMortgage = 6;
+}
