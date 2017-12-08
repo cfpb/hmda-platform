@@ -23,6 +23,12 @@ case class Institution(
     topHolder: TopHolder
 ) {
   def respondentId: String = respondent.externalId.value
+  def isEmpty: Boolean = {
+    this.id == "" &&
+      this.agency == UndeterminedAgency &&
+      this.institutionType == UndeterminedInstitutionType &&
+      this.respondent.isEmpty
+  }
 }
 
 case object Institution {
@@ -44,12 +50,20 @@ case object Institution {
 }
 
 case class Respondent(
-  externalId: ExternalId = ExternalId("", UndeterminedExternalId),
-  name: String = "",
-  state: String = "",
-  city: String = "",
-  fipsStateNumber: String = ""
-)
+    externalId: ExternalId = ExternalId("", UndeterminedExternalId),
+    name: String = "",
+    state: String = "",
+    city: String = "",
+    fipsStateNumber: String = ""
+) {
+  def isEmpty: Boolean = {
+    this.externalId == ExternalId("", UndeterminedExternalId) &&
+      this.name == "" &&
+      this.state == "" &&
+      this.city == "" &&
+      this.fipsStateNumber == ""
+  }
+}
 case class Parent(respondentId: String, idRssd: Int, name: String, city: String, state: String)
 case class TopHolder(idRssd: Int, name: String, city: String, state: String, country: String)
 

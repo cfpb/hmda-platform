@@ -11,8 +11,9 @@ import hmda.api.model.ErrorResponse
 import hmda.api.model.public.InstitutionSearchResults
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
-
 import akka.pattern.ask
+import hmda.model.institution.Institution
+import hmda.persistence.demo.DemoData
 
 class InstitutionSearchPathSpec extends InstitutionHttpApiSpec with ScalatestRouteTest with InstitutionSearchPaths {
   val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
@@ -35,6 +36,17 @@ class InstitutionSearchPathSpec extends InstitutionHttpApiSpec with ScalatestRou
         status mustBe StatusCodes.OK
         responseAs[InstitutionSearchResults].institutions.size mustBe 1
         responseAs[InstitutionSearchResults].institutions.head.id mustBe "0"
+      }
+    }
+    "return institution filtered by valid id" in {
+      Get("/institutions/0") ~> institutionSearchPath(fInstitutionsActor) ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[Institution] mustBe DemoData.testInstitutions.head
+      }
+    }
+    "return 404 when filtering by invalid id" in {
+      Get("/institutions/xxxx") ~> institutionSearchPath(fInstitutionsActor) ~> check {
+        status mustBe StatusCodes.NotFound
       }
     }
   }

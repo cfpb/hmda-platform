@@ -34,6 +34,59 @@ This documenatation describes de public HMDA Platform HTTP API
      ]
    }
    ```
+   
+* `/institutions/<institutionID>`
+
+    * `GET`
+
+    Retrieves the details of an institution. If not found, returns HTTP code 404
+
+    Example Response with HTTP code 200, in `JSON` format:
+
+    ```json
+        {
+          "id": "123",
+          "agency": "CFPB",
+          "activityYear": "2017",
+          "institutionType": "bank",
+          "cra": false,
+          "externalIds": [{
+            "id": "bank-id",
+            "idType": "fdic-certificate-number"
+          }],
+          "emailDomains": [
+            "email1",
+            "email2"
+          ],
+          "respondent": {
+            "externalId": {
+                "id": "bank-id",
+                "idType": "fdic-certificate-number"
+            },
+            "name": "bank 0",
+            "state": "VA",
+            "city": "City Name",
+            "fipsStateNumber": "2"
+          },
+          "hmdaFilerFlag": true,
+          "parent": {
+            "respondentId": "12-3",
+            "idRssd": 3,
+            "name": "parent name",
+            "city": "parent city",
+            "state": "VA"
+          },
+          "assets": 123,
+          "otherLenderCode": 0,
+          "topHolder": {
+            "idRssd": 4,
+            "name": "top holder name",
+            "city": "top holder city",
+            "state": "VA",
+            "country": "USA"
+      }
+    }
+    ```
 
 ### Modified LAR
 
