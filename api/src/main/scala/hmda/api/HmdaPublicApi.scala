@@ -52,7 +52,8 @@ class HmdaPublicApi(supervisor: ActorRef)
     routes(s"$name") ~
       institutionSearchPath(institutionPersistenceF) ~
       uliHttpRoutes ~
-      larRoutes(supervisor)
+      larRoutes(supervisor) ~
+      rateSpreadRoutes(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,

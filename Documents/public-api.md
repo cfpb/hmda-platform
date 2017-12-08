@@ -243,7 +243,7 @@ Example payload, in `JSON` format:
 ```json
 {
   "actionTakenType": 1,
-  "amortizationType:": 30,
+  "amortizationType": 30,
   "rateType": "FixedRate",
   "apr": 6.0,
   "lockinDate": "2017-11-20",
@@ -257,7 +257,7 @@ Example Response, in `JSON` format:
 
 ```json
 {
-  rateSpread: "2.01"
+  "rateSpread": "2.01"
 }
 ```
 
