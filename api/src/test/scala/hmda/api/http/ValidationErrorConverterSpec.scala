@@ -88,6 +88,13 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
       infos.last mustBe EditInfo("S100", s100Desc)
     }
 
+    "have correct edit descriptions" in {
+      val edits = List(ValidityValidationError("1234", "V295", false), ValidityValidationError("1235", "V300", false))
+      val infos = editInfos(edits)
+      infos.head mustBe EditInfo("V295", "State and county must = a valid combination or (county = NA where MSA/MD = NA). Valid state code format must be NN. Valid county code format must be NNN or NA.")
+      infos.last mustBe EditInfo("V300", "Census tract must = a valid census tract number for the MSA/MD, state, county combination or (NA if county is classified as small) or (where MSA/MD = NA the census tract must = a valid census tract for the state/county combination or NA). Valid census tract format must be NNNN.NN or NA. Valid state code format must be NN. Valid county code format must be NNN or NA.")
+    }
+
     "get msa info for Q029" in {
       val errorQ029 = QualityValidationError("8299422144", "Q029", ts = false)
       val result = validationErrorToResultRow(errorQ029, validationState)
