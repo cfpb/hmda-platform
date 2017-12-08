@@ -39,7 +39,7 @@ class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraReposit
   val fetchSize = config.getInt("hmda.query.fetch.size")
 
   val accessKeyId = config.getString("hmda.publication.aws.access-key-id")
-  val secretAccess = config.getString("hmda.publication.aws.secret-access-key ")
+  val secretAccess = config.getString("hmda.publication.aws.secret-access-key")
   val region = config.getString("hmda.publication.aws.region")
   val bucket = config.getString("hmda.publication.aws.private-bucket")
   val environment = config.getString("hmda.publication.aws.environment")

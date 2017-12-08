@@ -231,6 +231,58 @@ uli,isValid
 10Bx939c5543TqA1144M999133X38,false
 ```
 
+### Rate Spread Calculator
+
+* `rateSpread`
+
+    * `POST` - Calculate Rate Spread
+
+
+Example payload, in `JSON` format:
+
+```json
+{
+  "actionTakenType": 1,
+  "amortizationType": 30,
+  "rateType": "FixedRate",
+  "apr": 6.0,
+  "lockinDate": "2017-11-20",
+  "reverseMortgage": 2
+}
+```
+
+`RateType` can take the following values: `FixedRate` and `VariableRate`
+
+Example Response, in `JSON` format:
+
+```json
+{
+  "rateSpread": "2.01"
+}
+```
+
+The response is either a number representing the Rate Spread or "NA"
+
+* `rateSpread/csv`
+
+    * `POST` - Batch Rate Spread calculator
+
+Example file contents:
+
+```
+1,30,FixedRate,6.0,2017-11-20,2
+1,30,VariableRate,6.0,2017-11-20,2
+```
+
+The contents of this file include the `Action Taken Type` (values 1,2,8), `Amortization Term` (1 - 50 years), `Rate Type`, `APR`, `Lockin Date` and `Reverse Mortgage` (values 1 or 2)
+
+Example response in `CSV` format:
+
+```csv
+action_taken_type,amortization_type,rate_type,apr,lockin_date,reverse_mortgage,rate_spread
+1,30,FixedRate,6.0,2017-11-20,2,2.01
+1,30,VariableRate,6.0,2017-11-20,2,2.15
+```
 
 ## LAR Parsing and Valiation
 

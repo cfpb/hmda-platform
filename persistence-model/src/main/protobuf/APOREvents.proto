@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+import "APOR.proto";
+
+message APORCreatedMessage {
+    APORMessage apor = 1;
+    RateTypeMessage rateType = 2;
+}

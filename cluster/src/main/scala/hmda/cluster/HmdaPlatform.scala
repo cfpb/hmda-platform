@@ -19,6 +19,8 @@ import hmda.persistence.processing.SingleLarValidation
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
+import hmda.persistence.HmdaSupervisor.FindAPORPersistence
+import hmda.persistence.apor.HmdaAPORPersistence
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
 import hmda.publication.regulator.lar.{ ModifiedLarPublisher, RegulatorLarPublisher }
@@ -114,6 +116,10 @@ object HmdaPlatform extends App {
     (supervisorProxy ? FindActorByName(InstitutionPersistence.name))
       .mapTo[ActorRef]
       .map(a => log.info(s"Started institutions at ${a.path}"))
+
+    (supervisorProxy ? FindAPORPersistence(HmdaAPORPersistence.name))
+      .mapTo[ActorRef]
+      .map(a => log.info(s"Stareted Rate Spread calculator at ${a.path}"))
   }
 
   //Start Query
