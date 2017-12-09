@@ -1,18 +1,18 @@
 ---
 layout: default
-title: "HMDA Platform API - Institutions"
+title: "HMDA Platform API - LAR"
 ---
 
 <hgroup>
-  <h1>Institutions</h1>
-  <h2>Information about institutions and their filings</h2>
-  <p class="usa-font-lead">The <code>/institutions</code> endpoint allows access to data about HMDA institutions and their filing data.</p>
+  <h1>LAR</h1>
+  <h2>Test a single LAR for parsing and validation</h2>
+  <p class="usa-font-lead">The <code>/lar</code> endpoint allows testing of a single LAR row. It can used to test for formatting (parsing), edit validation, or both.</p>
 </hgroup>
 
 ---
 
 <hgroup>
-  <h3 id="search">Search</h3>
+  <h3 id="parse">Parse</h3>
   <p class="usa-font-lead">Query the list of known institutions on the HMDA Platform.</p>
   <p>Using the <code>/institutions</code> endpoint you can provide email domain and get a response containing a list of insitutions that use that email domain.</p>
 </hgroup>
