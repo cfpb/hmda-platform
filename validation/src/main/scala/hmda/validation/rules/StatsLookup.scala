@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 import akka.cluster.singleton.{ ClusterSingletonProxy, ClusterSingletonProxySettings }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.validation.{ AS, EC }
+import hmda.validation.{ AS, EC, ValidationStats }
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -20,13 +20,13 @@ trait StatsLookup {
       Future(
         system.actorOf(
           ClusterSingletonProxy.props(
-            singletonManagerPath = "/user/validation-stats",
+            singletonManagerPath = s"/user/${ValidationStats.name}",
             settings = ClusterSingletonProxySettings(system).withRole("persistence")
           )
         )
       )
     } else {
-      system.actorSelection("/user/validation-stats").resolveOne()
+      system.actorSelection(s"/user/${ValidationStats.name}").resolveOne()
     }
 
 }
