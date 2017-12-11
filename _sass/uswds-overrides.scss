@@ -38,6 +38,8 @@
 }
 
 .usa-sidenav-list a {
+  padding: .25rem;
+
   &:hover {
     background-color: transparent;
   }
@@ -48,8 +50,15 @@
   }
 }
 
-.usa-sidenav-sub_list .usa-sidenav-sub_list a {
-  padding-top: 0;
+.usa-sidenav-sub_list {
+  a {
+    padding-left: 1rem;
+  }
+
+  .usa-sidenav-sub_list a {
+    padding-top: 0;
+    padding-left: 2rem;
+  }
 }
 
 .usa-section {
