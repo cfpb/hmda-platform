@@ -19,5 +19,6 @@
   <logger name="com.datastax.driver" level="INFO" />
   <logger name="org.apache.zookeeper" level="WARN" />
   <logger name="de.heikoseeberger.constructr" level="INFO"/>
+  <logger name="org.quartz" level="INFO"/>
 
 </configuration>
