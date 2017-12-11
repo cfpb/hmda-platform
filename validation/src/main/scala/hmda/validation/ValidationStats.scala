@@ -55,7 +55,7 @@ object ValidationStats {
   def props(): Props = Props(new ValidationStats)
 
   def createValidationStats(system: ActorSystem): ActorRef = {
-    system.actorOf(ValidationStats.props().withDispatcher("validation-dispatcher"), "validation-stats")
+    system.actorOf(ValidationStats.props().withDispatcher("validation-dispatcher"), ValidationStats.name)
   }
 
   case class ValidationStatsState(stats: Seq[SubmissionStats] = Nil) {
