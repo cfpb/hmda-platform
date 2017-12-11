@@ -8,7 +8,7 @@ import hmda.persistence.messages.events.validation.ValidationStatsEvents._
 import hmda.persistence.model.HmdaPersistentActor
 
 object ValidationStats {
-  def name = "validation-stats"
+  def name = "ValidationStats"
 
   case class SubmissionStats(
     id: SubmissionId,
