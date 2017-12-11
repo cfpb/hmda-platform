@@ -4,9 +4,9 @@
     - title: "Parse"
       href: "/lar/#parse"
     - title: "Validate"
-      href: "/lar/validate"
+      href: "/lar/#validate"
     - title: "Parse and Validate"
-      href: "/lar/parseAndValidate"
+      href: "/lar/#parseAndValidate"
 
 - title: "Institutions"
   href: "/institutions/"
