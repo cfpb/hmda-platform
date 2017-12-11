@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "HMDA Platform API - Check Digit"
+title: "HMDA Platform API - ULI"
 ---
 
 <hgroup>
