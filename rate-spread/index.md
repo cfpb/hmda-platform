@@ -6,7 +6,7 @@ title: "HMDA Platform API - Rate Spread"
 <hgroup>
   <h1>Rate Spread</h1>
   <h2>Calculate the rate spread.</h2>
-  <p class="usa-font-lead">The <code>/reateSpread</code> endpoint you can provide information about a loan and have the rate spread calculated.</p>
+  <p class="usa-font-lead">The <code>/rateSpread</code> endpoint you can provide information about a loan and have the rate spread calculated.</p>
 </hgroup>
 
 ---
