@@ -6,9 +6,9 @@ The panel loader is designed to read a CSV file of institution data and load the
 
 The CSV file should use the `|` (pipe) delimiter, and should include a header row as the first line.
 
-A small example file (~200 institutions) is located at `loader/src/main/resources/inst_data_2017_dummy.csv`
+A small example file (~200 institutions) is located at `data/panel/inst_data_2017_dummy.csv`
 
-The real panel file (~160,000 institutions) is located at `loader/src/main/resources/inst_data_2017.csv`
+The real panel file (~253,000 institutions) is located at `data/panel/inst_data_2017.csv`
 
 
 ## Loading Institutions Remotely
