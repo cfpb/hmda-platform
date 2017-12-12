@@ -55,21 +55,18 @@ trait InstitutionSearchPaths extends InstitutionSearchProtocol with HmdaCustomDi
     } ~
       path("institutions" / Segment) { institutionId =>
         encodeResponse {
-          timedGet { uri =>
+          timedGet { _ =>
             val institutionF = for {
               a <- institutionPersistenceF
               o <- (a ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
-              i = o.getOrElse(Institution.empty)
-            } yield i
+            } yield o
 
             onComplete(institutionF) {
-              case Success(i) =>
-                if (i.isEmpty) {
-                  complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
-                } else {
-                  complete(ToResponseMarshallable(i))
-                }
-              case Failure(e) =>
+              case Success(Some(i)) =>
+                complete(ToResponseMarshallable(i))
+              case Success(None) =>
+                complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+              case Failure(_) =>
                 complete(ToResponseMarshallable(HttpResponse(StatusCodes.InternalServerError)))
             }
           }
