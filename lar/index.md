@@ -135,7 +135,7 @@ POST /lar/validate?check=syntactical
     <tr>
       <td><code>check</code></td>
       <td><code>string</code></td>
-      <td>`syntactical`, `validity`, or `quality`. (If left blank, or any other text is entered, defaults to run all checks.)</td>
+      <td><code>syntactical</code>, <code>validity</code>, or <code>quality</code>. (If left blank, or any other text is entered, defaults to run all checks.)</td>
     </tr>
   </tbody>
 </table>
@@ -250,7 +250,7 @@ POST /lar/parseAndValidate?check=syntactical
     <tr>
       <td><code>check</code></td>
       <td><code>string</code></td>
-      <td>`syntactical`, `validity`, or `quality`. (If left blank, or any other text is entered, defaults to run all checks.)</td>
+      <td><code>syntactical</code>, <code>validity</code>, or <code>quality</code>. (If left blank, or any other text is entered, defaults to run all checks.)</td>
     </tr>
   </tbody>
 </table>
