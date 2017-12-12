@@ -19,7 +19,7 @@ title: "HMDA Platform API - Institutions"
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-GET /institutions?domain=bank0.com
+GET https://ffiec-api.cfpb.gov/public/institutions?domain=bank0.com
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>
@@ -87,7 +87,7 @@ GET /institutions?domain=bank0.com
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-GET /institutions/:institutionId/filings/:period/lar
+GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId/filings/:period/lar
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>

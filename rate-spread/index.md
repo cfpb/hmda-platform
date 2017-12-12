@@ -13,7 +13,7 @@ title: "HMDA Platform API - Rate Spread"
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /rateSpread
+POST https://ffiec-api.cfpb.gov/public/rateSpread
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>
@@ -81,7 +81,7 @@ POST /rateSpread
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /rateSpread/csv
+POST https://ffiec-api.cfpb.gov/public/rateSpread/csv
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>

@@ -19,7 +19,7 @@ title: "HMDA Platform API - LAR"
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /lar/parse
+POST https://ffiec-api.cfpb.gov/public/lar/parse
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>
@@ -116,7 +116,7 @@ POST /lar/parse
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /lar/validate?check=syntactical
+POST https://ffiec-api.cfpb.gov/public/lar/validate?check=syntactical
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>
@@ -231,7 +231,7 @@ POST /lar/validate?check=syntactical
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /lar/parseAndValidate?check=syntactical
+POST https://ffiec-api.cfpb.gov/public/lar/parseAndValidate?check=syntactical
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>

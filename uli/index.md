@@ -19,7 +19,7 @@ title: "HMDA Platform API - ULI"
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /uli/checkDigit
+POST https://ffiec-api.cfpb.gov/public/uli/checkDigit
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>
@@ -75,7 +75,7 @@ POST /uli/checkDigit
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /uli/checkDigit/csv
+POST https://ffiec-api.cfpb.gov/public/uli/checkDigit/csv
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>
@@ -109,7 +109,7 @@ loanId,checkDigit,uli
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /uli/validate
+POST https://ffiec-api.cfpb.gov/public/uli/validate
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>
@@ -163,7 +163,7 @@ POST /uli/validate
 
 <h4>Example</h4>
 {% highlight PowerShell %}
-POST /uli/validate/csv
+POST https://ffiec-api.cfpb.gov/public/uli/validate/csv
 {% endhighlight %}
 
 <h4>Allowed Methods</h4>
