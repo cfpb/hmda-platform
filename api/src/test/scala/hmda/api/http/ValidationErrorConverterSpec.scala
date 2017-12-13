@@ -31,7 +31,6 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
 
     val validationState = HmdaFileValidationState(
       Some(ts),
-      badLars,
       tsErrors,
       Nil,
       Nil,

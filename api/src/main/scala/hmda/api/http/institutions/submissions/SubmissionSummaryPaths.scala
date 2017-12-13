@@ -8,7 +8,6 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.util.Timeout
 import hmda.api.http.ValidationErrorConverter
 import hmda.api.model.ErrorResponse
 import hmda.api.model.institutions.submissions.{ ContactSummary, FileSummary, RespondentSummary, SubmissionSummary }
@@ -22,6 +21,8 @@ import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
 import hmda.persistence.processing.HmdaFileValidator._
+import hmda.validation.ValidationStats.FindTotalSubmittedLars
+import hmda.validation.rules.StatsLookup
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success, Try }
@@ -32,13 +33,12 @@ trait SubmissionSummaryPaths
     with ApiErrorProtocol
     with EditResultsProtocol
     with RequestVerificationUtils
-    with ValidationErrorConverter {
+    with ValidationErrorConverter
+    with StatsLookup {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
-
-  implicit val timeout: Timeout
 
   case class TsLarSummary(ts: Option[TransmittalSheet], larSize: Int, hmdaFileName: String)
 
@@ -54,9 +54,11 @@ trait SubmissionSummaryPaths
           val tsF = for {
             validator <- validatorF
             submissions <- submissionPersistenceF
-            s <- (validator ? GetState).mapTo[HmdaFileValidationState]
+            ts <- (validator ? GetTs).mapTo[Option[TransmittalSheet]]
             sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
-          } yield TsLarSummary(s.ts, s.lars.size, sub.fileName)
+            actorRef <- validationStats
+            totalLars <- (actorRef ? FindTotalSubmittedLars(sub.id.institutionId, period)).mapTo[Int]
+          } yield TsLarSummary(ts, totalLars, sub.fileName)
 
           onComplete(tsF) {
             case Success(x) => x.ts match {
