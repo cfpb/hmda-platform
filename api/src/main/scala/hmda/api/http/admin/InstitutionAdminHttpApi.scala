@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{ HttpResponse, StatusCodes }
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
@@ -87,11 +87,15 @@ trait InstitutionAdminHttpApi
         val institutionF = for {
           a <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
           o <- (a ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
-          i = o.getOrElse(Institution.empty)
-        } yield i
+        } yield o
 
-        onComplete(institutionF) { institution =>
-          complete(ToResponseMarshallable(institution))
+        onComplete(institutionF) {
+          case Success(Some(i)) =>
+            complete(ToResponseMarshallable(i))
+          case Success(None) =>
+            complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+          case Failure(_) =>
+            complete(ToResponseMarshallable(HttpResponse(StatusCodes.InternalServerError)))
         }
       }
     }
