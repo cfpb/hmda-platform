@@ -19,12 +19,106 @@ import spray.json.JsValue
 
 import scala.concurrent.Future
 
-trait D11X
+trait D11X {
+  val reportId: String
+  def filters(lar: LoanApplicationRegister): Boolean
+}
+
+object D11_1 {
+  val reportId = "D11-1"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 2 && loan.purpose == 1 && lar.lienStatus == 1 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_2 {
+  val reportId = "D11-2"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 3 && loan.purpose == 1 && lar.lienStatus == 1 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_3 {
+  val reportId = "D11-3"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 1 && loan.purpose == 1 && lar.lienStatus == 1 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_4 {
+  val reportId = "D11-4"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 1 && loan.purpose == 1 && lar.lienStatus == 2 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_5 {
+  val reportId = "D11-5"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 2 && loan.purpose == 3 && lar.lienStatus == 1 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_6 {
+  val reportId = "D11-6"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 3 && loan.purpose == 3 && lar.lienStatus == 1 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_7 {
+  val reportId = "D11-7"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 1 && loan.purpose == 3 && lar.lienStatus == 1 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_8 {
+  val reportId = "D11-8"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 1 && loan.purpose == 3 && lar.lienStatus == 2 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_9 {
+  val reportId = "D11-9"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 1 && loan.purpose == 2 && lar.lienStatus == 1 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
+object D11_10 {
+  val reportId = "D11-10"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 1 && loan.purpose == 2 && lar.lienStatus == 2 &&
+      loan.propertyType == 1 && loan.occupancy == 1
+  }
+}
+
 object D11X {
 
 
   def generate[ec: EC, mat: MAT, as: AS](
-                                          report: D8X,
+                                          report: D11X,
                                           larSource: Source[LoanApplicationRegister, NotUsed],
                                           fipsCode: Int,
                                           respondentId: String,
