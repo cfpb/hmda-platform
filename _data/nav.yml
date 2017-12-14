@@ -11,8 +11,10 @@
 - title: "Institutions"
   href: "/institutions/"
   sub:
-    - title: "Search"
-      href: "/institutions/#search"
+    - title: "Search by email domain"
+      href: "/institutions/#search-by-domain"
+    - title: "Search by institution id"
+      href: "/institutions/#search-by-id"
     - title: "Modified LAR"
       href: "/institutions/#modified-lar"
 

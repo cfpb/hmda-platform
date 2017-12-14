@@ -12,9 +12,9 @@ title: "HMDA Platform API - Institutions"
 ---
 
 <hgroup>
-  <h3 id="search">Search</h3>
+  <h3 id="search-by-domain">Search by email domain</h3>
   <p class="usa-font-lead">Query the list of known institutions on the HMDA Platform.</p>
-  <p>Using the <code>/institutions</code> endpoint you can provide email domain and get a response containing a list of insitutions that use that email domain.</p>
+  <p>Using the <code>/institutions</code> endpoint you can provide an email domain and get a response containing a list of insitutions that use that email domain.</p>
 </hgroup>
 
 <h4>Example</h4>
@@ -66,6 +66,89 @@ GET https://ffiec-api.cfpb.gov/public/institutions?domain=bank0.com
       ]
     }
   ]
+}
+{% endhighlight %}
+</section>
+
+---
+
+<hgroup>
+  <h3 id="search-by-id">Search by institution id</h3>
+  <p class="usa-font-lead">Get details about an institution.</p>
+  <p>Using the <code>/institutions/:institutionId</code> endpoint you can provide an institution id and get the details of an institution.</p>
+</hgroup>
+
+<h4>Example</h4>
+{% highlight PowerShell %}
+GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId
+{% endhighlight %}
+
+<h4>Allowed Methods</h4>
+<code>GET</code>
+
+<h4>Parameters</h4>
+<table>
+<thead>
+  <tr>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Description</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td><code>institution id</code></td>
+    <td><code>string</code></td>
+    <td>Any institution id.</td>
+  </tr>
+</tbody>
+</table>
+
+<h4>Example Response</h4>
+<section class="code-block">
+<code>JSON</code>
+{% highlight json %}
+{
+  "id": "123",
+  "agency": "CFPB",
+  "activityYear": "2017",
+  "institutionType": "bank",
+  "cra": false,
+  "externalIds": [{
+    "id": "bank-id",
+    "idType": "fdic-certificate-number"
+  }],
+  "emailDomains": [
+    "email1",
+    "email2"
+  ],
+  "respondent": {
+    "externalId": {
+      "id": "bank-id",
+      "idType": "fdic-certificate-number"
+    },
+    "name": "bank 0",
+    "state": "VA",
+    "city": "City Name",
+    "fipsStateNumber": "2"
+  },
+  "hmdaFilerFlag": true,
+  "parent": {
+    "respondentId": "12-3",
+    "idRssd": 3,
+    "name": "parent name",
+    "city": "parent city",
+    "state": "VA"
+  },
+  "assets": 123,
+  "otherLenderCode": 0,
+  "topHolder": {
+    "idRssd": 4,
+    "name": "top holder name",
+    "city": "top holder city",
+    "state": "VA",
+    "country": "USA"
+  }
 }
 {% endhighlight %}
 </section>
