@@ -29,7 +29,7 @@ POST https://ffiec-api.cfpb.gov/public/rateSpread
   </thead>
   <tbody>
     <tr>
-      <td><code>actionTakeType</code></td>
+      <td><code>actionTakenType</code></td>
       <td><code>1</code>, <code>2</code>, or <code>8</code></td>
     </tr>
     <tr>
