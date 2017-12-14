@@ -53,11 +53,19 @@
 .usa-sidenav-sub_list {
   a {
     padding-left: 1rem;
+
+    &:hover {
+      padding-left: 1rem;
+    }
   }
 
   .usa-sidenav-sub_list a {
     padding-top: 0;
     padding-left: 2rem;
+
+    &:hover {
+      padding-left: 2rem;
+    }
   }
 }
 
