@@ -1,17 +1,17 @@
 package hmda.publication.reports.util
 
 import akka.NotUsed
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.publication.reports._
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
-import scala.util.{Success, Try}
+import scala.util.{ Success, Try }
 
-class PricingDataUtil extends SourceUtils {
+object PricingDataUtil extends SourceUtils {
 
-  def pricingData(lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+  def pricingData[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
     for {
       noData <- pricingDisposition(lars, _.rateSpread == "NA", "No Reported Pricing Data")
       reported <- pricingDisposition(lars, pricingDataReported, "Reported Pricing Data")
@@ -19,7 +19,7 @@ class PricingDataUtil extends SourceUtils {
       rs2_0 <- pricingDisposition(lars, rateSpreadBetween(2, 2.5), "2.00 - 2.49")
       rs2_5 <- pricingDisposition(lars, rateSpreadBetween(2.5, 3), "2.50 - 2.99")
       rs3 <- pricingDisposition(lars, rateSpreadBetween(3, 4), "3.00 - 3.99")
-      rs4 <- pricingDisposition(lars, rateSpreadBetween(4,5), "4.00 - 4.99")
+      rs4 <- pricingDisposition(lars, rateSpreadBetween(4, 5), "4.00 - 4.99")
       rs5 <- pricingDisposition(lars, rateSpreadBetween(5, Int.MaxValue), "5 or more")
       mean <- reportedMean(lars)
       median <- reportedMedian(lars)
@@ -36,7 +36,7 @@ class PricingDataUtil extends SourceUtils {
          |    $mean,
          |    $median
          |]
-     """. stripMargin
+     """.stripMargin
     }
   }
 
@@ -73,7 +73,7 @@ class PricingDataUtil extends SourceUtils {
   private def rateSpread(lar: LoanApplicationRegister): Double =
     Try(lar.rateSpread.toDouble).getOrElse(0)
 
-  private def reportedMean(lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+  private def reportedMean[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
     val loansFiltered = lars.filter(pricingDataReported)
     val loanCountF = count(loansFiltered)
     val rateSpreadSumF = sumDouble(loansFiltered, rateSpread)
@@ -81,17 +81,19 @@ class PricingDataUtil extends SourceUtils {
       count <- loanCountF
       totalRateSpread <- rateSpreadSumF
     } yield {
+      val mean = if (count == 0) "\"\"" else totalRateSpread / count
+
       s"""
          |{
          |    "pricing": "Mean",
-         |    "count": ${totalRateSpread / count},
+         |    "count": $mean,
          |    "value": "None"
          |}
        """.stripMargin
     }
   }
 
-  private def reportedMedian(lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+  private def reportedMedian[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
     val rateSpreadsF: Future[Seq[Double]] =
       lars.filter(pricingDataReported)
         // .limit(MAX_SIZE)
@@ -99,10 +101,12 @@ class PricingDataUtil extends SourceUtils {
         .runWith(Sink.seq)
 
     rateSpreadsF.map { seq =>
+      val median = if (seq.isEmpty) "\"\"" else calculateMedian(seq)
+
       s"""
          |{
          |    "pricing": "Median",
-         |    "count": ${calculateMedian(seq)},
+         |    "count": $median,
          |    "value": "None"
          |}
        """.stripMargin
@@ -110,7 +114,7 @@ class PricingDataUtil extends SourceUtils {
   }
 
   def calculateMedian(seq: Seq[Double]): Double = {
-    val (lowerHalf, upperHalf) = seq.sortWith(_<_).splitAt(seq.size / 2)
+    val (lowerHalf, upperHalf) = seq.sortWith(_ < _).splitAt(seq.size / 2)
     if (seq.size % 2 == 0) (lowerHalf.last + upperHalf.head) / 2.0 else upperHalf.head
   }
 

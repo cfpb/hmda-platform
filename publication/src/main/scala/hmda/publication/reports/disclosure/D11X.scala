@@ -12,19 +12,19 @@ import hmda.publication.reports._
 import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
 import hmda.publication.reports.util.GenderUtil.filterGender
 import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
+import hmda.publication.reports.util.PricingDataUtil.pricingData
 import hmda.publication.reports.util.RaceUtil.filterRace
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
-import spray.json.JsValue
-
 import scala.concurrent.Future
+import spray.json._
 
 trait D11X {
   val reportId: String
   def filters(lar: LoanApplicationRegister): Boolean
 }
 
-object D11_1 {
+object D11_1 extends D11X {
   val reportId = "D11-1"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -33,7 +33,7 @@ object D11_1 {
   }
 }
 
-object D11_2 {
+object D11_2 extends D11X {
   val reportId = "D11-2"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -42,7 +42,7 @@ object D11_2 {
   }
 }
 
-object D11_3 {
+object D11_3 extends D11X {
   val reportId = "D11-3"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -51,7 +51,7 @@ object D11_3 {
   }
 }
 
-object D11_4 {
+object D11_4 extends D11X {
   val reportId = "D11-4"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -60,7 +60,7 @@ object D11_4 {
   }
 }
 
-object D11_5 {
+object D11_5 extends D11X {
   val reportId = "D11-5"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -69,7 +69,7 @@ object D11_5 {
   }
 }
 
-object D11_6 {
+object D11_6 extends D11X {
   val reportId = "D11-6"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -78,7 +78,7 @@ object D11_6 {
   }
 }
 
-object D11_7 {
+object D11_7 extends D11X {
   val reportId = "D11-7"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -87,7 +87,7 @@ object D11_7 {
   }
 }
 
-object D11_8 {
+object D11_8 extends D11X {
   val reportId = "D11-8"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -96,7 +96,7 @@ object D11_8 {
   }
 }
 
-object D11_9 {
+object D11_9 extends D11X {
   val reportId = "D11-9"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -105,7 +105,7 @@ object D11_9 {
   }
 }
 
-object D11_10 {
+object D11_10 extends D11X {
   val reportId = "D11-10"
   def filters(lar: LoanApplicationRegister): Boolean = {
     val loan = lar.loan
@@ -116,14 +116,13 @@ object D11_10 {
 
 object D11X {
 
-
   def generate[ec: EC, mat: MAT, as: AS](
-                                          report: D11X,
-                                          larSource: Source[LoanApplicationRegister, NotUsed],
-                                          fipsCode: Int,
-                                          respondentId: String,
-                                          institutionNameF: Future[String]
-                                        ): Future[JsValue] = {
+    report: D11X,
+    larSource: Source[LoanApplicationRegister, NotUsed],
+    fipsCode: Int,
+    respondentId: String,
+    institutionNameF: Future[String]
+  ): Future[JsValue] = {
 
     val metaData = ReportsMetaDataLookup.values(report.reportId)
 
@@ -187,9 +186,10 @@ object D11X {
 
     } yield {
       s"""
+       |{
        |    "respondentId": "$respondentId",
        |    "institutionName": "$institutionName",
-       |    "table": "${metaData.reportTable} ",
+       |    "table": "${metaData.reportTable}",
        |    "type": "Disclosure",
        |    "description": "${metaData.description}",
        |    "year": "$year",
@@ -317,57 +317,9 @@ object D11X {
        |                }
        |            ]
        |        }
-       |    ],
-       |    "censusTractCharacteristics": [
-       |        {
-       |            "characteristic": "Racial/Ethnic Composition",
-       |            "compositions": [
-       |                {
-       |                    "composition": "Less than 10% minority",
-       |                    "pricingInformation": $tractMinorityComposition1
-       |                },
-       |                {
-       |                    "composition": "10-19% minority",
-       |                    "pricingInformation": $tractMinorityComposition2
-       |                },
-       |                {
-       |                    "composition": "20-49% minority",
-       |                    "pricingInformation": $tractMinorityComposition3
-       |                },
-       |                {
-       |                    "composition": "50-79% minority",
-       |                    "pricingInformation": $tractMinorityComposition4
-       |                },
-       |                {
-       |                    "composition": "80-100% minority",
-       |                    "pricingInformation": $tractMinorityComposition5
-       |                }
-       |            ]
-       |        },
-       |        {
-       |            "characteristic": "Income Characteristics",
-       |            "incomes": [
-       |                {
-       |                    "income": "Low income",
-       |                    "pricingInformation": $tractIncome1
-       |                },
-       |                {
-       |                    "income": "Moderate income",
-       |                    "pricingInformation": $tractIncome2
-       |                },
-       |                {
-       |                    "income": "Middle income",
-       |                    "pricingInformation": $tractIncome3
-       |                },
-       |                {
-       |                    "income": "Upper income",
-       |                    "pricingInformation": $tractIncome4
-       |                }
-       |            ]
-       |        }
        |    ]
        |}
-     """.stripMargin
+     """.stripMargin.parseJson
     }
   }
 
