@@ -5,6 +5,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import spray.json.{ JsArray, JsString }
 
@@ -22,11 +23,11 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   }
 
   val respId = "54345"
-  val fips = 45900 // Traverse City, MI
-  val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
-    val geo = lar.geography.copy(msa = fips.toString)
-    val loan = lar.loan.copy(propertyType = 3)
-    lar.copy(respondentId = respId, geography = geo, loan = loan)
+  val fips = 11540 // Appleton, WI
+
+  val lars = Gen.listOfN(100, larWithValidGeoGen).sample.get.map { lar: LoanApplicationRegister =>
+    val loan = lar.loan.copy(loanType = 2, purpose = 3, propertyType = 1, occupancy = 1)
+    lar.copy(respondentId = respId, loan = loan, lienStatus = 1)
   }
 
   val source: Source[LoanApplicationRegister, NotUsed] = Source
@@ -35,22 +36,22 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   val descriptionD85 = "Pricing information for FHA refinancing loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 
   "Generate a Disclosure 11-5 report" in {
-    D11X.generate(D11_5, source, fips, respId, Future("Northwoods Test Bank")).map { result =>
+    D11X.generate(D11_5, source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
       result.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
         case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
           respondentId mustBe respId
-          instName mustBe "Northwoods Test Bank"
+          instName mustBe "Fox Valley Test Bank"
           table mustBe "11-5"
           desc mustBe descriptionD85
           msa.asJsObject.getFields("name") match {
-            case Seq(JsString(msaName)) => msaName mustBe "Traverse City, MI"
+            case Seq(JsString(msaName)) => msaName mustBe "Appleton, WI"
           }
       }
     }
   }
 
   "Include correct borrower Characteristics" in {
-    D11X.generate(D11_5, source, fips, respId, Future("Northwoods Test Bank")).map { result =>
+    D11X.generate(D11_5, source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
       result.asJsObject.getFields("borrowerCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
@@ -72,7 +73,7 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   }
 
   "Include correct Census Tract Characteristics" in {
-    D11X.generate(D11_5, source, fips, respId, Future("Northwoods Test Bank")).map { result =>
+    D11X.generate(D11_5, source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
       result.asJsObject.getFields("censusTractCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>

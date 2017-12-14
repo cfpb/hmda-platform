@@ -159,4 +159,26 @@ trait LarGenerators extends FIGenerators {
   implicit def hoepaStatusGen: Gen[Int] = Gen.oneOf(1, 2)
 
   implicit def lienStatusGen: Gen[Int] = Gen.oneOf(1, 2, 3, 4)
+
+  def larWithValidGeoGen: Gen[LoanApplicationRegister] = {
+    for {
+      lar <- larGen
+      geo <- validAppletonGeoGen
+    } yield lar.copy(geography = geo)
+  }
+
+  def validAppletonGeoGen: Gen[Geography] = {
+    for {
+      county <- outagamieCountyTracts
+    } yield Geography(msa = "11540", state = "55", county = "087", tract = county)
+  }
+
+  def outagamieCountyTracts = Gen.oneOf(
+    "010100", "010200", "010300", "010500", "010601", "010602", "010700",
+    "010800", "010900", "011000", "011101", "011102", "011200", "011300",
+    "011400", "011501", "011502", "011600", "011700", "011800", "011900",
+    "012000", "012100", "012200", "012300", "012400", "012503", "012504",
+    "012505", "012506", "012601", "012602", "012700", "012800", "012901",
+    "012902", "013100", "013200", "013300", "940000"
+  )
 }
