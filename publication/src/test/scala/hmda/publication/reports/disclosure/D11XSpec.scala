@@ -71,4 +71,25 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     }
   }
 
+  "Include correct Census Tract Characteristics" in {
+    D11X.generate(D11_5, source, fips, respId, Future("Northwoods Test Bank")).map { result =>
+      result.asJsObject.getFields("censusTractCharacteristics") match {
+
+        case Seq(JsArray(characteristics)) =>
+          characteristics must have size 2
+          characteristics.head.asJsObject.getFields("characteristic", "compositions") match {
+
+            case Seq(JsString(char), JsArray(races)) =>
+              char mustBe "Racial/Ethnic Composition"
+              races must have size 5
+              races.head.asJsObject.getFields("composition", "pricingInformation") match {
+
+                case Seq(JsString(race), JsArray(pricing)) =>
+                  race mustBe "Less than 10% minority"
+                  pricing must have size 9
+              }
+          }
+      }
+    }
+  }
 }

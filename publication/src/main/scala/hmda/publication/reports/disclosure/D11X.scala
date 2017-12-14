@@ -9,6 +9,7 @@ import hmda.model.publication.reports.GenderEnum._
 import hmda.model.publication.reports.MinorityStatusEnum._
 import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
+import hmda.publication.reports.util.CensusTractUtil._
 import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
 import hmda.publication.reports.util.GenderUtil.filterGender
 import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
@@ -173,16 +174,16 @@ object D11X {
       i5 <- pricingData(incomeIntervals(GreaterThan120PercentOfMSAMedian))
       i6 <- pricingData(lars.filter(lar => lar.applicant.income == "NA"))
 
-      tractMinorityComposition1 <- ""
-      tractMinorityComposition2 <- ""
-      tractMinorityComposition3 <- ""
-      tractMinorityComposition4 <- ""
-      tractMinorityComposition5 <- ""
+      tractMinorityComposition1 <- pricingData(filterMinorityPopulation(lars, 0, 10))
+      tractMinorityComposition2 <- pricingData(filterMinorityPopulation(lars, 10, 20))
+      tractMinorityComposition3 <- pricingData(filterMinorityPopulation(lars, 20, 50))
+      tractMinorityComposition4 <- pricingData(filterMinorityPopulation(lars, 50, 80))
+      tractMinorityComposition5 <- pricingData(filterMinorityPopulation(lars, 80, 101))
 
-      tractIncome1 <- ""
-      tractIncome2 <- ""
-      tractIncome3 <- ""
-      tractIncome4 <- ""
+      tractIncome1 <- pricingData(filterIncomeCharacteristics(lars, 0, 50))
+      tractIncome2 <- pricingData(filterIncomeCharacteristics(lars, 50, 80))
+      tractIncome3 <- pricingData(filterIncomeCharacteristics(lars, 80, 120))
+      tractIncome4 <- pricingData(filterIncomeCharacteristics(lars, 120, 1000))
 
     } yield {
       s"""
@@ -314,6 +315,54 @@ object D11X {
        |                {
        |                    "gender": "Gender Not Available",
        |                    "pricingInformation": $g4
+       |                }
+       |            ]
+       |        }
+       |    ],
+       |    "censusTractCharacteristics": [
+       |        {
+       |            "characteristic": "Racial/Ethnic Composition",
+       |            "compositions": [
+       |                {
+       |                    "composition": "Less than 10% minority",
+       |                    "pricingInformation": $tractMinorityComposition1
+       |                },
+       |                {
+       |                    "composition": "10-19% minority",
+       |                    "pricingInformation": $tractMinorityComposition2
+       |                },
+       |                {
+       |                    "composition": "20-49% minority",
+       |                    "pricingInformation": $tractMinorityComposition3
+       |                },
+       |                {
+       |                    "composition": "50-79% minority",
+       |                    "pricingInformation": $tractMinorityComposition4
+       |                },
+       |                {
+       |                    "composition": "80-100% minority",
+       |                    "pricingInformation": $tractMinorityComposition5
+       |                }
+       |            ]
+       |        },
+       |        {
+       |            "characteristic": "Income Characteristics",
+       |            "incomes": [
+       |                {
+       |                    "income": "Low income",
+       |                    "pricingInformation": $tractIncome1
+       |                },
+       |                {
+       |                    "income": "Moderate income",
+       |                    "pricingInformation": $tractIncome2
+       |                },
+       |                {
+       |                    "income": "Middle income",
+       |                    "pricingInformation": $tractIncome3
+       |                },
+       |                {
+       |                    "income": "Upper income",
+       |                    "pricingInformation": $tractIncome4
        |                }
        |            ]
        |        }
