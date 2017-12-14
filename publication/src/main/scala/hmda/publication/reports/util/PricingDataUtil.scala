@@ -82,7 +82,11 @@ object PricingDataUtil extends SourceUtils {
       count <- loanCountF
       totalRateSpread <- rateSpreadSumF
     } yield {
-      val mean = if (count == 0) "\"\"" else totalRateSpread / count
+      val mean = if (count == 0) "\"\""
+      else {
+        val v = totalRateSpread / count
+        BigDecimal(v).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+      }
 
       s"""
          |{
@@ -116,7 +120,8 @@ object PricingDataUtil extends SourceUtils {
 
   def calculateMedian(seq: Seq[Double]): Double = {
     val (lowerHalf, upperHalf) = seq.sortWith(_ < _).splitAt(seq.size / 2)
-    if (seq.size % 2 == 0) (lowerHalf.last + upperHalf.head) / 2.0 else upperHalf.head
+    val median = if (seq.size % 2 == 0) (lowerHalf.last + upperHalf.head) / 2.0 else upperHalf.head
+    BigDecimal(median).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
   }
 
 }
