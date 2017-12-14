@@ -148,8 +148,12 @@ trait LarGenerators extends FIGenerators {
   }
 
   implicit def rateSpreadGen: Gen[String] = {
-    val numericSpreadGen = Gen.listOfN(2, stringOfN(2, Gen.numChar)).map(_.mkString("."))
-    optional(numericSpreadGen, "NA")
+    val rateSpread = for {
+      digit1 <- Gen.choose(1, 8)
+      decimal <- stringOfN(2, Gen.numChar)
+    } yield s"0$digit1.$decimal"
+
+    optional(rateSpread, "NA")
   }
 
   implicit def hoepaStatusGen: Gen[Int] = Gen.oneOf(1, 2)
