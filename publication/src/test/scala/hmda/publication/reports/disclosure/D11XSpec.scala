@@ -65,7 +65,7 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
 
                 case Seq(JsString(race), JsArray(pricing)) =>
                   race mustBe "American Indian/Alaska Native"
-                  pricing must have size 9
+                  pricing must have size 10
               }
           }
       }
@@ -87,10 +87,11 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
 
                 case Seq(JsString(race), JsArray(pricing)) =>
                   race mustBe "Less than 10% minority"
-                  pricing must have size 9
+                  pricing must have size 10
               }
           }
       }
     }
   }
+
 }

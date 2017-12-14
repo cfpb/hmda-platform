@@ -33,6 +33,7 @@ object PricingDataUtil extends SourceUtils {
          |    $rs2_5,
          |    $rs3,
          |    $rs4,
+         |    $rs5,
          |    $mean,
          |    $median
          |]
