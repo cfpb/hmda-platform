@@ -12,6 +12,7 @@ object TractLookup extends CbsaResourceUtils {
 
     lines.drop(1).map { line =>
       val values = parse(line, '\\', '|', '"').getOrElse(List())
+      val msa = values(1)
       val stateFips2010 = values(2)
       val countyFips2010 = values(3)
       val tractFips2010 = values(4)
@@ -21,7 +22,8 @@ object TractLookup extends CbsaResourceUtils {
         countyFips2010,
         tractFips2010,
         tractFips2010.slice(0, 4) + "." + tractFips2010.slice(4, 6),
-        stateFips2010 + countyFips2010
+        stateFips2010 + countyFips2010,
+        msa
       )
     }.toSet
   }
@@ -32,6 +34,7 @@ case class Tract(
   county: String = "",
   tract: String = "",
   tractDec: String = "",
-  key: String = ""
+  key: String = "",
+  msa: String = ""
 )
 
