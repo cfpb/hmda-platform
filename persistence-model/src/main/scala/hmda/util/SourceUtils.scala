@@ -16,6 +16,10 @@ trait SourceUtils {
     input.runWith(sinkSum(summation))
   }
 
+  def sumDouble[T: AS: MAT](input: Source[T, NotUsed], summation: T => Double): Future[Double] = {
+    input.runWith(sinkSumDouble(summation))
+  }
+
   def collectHeadValue[T: AS: MAT: EC](input: Source[T, NotUsed]): Future[T] = {
     input.take(1).runWith(Sink.seq).map(xs => xs.head)
   }
@@ -34,4 +38,10 @@ trait SourceUtils {
     }
   }
 
+  private def sinkSumDouble[T](summation: T => Double): Sink[T, Future[Double]] = {
+    Sink.fold[Double, T](0) { (acc, lar) =>
+      val total = acc + summation(lar)
+      total
+    }
+  }
 }
