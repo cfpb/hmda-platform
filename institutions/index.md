@@ -78,6 +78,13 @@ GET https://ffiec-api.cfpb.gov/public/institutions?domain=bank0.com
   <p>Using the <code>/institutions/:institutionId</code> endpoint you can provide an institution id and get the details of an institution.</p>
 </hgroup>
 
+<div class="usa-alert usa-alert-info">
+  <div class="usa-alert-body">
+    <h3 class="usa-alert-heading">Note!</h3>
+    <p class="usa-alert-text">The insitution id is the <abbr title="Replication Server System Database ID">RSSD ID</abbr> or, for non-depository institutions, the Federal Tax ID.</p>
+  </div>
+</div>
+
 <h4>Example</h4>
 {% highlight PowerShell %}
 GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId
@@ -99,7 +106,7 @@ GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId
   <tr>
     <td><code>institution id</code></td>
     <td><code>string</code></td>
-    <td>Any institution id.</td>
+    <td>An institutions <abbr title="Replication Server System Database ID">RSSD ID</abbr> or,<br />for non-depository institutions, the Federal Tax ID.</td>
   </tr>
 </tbody>
 </table>
