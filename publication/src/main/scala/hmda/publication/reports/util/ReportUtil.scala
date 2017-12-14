@@ -16,6 +16,7 @@ import hmda.publication.reports.util.MinorityStatusUtil.minorityStatusBorrowerCh
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
+import scala.util.Success
 
 object ReportUtil extends SourceUtils {
 
@@ -132,7 +133,10 @@ object ReportUtil extends SourceUtils {
   }
 
   def calculateYear[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[Int] = {
-    collectHeadValue(larSource).map(lar => lar.actionTakenDate.toString.substring(0, 4).toInt)
+    collectHeadValue(larSource).map {
+      case Success(lar) => lar.actionTakenDate.toString.substring(0, 4).toInt
+      case _ => 0
+    }
   }
 
   def calculateDispositions[ec: EC, mat: MAT, as: AS](
