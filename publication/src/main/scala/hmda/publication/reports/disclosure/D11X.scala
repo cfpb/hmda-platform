@@ -2,6 +2,7 @@ package hmda.publication.reports.disclosure
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
+import hmda.census.model.{ Tract, TractLookup }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports.EthnicityEnum._
@@ -17,6 +18,7 @@ import hmda.publication.reports.util.PricingDataUtil.pricingData
 import hmda.publication.reports.util.RaceUtil.filterRace
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
+
 import scala.concurrent.Future
 import spray.json._
 
@@ -141,7 +143,7 @@ object D11X {
     val reportDate = formattedCurrentDate
     val yearF = calculateYear(lars)
 
-    val fips = fipsCode.toString
+    val msaTracts: Set[Tract] = TractLookup.values.filter(_.msa == fipsCode.toString)
 
     for {
       institutionName <- institutionNameF
@@ -176,16 +178,16 @@ object D11X {
       i5 <- pricingData(incomeIntervals(GreaterThan120PercentOfMSAMedian))
       i6 <- pricingData(lars.filter(lar => lar.applicant.income == "NA"))
 
-      tractMinorityComposition1 <- pricingData(filterMinorityPopulation(lars, 0, 10, fips))
-      tractMinorityComposition2 <- pricingData(filterMinorityPopulation(lars, 10, 20, fips))
-      tractMinorityComposition3 <- pricingData(filterMinorityPopulation(lars, 20, 50, fips))
-      tractMinorityComposition4 <- pricingData(filterMinorityPopulation(lars, 50, 80, fips))
-      tractMinorityComposition5 <- pricingData(filterMinorityPopulation(lars, 80, 101, fips))
+      tractMinorityComposition1 <- pricingData(filterMinorityPopulation(lars, 0, 10, msaTracts))
+      tractMinorityComposition2 <- pricingData(filterMinorityPopulation(lars, 10, 20, msaTracts))
+      tractMinorityComposition3 <- pricingData(filterMinorityPopulation(lars, 20, 50, msaTracts))
+      tractMinorityComposition4 <- pricingData(filterMinorityPopulation(lars, 50, 80, msaTracts))
+      tractMinorityComposition5 <- pricingData(filterMinorityPopulation(lars, 80, 101, msaTracts))
 
-      tractIncome1 <- pricingData(filterIncomeCharacteristics(lars, 0, 50, fips))
-      tractIncome2 <- pricingData(filterIncomeCharacteristics(lars, 50, 80, fips))
-      tractIncome3 <- pricingData(filterIncomeCharacteristics(lars, 80, 120, fips))
-      tractIncome4 <- pricingData(filterIncomeCharacteristics(lars, 120, 1000, fips))
+      tractIncome1 <- pricingData(filterIncomeCharacteristics(lars, 0, 50, msaTracts))
+      tractIncome2 <- pricingData(filterIncomeCharacteristics(lars, 50, 80, msaTracts))
+      tractIncome3 <- pricingData(filterIncomeCharacteristics(lars, 80, 120, msaTracts))
+      tractIncome4 <- pricingData(filterIncomeCharacteristics(lars, 120, 1000, msaTracts))
 
     } yield {
       s"""

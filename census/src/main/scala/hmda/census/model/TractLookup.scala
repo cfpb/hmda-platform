@@ -35,9 +35,9 @@ object TractLookup extends CbsaResourceUtils {
     }.toSet
   }
 
-  def forLar(lar: LoanApplicationRegister): Option[Tract] = {
+  def forLar(lar: LoanApplicationRegister, possibleValues: Set[Tract] = values): Option[Tract] = {
     val geo = lar.geography
-    values.find { t =>
+    possibleValues.find { t =>
       t.state == geo.state &&
         t.county == geo.county &&
         t.tract == geo.tract
@@ -55,4 +55,3 @@ case class Tract(
   minorityPopulationPercent: Double = 0.0,
   tractMfiPercentageOfMsaMfi: Double = 0.0
 )
-
