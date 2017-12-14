@@ -1,7 +1,7 @@
 package hmda.publication.reports.util
 
 import akka.NotUsed
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Sink, Source}
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.publication.reports._
 import hmda.util.SourceUtils
@@ -22,6 +22,7 @@ class PricingDataUtil extends SourceUtils {
       rs4 <- pricingDisposition(lars, rateSpreadBetween(4,5), "4.00 - 4.99")
       rs5 <- pricingDisposition(lars, rateSpreadBetween(5, Int.MaxValue), "5 or more")
       mean <- reportedMean(lars)
+      median <- reportedMedian(lars)
     } yield {
       s"""
          |[
@@ -32,12 +33,8 @@ class PricingDataUtil extends SourceUtils {
          |    $rs2_5,
          |    $rs3,
          |    $rs4,
-         |    $mean
-         |    {
-         |        "pricing": "Median",
-         |        "count": 0,
-         |        "value": "None"
-         |    }
+         |    $mean,
+         |    $median
          |]
      """. stripMargin
     }
@@ -92,6 +89,29 @@ class PricingDataUtil extends SourceUtils {
          |}
        """.stripMargin
     }
+  }
+
+  private def reportedMedian(lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+    val rateSpreadsF: Future[Seq[Double]] =
+      lars.filter(pricingDataReported)
+        // .limit(MAX_SIZE)
+        .map(lar => lar.rateSpread.toDouble)
+        .runWith(Sink.seq)
+
+    rateSpreadsF.map { seq =>
+      s"""
+         |{
+         |    "pricing": "Median",
+         |    "count": ${calculateMedian(seq)},
+         |    "value": "None"
+         |}
+       """.stripMargin
+    }
+  }
+
+  def calculateMedian(seq: Seq[Double]): Double = {
+    val (lowerHalf, upperHalf) = seq.sortWith(_<_).splitAt(seq.size / 2)
+    if (seq.size % 2 == 0) (lowerHalf.last + upperHalf.head) / 2.0 else upperHalf.head
   }
 
 }
