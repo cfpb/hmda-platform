@@ -40,7 +40,7 @@ object TractLookup extends CbsaResourceUtils {
     possibleValues.find { t =>
       t.state == geo.state &&
         t.county == geo.county &&
-        t.tract == geo.tract
+        t.tractDec == geo.tract
     }
   }
 }

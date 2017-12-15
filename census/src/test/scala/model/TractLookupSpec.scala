@@ -9,8 +9,8 @@ class TractLookupSpec extends WordSpec with MustMatchers with LarGenerators {
   "Tract Lookup" must {
     val lookup = TractLookup.values
 
-    val geo1 = Geography(state = "01", county = "001", tract = "020100", msa = "any")
-    val geo2 = Geography(state = "06", county = "113", tract = "010800", msa = "any")
+    val geo1 = Geography(state = "01", county = "001", tract = "0201.00", msa = "any")
+    val geo2 = Geography(state = "06", county = "113", tract = "0108.00", msa = "any")
 
     val lar1 = larGen.sample.get.copy(geography = geo1)
     val lar2 = larGen.sample.get.copy(geography = geo2)
