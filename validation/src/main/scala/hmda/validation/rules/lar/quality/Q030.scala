@@ -11,7 +11,7 @@ object Q030 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q030"
 
   override def apply(lar: LoanApplicationRegister): Result = {
-    val tract = TractLookup.values.find(t => matchTract(t, lar)).getOrElse(Tract())
+    val tract = TractLookup.forLar(lar).getOrElse(Tract())
 
     when(lar.actionTakenType is containedIn(1 to 6)) {
       (lar.geography.tract not "NA") and
@@ -21,9 +21,4 @@ object Q030 extends EditCheck[LoanApplicationRegister] {
     }
   }
 
-  private def matchTract(tract: Tract, lar: LoanApplicationRegister): Boolean = {
-    tract.tractDec == lar.geography.tract &&
-      tract.state == lar.geography.state &&
-      tract.county == lar.geography.county
-  }
 }
