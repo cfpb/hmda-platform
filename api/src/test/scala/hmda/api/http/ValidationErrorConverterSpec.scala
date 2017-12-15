@@ -114,7 +114,7 @@ class ValidationErrorConverterSpec extends WordSpec with MustMatchers with Valid
     "convert edits to CSV" in {
       val csvResults: Seq[String] = validationErrorsToCsvResults(validationState).split("\n")
 
-      csvResults.length mustBe 18
+      csvResults.length mustBe 15
       csvResults.head mustBe "editType, editId, loanId"
       csvResults(1) mustBe "Syntactical, S020, Transmittal Sheet"
       csvResults.last mustBe "Macro, Q029, "
