@@ -61,7 +61,7 @@ class D4XSpec extends AsyncWordSpec with MustMatchers
           ms must have size 2
           ethnicities must have size 4
           incomes must have size 6
-          total must have size D4X.dispositions.size
+          total must have size 6
           races.head.asJsObject.getFields("race", "dispositions", "genders") match {
             case Seq(JsString(name), JsArray(disp), JsArray(genders)) =>
               name mustBe "American Indian/Alaska Native"
