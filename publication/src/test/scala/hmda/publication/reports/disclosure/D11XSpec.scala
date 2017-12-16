@@ -35,13 +35,13 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
 
   val descriptionD85 = "Pricing information for FHA refinancing loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 
-  "Generate a Disclosure 11-5 report" in {
+  "Generate a Disclosure 11-4 report" in {
     D11_4.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
       result.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
         case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
           respondentId mustBe respId
           instName mustBe "Fox Valley Test Bank"
-          table mustBe "11-5"
+          table mustBe "11-4"
           desc mustBe descriptionD85
           msa.asJsObject.getFields("name") match {
             case Seq(JsString(msaName)) => msaName mustBe "Appleton, WI"
