@@ -36,7 +36,7 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   val descriptionD85 = "Pricing information for FHA refinancing loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 
   "Generate a Disclosure 11-5 report" in {
-    D11X.generate(D11_5, source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
+    D11_4.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
       result.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
         case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
           respondentId mustBe respId
@@ -51,7 +51,7 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   }
 
   "Include correct borrower Characteristics" in {
-    D11X.generate(D11_5, source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
+    D11_5.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
       result.asJsObject.getFields("borrowerCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
@@ -73,7 +73,7 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   }
 
   "Include correct Census Tract Characteristics" in {
-    D11X.generate(D11_5, source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
+    D11_6.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
       result.asJsObject.getFields("censusTractCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
