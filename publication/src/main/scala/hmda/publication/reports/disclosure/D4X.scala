@@ -21,11 +21,6 @@ import hmda.publication.reports.util.ReportsMetaDataLookup
 import scala.concurrent.Future
 import spray.json._
 
-trait D4X {
-  val reportId: String
-  def filters(lar: LoanApplicationRegister): Boolean
-}
-
 object D41 extends D4X {
   val reportId = "D41"
   def filters(lar: LoanApplicationRegister): Boolean = {
@@ -82,25 +77,27 @@ object D47 extends D4X {
   }
 }
 
-object D4X {
+trait D4X {
+  val reportId: String
+  def filters(lar: LoanApplicationRegister): Boolean
+
   val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
     ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
   def generate[ec: EC, mat: MAT, as: AS](
-    report: D4X,
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
     respondentId: String,
     institutionNameF: Future[String]
   ): Future[JsValue] = {
 
-    val metaData = ReportsMetaDataLookup.values(report.reportId)
+    val metaData = ReportsMetaDataLookup.values(reportId)
 
     val lars = larSource
       .filter(lar => lar.respondentId == respondentId)
       .filter(lar => lar.geography.msa != "NA")
       .filter(lar => lar.geography.msa.toInt == fipsCode)
-      .filter(report.filters)
+      .filter(filters)
 
     val incomeIntervals = larsByIncomeInterval(
       lars.filter(lar => lar.applicant.income != "NA"),

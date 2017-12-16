@@ -36,13 +36,13 @@ class D4XSpec extends AsyncWordSpec with MustMatchers
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
-  val description = "Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
+  val description = "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 
-  "Generate a Disclosure 4-2 report" in {
-    D4X.generate(D42, source, fips, respId, Future("Grand Junction Mortgage Co.")).map { result =>
+  "Generate a Disclosure 4-1 report" in {
+    D41.generate(source, fips, respId, Future("Grand Junction Mortgage Co.")).map { result =>
       result.asJsObject.getFields("table", "description", "msa", "respondentId", "institutionName") match {
         case Seq(JsString(table), JsString(desc), msa, JsString(resp), JsString(instName)) =>
-          table mustBe "4-2"
+          table mustBe "4-1"
           desc mustBe description
           resp mustBe "10101"
           instName mustBe "Grand Junction Mortgage Co."
@@ -54,7 +54,7 @@ class D4XSpec extends AsyncWordSpec with MustMatchers
   }
 
   "Include correct demographics for dispositions" in {
-    D4X.generate(D42, source, fips, respId, Future("Grand Junction Mortgage Co.")).map { result =>
+    D42.generate(source, fips, respId, Future("Grand Junction Mortgage Co.")).map { result =>
       result.asJsObject.getFields("races", "minorityStatuses", "ethnicities", "incomes", "total") match {
         case Seq(JsArray(races), JsArray(ms), JsArray(ethnicities), JsArray(incomes), JsArray(total)) =>
           races must have size 8

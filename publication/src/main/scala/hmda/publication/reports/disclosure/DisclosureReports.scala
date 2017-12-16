@@ -33,7 +33,7 @@ class DisclosureReports(val sys: ActorSystem, val mat: ActorMaterializer) extend
 
     val d4XReports = List(D41, D42, D43, D44, D45, D46, D47)
     val d4XF = Future.sequence(d4XReports.map { report =>
-      D4X.generate(report, larSource, fipsCode, respId, institutionNameF)
+      report.generate(larSource, fipsCode, respId, institutionNameF)
     })
 
     val d51F = D51.generate(larSource, fipsCode, respId, institutionNameF)
