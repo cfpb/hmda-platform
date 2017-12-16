@@ -33,7 +33,7 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
-  val descriptionD85 = "Pricing information for FHA refinancing loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
+  val description = "Pricing information for conventional home-purchase loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 
   "Generate a Disclosure 11-4 report" in {
     D11_4.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
@@ -42,7 +42,7 @@ class D11XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
           respondentId mustBe respId
           instName mustBe "Fox Valley Test Bank"
           table mustBe "11-4"
-          desc mustBe descriptionD85
+          desc mustBe description
           msa.asJsObject.getFields("name") match {
             case Seq(JsString(msaName)) => msaName mustBe "Appleton, WI"
           }
