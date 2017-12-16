@@ -3,7 +3,7 @@ package hmda.validation.rules.lar.`macro`
 import akka.pattern.ask
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
-import hmda.validation.ValidationStats.FindQ072
+import hmda.validation.stats.ValidationStats.FindQ072
 import hmda.validation.{ AS, EC, MAT }
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.Result

@@ -9,7 +9,7 @@ import hmda.model.fi.lar.LarGenerators
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
-import hmda.validation.ValidationStats._
+import hmda.validation.stats.ValidationStats._
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import scala.concurrent.duration._

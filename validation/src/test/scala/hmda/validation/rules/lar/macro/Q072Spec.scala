@@ -6,7 +6,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
-import hmda.validation.ValidationStats._
+import hmda.validation.stats.ValidationStats._
 import org.scalacheck.Gen
 
 import scala.concurrent.Await

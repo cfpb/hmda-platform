@@ -3,7 +3,7 @@ package hmda.validation.rules.ts.quality
 import akka.pattern.ask
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
-import hmda.validation.ValidationStats.FindTotalSubmittedLars
+import hmda.validation.stats.ValidationStats.FindTotalSubmittedLars
 import hmda.validation._
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.{ AggregateEditCheck, IfContextPresentInAggregate, StatsLookup }

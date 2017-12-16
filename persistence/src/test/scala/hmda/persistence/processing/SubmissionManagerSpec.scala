@@ -19,7 +19,7 @@ import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.SubmissionPersistence.{ CreateSubmission, GetSubmissionById }
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.SubmissionManager.AddFileName
-import hmda.validation.ValidationStats
+import hmda.validation.stats.ValidationStats
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

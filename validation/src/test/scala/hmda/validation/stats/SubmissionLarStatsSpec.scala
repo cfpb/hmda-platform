@@ -7,7 +7,6 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.MacroStatsUpdated
 import hmda.persistence.model.{ ActorSpec, MsaGenerators }
-import hmda.validation.ValidationStats
 import hmda.validation.rules.lar.`macro`._
 import hmda.validation.stats.SubmissionLarStats._
 

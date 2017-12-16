@@ -10,7 +10,7 @@ import hmda.validation.rules._
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
-import hmda.validation.ValidationStats.FindTotalValidatedLars
+import hmda.validation.stats.ValidationStats.FindTotalValidatedLars
 
 import scala.concurrent.Future
 

@@ -31,7 +31,7 @@ import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.Macr
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.stats.SubmissionLarStats.PersistStatsForMacroEdits
-import hmda.validation.ValidationStats.AddSubmissionTaxId
+import hmda.validation.stats.ValidationStats.AddSubmissionTaxId
 import hmda.validation.stats.SubmissionLarStats
 
 import scala.util.Try

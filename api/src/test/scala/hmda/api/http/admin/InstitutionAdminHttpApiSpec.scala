@@ -14,7 +14,7 @@ import hmda.api.http.BaseHttpApi
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.HmdaSupervisor
-import hmda.validation.ValidationStats
+import hmda.validation.stats.ValidationStats
 
 import scala.concurrent.duration._
 import spray.json._

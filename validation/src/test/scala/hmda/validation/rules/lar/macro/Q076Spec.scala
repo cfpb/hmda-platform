@@ -4,7 +4,7 @@ import akka.pattern.ask
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
-import hmda.validation.ValidationStats.{ AddSubmissionMacroStats, FindQ076 }
+import hmda.validation.stats.ValidationStats._
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalacheck.Gen

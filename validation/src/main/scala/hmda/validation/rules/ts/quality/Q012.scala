@@ -4,7 +4,7 @@ import akka.pattern.ask
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.validation.{ AS, EC, MAT }
-import hmda.validation.ValidationStats.FindTaxId
+import hmda.validation.stats.ValidationStats.FindTaxId
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules._
 import hmda.validation.dsl.Result

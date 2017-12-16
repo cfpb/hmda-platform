@@ -6,7 +6,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
-import hmda.validation.ValidationStats._
+import hmda.validation.stats.ValidationStats._
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }

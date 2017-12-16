@@ -1,11 +1,11 @@
-package hmda.validation
+package hmda.validation.stats
 
 import akka.testkit.TestProbe
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.{ ActorSpec, MsaGenerators }
-import hmda.validation.ValidationStats._
+import hmda.validation.stats.ValidationStats._
 
 class ValidationStatsSpec extends ActorSpec with MsaGenerators {
 

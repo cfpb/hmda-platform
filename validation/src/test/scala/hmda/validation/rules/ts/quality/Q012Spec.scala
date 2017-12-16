@@ -12,7 +12,7 @@ import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.duration._
-import hmda.validation.ValidationStats._
+import hmda.validation.stats.ValidationStats._
 
 class Q012Spec extends AsyncWordSpec with MustMatchers with TsGenerators with BeforeAndAfterAll {
   val configuration = ConfigFactory.load()

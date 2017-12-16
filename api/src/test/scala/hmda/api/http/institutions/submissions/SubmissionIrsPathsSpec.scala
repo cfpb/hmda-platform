@@ -7,7 +7,7 @@ import hmda.api.model.IrsResponse
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.persistence.model.MsaGenerators
-import hmda.validation.ValidationStats._
+import hmda.validation.stats.ValidationStats._
 
 class SubmissionIrsPathsSpec
     extends InstitutionHttpApiSpec
