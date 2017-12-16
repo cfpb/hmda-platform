@@ -35,7 +35,7 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   val descriptionD85 = "Reasons for denial of applications for loans on dwellings for 5 or more families, by race, ethnicity, gender and income of applicant"
 
   "Generate a Disclosure 8-5 report" in {
-    D8X.generate(D85, source, fips, respId, Future("Bemidji Test Bank")).map { result =>
+    D85.generate(source, fips, respId, Future("Bemidji Test Bank")).map { result =>
       result.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
         case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
           respondentId mustBe respId
@@ -50,7 +50,7 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   }
 
   "Include correct applicant Characteristics" in {
-    D8X.generate(D85, source, fips, respId, Future("Bemidji Test Bank")).map { result =>
+    D85.generate(source, fips, respId, Future("Bemidji Test Bank")).map { result =>
       result.asJsObject.getFields("applicantCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
