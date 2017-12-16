@@ -17,8 +17,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
 
   val submissionId = SubmissionId("12345", "2017", 1)
 
-  val validationStats = ValidationStats.createValidationStats(system)
-  val submissionLarStats = createSubmissionStats(system, validationStats, submissionId)
+  val submissionLarStats = createSubmissionStats(system, submissionId)
 
   val probe = TestProbe()
 
@@ -48,7 +47,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
 
     "Aggregate all lars relevant to Q070" in {
       val submissionId2 = SubmissionId("12345", "2017", 2)
-      val submissionLarStats2 = createSubmissionStats(system, validationStats, submissionId2)
+      val submissionLarStats2 = createSubmissionStats(system, submissionId2)
 
       val irrelevantLars = listOfN(11, Q070Spec.irrelevant)
       val relevantNotSoldLars = listOfN(12, Q070Spec.relevantNotSold)
@@ -70,7 +69,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
 
     "Aggregate all lars relevant to Q071" in {
       val submissionId3 = SubmissionId("12345", "2017", 3)
-      val submissionLarStats3 = createSubmissionStats(system, validationStats, submissionId3)
+      val submissionLarStats3 = createSubmissionStats(system, submissionId3)
 
       val irrelevantLars = listOfN(5, Q071Spec.irrelevant)
       val relevantNotSoldLars = listOfN(6, Q071Spec.relevantNotSold)
@@ -92,7 +91,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
 
     "Aggregate all lars relevant to Q072" in {
       val submissionId = SubmissionId("12345", "2017", 4)
-      val submissionLarStats = createSubmissionStats(system, validationStats, submissionId)
+      val submissionLarStats = createSubmissionStats(system, submissionId)
 
       val irrelevantLars = listOfN(9, Q072Spec.irrelevant)
       val relevantNotSoldLars = listOfN(8, Q072Spec.relevantNotSold)
@@ -114,7 +113,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
 
     "Aggregate all lars relevant to Q075" in {
       val submissionId = SubmissionId("12345", "2017", 5)
-      val submissionLarStats = createSubmissionStats(system, validationStats, submissionId)
+      val submissionLarStats = createSubmissionStats(system, submissionId)
 
       val irrelevantLars = listOfN(6, Q075Spec.irrelevant)
       val relevantNotSoldLars = listOfN(5, Q075Spec.relevantNotSold)
@@ -135,7 +134,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
 
     "Aggregate all lars relevant to Q076" in {
       val submissionId = SubmissionId("12345", "2018", 6)
-      val submissionLarStats = createSubmissionStats(system, validationStats, submissionId)
+      val submissionLarStats = createSubmissionStats(system, submissionId)
 
       val irrelevantLars = listOfN(11, Q076Spec.irrelevant)
       val relevantNotSoldLars = listOfN(13, Q076Spec.relevantNotSold)
@@ -156,7 +155,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
 
     "Aggregate all IRS information" in {
       val submissionId = SubmissionId("12345", "2018", 7)
-      val submissionLarStats = createSubmissionStats(system, validationStats, submissionId)
+      val submissionLarStats = createSubmissionStats(system, submissionId)
 
       val msaNA = Geography("NA", "", "", "")
       val msaVT = Geography("13980", "", "", "")

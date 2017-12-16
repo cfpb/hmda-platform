@@ -8,6 +8,7 @@ import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
 import hmda.persistence.model.HmdaPersistentActor
+import hmda.validation.messages.ValidationStatsMessages.FindTotalSubmittedLars
 import hmda.validation.stats.ValidationStats.{ AddIrsStats, AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
 import hmda.validation.rules.lar.`macro`._
 
@@ -18,10 +19,10 @@ object SubmissionLarStats {
   case class CountSubmittedLarsInSubmission() extends Command
   case class PersistIrs() extends Command
 
-  def props(validationStats: ActorRef, submissionId: SubmissionId): Props = Props(new SubmissionLarStats(validationStats, submissionId))
+  def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
 
-  def createSubmissionStats(system: ActorSystem, validationStats: ActorRef, submissionId: SubmissionId): ActorRef = {
-    system.actorOf(SubmissionLarStats.props(validationStats, submissionId))
+  def createSubmissionStats(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
+    system.actorOf(SubmissionLarStats.props(submissionId))
   }
 
   case class SubmissionLarStatsState(
@@ -57,7 +58,7 @@ object SubmissionLarStats {
   }
 }
 
-class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) extends HmdaPersistentActor {
+class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor {
   import SubmissionLarStats._
 
   var totalSubmittedLars = 0
@@ -99,7 +100,7 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
       persist(SubmittedLarsUpdated(totalSubmittedLars)) { e =>
         log.debug(s"Persisted: $totalSubmittedLars")
         updateState(e)
-        validationStats ! AddSubmissionSubmittedTotal(totalSubmittedLars, submissionId)
+        //validationStats ! AddSubmissionSubmittedTotal(totalSubmittedLars, submissionId)
       }
 
     case PersistStatsForMacroEdits =>
@@ -123,7 +124,7 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
           q076Ratio
         )
         self ! PersistIrs
-        validationStats ! msg
+        //validationStats ! msg
         sender() ! e
       }
 
@@ -132,8 +133,11 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
       persist(IrsStatsUpdated(msaSeq)) { e =>
         log.debug(s"Persisted: $msaSeq")
         updateState(e)
-        validationStats ! AddIrsStats(msaSeq, submissionId)
+        //validationStats ! AddIrsStats(msaSeq, submissionId)
       }
+
+    case FindTotalSubmittedLars(id, period) =>
+      sender() ! state.totalSubmitted
 
     case GetState =>
       sender() ! state
