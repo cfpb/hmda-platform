@@ -22,7 +22,7 @@ import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
 import hmda.persistence.processing.SubmissionManager.{ AddFileName, GetActorRef }
-import hmda.validation.SubmissionLarStats
+import hmda.validation.stats.SubmissionLarStats
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

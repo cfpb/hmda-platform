@@ -1,4 +1,4 @@
-package hmda.validation
+package hmda.validation.stats
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.census.model.{ Msa, MsaMap }

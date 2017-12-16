@@ -17,8 +17,8 @@ import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.messages.events.processing.FileUploadEvents._
 import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, LarParsedErrors, TsParsed, TsParsedErrors }
 import hmda.persistence.processing.SubmissionManager.GetActorRef
-import hmda.validation.SubmissionLarStats
-import hmda.validation.SubmissionLarStats.CountSubmittedLarsInSubmission
+import hmda.validation.stats.SubmissionLarStats.CountSubmittedLarsInSubmission
+import hmda.validation.stats.SubmissionLarStats
 
 import scala.concurrent.duration._
 

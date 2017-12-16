@@ -1,4 +1,4 @@
-package hmda.validation
+package hmda.validation.stats
 
 import akka.testkit.TestProbe
 import hmda.model.fi.SubmissionId
@@ -7,8 +7,9 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.MacroStatsUpdated
 import hmda.persistence.model.{ ActorSpec, MsaGenerators }
-import hmda.validation.SubmissionLarStats._
+import hmda.validation.ValidationStats
 import hmda.validation.rules.lar.`macro`._
+import hmda.validation.stats.SubmissionLarStats._
 
 class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenerators {
 
