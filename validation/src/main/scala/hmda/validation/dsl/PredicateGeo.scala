@@ -42,13 +42,8 @@ object PredicateGeo {
     (cbsa.state, cbsa.county)
   }.toSet
 
-  private val smallCounties = cbsaTracts
-    .filter { cbsa => cbsa.smallCounty == 1 }
-    .map { cbsa => (cbsa.state, cbsa.county) }
-    .toSet
-
   def smallCounty: Predicate[Geography] = { (geo: Geography) =>
-    smallCounties.contains((geo.state, geo.county))
+    CBSATractLookup.smallCounties.contains((geo.state, geo.county))
   }
 
   def validStateCountyCombination: Predicate[Geography] = { (geo: Geography) =>

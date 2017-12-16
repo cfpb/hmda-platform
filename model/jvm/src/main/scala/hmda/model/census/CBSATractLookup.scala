@@ -1,6 +1,7 @@
 package hmda.model.census
 
 import hmda.model.ResourceUtils
+import hmda.model.fi.lar.Geography
 
 import scala.util.Try
 
@@ -37,6 +38,14 @@ object CBSATractLookup extends ResourceUtils {
       )
     }.toSeq
   }
+
+  val smallCounties =
+    values.filter { cbsa => cbsa.smallCounty == 1 }
+      .map { cbsa => (cbsa.state, cbsa.county) }
+      .toSet
+
+  def geoIsSmallCounty(geo: Geography): Boolean = smallCounties.contains((geo.state, geo.county))
+
 }
 
 case class CBSATract(
