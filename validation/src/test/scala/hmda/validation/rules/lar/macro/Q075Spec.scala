@@ -7,7 +7,8 @@ import hmda.model.institution.Institution
 import hmda.validation.stats.ValidationStats.AddSubmissionMacroStats
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
-import hmda.validation.messages.ValidationStatsMessages.FindQ075
+import hmda.validation.messages.ValidationStatsMessages.{ AddSubmissionLarStatsActorRef, FindQ075 }
+import hmda.validation.stats.SubmissionLarStats.createSubmissionStats
 import org.scalacheck.Gen
 
 import scala.concurrent.Await
@@ -20,7 +21,10 @@ class Q075Spec extends MacroSpecWithValidationStats {
 
     val instId = "inst-with-prev-year-data"
     "set up: persist last year's data: sold 60% of loans" in {
-      validationStats ! AddSubmissionMacroStats(SubmissionId(instId, "2016", 1), 0, 0, 0, 0, 0, 0, 0, 0.6, 0)
+      val submissionId = SubmissionId(instId, "2016", 1)
+      val larStats = createSubmissionStats(system, submissionId)
+      validationStats ! AddSubmissionLarStatsActorRef(larStats, submissionId)
+      validationStats ! AddSubmissionMacroStats(submissionId, 0, 0, 0, 0, 0, 0, 0, 0.6, 0)
       val ratio = Await.result((validationStats ? FindQ075(instId, "2016")).mapTo[Double], duration)
       ratio mustBe 0.6
     }
