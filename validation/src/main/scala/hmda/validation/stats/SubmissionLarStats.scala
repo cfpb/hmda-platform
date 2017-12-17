@@ -6,9 +6,10 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
+import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
 import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.messages.ValidationStatsMessages.FindTotalSubmittedLars
+import hmda.validation.messages.ValidationStatsMessages.{ FindTotalSubmittedLars, FindTotalValidatedLars }
 import hmda.validation.stats.ValidationStats.{ AddIrsStats, AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
 import hmda.validation.rules.lar.`macro`._
 
@@ -84,7 +85,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
   }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
-    case s: String =>
+    case LineAdded(_, _) =>
       totalSubmittedLars = totalSubmittedLars + 1
 
     case LarValidated(lar, _) =>
@@ -136,8 +137,11 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
         //validationStats ! AddIrsStats(msaSeq, submissionId)
       }
 
-    case FindTotalSubmittedLars(id, period) =>
+    case FindTotalSubmittedLars(_, _) =>
       sender() ! state.totalSubmitted
+
+    case FindTotalValidatedLars(_, _) =>
+      sender() ! totalValidatedLars
 
     case GetState =>
       sender() ! state

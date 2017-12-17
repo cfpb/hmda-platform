@@ -3,9 +3,10 @@ package hmda.validation.stats
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
-import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState, Shutdown }
+import hmda.persistence.messages.CommonMessages.{ Command, Event }
 import hmda.persistence.messages.events.validation.ValidationStatsEvents._
-import hmda.persistence.model.HmdaPersistentActor
+import hmda.persistence.model.HmdaActor
+import hmda.validation.messages.ValidationStatsMessages.{ AddSubmissionLarStatsActorRef, FindTotalSubmittedLars, FindTotalValidatedLars, RemoveSubmissionLarStatsActorRef }
 
 object ValidationStats {
   def name = "ValidationStats"
@@ -41,16 +42,6 @@ object ValidationStats {
     q076Ratio: Double
   ) extends Command
   case class AddIrsStats(msas: Seq[Msa], id: SubmissionId) extends Command
-
-  case class FindTotalSubmittedLars(institutionId: String, period: String) extends Command
-  case class FindTotalValidatedLars(institutionId: String, period: String) extends Command
-  case class FindIrsStats(submissionId: SubmissionId) extends Command
-  case class FindTaxId(institutionId: String, period: String) extends Command
-  case class FindQ070(institutionId: String, period: String) extends Command
-  case class FindQ071(institutionId: String, period: String) extends Command
-  case class FindQ072(institutionId: String, period: String) extends Command
-  case class FindQ075(institutionId: String, period: String) extends Command
-  case class FindQ076(institutionId: String, period: String) extends Command
 
   def props(): Props = Props(new ValidationStats)
 
@@ -103,88 +94,123 @@ object ValidationStats {
   }
 }
 
-class ValidationStats extends HmdaPersistentActor {
+class ValidationStats extends HmdaActor {
   import ValidationStats._
 
-  override def persistenceId: String = s"$name"
+  var actors = Map.empty[SubmissionId, ActorRef]
 
-  var state = ValidationStatsState()
+  //override def persistenceId: String = s"$name"
 
-  override def updateState(event: Event): Unit = {
-    state = state.updated(event)
-  }
+  //var state = ValidationStatsState()
+
+  //  override def updateState(event: Event): Unit = {
+  //    state = state.updated(event)
+  //  }
 
   override def preStart(): Unit = {
     log.info(s"Actor started at ${self.path}")
     log.debug("Thread name for actor: " + Thread.currentThread().getName)
   }
 
-  override def receiveCommand: Receive = super.receiveCommand orElse {
-    case AddSubmissionSubmittedTotal(total, id) =>
-      persist(SubmissionSubmittedTotalsAdded(total, id)) { e =>
-        log.debug(s"Persisted: $e")
-        updateState(e)
-      }
+  override def receive: Receive = {
+    case AddSubmissionLarStatsActorRef(actor, submissionId) =>
+      actors += submissionId -> actor
 
-    case AddSubmissionMacroStats(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
-      persist(SubmissionMacroStatsAdded(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076)) { e =>
-        log.debug(s"Persisted: $e")
-        updateState(e)
-      }
-
-    case AddSubmissionTaxId(tax, id) =>
-      persist(SubmissionTaxIdAdded(tax, id)) { e =>
-        log.debug(s"Persisted: $e")
-        updateState(e)
-      }
-
-    case AddIrsStats(map, id) =>
-      persist(IrsStatsAdded(map, id)) { e =>
-        log.debug(s"Persisted: $e")
-        updateState(e)
-      }
+    case RemoveSubmissionLarStatsActorRef(submissionId) =>
+      actors = actors.filterKeys(_ != submissionId)
 
     case FindTotalSubmittedLars(id, period) =>
-      sender ! state.latestStatsFor(id, period).totalSubmittedLars
+      val mLarStats = findLatestSubmissionActorRef(id, period)
+      mLarStats match {
+        case None => sender() ! 0
+        case Some(larStats) => larStats forward FindTotalSubmittedLars(id, period)
+      }
 
     case FindTotalValidatedLars(id, period) =>
-      sender ! state.latestStatsFor(id, period).totalValidatedLars
-
-    case FindIrsStats(subId) =>
-      val stats = state.stats.find(s => s.id == subId).getOrElse(SubmissionStats(subId))
-      sender ! stats.msas
-
-    case FindTaxId(id, period) =>
-      sender ! state.latestStatsFor(id, period).taxId
-
-    case FindQ070(id, period) =>
-      val stats = state.latestStatsFor(id, period)
-      val q070Stats = (stats.q070Lars, stats.q070SoldLars)
-      sender() ! q070Stats
-
-    case FindQ071(id, period) =>
-      val stats = state.latestStatsFor(id, period)
-      val q071Stats = (stats.q071Lars, stats.q071SoldLars)
-      sender() ! q071Stats
-
-    case FindQ072(id, period) =>
-      val stats = state.latestStatsFor(id, period)
-      val q072Stats = (stats.q072Lars, stats.q072SoldLars)
-      sender() ! q072Stats
-
-    case FindQ075(id, period) =>
-      val stats = state.latestStatsFor(id, period)
-      sender() ! stats.q075Ratio
-
-    case FindQ076(id, period) =>
-      val stats = state.latestStatsFor(id, period)
-      sender() ! stats.q076Ratio
-
-    case GetState =>
-      sender() ! state
-
-    case Shutdown =>
-      context stop self
+      val vLarStats = findLatestSubmissionActorRef(id, period)
+      vLarStats match {
+        case None => sender() ! 0
+        case Some(larStats) =>
+          larStats forward FindTotalValidatedLars(id, period)
+      }
   }
+
+  private def findLatestSubmissionActorRef(id: String, period: String): Option[ActorRef] = {
+    val sequenceNumbers = actors
+      .filterKeys(sId => sId.institutionId == id && sId.period == period)
+      .map(s => s._1.sequenceNumber)
+    val lastSeqNr = sequenceNumbers.max
+    actors
+      .find(s => s._1.sequenceNumber == lastSeqNr && s._1.period == period && s._1.institutionId == id)
+      .map(_._2)
+  }
+
+  //  override def receiveCommand: Receive = super.receiveCommand orElse {
+  //    case AddSubmissionSubmittedTotal(total, id) =>
+  //      persist(SubmissionSubmittedTotalsAdded(total, id)) { e =>
+  //        log.debug(s"Persisted: $e")
+  //        updateState(e)
+  //      }
+  //
+  //    case AddSubmissionMacroStats(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
+  //      persist(SubmissionMacroStatsAdded(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076)) { e =>
+  //        log.debug(s"Persisted: $e")
+  //        updateState(e)
+  //      }
+  //
+  //    case AddSubmissionTaxId(tax, id) =>
+  //      persist(SubmissionTaxIdAdded(tax, id)) { e =>
+  //        log.debug(s"Persisted: $e")
+  //        updateState(e)
+  //      }
+  //
+  //    case AddIrsStats(map, id) =>
+  //      persist(IrsStatsAdded(map, id)) { e =>
+  //        log.debug(s"Persisted: $e")
+  //        updateState(e)
+  //      }
+  //
+  //    case FindTotalSubmittedLars(id, period) =>
+  //      sender ! state.latestStatsFor(id, period).totalSubmittedLars
+  //
+  //    case FindTotalValidatedLars(id, period) =>
+  //      sender ! state.latestStatsFor(id, period).totalValidatedLars
+  //
+  //    case FindIrsStats(subId) =>
+  //      val stats = state.stats.find(s => s.id == subId).getOrElse(SubmissionStats(subId))
+  //      sender ! stats.msas
+  //
+  //    case FindTaxId(id, period) =>
+  //      sender ! state.latestStatsFor(id, period).taxId
+  //
+  //    case FindQ070(id, period) =>
+  //      val stats = state.latestStatsFor(id, period)
+  //      val q070Stats = (stats.q070Lars, stats.q070SoldLars)
+  //      sender() ! q070Stats
+  //
+  //    case FindQ071(id, period) =>
+  //      val stats = state.latestStatsFor(id, period)
+  //      val q071Stats = (stats.q071Lars, stats.q071SoldLars)
+  //      sender() ! q071Stats
+  //
+  //    case FindQ072(id, period) =>
+  //      val stats = state.latestStatsFor(id, period)
+  //      val q072Stats = (stats.q072Lars, stats.q072SoldLars)
+  //      sender() ! q072Stats
+  //
+  //    case FindQ075(id, period) =>
+  //      val stats = state.latestStatsFor(id, period)
+  //      sender() ! stats.q075Ratio
+  //
+  //    case FindQ076(id, period) =>
+  //      val stats = state.latestStatsFor(id, period)
+  //      sender() ! stats.q076Ratio
+  //
+  //    case GetState =>
+  //      sender() ! state
+  //
+  //    case Shutdown =>
+  //      context stop self
+  //  }
 
 }

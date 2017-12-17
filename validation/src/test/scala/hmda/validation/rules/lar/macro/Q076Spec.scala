@@ -7,6 +7,7 @@ import hmda.model.institution.Institution
 import hmda.validation.stats.ValidationStats._
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.messages.ValidationStatsMessages.FindQ076
 import org.scalacheck.Gen
 
 import scala.concurrent.Await

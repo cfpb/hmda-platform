@@ -39,7 +39,7 @@ object SubmissionManager {
   def createSubmissionManager(system: ActorSystem, validationStats: ActorRef, submissionId: SubmissionId): ActorRef = {
     system.actorOf(SubmissionManager.props(validationStats, submissionId).withDispatcher("persistence-dispatcher"))
   }
-}
+
 
 class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) extends HmdaActor {
 
@@ -52,7 +52,7 @@ class SubmissionManager(validationStats: ActorRef, submissionId: SubmissionId) e
   val supervisor = context.parent
   val hmdaFilingF = (supervisor ? FindHmdaFiling(period)).mapTo[ActorRef]
 
-  val submissionLarStats: ActorRef = context.actorOf(SubmissionLarStats.props(validationStats, submissionId)
+  val submissionLarStats: ActorRef = context.actorOf(SubmissionLarStats.props(submissionId)
     .withDispatcher("persistence-dispatcher"), s"submission-lar-stats-${submissionId.toString}")
   val submissionFSM: ActorRef = context.actorOf(SubmissionFSM
     .props(supervisor, submissionId)

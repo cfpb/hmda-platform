@@ -1,9 +1,9 @@
 package hmda.persistence.processing
 
 import akka.NotUsed
-import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.pattern.{ ask, pipe }
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.pattern.{ask, pipe}
+import akka.stream.scaladsl.{Sink, Source}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
@@ -11,13 +11,13 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.model.validation._
-import hmda.persistence.HmdaSupervisor.{ FindHmdaFiling, FindProcessingActor }
+import hmda.persistence.HmdaSupervisor.{FindHmdaFiling, FindProcessingActor}
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.PaginatedResource
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionById
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors }
+import hmda.persistence.processing.ProcessingMessages.{BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors}
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
@@ -25,12 +25,12 @@ import hmda.validation.engine.ts.TsEngine
 import hmda.validation.rules.lar.`macro`.MacroEditTypes._
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
-import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
+import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{LarParsed, TsParsed}
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.MacroStatsUpdated
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{MacroStatsUpdated, SubmittedLarsUpdated}
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager.GetActorRef
-import hmda.validation.stats.SubmissionLarStats.PersistStatsForMacroEdits
+import hmda.validation.stats.SubmissionLarStats.{CountSubmittedLarsInSubmission, PersistStatsForMacroEdits}
 import hmda.validation.stats.ValidationStats.AddSubmissionTaxId
 import hmda.validation.stats.SubmissionLarStats
 

@@ -1,10 +1,13 @@
 package hmda.validation.stats
 
+import java.time.Instant
+
 import akka.testkit.TestProbe
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.{ Geography, LarGenerators, LoanApplicationRegister }
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
+import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
 import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.MacroStatsUpdated
 import hmda.persistence.model.{ ActorSpec, MsaGenerators }
 import hmda.validation.rules.lar.`macro`._
@@ -13,7 +16,7 @@ import hmda.validation.stats.SubmissionLarStats._
 class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenerators {
 
   val lars10 = larListGen.sample.getOrElse(Nil)
-  val lars10String = lars10.map(x => x.toCSV)
+  val lars10Added = lars10.map(lar => LineAdded(Instant.now.getEpochSecond, lar.toCSV))
 
   val submissionId = SubmissionId("12345", "2017", 1)
 
@@ -23,7 +26,7 @@ class SubmissionLarStatsSpec extends ActorSpec with LarGenerators with MsaGenera
 
   "Submission Lar Stats" must {
     "Aggregate total submitted lar count for a submission" in {
-      for (lar <- lars10String) {
+      for (lar <- lars10Added) {
         probe.send(submissionLarStats, lar)
       }
       probe.send(submissionLarStats, CountSubmittedLarsInSubmission)

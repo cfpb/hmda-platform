@@ -4,9 +4,10 @@ import akka.pattern.ask
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
-import hmda.validation.stats.ValidationStats.{ AddSubmissionMacroStats, FindQ075 }
+import hmda.validation.stats.ValidationStats.AddSubmissionMacroStats
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.messages.ValidationStatsMessages.FindQ075
 import org.scalacheck.Gen
 
 import scala.concurrent.Await
