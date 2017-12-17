@@ -9,6 +9,8 @@ import hmda.model.institution.Institution
 import hmda.validation.stats.ValidationStats._
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.messages.ValidationStatsMessages.AddSubmissionLarStatsActorRef
+import hmda.validation.stats.SubmissionLarStats.createSubmissionStats
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.duration._
@@ -67,6 +69,9 @@ class S011Spec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
     ValidationContext(Some(Institution.empty.copy(id = institutionId)), Some(currentYear))
   }
   private def sendValidationStats(validationStats: ActorRef, institutionId: String, year: Int, submittedCount: Int): Unit = {
-    validationStats ! AddSubmissionSubmittedTotal(submittedCount, SubmissionId(institutionId, year.toString, 1))
+    val submissionId = SubmissionId(institutionId, year.toString, 1)
+    val larStats = createSubmissionStats(system, submissionId)
+    validationStats ! AddSubmissionLarStatsActorRef(larStats, submissionId)
+    validationStats ! AddSubmissionSubmittedTotal(submittedCount, submissionId)
   }
 }

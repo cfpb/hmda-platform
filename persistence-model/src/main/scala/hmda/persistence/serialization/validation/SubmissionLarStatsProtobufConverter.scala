@@ -1,7 +1,7 @@
 package hmda.persistence.serialization.validation
 
 import hmda.census.model.Msa
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated, ValidatedLarsUpdated }
 import hmda.persistence.model.serialization.SubmissionLarStatsEvents._
 
 object SubmissionLarStatsProtobufConverter {
@@ -15,6 +15,18 @@ object SubmissionLarStatsProtobufConverter {
   def submittedLarsUpdatedFromProtobuf(msg: SubmittedLarsUpdatedMessage): SubmittedLarsUpdated = {
     SubmittedLarsUpdated(
       totalSubmitted = msg.totalSubmitted
+    )
+  }
+
+  def validatedLarsUpdatedToProtobuf(event: ValidatedLarsUpdated): ValidatedLarsUpdatedMessage = {
+    ValidatedLarsUpdatedMessage(
+      totalValidated = event.totalValidated
+    )
+  }
+
+  def validatedLarsUpdatedFromProtobuf(msg: ValidatedLarsUpdatedMessage): ValidatedLarsUpdated = {
+    ValidatedLarsUpdated(
+      totalValidated = msg.totalValidated
     )
   }
 

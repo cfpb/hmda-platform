@@ -11,6 +11,7 @@ object ValidationStats {
   def name = "ValidationStats"
 
   case class AddSubmissionSubmittedTotal(total: Int, id: SubmissionId) extends Command
+  case class AddSubmissionValidatedTotal(total: Int, id: SubmissionId) extends Command
   case class AddSubmissionTaxId(taxId: String, id: SubmissionId) extends Command
   case class AddSubmissionMacroStats(
     id: SubmissionId,
@@ -57,16 +58,32 @@ class ValidationStats extends HmdaActor {
         case Some(larStats) => larStats forward msg
       }
 
-    //NOTE: this is mostly used for testing (SubmissionIrsPathsSpec and ValidationStats)
-    case msg @ AddIrsStats(_, id) =>
-      val iLarStats = findLatestSubmissionActorRef(id)
-      iLarStats match {
-        case None => //do nothing
+    //NOTE: this is used for testing (Q130Spec)
+    case msg @ AddSubmissionSubmittedTotal(_, submissionId) =>
+      val tLarStats = findLatestSubmissionActorRef(submissionId)
+      tLarStats match {
+        case None => // Do nothing
         case Some(larStats) => larStats forward msg
       }
 
-    //NOTE: this is mostly used for testing (Q011Spec,Q070Spec,Q071Spec,Q072Spec,Q075Spec,Q076Spec)
-    case msg @ AddSubmissionMacroStats(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
+    //NOTE: this is used for testing (ValidationStats)
+    case msg @ AddSubmissionValidatedTotal(_, submissionId) =>
+      val tLarStats = findLatestSubmissionActorRef(submissionId)
+      tLarStats match {
+        case None => // Do nothing
+        case Some(larStats) => larStats forward msg
+      }
+
+    //NOTE: this is used for testing (SubmissionIrsPathsSpec and ValidationStats)
+    case msg @ AddIrsStats(_, id) =>
+      val iLarStats = findLatestSubmissionActorRef(id)
+      iLarStats match {
+        case None => // Do nothing
+        case Some(larStats) => larStats forward msg
+      }
+
+    //NOTE: this is used for testing (Q011Spec,Q070Spec,Q071Spec,Q072Spec,Q075Spec,Q076Spec)
+    case msg @ AddSubmissionMacroStats(id, _, _, _, _, _, _, _, _, _) =>
       val mLarStats = findLatestSubmissionActorRef(id)
       mLarStats match {
         case None => // Do nothing

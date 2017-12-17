@@ -7,6 +7,10 @@ message SubmittedLarsUpdatedMessage {
     int32 totalSubmitted = 1;
 }
 
+message ValidatedLarsUpdatedMessage {
+    int32 totalValidated = 1;
+}
+
 message MacroStatsUpdatedMessage {
     int32 totalValidated = 1;
     int32 q070Total = 2;

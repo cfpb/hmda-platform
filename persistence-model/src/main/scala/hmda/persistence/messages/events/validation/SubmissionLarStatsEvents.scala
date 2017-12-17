@@ -6,6 +6,7 @@ import hmda.persistence.messages.CommonMessages.Event
 object SubmissionLarStatsEvents {
   trait SubmissionLarStatsEvent extends Event
   case class SubmittedLarsUpdated(totalSubmitted: Int) extends SubmissionLarStatsEvent
+  case class ValidatedLarsUpdated(totalValidated: Int) extends SubmissionLarStatsEvent
   case class MacroStatsUpdated(
     totalValidated: Int,
     q070Total: Int,

@@ -5,8 +5,7 @@ import java.time.Instant
 import akka.testkit.TestProbe
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
+import hmda.model.fi.lar.LarGenerators
 import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
 import hmda.persistence.model.{ ActorSpec, MsaGenerators }
 import hmda.validation.messages.ValidationStatsMessages._
@@ -52,18 +51,13 @@ class ValidationStatsSpec extends ActorSpec with MsaGenerators with LarGenerator
 
     "Find total validated lars for an institution in a certain period" in {
       probe.send(submissionValidationStats, AddSubmissionLarStatsActorRef(larStats3, id3))
-      for (_ <- 1 to 100) {
-        probe.send(larStats3, LarValidated(larGen.sample.getOrElse(LoanApplicationRegister()), id3))
-      }
+      probe.send(submissionValidationStats, AddSubmissionValidatedTotal(100, id3))
       probe.send(submissionValidationStats, FindTotalValidatedLars(id3.institutionId, id3.period))
       probe.expectMsg(100)
 
-      for (_ <- 1 to 125) {
-        probe.send(larStats2, LarValidated(larGen.sample.getOrElse(LoanApplicationRegister()), id2))
-      }
+      probe.send(submissionValidationStats, AddSubmissionValidatedTotal(125, id2))
       probe.send(submissionValidationStats, FindTotalValidatedLars(id2.institutionId, id2.period))
       probe.expectMsg(125)
-
     }
 
     "Find tax ID for an institution in a certain period" in {

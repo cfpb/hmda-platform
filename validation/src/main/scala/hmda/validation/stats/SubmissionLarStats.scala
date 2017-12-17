@@ -7,7 +7,7 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated, ValidatedLarsUpdated }
 import hmda.persistence.messages.events.validation.ValidationStatsEvents.SubmissionTaxIdAdded
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.validation.messages.ValidationStatsMessages._
@@ -43,6 +43,7 @@ object SubmissionLarStats {
   ) {
     def updated(event: Event): SubmissionLarStatsState = event match {
       case SubmittedLarsUpdated(submitted) => this.copy(totalSubmitted = submitted)
+      case ValidatedLarsUpdated(validated) => this.copy(totalValidated = validated)
       case MacroStatsUpdated(total, q070, q070sold, q071, q071sold, q072, q072sold, q075, q076) =>
         this.copy(
           totalValidated = total,
@@ -133,11 +134,20 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
         updateState(e)
       }
 
-    //NOTE: this is mostly used for testing (SubmissionIrsPathsSpec and ValidationStats)
+    //NOTE: this is used for testing (Q130Spec)
+    case AddSubmissionSubmittedTotal(total, _) =>
+      val event = SubmittedLarsUpdated(total)
+      updateState(event)
+
+    case AddSubmissionValidatedTotal(total, _) =>
+      val event = ValidatedLarsUpdated(total)
+      updateState(event)
+
+    //NOTE: this is used for testing (SubmissionIrsPathsSpec and ValidationStats)
     case AddIrsStats(msaSeq, id) =>
       updateState(IrsStatsUpdated(msaSeq))
 
-    //NOTE: this is mostly used for testing (Q011Spec,Q070Spec,Q071Spec,Q072Spec,Q075Spec,Q076Spec)
+    //NOTE: this is used for testing (Q011Spec,Q070Spec,Q071Spec,Q072Spec,Q075Spec,Q076Spec)
     case AddSubmissionMacroStats(_, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
       val event = MacroStatsUpdated(total, q070, q070Sold, q071,
         q071Sold, q072, q072Sold, q075, q076)
