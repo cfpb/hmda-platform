@@ -120,11 +120,25 @@ class ValidationStats extends HmdaActor {
       actors = actors.filterKeys(_ != submissionId)
 
     case msg @ AddSubmissionTaxId(_, id) =>
-      val institutionId = id.institutionId
-      val period = id.period
-      val iLarStats = findLatestSubmissionActorRef(institutionId, period)
+      val iLarStats = findLatestSubmissionActorRef(id)
       iLarStats match {
         case None => //do nothing
+        case Some(larStats) => larStats forward msg
+      }
+
+    //NOTE: this is mostly used for testing (SubmissionIrsPathsSpec and ValidationStats)
+    case msg @ AddIrsStats(_, id) =>
+      val iLarStats = findLatestSubmissionActorRef(id)
+      iLarStats match {
+        case None => //do nothing
+        case Some(larStats) => larStats forward msg
+      }
+
+    //NOTE: this is mostly used for testing (Q011Spec,Q070Spec,Q071Spec,Q072Spec,Q075Spec,Q076Spec)
+    case msg @ AddSubmissionMacroStats(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
+      val mLarStats = findLatestSubmissionActorRef(id)
+      mLarStats match {
+        case None => // Do nothing
         case Some(larStats) => larStats forward msg
       }
 
@@ -150,24 +164,40 @@ class ValidationStats extends HmdaActor {
         case Some(larStats) =>
           larStats forward msg
       }
+
+    case msg @ FindIrsStats(id) =>
+      val iLarStats = findLatestSubmissionActorRef(id)
+      iLarStats match {
+        case None => sender() ! SubmissionStats(id)
+        case Some(larStats) => larStats forward msg
+      }
+
+    case msg @ FindQ070(id, period) =>
+      val qLarStats = findLatestSubmissionActorRef(id, period)
+      qLarStats match {
+        case None =>
+          println("NOT FOUND")
+          val empty = (0, 0)
+          sender() ! empty
+        case Some(larStats) => larStats forward msg
+      }
+
+  }
+
+  private def findLatestSubmissionActorRef(submissionId: SubmissionId): Option[ActorRef] = {
+    findLatestSubmissionActorRef(submissionId.institutionId, submissionId.period)
   }
 
   private def findLatestSubmissionActorRef(id: String, period: String): Option[ActorRef] = {
     val sequenceNumbers = actors
       .filterKeys(sId => sId.institutionId == id && sId.period == period)
       .map(s => s._1.sequenceNumber)
-    val lastSeqNr = sequenceNumbers.max
+    val lastSeqNr = if (sequenceNumbers.nonEmpty) sequenceNumbers.max else 0
     actors
       .find(s => s._1.sequenceNumber == lastSeqNr && s._1.period == period && s._1.institutionId == id)
       .map(_._2)
   }
 
-  //  override def receiveCommand: Receive = super.receiveCommand orElse {
-  //    case AddSubmissionSubmittedTotal(total, id) =>
-  //      persist(SubmissionSubmittedTotalsAdded(total, id)) { e =>
-  //        log.debug(s"Persisted: $e")
-  //        updateState(e)
-  //      }
   //
   //    case AddSubmissionMacroStats(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
   //      persist(SubmissionMacroStatsAdded(id, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076)) { e =>
@@ -175,30 +205,6 @@ class ValidationStats extends HmdaActor {
   //        updateState(e)
   //      }
   //
-  //    case AddSubmissionTaxId(tax, id) =>
-  //      persist(SubmissionTaxIdAdded(tax, id)) { e =>
-  //        log.debug(s"Persisted: $e")
-  //        updateState(e)
-  //      }
-  //
-  //    case AddIrsStats(map, id) =>
-  //      persist(IrsStatsAdded(map, id)) { e =>
-  //        log.debug(s"Persisted: $e")
-  //        updateState(e)
-  //      }
-  //
-  //    case FindTotalSubmittedLars(id, period) =>
-  //      sender ! state.latestStatsFor(id, period).totalSubmittedLars
-  //
-  //    case FindTotalValidatedLars(id, period) =>
-  //      sender ! state.latestStatsFor(id, period).totalValidatedLars
-  //
-  //    case FindIrsStats(subId) =>
-  //      val stats = state.stats.find(s => s.id == subId).getOrElse(SubmissionStats(subId))
-  //      sender ! stats.msas
-  //
-  //    case FindTaxId(id, period) =>
-  //      sender ! state.latestStatsFor(id, period).taxId
   //
   //    case FindQ070(id, period) =>
   //      val stats = state.latestStatsFor(id, period)

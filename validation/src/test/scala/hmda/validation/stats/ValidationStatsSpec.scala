@@ -6,7 +6,6 @@ import akka.testkit.TestProbe
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
 import hmda.persistence.model.{ ActorSpec, MsaGenerators }
@@ -53,6 +52,7 @@ class ValidationStatsSpec extends ActorSpec with MsaGenerators with LarGenerator
   //      probe.expectMsg(ValidationStatsState(Seq(s1, s2, s3)))
   //    }
   //
+
   "Find total submitted lars for an institution in a certain period" in {
     probe.send(submissionValidationStats, AddSubmissionLarStatsActorRef(larStats1, id1))
     for (_ <- 1 to 124) {
@@ -93,28 +93,38 @@ class ValidationStatsSpec extends ActorSpec with MsaGenerators with LarGenerator
     probe.send(submissionValidationStats, AddSubmissionTaxId("a", id1))
     probe.send(submissionValidationStats, FindTaxId(id1.institutionId, id1.period))
     probe.expectMsg("a")
+
     probe.send(submissionValidationStats, AddSubmissionTaxId("c", id3))
     probe.send(submissionValidationStats, FindTaxId(id3.institutionId, id3.period))
     probe.expectMsg("c")
   }
   //
-  //    "Find IRS stats for an institution in a certain submission" in {
-  //      probe.send(submissionValidationStats, FindIrsStats(SubmissionId("12345", "2017", 1)))
-  //      probe.expectMsg(msa)
-  //      probe.send(submissionValidationStats, FindIrsStats(SubmissionId("12345", "2017", 2)))
-  //      probe.expectMsg(List[Msa]())
-  //      probe.send(submissionValidationStats, FindIrsStats(SubmissionId("12345", "2016", 1)))
-  //      probe.expectMsg(List[Msa]())
-  //    }
-  //
-  //    "Find Q070 stats" in {
-  //      probe.send(submissionValidationStats, FindQ070("12345", "2017"))
-  //      probe.expectMsg((126, 127))
-  //      probe.send(submissionValidationStats, FindQ070("12345", "2016"))
-  //      probe.expectMsg((99, 98))
-  //      probe.send(submissionValidationStats, FindQ070("nonexistent", "bogus"))
-  //      probe.expectMsg((0, 0))
-  //    }
+  "Find IRS stats for an institution in a certain submission" in {
+    probe.send(submissionValidationStats, AddIrsStats(msa, id1))
+    probe.send(submissionValidationStats, FindIrsStats(id1))
+    probe.expectMsg(msa)
+
+    probe.send(submissionValidationStats, AddIrsStats(Nil, id2))
+    probe.send(submissionValidationStats, FindIrsStats(id2))
+    probe.expectMsg(List[Msa]())
+    probe.send(submissionValidationStats, AddIrsStats(Nil, id3))
+    probe.send(submissionValidationStats, FindIrsStats(id3))
+    probe.expectMsg(List[Msa]())
+  }
+
+  "Find Q070 stats" in {
+    probe.send(submissionValidationStats, AddSubmissionMacroStats(id1, 21, 22, 23, 24, 25, 26, 27, 0.28, 0.29))
+    probe.send(submissionValidationStats, FindQ070("12345", "2017"))
+    probe.expectMsg((22, 23))
+    probe.send(submissionValidationStats, AddSubmissionMacroStats(id2, 125, 126, 127, 128, 129, 130, 131, 0.132, 0.133))
+    probe.send(submissionValidationStats, FindQ070("12345", "2017"))
+    probe.expectMsg((126, 127))
+    probe.send(submissionValidationStats, AddSubmissionMacroStats(id3, 100, 99, 98, 97, 96, 95, 94, .93, .92))
+    probe.send(submissionValidationStats, FindQ070("12345", "2016"))
+    probe.expectMsg((99, 98))
+    probe.send(submissionValidationStats, FindQ070("nonexistent", "bogus"))
+    probe.expectMsg((0, 0))
+  }
   //
   //    "Find Q071 stats" in {
   //      probe.send(submissionValidationStats, FindQ071("12345", "2017"))

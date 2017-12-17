@@ -10,8 +10,8 @@ import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
 import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
 import hmda.persistence.messages.events.validation.ValidationStatsEvents.SubmissionTaxIdAdded
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.messages.ValidationStatsMessages.{ FindTaxId, FindTotalSubmittedLars, FindTotalValidatedLars }
-import hmda.validation.stats.ValidationStats.{ AddIrsStats, AddSubmissionMacroStats, AddSubmissionSubmittedTotal, AddSubmissionTaxId }
+import hmda.validation.messages.ValidationStatsMessages._
+import hmda.validation.stats.ValidationStats._
 import hmda.validation.rules.lar.`macro`._
 
 object SubmissionLarStats {
@@ -116,20 +116,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       persist(event) { e =>
         log.debug(s"Persisted: $totalValidatedLars")
         updateState(e)
-        val msg = AddSubmissionMacroStats(
-          submissionId,
-          totalValidatedLars,
-          q070TotalLars,
-          q070TotalSoldLars,
-          q071TotalLars,
-          q071TotalSoldLars,
-          q072TotalLars,
-          q072TotalSoldLars,
-          q075Ratio,
-          q076Ratio
-        )
         self ! PersistIrs
-        //validationStats ! msg
         sender() ! e
       }
 
@@ -138,7 +125,6 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       persist(IrsStatsUpdated(msaSeq)) { e =>
         log.debug(s"Persisted: $msaSeq")
         updateState(e)
-        //validationStats ! AddIrsStats(msaSeq, submissionId)
       }
 
     case AddSubmissionTaxId(tax, id) =>
@@ -146,6 +132,16 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
         log.debug(s"Persisted: $e")
         updateState(e)
       }
+
+    //NOTE: this is mostly used for testing (SubmissionIrsPathsSpec and ValidationStats)
+    case AddIrsStats(msaSeq, id) =>
+      updateState(IrsStatsUpdated(msaSeq))
+
+    //NOTE: this is mostly used for testing (Q011Spec,Q070Spec,Q071Spec,Q072Spec,Q075Spec,Q076Spec)
+    case AddSubmissionMacroStats(_, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
+      val event = MacroStatsUpdated(total, q070, q070Sold, q071,
+        q071Sold, q072, q072Sold, q075, q076)
+      updateState(event)
 
     case FindTotalSubmittedLars(_, _) =>
       sender() ! state.totalSubmitted
@@ -155,6 +151,13 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
 
     case FindTaxId(_, _) =>
       sender() ! state.taxId
+
+    case FindIrsStats(_) =>
+      sender() ! state.msas
+
+    case FindQ070(_, _) =>
+      val q070Stats = (state.q070Total, state.q070SoldTotal)
+      sender() ! q070Stats
 
     case GetState =>
       sender() ! state
