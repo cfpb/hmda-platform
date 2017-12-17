@@ -147,7 +147,7 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       sender() ! state.totalSubmitted
 
     case FindTotalValidatedLars(_, _) =>
-      sender() ! totalValidatedLars
+      sender() ! state.totalValidated
 
     case FindTaxId(_, _) =>
       sender() ! state.taxId

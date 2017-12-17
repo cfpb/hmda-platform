@@ -9,10 +9,13 @@ import hmda.model.fi.lar.LarGenerators
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.messages.ValidationStatsMessages.AddSubmissionLarStatsActorRef
 import hmda.validation.stats.ValidationStats._
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
+
 import scala.concurrent.duration._
+import hmda.validation.stats.SubmissionLarStats._
 
 class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
   val configuration = ConfigFactory.load()
@@ -56,6 +59,7 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val ctx = generateValidationContext(currentYear, instId)
       val currentYearCount = Gen.choose(1, larSize - 1).sample.getOrElse(0)
       val lastYearCount = Gen.choose(1, larSize - 1).sample.getOrElse(0)
+      println(lastYearCount)
       val larSource1 = generateLarSource(currentYearCount)
       sendValidationStats(validationStats, instId, 1, lastYear, lastYearCount)
       Q011.inContext(ctx)(larSource1).map(r => r mustBe a[Success])
@@ -117,6 +121,9 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   }
 
   private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, lastYear: Int, lastYearCount: Int): Unit = {
-    validationStats ! AddSubmissionMacroStats(SubmissionId(institutionId, lastYear.toString, 1), lastYearCount, 0, 0, 0, 0, 0, 0, 0, 0)
+    val submissionId = SubmissionId(institutionId, lastYear.toString, 1)
+    val larStats = createSubmissionStats(system, submissionId)
+    validationStats ! AddSubmissionLarStatsActorRef(larStats, submissionId)
+    validationStats ! AddSubmissionMacroStats(submissionId, lastYearCount, 0, 0, 0, 0, 0, 0, 0, 0)
   }
 }
