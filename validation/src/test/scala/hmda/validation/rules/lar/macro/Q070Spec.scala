@@ -6,7 +6,8 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
-import hmda.validation.messages.ValidationStatsMessages.FindQ070
+import hmda.validation.messages.ValidationStatsMessages.{ AddSubmissionLarStatsActorRef, FindQ070 }
+import hmda.validation.stats.SubmissionLarStats.createSubmissionStats
 import hmda.validation.stats.ValidationStats._
 import org.scalacheck.Gen
 
@@ -21,8 +22,10 @@ class Q070Spec extends MacroSpecWithValidationStats {
     //// Check #1: comparing last year to this year ////
     val instId = "inst-with-prev-year-data"
     "set up: persist last year's data: sold 60% of loans" in {
-      //TODO: Add corresponding SubmissionLarStats instance and add it to the actors map within ValidationStats
-      validationStats ! AddSubmissionMacroStats(SubmissionId(instId, "2016", 1), 0, 100, 60, 0, 0, 0, 0, 0, 0)
+      val submissionId = SubmissionId(instId, "2016", 1)
+      val larStats = createSubmissionStats(system, submissionId)
+      validationStats ! AddSubmissionLarStatsActorRef(larStats, submissionId)
+      validationStats ! AddSubmissionMacroStats(submissionId, 0, 100, 60, 0, 0, 0, 0, 0, 0)
       val (relevant, relevantSold) = Await.result((validationStats ? FindQ070(instId, "2016")).mapTo[(Int, Int)], duration)
       relevant mustBe 100
       relevantSold mustBe 60
