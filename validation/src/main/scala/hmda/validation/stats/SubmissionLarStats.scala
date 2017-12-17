@@ -159,6 +159,22 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
       val q070Stats = (state.q070Total, state.q070SoldTotal)
       sender() ! q070Stats
 
+    case FindQ071(_, _) =>
+      val q071Stats = (state.q071Total, state.q071SoldTotal)
+      sender() ! q071Stats
+
+    case FindQ072(_, _) =>
+      val q072Stats = (state.q072Total, state.q072SoldTotal)
+      sender() ! q072Stats
+
+    case FindQ075(_, _) =>
+      val q075Stats = state.q075Ratio
+      sender() ! q075Stats
+
+    case FindQ076(_, _) =>
+      val q076Stats = state.q076Ratio
+      sender() ! q076Stats
+
     case GetState =>
       sender() ! state
   }
