@@ -12,7 +12,7 @@ import hmda.api.model.{ Irs, IrsResponse }
 import hmda.api.protocol.processing.MsaProtocol
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
-import hmda.validation.stats.ValidationStats.FindIrsStats
+import hmda.validation.messages.ValidationStatsMessages.FindIrsStats
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }

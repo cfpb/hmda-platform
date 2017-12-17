@@ -74,7 +74,7 @@ class ValidationStats extends HmdaActor {
         case Some(larStats) => larStats forward msg
       }
 
-    //NOTE: this is used for testing (SubmissionIrsPathsSpec and ValidationStats)
+    //NOTE: this is used for testing (SubmissionIrsPathsSpec, ValidationStats, SubmissioPathsSpec)
     case msg @ AddIrsStats(_, id) =>
       val iLarStats = findLatestSubmissionActorRef(id)
       iLarStats match {

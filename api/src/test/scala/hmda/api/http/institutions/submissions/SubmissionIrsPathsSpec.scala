@@ -7,7 +7,9 @@ import hmda.api.model.IrsResponse
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.persistence.model.MsaGenerators
+import hmda.validation.messages.ValidationStatsMessages.AddSubmissionLarStatsActorRef
 import hmda.validation.stats.ValidationStats._
+import hmda.validation.stats.SubmissionLarStats._
 
 class SubmissionIrsPathsSpec
     extends InstitutionHttpApiSpec
@@ -19,6 +21,8 @@ class SubmissionIrsPathsSpec
 
   override def beforeAll(): Unit = {
     super.beforeAll()
+    val larStats = createSubmissionStats(system, subId)
+    validationStats ! AddSubmissionLarStatsActorRef(larStats, subId)
     validationStats ! AddIrsStats(list, subId)
   }
 
