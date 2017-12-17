@@ -6,7 +6,7 @@ import hmda.model.fi.SubmissionId
 import hmda.persistence.messages.CommonMessages.{ Command, Event }
 import hmda.persistence.messages.events.validation.ValidationStatsEvents._
 import hmda.persistence.model.HmdaActor
-import hmda.validation.messages.ValidationStatsMessages.{ AddSubmissionLarStatsActorRef, FindTotalSubmittedLars, FindTotalValidatedLars, RemoveSubmissionLarStatsActorRef }
+import hmda.validation.messages.ValidationStatsMessages._
 
 object ValidationStats {
   def name = "ValidationStats"
@@ -119,19 +119,36 @@ class ValidationStats extends HmdaActor {
     case RemoveSubmissionLarStatsActorRef(submissionId) =>
       actors = actors.filterKeys(_ != submissionId)
 
-    case FindTotalSubmittedLars(id, period) =>
+    case msg @ AddSubmissionTaxId(_, id) =>
+      val institutionId = id.institutionId
+      val period = id.period
+      val iLarStats = findLatestSubmissionActorRef(institutionId, period)
+      iLarStats match {
+        case None => //do nothing
+        case Some(larStats) => larStats forward msg
+      }
+
+    case msg @ FindTotalSubmittedLars(id, period) =>
       val mLarStats = findLatestSubmissionActorRef(id, period)
       mLarStats match {
         case None => sender() ! 0
-        case Some(larStats) => larStats forward FindTotalSubmittedLars(id, period)
+        case Some(larStats) => larStats forward msg
       }
 
-    case FindTotalValidatedLars(id, period) =>
+    case msg @ FindTotalValidatedLars(id, period) =>
       val vLarStats = findLatestSubmissionActorRef(id, period)
       vLarStats match {
         case None => sender() ! 0
         case Some(larStats) =>
-          larStats forward FindTotalValidatedLars(id, period)
+          larStats forward msg
+      }
+
+    case msg @ FindTaxId(id, period) =>
+      val tLarStats = findLatestSubmissionActorRef(id, period)
+      tLarStats match {
+        case None => sender() ! ""
+        case Some(larStats) =>
+          larStats forward msg
       }
   }
 

@@ -88,13 +88,15 @@ class ValidationStatsSpec extends ActorSpec with MsaGenerators with LarGenerator
     probe.expectMsg(125)
 
   }
-  //
-  //    "Find tax ID for an institution in a certain period" in {
-  //      probe.send(submissionValidationStats, FindTaxId("12345", "2017"))
-  //      probe.expectMsg("b")
-  //      probe.send(submissionValidationStats, FindTaxId("12345", "2016"))
-  //      probe.expectMsg("c")
-  //    }
+
+  "Find tax ID for an institution in a certain period" in {
+    probe.send(submissionValidationStats, AddSubmissionTaxId("a", id1))
+    probe.send(submissionValidationStats, FindTaxId(id1.institutionId, id1.period))
+    probe.expectMsg("a")
+    probe.send(submissionValidationStats, AddSubmissionTaxId("c", id3))
+    probe.send(submissionValidationStats, FindTaxId(id3.institutionId, id3.period))
+    probe.expectMsg("c")
+  }
   //
   //    "Find IRS stats for an institution in a certain submission" in {
   //      probe.send(submissionValidationStats, FindIrsStats(SubmissionId("12345", "2017", 1)))

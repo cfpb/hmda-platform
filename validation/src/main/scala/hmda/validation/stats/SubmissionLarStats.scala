@@ -8,9 +8,10 @@ import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
 import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
+import hmda.persistence.messages.events.validation.ValidationStatsEvents.SubmissionTaxIdAdded
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.messages.ValidationStatsMessages.{ FindTotalSubmittedLars, FindTotalValidatedLars }
-import hmda.validation.stats.ValidationStats.{ AddIrsStats, AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
+import hmda.validation.messages.ValidationStatsMessages.{ FindTaxId, FindTotalSubmittedLars, FindTotalValidatedLars }
+import hmda.validation.stats.ValidationStats.{ AddIrsStats, AddSubmissionMacroStats, AddSubmissionSubmittedTotal, AddSubmissionTaxId }
 import hmda.validation.rules.lar.`macro`._
 
 object SubmissionLarStats {
@@ -37,6 +38,7 @@ object SubmissionLarStats {
       q072SoldTotal: Int = 0,
       q075Ratio: Double = 0.0,
       q076Ratio: Double = 0.0,
+      taxId: String = "",
       msas: Seq[Msa] = Seq[Msa]()
   ) {
     def updated(event: Event): SubmissionLarStatsState = event match {
@@ -55,6 +57,8 @@ object SubmissionLarStats {
         )
       case IrsStatsUpdated(msaSeq) =>
         this.copy(msas = msaSeq)
+      case SubmissionTaxIdAdded(tax, id) =>
+        this.copy(taxId = tax)
     }
   }
 }
@@ -137,11 +141,20 @@ class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor
         //validationStats ! AddIrsStats(msaSeq, submissionId)
       }
 
+    case AddSubmissionTaxId(tax, id) =>
+      persist(SubmissionTaxIdAdded(tax, id)) { e =>
+        log.debug(s"Persisted: $e")
+        updateState(e)
+      }
+
     case FindTotalSubmittedLars(_, _) =>
       sender() ! state.totalSubmitted
 
     case FindTotalValidatedLars(_, _) =>
       sender() ! totalValidatedLars
+
+    case FindTaxId(_, _) =>
+      sender() ! state.taxId
 
     case GetState =>
       sender() ! state
