@@ -1,6 +1,7 @@
 package hmda.publication.regulator.lar
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
@@ -56,7 +57,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"lar-$now.csv"
+      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}-lar.txt"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,

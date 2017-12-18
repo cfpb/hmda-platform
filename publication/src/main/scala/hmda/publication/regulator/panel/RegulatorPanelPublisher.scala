@@ -1,6 +1,7 @@
 package hmda.publication.regulator.panel
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 import akka.actor.{ ActorSystem, Props }
 import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
@@ -54,7 +55,7 @@ class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraReposit
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"panel-$now.csv"
+      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}-panel.txt"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,
