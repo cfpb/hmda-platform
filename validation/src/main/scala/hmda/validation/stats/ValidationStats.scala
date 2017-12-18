@@ -118,7 +118,7 @@ class ValidationStats extends HmdaActor {
     case msg @ FindIrsStats(id) =>
       val iLarStats = findLatestSubmissionActorRef(id)
       iLarStats match {
-        case None => sender() ! SubmissionStats(id)
+        case None => sender() ! Seq.empty[Msa]
         case Some(larStats) => larStats forward msg
       }
 
