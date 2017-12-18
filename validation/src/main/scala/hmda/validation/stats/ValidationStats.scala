@@ -46,7 +46,7 @@ class ValidationStats extends HmdaActor {
 
   override def receive: Receive = {
     case AddSubmissionLarStatsActorRef(actor, submissionId) =>
-      log.debug(s"Adding $submissionId to list")
+      log.debug(s"Adding ${actor.path} with id: $submissionId to list")
       actors += submissionId -> actor
 
     case RemoveSubmissionLarStatsActorRef(submissionId) =>

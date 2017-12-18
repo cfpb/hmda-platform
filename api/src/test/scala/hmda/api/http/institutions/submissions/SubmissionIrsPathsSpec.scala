@@ -1,5 +1,7 @@
 package hmda.api.http.institutions.submissions
 
+import akka.actor.ActorRef
+import akka.pattern.ask
 import akka.http.javadsl.model.StatusCodes
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.http.InstitutionHttpApiSpec
@@ -7,9 +9,14 @@ import hmda.api.model.IrsResponse
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
 import hmda.persistence.model.MsaGenerators
-import hmda.validation.messages.ValidationStatsMessages.AddSubmissionLarStatsActorRef
 import hmda.validation.stats.ValidationStats._
-import hmda.validation.stats.SubmissionLarStats._
+import hmda.persistence.HmdaSupervisor._
+import hmda.persistence.processing.SubmissionManager
+import hmda.persistence.processing.SubmissionManager.GetActorRef
+import hmda.validation.stats.SubmissionLarStats
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 class SubmissionIrsPathsSpec
     extends InstitutionHttpApiSpec
@@ -21,9 +28,12 @@ class SubmissionIrsPathsSpec
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    val larStats = createSubmissionStats(system, subId)
-    validationStats ! AddSubmissionLarStatsActorRef(larStats, subId)
-    validationStats ! AddIrsStats(list, subId)
+    val larStatsF = for {
+      manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, subId)).mapTo[ActorRef]
+      larStats <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
+    } yield larStats
+    val larStats = Await.result(larStatsF, 5.seconds)
+    larStats ! AddIrsStats(list, subId)
   }
 
   "Submission Irs Paths" must {
