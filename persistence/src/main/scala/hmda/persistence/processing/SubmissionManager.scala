@@ -2,7 +2,7 @@ package hmda.persistence.processing
 
 import java.util.concurrent.TimeUnit
 
-import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout }
+import akka.actor.{ ActorRef, ActorSystem, Props, ReceiveTimeout, Terminated }
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.Publish
 import akka.pattern.ask
@@ -21,7 +21,7 @@ import hmda.persistence.processing.HmdaFileValidator.ValidationStarted
 import hmda.persistence.processing.HmdaRawFile.AddLine
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM.{ Create, SubmissionData }
-import hmda.persistence.processing.SubmissionManager.{ AddFileName, GetActorRef }
+import hmda.validation.messages.ValidationStatsMessages.{ AddSubmissionLarStatsActorRef, RemoveSubmissionLarStatsActorRef }
 import hmda.validation.stats.SubmissionLarStats
 
 import scala.concurrent.Future
@@ -54,6 +54,9 @@ object SubmissionManager {
 
     val submissionLarStats: ActorRef = context.actorOf(SubmissionLarStats.props(submissionId)
       .withDispatcher("persistence-dispatcher"), s"submission-lar-stats-${submissionId.toString}")
+
+    context watch submissionLarStats
+
     val submissionFSM: ActorRef = context.actorOf(SubmissionFSM
       .props(supervisor, submissionId)
       .withDispatcher("persistence-dispatcher"))
@@ -68,6 +71,7 @@ object SubmissionManager {
       .withDispatcher("persistence-dispatcher"))
     val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
     val submissionPersistence = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
+    validationStats ! AddSubmissionLarStatsActorRef(submissionLarStats, submissionId)
 
     val mediator = DistributedPubSub(context.system).mediator
 
@@ -138,6 +142,10 @@ object SubmissionManager {
           originalSender ! r
           mediator ! Publish(PubSubTopics.submissionSigned, SubmissionSignedPubSub(submissionId))
         }
+
+      case Terminated(ref) =>
+        if (ref.path.toStringWithoutAddress.contains(s"submission-lar-stats-${submissionId.toString}"))
+          validationStats ! RemoveSubmissionLarStatsActorRef(submissionId)
 
       case GetActorRef(name) => name match {
         case SubmissionFSM.name => sender() ! submissionFSM
