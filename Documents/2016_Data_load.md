@@ -2,10 +2,11 @@
 
 The easiest way to load data to a running application is through a couple of shell scripts, listed below. The appropriate
 host and port need to be set up to point to the server running the `Filing API`.
+These script need to run in directory where HMDA 2016 .txt files are located.
 
 ## Data load script
 
-Loads 2016 data. Needs to run in directory where HMDA 2016 .txt files are located.
+Loads 2016 data.
 
 ```shell
 host=localhost
@@ -25,6 +26,9 @@ for i in *.txt
 ```
 
 # Data check script
+
+Checks the status of the loaded data. Should be 5 (parsing errors), 8 or 9 (validated with errors, or validated).
+Needs to run after validation has been completed.
 
 ```shell
 host=localhost
