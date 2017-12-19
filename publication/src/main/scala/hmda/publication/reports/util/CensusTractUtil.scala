@@ -3,6 +3,7 @@ package hmda.publication.reports.util
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model.{ Tract, TractLookup }
+import hmda.model.census.CBSATractLookup
 import hmda.model.fi.lar.LoanApplicationRegister
 
 object CensusTractUtil {
@@ -27,6 +28,14 @@ object CensusTractUtil {
         case _ => false
       }
     }
+  }
+
+  def filterSmallCounty(lars: Source[LoanApplicationRegister, NotUsed]): Source[LoanApplicationRegister, NotUsed] = {
+    lars.filter(lar => CBSATractLookup.geoIsSmallCounty(lar.geography))
+  }
+
+  def filterNotSmallCounty(lars: Source[LoanApplicationRegister, NotUsed]): Source[LoanApplicationRegister, NotUsed] = {
+    lars.filterNot(lar => CBSATractLookup.geoIsSmallCounty(lar.geography))
   }
 
 }
