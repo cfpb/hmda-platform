@@ -1,6 +1,6 @@
 package hmda.persistence.serialization.validation
 
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated, ValidatedLarsUpdated }
 import hmda.persistence.model.MsaGenerators
 import org.scalacheck.Gen
 import org.scalatest.{ MustMatchers, PropSpec }
@@ -14,6 +14,14 @@ class SubmissionLarStatsProtobufSerializerSpec extends PropSpec with PropertyChe
       val msg = SubmittedLarsUpdated(totalSubmitted = total)
       val bytes = serializer.toBinary(msg)
       serializer.fromBinary(bytes, serializer.SubmittedLarsUpdatedManifest) mustBe msg
+    }
+  }
+
+  property("ValidatedLarsUpdated message must be serialized to binary and back") {
+    forAll(Gen.choose(0, 100000)) { total =>
+      val msg = ValidatedLarsUpdated(total)
+      val bytes = serializer.toBinary(msg)
+      serializer.fromBinary(bytes, serializer.ValidatedLarsUpdatedManifest) mustBe msg
     }
   }
 

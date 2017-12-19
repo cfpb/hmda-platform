@@ -4,7 +4,8 @@ import akka.actor.ActorRef
 import akka.cluster.singleton.{ ClusterSingletonProxy, ClusterSingletonProxySettings }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.validation.{ AS, EC, ValidationStats }
+import hmda.validation.stats.ValidationStats
+import hmda.validation.{ AS, EC }
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

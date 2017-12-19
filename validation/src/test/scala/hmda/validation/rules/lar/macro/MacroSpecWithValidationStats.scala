@@ -7,7 +7,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.institution.InstitutionGenerators.sampleInstitution
-import hmda.validation.ValidationStats._
+import hmda.validation.stats.ValidationStats._
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import org.scalacheck.Gen

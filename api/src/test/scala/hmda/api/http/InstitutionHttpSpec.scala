@@ -13,12 +13,13 @@ import hmda.persistence.demo.DemoData
 import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.query.HmdaQuerySupervisor
-import hmda.validation.ValidationStats
 import org.iq80.leveldb.util.FileUtils
 import org.scalatest._
 
 import scala.concurrent.duration._
 import akka.pattern.ask
+import hmda.validation.stats.ValidationStats
+
 import scala.concurrent._
 
 trait InstitutionHttpSpec extends MustMatchers with BeforeAndAfterAll with RequestHeaderUtils with InstitutionsHttpApi with FileUploadUtils with ScalatestRouteTest { suite: Suite =>
