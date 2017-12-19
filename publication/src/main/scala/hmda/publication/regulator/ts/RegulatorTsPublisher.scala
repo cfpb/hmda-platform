@@ -1,6 +1,7 @@
 package hmda.publication.regulator.ts
 
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 import akka.actor.{ ActorSystem, Props }
 import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
@@ -52,7 +53,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"ts-$now.csv"
+      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}_ts.txt"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,
