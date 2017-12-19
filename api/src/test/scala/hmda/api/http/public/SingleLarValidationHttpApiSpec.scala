@@ -16,7 +16,7 @@ import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
 import hmda.model.parser.LarParsingError
 import hmda.persistence.HmdaSupervisor
-import hmda.validation.ValidationStats
+import hmda.validation.stats.ValidationStats
 import spray.json._
 
 import scala.concurrent.ExecutionContext

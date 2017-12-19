@@ -18,6 +18,14 @@ class SubmissionLarStatsProtobufConverterSpec extends PropSpec with PropertyChec
     }
   }
 
+  property("ValidatedLarsUpdated must convert to protobuf and back") {
+    forAll(Gen.choose(0, 100000)) { total =>
+      val validatedLarsUpdated = ValidatedLarsUpdated(total)
+      val protobuf = validatedLarsUpdatedToProtobuf(validatedLarsUpdated).toByteArray
+      validatedLarsUpdatedFromProtobuf(ValidatedLarsUpdatedMessage.parseFrom(protobuf)) mustBe validatedLarsUpdated
+    }
+  }
+
   property("MacroStatsUpdated must convert to protobuf and back") {
     val intGen = Gen.choose(0, 1000)
     forAll(Gen.choose(0d, 1d)) { d =>

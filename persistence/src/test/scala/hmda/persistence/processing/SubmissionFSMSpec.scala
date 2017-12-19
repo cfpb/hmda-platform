@@ -11,12 +11,12 @@ import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.ProcessingMessages._
 import hmda.persistence.processing.SubmissionFSM._
-import hmda.validation.ValidationStats
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import akka.pattern.ask
 import akka.util.Timeout
+import hmda.validation.stats.ValidationStats
 
 class SubmissionFSMSpec extends ActorSpec {
 

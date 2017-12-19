@@ -17,7 +17,6 @@ import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
-import hmda.validation.ValidationStats
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.HmdaSupervisor.FindAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence
@@ -27,6 +26,7 @@ import hmda.publication.regulator.lar.{ ModifiedLarPublisher, RegulatorLarPublis
 import hmda.publication.regulator.panel.RegulatorPanelPublisher
 import hmda.publication.regulator.ts.RegulatorTsPublisher
 import hmda.query.HmdaQuerySupervisor.{ FindSignedEventLARSubscriber, FindSignedEventTSSubscriber }
+import hmda.validation.stats.ValidationStats
 
 import scala.concurrent.duration._
 
