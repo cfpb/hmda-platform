@@ -148,11 +148,37 @@ trait LarGenerators extends FIGenerators {
   }
 
   implicit def rateSpreadGen: Gen[String] = {
-    val numericSpreadGen = Gen.listOfN(2, stringOfN(2, Gen.numChar)).map(_.mkString("."))
-    optional(numericSpreadGen, "NA")
+    val rateSpread = for {
+      digit1 <- Gen.choose(1, 8)
+      decimal <- stringOfN(2, Gen.numChar)
+    } yield s"0$digit1.$decimal"
+
+    optional(rateSpread, "NA")
   }
 
   implicit def hoepaStatusGen: Gen[Int] = Gen.oneOf(1, 2)
 
   implicit def lienStatusGen: Gen[Int] = Gen.oneOf(1, 2, 3, 4)
+
+  def larWithValidGeoGen: Gen[LoanApplicationRegister] = {
+    for {
+      lar <- larGen
+      geo <- validAppletonGeoGen
+    } yield lar.copy(geography = geo)
+  }
+
+  def validAppletonGeoGen: Gen[Geography] = {
+    for {
+      county <- outagamieCountyTracts
+    } yield Geography(msa = "11540", state = "55", county = "087", tract = county)
+  }
+
+  def outagamieCountyTracts = Gen.oneOf(
+    "0101.00", "0102.00", "0103.00", "0105.00", "0106.01", "0106.02", "0107.00",
+    "0108.00", "0109.00", "0110.00", "0111.01", "0111.02", "0112.00", "0113.00",
+    "0114.00", "0115.01", "0115.02", "0116.00", "0117.00", "0118.00", "0119.00",
+    "0120.00", "0121.00", "0122.00", "0123.00", "0124.00", "0125.03", "0125.04",
+    "0125.05", "0125.06", "0126.01", "0126.02", "0127.00", "0128.00", "0129.01",
+    "0129.02", "0131.00", "0132.00", "0133.00", "9400.00"
+  )
 }
