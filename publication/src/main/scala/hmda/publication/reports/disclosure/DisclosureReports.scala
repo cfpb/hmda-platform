@@ -28,7 +28,12 @@ class DisclosureReports(val sys: ActorSystem, val mat: ActorMaterializer) extend
 
     val d8XReports = List(D81, D82, D83, D84, D85, D86, D87)
     val d8XF = Future.sequence(d8XReports.map { report =>
-      D8X.generate(report, larSource, fipsCode, respId, institutionNameF)
+      report.generate(larSource, fipsCode, respId, institutionNameF)
+    })
+
+    val d4XReports = List(D41, D42, D43, D44, D45, D46, D47)
+    val d4XF = Future.sequence(d4XReports.map { report =>
+      report.generate(larSource, fipsCode, respId, institutionNameF)
     })
 
     val d51F = D51.generate(larSource, fipsCode, respId, institutionNameF)

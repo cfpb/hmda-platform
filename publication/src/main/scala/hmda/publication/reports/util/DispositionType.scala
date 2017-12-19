@@ -18,10 +18,10 @@ sealed abstract class DispositionType(
   def calculateValueDisposition[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[ValueDisposition] = {
     val loansFiltered = larSource.filter(filter)
     val loanCountF = count(loansFiltered)
-    val incomeF = sum(loansFiltered, incomeSum)
+    val totalValueF = sum(loansFiltered, loanAmount)
     for {
       count <- loanCountF
-      income <- incomeF
+      income <- totalValueF
     } yield {
       ValueDisposition(value, count, income)
     }
@@ -35,7 +35,7 @@ sealed abstract class DispositionType(
     }
   }
 
-  private def incomeSum(lar: LoanApplicationRegister): Int = Try(lar.applicant.income.toInt).getOrElse(0)
+  private def loanAmount(lar: LoanApplicationRegister): Int = lar.loan.amount
 }
 
 object DispositionType {
