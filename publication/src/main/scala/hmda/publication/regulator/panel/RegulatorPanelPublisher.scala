@@ -55,7 +55,7 @@ class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraReposit
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}-panel.txt"
+      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}_panel.txt"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,

@@ -53,7 +53,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}-ts.txt"
+      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}_ts.txt"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,

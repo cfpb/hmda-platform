@@ -57,7 +57,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
 
     case PublishRegulatorData =>
       val now = LocalDateTime.now()
-      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}-lar.txt"
+      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}_lar.txt"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(
         bucket,
