@@ -27,12 +27,12 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.MacroStatsUpdated
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ MacroStatsUpdated, SubmittedLarsUpdated }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager.GetActorRef
-import hmda.validation.SubmissionLarStats
-import hmda.validation.SubmissionLarStats.PersistStatsForMacroEdits
-import hmda.validation.ValidationStats.AddSubmissionTaxId
+import hmda.validation.stats.SubmissionLarStats.{ CountSubmittedLarsInSubmission, PersistStatsForMacroEdits }
+import hmda.validation.stats.ValidationStats.AddSubmissionTaxId
+import hmda.validation.stats.SubmissionLarStats
 
 import scala.util.Try
 import scala.concurrent.duration._

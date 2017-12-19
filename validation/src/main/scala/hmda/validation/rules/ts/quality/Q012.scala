@@ -4,12 +4,12 @@ import akka.pattern.ask
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.validation.{ AS, EC, MAT }
-import hmda.validation.ValidationStats.FindTaxId
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules._
 import hmda.validation.dsl.Result
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.messages.ValidationStatsMessages.FindTaxId
 
 import scala.concurrent.Future
 

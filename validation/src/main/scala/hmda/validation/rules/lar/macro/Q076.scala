@@ -3,11 +3,11 @@ package hmda.validation.rules.lar.`macro`
 import akka.pattern.ask
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
-import hmda.validation.ValidationStats.FindQ076
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.Result
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
+import hmda.validation.messages.ValidationStatsMessages.FindQ076
 import hmda.validation.rules.lar.`macro`.MacroEditTypes.LoanApplicationRegisterSource
 import hmda.validation.{ AS, EC, MAT }
 import hmda.validation.rules.{ AggregateEditCheck, IfContextPresentInAggregate, StatsLookup }

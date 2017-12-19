@@ -2,7 +2,10 @@ package hmda.api.http
 
 import akka.http.scaladsl.model.headers.{ HttpEncoding, `Accept-Encoding` }
 import akka.http.scaladsl.model.headers.HttpEncodings._
+import hmda.validation.messages.ValidationStatsMessages.AddSubmissionLarStatsActorRef
+import hmda.validation.stats.SubmissionLarStats.createSubmissionStats
 import org.scalacheck.Gen
+import hmda.model.fi.SubmissionId
 
 class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
 
@@ -77,6 +80,9 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
     }
 
     "use requested encoding for submissionIrs path" in {
+      val subId = SubmissionId("0", "2017", 1)
+      val larStats = createSubmissionStats(system, subId)
+      validationStats ! AddSubmissionLarStatsActorRef(larStats, subId)
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/irs")
         .addHeader(`Accept-Encoding`(encoding)) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {

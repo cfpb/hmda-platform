@@ -16,10 +16,10 @@ import hmda.model.apor.{ APOR, FixedRate, VariableRate }
 import hmda.persistence.HmdaSupervisor
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor }
-import hmda.validation.ValidationStats
 import hmda.api.protocol.apor.RateSpreadProtocol._
 import hmda.persistence.HmdaSupervisor.FindAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence
+import hmda.validation.stats.ValidationStats
 
 import scala.concurrent.{ Await, ExecutionContext }
 import scala.concurrent.duration._
