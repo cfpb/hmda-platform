@@ -1,5 +1,50 @@
 # 2016 HMDA DATA LOAD
 
+The easiest way to load data to a running application is through a couple of shell scripts, listed below. The appropriate
+host and port need to be set up to point to the server running the `Filing API`.
+
+## Data load script
+
+Loads 2016 data. Needs to run in directory where HMDA 2016 .txt files are located.
+
+```shell
+host=localhost
+port=8080
+
+for i in *.txt
+  do
+    echo 'Processing' $i
+    x=${i%.txt}
+    http POST http://$host:$port/institutions/$x/filings/2016/submissions cfpb-hmda-username :user cfpb-hmda-institutions:$x
+    sleep 0.25
+    SUB=$(http http://$host:$port/institutions/$x/filings/2016 cfpb-hmda-username:user cfpb-hmda-institutions:$x | jq '.submissions[0].id.sequenceNumber')
+    echo 'Submission' $SUB
+    http --form --timeout 240 POST http://$host:$port/institutions/$x/filings/2016/submissions/$SUB file@$i cfpb-hmda-username:user cfpb-hmda-institutions:$x
+    sleep 0.25
+  done
+```
+
+# Data check script
+
+```shell
+host=localhost
+port=23615
+
+for i in *.txt
+   do
+     echo 'Checking' $i
+     x=${i%.txt}
+     STATUS=$(http http://$host:$port/institutions/$x/filings/2016 cfpb-hmda-username:user     cfpb-hmda-institutions:$x | jq '.submissions[0].status.code')
+     echo $x','$STATUS >> files_checked.txt
+   done
+```
+
+
+NOTE: These two scripts require [httpie](https://httpie.org/) and [jq](https://stedolan.github.io/jq/) to be installed in order to run.
+
+
+# 2016 HMDA DATA LOAD - DEPRECATED
+
 The 2016 LAR data is necessary for some macro edits that will make comparisons between the file submitted and the previous year's data.
 
 In order to load the data, the 2017 panel should be loaded already. The LAR Loader will iterate through a file directory where the `HMDA` files reside,
