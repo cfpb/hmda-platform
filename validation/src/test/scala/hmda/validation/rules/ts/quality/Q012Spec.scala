@@ -8,11 +8,13 @@ import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.model.institution.Institution
 import hmda.validation.context.ValidationContext
 import hmda.validation.dsl.{ Failure, Success }
+import hmda.validation.messages.ValidationStatsMessages.AddSubmissionLarStatsActorRef
+import hmda.validation.stats.SubmissionLarStats.createSubmissionStats
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 
 import scala.concurrent.duration._
-import hmda.validation.ValidationStats._
+import hmda.validation.stats.ValidationStats._
 
 class Q012Spec extends AsyncWordSpec with MustMatchers with TsGenerators with BeforeAndAfterAll {
   val configuration = ConfigFactory.load()
@@ -82,6 +84,9 @@ class Q012Spec extends AsyncWordSpec with MustMatchers with TsGenerators with Be
   }
 
   private def sendValidationStats(validationStats: ActorRef, institutionId: String, seqNr: Int, lastYear: Int, taxId: String): Unit = {
+    val submissionId = SubmissionId(institutionId, lastYear.toString, 1)
+    val larStats = createSubmissionStats(system, submissionId)
+    validationStats ! AddSubmissionLarStatsActorRef(larStats, submissionId)
     validationStats ! AddSubmissionTaxId(taxId, SubmissionId(institutionId, lastYear.toString, 1))
   }
 }

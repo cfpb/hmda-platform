@@ -1,4 +1,4 @@
-package hmda.validation
+package hmda.validation.stats
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.census.model.{ Msa, MsaMap }
@@ -6,9 +6,12 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.messages.CommonMessages.{ Command, Event, GetState }
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated }
+import hmda.persistence.messages.events.processing.FileUploadEvents.LineAdded
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ IrsStatsUpdated, MacroStatsUpdated, SubmittedLarsUpdated, ValidatedLarsUpdated }
+import hmda.persistence.messages.events.validation.ValidationStatsEvents.SubmissionTaxIdAdded
 import hmda.persistence.model.HmdaPersistentActor
-import hmda.validation.ValidationStats.{ AddIrsStats, AddSubmissionMacroStats, AddSubmissionSubmittedTotal }
+import hmda.validation.messages.ValidationStatsMessages._
+import hmda.validation.stats.ValidationStats._
 import hmda.validation.rules.lar.`macro`._
 
 object SubmissionLarStats {
@@ -18,10 +21,10 @@ object SubmissionLarStats {
   case class CountSubmittedLarsInSubmission() extends Command
   case class PersistIrs() extends Command
 
-  def props(validationStats: ActorRef, submissionId: SubmissionId): Props = Props(new SubmissionLarStats(validationStats, submissionId))
+  def props(submissionId: SubmissionId): Props = Props(new SubmissionLarStats(submissionId))
 
-  def createSubmissionStats(system: ActorSystem, validationStats: ActorRef, submissionId: SubmissionId): ActorRef = {
-    system.actorOf(SubmissionLarStats.props(validationStats, submissionId))
+  def createSubmissionStats(system: ActorSystem, submissionId: SubmissionId): ActorRef = {
+    system.actorOf(SubmissionLarStats.props(submissionId))
   }
 
   case class SubmissionLarStatsState(
@@ -35,10 +38,12 @@ object SubmissionLarStats {
       q072SoldTotal: Int = 0,
       q075Ratio: Double = 0.0,
       q076Ratio: Double = 0.0,
+      taxId: String = "",
       msas: Seq[Msa] = Seq[Msa]()
   ) {
     def updated(event: Event): SubmissionLarStatsState = event match {
       case SubmittedLarsUpdated(submitted) => this.copy(totalSubmitted = submitted)
+      case ValidatedLarsUpdated(validated) => this.copy(totalValidated = validated)
       case MacroStatsUpdated(total, q070, q070sold, q071, q071sold, q072, q072sold, q075, q076) =>
         this.copy(
           totalValidated = total,
@@ -53,11 +58,13 @@ object SubmissionLarStats {
         )
       case IrsStatsUpdated(msaSeq) =>
         this.copy(msas = msaSeq)
+      case SubmissionTaxIdAdded(tax, id) =>
+        this.copy(taxId = tax)
     }
   }
 }
 
-class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) extends HmdaPersistentActor {
+class SubmissionLarStats(submissionId: SubmissionId) extends HmdaPersistentActor {
   import SubmissionLarStats._
 
   var totalSubmittedLars = 0
@@ -83,7 +90,7 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
   }
 
   override def receiveCommand: Receive = super.receiveCommand orElse {
-    case s: String =>
+    case LineAdded(_, _) =>
       totalSubmittedLars = totalSubmittedLars + 1
 
     case LarValidated(lar, _) =>
@@ -99,7 +106,7 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
       persist(SubmittedLarsUpdated(totalSubmittedLars)) { e =>
         log.debug(s"Persisted: $totalSubmittedLars")
         updateState(e)
-        validationStats ! AddSubmissionSubmittedTotal(totalSubmittedLars, submissionId)
+        //validationStats ! AddSubmissionSubmittedTotal(totalSubmittedLars, submissionId)
       }
 
     case PersistStatsForMacroEdits =>
@@ -110,20 +117,7 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
       persist(event) { e =>
         log.debug(s"Persisted: $totalValidatedLars")
         updateState(e)
-        val msg = AddSubmissionMacroStats(
-          submissionId,
-          totalValidatedLars,
-          q070TotalLars,
-          q070TotalSoldLars,
-          q071TotalLars,
-          q071TotalSoldLars,
-          q072TotalLars,
-          q072TotalSoldLars,
-          q075Ratio,
-          q076Ratio
-        )
         self ! PersistIrs
-        validationStats ! msg
         sender() ! e
       }
 
@@ -132,8 +126,64 @@ class SubmissionLarStats(validationStats: ActorRef, submissionId: SubmissionId) 
       persist(IrsStatsUpdated(msaSeq)) { e =>
         log.debug(s"Persisted: $msaSeq")
         updateState(e)
-        validationStats ! AddIrsStats(msaSeq, submissionId)
       }
+
+    case AddSubmissionTaxId(tax, id) =>
+      persist(SubmissionTaxIdAdded(tax, id)) { e =>
+        log.debug(s"Persisted: $e")
+        updateState(e)
+      }
+
+    //NOTE: this is used for testing (Q130Spec)
+    case AddSubmissionSubmittedTotal(total, _) =>
+      val event = SubmittedLarsUpdated(total)
+      updateState(event)
+
+    case AddSubmissionValidatedTotal(total, _) =>
+      val event = ValidatedLarsUpdated(total)
+      updateState(event)
+
+    //NOTE: this is used for testing (SubmissionIrsPathsSpec and ValidationStats)
+    case AddIrsStats(msaSeq, id) =>
+      updateState(IrsStatsUpdated(msaSeq))
+
+    //NOTE: this is used for testing (Q011Spec,Q070Spec,Q071Spec,Q072Spec,Q075Spec,Q076Spec)
+    case AddSubmissionMacroStats(_, total, q070, q070Sold, q071, q071Sold, q072, q072Sold, q075, q076) =>
+      val event = MacroStatsUpdated(total, q070, q070Sold, q071,
+        q071Sold, q072, q072Sold, q075, q076)
+      updateState(event)
+
+    case FindTotalSubmittedLars(_, _) =>
+      sender() ! state.totalSubmitted
+
+    case FindTotalValidatedLars(_, _) =>
+      sender() ! state.totalValidated
+
+    case FindTaxId(_, _) =>
+      sender() ! state.taxId
+
+    case FindIrsStats(_) =>
+      sender() ! state.msas
+
+    case FindQ070(_, _) =>
+      val q070Stats = (state.q070Total, state.q070SoldTotal)
+      sender() ! q070Stats
+
+    case FindQ071(_, _) =>
+      val q071Stats = (state.q071Total, state.q071SoldTotal)
+      sender() ! q071Stats
+
+    case FindQ072(_, _) =>
+      val q072Stats = (state.q072Total, state.q072SoldTotal)
+      sender() ! q072Stats
+
+    case FindQ075(_, _) =>
+      val q075Stats = state.q075Ratio
+      sender() ! q075Stats
+
+    case FindQ076(_, _) =>
+      val q076Stats = state.q076Ratio
+      sender() ! q076Stats
 
     case GetState =>
       sender() ! state
