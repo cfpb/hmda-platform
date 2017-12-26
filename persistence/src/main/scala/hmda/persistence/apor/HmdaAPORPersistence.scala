@@ -19,7 +19,9 @@ import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor }
 import hmda.persistence.messages.events.apor.APOREvents.AporCreated
 import hmda.persistence.model.HmdaPersistentActor
+
 import scala.concurrent.duration._
+import scala.util.{ Failure, Success, Try }
 
 object HmdaAPORPersistence {
   val name = "hmda-apor-persistence"
@@ -44,7 +46,7 @@ object HmdaAPORPersistence {
 class HmdaAPORPersistence extends HmdaPersistentActor {
   import HmdaAPORPersistence._
 
-  QuartzSchedulerExtension(system).schedule("AporCalculator", self, LoadAporDataFromS3)
+  scheduleAporFetch(system)
 
   var state = HmdaAPORState()
 
@@ -147,6 +149,15 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
     val values = aporObj.values
     val apor = if (values.nonEmpty) values(amortizationType) else 0
     apr - apor
+  }
+
+  private def scheduleAporFetch(system: ActorSystem) = {
+    Try(
+      QuartzSchedulerExtension(system).schedule("AporCalculator", self, LoadAporDataFromS3)
+    ) match {
+        case Success(date) => log.debug(s"Scheduled APOR data fetch. Next run: $date")
+        case Failure(e) => log.debug(s"Not scheduling APOR data fetch. Reason: $e")
+      }
   }
 
 }
