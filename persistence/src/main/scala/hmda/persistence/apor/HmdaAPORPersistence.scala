@@ -44,8 +44,6 @@ object HmdaAPORPersistence {
 class HmdaAPORPersistence extends HmdaPersistentActor {
   import HmdaAPORPersistence._
 
-  QuartzSchedulerExtension(system).schedule("AporCalculator", self, LoadAporDataFromS3)
-
   var state = HmdaAPORState()
 
   override def persistenceId: String = s"$name"
