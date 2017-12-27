@@ -17,13 +17,18 @@ title: "HMDA Platform API - ULI"
   <p>Using the <code>/uli/checkDigit</code> endpoint provide an application/loan id and get the check digit and full ULI in a response.</p>
 </hgroup>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-POST https://ffiec-api.cfpb.gov/public/uli/checkDigit
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>POST</code>
+
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/uli/checkDigit \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loanId": "10Bx939c5543TqA1144M999143X"
+  }' 
+{% endhighlight %}
 
 <h4>Parameters</h4>
 <table>
@@ -73,17 +78,19 @@ POST https://ffiec-api.cfpb.gov/public/uli/checkDigit
   <p>Using the <code>/uli/checkDigit/csv</code> endpoint provide a file with a list of loan ids, each on a new line.</p>
 </hgroup>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-POST https://ffiec-api.cfpb.gov/public/uli/checkDigit/csv
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>POST</code>
 
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/uli/checkDigit/csv \
+  -X POST \
+  -F file=@yourFile.txt
+{% endhighlight %}
+
 <h4>Example file contents</h4>
 <section class="code-block">
-{% highlight PowerShell %}
+{% highlight bash %}
 10Cx939c5543TqA1144M999143X
 10Bx939c5543TqA1144M999143X
 {% endhighlight %}
@@ -92,7 +99,7 @@ POST https://ffiec-api.cfpb.gov/public/uli/checkDigit/csv
 <h4>Example Response in <code>CSV</code> format</h4>
 <section class="code-block">
 <code>CSV</code>
-{% highlight PowerShell %}
+{% highlight bash %}
 loanId,checkDigit,uli
 10Bx939c5543TqA1144M999143X,38,10Bx939c5543TqA1144M999143X38
 10Cx939c5543TqA1144M999143X,10,10Cx939c5543TqA1144M999143X10
@@ -107,13 +114,18 @@ loanId,checkDigit,uli
   <p>Using the <code>/uli/validate</code> endpoint you can provide a ULI and get the response of valid or not.</p>
 </hgroup>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-POST https://ffiec-api.cfpb.gov/public/uli/validate
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>POST</code>
+
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/uli/validate \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+    "uli": "10Bx939c5543TqA1144M999143X38"
+  }'
+{% endhighlight %}
 
 <h4>Parameters</h4>
 <table>
@@ -161,17 +173,19 @@ POST https://ffiec-api.cfpb.gov/public/uli/validate
   <p>Using the <code>/uli/validate/csv</code> endpoint you can provide a list of ULIs and get the response of valid or not for each.</p>
 </hgroup>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-POST https://ffiec-api.cfpb.gov/public/uli/validate/csv
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>POST</code>
 
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/uli/validate/csv \
+  -X POST \
+  -F file=@yourFile.txt
+{% endhighlight %}
+
 <h4>Example file content</h4>
 <section class="code-block">
-{% highlight PowerShell %}
+{% highlight bash %}
 10Cx939c5543TqA1144M999143X10
 10Bx939c5543TqA1144M999143X38
 10Bx939c5543TqA1144M999133X38
@@ -181,7 +195,7 @@ POST https://ffiec-api.cfpb.gov/public/uli/validate/csv
 <h4>Example Response in <code>CSV</code> format</h4>
 <section class="code-block">
 <code>CSV</code>
-{% highlight PowerShell %}
+{% highlight bash %}
 uli,isValid
 10Cx939c5543TqA1144M999143X10,true
 10Bx939c5543TqA1144M999143X38,true
