@@ -11,7 +11,6 @@ import akka.stream.alpakka.s3.scaladsl.S3Client
 import akka.stream.scaladsl.{ Flow, Framing, Sink }
 import akka.util.{ ByteString, Timeout }
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
-import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.model.apor.{ APOR, FixedRate, RateType, VariableRate }
 import hmda.parser.apor.APORCsvParser
