@@ -16,7 +16,13 @@ class: home
 
 <h3>The API URL</h3>
 <p>All API endpoints in this documentation are available at the following base URL.</p>
-<pre><code class="language-bash">https://ffiec-api.cfpb.gov/public</code></pre>
-<p>For example, if you wanted to generate a check digit for your LEI and Loan/Application ID you would use the following.</p>
-<pre class="margin-bottom-0"><code class="language-bash">POST https://ffiec-api.cfpb.gov/public/uli/checkDigit</code></pre>
+{% highlight bash %}
+https://ffiec-api.cfpb.gov/public
+{% endhighlight %}
+
+<p>For example, if you wanted to look up an institution by ID you would use the following.</p>
+
+{% highlight bash %}
+POST https://ffiec-api.cfpb.gov/public/uli/checkDigit
+{% endhighlight %}
 <p class="usa-text-small">For more details see the <a href="{{ "/check-digit#generate" | relative_url }}">check digit documentation</a>.</p>
