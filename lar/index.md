@@ -273,7 +273,7 @@ curl https://ffiec-api.cfpb.gov/public/lar/validate \
 <hgroup>
   <h3 id="parseAndValidate">Parse and Validate</h3>
   <p class="usa-font-lead">Check whether a single LAR parses and passes validation.</p>
-  <p>Using the <code>/lar/parseAndValidate</code> endpoint you can test whether a single LAR is formatted correctly AND wheter or not it passes many of the edits.</p>
+  <p>Using the <code>/lar/parseAndValidate</code> endpoint you can test whether a single LAR is formatted correctly AND whether or not it passes many of the edits.</p>
 </hgroup>
 
 <div class="usa-alert usa-alert-info">
