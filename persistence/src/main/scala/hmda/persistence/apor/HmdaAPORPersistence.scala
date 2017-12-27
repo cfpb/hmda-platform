@@ -156,7 +156,7 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
       QuartzSchedulerExtension(system).schedule("AporCalculator", self, LoadAporDataFromS3)
     ) match {
         case Success(date) => log.debug(s"Scheduled APOR data fetch. Next run: $date")
-        case Failure(e) => log.debug(s"Not scheduling APOR data fetch. Reason: $e")
+        case Failure(e) => log.info(s"Not scheduling APOR data fetch. Reason: $e")
       }
   }
 
