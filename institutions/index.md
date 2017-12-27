@@ -17,13 +17,13 @@ title: "HMDA Platform API - Institutions"
   <p>Using the <code>/institutions</code> endpoint you can provide an email domain and get a response containing a list of insitutions that use that email domain.</p>
 </hgroup>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-GET https://ffiec-api.cfpb.gov/public/institutions?domain=bank0.com
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>GET</code>
+
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/institutions?domain=bank0.com
+{% endhighlight %}
 
 <h4>Parameters</h4>
 <p class="usa-text-small">Passed in as a query string.</p>
@@ -85,13 +85,13 @@ GET https://ffiec-api.cfpb.gov/public/institutions?domain=bank0.com
   </div>
 </div>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>GET</code>
+
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/institutions/:institutionId
+{% endhighlight %}
 
 <h4>Parameters</h4>
 <table>
@@ -104,7 +104,7 @@ GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId
 </thead>
 <tbody>
   <tr>
-    <td><code>institution id</code></td>
+    <td><code>institutionId</code></td>
     <td><code>string</code></td>
     <td>An institutions <abbr title="Replication Server System Database ID">RSSD ID</abbr> or,<br />for non-depository institutions, the Federal Tax ID.</td>
   </tr>
@@ -175,13 +175,13 @@ GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId
   </div>
 </div>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId/filings/:period/lar
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>GET</code>
+
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/institutions/:institutionId/filings/:period/lar
+{% endhighlight %}
 
 <h4>Parameters</h4>
 <table>
@@ -207,8 +207,8 @@ GET https://ffiec-api.cfpb.gov/public/institutions/:institutionId/filings/:perio
 </table>
 
 <h4>Example Response</h4>
-<p>The response is in <code>CSV</code> format. The schema is as follows:
-{% highlight PowerShell %}
+<p>The response is in <code>CSV</code> format. The schema is as follows:</p>
+{% highlight bash %}
 id
 respondent_id
 agency_code
@@ -247,7 +247,6 @@ denial_reason2
 denial_reason3
 period
 {% endhighlight %}
-</p>
 <p class="usa-text-small">For a definition of these fields, please consult the <a href="http://www.consumerfinance.gov/data-research/hmda/static/for-filers/2017/2017-HMDA-FIG.pdf" title="HMDA Filing Instructions Guide">HMDA Filing Instructions Guide</a>.</p>
 <p class="usa-text-small">Please note that the Modified LAR does not include the following fields listed in the HMDA Filing Instructions Guide:
 <ul>
