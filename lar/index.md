@@ -17,16 +17,18 @@ title: "HMDA Platform API - LAR"
   <p>Using the <code>/lar/parse</code> endpoint you can check whether or not a single LAR contains formatting errors.</p>
 </hgroup>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-POST https://ffiec-api.cfpb.gov/public/lar/parse
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>POST</code>
 
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/lar/parse \
+  -X POST \
+  -d '2|0|1|10164|20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1' 
+{% endhighlight %}
+
 <h4>Example Body</h4>
-{% highlight PowerShell %}
+{% highlight bash %}
 2|0|1|10164|20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1
 {% endhighlight %}
 
@@ -114,13 +116,65 @@ POST https://ffiec-api.cfpb.gov/public/lar/parse
   </div>
 </div>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-POST https://ffiec-api.cfpb.gov/public/lar/validate?check=syntactical
-{% endhighlight %}
 
 <h4>Allowed Methods</h4>
 <code>POST</code>
+
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/lar/validate \
+  -X POST \
+  -d '{
+    "respondentId": "0",
+    "applicant": {
+      "coSex": 2,
+      "coRace5": "",
+      "coEthnicity": 2,
+      "race2": "",
+      "coRace2": "",
+      "coRace1": 5,
+      "race4": "",
+      "race3": "",
+      "race1": 5,
+      "sex": 1,
+      "coRace3": "",
+      "income": "31",
+      "coRace4": "",
+      "ethnicity": 2,
+      "race5": ""
+    },
+    "hoepaStatus": 2,
+    "agencyCode": 1,
+    "actionTakenType": 1,
+    "denial": {
+      "reason1": "",
+      "reason2": "",
+      "reason3": ""
+    },
+    "rateSpread": "NA",
+    "loan": {
+      "applicationDate": "20170224",
+      "propertyType": 1,
+      "amount": 21,
+      "purpose": 3,
+      "id": "10164",
+      "occupancy": 1,
+      "loanType": 1
+    },
+    "id": 2,
+    "actionTakenDate": 20170326,
+    "geography": {
+      "msa": "45460",
+      "state": "18",
+      "county": "153",
+      "tract": "0501.00"
+    },
+    "lienStatus": 1,
+    "preapprovals": 3,
+    "purchaserType": 0
+  }' \
+  -H "Content-Type: application/json"
+{% endhighlight %}
 
 <h4>Parameters</h4>
 <table>
@@ -229,13 +283,15 @@ POST https://ffiec-api.cfpb.gov/public/lar/validate?check=syntactical
   </div>
 </div>
 
-<h4>Example</h4>
-{% highlight PowerShell %}
-POST https://ffiec-api.cfpb.gov/public/lar/parseAndValidate?check=syntactical
-{% endhighlight %}
-
 <h4>Allowed Methods</h4>
 <code>POST</code>
+
+<h4>Example</h4>
+{% highlight bash %}
+curl https://ffiec-api.cfpb.gov/public/lar/parseAndValidate \
+  -X POST \
+  -d '2|0|1|10164|20170224|1|1|3|1|21|3|1|20170326|45460|18|153|0501.00|2|2|5| | | | |5| | | | |1|2|31|0| | | |NA   |2|1' 
+{% endhighlight %}
 
 <h4>Parameters</h4>
 <table>
