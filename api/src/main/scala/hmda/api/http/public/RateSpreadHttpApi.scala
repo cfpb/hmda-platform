@@ -11,9 +11,9 @@ import hmda.api.protocol.processing.ApiErrorProtocol
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.Source
 import akka.util.{ ByteString, Timeout }
-import hmda.api.model.public.RateSpreadModel.RateSpreadResponse
 import hmda.api.protocol.apor.RateSpreadProtocol._
 import hmda.api.util.FlowUtils
+import hmda.model.rateSpread.RateSpreadResponse
 import hmda.persistence.HmdaSupervisor.FindAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence
 import hmda.persistence.messages.commands.apor.APORCommands.CalculateRateSpread

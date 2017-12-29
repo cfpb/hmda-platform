@@ -3,8 +3,8 @@ package hmda.api.protocol.apor
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import hmda.api.model.public.RateSpreadModel.{ RateSpreadError, RateSpreadResponse }
 import hmda.model.apor.{ FixedRate, RateType, VariableRate }
+import hmda.model.rateSpread.{ RateSpreadError, RateSpreadResponse }
 import hmda.persistence.messages.commands.apor.APORCommands.CalculateRateSpread
 import spray.json.{ DefaultJsonProtocol, DeserializationException, JsString, JsValue, RootJsonFormat, SerializationException }
 
@@ -40,5 +40,5 @@ object RateSpreadProtocol extends DefaultJsonProtocol {
 
   implicit val calculateRateSpreadFormat = jsonFormat6(CalculateRateSpread.apply)
   implicit val rateSpreadResponseFormat = jsonFormat1(RateSpreadResponse.apply)
-  implicit val rateSpreadErrorFormat = jsonFormat1(RateSpreadError.apply)
+  implicit val rateSpreadErrorFormat = jsonFormat2(RateSpreadError.apply)
 }

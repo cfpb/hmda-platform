@@ -14,12 +14,15 @@ import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.model.apor.{ APOR, FixedRate, RateType, VariableRate }
+import hmda.model.rateSpread.{ RateSpreadError, RateSpreadResponse }
 import hmda.parser.apor.APORCsvParser
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor }
 import hmda.persistence.messages.events.apor.APOREvents.AporCreated
 import hmda.persistence.model.HmdaPersistentActor
+
 import scala.concurrent.duration._
+import scala.util.{ Failure, Success, Try }
 
 object HmdaAPORPersistence {
   val name = "hmda-apor-persistence"
@@ -110,16 +113,9 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
         }
       }
 
-    case CalculateRateSpread(actionTakenType, amortizationType, rateType, apr, lockInDate, reverseMortgage) =>
-      val amortizationTypes = (1 to 50).toList
-      val apor = if (List(1, 2, 8).contains(actionTakenType) &&
-        amortizationTypes.contains(amortizationType) &&
-        reverseMortgage == 2) {
-        Some(findApor(amortizationType, rateType, apr, lockInDate))
-      } else {
-        None
-      }
-      sender() ! apor
+    case CalculateRateSpread(actionTakenType, loanTerm, amortizationType, apr, lockInDate, reverseMortgage) =>
+      val response = getRateSpreadResponse(actionTakenType, loanTerm, amortizationType, apr, lockInDate, reverseMortgage)
+      sender() ! response
 
     case GetState =>
       sender() ! state
@@ -129,24 +125,57 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
 
   }
 
-  private def findApor(amortizationType: Int, rateType: RateType, apr: Double, lockInDate: LocalDate): Double = {
-    rateType match {
-      case FixedRate =>
-        calculateRateSpread(amortizationType, apr, lockInDate, state.fixedRate)
-      case VariableRate =>
-        calculateRateSpread(amortizationType, apr, lockInDate, state.variableRate)
+  private def getRateSpreadResponse(actionTakenType: Int, loanTerm: Int, amortizationType: RateType, apr: Double, lockInDate: LocalDate, reverseMortgage: Int): Either[RateSpreadError, RateSpreadResponse] = {
+    if (!validLoanTerm(loanTerm)) {
+      Left(RateSpreadError(400, "Loan term must be 1-50"))
+    } else if (rateSpreadNA(actionTakenType, reverseMortgage)) {
+      Right(RateSpreadResponse("NA"))
+    } else {
+      aporForDateAndLoanTerm(loanTerm, amortizationType, lockInDate) match {
+        case Some(apor) => Right(RateSpreadResponse(calculateRateSpread(apr, apor).toString))
+        case None => Left(RateSpreadError(404, s"Cannot calculate rateSpread; APOR value not found for lock-in date $lockInDate"))
+      }
     }
   }
 
-  private def calculateRateSpread(amortizationType: Int, apr: Double, lockInDate: LocalDate, aporList: List[APOR]): Double = {
+  private def calculateRateSpread(apr: Double, apor: Double): BigDecimal = {
+    BigDecimal(apr - apor).setScale(3, BigDecimal.RoundingMode.HALF_UP)
+  }
+
+  private def aporForDateAndLoanTerm(loanTerm: Int, amortizationType: RateType, lockInDate: LocalDate): Option[Double] = {
+    val aporList = amortizationType match {
+      case FixedRate => state.fixedRate
+      case VariableRate => state.variableRate
+    }
+
+    val aporData = aporList.find { apor =>
+      weekOfYear(apor.loanTerm) == weekOfYear(lockInDate) &&
+        apor.loanTerm.getYear == lockInDate.getYear
+    }
+
+    aporData match {
+      case Some(data) =>
+        Try(data.values(loanTerm - 1)) match {
+          case Success(rate) => Some(rate)
+          case Failure(e) => None
+        }
+      case None => None
+    }
+
+  }
+
+  private def validLoanTerm(loanTerm: Int): Boolean = loanTerm >= 1 && loanTerm <= 50
+
+  private def rateSpreadNA(actionTakenType: Int, reverseMortgage: Int): Boolean = {
+    (actionTakenType != 1 && actionTakenType != 2 && actionTakenType != 8) ||
+      (reverseMortgage != 2)
+  }
+
+  private def weekOfYear(date: LocalDate): Int = {
     val zoneId = ZoneId.systemDefault()
     val weekField = IsoFields.WEEK_OF_WEEK_BASED_YEAR
-    val dateTime = lockInDate.atStartOfDay(zoneId)
-    val week = dateTime.get(weekField)
-    val aporObj = aporList.find(apor => apor.loanTerm.get(weekField) == week).getOrElse(APOR())
-    val values = aporObj.values
-    val apor = if (values.nonEmpty) values(amortizationType) else 0
-    apr - apor
+    val dateTime = date.atStartOfDay(zoneId)
+    dateTime.get(weekField)
   }
 
 }
