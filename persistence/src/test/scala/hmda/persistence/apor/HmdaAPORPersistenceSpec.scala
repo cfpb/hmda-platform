@@ -73,13 +73,17 @@ class HmdaAPORPersistenceSpec extends ActorSpec {
       probe.expectMsg(Right(RateSpreadResponse("NA")))
     }
     "return Left(RateSpreadError()) with message for loan term outside of 1-50" in {
-      val request = rateSpreadRequest.copy(loanTerm = 70)
+      val request = rateSpreadRequest.copy(loanTerm = 51)
       probe.send(aporPersistence, request)
+      probe.expectMsg(Left(RateSpreadError(400, "Loan term must be 1-50")))
+
+      val request2 = rateSpreadRequest.copy(loanTerm = 0)
+      probe.send(aporPersistence, request2)
       probe.expectMsg(Left(RateSpreadError(400, "Loan term must be 1-50")))
     }
     "return Left(RateSpreadError()) with message when lock in date is not covered by APOR data" in {
       val request = rateSpreadRequest.copy(lockInDate = LocalDate.of(2010, 11, 20))
-      val expectedMessage = "Cannot calculate rateSpread; APOR value not found for lock-in date 2010-11-20"
+      val expectedMessage = "Cannot calculate rate spread; APOR value not found for lock-in date 2010-11-20"
       probe.send(aporPersistence, request)
       probe.expectMsg(Left(RateSpreadError(404, expectedMessage)))
     }
