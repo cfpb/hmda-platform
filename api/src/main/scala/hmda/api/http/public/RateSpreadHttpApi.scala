@@ -49,10 +49,10 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
               val headerSource = Source
                 .fromIterator(() => List(
                   "action_taken_type,",
+                  "loan_term,",
                   "amortization_type,",
-                  "rate_type,",
                   "apr,",
-                  "lockin_date,",
+                  "lock_in_date,",
                   "reverse_mortgage," +
                     "rate_spread\n"
                 ).toIterator)

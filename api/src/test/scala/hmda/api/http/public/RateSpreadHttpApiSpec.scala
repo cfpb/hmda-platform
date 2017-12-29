@@ -91,7 +91,7 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
       Post("/rateSpread/csv", rateSpreadFile) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
-        csv must include("action_taken_type,amortization_type,rate_type,apr,lockin_date,reverse_mortgage,rate_spread")
+        csv must include("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread")
         csv must include(s"${calculateFixedRateSpread.toCSV},2.01")
         csv must include(s"${calculateVariableRateSpread.toCSV},2.15")
 

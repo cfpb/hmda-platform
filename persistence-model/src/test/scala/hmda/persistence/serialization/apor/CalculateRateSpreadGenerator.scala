@@ -8,17 +8,17 @@ trait CalculateRateSpreadGenerator {
   implicit def calculateRateSpreadGen: Gen[CalculateRateSpread] = {
     for {
       actionTakenType <- Gen.oneOf(1, 2, 8)
-      amortizationType <- Gen.choose(1, 50)
-      rateType <- rateTypeGen
+      loanTerm <- Gen.choose(1, 50)
+      amortizationType <- rateTypeGen
       apr <- Gen.choose(0, Double.MaxValue)
-      lockinDate <- localDateGen
+      lockInDate <- localDateGen
       reverseMortgage <- Gen.oneOf(1, 2)
     } yield CalculateRateSpread(
       actionTakenType,
+      loanTerm,
       amortizationType,
-      rateType,
       apr,
-      lockinDate,
+      lockInDate,
       reverseMortgage
     )
   }

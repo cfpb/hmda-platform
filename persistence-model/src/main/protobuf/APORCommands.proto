@@ -12,9 +12,9 @@ message CreateAPORMessage {
 
 message CalculateRateSpreadMessage {
     int32 actionTakenType = 1;
-    int32 amortizationType = 2;
-    RateTypeMessage rateType = 3;
+    int32 loanTerm = 2;
+    RateTypeMessage amortizationType = 3;
     double apr = 4;
-    string lockinDate = 5;
+    string lockInDate = 5;
     int32 reverseMortgage = 6;
 }

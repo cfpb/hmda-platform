@@ -72,10 +72,10 @@ object APORProtobufConverter {
   def calculateRateSpreadToProtobuf(obj: CalculateRateSpread): CalculateRateSpreadMessage = {
     CalculateRateSpreadMessage(
       obj.actionTakenType,
-      obj.amortizationType,
-      rateTypeToProtobuf(obj.rateType),
+      obj.loanTerm,
+      rateTypeToProtobuf(obj.amortizationType),
       obj.apr,
-      obj.lockinDate.toString,
+      obj.lockInDate.toString,
       obj.reverseMortgage
     )
   }
@@ -83,10 +83,10 @@ object APORProtobufConverter {
   def calculateRateSpreadFromProtobuf(msg: CalculateRateSpreadMessage): CalculateRateSpread = {
     CalculateRateSpread(
       msg.actionTakenType,
-      msg.amortizationType,
-      rateTypeFromProtobuf(msg.rateType),
+      msg.loanTerm,
+      rateTypeFromProtobuf(msg.amortizationType),
       msg.apr,
-      LocalDate.parse(msg.lockinDate, DateTimeFormatter.ISO_LOCAL_DATE),
+      LocalDate.parse(msg.lockInDate, DateTimeFormatter.ISO_LOCAL_DATE),
       msg.reverseMortgage
     )
   }

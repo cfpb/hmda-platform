@@ -17,14 +17,14 @@ object APORCommands {
       val amortizationType = values(1)
       val rateType = values(2)
       val apr = values(3)
-      val lockinDate = values(4)
+      val lockInDate = values(4)
       val reverseMortgage = values(5)
       CalculateRateSpread(
         Try(actionTakenType.toInt).getOrElse(0),
         Try(amortizationType.toInt).getOrElse(0),
         findRateType(rateType),
         Try(apr.toDouble).getOrElse(0.0),
-        LocalDate.parse(lockinDate, DateTimeFormatter.ISO_LOCAL_DATE),
+        LocalDate.parse(lockInDate, DateTimeFormatter.ISO_LOCAL_DATE),
         Try(reverseMortgage.toInt).getOrElse(0)
       )
     }
@@ -37,14 +37,14 @@ object APORCommands {
   }
   case class CalculateRateSpread(
       actionTakenType: Int,
-      amortizationType: Int,
-      rateType: RateType,
+      loanTerm: Int,
+      amortizationType: RateType,
       apr: Double,
-      lockinDate: LocalDate,
+      lockInDate: LocalDate,
       reverseMortgage: Int
   ) {
     def toCSV: String = {
-      s"$actionTakenType,$amortizationType,${rateType.toString},$apr,${lockinDate.toString},$reverseMortgage"
+      s"$actionTakenType,$loanTerm,${amortizationType.toString},$apr,${lockInDate.toString},$reverseMortgage"
     }
   }
 }

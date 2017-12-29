@@ -110,12 +110,12 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
         }
       }
 
-    case CalculateRateSpread(actionTakenType, amortizationType, rateType, apr, lockinDate, reverseMortgage) =>
+    case CalculateRateSpread(actionTakenType, amortizationType, rateType, apr, lockInDate, reverseMortgage) =>
       val amortizationTypes = (1 to 50).toList
       val apor = if (List(1, 2, 8).contains(actionTakenType) &&
         amortizationTypes.contains(amortizationType) &&
         reverseMortgage == 2) {
-        Some(findApor(amortizationType, rateType, apr, lockinDate))
+        Some(findApor(amortizationType, rateType, apr, lockInDate))
       } else {
         None
       }
@@ -129,19 +129,19 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
 
   }
 
-  private def findApor(amortizationType: Int, rateType: RateType, apr: Double, lockinDate: LocalDate): Double = {
+  private def findApor(amortizationType: Int, rateType: RateType, apr: Double, lockInDate: LocalDate): Double = {
     rateType match {
       case FixedRate =>
-        calculateRateSpread(amortizationType, apr, lockinDate, state.fixedRate)
+        calculateRateSpread(amortizationType, apr, lockInDate, state.fixedRate)
       case VariableRate =>
-        calculateRateSpread(amortizationType, apr, lockinDate, state.variableRate)
+        calculateRateSpread(amortizationType, apr, lockInDate, state.variableRate)
     }
   }
 
-  private def calculateRateSpread(amortizationType: Int, apr: Double, lockinDate: LocalDate, aporList: List[APOR]): Double = {
+  private def calculateRateSpread(amortizationType: Int, apr: Double, lockInDate: LocalDate, aporList: List[APOR]): Double = {
     val zoneId = ZoneId.systemDefault()
     val weekField = IsoFields.WEEK_OF_WEEK_BASED_YEAR
-    val dateTime = lockinDate.atStartOfDay(zoneId)
+    val dateTime = lockInDate.atStartOfDay(zoneId)
     val week = dateTime.get(weekField)
     val aporObj = aporList.find(apor => apor.loanTerm.get(weekField) == week).getOrElse(APOR())
     val values = aporObj.values
