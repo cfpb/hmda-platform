@@ -103,7 +103,7 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
 
     case CreateApor(apor, rateType) =>
       if (state.fixedRate.contains(apor) || state.variableRate.contains(apor)) {
-        log.debug(s"$apor for ${apor.loanTerm.toString} already exists, skipping")
+        log.debug(s"$apor for ${apor.rateDate.toString} already exists, skipping")
         sender() ! AporCreated(apor, rateType)
       } else {
         persist(AporCreated(apor, rateType)) { e =>
@@ -149,8 +149,8 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
     }
 
     val aporData = aporList.find { apor =>
-      weekOfYear(apor.loanTerm) == weekOfYear(lockInDate) &&
-        apor.loanTerm.getYear == lockInDate.getYear
+      weekOfYear(apor.rateDate) == weekOfYear(lockInDate) &&
+        apor.rateDate.getYear == lockInDate.getYear
     }
 
     aporData match {

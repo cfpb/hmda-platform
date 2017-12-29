@@ -14,14 +14,14 @@ object APORProtobufConverter {
 
   def aporToProtobuf(obj: APOR): APORMessage = {
     APORMessage(
-      loanTerm = obj.loanTerm.toString,
+      loanTerm = obj.rateDate.toString,
       values = obj.values
     )
   }
 
   def aporFromProtobuf(msg: APORMessage): APOR = {
     APOR(
-      loanTerm = LocalDate.parse(msg.loanTerm, DateTimeFormatter.ISO_LOCAL_DATE),
+      rateDate = LocalDate.parse(msg.loanTerm, DateTimeFormatter.ISO_LOCAL_DATE),
       values = msg.values
     )
   }

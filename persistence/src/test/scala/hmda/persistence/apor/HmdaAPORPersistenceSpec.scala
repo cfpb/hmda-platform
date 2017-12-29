@@ -18,9 +18,9 @@ class HmdaAPORPersistenceSpec extends ActorSpec {
   val aporPersistence = system.actorOf(Props(new HmdaAPORPersistence))
   val probe = TestProbe()
 
-  val apor1 = APORGen.sample.get.copy(loanTerm = LocalDate.of(2017, 11, 20))
-  val apor2 = APORGen.sample.get.copy(loanTerm = LocalDate.of(2017, 11, 27))
-  val apor3 = APORGen.sample.get.copy(loanTerm = LocalDate.of(2017, 12, 4))
+  val apor1 = APORGen.sample.get.copy(rateDate = LocalDate.of(2017, 11, 20))
+  val apor2 = APORGen.sample.get.copy(rateDate = LocalDate.of(2017, 11, 27))
+  val apor3 = APORGen.sample.get.copy(rateDate = LocalDate.of(2017, 12, 4))
   val apors = List(apor1, apor2, apor3)
   val state = HmdaAPORState(List(apor2, apor1), List(apor3))
 
