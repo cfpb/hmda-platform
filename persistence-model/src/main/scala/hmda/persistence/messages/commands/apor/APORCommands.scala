@@ -12,22 +12,23 @@ object APORCommands {
   case class CreateApor(apor: APOR, rateType: RateType) extends Command
 
   object CalculateRateSpread {
-    def fromCsv(s: String): CalculateRateSpread = {
+    def fromCsv(s: String): Option[CalculateRateSpread] = {
       val values = s.split(',').map(_.trim)
-      val actionTakenType = values.head
-      val amortizationType = values(1)
-      val rateType = values(2)
-      val apr = values(3)
-      val lockInDate = values(4)
-      val reverseMortgage = values(5)
-      CalculateRateSpread(
-        Try(actionTakenType.toInt).getOrElse(0),
-        Try(amortizationType.toInt).getOrElse(0),
-        findRateType(rateType),
-        Try(apr.toDouble).getOrElse(0.0),
-        LocalDate.parse(lockInDate, DateTimeFormatter.ISO_LOCAL_DATE),
-        Try(reverseMortgage.toInt).getOrElse(0)
-      )
+      val actionTakenType = Try(values.head.toInt)
+      val loanTerm = Try(values(1).toInt)
+      val amortizationType = Try(findRateType(values(2)))
+      val apr = Try(values(3).toDouble)
+      val lockInDate = Try(LocalDate.parse(values(4), DateTimeFormatter.ISO_LOCAL_DATE))
+      val reverseMortgage = Try(values(5).toInt)
+
+      val fields: List[Try[Any]] = List(actionTakenType, loanTerm, amortizationType, apr, lockInDate, reverseMortgage)
+
+      if (fields.forall(_.isSuccess)) {
+        Some(CalculateRateSpread(
+          actionTakenType.get, loanTerm.get, amortizationType.get,
+          apr.get, lockInDate.get, reverseMortgage.get
+        ))
+      } else None
     }
 
     def findRateType(rateType: String): RateType = rateType match {

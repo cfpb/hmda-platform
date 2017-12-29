@@ -131,7 +131,6 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
       }
     }
 
-    /*
     val badCSV = "non,sense" + "\n" + "bogus,rate,spread,csv"
     val badCSVFile = multiPartFile(badCSV, "nonsense.txt")
     "Return error for invalid rate spread CSV" in {
@@ -143,7 +142,6 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
         csv must include(s"bogus,rate,spread,csv,error: invalid rate spread CSV")
       }
     }
-    */
 
     val lockIn1 = calculateVariableRateSpread.copy(lockInDate = LocalDate.of(2017, 10, 20))
     val loanTerm51 = calculateVariableRateSpread.copy(loanTerm = 51)

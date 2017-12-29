@@ -75,12 +75,16 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
   }
 
   def csvResultLine(supervisor: ActorRef, line: String): Future[String] = {
-    val rateSpreadF = calculateSpread(supervisor, CalculateRateSpread.fromCsv(line))
-    val resultValueF = rateSpreadF.map {
-      case Right(result) => result.rateSpread
-      case Left(error) => s"error: ${error.message}"
+    CalculateRateSpread.fromCsv(line) match {
+      case Some(command) =>
+        val rateSpreadF = calculateSpread(supervisor, command)
+        val resultValueF = rateSpreadF.map {
+          case Right(result) => result.rateSpread
+          case Left(error) => s"error: ${error.message}"
+        }
+        resultValueF.map(value => s"$line,$value\n")
+      case None => Future(s"$line,error: invalid rate spread CSV")
     }
-    resultValueF.map(value => s"$line,$value\n")
   }
 
   private def calculateSpread(supervisor: ActorRef, calculateRateSpread: CalculateRateSpread): Future[Either[RateSpreadError, RateSpreadResponse]] = {
