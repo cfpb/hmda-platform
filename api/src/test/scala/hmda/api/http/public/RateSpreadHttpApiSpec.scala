@@ -11,7 +11,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FileUploadUtils
-import hmda.api.model.public.RateSpreadModel.RateSpreadResponse
+import hmda.api.model.public.RateSpreadModel.{ RateSpreadError, RateSpreadResponse }
 import hmda.model.apor.{ APOR, FixedRate, VariableRate }
 import hmda.persistence.HmdaSupervisor
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
@@ -50,11 +50,12 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
   "APOR Calculator" must {
     val calculateFixedRateSpread = CalculateRateSpread(1, 30, FixedRate, 6.0, LocalDate.of(2017, 11, 20), 2)
     val calculateVariableRateSpread = CalculateRateSpread(1, 30, VariableRate, 6.0, LocalDate.of(2017, 11, 20), 2)
-    val calculateBatchTxt = calculateFixedRateSpread.toCSV + "\n" +
-      calculateVariableRateSpread.toCSV
-    val rateSpreadFile = multiPartFile(calculateBatchTxt, "apor.txt")
-    "Calculate Rate Spread for Fixed term loan" in {
 
+    ////////////////////////////////////
+    // Individual Rate Spread Calculator
+    ////////////////////////////////////
+
+    "Calculate Rate Spread for Fixed term loan" in {
       Post("/rateSpread", calculateFixedRateSpread) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
         responseAs[RateSpreadResponse].rateSpread mustBe "2.01"
@@ -62,7 +63,6 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
 
     }
     "Calculate Rate Spread for Variable term loan" in {
-
       Post("/rateSpread", calculateVariableRateSpread) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
         responseAs[RateSpreadResponse].rateSpread mustBe "2.15"
@@ -70,7 +70,7 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
     }
 
     "Return NA if reverse mortgage is 1" in {
-      val calculateNAReverseMortgage = CalculateRateSpread(1, 30, VariableRate, 6.0, LocalDate.of(2017, 11, 20), 1)
+      val calculateNAReverseMortgage = calculateFixedRateSpread.copy(reverseMortgage = 1)
       Post("/rateSpread", calculateNAReverseMortgage) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
         responseAs[RateSpreadResponse].rateSpread mustBe "NA"
@@ -80,13 +80,48 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
     "Return NA if action taken type is not 1, 2, or 8" in {
       val actionTakenTypes = List(3, 4, 5, 6, 7)
       for (actionTakenType <- actionTakenTypes) {
-        val c = CalculateRateSpread(actionTakenType, 30, VariableRate, 6.0, LocalDate.of(2017, 11, 20), 2)
+        val c = calculateVariableRateSpread.copy(actionTakenType = actionTakenType)
         Post("/rateSpread", c) ~> rateSpreadRoutes(supervisor) ~> check {
           status mustBe StatusCodes.OK
           responseAs[RateSpreadResponse].rateSpread mustBe "NA"
         }
       }
     }
+    "Return 400 error if loan term not in 1-50" in {
+      val loanTerm0 = calculateFixedRateSpread.copy(loanTerm = 0)
+      Post("/rateSpread", loanTerm0) ~> rateSpreadRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.BadRequest
+        responseAs[RateSpreadError].error mustBe "Loan term must be 1-50"
+      }
+
+      val loanTerm51 = calculateVariableRateSpread.copy(loanTerm = 51)
+      Post("/rateSpread", loanTerm51) ~> rateSpreadRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.BadRequest
+        responseAs[RateSpreadError].error mustBe "Loan term must be 1-50"
+      }
+    }
+
+    "Return 404 error if given lock-in date isn't in our APOR data" in {
+      val lockIn1 = calculateVariableRateSpread.copy(lockInDate = LocalDate.of(2017, 10, 20))
+      Post("/rateSpread", lockIn1) ~> rateSpreadRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[RateSpreadError].error mustBe "Cannot calculate rate spread; APOR value not found for lock-in date 2017-10-20"
+      }
+
+      val lockIn2 = calculateFixedRateSpread.copy(lockInDate = LocalDate.of(2018, 11, 20))
+      Post("/rateSpread", lockIn2) ~> rateSpreadRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.NotFound
+        responseAs[RateSpreadError].error mustBe "Cannot calculate rate spread; APOR value not found for lock-in date 2018-11-20"
+      }
+    }
+
+    ////////////////////////////////
+    // Batch Rate Spread Calculator
+    ////////////////////////////////
+
+    val calculateBatchTxt = calculateFixedRateSpread.toCSV + "\n" + calculateVariableRateSpread.toCSV
+    val rateSpreadFile = multiPartFile(calculateBatchTxt, "apor.txt")
+
     "Perform batch rate spread calculation on a file" in {
       Post("/rateSpread/csv", rateSpreadFile) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
@@ -94,9 +129,38 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
         csv must include("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread")
         csv must include(s"${calculateFixedRateSpread.toCSV},2.01")
         csv must include(s"${calculateVariableRateSpread.toCSV},2.15")
-
       }
     }
+
+    val badCSV = "non,sense" + "\n" + "bogus,rate,spread,csv"
+    val badCSVFile = multiPartFile(badCSV, "nonsense.txt")
+    "Return error for invalid rate spread CSV" in {
+      Post("/rateSpread/csv", badCSVFile) ~> rateSpreadRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.OK
+        val csv = responseAs[String]
+        csv must include("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread")
+        csv must include(s"non,sense,error: invalid rate spread CSV")
+        csv must include(s"bogus,rate,spread,csv,error: invalid rate spread CSV")
+      }
+    }
+
+    val lockIn1 = calculateVariableRateSpread.copy(lockInDate = LocalDate.of(2017, 10, 20))
+    val loanTerm51 = calculateVariableRateSpread.copy(loanTerm = 51)
+    val reverseMortgageNA = calculateFixedRateSpread.copy(reverseMortgage = 1)
+    val batchWithErrors = List(reverseMortgageNA, lockIn1, loanTerm51).map(_.toCSV).mkString("\n")
+    val rateSpreadFileWithErrors = multiPartFile(batchWithErrors, "apor-err.txt")
+
+    "Put error and NA responses in line" in {
+      Post("/rateSpread/csv", rateSpreadFileWithErrors) ~> rateSpreadRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.OK
+        val csv = responseAs[String]
+        csv must include("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread")
+        csv must include(s"${reverseMortgageNA.toCSV},NA")
+        csv must include(s"${lockIn1.toCSV},error: Cannot calculate rate spread; APOR value not found for lock-in date 2018-11-20")
+        csv must include(s"${loanTerm51.toCSV},error: Loan term must be 1-50")
+      }
+    }
+
   }
 
 }
