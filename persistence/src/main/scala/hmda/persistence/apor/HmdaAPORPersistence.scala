@@ -133,7 +133,7 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
     } else {
       aporForDateAndLoanTerm(loanTerm, amortizationType, lockInDate) match {
         case Some(apor) => Right(RateSpreadResponse(calculateRateSpread(apr, apor).toString))
-        case None => Left(RateSpreadError(404, s"Cannot calculate rateSpread; APOR value not found for lock-in date $lockInDate"))
+        case None => Left(RateSpreadError(404, s"Cannot calculate rate spread; APOR value not found for lock-in date $lockInDate"))
       }
     }
   }

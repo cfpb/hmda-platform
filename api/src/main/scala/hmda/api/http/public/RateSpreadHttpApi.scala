@@ -13,7 +13,7 @@ import akka.stream.scaladsl.Source
 import akka.util.{ ByteString, Timeout }
 import hmda.api.protocol.apor.RateSpreadProtocol._
 import hmda.api.util.FlowUtils
-import hmda.model.rateSpread.RateSpreadResponse
+import hmda.model.rateSpread.{ RateSpreadError, RateSpreadResponse }
 import hmda.persistence.HmdaSupervisor.FindAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence
 import hmda.persistence.messages.commands.apor.APORCommands.CalculateRateSpread
@@ -25,15 +25,17 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
 
   implicit def timeout: Timeout
 
-  def rateSpreadRoutes(supervisor: ActorRef) = {
+  def individualRateSpread(implicit supervisor: ActorRef) =
     path("rateSpread") {
       encodeResponse {
         timedPost { _ =>
-          entity(as[CalculateRateSpread]) { calculateRateSpread =>
-            val fRateSpread = calculateSpread(supervisor, calculateRateSpread)
+          entity(as[CalculateRateSpread]) { request =>
+            val fRateSpread = calculateSpread(supervisor, request)
             onComplete(fRateSpread) {
-              case Success(rateSpread) =>
-                complete(ToResponseMarshallable(RateSpreadResponse(rateSpread)))
+              case Success(Right(response)) => complete(ToResponseMarshallable(response))
+              case Success(Left(errorResponse)) =>
+                val errorCode = StatusCodes.getForKey(errorResponse.code).getOrElse(StatusCodes.NotFound)
+                complete(ToResponseMarshallable(errorCode -> errorResponse))
               case Failure(error) =>
                 log.error(error.getLocalizedMessage)
                 complete(ToResponseMarshallable(StatusCodes.InternalServerError))
@@ -41,10 +43,14 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
           }
         }
       }
-    } ~
-      path("rateSpread" / "csv") {
-        timedPost { _ =>
-          fileUpload("file") {
+    }
+
+  /*
+  def batchRateSpread(implicit supervisor: ActorRef) =
+    path("rateSpread" / "csv") {
+      timedPost { _ =>
+        fileUpload("file") {
+          /*
             case (_, byteSource) =>
               val headerSource = Source
                 .fromIterator(() => List(
@@ -60,14 +66,14 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
               val rateSpread = processRateSpreadFile(supervisor, byteSource)
               val csv = headerSource.map(s => ByteString(s)).concat(rateSpread)
               complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
-            case _ =>
-              complete(ToResponseMarshallable(StatusCodes.BadRequest))
-          }
+              */
+          case _ =>
+            complete(ToResponseMarshallable(StatusCodes.BadRequest))
         }
       }
-  }
-
+    }
   private def processRateSpreadFile(supervisor: ActorRef, byteSource: Source[ByteString, Any]) = {
+    val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
     byteSource
       .via(framing)
       .map(_.utf8String)
@@ -79,12 +85,15 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
       .map(x => s"${x._1},${x._2}\n")
       .map(s => ByteString(s))
   }
+  */
 
-  private def calculateSpread(supervisor: ActorRef, calculateRateSpread: CalculateRateSpread): Future[String] = {
+  def rateSpreadRoutes(supervisor: ActorRef) = {
+    implicit val sv: ActorRef = supervisor
+    individualRateSpread //~ batchRateSpread
+  }
+
+  private def calculateSpread(supervisor: ActorRef, calculateRateSpread: CalculateRateSpread): Future[Either[RateSpreadError, RateSpreadResponse]] = {
     val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
-    for {
-      aporPersistence <- fHmdaAporPersistence
-      spread <- (aporPersistence ? calculateRateSpread).mapTo[Option[Double]]
-    } yield spread.map(x => x.toString).getOrElse("NA")
+    fHmdaAporPersistence.map(a => a ? calculateRateSpread).mapTo[Either[RateSpreadError, RateSpreadResponse]]
   }
 }
