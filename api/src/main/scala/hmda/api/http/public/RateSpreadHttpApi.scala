@@ -25,7 +25,9 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
 
   implicit def timeout: Timeout
 
-  def individualRateSpread(implicit supervisor: ActorRef) =
+  def rateSpreadRoutes(supervisor: ActorRef) = individualRateSpread(supervisor) ~ batchRateSpread(supervisor)
+
+  def individualRateSpread(supervisor: ActorRef) =
     path("rateSpread") {
       encodeResponse {
         timedPost { _ =>
@@ -45,55 +47,47 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
       }
     }
 
-  /*
-  def batchRateSpread(implicit supervisor: ActorRef) =
+  def batchRateSpread(supervisor: ActorRef) =
     path("rateSpread" / "csv") {
       timedPost { _ =>
         fileUpload("file") {
-          /*
-            case (_, byteSource) =>
-              val headerSource = Source
-                .fromIterator(() => List(
-                  "action_taken_type,",
-                  "loan_term,",
-                  "amortization_type,",
-                  "apr,",
-                  "lock_in_date,",
-                  "reverse_mortgage," +
-                    "rate_spread\n"
-                ).toIterator)
-
-              val rateSpread = processRateSpreadFile(supervisor, byteSource)
-              val csv = headerSource.map(s => ByteString(s)).concat(rateSpread)
-              complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
-              */
+          case (_, byteSource) =>
+            val rateSpread = processRateSpreadFile(supervisor, byteSource)
+            val csv = headerSource.map(s => ByteString(s)).concat(rateSpread)
+            complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
           case _ =>
             complete(ToResponseMarshallable(StatusCodes.BadRequest))
         }
       }
     }
+
+  private val headerSource = Source.fromIterator(() => List(
+    "action_taken_type,", "loan_term,", "amortization_type,",
+    "apr,", "lock_in_date,", "reverse_mortgage,", "rate_spread\n"
+  ).toIterator)
+
   private def processRateSpreadFile(supervisor: ActorRef, byteSource: Source[ByteString, Any]) = {
-    val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
     byteSource
       .via(framing)
       .map(_.utf8String)
-      .map(s => (s, CalculateRateSpread(s)))
-      .mapAsync(parallelism) { x =>
-        val y = (Future(x._1), calculateSpread(supervisor, x._2))
-        for (a <- y._1; b <- y._2) yield (a, b)
-      }
-      .map(x => s"${x._1},${x._2}\n")
+      .mapAsync(parallelism)(line => csvResultLine(supervisor, line))
       .map(s => ByteString(s))
   }
-  */
 
-  def rateSpreadRoutes(supervisor: ActorRef) = {
-    implicit val sv: ActorRef = supervisor
-    individualRateSpread //~ batchRateSpread
+  def csvResultLine(supervisor: ActorRef, line: String): Future[String] = {
+    val rateSpreadF = calculateSpread(supervisor, CalculateRateSpread.fromCsv(line))
+    val resultValueF = rateSpreadF.map {
+      case Right(result) => result.rateSpread
+      case Left(error) => s"error: ${error.message}"
+    }
+    resultValueF.map(value => s"$line,$value\n")
   }
 
   private def calculateSpread(supervisor: ActorRef, calculateRateSpread: CalculateRateSpread): Future[Either[RateSpreadError, RateSpreadResponse]] = {
     val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
-    fHmdaAporPersistence.map(a => a ? calculateRateSpread).mapTo[Either[RateSpreadError, RateSpreadResponse]]
+    for {
+      a <- fHmdaAporPersistence
+      r <- (a ? calculateRateSpread).mapTo[Either[RateSpreadError, RateSpreadResponse]]
+    } yield r
   }
 }

@@ -10,9 +10,9 @@ import scala.util.Try
 
 object APORCommands {
   case class CreateApor(apor: APOR, rateType: RateType) extends Command
-  /*
+
   object CalculateRateSpread {
-    def apply(s: String): CalculateRateSpread = {
+    def fromCsv(s: String): CalculateRateSpread = {
       val values = s.split(',').map(_.trim)
       val actionTakenType = values.head
       val amortizationType = values(1)
@@ -34,9 +34,7 @@ object APORCommands {
       case "FixedRate" => FixedRate
       case "VariableRate" => VariableRate
     }
-
   }
-    */
   case class CalculateRateSpread(
       actionTakenType: Int,
       loanTerm: Int,

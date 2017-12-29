@@ -114,7 +114,6 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
       }
     }
 
-    /*
     ////////////////////////////////
     // Batch Rate Spread Calculator
     ////////////////////////////////
@@ -132,6 +131,7 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
       }
     }
 
+    /*
     val badCSV = "non,sense" + "\n" + "bogus,rate,spread,csv"
     val badCSVFile = multiPartFile(badCSV, "nonsense.txt")
     "Return error for invalid rate spread CSV" in {
@@ -143,6 +143,7 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
         csv must include(s"bogus,rate,spread,csv,error: invalid rate spread CSV")
       }
     }
+    */
 
     val lockIn1 = calculateVariableRateSpread.copy(lockInDate = LocalDate.of(2017, 10, 20))
     val loanTerm51 = calculateVariableRateSpread.copy(loanTerm = 51)
@@ -156,12 +157,11 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
         val csv = responseAs[String]
         csv must include("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread")
         csv must include(s"${reverseMortgageNA.toCSV},NA")
-        csv must include(s"${lockIn1.toCSV},error: Cannot calculate rate spread; APOR value not found for lock-in date 2018-11-20")
+        csv must include(s"${lockIn1.toCSV},error: Cannot calculate rate spread; APOR value not found for lock-in date 2017-10-20")
         csv must include(s"${loanTerm51.toCSV},error: Loan term must be 1-50")
       }
     }
 
-  */
   }
 
 }
