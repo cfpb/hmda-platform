@@ -41,15 +41,15 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
   override def beforeAll(): Unit = {
     super.beforeAll()
     val aporPersistence = Await.result(aporPersistenceF, duration)
-    val valuesFixed = Seq(3.20, 3.23, 3.23, 3.23, 3.37, 3.37, 3.52, 3.52, 3.60, 3.60, 3.60, 3.60, 3.38, 3.38, 3.38, 3.38, 3.38, 3.38, 3.38, 3.38, 3.38, 3.38, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99, 3.99)
-    val valuesVariable = Seq(4.23, 4.14, 4.05, 4.05, 3.94, 3.94, 3.90, 3.90, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85, 3.85)
+    val valuesFixed = Seq(3.01, 3.02, 3.03, 3.04, 3.05, 3.06, 3.07, 3.08, 3.09, 3.10, 3.11, 3.12, 3.13, 3.14, 3.15, 3.16, 3.17, 3.18, 3.19, 3.20, 3.21, 3.22, 3.23, 3.24, 3.25, 3.26, 3.27, 3.28, 3.29, 3.30, 3.31, 3.32, 3.33, 3.34, 3.35, 3.36, 3.37, 3.38, 3.39, 3.40, 3.41, 3.42, 3.43, 3.44, 3.45, 3.46, 3.47, 3.48, 3.49, 3.50)
+    val valuesVariable = Seq(4.01, 4.02, 4.03, 4.04, 4.05, 4.06, 4.07, 4.08, 4.09, 4.10, 4.11, 4.12, 4.13, 4.14, 4.15, 4.16, 4.17, 4.18, 4.19, 4.20, 4.21, 4.22, 4.23, 4.24, 4.25, 4.26, 4.27, 4.28, 4.29, 4.30, 4.31, 4.32, 4.33, 4.34, 4.35, 4.36, 4.37, 4.38, 4.39, 4.40, 4.41, 4.42, 4.43, 4.44, 4.45, 4.46, 4.47, 4.48, 4.49, 4.50)
     aporPersistence ! CreateApor(APOR(LocalDate.of(2017, 11, 20), valuesFixed), FixedRate)
     aporPersistence ! CreateApor(APOR(LocalDate.of(2017, 11, 20), valuesVariable), VariableRate)
   }
 
   "APOR Calculator" must {
-    val calculateFixedRateSpread = CalculateRateSpread(1, 30, FixedRate, 6.0, LocalDate.of(2017, 11, 20), 2)
-    val calculateVariableRateSpread = CalculateRateSpread(1, 30, VariableRate, 6.0, LocalDate.of(2017, 11, 20), 2)
+    val calculateFixedRateSpread = CalculateRateSpread(1, 30, FixedRate, 6.0, LocalDate.of(2017, 11, 21), 2)
+    val calculateVariableRateSpread = CalculateRateSpread(1, 30, VariableRate, 6.0, LocalDate.of(2017, 11, 22), 2)
 
     ////////////////////////////////////
     // Individual Rate Spread Calculator
@@ -58,13 +58,13 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
     "Calculate Rate Spread for Fixed term loan" in {
       Post("/rateSpread", calculateFixedRateSpread) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
-        responseAs[RateSpreadResponse].rateSpread mustBe "2.010"
+        responseAs[RateSpreadResponse].rateSpread mustBe "2.700"
       }
     }
     "Calculate Rate Spread for Variable term loan" in {
       Post("/rateSpread", calculateVariableRateSpread) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.OK
-        responseAs[RateSpreadResponse].rateSpread mustBe "2.150"
+        responseAs[RateSpreadResponse].rateSpread mustBe "1.700"
       }
     }
 
@@ -126,8 +126,8 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
         csv must include("action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread")
-        csv must include(s"${calculateFixedRateSpread.toCSV},2.01")
-        csv must include(s"${calculateVariableRateSpread.toCSV},2.15")
+        csv must include(s"${calculateFixedRateSpread.toCSV},2.700")
+        csv must include(s"${calculateVariableRateSpread.toCSV},1.700")
       }
     }
 
