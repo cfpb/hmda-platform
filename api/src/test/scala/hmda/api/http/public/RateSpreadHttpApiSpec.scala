@@ -8,6 +8,7 @@ import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FileUploadUtils
@@ -23,6 +24,7 @@ import hmda.validation.stats.ValidationStats
 
 import scala.concurrent.{ Await, ExecutionContext }
 import scala.concurrent.duration._
+import spray.json._
 
 class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     with ScalatestRouteTest with RateSpreadHttpApi with FileUploadUtils {
@@ -97,6 +99,24 @@ class RateSpreadHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAft
       Post("/rateSpread", loanTerm51) ~> rateSpreadRoutes(supervisor) ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[RateSpreadError].message mustBe "Loan term must be 1-50"
+      }
+    }
+    "Return 400 error if lock-in date isn't a valid date" in {
+      val wrongDateRequest =
+        s"""
+           |{
+           |  "actionTakenType": 1,
+           |  "loanTerm": 30,
+           |  "amortizationType": "FixedRate",
+           |  "apr": 5.5,
+           |  "lockInDate": "2017-13-30",
+           |  "reverseMortgage": 2
+           |}
+         """.stripMargin.parseJson
+
+      Post("/rateSpread", wrongDateRequest) ~> Route.seal(rateSpreadRoutes(supervisor)) ~> check {
+        status mustBe StatusCodes.BadRequest
+        response.entity.toString must include("Invalid value for MonthOfYear (valid values 1 - 12): 13")
       }
     }
 
