@@ -296,8 +296,8 @@ Example payload, in `JSON` format:
 ```json
 {
   "actionTakenType": 1,
-  "amortizationType": 30,
-  "rateType": "FixedRate",
+  "loanTerm": 30,
+  "amortizationType": "FixedRate",
   "apr": 6.0,
   "lockInDate": "2017-11-20",
   "reverseMortgage": 2
