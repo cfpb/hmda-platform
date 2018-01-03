@@ -25,7 +25,7 @@ object APORGenerator {
   }
 
   implicit def aporListGen: Gen[Seq[Double]] = {
-    Gen.listOfN(50, Gen.choose(0, Double.MaxValue))
+    Gen.listOfN(50, Gen.choose(0, 12.0))
   }
 
 }

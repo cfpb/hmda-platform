@@ -296,10 +296,10 @@ Example payload, in `JSON` format:
 ```json
 {
   "actionTakenType": 1,
-  "amortizationType": 30,
-  "rateType": "FixedRate",
+  "loanTerm": 30,
+  "amortizationType": "FixedRate",
   "apr": 6.0,
-  "lockinDate": "2017-11-20",
+  "lockInDate": "2017-11-20",
   "reverseMortgage": 2
 }
 ```
@@ -327,12 +327,13 @@ Example file contents:
 1,30,VariableRate,6.0,2017-11-20,2
 ```
 
-The contents of this file include the `Action Taken Type` (values 1,2,8), `Amortization Term` (1 - 50 years), `Rate Type`, `APR`, `Lockin Date` and `Reverse Mortgage` (values 1 or 2)
+The contents of this file include the `Action Taken Type` (values 1,2,8), `Loan Term` (1 - 50 years),
+`Amortization Type` (`FixedRate` or `VariableRate`), `APR`, `Lock In Date` and `Reverse Mortgage` (values 1 or 2)
 
 Example response in `CSV` format:
 
 ```csv
-action_taken_type,amortization_type,rate_type,apr,lockin_date,reverse_mortgage,rate_spread
+action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spread
 1,30,FixedRate,6.0,2017-11-20,2,2.01
 1,30,VariableRate,6.0,2017-11-20,2,2.15
 ```
