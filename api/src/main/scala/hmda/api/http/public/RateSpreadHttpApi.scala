@@ -32,7 +32,8 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
       encodeResponse {
         timedPost { _ =>
           entity(as[CalculateRateSpread]) { request =>
-            val fRateSpread = calculateSpread(supervisor, request)
+            val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
+            val fRateSpread = calculateSpread(fHmdaAporPersistence, request)
             onComplete(fRateSpread) {
               case Success(Right(response)) => complete(ToResponseMarshallable(response))
               case Success(Left(errorResponse)) =>
@@ -52,7 +53,8 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
       timedPost { _ =>
         fileUpload("file") {
           case (_, byteSource) =>
-            val rateSpread = processRateSpreadFile(supervisor, byteSource)
+            val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
+            val rateSpread = processRateSpreadFile(fHmdaAporPersistence, byteSource)
             val csv = headerSource.map(s => ByteString(s)).concat(rateSpread)
             complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
           case _ =>
@@ -66,18 +68,18 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
     "apr,", "lock_in_date,", "reverse_mortgage,", "rate_spread\n"
   ).toIterator)
 
-  private def processRateSpreadFile(supervisor: ActorRef, byteSource: Source[ByteString, Any]) = {
+  private def processRateSpreadFile(fAporActor: Future[ActorRef], byteSource: Source[ByteString, Any]) = {
     byteSource
       .via(framing)
       .map(_.utf8String)
-      .mapAsync(parallelism)(line => csvResultLine(supervisor, line))
+      .mapAsync(parallelism)(line => csvResultLine(fAporActor, line))
       .map(s => ByteString(s))
   }
 
-  def csvResultLine(supervisor: ActorRef, line: String): Future[String] = {
+  def csvResultLine(fAporActor: Future[ActorRef], line: String): Future[String] = {
     CalculateRateSpread.fromCsv(line) match {
       case Some(command) =>
-        val rateSpreadF = calculateSpread(supervisor, command)
+        val rateSpreadF = calculateSpread(fAporActor, command)
         val resultValueF = rateSpreadF.map {
           case Right(result) => result.rateSpread
           case Left(error) => s"error: ${error.message}"
@@ -87,10 +89,9 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
     }
   }
 
-  private def calculateSpread(supervisor: ActorRef, calculateRateSpread: CalculateRateSpread): Future[Either[RateSpreadError, RateSpreadResponse]] = {
-    val fHmdaAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
+  private def calculateSpread(fAporActor: Future[ActorRef], calculateRateSpread: CalculateRateSpread): Future[Either[RateSpreadError, RateSpreadResponse]] = {
     for {
-      a <- fHmdaAporPersistence
+      a <- fAporActor
       r <- (a ? calculateRateSpread).mapTo[Either[RateSpreadError, RateSpreadResponse]]
     } yield r
   }
