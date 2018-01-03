@@ -33,14 +33,15 @@ object ULI {
     "z" -> 35
   )
 
-  def convert(loanId: String): String = loanId
-    .map(_.toLower)
-    .map { c =>
-      if (!c.isDigit)
-        conversionTable(c.toString).toString
-      else
-        c
-    }.mkString("")
+  def convert(loanId: String): BigInt = {
+    val digits = loanId
+      .map(_.toLower)
+      .map { c =>
+        if (!c.isDigit) conversionTable(c.toString).toString
+        else c
+      }.mkString("")
+    BigInt(digits)
+  }
 
   def calculateMod(i: BigInt): BigInt = {
     i % 97
@@ -51,7 +52,7 @@ object ULI {
   }
 
   def checkDigit(loanId: String): BigInt = {
-    calculateCheckDigit(calculateMod(BigInt(convert(loanId) ++ "00")))
+    calculateCheckDigit(calculateMod(convert(loanId) * 100))
   }
 
   def generateULI(loanId: String): String = {
@@ -59,7 +60,7 @@ object ULI {
   }
 
   def validateULI(uli: String): Boolean = {
-    calculateMod(BigInt(convert(uli))) == 1
+    calculateMod(convert(uli)) == 1
   }
 
 }
