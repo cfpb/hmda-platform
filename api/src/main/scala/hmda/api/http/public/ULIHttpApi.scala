@@ -36,7 +36,7 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
             entity(as[Loan]) { loan =>
               val loanId = loan.loanId
               val check = checkDigit(loanId)
-              val uli = ULI(loanId, check.toInt, loanId + check)
+              val uli = ULI(loanId, check.toString, loanId + check)
               complete(ToResponseMarshallable(uli))
             } ~
               fileUpload("file") {
@@ -122,7 +122,7 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     byteSource
       .via(framing)
       .map(_.utf8String)
-      .map(loanId => ULI(loanId, checkDigit(loanId).toInt, loanId + checkDigit(loanId)))
+      .map(loanId => ULI(loanId, checkDigit(loanId).toString, loanId + checkDigit(loanId)))
   }
 
   private def processUliFile(byteSource: Source[ByteString, Any]) = {

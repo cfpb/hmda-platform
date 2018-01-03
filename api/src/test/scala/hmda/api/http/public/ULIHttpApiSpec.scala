@@ -40,7 +40,7 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     val uliFile = multiPartFile(uliTxt, "ulis.txt")
     val loanFile = multiPartFile(loanTxt, "loanIds.txt")
     val loanId = "10Bx939c5543TqA1144M999143X"
-    val checkDigit = 38
+    val checkDigit = "38"
     val uli = "10Bx939c5543TqA1144M999143X" + checkDigit
     val loan = Loan(loanId)
     val uliCheck = ULICheck(uli)
@@ -54,8 +54,8 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
       Post("/uli/checkDigit", loanFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[LoanCheckDigitResponse].loanIds mustBe Seq(
-          ULI("10Bx939c5543TqA1144M999143X", 38, "10Bx939c5543TqA1144M999143X38"),
-          ULI("10Cx939c5543TqA1144M999143X", 10, "10Cx939c5543TqA1144M999143X10")
+          ULI("10Bx939c5543TqA1144M999143X", "38", "10Bx939c5543TqA1144M999143X38"),
+          ULI("10Cx939c5543TqA1144M999143X", "10", "10Cx939c5543TqA1144M999143X10")
         )
       }
     }
