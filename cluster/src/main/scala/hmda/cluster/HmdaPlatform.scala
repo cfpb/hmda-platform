@@ -9,6 +9,7 @@ import akka.cluster.Cluster
 import akka.cluster.http.management.ClusterHttpManagement
 import akka.cluster.singleton.{ ClusterSingletonManager, ClusterSingletonManagerSettings, ClusterSingletonProxy, ClusterSingletonProxySettings }
 import akka.util.Timeout
+import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.api.tcp.admin.InstitutionAdminTcpApi
 import hmda.api.{ HmdaAdminApi, HmdaFilingApi, HmdaPublicApi }
@@ -20,6 +21,7 @@ import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.cluster.HmdaConfig._
 import hmda.persistence.HmdaSupervisor.FindAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence
+import hmda.persistence.apor.HmdaAPORPersistence.LoadAporDataFromS3
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
 import hmda.publication.regulator.lar.{ ModifiedLarPublisher, RegulatorLarPublisher }
@@ -119,7 +121,10 @@ object HmdaPlatform extends App {
 
     (supervisorProxy ? FindAPORPersistence(HmdaAPORPersistence.name))
       .mapTo[ActorRef]
-      .map(a => log.info(s"Stareted Rate Spread calculator at ${a.path}"))
+      .map { a =>
+        QuartzSchedulerExtension(system).schedule("AporCalculator", a, LoadAporDataFromS3)
+        log.info(s"Started Rate Spread calculator at ${a.path}")
+      }
   }
 
   //Start Query
