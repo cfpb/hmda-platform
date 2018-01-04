@@ -13,7 +13,6 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ HttpCharsets, HttpEntity, StatusCodes }
 import akka.http.scaladsl.model.MediaTypes.`text/csv`
 import akka.stream.scaladsl.{ Sink, Source }
-import com.typesafe.config.ConfigFactory
 import hmda.api.protocol.processing.ApiErrorProtocol
 import hmda.api.protocol.public.ULIProtocol
 import hmda.api.util.FlowUtils
@@ -34,9 +33,8 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
         path("checkDigit") {
           timedPost { _ =>
             entity(as[Loan]) { loan =>
-              val loanId = loan.loanId
-              val check = checkDigit(loanId)
-              val uli = ULI(loanId, check.toInt, loanId + check)
+              val digit = checkDigit(loan.loanId)
+              val uli = ULI(loan.loanId, digit, loan.loanId + digit)
               complete(ToResponseMarshallable(uli))
             } ~
               fileUpload("file") {
@@ -122,7 +120,10 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     byteSource
       .via(framing)
       .map(_.utf8String)
-      .map(loanId => ULI(loanId, checkDigit(loanId).toInt, loanId + checkDigit(loanId)))
+      .map { loanId =>
+        val digit = checkDigit(loanId)
+        ULI(loanId, digit, loanId + digit)
+      }
   }
 
   private def processUliFile(byteSource: Source[ByteString, Any]) = {

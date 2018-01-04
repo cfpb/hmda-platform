@@ -40,7 +40,7 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     val uliFile = multiPartFile(uliTxt, "ulis.txt")
     val loanFile = multiPartFile(loanTxt, "loanIds.txt")
     val loanId = "10Bx939c5543TqA1144M999143X"
-    val checkDigit = 38
+    val checkDigit = "38"
     val uli = "10Bx939c5543TqA1144M999143X" + checkDigit
     val loan = Loan(loanId)
     val uliCheck = ULICheck(uli)
@@ -50,12 +50,22 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
         responseAs[ULI] mustBe ULI(loanId, checkDigit, uli)
       }
     }
+    "include leading 0 for check digits < 10" in {
+      val loanId = "5493001YS08XHF42M0372005203"
+      Post("/uli/checkDigit", Loan(loanId)) ~> uliHttpRoutes ~> check {
+        responseAs[ULI] mustBe ULI(loanId, "07", loanId + "07")
+      }
+      val lId2 = "asdgfhkjasdgfhkasd000"
+      Post("/uli/checkDigit", Loan(lId2)) ~> uliHttpRoutes ~> check {
+        responseAs[ULI] mustBe ULI(lId2, "03", lId2 + "03")
+      }
+    }
     "return check digit and ULI from file of loan ids" in {
       Post("/uli/checkDigit", loanFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[LoanCheckDigitResponse].loanIds mustBe Seq(
-          ULI("10Bx939c5543TqA1144M999143X", 38, "10Bx939c5543TqA1144M999143X38"),
-          ULI("10Cx939c5543TqA1144M999143X", 10, "10Cx939c5543TqA1144M999143X10")
+          ULI("10Bx939c5543TqA1144M999143X", "38", "10Bx939c5543TqA1144M999143X38"),
+          ULI("10Cx939c5543TqA1144M999143X", "10", "10Cx939c5543TqA1144M999143X10")
         )
       }
     }
