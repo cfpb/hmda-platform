@@ -47,6 +47,7 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     val loan = Loan(loanId)
     val uliCheck = ULICheck(uli)
     val shortUliCheck = ULICheck("10Bx939c5")
+    val longUliCheck = ULICheck("10Bx939c5543TqA1144M999143X1dq921CQEMWEW45p0qsDDASDAGS2912dqXS1dq921CQEMWEW45p0qsDDASDAGS2912dqXS")
 
     "return check digit and ULI from loan id" in {
       Post("/uli/checkDigit", loan) ~> uliHttpRoutes ~> check {
@@ -90,7 +91,12 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
         val response = responseAs[ErrorResponse]
         response.httpStatus mustBe 400
         response.path mustBe Path("/uli/validate")
-
+      }
+      Post("/uli/validate", longUliCheck) ~> uliHttpRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        val response = responseAs[ErrorResponse]
+        response.httpStatus mustBe 400
+        response.path mustBe Path("/uli/validate")
       }
     }
     "validate a file of ULIs and return csv" in {
