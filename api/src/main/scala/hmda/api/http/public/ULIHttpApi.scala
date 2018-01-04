@@ -13,6 +13,7 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ HttpCharsets, HttpEntity, StatusCodes }
 import akka.http.scaladsl.model.MediaTypes.`text/csv`
 import akka.stream.scaladsl.{ Sink, Source }
+import hmda.api.model.ErrorResponse
 import hmda.api.protocol.processing.ApiErrorProtocol
 import hmda.api.protocol.public.ULIProtocol
 import hmda.api.util.FlowUtils
@@ -72,12 +73,17 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
             }
           } ~
           path("validate") {
-            timedPost { _ =>
+            timedPost { uri =>
               entity(as[ULICheck]) { uc =>
                 val uli = uc.uli
-                val isValid = validateULI(uli)
-                val validated = ULIValidated(isValid)
-                complete(ToResponseMarshallable(validated))
+                if (!uliIsValidLength(uli)) {
+                  val errorResponse = ErrorResponse(400, s"$uli is not between 23 and 45 characters long", uri.path)
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+                } else {
+                  val isValid = validateULI(uli)
+                  val validated = ULIValidated(isValid)
+                  complete(ToResponseMarshallable(validated))
+                }
               } ~
                 fileUpload("file") {
                   case (_, byteSource) =>
@@ -130,7 +136,13 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     byteSource
       .via(framing)
       .map(_.utf8String)
+      .filter(uli => uliIsValidLength(uli))
       .map(uli => (uli, validateULI(uli)))
       .map(validated => ULIBatchValidated(validated._1, validated._2))
+  }
+
+  private def uliIsValidLength(uli: String): Boolean = {
+    val count = uli.count(_.toString != "")
+    count >= 23 && count <= 45
   }
 }

@@ -10,8 +10,10 @@ import hmda.api.protocol.public.ULIProtocol
 import hmda.model.fi.lar.LarGenerators
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.Uri.Path
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.FileUploadUtils
+import hmda.api.model.ErrorResponse
 
 import scala.concurrent.duration._
 
@@ -44,6 +46,7 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     val uli = "10Bx939c5543TqA1144M999143X" + checkDigit
     val loan = Loan(loanId)
     val uliCheck = ULICheck(uli)
+    val shortUliCheck = ULICheck("10Bx939c5")
 
     "return check digit and ULI from loan id" in {
       Post("/uli/checkDigit", loan) ~> uliHttpRoutes ~> check {
@@ -81,6 +84,13 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
     "Validate ULI" in {
       Post("/uli/validate", uliCheck) ~> uliHttpRoutes ~> check {
         responseAs[ULIValidated] mustBe ULIValidated(true)
+      }
+      Post("/uli/validate", shortUliCheck) ~> uliHttpRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        val response = responseAs[ErrorResponse]
+        response.httpStatus mustBe 400
+        response.path mustBe Path("/uli/validate")
+
       }
     }
     "validate a file of ULIs and return csv" in {
