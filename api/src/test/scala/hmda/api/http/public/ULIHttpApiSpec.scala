@@ -50,6 +50,12 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
         responseAs[ULI] mustBe ULI(loanId, checkDigit, uli)
       }
     }
+    "include leading 0 for check digits < 10" in {
+      val loanId = "5493001YS08XHF42M0372005203"
+      Post("/uli/checkDigit", Loan(loanId)) ~> uliHttpRoutes ~> check {
+        responseAs[ULI] mustBe ULI(loanId, "07", loanId + "07")
+      }
+    }
     "return check digit and ULI from file of loan ids" in {
       Post("/uli/checkDigit", loanFile) ~> uliHttpRoutes ~> check {
         status mustBe StatusCodes.OK

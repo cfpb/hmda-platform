@@ -23,10 +23,15 @@ class ULISpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
 
   "A ULI Validation" must {
     "Produce valid check digit" in {
-      ULI.checkDigit(loan1) mustBe 38
-      ULI.checkDigit(loan2) mustBe 10
+      ULI.checkDigit(loan1) mustBe "38"
+      ULI.checkDigit(loan2) mustBe "10"
       ULI.generateULI(loan1) mustBe validULI1
       ULI.generateULI(loan2) mustBe validULI2
+    }
+    "include a leading 0 for check digits < 10" in {
+      val loanId = "5493001YS08XHF42M0372005203"
+      ULI.checkDigit(loanId) mustBe "07"
+      ULI.generateULI(loanId) mustBe s"${loanId}07"
     }
     "Validate ULI" in {
       ULI.validateULI(validULI1) mustBe true

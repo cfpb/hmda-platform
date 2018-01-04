@@ -51,8 +51,13 @@ object ULI {
     98 - i
   }
 
-  def checkDigit(loanId: String): BigInt = {
-    calculateCheckDigit(calculateMod(convert(loanId) * 100))
+  def checkDigit(loanId: String): String = {
+    stringLengthTwo(calculateCheckDigit(calculateMod(convert(loanId) * 100)))
+  }
+
+  def stringLengthTwo(n: BigInt): String = {
+    if (n <= 9 && n >= 0) s"0$n"
+    else n.toString
   }
 
   def generateULI(loanId: String): String = {
