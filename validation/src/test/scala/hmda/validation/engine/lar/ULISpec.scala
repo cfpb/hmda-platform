@@ -32,6 +32,9 @@ class ULISpec extends AsyncWordSpec with MustMatchers with BeforeAndAfterAll {
       val loanId = "5493001YS08XHF42M0372005203"
       ULI.checkDigit(loanId) mustBe "07"
       ULI.generateULI(loanId) mustBe s"${loanId}07"
+      val lId2 = "asdgfhkjasdgfhkasd000"
+      ULI.checkDigit(lId2) mustBe "03"
+      ULI.generateULI(lId2) mustBe s"${lId2}03"
     }
     "Validate ULI" in {
       ULI.validateULI(validULI1) mustBe true
