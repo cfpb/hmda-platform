@@ -31,9 +31,9 @@ case class InstitutionQuery(
 ) {
   def toCSV: String = {
     s"$id|$agency|$filingPeriod|$activityYear|$respondentId|$institutionType|" +
-      s"$cra|$emailDomain1|$emailDomain2|$emailDomain3" +
+      s"$cra|$emailDomain1|$emailDomain2|$emailDomain3|" +
       s"$respondentName|$respondentState|$respondentCity|$respondentFipsStateNumber|" +
-      s"$hmdaFilerFlag|$parentRespondentId|$parentIdRssd|$parentName|$parentCity|$parentState" +
+      s"$hmdaFilerFlag|$parentRespondentId|$parentIdRssd|$parentName|$parentCity|$parentState|" +
       s"$assets|$otherLenderCode|$topHolderIdRssd|$topHolderName|$topHolderCity|$topHolderState|$topHolderCountry"
   }
 }

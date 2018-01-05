@@ -3,6 +3,7 @@ package hmda.publication.regulator.panel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import akka.NotUsed
 import akka.actor.{ ActorSystem, Props }
 import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
@@ -10,13 +11,14 @@ import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Flow, Source }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages.PublishRegulatorData
+import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.institutions.InstitutionCassandraRepository
 
 object RegulatorPanelPublisher {
@@ -97,11 +99,18 @@ class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraReposit
 
       val panelSource = readData(fetchSize)
         .filter(i => i.hmdaFilerFlag)
+        .via(filterTestBanks)
         .map(institution => institution.toCSV + "\n")
         .map(s => ByteString(s))
 
       val source = headerSource.map(s => ByteString(s)).concat(panelSource)
       source.runWith(s3Sink)
+  }
+
+  def filterTestBanks: Flow[InstitutionQuery, InstitutionQuery, NotUsed] = {
+    Flow[InstitutionQuery]
+      .filter(i => i.respondentName != "bank-0 National Association" && i.respondentId != "Bank0_RID")
+      .filter(i => i.respondentName != "bank-1 Mortgage Lending" && i.respondentId != "Bank1_RID")
   }
 
 }
