@@ -35,13 +35,14 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
           timedPost { uri =>
             entity(as[Loan]) { loan =>
               val loanId = loan.loanId
-              if (!loanIdIsValidLength(loanId)) {
-                val errorResponse = ErrorResponse(400, s"$loanId is not between 21 and 43 characters long", uri.path)
-                complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-              } else {
-                val digit = checkDigit(loanId)
-                val uli = ULI(loan.loanId, digit, loan.loanId + digit)
-                complete(ToResponseMarshallable(uli))
+              val maybeDigit = Try(checkDigit(loanId))
+              maybeDigit match {
+                case Success(digit) =>
+                  val uli = ULI(loan.loanId, digit, loan.loanId + digit)
+                  complete(ToResponseMarshallable(uli))
+                case Failure(error) =>
+                  val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
               }
             } ~
               fileUpload("file") {
@@ -136,6 +137,7 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
       .via(framing)
       .map(_.utf8String)
       .filter(loanId => loanIdIsValidLength(loanId))
+      .filter(loanId => isAlphanumeric(loanId))
       .map { loanId =>
         val digit = checkDigit(loanId)
         ULI(loanId, digit, loanId + digit)
@@ -147,12 +149,9 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
       .via(framing)
       .map(_.utf8String)
       .filter(uli => uliIsValidLength(uli))
+      .filter(uli => isAlphanumeric(uli))
       .map(uli => (uli, validateULI(uli)))
       .map(validated => ULIBatchValidated(validated._1, validated._2))
   }
 
-  private def loanIdIsValidLength(loanId: String): Boolean = {
-    val count = loanId.count(_.toString != "")
-    count >= 21 && count <= 43
-  }
 }

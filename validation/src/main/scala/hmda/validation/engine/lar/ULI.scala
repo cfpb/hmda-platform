@@ -1,5 +1,7 @@
 package hmda.validation.engine.lar
 
+import ULIValidationErrorMessages._
+
 //See https://www.consumerfinance.gov/eregulations/1003-C/2015-26607_20180101#1003-C-1
 
 object ULI {
@@ -52,8 +54,10 @@ object ULI {
   }
 
   def checkDigit(loanId: String): String = {
-    if (!isAlphanumeric(loanId)) {
-      throw new Exception("Loan ID is not alphanumeric")
+    if (!loanIdIsValidLength(loanId)) {
+      throw new Exception(invalidLoanIdLengthMessage)
+    } else if (!isAlphanumeric(loanId)) {
+      throw new Exception(nonAlpanumericLoanIdMessage)
     } else {
       stringLengthTwo(calculateCheckDigit(calculateMod(convert(loanId) * 100)))
     }
@@ -70,9 +74,9 @@ object ULI {
 
   def validateULI(uli: String): Boolean = {
     if (!isAlphanumeric(uli)) {
-      throw new Exception("ULI is not alphanumeric")
+      throw new Exception(nonAlphanumericULIMessage)
     } else if (!uliIsValidLength(uli)) {
-      throw new Exception(s"$uli is not between 23 and 45 characters long")
+      throw new Exception(invalidULILengthMessage)
     } else {
       calculateMod(convert(uli)) == 1
     }
@@ -80,13 +84,18 @@ object ULI {
 
   val alphanumeric = (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toSet
 
-  private def isAlphanumeric(str: String): Boolean = {
+  def isAlphanumeric(str: String): Boolean = {
     str.forall(alphanumeric.contains(_))
   }
 
   def uliIsValidLength(uli: String): Boolean = {
     val count = uli.count(_.toString != "")
     count >= 23 && count <= 45
+  }
+
+  def loanIdIsValidLength(loanId: String): Boolean = {
+    val count = loanId.count(_.toString != "")
+    count >= 21 && count <= 43
   }
 
 }
