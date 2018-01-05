@@ -19,7 +19,7 @@ import hmda.api.protocol.public.ULIProtocol
 import hmda.api.util.FlowUtils
 
 import scala.concurrent.ExecutionContext
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Success, Try }
 
 trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProtocol with FlowUtils {
   implicit val system: ActorSystem
@@ -80,9 +80,15 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
                   val errorResponse = ErrorResponse(400, s"$uli is not between 23 and 45 characters long", uri.path)
                   complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
                 } else {
-                  val isValid = validateULI(uli)
-                  val validated = ULIValidated(isValid)
-                  complete(ToResponseMarshallable(validated))
+                  val isValid = Try(validateULI(uli))
+                  isValid match {
+                    case Success(value) =>
+                      val validated = ULIValidated(value)
+                      complete(ToResponseMarshallable(validated))
+                    case Failure(error) =>
+                      val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                      complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+                  }
                 }
               } ~
                 fileUpload("file") {
@@ -93,7 +99,8 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
                         complete(ToResponseMarshallable(ULIBatchValidatedResponse(validated)))
                       case Failure(error) =>
                         log.error(error.getLocalizedMessage)
-                        complete(ToResponseMarshallable(StatusCodes.InternalServerError))
+                        val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                        complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
                     }
 
                   case _ =>

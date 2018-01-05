@@ -61,11 +61,20 @@ object ULI {
   }
 
   def generateULI(loanId: String): String = {
-    loanId + checkDigit(loanId).toString()
+    loanId + checkDigit(loanId).toString
   }
 
   def validateULI(uli: String): Boolean = {
-    calculateMod(convert(uli)) == 1
+    if (isAlphanumeric(uli))
+      calculateMod(convert(uli)) == 1
+    else
+      throw new Exception("ULI is not alphanumeric")
+  }
+
+  val alphanumeric = (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toSet
+
+  private def isAlphanumeric(str: String): Boolean = {
+    str.forall(alphanumeric.contains(_))
   }
 
 }
