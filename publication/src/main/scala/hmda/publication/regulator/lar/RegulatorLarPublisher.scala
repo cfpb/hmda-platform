@@ -3,17 +3,19 @@ package hmda.publication.regulator.lar
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Flow, Source }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages._
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
@@ -110,6 +112,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
         ).toIterator).map(s => ByteString(s))
 
       val larSource = readData(fetchSize)
+        .via(filterTestBanks)
         .map(lar => lar.toCSV + "\n")
         .map(s => ByteString(s))
 
@@ -118,5 +121,10 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
       source.runWith(s3Sink)
 
     case _ => //do nothing
+  }
+
+  def filterTestBanks: Flow[LoanApplicationRegister, LoanApplicationRegister, NotUsed] = {
+    Flow[LoanApplicationRegister]
+      .filter(lar => lar.respondentId != "Bank0_RID" && lar.respondentId != "Bank1_RID")
   }
 }
