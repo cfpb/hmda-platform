@@ -32,11 +32,17 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     encodeResponse {
       pathPrefix("uli") {
         path("checkDigit") {
-          timedPost { _ =>
+          timedPost { uri =>
             entity(as[Loan]) { loan =>
-              val digit = checkDigit(loan.loanId)
-              val uli = ULI(loan.loanId, digit, loan.loanId + digit)
-              complete(ToResponseMarshallable(uli))
+              val loanId = loan.loanId
+              if (!loanIdIsValidLength(loanId)) {
+                val errorResponse = ErrorResponse(400, s"$loanId is not between 21 and 43 characters long", uri.path)
+                complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              } else {
+                val digit = checkDigit(loanId)
+                val uli = ULI(loan.loanId, digit, loan.loanId + digit)
+                complete(ToResponseMarshallable(uli))
+              }
             } ~
               fileUpload("file") {
                 case (_, byteSource) =>
@@ -47,7 +53,8 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
                     }
                     case Failure(error) =>
                       log.error(error.getLocalizedMessage)
-                      complete(ToResponseMarshallable(StatusCodes.InternalServerError))
+                      val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                      complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
                   }
                 case _ =>
                   complete(ToResponseMarshallable(StatusCodes.BadRequest))
@@ -76,19 +83,14 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
             timedPost { uri =>
               entity(as[ULICheck]) { uc =>
                 val uli = uc.uli
-                if (!uliIsValidLength(uli)) {
-                  val errorResponse = ErrorResponse(400, s"$uli is not between 23 and 45 characters long", uri.path)
-                  complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-                } else {
-                  val isValid = Try(validateULI(uli))
-                  isValid match {
-                    case Success(value) =>
-                      val validated = ULIValidated(value)
-                      complete(ToResponseMarshallable(validated))
-                    case Failure(error) =>
-                      val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
-                      complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-                  }
+                val isValid = Try(validateULI(uli))
+                isValid match {
+                  case Success(value) =>
+                    val validated = ULIValidated(value)
+                    complete(ToResponseMarshallable(validated))
+                  case Failure(error) =>
+                    val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
                 }
               } ~
                 fileUpload("file") {
@@ -133,6 +135,7 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     byteSource
       .via(framing)
       .map(_.utf8String)
+      .filter(loanId => loanIdIsValidLength(loanId))
       .map { loanId =>
         val digit = checkDigit(loanId)
         ULI(loanId, digit, loanId + digit)
@@ -148,8 +151,8 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
       .map(validated => ULIBatchValidated(validated._1, validated._2))
   }
 
-  private def uliIsValidLength(uli: String): Boolean = {
-    val count = uli.count(_.toString != "")
-    count >= 23 && count <= 45
+  private def loanIdIsValidLength(loanId: String): Boolean = {
+    val count = loanId.count(_.toString != "")
+    count >= 21 && count <= 43
   }
 }
