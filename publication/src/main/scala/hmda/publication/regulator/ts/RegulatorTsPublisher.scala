@@ -64,38 +64,11 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
         S3Headers(ServerSideEncryption.AES256)
       )
 
-      val headerSource = Source.fromIterator(() =>
-        List(
-          "id|" +
-            "agency_code|" +
-            "timestamp|" +
-            "activity_year|" +
-            "tax_id|" +
-            "total_lines|" +
-            "respondent_id|" +
-            "respondent_name|" +
-            "respondent_address|" +
-            "respondent_city|" +
-            "respondent_state|" +
-            "respondent_zipcode|" +
-            "parent_name|" +
-            "parent_address|" +
-            "parent_city|" +
-            "parent_state|" +
-            "parent_zipcode|" +
-            "contact_name|" +
-            "contact_phone|" +
-            "contact_fax|" +
-            "contact_email|" +
-            "submission_timestamp\n"
-        ).toIterator).map(s => ByteString(s))
-
-      val tsSource = readData(fetchSize)
+      val source = readData(fetchSize)
         .via(filterTestBanks)
         .map(ts => ts.toCSV + "\n")
         .map(s => ByteString(s))
 
-      val source = headerSource.concat(tsSource)
       source.runWith(s3Sink)
 
     case _ => //do nothing
