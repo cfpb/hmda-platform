@@ -3,6 +3,7 @@ package hmda.publication.regulator.ts
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import akka.NotUsed
 import akka.actor.{ ActorSystem, Props }
 import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
@@ -10,12 +11,13 @@ import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Flow, Source }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages.PublishRegulatorData
+import hmda.query.model.filing.TransmittalSheetWithTimestamp
 import hmda.query.repository.filing.TransmittalSheetCassandraRepository
 
 object RegulatorTsPublisher {
@@ -89,6 +91,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
         ).toIterator).map(s => ByteString(s))
 
       val tsSource = readData(fetchSize)
+        .via(filterTestBanks)
         .map(ts => ts.toCSV + "\n")
         .map(s => ByteString(s))
 
@@ -96,6 +99,12 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
       source.runWith(s3Sink)
 
     case _ => //do nothing
+  }
+
+  def filterTestBanks: Flow[TransmittalSheetWithTimestamp, TransmittalSheetWithTimestamp, NotUsed] = {
+    Flow[TransmittalSheetWithTimestamp]
+      .filter(t => t.ts.respondent.name != "bank-0 National Association" && t.ts.respondentId != "Bank0_RID")
+      .filter(t => t.ts.respondent.name != "bank-1 Mortgage Lending" && t.ts.respondentId != "Bank1_RID")
   }
 
 }
