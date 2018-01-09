@@ -43,6 +43,9 @@ hr {
 
 table {
   margin-top: 0;
+  tbody {
+    font-size: 14px;
+  }
 }
 
 aside {
@@ -64,4 +67,12 @@ aside {
 
 .margin-bottom-0 {
   margin-bottom: 0;
+}
+
+.usa-unstyled-list {
+  li.na-response {
+    border-top: 1px solid $color-gray-lighter;
+    margin-top: 5px;
+    padding-top: 5px;
+  }
 }

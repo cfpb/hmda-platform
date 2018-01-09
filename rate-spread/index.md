@@ -16,10 +16,10 @@ title: "HMDA Platform API - Rate Spread"
 curl https://ffiec-api.cfpb.gov/public/rateSpread \
   -d '{ 
     "actionTakenType": 1,
-    "amortizationType": 30,
-    "rateType": "FixedRate",
+    "loanTerm": 30,
+    "amortizationType": "FixedRate",
     "apr": 6.0,
-    "lockinDate": "2017-11-20",
+    "lockInDate": "2017-11-20",
     "reverseMortgage": 2
   }' \
   -X POST \
@@ -42,15 +42,22 @@ curl https://ffiec-api.cfpb.gov/public/rateSpread \
     <tr>
       <td><code>actionTakenType</code></td>
       <td><code>integer</code></td>
-      <td><code>1</code>, <code>2</code>, or <code>8</code></td>
+      <td>
+        <ul class="usa-unstyled-list">
+          <li><code>1</code> = Originated</li>
+          <li><code>2</code> = Approved Not Accepted</li>
+          <li><code>8</code> = Pre-approval request approved but not Accepted</li>
+          <li class="na-response"><code>3</code>, <code>4</code>, <code>5</code>, <code>6</code> or <code>7</code> will result in <code>NA</code></li>
+        </ul>
+      </td>
     </tr>
     <tr>
-      <td><code>amortizationType</code></td>
+      <td><code>loanTerm</code></td>
       <td><code>integer</code></td>
       <td>Range from <code>1</code> to <code>50</code> years</td>
     </tr>
     <tr>
-      <td><code>rateType</code></td>
+      <td><code>amortizationType</code></td>
       <td><code>string</code></td>
       <td><code>FixedRate</code> or <code>VariableRate</code></td>
     </tr>
@@ -60,9 +67,19 @@ curl https://ffiec-api.cfpb.gov/public/rateSpread \
       <td>The Annual Percentage Rate on the loan, eg <code>6.0</code></td>
     </tr>
     <tr>
+      <td><code>lockInDate</code></td>
+      <td><code>date</code></td>
+      <td><code>yyyy-mm-dd</code></td>
+    </tr>
+    <tr>
       <td><code>reverseMortgage</code></td>
       <td><code>integer</code></td>
-      <td><code>1</code> or <code>2</code></td>
+      <td>
+        <ul class="usa-unstyled-list">
+          <li><code>2</code> = false</li>
+          <li class="na-response"><code>1</code> = true, will result in <code>NA</code></li>
+        </ul>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -71,12 +88,12 @@ curl https://ffiec-api.cfpb.gov/public/rateSpread \
 <section class="code-block">
 <code>JSON</code>
 {% highlight json %}
-{
+{ 
   "actionTakenType": 1,
-  "amortizationType": 30,
-  "rateType": "FixedRate",
+  "loanTerm": 30,
+  "amortizationType": "FixedRate",
   "apr": 6.0,
-  "lockinDate": "2017-11-20",
+  "lockInDate": "2017-11-20",
   "reverseMortgage": 2
 }
 {% endhighlight %}
@@ -118,13 +135,13 @@ curl https://ffiec-api.cfpb.gov/public/rateSpread/csv \
 {% endhighlight %}
 </section>
 
-<p class="use-text-small">The contents of this file include the <code>Action Taken Type</code>, <code>Amortization Term</code>, <code>Rate Type</code>, <code>APR</code>, <code>Lockin Date</code> and <code>Reverse Mortgage</code>.</p>
+<p class="use-text-small">The contents of this file include the <code>Action Taken Type</code>, <code>Loan Term</code>, <code>Amoritization Type</code>, <code>APR</code>, <code>Lock in Date</code> and <code>Reverse Mortgage</code>.</p>
 
 <h4>Example Response in <code>CSV</code> format</h4>
 <section class="code-block">
 <code>CSV</code>
 {% highlight bash %}
-action_taken_type,amortization_type,rate_type,apr,lockin_date,reverse_mortgage,rate_spread
+action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,rate_spreadrate_spread
 1,30,FixedRate,6.0,2017-11-20,2,2.01
 1,30,VariableRate,6.0,2017-11-20,2,2.15
 {% endhighlight %}
