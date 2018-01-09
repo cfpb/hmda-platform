@@ -40,12 +40,14 @@ object HmdaAPORPersistence {
         case FixedRate => HmdaAPORState(apor :: fixedRate, variableRate)
         case VariableRate => HmdaAPORState(fixedRate, apor :: variableRate)
       }
-      case AporModified(date, rateType, apor) => rateType match {
+      case AporModified(rateType, newApor) => rateType match {
         case FixedRate =>
-          val newAporList = apor :: fixedRate.filter(_.rateDate != date)
+          val date = newApor.rateDate
+          val newAporList = newApor :: fixedRate.filter(_.rateDate != date)
           HmdaAPORState(newAporList, variableRate)
         case VariableRate =>
-          val newAporList = apor :: variableRate.filter(_.rateDate != date)
+          val date = newApor.rateDate
+          val newAporList = newApor :: variableRate.filter(_.rateDate != date)
           HmdaAPORState(fixedRate, newAporList)
       }
     }
@@ -122,9 +124,10 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
         }
       }
 
-    case ModifyApor(date, rateType, apor) =>
+    case ModifyApor(rateType, newApor) =>
+      val date = newApor.rateDate
       if (state.fixedRate.map(_.rateDate).contains(date) || state.variableRate.map(_.rateDate).contains(date)) {
-        persist(AporModified(date, rateType, apor)) { e =>
+        persist(AporModified(rateType, newApor)) { e =>
           log.debug(s"APOR Modified: $e")
           updateState(e)
           sender() ! e
