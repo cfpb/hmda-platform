@@ -10,7 +10,7 @@ import hmda.model.apor.APORGenerator._
 import hmda.model.apor.{ FixedRate, VariableRate }
 import hmda.model.rateSpread.{ RateSpreadError, RateSpreadResponse }
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor, ModifyApor }
+import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor, FindApor, ModifyApor }
 import hmda.persistence.messages.events.apor.APOREvents.{ AporCreated, AporModified }
 
 class HmdaAPORPersistenceSpec extends ActorSpec {
@@ -36,7 +36,12 @@ class HmdaAPORPersistenceSpec extends ActorSpec {
       probe.expectMsg(AporCreated(apor3, VariableRate))
       probe.send(aporPersistence, CreateApor(apor3, VariableRate))
       probe.expectMsg(AporCreated(apor3, VariableRate))
-
+    }
+    "find APOR by date" in {
+      probe.send(aporPersistence, FindApor(VariableRate, LocalDate.of(2017, 12, 4)))
+      probe.expectMsg(Some(apor3))
+      probe.send(aporPersistence, FindApor(FixedRate, LocalDate.of(2000, 1, 1)))
+      probe.expectMsg(None)
     }
     "Retrieve current state" in {
       probe.send(aporPersistence, GetState)
