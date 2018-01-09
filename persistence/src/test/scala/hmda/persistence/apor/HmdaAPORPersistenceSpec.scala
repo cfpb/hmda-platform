@@ -10,8 +10,8 @@ import hmda.model.apor.APORGenerator._
 import hmda.model.apor.{ FixedRate, VariableRate }
 import hmda.model.rateSpread.{ RateSpreadError, RateSpreadResponse }
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor }
-import hmda.persistence.messages.events.apor.APOREvents.AporCreated
+import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor, ModifyApor }
+import hmda.persistence.messages.events.apor.APOREvents.{ AporCreated, AporModified }
 
 class HmdaAPORPersistenceSpec extends ActorSpec {
 
@@ -86,6 +86,21 @@ class HmdaAPORPersistenceSpec extends ActorSpec {
       val expectedMessage = "Cannot calculate rate spread; APOR value not found for lock-in date 2010-11-20"
       probe.send(aporPersistence, request)
       probe.expectMsg(Left(RateSpreadError(404, expectedMessage)))
+    }
+    "modify fixed and variable rate APOR" in {
+      val fixedDate = LocalDate.of(2017, 11, 20)
+      val newFixedRateApor = APORGen.sample.get.copy(rateDate = fixedDate)
+      probe.send(aporPersistence, ModifyApor(fixedDate, FixedRate, newFixedRateApor))
+      probe.expectMsg(AporModified(fixedDate, FixedRate, newFixedRateApor))
+      probe.send(aporPersistence, GetState)
+      probe.expectMsg(HmdaAPORState(List(newFixedRateApor, apor2), List(apor3)))
+
+      val variableDate = LocalDate.of(2017, 12, 4)
+      val newVariableRateApor = APORGen.sample.get.copy(rateDate = variableDate)
+      probe.send(aporPersistence, ModifyApor(variableDate, VariableRate, newVariableRateApor))
+      probe.expectMsg(AporModified(variableDate, VariableRate, newVariableRateApor))
+      probe.send(aporPersistence, GetState)
+      probe.expectMsg(HmdaAPORState(List(newFixedRateApor, apor2), List(newVariableRateApor)))
     }
   }
 }

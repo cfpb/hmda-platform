@@ -16,8 +16,8 @@ import hmda.model.apor.{ APOR, FixedRate, RateType, VariableRate }
 import hmda.model.rateSpread.{ RateSpreadError, RateSpreadResponse }
 import hmda.parser.apor.APORCsvParser
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor }
-import hmda.persistence.messages.events.apor.APOREvents.AporCreated
+import hmda.persistence.messages.commands.apor.APORCommands.{ CalculateRateSpread, CreateApor, ModifyApor }
+import hmda.persistence.messages.events.apor.APOREvents.{ AporCreated, AporModified }
 import hmda.persistence.model.HmdaPersistentActor
 
 import scala.concurrent.duration._
@@ -29,6 +29,7 @@ object HmdaAPORPersistence {
   case object LoadAporDataFromS3
 
   def props(): Props = Props(new HmdaAPORPersistence)
+
   def createAPORPersistence(system: ActorSystem): ActorRef = {
     system.actorOf(HmdaAPORPersistence.props(), name)
   }
@@ -39,11 +40,21 @@ object HmdaAPORPersistence {
         case FixedRate => HmdaAPORState(apor :: fixedRate, variableRate)
         case VariableRate => HmdaAPORState(fixedRate, apor :: variableRate)
       }
+      case AporModified(date, rateType, apor) => rateType match {
+        case FixedRate =>
+          val newAporList = apor :: fixedRate.filter(_.rateDate != date)
+          HmdaAPORState(newAporList, variableRate)
+        case VariableRate =>
+          val newAporList = apor :: variableRate.filter(_.rateDate != date)
+          HmdaAPORState(fixedRate, newAporList)
+      }
     }
   }
+
 }
 
 class HmdaAPORPersistence extends HmdaPersistentActor {
+
   import HmdaAPORPersistence._
 
   var state = HmdaAPORState()
@@ -72,8 +83,9 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
     Framing.delimiter(ByteString("\n"), maximumFrameLength = 65536, allowTruncation = true)
   }
 
-  override def updateState(event: Event): Unit =
+  override def updateState(event: Event): Unit = {
     state = state.update(event)
+  }
 
   override def receiveCommand: Receive = {
     case LoadAporDataFromS3 =>
@@ -105,6 +117,15 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
       } else {
         persist(AporCreated(apor, rateType)) { e =>
           log.debug(s"APOR Persisted: $e")
+          updateState(e)
+          sender() ! e
+        }
+      }
+
+    case ModifyApor(date, rateType, apor) =>
+      if (state.fixedRate.map(_.rateDate).contains(date) || state.variableRate.map(_.rateDate).contains(date)) {
+        persist(AporModified(date, rateType, apor)) { e =>
+          log.debug(s"APOR Modified: $e")
           updateState(e)
           sender() ! e
         }

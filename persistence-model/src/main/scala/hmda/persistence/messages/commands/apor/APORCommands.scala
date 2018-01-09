@@ -10,6 +10,7 @@ import scala.util.Try
 
 object APORCommands {
   case class CreateApor(apor: APOR, rateType: RateType) extends Command
+  case class ModifyApor(date: LocalDate, rateType: RateType, apor: APOR) extends Command
 
   object CalculateRateSpread {
     def fromCsv(s: String): Option[CalculateRateSpread] = {
