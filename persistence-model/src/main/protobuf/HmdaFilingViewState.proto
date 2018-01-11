@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-option java_package = "hmda.persistence.model.serialization";
-option optimize_for = SPEED;
-
-message FilingViewStateMessage {
-    int64 size = 1;
-    int64 seqNr = 2;
-}
