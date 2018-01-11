@@ -34,10 +34,12 @@ class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
 
   val uliTxt = "10Cx939c5543TqA1144M999143X10\n" +
     "10Bx939c5543TqA1144M999143X38\n" +
-    "10Bx939c5543TqA1144M999133X38\n"
+    "10Bx939c5543TqA1144M999133X38\n" +
+    "#%)WQD!"
 
   val loanTxt = "10Bx939c5543TqA1144M999143X\n" +
-    "10Cx939c5543TqA1144M999143X"
+    "10Cx939c5543TqA1144M999143X\n" +
+    "##!d23e("
 
   "ULI API" must {
     val uliFile = multiPartFile(uliTxt, "ulis.txt")
