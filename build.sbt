@@ -22,7 +22,7 @@ lazy val hmda = (project in file("."))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      mainClass in Compile := Some("hmda.cluster.HmdaPlatform"),
+      mainClass in Compile := Some("hmda.HmdaPlatform"),
       assemblyJarName in assembly := {
         s"${name.value}2.jar"
       }
