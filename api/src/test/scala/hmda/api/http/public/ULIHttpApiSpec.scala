@@ -7,7 +7,6 @@ import akka.util.Timeout
 import hmda.api.RequestHeaderUtils
 import hmda.api.model.public.ULIModel._
 import hmda.api.protocol.public.ULIProtocol
-import hmda.model.fi.lar.LarGenerators
 import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.Uri.Path
@@ -19,7 +18,7 @@ import hmda.validation.engine.lar.ULIValidationErrorMessages._
 import scala.concurrent.duration._
 
 class ULIHttpApiSpec extends WordSpec with MustMatchers with BeforeAndAfterAll
-    with ScalatestRouteTest with RequestHeaderUtils with ULIHttpApi with FileUploadUtils with LarGenerators with ULIProtocol {
+    with ScalatestRouteTest with RequestHeaderUtils with ULIHttpApi with FileUploadUtils with ULIProtocol {
 
   override val log: LoggingAdapter = NoLogging
   implicit val ec = system.dispatcher
