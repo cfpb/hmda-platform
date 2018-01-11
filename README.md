@@ -31,6 +31,17 @@ In addition, you'll need Scala's interactive build tool [sbt](https://www.scala-
 
 ## Building and Running
 
+### Running from the SBT prompt
+
+* To run the project from the `SBT` prompt for development purposes, issue the following commands on a terminal:
+
+```shell
+$ sbt
+sbt:hmda> project cluster
+sbt:cluster> reStart
+```
+
+
 ### Building the .jar
 
 * To build JVM artifacts (the default, includes all projects), from the sbt prompt:
