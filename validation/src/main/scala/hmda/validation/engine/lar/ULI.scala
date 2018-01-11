@@ -6,7 +6,45 @@ import ULIValidationErrorMessages._
 
 object ULI {
 
-  val conversionTable = Map(
+  def checkDigit(loanId: String): String = {
+    if (!loanIdIsValidLength(loanId)) {
+      throw new Exception(invalidLoanIdLengthMessage)
+    } else if (!isAlphanumeric(loanId)) {
+      throw new Exception(nonAlpanumericLoanIdMessage)
+    } else {
+      stringLengthTwo(calculateCheckDigit(calculateMod(convert(loanId) * 100)))
+    }
+  }
+
+  def generateULI(loanId: String): String = {
+    loanId + checkDigit(loanId).toString
+  }
+
+  def validateULI(uli: String): Boolean = {
+    if (!isAlphanumeric(uli)) {
+      throw new Exception(nonAlphanumericULIMessage)
+    } else if (!uliIsValidLength(uli)) {
+      throw new Exception(invalidULILengthMessage)
+    } else {
+      calculateMod(convert(uli)) == 1
+    }
+  }
+
+  def isAlphanumeric(str: String): Boolean = {
+    str.forall(alphanumeric.contains(_))
+  }
+
+  def uliIsValidLength(uli: String): Boolean = {
+    val count = uli.count(_.toString != "")
+    count >= 23 && count <= 45
+  }
+
+  def loanIdIsValidLength(loanId: String): Boolean = {
+    val count = loanId.count(_.toString != "")
+    count >= 21 && count <= 43
+  }
+
+  private val conversionTable = Map(
     "a" -> 10,
     "b" -> 11,
     "c" -> 12,
@@ -35,7 +73,7 @@ object ULI {
     "z" -> 35
   )
 
-  def convert(loanId: String): BigInt = {
+  private def convert(loanId: String): BigInt = {
     val digits = loanId
       .map(_.toLower)
       .map { c =>
@@ -45,57 +83,19 @@ object ULI {
     BigInt(digits)
   }
 
-  def calculateMod(i: BigInt): BigInt = {
+  private def calculateMod(i: BigInt): BigInt = {
     i % 97
   }
 
-  def calculateCheckDigit(i: BigInt): BigInt = {
+  private def calculateCheckDigit(i: BigInt): BigInt = {
     98 - i
   }
 
-  def checkDigit(loanId: String): String = {
-    if (!loanIdIsValidLength(loanId)) {
-      throw new Exception(invalidLoanIdLengthMessage)
-    } else if (!isAlphanumeric(loanId)) {
-      throw new Exception(nonAlpanumericLoanIdMessage)
-    } else {
-      stringLengthTwo(calculateCheckDigit(calculateMod(convert(loanId) * 100)))
-    }
-  }
-
-  def stringLengthTwo(n: BigInt): String = {
+  private def stringLengthTwo(n: BigInt): String = {
     if (n <= 9 && n >= 0) s"0$n"
     else n.toString
   }
 
-  def generateULI(loanId: String): String = {
-    loanId + checkDigit(loanId).toString
-  }
-
-  def validateULI(uli: String): Boolean = {
-    if (!isAlphanumeric(uli)) {
-      throw new Exception(nonAlphanumericULIMessage)
-    } else if (!uliIsValidLength(uli)) {
-      throw new Exception(invalidULILengthMessage)
-    } else {
-      calculateMod(convert(uli)) == 1
-    }
-  }
-
-  val alphanumeric = (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toSet
-
-  def isAlphanumeric(str: String): Boolean = {
-    str.forall(alphanumeric.contains(_))
-  }
-
-  def uliIsValidLength(uli: String): Boolean = {
-    val count = uli.count(_.toString != "")
-    count >= 23 && count <= 45
-  }
-
-  def loanIdIsValidLength(loanId: String): Boolean = {
-    val count = loanId.count(_.toString != "")
-    count >= 21 && count <= 43
-  }
+  private val alphanumeric = (('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).toSet
 
 }
