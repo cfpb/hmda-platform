@@ -3,6 +3,7 @@ package hmda.publication.regulator.panel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import akka.NotUsed
 import akka.actor.{ ActorSystem, Props }
 import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
@@ -10,13 +11,14 @@ import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{ Flow, Source }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages.PublishRegulatorData
+import hmda.query.model.institutions.InstitutionQuery
 import hmda.query.repository.institutions.InstitutionCassandraRepository
 
 object RegulatorPanelPublisher {
@@ -64,44 +66,19 @@ class RegulatorPanelPublisher extends HmdaActor with InstitutionCassandraReposit
         S3Headers(ServerSideEncryption.AES256)
       )
 
-      val headerSource = Source.fromIterator(() =>
-        List(
-          "id|" +
-            "agency|" +
-            "filing_period|" +
-            "activity_year|" +
-            "respondent_id|" +
-            "institution_type|" +
-            "cra|" +
-            "email_domain_1|" +
-            "email_domain_2|" +
-            "email_domain_3|" +
-            "respondent_name|" +
-            "respondent_state|" +
-            "respondent_city|" +
-            "respondent_fips_state_number|" +
-            "hmda_filer_flag|" +
-            "parent_respondent_id|" +
-            "parent_id_rssd|" +
-            "parent_name|" +
-            "parent_city|" +
-            "parent_state|" +
-            "assets|" +
-            "other_lender_code|" +
-            "top_holder_id_rssd|" +
-            "top_holder_name|" +
-            "top_holder_city|" +
-            "top_holder_state|" +
-            "top_holder_country\n"
-        ).toIterator)
-
-      val panelSource = readData(fetchSize)
+      val source = readData(fetchSize)
         .filter(i => i.hmdaFilerFlag)
+        .via(filterTestBanks)
         .map(institution => institution.toCSV + "\n")
         .map(s => ByteString(s))
 
-      val source = headerSource.map(s => ByteString(s)).concat(panelSource)
       source.runWith(s3Sink)
+  }
+
+  def filterTestBanks: Flow[InstitutionQuery, InstitutionQuery, NotUsed] = {
+    Flow[InstitutionQuery]
+      .filter(i => i.respondentName != "bank-0 National Association" && i.respondentId != "Bank0_RID")
+      .filter(i => i.respondentName != "bank-1 Mortgage Lending" && i.respondentId != "Bank1_RID")
   }
 
 }
