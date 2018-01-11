@@ -13,12 +13,13 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{ HttpCharsets, HttpEntity, StatusCodes }
 import akka.http.scaladsl.model.MediaTypes.`text/csv`
 import akka.stream.scaladsl.{ Sink, Source }
+import hmda.api.model.ErrorResponse
 import hmda.api.protocol.processing.ApiErrorProtocol
 import hmda.api.protocol.public.ULIProtocol
 import hmda.api.util.FlowUtils
 
 import scala.concurrent.ExecutionContext
-import scala.util.{ Failure, Success }
+import scala.util.{ Failure, Success, Try }
 
 trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProtocol with FlowUtils {
   implicit val system: ActorSystem
@@ -31,11 +32,18 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     encodeResponse {
       pathPrefix("uli") {
         path("checkDigit") {
-          timedPost { _ =>
+          timedPost { uri =>
             entity(as[Loan]) { loan =>
-              val digit = checkDigit(loan.loanId)
-              val uli = ULI(loan.loanId, digit, loan.loanId + digit)
-              complete(ToResponseMarshallable(uli))
+              val loanId = loan.loanId
+              val maybeDigit = Try(checkDigit(loanId))
+              maybeDigit match {
+                case Success(digit) =>
+                  val uli = ULI(loan.loanId, digit, loan.loanId + digit)
+                  complete(ToResponseMarshallable(uli))
+                case Failure(error) =>
+                  val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                  complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              }
             } ~
               fileUpload("file") {
                 case (_, byteSource) =>
@@ -46,7 +54,8 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
                     }
                     case Failure(error) =>
                       log.error(error.getLocalizedMessage)
-                      complete(ToResponseMarshallable(StatusCodes.InternalServerError))
+                      val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                      complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
                   }
                 case _ =>
                   complete(ToResponseMarshallable(StatusCodes.BadRequest))
@@ -72,12 +81,18 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
             }
           } ~
           path("validate") {
-            timedPost { _ =>
+            timedPost { uri =>
               entity(as[ULICheck]) { uc =>
                 val uli = uc.uli
-                val isValid = validateULI(uli)
-                val validated = ULIValidated(isValid)
-                complete(ToResponseMarshallable(validated))
+                val isValid = Try(validateULI(uli))
+                isValid match {
+                  case Success(value) =>
+                    val validated = ULIValidated(value)
+                    complete(ToResponseMarshallable(validated))
+                  case Failure(error) =>
+                    val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+                }
               } ~
                 fileUpload("file") {
                   case (_, byteSource) =>
@@ -87,7 +102,8 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
                         complete(ToResponseMarshallable(ULIBatchValidatedResponse(validated)))
                       case Failure(error) =>
                         log.error(error.getLocalizedMessage)
-                        complete(ToResponseMarshallable(StatusCodes.InternalServerError))
+                        val errorResponse = ErrorResponse(400, error.getLocalizedMessage, uri.path)
+                        complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
                     }
 
                   case _ =>
@@ -120,6 +136,8 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     byteSource
       .via(framing)
       .map(_.utf8String)
+      .filter(loanId => loanIdIsValidLength(loanId))
+      .filter(loanId => isAlphanumeric(loanId))
       .map { loanId =>
         val digit = checkDigit(loanId)
         ULI(loanId, digit, loanId + digit)
@@ -130,7 +148,10 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     byteSource
       .via(framing)
       .map(_.utf8String)
+      .filter(uli => uliIsValidLength(uli))
+      .filter(uli => isAlphanumeric(uli))
       .map(uli => (uli, validateULI(uli)))
       .map(validated => ULIBatchValidated(validated._1, validated._2))
   }
+
 }
