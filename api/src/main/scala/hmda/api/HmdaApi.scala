@@ -9,7 +9,7 @@ object HmdaApi {
 }
 
 class HmdaApi extends HmdaActor {
-  override def receive = super.receive orElse {
-    case _ =>
-  }
+
+  val filingApi = context.actorOf(HmdaFilingApi.props)
+
 }
