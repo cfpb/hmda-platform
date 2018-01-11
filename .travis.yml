@@ -12,7 +12,6 @@ scala: 2.12.3
 
 jdk:
 - oraclejdk9
-- openjdk9
 - oraclejdk8
 
 before_install:

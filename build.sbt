@@ -45,7 +45,8 @@ lazy val hmda = (project in file("."))
     dockerRepository := Some("jmarin"),
     dockerBaseImage := "openjdk:8-jre-alpine",
     // the bash scripts classpath only needs the fat jar
-    scriptClasspath := Seq((assemblyJarName in assembly).value)
+    scriptClasspath := Seq((assemblyJarName in assembly).value),
+    dependencyOverrides ++= akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps
   )
   .dependsOn(cluster)
   .aggregate(
