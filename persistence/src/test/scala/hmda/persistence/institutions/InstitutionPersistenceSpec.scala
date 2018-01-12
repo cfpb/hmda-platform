@@ -41,13 +41,13 @@ class InstitutionPersistenceSpec extends ActorSpec {
       probe.send(institutionsActor, GetInstitutionById(institution.id))
       probe.expectMsg(Some(institution))
 
-      probe.send(institutionsActor, DeleteInstitution(institution))
-      probe.expectMsg(Some(institution))
+      probe.send(institutionsActor, DeleteInstitution(institution.id))
+      probe.expectMsg(Some(institution.id))
 
       probe.send(institutionsActor, GetInstitutionById(institution.id))
       probe.expectMsg(None)
 
-      probe.send(institutionsActor, DeleteInstitution(institutionGen.sample.getOrElse(Institution.empty)))
+      probe.send(institutionsActor, DeleteInstitution(institutionGen.sample.getOrElse(Institution.empty).id))
       probe.expectMsg(None)
 
     }

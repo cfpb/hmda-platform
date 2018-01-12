@@ -70,15 +70,16 @@ class InstitutionPersistence extends HmdaPersistentActor {
         log.warning(s"Institution does not exist. Could not update $i")
       }
 
-    case DeleteInstitution(i) =>
-      if (state.institutions.map(x => x.id).contains(i.id)) {
-        persist(InstitutionDeleted(i)) { e =>
-          log.debug(s"Deleted: ${i.respondent.name}")
-          updateState(e)
-          sender() ! Some(e.institution)
-        }
-      } else {
-        sender() ! None
+    case DeleteInstitution(institutionId) =>
+      val maybeInstitution = state.institutions.find(i => i.id == institutionId)
+      maybeInstitution match {
+        case Some(institution) =>
+          persist(InstitutionDeleted(institution)) { e =>
+            log.debug(s"Deleted institution: $institutionId")
+            updateState(e)
+            sender() ! Some(institutionId)
+          }
+        case None => sender() ! None
       }
 
     case GetInstitutionById(id) =>
