@@ -32,6 +32,7 @@ trait HmdaCustomDirectives extends ApiErrorProtocol {
   def timedGet = get & time & extractUri
   def timedPost = post & time & extractUri
   def timedPut = put & time & extractUri
+  def timedDelete = delete & time & extractUri
 
   def headerAuthorize: Directive0 =
     authorize(ctx =>

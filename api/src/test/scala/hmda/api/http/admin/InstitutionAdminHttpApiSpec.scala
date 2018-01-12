@@ -107,6 +107,16 @@ class InstitutionAdminHttpApiSpec
         status mustBe StatusCodes.NotFound
       }
     }
+
+    "delete institution" in {
+      Delete(s"/institutions/${newInstitution.id}") ~> institutionAdminRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[String] mustBe newInstitution.id
+      }
+      Get(s"/institutions/${newInstitution.id}") ~> institutionAdminRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.NotFound
+      }
+    }
   }
 
   private def createRequest(jsonRequest: ByteString, method: HttpMethod): HttpRequest = {
