@@ -5,7 +5,7 @@ import hmda.model.institution.Institution
 import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.commands.institutions.InstitutionCommands._
-import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionModified }
+import hmda.persistence.messages.events.institutions.InstitutionEvents.{ InstitutionCreated, InstitutionDeleted, InstitutionModified }
 import hmda.persistence.model.HmdaPersistentActor
 
 object InstitutionPersistence {
@@ -27,7 +27,9 @@ object InstitutionPersistence {
           val elem = institutions.find(x => x.id == i.id).getOrElse(Institution.empty)
           val updated = (institutions - elem) + i
           InstitutionPersistenceState(updated)
-
+        case InstitutionDeleted(i) =>
+          val updated = institutions - i
+          InstitutionPersistenceState(updated)
       }
     }
   }
@@ -66,6 +68,17 @@ class InstitutionPersistence extends HmdaPersistentActor {
       } else {
         sender() ! None
         log.warning(s"Institution does not exist. Could not update $i")
+      }
+
+    case DeleteInstitution(i) =>
+      if (state.institutions.map(x => x.id).contains(i.id)) {
+        persist(InstitutionDeleted(i)) { e =>
+          log.debug(s"Deleted: ${i.respondent.name}")
+          updateState(e)
+          sender() ! Some(e.institution)
+        }
+      } else {
+        sender() ! None
       }
 
     case GetInstitutionById(id) =>

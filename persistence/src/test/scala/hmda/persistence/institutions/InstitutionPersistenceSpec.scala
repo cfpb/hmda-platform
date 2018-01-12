@@ -7,6 +7,7 @@ import hmda.persistence.institutions.InstitutionPersistence._
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.commands.institutions.InstitutionCommands._
 import hmda.persistence.model.ActorSpec
+import hmda.model.institution.InstitutionGenerators._
 
 class InstitutionPersistenceSpec extends ActorSpec {
 
@@ -30,6 +31,25 @@ class InstitutionPersistenceSpec extends ActorSpec {
     "get institution by id" in {
       probe.send(institutionsActor, GetInstitutionById(headInst.id))
       probe.expectMsg(Some(headInst))
+    }
+
+    "delete institution" in {
+      val institution = institutionGen.sample.getOrElse(Institution.empty)
+      probe.send(institutionsActor, CreateInstitution(institution))
+      probe.expectMsg(Some(institution))
+
+      probe.send(institutionsActor, GetInstitutionById(institution.id))
+      probe.expectMsg(Some(institution))
+
+      probe.send(institutionsActor, DeleteInstitution(institution))
+      probe.expectMsg(Some(institution))
+
+      probe.send(institutionsActor, GetInstitutionById(institution.id))
+      probe.expectMsg(None)
+
+      probe.send(institutionsActor, DeleteInstitution(institutionGen.sample.getOrElse(Institution.empty)))
+      probe.expectMsg(None)
+
     }
 
     "get institutions by id" in {
