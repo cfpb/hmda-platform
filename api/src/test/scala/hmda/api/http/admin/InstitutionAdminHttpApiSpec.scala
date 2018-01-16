@@ -109,10 +109,13 @@ class InstitutionAdminHttpApiSpec
     }
 
     "delete institution" in {
-      Delete(s"/institutions/${newInstitution.id}") ~> institutionAdminRoutes(supervisor) ~> check {
-        status mustBe StatusCodes.OK
+      val jsonRequest = ByteString(newInstitution.toJson.toString)
+      val deleteRequest = createRequest(jsonRequest, HttpMethods.DELETE)
+      deleteRequest ~> institutionAdminRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.Accepted
         responseAs[String] mustBe newInstitution.id
       }
+
       Get(s"/institutions/${newInstitution.id}") ~> institutionAdminRoutes(supervisor) ~> check {
         status mustBe StatusCodes.NotFound
       }

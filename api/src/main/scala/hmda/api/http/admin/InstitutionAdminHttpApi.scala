@@ -75,6 +75,21 @@ trait InstitutionAdminHttpApi
                   }
                 case Failure(error) => completeWithInternalError(uri, error)
               }
+            } ~
+            timedDelete { uri =>
+              val fDeleted = for {
+                a <- fInstitutionsActor
+                d <- (a ? DeleteInstitution(institution)).mapTo[Option[String]]
+              } yield d
+
+              onComplete(fDeleted) {
+                case Success(maybeInstitution) =>
+                  maybeInstitution match {
+                    case Some(id) => complete(ToResponseMarshallable(StatusCodes.Accepted -> id))
+                    case None => complete(ToResponseMarshallable(StatusCodes.NotFound))
+                  }
+                case Failure(error) => completeWithInternalError(uri, error)
+              }
             }
         }
       }
@@ -98,22 +113,7 @@ trait InstitutionAdminHttpApi
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
-        } ~
-          timedDelete { uri =>
-            val fInstitution = for {
-              a <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-              d <- (a ? DeleteInstitution(institutionId)).mapTo[Option[String]]
-            } yield d
-
-            onComplete(fInstitution) {
-              case Success(Some(id)) =>
-                complete(ToResponseMarshallable(id))
-              case Success(None) =>
-                complete(ToResponseMarshallable(StatusCodes.NotFound))
-              case Failure(error) =>
-                completeWithInternalError(uri, error)
-            }
-          }
+        }
       }
     }
 
