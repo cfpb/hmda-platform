@@ -54,6 +54,11 @@ class APORAdminHttpApiSpec extends WordSpec with MustMatchers with ScalatestRout
         status mustBe StatusCodes.Accepted
         responseAs[AporModified] mustBe AporModified(apor2, FixedRate)
       }
+      val notFoundAporRequest = ByteString(ModifyAporRequest(APORGen.sample.get, FixedRate).toJson.toString)
+      val notFoundPutRequest = createRequest(notFoundAporRequest, HttpMethods.PUT)
+      notFoundPutRequest ~> aporRoutes(supervisor) ~> check {
+        status mustBe StatusCodes.NotFound
+      }
     }
     "Find APOR by date" in {
       Get("/apor/fixed/2018/1/8") ~> aporRoutes(supervisor) ~> check {

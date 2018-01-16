@@ -130,8 +130,10 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
         persist(AporModified(newApor, rateType)) { e =>
           log.debug(s"APOR Modified: $e")
           updateState(e)
-          sender() ! e
+          sender() ! Some(e)
         }
+      } else {
+        sender() ! None
       }
 
     case FindApor(rateType, date) =>

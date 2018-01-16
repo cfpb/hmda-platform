@@ -96,14 +96,14 @@ class HmdaAPORPersistenceSpec extends ActorSpec {
       val fixedDate = LocalDate.of(2017, 11, 20)
       val newFixedRateApor = APORGen.sample.get.copy(rateDate = fixedDate)
       probe.send(aporPersistence, ModifyApor(newFixedRateApor, FixedRate))
-      probe.expectMsg(AporModified(newFixedRateApor, FixedRate))
+      probe.expectMsg(Some(AporModified(newFixedRateApor, FixedRate)))
       probe.send(aporPersistence, GetState)
       probe.expectMsg(HmdaAPORState(List(newFixedRateApor, apor2), List(apor3)))
 
       val variableDate = LocalDate.of(2017, 12, 4)
       val newVariableRateApor = APORGen.sample.get.copy(rateDate = variableDate)
       probe.send(aporPersistence, ModifyApor(newVariableRateApor, VariableRate))
-      probe.expectMsg(AporModified(newVariableRateApor, VariableRate))
+      probe.expectMsg(Some(AporModified(newVariableRateApor, VariableRate)))
       probe.send(aporPersistence, GetState)
       probe.expectMsg(HmdaAPORState(List(newFixedRateApor, apor2), List(newVariableRateApor)))
     }

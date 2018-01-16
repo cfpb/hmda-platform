@@ -62,15 +62,16 @@ trait APORAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol {
               val newApor = modifyApor.newApor
               val rateType = modifyApor.rateType
 
-              val fModified: Future[AporModified] = for {
+              val fModified: Future[Option[AporModified]] = for {
                 a <- fAporPersistence
-                m <- (a ? ModifyApor(newApor, rateType)).mapTo[AporModified]
+                m <- (a ? ModifyApor(newApor, rateType)).mapTo[Option[AporModified]]
               } yield m
 
               onComplete(fModified) {
-                case Success(modified) =>
+                case Success(Some(modified)) =>
                   complete(ToResponseMarshallable(StatusCodes.Accepted -> modified))
-
+                case Success(None) =>
+                  complete(ToResponseMarshallable(StatusCodes.NotFound))
                 case Failure(error) =>
                   completeWithInternalError(uri, error)
               }
