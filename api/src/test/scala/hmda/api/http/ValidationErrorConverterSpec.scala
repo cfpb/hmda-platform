@@ -1,5 +1,11 @@
 package hmda.api.http
 
+import akka.NotUsed
+import akka.actor.ActorSystem
+
+import scala.concurrent.Future
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{ Sink, Source }
 import hmda.api.model._
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
@@ -7,13 +13,59 @@ import hmda.model.util.FITestData._
 import hmda.model.validation._
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsDatParser
+import hmda.persistence.messages.CommonMessages.Event
+import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarEngine
-import org.scalatest.{ MustMatchers, WordSpec }
+import org.scalatest.{ AsyncWordSpec, MustMatchers }
 import spray.json.{ JsNumber, JsObject }
 
-class ValidationErrorConverterSpec extends WordSpec with MustMatchers with ValidationErrorConverter with LarEngine {
+class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with ValidationErrorConverter with LarEngine {
+
+  implicit val system = ActorSystem()
+  implicit val ec = system.dispatcher
+  implicit val materializer = ActorMaterializer()
+
+  ///// New way /////
+
+  "Validation Error Converter" must {
+    val events: List[Event] = List(
+      LarSyntacticalError(SyntacticalValidationError("xyz", "S205", false)),
+      TsSyntacticalError(SyntacticalValidationError("xyz", "S013", true)),
+      LarValidityError(ValidityValidationError("xyz", "V210", false)),
+      TsValidityError(ValidityValidationError("xyz", "V145", true)),
+      LarQualityError(QualityValidationError("xyz", "Q037", false)),
+      LarQualityError(QualityValidationError("xyz", "Q037", false)),
+      TsQualityError(SyntacticalValidationError("xyz", "Q130", true)),
+      LarMacroError(MacroValidationError("Q083"))
+    )
+
+    val eventSource: Source[Event, NotUsed] = Source.fromIterator(() => events.toIterator)
+
+    "filter for syntactical edits from an event source" in {
+      val first: Source[ValidationError, NotUsed] = editStreamOfType("syntactical", eventSource)
+      val syntacticalF: Future[Seq[ValidationError]] = first.runWith(Sink.seq)
+      syntacticalF.map(result => result must have size 2)
+    }
+
+    "filter for quality edits from an event source" in {
+      val first: Source[ValidationError, NotUsed] = editStreamOfType("quality", eventSource)
+      val qualityF: Future[Seq[ValidationError]] = first.runWith(Sink.seq)
+      qualityF.map(result => result must have size 3)
+    }
+
+    "gather Edit Info for each relevant edit, without duplicates" in {
+      val infosF: Future[List[EditInfo]] = editInfosF("quality", eventSource)
+      infosF.map { result =>
+        result must have size 2
+        result.head mustBe EditInfo("Q037", "If lien status = 2, then loan amount should be ≤ $250 ($250 thousand).")
+        result(1) mustBe EditInfo("Q130", "The number of loan/application records received in this transmission file per respondent does not = the total number of loan/application records reported in this respondent’s transmission or the total number of loan/application records in this submission is missing from the transmittal sheet.")
+      }
+    }
+  }
+
+  ////// Old way /////
 
   "Validation errors" must {
     val ts: TransmittalSheet = TsDatParser(tsDAT)

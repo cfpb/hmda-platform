@@ -1,14 +1,64 @@
 package hmda.api.http
 
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+import hmda.api._
 import hmda.api.model._
 import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
 import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
-import hmda.model.validation.ValidationError
+import hmda.model.validation.{ EmptyValidationError, ValidationError }
+import hmda.persistence.messages.CommonMessages.Event
+import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
 import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import spray.json.{ JsNumber, JsObject, JsString, JsValue }
 
+import scala.concurrent.Future
+
 trait ValidationErrorConverter {
+
+  //// New way
+  def editStreamOfType[ec: EC, mat: MAT, as: AS](errType: String, editSource: Source[Event, NotUsed]): Source[ValidationError, NotUsed] = {
+    val edits: Source[ValidationError, NotUsed] = errType.toLowerCase match {
+      case "syntactical" => editSource.map {
+        case LarSyntacticalError(err) => err
+        case TsSyntacticalError(err) => err
+        case _ => EmptyValidationError
+      }
+      case "validity" => editSource.map {
+        case LarValidityError(err) => err
+        case TsValidityError(err) => err
+        case _ => EmptyValidationError
+      }
+      case "quality" => editSource.map {
+        case LarQualityError(err) => err
+        case TsQualityError(err) => err
+        case _ => EmptyValidationError
+      }
+      case "macro" => editSource.map {
+        case LarMacroError(err) => err
+        case _ => EmptyValidationError
+      }
+    }
+
+    edits.filter(_ != EmptyValidationError)
+  }
+
+  private def uniqueEdits[ec: EC, mat: MAT, as: AS](editType: String, editSource: Source[Event, NotUsed]): Future[List[String]] = {
+    var uniqueEdits: List[String] = List()
+    val runF = editStreamOfType(editType, editSource).runForeach { e =>
+      val name = e.ruleName
+      if (!uniqueEdits.contains(name)) uniqueEdits = uniqueEdits :+ name
+    }
+    runF.map(_ => uniqueEdits)
+  }
+
+  def editInfosF[ec: EC, mat: MAT, as: AS](editType: String, editSource: Source[Event, NotUsed]): Future[List[EditInfo]] = {
+    uniqueEdits(editType, editSource).map(list =>
+      list.map(name => EditInfo(name, editDescription(name))))
+  }
+
+  ///// Old way
 
   def editsOfType(errType: String, vs: HmdaFileValidationState): Seq[ValidationError] = {
     errType.toLowerCase match {

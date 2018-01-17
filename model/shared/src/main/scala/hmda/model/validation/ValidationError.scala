@@ -30,3 +30,9 @@ case class MacroValidationError(ruleName: String) extends ValidationError {
   override def errorId: String = ""
   override def errorType: ValidationErrorType = Macro
 }
+case object EmptyValidationError extends ValidationError {
+  override def errorId: String = "empty"
+  override def ruleName: String = "empty"
+  override def errorType: ValidationErrorType = Macro
+  override def ts: Boolean = false
+}
