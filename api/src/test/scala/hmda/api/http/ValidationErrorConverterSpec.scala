@@ -149,14 +149,14 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
 
     "get msa info for Q029" in {
       val errorQ029 = QualityValidationError("8299422144", "Q029", ts = false)
-      val result = validationErrorToResultRow(errorQ029, validationState)
+      val result = validationErrorToResultRow(errorQ029, Some(ts), badLars)
       val msaField = result.fields.getFields("Metropolitan Statistical Area / Metropolitan Division Name").head.toString
       msaField mustBe "\"Battle Creek, MI\""
     }
 
     "convert edit to EditResultRow" in {
       val err = tsErrors.head
-      val result = validationErrorToResultRow(err, validationState)
+      val result = validationErrorToResultRow(err, Some(ts), badLars)
       result mustBe EditResultRow(
         RowId("Transmittal Sheet"),
         JsObject("Agency Code" -> JsNumber(9))

@@ -47,8 +47,9 @@ object HmdaFileValidator {
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
 
-  case class GetNamedErrorResultsPaginated(editName: String, page: Int)
-  case object GetVerificationState
+  case class GetNamedErrorResultsPaginated(editName: String, page: Int) extends Command
+  case object GetVerificationState extends Command
+  case object GetValidatedLines extends Command
 
   def props(supervisor: ActorRef, validationStats: ActorRef, id: SubmissionId): Props = Props(new HmdaFileValidator(supervisor, validationStats, id))
 
@@ -275,6 +276,9 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
     case GetVerificationState =>
       sender() ! (state.qualityVerified, state.macroVerified)
+
+    case GetValidatedLines =>
+      sender() ! (state.ts, state.lars)
 
     case GetNamedErrorResultsPaginated(editName, page) =>
       val allFailures = state.allErrors.filter(e => e.ruleName == editName)

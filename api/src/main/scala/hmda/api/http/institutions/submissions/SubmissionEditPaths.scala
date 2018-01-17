@@ -13,6 +13,8 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.fi.{ Submission, SubmissionId, SubmissionStatus }
 import hmda.model.validation.{ Macro, Quality, ValidationErrorType }
 import hmda.persistence.messages.CommonMessages.{ Event, GetState }
@@ -98,10 +100,19 @@ trait SubmissionEditPaths
     path("filings" / Segment / "submissions" / IntNumber / "edits" / svqmRegex) { (period, seqNr, editType) =>
       timedGet { uri =>
         completeVerified(supervisor, institutionId, period, seqNr, uri) {
-          val fState = getStatusAndValidationState(supervisor, SubmissionId(institutionId, period, seqNr))
+          val submissionId = SubmissionId(institutionId, period, seqNr)
+          val fValidator = fHmdaFileValidator(supervisor, submissionId)
+          val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
+
+          val fState = for {
+            sa <- fSubmissionsActor
+            status <- (sa ? GetSubmissionStatus(submissionId)).mapTo[SubmissionStatus]
+            va <- fValidator
+            edits <- editInfosF(editType, validationEventStream(submissionId))
+          } yield (edits, status)
+
           onComplete(fState) {
-            case Success((vs, status)) =>
-              val edits = editInfos(editsOfType(editType, vs))
+            case Success((edits, status)) =>
               complete(ToResponseMarshallable(SingleTypeEditResults(edits, status)))
             case Failure(error) => completeWithInternalError(uri, error)
           }
@@ -118,15 +129,15 @@ trait SubmissionEditPaths
         completeVerified(supervisor, institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
             val fValidator: Future[ActorRef] = fHmdaFileValidator(supervisor, SubmissionId(institutionId, period, seqNr))
-            val fPaginatedErrors: Future[(PaginatedErrors, HmdaFileValidationState)] = for {
+            val fPaginatedErrors = for {
               va <- fValidator
-              vs <- (va ? GetState).mapTo[HmdaFileValidationState]
+              (ts, lars) <- (va ? GetValidatedLines).mapTo[(Option[TransmittalSheet], Seq[LoanApplicationRegister])]
               p <- (va ? GetNamedErrorResultsPaginated(editName, page)).mapTo[PaginatedErrors]
-            } yield (p, vs)
+            } yield (p, ts, lars)
 
             onComplete(fPaginatedErrors) {
-              case Success((errorCollection, vs)) =>
-                val rows: Seq[EditResultRow] = errorCollection.errors.map(validationErrorToResultRow(_, vs))
+              case Success((errorCollection, ts, lars)) =>
+                val rows: Seq[EditResultRow] = errorCollection.errors.map(validationErrorToResultRow(_, ts, lars))
                 val result = EditResult(editName, rows, uri.path.toString, page, errorCollection.totalErrors)
                 complete(ToResponseMarshallable(result))
               case Failure(error) => completeWithInternalError(uri, error)
@@ -168,19 +179,6 @@ trait SubmissionEditPaths
   /////// Helper Methods ///////
   private def fHmdaFileValidator(supervisor: ActorRef, submissionId: SubmissionId): Future[ActorRef] =
     (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
-
-  private def getStatusAndValidationState(supervisor: ActorRef, submissionId: SubmissionId)(implicit ec: ExecutionContext): Future[(HmdaFileValidationState, SubmissionStatus)] = {
-    val fValidator = fHmdaFileValidator(supervisor, submissionId)
-    val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
-
-    for {
-      sa <- fSubmissionsActor
-      s <- (sa ? GetSubmissionById(submissionId)).mapTo[Submission]
-      va <- fValidator
-      vs <- (va ? GetState).mapTo[HmdaFileValidationState]
-    } yield (vs, s.status)
-
-  }
 
   private def getValidationState(supervisor: ActorRef, institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
     val fValidator = fHmdaFileValidator(supervisor, SubmissionId(institutionId, period, seqNr))

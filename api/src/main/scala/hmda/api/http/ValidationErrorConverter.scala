@@ -6,6 +6,8 @@ import hmda.api._
 import hmda.api.model._
 import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.model.validation.{ EmptyValidationError, ValidationError }
 import hmda.persistence.messages.CommonMessages.Event
@@ -87,8 +89,8 @@ trait ValidationErrorConverter {
     "editType, editId, loanId\n" + rows.mkString("\n")
   }
 
-  def validationErrorToResultRow(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
-    EditResultRow(RowId(err.publicErrorId), relevantFields(err, vs))
+  def validationErrorToResultRow(err: ValidationError, ts: Option[TransmittalSheet], lars: Seq[LoanApplicationRegister]): EditResultRow = {
+    EditResultRow(RowId(err.publicErrorId), relevantFields(err, ts, lars))
   }
 
   //// Helper methods
@@ -97,11 +99,11 @@ trait ValidationErrorConverter {
     EditMetaDataLookup.forEdit(editName).editDescription
   }
 
-  private def relevantFields(err: ValidationError, vs: HmdaFileValidationState): JsObject = {
+  private def relevantFields(err: ValidationError, ts: Option[TransmittalSheet], lars: Seq[LoanApplicationRegister]): JsObject = {
     val fieldNames: Seq[String] = EditMetaDataLookup.forEdit(err.ruleName).fieldNames
 
     val jsVals: Seq[(String, JsValue)] = fieldNames.map { fieldName =>
-      val row = relevantRow(err, vs)
+      val row = relevantRow(err, ts, lars)
       val fieldValue = if (fieldName == "Metropolitan Statistical Area / Metropolitan Division Name") {
         CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
       } else {
@@ -113,9 +115,9 @@ trait ValidationErrorConverter {
     JsObject(jsVals: _*)
   }
 
-  private def relevantRow(err: ValidationError, vs: HmdaFileValidationState): HmdaFileRow = {
-    if (err.ts) vs.ts.getOrElse(HmdaRowError())
-    else vs.lars.find(lar => lar.loan.id == err.errorId).getOrElse(HmdaRowError())
+  private def relevantRow(err: ValidationError, ts: Option[TransmittalSheet], lars: Seq[LoanApplicationRegister]): HmdaFileRow = {
+    if (err.ts) ts.getOrElse(HmdaRowError())
+    else lars.find(lar => lar.loan.id == err.errorId).getOrElse(HmdaRowError())
   }
 
   private def toJsonVal(value: Any) = {
