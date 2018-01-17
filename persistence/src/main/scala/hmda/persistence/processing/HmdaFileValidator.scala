@@ -48,6 +48,7 @@ object HmdaFileValidator {
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
 
   case class GetNamedErrorResultsPaginated(editName: String, page: Int)
+  case object GetVerificationState
 
   def props(supervisor: ActorRef, validationStats: ActorRef, id: SubmissionId): Props = Props(new HmdaFileValidator(supervisor, validationStats, id))
 
@@ -271,6 +272,9 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
     case GetState =>
       sender() ! state
+
+    case GetVerificationState =>
+      sender() ! (state.qualityVerified, state.macroVerified)
 
     case GetNamedErrorResultsPaginated(editName, page) =>
       val allFailures = state.allErrors.filter(e => e.ruleName == editName)

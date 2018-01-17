@@ -19,7 +19,7 @@ import hmda.persistence.messages.CommonMessages.{ Event, GetState }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
-import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
+import hmda.persistence.institutions.SubmissionPersistence.{ GetSubmissionById, GetSubmissionStatus }
 import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
 import hmda.persistence.processing.HmdaFileValidator._
 
@@ -54,21 +54,21 @@ trait SubmissionEditPaths
 
           val fState = for {
             sa <- fSubmissionsActor
-            submission <- (sa ? GetSubmissionById(submissionId)).mapTo[Submission]
+            status <- (sa ? GetSubmissionStatus(submissionId)).mapTo[SubmissionStatus]
             va <- fValidator
-            vs <- (va ? GetState).mapTo[HmdaFileValidationState]
+            (qualityV, macroV) <- (va ? GetVerificationState).mapTo[(Boolean, Boolean)]
             s <- editInfosF("syntactical", eventStream)
             v <- editInfosF("validity", eventStream)
             q <- editInfosF("quality", eventStream)
             m <- editInfosF("macro", eventStream)
-          } yield (vs, submission.status, List(s, v, q, m))
+          } yield (qualityV, macroV, status, List(s, v, q, m))
 
           onComplete(fState) {
-            case Success((vs, status, infoList)) =>
-              val s = EditCollection(infoList(0))
+            case Success((qv, mv, status, infoList)) =>
+              val s = EditCollection(infoList.head)
               val v = EditCollection(infoList(1))
-              val q = VerifiableEditCollection(vs.qualityVerified, infoList(2))
-              val m = VerifiableEditCollection(vs.macroVerified, infoList(3))
+              val q = VerifiableEditCollection(qv, infoList(2))
+              val m = VerifiableEditCollection(mv, infoList(3))
               complete(ToResponseMarshallable(SummaryEditResults(s, v, q, m, status)))
             case Failure(error) => completeWithInternalError(uri, error)
           }
