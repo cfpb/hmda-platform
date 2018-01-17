@@ -1,5 +1,6 @@
 package hmda.api.http.institutions.submissions
 
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
@@ -7,18 +8,21 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
 import hmda.model.fi.{ Submission, SubmissionId, SubmissionStatus }
 import hmda.model.validation.{ Macro, Quality, ValidationErrorType }
-import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.messages.CommonMessages.{ Event, GetState }
+import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
 import hmda.persistence.processing.HmdaFileValidator._
+
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
@@ -42,13 +46,29 @@ trait SubmissionEditPaths
     path("filings" / Segment / "submissions" / IntNumber / "edits") { (period, seqNr) =>
       timedGet { uri =>
         completeVerified(supervisor, institutionId, period, seqNr, uri) {
-          val fState = getStatusAndValidationState(supervisor, SubmissionId(institutionId, period, seqNr))
+          val submissionId = SubmissionId(institutionId, period, seqNr)
+          val eventStream = validationEventStream(submissionId)
+
+          val fValidator = fHmdaFileValidator(supervisor, submissionId)
+          val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
+
+          val fState = for {
+            sa <- fSubmissionsActor
+            submission <- (sa ? GetSubmissionById(submissionId)).mapTo[Submission]
+            va <- fValidator
+            vs <- (va ? GetState).mapTo[HmdaFileValidationState]
+            s <- editInfosF("syntactical", eventStream)
+            v <- editInfosF("validity", eventStream)
+            q <- editInfosF("quality", eventStream)
+            m <- editInfosF("macro", eventStream)
+          } yield (vs, submission.status, List(s, v, q, m))
+
           onComplete(fState) {
-            case Success((vs, status)) =>
-              val s = EditCollection(editInfos(vs.syntacticalErrors))
-              val v = EditCollection(editInfos(vs.validityErrors))
-              val q = VerifiableEditCollection(vs.qualityVerified, editInfos(vs.qualityErrors))
-              val m = VerifiableEditCollection(vs.macroVerified, editInfos(vs.larMacro))
+            case Success((vs, status, infoList)) =>
+              val s = EditCollection(infoList(0))
+              val v = EditCollection(infoList(1))
+              val q = VerifiableEditCollection(vs.qualityVerified, infoList(2))
+              val m = VerifiableEditCollection(vs.macroVerified, infoList(3))
               complete(ToResponseMarshallable(SummaryEditResults(s, v, q, m, status)))
             case Failure(error) => completeWithInternalError(uri, error)
           }
@@ -168,6 +188,11 @@ trait SubmissionEditPaths
       s <- fValidator
       xs <- (s ? GetState).mapTo[HmdaFileValidationState]
     } yield xs
+  }
+
+  private def validationEventStream(submissionId: SubmissionId): Source[Event, NotUsed] = {
+    val persistenceId = s"${HmdaFileValidator.name}-$submissionId"
+    events(persistenceId)
   }
 
 }
