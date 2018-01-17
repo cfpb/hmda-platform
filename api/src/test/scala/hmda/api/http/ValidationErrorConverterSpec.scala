@@ -29,15 +29,17 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
 
   ///// New way /////
 
-  "Validation Error Converter" must {
+  "Edits Collection" must {
     val events: List[Event] = List(
       LarSyntacticalError(SyntacticalValidationError("xyz", "S205", false)),
       TsSyntacticalError(SyntacticalValidationError("xyz", "S013", true)),
       LarValidityError(ValidityValidationError("xyz", "V210", false)),
       TsValidityError(ValidityValidationError("xyz", "V145", true)),
-      LarQualityError(QualityValidationError("xyz", "Q037", false)),
-      LarQualityError(QualityValidationError("xyz", "Q037", false)),
+      TsQualityError(SyntacticalValidationError("xyz", "Q595", true)),
+      TsQualityError(SyntacticalValidationError("xyz", "Q595", true)),
       TsQualityError(SyntacticalValidationError("xyz", "Q130", true)),
+      LarQualityError(QualityValidationError("xyz", "Q037", false)),
+      LarQualityError(QualityValidationError("xyz", "Q037", false)),
       LarMacroError(MacroValidationError("Q083"))
     )
 
@@ -52,17 +54,24 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
     "filter for quality edits from an event source" in {
       val first: Source[ValidationError, NotUsed] = editStreamOfType("quality", eventSource)
       val qualityF: Future[Seq[ValidationError]] = first.runWith(Sink.seq)
-      qualityF.map(result => result must have size 3)
+      qualityF.map(result => result must have size 5)
     }
 
     "gather Edit Info for each relevant edit, without duplicates" in {
       val infosF: Future[List[EditInfo]] = editInfosF("quality", eventSource)
       infosF.map { result =>
-        result must have size 2
+        result must have size 3
         result.head mustBe EditInfo("Q037", "If lien status = 2, then loan amount should be ≤ $250 ($250 thousand).")
         result(1) mustBe EditInfo("Q130", "The number of loan/application records received in this transmission file per respondent does not = the total number of loan/application records reported in this respondent’s transmission or the total number of loan/application records in this submission is missing from the transmittal sheet.")
       }
     }
+
+    "order edit info entries by rule name" in {
+      editInfosF("quality", eventSource).map { result =>
+        result.map(_.edit) mustBe Seq("Q037", "Q130", "Q595")
+      }
+    }
+
   }
 
   ////// Old way /////
@@ -94,58 +103,6 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
       macroMsaError,
       macroVerified = false
     )
-
-    val s020Desc = "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code."
-    val s100Desc = "Activity year must = year being processed (= 2017)."
-
-    "get descriptions for a collection of edits, removing duplicates" in {
-      val infos: Seq[EditInfo] = editInfos(larErrors)
-      infos.size mustBe larErrors.map(_.ruleName).distinct.size
-
-      val s020 = infos.find(i => i.edit == "S020").get
-      s020 mustBe EditInfo("S020", s020Desc)
-    }
-
-    "order edit info entries by rule name" in {
-      val errors: Seq[ValidationError] = Seq(
-        SyntacticalValidationError("", "S610", true),
-        SyntacticalValidationError("", "S010", false),
-        SyntacticalValidationError("", "S310", true),
-        SyntacticalValidationError("", "S110", false),
-        QualityValidationError("", "Q012", false),
-        QualityValidationError("", "Q010", true),
-        QualityValidationError("", "Q440", false),
-        MacroValidationError("M000")
-      )
-
-      val result = editInfos(errors)
-
-      result.map(_.edit) mustBe Seq(
-        "M000",
-        "Q010",
-        "Q012",
-        "Q440",
-        "S010",
-        "S110",
-        "S310",
-        "S610"
-      )
-
-    }
-
-    "get edit info for validationErrors" in {
-      val infos = editInfos(tsErrors)
-      infos.size mustBe tsErrors.size
-      infos.head mustBe EditInfo("S020", s020Desc)
-      infos.last mustBe EditInfo("S100", s100Desc)
-    }
-
-    "have correct edit descriptions" in {
-      val edits = List(ValidityValidationError("1234", "V295", false), ValidityValidationError("1235", "V300", false))
-      val infos = editInfos(edits)
-      infos.head mustBe EditInfo("V295", "State and county must = a valid combination or (county = NA where MSA/MD = NA). Valid state code format must be NN. Valid county code format must be NNN or NA.")
-      infos.last mustBe EditInfo("V300", "Census tract must = a valid census tract number for the MSA/MD, state, county combination or (NA if county is classified as small) or (where MSA/MD = NA the census tract must = a valid census tract for the state/county combination or NA). Valid census tract format must be NNNN.NN or NA. Valid state code format must be NN. Valid county code format must be NNN or NA.")
-    }
 
     "get msa info for Q029" in {
       val errorQ029 = QualityValidationError("8299422144", "Q029", ts = false)

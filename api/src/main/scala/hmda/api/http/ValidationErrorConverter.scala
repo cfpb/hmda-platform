@@ -56,32 +56,13 @@ trait ValidationErrorConverter {
   }
 
   def editInfosF[ec: EC, mat: MAT, as: AS](editType: String, editSource: Source[Event, NotUsed]): Future[List[EditInfo]] = {
-    uniqueEdits(editType, editSource).map(list =>
-      list.map(name => EditInfo(name, editDescription(name))))
-  }
-
-  ///// Old way
-
-  def editsOfType(errType: String, vs: HmdaFileValidationState): Seq[ValidationError] = {
-    errType.toLowerCase match {
-      case "syntactical" => vs.syntacticalErrors
-      case "validity" => vs.validityErrors
-      case "quality" => vs.qualityErrors
-      case "macro" => vs.larMacro
-      case _ => Seq()
+    uniqueEdits(editType, editSource).map { list =>
+      val infos = list.map(name => EditInfo(name, editDescription(name)))
+      infos.sortBy(_.edit)
     }
   }
 
-  def editInfos(edits: Seq[ValidationError]): Seq[EditInfo] = {
-    val errsByEdit: Map[String, Seq[ValidationError]] = edits.groupBy(_.ruleName)
-
-    val info = errsByEdit.map {
-      case (editName: String, _) =>
-        EditInfo(editName, editDescription(editName))
-    }.toSeq
-
-    info.sortBy(_.edit)
-  }
+  ///// Old way
 
   def validationErrorsToCsvResults(vs: HmdaFileValidationState): String = {
     val errors: Seq[ValidationError] = vs.allErrors
