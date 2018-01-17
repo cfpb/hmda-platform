@@ -242,8 +242,6 @@ This API is for internal use only. The following endpoints are available
         }
         ```
 
-    If a value for that date already exists, this new entry will not be created (see below for endpoint to update values).
-
     The response is the new APOR in `JSON` format (see endpoint below for exact data structure).
 
     * `PUT`
