@@ -173,3 +173,134 @@ This API is for internal use only. The following endpoints are available
     }
     ```
 
+* `/apor`
+
+    * `POST`
+
+    Creates a new APOR value
+
+    Example request, in `JSON` format
+
+    ```json
+        {
+        	"rateType": "FixedRate",
+        	"newApor": {
+        		"rateDate": "2018-01-01",
+        		"values": [
+        			1.00,
+        			3.26,
+        			3.39,
+        			3.39,
+        			3.59,
+        			3.59,
+        			3.68,
+        			3.68,
+        			3.74,
+        			3.74,
+        			3.74,
+        			3.74,
+        			3.51,
+        			3.51,
+        			3.51,
+        			3.51,
+        			3.51,
+        			3.51,
+        			3.51,
+        			3.51,
+        			3.51,
+        			3.51,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03,
+        			4.03
+        		]
+        	}
+        }
+        ```
+
+    The response is the new APOR in `JSON` format (see endpoint below for exact data structure).
+
+    * `PUT`
+
+    Updates APOR values, for a given rate type and rate date.
+
+    If an APOR record already exists in the system with the given rate type and date, the new record will effectively overwrite the existing one.
+    Both will exist in the system, but the most recently added one will be used in rate spread calculations
+
+    The `values` array should contain exactly 50 entries.
+
+    Example request, in `JSON` format:
+
+    ```json
+    {
+    	"rateType": "FixedRate",
+    	"newApor": {
+    		"rateDate": "2018-01-01",
+    		"values": [
+    			1.00, 3.26, 3.39, 3.39, 3.59,
+    			3.59, 3.68, 3.68, 3.74, 3.74,
+    			3.74, 3.74, 3.51, 3.51, 3.51,
+    			3.51, 3.51, 3.51, 3.51, 3.51,
+    			3.51, 3.51, 4.03, 4.03, 4.03,
+    			4.03, 4.03, 4.03, 4.03, 4.03,
+    			4.03, 4.03, 4.03, 4.03, 4.03,
+    			4.03, 4.03, 4.03, 4.03, 4.03,
+    			4.03, 4.03, 4.03, 4.03, 4.03,
+    			4.03, 4.03, 4.03, 4.03, 4.03
+    		]
+    	}
+    }
+    ```
+
+    The response is the updated APOR, in `JSON` format (see endpoint below for exact data structure).
+
+
+* `/apor/[fixed|variable]/<year>/<month>/<day>`
+
+    * `GET`
+    Retrieves the APOR values for a specific date, filtered by rate type (fixed or variable).
+    Returns 404 if the record does not exist.
+
+    Example Response, in `JSON` format:
+
+    ```json
+    {
+      "rateDate": "2018-01-01",
+      "values": [
+          3.25, 3.26, 3.39, 3.39, 3.59,
+          3.59, 3.68, 3.68, 3.74, 3.74,
+          3.74, 3.74, 3.51, 3.51, 3.51,
+          3.51, 3.51, 3.51, 3.51, 3.51,
+          3.51, 3.51, 4.03, 4.03, 4.03,
+          4.03, 4.03, 4.03, 4.03, 4.03,
+          4.03, 4.03, 4.03, 4.03, 4.03,
+          4.03, 4.03, 4.03, 4.03, 4.03,
+          4.03, 4.03, 4.03, 4.03, 4.03,
+          4.03, 4.03, 4.03, 4.03, 4.03
+      ]
+    }
+    ```
