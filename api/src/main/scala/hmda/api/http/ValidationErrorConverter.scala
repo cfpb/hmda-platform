@@ -12,7 +12,6 @@ import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.model.validation.{ EmptyValidationError, ValidationError }
 import hmda.persistence.messages.CommonMessages.Event
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
 import spray.json.{ JsNumber, JsObject, JsString, JsValue }
 
 import scala.concurrent.Future
@@ -41,6 +40,16 @@ trait ValidationErrorConverter {
         case LarMacroError(err) => err
         case _ => EmptyValidationError
       }
+      case "all" => editSource.map {
+        case LarSyntacticalError(err) => err
+        case TsSyntacticalError(err) => err
+        case LarValidityError(err) => err
+        case TsValidityError(err) => err
+        case LarQualityError(err) => err
+        case TsQualityError(err) => err
+        case LarMacroError(err) => err
+        case _ => EmptyValidationError
+      }
     }
 
     edits.filter(_ != EmptyValidationError)
@@ -62,13 +71,15 @@ trait ValidationErrorConverter {
     }
   }
 
-  ///// Old way
+  private val csvHeaderSource = Source.fromIterator(() => Iterator("editType, editId, loanId"))
 
-  def validationErrorsToCsvResults(vs: HmdaFileValidationState): String = {
-    val errors: Seq[ValidationError] = vs.allErrors
-    val rows: Seq[String] = errors.map(_.toCsv)
-    "editType, editId, loanId\n" + rows.mkString("\n")
+  def csvResultStream[ec: EC, mat: MAT, as: AS](eventSource: Source[Event, NotUsed]): Source[String, Any] = {
+    val edits = editStreamOfType("all", eventSource)
+    val csvSource = edits.map(_.toCsv)
+    csvHeaderSource.concat(csvSource)
   }
+
+  ///// Old way
 
   def validationErrorToResultRow(err: ValidationError, ts: Option[TransmittalSheet], lars: Seq[LoanApplicationRegister]): EditResultRow = {
     EditResultRow(RowId(err.publicErrorId), relevantFields(err, ts, lars))

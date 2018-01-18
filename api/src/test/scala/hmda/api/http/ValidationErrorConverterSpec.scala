@@ -29,21 +29,24 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
 
   ///// New way /////
 
-  "Edits Collection" must {
-    val events: List[Event] = List(
-      LarSyntacticalError(SyntacticalValidationError("xyz", "S205", false)),
-      TsSyntacticalError(SyntacticalValidationError("xyz", "S013", true)),
-      LarValidityError(ValidityValidationError("xyz", "V210", false)),
-      TsValidityError(ValidityValidationError("xyz", "V145", true)),
-      TsQualityError(SyntacticalValidationError("xyz", "Q595", true)),
-      TsQualityError(SyntacticalValidationError("xyz", "Q595", true)),
-      TsQualityError(SyntacticalValidationError("xyz", "Q130", true)),
-      LarQualityError(QualityValidationError("xyz", "Q037", false)),
-      LarQualityError(QualityValidationError("xyz", "Q037", false)),
-      LarMacroError(MacroValidationError("Q083"))
-    )
+  val events: List[Event] = List(
+    TsSyntacticalError(SyntacticalValidationError("xyz", "S013", true)),
+    LarSyntacticalError(SyntacticalValidationError("xyz", "S205", false)),
+    LarValidityError(ValidityValidationError("xyz", "V210", false)),
+    TsValidityError(ValidityValidationError("xyz", "V145", true)),
+    TsQualityError(QualityValidationError("xyz", "Q595", true)),
+    TsQualityError(QualityValidationError("xyz", "Q595", true)),
+    TsQualityError(QualityValidationError("xyz", "Q130", true)),
+    LarQualityError(QualityValidationError("xyz", "Q037", false)),
+    LarQualityError(QualityValidationError("xyz", "Q037", false)),
+    LarMacroError(MacroValidationError("Q083")),
+    EditsVerified(Quality, true),
+    EditsVerified(Macro, false)
+  )
 
-    val eventSource: Source[Event, NotUsed] = Source.fromIterator(() => events.toIterator)
+  val eventSource: Source[Event, NotUsed] = Source.fromIterator(() => events.toIterator)
+
+  "Edits Collection" must {
 
     "filter for syntactical edits from an event source" in {
       val first: Source[ValidationError, NotUsed] = editStreamOfType("syntactical", eventSource)
@@ -72,6 +75,25 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
       }
     }
 
+  }
+
+  "Edits CSV response" must {
+    "gather all edits from event stream" in {
+      val first: Source[ValidationError, NotUsed] = editStreamOfType("all", eventSource)
+      val syntacticalF: Future[Seq[ValidationError]] = first.runWith(Sink.seq)
+      syntacticalF.map(result => result must have size 10)
+    }
+
+    "convert to csv, add header row" in {
+      val csvLinesF = csvResultStream(eventSource).runWith(Sink.seq)
+      csvLinesF.map { csvLines =>
+        csvLines must have size 11
+        csvLines.head mustBe "editType, editId, loanId"
+        csvLines(1) mustBe "Syntactical, S013, Transmittal Sheet"
+        csvLines(2) mustBe "Syntactical, S205, xyz"
+        csvLines.last mustBe "Macro, Q083, "
+      }
+    }
   }
 
   ////// Old way /////
@@ -118,16 +140,6 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
         RowId("Transmittal Sheet"),
         JsObject("Agency Code" -> JsNumber(9))
       )
-    }
-
-    "convert edits to CSV" in {
-      val csvResults: Seq[String] = validationErrorsToCsvResults(validationState).split("\n")
-
-      csvResults.length mustBe 15
-      csvResults.head mustBe "editType, editId, loanId"
-      csvResults(1) mustBe "Syntactical, S020, Transmittal Sheet"
-      csvResults.last mustBe "Macro, Q029, "
-
     }
   }
 

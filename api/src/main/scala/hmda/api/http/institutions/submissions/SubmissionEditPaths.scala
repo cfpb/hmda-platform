@@ -5,10 +5,13 @@ import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.{ HttpCharsets, HttpEntity }
+import akka.http.scaladsl.model.MediaTypes.`text/csv`
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
@@ -83,13 +86,8 @@ trait SubmissionEditPaths
     path("filings" / Segment / "submissions" / IntNumber / "edits" / "csv") { (period, seqNr) =>
       timedGet { uri =>
         completeVerified(supervisor, institutionId, period, seqNr, uri) {
-          val fValidationState = getValidationState(supervisor, institutionId, period, seqNr)
-          onComplete(fValidationState) {
-            case Success(validationState) =>
-              val csv: String = validationErrorsToCsvResults(validationState)
-              complete(ToResponseMarshallable(csv))
-            case Failure(error) => completeWithInternalError(uri, error)
-          }
+          val csv = csvResultStream(validationEventStream(SubmissionId(institutionId, period, seqNr))).map(ByteString(_))
+          complete(HttpEntity.Chunked.fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
         }
       }
     }
