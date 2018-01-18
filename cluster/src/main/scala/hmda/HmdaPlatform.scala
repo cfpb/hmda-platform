@@ -83,7 +83,7 @@ object HmdaPlatform extends App {
 
   //Start API
   if (cluster.selfRoles.contains(HmdaClusterRoles.api)) {
-    system.actorOf(HmdaApi.props, HmdaApi.name)
+    //system.actorOf(HmdaApi.props, HmdaApi.name)
   }
 
 }
