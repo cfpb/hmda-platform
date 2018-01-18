@@ -7,4 +7,5 @@ object InstitutionEvents {
   trait InstitutionEvent extends Event
   case class InstitutionCreated(institution: Institution) extends InstitutionEvent
   case class InstitutionModified(institution: Institution) extends InstitutionEvent
+  case class InstitutionDeleted(institution: Institution) extends InstitutionEvent
 }

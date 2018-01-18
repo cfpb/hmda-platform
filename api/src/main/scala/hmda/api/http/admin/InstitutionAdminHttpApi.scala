@@ -17,7 +17,7 @@ import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindFilings
 import hmda.persistence.messages.commands.filing.FilingCommands._
 import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence }
-import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, GetInstitutionById, ModifyInstitution }
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ CreateInstitution, DeleteInstitution, GetInstitutionById, ModifyInstitution }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
 import scala.concurrent.ExecutionContext
@@ -75,30 +75,47 @@ trait InstitutionAdminHttpApi
                   }
                 case Failure(error) => completeWithInternalError(uri, error)
               }
+            } ~
+            timedDelete { uri =>
+              val fDeleted = for {
+                a <- fInstitutionsActor
+                d <- (a ? DeleteInstitution(institution)).mapTo[Option[String]]
+              } yield d
+
+              onComplete(fDeleted) {
+                case Success(maybeInstitution) =>
+                  maybeInstitution match {
+                    case Some(id) => complete(ToResponseMarshallable(StatusCodes.Accepted -> id))
+                    case None => complete(ToResponseMarshallable(StatusCodes.NotFound))
+                  }
+                case Failure(error) => completeWithInternalError(uri, error)
+              }
             }
         }
       }
     }
 
-  def institutionReadPath(supervisor: ActorRef) =
+  def institutionByIdPath(supervisor: ActorRef) =
     path("institutions" / Segment) { institutionId =>
       extractExecutionContext { executor =>
         implicit val ec: ExecutionContext = executor
-        val institutionF = for {
-          a <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-          o <- (a ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
-        } yield o
+        timedGet { uri =>
+          val institutionF = for {
+            a <- (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+            o <- (a ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
+          } yield o
 
-        onComplete(institutionF) {
-          case Success(Some(i)) =>
-            complete(ToResponseMarshallable(i))
-          case Success(None) =>
-            complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
-          case Failure(_) =>
-            complete(ToResponseMarshallable(HttpResponse(StatusCodes.InternalServerError)))
+          onComplete(institutionF) {
+            case Success(Some(i)) =>
+              complete(ToResponseMarshallable(i))
+            case Success(None) =>
+              complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+            case Failure(error) =>
+              completeWithInternalError(uri, error)
+          }
         }
       }
     }
 
-  def institutionAdminRoutes(supervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) ~ institutionReadPath(supervisor) }
+  def institutionAdminRoutes(supervisor: ActorRef) = encodeResponse { institutionsWritePath(supervisor) ~ institutionByIdPath(supervisor) }
 }
