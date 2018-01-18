@@ -15,8 +15,6 @@ import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsDatParser
 import hmda.persistence.messages.CommonMessages.Event
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
-import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarEngine
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
 import spray.json.{ JsNumber, JsObject }
@@ -105,25 +103,6 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
     val tsErrors = Seq(
       SyntacticalValidationError("1299422144", "S020", true),
       SyntacticalValidationError("1299422144", "S100", true)
-    )
-    val larErrors: Seq[ValidationError] = {
-      val ctx = ValidationContext(None, Some(2017))
-      badLars.flatMap(lar => validationErrors(lar, ctx, validateLar).errors)
-    }
-    val macroMsaError: Seq[MacroValidationError] = Seq(MacroValidationError("Q029"))
-
-    val validationState = HmdaFileValidationState(
-      Some(ts),
-      badLars,
-      tsErrors,
-      Nil,
-      Nil,
-      larErrors,
-      Nil,
-      Nil,
-      qualityVerified = true,
-      macroMsaError,
-      macroVerified = false
     )
 
     "get msa info for Q029" in {
