@@ -7,7 +7,7 @@ case class TransmittalSheet(
     id: Int = 1,
     institutionName: String = "",
     year: Int = 2018,
-    quarter: Int = 1,
+    quarter: Int = 4,
     contact: Contact = Contact(),
     agency: Agency = UndeterminedAgency,
     totalLines: Int = 0,
