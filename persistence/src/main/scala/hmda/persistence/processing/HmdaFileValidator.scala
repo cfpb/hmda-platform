@@ -34,6 +34,7 @@ import hmda.validation.stats.SubmissionLarStats.{ CountSubmittedLarsInSubmission
 import hmda.validation.stats.ValidationStats.AddSubmissionTaxId
 import hmda.validation.stats.SubmissionLarStats
 
+import scala.concurrent.Future
 import scala.util.Try
 import scala.concurrent.duration._
 
@@ -275,7 +276,8 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       sender() ! state
 
     case GetVerificationState =>
-      sender() ! (state.qualityVerified, state.macroVerified)
+      val replyTo: ActorRef = sender()
+      findVerificationState.map(vs => replyTo ! vs)
 
     case GetValidatedLines =>
       sender() ! (state.ts, state.lars)
@@ -290,6 +292,29 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     case Shutdown =>
       context stop self
 
+  }
+
+  private def findVerificationState: Future[(Boolean, Boolean)] = {
+    val allEvents: Source[Event, NotUsed] = events(persistenceId)
+
+    val qualityV: Future[Boolean] = allEvents.map {
+      case EditsVerified(Quality, verified) => Some(verified)
+      case _ => None
+    }.filter(_.isDefined).runWith(Sink.seq).map { seq =>
+      if (seq.isEmpty) false else seq.last.get
+    }
+
+    val macroV: Future[Boolean] = allEvents.map {
+      case EditsVerified(Macro, verified) => Some(verified)
+      case _ => None
+    }.filter(_.isDefined).runWith(Sink.seq).map { seq =>
+      if (seq.isEmpty) false else seq.last.get
+    }
+
+    for {
+      q <- qualityV
+      m <- macroV
+    } yield (q, m)
   }
 
   private def persistErrors(errors: Seq[Event]): Unit = {
