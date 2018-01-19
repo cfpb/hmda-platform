@@ -2,7 +2,7 @@ package hmda.http.common.api
 
 import java.net.InetSocketAddress
 
-import akka.actor.{Actor, ActorSystem, CoordinatedShutdown, Status}
+import akka.actor.{Actor, ActorSystem, Status}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Route
@@ -40,7 +40,4 @@ abstract class HttpServer extends HmdaActor {
     context stop self
   }
 
-  CoordinatedShutdown(system).addJvmShutdownHook({
-    http.flatMap(_.unbind())
-  })
 }

@@ -51,7 +51,7 @@ object HmdaPlatform extends App {
           |    }
           |  }
           |  cluster {
-          |    seed-nodes = ["akka.tcp://hmda@127.0.0.1:2551"]
+          |    seed-nodes = ["akka.tcp://hmda2@127.0.0.1:2551"]
           |  }
           |}
         """.stripMargin)
@@ -87,7 +87,7 @@ object HmdaPlatform extends App {
 
   //Start API
   if (cluster.selfRoles.contains(HmdaClusterRoles.api)) {
-    //system.actorOf(HmdaApi.props, HmdaApi.name)
+    system.actorOf(HmdaApi.props, HmdaApi.name)
   }
 
 }
