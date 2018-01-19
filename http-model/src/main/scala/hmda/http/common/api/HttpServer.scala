@@ -39,4 +39,5 @@ abstract class HttpServer extends HmdaActor {
     log.error(error, s"Failed to bind to $host:$port")
     context stop self
   }
+
 }

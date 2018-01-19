@@ -2,6 +2,8 @@ package hmda
 
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
+import akka.management.AkkaManagement
+import akka.management.cluster.bootstrap.ClusterBootstrap
 import com.typesafe.config.ConfigFactory
 import hmda.api.HmdaApi
 import hmda.cluster.HmdaClusterRoles
@@ -43,16 +45,13 @@ object HmdaPlatform extends App {
       .parseString("""
           |akka {
           |  remote {
-          |    artery {
-          |      enabled = on
-          |      canonical {
-          |        hostname = 127.0.0.1
-          |        port = 2551
-          |      }
+          |    netty.tcp {
+          |      hostname = 127.0.0.1
+          |      port = 2551
           |    }
           |  }
           |  cluster {
-          |    seed-nodes = ["akka://hmda@127.0.0.1:2551"]
+          |    seed-nodes = ["akka.tcp://hmda2@127.0.0.1:2551"]
           |  }
           |}
         """.stripMargin)
@@ -65,6 +64,11 @@ object HmdaPlatform extends App {
     ActorSystem(clusterConfig.getString("clustering.name"), clusterConfig)
 
   val cluster = Cluster(system)
+
+  if (runtimeMode == "prod") {
+    AkkaManagement(system).start()
+    ClusterBootstrap(system).start()
+  }
 
   //Start Persistence
   if (cluster.selfRoles.contains(HmdaClusterRoles.persistence)) {
