@@ -62,7 +62,7 @@ This task will create a `fat jar`, which can be executed on any `JDK9` compliant
 ```
 This task will create a `Docker` image. To run a container with the `HMDA Platform` as a single node cluster, will all dependencies:
 
-`docker run --rm -ti -p 19999:19999 cfpb/hmda`
+`docker run --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 cfpb/hmda`
 
 
 ## Contributing
