@@ -42,7 +42,7 @@ sbt:cluster> reStart
 ```
 
 
-### Building the .jar
+### Building and runnint the .jar
 
 * To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
@@ -53,7 +53,7 @@ This task will create a `fat jar`, which can be executed on any `JDK9` compliant
 
 `java -jar target/scala-2.12/hmda2.jar`
 
-### Building the Docker image
+### Building and running the Docker image
 
 * To build a `Docker` image that runs as a single node cluster, from the sbt prompt:
 
@@ -62,30 +62,8 @@ This task will create a `fat jar`, which can be executed on any `JDK9` compliant
 ```
 This task will create a `Docker` image. To run a container with the `HMDA Platform` as a single node cluster, will all dependencies:
 
-`docker run --rm -ti -p 19999:19999 jmarin/hmda`
+`docker run --rm -ti -p 19999:19999 cfpb/hmda`
 
-### Running as a local cluster
-
-The application can be run as a distributed cluster on a local machine, by running it on separate `JVM` processes.
-The following example starts 2 instances of the application that work as a cluster, with roles `persistence` and `health`:
-
-* First node, acts as seed node and has role `persistence`. From a terminal window:
-
-```shell
-export HMDA_RUNTIME_MODE=prod
-export HMDA_CLUSTER_ROLES=persistence
-java -Dakka.cluster.seed-nodes.0=akka://hmda@127.0.0.1:2551 -jar target/scala-2.12/hmda2.jar
-```
-
-
-* Second node, joins the cluster through the previous seed node and has role `health`. From a separate terminal window:
-
-```shell
-export HMDA_RUNTIME_MODE=prod
-export APP_PORT=0
-export HMDA_CLUSTER_ROLES=health
-java -Dakka.cluster.seed-nodes.0=akka://hmda@127.0.0.1:2551 -jar target/scala-2.12/hmda2.jar
-```
 
 ## Contributing
 
