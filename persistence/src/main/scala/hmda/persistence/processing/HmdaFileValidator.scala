@@ -33,6 +33,7 @@ import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.validation.stats.SubmissionLarStats.{ CountSubmittedLarsInSubmission, PersistStatsForMacroEdits }
 import hmda.validation.stats.ValidationStats.AddSubmissionTaxId
 import hmda.validation.stats.SubmissionLarStats
+import HmdaFileWorker._
 
 import scala.util.Try
 import scala.concurrent.duration._
@@ -160,15 +161,23 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         .filter(x => x.isInstanceOf[LarParsed])
         .map(e => e.asInstanceOf[LarParsed].lar)
 
-      larSource.map { lar =>
-        self ! lar
-        validateLar(lar, ctx).toEither
-      }
+      larSource
+        .via(balancer(validate(ctx, self), 3))
         .map {
-          case Right(_) => // do nothing
+          case Right(_) => //do nothing
           case Left(errors) => LarValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
+
+    //      larSource.map { lar =>
+    //        self ! lar
+    //        validateLar(lar, ctx).toEither
+    //      }
+    //        .map {
+    //          case Right(_) => // do nothing
+    //          case Left(errors) => LarValidationErrors(errors.list.toList)
+    //        }
+    //        .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
 
     case ValidateAggregate(ts) =>
       performAsyncChecks(ts, ctx)
