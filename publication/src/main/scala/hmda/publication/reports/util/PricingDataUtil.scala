@@ -48,7 +48,7 @@ object PricingDataUtil extends SourceUtils {
     }
   }
 
-  private def pricingDataReported(lar: LoanApplicationRegister): Boolean = {
+  def pricingDataReported(lar: LoanApplicationRegister): Boolean = {
     rateSpreadBetween(Int.MinValue, Int.MaxValue)(lar)
   }
 
@@ -71,7 +71,7 @@ object PricingDataUtil extends SourceUtils {
   }
 
   private def loanAmount(lar: LoanApplicationRegister): Int = lar.loan.amount
-  private def rateSpread(lar: LoanApplicationRegister): Double =
+  def rateSpread(lar: LoanApplicationRegister): Double =
     Try(lar.rateSpread.toDouble).getOrElse(0)
 
   private def reportedMean[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
