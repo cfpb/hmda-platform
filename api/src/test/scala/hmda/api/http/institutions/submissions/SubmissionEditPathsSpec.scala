@@ -14,7 +14,7 @@ import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
+import hmda.persistence.processing.HmdaFileValidator.{ GetVerificationState, HmdaFileValidationState }
 import hmda.validation.engine._
 import spray.json.{ JsNumber, JsObject }
 
@@ -94,7 +94,12 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
       // Check for correct baseline validation state.
       //   Incorrect baseline will invalidate the other tests in this section.
-      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
+      val fState = for {
+        s <- fHmdaValidatorActor(2)
+        xs <- (s ? GetState).mapTo[HmdaFileValidationState]
+      } yield xs
+      val state: HmdaFileValidationState = Await.result(fState, 5.seconds)
+
       state.validityErrors.isEmpty mustBe true
       state.syntacticalErrors.isEmpty mustBe true
       state.macroVerified mustBe false
@@ -113,9 +118,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
-      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
-      state.macroVerified mustBe true
-      state.qualityVerified mustBe false
+      //val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
+      val (qualityVerified, macroVerified) = Await.result(fVerificationState, 5.seconds)
+      qualityVerified mustBe false
+      macroVerified mustBe true
     }
   }
 
@@ -130,8 +136,9 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
-      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
-      state.qualityVerified mustBe true
+      val (qualityVerified, macroVerified) = Await.result(fVerificationState, 5.seconds)
+      qualityVerified mustBe true
+      macroVerified mustBe true
     }
   }
 
@@ -142,6 +149,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/quality", verification) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
       status mustBe StatusCodes.OK
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(false, currentStatus)
+
+      val (qualityVerified, macroVerified) = Await.result(fVerificationState, 5.seconds)
+      qualityVerified mustBe false
+      macroVerified mustBe true
     }
   }
 
@@ -247,10 +258,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
   }
 
-  private def fValidationState: Future[HmdaFileValidationState] = {
+  private def fVerificationState: Future[(Boolean, Boolean)] = {
     for {
       s <- fHmdaValidatorActor(2)
-      xs <- (s ? GetState).mapTo[HmdaFileValidationState]
+      xs <- (s ? GetVerificationState).mapTo[(Boolean, Boolean)]
     } yield xs
   }
 
