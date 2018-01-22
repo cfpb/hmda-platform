@@ -104,16 +104,21 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
   import HmdaFileValidator._
 
-  var institution: Option[Institution] = Some(Institution.empty.copy(id = submissionId.institutionId))
-
   val config = ConfigFactory.load()
   val duration = config.getInt("hmda.actor-lookup-timeout")
-
   implicit val timeout = Timeout(duration.seconds)
-
   val parserPersistenceId = s"${HmdaFileParser.name}-$submissionId"
 
+  var institution: Option[Institution] = Some(Institution.empty.copy(id = submissionId.institutionId))
   def ctx: ValidationContext = ValidationContext(institution, Try(Some(submissionId.period.toInt)).getOrElse(None))
+  override def preStart(): Unit = {
+    super.preStart()
+    val fInstitutions = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
+    for {
+      a <- fInstitutions
+      i <- (a ? GetInstitutionById(submissionId.institutionId)).mapTo[Option[Institution]]
+    } yield institution = i
+  }
 
   var state = HmdaFileValidationState()
 
@@ -123,16 +128,6 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
   } yield stat
 
-  override def preStart(): Unit = {
-    super.preStart()
-    val fInstitutions = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-    for {
-      a <- fInstitutions
-      i <- (a ? GetInstitutionById(submissionId.institutionId)).mapTo[Option[Institution]]
-    } yield {
-      institution = i
-    }
-  }
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
