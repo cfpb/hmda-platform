@@ -5,12 +5,15 @@ import akka.actor.ActorRef
 import akka.stream.FlowShape
 import akka.stream.scaladsl.{ Balance, Flow, GraphDSL, Merge }
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.validation.ValidationError
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine.lar.LarEngine
 
+import scalaz.NonEmptyList
+
 object HmdaFileWorker extends LarEngine {
 
-  def validate(ctx: ValidationContext, replyTo: ActorRef) = {
+  def validate(ctx: ValidationContext, replyTo: ActorRef): Flow[LoanApplicationRegister, Either[NonEmptyList[ValidationError], LoanApplicationRegister], NotUsed] = {
     Flow[LoanApplicationRegister]
       .map { lar =>
         replyTo ! lar
