@@ -54,9 +54,9 @@ trait SubmissionSummaryPaths
           val tsF = for {
             validator <- validatorF
             submissions <- submissionPersistenceF
-            s <- (validator ? GetState).mapTo[HmdaFileValidationState]
+            s <- (validator ? GetState).mapTo[HmdaVerificationState]
             sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
-          } yield TsLarSummary(s.ts, s.lars.size, sub.fileName)
+          } yield TsLarSummary(s.ts, s.larCount, sub.fileName)
 
           onComplete(tsF) {
             case Success(x) => x.ts match {

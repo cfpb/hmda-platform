@@ -49,7 +49,6 @@ object HmdaFileValidator {
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
 
   case class GetNamedErrorResultsPaginated(editName: String, page: Int) extends Command
-  case object GetVerificationState extends Command
   case object GetValidatedLines extends Command
 
   def props(supervisor: ActorRef, validationStats: ActorRef, id: SubmissionId): Props = Props(new HmdaFileValidator(supervisor, validationStats, id))
@@ -58,43 +57,51 @@ object HmdaFileValidator {
     system.actorOf(HmdaFileValidator.props(supervisor, validationStats, id).withDispatcher("persistence-dispatcher"))
   }
 
+  // Legacy Model
   case class HmdaFileValidationState(
-      ts: Option[TransmittalSheet] = None,
-      lars: Seq[LoanApplicationRegister] = Nil,
-      tsSyntactical: Seq[ValidationError] = Nil,
-      tsValidity: Seq[ValidationError] = Nil,
-      tsQuality: Seq[ValidationError] = Nil,
-      larSyntactical: Seq[ValidationError] = Nil,
-      larValidity: Seq[ValidationError] = Nil,
-      larQuality: Seq[ValidationError] = Nil,
+    ts: Option[TransmittalSheet] = None,
+    lars: Seq[LoanApplicationRegister] = Nil,
+    tsSyntactical: Seq[ValidationError] = Nil,
+    tsValidity: Seq[ValidationError] = Nil,
+    tsQuality: Seq[ValidationError] = Nil,
+    larSyntactical: Seq[ValidationError] = Nil,
+    larValidity: Seq[ValidationError] = Nil,
+    larQuality: Seq[ValidationError] = Nil,
+    qualityVerified: Boolean = false,
+    larMacro: Seq[ValidationError] = Vector.empty[ValidationError],
+    macroVerified: Boolean = false
+  )
+
+  case class HmdaVerificationState(
+      containsSVEdits: Boolean = false,
+      containsQMEdits: Boolean = false,
       qualityVerified: Boolean = false,
-      larMacro: Seq[ValidationError] = Vector.empty[ValidationError],
-      macroVerified: Boolean = false
+      macroVerified: Boolean = false,
+      ts: Option[TransmittalSheet] = None,
+      larCount: Int = 0
   ) {
-    def updated(event: Event): HmdaFileValidationState = event match {
-      case tsValidated @ TsValidated(newTs) => this.copy(ts = Some(newTs))
-      case larValidated @ LarValidated(lar, _) => this.copy(lars = lars :+ lar)
-      case TsSyntacticalError(e) => this.copy(tsSyntactical = tsSyntactical :+ e)
-      case TsValidityError(e) => this.copy(tsValidity = tsValidity :+ e)
-      case TsQualityError(e) => this.copy(tsQuality = tsQuality :+ e)
-      case LarSyntacticalError(e) => this.copy(larSyntactical = larSyntactical :+ e)
-      case LarValidityError(e) => this.copy(larValidity = larValidity :+ e)
-      case LarQualityError(e) => this.copy(larQuality = larQuality :+ e)
-      case LarMacroError(e) => this.copy(larMacro = larMacro :+ e)
+    def updated(event: Event): HmdaVerificationState = event match {
+
       case EditsVerified(editType, v) =>
         if (editType == Quality) this.copy(qualityVerified = v)
         else if (editType == Macro) this.copy(macroVerified = v)
         else this
+
+      case TsSyntacticalError(e) => this.copy(containsSVEdits = true)
+      case LarSyntacticalError(e) => this.copy(containsSVEdits = true)
+      case TsValidityError(e) => this.copy(containsSVEdits = true)
+      case LarValidityError(e) => this.copy(containsSVEdits = true)
+
+      case TsQualityError(e) => this.copy(containsQMEdits = true)
+      case LarQualityError(e) => this.copy(containsQMEdits = true)
+      case LarMacroError(e) => this.copy(containsQMEdits = true)
+
+      case LarValidated(_, _) => this.copy(larCount = larCount + 1)
+      case TsValidated(ts) => this.copy(ts = Some(ts))
     }
 
-    def syntacticalErrors: Seq[ValidationError] = tsSyntactical ++ larSyntactical
-    def validityErrors: Seq[ValidationError] = tsValidity ++ larValidity
-    def qualityErrors: Seq[ValidationError] = tsQuality ++ larQuality
-    def allErrors: Seq[ValidationError] = syntacticalErrors ++ validityErrors ++ qualityErrors ++ larMacro
-    def readyToSign: Boolean =
-      syntacticalErrors.isEmpty && validityErrors.isEmpty &&
-        (qualityErrors.isEmpty || qualityVerified) &&
-        (larMacro.isEmpty || macroVerified)
+    def bothVerified: Boolean = qualityVerified && macroVerified
+    def readyToSign: Boolean = !containsSVEdits && (!containsQMEdits || bothVerified)
   }
 
   case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)
@@ -120,14 +127,13 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     } yield institution = i
   }
 
-  var state = HmdaFileValidationState()
+  var state = HmdaVerificationState()
 
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
   def statRef = for {
     manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
     stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
   } yield stat
-
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
@@ -270,10 +276,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     case GetState =>
       sender() ! state
 
-    case GetVerificationState =>
-      val replyTo: ActorRef = sender()
-      findVerificationState.map(vs => replyTo ! vs)
-
+    /*
     case GetValidatedLines =>
       sender() ! (state.ts, state.lars)
 
@@ -283,33 +286,11 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       val p = PaginatedResource(totalSize)(page)
       val pageOfFailures = allFailures.slice(p.fromIndex, p.toIndex)
       sender() ! PaginatedErrors(pageOfFailures, totalSize)
+      */
 
     case Shutdown =>
       context stop self
 
-  }
-
-  private def findVerificationState: Future[(Boolean, Boolean)] = {
-    val allEvents: Source[Event, NotUsed] = events(persistenceId)
-
-    val qualityV: Future[Boolean] = allEvents.map {
-      case EditsVerified(Quality, verified) => Some(verified)
-      case _ => None
-    }.filter(_.isDefined).runWith(Sink.seq).map { seq =>
-      if (seq.isEmpty) false else seq.last.get
-    }
-
-    val macroV: Future[Boolean] = allEvents.map {
-      case EditsVerified(Macro, verified) => Some(verified)
-      case _ => None
-    }.filter(_.isDefined).runWith(Sink.seq).map { seq =>
-      if (seq.isEmpty) false else seq.last.get
-    }
-
-    for {
-      q <- qualityV
-      m <- macroV
-    } yield (q, m)
   }
 
   private def persistErrors(errors: Seq[Event]): Unit = {

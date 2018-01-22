@@ -14,7 +14,7 @@ import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.{ GetVerificationState, HmdaFileValidationState }
+import hmda.persistence.processing.HmdaFileValidator.HmdaVerificationState
 import hmda.validation.engine._
 import spray.json.{ JsNumber, JsObject }
 
@@ -96,12 +96,11 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       //   Incorrect baseline will invalidate the other tests in this section.
       val fState = for {
         s <- fHmdaValidatorActor(2)
-        xs <- (s ? GetState).mapTo[HmdaFileValidationState]
+        xs <- (s ? GetState).mapTo[HmdaVerificationState]
       } yield xs
-      val state: HmdaFileValidationState = Await.result(fState, 5.seconds)
+      val state: HmdaVerificationState = Await.result(fState, 5.seconds)
 
-      state.validityErrors.isEmpty mustBe true
-      state.syntacticalErrors.isEmpty mustBe true
+      state.containsSVEdits mustBe false
       state.macroVerified mustBe false
       state.qualityVerified mustBe false
     }
@@ -261,8 +260,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   private def fVerificationState: Future[(Boolean, Boolean)] = {
     for {
       s <- fHmdaValidatorActor(2)
-      xs <- (s ? GetVerificationState).mapTo[(Boolean, Boolean)]
-    } yield xs
+      xs <- (s ? GetState).mapTo[HmdaVerificationState]
+    } yield (xs.qualityVerified, xs.macroVerified)
   }
 
   private def fHmdaValidatorActor(seqNr: Int): Future[ActorRef] = {

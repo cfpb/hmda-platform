@@ -61,12 +61,12 @@ trait SubmissionEditPaths
             sa <- fSubmissionsActor
             status <- (sa ? GetSubmissionStatus(submissionId)).mapTo[SubmissionStatus]
             va <- fValidator
-            (qualityV, macroV) <- (va ? GetVerificationState).mapTo[(Boolean, Boolean)]
+            vs <- (va ? GetState).mapTo[HmdaVerificationState]
             s <- editInfosF("syntactical", eventStream)
             v <- editInfosF("validity", eventStream)
             q <- editInfosF("quality", eventStream)
             m <- editInfosF("macro", eventStream)
-          } yield (qualityV, macroV, status, List(s, v, q, m))
+          } yield (vs.qualityVerified, vs.macroVerified, status, List(s, v, q, m))
 
           onComplete(fState) {
             case Success((qv, mv, status, infoList)) =>

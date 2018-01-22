@@ -65,7 +65,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, ts)
       lars.foreach(lar => probe.send(hmdaFileValidator, lar))
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(Some(ts), lars.toSeq, Nil, Nil, Nil))
+      probe.expectMsg(HmdaVerificationState(ts = Some(ts), larCount = lars.size))
     }
 
     "persist validation errors" in {
@@ -74,19 +74,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, larErrors)
       probe.send(hmdaFileValidator, tsErrors)
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(
-        Some(ts),
-        lars,
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        qualityVerified = false,
-        Seq(e4),
-        macroVerified = false
-      ))
+      probe.expectMsg(HmdaVerificationState(true, true, false, false, Some(ts), lars.size))
     }
 
     "read parsed data and validate it" in {
@@ -104,108 +92,35 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsgType[ValidationCompletedWithErrors]
 
       probe.send(hmdaFileValidator2, GetState)
-      probe.expectMsg(HmdaFileValidationState(
-        Some(ts),
-        lars,
-        List(),
-        Nil,
-        Nil,
-        List(
-          SyntacticalValidationError("8299422144", "S020", false),
-          SyntacticalValidationError("2185751599", "S010", false),
-          SyntacticalValidationError("2185751599", "S020", false)
-        ),
-        List(
-          ValidityValidationError("4977566612", "V550", false),
-          ValidityValidationError("4977566612", "V555", false),
-          ValidityValidationError("4977566612", "V560", false)
-        ),
-        List(
-          QualityValidationError("8299422144", "Q030", false)
-        ),
-        qualityVerified = false,
-        List(
-          MacroValidationError("Q008"),
-          MacroValidationError("Q010"),
-          MacroValidationError("Q023")
-        ),
-        macroVerified = false
-      ))
+      probe.expectMsg(HmdaVerificationState(true, true, false, false, Some(ts), 4))
     }
 
     "verify quality edits" in {
-
       // establish baseline
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(
-        Some(ts),
-        lars,
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        qualityVerified = false,
-        Vector(e4),
-        macroVerified = false
-      ))
+      val originalState = HmdaVerificationState(true, true, false, false, Some(ts), 4)
+      probe.expectMsg(originalState)
 
       // send VerifyQualityEdits message
       probe.send(hmdaFileValidator, VerifyEdits(Quality, true, submissionManager))
 
       // expect updated validation state
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(
-        Some(ts),
-        lars,
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        qualityVerified = true,
-        Vector(e4),
-        macroVerified = false
-      ))
+      probe.expectMsg(originalState.copy(qualityVerified = true))
     }
 
     "verify macro edits" in {
       // establish baseline
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(
-        Some(ts),
-        lars,
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        qualityVerified = true,
-        Vector(e4),
-        macroVerified = false
-      ))
+      val originalState = HmdaVerificationState(true, true, true, false, Some(ts), 4)
+      probe.expectMsg(originalState)
 
-      // send VerifyQualityEdits message
+      // send VerifyMacroEdits message
       probe.send(hmdaFileValidator, VerifyEdits(Macro, true, submissionManager))
 
       // expect updated validation state
       probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaFileValidationState(
-        Some(ts),
-        lars,
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        Seq(e1),
-        Seq(e2),
-        Seq(e3),
-        qualityVerified = true,
-        Vector(e4),
-        macroVerified = true
-      ))
+      probe.expectMsg(originalState.copy(macroVerified = true))
     }
 
     val tsS987 = SyntacticalValidationError("tsheet", "S987", true)
