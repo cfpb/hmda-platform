@@ -27,10 +27,10 @@ import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents._
 import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
-import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.{ MacroStatsUpdated, SubmittedLarsUpdated }
+import hmda.persistence.messages.events.validation.SubmissionLarStatsEvents.MacroStatsUpdated
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager.GetActorRef
-import hmda.validation.stats.SubmissionLarStats.{ CountSubmittedLarsInSubmission, PersistStatsForMacroEdits }
+import hmda.validation.stats.SubmissionLarStats.PersistStatsForMacroEdits
 import hmda.validation.stats.ValidationStats.AddSubmissionTaxId
 import hmda.validation.stats.SubmissionLarStats
 import HmdaFileWorker._
@@ -168,16 +168,6 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
           case Left(errors) => LarValidationErrors(errors.list.toList)
         }
         .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
-
-    //      larSource.map { lar =>
-    //        self ! lar
-    //        validateLar(lar, ctx).toEither
-    //      }
-    //        .map {
-    //          case Right(_) => // do nothing
-    //          case Left(errors) => LarValidationErrors(errors.list.toList)
-    //        }
-    //        .runWith(Sink.actorRef(self, ValidateMacro(larSource, replyTo)))
 
     case ValidateAggregate(ts) =>
       performAsyncChecks(ts, ctx)
