@@ -8,7 +8,6 @@ import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.util.SourceUtils
 
 import scala.concurrent.Future
-import scala.util.Try
 
 sealed abstract class DispositionType(
     val value: String,
