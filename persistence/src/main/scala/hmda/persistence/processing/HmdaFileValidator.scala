@@ -106,6 +106,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
   val config = ConfigFactory.load()
   val duration = config.getInt("hmda.actor-lookup-timeout")
+  val processingParallelism = config.getInt("hmda.processing.parallelism")
 
   implicit val timeout = Timeout(duration.seconds)
 
@@ -162,7 +163,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         .map(e => e.asInstanceOf[LarParsed].lar)
 
       larSource
-        .via(balancer(validate(ctx, self), 3))
+        .via(balancer(validate(ctx, self), processingParallelism))
         .map {
           case Right(_) => //do nothing
           case Left(errors) => LarValidationErrors(errors.list.toList)
