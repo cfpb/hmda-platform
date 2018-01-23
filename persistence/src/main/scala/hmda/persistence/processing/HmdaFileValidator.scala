@@ -279,13 +279,11 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
     case GetNamedErrorResultsPaginated(editName, page) =>
       val replyTo = sender()
-
-      count(allEdits).map { total =>
+      val allFailures = allEdits.filter(e => e.ruleName == editName)
+      count(allFailures).map { total =>
         val p = PaginatedResource(total)(page)
-        val allFailures = allEdits.filter(e => e.ruleName == editName)
-        val selectedFailuresF = allFailures.take(p.toIndex).drop(p.fromIndex).runWith(Sink.seq)
-
-        selectedFailuresF.map { pageOfFailures =>
+        val pageOfFailuresF = allFailures.take(p.toIndex).drop(p.fromIndex).runWith(Sink.seq)
+        pageOfFailuresF.map { pageOfFailures =>
           replyTo ! PaginatedErrors(pageOfFailures, total)
         }
       }
