@@ -7,6 +7,7 @@ import scala.concurrent.Future
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.api.model._
+import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.util.FITestData._
@@ -14,6 +15,7 @@ import hmda.model.validation._
 import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsDatParser
 import hmda.persistence.messages.CommonMessages.Event
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
 import hmda.validation.engine.lar.LarEngine
 import org.scalatest.{ AsyncWordSpec, MustMatchers }
@@ -25,9 +27,7 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
-  ///// New way /////
-
-  val events: List[Event] = List(
+  val editEvents: List[Event] = List(
     TsSyntacticalError(SyntacticalValidationError("xyz", "S013", true)),
     LarSyntacticalError(SyntacticalValidationError("xyz", "S205", false)),
     LarValidityError(ValidityValidationError("xyz", "V210", false)),
@@ -42,7 +42,7 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
     EditsVerified(Macro, false)
   )
 
-  val eventSource: Source[Event, NotUsed] = Source.fromIterator(() => events.toIterator)
+  val eventSource: Source[Event, NotUsed] = Source.fromIterator(() => editEvents.toIterator)
 
   "Edits Collection" must {
 
@@ -94,11 +94,13 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
     }
   }
 
-  ////// Old way /////
-
   "Validation errors" must {
     val ts: TransmittalSheet = TsDatParser(tsDAT)
-    val badLars: Seq[LoanApplicationRegister] = fiCSVEditErrorsWithMsa.split("\n").tail.map(line => LarCsvParser(line).right.get)
+    val larEvents: Seq[Event] =
+      fiCSVEditErrorsWithMsa.split("\n").tail.map { line =>
+        LarValidated(LarCsvParser(line).right.get, SubmissionId())
+      }
+    val larEventSource: Source[Event, NotUsed] = Source.fromIterator(() => larEvents.toIterator)
 
     val tsErrors = Seq(
       SyntacticalValidationError("1299422144", "S020", true),
@@ -107,18 +109,21 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
 
     "get msa info for Q029" in {
       val errorQ029 = QualityValidationError("8299422144", "Q029", ts = false)
-      val result = validationErrorToResultRow(errorQ029, Some(ts), badLars)
-      val msaField = result.fields.getFields("Metropolitan Statistical Area / Metropolitan Division Name").head.toString
-      msaField mustBe "\"Battle Creek, MI\""
+      val resultF = validationErrorToResultRow(errorQ029, Some(ts), larEventSource)
+      resultF.map { result =>
+        val msaField = result.fields.getFields("Metropolitan Statistical Area / Metropolitan Division Name").head.toString
+        msaField mustBe "\"Battle Creek, MI\""
+      }
     }
 
     "convert edit to EditResultRow" in {
-      val err = tsErrors.head
-      val result = validationErrorToResultRow(err, Some(ts), badLars)
-      result mustBe EditResultRow(
-        RowId("Transmittal Sheet"),
-        JsObject("Agency Code" -> JsNumber(9))
-      )
+      val resultF = validationErrorToResultRow(tsErrors.head, Some(ts), larEventSource)
+      resultF.map { result =>
+        result mustBe EditResultRow(
+          RowId("Transmittal Sheet"),
+          JsObject("Agency Code" -> JsNumber(9))
+        )
+      }
     }
   }
 

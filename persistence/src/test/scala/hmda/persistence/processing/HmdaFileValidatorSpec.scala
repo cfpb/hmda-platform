@@ -27,17 +27,12 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   val submissionId2 = SubmissionId("0", "2017", 2)
 
   val larValidator = system.actorSelection(createSingleLarValidator(system).path)
-
   val hmdaFileParser = createHmdaFileParser(system, submissionId2)
-
   val validationStats = createValidationStats(system)
-
-  var hmdaFileValidator: ActorRef = _
-
   val submissionManager = system.actorOf(SubmissionManager.props(validationStats, submissionId1))
-
   val supervisor = system.actorOf(HmdaSupervisor.props(validationStats))
 
+  var hmdaFileValidator: ActorRef = _
   val probe = TestProbe()
 
   val lines = fiCSVEditErrors.split("\n")

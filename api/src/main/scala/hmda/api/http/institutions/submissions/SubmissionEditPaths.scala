@@ -126,17 +126,20 @@ trait SubmissionEditPaths
       timedGet { uri =>
         completeVerified(supervisor, institutionId, period, seqNr, uri) {
           parameters('page.as[Int] ? 1) { (page: Int) =>
-            val fValidator: Future[ActorRef] = fHmdaFileValidator(supervisor, SubmissionId(institutionId, period, seqNr))
+            val submissionId = SubmissionId(institutionId, period, seqNr)
+            val eventStream = validationEventStream(submissionId)
+            val fValidator: Future[ActorRef] = fHmdaFileValidator(supervisor, submissionId)
+
             val fPaginatedErrors = for {
               va <- fValidator
-              (ts, lars) <- (va ? GetValidatedLines).mapTo[(Option[TransmittalSheet], Seq[LoanApplicationRegister])]
-              p <- (va ? GetNamedErrorResultsPaginated(editName, page)).mapTo[PaginatedErrors]
-            } yield (p, ts, lars)
+              vs <- (va ? GetState).mapTo[HmdaVerificationState]
+              errorCollection <- (va ? GetNamedErrorResultsPaginated(editName, page)).mapTo[PaginatedErrors]
+              rows <- Future.sequence(errorCollection.errors.map(validationErrorToResultRow(_, vs.ts, eventStream)))
+            } yield (rows, errorCollection.totalErrors)
 
             onComplete(fPaginatedErrors) {
-              case Success((errorCollection, ts, lars)) =>
-                val rows: Seq[EditResultRow] = errorCollection.errors.map(validationErrorToResultRow(_, ts, lars))
-                val result = EditResult(editName, rows, uri.path.toString, page, errorCollection.totalErrors)
+              case Success((jsonRows, total)) =>
+                val result = EditResult(editName, jsonRows, uri.path.toString, page, total)
                 complete(ToResponseMarshallable(result))
               case Failure(error) => completeWithInternalError(uri, error)
             }

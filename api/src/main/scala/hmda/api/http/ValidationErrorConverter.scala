@@ -11,14 +11,16 @@ import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
 import hmda.model.validation.{ EmptyValidationError, ValidationError }
 import hmda.persistence.messages.CommonMessages.Event
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
+import hmda.util.SourceUtils
 import spray.json.{ JsNumber, JsObject, JsString, JsValue }
 
 import scala.concurrent.Future
+import scala.util.{ Failure, Success }
 
-trait ValidationErrorConverter {
+trait ValidationErrorConverter extends SourceUtils {
 
-  //// New way
   def editStreamOfType[ec: EC, mat: MAT, as: AS](errType: String, editSource: Source[Event, NotUsed]): Source[ValidationError, NotUsed] = {
     val edits: Source[ValidationError, NotUsed] = errType.toLowerCase match {
       case "syntactical" => editSource.map {
@@ -79,10 +81,10 @@ trait ValidationErrorConverter {
     csvHeaderSource.concat(csvSource)
   }
 
-  ///// Old way
-
-  def validationErrorToResultRow(err: ValidationError, ts: Option[TransmittalSheet], lars: Seq[LoanApplicationRegister]): EditResultRow = {
-    EditResultRow(RowId(err.publicErrorId), relevantFields(err, ts, lars))
+  def validationErrorToResultRow[ec: EC, mat: MAT, as: AS](err: ValidationError, ts: Option[TransmittalSheet], eventSource: Source[Event, NotUsed]): Future[EditResultRow] = {
+    relevantFields(err, ts, validatedLars(eventSource)).map { fields =>
+      EditResultRow(RowId(err.publicErrorId), fields)
+    }
   }
 
   //// Helper methods
@@ -91,25 +93,34 @@ trait ValidationErrorConverter {
     EditMetaDataLookup.forEdit(editName).editDescription
   }
 
-  private def relevantFields(err: ValidationError, ts: Option[TransmittalSheet], lars: Seq[LoanApplicationRegister]): JsObject = {
+  private def relevantFields[ec: EC, mat: MAT, as: AS](err: ValidationError, ts: Option[TransmittalSheet], lars: Source[LoanApplicationRegister, NotUsed]): Future[JsObject] = {
     val fieldNames: Seq[String] = EditMetaDataLookup.forEdit(err.ruleName).fieldNames
 
-    val jsVals: Seq[(String, JsValue)] = fieldNames.map { fieldName =>
-      val row = relevantRow(err, ts, lars)
-      val fieldValue = if (fieldName == "Metropolitan Statistical Area / Metropolitan Division Name") {
-        CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
-      } else {
-        row.valueOf(fieldName)
+    val jsValsF: Future[Seq[(String, JsValue)]] = Future.sequence {
+      fieldNames.map { fieldName =>
+        val rowF = relevantRow(err, ts, lars)
+        rowF.map { row =>
+          val fieldValue = if (fieldName == "Metropolitan Statistical Area / Metropolitan Division Name") {
+            CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
+          } else {
+            row.valueOf(fieldName)
+          }
+          (fieldName, toJsonVal(fieldValue))
+        }
       }
-      (fieldName, toJsonVal(fieldValue))
     }
 
-    JsObject(jsVals: _*)
+    jsValsF.map(jsVals => JsObject(jsVals: _*))
   }
 
-  private def relevantRow(err: ValidationError, ts: Option[TransmittalSheet], lars: Seq[LoanApplicationRegister]): HmdaFileRow = {
-    if (err.ts) ts.getOrElse(HmdaRowError())
-    else lars.find(lar => lar.loan.id == err.errorId).getOrElse(HmdaRowError())
+  private def relevantRow[ec: EC, mat: MAT, as: AS](err: ValidationError, ts: Option[TransmittalSheet], lars: Source[LoanApplicationRegister, NotUsed]): Future[HmdaFileRow] = {
+    if (err.ts) Future(ts.getOrElse(HmdaRowError()))
+    else {
+      collectHeadValue(lars.filter(lar => lar.loan.id == err.errorId).take(1)).map {
+        case Success(lar) => lar
+        case Failure(e) => HmdaRowError()
+      }
+    }
   }
 
   private def toJsonVal(value: Any) = {
@@ -118,6 +129,13 @@ trait ValidationErrorConverter {
       case l: Long => JsNumber(l)
       case s: String => JsString(s)
     }
+  }
+
+  private def validatedLars[ec: EC, mat: MAT, as: AS](eventSource: Source[Event, NotUsed]): Source[LoanApplicationRegister, NotUsed] = {
+    eventSource.map {
+      case LarValidated(lar, _) => lar
+      case _ => LoanApplicationRegister()
+    }.filterNot(_.isEmpty)
   }
 
 }

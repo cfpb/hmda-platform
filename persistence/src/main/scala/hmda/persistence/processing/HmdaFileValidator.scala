@@ -18,6 +18,7 @@ import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionById
 import hmda.persistence.model.HmdaPersistentActor
 import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, CompleteValidation, ValidationCompleted, ValidationCompletedWithErrors }
+import hmda.util.SourceUtils
 import hmda.validation.context.ValidationContext
 import hmda.validation.engine._
 import hmda.validation.engine.lar.LarEngine
@@ -107,7 +108,8 @@ object HmdaFileValidator {
   case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)
 }
 
-class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submissionId: SubmissionId) extends HmdaPersistentActor with TsEngine with LarEngine {
+class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submissionId: SubmissionId)
+    extends HmdaPersistentActor with TsEngine with LarEngine with SourceUtils {
 
   import HmdaFileValidator._
 
@@ -279,18 +281,38 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     /*
     case GetValidatedLines =>
       sender() ! (state.ts, state.lars)
+      */
 
     case GetNamedErrorResultsPaginated(editName, page) =>
-      val allFailures = state.allErrors.filter(e => e.ruleName == editName)
-      val totalSize = allFailures.size
-      val p = PaginatedResource(totalSize)(page)
-      val pageOfFailures = allFailures.slice(p.fromIndex, p.toIndex)
-      sender() ! PaginatedErrors(pageOfFailures, totalSize)
-      */
+      val replyTo = sender()
+
+      count(allEdits).map { total =>
+        val p = PaginatedResource(total)(page)
+        val allFailures = allEdits.filter(e => e.ruleName == editName)
+        val selectedFailuresF = allFailures.take(p.toIndex).drop(p.fromIndex).runWith(Sink.seq)
+
+        selectedFailuresF.map { pageOfFailures =>
+          replyTo ! PaginatedErrors(pageOfFailures, total)
+        }
+      }
 
     case Shutdown =>
       context stop self
 
+  }
+
+  private def allEdits: Source[ValidationError, NotUsed] = {
+    val edits = events(persistenceId).map {
+      case LarSyntacticalError(err) => err
+      case TsSyntacticalError(err) => err
+      case LarValidityError(err) => err
+      case TsValidityError(err) => err
+      case LarQualityError(err) => err
+      case TsQualityError(err) => err
+      case LarMacroError(err) => err
+      case _ => EmptyValidationError
+    }
+    edits.filter(_ != EmptyValidationError)
   }
 
   private def persistErrors(errors: Seq[Event]): Unit = {
