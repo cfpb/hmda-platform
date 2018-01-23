@@ -102,9 +102,8 @@ trait ValidationErrorConverter extends SourceUtils {
         rowF.map { row =>
           val fieldValue = if (fieldName == "Metropolitan Statistical Area / Metropolitan Division Name") {
             CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
-          } else {
-            row.valueOf(fieldName)
-          }
+          } else row.valueOf(fieldName)
+
           (fieldName, toJsonVal(fieldValue))
         }
       }

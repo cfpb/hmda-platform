@@ -8,7 +8,6 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.api.model._
 import hmda.model.fi.SubmissionId
-import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.util.FITestData._
 import hmda.model.validation._

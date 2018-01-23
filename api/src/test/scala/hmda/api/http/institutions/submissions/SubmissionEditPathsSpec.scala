@@ -117,10 +117,9 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
-      //val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
-      val (qualityVerified, macroVerified) = Await.result(fVerificationState, 5.seconds)
-      qualityVerified mustBe false
-      macroVerified mustBe true
+      val state = Await.result(fVerificationState, 5.seconds)
+      state.qualityVerified mustBe false
+      state.macroVerified mustBe true
     }
   }
 
@@ -135,9 +134,9 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
-      val (qualityVerified, macroVerified) = Await.result(fVerificationState, 5.seconds)
-      qualityVerified mustBe true
-      macroVerified mustBe true
+      val state = Await.result(fVerificationState, 5.seconds)
+      state.qualityVerified mustBe true
+      state.macroVerified mustBe true
     }
   }
 
@@ -149,9 +148,9 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       status mustBe StatusCodes.OK
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(false, currentStatus)
 
-      val (qualityVerified, macroVerified) = Await.result(fVerificationState, 5.seconds)
-      qualityVerified mustBe false
-      macroVerified mustBe true
+      val state = Await.result(fVerificationState, 5.seconds)
+      state.qualityVerified mustBe false
+      state.macroVerified mustBe true
     }
   }
 
@@ -257,11 +256,11 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
   }
 
-  private def fVerificationState: Future[(Boolean, Boolean)] = {
+  private def fVerificationState: Future[HmdaVerificationState] = {
     for {
       s <- fHmdaValidatorActor(2)
       xs <- (s ? GetState).mapTo[HmdaVerificationState]
-    } yield (xs.qualityVerified, xs.macroVerified)
+    } yield xs
   }
 
   private def fHmdaValidatorActor(seqNr: Int): Future[ActorRef] = {

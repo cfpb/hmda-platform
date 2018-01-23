@@ -16,15 +16,13 @@ import akka.util.Timeout
 import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
-import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.fi.ts.TransmittalSheet
-import hmda.model.fi.{ Submission, SubmissionId, SubmissionStatus }
+import hmda.model.fi.{ SubmissionId, SubmissionStatus }
 import hmda.model.validation.{ Macro, Quality, ValidationErrorType }
 import hmda.persistence.messages.CommonMessages.{ Event, GetState }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
-import hmda.persistence.institutions.SubmissionPersistence.{ GetSubmissionById, GetSubmissionStatus }
+import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionStatus
 import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
 import hmda.persistence.processing.HmdaFileValidator._
 
