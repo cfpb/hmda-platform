@@ -57,21 +57,6 @@ object HmdaFileValidator {
     system.actorOf(HmdaFileValidator.props(supervisor, validationStats, id).withDispatcher("persistence-dispatcher"))
   }
 
-  // Legacy Model
-  case class HmdaFileValidationState(
-    ts: Option[TransmittalSheet] = None,
-    lars: Seq[LoanApplicationRegister] = Nil,
-    tsSyntactical: Seq[ValidationError] = Nil,
-    tsValidity: Seq[ValidationError] = Nil,
-    tsQuality: Seq[ValidationError] = Nil,
-    larSyntactical: Seq[ValidationError] = Nil,
-    larValidity: Seq[ValidationError] = Nil,
-    larQuality: Seq[ValidationError] = Nil,
-    qualityVerified: Boolean = false,
-    larMacro: Seq[ValidationError] = Vector.empty[ValidationError],
-    macroVerified: Boolean = false
-  )
-
   case class HmdaVerificationState(
       containsSVEdits: Boolean = false,
       containsQMEdits: Boolean = false,
