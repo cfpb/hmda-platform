@@ -179,14 +179,6 @@ trait SubmissionEditPaths
   private def fHmdaFileValidator(supervisor: ActorRef, submissionId: SubmissionId): Future[ActorRef] =
     (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
 
-  private def getValidationState(supervisor: ActorRef, institutionId: String, period: String, seqNr: Int)(implicit ec: ExecutionContext): Future[HmdaFileValidationState] = {
-    val fValidator = fHmdaFileValidator(supervisor, SubmissionId(institutionId, period, seqNr))
-    for {
-      s <- fValidator
-      xs <- (s ? GetState).mapTo[HmdaFileValidationState]
-    } yield xs
-  }
-
   private def validationEventStream(submissionId: SubmissionId): Source[Event, NotUsed] = {
     val persistenceId = s"${HmdaFileValidator.name}-$submissionId"
     events(persistenceId)
