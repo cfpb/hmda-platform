@@ -3,6 +3,7 @@ package hmda.publication.reports.disclosure
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.institution.Institution
 import hmda.model.publication.reports.ValueDisposition
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.model.publication.reports.GenderEnum._
@@ -87,14 +88,13 @@ trait D4X {
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    respondentId: String,
-    institutionNameF: Future[String]
+    institution: Institution
   ): Future[JsValue] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
     val lars = larSource
-      .filter(lar => lar.respondentId == respondentId)
+      .filter(lar => lar.respondentId == institution.respondentId)
       .filter(lar => lar.geography.msa != "NA")
       .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
@@ -108,7 +108,6 @@ trait D4X {
     val yearF = calculateYear(larSource)
 
     for {
-      institutionName <- institutionNameF
       year <- yearF
 
       e1 <- dispositionsOutput(filterEthnicity(lars, HispanicOrLatino))
@@ -153,8 +152,8 @@ trait D4X {
     } yield {
       s"""
          |{
-         |    "respondentId": "$respondentId",
-         |    "institutionName": "$institutionName",
+         |    "respondentId": "${institution.respondentId}",
+         |    "institutionName": "${institution.respondent.name}",
          |    "table": "${metaData.reportTable}",
          |    "type": "Disclosure",
          |    "description": "${metaData.description}",
