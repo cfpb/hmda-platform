@@ -1,7 +1,7 @@
 {
   "id": "/hmda2",
   "instances": 3,
-  "cpus": 0.1,
+  "cpus": 1,
   "mem": 1024,
   "ports": [
     19999
@@ -79,6 +79,10 @@
       "path": "/cluster/members"
     }
   ],
+  "labels": {
+    "HAPROXY_GROUP": "external",
+    "HAPROXY_0_VHOST": "marathon-lb.marathon.mesos"
+  },
   "readinessChecks": [],
   "dependencies": [],
   "upgradeStrategy": {
@@ -93,6 +97,7 @@
   "requirePorts": true,
   "env": {
     "SERVICE_NAME": "hmda2.marathon.mesos",
-    "HMDA_RUNTIME_MODE": "prod"
+    "HMDA_RUNTIME_MODE": "prod",
+    "JAVA_OPTS": "-Xms512m -Xmx1024m"
   }
 }
