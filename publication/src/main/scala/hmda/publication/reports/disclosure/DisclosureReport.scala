@@ -1,18 +1,23 @@
 package hmda.publication.reports.disclosure
 
-import hmda.model.publication.reports.{ MSAReport, ReportTypeEnum }
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.institution.Institution
+import hmda.model.publication.reports.ReportTypeEnum
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
+import hmda.publication.reports._
+import spray.json.JsValue
+
+import scala.concurrent.Future
 
 trait DisclosureReport {
 
-  val respondentId: String
-  val institutionName: String
-  val description: String
-  val table: String
-  val year: Int
-  val msa: MSAReport
-  val reportDate: String
-
   val reportType: ReportTypeEnum = Disclosure
+
+  def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed],
+               fipsCode: Int,
+               institution: Institution
+              ): Future[JsValue]
 
 }

@@ -3,11 +3,12 @@ package hmda.publication.reports.disclosure
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.institution.Institution
 import hmda.publication.reports._
 
 import scala.concurrent.Future
 
-object D52 {
+object D52 extends DisclosureReport {
 
   def filters(lar: LoanApplicationRegister): Boolean = {
     (lar.loan.loanType == 1) &&
@@ -18,10 +19,9 @@ object D52 {
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    respondentId: String,
-    institutionNameF: Future[String]
+    institution: Institution
   ): Future[D5X] = {
 
-    D5X.generateD5X("D52", filters, larSource, fipsCode, respondentId, institutionNameF)
+    D5X.generateD5X("D52", filters, larSource, fipsCode, institution)
   }
 }

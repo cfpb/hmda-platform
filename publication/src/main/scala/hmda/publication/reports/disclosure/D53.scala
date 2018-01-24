@@ -8,7 +8,7 @@ import hmda.publication.reports._
 
 import scala.concurrent.Future
 
-object D53 {
+object D53 extends DisclosureReport {
 
   def filters(lar: LoanApplicationRegister): Boolean = {
     (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&

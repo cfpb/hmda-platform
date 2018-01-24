@@ -3,6 +3,7 @@ package hmda.publication.reports.disclosure
 import akka.NotUsed
 import akka.stream.scaladsl.{ Sink, Source }
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.institution.Institution
 import hmda.publication.reports._
 import hmda.publication.reports.util.PricingDataUtil.{ calculateMedian, pricingDataReported, rateSpread }
 import hmda.publication.reports.util.ReportUtil._
@@ -18,7 +19,7 @@ object DiscB extends DisclosureB {
   }
 }
 
-trait DisclosureB {
+trait DisclosureB extends DisclosureReport {
   val reportId: String
   def filters(lar: LoanApplicationRegister): Boolean
 
@@ -27,14 +28,13 @@ trait DisclosureB {
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    respondentId: String,
-    institutionNameF: Future[String]
+    institution: Institution
   ): Future[JsValue] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
     val lars = larSource
-      .filter(lar => lar.respondentId == respondentId)
+      .filter(lar => lar.respondentId == institution.respondentId)
       .filter(lar => lar.geography.msa != "NA")
       .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
@@ -61,13 +61,12 @@ trait DisclosureB {
       manufacturedM1 <- purposes(manufactured, rateSpreadMean)
       manufacturedM2 <- purposes(manufactured, rateSpreadMedian)
 
-      institutionName <- institutionNameF
       year <- yearF
     } yield {
       s"""
        |{
-       |    "respondentId": "$respondentId",
-       |    "institutionName": "$institutionName",
+       |    "respondentId": "${institution.respondentId}",
+       |    "institutionName": "${institution.respondent.name}",
        |    "table": "${metaData.reportTable}",
        |    "type": "Disclosure",
        |    "description": "${metaData.description}",

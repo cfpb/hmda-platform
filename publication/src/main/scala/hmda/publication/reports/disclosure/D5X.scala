@@ -21,7 +21,7 @@ case class D5X(
   table: String,
   description: String,
   reportDate: String = formattedCurrentDate
-) extends DisclosureReport
+)
 
 object D5X {
   def generateD5X[ec: EC, mat: MAT, as: AS](

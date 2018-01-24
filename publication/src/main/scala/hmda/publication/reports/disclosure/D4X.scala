@@ -78,7 +78,7 @@ object D47 extends D4X {
   }
 }
 
-trait D4X {
+trait D4X extends DisclosureReport {
   val reportId: String
   def filters(lar: LoanApplicationRegister): Boolean
 

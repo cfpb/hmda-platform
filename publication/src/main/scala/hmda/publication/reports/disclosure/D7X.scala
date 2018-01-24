@@ -4,6 +4,7 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model.{ Tract, TractLookup }
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.institution.Institution
 import hmda.model.publication.reports.ValueDisposition
 import hmda.publication.reports._
 import hmda.publication.reports.util.CensusTractUtil._
@@ -77,7 +78,7 @@ object D77 extends D7X {
   }
 }
 
-trait D7X {
+trait D7X extends DisclosureReport {
   val reportId: String
   def filters(lar: LoanApplicationRegister): Boolean
 
@@ -87,14 +88,13 @@ trait D7X {
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    respondentId: String,
-    institutionNameF: Future[String]
+    institution: Institution
   ): Future[JsValue] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
     val lars = larSource
-      .filter(lar => lar.respondentId == respondentId)
+      .filter(lar => lar.respondentId == institution.respondentId)
       .filter(lar => lar.geography.msa != "NA")
       .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
@@ -111,7 +111,6 @@ trait D7X {
     val upperIncomeLars = filterIncomeCharacteristics(lars, 120, 1000, msaTracts)
 
     for {
-      institutionName <- institutionNameF
       year <- yearF
 
       tractMinorityComposition1 <- dispositionsOutput(filterMinorityPopulation(lars, 0, 10, msaTracts))
@@ -157,8 +156,8 @@ trait D7X {
     } yield {
       s"""
          |{
-         |    "respondentId": "$respondentId",
-         |    "institutionName": "$institutionName",
+         |    "respondentId": "${institution.respondentId}",
+         |    "institutionName": "${institution.respondent.name}",
          |    "table": "${metaData.reportTable}",
          |    "type": "Disclosure",
          |    "description": "${metaData.description}",
