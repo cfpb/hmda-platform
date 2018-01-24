@@ -57,14 +57,14 @@ object HmdaPlatform extends App {
   }
 
   //Start Persistence
-  //system.actorOf(HmdaPersistence.props, HmdaPersistence.name)
+  system.actorOf(HmdaPersistence.props, HmdaPersistence.name)
 
   //Start Query
-  //system.actorOf(HmdaQuery.props, HmdaQuery.name)
+  system.actorOf(HmdaQuery.props, HmdaQuery.name)
 
   //Start Validation
-  //system.actorOf(HmdaValidation.props, HmdaValidation.name)
+  system.actorOf(HmdaValidation.props, HmdaValidation.name)
 
   //Start API
-  //system.actorOf(HmdaApi.props, HmdaApi.name)
+  system.actorOf(HmdaApi.props, HmdaApi.name)
 }
