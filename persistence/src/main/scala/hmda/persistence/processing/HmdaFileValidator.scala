@@ -275,7 +275,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
     case GetNamedErrorResultsPaginated(editName, page) =>
       val replyTo = sender()
-      val allFailures = allEdits.filter(e => e.ruleName == editName)
+      val allFailures = allEditsByName(editName)
       count(allFailures).map { total =>
         val p = PaginatedResource(total)(page)
         val pageOfFailuresF = allFailures.take(p.toIndex).drop(p.fromIndex).runWith(Sink.seq)
@@ -289,15 +289,15 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
   }
 
-  private def allEdits: Source[ValidationError, NotUsed] = {
+  private def allEditsByName(name: String): Source[ValidationError, NotUsed] = {
     val edits = events(persistenceId).map {
-      case LarSyntacticalError(err) => err
-      case TsSyntacticalError(err) => err
-      case LarValidityError(err) => err
-      case TsValidityError(err) => err
-      case LarQualityError(err) => err
-      case TsQualityError(err) => err
-      case LarMacroError(err) => err
+      case LarSyntacticalError(err) if err.ruleName == name => err
+      case TsSyntacticalError(err) if err.ruleName == name => err
+      case LarValidityError(err) if err.ruleName == name => err
+      case TsValidityError(err) if err.ruleName == name => err
+      case LarQualityError(err) if err.ruleName == name => err
+      case TsQualityError(err) if err.ruleName == name => err
+      case LarMacroError(err) if err.ruleName == name => err
       case _ => EmptyValidationError
     }
     edits.filter(_ != EmptyValidationError)
