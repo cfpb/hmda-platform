@@ -29,6 +29,7 @@ import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import hmda.validation.messages.ValidationStatsMessages.FindIrsStats
 import hmda.validation.stats.SubmissionLarStats
 import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
+import hmda.persistence.institutions.InstitutionPersistence
 import hmda.persistence.messages.commands.disclosure.DisclosureCommands.GenerateDisclosureReports
 
 import scala.concurrent.Future
@@ -70,13 +71,17 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
   val awsSettings = new S3Settings(MemoryBufferType, None, awsCredentials, region, false)
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
-  val reports = List(
+  /*val reports = List(
     D41, D42, D43, D44, D45, D46, D47,
     D51, D52, D53,
     D71, D72, D73, D74, D75, D76, D77,
     D81, D82, D83, D84, D85, D86, D87,
     D11_1, D11_2, D11_3, D11_4, D11_5, D11_6, D11_7, D11_8, D11_9, D11_10,
     DiscB
+  )*/
+
+  val reports = List(
+    D41, D42, D43, D44, D45, D46, D47
   )
 
   override def receive: Receive = {
@@ -95,8 +100,6 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
   }
 
   private def generateReports(submissionId: SubmissionId): Future[Unit] = {
-    val larSource = readData(1000)
-
     val futures = for {
       i <- getInstitution(submissionId.institutionId).mapTo[Institution]
       irs <- getMSAFromIRS(submissionId)
@@ -108,7 +111,7 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
 
       val reportFlow: Flow[Int, DisclosureReportPayload, NotUsed] =
         Flow[Int]
-          .mapAsync(4)(msa => generateIndividualReports(larSource, msa, institution))
+          .mapAsync(1)(msa => generateIndividualReports(msa, institution))
           .mapConcat(identity)
 
       val s3Flow: Flow[DisclosureReportPayload, CompletionStage[MultipartUploadResult], NotUsed] =
@@ -119,35 +122,47 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
               .runWith(s3Client.multipartUpload(bucket, filePath))
           })
 
-      Source(msaList).via(reportFlow).runWith(Sink.foreach(println))
+      Source(msaList).via(reportFlow).via(s3Flow).runWith(Sink.foreach(println))
     })
   }
 
   private def generateIndividualReports(
-    larSource: Source[LoanApplicationRegister, NotUsed],
     msa: Int,
     institution: Institution
   ): Future[List[DisclosureReportPayload]] = {
-    Future.sequence(reports.map(report =>
-      report.generate(larSource, msa, institution)))
+    log.info(s"Generating reports for ${institution.respondent.name} in the MSA $msa")
+    Future.sequence(reports.map(report => {
+      val larSource = readData(1000)
+      report.generate(larSource, msa, institution)
+    }))
+    /*var fSerialize: Future[List[DisclosureReportPayload]] = Future[List[DisclosureReportPayload]]{()}
+    reports.foreach(report => {
+      val larSource = readData(1000)
+      fSerialize = fSerialize.flatMap{_ => report.generate(larSource, msa, institution})
+    })
+    fSerialize*/
   }
 
   private def getInstitution(institutionId: String): Future[Institution] = {
-    val supervisor = system.actorSelection("/user/supervisor")
-    val fInstitutionsActor = (supervisor ? FindActorByName("institutions")).mapTo[ActorRef]
+    val supervisor = system.actorSelection("/user/supervisor/singleton")
+    val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
     for {
       a <- fInstitutionsActor
       i <- (a ? GetInstitutionById(institutionId)).mapTo[Option[Institution]]
-    } yield i.getOrElse(Institution.empty)
+    } yield {
+      i.getOrElse(Institution.empty)
+    }
   }
 
   private def getMSAFromIRS(submissionId: SubmissionId): Future[Seq[Int]] = {
-    val supervisor = system.actorSelection("/user/supervisor")
+    val supervisor = system.actorSelection("/user/supervisor/singleton")
     for {
       manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
       larStats <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
       stats <- (larStats ? FindIrsStats(submissionId)).mapTo[Seq[Msa]]
-    } yield stats.map(m => m.id.toInt)
+    } yield {
+      stats.filter(m => m.id != "NA").map(m => m.id.toInt)
+    }
   }
 
 }

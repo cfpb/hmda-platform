@@ -161,7 +161,7 @@ object HmdaPlatform extends App {
     system.actorOf(RegulatorTsPublisher.props().withDispatcher("publication-dispatcher"), "regulator-ts-publisher")
     system.actorOf(RegulatorLarPublisher.props().withDispatcher("publication-dispatcher"), "regulator-lar-publisher")
     system.actorOf(RegulatorPanelPublisher.props().withDispatcher("publication-dispatcher"), "regulator-panel-publisher")
-    system.actorOf(DisclosureReportPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"))
+    system.actorOf(DisclosureReportPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"), "disclosure-report-publisher")
   }
 
   //Load demo data

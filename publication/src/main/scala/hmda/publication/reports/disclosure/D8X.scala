@@ -278,7 +278,7 @@ trait D8X extends DisclosureReport {
          |
        """.stripMargin
 
-      DisclosureReportPayload(metaData.reportTable, msa, report)
+      DisclosureReportPayload(metaData.reportTable, fipsCode.toString, report)
     }
   }
 
