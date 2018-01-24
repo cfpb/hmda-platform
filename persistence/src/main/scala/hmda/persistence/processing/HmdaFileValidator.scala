@@ -49,6 +49,8 @@ object HmdaFileValidator {
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
 
   case class GetNamedErrorResultsPaginated(editName: String, page: Int) extends Command
+  case object GetSVState extends Command
+  case object GetQMState extends Command
   case object GetValidatedLines extends Command
 
   def props(supervisor: ActorRef, validationStats: ActorRef, id: SubmissionId): Props = Props(new HmdaFileValidator(supervisor, validationStats, id))
@@ -57,47 +59,46 @@ object HmdaFileValidator {
     system.actorOf(HmdaFileValidator.props(supervisor, validationStats, id).withDispatcher("persistence-dispatcher"))
   }
 
-  case class HmdaVerificationState(
+  case class SVState(
       syntacticalEdits: Set[String] = Set(),
-      validityEdits: Set[String] = Set(),
+      validityEdits: Set[String] = Set()
+  ) {
+    def updated(event: Event): SVState = event match {
+      case TsSyntacticalError(e) => this.copy(syntacticalEdits = syntacticalEdits + e.ruleName)
+      case LarSyntacticalError(e) => this.copy(syntacticalEdits = syntacticalEdits + e.ruleName)
+      case TsValidityError(e) => this.copy(validityEdits = validityEdits + e.ruleName)
+      case LarValidityError(e) => this.copy(validityEdits = validityEdits + e.ruleName)
+    }
+    def containsSVEdits = syntacticalEdits.nonEmpty || validityEdits.nonEmpty
+  }
+
+  case class QMState(
       qualityEdits: Set[String] = Set(),
-      macroEdits: Set[String] = Set(),
-      containsSVEdits: Boolean = false,
-      containsQMEdits: Boolean = false,
+      macroEdits: Set[String] = Set()
+  ) {
+    def updated(event: Event): QMState = event match {
+      case TsQualityError(e) => this.copy(qualityEdits = qualityEdits + e.ruleName)
+      case LarQualityError(e) => this.copy(qualityEdits = qualityEdits + e.ruleName)
+      case LarMacroError(e) => this.copy(macroEdits = macroEdits + e.ruleName)
+    }
+    def containsQMEdits = qualityEdits.nonEmpty || macroEdits.nonEmpty
+  }
+
+  case class HmdaVerificationState(
       qualityVerified: Boolean = false,
       macroVerified: Boolean = false,
       ts: Option[TransmittalSheet] = None,
       larCount: Int = 0
   ) {
     def updated(event: Event): HmdaVerificationState = event match {
-
       case EditsVerified(editType, v) =>
         if (editType == Quality) this.copy(qualityVerified = v)
         else if (editType == Macro) this.copy(macroVerified = v)
         else this
-
-      case TsSyntacticalError(e) =>
-        this.copy(containsSVEdits = true, syntacticalEdits = syntacticalEdits + e.ruleName)
-      case LarSyntacticalError(e) =>
-        this.copy(containsSVEdits = true, syntacticalEdits = syntacticalEdits + e.ruleName)
-      case TsValidityError(e) =>
-        this.copy(containsSVEdits = true, validityEdits = validityEdits + e.ruleName)
-      case LarValidityError(e) =>
-        this.copy(containsSVEdits = true, validityEdits = validityEdits + e.ruleName)
-
-      case TsQualityError(e) =>
-        this.copy(containsQMEdits = true, qualityEdits = qualityEdits + e.ruleName)
-      case LarQualityError(e) =>
-        this.copy(containsQMEdits = true, qualityEdits = qualityEdits + e.ruleName)
-      case LarMacroError(e) =>
-        this.copy(containsQMEdits = true, macroEdits = macroEdits + e.ruleName)
-
       case LarValidated(_, _) => this.copy(larCount = larCount + 1)
       case TsValidated(tSheet) => this.copy(ts = Some(tSheet))
     }
-
     def bothVerified: Boolean = qualityVerified && macroVerified
-    def readyToSign: Boolean = !containsSVEdits && (!containsQMEdits || bothVerified)
   }
 
   case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)
@@ -124,7 +125,9 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     } yield institution = i
   }
 
-  var state = HmdaVerificationState()
+  var verificationState = HmdaVerificationState()
+  var svState = SVState()
+  var qmState = QMState()
 
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
   def statRef = for {
@@ -133,7 +136,20 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   } yield stat
 
   override def updateState(event: Event): Unit = {
-    state = state.updated(event)
+    event match {
+      case event: TsSyntacticalError => svState = svState.updated(event)
+      case event: LarSyntacticalError => svState = svState.updated(event)
+      case event: TsValidityError => svState = svState.updated(event)
+      case event: LarValidityError => svState = svState.updated(event)
+
+      case event: TsQualityError => qmState = qmState.updated(event)
+      case event: LarQualityError => qmState = qmState.updated(event)
+      case event: LarMacroError => qmState = qmState.updated(event)
+
+      case event: EditsVerified => verificationState = verificationState.updated(event)
+      case event: TsValidated => verificationState = verificationState.updated(event)
+      case event: LarValidated => verificationState = verificationState.updated(event)
+    }
   }
 
   override def persistenceId: String = s"$name-$submissionId"
@@ -253,7 +269,8 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       self ! CompleteValidation(replyTo)
 
     case CompleteValidation(replyTo, originalSender) =>
-      if (state.readyToSign) {
+      val readyToSign = !svState.containsSVEdits && (!qmState.containsQMEdits || verificationState.bothVerified)
+      if (readyToSign) {
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(originalSender)
       } else {
@@ -270,8 +287,9 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
         }
       } else client ! None
 
-    case GetState =>
-      sender() ! state
+    case GetState => sender() ! verificationState
+    case GetSVState => sender() ! svState
+    case GetQMState => sender() ! qmState
 
     case GetNamedErrorResultsPaginated(editName, page) =>
       val replyTo = sender()

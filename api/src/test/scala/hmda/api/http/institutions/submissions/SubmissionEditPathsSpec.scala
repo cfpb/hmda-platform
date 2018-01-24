@@ -14,7 +14,7 @@ import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.HmdaVerificationState
+import hmda.persistence.processing.HmdaFileValidator.{ GetSVState, HmdaVerificationState, SVState }
 import hmda.validation.engine._
 import spray.json.{ JsNumber, JsObject }
 
@@ -99,10 +99,11 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       val fState = for {
         s <- fHmdaValidatorActor(2)
         xs <- (s ? GetState).mapTo[HmdaVerificationState]
-      } yield xs
-      val state: HmdaVerificationState = Await.result(fState, 5.seconds)
+        svState <- (s ? GetSVState).mapTo[SVState]
+      } yield (xs, svState.containsSVEdits)
+      val (state: HmdaVerificationState, containsSVEdits: Boolean) = Await.result(fState, 5.seconds)
 
-      state.containsSVEdits mustBe false
+      containsSVEdits mustBe false
       state.macroVerified mustBe false
       state.qualityVerified mustBe false
     }
