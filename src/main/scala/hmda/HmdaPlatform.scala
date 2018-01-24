@@ -1,5 +1,7 @@
 package hmda
 
+import java.io.File
+
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
 import akka.management.AkkaManagement
@@ -35,22 +37,10 @@ object HmdaPlatform extends App {
 
   val runtimeMode = config.getString("hmda.runtime.mode")
 
+  log.info(s"HMDA_RUNTIME_MODE: $runtimeMode")
+
   val clusterConfig = if (runtimeMode == "dev") {
-    ConfigFactory
-      .parseString("""
-          |akka {
-          |  remote {
-          |    netty.tcp {
-          |      hostname = 127.0.0.1
-          |      port = 2551
-          |    }
-          |  }
-          |  cluster {
-          |    seed-nodes = ["akka.tcp://hmda2@127.0.0.1:2551"]
-          |  }
-          |}
-        """.stripMargin)
-      .withFallback(config)
+    ConfigFactory.parseResources("application-dev.conf").resolve()
   } else {
     config
   }
@@ -61,9 +51,8 @@ object HmdaPlatform extends App {
   implicit val mat = ActorMaterializer()
   implicit val cluster = Cluster(system)
 
-  AkkaManagement(system).start()
-
   if (runtimeMode == "prod") {
+    AkkaManagement(system).start()
     ClusterBootstrap(system).start()
   }
 
