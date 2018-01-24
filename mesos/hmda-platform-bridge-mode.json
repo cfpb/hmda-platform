@@ -1,6 +1,6 @@
 {
   "id": "/hmda2",
-  "instances": 2,
+  "instances": 3,
   "cpus": 0.1,
   "mem": 1024,
   "ports": [
@@ -57,7 +57,28 @@
       "forcePullImage": true
     }
   },
-  "healthChecks": [],
+  "healthChecks": [
+    {
+      "portIndex": 0,
+      "path": "/",
+      "protocol": "HTTP"
+    },
+    {
+      "portIndex": 1,
+      "path": "/",
+      "protocol": "HTTP"
+    },
+    {
+      "portIndex": 2,
+      "protocol": "HTTP",
+      "path": "/"
+    },
+    {
+      "portIndex": 3,
+      "protocol": "HTTP",
+      "path": "/cluster/members"
+    }
+  ],
   "readinessChecks": [],
   "dependencies": [],
   "upgradeStrategy": {
