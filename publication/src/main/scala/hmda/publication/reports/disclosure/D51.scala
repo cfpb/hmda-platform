@@ -20,7 +20,7 @@ object D51 extends DisclosureReport {
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
     institution: Institution
-  ): Future[String] = {
+  ): Future[DisclosureReportPayload] = {
 
     D5X.generateD5X("D51", filters, larSource, fipsCode, institution)
   }

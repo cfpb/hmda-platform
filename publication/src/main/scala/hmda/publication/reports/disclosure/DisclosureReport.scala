@@ -14,9 +14,10 @@ trait DisclosureReport {
 
   val reportType: ReportTypeEnum = Disclosure
 
-  def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed],
-               fipsCode: Int,
-               institution: Institution
-              ): Future[DisclosureReportPayload]
+  def generate[ec: EC, mat: MAT, as: AS](
+    larSource: Source[LoanApplicationRegister, NotUsed],
+    fipsCode: Int,
+    institution: Institution
+  ): Future[DisclosureReportPayload]
 
 }

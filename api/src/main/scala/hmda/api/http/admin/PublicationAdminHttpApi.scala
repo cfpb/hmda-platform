@@ -1,7 +1,5 @@
 package hmda.api.http.admin
 
-import java.time.LocalDate
-
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -12,17 +10,11 @@ import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
-import hmda.api.model.admin.AdminAporRequests.{ CreateAporRequest, ModifyAporRequest }
-import hmda.api.protocol.admin.AdminAporProtocol._
 import hmda.api.protocol.processing.ApiErrorProtocol
-import hmda.model.apor.{ APOR, FixedRate, VariableRate }
-import hmda.persistence.HmdaSupervisor.FindAPORPersistence
-import hmda.persistence.apor.HmdaAPORPersistence
-import hmda.persistence.messages.commands.apor.APORCommands.{ CreateApor, FindApor, ModifyApor }
-import hmda.persistence.messages.events.apor.APOREvents.{ AporCreated, AporModified }
+import hmda.model.fi.SubmissionId
+import hmda.persistence.messages.commands.disclosure.DisclosureCommands.GenerateDisclosureReports
 
-import scala.concurrent.Future
-import scala.util.{ Failure, Success, Try }
+import scala.util.{ Failure, Success }
 
 trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol {
 
@@ -33,52 +25,29 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
   val log: LoggingAdapter
 
   def disclosureGenerationPath(supervisor: ActorRef) =
-    path("disclosure" / Segment) { (institutionId) =>
-      val fAporPersistence = (supervisor ? FindAPORPersistence(HmdaAPORPersistence.name)).mapTo[ActorRef]
+    path("disclosure" / Segment / IntNumber / IntNumber) { (instId, year, subId) =>
       extractExecutionContext { executor =>
         implicit val ec = executor
         timedPost { uri =>
-          entity(as[CreateAporRequest]) { createApor =>
-            val newApor = createApor.newApor
-            val rateType = createApor.rateType
+          val actorRef = system.actorSelection("user/publication-dispatcher").resolveOne()
+          val submissionId = SubmissionId(instId, year.toString, subId)
 
-            val fCreated: Future[AporCreated] = for {
-              a <- fAporPersistence
-              c <- (a ? CreateApor(newApor, rateType)).mapTo[AporCreated]
-            } yield c
+          val message = for {
+            a <- actorRef
+            c <- a ? GenerateDisclosureReports(submissionId)
+          } yield c
 
-            onComplete(fCreated) {
-              case Success(created) =>
-                complete(ToResponseMarshallable(StatusCodes.Created -> created))
+          onComplete(message) {
+            case Success(created) =>
+              complete(ToResponseMarshallable(StatusCodes.OK))
 
-              case Failure(error) =>
-                completeWithInternalError(uri, error)
-            }
+            case Failure(error) =>
+              completeWithInternalError(uri, error)
           }
-        } ~
-          timedPut { uri =>
-            entity(as[ModifyAporRequest]) { modifyApor =>
-              val newApor = modifyApor.newApor
-              val rateType = modifyApor.rateType
-
-              val fModified: Future[Option[AporModified]] = for {
-                a <- fAporPersistence
-                m <- (a ? ModifyApor(newApor, rateType)).mapTo[Option[AporModified]]
-              } yield m
-
-              onComplete(fModified) {
-                case Success(Some(modified)) =>
-                  complete(ToResponseMarshallable(StatusCodes.Accepted -> modified))
-                case Success(None) =>
-                  complete(ToResponseMarshallable(StatusCodes.NotFound))
-                case Failure(error) =>
-                  completeWithInternalError(uri, error)
-              }
-            }
-          }
+        }
       }
     }
 
-  def aporRoutes(supervisor: ActorRef) = aporWritePath(supervisor) ~ aporReadPath(supervisor)
+  def publicationRoutes(supervisor: ActorRef) = disclosureGenerationPath(supervisor)
 
 }

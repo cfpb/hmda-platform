@@ -2,7 +2,7 @@ package hmda.publication.reports.disclosure
 
 import java.util.concurrent.CompletionStage
 
-import akka.{ Done, NotUsed }
+import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
@@ -19,35 +19,28 @@ import hmda.model.fi.SubmissionId
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
-import hmda.persistence.messages.CommonMessages.Command
 import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionById
-import hmda.persistence.events.pubsub.SubmissionSignedPubSub
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SubmissionManager.GetActorRef
 import hmda.persistence.processing.{ PubSubTopics, SubmissionManager }
-import hmda.publication.regulator.lar.ModifiedLarPublisher
-import hmda.publication.reports.disclosure.DisclosureReportPublisher.GenerateDisclosureReports
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import hmda.validation.messages.ValidationStatsMessages.FindIrsStats
 import hmda.validation.stats.SubmissionLarStats
 import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
+import hmda.persistence.messages.commands.disclosure.DisclosureCommands.GenerateDisclosureReports
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import spray.json._
 
 object DisclosureReportPublisher {
-
-  case class GenerateDisclosureReports(submissionId: SubmissionId) extends Command
-
   val name = "SubmissionSignedDisclosureReportSubscriber"
-  def props(supervisor: ActorRef): Props = Props(new ModifiedLarPublisher(supervisor))
+  def props(supervisor: ActorRef): Props = Props(new DisclosureReportPublisher(supervisor))
 }
 
-
-class DisclosureReportPublisher(val sys: ActorSystem, val mat: ActorMaterializer) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
+class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   val decider: Decider = { e =>
     repositoryLog.error("Unhandled error in stream", e)
@@ -83,7 +76,8 @@ class DisclosureReportPublisher(val sys: ActorSystem, val mat: ActorMaterializer
     D71, D72, D73, D74, D75, D76, D77,
     D81, D82, D83, D84, D85, D86, D87,
     D11_1, D11_2, D11_3, D11_4, D11_5, D11_6, D11_7, D11_8, D11_9, D11_10,
-    DiscB)
+    DiscB
+  )
 
   override def receive: Receive = {
 
@@ -125,16 +119,17 @@ class DisclosureReportPublisher(val sys: ActorSystem, val mat: ActorMaterializer
               .runWith(s3Client.multipartUpload(bucket, filePath))
           })
 
-      Source(msaList).via(reportFlow).via(s3Flow).runWith(Sink.ignore)
+      Source(msaList).via(reportFlow).runWith(Sink.foreach(println))
     })
   }
 
-  private def generateIndividualReports(larSource: Source[LoanApplicationRegister, NotUsed],
-                                        msa: Int,
-                                        institution: Institution): Future[List[DisclosureReportPayload]] = {
+  private def generateIndividualReports(
+    larSource: Source[LoanApplicationRegister, NotUsed],
+    msa: Int,
+    institution: Institution
+  ): Future[List[DisclosureReportPayload]] = {
     Future.sequence(reports.map(report =>
-      report.generate(larSource, msa, institution)
-    ))
+      report.generate(larSource, msa, institution)))
   }
 
   private def getInstitution(institutionId: String): Future[Institution] = {
