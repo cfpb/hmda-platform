@@ -29,7 +29,7 @@ trait DisclosureB extends DisclosureReport {
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
     institution: Institution
-  ): Future[JsValue] = {
+  ): Future[DisclosureReportPayload] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
@@ -63,7 +63,7 @@ trait DisclosureB extends DisclosureReport {
 
       year <- yearF
     } yield {
-      s"""
+      val report = s"""
        |{
        |    "respondentId": "${institution.respondentId}",
        |    "institutionName": "${institution.respondent.name}",
@@ -147,7 +147,9 @@ trait DisclosureB extends DisclosureReport {
        |    ]
        |}
        |
-     """.stripMargin.parseJson
+     """.stripMargin
+
+      DisclosureReportPayload(metaData.reportTable, msa, report)
     }
   }
 

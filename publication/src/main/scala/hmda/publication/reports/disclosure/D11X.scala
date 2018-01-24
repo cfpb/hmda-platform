@@ -21,7 +21,6 @@ import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
-import spray.json._
 
 object D11_1 extends D11X {
   val reportId = "D11-1"
@@ -121,7 +120,7 @@ trait D11X extends DisclosureReport {
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
     institution: Institution
-  ): Future[JsValue] = {
+  ): Future[DisclosureReportPayload] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
@@ -185,7 +184,7 @@ trait D11X extends DisclosureReport {
       tractIncome4 <- pricingData(filterIncomeCharacteristics(lars, 120, 1000, msaTracts))
 
     } yield {
-      s"""
+      val report = s"""
        |{
        |    "respondentId": "${institution.respondentId}",
        |    "institutionName": "${institution.respondent.name}",
@@ -367,7 +366,9 @@ trait D11X extends DisclosureReport {
        |        }
        |    ]
        |}
-     """.stripMargin.parseJson
+     """.stripMargin
+
+      DisclosureReportPayload(metaData.reportTable, msa, report)
     }
   }
 

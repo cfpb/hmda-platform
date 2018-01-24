@@ -7,7 +7,6 @@ import hmda.model.institution.Institution
 import hmda.model.publication.reports.ReportTypeEnum
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
 import hmda.publication.reports._
-import spray.json.JsValue
 
 import scala.concurrent.Future
 
@@ -18,6 +17,6 @@ trait DisclosureReport {
   def generate[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed],
                fipsCode: Int,
                institution: Institution
-              ): Future[JsValue]
+              ): Future[DisclosureReportPayload]
 
 }

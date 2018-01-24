@@ -8,8 +8,10 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.publication.reports._
+import hmda.publication.reports.protocol.disclosure.D5XProtocol._
 
 import scala.concurrent.Future
+import spray.json._
 
 case class D5X(
   respondentId: String,
@@ -30,7 +32,7 @@ object D5X {
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
     institution: Institution
-  ): Future[D5X] = {
+  ): Future[DisclosureReportPayload] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
     val dispositions = metaData.dispositions
@@ -57,7 +59,7 @@ object D5X {
       total <- totalF
     } yield {
 
-      D5X(
+      val report = D5X(
         institution.respondentId,
         institution.respondent.name,
         year,
@@ -66,7 +68,9 @@ object D5X {
         total,
         metaData.reportTable,
         metaData.description
-      )
+      ).toJson.toString
+
+      DisclosureReportPayload(metaData.reportTable, msa.id, report)
     }
 
   }

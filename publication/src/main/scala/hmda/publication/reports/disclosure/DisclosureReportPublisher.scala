@@ -1,6 +1,8 @@
 package hmda.publication.reports.disclosure
 
-import akka.NotUsed
+import java.util.concurrent.CompletionStage
+
+import akka.{ Done, NotUsed }
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
@@ -9,8 +11,8 @@ import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.stream.Supervision._
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.{ Sink, Source }
-import akka.util.Timeout
+import akka.stream.scaladsl.{ Flow, Sink, Source }
+import akka.util.{ ByteString, Timeout }
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import hmda.census.model.Msa
 import hmda.model.fi.SubmissionId
@@ -18,7 +20,8 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.Command
-import hmda.persistence.messages.commands.institutions.InstitutionCommands.{ GetInstitutionById, GetInstitutionByRespondentId }
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionById
+import hmda.persistence.events.pubsub.SubmissionSignedPubSub
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 import hmda.persistence.model.HmdaActor
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
@@ -29,6 +32,7 @@ import hmda.publication.reports.disclosure.DisclosureReportPublisher.GenerateDis
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import hmda.validation.messages.ValidationStatsMessages.FindIrsStats
 import hmda.validation.stats.SubmissionLarStats
+import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -108,15 +112,26 @@ class DisclosureReportPublisher(val sys: ActorSystem, val mat: ActorMaterializer
       val institution = f._1
       val msaList = f._2.toList
 
-      Source(msaList)
-        .mapAsync(4)(msa => generateIndividualReports(larSource, msa, institution))
+      val reportFlow: Flow[Int, DisclosureReportPayload, NotUsed] =
+        Flow[Int]
+          .mapAsync(4)(msa => generateIndividualReports(larSource, msa, institution))
+          .mapConcat(identity)
 
+      val s3Flow: Flow[DisclosureReportPayload, CompletionStage[MultipartUploadResult], NotUsed] =
+        Flow[DisclosureReportPayload]
+          .map(payload => {
+            val filePath = s"$environment/reports/disclosure/${submissionId.institutionId}/${payload.msa}/${payload.reportID}.txt"
+            Source.single(ByteString(payload.report))
+              .runWith(s3Client.multipartUpload(bucket, filePath))
+          })
+
+      Source(msaList).via(reportFlow).via(s3Flow).runWith(Sink.ignore)
     })
   }
 
   private def generateIndividualReports(larSource: Source[LoanApplicationRegister, NotUsed],
                                         msa: Int,
-                                        institution: Institution): Future[List[JsValue]] = {
+                                        institution: Institution): Future[List[DisclosureReportPayload]] = {
     Future.sequence(reports.map(report =>
       report.generate(larSource, msa, institution)
     ))
