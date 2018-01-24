@@ -64,6 +64,18 @@ This task will create a `Docker` image. To run a container with the `HMDA Platfo
 
 `docker run --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 cfpb/hmda`
 
+### Running the application in clustered mode (mesos)
+
+* A couple of scripts in the `mesos` folder describe the deployment through [Marathon](https://mesosphere.github.io/marathon/) on a DCOS / Mesos cluster.
+
+For a 3 node cluster deployed through the [DC/OS CLI](https://docs.mesosphere.com/1.10/cli/), the following command can be used:
+
+```shell
+dcos marathon app add mesos/hmda-platform-bridge-mode.json
+```
+
+For more details, please refer to the Marathon Documentation
+
 
 ## Contributing
 
