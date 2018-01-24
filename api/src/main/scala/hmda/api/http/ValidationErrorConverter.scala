@@ -73,6 +73,10 @@ trait ValidationErrorConverter extends SourceUtils {
     }
   }
 
+  def editInfosF[ec: EC, mat: MAT, as: AS](editNames: Set[String]): Future[List[EditInfo]] = {
+    Future(editNames.toList.sorted.map(name => EditInfo(name, editDescription(name))))
+  }
+
   private val csvHeaderSource = Source.fromIterator(() => Iterator("editType, editId, loanId"))
 
   def csvResultStream[ec: EC, mat: MAT, as: AS](eventSource: Source[Event, NotUsed]): Source[String, Any] = {

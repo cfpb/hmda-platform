@@ -60,10 +60,10 @@ trait SubmissionEditPaths
             status <- (sa ? GetSubmissionStatus(submissionId)).mapTo[SubmissionStatus]
             va <- fValidator
             vs <- (va ? GetState).mapTo[HmdaVerificationState]
-            s <- editInfosF("syntactical", eventStream)
-            v <- editInfosF("validity", eventStream)
-            q <- editInfosF("quality", eventStream)
-            m <- editInfosF("macro", eventStream)
+            s <- editInfosF(vs.syntacticalEdits)
+            v <- editInfosF(vs.validityEdits)
+            q <- editInfosF(vs.qualityEdits)
+            m <- editInfosF(vs.macroEdits)
           } yield (vs.qualityVerified, vs.macroVerified, status, List(s, v, q, m))
 
           onComplete(fState) {

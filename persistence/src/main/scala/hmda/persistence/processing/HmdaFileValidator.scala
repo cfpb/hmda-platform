@@ -58,6 +58,10 @@ object HmdaFileValidator {
   }
 
   case class HmdaVerificationState(
+      syntacticalEdits: Set[String] = Set(),
+      validityEdits: Set[String] = Set(),
+      qualityEdits: Set[String] = Set(),
+      macroEdits: Set[String] = Set(),
       containsSVEdits: Boolean = false,
       containsQMEdits: Boolean = false,
       qualityVerified: Boolean = false,
@@ -72,17 +76,24 @@ object HmdaFileValidator {
         else if (editType == Macro) this.copy(macroVerified = v)
         else this
 
-      case TsSyntacticalError(e) => this.copy(containsSVEdits = true)
-      case LarSyntacticalError(e) => this.copy(containsSVEdits = true)
-      case TsValidityError(e) => this.copy(containsSVEdits = true)
-      case LarValidityError(e) => this.copy(containsSVEdits = true)
+      case TsSyntacticalError(e) =>
+        this.copy(containsSVEdits = true, syntacticalEdits = syntacticalEdits + e.ruleName)
+      case LarSyntacticalError(e) =>
+        this.copy(containsSVEdits = true, syntacticalEdits = syntacticalEdits + e.ruleName)
+      case TsValidityError(e) =>
+        this.copy(containsSVEdits = true, validityEdits = validityEdits + e.ruleName)
+      case LarValidityError(e) =>
+        this.copy(containsSVEdits = true, validityEdits = validityEdits + e.ruleName)
 
-      case TsQualityError(e) => this.copy(containsQMEdits = true)
-      case LarQualityError(e) => this.copy(containsQMEdits = true)
-      case LarMacroError(e) => this.copy(containsQMEdits = true)
+      case TsQualityError(e) =>
+        this.copy(containsQMEdits = true, qualityEdits = qualityEdits + e.ruleName)
+      case LarQualityError(e) =>
+        this.copy(containsQMEdits = true, qualityEdits = qualityEdits + e.ruleName)
+      case LarMacroError(e) =>
+        this.copy(containsQMEdits = true, macroEdits = macroEdits + e.ruleName)
 
       case LarValidated(_, _) => this.copy(larCount = larCount + 1)
-      case TsValidated(ts) => this.copy(ts = Some(ts))
+      case TsValidated(tSheet) => this.copy(ts = Some(tSheet))
     }
 
     def bothVerified: Boolean = qualityVerified && macroVerified
