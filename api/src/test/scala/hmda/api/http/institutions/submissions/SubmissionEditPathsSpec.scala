@@ -51,6 +51,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     }
   }
 
+  /*
   "return a list of validation errors for a single type" in {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
       status mustBe StatusCodes.OK
@@ -62,6 +63,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[SingleTypeEditResults].edits mustBe Seq(q007info)
     }
   }
+  */
 
   val s010 = Seq(EditResultRow(RowId("loan1"), JsObject(("Record Identifier", JsNumber(111)))))
   "return row details for an edit" in {
@@ -156,6 +158,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
   ///// 405 (Method Not Allowed) Responses /////
 
+  /*
   "Edit Type endpoint: return 405 when posting verification to syntactical endpoint" in {
     postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes(supervisor, querySupervisor, validationStats)) ~> check {
       status mustBe StatusCodes.MethodNotAllowed
@@ -207,6 +210,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
     }
   }
+  */
 
   ///// Helper Methods /////
 

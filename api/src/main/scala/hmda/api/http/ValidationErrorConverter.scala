@@ -57,6 +57,7 @@ trait ValidationErrorConverter extends SourceUtils {
     edits.filter(_ != EmptyValidationError)
   }
 
+  /*
   private def uniqueEdits[ec: EC, mat: MAT, as: AS](editType: String, editSource: Source[Event, NotUsed]): Future[List[String]] = {
     var uniqueEdits: List[String] = List()
     val runF = editStreamOfType(editType, editSource).runForeach { e =>
@@ -65,13 +66,16 @@ trait ValidationErrorConverter extends SourceUtils {
     }
     runF.map(_ => uniqueEdits)
   }
+  */
 
+  /*
   def editInfosF[ec: EC, mat: MAT, as: AS](editType: String, editSource: Source[Event, NotUsed]): Future[List[EditInfo]] = {
     uniqueEdits(editType, editSource).map { list =>
       val infos = list.map(name => EditInfo(name, editDescription(name)))
       infos.sortBy(_.edit)
     }
   }
+  */
 
   def editInfosF[ec: EC, mat: MAT, as: AS](editNames: Set[String]): Future[List[EditInfo]] = {
     Future(editNames.toList.sorted.map(name => EditInfo(name, editDescription(name))))

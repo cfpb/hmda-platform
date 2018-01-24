@@ -23,6 +23,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   import hmda.model.util.FITestData._
   val config = ConfigFactory.load()
 
+  /*
   val submissionId1 = SubmissionId("0", "2017", 1)
   val submissionId2 = SubmissionId("0", "2017", 2)
 
@@ -147,5 +148,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     }
 
   }
+  */
 
 }

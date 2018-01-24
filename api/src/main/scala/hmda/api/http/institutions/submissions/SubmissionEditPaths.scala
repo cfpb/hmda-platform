@@ -90,6 +90,7 @@ trait SubmissionEditPaths
       }
     }
 
+  /*
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/<editType>
   private val svqmRegex = new Regex("syntactical|validity|quality|macro")
   def submissionSingleEditPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
@@ -115,6 +116,7 @@ trait SubmissionEditPaths
         }
       }
     }
+    */
 
   // /institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<edit>
   private val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d""")

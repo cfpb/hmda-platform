@@ -57,6 +57,7 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
       qualityF.map(result => result must have size 5)
     }
 
+    /*
     "gather Edit Info for each relevant edit, without duplicates" in {
       val infosF: Future[List[EditInfo]] = editInfosF("quality", eventSource)
       infosF.map { result =>
@@ -71,6 +72,7 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
         result.map(_.edit) mustBe Seq("Q037", "Q130", "Q595")
       }
     }
+    */
 
   }
 

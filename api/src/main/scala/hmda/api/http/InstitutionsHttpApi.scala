@@ -48,7 +48,7 @@ trait InstitutionsHttpApi
                   submissionEditsPath(supervisor, querySupervisor, instId) ~
                   submissionParseErrorsPath(supervisor, querySupervisor, instId) ~
                   submissionEditCsvPath(supervisor, querySupervisor, instId) ~
-                  submissionSingleEditPath(supervisor, querySupervisor, instId) ~
+                  //submissionSingleEditPath(supervisor, querySupervisor, instId) ~
                   editFailureDetailsPath(supervisor, querySupervisor, instId) ~
                   verifyEditsPath(supervisor, querySupervisor, instId) ~
                   submissionIrsPath(supervisor, querySupervisor, validationStats, instId) ~

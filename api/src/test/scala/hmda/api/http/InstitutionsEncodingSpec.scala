@@ -71,6 +71,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
         }
     }
 
+    /*
     "use requested encoding for submissionSingleEdit path" in {
       val encoding = encodingChooser
       getWithCfpbHeaders("/institutions/0/filings/2017/submissions/1/edits/validity")
@@ -78,6 +79,7 @@ class InstitutionsEncodingSpec extends InstitutionHttpApiSpec {
           response.encoding mustBe encoding
         }
     }
+    */
 
     "use requested encoding for submissionIrs path" in {
       val subId = SubmissionId("0", "2017", 1)
