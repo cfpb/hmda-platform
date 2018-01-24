@@ -24,18 +24,27 @@
         {
           "containerPort": 8080,
           "hostPort": 0,
+          "labels": {
+            "VIP_0": "/hmda2:8080"
+          },
           "protocol": "tcp",
           "name": "filing-api"
         },
         {
           "containerPort": 8081,
           "hostPort": 0,
+          "labels": {
+            "VIP_1": "/hmda2:8081"
+          },
           "protocol": "tcp",
           "name": "admin-api"
         },
         {
           "containerPort": 8082,
           "hostPort": 0,
+          "labels": {
+            "VIP_2": "/hmda2:8082"
+          },
           "protocol": "tcp",
           "name": "public-api"
         },
