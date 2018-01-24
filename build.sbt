@@ -25,7 +25,7 @@ lazy val dockerSettings = Seq(
   Docker / version := "latest",
   dockerBaseImage := "openjdk:8-jre-alpine",
   dockerExposedPorts := Vector(8080, 8081, 8082, 19999),
-  dockerRepository := Some("cfpb")
+  dockerRepository := Some("jmarin")
 )
 
 lazy val packageSettings = Seq(
