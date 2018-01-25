@@ -71,17 +71,13 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
   val awsSettings = new S3Settings(MemoryBufferType, None, awsCredentials, region, false)
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
-  /*val reports = List(
+  val reports = List(
     D41, D42, D43, D44, D45, D46, D47,
     D51, D52, D53,
     D71, D72, D73, D74, D75, D76, D77,
     D81, D82, D83, D84, D85, D86, D87,
     D11_1, D11_2, D11_3, D11_4, D11_5, D11_6, D11_7, D11_8, D11_9, D11_10,
     DiscB
-  )*/
-
-  val reports = List(
-    D41, D42, D43, D44, D45, D46, D47
   )
 
   override def receive: Receive = {
@@ -109,10 +105,12 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
       val institution = f._1
       val msaList = f._2.toList
 
-      val reportFlow: Flow[Int, DisclosureReportPayload, NotUsed] =
-        Flow[Int]
-          .mapAsync(1)(msa => generateIndividualReports(msa, institution))
-          .mapConcat(identity)
+      val larSource = readData(1000)
+      val combinations = combine(msaList, reports)
+
+      val simpleReportFlow: Flow[(Int, DisclosureReport), DisclosureReportPayload, NotUsed] =
+        Flow[(Int, DisclosureReport)]
+          .mapAsync(1)(comb => comb._2.generate(larSource, comb._1, institution))
 
       val s3Flow: Flow[DisclosureReportPayload, CompletionStage[MultipartUploadResult], NotUsed] =
         Flow[DisclosureReportPayload]
@@ -122,25 +120,19 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
               .runWith(s3Client.multipartUpload(bucket, filePath))
           })
 
-      Source(msaList).via(reportFlow).via(s3Flow).runWith(Sink.foreach(println))
+      Source(combinations).via(simpleReportFlow).via(s3Flow).runWith(Sink.ignore)
     })
   }
 
-  private def generateIndividualReports(
-    msa: Int,
-    institution: Institution
-  ): Future[List[DisclosureReportPayload]] = {
-    log.info(s"Generating reports for ${institution.respondent.name} in the MSA $msa")
-    Future.sequence(reports.map(report => {
-      val larSource = readData(1000)
-      report.generate(larSource, msa, institution)
-    }))
-    /*var fSerialize: Future[List[DisclosureReportPayload]] = Future[List[DisclosureReportPayload]]{()}
-    reports.foreach(report => {
-      val larSource = readData(1000)
-      fSerialize = fSerialize.flatMap{_ => report.generate(larSource, msa, institution})
+  /**
+   * Returns all combinations of MSA and Disclosure Reports
+   * Input:   List(407, 508) and List(D41, D42)
+   * Returns: List((407, D41), (407, D42), (508, D41), (508, D42))
+   */
+  private def combine(a: List[Int], b: List[DisclosureReport]): List[(Int, DisclosureReport)] = {
+    a.flatMap(msa => {
+      List.fill(b.length)(msa).zip(b)
     })
-    fSerialize*/
   }
 
   private def getInstitution(institutionId: String): Future[Institution] = {
