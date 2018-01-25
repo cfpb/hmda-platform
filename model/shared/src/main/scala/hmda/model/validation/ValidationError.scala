@@ -12,7 +12,7 @@ trait ValidationError {
   def ruleName: String
   def errorType: ValidationErrorType
   def ts: Boolean
-  def toCsv: String = s"$errorType, $ruleName, $publicErrorId"
+  def toCsv: String = s"$errorType, $ruleName, $publicErrorId\n"
   def publicErrorId = if (ts) "Transmittal Sheet" else errorId
 }
 
