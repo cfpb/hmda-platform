@@ -26,37 +26,7 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
   implicit val ec = system.dispatcher
   implicit val materializer = ActorMaterializer()
 
-  val editEvents: List[Event] = List(
-    TsSyntacticalError(SyntacticalValidationError("xyz", "S013", true)),
-    LarSyntacticalError(SyntacticalValidationError("xyz", "S205", false)),
-    LarValidityError(ValidityValidationError("xyz", "V210", false)),
-    TsValidityError(ValidityValidationError("xyz", "V145", true)),
-    TsQualityError(QualityValidationError("xyz", "Q595", true)),
-    TsQualityError(QualityValidationError("xyz", "Q595", true)),
-    TsQualityError(QualityValidationError("xyz", "Q130", true)),
-    LarQualityError(QualityValidationError("xyz", "Q037", false)),
-    LarQualityError(QualityValidationError("xyz", "Q037", false)),
-    LarMacroError(MacroValidationError("Q083")),
-    EditsVerified(Quality, true),
-    EditsVerified(Macro, false)
-  )
-
-  val eventSource: Source[Event, NotUsed] = Source.fromIterator(() => editEvents.toIterator)
-
   "Edits Collection" must {
-
-    "filter for syntactical edits from an event source" in {
-      val first: Source[ValidationError, NotUsed] = editStreamOfType("syntactical", eventSource)
-      val syntacticalF: Future[Seq[ValidationError]] = first.runWith(Sink.seq)
-      syntacticalF.map(result => result must have size 2)
-    }
-
-    "filter for quality edits from an event source" in {
-      val first: Source[ValidationError, NotUsed] = editStreamOfType("quality", eventSource)
-      val qualityF: Future[Seq[ValidationError]] = first.runWith(Sink.seq)
-      qualityF.map(result => result must have size 5)
-    }
-
     "gather Edit Info for each relevant edit, without duplicates" in {
       val editNames = Set("Q595", "Q595", "Q130", "Q037", "Q037")
       val result: List[EditInfo] = editInfos(editNames)
@@ -69,12 +39,27 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
       val editNames = Set("Q100", "Q010", "Q001")
       editInfos(editNames).map(_.edit) mustBe Seq("Q001", "Q010", "Q100")
     }
-
   }
 
   "Edits CSV response" must {
+    val editEvents: List[Event] = List(
+      TsSyntacticalError(SyntacticalValidationError("xyz", "S013", true)),
+      LarSyntacticalError(SyntacticalValidationError("xyz", "S205", false)),
+      LarValidityError(ValidityValidationError("xyz", "V210", false)),
+      TsValidityError(ValidityValidationError("xyz", "V145", true)),
+      TsQualityError(QualityValidationError("xyz", "Q595", true)),
+      TsQualityError(QualityValidationError("xyz", "Q595", true)),
+      TsQualityError(QualityValidationError("xyz", "Q130", true)),
+      LarQualityError(QualityValidationError("xyz", "Q037", false)),
+      LarQualityError(QualityValidationError("xyz", "Q037", false)),
+      LarMacroError(MacroValidationError("Q083")),
+      EditsVerified(Quality, true),
+      EditsVerified(Macro, false)
+    )
+
+    val eventSource: Source[Event, NotUsed] = Source.fromIterator(() => editEvents.toIterator)
     "gather all edits from event stream" in {
-      val first: Source[ValidationError, NotUsed] = editStreamOfType("all", eventSource)
+      val first: Source[ValidationError, NotUsed] = allEdits(eventSource)
       val syntacticalF: Future[Seq[ValidationError]] = first.runWith(Sink.seq)
       syntacticalF.map(result => result must have size 10)
     }

@@ -21,42 +21,6 @@ import scala.concurrent.Future
 trait ValidationErrorConverter extends SourceUtils {
 
   ///// Edit Collection
-  def editStreamOfType[ec: EC, mat: MAT, as: AS](errType: String, editSource: Source[Event, NotUsed]): Source[ValidationError, NotUsed] = {
-    val edits: Source[ValidationError, NotUsed] = errType.toLowerCase match {
-      case "syntactical" => editSource.map {
-        case LarSyntacticalError(err) => err
-        case TsSyntacticalError(err) => err
-        case _ => EmptyValidationError
-      }
-      case "validity" => editSource.map {
-        case LarValidityError(err) => err
-        case TsValidityError(err) => err
-        case _ => EmptyValidationError
-      }
-      case "quality" => editSource.map {
-        case LarQualityError(err) => err
-        case TsQualityError(err) => err
-        case _ => EmptyValidationError
-      }
-      case "macro" => editSource.map {
-        case LarMacroError(err) => err
-        case _ => EmptyValidationError
-      }
-      case "all" => editSource.map {
-        case LarSyntacticalError(err) => err
-        case TsSyntacticalError(err) => err
-        case LarValidityError(err) => err
-        case TsValidityError(err) => err
-        case LarQualityError(err) => err
-        case TsQualityError(err) => err
-        case LarMacroError(err) => err
-        case _ => EmptyValidationError
-      }
-    }
-
-    edits.filter(_ != EmptyValidationError)
-  }
-
   def editInfos[ec: EC, mat: MAT, as: AS](editNames: Set[String]): List[EditInfo] = {
     editNames.toList.sorted.map(name => EditInfo(name, editDescription(name)))
   }
@@ -69,9 +33,25 @@ trait ValidationErrorConverter extends SourceUtils {
   private val csvHeaderSource = Source.fromIterator(() => Iterator("editType, editId, loanId"))
 
   def csvResultStream[ec: EC, mat: MAT, as: AS](eventSource: Source[Event, NotUsed]): Source[String, Any] = {
-    val edits = editStreamOfType("all", eventSource)
+    val edits = allEdits(eventSource)
     val csvSource = edits.map(_.toCsv)
     csvHeaderSource.concat(csvSource)
+  }
+
+  def allEdits(eventSource: Source[Event, NotUsed]) = {
+    val edits: Source[ValidationError, NotUsed] =
+      eventSource.map {
+        case LarSyntacticalError(err) => err
+        case TsSyntacticalError(err) => err
+        case LarValidityError(err) => err
+        case TsValidityError(err) => err
+        case LarQualityError(err) => err
+        case TsQualityError(err) => err
+        case LarMacroError(err) => err
+        case _ => EmptyValidationError
+      }
+
+    edits.filter(_ != EmptyValidationError)
   }
 
   ///// Edit Details
