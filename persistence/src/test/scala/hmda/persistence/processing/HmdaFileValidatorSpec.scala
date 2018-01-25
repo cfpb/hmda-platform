@@ -23,7 +23,6 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   import hmda.model.util.FITestData._
   val config = ConfigFactory.load()
 
-  /*
   val submissionId1 = SubmissionId("0", "2017", 1)
   val submissionId2 = SubmissionId("0", "2017", 2)
 
@@ -51,6 +50,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
   val e2 = ValidityValidationError("1", "V999", true)
   val e3 = QualityValidationError("1", "Q999", false)
   val e4 = MacroValidationError("Q007")
+  val e2duplicate = ValidityValidationError("2", "V999", true)
 
   val ts = TsCsvParser(lines(0)).right.get
   val lars = lines.tail.map(line => LarCsvParser(line).right.get)
@@ -65,12 +65,15 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     }
 
     "persist validation errors" in {
-      val larErrors = LarValidationErrors(Seq(e1, e2, e3, e4))
+      val larErrors = LarValidationErrors(Seq(e1, e2, e3, e4, e2duplicate))
       val tsErrors = TsValidationErrors(Seq(e1, e2, e3))
       probe.send(hmdaFileValidator, larErrors)
       probe.send(hmdaFileValidator, tsErrors)
-      probe.send(hmdaFileValidator, GetState)
-      probe.expectMsg(HmdaVerificationState(true, true, false, false, Some(ts), lars.size))
+
+      probe.send(hmdaFileValidator, GetSVState)
+      probe.expectMsg(SVState(Set("S999"), Set("V999")))
+      probe.send(hmdaFileValidator, GetQMState)
+      probe.expectMsg(QMState(Set("Q999"), Set("Q007")))
     }
 
     "read parsed data and validate it" in {
@@ -88,13 +91,17 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsgType[ValidationCompletedWithErrors]
 
       probe.send(hmdaFileValidator2, GetState)
-      probe.expectMsg(HmdaVerificationState(true, true, false, false, Some(ts), 4))
+      probe.expectMsg(HmdaVerificationState(false, false, Some(ts), 4))
+      probe.send(hmdaFileValidator, GetSVState)
+      probe.expectMsg(SVState(Set("S999"), Set("V999")))
+      probe.send(hmdaFileValidator, GetQMState)
+      probe.expectMsg(QMState(Set("Q999"), Set("Q007")))
     }
 
     "verify quality edits" in {
       // establish baseline
       probe.send(hmdaFileValidator, GetState)
-      val originalState = HmdaVerificationState(true, true, false, false, Some(ts), 4)
+      val originalState = HmdaVerificationState(false, false, Some(ts), 4)
       probe.expectMsg(originalState)
 
       // send VerifyQualityEdits message
@@ -108,7 +115,7 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     "verify macro edits" in {
       // establish baseline
       probe.send(hmdaFileValidator, GetState)
-      val originalState = HmdaVerificationState(true, true, true, false, Some(ts), 4)
+      val originalState = HmdaVerificationState(true, false, Some(ts), 4)
       probe.expectMsg(originalState)
 
       // send VerifyMacroEdits message
@@ -148,6 +155,5 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
     }
 
   }
-  */
 
 }
