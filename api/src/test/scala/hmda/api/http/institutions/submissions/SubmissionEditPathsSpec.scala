@@ -3,7 +3,6 @@ package hmda.api.http.institutions.submissions
 import akka.actor.ActorRef
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import hmda.api.http.InstitutionHttpApiSpec
 import hmda.api.model.{ EditResult, _ }
@@ -50,20 +49,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info))
     }
   }
-
-  /*
-  "return a list of validation errors for a single type" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.OK
-      responseAs[SingleTypeEditResults].edits mustBe Seq(v280info, v285info)
-    }
-
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.OK
-      responseAs[SingleTypeEditResults].edits mustBe Seq(q007info)
-    }
-  }
-  */
 
   val s010 = Seq(EditResultRow(RowId("loan1"), JsObject(("Record Identifier", JsNumber(111)))))
   "return row details for an edit" in {
@@ -157,21 +142,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     }
   }
 
-  ///// 405 (Method Not Allowed) Responses /////
-
-  /*
-  "Edit Type endpoint: return 405 when posting verification to syntactical endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes(supervisor, querySupervisor, validationStats)) ~> check {
-      status mustBe StatusCodes.MethodNotAllowed
-    }
-  }
-
-  "Edit Type endpoint: return 405 when posting verification to validity endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> Route.seal(institutionsRoutes(supervisor, querySupervisor, validationStats)) ~> check {
-      status mustBe StatusCodes.MethodNotAllowed
-    }
-  }
-
   ///// 404 (Not Found) Responses /////
 
   "Edits endpoint: return 404 for nonexistent institution" in {
@@ -192,26 +162,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
     }
   }
-
-  "Edit Type endpoint: return 404 for nonexistent institution" in {
-    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
-    }
-  }
-  "Edit Type endpoint: return 404 for nonexistent filing period" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits/quality") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
-    }
-  }
-  "Edit Type endpoint: return 404 for nonexistent submission" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
-    }
-  }
-  */
 
   ///// Helper Methods /////
 

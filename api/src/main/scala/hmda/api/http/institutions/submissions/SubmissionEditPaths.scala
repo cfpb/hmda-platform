@@ -92,34 +92,6 @@ trait SubmissionEditPaths
       }
     }
 
-  /*
-  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>/edits/<editType>
-  private val svqmRegex = new Regex("syntactical|validity|quality|macro")
-  def submissionSingleEditPath(supervisor: ActorRef, querySupervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext) =
-    path("filings" / Segment / "submissions" / IntNumber / "edits" / svqmRegex) { (period, seqNr, editType) =>
-      timedGet { uri =>
-        completeVerified(supervisor, institutionId, period, seqNr, uri) {
-          val submissionId = SubmissionId(institutionId, period, seqNr)
-          val fValidator = fHmdaFileValidator(supervisor, submissionId)
-          val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
-
-          val fState = for {
-            sa <- fSubmissionsActor
-            status <- (sa ? GetSubmissionStatus(submissionId)).mapTo[SubmissionStatus]
-            va <- fValidator
-            edits <- editInfosF(editType, validationEventStream(submissionId))
-          } yield (edits, status)
-
-          onComplete(fState) {
-            case Success((edits, status)) =>
-              complete(ToResponseMarshallable(SingleTypeEditResults(edits, status)))
-            case Failure(error) => completeWithInternalError(uri, error)
-          }
-        }
-      }
-    }
-    */
-
   // /institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<edit>
   private val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d""")
 
