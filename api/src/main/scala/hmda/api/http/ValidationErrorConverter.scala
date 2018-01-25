@@ -55,19 +55,16 @@ trait ValidationErrorConverter extends SourceUtils {
 
   ///// Edit Details
   def resultRowsFromCollection[ec: EC, mat: MAT, as: AS](errors: Seq[ValidationError], ts: Option[TransmittalSheet], eventSource: Source[Event, NotUsed]): Future[Seq[EditResultRow]] = {
-    val fieldNames = fieldNamesForEdit(errors.head)
+    val fieldNames = EditMetaDataLookup.forEdit(errors.head.ruleName).fieldNames
     val rowIds = errors.map(_.errorId)
 
-    val tsRows = tsRow(errors, ts, fieldNames)
-    val larRowsF: Future[Seq[EditResultRow]] = relevantLars(rowIds, eventSource).map { lar =>
-      EditResultRow(RowId(lar.loan.id), fieldJsonForRow(fieldNames, lar))
-    }.runWith(Sink.seq)
+    val tsRows: Seq[EditResultRow] = tsRow(errors, ts, fieldNames)
+
+    val larRowsF: Future[Seq[EditResultRow]] =
+      relevantLarRows(rowIds, fieldNames, eventSource)
+        .filter(_.isDefined).map(_.get).runWith(Sink.seq)
 
     larRowsF.map(larRows => tsRows ++ larRows)
-  }
-
-  private def fieldNamesForEdit(edit: ValidationError): Seq[String] = {
-    EditMetaDataLookup.forEdit(edit.ruleName).fieldNames
   }
 
   private def fieldJsonForRow(fieldNames: Seq[String], row: HmdaFileRow): JsObject = {
@@ -90,11 +87,12 @@ trait ValidationErrorConverter extends SourceUtils {
     }
   }
 
-  private def relevantLars[ec: EC, mat: MAT, as: AS](rowIds: Seq[String], eventSource: Source[Event, NotUsed]): Source[LoanApplicationRegister, NotUsed] = {
+  private def relevantLarRows[ec: EC, mat: MAT, as: AS](rowIds: Seq[String], fieldNames: Seq[String], eventSource: Source[Event, NotUsed]): Source[Option[EditResultRow], NotUsed] = {
     eventSource.map {
-      case LarValidated(lar, _) if rowIds.contains(lar.loan.id) => lar
-      case _ => LoanApplicationRegister()
-    }.filterNot(_.isEmpty)
+      case LarValidated(lar, _) if rowIds.contains(lar.loan.id) =>
+        Some(EditResultRow(RowId(lar.loan.id), fieldJsonForRow(fieldNames, lar)))
+      case _ => None
+    }
   }
 
   private def toJsonVal(value: Any) = {
