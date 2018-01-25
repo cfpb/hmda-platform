@@ -50,8 +50,6 @@ trait SubmissionEditPaths
       timedGet { uri =>
         completeVerified(supervisor, institutionId, period, seqNr, uri) {
           val submissionId = SubmissionId(institutionId, period, seqNr)
-          val eventStream = validationEventStream(submissionId)
-
           val fValidator = fHmdaFileValidator(supervisor, submissionId)
           val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
 
@@ -62,18 +60,14 @@ trait SubmissionEditPaths
             vs <- (va ? GetState).mapTo[HmdaVerificationState]
             svState <- (va ? GetSVState).mapTo[SVState]
             qmState <- (va ? GetQMState).mapTo[QMState]
-            s <- editInfosF(svState.syntacticalEdits)
-            v <- editInfosF(svState.validityEdits)
-            q <- editInfosF(qmState.qualityEdits)
-            m <- editInfosF(qmState.macroEdits)
-          } yield (vs.qualityVerified, vs.macroVerified, status, List(s, v, q, m))
+          } yield (vs.qualityVerified, vs.macroVerified, status, svState, qmState)
 
           onComplete(fState) {
-            case Success((qv, mv, status, infoList)) =>
-              val s = EditCollection(infoList.head)
-              val v = EditCollection(infoList(1))
-              val q = VerifiableEditCollection(qv, infoList(2))
-              val m = VerifiableEditCollection(mv, infoList(3))
+            case Success((qv, mv, status, svState, qmState)) =>
+              val s = EditCollection(editInfos(svState.syntacticalEdits))
+              val v = EditCollection(editInfos(svState.validityEdits))
+              val q = VerifiableEditCollection(qv, editInfos(qmState.qualityEdits))
+              val m = VerifiableEditCollection(mv, editInfos(qmState.macroEdits))
               complete(ToResponseMarshallable(SummaryEditResults(s, v, q, m, status)))
             case Failure(error) => completeWithInternalError(uri, error)
           }

@@ -57,22 +57,18 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
       qualityF.map(result => result must have size 5)
     }
 
-    /*
     "gather Edit Info for each relevant edit, without duplicates" in {
-      val infosF: Future[List[EditInfo]] = editInfosF("quality", eventSource)
-      infosF.map { result =>
-        result must have size 3
-        result.head mustBe EditInfo("Q037", "If lien status = 2, then loan amount should be ≤ $250 ($250 thousand).")
-        result(1) mustBe EditInfo("Q130", "The number of loan/application records received in this transmission file per respondent does not = the total number of loan/application records reported in this respondent’s transmission or the total number of loan/application records in this submission is missing from the transmittal sheet.")
-      }
+      val editNames = Set("Q595", "Q595", "Q130", "Q037", "Q037")
+      val result: List[EditInfo] = editInfos(editNames)
+      result must have size 3
+      result.head mustBe EditInfo("Q037", "If lien status = 2, then loan amount should be ≤ $250 ($250 thousand).")
+      result(1) mustBe EditInfo("Q130", "The number of loan/application records received in this transmission file per respondent does not = the total number of loan/application records reported in this respondent’s transmission or the total number of loan/application records in this submission is missing from the transmittal sheet.")
     }
 
     "order edit info entries by rule name" in {
-      editInfosF("quality", eventSource).map { result =>
-        result.map(_.edit) mustBe Seq("Q037", "Q130", "Q595")
-      }
+      val editNames = Set("Q100", "Q010", "Q001")
+      editInfos(editNames).map(_.edit) mustBe Seq("Q001", "Q010", "Q100")
     }
-    */
 
   }
 
@@ -108,26 +104,21 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
       SyntacticalValidationError("1299422144", "S100", true)
     )
 
-    /*
     "get msa info for Q029" in {
       val errorQ029 = QualityValidationError("8299422144", "Q029", ts = false)
-      val resultF = validationErrorToResultRow(errorQ029, Some(ts), larEventSource)
+      val resultF = resultRowsFromCollection(Seq(errorQ029), None, larEventSource)
       resultF.map { result =>
-        val msaField = result.fields.getFields("Metropolitan Statistical Area / Metropolitan Division Name").head.toString
+        val msaField = result.head.fields.getFields("Metropolitan Statistical Area / Metropolitan Division Name").head.toString
         msaField mustBe "\"Battle Creek, MI\""
       }
     }
 
     "convert edit to EditResultRow" in {
-      val resultF = validationErrorToResultRow(tsErrors.head, Some(ts), larEventSource)
+      val resultF = resultRowsFromCollection(tsErrors, Some(ts), larEventSource)
       resultF.map { result =>
-        result mustBe EditResultRow(
-          RowId("Transmittal Sheet"),
-          JsObject("Agency Code" -> JsNumber(9))
-        )
+        result.head mustBe EditResultRow(RowId("Transmittal Sheet"), JsObject("Agency Code" -> JsNumber(9)))
       }
     }
-    */
   }
 
 }

@@ -8,16 +8,15 @@ import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
-import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
+import hmda.model.fi.HmdaFileRow
 import hmda.model.validation.{ EmptyValidationError, ValidationError }
 import hmda.persistence.messages.CommonMessages.Event
 import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
 import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
 import hmda.util.SourceUtils
-import spray.json.{ JsNumber, JsObject, JsString, JsValue }
+import spray.json.{ JsNumber, JsObject, JsString }
 
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
 
 trait ValidationErrorConverter extends SourceUtils {
 
@@ -58,34 +57,15 @@ trait ValidationErrorConverter extends SourceUtils {
     edits.filter(_ != EmptyValidationError)
   }
 
-  /*
-  private def uniqueEdits[ec: EC, mat: MAT, as: AS](editType: String, editSource: Source[Event, NotUsed]): Future[List[String]] = {
-    var uniqueEdits: List[String] = List()
-    val runF = editStreamOfType(editType, editSource).runForeach { e =>
-      val name = e.ruleName
-      if (!uniqueEdits.contains(name)) uniqueEdits = uniqueEdits :+ name
-    }
-    runF.map(_ => uniqueEdits)
-  }
-  */
-
-  /*
-  def editInfosF[ec: EC, mat: MAT, as: AS](editType: String, editSource: Source[Event, NotUsed]): Future[List[EditInfo]] = {
-    uniqueEdits(editType, editSource).map { list =>
-      val infos = list.map(name => EditInfo(name, editDescription(name)))
-      infos.sortBy(_.edit)
-    }
-  }
-  */
-
-  def editInfosF[ec: EC, mat: MAT, as: AS](editNames: Set[String]): Future[List[EditInfo]] = {
-    Future(editNames.toList.sorted.map(name => EditInfo(name, editDescription(name))))
+  def editInfos[ec: EC, mat: MAT, as: AS](editNames: Set[String]): List[EditInfo] = {
+    editNames.toList.sorted.map(name => EditInfo(name, editDescription(name)))
   }
 
   private def editDescription(editName: String): String = {
     EditMetaDataLookup.forEdit(editName).editDescription
   }
 
+  ///// Edits Report CSV
   private val csvHeaderSource = Source.fromIterator(() => Iterator("editType, editId, loanId"))
 
   def csvResultStream[ec: EC, mat: MAT, as: AS](eventSource: Source[Event, NotUsed]): Source[String, Any] = {
