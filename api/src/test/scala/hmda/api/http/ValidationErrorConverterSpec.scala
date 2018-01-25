@@ -108,6 +108,7 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
       SyntacticalValidationError("1299422144", "S100", true)
     )
 
+    /*
     "get msa info for Q029" in {
       val errorQ029 = QualityValidationError("8299422144", "Q029", ts = false)
       val resultF = validationErrorToResultRow(errorQ029, Some(ts), larEventSource)
@@ -126,6 +127,7 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
         )
       }
     }
+    */
   }
 
 }

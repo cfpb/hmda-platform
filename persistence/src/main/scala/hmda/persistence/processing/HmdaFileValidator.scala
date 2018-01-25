@@ -35,7 +35,8 @@ import hmda.validation.stats.SubmissionLarStats.PersistStatsForMacroEdits
 import hmda.validation.stats.ValidationStats.AddSubmissionTaxId
 import hmda.validation.stats.SubmissionLarStats
 
-import scala.util.Try
+import scala.concurrent.Future
+import scala.util.{ Failure, Success, Try }
 import scala.concurrent.duration._
 
 object HmdaFileValidator {

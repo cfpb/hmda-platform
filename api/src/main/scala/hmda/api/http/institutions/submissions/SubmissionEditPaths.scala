@@ -136,7 +136,7 @@ trait SubmissionEditPaths
               va <- fValidator
               vs <- (va ? GetState).mapTo[HmdaVerificationState]
               errorCollection <- (va ? GetNamedErrorResultsPaginated(editName, page)).mapTo[PaginatedErrors]
-              rows <- Future.sequence(errorCollection.errors.map(validationErrorToResultRow(_, vs.ts, eventStream)))
+              rows <- resultRowsFromCollection(errorCollection.errors, vs.ts, eventStream)
             } yield (rows, errorCollection.totalErrors)
 
             onComplete(fPaginatedErrors) {
