@@ -30,7 +30,7 @@ trait ValidationErrorConverter extends SourceUtils {
   }
 
   ///// Edits Report CSV
-  private val csvHeaderSource = Source.fromIterator(() => Iterator("editType, editId, loanId"))
+  private val csvHeaderSource = Source.fromIterator(() => Iterator("editType, editId, loanId\n"))
 
   def csvResultStream[ec: EC, mat: MAT, as: AS](eventSource: Source[Event, NotUsed]): Source[String, Any] = {
     val edits = allEdits(eventSource)
