@@ -6,7 +6,6 @@ import hmda.api._
 import hmda.api.model._
 import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
-import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.fi.ts.TransmittalSheet
 import hmda.model.fi.HmdaFileRow
 import hmda.model.validation.{ EmptyValidationError, ValidationError }

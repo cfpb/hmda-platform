@@ -68,10 +68,10 @@ class ValidationErrorConverterSpec extends AsyncWordSpec with MustMatchers with 
       val csvLinesF = csvResultStream(eventSource).runWith(Sink.seq)
       csvLinesF.map { csvLines =>
         csvLines must have size 11
-        csvLines.head mustBe "editType, editId, loanId"
-        csvLines(1) mustBe "Syntactical, S013, Transmittal Sheet"
-        csvLines(2) mustBe "Syntactical, S205, xyz"
-        csvLines.last mustBe "Macro, Q083, "
+        csvLines.head mustBe "editType, editId, loanId\n"
+        csvLines(1) mustBe "Syntactical, S013, Transmittal Sheet\n"
+        csvLines(2) mustBe "Syntactical, S205, xyz\n"
+        csvLines.last mustBe "Macro, Q083, \n"
       }
     }
   }
