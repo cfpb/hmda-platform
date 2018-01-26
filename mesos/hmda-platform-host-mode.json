@@ -15,7 +15,7 @@
     "type": "DOCKER",
     "volumes": [],
     "docker": {
-      "image": "jmarin/hmda:latest",
+      "image": "hmda/hmda:latest",
       "network": "HOST",
       "privileged": false,
       "parameters": [],
