@@ -1,7 +1,5 @@
 package hmda
 
-import java.io.File
-
 import akka.actor.ActorSystem
 import akka.cluster.Cluster
 import akka.management.AkkaManagement

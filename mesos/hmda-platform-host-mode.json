@@ -1,6 +1,6 @@
 {
   "id": "/hmda2",
-  "instances": 1,
+  "instances": 3,
   "cpus": 0.1,
   "mem": 1024,
   "disk": 0,
@@ -22,7 +22,6 @@
       "forcePullImage": true
     }
   },
-  "healthChecks": [],
   "readinessChecks": [],
   "dependencies": [],
   "upgradeStrategy": {
