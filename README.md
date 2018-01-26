@@ -71,7 +71,7 @@ This task will create a `Docker` image. To run a container with the `HMDA Platfo
 For a 3 node cluster deployed through the [DC/OS CLI](https://docs.mesosphere.com/1.10/cli/), the following command can be used:
 
 ```shell
-dcos marathon app add mesos/hmda-platform-bridge-mode.json
+dcos marathon app add mesos/hmda-platform-host-mode.json
 ```
 
 For more details, please refer to the Marathon Documentation
