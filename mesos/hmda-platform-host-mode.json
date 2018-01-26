@@ -22,6 +22,32 @@
       "forcePullImage": true
     }
   },
+  "portDefinitions": [
+    {
+      "labels": {
+        "VIP_0": "/hmda2:10001"
+      },
+      "port": 10001
+    },
+    {
+      "labels": {
+        "VIP_1": "/hmda2:10002"
+      },
+      "port": 10002
+    },
+    {
+      "labels": {
+        "VIP_2": "/hmda2:10003"
+      },
+      "port": 10003
+    },
+    {
+      "labels": {
+        "VIP_3": "/hmda2:10004"
+      },
+      "port": 10004
+    }
+  ],
   "labels": {
     "HAPROXY_GROUP": "external",
     "HAPROXY_0_VHOST": "marathon-lb.marathon.mesos"
@@ -37,9 +63,13 @@
     "expungeAfterSeconds": 600
   },
   "killSelection": "YOUNGEST_FIRST",
-  "requirePorts": false,
+  "requirePorts": true,
   "env": {
     "SERVICE_NAME": "hmda2.marathon.mesos",
-    "HMDA_RUNTIME_MODE": "prod"
+    "HMDA_RUNTIME_MODE": "prod",
+    "HMDA_HTTP_PORT": "10001",
+    "HMDA_HTTP_ADMIN_PORT": "10002",
+    "HMDA_HTTP_PUBLIC_PORT": "10003",
+    "PORT_19999": "10004"
   }
 }
