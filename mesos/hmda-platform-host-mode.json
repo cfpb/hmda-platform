@@ -27,25 +27,29 @@
       "labels": {
         "VIP_0": "/hmda2:10001"
       },
-      "port": 10001
+      "port": 10001,
+      "name": "filing"
     },
     {
       "labels": {
         "VIP_1": "/hmda2:10002"
       },
-      "port": 10002
+      "port": 10002,
+      "name": "admin"
     },
     {
       "labels": {
         "VIP_2": "/hmda2:10003"
       },
-      "port": 10003
+      "port": 10003,
+      "name": "public"
     },
     {
       "labels": {
         "VIP_3": "/hmda2:10004"
       },
-      "port": 10004
+      "port": 10004,
+      "name": "cluster"
     }
   ],
   "labels": {
@@ -71,5 +75,51 @@
     "HMDA_HTTP_ADMIN_PORT": "10002",
     "HMDA_HTTP_PUBLIC_PORT": "10003",
     "PORT_19999": "10004"
-  }
+  },
+  "healthChecks": [
+    {
+      "gracePeriodSeconds": 300,
+      "ignoreHttp1xx": false,
+      "intervalSeconds": 60,
+      "maxConsecutiveFailures": 3,
+      "path": "/",
+      "portIndex": 0,
+      "protocol": "HTTP",
+      "timeoutSeconds": 20,
+      "delaySeconds": 15
+    },
+    {
+      "gracePeriodSeconds": 300,
+      "ignoreHttp1xx": false,
+      "intervalSeconds": 60,
+      "maxConsecutiveFailures": 3,
+      "path": "/",
+      "portIndex": 1,
+      "protocol": "HTTP",
+      "timeoutSeconds": 20,
+      "delaySeconds": 15
+    },
+    {
+      "gracePeriodSeconds": 300,
+      "ignoreHttp1xx": false,
+      "intervalSeconds": 60,
+      "maxConsecutiveFailures": 3,
+      "path": "/",
+      "portIndex": 2,
+      "protocol": "HTTP",
+      "timeoutSeconds": 20,
+      "delaySeconds": 15
+    },
+    {
+      "gracePeriodSeconds": 300,
+      "ignoreHttp1xx": false,
+      "intervalSeconds": 60,
+      "maxConsecutiveFailures": 3,
+      "path": "/cluster/members",
+      "portIndex": 3,
+      "protocol": "HTTP",
+      "timeoutSeconds": 20,
+      "delaySeconds": 15
+    }
+  ]
 }
