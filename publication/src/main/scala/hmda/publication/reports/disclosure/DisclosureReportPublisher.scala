@@ -110,12 +110,12 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
 
       val simpleReportFlow: Flow[(Int, DisclosureReport), DisclosureReportPayload, NotUsed] =
         Flow[(Int, DisclosureReport)]
-          .mapAsync(1)(comb => comb._2.generate(larSource, comb._1, institution))
+          .mapAsync(2)(comb => comb._2.generate(larSource, comb._1, institution))
 
       val s3Flow: Flow[DisclosureReportPayload, CompletionStage[MultipartUploadResult], NotUsed] =
         Flow[DisclosureReportPayload]
           .map(payload => {
-            val filePath = s"$environment/reports/disclosure/${submissionId.institutionId}/${payload.msa}/${payload.reportID}.txt"
+            val filePath = s"$environment/reports/disclosure/${submissionId.period}/${institution.respondent.name}/${payload.msa}/${payload.reportID}.txt"
             Source.single(ByteString(payload.report))
               .runWith(s3Client.multipartUpload(bucket, filePath))
           })
