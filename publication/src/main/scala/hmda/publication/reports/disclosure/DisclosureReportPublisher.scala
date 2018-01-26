@@ -116,6 +116,7 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
         Flow[DisclosureReportPayload]
           .map(payload => {
             val filePath = s"$environment/reports/disclosure/${submissionId.period}/${institution.respondent.name}/${payload.msa}/${payload.reportID}.txt"
+            log.info(s"Publishing report. Institution: ${institution.id}, MSA: ${payload.msa}, Report #: ${payload.reportID}")
             Source.single(ByteString(payload.report))
               .runWith(s3Client.multipartUpload(bucket, filePath))
           })
