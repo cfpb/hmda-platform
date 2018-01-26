@@ -15,12 +15,16 @@
     "type": "DOCKER",
     "volumes": [],
     "docker": {
-      "image": "hmda/hmda:latest",
+      "image": "hmda/hmda-platform:latest",
       "network": "HOST",
       "privileged": false,
       "parameters": [],
       "forcePullImage": true
     }
+  },
+  "labels": {
+    "HAPROXY_GROUP": "external",
+    "HAPROXY_0_VHOST": "marathon-lb.marathon.mesos"
   },
   "readinessChecks": [],
   "dependencies": [],
