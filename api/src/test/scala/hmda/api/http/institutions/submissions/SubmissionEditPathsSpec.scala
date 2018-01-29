@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import akka.pattern.ask
-import hmda.api.http.InstitutionHttpApiSpec
+import hmda.api.http.InstitutionHttpApiAsyncSpec
 import hmda.api.model.{ EditResult, _ }
 import hmda.model.fi._
 import hmda.model.fi.lar.LarGenerators
@@ -17,10 +17,9 @@ import hmda.persistence.processing.HmdaFileValidator.{ GetSVState, HmdaVerificat
 import hmda.validation.engine._
 import spray.json.{ JsNumber, JsObject }
 
-import scala.concurrent.{ Await, Future }
-import scala.concurrent.duration._
+import scala.concurrent.Future
 
-class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators with TsGenerators {
+class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenerators with TsGenerators {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -81,16 +80,19 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
       // Check for correct baseline validation state.
       //   Incorrect baseline will invalidate the other tests in this section.
-      val fState = for {
+      val fState: Future[(HmdaVerificationState, Boolean)] = for {
         s <- fHmdaValidatorActor(2)
         xs <- (s ? GetState).mapTo[HmdaVerificationState]
         svState <- (s ? GetSVState).mapTo[SVState]
       } yield (xs, svState.containsSVEdits)
-      val (state: HmdaVerificationState, containsSVEdits: Boolean) = Await.result(fState, 5.seconds)
 
-      containsSVEdits mustBe false
-      state.macroVerified mustBe false
-      state.qualityVerified mustBe false
+      fState.map {
+        case ((state: HmdaVerificationState, svEdits: Boolean)) =>
+          svEdits mustBe false
+          state.macroVerified mustBe false
+          state.qualityVerified mustBe false
+      }
+
     }
   }
 
@@ -105,9 +107,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
-      val state = Await.result(fVerificationState, 5.seconds)
-      state.qualityVerified mustBe false
-      state.macroVerified mustBe true
+      fVerificationState.map { state =>
+        state.qualityVerified mustBe false
+        state.macroVerified mustBe true
+      }
     }
   }
 
@@ -122,9 +125,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
-      val state = Await.result(fVerificationState, 5.seconds)
-      state.qualityVerified mustBe true
-      state.macroVerified mustBe true
+      fVerificationState.map { state =>
+        state.qualityVerified mustBe true
+        state.macroVerified mustBe true
+      }
     }
   }
 
@@ -136,9 +140,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       status mustBe StatusCodes.OK
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(false, currentStatus)
 
-      val state = Await.result(fVerificationState, 5.seconds)
-      state.qualityVerified mustBe false
-      state.macroVerified mustBe true
+      fVerificationState.map { state =>
+        state.qualityVerified mustBe false
+        state.macroVerified mustBe true
+      }
     }
   }
 
