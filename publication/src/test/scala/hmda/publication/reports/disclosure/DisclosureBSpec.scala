@@ -5,10 +5,10 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.institution.ExternalIdType.RssdId
+import hmda.model.institution.{ ExternalId, Institution, Respondent }
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
-import spray.json.{ JsArray, JsNumber, JsString }
-
-import scala.concurrent.Future
+import spray.json._
 
 class DisclosureBSpec extends AsyncWordSpec with MustMatchers
     with LarGenerators with BeforeAndAfterAll {
@@ -24,6 +24,8 @@ class DisclosureBSpec extends AsyncWordSpec with MustMatchers
 
   val respId = "65656"
   val fips = 24300 // Grand Junction, CO
+  val resp = Respondent(ExternalId(respId, RssdId), "Grand Junction Mortgage Co.", "", "", "")
+  val inst = Institution.empty.copy(respondent = resp)
   val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
     val geo = lar.geography.copy(msa = fips.toString)
     val loan = lar.loan.copy(loanType = 1, occupancy = 1)
@@ -36,8 +38,8 @@ class DisclosureBSpec extends AsyncWordSpec with MustMatchers
   val description = "Loan pricing information for conventional loans by incidence and level"
 
   "Generate a Disclosure B report" in {
-    DiscB.generate(source, fips, respId, Future("Grand Junction Mortgage Co.")).map { result =>
-      result.asJsObject.getFields("table", "description", "msa", "respondentId", "institutionName") match {
+    DiscB.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("table", "description", "msa", "respondentId", "institutionName") match {
         case Seq(JsString(table), JsString(desc), msa, JsString(resp), JsString(instName)) =>
           table mustBe "B"
           desc mustBe description
@@ -51,8 +53,8 @@ class DisclosureBSpec extends AsyncWordSpec with MustMatchers
   }
 
   "Have correct JSON structure" in {
-    DiscB.generate(source, fips, respId, Future("Grand Junction Mortgage Co.")).map { result =>
-      result.asJsObject.getFields("singleFamily", "manufactured") match {
+    DiscB.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("singleFamily", "manufactured") match {
         case Seq(JsArray(singleFamily), JsArray(manufactured)) =>
           singleFamily must have size 2
           manufactured must have size 2

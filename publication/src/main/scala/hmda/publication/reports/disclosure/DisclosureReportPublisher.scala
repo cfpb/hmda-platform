@@ -108,7 +108,7 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
       val larSource = readData(1000)
         .filter(lar => lar.respondentId == institution.respondentId)
         .filter(lar => lar.geography.msa != "NA")
-      
+
       val combinations = combine(msaList, reports)
 
       val simpleReportFlow: Flow[(Int, DisclosureReport), DisclosureReportPayload, NotUsed] =
