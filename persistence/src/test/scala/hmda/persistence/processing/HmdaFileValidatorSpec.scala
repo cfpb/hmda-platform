@@ -20,7 +20,9 @@ import org.scalatest.BeforeAndAfterEach
 import hmda.validation.stats.ValidationStats._
 
 class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
+
   import hmda.model.util.FITestData._
+
   val config = ConfigFactory.load()
 
   val submissionId1 = SubmissionId("0", "2017", 1)
