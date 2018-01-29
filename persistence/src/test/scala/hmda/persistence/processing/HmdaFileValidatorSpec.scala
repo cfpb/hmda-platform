@@ -20,7 +20,9 @@ import org.scalatest.BeforeAndAfterEach
 import hmda.validation.stats.ValidationStats._
 
 class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaFileParserSpecUtils {
+
   import hmda.model.util.FITestData._
+
   val config = ConfigFactory.load()
 
   val submissionId1 = SubmissionId("0", "2017", 1)
@@ -104,33 +106,43 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.expectMsgType[ValidationCompletedWithErrors]
 
       probe.send(hmdaFileValidator2, GetState)
-      probe.expectMsg(HmdaFileValidationState(
-        Some(ts),
-        lars,
-        List(),
-        Nil,
-        Nil,
-        List(
-          SyntacticalValidationError("8299422144", "S020", false),
-          SyntacticalValidationError("2185751599", "S010", false),
-          SyntacticalValidationError("2185751599", "S020", false)
-        ),
-        List(
-          ValidityValidationError("4977566612", "V550", false),
-          ValidityValidationError("4977566612", "V555", false),
-          ValidityValidationError("4977566612", "V560", false)
-        ),
-        List(
-          QualityValidationError("8299422144", "Q030", false)
-        ),
-        qualityVerified = false,
-        List(
-          MacroValidationError("Q008"),
-          MacroValidationError("Q010"),
-          MacroValidationError("Q023")
-        ),
-        macroVerified = false
-      ))
+      probe.expectMsgPF() {
+        case HmdaFileValidationState(
+          maybeTs,
+          larSeq,
+          tsSyntactical,
+          tsValidity,
+          tsQuality,
+          larSyntactical,
+          larValidity,
+          larQuality,
+          qualityVerified,
+          larMacro,
+          macroVerified
+          ) =>
+          maybeTs mustBe Some(ts)
+          larSeq mustBe lars
+          tsSyntactical mustBe List()
+          tsValidity mustBe Nil
+          tsQuality mustBe Nil
+          larSyntactical.size mustBe 3
+          larSyntactical.contains(SyntacticalValidationError("8299422144", "S020", false)) mustBe true
+          larSyntactical.contains(SyntacticalValidationError("2185751599", "S010", false)) mustBe true
+          larSyntactical.contains(SyntacticalValidationError("2185751599", "S020", false)) mustBe true
+          larValidity.size mustBe 3
+          larValidity.contains(ValidityValidationError("4977566612", "V550", false)) mustBe true
+          larValidity.contains(ValidityValidationError("4977566612", "V555", false)) mustBe true
+          larValidity.contains(ValidityValidationError("4977566612", "V560", false)) mustBe true
+          larQuality.size mustBe 1
+          larQuality.contains(QualityValidationError("8299422144", "Q030", false)) mustBe true
+          qualityVerified mustBe false
+          larMacro.size mustBe 3
+          larMacro.contains(MacroValidationError("Q008")) mustBe true
+          larMacro.contains(MacroValidationError("Q010")) mustBe true
+          larMacro.contains(MacroValidationError("Q023")) mustBe true
+          macroVerified mustBe false
+
+      }
     }
 
     "verify quality edits" in {
