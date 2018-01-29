@@ -113,7 +113,7 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
 
       val simpleReportFlow: Flow[(Int, DisclosureReport), DisclosureReportPayload, NotUsed] =
         Flow[(Int, DisclosureReport)]
-          .mapAsyncUnordered(2)(comb => comb._2.generate(larSource, comb._1, institution))
+          .mapAsyncUnordered(1)(comb => comb._2.generate(larSource, comb._1, institution))
 
       val s3Flow: Flow[DisclosureReportPayload, CompletionStage[MultipartUploadResult], NotUsed] =
         Flow[DisclosureReportPayload]
