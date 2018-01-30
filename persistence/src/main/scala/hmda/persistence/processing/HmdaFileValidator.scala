@@ -3,6 +3,7 @@ package hmda.persistence.processing
 import akka.NotUsed
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.{ ask, pipe }
+import akka.persistence.SnapshotOffer
 import akka.stream.scaladsl.{ Sink, Source }
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
@@ -44,14 +45,21 @@ object HmdaFileValidator {
   val name = "HmdaFileValidator"
 
   case class ValidationStarted(submissionId: SubmissionId) extends Event
+
   case class ValidateMacro(source: LoanApplicationRegisterSource, replyTo: ActorRef) extends Command
+
   case class ValidateAggregate(ts: TransmittalSheet) extends Command
+
   case class CompleteMacroValidation(errors: LarValidationErrors, replyTo: ActorRef) extends Command
+
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
 
   case class GetNamedErrorResultsPaginated(editName: String, page: Int) extends Command
+
   case object GetSVState extends Command
+
   case object GetQMState extends Command
+
   case object GetValidatedLines extends Command
 
   def props(supervisor: ActorRef, validationStats: ActorRef, id: SubmissionId): Props = Props(new HmdaFileValidator(supervisor, validationStats, id))
@@ -70,6 +78,7 @@ object HmdaFileValidator {
       case TsValidityError(e) => this.copy(validityEdits = validityEdits + e.ruleName)
       case LarValidityError(e) => this.copy(validityEdits = validityEdits + e.ruleName)
     }
+
     def containsSVEdits = syntacticalEdits.nonEmpty || validityEdits.nonEmpty
   }
 
@@ -82,6 +91,7 @@ object HmdaFileValidator {
       case LarQualityError(e) => this.copy(qualityEdits = qualityEdits + e.ruleName)
       case LarMacroError(e) => this.copy(macroEdits = macroEdits + e.ruleName)
     }
+
     def containsQMEdits = qualityEdits.nonEmpty || macroEdits.nonEmpty
   }
 
@@ -99,10 +109,12 @@ object HmdaFileValidator {
       case LarValidated(_, _) => this.copy(larCount = larCount + 1)
       case TsValidated(tSheet) => this.copy(ts = Some(tSheet))
     }
+
     def bothVerified: Boolean = qualityVerified && macroVerified
   }
 
   case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)
+
 }
 
 class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submissionId: SubmissionId)
@@ -115,8 +127,13 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   implicit val timeout = Timeout(duration.seconds)
   val parserPersistenceId = s"${HmdaFileParser.name}-$submissionId"
 
+  var counter = 0
+  val snapshotCounter = config.getInt("hmda.journal.snapshot.counter")
+
   var institution: Option[Institution] = Some(Institution.empty.copy(id = submissionId.institutionId))
+
   def ctx: ValidationContext = ValidationContext(institution, Try(Some(submissionId.period.toInt)).getOrElse(None))
+
   override def preStart(): Unit = {
     super.preStart()
     val fInstitutions = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
@@ -131,6 +148,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   var qmState = QMState()
 
   val fHmdaFiling = (supervisor ? FindHmdaFiling(submissionId.period)).mapTo[ActorRef]
+
   def statRef = for {
     manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, submissionId)).mapTo[ActorRef]
     stat <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
@@ -248,6 +266,14 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       persistErrors(qualityErrors)
 
     case larErrors: LarValidationErrors =>
+      if (counter > snapshotCounter) {
+        log.info(s"Saving snapshot for $submissionId")
+        saveSnapshot(svState)
+        saveSnapshot(qmState)
+        saveSnapshot(verificationState)
+        counter = 0
+      }
+      counter += 1
       val errors = larErrors.errors
       val syntacticalErrors = errorsOfType(errors, Syntactical)
         .map(e => LarSyntacticalError(e))
@@ -306,6 +332,18 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     case Shutdown =>
       context stop self
 
+  }
+
+  override def receiveRecover: Receive = super.receiveRecover orElse {
+    case SnapshotOffer(_, sv: SVState) =>
+      log.info("Recovering SVState")
+      svState = sv
+    case SnapshotOffer(_, qm: QMState) =>
+      log.info("Recovering QMState")
+      qmState = qm
+    case SnapshotOffer(_, v: HmdaVerificationState) =>
+      log.info("Recovering HmdaVerificationState")
+      verificationState = v
   }
 
   private def allEditsByName(name: String): Source[ValidationError, NotUsed] = {
