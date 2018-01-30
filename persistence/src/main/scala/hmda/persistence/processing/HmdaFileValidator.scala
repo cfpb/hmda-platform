@@ -267,7 +267,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
     case larErrors: LarValidationErrors =>
       if (counter > snapshotCounter) {
-        log.info(s"Saving snapshot for $submissionId")
+        log.debug(s"Saving snapshot for $submissionId")
         saveSnapshot(svState)
         saveSnapshot(qmState)
         saveSnapshot(verificationState)
@@ -336,13 +336,13 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
   override def receiveRecover: Receive = super.receiveRecover orElse {
     case SnapshotOffer(_, sv: SVState) =>
-      log.info("Recovering SVState")
+      log.debug("Recovering SVState")
       svState = sv
     case SnapshotOffer(_, qm: QMState) =>
-      log.info("Recovering QMState")
+      log.debug("Recovering QMState")
       qmState = qm
     case SnapshotOffer(_, v: HmdaVerificationState) =>
-      log.info("Recovering HmdaVerificationState")
+      log.debug("Recovering HmdaVerificationState")
       verificationState = v
   }
 
