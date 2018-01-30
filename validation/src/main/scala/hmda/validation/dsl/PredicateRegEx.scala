@@ -16,6 +16,8 @@ object PredicateRegEx {
 
   def numericMatching(pattern: String): Predicate[String] = stringMatching(regExFor(pattern))
 
+  def allCharacters: Predicate[String] = stringMatching("^[a-zA-Z]+$".r)
+
   private def regExFor(pattern: String): Regex = {
     val result = pattern.map {
       case 'N' => "\\d"
