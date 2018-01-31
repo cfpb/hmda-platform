@@ -177,7 +177,7 @@ object LarCsvParser {
     } else if (value == "NA") {
       List(0).success
     } else {
-      check(value, fieldName)(Try(value.toDouble.toInt))(s"$fieldName is not numeric or NA")
+      check(value, fieldName)(Try(value.toDouble.toInt))(s"$fieldName is not double or NA")
     }
   }
 
@@ -187,13 +187,13 @@ object LarCsvParser {
     } else if (value == "NA") {
       List(0).success
     } else {
-      check(value, fieldName)(checkJustNumbers(value, fieldName))(s"$fieldName is not numeric or NA")
+      check(value, fieldName)(checkJustNumbers(value, fieldName))(s"$fieldName is not integer or NA")
     }
   }
 
   private def checkJustNumbers(value: String, fieldName: String): Try[Int] = {
     if (value.contains(".")) {
-      Failure(throw new Exception(s"$fieldName contains . , must be all integer values"))
+      Failure(new Exception(s"$fieldName contains . , must be all integer values"))
     } else {
       Try(value.toInt)
     }
