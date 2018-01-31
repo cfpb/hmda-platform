@@ -86,7 +86,7 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
       log.info(s"${self.path} subscribed to ${PubSubTopics.submissionSigned}")
 
     case SubmissionSignedPubSub(submissionId) =>
-      self ! GenerateDisclosureReports(submissionId)
+      //self ! GenerateDisclosureReports(submissionId)
 
     case GenerateDisclosureReports(submissionId) =>
       log.info(s"Generating disclosure reports for ${submissionId.toString}")
