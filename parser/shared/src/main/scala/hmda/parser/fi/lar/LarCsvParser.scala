@@ -177,7 +177,7 @@ object LarCsvParser {
     } else if (value == "NA") {
       List(0).success
     } else {
-      check(value, fieldName)(Try(value.toDouble.toInt))(s"$fieldName is not double or NA")
+      check(value, fieldName)(Try(value.toDouble.toInt))(s"$fieldName is not decimal or NA")
     }
   }
 

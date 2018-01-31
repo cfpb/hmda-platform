@@ -46,13 +46,13 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers wi
   property("Fail parsing when NA is not properly spelled") {
     forAll(larGen) { lar =>
       val na = lar.copy(rateSpread = "na")
-      LarCsvParser(na.toCSV).left.get mustBe LarParsingError(0, List("Rate Spread is not double or NA"))
+      LarCsvParser(na.toCSV).left.get mustBe LarParsingError(0, List("Rate Spread is not decimal or NA"))
 
       val notApplicable = lar.copy(geography = geographyGen.sample.get.copy(msa = "Not Applicable"))
       LarCsvParser(notApplicable.toCSV).left.get mustBe LarParsingError(0, List("MSA is not integer or NA"))
 
       val na2 = lar.copy(rateSpread = "N/A")
-      LarCsvParser(na2.toCSV).left.get mustBe LarParsingError(0, List("Rate Spread is not double or NA"))
+      LarCsvParser(na2.toCSV).left.get mustBe LarParsingError(0, List("Rate Spread is not decimal or NA"))
     }
   }
 
