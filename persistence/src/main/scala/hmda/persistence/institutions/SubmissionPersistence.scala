@@ -15,6 +15,7 @@ object SubmissionPersistence {
   case class UpdateSubmissionStatus(id: SubmissionId, status: SubmissionStatus) extends Command
   case class AddSubmissionFileName(id: SubmissionId, fileName: String) extends Command
   case class GetSubmissionById(id: SubmissionId) extends Command
+  case class GetSubmissionStatus(id: SubmissionId) extends Command
   case object GetLatestSubmission extends Command
 
   def props(institutionId: String, period: String): Props = Props(new SubmissionPersistence(institutionId, period))
@@ -104,6 +105,10 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
     case GetSubmissionById(id) =>
       val submission = state.submissions.find(s => s.id == id).getOrElse(Submission(SubmissionId(), Failed("No submission found"), 0L, 0L))
       sender() ! submission
+
+    case GetSubmissionStatus(id) =>
+      val submission = state.submissions.find(s => s.id == id).getOrElse(Submission(SubmissionId(), Failed("No submission found"), 0L, 0L))
+      sender() ! submission.status
 
     case GetLatestSubmission =>
       val latest = state.submissions.headOption.getOrElse(Submission(SubmissionId(), Failed("No submission found"), 0L, 0L))
