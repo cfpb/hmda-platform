@@ -55,4 +55,17 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers wi
       LarCsvParser(na2.toCSV).left.get mustBe LarParsingError(0, List("Rate Spread is not numeric or NA"))
     }
   }
+
+  property("Must fail parsing when income includes period (.) character") {
+    forAll(larGen) { lar =>
+      val income = lar.applicant.income
+      if (income != "NA") {
+        val invalidIncome = income.toDouble + 0.123
+        println(invalidIncome)
+        val invalidApplicant = lar.applicant.copy(income = invalidIncome.toString)
+        val invalidLar = lar.copy(applicant = invalidApplicant)
+        LarCsvParser(invalidLar.toCSV).left.get mustBe LarParsingError(0, List("income contains . , must be all integer values"))
+      }
+    }
+  }
 }

@@ -6,7 +6,7 @@ import hmda.model.parser.LarParsingError
 import scala.collection.immutable.ListMap
 import scalaz._
 import scalaz.Scalaz._
-import scala.util.{Failure, Success, Try}
+import scala.util.{ Failure, Success, Try }
 
 object LarCsvParser {
   def apply(s: String): Either[LarParsingError, LoanApplicationRegister] = {
@@ -155,7 +155,7 @@ object LarCsvParser {
         "MSA" -> fields(13),
         "State" -> fields(14),
         "County" -> fields(15),
-        "Applicant Income" -> fields(31),
+        "Applicant Income" -> fields(31)
       )
 
       val numericValidationList = numericFields.map { case (key, value) => toIntOrFail(value, key) }
@@ -166,7 +166,6 @@ object LarCsvParser {
       validationList.reduce(_ +++ _)
     }
   }
-
 
   private def toIntOrFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
     check(value, fieldName)(Try(value.toInt))(s"$fieldName is not an integer")
