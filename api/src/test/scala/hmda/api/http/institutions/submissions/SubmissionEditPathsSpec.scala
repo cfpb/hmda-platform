@@ -12,8 +12,9 @@ import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.messages.commands.processing.HmdaFileValidatorState.{ HmdaVerificationState, SVState }
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.{ GetSVState, HmdaVerificationState, SVState }
+import hmda.persistence.processing.HmdaFileValidator.GetSVState
 import hmda.validation.engine._
 import spray.json.{ JsNumber, JsObject }
 

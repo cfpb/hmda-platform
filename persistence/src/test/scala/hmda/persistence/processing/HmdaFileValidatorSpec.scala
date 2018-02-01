@@ -9,12 +9,12 @@ import hmda.parser.fi.lar.LarCsvParser
 import hmda.parser.fi.ts.TsCsvParser
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.messages.commands.processing.HmdaFileValidatorState.{HmdaVerificationState, QMState, SVState}
-import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{LarParsed, TsParsed}
+import hmda.persistence.messages.commands.processing.HmdaFileValidatorState.{ HmdaVerificationState, QMState, SVState }
+import hmda.persistence.messages.events.processing.HmdaFileParserEvents.{ LarParsed, TsParsed }
 import hmda.persistence.model.ActorSpec
 import hmda.persistence.processing.HmdaFileParser._
 import hmda.persistence.processing.HmdaFileValidator._
-import hmda.persistence.processing.ProcessingMessages.{BeginValidation, Persisted, ValidationCompletedWithErrors}
+import hmda.persistence.processing.ProcessingMessages.{ BeginValidation, Persisted, ValidationCompletedWithErrors }
 import hmda.persistence.processing.SingleLarValidation._
 import hmda.validation.engine._
 import org.scalatest.BeforeAndAfterEach
