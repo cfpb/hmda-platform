@@ -1,6 +1,5 @@
 package hmda.persistence.serialization.processing
 
-import hmda.model.fi.ts.TransmittalSheet
 import hmda.persistence.messages.commands.processing.HmdaFileValidatorState.{ HmdaVerificationState, QMState, SVState }
 import hmda.persistence.model.serialization.HmdaFileValidatorCommands.{ HmdaVerificationStateMessage, QMStateMessage, SVStateMessage }
 import hmda.persistence.serialization.ts.TsProtobufConverter._
