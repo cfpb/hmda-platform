@@ -36,6 +36,7 @@ import hmda.validation.stats.SubmissionLarStats.PersistStatsForMacroEdits
 import hmda.validation.stats.ValidationStats.AddSubmissionTaxId
 import hmda.validation.stats.SubmissionLarStats
 import HmdaFileWorker._
+import hmda.persistence.messages.commands.processing.HmdaFileValidatorState._
 
 import scala.util.Try
 import scala.concurrent.duration._
@@ -66,51 +67,6 @@ object HmdaFileValidator {
 
   def createHmdaFileValidator(system: ActorSystem, supervisor: ActorRef, validationStats: ActorRef, id: SubmissionId): ActorRef = {
     system.actorOf(HmdaFileValidator.props(supervisor, validationStats, id).withDispatcher("persistence-dispatcher"))
-  }
-
-  case class SVState(
-      syntacticalEdits: Set[String] = Set(),
-      validityEdits: Set[String] = Set()
-  ) {
-    def updated(event: Event): SVState = event match {
-      case TsSyntacticalError(e) => this.copy(syntacticalEdits = syntacticalEdits + e.ruleName)
-      case LarSyntacticalError(e) => this.copy(syntacticalEdits = syntacticalEdits + e.ruleName)
-      case TsValidityError(e) => this.copy(validityEdits = validityEdits + e.ruleName)
-      case LarValidityError(e) => this.copy(validityEdits = validityEdits + e.ruleName)
-    }
-
-    def containsSVEdits = syntacticalEdits.nonEmpty || validityEdits.nonEmpty
-  }
-
-  case class QMState(
-      qualityEdits: Set[String] = Set(),
-      macroEdits: Set[String] = Set()
-  ) {
-    def updated(event: Event): QMState = event match {
-      case TsQualityError(e) => this.copy(qualityEdits = qualityEdits + e.ruleName)
-      case LarQualityError(e) => this.copy(qualityEdits = qualityEdits + e.ruleName)
-      case LarMacroError(e) => this.copy(macroEdits = macroEdits + e.ruleName)
-    }
-
-    def containsQMEdits = qualityEdits.nonEmpty || macroEdits.nonEmpty
-  }
-
-  case class HmdaVerificationState(
-      qualityVerified: Boolean = false,
-      macroVerified: Boolean = false,
-      ts: Option[TransmittalSheet] = None,
-      larCount: Int = 0
-  ) {
-    def updated(event: Event): HmdaVerificationState = event match {
-      case EditsVerified(editType, v) =>
-        if (editType == Quality) this.copy(qualityVerified = v)
-        else if (editType == Macro) this.copy(macroVerified = v)
-        else this
-      case LarValidated(_, _) => this.copy(larCount = larCount + 1)
-      case TsValidated(tSheet) => this.copy(ts = Some(tSheet))
-    }
-
-    def bothVerified: Boolean = qualityVerified && macroVerified
   }
 
   case class PaginatedErrors(errors: Seq[ValidationError], totalErrors: Int)

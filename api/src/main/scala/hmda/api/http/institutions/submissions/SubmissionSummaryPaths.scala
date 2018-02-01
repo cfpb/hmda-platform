@@ -20,8 +20,8 @@ import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.messages.commands.processing.HmdaFileValidatorState.HmdaVerificationState
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator._
 
 import scala.concurrent.ExecutionContext
 import scala.util.{ Failure, Success, Try }
