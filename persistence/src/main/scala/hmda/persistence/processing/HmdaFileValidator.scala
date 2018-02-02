@@ -291,8 +291,8 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
 
   def readyToSign: Boolean = {
     val svReady = !svState.containsSVEdits
-    val qualityReady: Boolean =  verificationState.qualityVerified || qmState.qualityEdits.isEmpty
-    val macroReady: Boolean =  verificationState.macroVerified || qmState.macroEdits.isEmpty
+    val qualityReady: Boolean = verificationState.qualityVerified || qmState.qualityEdits.isEmpty
+    val macroReady: Boolean = verificationState.macroVerified || qmState.macroEdits.isEmpty
 
     svReady && qualityReady && macroReady
   }
