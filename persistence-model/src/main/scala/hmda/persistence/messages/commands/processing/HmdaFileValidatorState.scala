@@ -31,8 +31,6 @@ object HmdaFileValidatorState {
       case LarQualityError(e) => this.copy(qualityEdits = qualityEdits + e.ruleName)
       case LarMacroError(e) => this.copy(macroEdits = macroEdits + e.ruleName)
     }
-
-    def containsQMEdits = qualityEdits.nonEmpty || macroEdits.nonEmpty
   }
 
   case class HmdaVerificationState(
