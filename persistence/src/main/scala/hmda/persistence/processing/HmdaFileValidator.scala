@@ -252,7 +252,6 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       self ! CompleteValidation(replyTo)
 
     case CompleteValidation(replyTo, originalSender) =>
-      val readyToSign = !svState.containsSVEdits && (!qmState.containsQMEdits || verificationState.bothVerified)
       if (readyToSign) {
         log.debug(s"Validation completed for $submissionId")
         replyTo ! ValidationCompleted(originalSender)
@@ -288,6 +287,14 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     case Shutdown =>
       context stop self
 
+  }
+
+  def readyToSign: Boolean = {
+    val svReady = !svState.containsSVEdits
+    val qualityReady: Boolean = verificationState.qualityVerified || qmState.qualityEdits.isEmpty
+    val macroReady: Boolean = verificationState.macroVerified || qmState.macroEdits.isEmpty
+
+    svReady && qualityReady && macroReady
   }
 
   override def receiveRecover: Receive = super.receiveRecover orElse {
