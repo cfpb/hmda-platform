@@ -6,7 +6,7 @@ import HmdaFileValidatorStateProtobufConverter._
 import hmda.persistence.model.serialization.HmdaFileValidatorCommands.{ HmdaVerificationStateMessage, QMStateMessage, SVStateMessage }
 
 class HmdaFileValidatorStateProtobufSerializer extends SerializerWithStringManifest {
-  override def identifier: Int = 1011
+  override def identifier: Int = 1013
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
