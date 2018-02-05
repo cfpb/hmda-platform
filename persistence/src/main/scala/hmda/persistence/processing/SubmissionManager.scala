@@ -11,7 +11,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.fi.{ Signed => _, _ }
 import hmda.persistence.institutions.{ FilingPersistence, SubmissionPersistence }
 import hmda.persistence.messages.commands.filing.FilingCommands._
-import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindSubmissions }
+import hmda.persistence.HmdaSupervisor.{ FindFilings, FindHmdaFiling, FindProcessingActor, FindSubmissions }
 import hmda.persistence.institutions.SubmissionPersistence.AddSubmissionFileName
 import hmda.persistence.messages.CommonMessages.{ Command, GetState, Shutdown }
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
@@ -66,9 +66,7 @@ object SubmissionManager {
     val submissionParser: ActorRef = context.actorOf(HmdaFileParser
       .props(submissionId)
       .withDispatcher("persistence-dispatcher"))
-    val submissionValidator: ActorRef = context.actorOf(HmdaFileValidator
-      .props(supervisor, validationStats, submissionId)
-      .withDispatcher("persistence-dispatcher"))
+    val submissionValidator = (supervisor ? FindProcessingActor(HmdaFileValidator.name, submissionId)).mapTo[ActorRef]
     val filingPersistence = (supervisor ? FindFilings(FilingPersistence.name, submissionId.institutionId)).mapTo[ActorRef]
     val submissionPersistence = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
     validationStats ! AddSubmissionLarStatsActorRef(submissionLarStats, submissionId)
@@ -113,7 +111,7 @@ object SubmissionManager {
       case ParsingCompleted(sId) =>
         log.info(s"Completed parsing for submission: ${sId.toString}")
         submissionFSM ! CompleteParsing
-        submissionValidator ! BeginValidation(self)
+        submissionValidator.map(_ ! BeginValidation(self))
 
       case ParsingCompletedWithErrors(sId) =>
         log.info(s"Completed parsing with errors for submission: ${sId.toString}")
@@ -151,7 +149,7 @@ object SubmissionManager {
         case SubmissionFSM.name => sender() ! submissionFSM
         case HmdaRawFile.name => sender() ! submissionUpload
         case HmdaFileParser.name => sender() ! submissionParser
-        case HmdaFileValidator.name => sender() ! submissionValidator
+        case HmdaFileValidator.name => submissionValidator.map(sender() ! _)
         case SubmissionLarStats.name => sender() ! submissionLarStats
       }
 
