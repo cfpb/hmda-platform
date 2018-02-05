@@ -149,7 +149,9 @@ object SubmissionManager {
         case SubmissionFSM.name => sender() ! submissionFSM
         case HmdaRawFile.name => sender() ! submissionUpload
         case HmdaFileParser.name => sender() ! submissionParser
-        case HmdaFileValidator.name => submissionValidator.map(sender() ! _)
+        case HmdaFileValidator.name =>
+          val replyTo = sender()
+          submissionValidator.map(replyTo ! _)
         case SubmissionLarStats.name => sender() ! submissionLarStats
       }
 
