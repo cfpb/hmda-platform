@@ -24,5 +24,4 @@ object TsParserErrorModel {
     override def errorMessage: String = notAnInteger("agency code")
   }
 
-
 }
