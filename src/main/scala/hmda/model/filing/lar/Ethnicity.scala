@@ -6,7 +6,7 @@ sealed trait Ethnicity {
 }
 
 object Ethnicity {
-  val values = List(1, 11, 12, 13, 14, 2, 3, 4)
+  val values = List(1, 11, 12, 13, 14, 2, 3, 4, 5)
 
   def valueOf(code: Int): Ethnicity = {
     code match {
@@ -18,6 +18,7 @@ object Ethnicity {
       case 2  => NotHispanicOrLatino
       case 3  => InformationNotProvided
       case 4  => EthnicityNotApplicable
+      case 5  => EthnicityNoCoApplicant
       case _  => throw new Exception("Invalid Ethnicity Code")
     }
   }
@@ -62,4 +63,9 @@ case object InformationNotProvided extends Ethnicity {
 case object EthnicityNotApplicable extends Ethnicity {
   override val code: Int = 4
   override val description: String = "Not Applicable"
+}
+
+case object EthnicityNoCoApplicant extends Ethnicity {
+  override val code: Int = 5
+  override val description: String = "No co-applicant"
 }
