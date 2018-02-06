@@ -62,16 +62,6 @@ sealed trait TsFormatValidator {
 
   }
 
-  def validateTsLength(
-      values: Seq[String]): TsParserValidationResult[Seq[String]] = {
-    if (values.lengthCompare(numberOfFields) == 0) {
-      values.validNel
-    } else {
-      IncorrectNumberOfFields(numberOfFields).invalidNel
-    }
-
-  }
-
   def validateTsValues(
       id: String,
       institutionName: String,
