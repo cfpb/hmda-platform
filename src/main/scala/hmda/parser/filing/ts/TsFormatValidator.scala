@@ -23,9 +23,8 @@ sealed trait TsFormatValidator {
 
   def validateTs(
       values: Seq[String]): TsParserValidationResult[TransmittalSheet] = {
-    println("length: " + values.length)
     if (values.lengthCompare(numberOfFields) != 0) {
-      IncorrectNumberOfFields(numberOfFields).invalidNel
+      IncorrectNumberOfFields(values.length).invalidNel
     } else {
       val id = values.headOption.getOrElse("")
       val institutionName = values(1)

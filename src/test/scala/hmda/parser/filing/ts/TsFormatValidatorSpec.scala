@@ -29,7 +29,7 @@ class TsFormatValidatorSpec
     val numberOfFields = config.getInt("hmda.filing.ts.length")
     val values = List("a", "b", "c")
     validateTs(values) mustBe Invalid(
-      NonEmptyList.of(IncorrectNumberOfFields(numberOfFields)))
+      NonEmptyList.of(IncorrectNumberOfFields(values.length)))
   }
 
   property(
