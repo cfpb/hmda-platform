@@ -12,7 +12,7 @@ trait ValidationError {
   def ruleName: String
   def errorType: ValidationErrorType
   def ts: Boolean
-  def toCsv: String = s"$errorType, $ruleName, $publicErrorId"
+  def toCsv: String = s"$errorType, $ruleName, $publicErrorId\n"
   def publicErrorId = if (ts) "Transmittal Sheet" else errorId
 }
 
@@ -29,4 +29,10 @@ case class MacroValidationError(ruleName: String) extends ValidationError {
   override def ts: Boolean = false
   override def errorId: String = ""
   override def errorType: ValidationErrorType = Macro
+}
+case object EmptyValidationError extends ValidationError {
+  override def errorId: String = "empty"
+  override def ruleName: String = "empty"
+  override def errorType: ValidationErrorType = Macro
+  override def ts: Boolean = false
 }

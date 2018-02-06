@@ -3,9 +3,8 @@ package hmda.api.http.institutions.submissions
 import akka.actor.ActorRef
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Route
 import akka.pattern.ask
-import hmda.api.http.InstitutionHttpApiSpec
+import hmda.api.http.InstitutionHttpApiAsyncSpec
 import hmda.api.model.{ EditResult, _ }
 import hmda.model.fi._
 import hmda.model.fi.lar.LarGenerators
@@ -13,15 +12,15 @@ import hmda.model.fi.ts.{ TransmittalSheet, TsGenerators }
 import hmda.model.validation._
 import hmda.persistence.HmdaSupervisor.FindProcessingActor
 import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.messages.commands.processing.HmdaFileValidatorState.{ HmdaVerificationState, SVState }
 import hmda.persistence.processing.HmdaFileValidator
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
+import hmda.persistence.processing.HmdaFileValidator.GetSVState
 import hmda.validation.engine._
 import spray.json.{ JsNumber, JsObject }
 
-import scala.concurrent.{ Await, Future }
-import scala.concurrent.duration._
+import scala.concurrent.Future
 
-class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators with TsGenerators {
+class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenerators with TsGenerators {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
@@ -48,18 +47,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       r.validity mustBe EditCollection(Seq(v280info, v285info))
       r.quality mustBe VerifiableEditCollection(verified = false, Seq())
       r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info))
-    }
-  }
-
-  "return a list of validation errors for a single type" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.OK
-      responseAs[SingleTypeEditResults].edits mustBe Seq(v280info, v285info)
-    }
-
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits/macro") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.OK
-      responseAs[SingleTypeEditResults].edits mustBe Seq(q007info)
     }
   }
 
@@ -94,11 +81,19 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
       // Check for correct baseline validation state.
       //   Incorrect baseline will invalidate the other tests in this section.
-      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
-      state.validityErrors.isEmpty mustBe true
-      state.syntacticalErrors.isEmpty mustBe true
-      state.macroVerified mustBe false
-      state.qualityVerified mustBe false
+      val fState: Future[(HmdaVerificationState, Boolean)] = for {
+        s <- fHmdaValidatorActor(2)
+        xs <- (s ? GetState).mapTo[HmdaVerificationState]
+        svState <- (s ? GetSVState).mapTo[SVState]
+      } yield (xs, svState.containsSVEdits)
+
+      fState.map {
+        case ((state: HmdaVerificationState, svEdits: Boolean)) =>
+          svEdits mustBe false
+          state.macroVerified mustBe false
+          state.qualityVerified mustBe false
+      }
+
     }
   }
 
@@ -113,9 +108,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
-      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
-      state.macroVerified mustBe true
-      state.qualityVerified mustBe false
+      fVerificationState.map { state =>
+        state.qualityVerified mustBe false
+        state.macroVerified mustBe true
+      }
     }
   }
 
@@ -130,8 +126,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(true, currentStatus)
 
       // test that it updates validation state
-      val state: HmdaFileValidationState = Await.result(fValidationState, 5.seconds)
-      state.qualityVerified mustBe true
+      fVerificationState.map { state =>
+        state.qualityVerified mustBe true
+        state.macroVerified mustBe true
+      }
     }
   }
 
@@ -142,20 +140,11 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
     postWithCfpbHeaders("/institutions/0/filings/2017/submissions/2/edits/quality", verification) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
       status mustBe StatusCodes.OK
       responseAs[EditsVerifiedResponse] mustBe EditsVerifiedResponse(false, currentStatus)
-    }
-  }
 
-  ///// 405 (Method Not Allowed) Responses /////
-
-  "Edit Type endpoint: return 405 when posting verification to syntactical endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> Route.seal(institutionsRoutes(supervisor, querySupervisor, validationStats)) ~> check {
-      status mustBe StatusCodes.MethodNotAllowed
-    }
-  }
-
-  "Edit Type endpoint: return 405 when posting verification to validity endpoint" in {
-    postWithCfpbHeaders("/institutions/0/filings/2017/submissions/0/edits/validity") ~> Route.seal(institutionsRoutes(supervisor, querySupervisor, validationStats)) ~> check {
-      status mustBe StatusCodes.MethodNotAllowed
+      fVerificationState.map { state =>
+        state.qualityVerified mustBe false
+        state.macroVerified mustBe true
+      }
     }
   }
 
@@ -175,25 +164,6 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
   }
   "Edits endpoint: return 404 for nonexistent submission" in {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
-    }
-  }
-
-  "Edit Type endpoint: return 404 for nonexistent institution" in {
-    getWithCfpbHeaders(s"/institutions/xxxxx/filings/2017/submissions/1/edits/validity") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "Institution xxxxx not found"
-    }
-  }
-  "Edit Type endpoint: return 404 for nonexistent filing period" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/1980/submissions/1/edits/quality") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
-      status mustBe StatusCodes.NotFound
-      responseAs[ErrorResponse].message mustBe "1980 filing period not found for institution 0"
-    }
-  }
-  "Edit Type endpoint: return 404 for nonexistent submission" in {
-    getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/0/edits/syntactical") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
       status mustBe StatusCodes.NotFound
       responseAs[ErrorResponse].message mustBe "Submission 0 not found for 2017 filing period"
     }
@@ -247,10 +217,10 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiSpec with LarGenerators 
 
   }
 
-  private def fValidationState: Future[HmdaFileValidationState] = {
+  private def fVerificationState: Future[HmdaVerificationState] = {
     for {
       s <- fHmdaValidatorActor(2)
-      xs <- (s ? GetState).mapTo[HmdaFileValidationState]
+      xs <- (s ? GetState).mapTo[HmdaVerificationState]
     } yield xs
   }
 

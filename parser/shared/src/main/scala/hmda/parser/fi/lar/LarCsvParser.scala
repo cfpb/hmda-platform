@@ -145,41 +145,65 @@ object LarCsvParser {
         "Lien Status" -> fields(38)
       )
 
-      val NAFields = ListMap(
+      val doubleNAFields = ListMap(
+        "Census Tract" -> fields(16),
+        "Rate Spread" -> fields(36)
+      )
+
+      val intNAFields = ListMap(
         "Date Application Received" -> fields(4),
         "MSA" -> fields(13),
         "State" -> fields(14),
         "County" -> fields(15),
-        "Census Tract" -> fields(16),
-        "Applicant Income" -> fields(31),
-        "Rate Spread" -> fields(36)
+        "Applicant Income" -> fields(31)
       )
 
       val numericValidationList = numericFields.map { case (key, value) => toIntOrFail(value, key) }
-      val naValidationList = NAFields.map { case (key, value) => checkNA(value, key) }
-      val validationList = numericValidationList ++ naValidationList
+      val doubleNAValidationList = doubleNAFields.map { case (key, value) => checkDoubleOrNA(value, key) }
+      val intNAValidationList = intNAFields.map { case (key, value) => checkIntOrNA(value, key) }
+      val validationList = numericValidationList ++ doubleNAValidationList ++ intNAValidationList
 
       validationList.reduce(_ +++ _)
     }
   }
 
-  def toIntOrFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
-    Try(value.toInt) match {
-      case Failure(_) => s"$fieldName is not an integer".failure.toValidationNel
-      case Success(result) => List(result).success
-    }
+  private def toIntOrFail(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
+    check(value, fieldName)(Try(value.toInt))(s"$fieldName is not an integer")
   }
 
-  def checkNA(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
+  private def checkDoubleOrNA(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
     if (value == "") {
       s"$fieldName cannot have empty value".failure.toValidationNel
     } else if (value == "NA") {
       List(0).success
     } else {
-      Try(value.toDouble.toInt) match {
-        case Success(result) => List(result).success
-        case Failure(_) => s"$fieldName is not numeric or NA".failure.toValidationNel
-      }
+      check(value, fieldName)(Try(value.toDouble.toInt))(s"$fieldName is not decimal or NA")
     }
   }
+
+  private def checkIntOrNA(value: String, fieldName: String): ValidationNel[String, List[Int]] = {
+    if (value == "") {
+      s"$fieldName cannot have empty value".failure.toValidationNel
+    } else if (value == "NA") {
+      List(0).success
+    } else {
+      check(value, fieldName)(checkJustNumbers(value, fieldName))(s"$fieldName is not integer or NA")
+    }
+  }
+
+  private def checkJustNumbers(value: String, fieldName: String): Try[Int] = {
+    if (value.contains(".")) {
+      Failure(new Exception(s"$fieldName contains . , must be all integer values"))
+    } else {
+      Try(value.toInt)
+    }
+  }
+
+  private def check[A](value: String, fieldName: String)(f: Try[A])(message: String): ValidationNel[String, List[A]] = {
+    f match {
+      case Success(result) => List(result).success
+      case Failure(_) => s"$message".failure.toValidationNel
+    }
+  }
+
 }

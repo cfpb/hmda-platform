@@ -1,71 +1,98 @@
 package hmda.api.http
 
+import akka.NotUsed
+import akka.stream.scaladsl.{ Sink, Source }
+import hmda.api._
 import hmda.api.model._
 import hmda.census.model.CbsaLookup
 import hmda.model.edits.EditMetaDataLookup
-import hmda.model.fi.{ HmdaFileRow, HmdaRowError }
-import hmda.model.validation.ValidationError
-import hmda.persistence.processing.HmdaFileValidator.HmdaFileValidationState
-import spray.json.{ JsNumber, JsObject, JsString, JsValue }
+import hmda.model.fi.ts.TransmittalSheet
+import hmda.model.fi.HmdaFileRow
+import hmda.model.validation.{ EmptyValidationError, ValidationError }
+import hmda.persistence.messages.CommonMessages.Event
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
+import hmda.persistence.messages.events.processing.HmdaFileValidatorEvents._
+import hmda.util.SourceUtils
+import spray.json.{ JsNumber, JsObject, JsString }
 
-trait ValidationErrorConverter {
+import scala.concurrent.Future
 
-  def editsOfType(errType: String, vs: HmdaFileValidationState): Seq[ValidationError] = {
-    errType.toLowerCase match {
-      case "syntactical" => vs.syntacticalErrors
-      case "validity" => vs.validityErrors
-      case "quality" => vs.qualityErrors
-      case "macro" => vs.larMacro
-      case _ => Seq()
-    }
+trait ValidationErrorConverter extends SourceUtils {
+
+  ///// Edit Collection
+  def editInfos[ec: EC, mat: MAT, as: AS](editNames: Set[String]): List[EditInfo] = {
+    editNames.toList.sorted.map(name => EditInfo(name, editDescription(name)))
   }
-
-  def editInfos(edits: Seq[ValidationError]): Seq[EditInfo] = {
-    val errsByEdit: Map[String, Seq[ValidationError]] = edits.groupBy(_.ruleName)
-
-    val info = errsByEdit.map {
-      case (editName: String, _) =>
-        EditInfo(editName, editDescription(editName))
-    }.toSeq
-
-    info.sortBy(_.edit)
-  }
-
-  def validationErrorsToCsvResults(vs: HmdaFileValidationState): String = {
-    val errors: Seq[ValidationError] = vs.allErrors
-    val rows: Seq[String] = errors.map(_.toCsv)
-    "editType, editId, loanId\n" + rows.mkString("\n")
-  }
-
-  def validationErrorToResultRow(err: ValidationError, vs: HmdaFileValidationState): EditResultRow = {
-    EditResultRow(RowId(err.publicErrorId), relevantFields(err, vs))
-  }
-
-  //// Helper methods
 
   private def editDescription(editName: String): String = {
     EditMetaDataLookup.forEdit(editName).editDescription
   }
 
-  private def relevantFields(err: ValidationError, vs: HmdaFileValidationState): JsObject = {
-    val fieldNames: Seq[String] = EditMetaDataLookup.forEdit(err.ruleName).fieldNames
+  ///// Edits Report CSV
+  private val csvHeaderSource = Source.fromIterator(() => Iterator("editType, editId, loanId\n"))
 
-    val jsVals: Seq[(String, JsValue)] = fieldNames.map { fieldName =>
-      val row = relevantRow(err, vs)
+  def csvResultStream[ec: EC, mat: MAT, as: AS](eventSource: Source[Event, NotUsed]): Source[String, Any] = {
+    val edits = allEdits(eventSource)
+    val csvSource = edits.map(_.toCsv)
+    csvHeaderSource.concat(csvSource)
+  }
+
+  def allEdits(eventSource: Source[Event, NotUsed]) = {
+    val edits: Source[ValidationError, NotUsed] =
+      eventSource.map {
+        case LarSyntacticalError(err) => err
+        case TsSyntacticalError(err) => err
+        case LarValidityError(err) => err
+        case TsValidityError(err) => err
+        case LarQualityError(err) => err
+        case TsQualityError(err) => err
+        case LarMacroError(err) => err
+        case _ => EmptyValidationError
+      }
+
+    edits.filter(_ != EmptyValidationError)
+  }
+
+  ///// Edit Details
+  def resultRowsFromCollection[ec: EC, mat: MAT, as: AS](errors: Seq[ValidationError], ts: Option[TransmittalSheet], eventSource: Source[Event, NotUsed]): Future[Seq[EditResultRow]] = {
+    val fieldNames = EditMetaDataLookup.forEdit(errors.head.ruleName).fieldNames
+    val rowIds = errors.map(_.errorId)
+
+    val tsRows: Seq[EditResultRow] = tsRow(errors, ts, fieldNames)
+
+    val larRowsF: Future[Seq[EditResultRow]] =
+      relevantLarRows(rowIds, fieldNames, eventSource)
+        .filter(_.isDefined).map(_.get).runWith(Sink.seq)
+
+    larRowsF.map(larRows => tsRows ++ larRows)
+  }
+
+  private def fieldJsonForRow(fieldNames: Seq[String], row: HmdaFileRow): JsObject = {
+    val jsVals = fieldNames.map { fieldName =>
       val fieldValue = if (fieldName == "Metropolitan Statistical Area / Metropolitan Division Name") {
         CbsaLookup.nameFor(row.valueOf("Metropolitan Statistical Area / Metropolitan Division").toString)
-      } else {
-        row.valueOf(fieldName)
-      }
+      } else row.valueOf(fieldName)
+
       (fieldName, toJsonVal(fieldValue))
     }
-
     JsObject(jsVals: _*)
   }
 
-  private def relevantRow(err: ValidationError, vs: HmdaFileValidationState): HmdaFileRow = {
-    if (err.ts) vs.ts.getOrElse(HmdaRowError())
-    else vs.lars.find(lar => lar.loan.id == err.errorId).getOrElse(HmdaRowError())
+  private def tsRow(errors: Seq[ValidationError], ts: Option[TransmittalSheet], fieldNames: Seq[String]): Seq[EditResultRow] = {
+    errors.find(_.ts) match {
+      case Some(error) =>
+        val fieldJson = fieldJsonForRow(fieldNames, ts.getOrElse(TransmittalSheet()))
+        Seq(EditResultRow(RowId(error.publicErrorId), fieldJson))
+      case None => Seq()
+    }
+  }
+
+  private def relevantLarRows[ec: EC, mat: MAT, as: AS](rowIds: Seq[String], fieldNames: Seq[String], eventSource: Source[Event, NotUsed]): Source[Option[EditResultRow], NotUsed] = {
+    eventSource.map {
+      case LarValidated(lar, _) if rowIds.contains(lar.loan.id) =>
+        Some(EditResultRow(RowId(lar.loan.id), fieldJsonForRow(fieldNames, lar)))
+      case _ => None
+    }
   }
 
   private def toJsonVal(value: Any) = {
