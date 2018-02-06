@@ -47,8 +47,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenera
       val r = responseAs[SummaryEditResults]
       r.syntactical mustBe EditCollection(Seq(s010info, s020info))
       r.validity mustBe EditCollection(Seq(v280info, v285info))
-      r.quality mustBe VerifiableEditCollection(verified = false, Seq())
-      r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info, q666info))
+      r.quality mustBe VerifiableEditCollection(verified = false, Seq(q666info))
+      r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info))
     }
   }
 
@@ -56,6 +56,17 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenera
   "return row details for an edit" in {
     val path = "/institutions/0/filings/2017/submissions/1/edits/S010"
     val expected = EditResult("S010", s010, path, 1, 1)
+
+    getWithCfpbHeaders(path) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
+      status mustBe StatusCodes.OK
+      responseAs[EditResult] mustBe expected
+    }
+  }
+
+  val q666Result = Seq(EditResultRow(RowId("loan1"), JsObject(("Record Identifier", JsNumber(111)))))
+  "return row details for Q666" in {
+    val path = "/institutions/0/filings/2017/submissions/1/edits/Q666"
+    val expected = EditResult("Q666", q666Result, path, 1, 1)
 
     getWithCfpbHeaders(path) ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
       status mustBe StatusCodes.OK
@@ -179,8 +190,8 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenera
     val v1 = ValidityValidationError("loan1", "V280", false)
     val v2 = ValidityValidationError("loan2", "V285", false)
     val v3 = ValidityValidationError("loan3", "V285", false)
+    val q1 = QualityValidationError("loan1", "Q666", false)
     val m1 = MacroValidationError("Q007")
-    val m2 = MacroValidationError("Q666")
 
     val l1 = sampleLar
     val lar1 = l1.copy(
@@ -204,7 +215,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenera
 
     val ts = tsGen.sample.getOrElse(TransmittalSheet()).copy(agencyCode = 888)
 
-    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1, m2))
+    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, q1, m1))
     val tsValidationErrors = TsValidationErrors(Seq(s2.copy(ts = true)))
 
     for {
