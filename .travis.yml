@@ -8,15 +8,16 @@ cache:
 
 language: scala
 
-scala: 2.12.3
+scala: 2.12.4
 
 jdk:
+- oraclejdk9
 - oraclejdk8
 
 before_install:
   - . $HOME/.nvm/nvm.sh
-  - nvm install 0.10.36
-  - nvm use 0.10.36
+  - nvm install 8.9.4
+  - nvm use 8.9.4
 
 script: 
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test assembly
