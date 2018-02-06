@@ -32,12 +32,14 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenera
   val v280Description = "MSA/MD must = a valid Metropolitan Statistical Area or Metropolitan Division (if appropriate) code for period being processed or NA."
   val v285Description = "State must = a valid FIPS code or (NA where MSA/MD = NA)."
   val q007Description = "If action taken type = 2, then the total number of these loans should be ≤ 15% of the total number of loan applications."
+  val q666Description = "The Loan/Application Number data field contains all alphabetical characters following the pattern of a name or numbers and dashes following the pattern of a Social Security number. Institutions are strongly encouraged not to use the applicant’s or borrower’s name or Social Security number in the Loan/Application Number field, for privacy reasons. Please review the data in this field and consider updating your file, if appropriate."
 
   val s020info = EditInfo("S020", s020Description)
   val s010info = EditInfo("S010", s010Description)
   val v280info = EditInfo("V280", v280Description)
   val v285info = EditInfo("V285", v285Description)
   val q007info = EditInfo("Q007", q007Description)
+  val q666info = EditInfo("Q666", q666Description)
 
   "return summary of validation errors" in {
     getWithCfpbHeaders(s"/institutions/0/filings/2017/submissions/1/edits") ~> institutionsRoutes(supervisor, querySupervisor, validationStats) ~> check {
@@ -46,7 +48,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenera
       r.syntactical mustBe EditCollection(Seq(s010info, s020info))
       r.validity mustBe EditCollection(Seq(v280info, v285info))
       r.quality mustBe VerifiableEditCollection(verified = false, Seq())
-      r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info))
+      r.`macro` mustBe VerifiableEditCollection(verified = false, Seq(q007info, q666info))
     }
   }
 
@@ -178,6 +180,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenera
     val v2 = ValidityValidationError("loan2", "V285", false)
     val v3 = ValidityValidationError("loan3", "V285", false)
     val m1 = MacroValidationError("Q007")
+    val m2 = MacroValidationError("Q666")
 
     val l1 = sampleLar
     val lar1 = l1.copy(
@@ -201,7 +204,7 @@ class SubmissionEditPathsSpec extends InstitutionHttpApiAsyncSpec with LarGenera
 
     val ts = tsGen.sample.getOrElse(TransmittalSheet()).copy(agencyCode = 888)
 
-    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1))
+    val larValidationErrors = LarValidationErrors(Seq(s1, s2, v1, v2, v3, m1, m2))
     val tsValidationErrors = TsValidationErrors(Seq(s2.copy(ts = true)))
 
     for {

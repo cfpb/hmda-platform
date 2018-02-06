@@ -11,7 +11,7 @@ object Q666 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): Result = {
     val loanId = lar.loan.id
-    loanId not allCharacters
+    (loanId is containsDigits) and (loanId not ssnFormat)
   }
 
 }

@@ -36,7 +36,7 @@ class SingleLarValidationHttpApiSpec extends WordSpec with MustMatchers with Sca
   val validationStats = ValidationStats.createValidationStats(system)
   val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
 
-  val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
+  val larCsv = "2|0123456789|9|9ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
   val invalidLarCsv = "invalid|0123456789|invalid|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
 
   val lar = LarCsvParser(larCsv).right.get // Assuming the hardcoded value will parse correctly
