@@ -7,6 +7,6 @@ case class Contact(
     address: Address = Address()
 ) {
   def toCSV: String = {
-    s"$name|$phone|$email|$address"
+    s"$name|$phone|$email|${address.toCSV}"
   }
 }
