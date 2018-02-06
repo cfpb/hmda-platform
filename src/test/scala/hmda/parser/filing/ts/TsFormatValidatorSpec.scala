@@ -1,9 +1,5 @@
 package hmda.parser.filing.ts
 
-import com.typesafe.config.ConfigFactory
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
-
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.model.filing.ts.TsGenerators._
