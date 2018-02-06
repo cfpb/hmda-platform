@@ -9,5 +9,9 @@ case class LoanApplicationRegister(
     actionTakenDate: Int,
     geography: Geography,
     applicant: Applicant,
-    coApplicant: Applicant
+    coApplicant: Applicant,
+    purchaserType: PurchaserType,
+    rateSpread: String,
+    hoepaStatus: HOEPAStatus,
+    lienStatus: LienStatus
 )

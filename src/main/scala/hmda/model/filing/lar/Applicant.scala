@@ -16,5 +16,12 @@ case class Applicant(
     raceObserved: RaceObserved,
     otherNativeRace: String,
     otherAsianRace: String,
-    otherPacificIslanderRace: String
+    otherPacificIslanderRace: String,
+    sex: Sex,
+    coSex: Sex,
+    sexObserved: SexObserved,
+    coSexObserved: SexObserved,
+    age: Int,
+    coAge: Int,
+    income: String
 )
