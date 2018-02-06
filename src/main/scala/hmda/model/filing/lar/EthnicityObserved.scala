@@ -10,21 +10,21 @@ object EthnicityObserved {
 
   def valueOf(code: Int): EthnicityObserved = {
     code match {
-      case 1 => VisualOrSurname
-      case 2 => NotVisualOrSurname
+      case 1 => VisualOrSurnameEthnicity
+      case 2 => NotVisualOrSurnameEthnicity
       case 3 => EthnicityObservedNotApplicable
       case _ => throw new Exception("Invalid Ethnicity Observed Code")
     }
   }
 }
 
-case object VisualOrSurname extends EthnicityObserved {
+case object VisualOrSurnameEthnicity extends EthnicityObserved {
   override val code: Int = 1
   override val description: String =
     "Collected on the basis of visual observation or surname"
 }
 
-case object NotVisualOrSurname extends EthnicityObserved {
+case object NotVisualOrSurnameEthnicity extends EthnicityObserved {
   override val code: Int = 2
   override val description: String =
     "Not collected on the basis of visual observation or surname"
