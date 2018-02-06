@@ -23,6 +23,7 @@ sealed trait TsFormatValidator {
 
   def validateTs(
       values: Seq[String]): TsParserValidationResult[TransmittalSheet] = {
+    println("length: " + values.length)
     if (values.lengthCompare(numberOfFields) != 0) {
       IncorrectNumberOfFields(numberOfFields).invalidNel
     } else {
