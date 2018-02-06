@@ -23,5 +23,6 @@ case class Applicant(
     coSexObserved: SexObserved,
     age: Int,
     coAge: Int,
-    income: String
+    income: String,
+    creditScore: Int
 )
