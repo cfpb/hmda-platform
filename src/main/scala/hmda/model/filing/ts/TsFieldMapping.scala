@@ -14,7 +14,7 @@ object TsFieldMapping {
     "Contact Person's Office City" -> ts.contact.address.city,
     "Contact Person's Office State" -> ts.contact.address.state,
     "Contact Person's Office Zip Code" -> ts.contact.address.zipCode,
-    "Federal Agency" -> ts.agency.value,
+    "Federal Agency" -> ts.agency.code,
     "Total Line Entries" -> ts.totalLines,
     "Tax ID" -> ts.taxId,
     "Legal Entity Identifier" -> ts.LEI

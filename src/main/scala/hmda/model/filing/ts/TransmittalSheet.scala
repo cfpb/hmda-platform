@@ -15,7 +15,7 @@ case class TransmittalSheet(
     LEI: String = ""
 ) extends HmdaFileRow {
   def toCSV: String = {
-    s"$id|$institutionName|$year|$quarter|${contact.toCSV}|${agency.value}|$totalLines|$taxId|$LEI"
+    s"$id|$institutionName|$year|$quarter|${contact.toCSV}|${agency.code}|$totalLines|$taxId|$LEI"
   }
 
   override def valueOf(field: String): Any = {
