@@ -95,10 +95,10 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
 
       probe.send(hmdaFileValidator2, GetState)
       probe.expectMsg(HmdaVerificationState(false, false, Some(ts), 4))
-      probe.send(hmdaFileValidator, GetSVState)
-      probe.expectMsg(SVState(Set("S999"), Set("V999")))
-      probe.send(hmdaFileValidator, GetQMState)
-      probe.expectMsg(QMState(Set("Q999"), Set("Q007")))
+      probe.send(hmdaFileValidator2, GetSVState)
+      probe.expectMsg(SVState(Set("S010", "S020"), Set("V550", "V555", "V560")))
+      probe.send(hmdaFileValidator2, GetQMState)
+      probe.expectMsg(QMState(Set("Q030", "Q666"), Set("Q008", "Q010", "Q023")))
     }
 
     "verify quality edits" in {

@@ -40,7 +40,8 @@ trait LarQualityEngine extends LarCommonEngine with ValidationApi {
       Q064,
       Q066,
       Q067,
-      Q068
+      Q068,
+      Q666
     ).map(check(_, lar, lar.loan.id, Quality, false))
 
     validateAll(checks, lar)

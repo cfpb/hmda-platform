@@ -16,10 +16,15 @@ object PredicateRegEx {
 
   def numericMatching(pattern: String): Predicate[String] = stringMatching(regExFor(pattern))
 
+  def containsDigits: Predicate[String] = stringMatching("\\d{1}".r)
+
+  def ssnFormat: Predicate[String] = numericMatching("NNN-NN-NNNN")
+
   private def regExFor(pattern: String): Regex = {
     val result = pattern.map {
       case 'N' => "\\d"
       case '.' => "\\."
+      case '-' => "\\-"
     }
     result.mkString("^", "", "$").r
   }
