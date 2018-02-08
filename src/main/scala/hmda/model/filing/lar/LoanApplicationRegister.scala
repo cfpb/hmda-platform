@@ -34,7 +34,7 @@ case class LoanApplicationRegister(
     negativeAmortization: NegativeAmortizationEnum,
     otherNonAmortizingFeatures: OtherNonAmortizingFeaturesEnum,
     propertyValue: String,
-    manufacturedHomeSecuredPropertyType: ManufacturedHomeSecuredPropertyEnum,
+    manufacturedHomeSecuredProperty: ManufacturedHomeSecuredPropertyEnum,
     totalUnits: Int,
     multiFamilyAffordableUnits: String,
     applicationSubmission: ApplicationSubmissionEnum,
@@ -46,5 +46,5 @@ case class LoanApplicationRegister(
     otherAusResult: String,
     reverseMortgage: MortgageTypeEnum,
     lineOfCredit: LineOfCreditEnum,
-    businessOrCommercialPurposeType: BusinessOrCommercialBusinessEnum
+    businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum
 )
