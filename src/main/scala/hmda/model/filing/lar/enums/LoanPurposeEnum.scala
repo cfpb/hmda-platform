@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait LoanPurpose {
+sealed trait LoanPurposeEnum {
   val code: Int
   val description: String
 }
 
-object LoanPurpose {
+object LoanPurposeEnum {
   val values = List(1, 2, 31, 32, 4, 5)
 
-  def valueOf(code: Int): LoanPurpose = {
+  def valueOf(code: Int): LoanPurposeEnum = {
     code match {
       case 1  => HomePurchase
       case 2  => HomeImprovement
@@ -21,32 +21,32 @@ object LoanPurpose {
   }
 }
 
-case object HomePurchase extends LoanPurpose {
+case object HomePurchase extends LoanPurposeEnum {
   override val code: Int = 1
   override val description: String = "Home Purchase"
 }
 
-case object HomeImprovement extends LoanPurpose {
+case object HomeImprovement extends LoanPurposeEnum {
   override val code: Int = 2
   override val description: String = "Home Improvement"
 }
 
-case object Refinancing extends LoanPurpose {
+case object Refinancing extends LoanPurposeEnum {
   override val code: Int = 31
   override val description: String = "Refinancing"
 }
 
-case object CashOutRefinancing extends LoanPurpose {
+case object CashOutRefinancing extends LoanPurposeEnum {
   override val code: Int = 32
   override val description: String = "Cash-out refinancing"
 }
 
-case object OtherPurpose extends LoanPurpose {
+case object OtherPurpose extends LoanPurposeEnum {
   override val code: Int = 4
   override val description: String = "Other purpose"
 }
 
-case object LoanPurposeNotApplicable extends LoanPurpose {
+case object LoanPurposeNotApplicable extends LoanPurposeEnum {
   override val code: Int = 5
   override val description: String = "Not applicable"
 }

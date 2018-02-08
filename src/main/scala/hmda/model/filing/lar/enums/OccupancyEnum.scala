@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait OccupancyType {
+sealed trait OccupancyEnum {
   val code: Int
   val description: String
 }
 
-object OccupancyType {
+object OccupancyEnum {
   val values = List(1, 2, 3)
 
-  def valueOf(code: Int): OccupancyType = {
+  def valueOf(code: Int): OccupancyEnum = {
     code match {
       case 1 => PrincipalResidence
       case 2 => SecondResidence
@@ -18,17 +18,17 @@ object OccupancyType {
   }
 }
 
-case object PrincipalResidence extends OccupancyType {
+case object PrincipalResidence extends OccupancyEnum {
   override val code: Int = 1
   override val description: String = "Principal Residence"
 }
 
-case object SecondResidence extends OccupancyType {
+case object SecondResidence extends OccupancyEnum {
   override val code: Int = 2
   override val description: String = "Second Residence"
 }
 
-case object InvestmentProperty extends OccupancyType {
+case object InvestmentProperty extends OccupancyEnum {
   override val code: Int = 3
   override val description: String = "Investment Property"
 }

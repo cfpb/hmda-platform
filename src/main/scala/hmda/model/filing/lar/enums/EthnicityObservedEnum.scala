@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait EthnicityObserved {
+sealed trait EthnicityObservedEnum {
   val code: Int
   val description: String
 }
 
-object EthnicityObserved {
+object EthnicityObservedEnum {
   val values = List(1, 2, 3)
 
-  def valueOf(code: Int): EthnicityObserved = {
+  def valueOf(code: Int): EthnicityObservedEnum = {
     code match {
       case 1 => VisualOrSurnameEthnicity
       case 2 => NotVisualOrSurnameEthnicity
@@ -18,24 +18,24 @@ object EthnicityObserved {
   }
 }
 
-case object VisualOrSurnameEthnicity extends EthnicityObserved {
+case object VisualOrSurnameEthnicity extends EthnicityObservedEnum {
   override val code: Int = 1
   override val description: String =
     "Collected on the basis of visual observation or surname"
 }
 
-case object NotVisualOrSurnameEthnicity extends EthnicityObserved {
+case object NotVisualOrSurnameEthnicity extends EthnicityObservedEnum {
   override val code: Int = 2
   override val description: String =
     "Not collected on the basis of visual observation or surname"
 }
 
-case object EthnicityObservedNotApplicable extends EthnicityObserved {
+case object EthnicityObservedNotApplicable extends EthnicityObservedEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
 }
 
-case object EthnicityObservedNoCoApplicant extends EthnicityObserved {
+case object EthnicityObservedNoCoApplicant extends EthnicityObservedEnum {
   override val code: Int = 4
   override val description: String = "No co-applicant"
 }

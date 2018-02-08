@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait HOEPAStatus {
+sealed trait HOEPAStatusEnum {
   val code: Int
   val description: String
 }
 
-object HOEPAStatus {
-  val values = List(1,2,3)
+object HOEPAStatusEnum {
+  val values = List(1, 2, 3)
 
-  def valueOf(code: Int): HOEPAStatus = {
+  def valueOf(code: Int): HOEPAStatusEnum = {
     code match {
       case 1 => HighCostMortgage
       case 2 => NotHighCostMortgage
@@ -18,17 +18,17 @@ object HOEPAStatus {
   }
 }
 
-case object HighCostMortgage extends HOEPAStatus {
+case object HighCostMortgage extends HOEPAStatusEnum {
   override val code: Int = 1
   override val description: String = "High-cost mortgage"
 }
 
-case object NotHighCostMortgage extends HOEPAStatus {
+case object NotHighCostMortgage extends HOEPAStatusEnum {
   override val code: Int = 2
   override val description: String = "Not a high-cost mortgage"
 }
 
-case object HOEPStatusANotApplicable extends HOEPAStatus {
+case object HOEPStatusANotApplicable extends HOEPAStatusEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
 }

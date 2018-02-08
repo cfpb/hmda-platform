@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait Preapproval {
+sealed trait PreapprovalEnum {
   val code: Int
   val description: String
 }
 
-object Preapproval {
+object PreapprovalEnum {
   val values = List(1, 2)
 
-  def valueOf(code: Int): Preapproval = {
+  def valueOf(code: Int): PreapprovalEnum = {
     code match {
       case 1 => PreapprovalRequested
       case 2 => PreapprovalNotRequested
@@ -17,12 +17,12 @@ object Preapproval {
   }
 }
 
-case object PreapprovalRequested extends Preapproval {
+case object PreapprovalRequested extends PreapprovalEnum {
   override val code: Int = 1
   override val description: String = "Preapproval requested"
 }
 
-case object PreapprovalNotRequested extends Preapproval {
+case object PreapprovalNotRequested extends PreapprovalEnum {
   override val code: Int = 2
   override val description: String = "Preapproval not requested"
 }

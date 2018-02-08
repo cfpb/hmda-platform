@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait LoanType {
+sealed trait LoanTypeEnum {
   val code: Int
   val description: String
 }
 
-object LoanType {
+object LoanTypeEnum {
   val values = List(1, 2, 3, 4)
 
-  def valueOf(code: Int): LoanType = {
+  def valueOf(code: Int): LoanTypeEnum = {
     code match {
       case 1 => Conventional
       case 2 => FHAInsured
@@ -19,27 +19,27 @@ object LoanType {
   }
 }
 
-case object Conventional extends LoanType {
+case object Conventional extends LoanTypeEnum {
   override val code: Int = 1
 
   override val description: String =
     "Conventional (not insured or guaranteed by FHA, VA, RHS, or FSA)"
 }
 
-case object FHAInsured extends LoanType {
+case object FHAInsured extends LoanTypeEnum {
   override val code: Int = 2
 
   override val description: String =
     "Federal Housing Administration insured (FHA)"
 }
 
-case object VAGuaranteed extends LoanType {
+case object VAGuaranteed extends LoanTypeEnum {
   override val code: Int = 3
 
   override val description: String = "Veterans Affairs guaranteed (VA)"
 }
 
-case object RHSOrFSAGuaranteed extends LoanType {
+case object RHSOrFSAGuaranteed extends LoanTypeEnum {
   override val code: Int = 4
 
   override val description: String =

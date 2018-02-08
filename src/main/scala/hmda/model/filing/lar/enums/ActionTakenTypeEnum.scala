@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait ActionTakenType {
+sealed trait ActionTakenTypeEnum {
   val code: Int
   val description: String
 }
 
-object ActionTakenType {
+object ActionTakenTypeEnum {
   val values = List(1, 2, 3, 4, 5, 6, 7, 8)
 
-  def valueOf(code: Int): ActionTakenType = {
+  def valueOf(code: Int): ActionTakenTypeEnum = {
     code match {
       case 1 => LoanOriginated
       case 2 => ApplicationApprovedButNotAccepted
@@ -23,42 +23,43 @@ object ActionTakenType {
   }
 }
 
-case object LoanOriginated extends ActionTakenType {
+case object LoanOriginated extends ActionTakenTypeEnum {
   override val code: Int = 1
   override val description: String = "Loan Originated"
 }
 
-case object ApplicationApprovedButNotAccepted extends ActionTakenType {
+case object ApplicationApprovedButNotAccepted extends ActionTakenTypeEnum {
   override val code: Int = 2
   override val description: String = "Application approved but not accepted"
 }
 
-case object ApplicationDenied extends ActionTakenType {
+case object ApplicationDenied extends ActionTakenTypeEnum {
   override val code: Int = 3
   override val description: String = "Application denied"
 }
 
-case object ApplicationWithdrawnByApplicant extends ActionTakenType {
+case object ApplicationWithdrawnByApplicant extends ActionTakenTypeEnum {
   override val code: Int = 4
   override val description: String = "Application withdrawn by applicant"
 }
 
-case object FileClosedForIncompleteness extends ActionTakenType {
+case object FileClosedForIncompleteness extends ActionTakenTypeEnum {
   override val code: Int = 5
   override val description: String = "File closed for incompleteness"
 }
 
-case object PurchasedLoan extends ActionTakenType {
+case object PurchasedLoan extends ActionTakenTypeEnum {
   override val code: Int = 6
   override val description: String = "Purchased loan"
 }
 
-case object PreapprovalRequestDenied extends ActionTakenType {
+case object PreapprovalRequestDenied extends ActionTakenTypeEnum {
   override val code: Int = 7
   override val description: String = "Preapproval request denied"
 }
 
-case object PreapprovalRequestApprovedButNotAccepted extends ActionTakenType {
+case object PreapprovalRequestApprovedButNotAccepted
+    extends ActionTakenTypeEnum {
   override val code: Int = 8
   override val description: String =
     "Preapproval request approved but not accepted"

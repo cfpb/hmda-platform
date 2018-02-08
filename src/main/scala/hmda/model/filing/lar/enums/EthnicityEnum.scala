@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait Ethnicity {
+sealed trait EthnicityEnum {
   val code: Int
   val description: String
 }
 
-object Ethnicity {
+object EthnicityEnum {
   val values = List(1, 11, 12, 13, 14, 2, 3, 4, 5)
 
-  def valueOf(code: Int): Ethnicity = {
+  def valueOf(code: Int): EthnicityEnum = {
     code match {
       case 1  => HispanicOrLatino
       case 11 => Mexican
@@ -24,48 +24,48 @@ object Ethnicity {
   }
 }
 
-case object HispanicOrLatino extends Ethnicity {
+case object HispanicOrLatino extends EthnicityEnum {
   override val code: Int = 1
   override val description: String = "Hispanic or Latino"
 }
 
-case object Mexican extends Ethnicity {
+case object Mexican extends EthnicityEnum {
   override val code: Int = 11
   override val description: String = "Mexican"
 }
 
-case object PuertoRican extends Ethnicity {
+case object PuertoRican extends EthnicityEnum {
   override val code: Int = 12
   override val description: String = "Puerto Rican"
 }
 
-case object Cuban extends Ethnicity {
+case object Cuban extends EthnicityEnum {
   override val code: Int = 13
   override val description: String = "Cuban"
 }
 
-case object OtherHispanicOrLatino extends Ethnicity {
+case object OtherHispanicOrLatino extends EthnicityEnum {
   override val code: Int = 14
   override val description: String = "Other Hispanic or Latino"
 }
 
-case object NotHispanicOrLatino extends Ethnicity {
+case object NotHispanicOrLatino extends EthnicityEnum {
   override val code: Int = 2
   override val description: String = "Not Hispanic or Latino"
 }
 
-case object InformationNotProvided extends Ethnicity {
+case object InformationNotProvided extends EthnicityEnum {
   override val code: Int = 3
   override val description: String =
     "Information not provided by applicant in mail, internet, or telephone communication"
 }
 
-case object EthnicityNotApplicable extends Ethnicity {
+case object EthnicityNotApplicable extends EthnicityEnum {
   override val code: Int = 4
   override val description: String = "Not Applicable"
 }
 
-case object EthnicityNoCoApplicant extends Ethnicity {
+case object EthnicityNoCoApplicant extends EthnicityEnum {
   override val code: Int = 5
   override val description: String = "No co-applicant"
 }

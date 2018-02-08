@@ -1,14 +1,14 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait ConstructionMethod {
+sealed trait ConstructionMethodEnum {
   val code: Int
   val description: String
 }
 
-object ConstructionMethod {
+object ConstructionMethodType {
   val values = List(1, 2, 3)
 
-  def valueOf(code: Int): ConstructionMethod = {
+  def valueOf(code: Int): ConstructionMethodEnum = {
     code match {
       case 1 => SiteBuilt
       case 2 => ManufacturedHome
@@ -17,12 +17,12 @@ object ConstructionMethod {
   }
 }
 
-case object SiteBuilt extends ConstructionMethod {
+case object SiteBuilt extends ConstructionMethodEnum {
   override val code: Int = 1
   override val description: String = "Site-built"
 }
 
-case object ManufacturedHome extends ConstructionMethod {
+case object ManufacturedHome extends ConstructionMethodEnum {
   override val code: Int = 2
   override val description: String = "Manufactured Home"
 }
