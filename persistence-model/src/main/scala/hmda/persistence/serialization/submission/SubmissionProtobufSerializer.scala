@@ -12,11 +12,13 @@ class SubmissionProtobufSerializer extends SerializerWithStringManifest {
 
   final val SubmissionCreatedManifest = classOf[SubmissionCreated].getName
   final val SubmissionStatusUpdatedManifest = classOf[SubmissionStatusUpdated].getName
+  final val SubmissionStatusUpdatedV2Manifest = classOf[SubmissionStatusUpdatedV2].getName
   final val SubmissionFileNameAddedManifest = classOf[SubmissionFileNameAdded].getName
 
   override def toBinary(o: AnyRef): Array[Byte] = o match {
     case evt: SubmissionCreated => submissionCreatedToProtobuf(evt).toByteArray
     case evt: SubmissionStatusUpdated => submissionStatusUpdatedToProtobuf(evt).toByteArray
+    case evt: SubmissionStatusUpdatedV2 => submissionStatusUpdatedV2ToProtobuf(evt).toByteArray
     case evt: SubmissionFileNameAdded => submissionFileNameAddedToProtobuf(evt).toByteArray
     case msg: Any => throw new RuntimeException(s"Cannot serialize this message: ${msg.toString}")
   }
@@ -26,6 +28,8 @@ class SubmissionProtobufSerializer extends SerializerWithStringManifest {
       submissionCreatedFromProtobuf(SubmissionCreatedMessage.parseFrom(bytes))
     case SubmissionStatusUpdatedManifest =>
       submissionStatusUpdatedFromProtobuf(SubmissionStatusUpdatedMessage.parseFrom(bytes))
+    case SubmissionStatusUpdatedV2Manifest =>
+      submissionStatusUpdatedV2FromProtobuf(SubmissionStatusUpdatedV2Message.parseFrom(bytes))
     case SubmissionFileNameAddedManifest =>
       submissionFileNameAddedFromProtobuf(SubmissionFileNameAddedMessage.parseFrom(bytes))
     case msg: Any => throw new RuntimeException(s"Cannot deserialize this message: ${msg.toString}")
