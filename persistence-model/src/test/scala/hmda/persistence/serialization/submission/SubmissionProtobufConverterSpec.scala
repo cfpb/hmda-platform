@@ -39,6 +39,15 @@ class SubmissionProtobufConverterSpec extends PropSpec with PropertyChecks with 
     }
   }
 
+  property("Submission Status Updated V2 must serialize to protobuf and back") {
+    val timeGen = Gen.choose(1483287071000L, 1514736671000L)
+    forAll(submissionIdGen, submissionStatusGen, timeGen) { (submissionId, submissionStatus, time) =>
+      val submissionStatusUpdatedV2 = SubmissionStatusUpdatedV2(submissionId, submissionStatus, time)
+      val protobuf = submissionStatusUpdatedV2ToProtobuf(submissionStatusUpdatedV2).toByteArray
+      submissionStatusUpdatedV2FromProtobuf(SubmissionStatusUpdatedV2Message.parseFrom(protobuf)) mustBe submissionStatusUpdatedV2
+    }
+  }
+
   property("Submission File Name Added must serialize to protobuf and back") {
     forAll(submissionIdGen, Gen.alphaStr) { (submissionId, fileName) =>
       val submissionFileNameAdded = SubmissionFileNameAdded(submissionId, fileName)

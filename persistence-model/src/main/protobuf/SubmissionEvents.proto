@@ -33,6 +33,12 @@ message SubmissionStatusUpdatedMessage {
     SubmissionStatusMessage status = 2;
 }
 
+message SubmissionStatusUpdatedV2Message {
+    SubmissionIdMessage id = 1;
+    SubmissionStatusMessage status = 2;
+    int64 time = 3;
+}
+
 message SubmissionFileNameAddedMessage {
     SubmissionIdMessage id = 1;
     string fileName = 2;

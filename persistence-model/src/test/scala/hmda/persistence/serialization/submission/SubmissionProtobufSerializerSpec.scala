@@ -25,6 +25,16 @@ class SubmissionProtobufSerializerSpec extends PropSpec with PropertyChecks with
     }
   }
 
+  property("Submission Status Updated V2 messages must be serialized to binary and back") {
+    val timeGen = Gen.choose(1483287071000L, 1514736671000L)
+
+    forAll(submissionIdGen, submissionStatusGen, timeGen) { (submissionId, submissionStatus, time) =>
+      val msg = SubmissionStatusUpdatedV2(submissionId, submissionStatus, time)
+      val bytes = serializer.toBinary(msg)
+      serializer.fromBinary(bytes, serializer.SubmissionStatusUpdatedV2Manifest) mustBe msg
+    }
+  }
+
   property("Submission File Name Added messages must be serialized to binary and back") {
     forAll(submissionIdGen, Gen.alphaStr) { (submissionId, fileName) =>
       val msg = SubmissionFileNameAdded(submissionId, fileName)
