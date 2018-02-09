@@ -3,14 +3,19 @@ package hmda.api.http.admin
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.HmdaCustomDirectives
+import hmda.api.model.ErrorResponse
 import hmda.api.protocol.processing.ApiErrorProtocol
-import hmda.model.fi.SubmissionId
+import hmda.model.fi.{ Signed, Submission, SubmissionId }
+import hmda.persistence.HmdaSupervisor.FindSubmissions
+import hmda.persistence.institutions.SubmissionPersistence
+import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.messages.commands.disclosure.DisclosureCommands.GenerateDisclosureReports
 
 import scala.util.{ Failure, Success }
@@ -28,17 +33,30 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
       extractExecutionContext { executor =>
         implicit val ec = executor
         timedPost { uri =>
-          val actorRef = system.actorSelection("user/disclosure-report-publisher").resolveOne()
           val submissionId = SubmissionId(instId, year.toString, subId)
 
+          val publisherRef = system.actorSelection("user/disclosure-report-publisher").resolveOne()
+          val submissionPersistenceF = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
+
           val message = for {
-            a <- actorRef
-          } yield a ! GenerateDisclosureReports(submissionId)
+            submissions <- submissionPersistenceF
+            sub <- (submissions ? GetSubmissionById(submissionId)).mapTo[Submission]
+            p <- publisherRef
+          } yield {
+            if (sub.status == Signed) {
+              p ! GenerateDisclosureReports(submissionId)
+            }
+            sub
+          }
 
           onComplete(message) {
-            case Success(created) =>
-              complete(ToResponseMarshallable(StatusCodes.OK))
-
+            case Success(sub) =>
+              if (sub.status == Signed) {
+                complete(ToResponseMarshallable(StatusCodes.OK))
+              } else {
+                val errorResponse = ErrorResponse(400, s"Submission ${submissionId.toString} has not been signed", uri.path)
+                complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+              }
             case Failure(error) =>
               completeWithInternalError(uri, error)
           }
