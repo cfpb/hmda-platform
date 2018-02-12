@@ -17,7 +17,7 @@ import hmda.api.http.{ HmdaCustomDirectives, ValidationErrorConverter }
 import hmda.api.model._
 import hmda.api.protocol.processing.{ ApiErrorProtocol, EditResultsProtocol, InstitutionProtocol }
 import hmda.model.fi.{ SubmissionId, SubmissionStatus }
-import hmda.model.validation.{ Macro, Quality, ValidationErrorType }
+import hmda.model.validation.{ Macro, Quality, ValidationError, ValidationErrorType }
 import hmda.persistence.messages.CommonMessages.{ Event, GetState }
 import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.HmdaSupervisor.{ FindProcessingActor, FindSubmissions }
@@ -25,7 +25,7 @@ import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionStatus
 import hmda.persistence.messages.commands.processing.HmdaFileValidatorState.{ HmdaVerificationState, QMState, SVState }
 import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
-import hmda.persistence.processing.HmdaFileValidator._
+import hmda.persistence.processing.HmdaFileValidator.{ PaginateErrorResults, _ }
 
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.matching.Regex
@@ -102,7 +102,9 @@ trait SubmissionEditPaths
             val fPaginatedErrors = for {
               va <- fValidator
               vs <- (va ? GetState).mapTo[HmdaVerificationState]
-              errorCollection <- (va ? GetNamedErrorResultsPaginated(editName, page)).mapTo[PaginatedErrors]
+              namedEdits <- (va ? GetNamedEdits(editName)).mapTo[Source[ValidationError, NotUsed]]
+              count <- (va ? CountErrorResults(namedEdits)).mapTo[Int]
+              errorCollection <- (va ? PaginateErrorResults(count, namedEdits, page)).mapTo[PaginatedErrors]
               rows <- resultRowsFromCollection(errorCollection.errors, vs.ts, eventStream)
             } yield (rows, errorCollection.totalErrors)
 

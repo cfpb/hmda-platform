@@ -55,7 +55,11 @@ object HmdaFileValidator {
 
   case class VerifyEdits(editType: ValidationErrorType, verified: Boolean, replyTo: ActorRef) extends Command
 
-  case class GetNamedErrorResultsPaginated(editName: String, page: Int) extends Command
+  case class GetNamedEdits(editName: String) extends Command
+
+  case class CountErrorResults(source: Source[ValidationError, NotUsed]) extends Command
+
+  case class PaginateErrorResults(count: Int, source: Source[ValidationError, NotUsed], page: Int) extends Command
 
   case object GetSVState extends Command
 
@@ -273,15 +277,22 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     case GetSVState => sender() ! svState
     case GetQMState => sender() ! qmState
 
-    case GetNamedErrorResultsPaginated(editName, page) =>
-      val replyTo = sender()
+    case GetNamedEdits(editName) =>
       val allFailures = allEditsByName(editName)
+      sender() ! allFailures
+
+    case CountErrorResults(allFailures) =>
+      val replyTo = sender()
       count(allFailures).map { total =>
-        val p = PaginatedResource(total)(page)
-        val pageOfFailuresF = allFailures.take(p.toIndex).drop(p.fromIndex).runWith(Sink.seq)
-        pageOfFailuresF.map { pageOfFailures =>
-          replyTo ! PaginatedErrors(pageOfFailures, total)
-        }
+        replyTo ! total
+      }
+
+    case PaginateErrorResults(total, allFailures, page) =>
+      val replyTo = sender()
+      val p = PaginatedResource(total)(page)
+      val pageOfFailuresF = allFailures.take(p.toIndex).drop(p.fromIndex).runWith(Sink.seq)
+      pageOfFailuresF.map { pageOfFailures =>
+        replyTo ! PaginatedErrors(pageOfFailures, total)
       }
 
     case Shutdown =>

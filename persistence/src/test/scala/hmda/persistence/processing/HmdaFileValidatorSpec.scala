@@ -141,18 +141,18 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       probe.send(hmdaFileValidator, larErrors)
 
       //First page should have errors 1 - 20
-      probe.send(hmdaFileValidator, GetNamedErrorResultsPaginated("S987", 1))
+      probe.send(hmdaFileValidator, GetNamedEdits("S987", 1))
       val pg1 = probe.expectMsgType[PaginatedErrors]
       pg1.errors.size mustBe 20
       pg1.errors.head mustBe tsS987
 
       //Second page should have errors 21 - 40
-      probe.send(hmdaFileValidator, GetNamedErrorResultsPaginated("S987", 2))
+      probe.send(hmdaFileValidator, GetNamedEdits("S987", 2))
       val pg2 = probe.expectMsgType[PaginatedErrors]
       pg2.errors.size mustBe 20
 
       //Third page should have remaining errors (41 - 43)
-      probe.send(hmdaFileValidator, GetNamedErrorResultsPaginated("S987", 3))
+      probe.send(hmdaFileValidator, GetNamedEdits("S987", 3))
       val pg3 = probe.expectMsgType[PaginatedErrors]
       pg3.errors.size mustBe 3
     }
