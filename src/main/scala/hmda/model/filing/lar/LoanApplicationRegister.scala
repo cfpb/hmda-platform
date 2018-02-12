@@ -46,6 +46,6 @@ case class LoanApplicationRegister(
     ausResult: Option[AutomatedUnderwritingSystemResult],
     otherAusResult: Option[String],
     reverseMortgage: Option[MortgageTypeEnum],
-    lineOfCredit: LineOfCreditEnum,
+    lineOfCredit: Option[LineOfCreditEnum],
     businessOrCommercialPurpose: Option[BusinessOrCommercialBusinessEnum]
 )
