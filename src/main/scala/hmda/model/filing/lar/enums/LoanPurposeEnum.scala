@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait LoanPurposeEnum {
-  val code: Int
-  val description: String
-}
+sealed trait LoanPurposeEnum extends LarEnum
 
-object LoanPurposeEnum {
-  val values = List(1, 2, 31, 32, 4, 5)
+object LoanPurposeEnum extends LarCodeEnum[LoanPurposeEnum] {
+  override val values = List(1, 2, 31, 32, 4, 5)
 
-  def valueOf(code: Int): LoanPurposeEnum = {
+  override def valueOf(code: Int): LoanPurposeEnum = {
     code match {
       case 1  => HomePurchase
       case 2  => HomeImprovement

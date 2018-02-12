@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait EthnicityEnum {
-  val code: Int
-  val description: String
-}
+sealed trait EthnicityEnum extends LarEnum
 
-object EthnicityEnum {
-  val values = List(1, 11, 12, 13, 14, 2, 3, 4, 5)
+object EthnicityEnum extends LarCodeEnum[EthnicityEnum] {
+  override val values = List(1, 11, 12, 13, 14, 2, 3, 4, 5)
 
-  def valueOf(code: Int): EthnicityEnum = {
+  override def valueOf(code: Int): EthnicityEnum = {
     code match {
       case 1  => HispanicOrLatino
       case 11 => Mexican

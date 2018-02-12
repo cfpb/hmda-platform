@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait LineOfCreditEnum {
-  val code: Int
-  val description: String
-}
+sealed trait LineOfCreditEnum extends LarEnum
 
-object LineOfCreditEnum {
-  val values = List(1, 2)
+object LineOfCreditEnum extends LarCodeEnum[LineOfCreditEnum] {
+  override val values = List(1, 2)
 
-  def valueOf(code: Int): LineOfCreditEnum = {
+  override def valueOf(code: Int): LineOfCreditEnum = {
     code match {
       case 1 => OpenEndLineOfCredit
       case 2 => NotOpenEndLineOfCredit

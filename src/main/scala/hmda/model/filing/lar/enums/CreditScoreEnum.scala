@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait CreditScoreEnum {
-  val code: Int
-  val description: String
-}
+sealed trait CreditScoreEnum extends LarEnum
 
-object CreditScoreType {
-  val values = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+object CreditScoreType extends LarCodeEnum[CreditScoreEnum] {
+  override val values = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
-  def valueOf(code: Int): CreditScoreEnum = {
+  override def valueOf(code: Int): CreditScoreEnum = {
     code match {
       case 1  => EquifaxBeacon5
       case 2  => ExperianFairIsaac

@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait HOEPAStatusEnum {
-  val code: Int
-  val description: String
-}
+sealed trait HOEPAStatusEnum extends LarEnum
 
-object HOEPAStatusEnum {
-  val values = List(1, 2, 3)
+object HOEPAStatusEnum extends LarCodeEnum[HOEPAStatusEnum] {
+  override val values = List(1, 2, 3)
 
-  def valueOf(code: Int): HOEPAStatusEnum = {
+  override def valueOf(code: Int): HOEPAStatusEnum = {
     code match {
       case 1 => HighCostMortgage
       case 2 => NotHighCostMortgage

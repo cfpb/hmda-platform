@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait PurchaserEnum {
-  val code: Int
-  val description: String
-}
+sealed trait PurchaserEnum extends LarEnum
 
-object PurchaserEnum {
-  val values = List(0, 1, 2, 3, 4, 5, 6, 71, 72, 8, 9)
+object PurchaserEnum extends LarCodeEnum[PurchaserEnum] {
+  override val values = List(0, 1, 2, 3, 4, 5, 6, 71, 72, 8, 9)
 
-  def valueOf(code: Int): PurchaserEnum = {
+  override def valueOf(code: Int): PurchaserEnum = {
     code match {
       case 0  => PurchaserTypeNotApplicable
       case 1  => FannieMae

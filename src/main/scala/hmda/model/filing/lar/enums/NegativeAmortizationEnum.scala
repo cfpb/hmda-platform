@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait NegativeAmortizationEnum {
-  val code: Int
-  val description: String
-}
+sealed trait NegativeAmortizationEnum extends LarEnum
 
-object NegativeAmortizationEnum {
-  val values = List(1, 2)
+object NegativeAmortizationEnum extends LarCodeEnum[NegativeAmortizationEnum] {
+  override val values = List(1, 2)
 
-  def valueOf(code: Int): NegativeAmortizationEnum = {
+  override def valueOf(code: Int): NegativeAmortizationEnum = {
     code match {
       case 1 => NegativeAmortization
       case 2 => NoNegativeAmortization

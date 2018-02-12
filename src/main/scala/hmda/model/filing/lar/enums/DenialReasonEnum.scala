@@ -1,11 +1,8 @@
 package hmda.model.filing.lar.enums
 
-sealed trait DenialReasonEnum {
-  val code: Int
-  val description: String
-}
+sealed trait DenialReasonEnum extends LarEnum
 
-object DenialReasonEnum {
+object DenialReasonEnum extends LarCodeEnum[DenialReasonEnum] {
   val values = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
   def valueOf(code: Int): DenialReasonEnum = {

@@ -1,14 +1,12 @@
 package hmda.model.filing.lar.enums
 
-sealed trait BusinessOrCommercialBusinessEnum {
-  val code: Int
-  val description: String
-}
+sealed trait BusinessOrCommercialBusinessEnum extends LarEnum
 
-object BusinessOrCommercialBusinessEnum {
-  val values = List(1, 2)
+object BusinessOrCommercialBusinessEnum
+    extends LarCodeEnum[BusinessOrCommercialBusinessEnum] {
+  override val values = List(1, 2)
 
-  def valueOf(code: Int): BusinessOrCommercialBusinessEnum = {
+  override def valueOf(code: Int): BusinessOrCommercialBusinessEnum = {
     code match {
       case 1 => PrimarilyBusinessOrCommercialPurpose
       case 2 => NotPrimarilyBusinessOrCommercialPurpose

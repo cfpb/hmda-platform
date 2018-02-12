@@ -1,14 +1,12 @@
 package hmda.model.filing.lar.enums
 
-sealed trait AutomatedUnderwritingSystemEnum {
-  val code: Int
-  val description: String
-}
+sealed trait AutomatedUnderwritingSystemEnum extends LarEnum
 
-object AutomatedUnderwritingSystemEnum {
-  val values = List(1, 2, 3, 4, 5)
+object AutomatedUnderwritingSystemEnum
+    extends LarCodeEnum[AutomatedUnderwritingSystemEnum] {
+  override val values = List(1, 2, 3, 4, 5)
 
-  def valueOf(code: Int): AutomatedUnderwritingSystemEnum = {
+  override def valueOf(code: Int): AutomatedUnderwritingSystemEnum = {
     code match {
       case 1 => DesktopUnderwriter
       case 2 => LoanProspector

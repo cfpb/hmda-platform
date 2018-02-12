@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait PayableToInstitutionEnum {
-  val code: Int
-  val description: String
-}
+sealed trait PayableToInstitutionEnum extends LarEnum
 
-object PayableToInstitutionEnum {
-  val values = List(1, 2, 3)
+object PayableToInstitutionEnum extends LarCodeEnum[PayableToInstitutionEnum] {
+  override val values = List(1, 2, 3)
 
-  def valueOf(code: Int): PayableToInstitutionEnum = {
+  override def valueOf(code: Int): PayableToInstitutionEnum = {
     code match {
       case 1 => NotInitiallyPayableToInstitution
       case 2 => NotInitiallyPayableToInstitution

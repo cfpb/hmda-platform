@@ -1,14 +1,11 @@
-package hmda.model.filing.lar
+package hmda.model.filing.lar.enums
 
-sealed trait SexObservedEnum {
-  val code: Int
-  val description: String
-}
+sealed trait SexObservedEnum extends LarEnum
 
-object SexObservedEnum {
-  val values = List(1, 2, 3, 4)
+object SexObservedEnum extends LarCodeEnum[SexObservedEnum] {
+  override val values = List(1, 2, 3, 4)
 
-  def valueOf(code: Int): SexObservedEnum = {
+  override def valueOf(code: Int): SexObservedEnum = {
     code match {
       case 1 => VisualOrSurnameSex
       case 2 => NotVisualOrSurnameSex

@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait BalloonPaymentEnum {
-  val code: Int
-  val description: String
-}
+sealed trait BalloonPaymentEnum extends LarEnum
 
-object BalloonPaymentEnum {
-  val values = List(1, 2)
+object BalloonPaymentEnum extends LarCodeEnum[BalloonPaymentEnum] {
+  override val values = List(1, 2)
 
-  def valueOf(code: Int): BalloonPaymentEnum = {
+  override def valueOf(code: Int): BalloonPaymentEnum = {
     code match {
       case 1 => BalloonPayment
       case 2 => NoBallonPayment

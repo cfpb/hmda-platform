@@ -1,14 +1,11 @@
 package hmda.model.filing.lar.enums
 
-sealed trait LienStatusEnum {
-  val code: Int
-  val description: String
-}
+sealed trait LienStatusEnum extends LarEnum
 
-object LienStatusEnum {
-  val values = List(1, 2)
+object LienStatusEnum extends LarCodeEnum[LienStatusEnum] {
+  override val values = List(1, 2)
 
-  def valueOf(code: Int): LienStatusEnum = {
+  override def valueOf(code: Int): LienStatusEnum = {
     code match {
       case 1 => SecuredByFirstLien
       case 2 => SecuredBySubordinateLien

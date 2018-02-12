@@ -1,13 +1,21 @@
 package hmda.model.filing.lar.enums
 
-sealed trait SexEnum {
-  val code: Int
-  val description: String
-}
+sealed trait SexEnum extends LarEnum
 
-object SexEnum {
-  val values = List(1, 2, 3, 4, 5, 6)
+object SexEnum extends LarCodeEnum[SexEnum] {
+  override val values = List(1, 2, 3, 4, 5, 6)
 
+  override def valueOf(code: Int): SexEnum = {
+    code match {
+      case 1 => Male
+      case 2 => Female
+      case 3 => SexInformationNotProvided
+      case 4 => SexNotApplicable
+      case 5 => SexNoCoApplicant
+      case 6 => MaleAndFemale
+      case _ => throw new Exception("Invalid Sex Code")
+    }
+  }
 }
 
 case object Male extends SexEnum {

@@ -1,14 +1,12 @@
 package hmda.model.filing.lar.enums
 
-sealed trait ApplicationSubmissionEnum {
-  val code: Int
-  val description: String
-}
+sealed trait ApplicationSubmissionEnum extends LarEnum
 
-object ApplicationSubmissionEnum {
-  val values = List(1, 2, 3)
+object ApplicationSubmissionEnum
+    extends LarCodeEnum[ApplicationSubmissionEnum] {
+  override val values = List(1, 2, 3)
 
-  def valueOf(code: Int): ApplicationSubmissionEnum = {
+  override def valueOf(code: Int): ApplicationSubmissionEnum = {
     code match {
       case 1 => SubmittedDirectlyToInstitution
       case 2 => NotSubmittedDirectlyToInstitution

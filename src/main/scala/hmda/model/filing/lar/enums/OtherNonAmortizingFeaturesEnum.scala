@@ -1,14 +1,12 @@
 package hmda.model.filing.lar.enums
 
-trait OtherNonAmortizingFeaturesEnum {
-  val code: Int
-  val description: String
-}
+trait OtherNonAmortizingFeaturesEnum extends LarEnum
 
-object OtherNonAmortizingFeaturesEnum {
-  val values = List(1, 2)
+object OtherNonAmortizingFeaturesEnum
+    extends LarCodeEnum[OtherNonAmortizingFeaturesEnum] {
+  override val values = List(1, 2)
 
-  def valueOf(code: Int): OtherNonAmortizingFeaturesEnum = {
+  override def valueOf(code: Int): OtherNonAmortizingFeaturesEnum = {
     code match {
       case 1 => OtherNonFullyAmortizingFeatures
       case 2 => NoOtherNonFullyAmortizingFeatures

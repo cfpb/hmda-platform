@@ -1,14 +1,12 @@
 package hmda.model.filing.lar.enums
 
-sealed trait ManufacturedHomeLandPropertyInterestEnum {
-  val code: Int
-  val description: String
-}
+sealed trait ManufacturedHomeLandPropertyInterestEnum extends LarEnum
 
-object ManufacturedHomeLandPropertyInterestEnum {
-  val values = List(1, 2, 3, 4, 5)
-//
-  def valueOf(code: Int): ManufacturedHomeLandPropertyInterestEnum = {
+object ManufacturedHomeLandPropertyInterestEnum
+    extends LarCodeEnum[ManufacturedHomeLandPropertyInterestEnum] {
+  override val values = List(1, 2, 3, 4, 5)
+
+  override def valueOf(code: Int): ManufacturedHomeLandPropertyInterestEnum = {
     code match {
       case 1 => DirectOwnership
       case 2 => IndirectOwnership

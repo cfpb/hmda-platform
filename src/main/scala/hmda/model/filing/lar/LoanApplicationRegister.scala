@@ -34,8 +34,10 @@ case class LoanApplicationRegister(
     negativeAmortization: NegativeAmortizationEnum,
     otherNonAmortizingFeatures: OtherNonAmortizingFeaturesEnum,
     propertyValue: String,
-    manufacturedHomeSecuredProperty: Option[ManufacturedHomeSecuredPropertyEnum] = None,
-    manufacturedHomeLandPropertyInterestEnum: Option[ManufacturedHomeLandPropertyInterestEnum] = None,
+    manufacturedHomeSecuredProperty: Option[
+      ManufacturedHomeSecuredPropertyEnum] = None,
+    manufacturedHomeLandPropertyInterestEnum: Option[
+      ManufacturedHomeLandPropertyInterestEnum] = None,
     totalUnits: Option[Int] = None,
     multiFamilyAffordableUnits: Option[String] = None,
     applicationSubmission: ApplicationSubmissionEnum,

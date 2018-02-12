@@ -1,14 +1,12 @@
 package hmda.model.filing.lar.enums
 
-sealed trait AutomatedUnderwritingResultEnum {
-  val code: Int
-  val description: String
-}
+sealed trait AutomatedUnderwritingResultEnum extends LarEnum
 
-object AutomatedUnderwritingResultEnum {
-  val values = (1 to 17).toList
+object AutomatedUnderwritingResultEnum
+    extends LarCodeEnum[AutomatedUnderwritingResultEnum] {
+  override val values = (1 to 17).toList
 
-  def valueOf(code: Int): AutomatedUnderwritingResultEnum = {
+  override def valueOf(code: Int): AutomatedUnderwritingResultEnum = {
     code match {
       case 1  => ApproveEligible
       case 2  => ApproveIneligible

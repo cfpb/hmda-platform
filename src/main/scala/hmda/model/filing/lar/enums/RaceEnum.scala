@@ -1,15 +1,12 @@
 package hmda.model.filing.lar.enums
 
-sealed trait RaceEnum {
-  val code: Int
-  val description: String
-}
+sealed trait RaceEnum extends LarEnum
 
-object RaceEnum {
-  val values =
+object RaceEnum extends LarCodeEnum[RaceEnum] {
+  override val values =
     List(1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7)
 
-  def valueOf(code: Int): RaceEnum = {
+  override def valueOf(code: Int): RaceEnum = {
     code match {
       case 1  => AmericanIndianOrAlaskaNative
       case 2  => Asian
