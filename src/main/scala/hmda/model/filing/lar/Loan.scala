@@ -8,7 +8,7 @@ import hmda.model.filing.lar.enums.{
 }
 
 case class Loan(
-    ULI: String,
+    ULI: Option[String] = None,
     applicationDate: String,
     loanType: LoanTypeEnum,
     loanPurpose: LoanPurposeEnum,
