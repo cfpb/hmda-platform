@@ -4,10 +4,11 @@ sealed trait AutomatedUnderwritingResultEnum extends LarEnum
 
 object AutomatedUnderwritingResultEnum
     extends LarCodeEnum[AutomatedUnderwritingResultEnum] {
-  override val values = (1 to 17).toList
+  override val values = (0 to 17).toList
 
   override def valueOf(code: Int): AutomatedUnderwritingResultEnum = {
     code match {
+      case 0  => EmptyAUSResultValue
       case 1  => ApproveEligible
       case 2  => ApproveIneligible
       case 3  => ReferEligilbe
@@ -29,6 +30,11 @@ object AutomatedUnderwritingResultEnum
         throw new Exception("Invalid Automated Underwriting Result Code")
     }
   }
+}
+
+case object EmptyAUSResultValue extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 0
+  override def description: String = "Empty Value"
 }
 
 case object ApproveEligible extends AutomatedUnderwritingResultEnum {

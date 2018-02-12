@@ -5,7 +5,7 @@ trait LarEnum {
   def description: String
 }
 
-trait LarCodeEnum[A] {
+trait LarCodeEnum[+A] {
   val values: List[Int]
   def valueOf(code: Int): A
 }

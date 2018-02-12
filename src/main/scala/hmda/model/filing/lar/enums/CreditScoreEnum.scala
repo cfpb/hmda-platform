@@ -2,7 +2,7 @@ package hmda.model.filing.lar.enums
 
 sealed trait CreditScoreEnum extends LarEnum
 
-object CreditScoreType extends LarCodeEnum[CreditScoreEnum] {
+object CreditScoreEnum extends LarCodeEnum[CreditScoreEnum] {
   override val values = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
   override def valueOf(code: Int): CreditScoreEnum = {

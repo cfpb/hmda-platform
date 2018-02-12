@@ -2,8 +2,8 @@ package hmda.model.filing.lar.enums
 
 sealed trait ConstructionMethodEnum extends LarEnum
 
-object ConstructionMethodType extends LarCodeEnum[ConstructionMethodEnum] {
-  override val values = List(1, 2, 3)
+object ConstructionMethodEnum extends LarCodeEnum[ConstructionMethodEnum] {
+  override val values = List(1, 2)
 
   override def valueOf(code: Int): ConstructionMethodEnum = {
     code match {
