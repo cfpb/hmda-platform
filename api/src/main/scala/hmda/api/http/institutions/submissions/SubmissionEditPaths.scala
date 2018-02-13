@@ -28,6 +28,7 @@ import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
 import hmda.persistence.processing.HmdaFileValidator.{ PaginateErrorResults, _ }
 
 import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.duration._
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
@@ -102,9 +103,8 @@ trait SubmissionEditPaths
             val fPaginatedErrors = for {
               va <- fValidator
               vs <- (va ? GetState).mapTo[HmdaVerificationState]
-              namedEdits <- (va ? GetNamedEdits(editName)).mapTo[Source[ValidationError, NotUsed]]
-              count <- (va ? CountErrorResults(namedEdits)).mapTo[Int]
-              errorCollection <- (va ? PaginateErrorResults(count, namedEdits, page)).mapTo[PaginatedErrors]
+              namedEdits <- (va ? GetNamedEdits(editName)).mapTo[Seq[ValidationError]]
+              errorCollection <- (va ? PaginateErrorResults(namedEdits, page)).mapTo[PaginatedErrors]
               rows <- resultRowsFromCollection(errorCollection.errors, vs.ts, eventStream)
             } yield (rows, errorCollection.totalErrors)
 

@@ -57,9 +57,9 @@ object HmdaFileValidator {
 
   case class GetNamedEdits(editName: String) extends Command
 
-  case class CountErrorResults(source: Source[ValidationError, NotUsed]) extends Command
+  case class CountErrorResults(edits: Seq[ValidationError]) extends Command
 
-  case class PaginateErrorResults(count: Int, source: Source[ValidationError, NotUsed], page: Int) extends Command
+  case class PaginateErrorResults(source: Seq[ValidationError], page: Int) extends Command
 
   case object GetSVState extends Command
 
@@ -86,7 +86,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   val duration = config.getInt("hmda.actor-lookup-timeout")
   val processingParallelism = config.getInt("hmda.processing.parallelism")
 
-  implicit val timeout = Timeout(duration.seconds)
+  implicit val timeout = Timeout(30.seconds)
   val parserPersistenceId = s"${HmdaFileParser.name}-$submissionId"
 
   var counter = 0
@@ -278,22 +278,25 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     case GetQMState => sender() ! qmState
 
     case GetNamedEdits(editName) =>
+      log.info(s"GetNamedEdits:\nRequest received at ${System.currentTimeMillis()}")
       val allFailures = allEditsByName(editName)
-      sender() ! allFailures
+      allFailures.runWith(Sink.seq[ValidationError]).map { edits =>
+        log.info(s"GetNamedEdits:\nRequest processed at ${System.currentTimeMillis()}")
+        sender() ! edits
+      }
 
     case CountErrorResults(allFailures) =>
+      log.info(s"CountErrorResults:\nRequest received at ${System.currentTimeMillis()}")
       val replyTo = sender()
-      count(allFailures).map { total =>
-        replyTo ! total
-      }
+      replyTo ! allFailures.length
 
-    case PaginateErrorResults(total, allFailures, page) =>
+    case PaginateErrorResults(allFailures, page) =>
+      log.info(s"PaginateErrorResults:\nRequest received at ${System.currentTimeMillis()}")
       val replyTo = sender()
-      val p = PaginatedResource(total)(page)
-      val pageOfFailuresF = allFailures.take(p.toIndex).drop(p.fromIndex).runWith(Sink.seq)
-      pageOfFailuresF.map { pageOfFailures =>
-        replyTo ! PaginatedErrors(pageOfFailures, total)
-      }
+      val p = PaginatedResource(allFailures.length)(page)
+      val pageOfFailuresF = allFailures.slice(p.fromIndex, p.toIndex)
+      log.info(s"PaginateErrorResults:\nRequest processed at ${System.currentTimeMillis()}")
+      replyTo ! PaginatedErrors(pageOfFailuresF, allFailures.length)
 
     case Shutdown =>
       context stop self
@@ -321,7 +324,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   }
 
   private def allEditsByName(name: String): Source[ValidationError, NotUsed] = {
-    val edits = events(persistenceId).map {
+    events(persistenceId).collect {
       case LarSyntacticalError(err) if err.ruleName == name => err
       case TsSyntacticalError(err) if err.ruleName == name => err
       case LarValidityError(err) if err.ruleName == name => err
@@ -329,9 +332,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
       case LarQualityError(err) if err.ruleName == name => err
       case TsQualityError(err) if err.ruleName == name => err
       case LarMacroError(err) if err.ruleName == name => err
-      case _ => EmptyValidationError
     }
-    edits.filter(_ != EmptyValidationError)
   }
 
   private def persistErrors(errors: Seq[Event]): Unit = {

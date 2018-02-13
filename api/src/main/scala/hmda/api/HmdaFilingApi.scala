@@ -31,7 +31,7 @@ class HmdaFilingApi(supervisor: ActorRef, querySupervisor: ActorRef, validationS
   override val name = "hmda-filing-api"
 
   lazy val httpTimeout = configuration.getInt("hmda.http.timeout")
-  implicit val timeout = Timeout(httpTimeout.seconds)
+  implicit val timeout = Timeout(30.seconds)
 
   override lazy val host = configuration.getString("hmda.http.host")
   override lazy val port = configuration.getInt("hmda.http.port")
