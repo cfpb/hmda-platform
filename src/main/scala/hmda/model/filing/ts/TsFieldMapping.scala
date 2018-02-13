@@ -1,6 +1,5 @@
 package hmda.model.filing.ts
 
-// Maps a field's friendly name to its value in the TS record
 object TsFieldMapping {
   def mapping(ts: TransmittalSheet): Map[String, Any] = Map(
     "Record Identifier" -> ts.id,

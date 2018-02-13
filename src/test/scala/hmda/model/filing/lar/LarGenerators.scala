@@ -92,7 +92,6 @@ object LarGenerators {
         prepaymentPenaltyTerm,
         debtToIncomeRatio,
         loanToValueRatio,
-        loanTerm,
         introductoryRatePeriod,
         balloonPayment,
         interestOnlyPayments,
@@ -124,7 +123,8 @@ object LarGenerators {
       loanPurpose <- loanPurposeEnumGen
       constructionMethod <- constructionMethodEnumGen
       occupancy <- occupancyEnumGen
-      amount <- Gen.choose(0, Double.MaxValue)
+      amount <- Gen.choose(0.0, Double.MaxValue)
+      term <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
     } yield
       Loan(uli,
            applicationDate,
@@ -132,7 +132,8 @@ object LarGenerators {
            loanPurpose,
            constructionMethod,
            occupancy,
-           amount)
+           amount,
+           term)
   }
 
   implicit def dateGen: Gen[Int] = {
