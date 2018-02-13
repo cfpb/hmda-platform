@@ -1,6 +1,8 @@
 package hmda.persistence.processing
 
+import akka.NotUsed
 import akka.actor.ActorRef
+import akka.stream.scaladsl.Source
 import akka.testkit.TestProbe
 import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
@@ -139,20 +141,24 @@ class HmdaFileValidatorSpec extends ActorSpec with BeforeAndAfterEach with HmdaF
       val larErrors = LarValidationErrors(lars42)
       probe.send(hmdaFileValidator, tsErrors)
       probe.send(hmdaFileValidator, larErrors)
+      probe.send(hmdaFileValidator, GetNamedEdits("S987"))
+      val source = probe.expectMsgType[Source[ValidationError, NotUsed]]
+      probe.send(hmdaFileValidator, CountErrorResults(source))
+      val count = probe.expectMsgType[Int]
 
       //First page should have errors 1 - 20
-      probe.send(hmdaFileValidator, GetNamedEdits("S987", 1))
+      probe.send(hmdaFileValidator, PaginateErrorResults(count, source, 1))
       val pg1 = probe.expectMsgType[PaginatedErrors]
       pg1.errors.size mustBe 20
       pg1.errors.head mustBe tsS987
 
       //Second page should have errors 21 - 40
-      probe.send(hmdaFileValidator, GetNamedEdits("S987", 2))
+      probe.send(hmdaFileValidator, PaginateErrorResults(count, source, 2))
       val pg2 = probe.expectMsgType[PaginatedErrors]
       pg2.errors.size mustBe 20
 
       //Third page should have remaining errors (41 - 43)
-      probe.send(hmdaFileValidator, GetNamedEdits("S987", 3))
+      probe.send(hmdaFileValidator, PaginateErrorResults(count, source, 3))
       val pg3 = probe.expectMsgType[PaginatedErrors]
       pg3.errors.size mustBe 3
     }
