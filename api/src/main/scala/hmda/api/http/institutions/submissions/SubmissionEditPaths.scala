@@ -103,8 +103,9 @@ trait SubmissionEditPaths
             val fPaginatedErrors = for {
               va <- fValidator
               vs <- (va ? GetState).mapTo[HmdaVerificationState]
-              namedEdits <- (va ? GetNamedEdits(editName)).mapTo[Seq[ValidationError]]
-              errorCollection <- (va ? PaginateErrorResults(namedEdits, page)).mapTo[PaginatedErrors]
+              namedEdits <- (va ? GetNamedEdits(editName)).mapTo[Source[ValidationError, NotUsed]]
+              count <- (va ? CountErrorResults(namedEdits)).mapTo[Int]
+              errorCollection <- (va ? PaginateErrorResults(count, namedEdits, page)).mapTo[PaginatedErrors]
               rows <- resultRowsFromCollection(errorCollection.errors, vs.ts, eventStream)
             } yield (rows, errorCollection.totalErrors)
 

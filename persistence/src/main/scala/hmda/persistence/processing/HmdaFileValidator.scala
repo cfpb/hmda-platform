@@ -57,9 +57,9 @@ object HmdaFileValidator {
 
   case class GetNamedEdits(editName: String) extends Command
 
-  case class CountErrorResults(edits: Seq[ValidationError]) extends Command
+  case class CountErrorResults(source: Source[ValidationError, NotUsed]) extends Command
 
-  case class PaginateErrorResults(source: Seq[ValidationError], page: Int) extends Command
+  case class PaginateErrorResults(count: Int, source: Source[ValidationError, NotUsed], page: Int) extends Command
 
   case object GetSVState extends Command
 
@@ -278,25 +278,22 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
     case GetQMState => sender() ! qmState
 
     case GetNamedEdits(editName) =>
-      log.info(s"GetNamedEdits:\nRequest received at ${System.currentTimeMillis()}")
       val allFailures = allEditsByName(editName)
-      allFailures.runWith(Sink.seq[ValidationError]).map { edits =>
-        log.info(s"GetNamedEdits:\nRequest processed at ${System.currentTimeMillis()}")
-        sender() ! edits
-      }
+      sender() ! allFailures
 
     case CountErrorResults(allFailures) =>
-      log.info(s"CountErrorResults:\nRequest received at ${System.currentTimeMillis()}")
       val replyTo = sender()
-      replyTo ! allFailures.length
+      count(allFailures).map { total =>
+        replyTo ! total
+      }
 
-    case PaginateErrorResults(allFailures, page) =>
-      log.info(s"PaginateErrorResults:\nRequest received at ${System.currentTimeMillis()}")
+    case PaginateErrorResults(total, allFailures, page) =>
       val replyTo = sender()
-      val p = PaginatedResource(allFailures.length)(page)
-      val pageOfFailuresF = allFailures.slice(p.fromIndex, p.toIndex)
-      log.info(s"PaginateErrorResults:\nRequest processed at ${System.currentTimeMillis()}")
-      replyTo ! PaginatedErrors(pageOfFailuresF, allFailures.length)
+      val p = PaginatedResource(total)(page)
+      val pageOfFailuresF = allFailures.take(p.toIndex).drop(p.fromIndex).runWith(Sink.seq)
+      pageOfFailuresF.map { pageOfFailures =>
+        replyTo ! PaginatedErrors(pageOfFailures, total)
+      }
 
     case Shutdown =>
       context stop self
