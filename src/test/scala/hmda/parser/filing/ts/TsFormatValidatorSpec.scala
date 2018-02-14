@@ -18,6 +18,8 @@ class TsFormatValidatorSpec
 
   val config = ConfigFactory.load()
 
+  val numberOfFields = config.getInt("hmda.filing.ts.length")
+
   property("Transmittal Sheet must be valid") {
     forAll(tsGen) { ts =>
       val values = extractValues(ts)
@@ -29,7 +31,7 @@ class TsFormatValidatorSpec
     val numberOfFields = config.getInt("hmda.filing.ts.length")
     val values = List("a", "b", "c")
     validateTs(values) mustBe Invalid(
-      NonEmptyList.of(IncorrectNumberOfFields(values.length)))
+      NonEmptyList.of(IncorrectNumberOfFields(values.length, numberOfFields)))
   }
 
   property(
