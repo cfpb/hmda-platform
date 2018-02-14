@@ -5,3 +5,10 @@ services:
     image: jplock/zookeeper
     ports:
       - '2181:2181'
+
+  cassandra:
+    image: cassandra
+    ports:
+      - '9042:9042'
+      - '7000:7000'
+      - '7199:7199'

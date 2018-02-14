@@ -86,7 +86,7 @@ class HmdaFileValidator(supervisor: ActorRef, validationStats: ActorRef, submiss
   val duration = config.getInt("hmda.actor-lookup-timeout")
   val processingParallelism = config.getInt("hmda.processing.parallelism")
 
-  implicit val timeout = Timeout(30.seconds)
+  implicit val timeout = Timeout(duration.seconds)
   val parserPersistenceId = s"${HmdaFileParser.name}-$submissionId"
 
   var counter = 0

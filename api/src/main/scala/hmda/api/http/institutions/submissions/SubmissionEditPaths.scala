@@ -28,7 +28,6 @@ import hmda.persistence.processing.{ HmdaFileValidator, SubmissionManager }
 import hmda.persistence.processing.HmdaFileValidator.{ PaginateErrorResults, _ }
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.concurrent.duration._
 import scala.util.matching.Regex
 import scala.util.{ Failure, Success }
 
