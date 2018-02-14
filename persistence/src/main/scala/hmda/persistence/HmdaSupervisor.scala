@@ -72,6 +72,9 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
     case id @ SingleLarValidation.name =>
       val actor = context.actorOf(SingleLarValidation.props.withDispatcher("persistence-dispatcher"), id)
       supervise(actor, id)
+    case id @ SingleTsValidation.name =>
+      val actor = context.actorOf(SingleTsValidation.props.withDispatcher("persistence-dispatcher"), id)
+      supervise(actor, id)
     case id @ InstitutionPersistence.name =>
       val actor = context.actorOf(InstitutionPersistence.props.withDispatcher("persistence-dispatcher"), id)
       supervise(actor, id)
