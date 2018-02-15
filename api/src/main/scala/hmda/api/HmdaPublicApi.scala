@@ -9,12 +9,12 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.public.RateSpreadHttpApi
-import hmda.api.http.{ BaseHttpApi, SingleLarValidationHttpApi, SingleTsValidationHttpApi }
-import hmda.api.http.public.{ InstitutionSearchPaths, ULIHttpApi }
+import hmda.api.http.public._
+import hmda.api.http.BaseHttpApi
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import akka.http.scaladsl.server.Directives._
 import hmda.persistence.institutions.InstitutionPersistence
+
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 

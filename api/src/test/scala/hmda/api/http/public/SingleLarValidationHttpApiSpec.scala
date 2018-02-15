@@ -1,7 +1,7 @@
-package hmda.api.http
+package hmda.api.http.public
 
 import akka.event.{ LoggingAdapter, NoLogging }
-import akka.http.javadsl.model.StatusCodes
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import hmda.api.model.SingleValidationErrorResult
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -52,14 +52,14 @@ class SingleLarValidationHttpApiSpec extends WordSpec with MustMatchers with Sca
 
     "fail to parse an invalid pipe delimited LAR and return a list of errors" in {
       postWithCfpbHeaders("/lar/parse", invalidLarCsv) ~> larRoutes(supervisor) ~> check {
-        status mustEqual StatusCodes.BAD_REQUEST
+        status mustEqual StatusCodes.BadRequest
         responseAs[LarParsingError].errorMessages.length mustBe 2
       }
     }
 
     "fail to parse an valid pipe delimited LAR with too many fields and return an error" in {
       postWithCfpbHeaders("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes(supervisor) ~> check {
-        status mustEqual StatusCodes.BAD_REQUEST
+        status mustEqual StatusCodes.BadRequest
         responseAs[LarParsingError].errorMessages.length mustBe 1
       }
     }
@@ -125,7 +125,7 @@ class SingleLarValidationHttpApiSpec extends WordSpec with MustMatchers with Sca
 
     "return parsing errors for an invalid LAR" in {
       postWithCfpbHeaders("/lar/parseAndValidate", invalidLarCsv) ~> larRoutes(supervisor) ~> check {
-        status mustEqual StatusCodes.BAD_REQUEST
+        status mustEqual StatusCodes.BadRequest
         responseAs[LarParsingError].errorMessages.length mustBe 2
       }
     }
