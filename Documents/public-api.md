@@ -344,7 +344,7 @@ action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,
 
 `/ts/parse`
 
-`POST` - Returns a JSON representation of a LAR, or a list of errors if the LAR fails to parse
+`POST` - Returns a JSON representation of a TS, or a list of errors if the TS fails to parse
 
 Example body: 
 
