@@ -4,7 +4,7 @@ import org.scalacheck.Gen
 import hmda.model.filing.FilingGenerators._
 import hmda.model.census.Census._
 
-class TsGenerators {
+object TsGenerators {
 
   implicit def tsGen: Gen[TransmittalSheet] = {
     for {
