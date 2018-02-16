@@ -42,7 +42,7 @@ sbt:cluster> reStart
 ```
 
 
-### Building the .jar
+### Building and runnint the .jar
 
 * To build JVM artifacts (the default, includes all projects), from the sbt prompt:
 
@@ -53,7 +53,7 @@ This task will create a `fat jar`, which can be executed on any `JDK9` compliant
 
 `java -jar target/scala-2.12/hmda2.jar`
 
-### Building the Docker image
+### Building and running the Docker image
 
 * To build a `Docker` image that runs as a single node cluster, from the sbt prompt:
 
@@ -62,30 +62,20 @@ This task will create a `fat jar`, which can be executed on any `JDK9` compliant
 ```
 This task will create a `Docker` image. To run a container with the `HMDA Platform` as a single node cluster, will all dependencies:
 
-`docker run --rm -ti -p 19999:19999 jmarin/hmda`
+`docker run --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 hmda/hmda-platform`
 
-### Running as a local cluster
+### Running the application in clustered mode (mesos)
 
-The application can be run as a distributed cluster on a local machine, by running it on separate `JVM` processes.
-The following example starts 2 instances of the application that work as a cluster, with roles `persistence` and `health`:
+* A couple of scripts in the `mesos` folder describe the deployment through [Marathon](https://mesosphere.github.io/marathon/) on a DCOS / Mesos cluster.
 
-* First node, acts as seed node and has role `persistence`. From a terminal window:
-
-```shell
-export HMDA_RUNTIME_MODE=prod
-export HMDA_CLUSTER_ROLES=persistence
-java -Dakka.cluster.seed-nodes.0=akka://hmda@127.0.0.1:2551 -jar target/scala-2.12/hmda2.jar
-```
-
-
-* Second node, joins the cluster through the previous seed node and has role `health`. From a separate terminal window:
+For a 3 node cluster deployed through the [DC/OS CLI](https://docs.mesosphere.com/1.10/cli/), the following command can be used:
 
 ```shell
-export HMDA_RUNTIME_MODE=prod
-export APP_PORT=0
-export HMDA_CLUSTER_ROLES=health
-java -Dakka.cluster.seed-nodes.0=akka://hmda@127.0.0.1:2551 -jar target/scala-2.12/hmda2.jar
+dcos marathon app add mesos/hmda-platform-host-mode.json
 ```
+
+For more details, please refer to the Marathon Documentation
+
 
 ## Contributing
 
