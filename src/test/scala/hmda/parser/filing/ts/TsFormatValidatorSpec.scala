@@ -4,16 +4,21 @@ import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.model.filing.ts.TsGenerators._
 import TsFormatValidator._
-import cats.data.NonEmptyList
-import cats.data.Validated.{Invalid, Valid}
 import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
 import hmda.parser.filing.ts.TsParserErrorModel._
 import TsValidationUtils._
+import cats.data.NonEmptyList
+import com.typesafe.config.ConfigFactory
+import cats.data.Validated.{Invalid, Valid}
 
 class TsFormatValidatorSpec
     extends PropSpec
     with PropertyChecks
     with MustMatchers {
+
+  val config = ConfigFactory.load()
+
+  val numberOfFields = config.getInt("hmda.filing.ts.length")
 
   property("Transmittal Sheet must be valid") {
     forAll(tsGen) { ts =>
@@ -25,7 +30,7 @@ class TsFormatValidatorSpec
   property("Transmittal Sheet must have the correct number of fields") {
     val values = List("a", "b", "c")
     validateTs(values) mustBe Invalid(
-      NonEmptyList.of(IncorrectNumberOfFields(values.length)))
+      NonEmptyList.of(IncorrectNumberOfFields(values.length, numberOfFields)))
   }
 
   property(
