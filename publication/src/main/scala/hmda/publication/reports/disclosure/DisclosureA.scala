@@ -4,46 +4,20 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
-import hmda.model.publication.reports.ValueDisposition
-import hmda.model.publication.reports.EthnicityEnum._
-import hmda.model.publication.reports.GenderEnum._
-import hmda.model.publication.reports.ApplicantIncomeEnum._
-import hmda.model.publication.reports.MinorityStatusEnum._
-import hmda.model.publication.reports.RaceEnum._
 import hmda.publication.reports._
-import hmda.publication.reports.util.DispositionType._
-import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
-import hmda.publication.reports.util.GenderUtil.filterGender
-import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
-import hmda.publication.reports.util.RaceUtil.filterRace
+import hmda.publication.reports.disclosure.DisclosureAUtil._
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
 
-object A1 extends DisclosureA {
-  val reportId = "A1"
+object A1 extends DisclosureReport {
+  val reportId = "DA1"
   def filters(lar: LoanApplicationRegister, msa: Int): Boolean = {
     (1 to 4).contains(lar.loan.loanType) &&
       lar.loan.propertyType == 1 &&
       lar.geography.msa.toInt == msa
   }
-}
-
-object A1W extends DisclosureA {
-  val reportId = "A1W"
-  def filters(lar: LoanApplicationRegister, msa: Int): Boolean = {
-    (1 to 4).contains(lar.loan.loanType) &&
-      lar.loan.propertyType == 1
-  }
-}
-
-trait DisclosureA extends DisclosureReport {
-  val reportId: String
-  def filters(lar: LoanApplicationRegister, msa: Int): Boolean
-
-  val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
-    ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
@@ -69,61 +43,160 @@ trait DisclosureA extends DisclosureReport {
       denied <- loanTypes(lars.filter(lar => lar.actionTakenType == 3))
       withdrawn <- loanTypes(lars.filter(lar => lar.actionTakenType == 4))
       closed <- loanTypes(lars.filter(lar => lar.actionTakenType == 5))
-      preapproval <- loanTypes(lars.filter(lar => lar.actionTakenType == 1 && lar.preapprovals ==1))
+      preapproval <- loanTypes(lars.filter(lar => lar.actionTakenType == 1 && lar.preapprovals == 1))
       sold <- loanTypes(lars.filter(lar => (1 to 9).contains(lar.purchaserType)))
     } yield {
       val report = s"""
-         |{
-         |    "respondentId": "${institution.respondentId}",
-         |    "institutionName": "${institution.respondent.name}",
-         |    "table": "${metaData.reportTable}",
-         |    "type": "Disclosure",
-         |    "description": "${metaData.description}",
-         |    "year": "$year",
-         |    "reportDate": "$reportDate",
-         |    "msa": $msa,,
-         |    "dispositions": [
-         |        {
-         |            "disposition": "Applications Received",
-         |            "loantypes": $received
-         |        },
-         |        {
-         |            "disposition": "Loans Originated",
-         |            "loantypes": $originiated
-         |        },
-         |        {
-         |            "disposition": "Apps. Approved But Not Accepted",
-         |            "loantypes": $appNotAcc
-         |        },
-         |        {
-         |            "disposition": "Applications Denied",
-         |            "loantypes": $denied
-         |        },
-         |        {
-         |            "disposition": "Applications Withdrawn",
-         |            "loantypes": $withdrawn
-         |        },
-         |        {
-         |            "disposition": "Files Closed For Incompleteness",
-         |            "loantypes": $closed
-         |        },
-         |        {
-         |            "disposition": "Preapprovals Resulting in Originations",
-         |            "loantypes": $preapproval
-         |        },
-         |        {
-         |            "disposition": "Loans Sold",
-         |            "loantypes": $sold
-         |        }
-         |    ]
-         |}
+                      |{
+                      |    "respondentId": "${institution.respondentId}",
+                      |    "institutionName": "${institution.respondent.name}",
+                      |    "table": "${metaData.reportTable}",
+                      |    "type": "Disclosure",
+                      |    "description": "${metaData.description}",
+                      |    "year": "$year",
+                      |    "reportDate": "$reportDate",
+                      |    "msa": $msa,
+                      |    "dispositions": [
+                      |        {
+                      |            "disposition": "Applications Received",
+                      |            "loantypes": $received
+                      |        },
+                      |        {
+                      |            "disposition": "Loans Originated",
+                      |            "loantypes": $originiated
+                      |        },
+                      |        {
+                      |            "disposition": "Apps. Approved But Not Accepted",
+                      |            "loantypes": $appNotAcc
+                      |        },
+                      |        {
+                      |            "disposition": "Applications Denied",
+                      |            "loantypes": $denied
+                      |        },
+                      |        {
+                      |            "disposition": "Applications Withdrawn",
+                      |            "loantypes": $withdrawn
+                      |        },
+                      |        {
+                      |            "disposition": "Files Closed For Incompleteness",
+                      |            "loantypes": $closed
+                      |        },
+                      |        {
+                      |            "disposition": "Preapprovals Resulting in Originations",
+                      |            "loantypes": $preapproval
+                      |        },
+                      |        {
+                      |            "disposition": "Loans Sold",
+                      |            "loantypes": $sold
+                      |        }
+                      |    ]
+                      |}
+       """.stripMargin
+
+      DisclosureReportPayload(metaData.reportTable, fipsCode.toString, report)
+    }
+  }
+}
+
+object A1W extends DisclosureReport {
+  val reportId = "DA1W"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    (1 to 4).contains(lar.loan.loanType) &&
+      lar.loan.propertyType == 1
+  }
+
+  def generate[ec: EC, mat: MAT, as: AS](
+    larSource: Source[LoanApplicationRegister, NotUsed],
+    fipsCode: Int,
+    institution: Institution
+  ): Future[DisclosureReportPayload] = {
+
+    val metaData = ReportsMetaDataLookup.values(reportId)
+
+    val lars = larSource
+      .filter(lar => filters(lar))
+
+    val msa = msaReport(fipsCode.toString).toJsonFormat
+    val reportDate = formattedCurrentDate
+    val yearF = calculateYear(larSource)
+
+    for {
+      year <- yearF
+
+      received <- loanTypes(lars.filter(lar => List(1, 2, 3, 4, 5, 7, 8).contains(lar.actionTakenType)))
+      originiated <- loanTypes(lars.filter(lar => lar.actionTakenType == 1))
+      appNotAcc <- loanTypes(lars.filter(lar => lar.actionTakenType == 2))
+      appDenied <- loanTypes(lars.filter(lar => lar.actionTakenType == 3))
+      withdrawn <- loanTypes(lars.filter(lar => lar.actionTakenType == 4))
+      closed <- loanTypes(lars.filter(lar => lar.actionTakenType == 5))
+      preDenied <- loanTypes(lars.filter(lar => lar.actionTakenType == 7))
+      preAppNotAcc <- loanTypes(lars.filter(lar => lar.actionTakenType == 8))
+      preapproval <- loanTypes(lars.filter(lar => lar.actionTakenType == 1 && lar.preapprovals == 1))
+      sold <- loanTypes(lars.filter(lar => (1 to 9).contains(lar.purchaserType)))
+    } yield {
+      val report = s"""
+                      |{
+                      |    "respondentId": "${institution.respondentId}",
+                      |    "institutionName": "${institution.respondent.name}",
+                      |    "table": "${metaData.reportTable}",
+                      |    "type": "Disclosure",
+                      |    "description": "${metaData.description}",
+                      |    "year": "$year",
+                      |    "reportDate": "$reportDate",
+                      |    "msa": $msa,
+                      |    "dispositions": [
+                      |        {
+                      |            "disposition": "Applications Received",
+                      |            "loantypes": $received
+                      |        },
+                      |        {
+                      |            "disposition": "Loans Originated",
+                      |            "loantypes": $originiated
+                      |        },
+                      |        {
+                      |            "disposition": "Apps. Approved But Not Accepted",
+                      |            "loantypes": $appNotAcc
+                      |        },
+                      |        {
+                      |            "disposition": "Applications Denied",
+                      |            "loantypes": $appDenied
+                      |        },
+                      |        {
+                      |            "disposition": "Applications Withdrawn",
+                      |            "loantypes": $withdrawn
+                      |        },
+                      |        {
+                      |            "disposition": "Files Closed For Incompleteness",
+                      |            "loantypes": $closed
+                      |        },
+                      |        {
+                      |            "disposition": "Preapprovals Denied",
+                      |            "loantypes": $preDenied
+                      |        },
+                      |        {
+                      |            "disposition": "Preapprovals Approved but not Accepted",
+                      |            "loantypes": $preAppNotAcc
+                      |        },
+                      |        {
+                      |            "disposition": "Preapprovals Resulting in Originations",
+                      |            "loantypes": $preapproval
+                      |        },
+                      |        {
+                      |            "disposition": "Loans Sold",
+                      |            "loantypes": $sold
+                      |        }
+                      |    ]
+                      |}
        """.stripMargin
 
       DisclosureReportPayload(metaData.reportTable, fipsCode.toString, report)
     }
   }
 
-  private def loanTypes[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+}
+
+object DisclosureAUtil {
+  def loanTypes[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
     for {
       conv <- purposesOutput(larSource.filter(lar => lar.loan.loanType == 1))
       fha <- purposesOutput(larSource.filter(lar => lar.loan.loanType == 2))
@@ -161,7 +234,7 @@ trait DisclosureA extends DisclosureReport {
       refinanceJunior <- count(larSource.filter(lar => lar.lienStatus == 2 && lar.loan.purpose == 3))
       homeImprovementFirst <- count(larSource.filter(lar => lar.lienStatus == 1 && lar.loan.purpose == 2))
       homeImprovementJunior <- count(larSource.filter(lar => lar.lienStatus == 2 && lar.loan.purpose == 2))
-      homeImprovementNo <- count(larSource.filter(lar => lar.lienStatus == 3 && lar.loan.purpose == 2))
+      homeImprovementNo <- count(larSource.filter(lar => lar.lienStatus != 1 && lar.lienStatus != 2 && lar.loan.purpose == 2))
     } yield {
       s"""
          |[
@@ -185,5 +258,4 @@ trait DisclosureA extends DisclosureReport {
      """.stripMargin
     }
   }
-
 }
