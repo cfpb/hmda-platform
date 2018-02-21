@@ -30,18 +30,13 @@ object SubmissionPersistence {
         case SubmissionCreated(s) =>
           SubmissionState(s +: submissions)
 
+        case SubmissionStatusUpdatedV2(id, status, time) =>
+          updateCollection(id, status, time)
+
         case SubmissionStatusUpdated(id, status) =>
-          val x = submissions.find(x => x.id == id).getOrElse(Submission())
-          val i = submissions.indexOf(x)
-
-          val updatedSub: Submission = {
-            if (status == Signed) {
-              val now = System.currentTimeMillis
-              x.copy(status = status, end = now, receipt = generateReceipt(x.id, now))
-            } else x.copy(status = status)
-          }
-
-          SubmissionState(submissions.updated(i, updatedSub))
+          // Handle old data version. Since we can't know the correct time,
+          //   use the time of writing this method: 21 Feb 2018, aka 1519223881135
+          updateCollection(id, status, 1519223881135L)
 
         case SubmissionFileNameAdded(id, fileName) =>
           val sub = submissions.find(_.id == id).getOrElse(Submission())
@@ -49,6 +44,17 @@ object SubmissionPersistence {
           val updated = sub.copy(fileName = fileName)
           SubmissionState(submissions.updated(index, updated))
       }
+    }
+
+    private def updateCollection(id: SubmissionId, status: SubmissionStatus, time: Long): SubmissionState = {
+      val x = submissions.find(x => x.id == id).getOrElse(Submission())
+      val i = submissions.indexOf(x)
+
+      val updatedSub = if (status == Signed) {
+        x.copy(status = status, end = time, receipt = generateReceipt(x.id, time))
+      } else x.copy(status = status)
+
+      SubmissionState(submissions.updated(i, updatedSub))
     }
 
     private def generateReceipt(submissionId: SubmissionId, timestamp: Long): String = {
@@ -82,7 +88,8 @@ class SubmissionPersistence(institutionId: String, period: String) extends HmdaP
 
     case UpdateSubmissionStatus(id, status) =>
       if (state.submissions.map(x => x.id).contains(id)) {
-        persist(SubmissionStatusUpdated(id, status)) { e =>
+        val now = System.currentTimeMillis
+        persist(SubmissionStatusUpdatedV2(id, status, now)) { e =>
           updateState(e)
           sender() ! Some(Submission(id, status))
         }
