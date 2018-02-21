@@ -1,7 +1,7 @@
-package hmda.api.http
+package hmda.api.http.public
 
 import akka.event.{ LoggingAdapter, NoLogging }
-import akka.http.javadsl.model.StatusCodes
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import hmda.api.model.SingleValidationErrorResult
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -36,7 +36,7 @@ class SingleLarValidationHttpApiSpec extends WordSpec with MustMatchers with Sca
   val validationStats = ValidationStats.createValidationStats(system)
   val supervisor = HmdaSupervisor.createSupervisor(system, validationStats)
 
-  val larCsv = "2|0123456789|9|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
+  val larCsv = "2|0123456789|9|9ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
   val invalidLarCsv = "invalid|0123456789|invalid|ABCDEFGHIJKLMNOPQRSTUVWXY|NA|4|2|2|1|100|3|6|20130119|14454|25|025|0001.00|4|3|5|4|3|2|1|6|||||1|2|NA|0||||NA|2|4"
 
   val lar = LarCsvParser(larCsv).right.get // Assuming the hardcoded value will parse correctly
@@ -52,14 +52,14 @@ class SingleLarValidationHttpApiSpec extends WordSpec with MustMatchers with Sca
 
     "fail to parse an invalid pipe delimited LAR and return a list of errors" in {
       postWithCfpbHeaders("/lar/parse", invalidLarCsv) ~> larRoutes(supervisor) ~> check {
-        status mustEqual StatusCodes.BAD_REQUEST
+        status mustEqual StatusCodes.BadRequest
         responseAs[LarParsingError].errorMessages.length mustBe 2
       }
     }
 
     "fail to parse an valid pipe delimited LAR with too many fields and return an error" in {
       postWithCfpbHeaders("/lar/parse", larCsv + "|too|many|fields") ~> larRoutes(supervisor) ~> check {
-        status mustEqual StatusCodes.BAD_REQUEST
+        status mustEqual StatusCodes.BadRequest
         responseAs[LarParsingError].errorMessages.length mustBe 1
       }
     }
@@ -125,7 +125,7 @@ class SingleLarValidationHttpApiSpec extends WordSpec with MustMatchers with Sca
 
     "return parsing errors for an invalid LAR" in {
       postWithCfpbHeaders("/lar/parseAndValidate", invalidLarCsv) ~> larRoutes(supervisor) ~> check {
-        status mustEqual StatusCodes.BAD_REQUEST
+        status mustEqual StatusCodes.BadRequest
         responseAs[LarParsingError].errorMessages.length mustBe 2
       }
     }

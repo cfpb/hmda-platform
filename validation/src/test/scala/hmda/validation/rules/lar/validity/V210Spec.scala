@@ -60,5 +60,13 @@ class V210Spec extends LarEditCheckSpec {
     }
   }
 
+  property("A lar without leading zeroes must fail") {
+    forAll(larGen, invalidDayGen) { (lar, day) =>
+      val badLoan = lar.loan.copy(applicationDate = "2016111")
+      val badLar = lar.copy(loan = badLoan)
+      badLar.mustFail
+    }
+  }
+
   override def check: EditCheck[LoanApplicationRegister] = V210
 }

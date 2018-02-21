@@ -1,4 +1,4 @@
-package hmda.api.http
+package hmda.api.http.public
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.LoggingAdapter
@@ -9,6 +9,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.pattern.ask
+import hmda.api.http.HmdaCustomDirectives
 import hmda.api.model.SingleValidationErrorResult
 import hmda.api.protocol.fi.lar.LarProtocol
 import hmda.api.protocol.processing.ParserResultsProtocol

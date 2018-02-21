@@ -16,7 +16,7 @@ object V210 extends EditCheck[LoanApplicationRegister] {
     val format = new SimpleDateFormat("yyyyMMdd")
     format.setLenient(false)
 
-    Try(format.parse(date).after(format.parse("20000101")) is equalTo(true))
+    Try((format.parse(date).after(format.parse("20000101")) is equalTo(true)) and (date.length is equalTo(8)))
       .getOrElse(date is equalTo("NA"))
   }
 

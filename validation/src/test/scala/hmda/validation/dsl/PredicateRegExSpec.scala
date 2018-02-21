@@ -132,4 +132,37 @@ class PredicateRegExSpec
     val testCases = List("1234.ab", " 1234.56", "1234-56", "OOOO.O1", "12.3456", "", ".")
     testCases.foreach(validCensusTractFormat.validate(_) mustBe false)
   }
+
+  // Contains Digits (Q666) **************
+  property("An alpha string with no digits must fail the regex") {
+    forAll(Gen.alphaStr) { str =>
+      containsDigits.validate(str) mustBe false
+    }
+  }
+
+  property("Alpha strings with punctuation and special characters (but no digits) must fail the regex") {
+    val testCases = List("first last", "lastName-denied", "lastname(NewYork)", "last.first", "Smith#III")
+    testCases.foreach(containsDigits.validate(_) mustBe false)
+  }
+
+  property("A string with any digits must pass the regex") {
+    val testCases = List("first4 last", "lastName2-denied", "1lastname(NewYork)", "last.first.9", "Smith#3")
+    testCases.foreach(containsDigits.validate(_) mustBe true)
+  }
+
+  // Looks like SSN (Q666) **************
+  property("A string with format NNN-NN-NNNN must pass the regex") {
+    val testCases = List("333-22-4444", "123-45-6789", "789-03-5238", "111-11-1111")
+    testCases.foreach(ssnFormat.validate(_) mustBe true)
+  }
+
+  property("A string with non-SSN formats must fail the regex") {
+    val testCases = List("333-22-55555", "1234-56-7890", "123-ab-4567", "xy-555-55-5555")
+    testCases.foreach(ssnFormat.validate(_) mustBe false)
+  }
+
+  property("A string with different punctuation must fail the regex") {
+    val testCases = List("333224444", "123.45.6789", "789 03 5238", "111,11,1111")
+    testCases.foreach(ssnFormat.validate(_) mustBe false)
+  }
 }
