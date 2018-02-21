@@ -21,7 +21,7 @@ object D5XProtocol
         "institutionName" -> JsString(obj.institutionName),
         "table" -> JsString(obj.table),
         "type" -> JsString(Disclosure.toString),
-        "desc" -> JsString(obj.description),
+        "description" -> JsString(obj.description),
         "year" -> JsNumber(obj.year),
         "reportDate" -> JsString(obj.reportDate),
         "msa" -> obj.msa.toJson,
@@ -39,7 +39,7 @@ object D5XProtocol
       "applicantIncomes",
       "total",
       "table",
-      "desc"
+      "description"
     ) match {
         case Seq(respondentId, institutionName, year, reportDate, msa, applicantIncomes, total, table, desc) =>
           D5X(

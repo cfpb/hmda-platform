@@ -5,10 +5,10 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.institution.ExternalIdType.RssdId
+import hmda.model.institution.{ ExternalId, Institution, Respondent }
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
-import spray.json.{ JsArray, JsString }
-
-import scala.concurrent.Future
+import spray.json._
 
 class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
 
@@ -23,6 +23,8 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
 
   val respId = "98765"
   val fips = 13420 // Bemidji, MN
+  val resp = Respondent(ExternalId(respId, RssdId), "Bemidji Test Bank", "", "", "")
+  val inst = Institution.empty.copy(respondent = resp)
   val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
     val geo = lar.geography.copy(msa = fips.toString)
     val loan = lar.loan.copy(propertyType = 3)
@@ -35,8 +37,8 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   val descriptionD85 = "Reasons for denial of applications for loans on dwellings for 5 or more families, by race, ethnicity, gender and income of applicant"
 
   "Generate a Disclosure 8-5 report" in {
-    D85.generate(source, fips, respId, Future("Bemidji Test Bank")).map { result =>
-      result.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
+    D85.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
         case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
           respondentId mustBe respId
           instName mustBe "Bemidji Test Bank"
@@ -50,8 +52,8 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   }
 
   "Include correct applicant Characteristics" in {
-    D85.generate(source, fips, respId, Future("Bemidji Test Bank")).map { result =>
-      result.asJsObject.getFields("applicantCharacteristics") match {
+    D85.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("applicantCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
           characteristics must have size 5

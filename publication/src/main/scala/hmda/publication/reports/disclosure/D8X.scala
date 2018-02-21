@@ -3,6 +3,7 @@ package hmda.publication.reports.disclosure
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.institution.Institution
 import hmda.model.publication.reports.PercentageDisposition
 import hmda.model.publication.reports.EthnicityEnum._
 import hmda.model.publication.reports.GenderEnum._
@@ -19,7 +20,6 @@ import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
-import spray.json._
 
 object D81 extends D8X {
   val reportId = "D81"
@@ -77,7 +77,7 @@ object D87 extends D8X {
   }
 }
 
-trait D8X {
+trait D8X extends DisclosureReport {
   val reportId: String
   def filters(lar: LoanApplicationRegister): Boolean
 
@@ -88,15 +88,12 @@ trait D8X {
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    respondentId: String,
-    institutionNameF: Future[String]
-  ): Future[JsValue] = {
+    institution: Institution
+  ): Future[DisclosureReportPayload] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
     val lars = larSource
-      .filter(lar => lar.respondentId == respondentId)
-      .filter(lar => lar.geography.msa != "NA")
       .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
 
@@ -109,7 +106,6 @@ trait D8X {
     val yearF = calculateYear(lars)
 
     for {
-      institutionName <- institutionNameF
       year <- yearF
 
       e1 <- dispositionsOutput(filterEthnicity(lars, HispanicOrLatino))
@@ -142,10 +138,10 @@ trait D8X {
       i6 <- dispositionsOutput(lars.filter(lar => lar.applicant.income == "NA"))
 
     } yield {
-      s"""
+      val report = s"""
          |{
-         |    "respondentId": "$respondentId",
-         |    "institutionName": "$institutionName",
+         |    "respondentId": "${institution.respondentId}",
+         |    "institutionName": "${institution.respondent.name}",
          |    "table": "${metaData.reportTable}",
          |    "type": "Disclosure",
          |    "description": "${metaData.description}",
@@ -278,7 +274,9 @@ trait D8X {
          |
          |}
          |
-       """.stripMargin.parseJson
+       """.stripMargin
+
+      DisclosureReportPayload(metaData.reportTable, fipsCode.toString, report)
     }
   }
 

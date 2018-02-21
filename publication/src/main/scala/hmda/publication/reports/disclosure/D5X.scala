@@ -1,14 +1,17 @@
 package hmda.publication.reports.disclosure
 
-import hmda.model.publication.reports.{ ApplicantIncome, ValueDisposition, MSAReport }
+import hmda.model.publication.reports.{ ApplicantIncome, MSAReport, ValueDisposition }
 import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.publication.reports.util.ReportUtil._
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.model.institution.Institution
 import hmda.publication.reports._
+import hmda.publication.reports.protocol.disclosure.D5XProtocol._
 
 import scala.concurrent.Future
+import spray.json._
 
 case class D5X(
   respondentId: String,
@@ -20,7 +23,7 @@ case class D5X(
   table: String,
   description: String,
   reportDate: String = formattedCurrentDate
-) extends DisclosureReport
+)
 
 object D5X {
   def generateD5X[ec: EC, mat: MAT, as: AS](
@@ -28,16 +31,13 @@ object D5X {
     filters: LoanApplicationRegister => Boolean,
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    respondentId: String,
-    institutionNameF: Future[String]
-  ): Future[D5X] = {
+    institution: Institution
+  ): Future[DisclosureReportPayload] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
     val dispositions = metaData.dispositions
 
     val lars = larSource
-      .filter(lar => lar.respondentId == respondentId)
-      .filter(lar => lar.geography.msa != "NA")
       .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
 
@@ -52,22 +52,23 @@ object D5X {
     val totalF = calculateDispositions(lars, dispositions)
 
     for {
-      institutionName <- institutionNameF
       year <- yearF
       applicantIncomes <- applicantIncomesF
       total <- totalF
     } yield {
 
-      D5X(
-        respondentId,
-        institutionName,
+      val report = D5X(
+        institution.respondentId,
+        institution.respondent.name,
         year,
         msa,
         applicantIncomes,
         total,
         metaData.reportTable,
         metaData.description
-      )
+      ).toJson.toString
+
+      DisclosureReportPayload(metaData.reportTable, msa.id, report)
     }
 
   }

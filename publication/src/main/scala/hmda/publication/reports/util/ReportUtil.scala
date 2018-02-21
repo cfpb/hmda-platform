@@ -25,7 +25,7 @@ object ReportUtil extends SourceUtils {
   }
 
   def msaReport(fipsCode: String): MSAReport = {
-    CbsaLookup.values.find(x => x.cbsa == fipsCode) match {
+    CbsaLookup.values.find(x => x.cbsa == fipsCode || x.metroDiv == fipsCode) match {
       case Some(cbsa) =>
         val stateFips = cbsa.key.substring(0, 2)
         val state = StateAbrvLookup.values.find(s => s.state == stateFips).getOrElse(StateAbrv("", "", ""))

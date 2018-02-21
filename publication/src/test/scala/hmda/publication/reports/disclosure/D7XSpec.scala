@@ -5,11 +5,11 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
+import hmda.model.institution.ExternalIdType.RssdId
+import hmda.model.institution.{ ExternalId, Institution, Respondent }
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
-import spray.json.{ JsArray, JsNumber, JsString }
-
-import scala.concurrent.Future
+import spray.json._
 
 class D7XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
 
@@ -24,7 +24,8 @@ class D7XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
 
   val respId = "54345"
   val fips = 11540 // Appleton, WI
-
+  val resp = Respondent(ExternalId(respId, RssdId), "Fox Valley Test Bank", "", "", "")
+  val inst = Institution.empty.copy(respondent = resp)
   val lars = Gen.listOfN(100, larWithValidGeoGen).sample.get.map { lar: LoanApplicationRegister =>
     val loan = lar.loan.copy(loanType = 2, purpose = 3, propertyType = 1, occupancy = 1)
     lar.copy(respondentId = respId, loan = loan, lienStatus = 1)
@@ -36,8 +37,8 @@ class D7XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   val descriptionD74 = "Disposition of applications for home improvement loans, 1- to 4-family and manufactured home dwellings, by characteristics of census tract in which property is located"
 
   "Generate a Disclosure 7-5 report" in {
-    D74.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
-      result.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
+    D74.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
         case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
           respondentId mustBe respId
           instName mustBe "Fox Valley Test Bank"
@@ -51,8 +52,8 @@ class D7XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   }
 
   "Include correct Census Tract Characteristics" in {
-    D75.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
-      result.asJsObject.getFields("censusTractCharacteristics") match {
+    D75.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("censusTractCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
           characteristics must have size 2
@@ -73,8 +74,8 @@ class D7XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   }
 
   "Include correct Income/Racial Composition json" in {
-    D76.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
-      result.asJsObject.getFields("incomeRaces") match {
+    D76.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("incomeRaces") match {
 
         case Seq(JsArray(incomeRaces)) =>
           incomeRaces must have size 1
@@ -101,8 +102,8 @@ class D7XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   }
 
   "Include correct remaining json" in {
-    D76.generate(source, fips, respId, Future("Fox Valley Test Bank")).map { result =>
-      result.asJsObject.getFields("types", "total") match {
+    D76.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("types", "total") match {
 
         case Seq(JsArray(types), JsArray(total)) =>
           total must have size 6

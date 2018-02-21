@@ -354,3 +354,11 @@ This API is for internal use only. The following endpoints are available
       ]
     }
     ```
+
+* `/disclosure/<institution RSSD>/<year>/<submission ID>`
+
+    * `POST`
+
+    Forces the backend to generate and publish the disclosure reports for a given submission.
+
+    Returns a `200 OK` response.
