@@ -38,6 +38,7 @@ object D5X {
     val dispositions = metaData.dispositions
 
     val lars = larSource
+      .filter(lar => lar.geography.msa != "NA")
       .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
 
