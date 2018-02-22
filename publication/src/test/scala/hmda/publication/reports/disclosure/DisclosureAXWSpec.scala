@@ -10,7 +10,7 @@ import hmda.model.institution.{ ExternalId, Institution, Respondent }
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import spray.json._
 
-class DisclosureASpec extends AsyncWordSpec with MustMatchers
+class DisclosureAXWSpec extends AsyncWordSpec with MustMatchers
     with LarGenerators with BeforeAndAfterAll {
 
   implicit val system = ActorSystem()
@@ -37,26 +37,23 @@ class DisclosureASpec extends AsyncWordSpec with MustMatchers
 
   val description = "Disposition of applications and loan sales by loan type, 1- to 4-family dwellings (Excludes manufactured homes)"
 
-  "Generate an A1 report" in {
-    A1.generate(source, fips, inst).map { result =>
-      result.report.parseJson.asJsObject.getFields("table", "description", "msa", "respondentId", "institutionName") match {
-        case Seq(JsString(table), JsString(desc), msa, JsString(resp), JsString(instName)) =>
-          table mustBe "A1"
+  "Generate an A1W report" in {
+    A1W.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("table", "description", "respondentId", "institutionName") match {
+        case Seq(JsString(table), JsString(desc), JsString(resp), JsString(instName)) =>
+          table mustBe "A1W"
           desc mustBe description
           resp mustBe "65656"
           instName mustBe "Grand Junction Mortgage Co."
-          msa.asJsObject.getFields("name") match {
-            case Seq(JsString(msaName)) => msaName mustBe "Grand Junction, CO"
-          }
       }
     }
   }
 
   "Have correct JSON structure" in {
-    A1.generate(source, fips, inst).map { result =>
+    A1W.generate(source, fips, inst).map { result =>
       result.report.parseJson.asJsObject.getFields("dispositions") match {
         case Seq(JsArray(dispositions)) =>
-          dispositions must have size 8
+          dispositions must have size 10
 
           dispositions.head.asJsObject.getFields("disposition", "loantypes") match {
             case Seq(JsString(char), JsArray(loanTypes)) =>

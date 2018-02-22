@@ -11,31 +11,31 @@ import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
 
-object A1 extends AX {
-  val reportId = "DA1"
+object A1W extends AXW {
+  val reportId = "DA1W"
   def filters(lar: LoanApplicationRegister): Boolean = {
     (1 to 4).contains(lar.loan.loanType) &&
       lar.loan.propertyType == 1
   }
 }
 
-object A2 extends AX {
-  val reportId = "DA2"
+object A2W extends AXW {
+  val reportId = "DA2W"
   def filters(lar: LoanApplicationRegister): Boolean = {
     (1 to 4).contains(lar.loan.loanType) &&
       lar.loan.propertyType == 2
   }
 }
 
-object A3 extends AX {
-  val reportId = "DA3"
+object A3W extends AXW {
+  val reportId = "DA3W"
   def filters(lar: LoanApplicationRegister): Boolean = {
     (1 to 4).contains(lar.loan.loanType) &&
       lar.loan.propertyType == 3
   }
 }
 
-trait AX extends DisclosureReport {
+trait AXW extends DisclosureReport {
   val reportId: String
   def filters(lar: LoanApplicationRegister): Boolean
 
@@ -48,23 +48,22 @@ trait AX extends DisclosureReport {
     val metaData = ReportsMetaDataLookup.values(reportId)
 
     val lars = larSource
-      .filter(lar => lar.geography.msa != "NA")
-      .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
 
-    val msa = msaReport(fipsCode.toString).toJsonFormat
     val reportDate = formattedCurrentDate
     val yearF = calculateYear(larSource)
 
     for {
       year <- yearF
 
-      received <- loanTypes(lars.filter(lar => (1 to 5).contains(lar.actionTakenType)))
+      received <- loanTypes(lars.filter(lar => List(1, 2, 3, 4, 5, 7, 8).contains(lar.actionTakenType)))
       originiated <- loanTypes(lars.filter(lar => lar.actionTakenType == 1))
       appNotAcc <- loanTypes(lars.filter(lar => lar.actionTakenType == 2))
-      denied <- loanTypes(lars.filter(lar => lar.actionTakenType == 3))
+      appDenied <- loanTypes(lars.filter(lar => lar.actionTakenType == 3))
       withdrawn <- loanTypes(lars.filter(lar => lar.actionTakenType == 4))
       closed <- loanTypes(lars.filter(lar => lar.actionTakenType == 5))
+      preDenied <- loanTypes(lars.filter(lar => lar.actionTakenType == 7))
+      preAppNotAcc <- loanTypes(lars.filter(lar => lar.actionTakenType == 8))
       preapproval <- loanTypes(lars.filter(lar => lar.actionTakenType == 1 && lar.preapprovals == 1))
       sold <- loanTypes(lars.filter(lar => (1 to 9).contains(lar.purchaserType)))
     } yield {
@@ -77,7 +76,6 @@ trait AX extends DisclosureReport {
                       |    "description": "${metaData.description}",
                       |    "year": "$year",
                       |    "reportDate": "$reportDate",
-                      |    "msa": $msa,
                       |    "dispositions": [
                       |        {
                       |            "disposition": "Applications Received",
@@ -93,7 +91,7 @@ trait AX extends DisclosureReport {
                       |        },
                       |        {
                       |            "disposition": "Applications Denied",
-                      |            "loantypes": $denied
+                      |            "loantypes": $appDenied
                       |        },
                       |        {
                       |            "disposition": "Applications Withdrawn",
@@ -102,6 +100,14 @@ trait AX extends DisclosureReport {
                       |        {
                       |            "disposition": "Files Closed For Incompleteness",
                       |            "loantypes": $closed
+                      |        },
+                      |        {
+                      |            "disposition": "Preapprovals Denied",
+                      |            "loantypes": $preDenied
+                      |        },
+                      |        {
+                      |            "disposition": "Preapprovals Approved but not Accepted",
+                      |            "loantypes": $preAppNotAcc
                       |        },
                       |        {
                       |            "disposition": "Preapprovals Resulting in Originations",
