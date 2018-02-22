@@ -79,43 +79,43 @@ trait AXW extends DisclosureReport {
                       |    "dispositions": [
                       |        {
                       |            "disposition": "Applications Received",
-                      |            "loantypes": $received
+                      |            "loanTypes": $received
                       |        },
                       |        {
                       |            "disposition": "Loans Originated",
-                      |            "loantypes": $originiated
+                      |            "loanTypes": $originiated
                       |        },
                       |        {
                       |            "disposition": "Apps. Approved But Not Accepted",
-                      |            "loantypes": $appNotAcc
+                      |            "loanTypes": $appNotAcc
                       |        },
                       |        {
                       |            "disposition": "Applications Denied",
-                      |            "loantypes": $appDenied
+                      |            "loanTypes": $appDenied
                       |        },
                       |        {
                       |            "disposition": "Applications Withdrawn",
-                      |            "loantypes": $withdrawn
+                      |            "loanTypes": $withdrawn
                       |        },
                       |        {
                       |            "disposition": "Files Closed For Incompleteness",
-                      |            "loantypes": $closed
+                      |            "loanTypes": $closed
                       |        },
                       |        {
                       |            "disposition": "Preapprovals Denied",
-                      |            "loantypes": $preDenied
+                      |            "loanTypes": $preDenied
                       |        },
                       |        {
                       |            "disposition": "Preapprovals Approved but not Accepted",
-                      |            "loantypes": $preAppNotAcc
+                      |            "loanTypes": $preAppNotAcc
                       |        },
                       |        {
                       |            "disposition": "Preapprovals Resulting in Originations",
-                      |            "loantypes": $preapproval
+                      |            "loanTypes": $preapproval
                       |        },
                       |        {
                       |            "disposition": "Loans Sold",
-                      |            "loantypes": $sold
+                      |            "loanTypes": $sold
                       |        }
                       |    ]
                       |}

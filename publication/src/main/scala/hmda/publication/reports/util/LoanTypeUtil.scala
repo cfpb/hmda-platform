@@ -19,19 +19,19 @@ object LoanTypeUtil extends SourceUtils {
       s"""
          |[
          |  {
-         |    "loantype": "Conventional",
+         |    "loanType": "Conventional",
          |    "purposes": $conv
          |  },
          |  {
-         |    "loantype": "FHA",
+         |    "loanType": "FHA",
          |    "purposes": $fha
          |  },
          |  {
-         |    "loantype": "VA",
+         |    "loanType": "VA",
          |    "purposes": $va
          |  },
          |  {
-         |    "loantype": "FSA/RHS",
+         |    "loanType": "FSA/RHS",
          |    "purposes": $fsa
          |  }
          |]
@@ -53,19 +53,19 @@ object LoanTypeUtil extends SourceUtils {
          |[
          |  {
          |    "purpose": "Home Purchase",
-         |    "firstliencount": $homePurchaseFirst,
-         |    "juniorliencount": $homePurchaseJunior
+         |    "firstLienCount": $homePurchaseFirst,
+         |    "juniorLienCount": $homePurchaseJunior
          |  },
          |  {
          |    "purpose": "Refinance",
-         |    "firstliencount": $refinanceFirst,
-         |    "juniorliencount": $refinanceJunior
+         |    "firstLienCount": $refinanceFirst,
+         |    "juniorLienCount": $refinanceJunior
          |  },
          |  {
          |    "purpose": "Home Improvement",
-         |    "firstliencount": $homeImprovementFirst,
-         |    "juniorliencount": $homeImprovementJunior,
-         |    "noliencount": $homeImprovementNo
+         |    "firstLienCount": $homeImprovementFirst,
+         |    "juniorLienCount": $homeImprovementJunior,
+         |    "noLienCount": $homeImprovementNo
          |  }
          |]
      """.stripMargin

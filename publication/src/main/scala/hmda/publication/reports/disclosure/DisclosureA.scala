@@ -81,35 +81,35 @@ trait AX extends DisclosureReport {
                       |    "dispositions": [
                       |        {
                       |            "disposition": "Applications Received",
-                      |            "loantypes": $received
+                      |            "loanTypes": $received
                       |        },
                       |        {
                       |            "disposition": "Loans Originated",
-                      |            "loantypes": $originiated
+                      |            "loanTypes": $originiated
                       |        },
                       |        {
                       |            "disposition": "Apps. Approved But Not Accepted",
-                      |            "loantypes": $appNotAcc
+                      |            "loanTypes": $appNotAcc
                       |        },
                       |        {
                       |            "disposition": "Applications Denied",
-                      |            "loantypes": $denied
+                      |            "loanTypes": $denied
                       |        },
                       |        {
                       |            "disposition": "Applications Withdrawn",
-                      |            "loantypes": $withdrawn
+                      |            "loanTypes": $withdrawn
                       |        },
                       |        {
                       |            "disposition": "Files Closed For Incompleteness",
-                      |            "loantypes": $closed
+                      |            "loanTypes": $closed
                       |        },
                       |        {
                       |            "disposition": "Preapprovals Resulting in Originations",
-                      |            "loantypes": $preapproval
+                      |            "loanTypes": $preapproval
                       |        },
                       |        {
                       |            "disposition": "Loans Sold",
-                      |            "loantypes": $sold
+                      |            "loanTypes": $sold
                       |        }
                       |    ]
                       |}

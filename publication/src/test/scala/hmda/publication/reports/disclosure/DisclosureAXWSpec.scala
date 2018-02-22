@@ -55,17 +55,17 @@ class DisclosureAXWSpec extends AsyncWordSpec with MustMatchers
         case Seq(JsArray(dispositions)) =>
           dispositions must have size 10
 
-          dispositions.head.asJsObject.getFields("disposition", "loantypes") match {
+          dispositions.head.asJsObject.getFields("disposition", "loanTypes") match {
             case Seq(JsString(char), JsArray(loanTypes)) =>
               char mustBe "Applications Received"
               loanTypes must have size 4
 
-              loanTypes.head.asJsObject.getFields("loantype", "purposes") match {
+              loanTypes.head.asJsObject.getFields("loanType", "purposes") match {
                 case Seq(JsString(conv), JsArray(purposes)) =>
                   conv mustBe "Conventional"
                   purposes must have size 3
 
-                  purposes.head.asJsObject.getFields("purpose", "firstliencount", "juniorliencount") match {
+                  purposes.head.asJsObject.getFields("purpose", "firstLienCount", "juniorLienCount") match {
                     case Seq(JsString(purpose), JsNumber(first), JsNumber(junior)) =>
                       purpose mustBe "Home Purchase"
                   }
