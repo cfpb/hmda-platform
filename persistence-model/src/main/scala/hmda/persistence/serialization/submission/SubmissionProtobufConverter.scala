@@ -32,6 +32,22 @@ object SubmissionProtobufConverter {
     )
   }
 
+  def submissionStatusUpdatedV2ToProtobuf(obj: SubmissionStatusUpdatedV2): SubmissionStatusUpdatedV2Message = {
+    SubmissionStatusUpdatedV2Message(
+      id = Some(submissionIdToProtobuf(obj.id)),
+      status = Some(submissionStatusToProtobuf(obj.status)),
+      time = obj.time
+    )
+  }
+
+  def submissionStatusUpdatedV2FromProtobuf(msg: SubmissionStatusUpdatedV2Message): SubmissionStatusUpdatedV2 = {
+    SubmissionStatusUpdatedV2(
+      id = submissionIdFromProtobuf(msg.id.getOrElse(SubmissionIdMessage())),
+      status = submissionStatusFromProtobuf(msg.status.getOrElse(SubmissionStatusMessage())),
+      time = msg.time
+    )
+  }
+
   def submissionFileNameAddedToProtobuf(obj: SubmissionFileNameAdded): SubmissionFileNameAddedMessage = {
     SubmissionFileNameAddedMessage(
       id = Some(submissionIdToProtobuf(obj.id)),
