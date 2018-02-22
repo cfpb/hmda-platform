@@ -117,7 +117,6 @@ object A1W extends DisclosureReport {
     val lars = larSource
       .filter(lar => filters(lar))
 
-    val msa = msaReport(fipsCode.toString).toJsonFormat
     val reportDate = formattedCurrentDate
     val yearF = calculateYear(larSource)
 
@@ -144,7 +143,6 @@ object A1W extends DisclosureReport {
                       |    "description": "${metaData.description}",
                       |    "year": "$year",
                       |    "reportDate": "$reportDate",
-                      |    "msa": $msa,
                       |    "dispositions": [
                       |        {
                       |            "disposition": "Applications Received",
