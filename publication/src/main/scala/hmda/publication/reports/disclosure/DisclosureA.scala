@@ -28,6 +28,7 @@ object A1 extends DisclosureReport {
     val metaData = ReportsMetaDataLookup.values(reportId)
 
     val lars = larSource
+      .filter(lar => lar.geography.msa != "NA")
       .filter(lar => filters(lar, fipsCode))
 
     val msa = msaReport(fipsCode.toString).toJsonFormat

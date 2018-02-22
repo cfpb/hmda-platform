@@ -93,6 +93,7 @@ trait D4X extends DisclosureReport {
     val metaData = ReportsMetaDataLookup.values(reportId)
 
     val lars = larSource
+      .filter(lar => lar.geography.msa != "NA")
       .filter(lar => lar.geography.msa.toInt == fipsCode)
       .filter(filters)
 
