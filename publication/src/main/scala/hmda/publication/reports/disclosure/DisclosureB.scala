@@ -40,13 +40,12 @@ trait DisclosureB extends DisclosureReport {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
-    val lars = larSource
-      .filter(lar => lar.geography.msa != "NA")
-      .filter { lar =>
-        if (reportId == "DB") lar.geography.msa.toInt == fipsCode
-        else true
-      }
-      .filter(filters)
+    val lars = larSource.filter { lar =>
+        if (reportId == "DB") {
+          lar.geography.msa.toInt == fipsCode &&
+           lar.geography.msa != "NA"
+        } else true
+      }.filter(filters)
 
     val singleFamily = lars.filter(lar => lar.loan.propertyType == 1)
     val manufactured = lars.filter(lar => lar.loan.propertyType == 2)
