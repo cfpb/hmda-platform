@@ -19,6 +19,13 @@ object DiscB extends DisclosureB {
   }
 }
 
+object DiscBW extends DisclosureB {
+  override val reportId: String = "DBW"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    lar.loan.loanType == 1 && lar.loan.occupancy == 1
+  }
+}
+
 trait DisclosureB extends DisclosureReport {
   val reportId: String
   def filters(lar: LoanApplicationRegister): Boolean
@@ -35,13 +42,18 @@ trait DisclosureB extends DisclosureReport {
 
     val lars = larSource
       .filter(lar => lar.geography.msa != "NA")
-      .filter(lar => lar.geography.msa.toInt == fipsCode)
+      .filter { lar =>
+        if (reportId == "DB") lar.geography.msa.toInt == fipsCode
+        else true
+      }
       .filter(filters)
 
     val singleFamily = lars.filter(lar => lar.loan.propertyType == 1)
     val manufactured = lars.filter(lar => lar.loan.propertyType == 2)
 
     val msa = msaReport(fipsCode.toString).toJsonFormat
+    val msaLine: String = if (reportId == "DB") s""""msa": $msa,""" else ""
+
     val reportDate = formattedCurrentDate
     val yearF = calculateYear(lars)
 
@@ -71,7 +83,7 @@ trait DisclosureB extends DisclosureReport {
        |    "description": "${metaData.description}",
        |    "year": "$year",
        |    "reportDate": "$reportDate",
-       |    "msa": $msa,
+       |    $msaLine
        |    "singleFamily": [
        |        {
        |            "characteristic": "Incidence of Pricing",
