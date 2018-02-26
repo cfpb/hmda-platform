@@ -47,6 +47,7 @@ services:
       KEYCLOAK_URL: https://192.168.99.100:8443/auth/realms/hmda
       # lb settings
       VIRTUAL_HOST: 'http://*:80/*, https://*:443/*'
+      VIRTUAL_HOST_WEIGHT: 0
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
 
@@ -60,13 +61,14 @@ services:
       - auth_proxy
       - keycloak
     volumes:
-      - ../hmda-pub-ui/dist:/usr/src/app/reports
+      - ../hmda-pub-ui/reports:/usr/src/app/reports
     environment:
       APP_URL: https://192.168.99.100
       HMDA_API: https://192.168.99.100:4443/hmda
       KEYCLOAK_URL: https://192.168.99.100:8443/auth/realms/hmda
       # lb settings
       VIRTUAL_HOST: 'http://*:80/reports/*, https://*:443/reports/*'
+      VIRTUAL_HOST_WEIGHT: 1 # make sure this wins over the app UI
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
 
