@@ -181,4 +181,41 @@ object DispositionType {
     _.denial.reason1 != ""
   )
 
+  //////////////////////////////////
+  // Table 1/2 Dispositions
+  //////////////////////////////////
+  case object FHA extends DispositionType(
+    "FHA, FSA/RHS & VA (A)",
+    lar => (lar.loan.propertyType == 1 || lar.loan.propertyType == 2)
+      && (lar.loan.purpose == 1)
+      && (2 to 4).contains(lar.loan.loanType)
+  )
+  case object Conventional extends DispositionType(
+    "Conventional (B)",
+    lar => (lar.loan.propertyType == 1 || lar.loan.propertyType == 2)
+      && (lar.loan.purpose == 1)
+      && (lar.loan.loanType == 1)
+  )
+  case object Refinancings extends DispositionType(
+    "Refinancings (C)",
+    lar => (lar.loan.propertyType == 1 || lar.loan.propertyType == 2)
+      && (lar.loan.purpose == 3)
+  )
+  case object HomeImprovementLoans extends DispositionType(
+    "Home Improvement Loans (D)",
+    lar => (lar.loan.propertyType == 1 || lar.loan.propertyType == 2)
+      && (lar.loan.purpose == 2)
+  )
+  case object LoansForFiveOrMore extends DispositionType(
+    "Loans on Dwellings For 5 or More Families (E)",
+    lar => lar.loan.propertyType == 3
+  )
+  case object NonoccupantLoans extends DispositionType(
+    "Nonoccupant Loans (F)",
+    lar => lar.loan.occupancy == 2
+  )
+  case object ManufacturedHomeDwellings extends DispositionType(
+    "Loans On Manufactured Home Dwellings (G)",
+    lar => lar.loan.propertyType == 2
+  )
 }
