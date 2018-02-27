@@ -69,6 +69,7 @@ services:
       # lb settings
       VIRTUAL_HOST: 'http://*:80/reports/*, https://*:443/reports/*'
       VIRTUAL_HOST_WEIGHT: 1 # make sure this wins over the app UI
+      EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /reports//?(.*)" "\1\ /\2"'
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
 
@@ -171,6 +172,7 @@ services:
       - keycloak
       - mail_dev
       - ui
+      - reports_ui
     environment:
       # EXTRA_GLOBAL_SETTINGS: 'debug' # enable for request logging
       # Default SSL cert for ALL services served by lb
