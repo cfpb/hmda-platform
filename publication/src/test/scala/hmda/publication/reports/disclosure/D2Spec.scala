@@ -33,7 +33,7 @@ class D2Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Bef
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
-  val descriptionD1 = "Disposition of loan applications, by location of property and type of loan"
+  val descriptionD2 = "Loans purchased, by location of property and type of loan"
 
   "Generate a Disclosure 2 report" in {
     D2.generate(source, fips, inst).map { result =>
@@ -42,7 +42,7 @@ class D2Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Bef
           respondentId mustBe respId
           instName mustBe "Fox Valley Test Bank"
           table mustBe "2"
-          desc mustBe descriptionD1
+          desc mustBe descriptionD2
           msa.asJsObject.getFields("name") match {
             case Seq(JsString(msaName)) => msaName mustBe "Appleton, WI"
           }

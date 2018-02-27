@@ -2,7 +2,7 @@ ReportId,Type,ReportTable,Dispositions,Description
 A52,Aggregate,5-2,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
 A53,Aggregate,5-3,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications to Refinance Loans on 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
 D1,Disclosure,1,,"Disposition of loan applications, by location of property and type of loan"
-D2,Disclosure,2,,"Disposition of loan applications, by location of property and type of loan"
+D2,Disclosure,2,,"Loans purchased, by location of property and type of loan"
 DA1,Disclosure,A1,,"Disposition of applications and loan sales by loan type, 1- to 4-family dwellings (Excludes manufactured homes)"
 DA2,Disclosure,A2,,"Disposition of applications and loan sales by loan type, manufactured homes"
 DA3,Disclosure,A3,,"Disposition of applications and loan sales by loan type, multifamily housing"
