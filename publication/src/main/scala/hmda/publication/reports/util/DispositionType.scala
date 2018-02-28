@@ -181,4 +181,20 @@ object DispositionType {
     _.denial.reason1 != ""
   )
 
+  //////////////////////////////////
+  // Preapprovals Dispositions
+  //////////////////////////////////
+
+  case object PreapprovalsToOriginations extends DispositionType(
+    "Preapprovals reasulting in originations",
+    lar => lar.preapprovals == 1 && lar.actionTakenType == 1
+  )
+  case object PreapprovalsNotAccepted extends DispositionType(
+    "Preapprovals approved but not accepted",
+    _.actionTakenType == 8
+  )
+  case object PreApprovalsDenied extends DispositionType(
+    "Preapprovals denied",
+    _.actionTakenType == 7
+  )
 }

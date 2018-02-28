@@ -79,6 +79,7 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
     D12_2,
     A1, A2, A3,
     A1W, A2W, A3W,
+    A4W,
     DiscB, DiscBW
   )
 
