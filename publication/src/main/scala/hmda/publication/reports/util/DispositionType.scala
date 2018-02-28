@@ -20,9 +20,9 @@ sealed abstract class DispositionType(
     val totalValueF = sum(loansFiltered, loanAmount)
     for {
       count <- loanCountF
-      income <- totalValueF
+      total <- totalValueF
     } yield {
-      ValueDisposition(value, count, income)
+      ValueDisposition(value, count, total)
     }
   }
 
