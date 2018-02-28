@@ -71,14 +71,17 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
 
   val reports = List(
     D1, D2,
+    D31, D32,
     D41, D42, D43, D44, D45, D46, D47,
     D51, D52, D53, D54, D56, D57,
     D71, D72, D73, D74, D75, D76, D77,
     D81, D82, D83, D84, D85, D86, D87,
     D11_1, D11_2, D11_3, D11_4, D11_5, D11_6, D11_7, D11_8, D11_9, D11_10,
+    D12_2,
     A1, A2, A3,
     A1W, A2W, A3W,
-    DiscB
+    A4W,
+    DiscB, DiscBW
   )
 
   override def receive: Receive = {

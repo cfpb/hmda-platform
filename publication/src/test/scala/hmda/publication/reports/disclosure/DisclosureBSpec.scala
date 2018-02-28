@@ -79,4 +79,16 @@ class DisclosureBSpec extends AsyncWordSpec with MustMatchers
     }
   }
 
+  "Generate a Disclosure BW report" in {
+    DiscBW.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("table", "description", "respondentId", "institutionName") match {
+        case Seq(JsString(table), JsString(desc), JsString(resp), JsString(instName)) =>
+          table mustBe "BW"
+          desc mustBe description
+          resp mustBe "65656"
+          instName mustBe "Grand Junction Mortgage Co."
+      }
+    }
+  }
+
 }
