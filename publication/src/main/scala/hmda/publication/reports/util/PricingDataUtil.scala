@@ -41,7 +41,7 @@ object PricingDataUtil extends SourceUtils {
     }
   }
 
-  private def rateSpreadBetween(lower: Double, upper: Double)(lar: LoanApplicationRegister): Boolean = {
+  def rateSpreadBetween(lower: Double, upper: Double)(lar: LoanApplicationRegister): Boolean = {
     Try(lar.rateSpread.toDouble) match {
       case Success(value) => value >= lower && value < upper
       case _ => false
@@ -70,7 +70,7 @@ object PricingDataUtil extends SourceUtils {
     }
   }
 
-  private def loanAmount(lar: LoanApplicationRegister): Int = lar.loan.amount
+  def loanAmount(lar: LoanApplicationRegister): Int = lar.loan.amount
   def rateSpread(lar: LoanApplicationRegister): Double =
     Try(lar.rateSpread.toDouble).getOrElse(0)
 
