@@ -76,22 +76,13 @@ object PricingDataUtil extends SourceUtils {
 
   private def reportedMean[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
     val loansFiltered = lars.filter(pricingDataReported)
-    val loanCountF = count(loansFiltered)
-    val rateSpreadSumF = sumDouble(loansFiltered, rateSpread)
-    for {
-      count <- loanCountF
-      totalRateSpread <- rateSpreadSumF
-    } yield {
-      val mean = if (count == 0) "\"\""
-      else {
-        val v = totalRateSpread / count
-        BigDecimal(v).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-      }
 
+    calculateMean(loansFiltered, rateSpread).map { mean =>
+      val displayMean = if (mean == 0) "\"\"" else mean
       s"""
          |{
          |    "pricing": "Mean",
-         |    "count": $mean,
+         |    "count": $displayMean,
          |    "value": "None"
          |}
        """.stripMargin
@@ -99,29 +90,19 @@ object PricingDataUtil extends SourceUtils {
   }
 
   private def reportedMedian[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
-    val rateSpreadsF: Future[Seq[Double]] =
-      lars.filter(pricingDataReported)
-        // .limit(MAX_SIZE)
-        .map(lar => lar.rateSpread.toDouble)
-        .runWith(Sink.seq)
+    val median = calculateMedian(lars.filter(pricingDataReported), rateSpread)
 
-    rateSpreadsF.map { seq =>
-      val median = if (seq.isEmpty) "\"\"" else calculateMedian(seq)
+    median.map { value =>
+      val displayMedian = if (value == 0) "\"\"" else value
 
       s"""
          |{
          |    "pricing": "Median",
-         |    "count": $median,
+         |    "count": $displayMedian,
          |    "value": "None"
          |}
        """.stripMargin
     }
-  }
-
-  def calculateMedian(seq: Seq[Double]): Double = {
-    val (lowerHalf, upperHalf) = seq.sortWith(_ < _).splitAt(seq.size / 2)
-    val median = if (seq.size % 2 == 0) (lowerHalf.last + upperHalf.head) / 2.0 else upperHalf.head
-    BigDecimal(median).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
   }
 
 }
