@@ -42,4 +42,5 @@ D11-7,Disclosure,11-7,,"Pricing information for conventional refinancing loans, 
 D11-8,Disclosure,11-8,,"Pricing information for conventional refinancing loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 D11-9,Disclosure,11-9,,"Pricing information for conventional home improvement loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 D11-10,Disclosure,11-10,,"Pricing information for conventional home improvement loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
+D12-2,Disclosure,12-2,,"Pricing information for conventional manufactured home-purchase loans, first lien, owner-occupied dwelling, by borrower or census tract characteristics"
 N52,National Aggregate,5-2,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
