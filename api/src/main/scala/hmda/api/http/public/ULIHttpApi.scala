@@ -136,6 +136,7 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     byteSource
       .via(framing)
       .map(_.utf8String)
+      .map(_.trim)
       .filter(loanId => loanIdIsValidLength(loanId))
       .filter(loanId => isAlphanumeric(loanId))
       .map { loanId =>
@@ -148,6 +149,7 @@ trait ULIHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with ULIProt
     byteSource
       .via(framing)
       .map(_.utf8String)
+      .map(_.trim)
       .filter(uli => uliIsValidLength(uli))
       .filter(uli => isAlphanumeric(uli))
       .map(uli => (uli, validateULI(uli)))

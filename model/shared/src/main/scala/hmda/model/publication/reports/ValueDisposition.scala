@@ -11,13 +11,11 @@ case class ValueDisposition(
 
   def toJsonFormat: String = {
     s"""
-       |
        |{
        |  "disposition": "$dispositionName",
        |  "count": $count,
        |  "value": $value
        |}
-       |
         """
   }
 }

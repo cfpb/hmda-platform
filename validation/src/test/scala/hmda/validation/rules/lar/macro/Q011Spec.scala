@@ -59,7 +59,6 @@ class Q011Spec extends AsyncWordSpec with MustMatchers with LarGenerators with B
       val ctx = generateValidationContext(currentYear, instId)
       val currentYearCount = Gen.choose(1, larSize - 1).sample.getOrElse(0)
       val lastYearCount = Gen.choose(1, larSize - 1).sample.getOrElse(0)
-      println(lastYearCount)
       val larSource1 = generateLarSource(currentYearCount)
       sendValidationStats(validationStats, instId, 1, lastYear, lastYearCount)
       Q011.inContext(ctx)(larSource1).map(r => r mustBe a[Success])
