@@ -119,7 +119,8 @@ trait D11X extends DisclosureReport {
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    institution: Institution
+    institution: Institution,
+    msaList: List[Int]
   ): Future[DisclosureReportPayload] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
