@@ -121,7 +121,7 @@ trait AXW extends DisclosureReport {
                       |}
        """.stripMargin
 
-      DisclosureReportPayload(metaData.reportTable, fipsCode.toString, report)
+      DisclosureReportPayload(metaData.reportTable, "nationwide", report)
     }
   }
 }
