@@ -70,6 +70,7 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
   val reports = List(
+    D1, D2,
     D31, D32,
     D41, D42, D43, D44, D45, D46, D47,
     D51, D52, D53, D54, D56, D57,

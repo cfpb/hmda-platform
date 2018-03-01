@@ -18,12 +18,14 @@ object CbsaLookup extends CbsaResourceUtils {
       val metroDivTitle = values(5)
       val stateFips = values(9)
       val countyFips = values(10)
+      val countyName = values(7)
       Cbsa(
         cbsaCode,
         metroDivCode,
         cbsaTitle,
         metroDivTitle,
-        stateFips + countyFips
+        stateFips + countyFips,
+        countyName
       )
     }
   }.toSeq
@@ -51,5 +53,6 @@ case class Cbsa(
   metroDiv: String = "",
   cbsaTitle: String = "",
   metroDivTitle: String = "",
-  key: String = ""
+  key: String = "",
+  countyName: String = ""
 )
