@@ -248,18 +248,27 @@ After the test is run, some statistics will be presented on the screen. To furth
 
 1. Ensure you have a Docker Machine with sufficient resources, as described in the [Docker](#docker) section above.
 
-1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui) and
-    [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth) into the same
+1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui), 
+    [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth), and [hmda-pub-ui](https://github.com/cfpb/hmda-pub-ui) into the same
     directory as hmda-platform.
 
         ~/dev/hmda-project$ ls -l
         drwxr-xr-x  22 lortone  staff   748B Jul 27 16:28 hmda-platform/
         drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
         drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
+        drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-pub-ui/
 
 1. Build hmda-platform-ui
 
         cd hmda-platform-ui && \
+        yarn && \
+        cd ..
+
+    **Note:** This requires [yarn](https://yarnpkg.com/lang/en/docs/install/) to be installed.
+
+1. Build hmda-pub-ui
+
+        cd hmda-pub-ui && \
         yarn && \
         cd ..
 
@@ -307,16 +316,17 @@ After the test is run, some statistics will be presented on the screen. To furth
 
     1. Submit a HMDA filing.  Several sample files can be found [here](https://github.com/cfpb/hmda-platform/tree/master/parser/jvm/src/test/resources/txt).
 
+1. To view the publication UI (hmda-pub-ui) go to http://192.168.99.100/reports.
+
 ##### Updating an existing system
 
-If you've updated any of the hmda-platform services, and would like to see those
-changes reflected in the Docker Compose setup, the simplest way to do this is to
-rebuild everything from scratch.  The following command should be executed from
-within the `hmda-platform` directory.
+If you've updated any of the hmda-platform services, and would like to see those changes reflected in the Docker Compose setup, the simplest way to do this is to rebuild everything from scratch.  The following command should be executed from within the `hmda-platform` directory.
 
     docker-compose stop -t0 && \
     docker-compose rm -vf && \
     cd ../hmda-platform-ui && \
+    yarn && \
+    cd ../hmda-pub-ui && \
     yarn && \
     cd ../hmda-platform && \
     sbt clean assembly && \
@@ -328,15 +338,16 @@ within the `hmda-platform` directory.
 
 When running the full stack via Docker Compose, the following services are available:
 
-| Service                | URL                                 |
-|------------------------|-------------------------------------|
-| Filing UI              | https://192.168.99.100              |
-| Filing API (Unsecured) | http://192.168.99.100:8080          |
-| Filing API (Secured)   | https://192.168.99.100:4443/hmda/   |
-| Admin API              | http://192.168.99.100:8081          |
-| Public API             | https://192.168.99.100:4443/public/ |
-| Keycloak               | https://192.168.99.100:8443         |
-| MailDev                | https://192.168.99.100:8443/mail/   |
+| Service                | URL                                  |
+|------------------------|--------------------------------------|
+| Filing UI              | https://192.168.99.100               |
+| Filing API (Unsecured) | http://192.168.99.100:8080           |
+| Filing API (Secured)   | https://192.168.99.100:4443/hmda/    |
+| Reports UI             | https://192.168.99.100:8443/reports/ |
+| Admin API              | http://192.168.99.100:8081           |
+| Public API             | https://192.168.99.100:4443/public/  |
+| Keycloak               | https://192.168.99.100:8443          |
+| MailDev                | https://192.168.99.100:8443/mail/    |
 
 #### Development conveniences
 
@@ -345,10 +356,11 @@ When running the full stack via Docker Compose, the following services are avail
 For convenience when doing development on the UI, Auth setup, and API, the `docker-compose` file uses a `volumes` which mounts
 
 - the ui's `dist/` directory into the `hmda-platform-ui` container,
+- the publication ui's `reports/` directory into the `hmda-pub-ui` container,
 - the `hmda.jar` into `hmda-platform` container,
 - and the `hmda` themes directory in the auth repo into the `keycloak` container.
 
-This means you can make changes to the UI, Keycloak theme, or API and (in most cases) view them without needing to rebuild their respective containers.
+This means you can make changes to the UI, publication UI, Keycloak theme, or API and (in most cases) view them without needing to rebuild their respective containers.
 
 In order to view changes in the API you need to rebuild the jar and then restart the container:
 
@@ -362,7 +374,7 @@ docker-compose up
 To allow continued rebuilding of the front-end, you can run the following:
 
 ```shell
-# from the hmda-platform-ui directory
+# from the hmda-platform-ui and/or hmda-pub-ui directory
 npm run watch
 ```
 
@@ -383,4 +395,5 @@ We use GitHub issues in this repository to track features, bugs, and enhancement
   - https://github.com/cfpb/hmda-pilot
 2. Related projects
   - https://github.com/cfpb/hmda-platform-ui
+  - https://github.com/cfpb/hmda-pub-ui
   - https://github.com/cfpb/hmda-platform-auth

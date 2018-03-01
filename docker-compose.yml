@@ -31,10 +31,7 @@ services:
     restart: always
 
   ui:
-    build:
-      context: ../hmda-platform-ui
-      args:
-        SKIP_JS_BUILD: 1
+    build: ../hmda-platform-ui
     depends_on:
       - api
       - auth_proxy
@@ -47,6 +44,23 @@ services:
       KEYCLOAK_URL: https://192.168.99.100:8443/auth/realms/hmda
       # lb settings
       VIRTUAL_HOST: 'http://*:80/*, https://*:443/*'
+      VIRTUAL_HOST_WEIGHT: 0
+      EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
+      FORCE_SSL: 'true' # redirect 80 to 443
+
+  reports_ui:
+    build: ../hmda-pub-ui
+    depends_on:
+      - api
+    volumes:
+      - ../hmda-pub-ui/reports:/usr/src/app/reports
+    environment:
+      APP_URL: https://192.168.99.100
+      HMDA_API: https://192.168.99.100:4443/hmda
+      # lb settings
+      VIRTUAL_HOST: 'http://*:80/reports/*, https://*:443/reports/*'
+      VIRTUAL_HOST_WEIGHT: 1 # make sure this wins over the app UI
+      EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /reports//?(.*)" "\1\ /\2"'
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
 
@@ -73,7 +87,6 @@ services:
       VIRTUAL_HOST_WEIGHT: 0
     volumes:
       - '../hmda-platform-auth/keycloak/themes/hmda:/opt/jboss/keycloak/themes/hmda'
-    #  - '../hmda-platform-auth/keycloak/import:/opt/jboss/import'
 
     # Set action to "export" to dump Keycloak realm data
     command: './docker-entrypoint.sh'
@@ -149,6 +162,7 @@ services:
       - keycloak
       - mail_dev
       - ui
+      - reports_ui
     environment:
       # EXTRA_GLOBAL_SETTINGS: 'debug' # enable for request logging
       # Default SSL cert for ALL services served by lb
