@@ -79,10 +79,11 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
     D11_1, D11_2, D11_3, D11_4, D11_5, D11_6, D11_7, D11_8, D11_9, D11_10,
     D12_2,
     A1, A2, A3,
-    A1W, A2W, A3W,
     A4W,
-    DiscB, DiscBW
+    DiscB
   )
+
+  val nationwideReports = List(A1W, A2W, A3W, DiscBW)
 
   override def receive: Receive = {
 
@@ -112,7 +113,7 @@ class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with Loa
       val larSource = readData(1000)
         .filter(lar => lar.respondentId == institution.respondentId)
 
-      val combinations = combine(msaList, reports)
+      val combinations = combine(msaList, reports) ++ combine(List(-1), nationwideReports)
 
       val simpleReportFlow: Flow[(Int, DisclosureReport), DisclosureReportPayload, NotUsed] =
         Flow[(Int, DisclosureReport)]

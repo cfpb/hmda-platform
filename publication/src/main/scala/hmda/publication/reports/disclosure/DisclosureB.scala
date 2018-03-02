@@ -159,7 +159,9 @@ trait DisclosureB extends DisclosureReport {
        |
      """.stripMargin
 
-      DisclosureReportPayload(metaData.reportTable, fipsCode.toString, report)
+      val fipsString = if (reportId == "DB") fipsCode.toString else "nationwide"
+
+      DisclosureReportPayload(metaData.reportTable, fipsString, report)
     }
   }
 
