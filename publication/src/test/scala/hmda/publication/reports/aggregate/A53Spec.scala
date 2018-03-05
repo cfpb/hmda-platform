@@ -39,7 +39,7 @@ class A53Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
       .map(_.value)
 
   "Generate an Aggregate 5-3 report" in {
-    A53.generate(source, fips).map { result =>
+    A53.generateA5X(source, fips).map { result =>
 
       result.msa mustBe MSAReport("18700", "Corvallis, OR", "OR", "Oregon")
       result.table mustBe "5-3"
