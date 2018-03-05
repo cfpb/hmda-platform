@@ -35,9 +35,7 @@ object LarGenerators {
       loanDisclosure <- loanDisclosureGen
       interestRate <- Gen.option(valueOrNA(Gen.choose(0.0, 30.0)))
       prepaymentPenaltyTerm <- valueOrNA(Gen.alphaNumStr)
-
       loanToValueRatio <- Gen.option(valueOrNA(Gen.choose(0.0, 100.0)))
-      loanTerm <- valueOrNA(Gen.alphaNumStr)
       introductoryRatePeriod <- valueOrNA(Gen.alphaNumStr)
       otherNonAmortizingFeatures <- otherNonAmortizingFeaturesGen
       propertyValue <- valueOrNA(Gen.alphaNumStr)
