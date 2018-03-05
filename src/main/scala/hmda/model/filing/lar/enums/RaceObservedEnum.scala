@@ -25,7 +25,7 @@ case object VisualOrSurnameRace extends RaceObservedEnum {
 case object NotVisualOrSurnameRace extends RaceObservedEnum {
   override val code: Int = 2
   override val description: String =
-    "Not collected on the bassis of visual observation or surname"
+    "Not collected on the basis of visual observation or surname"
 }
 
 case object RaceObservedNotApplicable extends RaceObservedEnum {
