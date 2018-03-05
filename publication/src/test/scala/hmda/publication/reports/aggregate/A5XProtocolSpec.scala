@@ -1,6 +1,6 @@
 package hmda.publication.reports.aggregate
 
-import hmda.publication.reports.protocol.aggregate.A5XProtocol._
+import hmda.publication.reports.protocol.aggregate.A5XReportProtocol._
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import spray.json._
@@ -10,7 +10,7 @@ class A5XProtocolSpec extends PropSpec with PropertyChecks with MustMatchers {
 
   property("A5X Report must convert to and from JSON") {
     forAll(a5XGen) { a5X =>
-      a5X.toJson.convertTo[A5X] mustBe a5X
+      a5X.toJson.convertTo[A5XReport] mustBe a5X
     }
   }
 
