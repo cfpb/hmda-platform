@@ -38,7 +38,6 @@ class DisclosureIRSSpec extends AsyncWordSpec with MustMatchers
 
   "Generate an IRS report" in {
     DIRS.generate(source, -1, inst, msaList).map { result =>
-      println(result.report)
       result.report.parseJson.asJsObject.getFields("table", "description", "respondentId", "institutionName") match {
         case Seq(JsString(table), JsString(desc), JsString(resp), JsString(instName)) =>
           table mustBe "IRS"
@@ -56,7 +55,7 @@ class DisclosureIRSSpec extends AsyncWordSpec with MustMatchers
           msas must have size msaList.size + 1
           total.asJsObject.getFields("msaName", "totalLars") match {
             case Seq(JsString(msaName), JsNumber(totalLars)) =>
-              msaName mustBe "Total"
+              msaName mustBe "TOTAL"
               totalLars mustBe 100
           }
       }
