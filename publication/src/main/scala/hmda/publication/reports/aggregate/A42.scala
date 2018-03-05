@@ -9,33 +9,40 @@ import hmda.model.publication.reports.GenderEnum.{ Female, JointGender, Male }
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports.MinorityStatusEnum._
 import hmda.model.publication.reports.RaceEnum._
-import hmda.publication.reports._
+import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
 import hmda.publication.reports.util.GenderUtil.filterGender
 import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
 import hmda.publication.reports.util.RaceUtil.filterRace
 import hmda.publication.reports.util.ReportUtil._
+import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
-import spray.json._
 
-object A42 {
-  val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
-    ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
-
-  def reportFilters(lar: LoanApplicationRegister): Boolean = {
+object A42 extends A4X {
+  val reportId: String = "A42"
+  def filters(lar: LoanApplicationRegister): Boolean = {
     lar.loan.loanType == 1 &&
       (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
       (lar.loan.purpose == 1)
   }
+}
+
+trait A4X extends AggregateReport {
+  val reportId: String
+  def filters(lar: LoanApplicationRegister): Boolean
+
+  val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
+    ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int
-  ): Future[JsValue] = {
+  ): Future[AggregateReportPayload] = {
+    val metaData = ReportsMetaDataLookup.values(reportId)
 
-    val lars = larSource.filter(reportFilters)
+    val lars = larSource.filter(filters)
     val incomeIntervals = larsByIncomeInterval(lars.filter(lar => lar.applicant.income != "NA"), calculateMedianIncomeIntervals(fipsCode))
     val msa = msaReport(fipsCode.toString).toJsonFormat
     val reportDate = formattedCurrentDate
@@ -83,11 +90,11 @@ object A42 {
 
       total <- dispositionsOutput(lars)
     } yield {
-      s"""
+      val report = s"""
          |{
-         |    "table": "4-2",
+         |    "table": "${metaData.reportTable}",
          |    "type": "Aggregate",
-         |    "description": "Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant",
+         |    "description": "${metaData.description}",
          |    "year": "$year",
          |    "reportDate": "$reportDate",
          |    "msa": $msa,
@@ -196,7 +203,9 @@ object A42 {
          |    "total": $total
          |}
          |
-       """.stripMargin.parseJson
+       """.stripMargin
+
+      AggregateReportPayload(reportId, fipsCode.toString, report)
     }
   }
 
