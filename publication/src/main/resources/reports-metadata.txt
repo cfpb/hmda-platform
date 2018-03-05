@@ -1,5 +1,7 @@
 ReportId,Type,ReportTable,Dispositions,Description
 A42,Aggregate,4-2,,"Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
+A45,Aggregate,4-5,,"Disposition of applications for loans on dwellings for 5 or more families, by race, ethnicity, gender and income of applicant"
+A46,Aggregate,4-6,,"Disposition of applications from nonoccupants for home-purchase, home improvement, or refinancing loans, 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 A52,Aggregate,5-2,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
 A53,Aggregate,5-3,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications to Refinance Loans on 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"
 D1,Disclosure,1,,"Disposition of loan applications, by location of property and type of loan"
@@ -50,4 +52,6 @@ D11-8,Disclosure,11-8,,"Pricing information for conventional refinancing loans, 
 D11-9,Disclosure,11-9,,"Pricing information for conventional home improvement loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 D11-10,Disclosure,11-10,,"Pricing information for conventional home improvement loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 D12-2,Disclosure,12-2,,"Pricing information for conventional manufactured home-purchase loans, first lien, owner-occupied dwelling, by borrower or census tract characteristics"
+N45,National Aggregate,4-5,,"Disposition of applications for loans on dwellings for 5 or more families, by race, ethnicity, gender and income of applicant"
+N46,National Aggregate,4-6,,"Disposition of applications from nonoccupants for home-purchase, home improvement, or refinancing loans, 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 N52,National Aggregate,5-2,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of Applications for Conventional Home-Purchase Loans, 1-to-4 Family and Manufactured Home Dwellings, by Income, Race, and Ethnicity of Applicant"

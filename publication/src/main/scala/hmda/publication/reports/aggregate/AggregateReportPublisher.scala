@@ -54,7 +54,9 @@ class AggregateReportPublisher(supervisor: ActorRef) extends HmdaActor with Loan
     A52, A53
   )
 
-  //val nationalAggregateReports: List[]
+  val nationalAggregateReports: List[AggregateReport] = List(
+    N45
+  )
 
   override def receive: Receive = {
 
@@ -69,8 +71,7 @@ class AggregateReportPublisher(supervisor: ActorRef) extends HmdaActor with Loan
     val larSource = readData(1000)
     val msaList = MsaIncomeLookup.everyFips.toList
 
-    //TODO: enhancement: only generate aggregate reports for MSAs that have >0 LARs
-    val combinations = combine(msaList, aggregateReports)
+    val combinations = combine(msaList, aggregateReports) ++ combine(List(-1), nationalAggregateReports)
 
     val simpleReportFlow: Flow[(Int, AggregateReport), AggregateReportPayload, NotUsed] =
       Flow[(Int, AggregateReport)].mapAsyncUnordered(1) {
