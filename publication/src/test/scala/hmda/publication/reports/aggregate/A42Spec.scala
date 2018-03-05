@@ -33,17 +33,19 @@ class A42Spec
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
-  val description = "Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
+  val descriptionA42 = "Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
+  val descriptionN46 = "Disposition of applications from nonoccupants for home-purchase, home improvement, or refinancing loans, 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 
   "Generate an Aggregate 4-2 report" in {
     A42.generate(source, fips).map {
       case AggregateReportPayload(reportId, fipsCode, report) =>
         reportId mustBe "A42"
         fipsCode mustBe fips.toString
-        report.parseJson.asJsObject.getFields("table", "description", "msa") match {
-          case Seq(JsString(table), JsString(desc), msa) =>
+        report.parseJson.asJsObject.getFields("table", "type", "description", "year", "msa") match {
+          case Seq(JsString(table), JsString(reportType), JsString(desc), JsString(reportYear), msa) =>
             table mustBe "4-2"
-            desc mustBe description
+            reportType mustBe "Aggregate"
+            desc mustBe descriptionA42
             msa.asJsObject.getFields("name") match {
               case Seq(JsString(msaName)) => msaName mustBe "Corvallis, OR"
             }
@@ -52,9 +54,9 @@ class A42Spec
   }
 
   "Include correct demographics for dispositions" in {
-    A42.generate(source, fips).map {
+    A45.generate(source, fips).map {
       case AggregateReportPayload(reportId, fipsCode, report) =>
-        reportId mustBe "A42"
+        reportId mustBe "A45"
         fipsCode mustBe fips.toString
         report.parseJson.asJsObject.getFields("races", "minorityStatuses", "ethnicities", "incomes", "total") match {
           case Seq(JsArray(races), JsArray(ms), JsArray(ethnicities), JsArray(incomes), JsArray(total)) =>
@@ -70,4 +72,17 @@ class A42Spec
     }
   }
 
+  "Generate a National Aggregate 4-6 report" in {
+    N46.generate(source, fips).map {
+      case AggregateReportPayload(reportId, fipsCode, report) =>
+        reportId mustBe "N46"
+        fipsCode mustBe fips.toString
+        report.parseJson.asJsObject.getFields("table", "type", "description", "year") match {
+          case Seq(JsString(table), JsString(reportType), JsString(desc), JsString(reportYear)) =>
+            table mustBe "4-6"
+            reportType mustBe "National Aggregate"
+            desc mustBe descriptionN46
+        }
+    }
+  }
 }

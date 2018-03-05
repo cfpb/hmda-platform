@@ -18,7 +18,7 @@ class N5XProtocolSpec extends PropSpec with PropertyChecks with MustMatchers {
     forAll(n5XGen) { n5X =>
       n5X.toJson mustBe JsObject(
         "table" -> JsString(n5X.table),
-        "type" -> JsString("NationalAggregate"),
+        "type" -> JsString("National Aggregate"),
         "desc" -> JsString(n5X.description),
         "year" -> JsNumber(n5X.year),
         "reportDate" -> JsString(n5X.reportDate),

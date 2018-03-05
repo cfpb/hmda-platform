@@ -218,7 +218,7 @@ object DispositionType {
     "Loans On Manufactured Home Dwellings (G)",
     lar => lar.loan.propertyType == 2
   )
-    
+
   //////////////////////////////////
   // Preapprovals Dispositions
   //////////////////////////////////
