@@ -29,7 +29,7 @@ import hmda.validation.messages.ValidationStatsMessages.FindIrsStats
 import hmda.validation.stats.SubmissionLarStats
 import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
 import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.messages.commands.disclosure.DisclosureCommands.GenerateDisclosureReports
+import hmda.persistence.messages.commands.publication.PublicationCommands.GenerateDisclosureReports
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

@@ -16,8 +16,9 @@ import hmda.model.fi.{ Signed, Submission, SubmissionId }
 import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
-import hmda.persistence.messages.commands.disclosure.DisclosureCommands.GenerateDisclosureReports
+import hmda.persistence.messages.commands.publication.PublicationCommands.{ GenerateAggregateReports, GenerateDisclosureReports }
 
+import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
 trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol {
@@ -64,6 +65,22 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
       }
     }
 
-  def publicationRoutes(supervisor: ActorRef) = disclosureGenerationPath(supervisor)
+  def aggregateGenerationPath(supervisor: ActorRef) =
+    path("aggregate" / IntNumber) { year =>
+      extractExecutionContext { executor =>
+        implicit val ec = executor
+        timedPost { uri =>
+          val publisherF: Future[ActorRef] = system.actorSelection("user/aggregate-report-publisher").resolveOne()
+          val msg = publisherF.map(_ ! GenerateAggregateReports)
+
+          onComplete(msg) {
+            case Success(sub) => complete(ToResponseMarshallable(StatusCodes.OK))
+            case Failure(error) => completeWithInternalError(uri, error)
+          }
+        }
+      }
+    }
+
+  def publicationRoutes(supervisor: ActorRef) = disclosureGenerationPath(supervisor) ~ aggregateGenerationPath(supervisor)
 
 }
