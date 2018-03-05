@@ -7,7 +7,7 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
-import spray.json.{ JsArray, JsString }
+import spray.json.{ JsArray, JsString, _ }
 
 class A42Spec
     extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
@@ -36,31 +36,37 @@ class A42Spec
   val description = "Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 
   "Generate an Aggregate 4-2 report" in {
-    A42.generate(source, fips).map { result =>
-      result.asJsObject.getFields("table", "description", "msa") match {
-        case Seq(JsString(table), JsString(desc), msa) =>
-          table mustBe "4-2"
-          desc mustBe description
-          msa.asJsObject.getFields("name") match {
-            case Seq(JsString(msaName)) => msaName mustBe "Corvallis, OR"
-          }
-      }
+    A42.generate(source, fips).map {
+      case AggregateReportPayload(reportId, fipsCode, report) =>
+        reportId mustBe "A42"
+        fipsCode mustBe fips.toString
+        report.parseJson.asJsObject.getFields("table", "description", "msa") match {
+          case Seq(JsString(table), JsString(desc), msa) =>
+            table mustBe "4-2"
+            desc mustBe description
+            msa.asJsObject.getFields("name") match {
+              case Seq(JsString(msaName)) => msaName mustBe "Corvallis, OR"
+            }
+        }
     }
   }
 
   "Include correct demographics for dispositions" in {
-    A42.generate(source, fips).map { result =>
-      result.asJsObject.getFields("races", "minorityStatuses", "ethnicities", "incomes", "total") match {
-        case Seq(JsArray(races), JsArray(ms), JsArray(ethnicities), JsArray(incomes), JsArray(total)) =>
-          races must have size 8
-          ms must have size 2
-          ethnicities must have size 4
-          incomes must have size 6
-          total must have size A42.dispositions.size
-          races.head.asJsObject.getFields("race") match {
-            case Seq(JsString(name)) => name mustBe "American Indian/Alaska Native"
-          }
-      }
+    A42.generate(source, fips).map {
+      case AggregateReportPayload(reportId, fipsCode, report) =>
+        reportId mustBe "A42"
+        fipsCode mustBe fips.toString
+        report.parseJson.asJsObject.getFields("races", "minorityStatuses", "ethnicities", "incomes", "total") match {
+          case Seq(JsArray(races), JsArray(ms), JsArray(ethnicities), JsArray(incomes), JsArray(total)) =>
+            races must have size 8
+            ms must have size 2
+            ethnicities must have size 4
+            incomes must have size 6
+            total must have size A42.dispositions.size
+            races.head.asJsObject.getFields("race") match {
+              case Seq(JsString(name)) => name mustBe "American Indian/Alaska Native"
+            }
+        }
     }
   }
 
