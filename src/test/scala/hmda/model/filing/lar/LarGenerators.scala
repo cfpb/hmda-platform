@@ -32,22 +32,14 @@ object LarGenerators {
       lienStatus <- lienStatusEnumGen
       denial <- denialGen
       otherDenialReason <- Gen.alphaStr
-      totalLoanCosts <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
-      totalPointsAndFees <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
-      originationCharges <- Gen.option(
-        valueOrNA(Gen.choose(0.0, Double.MaxValue)))
-      discountPoints <- Gen.option(valueOrNA(Gen.choose(0.0, Double.MaxValue)))
-      lenderCredits <- Gen.option(valueOrNA(Gen.choose(0.0, Double.MaxValue)))
+      loanDisclosure <- loanDisclosureGen
       interestRate <- Gen.option(valueOrNA(Gen.choose(0.0, 30.0)))
       prepaymentPenaltyTerm <- valueOrNA(Gen.alphaNumStr)
-      debtToIncomeRatio <- Gen.option(valueOrNA(Gen.choose(0.0, 5.0)))
+
       loanToValueRatio <- Gen.option(valueOrNA(Gen.choose(0.0, 100.0)))
       loanTerm <- valueOrNA(Gen.alphaNumStr)
       introductoryRatePeriod <- valueOrNA(Gen.alphaNumStr)
-      balloonPayment <- ballonPaymentEnumGen
-      interestOnlyPayments <- interestOnlyPayementsEnumGen
-      negativeAmortization <- negativeAmortizationEnumGen
-      otherNonAmortizingFeatures <- otherNonAmortizingFeaturesEnumGen
+      otherNonAmortizingFeatures <- otherNonAmortizingFeaturesGen
       propertyValue <- valueOrNA(Gen.alphaNumStr)
       manufacturedHomeSecuredProperty <- Gen.option(
         manufacturedHomeSecuredPropertyEnumGen)
@@ -83,19 +75,11 @@ object LarGenerators {
         lienStatus,
         denial,
         otherDenialReason,
-        totalLoanCosts,
-        totalPointsAndFees,
-        originationCharges,
-        discountPoints,
-        lenderCredits,
+        loanDisclosure,
         interestRate,
         prepaymentPenaltyTerm,
-        debtToIncomeRatio,
         loanToValueRatio,
         introductoryRatePeriod,
-        balloonPayment,
-        interestOnlyPayments,
-        negativeAmortization,
         otherNonAmortizingFeatures,
         propertyValue,
         manufacturedHomeSecuredProperty,
@@ -136,6 +120,23 @@ object LarGenerators {
            term)
   }
 
+  implicit def loanDisclosureGen: Gen[LoanDisclosure] = {
+    for {
+      totalLoanCosts <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
+      totalPointsAndFees <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
+      originationCharges <- Gen.option(
+        valueOrNA(Gen.choose(0.0, Double.MaxValue)))
+      discountPoints <- Gen.option(valueOrNA(Gen.choose(0.0, Double.MaxValue)))
+      lenderCredits <- Gen.option(valueOrNA(Gen.choose(0.0, Double.MaxValue)))
+    } yield {
+      LoanDisclosure(totalLoanCosts,
+                     totalPointsAndFees,
+                     originationCharges,
+                     discountPoints,
+                     lenderCredits)
+    }
+  }
+
   implicit def dateGen: Gen[Int] = {
     val dateFormat = new SimpleDateFormat("yyyyMMdd")
     val beginDate = dateFormat.parse("20180101")
@@ -154,6 +155,22 @@ object LarGenerators {
       county <- countyGen
       tract <- tractGen
     } yield Geography(street, city, state, zipCode, county, tract)
+  }
+
+  implicit def otherNonAmortizingFeaturesGen: Gen[NonAmortizingFeatures] = {
+    for {
+      balloonPayment <- ballonPaymentEnumGen
+      interestOnlyPayments <- interestOnlyPayementsEnumGen
+      negativeAmortization <- negativeAmortizationEnumGen
+      otherNonAmortizingFeatures <- otherNonAmortizingFeaturesEnumGen
+    } yield {
+      NonAmortizingFeatures(
+        balloonPayment,
+        interestOnlyPayments,
+        negativeAmortization,
+        otherNonAmortizingFeatures
+      )
+    }
   }
 
   implicit def stateCodeGen: Gen[String] = {
@@ -203,6 +220,7 @@ object LarGenerators {
       income <- valueOrNA(Gen.choose(0, 1000))
       creditScore <- Gen.choose(0, Int.MaxValue)
       creditScoreType <- creditScoreEnumGen
+      debtToIncomeRatio <- Gen.option(valueOrNA(Gen.choose(0.0, 5.0)))
       otherCreditScoreModel <- Gen.alphaStr
     } yield
       Applicant(
@@ -223,6 +241,7 @@ object LarGenerators {
         income,
         creditScore,
         creditScoreType,
+        debtToIncomeRatio,
         otherCreditScoreModel
       )
   }

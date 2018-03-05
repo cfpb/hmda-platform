@@ -19,20 +19,12 @@ case class LoanApplicationRegister(
     lienStatus: LienStatusEnum,
     denial: Denial,
     otherDenialReason: String,
-    totalLoanCosts: String,
-    totalPointsAndFees: String,
-    originationCharges: Option[String] = None,
-    discountPoints: Option[String] = None,
-    lenderCredits: Option[String] = None,
+    loanDisclosure: LoanDisclosure,
     interestRate: Option[String] = None,
     prepaymentPenaltyTerm: String,
-    debtToIncomeRatio: Option[String] = None,
     loanToValueRatio: Option[String] = None,
     introductoryRatePeriod: String,
-    balloonPayment: BalloonPaymentEnum,
-    interestOnlyPayments: InterestOnlyPaymentsEnum,
-    negativeAmortization: NegativeAmortizationEnum,
-    otherNonAmortizingFeatures: OtherNonAmortizingFeaturesEnum,
+    nonAmortizingFeatures: NonAmortizingFeatures,
     propertyValue: String,
     manufacturedHomeSecuredProperty: Option[
       ManufacturedHomeSecuredPropertyEnum] = None,
@@ -57,28 +49,8 @@ case class LoanApplicationRegister(
       case None      => ""
     }
 
-    val originationChargesStr = originationCharges match {
-      case Some(charges) => charges
-      case None          => ""
-    }
-
-    val discountPointsStr = discountPoints match {
-      case Some(points) => points
-      case None         => ""
-    }
-
-    val lenderCreditsStr = lenderCredits match {
-      case Some(credits) => credits
-      case None          => ""
-    }
-
     val interestRateStr = interestRate match {
       case Some(rate) => rate
-      case None       => ""
-    }
-
-    val debtToIncomeRatioStr = debtToIncomeRatio match {
-      case Some(debt) => debt
       case None       => ""
     }
 
@@ -146,9 +118,8 @@ case class LoanApplicationRegister(
 
     s"$id|$leiStr|${loan.toCSV}|${preapproval.code}|${actionTakenType.code}|$actionTakenDate|${geography.toCSV}|" +
       s"${applicant.toCSV}|${purchaserType.code}|$rateSpread|${hoepaStatus.code}|${lienStatus.code}|${denial.toCSV}|" +
-      s"$otherDenialReason|$totalLoanCosts|$totalPointsAndFees|$originationChargesStr|$discountPointsStr|$lenderCreditsStr|" +
-      s"$interestRateStr|$prepaymentPenaltyTerm|$debtToIncomeRatioStr|$loanToValueRatioStr|$introductoryRatePeriod|" +
-      s"${balloonPayment.code}|${interestOnlyPayments.code}|${negativeAmortization.code}|${otherNonAmortizingFeatures.code}|" +
+      s"$otherDenialReason|${loanDisclosure.toCSV}|$interestRateStr|$prepaymentPenaltyTerm|$loanToValueRatioStr|$introductoryRatePeriod|" +
+      s"${nonAmortizingFeatures.toCSV}" +
       s"$propertyValue|$manufacturedHomeSecuredPropertyStr|$manufacturedHomeLandStr|$totalUnitsStr|$multiFamilyStr|" +
       s"${applicationSubmission.code}|${payableToInstitution.code}|$NMLSRIdentified|$ausStr|$otherAusStr|$ausResultStr|" +
       s"$otherAusResultStr|$mortgageTypeStr|$lineOfCreditStr|$businessOrCommercialStr"
