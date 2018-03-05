@@ -12,6 +12,7 @@ DA3W,Disclosure,A3W,,"Disposition of applications and loan sales by loan type, m
 DA4W,Disclosure,A4W,,"Disposition of preapprovals for conventional home-purchase loans, first lien, 1- to 4-family dwellings (excludes manufactured homes), by borrower or census tract characteristics"
 DB,Disclosure,B,,"Loan pricing information for conventional loans by incidence and level"
 DBW,Disclosure,BW,,"Loan pricing information for conventional loans by incidence and level"
+DIRS,Disclosure,IRS,,"Home Mortgage Disclosure Act Institution Register Summary for 2017"
 D31,Disclosure,3-1,,"Loans sold, by characteristics of borrower and census tract in which property is located and by type of purchaser (includes originations and purchased loans)"
 D32,Disclosure,3-2,,"Pricing Information for First and Junior Lien Loans Sold by Type of Purchaser (includes originations only)"
 D51,Disclosure,5-1,Received;Originated;ApprovedButNotAccepted;Denied;Withdrawn;Closed,"Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4-family and manufactured home dwellings, by income, race and ethnicity of applicant"

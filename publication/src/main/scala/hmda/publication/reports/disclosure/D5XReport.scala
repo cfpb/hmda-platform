@@ -14,7 +14,8 @@ trait D5XReport extends DisclosureReport {
   override def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    institution: Institution
+    institution: Institution,
+    msaList: List[Int]
   ): Future[DisclosureReportPayload] = {
 
     D5X.generateD5X(reportId, filters, larSource, fipsCode, institution)
