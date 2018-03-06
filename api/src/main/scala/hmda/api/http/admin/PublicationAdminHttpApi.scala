@@ -66,7 +66,7 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
     }
 
   def aggregateGenerationPath(supervisor: ActorRef) =
-    path("aggregate" / IntNumber) { year =>
+    path("aggregate" / "2017") {
       extractExecutionContext { executor =>
         implicit val ec = executor
         timedPost { uri =>
