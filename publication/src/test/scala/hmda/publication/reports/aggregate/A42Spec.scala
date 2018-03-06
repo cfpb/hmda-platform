@@ -76,7 +76,7 @@ class A42Spec
     N46.generate(source, fips).map {
       case AggregateReportPayload(reportId, fipsCode, report) =>
         reportId mustBe "N46"
-        fipsCode mustBe fips.toString
+        fipsCode mustBe "nationwide"
         report.parseJson.asJsObject.getFields("table", "type", "description", "year") match {
           case Seq(JsString(table), JsString(reportType), JsString(desc), JsString(reportYear)) =>
             table mustBe "4-6"
