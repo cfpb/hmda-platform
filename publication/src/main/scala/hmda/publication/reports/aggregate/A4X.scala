@@ -65,8 +65,8 @@ trait A4X extends AggregateReport {
     ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
   def geoFilter(fips: Int)(lar: LoanApplicationRegister): Boolean =
-    lar.geography.msa.toInt == fips &&
-      lar.geography.msa != "NA"
+    lar.geography.msa != "NA" &&
+      lar.geography.msa.toInt == fips
 
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
