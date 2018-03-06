@@ -9,7 +9,7 @@ import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import spray.json.{ JsArray, JsString, _ }
 
-class A42Spec
+class A4XSpec
     extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
 
   implicit val system = ActorSystem()
