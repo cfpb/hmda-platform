@@ -55,7 +55,7 @@ class AggregateReportPublisher(supervisor: ActorRef) extends HmdaActor with Loan
   )
 
   val nationalAggregateReports: List[AggregateReport] = List(
-    N45
+    N45, N46
   )
 
   override def receive: Receive = {
