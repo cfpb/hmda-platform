@@ -30,14 +30,14 @@ class A4XSpec
     lar.copy(geography = geo, loan = loan)
   }
 
-  val source: Source[LoanApplicationRegister, NotUsed] = Source
+  val aggregateSource: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
   val descriptionA42 = "Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
   val descriptionN46 = "Disposition of applications from nonoccupants for home-purchase, home improvement, or refinancing loans, 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 
   "Generate an Aggregate 4-2 report" in {
-    A42.generate(source, fips).map {
+    A42.generate(aggregateSource, fips).map {
       case AggregateReportPayload(reportId, fipsCode, report) =>
         reportId mustBe "A42"
         fipsCode mustBe fips.toString
@@ -54,7 +54,7 @@ class A4XSpec
   }
 
   "Include correct demographics for dispositions" in {
-    A45.generate(source, fips).map {
+    A45.generate(aggregateSource, fips).map {
       case AggregateReportPayload(reportId, fipsCode, report) =>
         reportId mustBe "A45"
         fipsCode mustBe fips.toString
@@ -72,8 +72,16 @@ class A4XSpec
     }
   }
 
+  val lars2 = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
+    val loan = lar.loan.copy(loanType = 1, propertyType = propType, purpose = 1)
+    lar.copy(loan = loan)
+  }
+
+  val nationalSource: Source[LoanApplicationRegister, NotUsed] = Source
+    .fromIterator(() => lars2.toIterator)
+
   "Generate a National Aggregate 4-6 report" in {
-    N46.generate(source, fips).map {
+    N46.generate(nationalSource, fips).map {
       case AggregateReportPayload(reportId, fipsCode, report) =>
         reportId mustBe "N46"
         fipsCode mustBe "nationwide"
