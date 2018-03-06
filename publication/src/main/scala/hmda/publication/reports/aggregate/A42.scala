@@ -240,7 +240,9 @@ trait A4X extends AggregateReport {
          |
        """.stripMargin
 
-      AggregateReportPayload(reportId, fipsCode.toString, report)
+      val fipsString = if (metaData.reportType == Aggregate) fipsCode.toString else "nationwide"
+
+      AggregateReportPayload(reportId, fipsString, report)
     }
   }
 
