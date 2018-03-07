@@ -20,7 +20,7 @@ object HmdaPublicationSupervisor {
 
   def props(): Props = Props(new HmdaPublicationSupervisor)
 
-  def createQuerySupervisor(system: ActorSystem): ActorRef = {
+  def createPublicationSupervisor(system: ActorSystem): ActorRef = {
     system.actorOf(HmdaPublicationSupervisor.props(), name)
   }
 }
