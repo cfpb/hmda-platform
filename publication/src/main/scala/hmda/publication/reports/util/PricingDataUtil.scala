@@ -1,7 +1,7 @@
 package hmda.publication.reports.util
 
 import akka.NotUsed
-import akka.stream.scaladsl.{ Sink, Source }
+import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.publication.reports._
 import hmda.util.SourceUtils

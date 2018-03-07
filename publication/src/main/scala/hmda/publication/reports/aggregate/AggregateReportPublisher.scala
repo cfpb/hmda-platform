@@ -3,7 +3,7 @@ package hmda.publication.reports.aggregate
 import java.util.concurrent.CompletionStage
 
 import akka.NotUsed
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ ActorSystem, Props }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.stream.Supervision._
 import akka.stream.alpakka.s3.javadsl.S3Client

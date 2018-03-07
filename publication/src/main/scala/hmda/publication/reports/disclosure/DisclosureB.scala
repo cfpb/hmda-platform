@@ -8,7 +8,6 @@ import hmda.publication.reports._
 import hmda.publication.reports.util.PricingDataUtil.{ calculateMedian, pricingDataReported, rateSpread }
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
-import spray.json._
 
 import scala.concurrent.Future
 
