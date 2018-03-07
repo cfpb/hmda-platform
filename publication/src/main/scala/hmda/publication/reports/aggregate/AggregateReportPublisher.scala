@@ -52,12 +52,12 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
   val aggregateReports: List[AggregateReport] = List(
-    A42, A45, A46
+    A42, A43, A45, A46, A47
   //A52, A53  TODO: fix these A5X reports, which cause timeout errors in the cluster
   )
 
   val nationalAggregateReports: List[AggregateReport] = List(
-    N45, N46
+    N41, N43, N45, N46, N47
   )
 
   override def receive: Receive = {
