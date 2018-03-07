@@ -24,11 +24,10 @@ import hmda.persistence.apor.HmdaAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence.LoadAporDataFromS3
 import hmda.persistence.demo.DemoData
 import hmda.persistence.messages.CommonMessages._
+import hmda.publication.HmdaPublicationSupervisor
 import hmda.publication.regulator.lar.{ ModifiedLarPublisher, RegulatorLarPublisher }
 import hmda.publication.regulator.panel.RegulatorPanelPublisher
 import hmda.publication.regulator.ts.RegulatorTsPublisher
-import hmda.publication.reports.aggregate.AggregateReportPublisher
-import hmda.publication.reports.disclosure.DisclosureReportPublisher
 import hmda.query.HmdaQuerySupervisor.{ FindSignedEventLARSubscriber, FindSignedEventTSSubscriber }
 import hmda.validation.stats.ValidationStats
 
@@ -75,6 +74,14 @@ object HmdaPlatform extends App {
     name = "querySupervisorProxy"
   )
 
+  val publicationSupervisorProxy = system.actorOf(
+    ClusterSingletonProxy.props(
+      singletonManagerPath = s"/user/${HmdaPublicationSupervisor.name}",
+      settings = ClusterSingletonProxySettings(system).withRole("publication")
+    ),
+    name = "publicationSupervisorProxy"
+  )
+
   val validationStatsProxy = system.actorOf(
     ClusterSingletonProxy.props(
       singletonManagerPath = s"/user/${ValidationStats.name}",
@@ -86,7 +93,7 @@ object HmdaPlatform extends App {
   if (cluster.selfRoles.contains("api")) {
     ClusterHttpManagement(cluster).start()
     system.actorOf(HmdaFilingApi.props(supervisorProxy, querySupervisorProxy, validationStatsProxy).withDispatcher("api-dispatcher"), "hmda-filing-api")
-    system.actorOf(HmdaAdminApi.props(supervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
+    system.actorOf(HmdaAdminApi.props(supervisorProxy, publicationSupervisorProxy).withDispatcher("api-dispatcher"), "hmda-admin-api")
     system.actorOf(HmdaPublicApi.props(supervisorProxy).withDispatcher("api-dispatcher"), "hmda-public-api")
     system.actorOf(InstitutionAdminTcpApi.props(supervisorProxy), "panel-loader-tcp")
   }
@@ -162,8 +169,6 @@ object HmdaPlatform extends App {
     system.actorOf(RegulatorTsPublisher.props().withDispatcher("publication-dispatcher"), "regulator-ts-publisher")
     system.actorOf(RegulatorLarPublisher.props().withDispatcher("publication-dispatcher"), "regulator-lar-publisher")
     system.actorOf(RegulatorPanelPublisher.props().withDispatcher("publication-dispatcher"), "regulator-panel-publisher")
-    system.actorOf(DisclosureReportPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"), "disclosure-report-publisher")
-    system.actorOf(AggregateReportPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"), "aggregate-report-publisher")
   }
 
   //Load demo data

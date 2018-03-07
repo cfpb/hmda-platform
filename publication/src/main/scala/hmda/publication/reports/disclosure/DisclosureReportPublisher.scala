@@ -35,11 +35,11 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object DisclosureReportPublisher {
-  val name = "SubmissionSignedDisclosureReportSubscriber"
-  def props(supervisor: ActorRef): Props = Props(new DisclosureReportPublisher(supervisor))
+  val name = "disclosure-report-publisher"
+  def props(): Props = Props(new DisclosureReportPublisher)
 }
 
-class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
+class DisclosureReportPublisher extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   val decider: Decider = { e =>
     repositoryLog.error("Unhandled error in stream", e)

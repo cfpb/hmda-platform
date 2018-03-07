@@ -20,10 +20,11 @@ import hmda.persistence.messages.commands.publication.PublicationCommands.Genera
 import scala.concurrent.duration._
 
 object AggregateReportPublisher {
-  def props(supervisor: ActorRef): Props = Props(new AggregateReportPublisher(supervisor))
+  val name = "aggregate-report-publisher"
+  def props(): Props = Props(new AggregateReportPublisher)
 }
 
-class AggregateReportPublisher(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
+class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   val decider: Decider = { e =>
     repositoryLog.error("Unhandled error in stream", e)

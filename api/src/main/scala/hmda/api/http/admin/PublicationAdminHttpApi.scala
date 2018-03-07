@@ -17,8 +17,8 @@ import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.messages.commands.publication.PublicationCommands.{ GenerateAggregateReports, GenerateDisclosureReports }
+import hmda.publication.HmdaPublicationSupervisor.{ FindAggregatePublisher, FindDisclosurePublisher }
 
-import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
 trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol {
@@ -29,14 +29,14 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
 
   val log: LoggingAdapter
 
-  def disclosureGenerationPath(supervisor: ActorRef) =
+  def disclosureGenerationPath(supervisor: ActorRef, publicationSupervisor: ActorRef) =
     path("disclosure" / Segment / IntNumber / IntNumber) { (instId, year, subId) =>
       extractExecutionContext { executor =>
         implicit val ec = executor
         timedPost { uri =>
           val submissionId = SubmissionId(instId, year.toString, subId)
 
-          val publisherRef = system.actorSelection("user/disclosure-report-publisher").resolveOne()
+          val publisherRef = (publicationSupervisor ? FindDisclosurePublisher).mapTo[ActorRef]
           val submissionPersistenceF = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
 
           val message = for {
@@ -65,12 +65,12 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
       }
     }
 
-  def aggregateGenerationPath(supervisor: ActorRef) =
+  def aggregateGenerationPath(supervisor: ActorRef, publicationSupervisor: ActorRef) =
     path("aggregate" / "2017") {
       extractExecutionContext { executor =>
         implicit val ec = executor
         timedPost { uri =>
-          val publisherF: Future[ActorRef] = system.actorSelection("user/aggregate-report-publisher").resolveOne()
+          val publisherF = (publicationSupervisor ? FindAggregatePublisher).mapTo[ActorRef]
           val msg = publisherF.map(_ ! GenerateAggregateReports)
 
           onComplete(msg) {
@@ -81,6 +81,7 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
       }
     }
 
-  def publicationRoutes(supervisor: ActorRef) = disclosureGenerationPath(supervisor) ~ aggregateGenerationPath(supervisor)
+  def publicationRoutes(supervisor: ActorRef, publicationSupervisor: ActorRef) =
+    disclosureGenerationPath(supervisor, publicationSupervisor) ~ aggregateGenerationPath(supervisor, publicationSupervisor)
 
 }
