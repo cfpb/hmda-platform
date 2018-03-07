@@ -119,7 +119,7 @@ case class LoanApplicationRegister(
     s"$id|$leiStr|${loan.toCSV}|${preapproval.code}|${actionTakenType.code}|$actionTakenDate|${geography.toCSV}|" +
       s"${applicant.toCSV}|${purchaserType.code}|$rateSpread|${hoepaStatus.code}|${lienStatus.code}|${denial.toCSV}|" +
       s"$otherDenialReason|${loanDisclosure.toCSV}|$interestRateStr|$prepaymentPenaltyTerm|$loanToValueRatioStr|$introductoryRatePeriod|" +
-      s"${nonAmortizingFeatures.toCSV}" +
+      s"${nonAmortizingFeatures.toCSV}|" +
       s"$propertyValue|$manufacturedHomeSecuredPropertyStr|$manufacturedHomeLandStr|$totalUnitsStr|$multiFamilyStr|" +
       s"${applicationSubmission.code}|${payableToInstitution.code}|$NMLSRIdentified|$ausStr|$otherAusStr|$ausResultStr|" +
       s"$otherAusResultStr|$mortgageTypeStr|$lineOfCreditStr|$businessOrCommercialStr"
