@@ -169,6 +169,16 @@ object HmdaPlatform extends App {
     system.actorOf(RegulatorTsPublisher.props().withDispatcher("publication-dispatcher"), "regulator-ts-publisher")
     system.actorOf(RegulatorLarPublisher.props().withDispatcher("publication-dispatcher"), "regulator-lar-publisher")
     system.actorOf(RegulatorPanelPublisher.props().withDispatcher("publication-dispatcher"), "regulator-panel-publisher")
+
+    system.actorOf(
+      ClusterSingletonManager.props(
+        singletonProps = Props(classOf[HmdaPublicationSupervisor]),
+        terminationMessage = Shutdown,
+        settings = ClusterSingletonManagerSettings(system).withRole("publication")
+      ),
+      name = HmdaPublicationSupervisor.name
+    )
+
   }
 
   //Load demo data
