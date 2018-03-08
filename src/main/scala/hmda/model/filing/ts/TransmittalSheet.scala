@@ -1,6 +1,6 @@
 package hmda.model.filing.ts
 
-import hmda.model.filing.HmdaFileRow
+import hmda.model.filing.{HmdaFileRow, PipeDelimited}
 import hmda.model.institution.{Agency, UndeterminedAgency}
 
 case class TransmittalSheet(
@@ -13,9 +13,10 @@ case class TransmittalSheet(
     totalLines: Int = 0,
     taxId: String = "",
     LEI: String = ""
-) extends HmdaFileRow {
-  def toCSV: String = {
-    s"$id|$institutionName|$year|$quarter|${contact.toCSV}|${agency.value}|$totalLines|$taxId|$LEI"
+) extends PipeDelimited
+    with HmdaFileRow {
+  override def toCSV: String = {
+    s"$id|$institutionName|$year|$quarter|${contact.toCSV}|${agency.code}|$totalLines|$taxId|$LEI"
   }
 
   override def valueOf(field: String): Any = {

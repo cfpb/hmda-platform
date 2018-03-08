@@ -91,7 +91,8 @@ We use GitHub issues in this repository to track features, bugs, and enhancement
 ## Credits and references
 
 1. Projects that inspired you
-  - https://github.com/cfpb/hmda-pilot
+
 2. Related projects
   - https://github.com/cfpb/hmda-platform-ui
+  - https://github.com/cfpb/hmda-pub-ui
   - https://github.com/cfpb/hmda-platform-auth

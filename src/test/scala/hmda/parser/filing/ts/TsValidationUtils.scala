@@ -17,7 +17,7 @@ object TsValidationUtils {
     val city = ts.contact.address.city
     val state = ts.contact.address.state
     val zipCode = ts.contact.address.zipCode
-    val agencyCode = ts.agency.value.toString
+    val agencyCode = ts.agency.code.toString
     val totalLines = ts.totalLines.toString
     val taxId = ts.taxId
     val lei = ts.LEI
