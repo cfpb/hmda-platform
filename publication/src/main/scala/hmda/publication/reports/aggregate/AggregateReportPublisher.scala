@@ -52,11 +52,13 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
 
   val aggregateReports: List[AggregateReport] = List(
     A42,
-    A52, A53
+    A52, A53,
+    A11_1, A11_2, A11_3, A11_4, A11_5, A11_6, A11_7, A11_8, A11_9, A11_10
   )
 
   val nationalAggregateReports: List[AggregateReport] = List(
-    N45, N46
+    N45, N46,
+    N11_1, N11_2, N11_3, N11_4, N11_5, N11_6, N11_7, N11_8, N11_9, N11_10
   )
 
   override def receive: Receive = {
