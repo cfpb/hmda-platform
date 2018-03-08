@@ -26,31 +26,32 @@ object LarGenerators {
       geography <- geographyGen
       applicant <- applicantGen
       coApplicant <- applicantGen
+      income <- Gen.alphaStr
       purchaserType <- purchaserEnumGen
       rateSpread <- valueOrNA(Gen.choose(0.0, 1.0))
       hoepaStatus <- hOEPAStatusEnumGen
       lienStatus <- lienStatusEnumGen
       denial <- denialGen
-      otherDenialReason <- Gen.alphaStr
       loanDisclosure <- loanDisclosureGen
       interestRate <- Gen.option(valueOrNA(Gen.choose(0.0, 30.0)))
       prepaymentPenaltyTerm <- valueOrNA(Gen.alphaNumStr)
+      debtToIncomeRatio <- Gen.option(Gen.alphaStr)
       loanToValueRatio <- Gen.option(valueOrNA(Gen.choose(0.0, 100.0)))
       introductoryRatePeriod <- valueOrNA(Gen.alphaNumStr)
       otherNonAmortizingFeatures <- otherNonAmortizingFeaturesGen
       propertyValue <- valueOrNA(Gen.alphaNumStr)
       manufacturedHomeSecuredProperty <- Gen.option(
         manufacturedHomeSecuredPropertyEnumGen)
-      manufacturedHomeLandPropertyInterestEnum <- Gen.option(
+      manufacturedHomeLandPropertyInterest <- Gen.option(
         manufacturedHomeLandPropertyInterestEnumGen)
       totalUnits <- Gen.option(Gen.choose(1, 100))
       multiFamilyAffordableUnits <- Gen.option(valueOrNA(Gen.choose(1, 1000)))
       applicationSubmission <- applicationSubmissionEnumGen
       payableToInstitution <- payableToInstitutionEnumGen
-      nmlsrIdentified <- valueOrNA(Gen.alphaNumStr)
+      nmlsrIdentifier <- valueOrNA(Gen.alphaNumStr)
       aus <- Gen.option(automatedUnderwritingSystemGen)
       otherAUS <- Gen.option(Gen.alphaStr)
-      ausResult <- Gen.option(automatedUnderwritingSystemResult)
+      ausResult <- Gen.option(automatedUnderwritingSystemResultGen)
       otherAusResult <- Gen.option(Gen.alphaStr)
       reverseMortgage <- Gen.option(mortgageTypeEnum)
       lineOfCredit <- Gen.option(lineOfCreditEnumGen)
@@ -67,30 +68,29 @@ object LarGenerators {
         geography,
         applicant,
         coApplicant,
+        income,
         purchaserType,
         rateSpread,
         hoepaStatus,
         lienStatus,
         denial,
-        otherDenialReason,
         loanDisclosure,
         interestRate,
         prepaymentPenaltyTerm,
+        debtToIncomeRatio,
         loanToValueRatio,
         introductoryRatePeriod,
         otherNonAmortizingFeatures,
         propertyValue,
         manufacturedHomeSecuredProperty,
-        manufacturedHomeLandPropertyInterestEnum,
+        manufacturedHomeLandPropertyInterest,
         totalUnits,
         multiFamilyAffordableUnits,
         applicationSubmission,
         payableToInstitution,
-        nmlsrIdentified,
+        nmlsrIdentifier,
         aus,
-        otherAUS,
         ausResult,
-        otherAusResult,
         reverseMortgage,
         lineOfCredit,
         businessOrCommercialPurpose
@@ -202,44 +202,20 @@ object LarGenerators {
   implicit def applicantGen: Gen[Applicant] = {
     for {
       ethnicity <- ethnicityGen
-      otherHispanicOrLatino <- Gen.alphaStr
-      ethnicityObserved <- ethnicifyObserverdEnumGen
       race <- raceGen
-      raceObserved <- raceObservedEnumGen
-      otherNativeRace <- Gen.alphaStr
-      otherAsianRace <- Gen.alphaStr
-      otherPacificRace <- Gen.alphaStr
-      sex <- sexEnumGen
-      coSex <- sexEnumGen
-      sexObserved <- sexObservedEnumGen
-      coSexObserved <- sexObservedEnumGen
+      sex <- sexGen
       age <- Gen.choose(18, 100)
-      coAge <- Gen.choose(18, 100)
-      income <- valueOrNA(Gen.choose(0, 1000))
       creditScore <- Gen.choose(0, Int.MaxValue)
       creditScoreType <- creditScoreEnumGen
-      debtToIncomeRatio <- Gen.option(valueOrNA(Gen.choose(0.0, 5.0)))
       otherCreditScoreModel <- Gen.alphaStr
     } yield
       Applicant(
         ethnicity,
-        otherHispanicOrLatino,
-        ethnicityObserved,
         race,
-        raceObserved,
-        otherNativeRace,
-        otherAsianRace,
-        otherPacificRace,
         sex,
-        coSex,
-        sexObserved,
-        coSexObserved,
         age,
-        coAge,
-        income,
         creditScore,
         creditScoreType,
-        debtToIncomeRatio,
         otherCreditScoreModel
       )
   }
@@ -251,7 +227,9 @@ object LarGenerators {
       eth3 <- ethnicityEnumGen
       eth4 <- ethnicityEnumGen
       eth5 <- ethnicityEnumGen
-    } yield Ethnicity(eth1, eth2, eth3, eth4, eth5)
+      other <- Gen.alphaStr
+      observed <- ethnicifyObserverdEnumGen
+    } yield Ethnicity(eth1, eth2, eth3, eth4, eth5, other, observed)
   }
 
   implicit def raceGen: Gen[Race] = {
@@ -261,7 +239,27 @@ object LarGenerators {
       race3 <- raceEnumGen
       race4 <- raceEnumGen
       race5 <- raceEnumGen
-    } yield Race(race1, race2, race3, race4, race5)
+      otherNative <- Gen.alphaStr
+      otherAsian <- Gen.alphaStr
+      otherPacific <- Gen.alphaStr
+      observed <- raceObservedEnumGen
+    } yield
+      Race(race1,
+           race2,
+           race3,
+           race4,
+           race5,
+           otherNative,
+           otherAsian,
+           otherPacific,
+           observed)
+  }
+
+  implicit def sexGen: Gen[Sex] = {
+    for {
+      sexEnum <- sexEnumGen
+      sexObserved <- sexObservedEnumGen
+    } yield Sex(sexEnum, sexObserved)
   }
 
   implicit def denialGen: Gen[Denial] = {
@@ -270,7 +268,8 @@ object LarGenerators {
       denial2 <- denialReasonEnumGen
       denial3 <- denialReasonEnumGen
       denial4 <- denialReasonEnumGen
-    } yield Denial(denial1, denial2, denial3, denial4)
+      other <- Gen.alphaStr
+    } yield Denial(denial1, denial2, denial3, denial4, other)
   }
 
   implicit def automatedUnderwritingSystemGen
@@ -281,10 +280,11 @@ object LarGenerators {
       aus3 <- automatedUnderwritingSystemEnumGen
       aus4 <- automatedUnderwritingSystemEnumGen
       aus5 <- automatedUnderwritingSystemEnumGen
-    } yield AutomatedUnderwritingSystem(aus1, aus2, aus3, aus4, aus5)
+      other <- Gen.option(Gen.alphaStr)
+    } yield AutomatedUnderwritingSystem(aus1, aus2, aus3, aus4, aus5, other)
   }
 
-  implicit def automatedUnderwritingSystemResult
+  implicit def automatedUnderwritingSystemResultGen
     : Gen[AutomatedUnderwritingSystemResult] = {
     for {
       ausResult1 <- automatedUnderWritingSystemResultEnumGen
@@ -292,12 +292,14 @@ object LarGenerators {
       ausResult3 <- automatedUnderWritingSystemResultEnumGen
       ausResult4 <- automatedUnderWritingSystemResultEnumGen
       ausResult5 <- automatedUnderWritingSystemResultEnumGen
+      other <- Gen.option(Gen.alphaStr)
     } yield
       AutomatedUnderwritingSystemResult(ausResult1,
                                         ausResult2,
                                         ausResult3,
                                         ausResult4,
-                                        ausResult5)
+                                        ausResult5,
+                                        other)
   }
 
   private def valueOrNA[A](g: Gen[A]): Gen[String] = valueOrDefault("NA")
