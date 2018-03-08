@@ -221,10 +221,10 @@ trait A11X extends AggregateReport {
       if (metaData.reportType == Aggregate) larSource.filter(filters).filter(geoFilter(fipsCode))
       else larSource.filter(filters)
 
-    val larsWithoutNaIncome = lars.filter(lar => lar.applicant.income != "NA")
+    val larsForIncomeCalculation = lars.filter(lar => lar.applicant.income != "NA" && lar.geography.msa != "NA")
     val incomeIntervals =
-      if(metaData.reportType == Aggregate) larsByIncomeInterval(larsWithoutNaIncome, calculateMedianIncomeIntervals(fipsCode))
-      else nationalLarsByIncomeInterval(larsWithoutNaIncome)
+      if (metaData.reportType == Aggregate) larsByIncomeInterval(larsForIncomeCalculation, calculateMedianIncomeIntervals(fipsCode))
+      else nationalLarsByIncomeInterval(larsForIncomeCalculation)
 
     val msa: String = if (metaData.reportType == Aggregate) s""""msa": ${msaReport(fipsCode.toString).toJsonFormat},""" else ""
     val reportDate = formattedCurrentDate
@@ -281,7 +281,7 @@ trait A11X extends AggregateReport {
       val report = s"""
                       |{
                       |    "table": "${metaData.reportTable}",
-                      |    "type": "Disclosure",
+                      |    "type": "${metaData.reportType}",
                       |    "description": "${metaData.description}",
                       |    "year": "$year",
                       |    "reportDate": "$reportDate",
@@ -462,7 +462,7 @@ trait A11X extends AggregateReport {
 
       val fipsString = if (metaData.reportType == Aggregate) fipsCode.toString else "nationwide"
 
-      AggregateReportPayload(metaData.reportTable, fipsCode.toString, report)
+      AggregateReportPayload(metaData.reportTable, fipsString, report)
     }
   }
 }
