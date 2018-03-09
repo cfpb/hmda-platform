@@ -16,6 +16,7 @@ import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
 import hmda.census.model.MsaIncomeLookup
 import hmda.persistence.messages.commands.publication.PublicationCommands.GenerateAggregateReports
+import hmda.publication.reports
 
 import scala.concurrent.duration._
 import scalaz.Alpha.X
@@ -53,12 +54,14 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
 
   val aggregateReports: List[AggregateReport] = List(
     A42, A43, A45, A46, A47,
+    A81, A82, A83, A84, A85, A86, A87,
     A11_1, A11_2, A11_3, A11_4, A11_5, A11_6, A11_7, A11_8, A11_9, A11_10
   //A52, A53 FIXME: A5X reports futures don't resolve
   )
 
   val nationalAggregateReports: List[AggregateReport] = List(
     N41, N43, N45, N46, N47,
+    N81, N82, N83, N84, N85, N86, N87,
     N11_1, N11_2, N11_3, N11_4, N11_5, N11_6, N11_7, N11_8, N11_9, N11_10
   //A52, A53 FIXME: A5X reports futures don't resolve
   )
