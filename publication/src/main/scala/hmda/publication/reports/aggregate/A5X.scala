@@ -5,12 +5,31 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.{ ApplicantIncome, ValueDisposition, MSAReport }
 import hmda.publication.reports._
+import hmda.publication.reports.protocol.aggregate.A5XReportProtocol._
 import hmda.publication.reports.util.ReportUtil._
 import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
+import spray.json._
 
-case class A5X(
+object A52 extends A5X {
+  val reportId = "A52"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    (lar.loan.loanType == 1) &&
+      (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
+      (lar.loan.purpose == 1)
+  }
+}
+
+object A53 extends A5X {
+  val reportId = "A53"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
+      (lar.loan.purpose == 3)
+  }
+}
+
+case class A5XReport(
   year: Int,
   msa: MSAReport,
   applicantIncomes: List[ApplicantIncome],
@@ -18,15 +37,27 @@ case class A5X(
   table: String,
   description: String,
   reportDate: String = formattedCurrentDate
-) extends AggregateReport
+)
 
-object A5X {
-  def generateA5X[ec: EC, mat: MAT, as: AS](
-    reportId: String,
+trait A5X extends AggregateReport {
+  val reportId: String
+  def filters(lar: LoanApplicationRegister): Boolean
+
+  override def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
-    fipsCode: Int,
-    filters: LoanApplicationRegister => Boolean
-  ): Future[A5X] = {
+    fipsCode: Int
+  ): Future[AggregateReportPayload] = {
+
+    generateA5X(larSource, fipsCode).map { a5x =>
+      val report = a5x.toJson.toString
+      AggregateReportPayload(reportId, fipsCode.toString, report)
+    }
+  }
+
+  def generateA5X[ec: EC, mat: MAT, as: AS](
+    larSource: Source[LoanApplicationRegister, NotUsed],
+    fipsCode: Int
+  ): Future[A5XReport] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
     val dispositions = metaData.dispositions
@@ -52,7 +83,7 @@ object A5X {
       total <- totalF
     } yield {
 
-      A5X(
+      A5XReport(
         year,
         msa,
         applicantIncomes,

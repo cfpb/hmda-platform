@@ -7,7 +7,6 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
 import hmda.model.institution.ExternalIdType.RssdId
 import hmda.model.institution.{ ExternalId, Institution, Respondent }
-import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import spray.json._
 
