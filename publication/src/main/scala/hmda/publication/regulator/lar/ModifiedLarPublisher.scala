@@ -50,6 +50,7 @@ class ModifiedLarPublisher(supervisor: ActorRef) extends HmdaActor with LoanAppl
   val region = config.getString("hmda.publication.aws.region")
   val bucket = config.getString("hmda.publication.aws.public-bucket")
   val environment = config.getString("hmda.publication.aws.environment")
+  val year = config.getInt("hmda.publication.year")
 
   val awsCredentials = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess)
@@ -65,7 +66,7 @@ class ModifiedLarPublisher(supervisor: ActorRef) extends HmdaActor with LoanAppl
     case SubmissionSignedPubSub(submissionId) =>
       val institutionId = submissionId.institutionId
       val fileName = s"$institutionId.txt"
-      val s3Sink = s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
+      val s3Sink = s3Client.multipartUpload(bucket, s"$environment/modified-lar/$year/$fileName")
       log.info(s"${self.path} received submission signed event with submission id: ${submissionId.toString}")
       val persistenceId = s"HmdaFileValidator-$submissionId"
       val larSource = events(persistenceId).map {
