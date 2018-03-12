@@ -61,7 +61,7 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
 
   override def receive: Receive = {
 
-    case GenerateAggregateReports =>
+    case GenerateAggregateReports() =>
       log.info(s"Generating aggregate reports for 2017 filing year")
       generateReports
 
