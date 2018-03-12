@@ -17,7 +17,7 @@ import hmda.persistence.HmdaSupervisor.FindSubmissions
 import hmda.persistence.institutions.SubmissionPersistence
 import hmda.persistence.institutions.SubmissionPersistence.GetSubmissionById
 import hmda.persistence.messages.commands.publication.PublicationCommands.{ GenerateAggregateReports, GenerateDisclosureReports }
-import hmda.publication.HmdaPublicationSupervisor.{ FindAggregatePublisher, FindDisclosurePublisher }
+import hmda.persistence.messages.events.pubsub.PubSubEvents.{ FindAggregatePublisher, FindDisclosurePublisher }
 
 import scala.util.{ Failure, Success }
 
@@ -36,7 +36,7 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
         timedPost { uri =>
           val submissionId = SubmissionId(instId, year.toString, subId)
 
-          val publisherRef = (publicationSupervisor ? FindDisclosurePublisher).mapTo[ActorRef]
+          val publisherRef = (publicationSupervisor ? FindDisclosurePublisher()).mapTo[ActorRef]
           val submissionPersistenceF = (supervisor ? FindSubmissions(SubmissionPersistence.name, submissionId.institutionId, submissionId.period)).mapTo[ActorRef]
 
           val message = for {
@@ -70,8 +70,8 @@ trait PublicationAdminHttpApi extends HmdaCustomDirectives with ApiErrorProtocol
       extractExecutionContext { executor =>
         implicit val ec = executor
         timedPost { uri =>
-          val publisherF = (publicationSupervisor ? FindAggregatePublisher).mapTo[ActorRef]
-          val msg = publisherF.map(_ ! GenerateAggregateReports)
+          val publisherF = (publicationSupervisor ? FindAggregatePublisher()).mapTo[ActorRef]
+          val msg = publisherF.map(_ ! GenerateAggregateReports())
 
           onComplete(msg) {
             case Success(sub) => complete(ToResponseMarshallable(StatusCodes.OK))

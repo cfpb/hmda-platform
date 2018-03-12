@@ -6,6 +6,7 @@ import akka.util.Timeout
 import hmda.persistence.model.HmdaSupervisorActor
 import hmda.persistence.PersistenceConfig._
 import hmda.persistence.messages.CommonMessages._
+import hmda.persistence.messages.events.pubsub.PubSubEvents.{ FindAggregatePublisher, FindDisclosurePublisher }
 import hmda.publication.reports.aggregate.AggregateReportPublisher
 import hmda.publication.reports.disclosure.DisclosureReportPublisher
 
@@ -15,9 +16,6 @@ object HmdaPublicationSupervisor {
 
   val name = "publication-supervisor"
 
-  case object FindDisclosurePublisher extends Command
-  case object FindAggregatePublisher extends Command
-
   def props(): Props = Props(new HmdaPublicationSupervisor)
 
   def createPublicationSupervisor(system: ActorSystem): ActorRef = {
@@ -26,7 +24,6 @@ object HmdaPublicationSupervisor {
 }
 
 class HmdaPublicationSupervisor extends HmdaSupervisorActor {
-  import HmdaPublicationSupervisor._
 
   val duration = configuration.getInt("hmda.actor-lookup-timeout")
 
@@ -36,9 +33,9 @@ class HmdaPublicationSupervisor extends HmdaSupervisorActor {
   ClusterClientReceptionist(context.system).registerService(self)
 
   override def receive: Receive = super.receive orElse {
-    case FindDisclosurePublisher =>
+    case FindDisclosurePublisher() =>
       sender() ! findDisclosurePublisher()
-    case FindAggregatePublisher =>
+    case FindAggregatePublisher() =>
       sender() ! findAggregatePublisher()
     case Shutdown =>
       context stop self

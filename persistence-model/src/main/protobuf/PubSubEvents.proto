@@ -8,3 +8,13 @@ import "SubmissionEvents.proto";
 message SubmissionSignedPubSubMessage {
     SubmissionIdMessage submissionId = 1;
 }
+
+message FindAggregatePublisherMessage {}
+
+message FindDisclosurePublisherMessage {}
+
+message GenerateDisclosureReportsMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message GenerateAggregateReportsMessage {}
