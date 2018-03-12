@@ -109,26 +109,26 @@ class DisclosureReportPublisher extends HmdaActor with LoanApplicationRegisterCa
     futures.map(f => {
       val institution = f._1
       val msaList = f._2.toList
+      val parallelism = 1
 
       val larSource = readData(1000)
         .filter(lar => lar.respondentId == institution.respondentId)
 
       val combinations = combine(msaList, reports) ++ combine(List(-1), nationwideReports)
 
-      val simpleReportFlow: Flow[(Int, DisclosureReport), DisclosureReportPayload, NotUsed] =
-        Flow[(Int, DisclosureReport)]
-          .mapAsyncUnordered(1)(comb => comb._2.generate(larSource, comb._1, institution, msaList))
+      val reportS3Flow: Flow[(Int, DisclosureReport), CompletionStage[MultipartUploadResult], NotUsed] =
+        Flow[(Int, DisclosureReport)].mapAsync(parallelism) {
+          case (msa, report) =>
+            report.generate(larSource, msa, institution).map { payload =>
+              val filePath = s"$environment/reports/disclosure/${submissionId.period}/${institution.respondent.name}/${payload.msa}/${payload.reportID}.txt"
+              log.info(s"Publishing report. Institution: ${institution.id}, MSA: ${payload.msa}, Report #: ${payload.reportID}")
 
-      val s3Flow: Flow[DisclosureReportPayload, CompletionStage[MultipartUploadResult], NotUsed] =
-        Flow[DisclosureReportPayload]
-          .map(payload => {
-            val filePath = s"$environment/reports/disclosure/${submissionId.period}/${institution.respondent.name}/${payload.msa}/${payload.reportID}.txt"
-            log.info(s"Publishing report. Institution: ${institution.id}, MSA: ${payload.msa}, Report #: ${payload.reportID}")
-            Source.single(ByteString(payload.report))
-              .runWith(s3Client.multipartUpload(bucket, filePath))
-          })
+              Source.single(ByteString(payload.report))
+                .runWith(s3Client.multipartUpload(bucket, filePath))
+            }
+        }
 
-      Source(combinations).via(simpleReportFlow).via(s3Flow).runWith(Sink.ignore)
+      Source(combinations).via(reportS3Flow).runWith(Sink.ignore)
     })
   }
 
