@@ -44,6 +44,41 @@ object ReportUtil extends SourceUtils {
     Array(i50, i80, i100, i120)
   }
 
+  def larInIncomeInterval(lar: LoanApplicationRegister, applicantIncomeEnum: ApplicantIncomeEnum): Boolean = {
+    val incomeIntervals = calculateMedianIncomeIntervals(lar.geography.msa.toInt)
+    val income = lar.applicant.income.toInt
+    (income < incomeIntervals(0) && applicantIncomeEnum == LessThan50PercentOfMSAMedian) ||
+      (income >= incomeIntervals(0) && income < incomeIntervals(1) && applicantIncomeEnum == Between50And79PercentOfMSAMedian) ||
+      (income >= incomeIntervals(1) && income < incomeIntervals(2) && applicantIncomeEnum == Between80And99PercentOfMSAMedian) ||
+      (income >= incomeIntervals(2) && income < incomeIntervals(3) && applicantIncomeEnum == Between100And119PercentOfMSAMedian) ||
+      (income >= incomeIntervals(3) && applicantIncomeEnum == GreaterThan120PercentOfMSAMedian)
+  }
+
+  def nationalLarsByIncomeInterval(larSource: Source[LoanApplicationRegister, NotUsed]): Map[ApplicantIncomeEnum, Source[LoanApplicationRegister, NotUsed]] = {
+    val lars50 = larSource
+      .filter(lar => larInIncomeInterval(lar, LessThan50PercentOfMSAMedian))
+
+    val lars50To79 = larSource
+      .filter(lar => larInIncomeInterval(lar, Between50And79PercentOfMSAMedian))
+
+    val lars80To99 = larSource
+      .filter(lar => larInIncomeInterval(lar, Between80And99PercentOfMSAMedian))
+
+    val lars100To120 = larSource
+      .filter(lar => larInIncomeInterval(lar, Between100And119PercentOfMSAMedian))
+
+    val lars120 = larSource
+      .filter(lar => larInIncomeInterval(lar, GreaterThan120PercentOfMSAMedian))
+
+    Map(
+      LessThan50PercentOfMSAMedian -> lars50,
+      Between50And79PercentOfMSAMedian -> lars50To79,
+      Between80And99PercentOfMSAMedian -> lars80To99,
+      Between100And119PercentOfMSAMedian -> lars100To120,
+      GreaterThan120PercentOfMSAMedian -> lars120
+    )
+  }
+
   def larsByIncomeInterval(larSource: Source[LoanApplicationRegister, NotUsed], incomeIntervals: Array[Double]): Map[ApplicantIncomeEnum, Source[LoanApplicationRegister, NotUsed]] = {
     val lars50 = larSource
       .filter(lar => lar.applicant.income.toInt < incomeIntervals(0))
