@@ -29,17 +29,17 @@ import hmda.validation.messages.ValidationStatsMessages.FindIrsStats
 import hmda.validation.stats.SubmissionLarStats
 import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
 import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.messages.commands.disclosure.DisclosureCommands.GenerateDisclosureReports
+import hmda.persistence.messages.commands.publication.PublicationCommands.GenerateDisclosureReports
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object DisclosureReportPublisher {
-  val name = "SubmissionSignedDisclosureReportSubscriber"
-  def props(supervisor: ActorRef): Props = Props(new DisclosureReportPublisher(supervisor))
+  val name = "disclosure-report-publisher"
+  def props(): Props = Props(new DisclosureReportPublisher)
 }
 
-class DisclosureReportPublisher(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
+class DisclosureReportPublisher extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   val decider: Decider = { e =>
     repositoryLog.error("Unhandled error in stream", e)

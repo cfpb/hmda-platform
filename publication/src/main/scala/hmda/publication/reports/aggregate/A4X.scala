@@ -9,35 +9,77 @@ import hmda.model.publication.reports.GenderEnum.{ Female, JointGender, Male }
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports.MinorityStatusEnum._
 import hmda.model.publication.reports.RaceEnum._
-import hmda.publication.reports._
+import hmda.model.publication.reports.ReportTypeEnum.Aggregate
+import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
 import hmda.publication.reports.util.GenderUtil.filterGender
 import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
 import hmda.publication.reports.util.RaceUtil.filterRace
 import hmda.publication.reports.util.ReportUtil._
+import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
-import spray.json._
 
-object A42 {
-  val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
-    ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
-
-  def reportFilters(lar: LoanApplicationRegister): Boolean = {
+object A42 extends A4X {
+  val reportId: String = "A42"
+  def filters(lar: LoanApplicationRegister): Boolean = {
     lar.loan.loanType == 1 &&
       (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
       (lar.loan.purpose == 1)
   }
+}
+object A45 extends A4X {
+  override val reportId: String = "A45"
+  override def filters(lar: LoanApplicationRegister): Boolean =
+    lar.loan.propertyType == 3
+}
+object A46 extends A4X {
+  override val reportId: String = "A46"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    lar.loan.occupancy == 2 &&
+      List(1, 2, 3).contains(lar.loan.purpose) &&
+      List(1, 2).contains(lar.loan.propertyType)
+  }
+}
+
+object N45 extends A4X {
+  override val reportId: String = "N45"
+  override def filters(lar: LoanApplicationRegister): Boolean =
+    lar.loan.propertyType == 3
+}
+object N46 extends A4X {
+  override val reportId: String = "N46"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    lar.loan.occupancy == 2 &&
+      List(1, 2, 3).contains(lar.loan.purpose) &&
+      List(1, 2).contains(lar.loan.propertyType)
+  }
+}
+
+trait A4X extends AggregateReport {
+  val reportId: String
+  def filters(lar: LoanApplicationRegister): Boolean
+
+  val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
+    ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
+
+  def geoFilter(fips: Int)(lar: LoanApplicationRegister): Boolean =
+    lar.geography.msa != "NA" &&
+      lar.geography.msa.toInt == fips
 
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int
-  ): Future[JsValue] = {
+  ): Future[AggregateReportPayload] = {
+    val metaData = ReportsMetaDataLookup.values(reportId)
 
-    val lars = larSource.filter(reportFilters)
+    val lars =
+      if (metaData.reportType == Aggregate) larSource.filter(filters).filter(geoFilter(fipsCode))
+      else larSource.filter(filters)
+
     val incomeIntervals = larsByIncomeInterval(lars.filter(lar => lar.applicant.income != "NA"), calculateMedianIncomeIntervals(fipsCode))
-    val msa = msaReport(fipsCode.toString).toJsonFormat
+    val msa: String = if (metaData.reportType == Aggregate) s""""msa": ${msaReport(fipsCode.toString).toJsonFormat},""" else ""
     val reportDate = formattedCurrentDate
     val yearF = calculateYear(lars)
 
@@ -83,14 +125,14 @@ object A42 {
 
       total <- dispositionsOutput(lars)
     } yield {
-      s"""
+      val report = s"""
          |{
-         |    "table": "4-2",
-         |    "type": "Aggregate",
-         |    "description": "Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant",
+         |    "table": "${metaData.reportTable}",
+         |    "type": "${metaData.reportType}",
+         |    "description": "${metaData.description}",
          |    "year": "$year",
          |    "reportDate": "$reportDate",
-         |    "msa": $msa,
+         |    $msa
          |    "ethnicities": [
          |        {
          |            "ethnicity": "Hispanic or Latino",
@@ -196,7 +238,11 @@ object A42 {
          |    "total": $total
          |}
          |
-       """.stripMargin.parseJson
+       """.stripMargin
+
+      val fipsString = if (metaData.reportType == Aggregate) fipsCode.toString else "nationwide"
+
+      AggregateReportPayload(reportId, fipsString, report)
     }
   }
 

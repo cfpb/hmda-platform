@@ -1,25 +1,27 @@
 package hmda.publication.reports.national
 
+/*
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.census.model.MsaIncomeLookup
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.publication.reports._
 import hmda.publication.reports._
-import hmda.publication.reports.aggregate.{ A5X, A5XReportCreator }
+import hmda.publication.reports.aggregate.{ A5X, A5XReport, A5XReportCreator }
 
 import scala.concurrent.Future
+*/
+import hmda.model.publication.reports._
 
 case class N5X(
-    year: Int,
-    applicantIncomes: List[ApplicantIncome],
-    total: List[ValueDisposition],
-    table: String,
-    description: String,
-    reportDate: String
-) extends NationalAggregateReport {
+  year: Int,
+  applicantIncomes: List[ApplicantIncome],
+  total: List[ValueDisposition],
+  table: String,
+  description: String,
+  reportDate: String
+) extends NationalAggregateReport /*{
 
-  def +(a5X: A5X): N5X = {
+  def +(a5X: A5XReport): N5X = {
     if (table != a5X.table) throw new IllegalArgumentException
 
     val incomes: List[ApplicantIncome] =
@@ -78,3 +80,4 @@ object N5X {
     })
   }
 }
+*/

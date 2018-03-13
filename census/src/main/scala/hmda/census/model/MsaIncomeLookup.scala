@@ -15,4 +15,6 @@ object MsaIncomeLookup extends ResourceUtils {
       MsaIncome(fipsCode, name, income)
     }.toSeq
   }
+
+  val everyFips: Seq[Int] = values.map(_.fips).filterNot(_ == 99999)
 }

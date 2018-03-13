@@ -39,7 +39,7 @@ class A52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
     List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted, ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
   "Generate an Aggregate 5-2 report" in {
-    A52.generate(source, fips).map { result =>
+    A52.generateA5X(source, fips).map { result =>
 
       result.msa mustBe MSAReport("18700", "Corvallis, OR", "OR", "Oregon")
       result.table mustBe "5-2"

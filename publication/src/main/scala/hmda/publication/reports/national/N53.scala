@@ -1,5 +1,6 @@
 package hmda.publication.reports.national
 
+/*
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
@@ -13,3 +14,4 @@ object N53 {
     larSource: Source[LoanApplicationRegister, NotUsed]
   ): Future[N5X] = N5X.generateN5X(A53, larSource)
 }
+*/
