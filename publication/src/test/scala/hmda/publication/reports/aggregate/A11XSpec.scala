@@ -108,7 +108,7 @@ class A11XSpec
   val nationalSource: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars2.toIterator)
 
-  "Generate a National Aggregate 4-6 report" in {
+  "Generate a National Aggregate 11-6 report" in {
     N11_6.generate(nationalSource, fips).map {
       case AggregateReportPayload(reportId, fipsCode, report) =>
         reportId mustBe "11-6"
