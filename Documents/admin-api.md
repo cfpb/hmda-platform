@@ -360,5 +360,16 @@ This API is for internal use only. The following endpoints are available
     * `POST`
 
     Forces the backend to generate and publish the disclosure reports for a given submission.
+    Saves all reports to the s3 bucket that is configured in the AWS environment variables.
+
+    If the submission has a `Signed` status, returns a `200 OK` response.
+    If the submission is not Signed, returns `400 Bad Request` response and does not generate reports.
+
+* `/aggregate/2017`
+
+    * `POST`
+
+    Generates all Aggregate and National Aggregate reports for all 2017 data that has been reported.
+    Saves all reports to the s3 bucket that is configured in the AWS environment variables.
 
     Returns a `200 OK` response.

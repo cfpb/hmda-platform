@@ -7,7 +7,7 @@ import hmda.publication.reports.util.DateUtil._
 import org.scalacheck.Gen
 
 object AggregateReportGenerators {
-  implicit def a5XGen: Gen[A5X] = {
+  implicit def a5XGen: Gen[A5XReport] = {
     for {
       msa <- msaReportGen
       year = Calendar.getInstance().get(Calendar.YEAR)
@@ -16,6 +16,6 @@ object AggregateReportGenerators {
       table <- Gen.alphaStr
       description <- Gen.alphaStr
       total <- Gen.listOfN(4, valueDispositionGen)
-    } yield A5X(year, msa, applicantIncomes, total, table, description, reportDate)
+    } yield A5XReport(year, msa, applicantIncomes, total, table, description, reportDate)
   }
 }
