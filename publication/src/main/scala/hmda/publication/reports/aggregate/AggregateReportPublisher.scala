@@ -17,6 +17,7 @@ import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
 import hmda.census.model.MsaIncomeLookup
 import hmda.persistence.messages.commands.publication.PublicationCommands.GenerateAggregateReports
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object AggregateReportPublisher {
@@ -51,12 +52,12 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
   val aggregateReports: List[AggregateReport] = List(
-    A42, A45, A46
-  //A52, A53 FIXME: A5X reports futures don't resolve
+    A42, A43, A45, A46, A47
+  //A52, A53  TODO: fix these A5X reports, which cause timeout errors in the cluster
   )
 
   val nationalAggregateReports: List[AggregateReport] = List(
-    N45, N46
+    N41, N43, N45, N46, N47
   )
 
   override def receive: Receive = {
@@ -69,27 +70,28 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
   }
 
   private def generateReports = {
-    val larSource = readData(1000)
     val msaList = MsaIncomeLookup.everyFips.toList
+    val parallelism = 1
 
     val combinations = combine(msaList, aggregateReports) ++ combine(List(-1), nationalAggregateReports)
 
-    val simpleReportFlow: Flow[(Int, AggregateReport), AggregateReportPayload, NotUsed] =
-      Flow[(Int, AggregateReport)].mapAsyncUnordered(1) {
-        case (msa, report) => report.generate(larSource, msa)
+    val reportS3Flow: Flow[(Int, AggregateReport), CompletionStage[MultipartUploadResult], NotUsed] =
+      Flow[(Int, AggregateReport)].mapAsync(parallelism) {
+        case (msa, report) => publishSingleReport(msa, report)
       }
 
-    val s3Flow: Flow[AggregateReportPayload, CompletionStage[MultipartUploadResult], NotUsed] =
-      Flow[AggregateReportPayload]
-        .map(payload => {
-          val filePath = s"$environment/reports/aggregate/2017/${payload.msa}/${payload.reportID}.txt"
-          log.info(s"Publishing Aggregate report. MSA: ${payload.msa}, Report #: ${payload.reportID}")
+    Source(combinations).via(reportS3Flow).runWith(Sink.ignore)
+  }
 
-          Source.single(ByteString(payload.report))
-            .runWith(s3Client.multipartUpload(bucket, filePath))
-        })
+  private def publishSingleReport(msa: Int, report: AggregateReport): Future[CompletionStage[MultipartUploadResult]] = {
+    val larSource = readData(1000)
+    report.generate(larSource, msa).map { payload =>
+      val filePath = s"$environment/reports/aggregate/2017/${payload.msa}/${payload.reportID}.txt"
+      log.info(s"Publishing Aggregate report. MSA: ${payload.msa}, Report #: ${payload.reportID}")
 
-    Source(combinations).via(simpleReportFlow).via(s3Flow).runWith(Sink.ignore)
+      Source.single(ByteString(payload.report))
+        .runWith(s3Client.multipartUpload(bucket, filePath))
+    }
   }
 
   /**
