@@ -29,6 +29,13 @@ object A42 extends A4X {
       (lar.loan.purpose == 1)
   }
 }
+object A43 extends A4X {
+  override val reportId: String = "A43"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    List(1, 2).contains(lar.loan.propertyType) &&
+      lar.loan.purpose == 3
+  }
+}
 object A45 extends A4X {
   override val reportId: String = "A45"
   override def filters(lar: LoanApplicationRegister): Boolean =
@@ -42,7 +49,29 @@ object A46 extends A4X {
       List(1, 2).contains(lar.loan.propertyType)
   }
 }
+object A47 extends A4X {
+  override val reportId: String = "A47"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    List(1, 2, 3).contains(lar.loan.purpose) &&
+      lar.loan.propertyType == 2
+  }
+}
 
+object N41 extends A4X {
+  override val reportId: String = "N41"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    List(2, 3, 4).contains(lar.loan.loanType) &&
+      List(1, 2).contains(lar.loan.propertyType) &&
+      lar.loan.purpose == 1
+  }
+}
+object N43 extends A4X {
+  override val reportId: String = "N43"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    List(1, 2).contains(lar.loan.propertyType) &&
+      lar.loan.purpose == 3
+  }
+}
 object N45 extends A4X {
   override val reportId: String = "N45"
   override def filters(lar: LoanApplicationRegister): Boolean =
@@ -54,6 +83,13 @@ object N46 extends A4X {
     lar.loan.occupancy == 2 &&
       List(1, 2, 3).contains(lar.loan.purpose) &&
       List(1, 2).contains(lar.loan.propertyType)
+  }
+}
+object N47 extends A4X {
+  override val reportId: String = "N47"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    List(1, 2, 3).contains(lar.loan.purpose) &&
+      lar.loan.propertyType == 2
   }
 }
 
