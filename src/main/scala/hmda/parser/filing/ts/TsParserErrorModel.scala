@@ -5,23 +5,23 @@ import hmda.parser.ParserErrorModel._
 object TsParserErrorModel {
 
   case object InvalidId extends ParserValidationError {
-    override def errorMessage: String = notAnInteger("id")
+    override def errorMessage: String = notNumeric("id")
   }
 
   case object InvalidYear extends ParserValidationError {
-    override def errorMessage: String = notAnInteger("year")
+    override def errorMessage: String = notNumeric("year")
   }
 
   case object InvalidQuarter extends ParserValidationError {
-    override def errorMessage: String = notAnInteger("quarter")
+    override def errorMessage: String = notNumeric("quarter")
   }
 
   case object InvalidTotalLines extends ParserValidationError {
-    override def errorMessage: String = notAnInteger("total lines")
+    override def errorMessage: String = notNumeric("total lines")
   }
 
   case object InvalidAgencyCode extends ParserValidationError {
-    override def errorMessage: String = notAnInteger("agency code")
+    override def errorMessage: String = notNumeric("agency code")
   }
 
 }

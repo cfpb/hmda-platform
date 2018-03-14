@@ -155,13 +155,13 @@ object LarParserErrorModel {
   }
 
   case object InvalidManufacturedHomeSecuredProperty
-    extends ParserValidationError {
+      extends ParserValidationError {
     override def errorMessage: String =
       notNumeric("manufactured home secured property")
   }
 
   case object InvalidManufacturedHomeLandPropertyInterest
-    extends ParserValidationError {
+      extends ParserValidationError {
     override def errorMessage: String =
       notNumeric("manufactured home land property interest")
   }
@@ -192,7 +192,7 @@ object LarParserErrorModel {
   }
 
   case object InvalidAutomatedUnderwritingSystemResult
-    extends ParserValidationError {
+      extends ParserValidationError {
     override def errorMessage: String =
       notNumeric("automated underwriting result")
   }
