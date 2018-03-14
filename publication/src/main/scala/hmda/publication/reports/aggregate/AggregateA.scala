@@ -97,7 +97,7 @@ trait AggregateAX extends AggregateReport {
       val report = s"""
                       |{
                       |    "table": "${metaData.reportTable}",
-                      |    "type": "Disclosure",
+                      |    "type": "${metaData.reportType}",
                       |    "description": "${metaData.description}",
                       |    "year": "$year",
                       |    "reportDate": "$reportDate",
