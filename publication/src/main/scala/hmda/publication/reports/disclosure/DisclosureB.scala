@@ -14,14 +14,14 @@ import scala.concurrent.Future
 object DiscB extends DisclosureB {
   override val reportId: String = "DB"
   override def filters(lar: LoanApplicationRegister): Boolean = {
-    lar.loan.loanType == 1 && lar.loan.occupancy == 1
+    lar.loan.loanType == 1
   }
 }
 
 object DiscBW extends DisclosureB {
   override val reportId: String = "DBW"
   override def filters(lar: LoanApplicationRegister): Boolean = {
-    lar.loan.loanType == 1 && lar.loan.occupancy == 1
+    lar.loan.loanType == 1
   }
 }
 
