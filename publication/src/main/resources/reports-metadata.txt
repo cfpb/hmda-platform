@@ -16,6 +16,7 @@ A11-7,Aggregate,11-7,,"Pricing information for conventional refinancing loans, f
 A11-8,Aggregate,11-8,,"Pricing information for conventional refinancing loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 A11-9,Aggregate,11-9,,"Pricing information for conventional home improvement loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 A11-10,Aggregate,11-10,,"Pricing information for conventional home improvement loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
+A12-2,Aggregate,12-2,,"Pricing information for conventional manufactured home-purchase loans, first lien, owner-occupied dwelling, by borrower or census tract characteristics"
 D1,Disclosure,1,,"Disposition of loan applications, by location of property and type of loan"
 D2,Disclosure,2,,"Loans purchased, by location of property and type of loan"
 DA1,Disclosure,A1,,"Disposition of applications and loan sales by loan type, 1- to 4-family dwellings (Excludes manufactured homes)"
@@ -81,3 +82,4 @@ N11-7,National Aggregate,11-7,,"Pricing information for conventional refinancing
 N11-8,National Aggregate,11-8,,"Pricing information for conventional refinancing loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 N11-9,National Aggregate,11-9,,"Pricing information for conventional home improvement loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 N11-10,National Aggregate,11-10,,"Pricing information for conventional home improvement loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
+N12-2,National Aggregate,12-2,,"Pricing information for conventional manufactured home-purchase loans, first lien, owner-occupied dwelling, by borrower or census tract characteristics"
