@@ -15,7 +15,8 @@ trait LarParser {
     : LarParserValidationResult[Int] = {
     Try(value.toInt) match {
       case Success(i) => i.validNel
-      case Failure(_) => parserValidationError.invalidNel
+      case Failure(e) =>
+        parserValidationError.invalidNel
     }
   }
 
@@ -32,13 +33,10 @@ trait LarParser {
                            parserValidationError: ParserValidationError)
     : LarParserValidationResult[String] = {
     if (value == "") {
-      println("found empty value")
       parserValidationError.invalidNel
     } else if (value == "NA") {
-      println("Found NA")
       value.validNel
     } else {
-      println("Value: " + value)
       validateIntField(value, parserValidationError).map(x => x.toString)
     }
   }

@@ -5,6 +5,7 @@ import java.util.Date
 
 import hmda.model.census.Census
 import org.scalacheck.Gen
+import org.scalacheck.Arbitrary.arbitrary
 import hmda.model.filing.FilingGenerators._
 import hmda.model.filing.lar.enums.LarEnumGenerators._
 
@@ -24,7 +25,7 @@ object LarGenerators {
       geography <- geographyGen
       applicant <- applicantGen
       coApplicant <- applicantGen
-      income <- Gen.alphaStr
+      income <- valueOrNA(Gen.choose(1.0, 1000000.0))
       purchaserType <- purchaserEnumGen
       hoepaStatus <- hOEPAStatusEnumGen
       lienStatus <- lienStatusEnumGen
@@ -68,8 +69,9 @@ object LarGenerators {
   implicit def larIdentifierGen: Gen[LarIdentifier] = {
     for {
       lei <- stringOfN(20, Gen.alphaChar)
-      nmlsrIdentifier <- valueOrNA(Gen.alphaNumStr)
+      nmlsrIdentifier <- valueOrNA(Gen.choose(0, Int.MaxValue))
     } yield LarIdentifier(2, lei, nmlsrIdentifier)
+
   }
 
   implicit def loanGen: Gen[Loan] = {
@@ -85,7 +87,7 @@ object LarGenerators {
       rateSpread <- valueOrNA(Gen.choose(0.0, 1.0))
       interestRate <- valueOrNA(Gen.choose(0.0, 30.0))
       prepaymentPenaltyTerm <- valueOrNA(Gen.alphaNumStr)
-      debtToIncomeRatio <- Gen.alphaStr
+      debtToIncomeRatio <- valueOrNA(Gen.choose(0.0, 1.0))
       loanToValueRatio <- valueOrNA(Gen.choose(0.0, 100.0))
       introductoryRatePeriod <- valueOrNA(Gen.alphaNumStr)
     } yield
@@ -218,7 +220,7 @@ object LarGenerators {
       race <- raceGen
       sex <- sexGen
       age <- Gen.choose(18, 100)
-      creditScore <- Gen.choose(0, Int.MaxValue)
+      creditScore <- Gen.choose(0, 20000)
       creditScoreType <- creditScoreEnumGen
       otherCreditScoreModel <- Gen.alphaStr
     } yield
@@ -315,9 +317,10 @@ object LarGenerators {
                                         other)
   }
 
-  private def valueOrNA[A](g: Gen[A]): Gen[String] = valueOrDefault("NA")
+  private def valueOrNA[A](g: Gen[A]): Gen[String] =
+    valueOrDefault(arbitrary[Int], "NA")
 
-  private def valueOrDefault[A](g: Gen[A], value: String = "") = {
+  private def valueOrDefault[A](g: Gen[A], value: String) = {
     Gen.oneOf(g.map(_.toString), Gen.const(value))
   }
 

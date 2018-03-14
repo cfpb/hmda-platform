@@ -10,6 +10,13 @@ object LarValidationUtils {
     values.toSeq
   }
 
+  def extractValues(larIdentifier: LarIdentifier): Seq[String] = {
+    val id = larIdentifier.id.toString
+    val lei = larIdentifier.LEI.toString
+    val nmlsId = larIdentifier.NMLSRIdentifier.toString
+    List(id, lei, nmlsId)
+  }
+
   def extractValues(applicant: Applicant): Seq[String] = {
     val age = applicant.age.toString
     val creditScore = applicant.creditScore.toString
@@ -23,7 +30,7 @@ object LarValidationUtils {
 
   }
 
-  private def extractEthnicityValues(ethnicity: Ethnicity): Seq[String] = {
+  def extractEthnicityValues(ethnicity: Ethnicity): Seq[String] = {
     val eth1 = ethnicity.ethnicity1.code.toString
     val eth2 = ethnicity.ethnicity2.code.toString
     val eth3 = ethnicity.ethnicity3.code.toString
@@ -42,7 +49,7 @@ object LarValidationUtils {
     )
   }
 
-  private def extractRaceValues(race: Race): Seq[String] = {
+  def extractRaceValues(race: Race): Seq[String] = {
     val race1 = race.race1.code.toString
     val race2 = race.race2.code.toString
     val race3 = race.race3.code.toString
@@ -65,7 +72,7 @@ object LarValidationUtils {
     )
   }
 
-  private def extractSexValues(sex: Sex): Seq[String] = {
+  def extractSexValues(sex: Sex): Seq[String] = {
     val sexStr = sex.sexEnum.code.toString
     val sexObserved = sex.sexObservedEnum.code.toString
     List(

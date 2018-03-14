@@ -470,7 +470,7 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(LoanApplicationRegister)
   }
 
-  private def validateLarIdentifier(
+  def validateLarIdentifier(
       id: String,
       LEI: String,
       NMLSRIdentifier: String
@@ -482,7 +482,7 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(LarIdentifier)
   }
 
-  private def validateLoan(
+  def validateLoan(
       uli: String,
       applicationDate: String,
       loanType: String,
@@ -518,7 +518,7 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(Loan)
   }
 
-  private def validateLarAction(
+  def validateLarAction(
       preapproval: String,
       actionTaken: String,
       actionDate: String): LarParserValidationResult[LarAction] = {
@@ -529,13 +529,12 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(LarAction)
   }
 
-  private def validateGeography(
-      street: String,
-      city: String,
-      state: String,
-      zipCode: String,
-      county: String,
-      tract: String): LarParserValidationResult[Geography] = {
+  def validateGeography(street: String,
+                        city: String,
+                        state: String,
+                        zipCode: String,
+                        county: String,
+                        tract: String): LarParserValidationResult[Geography] = {
     (
       validateStr(street),
       validateStr(city),
@@ -546,7 +545,7 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(Geography)
   }
 
-  private def validateDenial(
+  def validateDenial(
       denial1: String,
       denial2: String,
       denial3: String,
@@ -563,7 +562,7 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(Denial)
   }
 
-  private def validateLoanDisclosure(
+  def validateLoanDisclosure(
       totalLoanCosts: String,
       totalPointsAndFees: String,
       originationCharges: String,
@@ -579,7 +578,7 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(LoanDisclosure)
   }
 
-  private def validateNonAmortizingFeatures(
+  def validateNonAmortizingFeatures(
       ballonPayment: String,
       interestOnlyPayment: String,
       negativeAmortization: String,
@@ -599,7 +598,7 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(NonAmortizingFeatures)
   }
 
-  private def validateProperty(
+  def validateProperty(
       propertyValue: String,
       manufacturedHomeSecuredProperty: String,
       manufacturedHomeLandPropertyInterest: String,
@@ -620,7 +619,7 @@ sealed trait LarFormatValidator extends LarParser {
 
   }
 
-  private def validateAus(
+  def validateAus(
       aus1: String,
       aus2: String,
       aus3: String,
@@ -649,7 +648,7 @@ sealed trait LarFormatValidator extends LarParser {
     ).mapN(AutomatedUnderwritingSystem)
   }
 
-  private def validateAusResult(
+  def validateAusResult(
       ausResult1: String,
       ausResult2: String,
       ausResult3: String,
