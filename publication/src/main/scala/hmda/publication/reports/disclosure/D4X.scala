@@ -288,7 +288,6 @@ trait D4X extends DisclosureReport {
     } yield {
 
       s"""
-         |
          |[
          | {
          |     "gender": "Male",
@@ -303,7 +302,6 @@ trait D4X extends DisclosureReport {
          |     "dispositions": $joint
          | }
          |]
-         |
      """.stripMargin
 
     }

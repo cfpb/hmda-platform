@@ -6,21 +6,86 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.institution.Institution
+import hmda.model.publication.reports.ApplicantIncomeEnum._
+import hmda.model.publication.reports.EthnicityEnum.{ HispanicOrLatino, JointEthnicity, NotAvailable, NotHispanicOrLatino }
+import hmda.model.publication.reports.MinorityStatusEnum.{ OtherIncludingHispanic, WhiteNonHispanic }
+import hmda.model.publication.reports.RaceEnum._
+import hmda.model.publication.reports.ValueDisposition
 import hmda.publication.reports._
+import hmda.publication.reports.util.DispositionType._
+import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
+import hmda.publication.reports.util.MinorityStatusUtil.filterMinorityStatus
+import hmda.publication.reports.util.RaceUtil.filterRace
 
 import scala.concurrent.Future
 
-object D5X {
-  def generateD5X[ec: EC, mat: MAT, as: AS](
-    reportId: String,
-    filters: LoanApplicationRegister => Boolean,
+object D51 extends D5X {
+  val reportId = "D51"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    (lar.loan.loanType == 2 || lar.loan.loanType == 3 || lar.loan.loanType == 4) &&
+      (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
+      (lar.loan.purpose == 1)
+  }
+}
+
+object D52 extends D5X {
+  val reportId = "D52"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    (lar.loan.loanType == 1) &&
+      (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
+      (lar.loan.purpose == 1)
+  }
+}
+
+object D53 extends D5X {
+  val reportId = "D53"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
+      (lar.loan.purpose == 3)
+  }
+}
+
+object D54 extends D5X {
+  val reportId = "D54"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
+      (lar.loan.purpose == 2)
+  }
+}
+
+object D56 extends D5X {
+  val reportId = "D56"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.occupancy == 2 &&
+      (loan.propertyType == 1 || loan.propertyType == 2) &&
+      (loan.purpose == 1 || loan.purpose == 2 || loan.purpose == 3)
+  }
+}
+
+object D57 extends D5X {
+  val reportId = "D57"
+  def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.propertyType == 2 &&
+      (loan.purpose == 1 || loan.purpose == 2 || loan.purpose == 3)
+  }
+}
+
+trait D5X extends DisclosureReport {
+  val reportId: String
+  def filters(lar: LoanApplicationRegister): Boolean
+  val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
+    ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
+
+  override def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int,
-    institution: Institution
+    institution: Institution,
+    msaList: List[Int]
   ): Future[DisclosureReportPayload] = {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
-    val dispositions = metaData.dispositions
 
     val lars = larSource
       .filter(lar => lar.geography.msa != "NA")
@@ -29,109 +94,67 @@ object D5X {
 
     val larsWithIncome = lars.filter(lar => lar.applicant.income != "NA")
 
-    val msa = msaReport(fipsCode.toString)
+    val msa = msaReport(fipsCode.toString).toJsonFormat
 
-    val incomeIntervals = calculateMedianIncomeIntervals(fipsCode)
-
+    val incomeIntervals = larsByIncomeInterval(
+      lars.filter(_.applicant.income != "NA"),
+      calculateMedianIncomeIntervals(fipsCode)
+    )
     val yearF = calculateYear(larSource)
-    val totalF = calculateDispositions(lars, dispositions)
+    val reportDate = formattedCurrentDate
 
     for {
       year <- yearF
-      total <- totalF
+
+      ri1 <- raceDispositions(incomeIntervals(LessThan50PercentOfMSAMedian))
+      ei1 <- ethnicityDispositions(incomeIntervals(LessThan50PercentOfMSAMedian))
+      mi1 <- minorityStatusDispositions(incomeIntervals(LessThan50PercentOfMSAMedian))
+
+      ri2 <- raceDispositions(incomeIntervals(Between50And79PercentOfMSAMedian))
+      ei2 <- ethnicityDispositions(incomeIntervals(Between50And79PercentOfMSAMedian))
+      mi2 <- minorityStatusDispositions(incomeIntervals(Between50And79PercentOfMSAMedian))
+
+      ri3 <- raceDispositions(incomeIntervals(Between80And99PercentOfMSAMedian))
+      ei3 <- ethnicityDispositions(incomeIntervals(Between80And99PercentOfMSAMedian))
+      mi3 <- minorityStatusDispositions(incomeIntervals(Between80And99PercentOfMSAMedian))
+
+      ri4 <- raceDispositions(incomeIntervals(Between100And119PercentOfMSAMedian))
+      ei4 <- ethnicityDispositions(incomeIntervals(Between100And119PercentOfMSAMedian))
+      mi4 <- minorityStatusDispositions(incomeIntervals(Between100And119PercentOfMSAMedian))
+
+      ri5 <- raceDispositions(incomeIntervals(GreaterThan120PercentOfMSAMedian))
+      ei5 <- ethnicityDispositions(incomeIntervals(GreaterThan120PercentOfMSAMedian))
+      mi5 <- minorityStatusDispositions(incomeIntervals(GreaterThan120PercentOfMSAMedian))
+
+      total <- dispositionsOutput(larsWithIncome)
     } yield {
 
-      /*
-      val reportContent =
+      val report =
         s"""
            |{
-           |    "respondentId": "0000451965",
-           |    "institutionName": "WELLS FARGO BANK, NA",
-           |    "table": "5-1",
+           |    "respondentId": "${institution.respondentId}",
+           |    "institutionName": "${institution.respondent.name}",
+           |    "table": "${metaData.reportTable}",
            |    "type": "Disclosure",
-           |    "description": "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4-family and manufactured home dwellings, by income, race and ethnicity of applicant",
-           |    "year": "2013",
-           |    "reportDate": "05/27/2015",
-           |    "msa": {
-           |        "id": "31084",
-           |        "name": "Los_Angeles-Long_Beach-Santa_Ana",
-           |        "state": "CA",
-           |        "stateName": "California"
-           |    },
+           |    "description": "${metaData.description}",
+           |    "year": "$year",
+           |    "reportDate": "$reportDate",
+           |    "msa": $msa,
            |    "applicantIncomes": [
            |        {
            |            "applicantIncome": "Less than 50% of MSA/MD median",
            |            "borrowerCharacteristics": [
            |                {
            |                    "characteristic": "Race",
-           |                    "races": [
-           |                        {
-           |                            "race": "American Indian/Alaska Native",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Asian",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Black or African American",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Native Hawaiian or Other Pacific Islander",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "White",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "2 or more minority races",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Joint (White/Minority Race)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Race Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "races": $ri1
            |                },
            |                {
            |                    "characteristic": "Ethnicity",
-           |                    "ethnicities": [
-           |                        {
-           |                            "ethnicity": "Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Not Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Joint (Hispanic or Latino/Not Hispanic or Latino)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Ethnicity Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "ethnicities": $ei1
            |                },
            |                {
            |                    "characteristic": "Minority Status",
-           |                    "minorityStatus": [
-           |                        {
-           |                            "minorityStatus": "White Non-Hispanic",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "minorityStatus": "Others, Including Hispanic",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "minorityStatus": $mi1
            |                }
            |            ]
            |        },
@@ -140,74 +163,15 @@ object D5X {
            |            "borrowerCharacteristics": [
            |                {
            |                    "characteristic": "Race",
-           |                    "races": [
-           |                        {
-           |                            "race": "American Indian/Alaska Native",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Asian",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Black or African American",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Native Hawaiian or Other Pacific Islander",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "White",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "2 or more minority races",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Joint (White/Minority Race)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Race Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "races": $ri2
            |                },
            |                {
            |                    "characteristic": "Ethnicity",
-           |                    "ethnicities": [
-           |                        {
-           |                            "ethnicity": "Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Not Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Joint (Hispanic or Latino/Not Hispanic or Latino)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Ethnicity Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "ethnicities": $ei2
            |                },
            |                {
            |                    "characteristic": "Minority Status",
-           |                    "minorityStatus": [
-           |                        {
-           |                            "minorityStatus": "White Non-Hispanic",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "minorityStatus": "Others, Including Hispanic",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "minorityStatus": $mi2
            |                }
            |            ]
            |        },
@@ -216,74 +180,15 @@ object D5X {
            |            "borrowerCharacteristics": [
            |                {
            |                    "characteristic": "Race",
-           |                    "races": [
-           |                        {
-           |                            "race": "American Indian/Alaska Native",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Asian",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Black or African American",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Native Hawaiian or Other Pacific Islander",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "White",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "2 or more minority races",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Joint (White/Minority Race)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Race Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "races": $ri3
            |                },
            |                {
            |                    "characteristic": "Ethnicity",
-           |                    "ethnicities": [
-           |                        {
-           |                            "ethnicity": "Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Not Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Joint (Hispanic or Latino/Not Hispanic or Latino)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Ethnicity Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "ethnicities": $ei3
            |                },
            |                {
            |                    "characteristic": "Minority Status",
-           |                    "minorityStatus": [
-           |                        {
-           |                            "minorityStatus": "White Non-Hispanic",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "minorityStatus": "Others, Including Hispanic",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "minorityStatus": $mi3
            |                }
            |            ]
            |        },
@@ -292,74 +197,15 @@ object D5X {
            |            "borrowerCharacteristics": [
            |                {
            |                    "characteristic": "Race",
-           |                    "races": [
-           |                        {
-           |                            "race": "American Indian/Alaska Native",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Asian",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Black or African American",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Native Hawaiian or Other Pacific Islander",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "White",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "2 or more minority races",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Joint (White/Minority Race)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Race Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "races": $ri4
            |                },
            |                {
            |                    "characteristic": "Ethnicity",
-           |                    "ethnicities": [
-           |                        {
-           |                            "ethnicity": "Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Not Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Joint (Hispanic or Latino/Not Hispanic or Latino)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Ethnicity Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "ethnicities": $ei4
            |                },
            |                {
            |                    "characteristic": "Minority Status",
-           |                    "minorityStatus": [
-           |                        {
-           |                            "minorityStatus": "White Non-Hispanic",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "minorityStatus": "Others, Including Hispanic",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "minorityStatus": $mi4
            |                }
            |            ]
            |        },
@@ -368,85 +214,89 @@ object D5X {
            |            "borrowerCharacteristics": [
            |                {
            |                    "characteristic": "Race",
-           |                    "races": [
-           |                        {
-           |                            "race": "American Indian/Alaska Native",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Asian",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Black or African American",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Native Hawaiian or Other Pacific Islander",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "White",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "2 or more minority races",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Joint (White/Minority Race)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "race": "Race Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "races": $ri5
            |                },
            |                {
            |                    "characteristic": "Ethnicity",
-           |                    "ethnicities": [
-           |                        {
-           |                            "ethnicity": "Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Not Hispanic or Latino",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Joint (Hispanic or Latino/Not Hispanic or Latino)",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "ethnicity": "Ethnicity Not Available",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "ethnicities": $ei5
            |                },
            |                {
            |                    "characteristic": "Minority Status",
-           |                    "minorityStatus": [
-           |                        {
-           |                            "minorityStatus": "White Non-Hispanic",
-           |                            "dispositions": $r1
-           |                        },
-           |                        {
-           |                            "minorityStatus": "Others, Including Hispanic",
-           |                            "dispositions": $r1
-           |                        }
-           |                    ]
+           |                    "minorityStatus": $mi5
            |                }
            |            ]
            |        }
            |    ],
-           |    "total": $r1
+           |    "total": $total
            |}
          """.stripMargin
 
-*/
-      DisclosureReportPayload(metaData.reportTable, msa.id, "placeholder string")
+      DisclosureReportPayload(metaData.reportTable, fipsCode.toString, report)
     }
 
+  }
+
+  private def raceDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+    val races = List(AmericanIndianOrAlaskaNative, Asian, BlackOrAfricanAmerican,
+      HawaiianOrPacific, White, TwoOrMoreMinority, JointRace, NotProvided)
+
+    val raceOutputs: Future[List[String]] = Future.sequence(
+      races.map { race =>
+        dispositionsOutput(filterRace(larSource, race)).map { disp =>
+          s"""
+             |{
+             |    "race": "${race.description}",
+             |    "dispositions": $disp
+             |}
+          """.stripMargin
+        }
+      }
+    )
+
+    raceOutputs.map { list => list.mkString("[", ",", "]") }
+  }
+  private def ethnicityDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+    val ethnicities = List(HispanicOrLatino, NotHispanicOrLatino, JointEthnicity, NotAvailable)
+
+    val ethnicityOutputs: Future[List[String]] = Future.sequence(
+      ethnicities.map { ethnicity =>
+        dispositionsOutput(filterEthnicity(larSource, ethnicity)).map { disp =>
+          s"""
+             |{
+             |    "ethnicity": "${ethnicity.description}",
+             |    "dispositions": $disp
+             |}
+          """.stripMargin
+        }
+      }
+    )
+
+    ethnicityOutputs.map { list => list.mkString("[", ",", "]") }
+  }
+  private def minorityStatusDispositions[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+    val minorityStatuses = List(WhiteNonHispanic, OtherIncludingHispanic)
+
+    val minorityStatusOutputs: Future[List[String]] = Future.sequence(
+      minorityStatuses.map { minorityStatus =>
+        dispositionsOutput(filterMinorityStatus(larSource, minorityStatus)).map { disp =>
+          s"""
+             |{
+             |    "minorityStatus": "${minorityStatus.description}",
+             |    "dispositions": $disp
+             |}
+          """.stripMargin
+        }
+      }
+    )
+
+    minorityStatusOutputs.map { list => list.mkString("[", ",", "]") }
+  }
+
+  private def dispositionsOutput[ec: EC, mat: MAT, as: AS](larSource: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
+    val calculatedDispositions: Future[List[ValueDisposition]] = Future.sequence(
+      dispositions.map(_.calculateValueDisposition(larSource))
+    )
+
+    calculatedDispositions.map(list => list.map(_.toJsonFormat).mkString("[", ",", "]"))
   }
 }
