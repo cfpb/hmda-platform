@@ -61,4 +61,32 @@ class A52Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
     }
   }
 
+  "Generate correct JSON structure" in {
+    A52.generate(source, fips).map {
+      case AggregateReportPayload(reportId, fipsCode, report) =>
+        reportId mustBe "A52"
+        fipsCode mustBe fips.toString
+        report.parseJson.asJsObject.getFields("table", "type", "description", "year", "msa", "reportDate") match {
+          case Seq(JsString(table), JsString(reportType), JsString(desc), JsNumber(reportYear), msa, JsString(reportDate)) =>
+            table mustBe "5-2"
+            reportType mustBe "Aggregate"
+            desc mustBe a52Description
+            msa.asJsObject.getFields("name") match {
+              case Seq(JsString(msaName)) => msaName mustBe "Corvallis, OR"
+            }
+        }
+    }
+  }
+
+  "Generate correct Applicant Incomes Json structure" in {
+    A52.generate(source, fips).map {
+      case AggregateReportPayload(reportId, fipsCode, report) =>
+        report.parseJson.asJsObject.getFields("applicantIncomes", "total") match {
+          case Seq(JsArray(incomes), JsArray(tot)) =>
+            incomes.size mustBe 5
+            tot.size mustBe 6
+        }
+    }
+  }
+
 }
