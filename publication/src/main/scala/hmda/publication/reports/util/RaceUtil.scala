@@ -3,12 +3,8 @@ package hmda.publication.reports.util
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.model.publication.reports.{ RaceBorrowerCharacteristic, RaceCharacteristic, RaceEnum }
+import hmda.model.publication.reports.RaceEnum
 import hmda.model.publication.reports.RaceEnum._
-import hmda.publication.reports._
-import hmda.publication.reports.util.ReportUtil.calculateDispositions
-
-import scala.concurrent.Future
 
 object RaceUtil {
 
@@ -119,61 +115,6 @@ object RaceUtil {
       (lar.applicant.coRace3 != "" && lar.applicant.coRace3 != "5") ||
       (lar.applicant.coRace4 != "" && lar.applicant.coRace4 != "5") ||
       (lar.applicant.coRace5 != "" && lar.applicant.coRace5 != "5")
-  }
-
-  def raceBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](larSource: Source[LoanApplicationRegister, NotUsed], dispositions: List[DispositionType]): Future[RaceBorrowerCharacteristic] = {
-
-    val larsAlaskan = filterRace(larSource, AmericanIndianOrAlaskaNative)
-    val larsAsian = filterRace(larSource, Asian)
-    val larsBlack = filterRace(larSource, BlackOrAfricanAmerican)
-    val larsHawaiian = filterRace(larSource, HawaiianOrPacific)
-    val larsWhite = filterRace(larSource, White)
-    val larsTwoMinorities = filterRace(larSource, TwoOrMoreMinority)
-    val larsJoint = filterRace(larSource, JointRace)
-    val larsNotProvided = filterRace(larSource, NotProvided)
-
-    val dispAlaskanF = calculateDispositions(larsAlaskan, dispositions)
-    val dispAsianF = calculateDispositions(larsAsian, dispositions)
-    val dispBlackF = calculateDispositions(larsBlack, dispositions)
-    val dispHawaiianF = calculateDispositions(larsHawaiian, dispositions)
-    val dispWhiteF = calculateDispositions(larsWhite, dispositions)
-    val dispTwoMinoritiesF = calculateDispositions(larsTwoMinorities, dispositions)
-    val dispJointF = calculateDispositions(larsJoint, dispositions)
-    val dispNotProvidedF = calculateDispositions(larsNotProvided, dispositions)
-
-    for {
-      dispAlaskan <- dispAlaskanF
-      dispAsian <- dispAsianF
-      dispBlack <- dispBlackF
-      dispHawaiian <- dispHawaiianF
-      dispWhite <- dispWhiteF
-      dispTwoMinorities <- dispTwoMinoritiesF
-      dispJoint <- dispJointF
-      dispNotProvided <- dispNotProvidedF
-    } yield {
-      val alaskanCharacteristic = RaceCharacteristic(AmericanIndianOrAlaskaNative, dispAlaskan)
-      val asianCharacteristic = RaceCharacteristic(Asian, dispAsian)
-      val blackCharacteristic = RaceCharacteristic(BlackOrAfricanAmerican, dispBlack)
-      val hawaiianCharacteristic = RaceCharacteristic(HawaiianOrPacific, dispHawaiian)
-      val whiteCharacteristic = RaceCharacteristic(White, dispWhite)
-      val twoOrMoreMinorityCharacteristic = RaceCharacteristic(TwoOrMoreMinority, dispTwoMinorities)
-      val jointCharacteristic = RaceCharacteristic(JointRace, dispJoint)
-      val notProvidedCharacteristic = RaceCharacteristic(NotProvided, dispNotProvided)
-
-      RaceBorrowerCharacteristic(
-        List(
-          alaskanCharacteristic,
-          asianCharacteristic,
-          blackCharacteristic,
-          hawaiianCharacteristic,
-          whiteCharacteristic,
-          twoOrMoreMinorityCharacteristic,
-          jointCharacteristic,
-          notProvidedCharacteristic
-        )
-      )
-    }
-
   }
 
 }
