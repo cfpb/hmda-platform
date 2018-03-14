@@ -139,7 +139,7 @@ trait A8X extends AggregateReport {
 
   val dispositions = List(DebtToIncomeRatio, EmploymentHistory, CreditHistory,
     Collateral, InsufficientCash, UnverifiableInformation, CreditAppIncomplete,
-    MortgageInsuranceDenied, OtherDenialReason)
+    MortgageInsuranceDenied, OtherDenialReason, TotalDenied)
 
   def geoFilter(fips: Int)(lar: LoanApplicationRegister): Boolean =
     lar.geography.msa != "NA" &&
