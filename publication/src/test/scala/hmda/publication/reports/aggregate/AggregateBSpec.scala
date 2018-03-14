@@ -1,16 +1,14 @@
-package hmda.publication.reports.disclosure
+package hmda.publication.reports.aggregate
 
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.model.institution.ExternalIdType.RssdId
-import hmda.model.institution.{ ExternalId, Institution, Respondent }
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import spray.json._
 
-class DisclosureBSpec extends AsyncWordSpec with MustMatchers
+class AggregateBSpec extends AsyncWordSpec with MustMatchers
     with LarGenerators with BeforeAndAfterAll {
 
   implicit val system = ActorSystem()
@@ -24,8 +22,6 @@ class DisclosureBSpec extends AsyncWordSpec with MustMatchers
 
   val respId = "65656"
   val fips = 24300 // Grand Junction, CO
-  val resp = Respondent(ExternalId(respId, RssdId), "Grand Junction Mortgage Co.", "", "", "")
-  val inst = Institution.empty.copy(respondent = resp)
   val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
     val geo = lar.geography.copy(msa = fips.toString)
     val loan = lar.loan.copy(loanType = 1)
@@ -37,14 +33,12 @@ class DisclosureBSpec extends AsyncWordSpec with MustMatchers
 
   val description = "Loan pricing information for conventional loans by incidence and level"
 
-  "Generate a Disclosure B report" in {
-    DiscB.generate(source, fips, inst).map { result =>
-      result.report.parseJson.asJsObject.getFields("table", "description", "msa", "respondentId", "institutionName") match {
-        case Seq(JsString(table), JsString(desc), msa, JsString(resp), JsString(instName)) =>
+  "Generate an Aggregate B report" in {
+    AggregateB.generate(source, fips).map { result =>
+      result.report.parseJson.asJsObject.getFields("table", "description", "msa") match {
+        case Seq(JsString(table), JsString(desc), msa) =>
           table mustBe "B"
           desc mustBe description
-          resp mustBe "65656"
-          instName mustBe "Grand Junction Mortgage Co."
           msa.asJsObject.getFields("name") match {
             case Seq(JsString(msaName)) => msaName mustBe "Grand Junction, CO"
           }
@@ -53,7 +47,7 @@ class DisclosureBSpec extends AsyncWordSpec with MustMatchers
   }
 
   "Have correct JSON structure" in {
-    DiscB.generate(source, fips, inst).map { result =>
+    AggregateB.generate(source, fips).map { result =>
       result.report.parseJson.asJsObject.getFields("singleFamily", "manufactured") match {
         case Seq(JsArray(singleFamily), JsArray(manufactured)) =>
           singleFamily must have size 2
@@ -79,14 +73,12 @@ class DisclosureBSpec extends AsyncWordSpec with MustMatchers
     }
   }
 
-  "Generate a Disclosure BW report" in {
-    DiscBW.generate(source, fips, inst).map { result =>
-      result.report.parseJson.asJsObject.getFields("table", "description", "respondentId", "institutionName") match {
-        case Seq(JsString(table), JsString(desc), JsString(resp), JsString(instName)) =>
-          table mustBe "BW"
+  "Generate a National Aggregate B report" in {
+    NationalAggregateB.generate(source, fips).map { result =>
+      result.report.parseJson.asJsObject.getFields("table", "description") match {
+        case Seq(JsString(table), JsString(desc)) =>
+          table mustBe "B"
           desc mustBe description
-          resp mustBe "65656"
-          instName mustBe "Grand Junction Mortgage Co."
       }
     }
   }
