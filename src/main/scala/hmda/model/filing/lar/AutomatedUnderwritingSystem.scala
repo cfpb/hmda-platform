@@ -1,5 +1,6 @@
 package hmda.model.filing.lar
 
+import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.enums.AutomatedUnderwritingSystemEnum
 
 case class AutomatedUnderwritingSystem(
@@ -9,4 +10,8 @@ case class AutomatedUnderwritingSystem(
     aus4: AutomatedUnderwritingSystemEnum,
     aus5: AutomatedUnderwritingSystemEnum,
     otherAUS: Option[String] = None
-)
+) extends PipeDelimited {
+  override def toCSV: String = {
+    s"$aus1|$aus2|$aus3|$aus4|$aus5|$otherAUS"
+  }
+}
