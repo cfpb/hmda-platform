@@ -9,7 +9,7 @@ object InterestOnlyPaymentsEnum extends LarCodeEnum[InterestOnlyPaymentsEnum] {
     code match {
       case 1 => InterestOnlyPayment
       case 2 => NoInterestOnlyPayment
-      case _ => throw new Exception("Invalid Interest Only Payment Code")
+      case _ => InvalidInterestOnlyPaymentCode
     }
   }
 }
@@ -22,4 +22,9 @@ case object InterestOnlyPayment extends InterestOnlyPaymentsEnum {
 case object NoInterestOnlyPayment extends InterestOnlyPaymentsEnum {
   override val code: Int = 2
   override val description: String = "No interest-only payments"
+}
+
+case object InvalidInterestOnlyPaymentCode extends InterestOnlyPaymentsEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

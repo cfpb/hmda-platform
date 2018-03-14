@@ -10,8 +10,7 @@ object OtherNonAmortizingFeaturesEnum
     code match {
       case 1 => OtherNonFullyAmortizingFeatures
       case 2 => NoOtherNonFullyAmortizingFeatures
-      case _ =>
-        throw new Exception("Invalid Other Non Amortizing Features Code")
+      case _ => InvalidOtherNonAmortizingFeaturesCode
     }
   }
 }
@@ -26,4 +25,9 @@ case object NoOtherNonFullyAmortizingFeatures
     extends OtherNonAmortizingFeaturesEnum {
   override val code: Int = 2
   override val description: String = "No other non-fully amortizing features"
+}
+
+case object InvalidOtherNonAmortizingFeaturesCode extends OtherNonAmortizingFeaturesEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

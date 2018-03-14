@@ -18,7 +18,7 @@ object DenialReasonEnum extends LarCodeEnum[DenialReasonEnum] {
       case 8  => MortgageInsuranceDenied
       case 9  => OtherDenialReason
       case 10 => DenialReasonNotApplicable
-      case _  => throw new Exception("Invalid Denial Reason Code")
+      case _  => InvalidDenialReasonCode
     }
   }
 }
@@ -77,4 +77,9 @@ case object OtherDenialReason extends DenialReasonEnum {
 case object DenialReasonNotApplicable extends DenialReasonEnum {
   override val code: Int = 10
   override val description: String = "Not Applicable"
+}
+
+case object InvalidDenialReasonCode extends DenialReasonEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

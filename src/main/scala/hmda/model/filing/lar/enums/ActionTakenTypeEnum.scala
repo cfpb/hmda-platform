@@ -15,7 +15,7 @@ object ActionTakenTypeEnum extends LarCodeEnum[ActionTakenTypeEnum] {
       case 6 => PurchasedLoan
       case 7 => PreapprovalRequestDenied
       case 8 => PreapprovalRequestApprovedButNotAccepted
-      case _ => throw new Exception("Invalid Action Taken Type Code")
+      case _ => InvalidActionTakenTypeCode
     }
   }
 }
@@ -60,4 +60,9 @@ case object PreapprovalRequestApprovedButNotAccepted
   override val code: Int = 8
   override val description: String =
     "Preapproval request approved but not accepted"
+}
+
+case object InvalidActionTakenTypeCode extends ActionTakenTypeEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid code"
 }

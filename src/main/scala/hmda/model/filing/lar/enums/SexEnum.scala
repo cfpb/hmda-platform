@@ -13,7 +13,7 @@ object SexEnum extends LarCodeEnum[SexEnum] {
       case 4 => SexNotApplicable
       case 5 => SexNoCoApplicant
       case 6 => MaleAndFemale
-      case _ => throw new Exception("Invalid Sex Code")
+      case _ => InvalidSexCode
     }
   }
 }
@@ -47,4 +47,9 @@ case object SexNoCoApplicant extends SexEnum {
 case object MaleAndFemale extends SexEnum {
   override val code: Int = 6
   override val description: String = "Applicant selected both male and female"
+}
+
+case object InvalidSexCode extends SexEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

@@ -11,8 +11,7 @@ object ManufacturedHomeSecuredPropertyEnum
       case 1 => ManufacturedHomeAndLand
       case 2 => ManufacturedHomeAndNotLand
       case 3 => ManufacturedHomeSecuredNotApplicable
-      case _ =>
-        throw new Exception("Invalid Manufactured Home Secured Property Code")
+      case _ => InvalidManufacturedHomeSecuredPropertyCode
     }
   }
 }
@@ -33,4 +32,9 @@ case object ManufacturedHomeSecuredNotApplicable
     extends ManufacturedHomeSecuredPropertyEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
+}
+
+case object InvalidManufacturedHomeSecuredPropertyCode extends ManufacturedHomeSecuredPropertyEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

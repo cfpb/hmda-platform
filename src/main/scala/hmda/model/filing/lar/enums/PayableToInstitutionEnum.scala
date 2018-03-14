@@ -10,7 +10,7 @@ object PayableToInstitutionEnum extends LarCodeEnum[PayableToInstitutionEnum] {
       case 1 => NotInitiallyPayableToInstitution
       case 2 => NotInitiallyPayableToInstitution
       case 3 => PayableToInstitutionNotApplicable
-      case _ => throw new Exception("Invalid Payable To Institution Code")
+      case _ => InvalidPayableToInstitutionCode
     }
   }
 }
@@ -28,4 +28,9 @@ case object NotInitiallyPayableToInstitution extends PayableToInstitutionEnum {
 case object PayableToInstitutionNotApplicable extends PayableToInstitutionEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
+}
+
+case object InvalidPayableToInstitutionCode extends PayableToInstitutionEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

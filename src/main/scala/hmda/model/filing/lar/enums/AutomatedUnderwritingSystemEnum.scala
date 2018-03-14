@@ -15,8 +15,8 @@ object AutomatedUnderwritingSystemEnum
       case 4 => GuaranteedUnderwritingSystem
       case 5 => OtherAUS
       case 6 => AUSNotApplicable
-      case _ =>
-        throw new Exception("Invalid Automated Underwriting System Code")
+      case _ => InvalidAutomatedUnderwritingSystemCode
+
     }
   }
 }
@@ -58,4 +58,9 @@ case object OtherAUS extends AutomatedUnderwritingSystemEnum {
 case object AUSNotApplicable extends AutomatedUnderwritingSystemEnum {
   override val code: Int = 6
   override val description: String = "Not App"
+}
+
+case object InvalidAutomatedUnderwritingSystemCode extends AutomatedUnderwritingSystemEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

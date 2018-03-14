@@ -10,7 +10,7 @@ object HOEPAStatusEnum extends LarCodeEnum[HOEPAStatusEnum] {
       case 1 => HighCostMortgage
       case 2 => NotHighCostMortgage
       case 3 => HOEPStatusANotApplicable
-      case _ => throw new Exception("Invalid HOEPA Status Code")
+      case _ => InvalidHoepaStatusCode
     }
   }
 }
@@ -28,4 +28,9 @@ case object NotHighCostMortgage extends HOEPAStatusEnum {
 case object HOEPStatusANotApplicable extends HOEPAStatusEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
+}
+
+case object InvalidHoepaStatusCode extends HOEPAStatusEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

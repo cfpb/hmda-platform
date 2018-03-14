@@ -9,7 +9,7 @@ object NegativeAmortizationEnum extends LarCodeEnum[NegativeAmortizationEnum] {
     code match {
       case 1 => NegativeAmortization
       case 2 => NoNegativeAmortization
-      case _ => throw new Exception("Invalid Negative Amortization Code")
+      case _ => InvalidNegativeArmotizationCode
     }
   }
 }
@@ -22,4 +22,9 @@ case object NegativeAmortization extends NegativeAmortizationEnum {
 case object NoNegativeAmortization extends NegativeAmortizationEnum {
   override val code: Int = 2
   override val description: String = "No negative amortization"
+}
+
+case object InvalidNegativeArmotizationCode extends NegativeAmortizationEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }
