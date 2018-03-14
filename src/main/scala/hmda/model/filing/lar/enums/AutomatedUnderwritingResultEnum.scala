@@ -26,7 +26,7 @@ object AutomatedUnderwritingResultEnum
       case 15 => UnableToDetermineOrUnknown
       case 16 => OtherAutomatedUnderwritingResult
       case 17 => AutomatedUnderwritingResultNotApplicable
-      case _ => InvalidAutomatedUnderwritingResultCode
+      case _  => InvalidAutomatedUnderwritingResultCode
     }
   }
 }
@@ -123,7 +123,8 @@ case object AutomatedUnderwritingResultNotApplicable
   override val description: String = "Not applicable"
 }
 
-case object InvalidAutomatedUnderwritingResultCode extends AutomatedUnderwritingResultEnum {
+case object InvalidAutomatedUnderwritingResultCode
+    extends AutomatedUnderwritingResultEnum {
   override def code: Int = -1
   override def description: String = "Invalid Code"
 }

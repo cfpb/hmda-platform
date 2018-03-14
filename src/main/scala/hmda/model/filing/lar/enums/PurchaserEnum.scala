@@ -18,7 +18,7 @@ object PurchaserEnum extends LarCodeEnum[PurchaserEnum] {
       case 72 => LifeInsuranceCompany
       case 8  => AffiliateInstitution
       case 9  => OtherPurchaserType
-      case _ => InvalidPurchaserCode
+      case _  => InvalidPurchaserCode
     }
   }
 }

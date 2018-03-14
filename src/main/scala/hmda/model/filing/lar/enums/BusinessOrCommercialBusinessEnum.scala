@@ -28,7 +28,8 @@ case object NotPrimarilyBusinessOrCommercialPurpose
   override val description: String =
     "Not primarily for a business or commercial purpose"
 }
-case object InvalidBusinessOrCommercialBusinessCode extends BusinessOrCommercialBusinessEnum {
+case object InvalidBusinessOrCommercialBusinessCode
+    extends BusinessOrCommercialBusinessEnum {
   override def code: Int = -1
   override def description: String = "Invalid Code"
 }

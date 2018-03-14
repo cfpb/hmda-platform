@@ -60,7 +60,8 @@ case object AUSNotApplicable extends AutomatedUnderwritingSystemEnum {
   override val description: String = "Not App"
 }
 
-case object InvalidAutomatedUnderwritingSystemCode extends AutomatedUnderwritingSystemEnum {
+case object InvalidAutomatedUnderwritingSystemCode
+    extends AutomatedUnderwritingSystemEnum {
   override def code: Int = -1
   override def description: String = "Invalid Code"
 }

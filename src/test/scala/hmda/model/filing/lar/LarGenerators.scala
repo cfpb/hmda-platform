@@ -67,7 +67,7 @@ object LarGenerators {
 
   implicit def larIdentifierGen: Gen[LarIdentifier] = {
     for {
-      lei <- Gen.option(stringOfN(20, Gen.alphaChar))
+      lei <- stringOfN(20, Gen.alphaChar)
       nmlsrIdentifier <- valueOrNA(Gen.alphaNumStr)
     } yield LarIdentifier(2, lei, nmlsrIdentifier)
   }
@@ -293,7 +293,7 @@ object LarGenerators {
       aus3 <- automatedUnderwritingSystemEnumGen
       aus4 <- automatedUnderwritingSystemEnumGen
       aus5 <- automatedUnderwritingSystemEnumGen
-      other <- Gen.option(Gen.alphaStr)
+      other <- Gen.alphaStr
     } yield AutomatedUnderwritingSystem(aus1, aus2, aus3, aus4, aus5, other)
   }
 
@@ -305,7 +305,7 @@ object LarGenerators {
       ausResult3 <- automatedUnderWritingSystemResultEnumGen
       ausResult4 <- automatedUnderWritingSystemResultEnumGen
       ausResult5 <- automatedUnderWritingSystemResultEnumGen
-      other <- Gen.option(Gen.alphaStr)
+      other <- Gen.alphaStr
     } yield
       AutomatedUnderwritingSystemResult(ausResult1,
                                         ausResult2,

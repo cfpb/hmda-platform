@@ -9,7 +9,7 @@ case class AutomatedUnderwritingSystemResult(
     ausResult3: AutomatedUnderwritingResultEnum,
     ausResult4: AutomatedUnderwritingResultEnum,
     ausResult5: AutomatedUnderwritingResultEnum,
-    otherAusResult: Option[String] = None
+    otherAusResult: String
 ) extends PipeDelimited {
   override def toCSV: String = {
     s"$ausResult1|$ausResult2|$ausResult3|$ausResult4|$ausResult5|$otherAusResult"

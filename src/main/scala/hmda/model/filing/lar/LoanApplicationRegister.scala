@@ -29,7 +29,7 @@ case class LoanApplicationRegister(
 
   override def toCSV: String = {
 
-    s"${larIdentifier.id}|${larIdentifier.LEI.getOrElse("")}|${loan.ULI}|${loan.applicationDate}|${loan.loanType.code}|${loan.loanPurpose.code}|${action.preapproval.code}|" +
+    s"${larIdentifier.id}|${larIdentifier.LEI}|${loan.ULI}|${loan.applicationDate}|${loan.loanType.code}|${loan.loanPurpose.code}|${action.preapproval.code}|" +
       s"${loan.constructionMethod.code}|${loan.occupancy.code}|${loan.amount}|${action.actionTakenType.code}|${action.actionTakenDate}|" +
       s"${geography.toCSV}|" +
       s"${applicant.ethnicity.ethnicity1.code}|${applicant.ethnicity.ethnicity2.code}|${applicant.ethnicity.ethnicity3.code}|" +

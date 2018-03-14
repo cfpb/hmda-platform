@@ -27,7 +27,8 @@ case object NoOtherNonFullyAmortizingFeatures
   override val description: String = "No other non-fully amortizing features"
 }
 
-case object InvalidOtherNonAmortizingFeaturesCode extends OtherNonAmortizingFeaturesEnum {
+case object InvalidOtherNonAmortizingFeaturesCode
+    extends OtherNonAmortizingFeaturesEnum {
   override def code: Int = -1
   override def description: String = "Invalid Code"
 }

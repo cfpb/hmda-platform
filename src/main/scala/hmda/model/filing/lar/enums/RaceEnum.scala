@@ -27,7 +27,7 @@ object RaceEnum extends LarCodeEnum[RaceEnum] {
       case 5  => White
       case 6  => RaceInformationNotProvided
       case 7  => RaceNotApplicable
-      case _ => InvalidRaceCode
+      case _  => InvalidRaceCode
     }
   }
 }

@@ -19,6 +19,15 @@ trait LarParser {
     }
   }
 
+  def validateDoubleField(value: String,
+                          parserValidationError: ParserValidationError)
+    : LarParserValidationResult[Double] = {
+    Try(value.toDouble) match {
+      case Success(i) => i.validNel
+      case Failure(_) => parserValidationError.invalidNel
+    }
+  }
+
   def validateStrOrNAField(value: String,
                            parserValidationError: ParserValidationError)
     : LarParserValidationResult[String] = {
@@ -46,6 +55,14 @@ trait LarParser {
       case Success(enum) => enum.validNel
       case Failure(_)    => parserValidationError.invalidNel
     }
+  }
+
+  def validateMaybeLarCode[A](larCodeEnum: LarCodeEnum[A],
+                              value: String,
+                              parserValidationError: ParserValidationError)
+    : LarParserValidationResult[A] = {
+    val checkValue = if (value == "") "-1" else value
+    validateLarCode(larCodeEnum, checkValue, parserValidationError)
   }
 
 }

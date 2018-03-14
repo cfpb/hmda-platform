@@ -34,7 +34,8 @@ case object ManufacturedHomeSecuredNotApplicable
   override val description: String = "Not applicable"
 }
 
-case object InvalidManufacturedHomeSecuredPropertyCode extends ManufacturedHomeSecuredPropertyEnum {
+case object InvalidManufacturedHomeSecuredPropertyCode
+    extends ManufacturedHomeSecuredPropertyEnum {
   override def code: Int = -1
   override def description: String = "Invalid Code"
 }
