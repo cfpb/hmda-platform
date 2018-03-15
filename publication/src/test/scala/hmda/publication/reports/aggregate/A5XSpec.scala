@@ -106,7 +106,7 @@ class A5XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   "Generate a National Aggregate 5-7 report" in {
     N57.generate(nationalSource, -1).map {
       case AggregateReportPayload(reportId, fipsCode, report) =>
-        reportId mustBe "N56"
+        reportId mustBe "N57"
         fipsCode mustBe "nationwide"
         report.parseJson.asJsObject.getFields("table", "type", "description", "year") match {
           case Seq(JsString(table), JsString(reportType), JsString(desc), JsString(reportYear)) =>
