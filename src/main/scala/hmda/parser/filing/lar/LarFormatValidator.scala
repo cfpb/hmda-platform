@@ -629,21 +629,21 @@ sealed trait LarFormatValidator extends LarParser {
   ): LarParserValidationResult[AutomatedUnderwritingSystem] = {
 
     (
-      validateMaybeLarCode(AutomatedUnderwritingSystemEnum,
-                           aus1,
-                           InvalidAutomatedUnderwritingSystem),
-      validateMaybeLarCode(AutomatedUnderwritingSystemEnum,
-                           aus2,
-                           InvalidAutomatedUnderwritingSystem),
-      validateMaybeLarCode(AutomatedUnderwritingSystemEnum,
-                           aus3,
-                           InvalidAutomatedUnderwritingSystem),
-      validateMaybeLarCode(AutomatedUnderwritingSystemEnum,
-                           aus4,
-                           InvalidAutomatedUnderwritingSystem),
-      validateMaybeLarCode(AutomatedUnderwritingSystemEnum,
-                           aus5,
-                           InvalidAutomatedUnderwritingSystem),
+      validateLarCode(AutomatedUnderwritingSystemEnum,
+                      aus1,
+                      InvalidAutomatedUnderwritingSystem),
+      validateLarCodeOrEmptyField(AutomatedUnderwritingSystemEnum,
+                                  aus2,
+                                  InvalidAutomatedUnderwritingSystem),
+      validateLarCodeOrEmptyField(AutomatedUnderwritingSystemEnum,
+                                  aus3,
+                                  InvalidAutomatedUnderwritingSystem),
+      validateLarCodeOrEmptyField(AutomatedUnderwritingSystemEnum,
+                                  aus4,
+                                  InvalidAutomatedUnderwritingSystem),
+      validateLarCodeOrEmptyField(AutomatedUnderwritingSystemEnum,
+                                  aus5,
+                                  InvalidAutomatedUnderwritingSystem),
       validateStr(otherAus)
     ).mapN(AutomatedUnderwritingSystem)
   }
@@ -658,21 +658,21 @@ sealed trait LarFormatValidator extends LarParser {
   ): LarParserValidationResult[AutomatedUnderwritingSystemResult] = {
 
     (
-      validateMaybeLarCode(AutomatedUnderwritingResultEnum,
-                           ausResult1,
-                           InvalidAutomatedUnderwritingSystemResult),
-      validateMaybeLarCode(AutomatedUnderwritingResultEnum,
-                           ausResult2,
-                           InvalidAutomatedUnderwritingSystemResult),
-      validateMaybeLarCode(AutomatedUnderwritingResultEnum,
-                           ausResult3,
-                           InvalidAutomatedUnderwritingSystemResult),
-      validateMaybeLarCode(AutomatedUnderwritingResultEnum,
-                           ausResult4,
-                           InvalidAutomatedUnderwritingSystemResult),
-      validateMaybeLarCode(AutomatedUnderwritingResultEnum,
-                           ausResult5,
-                           InvalidAutomatedUnderwritingSystemResult),
+      validateLarCode(AutomatedUnderwritingResultEnum,
+                      ausResult1,
+                      InvalidAutomatedUnderwritingSystemResult),
+      validateLarCodeOrEmptyField(AutomatedUnderwritingResultEnum,
+                                  ausResult2,
+                                  InvalidAutomatedUnderwritingSystemResult),
+      validateLarCodeOrEmptyField(AutomatedUnderwritingResultEnum,
+                                  ausResult3,
+                                  InvalidAutomatedUnderwritingSystemResult),
+      validateLarCodeOrEmptyField(AutomatedUnderwritingResultEnum,
+                                  ausResult4,
+                                  InvalidAutomatedUnderwritingSystemResult),
+      validateLarCodeOrEmptyField(AutomatedUnderwritingResultEnum,
+                                  ausResult5,
+                                  InvalidAutomatedUnderwritingSystemResult),
       validateStr(otherAusResult)
     ).mapN(AutomatedUnderwritingSystemResult)
 

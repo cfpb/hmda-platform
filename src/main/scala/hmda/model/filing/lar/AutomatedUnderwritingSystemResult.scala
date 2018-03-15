@@ -12,6 +12,6 @@ case class AutomatedUnderwritingSystemResult(
     otherAusResult: String
 ) extends PipeDelimited {
   override def toCSV: String = {
-    s"$ausResult1|$ausResult2|$ausResult3|$ausResult4|$ausResult5|$otherAusResult"
+    s"${ausResult1.code}|${ausResult2.code}|${ausResult3.code}|${ausResult4.code}|${ausResult5.code}|$otherAusResult"
   }
 }

@@ -124,106 +124,265 @@ class LarFormatValidatorSpec
     }
   }
 
+  property("A Denial must validate its format") {
+    forAll(larGen) { lar =>
+      val denial = lar.denial
+      validateDenial(
+        denial.denialReason1.code.toString,
+        denial.denialReason2.code.toString,
+        denial.denialReason3.code.toString,
+        denial.denialReason4.code.toString,
+        denial.otherDenialReason
+      ) mustBe Valid(denial)
+    }
+  }
+
   property("InvalidIncome") {
     validateStrOrNAField(badValue(), InvalidIncome) mustBe Invalid(
       NonEmptyList.of(InvalidIncome)
     )
   }
-  //  property("InvalidPurchaserType") {
-  //    pending
-  //  }
-  //  property("InvalidRateSpread") {
-  //    pending
-  //  }
-  //  property("InvalidHoepaStatus") {
-  //    pending
-  //  }
-  //  property("InvalidLienStatus") {
-  //    pending
-  //  }
-  //  property("InvalidDenial") {
-  //    pending
-  //  }
-  //  property("InvalidTotalLoanCosts") {
-  //    pending
-  //  }
-  //  property("InvalidPointsAndFees") {
-  //    pending
-  //  }
-  //  property("InvalidOriginationCharges") {
-  //    pending
-  //  }
-  //  property("InvalidDiscountPoints") {
-  //    pending
-  //  }
-  //  property("InvalidLenderCredits") {
-  //    pending
-  //  }
-  //  property("InvalidInterestRate") {
-  //    pending
-  //  }
-  //  property("InvalidPrepaymentPenaltyTerm") {
-  //    pending
-  //  }
-  //  property("InvalidDebtToIncomeRatio") {
-  //    pending
-  //  }
-  //  property("InvalidLoanToValueRatio") {
-  //    pending
-  //  }
-  //  property("InvalidIntroductoryRatePeriod") {
-  //    pending
-  //  }
-  //  property("InvalidBalloonPayment") {
-  //    pending
-  //  }
-  //  property("InvalidInterestOnlyPayment") {
-  //    pending
-  //  }
-  //  property("InvalidNegativeAmortization") {
-  //    pending
-  //  }
-  //  property("InvalidOtherNonAmortizingFeatures") {
-  //    pending
-  //  }
-  //  property("InvalidPropertyValue") {
-  //    pending
-  //  }
-  //  property("InvalidManufacturedHomeSecuredProperty") {
-  //    pending
-  //  }
-  //  property("InvalidManufacturedHomeLandPropertyInterest") {
-  //    pending
-  //  }
-  //  property("InvalidTotalUnits") {
-  //    pending
-  //  }
-  //  property("InvalidMultifamilyUnits") {
-  //    pending
-  //  }
-  //  property("InvalidApplicationSubmission") {
-  //    pending
-  //  }
-  //  property("InvalidPayableToInstitution") {
-  //    pending
-  //  }
-  //  property("InvalidNMLSRIdentifier") {
-  //    pending
-  //  }
-  //  property("InvalidAutomatedUnderwritingSystem") {
-  //    pending
-  //  }
-  //  property("InvalidAutomatedUnderwritingSystemResult") {
-  //    pending
-  //  }
-  //  property("InvalidMortgageType") {
-  //    pending
-  //  }
-  //  property("InvalidLineOfCredit") {
-  //    pending
-  //  }
-  //  property("InvalidBusinessOrCommercial") {
-  //    pending
-  //  }
+  property("InvalidPurchaserType") {
+    validateLarCode(PurchaserEnum, badValue(), InvalidPurchaserType) mustBe Invalid(
+      NonEmptyList.of(InvalidPurchaserType)
+    )
+  }
+  property("InvalidRateSpread") {
+    validateStrOrNAField(badValue(), InvalidRateSpread) mustBe Invalid(
+      NonEmptyList.of(InvalidRateSpread)
+    )
+  }
+  property("InvalidHoepaStatus") {
+    validateLarCode(HOEPAStatusEnum, badValue(), InvalidHoepaStatus) mustBe Invalid(
+      NonEmptyList.of(InvalidHoepaStatus)
+    )
+  }
+  property("InvalidLienStatus") {
+    validateLarCode(LienStatusEnum, badValue(), InvalidLienStatus) mustBe Invalid(
+      NonEmptyList.of(InvalidLienStatus)
+    )
+  }
+  property("Denial Reason 1") {
+    validateLarCode(DenialReasonEnum, badValue(), InvalidDenial) mustBe Invalid(
+      NonEmptyList.of(InvalidDenial)
+    )
+  }
+
+  property("Denial Reason 2-4") {
+    validateLarCodeOrEmptyField(DenialReasonEnum, badValue(), InvalidDenial) mustBe Invalid(
+      NonEmptyList.of(InvalidDenial)
+    )
+    validateLarCodeOrEmptyField(DenialReasonEnum, "", InvalidDenial) mustBe Valid(
+      InvalidDenialReasonCode)
+  }
+  property("InvalidTotalLoanCosts") {
+    validateStrOrNAField(badValue(), InvalidTotalLoanCosts) mustBe Invalid(
+      NonEmptyList.of(InvalidTotalLoanCosts)
+    )
+  }
+  property("InvalidPointsAndFees") {
+    validateStrOrNAField(badValue(), InvalidPointsAndFees) mustBe Invalid(
+      NonEmptyList.of(InvalidPointsAndFees)
+    )
+  }
+  property("InvalidOriginationCharges") {
+    validateStrOrNAField(badValue(), InvalidOriginationCharges) mustBe Invalid(
+      NonEmptyList.of(InvalidOriginationCharges)
+    )
+  }
+  property("InvalidDiscountPoints") {
+    validateStrOrNAField(badValue(), InvalidDiscountPoints) mustBe Invalid(
+      NonEmptyList.of(InvalidDiscountPoints)
+    )
+  }
+  property("InvalidLenderCredits") {
+    validateStrOrNAField(badValue(), InvalidLenderCredits) mustBe Invalid(
+      NonEmptyList.of(InvalidLenderCredits)
+    )
+  }
+  property("InvalidInterestRate") {
+    validateStrOrNAField(badValue(), InvalidInterestRate) mustBe Invalid(
+      NonEmptyList.of(InvalidInterestRate)
+    )
+  }
+  property("InvalidPrepaymentPenaltyTerm") {
+    validateStrOrNAField(badValue(), InvalidPrepaymentPenaltyTerm) mustBe Invalid(
+      NonEmptyList.of(InvalidPrepaymentPenaltyTerm)
+    )
+  }
+  property("InvalidDebtToIncomeRatio") {
+    validateStrOrNAField(badValue(), InvalidDebtToIncomeRatio) mustBe Invalid(
+      NonEmptyList.of(InvalidDebtToIncomeRatio)
+    )
+  }
+  property("InvalidLoanToValueRatio") {
+    validateStrOrNAField(badValue(), InvalidLoanToValueRatio) mustBe Invalid(
+      NonEmptyList.of(InvalidLoanToValueRatio)
+    )
+  }
+  property("InvalidIntroductoryRatePeriod") {
+    validateStrOrNAField(badValue(), InvalidIntroductoryRatePeriod) mustBe Invalid(
+      NonEmptyList.of(InvalidIntroductoryRatePeriod)
+    )
+  }
+  property("InvalidBalloonPayment") {
+    validateLarCode(BalloonPaymentEnum, badValue(), InvalidBalloonPayment) mustBe Invalid(
+      NonEmptyList.of(InvalidBalloonPayment)
+    )
+  }
+  property("InvalidInterestOnlyPayment") {
+    validateLarCode(InterestOnlyPaymentsEnum,
+                    badValue(),
+                    InvalidInterestOnlyPayment) mustBe Invalid(
+      NonEmptyList.of(InvalidInterestOnlyPayment)
+    )
+  }
+  property("InvalidNegativeAmortization") {
+    validateLarCode(NegativeAmortizationEnum,
+                    badValue(),
+                    InvalidNegativeAmortization) mustBe Invalid(
+      NonEmptyList.of(InvalidNegativeAmortization)
+    )
+  }
+  property("InvalidOtherNonAmortizingFeatures") {
+    validateLarCode(OtherNonAmortizingFeaturesEnum,
+                    badValue(),
+                    InvalidOtherNonAmortizingFeatures) mustBe Invalid(
+      NonEmptyList.of(InvalidOtherNonAmortizingFeatures)
+    )
+  }
+  property("InvalidPropertyValue") {
+    validateStrOrNAField("", InvalidPropertyValue) mustBe Invalid(
+      NonEmptyList.of(InvalidPropertyValue)
+    )
+    validateStrOrNAField(badValue(), InvalidPropertyValue) mustBe Invalid(
+      NonEmptyList.of(InvalidPropertyValue)
+    )
+  }
+  property("InvalidManufacturedHomeSecuredProperty") {
+    validateLarCode(ManufacturedHomeSecuredPropertyEnum,
+                    badValue(),
+                    InvalidManufacturedHomeSecuredProperty) mustBe Invalid(
+      NonEmptyList.of(InvalidManufacturedHomeSecuredProperty)
+    )
+  }
+  property("InvalidManufacturedHomeLandPropertyInterest") {
+    validateLarCode(ManufacturedHomeLandPropertyInterestEnum,
+                    badValue(),
+                    InvalidManufacturedHomeLandPropertyInterest) mustBe Invalid(
+      NonEmptyList.of(InvalidManufacturedHomeLandPropertyInterest)
+    )
+  }
+  property("InvalidTotalUnits") {
+    validateIntField(badValue(), InvalidTotalUnits) mustBe Invalid(
+      NonEmptyList.of(InvalidTotalUnits)
+    )
+  }
+  property("InvalidMultifamilyUnits") {
+    validateStrOrNAField(badValue(), InvalidMultifamilyUnits) mustBe Invalid(
+      NonEmptyList.of(InvalidMultifamilyUnits)
+    )
+  }
+  property("InvalidApplicationSubmission") {
+    validateLarCode(ApplicationSubmissionEnum,
+                    badValue(),
+                    InvalidApplicationSubmission) mustBe Invalid(
+      NonEmptyList.of(InvalidApplicationSubmission)
+    )
+  }
+  property("InvalidPayableToInstitution") {
+    validateLarCode(PayableToInstitutionEnum,
+                    badValue(),
+                    InvalidPayableToInstitution) mustBe Invalid(
+      NonEmptyList.of(InvalidPayableToInstitution)
+    )
+  }
+  property("InvalidNMLSRIdentifier") {
+    validateStrOrNAField(badValue(), InvalidNMLSRIdentifier) mustBe Invalid(
+      NonEmptyList.of(InvalidNMLSRIdentifier)
+    )
+  }
+  property("InvalidAutomatedUnderwritingSystem 1") {
+    validateLarCode(AutomatedUnderwritingSystemEnum,
+                    badValue(),
+                    InvalidAutomatedUnderwritingSystem) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystem)
+    )
+    validateLarCode(AutomatedUnderwritingResultEnum,
+                    "2",
+                    InvalidAutomatedUnderwritingSystem) mustBe Valid(
+      ApproveIneligible
+    )
+    validateLarCode(AutomatedUnderwritingResultEnum,
+                    "",
+                    InvalidAutomatedUnderwritingSystem) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystem)
+    )
+  }
+
+  property("InvalidAutomatedUnderwritingSystem 2 - 5") {
+    validateLarCodeOrEmptyField(
+      AutomatedUnderwritingSystemEnum,
+      badValue(),
+      InvalidAutomatedUnderwritingSystem) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystem)
+    )
+    validateLarCodeOrEmptyField(
+      AutomatedUnderwritingResultEnum,
+      "",
+      InvalidAutomatedUnderwritingSystem) mustBe Valid(
+      InvalidAutomatedUnderwritingResultCode)
+
+  }
+  property("InvalidAutomatedUnderwritingSystemResult 1") {
+    validateLarCode(AutomatedUnderwritingResultEnum,
+                    badValue(),
+                    InvalidAutomatedUnderwritingSystemResult) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystemResult)
+    )
+    validateLarCode(AutomatedUnderwritingResultEnum,
+                    "2",
+                    InvalidAutomatedUnderwritingSystem) mustBe Valid(
+      ApproveIneligible
+    )
+    validateLarCode(AutomatedUnderwritingResultEnum,
+                    "",
+                    InvalidAutomatedUnderwritingSystemResult) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystemResult))
+  }
+
+  property("InvalidAutomatedUnderwritingSystemResult 2-5") {
+    validateLarCodeOrEmptyField(
+      AutomatedUnderwritingResultEnum,
+      badValue(),
+      InvalidAutomatedUnderwritingSystemResult) mustBe Invalid(
+      NonEmptyList.of(InvalidAutomatedUnderwritingSystemResult)
+    )
+    validateLarCodeOrEmptyField(
+      AutomatedUnderwritingResultEnum,
+      "2",
+      InvalidAutomatedUnderwritingSystem) mustBe Valid(
+      ApproveIneligible
+    )
+    validateLarCodeOrEmptyField(
+      AutomatedUnderwritingResultEnum,
+      "",
+      InvalidAutomatedUnderwritingSystemResult) mustBe Valid(
+      InvalidAutomatedUnderwritingResultCode)
+  }
+  property("InvalidMortgageType") {
+    validateLarCode(MortgageTypeEnum, badValue(), InvalidMortgageType) mustBe Invalid(
+      NonEmptyList.of(InvalidMortgageType))
+  }
+  property("InvalidLineOfCredit") {
+    validateLarCode(LineOfCreditEnum, badValue(), InvalidLineOfCredit) mustBe Invalid(
+      NonEmptyList.of(InvalidLineOfCredit))
+  }
+  property("InvalidBusinessOrCommercial") {
+    validateLarCode(BusinessOrCommercialBusinessEnum,
+                    badValue(),
+                    InvalidBusinessOrCommercial) mustBe Invalid(
+      NonEmptyList.of(InvalidBusinessOrCommercial))
+  }
 
 }

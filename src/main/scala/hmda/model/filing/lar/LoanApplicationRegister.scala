@@ -44,7 +44,7 @@ case class LoanApplicationRegister(
       s"${applicant.sex.sexEnum.code}|${coApplicant.sex.sexEnum.code}|${applicant.sex.sexObservedEnum.code}|${coApplicant.sex.sexObservedEnum.code}|" +
       s"${applicant.age}|${coApplicant.age}|$income|${purchaserType.code}|${loan.rateSpread}|${hoepaStatus.code}|${lienStatus.code}|${applicant.creditScore}|${coApplicant.creditScore}|" +
       s"${applicant.creditScoreType.code}|${applicant.otherCreditScoreModel}|${coApplicant.creditScoreType.code}|${coApplicant.otherCreditScoreModel}|" +
-      s"${denial.denialReason1}|${denial.denialReason2}|${denial.denialReason3}|${denial.denialReason4}|${denial.otherDenialReason}|${loanDisclosure.totalLoanCosts}|" +
+      s"${denial.denialReason1.code}|${denial.denialReason2.code}|${denial.denialReason3.code}|${denial.denialReason4.code}|${denial.otherDenialReason}|${loanDisclosure.totalLoanCosts}|" +
       s"${loanDisclosure.totalPointsAndFees}|${loanDisclosure.originationCharges}|${loanDisclosure.discountPoints}|${loanDisclosure.lenderCredits}|${loan.interestRate}|" +
       s"${loan.prepaymentPenaltyTerm}|${loan.debtToIncomeRatio}|${loan.loanToValueRatio}|${loan.loanTerm}|${loan.introductoryRatePeriod}|${nonAmortizingFeatures.balloonPayment.code}|" +
       s"${nonAmortizingFeatures.interestOnlyPayments.code}|${nonAmortizingFeatures.negativeAmortization.code}|${nonAmortizingFeatures.otherNonAmortizingFeatures.code}|" +

@@ -55,6 +55,18 @@ trait LarParser {
     }
   }
 
+  def validateLarCodeOrEmptyField[A](
+      larCodeEnum: LarCodeEnum[A],
+      value: String,
+      parserValidationError: ParserValidationError)
+    : LarParserValidationResult[A] = {
+    if (value == "") {
+      larCodeEnum.valueOf(-1).validNel
+    } else {
+      validateLarCode(larCodeEnum, value, parserValidationError)
+    }
+  }
+
   def validateMaybeLarCode[A](larCodeEnum: LarCodeEnum[A],
                               value: String,
                               parserValidationError: ParserValidationError)
