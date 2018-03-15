@@ -1,7 +1,6 @@
 package hmda.publication.reports.util
 
 import hmda.model.publication.reports.ReportTypeEnum.Disclosure
-import hmda.publication.reports.util.DispositionType._
 import org.scalatest.{ MustMatchers, WordSpec }
 
 class ReportsMetaDataLookupSpec extends WordSpec with MustMatchers {
