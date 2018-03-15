@@ -1,16 +1,14 @@
-package hmda.publication.reports.disclosure
+package hmda.publication.reports.aggregate
 
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.model.institution.ExternalIdType.RssdId
-import hmda.model.institution.{ ExternalId, Institution, Respondent }
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import spray.json._
 
-class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
+class A8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
 
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
@@ -23,36 +21,29 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
 
   val respId = "98765"
   val fips = 13420 // Bemidji, MN
-  val resp = Respondent(ExternalId(respId, RssdId), "Bemidji Test Bank", "", "", "")
-  val inst = Institution.empty.copy(respondent = resp)
   val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
     val geo = lar.geography.copy(msa = fips.toString)
     val loan = lar.loan.copy(propertyType = 3)
-    lar.copy(respondentId = respId, geography = geo, loan = loan)
+    lar.copy(geography = geo, loan = loan)
   }
 
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
-  val descriptionD85 = "Reasons for denial of applications for loans on dwellings for 5 or more families, by race, ethnicity, gender and income of applicant"
+  val descriptionA85 = "Reasons for denial of applications for loans on dwellings for 5 or more families, by race, ethnicity, gender and income of applicant"
 
-  "Generate a Disclosure 8-5 report" in {
-    D85.generate(source, fips, inst).map { result =>
-      result.report.parseJson.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
-        case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
-          respondentId mustBe respId
-          instName mustBe "Bemidji Test Bank"
+  "Generate an Aggregate 8-5 report" in {
+    A85.generate(source, fips).map { result =>
+      result.report.parseJson.asJsObject.getFields("table", "description") match {
+        case Seq(JsString(table), JsString(desc)) =>
           table mustBe "8-5"
-          desc mustBe descriptionD85
-          msa.asJsObject.getFields("name") match {
-            case Seq(JsString(msaName)) => msaName mustBe "Bemidji, MN"
-          }
+          desc mustBe descriptionA85
       }
     }
   }
 
   "Include correct applicant Characteristics" in {
-    D85.generate(source, fips, inst).map { result =>
+    A85.generate(source, fips).map { result =>
       result.report.parseJson.asJsObject.getFields("applicantCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
@@ -69,6 +60,16 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
                   reasons must have size 11
               }
           }
+      }
+    }
+  }
+
+  "Generate a National Aggregate 8-5 report" in {
+    N85.generate(source, fips).map { result =>
+      result.report.parseJson.asJsObject.getFields("table", "description") match {
+        case Seq(JsString(table), JsString(desc)) =>
+          table mustBe "8-5"
+          desc mustBe descriptionA85
       }
     }
   }
