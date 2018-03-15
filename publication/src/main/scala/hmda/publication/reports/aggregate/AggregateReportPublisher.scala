@@ -52,7 +52,7 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
   val aggregateReports: List[AggregateReport] = List(
-    A2,
+    A1, A2,
     AggregateA1, AggregateA2, AggregateA3,
     AggregateA4,
     AggregateB,
