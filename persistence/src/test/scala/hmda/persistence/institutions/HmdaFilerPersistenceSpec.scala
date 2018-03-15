@@ -5,7 +5,8 @@ import HmdaFilerPersistence._
 import akka.actor.ActorRef
 import akka.testkit.TestProbe
 import hmda.model.institution.HmdaFiler
-import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, FindHmdaFiler }
+import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler }
+import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 
 class HmdaFilerPersistenceSpec extends ActorSpec {
 
@@ -19,11 +20,21 @@ class HmdaFilerPersistenceSpec extends ActorSpec {
       probe.send(hmdaFilers, FindHmdaFiler(hmdaFiler1.institutionId))
       probe.expectMsg(None)
     }
+    "return nothing when deleting empty journal" in {
+      probe.send(hmdaFilers, DeleteHmdaFiler(hmdaFiler1))
+      probe.expectMsg(None)
+    }
     "be created and read back" in {
       probe.send(hmdaFilers, CreateHmdaFiler(hmdaFiler1))
-      probe.expectMsg(hmdaFiler1)
+      probe.expectMsg(HmdaFilerCreated(hmdaFiler1))
       probe.send(hmdaFilers, FindHmdaFiler(hmdaFiler1.institutionId))
       probe.expectMsg(Some(hmdaFiler1))
+    }
+    "delete" in {
+      probe.send(hmdaFilers, DeleteHmdaFiler(hmdaFiler1))
+      probe.expectMsg(Some(HmdaFilerDeleted(hmdaFiler1)))
+      probe.send(hmdaFilers, FindHmdaFiler(hmdaFiler1.institutionId))
+      probe.expectMsg(None)
     }
   }
 

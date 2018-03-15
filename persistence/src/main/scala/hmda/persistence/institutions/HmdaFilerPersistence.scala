@@ -4,8 +4,8 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.institution.HmdaFiler
 import hmda.persistence.institutions.HmdaFilerPersistence.HmdaFilerState
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, FindHmdaFiler }
-import hmda.persistence.messages.events.institutions.HmdaFilerEvents.HmdaFilerCreated
+import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler }
+import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 import hmda.persistence.model.HmdaPersistentActor
 
 object HmdaFilerPersistence {
@@ -19,6 +19,8 @@ object HmdaFilerPersistence {
     def updated(event: Event): HmdaFilerState = event match {
       case HmdaFilerCreated(hmdFiler) =>
         HmdaFilerState(filers + hmdFiler)
+      case HmdaFilerDeleted(hmdaFiler) =>
+        HmdaFilerState(filers - hmdaFiler)
     }
   }
 
@@ -42,7 +44,19 @@ class HmdaFilerPersistence extends HmdaPersistentActor {
     case CreateHmdaFiler(hmdaFiler) =>
       persist(HmdaFilerCreated(hmdaFiler)) { e =>
         updateState(e)
-        sender() ! hmdaFiler
+        sender() ! e
+      }
+
+    case DeleteHmdaFiler(hmdaFiler) =>
+      val maybeFiler = state.filers.find(f => f.institutionId == hmdaFiler.institutionId)
+      maybeFiler match {
+        case Some(filer) =>
+          persist(HmdaFilerDeleted(filer)) { e =>
+            println(s"deleted: ${e.toString}")
+            updateState(e)
+            sender() ! Some(e)
+          }
+        case None => sender() ! None
       }
 
     case FindHmdaFiler(id) =>
