@@ -1,4 +1,5 @@
 ReportId,Type,ReportTable,Dispositions,Description
+A32,Aggregate,3-2,,"Pricing Information for First and Junior Lien Loans Sold by Type of Purchaser (includes originations only)"
 A42,Aggregate,4-2,,"Disposition of applications for conventional home-purchase loans 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 A43,Aggregate,4-3,,"Disposition of applications to refinance loans on 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 A45,Aggregate,4-5,,"Disposition of applications for loans on dwellings for 5 or more families, by race, ethnicity, gender and income of applicant"
@@ -72,6 +73,7 @@ D11-8,Disclosure,11-8,,"Pricing information for conventional refinancing loans, 
 D11-9,Disclosure,11-9,,"Pricing information for conventional home improvement loans, first lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 D11-10,Disclosure,11-10,,"Pricing information for conventional home improvement loans, junior lien, 1- to 4-family owner-occupied dwelling (excludes manufactured homes), by borrower or census tract characteristics"
 D12-2,Disclosure,12-2,,"Pricing information for conventional manufactured home-purchase loans, first lien, owner-occupied dwelling, by borrower or census tract characteristics"
+N32,National Aggregate,3-2,,"Pricing Information for First and Junior Lien Loans Sold by Type of Purchaser (includes originations only)"
 N41,National Aggregate,4-1,,"Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 N43,National Aggregate,4-3,,"Disposition of applications to refinance loans on 1- to 4- family and manufactured home dwellings, by race, ethnicity, gender and income of applicant"
 N45,National Aggregate,4-5,,"Disposition of applications for loans on dwellings for 5 or more families, by race, ethnicity, gender and income of applicant"
