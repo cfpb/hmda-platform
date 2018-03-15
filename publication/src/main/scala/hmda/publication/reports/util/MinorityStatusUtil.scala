@@ -5,10 +5,6 @@ import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports._
 import hmda.model.publication.reports.MinorityStatusEnum.{ OtherIncludingHispanic, WhiteNonHispanic }
-import hmda.publication.reports.util.ReportUtil.calculateDispositions
-import hmda.publication.reports.{ AS, EC, MAT }
-
-import scala.concurrent.Future
 
 object MinorityStatusUtil {
 
@@ -31,32 +27,6 @@ object MinorityStatusUtil {
       lar.applicant.race3 != "5" &&
       lar.applicant.race4 != "5" &&
       lar.applicant.race5 != "5"
-  }
-
-  def minorityStatusBorrowerCharacteristic[as: AS, mat: MAT, ec: EC](
-    larSource: Source[LoanApplicationRegister, NotUsed],
-    dispositions: List[DispositionType]
-  ): Future[MinorityStatusBorrowerCharacteristic] = {
-
-    val larsWhite = filterMinorityStatus(larSource, WhiteNonHispanic)
-    val larsOther = filterMinorityStatus(larSource, OtherIncludingHispanic)
-
-    val dispWhiteF = calculateDispositions(larsWhite, dispositions)
-    val dispOtherF = calculateDispositions(larsOther, dispositions)
-
-    for {
-      whiteDispositions <- dispWhiteF
-      otherDispositions <- dispOtherF
-    } yield {
-
-      MinorityStatusBorrowerCharacteristic(
-        List(
-          MinorityStatusCharacteristic(WhiteNonHispanic, whiteDispositions),
-          MinorityStatusCharacteristic(OtherIncludingHispanic, otherDispositions)
-        )
-      )
-
-    }
   }
 
 }
