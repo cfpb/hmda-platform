@@ -53,6 +53,7 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
 
   val aggregateReports: List[AggregateReport] = List(
     AggregateA1, AggregateA2, AggregateA3,
+    AggregateA4,
     A42, A43, A45, A46, A47,
     A51, A52, A53, A54, A56, A57,
     A71, A72, A73, A74, A75, A76, A77,
@@ -63,6 +64,7 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
 
   val nationalAggregateReports: List[AggregateReport] = List(
     NationalAggregateA1, NationalAggregateA2, NationalAggregateA3,
+    NationalAggregateA4,
     N41, N43, N45, N46, N47,
     N51, N52, N53, N54, N56, N57,
     N71, N72, N73, N74, N75, N76, N77,
