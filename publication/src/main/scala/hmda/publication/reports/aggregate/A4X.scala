@@ -9,7 +9,7 @@ import hmda.model.publication.reports.GenderEnum.{ Female, JointGender, Male }
 import hmda.model.publication.reports.ApplicantIncomeEnum._
 import hmda.model.publication.reports.MinorityStatusEnum._
 import hmda.model.publication.reports.RaceEnum._
-import hmda.model.publication.reports.ReportTypeEnum.Aggregate
+import hmda.model.publication.reports.ReportTypeEnum.{ Aggregate, NationalAggregate }
 import hmda.publication.reports.{ AS, EC, MAT }
 import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.EthnicityUtil.filterEthnicity
@@ -100,66 +100,70 @@ trait A4X extends AggregateReport {
   val dispositions = List(ApplicationReceived, LoansOriginated, ApprovedButNotAccepted,
     ApplicationsDenied, ApplicationsWithdrawn, ClosedForIncompleteness)
 
-  def geoFilter(fips: Int)(lar: LoanApplicationRegister): Boolean =
-    lar.geography.msa != "NA" &&
-      lar.geography.msa.toInt == fips
-
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
     fipsCode: Int
   ): Future[AggregateReportPayload] = {
     val metaData = ReportsMetaDataLookup.values(reportId)
 
-    val lars =
-      if (metaData.reportType == Aggregate) larSource.filter(filters).filter(geoFilter(fipsCode))
-      else larSource.filter(filters)
+    val larsInitialFilters = larSource
+      .filter(lar => lar.geography.msa != "NA")
+      .filter(lar => lar.applicant.income != "NA")
+      .filter(filters)
 
-    val incomeIntervals = larsByIncomeInterval(lars.filter(lar => lar.applicant.income != "NA"), calculateMedianIncomeIntervals(fipsCode))
+    val reportLars =
+      if (metaData.reportType == NationalAggregate) larsInitialFilters
+      else larsInitialFilters.filter(_.geography.msa.toInt == fipsCode)
+
+    val incomeIntervals =
+      if (metaData.reportType == NationalAggregate) nationalLarsByIncomeInterval(reportLars)
+      else larsByIncomeInterval(reportLars, calculateMedianIncomeIntervals(fipsCode))
+
     val msa: String = if (metaData.reportType == Aggregate) s""""msa": ${msaReport(fipsCode.toString).toJsonFormat},""" else ""
     val reportDate = formattedCurrentDate
-    val yearF = calculateYear(lars)
+    val yearF = calculateYear(reportLars)
 
     for {
       year <- yearF
-      e1 <- dispositionsOutput(filterEthnicity(lars, HispanicOrLatino))
-      e1g <- dispositionsByGender(filterEthnicity(lars, HispanicOrLatino))
-      e2 <- dispositionsOutput(filterEthnicity(lars, NotHispanicOrLatino))
-      e2g <- dispositionsByGender(filterEthnicity(lars, NotHispanicOrLatino))
-      e3 <- dispositionsOutput(filterEthnicity(lars, JointEthnicity))
-      e3g <- dispositionsByGender(filterEthnicity(lars, JointEthnicity))
-      e4 <- dispositionsOutput(filterEthnicity(lars, NotAvailable))
-      e4g <- dispositionsByGender(filterEthnicity(lars, NotAvailable))
+      e1 <- dispositionsOutput(filterEthnicity(reportLars, HispanicOrLatino))
+      e1g <- dispositionsByGender(filterEthnicity(reportLars, HispanicOrLatino))
+      e2 <- dispositionsOutput(filterEthnicity(reportLars, NotHispanicOrLatino))
+      e2g <- dispositionsByGender(filterEthnicity(reportLars, NotHispanicOrLatino))
+      e3 <- dispositionsOutput(filterEthnicity(reportLars, JointEthnicity))
+      e3g <- dispositionsByGender(filterEthnicity(reportLars, JointEthnicity))
+      e4 <- dispositionsOutput(filterEthnicity(reportLars, NotAvailable))
+      e4g <- dispositionsByGender(filterEthnicity(reportLars, NotAvailable))
 
-      r1 <- dispositionsOutput(filterRace(lars, AmericanIndianOrAlaskaNative))
-      r1g <- dispositionsByGender(filterRace(lars, AmericanIndianOrAlaskaNative))
-      r2 <- dispositionsOutput(filterRace(lars, Asian))
-      r2g <- dispositionsByGender(filterRace(lars, Asian))
-      r3 <- dispositionsOutput(filterRace(lars, BlackOrAfricanAmerican))
-      r3g <- dispositionsByGender(filterRace(lars, BlackOrAfricanAmerican))
-      r4 <- dispositionsOutput(filterRace(lars, HawaiianOrPacific))
-      r4g <- dispositionsByGender(filterRace(lars, HawaiianOrPacific))
-      r5 <- dispositionsOutput(filterRace(lars, White))
-      r5g <- dispositionsByGender(filterRace(lars, White))
-      r6 <- dispositionsOutput(filterRace(lars, TwoOrMoreMinority))
-      r6g <- dispositionsByGender(filterRace(lars, TwoOrMoreMinority))
-      r7 <- dispositionsOutput(filterRace(lars, JointRace))
-      r7g <- dispositionsByGender(filterRace(lars, JointRace))
-      r8 <- dispositionsOutput(filterRace(lars, NotProvided))
-      r8g <- dispositionsByGender(filterRace(lars, NotProvided))
+      r1 <- dispositionsOutput(filterRace(reportLars, AmericanIndianOrAlaskaNative))
+      r1g <- dispositionsByGender(filterRace(reportLars, AmericanIndianOrAlaskaNative))
+      r2 <- dispositionsOutput(filterRace(reportLars, Asian))
+      r2g <- dispositionsByGender(filterRace(reportLars, Asian))
+      r3 <- dispositionsOutput(filterRace(reportLars, BlackOrAfricanAmerican))
+      r3g <- dispositionsByGender(filterRace(reportLars, BlackOrAfricanAmerican))
+      r4 <- dispositionsOutput(filterRace(reportLars, HawaiianOrPacific))
+      r4g <- dispositionsByGender(filterRace(reportLars, HawaiianOrPacific))
+      r5 <- dispositionsOutput(filterRace(reportLars, White))
+      r5g <- dispositionsByGender(filterRace(reportLars, White))
+      r6 <- dispositionsOutput(filterRace(reportLars, TwoOrMoreMinority))
+      r6g <- dispositionsByGender(filterRace(reportLars, TwoOrMoreMinority))
+      r7 <- dispositionsOutput(filterRace(reportLars, JointRace))
+      r7g <- dispositionsByGender(filterRace(reportLars, JointRace))
+      r8 <- dispositionsOutput(filterRace(reportLars, NotProvided))
+      r8g <- dispositionsByGender(filterRace(reportLars, NotProvided))
 
-      m1 <- dispositionsOutput(filterMinorityStatus(lars, WhiteNonHispanic))
-      m1g <- dispositionsByGender(filterMinorityStatus(lars, WhiteNonHispanic))
-      m2 <- dispositionsOutput(filterMinorityStatus(lars, OtherIncludingHispanic))
-      m2g <- dispositionsByGender(filterMinorityStatus(lars, OtherIncludingHispanic))
+      m1 <- dispositionsOutput(filterMinorityStatus(reportLars, WhiteNonHispanic))
+      m1g <- dispositionsByGender(filterMinorityStatus(reportLars, WhiteNonHispanic))
+      m2 <- dispositionsOutput(filterMinorityStatus(reportLars, OtherIncludingHispanic))
+      m2g <- dispositionsByGender(filterMinorityStatus(reportLars, OtherIncludingHispanic))
 
       i1 <- dispositionsOutput(incomeIntervals(LessThan50PercentOfMSAMedian))
       i2 <- dispositionsOutput(incomeIntervals(Between50And79PercentOfMSAMedian))
       i3 <- dispositionsOutput(incomeIntervals(Between80And99PercentOfMSAMedian))
       i4 <- dispositionsOutput(incomeIntervals(Between100And119PercentOfMSAMedian))
       i5 <- dispositionsOutput(incomeIntervals(GreaterThan120PercentOfMSAMedian))
-      i6 <- dispositionsOutput(lars.filter(lar => lar.applicant.income == "NA"))
+      i6 <- dispositionsOutput(reportLars.filter(lar => lar.applicant.income == "NA"))
 
-      total <- dispositionsOutput(lars)
+      total <- dispositionsOutput(reportLars)
     } yield {
       val report = s"""
          |{
