@@ -17,7 +17,6 @@ object ReportsMetaDataLookup extends ResourceUtils {
 case class ReportMetaData(
   reportType: ReportTypeEnum,
   reportTable: String,
-  dispositions: List[DispositionType],
   description: String
 )
 
@@ -29,15 +28,10 @@ case object ReportMetaData {
     val reportType = ReportTypeEnum.byName(values(1).toLowerCase)
     val reportNumber = values(2)
     val description = values(4)
-    val dispositions =
-      values(3).split(";").filter(_.nonEmpty).map { d =>
-        DispositionType.byName(d.toLowerCase)
-      }.toList
 
     val data = ReportMetaData(
       reportType,
       reportNumber,
-      dispositions,
       description
     )
 

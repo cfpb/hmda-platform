@@ -2,8 +2,6 @@ package hmda.publication.reports.util
 
 import hmda.model.fi.lar.Applicant
 import hmda.model.publication.reports.RaceEnum._
-import hmda.model.publication.reports.{ RaceBorrowerCharacteristic, RaceCharacteristic }
-import hmda.publication.reports.util.DispositionType.{ LoansOriginated, ApplicationReceived }
 import hmda.publication.reports.util.RaceUtil._
 import hmda.util.SourceUtils
 import org.scalacheck.Gen
@@ -195,27 +193,6 @@ class RaceUtilSpec extends AsyncWordSpec with MustMatchers with SourceUtils with
       val excludedLars = larCollectionWithApplicant(_.copy(race1 = minority, coRace1 = 8))
       val nonJointLars = filterRace(source(excludedLars), JointRace)
       count(nonJointLars).map(_ mustBe 0)
-    }
-  }
-
-  "raceBorrowerCharacteristic" must {
-    "generate a RaceBorrowerCharacteristic with all 4 ethnicity categories and the specified dispositions" in {
-      val lars = lar100ListGen.sample.get
-      val dispositions = List(ApplicationReceived, LoansOriginated)
-
-      val resultF = raceBorrowerCharacteristic(source(lars), dispositions)
-
-      resultF.map { result =>
-        result mustBe a[RaceBorrowerCharacteristic]
-
-        result.races.size mustBe 8
-
-        val firstEthCharacteristic = result.races.head
-        firstEthCharacteristic mustBe a[RaceCharacteristic]
-        firstEthCharacteristic.race mustBe AmericanIndianOrAlaskaNative
-        firstEthCharacteristic.dispositions.map(_.dispositionName) mustBe
-          List(ApplicationReceived.value, LoansOriginated.value)
-      }
     }
   }
 
