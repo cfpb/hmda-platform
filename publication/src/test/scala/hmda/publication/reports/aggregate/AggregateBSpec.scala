@@ -24,7 +24,7 @@ class AggregateBSpec extends AsyncWordSpec with MustMatchers
   val fips = 24300 // Grand Junction, CO
   val lars = lar100ListGen.sample.get.map { lar: LoanApplicationRegister =>
     val geo = lar.geography.copy(msa = fips.toString)
-    val loan = lar.loan.copy(loanType = 1)
+    val loan = lar.loan.copy(loanType = 1, occupancy = 1)
     lar.copy(respondentId = respId, geography = geo, loan = loan)
   }
 

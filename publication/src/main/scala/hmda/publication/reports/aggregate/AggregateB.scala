@@ -22,7 +22,7 @@ object NationalAggregateB extends AggregateBX {
 trait AggregateBX extends AggregateReport {
   val reportId: String
   def filters(lar: LoanApplicationRegister): Boolean = {
-    lar.loan.loanType == 1
+    lar.loan.loanType == 1 && lar.loan.occupancy == 1
   }
 
   def geoFilter(fips: Int)(lar: LoanApplicationRegister): Boolean =
