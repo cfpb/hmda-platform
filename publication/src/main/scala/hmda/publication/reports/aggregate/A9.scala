@@ -4,7 +4,7 @@ import akka.stream.scaladsl.Source
 import hmda.census.model.{ Tract, TractLookup }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.model.publication.reports.ValueDisposition
-import hmda.publication.reports.util.CensusTractUtil.filterMedianYearHomesBuilt
+import hmda.publication.reports.util.CensusTractUtil._
 import hmda.publication.reports.util.DispositionType._
 import hmda.publication.reports.util.ReportsMetaDataLookup
 import hmda.publication.reports.util.ReportUtil.{ calculateYear, formattedCurrentDate, msaReport }
@@ -19,8 +19,6 @@ object A9 extends Aggregate9 {
   def msaTracts(fips: Int): Set[Tract] = TractLookup.values.filter(_.msa == fips.toString)
   def msaLars(larSource: Source[LoanApplicationRegister, NotUsed], fips: Int): Source[LoanApplicationRegister, NotUsed] =
     larSource.filter(_.geography.msa == fips)
-  def naLars(larSource: Source[LoanApplicationRegister, NotUsed]): Source[LoanApplicationRegister, NotUsed] =
-    Source.empty
 }
 object N9 extends Aggregate9 {
   val reportId: String = "N9"
@@ -29,8 +27,6 @@ object N9 extends Aggregate9 {
   def msaTracts(fips: Int): Set[Tract] = TractLookup.values
   def msaLars(larSource: Source[LoanApplicationRegister, NotUsed], fips: Int): Source[LoanApplicationRegister, NotUsed] =
     larSource.filter(_.geography.msa != "NA")
-  def naLars(larSource: Source[LoanApplicationRegister, NotUsed]): Source[LoanApplicationRegister, NotUsed] =
-    larSource.filter(_.geography.msa == "NA")
 }
 
 trait Aggregate9 extends AggregateReport {
@@ -39,7 +35,6 @@ trait Aggregate9 extends AggregateReport {
   def msaString(fips: Int): String
   def msaTracts(fips: Int): Set[Tract]
   def msaLars(larSource: Source[LoanApplicationRegister, NotUsed], fips: Int): Source[LoanApplicationRegister, NotUsed]
-  def naLars(larSource: Source[LoanApplicationRegister, NotUsed]): Source[LoanApplicationRegister, NotUsed]
 
   val loanCategories = List(FHA, Conventional, Refinancings, HomeImprovementLoans,
     LoansForFiveOrMore, NonoccupantLoans, ManufacturedHomeDwellings)
@@ -55,11 +50,13 @@ trait Aggregate9 extends AggregateReport {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
-    val yearF = calculateYear(larSource)
+    val reportLars = larSource.filter(filters)
+
+    val yearF = calculateYear(reportLars)
     val reportDate = formattedCurrentDate
-    val lars = msaLars(larSource, fipsCode)
-    val larsWithoutMSA = naLars(larSource)
+    val lars = msaLars(reportLars, fipsCode)
     val tracts = msaTracts(fipsCode)
+    val larsUnknownMedianAgeInTract = filterUnknownMedianYearBuilt(reportLars, tracts)
 
     for {
       year <- yearF
@@ -69,7 +66,7 @@ trait Aggregate9 extends AggregateReport {
       a3 <- loanCategoryDispositions(filterMedianYearHomesBuilt(lars, 1980, 1990, tracts))
       a4 <- loanCategoryDispositions(filterMedianYearHomesBuilt(lars, 1970, 1980, tracts))
       a5 <- loanCategoryDispositions(filterMedianYearHomesBuilt(lars, 0, 1980, tracts))
-      a6 <- loanCategoryDispositions(larsWithoutMSA)
+      a6 <- loanCategoryDispositions(larsUnknownMedianAgeInTract)
 
     } yield {
       val report =
