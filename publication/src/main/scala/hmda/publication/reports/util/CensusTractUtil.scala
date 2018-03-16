@@ -30,6 +30,17 @@ object CensusTractUtil {
     }
   }
 
+  def filterMedianYearHomesBuilt(lars: Source[LoanApplicationRegister, NotUsed], lower: Int, upper: Int, tracts: Set[Tract]): Source[LoanApplicationRegister, NotUsed] = {
+    lars.filter { lar =>
+      TractLookup.forLar(lar, tracts) match {
+        case Some(tract) =>
+          val medianAge = tract.medianYearHomesBuilt
+          medianAge >= lower && medianAge < upper
+        case _ => false
+      }
+    }
+  }
+
   def filterSmallCounty(lars: Source[LoanApplicationRegister, NotUsed]): Source[LoanApplicationRegister, NotUsed] = {
     lars.filter(lar => CBSATractLookup.geoIsSmallCounty(lar.geography))
   }

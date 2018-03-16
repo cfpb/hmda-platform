@@ -56,5 +56,15 @@ class TractLookupSpec extends WordSpec with MustMatchers with LarGenerators {
       lookup.forall(_.tractMfiPercentageOfMsaMfi >= 0) mustBe true
       lookup.forall(_.tractMfiPercentageOfMsaMfi <= 1000) mustBe true
     }
+
+    "have median age of homes per tract" in {
+      TractLookup.forLar(lar1).get.medianYearHomesBuilt mustBe 1979
+      TractLookup.forLar(lar2).get.medianYearHomesBuilt mustBe 1958
+    }
+
+    "have realistic values for median age of homes" in {
+      lookup.forall(_.medianYearHomesBuilt <= 2015) mustBe true
+      lookup.forall(_.medianYearHomesBuilt >= 1800) mustBe true
+    }
   }
 }

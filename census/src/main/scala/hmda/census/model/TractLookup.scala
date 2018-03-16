@@ -21,6 +21,7 @@ object TractLookup extends CbsaResourceUtils {
       val tractFips2010 = values(4)
       val minorityPopulation = Try(values(7).toDouble).getOrElse(0.0)
       val tractMfiToMsaPercent = Try(values(11).toDouble).getOrElse(100.0)
+      val medianYearHomesBuilt = 2015 - Try(values(12).toInt).getOrElse(0)
 
       Tract(
         stateFips2010,
@@ -30,7 +31,8 @@ object TractLookup extends CbsaResourceUtils {
         stateFips2010 + countyFips2010,
         msa,
         minorityPopulation,
-        tractMfiToMsaPercent
+        tractMfiToMsaPercent,
+        medianYearHomesBuilt
       )
     }.toSet
   }
@@ -53,5 +55,6 @@ case class Tract(
   key: String = "",
   msa: String = "",
   minorityPopulationPercent: Double = 0.0,
-  tractMfiPercentageOfMsaMfi: Double = 0.0
+  tractMfiPercentageOfMsaMfi: Double = 0.0,
+  medianYearHomesBuilt: Int = 0
 )
