@@ -48,19 +48,35 @@ services:
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
 
-  reports_ui:
+  data_pub:
     build: ../hmda-pub-ui
     depends_on:
       - api
     volumes:
-      - ../hmda-pub-ui/reports:/usr/src/app/reports
+      - ../hmda-pub-ui/data-publication:/usr/src/app/data-publication
     environment:
       APP_URL: https://192.168.99.100
       HMDA_API: https://192.168.99.100:4443/hmda
       # lb settings
-      VIRTUAL_HOST: 'http://*:80/reports/*, https://*:443/reports/*'
+      VIRTUAL_HOST: 'http://*:80/data-publication/*, https://*:443/data-publication/*'
       VIRTUAL_HOST_WEIGHT: 1 # make sure this wins over the app UI
-      EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /reports//?(.*)" "\1\ /\2"'
+      EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /data-publication//?(.*)" "\1\ /\2"'
+      EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
+      FORCE_SSL: 'true' # redirect 80 to 443
+
+  tools:
+    build: ../hmda-platform-tools
+    depends_on:
+      - api
+    volumes:
+      - ../hmda-platform-tools/tools:/usr/src/app/tools
+    environment:
+      APP_URL: https://192.168.99.100
+      HMDA_API: https://192.168.99.100:4443/hmda
+      # lb settings
+      VIRTUAL_HOST: 'http://*:80/tools/*, https://*:443/tools/*'
+      VIRTUAL_HOST_WEIGHT: 1 # make sure this wins over the app UI
+      EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /tools//?(.*)" "\1\ /\2"'
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
 
@@ -162,7 +178,8 @@ services:
       - keycloak
       - mail_dev
       - ui
-      - reports_ui
+      - data_pub
+      - tools
     environment:
       # EXTRA_GLOBAL_SETTINGS: 'debug' # enable for request logging
       # Default SSL cert for ALL services served by lb
