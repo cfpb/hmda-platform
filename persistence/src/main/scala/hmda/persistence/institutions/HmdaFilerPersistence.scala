@@ -112,7 +112,6 @@ class HmdaFilerPersistence extends HmdaPersistentActor {
 
     case GetState =>
       val filers = state.filers
-      println(filers)
       sender() ! filers
 
     case msg: Any =>
