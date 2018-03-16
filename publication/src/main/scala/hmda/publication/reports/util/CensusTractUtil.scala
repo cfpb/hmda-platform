@@ -34,9 +34,24 @@ object CensusTractUtil {
     lars.filter { lar =>
       TractLookup.forLar(lar, tracts) match {
         case Some(tract) =>
-          val medianAge = tract.medianYearHomesBuilt
-          medianAge >= lower && medianAge < upper
+          tract.medianYearHomesBuilt match {
+            case Some(medianAge) => medianAge >= lower && medianAge < upper
+            case _ => false
+          }
         case _ => false
+      }
+    }
+  }
+
+  def filterUnknownMedianYearBuilt(lars: Source[LoanApplicationRegister, NotUsed], tracts: Set[Tract]): Source[LoanApplicationRegister, NotUsed] = {
+    lars.filter { lar =>
+      TractLookup.forLar(lar, tracts) match {
+        case Some(tract) =>
+          tract.medianYearHomesBuilt match {
+            case None => true
+            case _ => false
+          }
+        case _ => true
       }
     }
   }

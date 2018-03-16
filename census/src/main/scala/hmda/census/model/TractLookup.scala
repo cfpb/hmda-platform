@@ -3,7 +3,7 @@ package hmda.census.model
 import com.github.tototoshi.csv.CSVParser._
 import hmda.model.fi.lar.LoanApplicationRegister
 
-import scala.util.Try
+import scala.util.{ Success, Try }
 
 // The file contains a list of all census tracts and what county and state they are in
 // site: https://www.ffiec.gov/censusapp.htm
@@ -21,7 +21,10 @@ object TractLookup extends CbsaResourceUtils {
       val tractFips2010 = values(4)
       val minorityPopulation = Try(values(7).toDouble).getOrElse(0.0)
       val tractMfiToMsaPercent = Try(values(11).toDouble).getOrElse(100.0)
-      val medianYearHomesBuilt = 2015 - Try(values(12).toInt).getOrElse(0)
+      val medianYearHomesBuilt = Try(values(12).toInt) match {
+        case Success(value) => Some(2015 - value)
+        case _ => None
+      }
 
       Tract(
         stateFips2010,
@@ -56,5 +59,5 @@ case class Tract(
   msa: String = "",
   minorityPopulationPercent: Double = 0.0,
   tractMfiPercentageOfMsaMfi: Double = 0.0,
-  medianYearHomesBuilt: Int = 0
+  medianYearHomesBuilt: Option[Int] = None
 )
