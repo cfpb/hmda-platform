@@ -2,13 +2,19 @@ package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
 import hmda.model.institution.HmdaFiler
-import hmda.persistence.institutions.HmdaFilerPersistence.HmdaFilerState
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler }
 import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 import hmda.persistence.model.HmdaPersistentActor
+import akka.cluster.pubsub.DistributedPubSub
+import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
+import hmda.persistence.processing.PubSubTopics
+import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
 
 object HmdaFilerPersistence {
+
+  val name = "hmda-filers"
+
   def props: Props = Props(new HmdaFilerPersistence)
 
   def createHmdaFilers(system: ActorSystem): ActorRef = {
@@ -27,20 +33,28 @@ object HmdaFilerPersistence {
 }
 
 class HmdaFilerPersistence extends HmdaPersistentActor {
+  import HmdaFilerPersistence._
 
-  override def persistenceId: String = "hmda-filers"
+  override def persistenceId: String = name
 
   var state = HmdaFilerState()
 
-  override def preStart(): Unit = {
-    super.preStart()
-  }
+  val mediator = DistributedPubSub(context.system).mediator
+
+  mediator ! Subscribe(PubSubTopics.submissionSigned, self)
 
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
   }
 
   override def receiveCommand: Receive = {
+    case SubscribeAck(Subscribe(PubSubTopics.submissionSigned, None, `self`)) =>
+      log.info(s"${self.path} subscribed to ${PubSubTopics.submissionSigned}")
+
+    case SubmissionSignedPubSub(submissionId) =>
+      log.debug(s"Received Signed event for ${submissionId.toString}")
+      val institutionId = submissionId.institutionId
+
     case CreateHmdaFiler(hmdaFiler) =>
       persist(HmdaFilerCreated(hmdaFiler)) { e =>
         updateState(e)
