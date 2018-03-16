@@ -1,15 +1,21 @@
 package hmda.persistence.institutions
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
-import hmda.model.institution.HmdaFiler
+import akka.pattern.ask
+import hmda.model.institution.{ HmdaFiler, Institution }
 import hmda.persistence.messages.CommonMessages._
 import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler }
 import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 import hmda.persistence.model.HmdaPersistentActor
 import akka.cluster.pubsub.DistributedPubSub
 import akka.cluster.pubsub.DistributedPubSubMediator.{ Subscribe, SubscribeAck }
+import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
+import hmda.persistence.messages.commands.institutions.InstitutionCommands.GetInstitutionById
 import hmda.persistence.processing.PubSubTopics
 import hmda.persistence.messages.events.pubsub.PubSubEvents.SubmissionSignedPubSub
+import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
+import scala.concurrent.duration._
 
 object HmdaFilerPersistence {
 
@@ -43,6 +49,11 @@ class HmdaFilerPersistence extends HmdaPersistentActor {
 
   mediator ! Subscribe(PubSubTopics.submissionSigned, self)
 
+  val config = ConfigFactory.load()
+  val duration = config.getInt("hmda.actor.timeout")
+
+  implicit val timeout = Timeout(duration.seconds)
+
   override def updateState(event: Event): Unit = {
     state = state.updated(event)
   }
@@ -54,6 +65,17 @@ class HmdaFilerPersistence extends HmdaPersistentActor {
     case SubmissionSignedPubSub(submissionId) =>
       log.debug(s"Received Signed event for ${submissionId.toString}")
       val institutionId = submissionId.institutionId
+      val supervisor = context.parent
+      val institutionPersistenceF = (supervisor ? FindActorByName(InstitutionPersistence.name))
+        .mapTo[ActorRef]
+
+      for {
+        a <- institutionPersistenceF
+        i <- (a ? GetInstitutionById(institutionId)).mapTo[Institution]
+        f = HmdaFiler(i.id, i.respondentId, submissionId.period, i.respondent.name)
+      } yield {
+        self ! CreateHmdaFiler(f)
+      }
 
     case CreateHmdaFiler(hmdaFiler) =>
       persist(HmdaFilerCreated(hmdaFiler)) { e =>
