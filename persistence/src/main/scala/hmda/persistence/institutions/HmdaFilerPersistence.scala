@@ -52,7 +52,6 @@ class HmdaFilerPersistence extends HmdaPersistentActor {
       maybeFiler match {
         case Some(filer) =>
           persist(HmdaFilerDeleted(filer)) { e =>
-            println(s"deleted: ${e.toString}")
             updateState(e)
             sender() ! Some(e)
           }
