@@ -16,7 +16,6 @@ import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
 import hmda.census.model.MsaIncomeLookup
 import hmda.persistence.messages.commands.publication.PublicationCommands.GenerateAggregateReports
-import hmda.publication.reports
 
 import scala.concurrent.duration._
 
@@ -61,6 +60,7 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
     A51, A52, A53, A54, A56, A57,
     A71, A72, A73, A74, A75, A76, A77,
     A81, A82, A83, A84, A85, A86, A87,
+    A9,
     A11_1, A11_2, A11_3, A11_4, A11_5, A11_6, A11_7, A11_8, A11_9, A11_10,
     A12_1, A12_2
   )
@@ -74,6 +74,7 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
     N51, N52, N53, N54, N56, N57,
     N71, N72, N73, N74, N75, N76, N77,
     N81, N82, N83, N84, N85, N86, N87,
+    N9,
     N11_1, N11_2, N11_3, N11_4, N11_5, N11_6, N11_7, N11_8, N11_9, N11_10,
     N12_1, N12_2
   )
