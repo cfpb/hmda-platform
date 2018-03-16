@@ -90,6 +90,9 @@ class InstitutionPersistence extends HmdaPersistentActor {
       val institutions = state.institutions.filter(i => ids.contains(i.id))
       sender() ! institutions
 
+    case GetInstitutionByIdAndPeriod(institutionId, period) =>
+      sender() ! state.institutions.find(i => i.id == institutionId && i.activityYear.toString == period).headOption.getOrElse(Institution.empty)
+
     case GetInstitutionByRespondentId(respondentId) =>
       val institution = state.institutions.find { i =>
         i.respondent.externalId.value == respondentId
