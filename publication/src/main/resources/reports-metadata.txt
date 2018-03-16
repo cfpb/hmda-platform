@@ -1,4 +1,5 @@
 ReportId,Type,ReportTable,Dispositions,Description
+AI,Aggregate,i,,"List of financial institutions whose data make up the 2017 MSA/MD aggregate report"
 A_A1,Aggregate,A1,,"Disposition of applications and loan sales by loan type, 1- to 4-family dwellings (Excludes manufactured homes)"
 A_A2,Aggregate,A2,,"Disposition of applications and loan sales by loan type, manufactured homes"
 A_A3,Aggregate,A3,,"Disposition of applications and loan sales by loan type, multifamily housing"
