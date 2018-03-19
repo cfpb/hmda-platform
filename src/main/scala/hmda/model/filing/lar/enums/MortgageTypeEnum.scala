@@ -9,7 +9,7 @@ object MortgageTypeEnum extends LarCodeEnum[MortgageTypeEnum] {
     code match {
       case 1 => ReverseMortgate
       case 2 => NotReverseMortgage
-      case _ => throw new Exception("Invalid Mortgage Type Code")
+      case _ => InvalidMortgageTypeCode
     }
   }
 }
@@ -22,4 +22,9 @@ case object ReverseMortgate extends MortgageTypeEnum {
 case object NotReverseMortgage extends MortgageTypeEnum {
   override val code: Int = 2
   override val description: String = "Not a reverse mortgate"
+}
+
+case object InvalidMortgageTypeCode extends MortgageTypeEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

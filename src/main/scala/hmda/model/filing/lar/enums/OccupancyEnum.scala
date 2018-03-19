@@ -10,7 +10,7 @@ object OccupancyEnum extends LarCodeEnum[OccupancyEnum] {
       case 1 => PrincipalResidence
       case 2 => SecondResidence
       case 3 => InvestmentProperty
-      case _ => throw new Exception("Invalid Occupancy Type Code")
+      case _ => InvalidOccupancyCode
     }
   }
 }
@@ -28,4 +28,9 @@ case object SecondResidence extends OccupancyEnum {
 case object InvestmentProperty extends OccupancyEnum {
   override val code: Int = 3
   override val description: String = "Investment Property"
+}
+
+case object InvalidOccupancyCode extends OccupancyEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

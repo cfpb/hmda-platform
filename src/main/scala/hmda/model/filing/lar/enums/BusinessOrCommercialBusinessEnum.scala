@@ -10,7 +10,7 @@ object BusinessOrCommercialBusinessEnum
     code match {
       case 1 => PrimarilyBusinessOrCommercialPurpose
       case 2 => NotPrimarilyBusinessOrCommercialPurpose
-      case _ => throw new Exception("Invalid Business Or Commercial Type Code")
+      case _ => InvalidBusinessOrCommercialBusinessCode
     }
   }
 }
@@ -27,4 +27,9 @@ case object NotPrimarilyBusinessOrCommercialPurpose
   override val code: Int = 2
   override val description: String =
     "Not primarily for a business or commercial purpose"
+}
+case object InvalidBusinessOrCommercialBusinessCode
+    extends BusinessOrCommercialBusinessEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

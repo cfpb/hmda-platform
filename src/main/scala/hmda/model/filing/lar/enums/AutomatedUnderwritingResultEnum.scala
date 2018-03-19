@@ -26,8 +26,7 @@ object AutomatedUnderwritingResultEnum
       case 15 => UnableToDetermineOrUnknown
       case 16 => OtherAutomatedUnderwritingResult
       case 17 => AutomatedUnderwritingResultNotApplicable
-      case _ =>
-        throw new Exception("Invalid Automated Underwriting Result Code")
+      case _  => InvalidAutomatedUnderwritingResultCode
     }
   }
 }
@@ -122,4 +121,10 @@ case object AutomatedUnderwritingResultNotApplicable
     extends AutomatedUnderwritingResultEnum {
   override val code: Int = 17
   override val description: String = "Not applicable"
+}
+
+case object InvalidAutomatedUnderwritingResultCode
+    extends AutomatedUnderwritingResultEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }

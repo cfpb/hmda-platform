@@ -8,12 +8,18 @@ import hmda.model.filing.lar.enums.{
 }
 
 case class Loan(
-    ULI: Option[String] = None,
+    ULI: String,
     applicationDate: String,
     loanType: LoanTypeEnum,
     loanPurpose: LoanPurposeEnum,
     constructionMethod: ConstructionMethodEnum,
     occupancy: OccupancyEnum,
     amount: Double,
-    loanTerm: String
+    loanTerm: String,
+    rateSpread: String,
+    interestRate: String,
+    prepaymentPenaltyTerm: String,
+    debtToIncomeRatio: String,
+    loanToValueRatio: String,
+    introductoryRatePeriod: String
 )
