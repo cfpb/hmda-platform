@@ -22,7 +22,7 @@ object HmdaFilerPersistence {
 
   val name = "hmda-filers"
 
-  def props: Props = Props(new HmdaFilerPersistence)
+  def props(): Props = Props(new HmdaFilerPersistence)
 
   def createHmdaFilers(system: ActorSystem): ActorRef = {
     system.actorOf(HmdaFilerPersistence.props)

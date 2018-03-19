@@ -73,7 +73,7 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
     actors.getOrElse(s"$name", createAPORPersistence(name))
 
   private def findHmdaFilerPersistence(name: String) =
-    actors.getOrElse(s"name", createHmdaFilerPersistence(name))
+    actors.getOrElse(s"$name", createHmdaFilerPersistence(name))
 
   override def createActor(name: String): ActorRef = name match {
     case id @ SingleLarValidation.name =>
@@ -114,7 +114,7 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
   }
 
   private def createHmdaFilerPersistence(name: String): ActorRef = {
-    val actor = context.actorOf(HmdaFilerPersistence.props.withDispatcher("persistence-dispatcher"), name)
+    val actor = context.actorOf(HmdaFilerPersistence.props().withDispatcher("persistence-dispatcher"), name)
     supervise(actor, name)
   }
 
