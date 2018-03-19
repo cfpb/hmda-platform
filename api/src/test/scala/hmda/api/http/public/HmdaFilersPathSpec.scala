@@ -6,7 +6,7 @@ import akka.event.{ LoggingAdapter, NoLogging }
 import akka.http.scaladsl.model.StatusCodes
 import akka.util.Timeout
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import org.scalatest.{ MustMatchers, WordSpec }
+import org.scalatest.{ BeforeAndAfterAll, MustMatchers, WordSpec }
 
 import scala.concurrent.{ Await, ExecutionContext }
 import scala.concurrent.duration._
@@ -19,7 +19,7 @@ import hmda.persistence.institutions.HmdaFilerPersistence
 import hmda.validation.stats.ValidationStats
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
-class HmdaFilersPathSpec extends WordSpec with MustMatchers with ScalatestRouteTest with HmdaFilerPaths {
+class HmdaFilersPathSpec extends WordSpec with MustMatchers with BeforeAndAfterAll with ScalatestRouteTest with HmdaFilerPaths {
 
   val duration = 10.seconds
 
