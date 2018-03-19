@@ -11,7 +11,7 @@ object ApplicationSubmissionEnum
       case 1 => SubmittedDirectlyToInstitution
       case 2 => NotSubmittedDirectlyToInstitution
       case 3 => ApplicationSubmissionNotApplicable
-      case _ => throw new Exception("Invalid Application Submission Code")
+      case _ => InvalidApplicationSubmissionCode
     }
   }
 }
@@ -32,4 +32,9 @@ case object ApplicationSubmissionNotApplicable
     extends ApplicationSubmissionEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
+}
+
+case object InvalidApplicationSubmissionCode extends ApplicationSubmissionEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid code"
 }

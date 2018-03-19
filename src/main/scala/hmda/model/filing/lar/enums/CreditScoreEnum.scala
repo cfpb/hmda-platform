@@ -17,7 +17,7 @@ object CreditScoreEnum extends LarCodeEnum[CreditScoreEnum] {
       case 8  => OtherCreditScoreModel
       case 9  => CreditScoreNotApplicable
       case 10 => CreditScoreNoCoApplicant
-      case _  => throw new Exception("Invalid Credit Score Code")
+      case _  => InvalidCreditScoreCode
     }
   }
 }
@@ -70,4 +70,9 @@ case object CreditScoreNotApplicable extends CreditScoreEnum {
 case object CreditScoreNoCoApplicant extends CreditScoreEnum {
   override val code: Int = 10
   override val description: String = "No co-applicant"
+}
+
+case object InvalidCreditScoreCode extends CreditScoreEnum {
+  override def code: Int = -1
+  override def description: String = "Invalid Code"
 }
