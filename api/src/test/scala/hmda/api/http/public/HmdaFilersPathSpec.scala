@@ -12,12 +12,12 @@ import scala.concurrent.{ Await, ExecutionContext }
 import scala.concurrent.duration._
 import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.CreateHmdaFiler
 import hmda.model.institution.FilingGenerators._
-import hmda.model.institution.HmdaFiler
 import hmda.persistence.HmdaSupervisor
 import hmda.persistence.HmdaSupervisor.FindHmdaFilerPersistence
 import hmda.persistence.institutions.HmdaFilerPersistence
 import hmda.validation.stats.ValidationStats
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import hmda.api.model.public.HmdaFilerResponse
 
 class HmdaFilersPathSpec extends WordSpec with MustMatchers with BeforeAndAfterAll with ScalatestRouteTest with HmdaFilerPaths {
 
@@ -51,7 +51,7 @@ class HmdaFilersPathSpec extends WordSpec with MustMatchers with BeforeAndAfterA
     "retrieve list of filers" in {
       Get("/filers") ~> hmdaFilersPath(supervisor) ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Set[HmdaFiler]] mustBe Set(hmdaFiler1, hmdaFiler2)
+        responseAs[HmdaFilerResponse] mustBe HmdaFilerResponse(Set(hmdaFiler1, hmdaFiler2))
       }
     }
   }

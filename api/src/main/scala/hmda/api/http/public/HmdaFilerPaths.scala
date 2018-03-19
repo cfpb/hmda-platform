@@ -9,6 +9,7 @@ import hmda.api.protocol.processing.ApiErrorProtocol
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import hmda.api.model.public.HmdaFilerResponse
 import hmda.api.protocol.public.HmdaFilerProtocol
 import hmda.model.institution.HmdaFiler
 import hmda.persistence.HmdaSupervisor.FindHmdaFilerPersistence
@@ -37,7 +38,7 @@ trait HmdaFilerPaths extends HmdaCustomDirectives with HmdaFilerProtocol with Ap
 
           onComplete(filersF) {
             case Success(filers) =>
-              complete(ToResponseMarshallable(filers))
+              complete(ToResponseMarshallable(HmdaFilerResponse(filers)))
             case Failure(e) =>
               completeWithInternalError(uri, e)
           }
