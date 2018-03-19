@@ -21,9 +21,18 @@ import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
 
+object A41 extends A4X {
+  override val reportId: String = "A41"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    List(2, 3, 4).contains(loan.loanType) &&
+      List(1, 2).contains(loan.propertyType) &&
+      loan.purpose == 1
+  }
+}
 object A42 extends A4X {
-  val reportId: String = "A42"
-  def filters(lar: LoanApplicationRegister): Boolean = {
+  override val reportId: String = "A42"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
     lar.loan.loanType == 1 &&
       (lar.loan.propertyType == 1 || lar.loan.propertyType == 2) &&
       (lar.loan.purpose == 1)
@@ -34,6 +43,12 @@ object A43 extends A4X {
   override def filters(lar: LoanApplicationRegister): Boolean = {
     List(1, 2).contains(lar.loan.propertyType) &&
       lar.loan.purpose == 3
+  }
+}
+object A44 extends A4X {
+  override val reportId: String = "A44"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    List(1, 2).contains(lar.loan.propertyType) && lar.loan.purpose == 2
   }
 }
 object A45 extends A4X {
@@ -65,11 +80,25 @@ object N41 extends A4X {
       lar.loan.purpose == 1
   }
 }
+object N42 extends A4X {
+  override val reportId: String = "N42"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    val loan = lar.loan
+    loan.loanType == 1 && loan.purpose == 1 &&
+      List(1, 2).contains(loan.propertyType)
+  }
+}
 object N43 extends A4X {
   override val reportId: String = "N43"
   override def filters(lar: LoanApplicationRegister): Boolean = {
     List(1, 2).contains(lar.loan.propertyType) &&
       lar.loan.purpose == 3
+  }
+}
+object N44 extends A4X {
+  override val reportId: String = "N44"
+  override def filters(lar: LoanApplicationRegister): Boolean = {
+    List(1, 2).contains(lar.loan.propertyType) && lar.loan.purpose == 2
   }
 }
 object N45 extends A4X {
