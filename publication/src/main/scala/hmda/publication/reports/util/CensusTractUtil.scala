@@ -30,6 +30,32 @@ object CensusTractUtil {
     }
   }
 
+  def filterMedianYearHomesBuilt(lars: Source[LoanApplicationRegister, NotUsed], lower: Int, upper: Int, tracts: Set[Tract]): Source[LoanApplicationRegister, NotUsed] = {
+    lars.filter { lar =>
+      TractLookup.forLar(lar, tracts) match {
+        case Some(tract) =>
+          tract.medianYearHomesBuilt match {
+            case Some(medianAge) => medianAge >= lower && medianAge < upper
+            case _ => false
+          }
+        case _ => false
+      }
+    }
+  }
+
+  def filterUnknownMedianYearBuilt(lars: Source[LoanApplicationRegister, NotUsed], tracts: Set[Tract]): Source[LoanApplicationRegister, NotUsed] = {
+    lars.filter { lar =>
+      TractLookup.forLar(lar, tracts) match {
+        case Some(tract) =>
+          tract.medianYearHomesBuilt match {
+            case None => true
+            case _ => false
+          }
+        case _ => true
+      }
+    }
+  }
+
   def filterSmallCounty(lars: Source[LoanApplicationRegister, NotUsed]): Source[LoanApplicationRegister, NotUsed] = {
     lars.filter(lar => CBSATractLookup.geoIsSmallCounty(lar.geography))
   }
