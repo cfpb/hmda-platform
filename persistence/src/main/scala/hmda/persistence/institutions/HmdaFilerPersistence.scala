@@ -25,7 +25,7 @@ object HmdaFilerPersistence {
   def props(): Props = Props(new HmdaFilerPersistence)
 
   def createHmdaFilers(system: ActorSystem): ActorRef = {
-    system.actorOf(HmdaFilerPersistence.props)
+    system.actorOf(HmdaFilerPersistence.props, HmdaFilerPersistence.name)
   }
 
   case class HmdaFilerState(filers: Set[HmdaFiler] = Set.empty[HmdaFiler]) {
