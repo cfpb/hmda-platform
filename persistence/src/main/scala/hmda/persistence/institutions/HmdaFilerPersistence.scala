@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.pattern.ask
 import hmda.model.institution.{ HmdaFiler, Institution }
 import hmda.persistence.messages.CommonMessages._
-import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, CreateHmdaFilerWithReply, DeleteHmdaFiler, FindHmdaFiler }
+import hmda.persistence.messages.commands.institutions.HmdaFilerCommands._
 import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 import hmda.persistence.model.HmdaPersistentActor
 import akka.cluster.pubsub.DistributedPubSub
@@ -109,6 +109,10 @@ class HmdaFilerPersistence extends HmdaPersistentActor {
 
     case FindHmdaFiler(id) =>
       sender() ! state.filers.find(f => f.institutionId == id)
+
+    case FindHmdaFilers(period) =>
+      val filtered = state.filers.filter(f => f.period == period)
+      sender() ! filtered
 
     case GetState =>
       val filers = state.filers

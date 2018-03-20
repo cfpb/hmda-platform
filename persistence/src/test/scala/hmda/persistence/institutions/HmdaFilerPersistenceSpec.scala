@@ -1,8 +1,7 @@
 package hmda.persistence.institutions
 
-import hmda.persistence.model.{ ActorSpec, AsyncActorSpec }
+import hmda.persistence.model.ActorSpec
 import akka.pattern.ask
-import HmdaFilerPersistence._
 import akka.actor.ActorRef
 import akka.testkit.TestProbe
 import akka.util.Timeout
@@ -10,7 +9,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.fi.SubmissionId
 import hmda.model.institution.ExternalIdType.RssdId
 import hmda.model.institution.{ ExternalId, HmdaFiler, Institution, Respondent }
-import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler }
+import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler, FindHmdaFilers }
 import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 import hmda.persistence.HmdaSupervisor._
 import hmda.persistence.messages.CommonMessages.GetState
@@ -42,7 +41,7 @@ class HmdaFilerPersistenceSpec extends ActorSpec with BeforeAndAfterAll {
   val hmdaFilers = Await.result(hmdaFilersF, duration.seconds)
   val institutions = Await.result(institutionsF, duration.seconds)
 
-  val i = Institution.empty.copy(id = "abc", activityYear = 2017, respondent = Respondent(ExternalId("respId 1", RssdId), name = "Bank 0"))
+  val i = Institution.empty.copy(id = "abc", activityYear = 2017, respondent = Respondent(ExternalId("respId 2", RssdId), name = "Bank 2"))
 
   val probe = TestProbe()
 
@@ -51,8 +50,10 @@ class HmdaFilerPersistenceSpec extends ActorSpec with BeforeAndAfterAll {
     institutions ! CreateInstitution(i)
   }
 
-  val hmdaFiler1 = HmdaFiler("12345", "respId 2", "2017", "Bank 1")
-  val hmdaFiler2 = HmdaFiler("abc", "respId 1", "2017", "Bank 0")
+  val hmdaFiler1 = HmdaFiler("12345", "respId 1", "2017", "Bank 1")
+  val hmdaFiler2 = HmdaFiler("abc", "respId 2", "2017", "Bank 2")
+  val hmdaFiler3 = HmdaFiler("abcd", "respId 3", "2016", "Bank 3")
+  val hmdaFiler4 = HmdaFiler("xxxx", "respId 4", "2017", "Bank 4")
 
   "Hmda Filers" must {
     "return empty when there is nothing saved" in {
@@ -82,7 +83,18 @@ class HmdaFilerPersistenceSpec extends ActorSpec with BeforeAndAfterAll {
       probe.expectMsg(HmdaFilerCreated(hmdaFiler2))
       probe.send(hmdaFilers, GetState)
       probe.expectMsg(Set(hmdaFiler2))
+    }
+    "Filter by year" in {
+      probe.send(hmdaFilers, CreateHmdaFiler(hmdaFiler3))
+      probe.expectMsg(HmdaFilerCreated(hmdaFiler3))
 
+      probe.send(hmdaFilers, CreateHmdaFiler(hmdaFiler4))
+      probe.expectMsg(HmdaFilerCreated(hmdaFiler4))
+      probe.send(hmdaFilers, GetState)
+      probe.expectMsg(Set(hmdaFiler2, hmdaFiler3, hmdaFiler4))
+
+      probe.send(hmdaFilers, FindHmdaFilers("2017"))
+      probe.expectMsg(Set(hmdaFiler2, hmdaFiler4))
     }
   }
 
