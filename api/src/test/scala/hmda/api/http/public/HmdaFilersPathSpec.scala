@@ -18,6 +18,7 @@ import hmda.persistence.institutions.HmdaFilerPersistence
 import hmda.validation.stats.ValidationStats
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import hmda.api.model.public.HmdaFilerResponse
+import hmda.model.institution.HmdaFiler
 
 class HmdaFilersPathSpec extends WordSpec with MustMatchers with BeforeAndAfterAll with ScalatestRouteTest with HmdaFilerPaths {
 
@@ -27,8 +28,8 @@ class HmdaFilersPathSpec extends WordSpec with MustMatchers with BeforeAndAfterA
   override val ec: ExecutionContext = system.dispatcher
   override val log: LoggingAdapter = NoLogging
 
-  val hmdaFiler1 = hmdaFilerGen.sample.get
-  val hmdaFiler2 = hmdaFilerGen.sample.get
+  val hmdaFiler1 = hmdaFilerGen.sample.getOrElse(HmdaFiler("inst1", "resp1", "2017", "Bank 1"))
+  val hmdaFiler2 = hmdaFilerGen.sample.getOrElse(HmdaFiler("inst2", "resp2", "2016", "Bank2")).copy(period = "2016")
 
   val validationStats = system.actorOf(ValidationStats.props())
   val supervisor = system.actorOf(HmdaSupervisor.props(validationStats))
@@ -52,6 +53,12 @@ class HmdaFilersPathSpec extends WordSpec with MustMatchers with BeforeAndAfterA
       Get("/filers") ~> hmdaFilersPath(supervisor) ~> check {
         status mustBe StatusCodes.OK
         responseAs[HmdaFilerResponse] mustBe HmdaFilerResponse(Set(hmdaFiler1, hmdaFiler2))
+      }
+    }
+    "filter filers by period" in {
+      Get("/filers/2017") ~> hmdaFilersPath(supervisor) ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[HmdaFilerResponse] mustBe HmdaFilerResponse(Set(hmdaFiler1))
       }
     }
   }

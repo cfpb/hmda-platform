@@ -9,14 +9,16 @@ import hmda.api.protocol.processing.ApiErrorProtocol
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.model.Uri
 import hmda.api.model.public.HmdaFilerResponse
 import hmda.api.protocol.public.HmdaFilerProtocol
 import hmda.model.institution.HmdaFiler
 import hmda.persistence.HmdaSupervisor.FindHmdaFilerPersistence
 import hmda.persistence.institutions.HmdaFilerPersistence
 import hmda.persistence.messages.CommonMessages.GetState
+import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.FindHmdaFilers
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.util.{ Failure, Success }
 
 trait HmdaFilerPaths extends HmdaCustomDirectives with HmdaFilerProtocol with ApiErrorProtocol {
@@ -36,15 +38,31 @@ trait HmdaFilerPaths extends HmdaCustomDirectives with HmdaFilerProtocol with Ap
             filers <- (a ? GetState).mapTo[Set[HmdaFiler]]
           } yield filers
 
-          onComplete(filersF) {
-            case Success(filers) =>
-              complete(ToResponseMarshallable(HmdaFilerResponse(filers)))
-            case Failure(e) =>
-              completeWithInternalError(uri, e)
+          sendResponse(filersF, uri)
+        }
+      }
+    } ~
+      path("filers" / Segment) { period =>
+        encodeResponse {
+          timedGet { uri =>
+            val hmdaFilerPersistenceF = (supervisor ? FindHmdaFilerPersistence(HmdaFilerPersistence.name)).mapTo[ActorRef]
+            val filersF = for {
+              a <- hmdaFilerPersistenceF
+              filers <- (a ? FindHmdaFilers(period)).mapTo[Set[HmdaFiler]]
+            } yield filers
+
+            sendResponse(filersF, uri)
           }
         }
       }
-    }
   }
 
+  private def sendResponse(filersF: Future[Set[HmdaFiler]], uri: Uri) = {
+    onComplete(filersF) {
+      case Success(filers) =>
+        complete(ToResponseMarshallable(HmdaFilerResponse(filers)))
+      case Failure(e) =>
+        completeWithInternalError(uri, e)
+    }
+  }
 }
