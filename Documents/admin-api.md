@@ -373,3 +373,67 @@ This API is for internal use only. The following endpoints are available
     Saves all reports to the s3 bucket that is configured in the AWS environment variables.
 
     Returns a `200 OK` response.
+
+
+* `/filers`
+
+    * `POST`
+
+    Creates a new HMDA filer
+    Returns HTTP code 201 when successful
+
+    Example payload, in `JSON` format:
+
+    ```json
+    {
+        "institutionId": "0",
+        "name": "bank-0 National Association",
+        "period": "2017",
+        "respondentId": "Bank0_RID"
+    }
+    ```
+
+    The response is the same filer that has been inserted.
+
+    * `GET`
+
+    Retrieves list of HMDA filers.
+    Example response with HTTP code 200, in `JSON` format:
+
+    ```json
+    {
+        "institutions": [
+            {
+                "institutionId": "0",
+                "name": "bank-0 National Association",
+                "period": "2017",
+                "respondentId": "Bank0_RID"
+            },
+            {
+                "institutionId": "1",
+                "name": "Bak 1",
+                "period": "2016",
+                "respondentId": "Bank1_RID"
+             }
+        ]
+    }
+    ```
+
+    * `DELETE`
+
+    Deletes HMDA filer.
+    Returns HTTP code 202 when successful
+
+    Example payload, in `JSON` format:
+
+    ```json
+    {
+        "institutionId": "0",
+        "name": "bank-0 National Association",
+        "period": "2017",
+        "respondentId": "Bank0_RID"
+    }
+    ```
+
+    The response is the same filer that has been deleted.
+
