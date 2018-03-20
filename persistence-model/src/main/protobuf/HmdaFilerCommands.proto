@@ -17,3 +17,7 @@ message FindHmdaFilerMessage {
     string institutionId = 1;
 }
 
+message FindHmdaFilersMessage {
+    string period = 1;
+}
+

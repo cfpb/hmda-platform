@@ -4,10 +4,10 @@ import hmda.model.institution.FilingGenerators._
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import HmdaFilerProtobufConverter._
-import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler }
+import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler, FindHmdaFilers }
 import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 import hmda.persistence.model.serialization.HmdaFiler.HmdaFilerMessage
-import hmda.persistence.model.serialization.HmdaFilerCommands.{ CreateHmdaFilerMessage, DeleteHmdaFilerMessage, FindHmdaFilerMessage }
+import hmda.persistence.model.serialization.HmdaFilerCommands.{ CreateHmdaFilerMessage, DeleteHmdaFilerMessage, FindHmdaFilerMessage, FindHmdaFilersMessage }
 import hmda.persistence.model.serialization.HmdaFilerEvents.{ HmdaFilerCreatedMessage, HmdaFilerDeletedMessage }
 
 class HmdaFilerProtobufConverterSpec extends PropSpec with PropertyChecks with MustMatchers {
@@ -51,6 +51,14 @@ class HmdaFilerProtobufConverterSpec extends PropSpec with PropertyChecks with M
     forAll(hmdaFilerGen) { hmdaFiler =>
       val protobuf = findHmdaFilerToProtobuf(FindHmdaFiler(hmdaFiler.institutionId)).toByteArray
       findHmdaFilerFromProtobuf(FindHmdaFilerMessage.parseFrom(protobuf)) mustBe FindHmdaFiler(hmdaFiler.institutionId)
+    }
+  }
+
+  property("FindHmdaFilers by period must serialize to protobuf and back") {
+    forAll(filingGen) { filing =>
+      val findFilings = FindHmdaFilers(filing.period)
+      val protobuf = findHmdaFilersToProtobuf(findFilings).toByteArray
+      findHmdaFilersFromProtobuf(FindHmdaFilersMessage.parseFrom(protobuf)) mustBe findFilings
     }
   }
 

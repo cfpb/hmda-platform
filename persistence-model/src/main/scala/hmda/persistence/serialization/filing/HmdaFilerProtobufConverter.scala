@@ -1,10 +1,10 @@
 package hmda.persistence.serialization.filing
 
 import hmda.model.institution.HmdaFiler
-import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler }
+import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler, FindHmdaFilers }
 import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 import hmda.persistence.model.serialization.HmdaFiler.HmdaFilerMessage
-import hmda.persistence.model.serialization.HmdaFilerCommands.{ CreateHmdaFilerMessage, DeleteHmdaFilerMessage, FindHmdaFilerMessage }
+import hmda.persistence.model.serialization.HmdaFilerCommands.{ CreateHmdaFilerMessage, DeleteHmdaFilerMessage, FindHmdaFilerMessage, FindHmdaFilersMessage }
 import hmda.persistence.model.serialization.HmdaFilerEvents.{ HmdaFilerCreatedMessage, HmdaFilerDeletedMessage }
 
 object HmdaFilerProtobufConverter {
@@ -36,6 +36,18 @@ object HmdaFilerProtobufConverter {
   def findHmdaFilerFromProtobuf(msg: FindHmdaFilerMessage): FindHmdaFiler = {
     FindHmdaFiler(
       institutionId = msg.institutionId
+    )
+  }
+
+  def findHmdaFilersToProtobuf(obj: FindHmdaFilers): FindHmdaFilersMessage = {
+    FindHmdaFilersMessage(
+      period = obj.period
+    )
+  }
+
+  def findHmdaFilersFromProtobuf(msg: FindHmdaFilersMessage): FindHmdaFilers = {
+    FindHmdaFilers(
+      period = msg.period
     )
   }
 

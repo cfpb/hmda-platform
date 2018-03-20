@@ -3,7 +3,7 @@ package hmda.persistence.serialization.filing
 import org.scalatest.{ MustMatchers, PropSpec }
 import org.scalatest.prop.PropertyChecks
 import hmda.model.institution.FilingGenerators._
-import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler }
+import hmda.persistence.messages.commands.institutions.HmdaFilerCommands.{ CreateHmdaFiler, DeleteHmdaFiler, FindHmdaFiler, FindHmdaFilers }
 import hmda.persistence.messages.events.institutions.HmdaFilerEvents.{ HmdaFilerCreated, HmdaFilerDeleted }
 
 class HmdFilerProtobufSerializerSpec extends PropSpec with PropertyChecks with MustMatchers {
@@ -47,6 +47,14 @@ class HmdFilerProtobufSerializerSpec extends PropSpec with PropertyChecks with M
       val msg = HmdaFilerDeleted(hmdaFiler)
       val bytes = serializer.toBinary(msg)
       serializer.fromBinary(bytes, serializer.HmdaFilerDeletedManifest) mustBe msg
+    }
+  }
+
+  property("FindHmdaFilers messages must be serialized to binary and back") {
+    forAll(hmdaFilerGen) { hmdaFiler =>
+      val msg = FindHmdaFilers(hmdaFiler.period)
+      val bytes = serializer.toBinary(msg)
+      serializer.fromBinary(bytes, serializer.FindHmdaFilersManifest) mustBe msg
     }
   }
 
