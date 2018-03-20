@@ -28,7 +28,7 @@ class HmdaFilersPathSpec extends WordSpec with MustMatchers with BeforeAndAfterA
   override val ec: ExecutionContext = system.dispatcher
   override val log: LoggingAdapter = NoLogging
 
-  val hmdaFiler1 = hmdaFilerGen.sample.getOrElse(HmdaFiler("inst1", "resp1", "2017", "Bank 1"))
+  val hmdaFiler1 = hmdaFilerGen.sample.getOrElse(HmdaFiler("inst1", "resp1", "2017", "Bank 1")).copy(period = "2017")
   val hmdaFiler2 = hmdaFilerGen.sample.getOrElse(HmdaFiler("inst2", "resp2", "2016", "Bank2")).copy(period = "2016")
 
   val validationStats = system.actorOf(ValidationStats.props())
