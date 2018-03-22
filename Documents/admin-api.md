@@ -421,7 +421,7 @@ This API is for internal use only. The following endpoints are available
 
     * `DELETE`
 
-    Deletes HMDA filer.
+    Deletes HMDA filer with matching institutionId. name, period, and respondentId fields in payload are ignored.
     Returns HTTP code 202 when successful
 
     Example payload, in `JSON` format:
