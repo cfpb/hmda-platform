@@ -4,7 +4,7 @@ import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.cluster.client.ClusterClientReceptionist
 import hmda.model.fi.SubmissionId
 import hmda.persistence.apor.HmdaAPORPersistence
-import hmda.persistence.institutions.{ FilingPersistence, InstitutionPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.{ FilingPersistence, HmdaFilerPersistence, InstitutionPersistence, SubmissionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor
 import hmda.persistence.processing._
 import hmda.persistence.messages.CommonMessages._
@@ -18,6 +18,7 @@ object HmdaSupervisor {
   case class FindSubmissions(name: String, institutionId: String, period: String) extends Command
   case class FindProcessingActor(name: String, submissionId: SubmissionId) extends Command
   case class FindAPORPersistence(name: String) extends Command
+  case class FindHmdaFilerPersistence(name: String) extends Command
 
   def props(validationStats: ActorRef): Props = Props(new HmdaSupervisor(validationStats))
 
@@ -49,6 +50,9 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
     case FindAPORPersistence(aporName) =>
       sender() ! findAPORPersistence(aporName)
 
+    case FindHmdaFilerPersistence(hmdaFileName) =>
+      sender() ! findHmdaFilerPersistence(hmdaFileName)
+
     case Shutdown => context stop self
 
   }
@@ -67,6 +71,9 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
 
   private def findAPORPersistence(name: String): ActorRef =
     actors.getOrElse(s"$name", createAPORPersistence(name))
+
+  private def findHmdaFilerPersistence(name: String) =
+    actors.getOrElse(s"$name", createHmdaFilerPersistence(name))
 
   override def createActor(name: String): ActorRef = name match {
     case id @ SingleLarValidation.name =>
@@ -103,6 +110,11 @@ class HmdaSupervisor(validationStats: ActorRef) extends HmdaSupervisorActor {
 
   private def createAPORPersistence(name: String): ActorRef = {
     val actor = context.actorOf(HmdaAPORPersistence.props().withDispatcher("persistence-dispatcher"), name)
+    supervise(actor, name)
+  }
+
+  private def createHmdaFilerPersistence(name: String): ActorRef = {
+    val actor = context.actorOf(HmdaFilerPersistence.props().withDispatcher("persistence-dispatcher"), name)
     supervise(actor, name)
   }
 

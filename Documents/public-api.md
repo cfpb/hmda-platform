@@ -88,6 +88,53 @@ This documenatation describes de public HMDA Platform HTTP API
     }
     ```
 
+### HMDA Filers
+
+* `/filers`
+
+    * `GET`
+
+    Retrieves list of HMDA filers.
+    Example response with HTTP code 200, in `JSON` format:
+
+    ```json
+    {
+        "institutions": [
+            {
+                "institutionId": "0",
+                "name": "bank-0 National Association",
+                "period": "2017",
+                "respondentId": "Bank0_RID"
+            },
+            {
+                "institutionId": "1",
+                "name": "Bak 1",
+                "period": "2016",
+                "respondentId": "Bank1_RID"
+            }
+        ]
+    }
+    ```
+
+* `/filers/<period>`
+
+    * `GET`
+
+    Retrieves list of HMDA filers, filtered by period.
+    Example response with HTTP code 200, in `JSON` format:
+
+    {
+        "institutions": [
+            {
+                "institutionId": "0",
+                "name": "bank-0 National Association",
+                "period": "2017",
+                "respondentId": "Bank0_RID"
+            }
+        ]
+    }
+
+
 ### Modified LAR
 
 * `/institutions/<institutionId>/filings/<period>/lar`

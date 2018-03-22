@@ -14,12 +14,12 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.tcp.admin.InstitutionAdminTcpApi
 import hmda.api.{ HmdaAdminApi, HmdaFilingApi, HmdaPublicApi }
 import hmda.persistence.HmdaSupervisor
-import hmda.persistence.institutions.InstitutionPersistence
+import hmda.persistence.institutions.{ HmdaFilerPersistence, InstitutionPersistence }
 import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 import hmda.persistence.processing.SingleLarValidation
 import hmda.query.{ HmdaProjectionQuery, HmdaQuerySupervisor }
 import hmda.cluster.HmdaConfig._
-import hmda.persistence.HmdaSupervisor.FindAPORPersistence
+import hmda.persistence.HmdaSupervisor.{ FindAPORPersistence, FindHmdaFilerPersistence }
 import hmda.persistence.apor.HmdaAPORPersistence
 import hmda.persistence.apor.HmdaAPORPersistence.LoadAporDataFromS3
 import hmda.persistence.demo.DemoData
@@ -134,6 +134,10 @@ object HmdaPlatform extends App {
         QuartzSchedulerExtension(system).schedule("AporCalculator", a, LoadAporDataFromS3)
         log.info(s"Started Rate Spread calculator at ${a.path}")
       }
+
+    (supervisorProxy ? FindHmdaFilerPersistence(HmdaFilerPersistence.name))
+      .mapTo[ActorRef]
+      .map(a => log.info(s"Started filers at ${a.path}"))
   }
 
   //Start Query

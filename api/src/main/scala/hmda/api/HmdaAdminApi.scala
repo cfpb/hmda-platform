@@ -11,7 +11,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.BaseHttpApi
-import hmda.api.http.admin.{ APORAdminHttpApi, InstitutionAdminHttpApi, PublicationAdminHttpApi }
+import hmda.api.http.admin.{ APORAdminHttpApi, HmdaFilerAdminHttpApi, InstitutionAdminHttpApi, PublicationAdminHttpApi }
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -21,7 +21,7 @@ object HmdaAdminApi {
 }
 
 class HmdaAdminApi(supervisor: ActorRef, publicationSupervisor: ActorRef)
-    extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi with APORAdminHttpApi with PublicationAdminHttpApi {
+    extends HttpApi with BaseHttpApi with InstitutionAdminHttpApi with APORAdminHttpApi with PublicationAdminHttpApi with HmdaFilerAdminHttpApi {
 
   val config = ConfigFactory.load()
 
@@ -39,7 +39,7 @@ class HmdaAdminApi(supervisor: ActorRef, publicationSupervisor: ActorRef)
   override val log = Logging(system, getClass)
 
   override val paths: Route = routes(s"$name") ~ institutionAdminRoutes(supervisor) ~
-    aporRoutes(supervisor) ~ publicationRoutes(supervisor, publicationSupervisor)
+    aporRoutes(supervisor) ~ publicationRoutes(supervisor, publicationSupervisor) ~ hmdaFilerAdminRoutes(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
