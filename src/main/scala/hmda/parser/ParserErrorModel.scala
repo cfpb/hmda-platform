@@ -2,7 +2,10 @@ package hmda.parser
 
 object ParserErrorModel {
 
-  def notAnInteger(fieldName: String) = s"$fieldName is not an integer"
+  def notNumeric(fieldName: String) = s"$fieldName is not numeric"
+
+  def notStringOrNA(fieldName: String) =
+    s"$fieldName is not a non-empty string or NA"
 
   trait ParserValidationError {
     def errorMessage: String
