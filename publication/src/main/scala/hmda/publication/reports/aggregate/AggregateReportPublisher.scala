@@ -3,26 +3,20 @@ package hmda.publication.reports.aggregate
 import java.util.concurrent.CompletionStage
 
 import akka.NotUsed
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.actor.{ ActorSystem, Props }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.stream.Supervision._
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
 import akka.stream.scaladsl.{ Flow, Sink, Source }
 import akka.util.{ ByteString, Timeout }
-import akka.pattern.ask
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import hmda.persistence.model.HmdaActor
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 import akka.stream.alpakka.s3.javadsl.MultipartUploadResult
 import hmda.census.model.MsaIncomeLookup
-import hmda.model.institution.Institution
-import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.messages.CommonMessages.GetState
 import hmda.persistence.messages.commands.publication.PublicationCommands.GenerateAggregateReports
-import hmda.persistence.model.HmdaSupervisorActor.FindActorByName
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object AggregateReportPublisher {
@@ -103,7 +97,6 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
 
     val simpleReportFlow: Flow[(Int, AggregateReport), AggregateReportPayload, NotUsed] =
       Flow[(Int, AggregateReport)].mapAsyncUnordered(1) {
-        case (msa, AI) => AI.generateWithInst(larSource, msa, getInstitutions())
         case (msa, report) => report.generate(larSource, msa)
       }
 
@@ -127,15 +120,6 @@ class AggregateReportPublisher extends HmdaActor with LoanApplicationRegisterCas
    */
   private def combine(msas: List[Int], reports: List[AggregateReport]): List[(Int, AggregateReport)] = {
     msas.flatMap(msa => List.fill(reports.length)(msa).zip(reports))
-  }
-
-  private def getInstitutions(): Future[Set[Institution]] = {
-    val supervisor = system.actorSelection("/user/supervisor/singleton")
-    val fInstitutionsActor = (supervisor ? FindActorByName(InstitutionPersistence.name)).mapTo[ActorRef]
-    for {
-      a <- fInstitutionsActor
-      i <- (a ? GetState).mapTo[Set[Institution]]
-    } yield i
   }
 
 }
