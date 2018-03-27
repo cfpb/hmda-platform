@@ -1,4 +1,4 @@
-package hmda.http.model.common
+package hmda.api.http
 
 import java.net.InetAddress
 import java.time.Instant
@@ -6,10 +6,15 @@ import java.time.Instant
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.server.Directives.{
+  complete,
+  encodeResponse,
+  pathSingleSlash
+}
 import akka.stream.ActorMaterializer
-import hmda.http.model.directives.HmdaTimeDirectives
+import hmda.api.http.model.common.HmdaServiceStatus
+import hmda.api.http.model.directives.HmdaTimeDirectives
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import akka.http.scaladsl.server.Directives._
 import io.circe.generic.auto._
 
 trait BaseHttpApi extends HmdaTimeDirectives {

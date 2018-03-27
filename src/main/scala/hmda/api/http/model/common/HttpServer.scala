@@ -1,4 +1,4 @@
-package hmda.http.model.common
+package hmda.api.http.model.common
 
 import java.net.InetSocketAddress
 

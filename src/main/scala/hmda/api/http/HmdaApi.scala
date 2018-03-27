@@ -1,4 +1,4 @@
-package hmda.http.api
+package hmda.api.http
 
 import akka.actor.Props
 import hmda.model.actor.HmdaActor

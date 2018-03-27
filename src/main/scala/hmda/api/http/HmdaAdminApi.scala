@@ -1,21 +1,22 @@
-package hmda.http.api
+package hmda.api.http
 
 import akka.actor.{ActorSystem, Props}
-import akka.pattern.pipe
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
+import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.http.model.common.{BaseHttpApi, HttpServer}
+import hmda.api.http.model.common.HttpServer
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object HmdaFilingApi {
-  def props: Props = Props(new HmdaFilingApi)
+object HmdaAdminApi {
+  def props: Props = Props(new HmdaAdminApi)
 }
 
-class HmdaFilingApi extends HttpServer with BaseHttpApi {
+class HmdaAdminApi extends HttpServer with BaseHttpApi {
+
   val config = ConfigFactory.load()
 
   override implicit val system: ActorSystem = context.system
@@ -23,9 +24,9 @@ class HmdaFilingApi extends HttpServer with BaseHttpApi {
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val name: String = "hmda-filing-api"
-  override val host: String = config.getString("hmda.http.filingHost")
-  override val port: Int = config.getInt("hmda.http.filingPort")
+  override val name: String = "hmda-admin-api"
+  override val host: String = config.getString("hmda.http.adminHost")
+  override val port: Int = config.getInt("hmda.http.adminPort")
 
   override val paths: Route = routes(s"$name")
 
@@ -36,5 +37,4 @@ class HmdaFilingApi extends HttpServer with BaseHttpApi {
   )
 
   http pipeTo self
-
 }
