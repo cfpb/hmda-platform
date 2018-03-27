@@ -8,6 +8,10 @@ import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.common.HttpServer
+import hmda.api.http.public.TsValidationHttpApi
+import akka.http.scaladsl.server.Directives._
+import akka.util.Timeout
+import scala.concurrent.duration._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -15,7 +19,10 @@ object HmdaPublicApi {
   def props: Props = Props(new HmdaPublicApi)
 }
 
-class HmdaPublicApi extends HttpServer with BaseHttpApi {
+class HmdaPublicApi
+    extends HttpServer
+    with BaseHttpApi
+    with TsValidationHttpApi {
 
   val config = ConfigFactory.load()
 
@@ -27,8 +34,10 @@ class HmdaPublicApi extends HttpServer with BaseHttpApi {
   override val name: String = "hmda-public-api"
   override val host: String = config.getString("hmda.http.publicHost")
   override val port: Int = config.getInt("hmda.http.publicPort")
+  override val timeout: Timeout = Timeout(
+    config.getInt("hmda.http.timeout").seconds)
 
-  override val paths: Route = routes(s"$name")
+  override val paths: Route = routes(s"$name") ~ tsRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
@@ -37,5 +46,4 @@ class HmdaPublicApi extends HttpServer with BaseHttpApi {
   )
 
   http pipeTo self
-
 }
