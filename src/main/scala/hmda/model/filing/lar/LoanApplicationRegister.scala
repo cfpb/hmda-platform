@@ -1,7 +1,7 @@
 package hmda.model.filing.lar
 
 import enums._
-import hmda.model.filing.PipeDelimited
+import hmda.model.filing.{ HmdaFileRow, PipeDelimited }
 
 case class LoanApplicationRegister(
     larIdentifier: LarIdentifier,
@@ -25,7 +25,7 @@ case class LoanApplicationRegister(
     reverseMortgage: MortgageTypeEnum,
     lineOfCredit: LineOfCreditEnum,
     businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum
-) extends PipeDelimited {
+) extends PipeDelimited with HmdaFileRow {
 
   override def toCSV: String = {
 
@@ -51,5 +51,9 @@ case class LoanApplicationRegister(
       s"${property.propertyValue}|${property.manufacturedHomeSecuredProperty.code}|${property.manufacturedHomeLandPropertyInterest.code}|${property.totalUnits}|${property.multiFamilyAffordableUnits}|${applicationSubmission.code}|" +
       s"${payableToInstitution.code}|${larIdentifier.NMLSRIdentifier}|${AUS.toCSV}|${ausResult.toCSV}|${reverseMortgage.code}|${lineOfCredit.code}|${businessOrCommercialPurpose.code}"
 
+  }
+
+  override def valueOf(field: String): Any = {
+    LarFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")
   }
 }
