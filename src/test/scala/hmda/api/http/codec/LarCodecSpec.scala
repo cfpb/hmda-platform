@@ -16,11 +16,48 @@ class LarCodecSpec extends PropSpec with PropertyChecks with MustMatchers {
     }
   }
 
-  property("LOan must encode/decode to/from JSON") {
+  property("Loan must encode/decode to/from JSON") {
     forAll(loanGen) { loan =>
       val json = loan.asJson
       json.as[Loan].getOrElse(Loan()) mustBe loan
     }
   }
+
+  property("LarAction must encode/decode to/from JSON") {
+    pending
+  }
+
+  property("Geography must encode/decode to/from JSON") {
+    pending
+  }
+
+  property("Applicant must encode/decode to/from JSON") {
+    pending
+  }
+
+  property("Denial must encode/decode to/from JSON") {
+    pending
+  }
+
+  property("LoanDisclosure must encode/decode to/from JSON") {
+    pending
+  }
+
+  property("Property must encode/decode to/from JSON") {
+    pending
+  }
+
+  property("AutomatedUnderwritingSystem must encode/decode to/from JSON") {
+    pending
+  }
+
+  property("AutomatedUnderwritingSystemResult must encode/decode to/from JSON") {
+    pending
+  }
+
+  property("LoanApplicationRegister must encode/decode to/from JSON") {
+    pending
+  }
+
 
 }
