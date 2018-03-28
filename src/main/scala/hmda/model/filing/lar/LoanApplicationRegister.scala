@@ -4,27 +4,31 @@ import enums._
 import hmda.model.filing.PipeDelimited
 
 case class LoanApplicationRegister(
-    larIdentifier: LarIdentifier,
-    loan: Loan,
-    action: LarAction,
-    geography: Geography,
-    applicant: Applicant,
-    coApplicant: Applicant,
-    income: String,
-    purchaserType: PurchaserEnum,
-    hoepaStatus: HOEPAStatusEnum,
-    lienStatus: LienStatusEnum,
-    denial: Denial,
-    loanDisclosure: LoanDisclosure,
-    nonAmortizingFeatures: NonAmortizingFeatures,
-    property: Property,
-    applicationSubmission: ApplicationSubmissionEnum,
-    payableToInstitution: PayableToInstitutionEnum,
-    AUS: AutomatedUnderwritingSystem,
-    ausResult: AutomatedUnderwritingSystemResult,
-    reverseMortgage: MortgageTypeEnum,
-    lineOfCredit: LineOfCreditEnum,
-    businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum
+    larIdentifier: LarIdentifier = LarIdentifier(),
+    loan: Loan = Loan(),
+    action: LarAction = LarAction(),
+    geography: Geography = Geography(),
+    applicant: Applicant = Applicant(),
+    coApplicant: Applicant = Applicant(),
+    income: String = "",
+    purchaserType: PurchaserEnum = InvalidPurchaserCode,
+    hoepaStatus: HOEPAStatusEnum = InvalidHoepaStatusCode,
+    lienStatus: LienStatusEnum = InvalidLientStatusCode,
+    denial: Denial = Denial(),
+    loanDisclosure: LoanDisclosure = LoanDisclosure(),
+    nonAmortizingFeatures: NonAmortizingFeatures = NonAmortizingFeatures(),
+    property: Property = Property(),
+    applicationSubmission: ApplicationSubmissionEnum =
+      InvalidApplicationSubmissionCode,
+    payableToInstitution: PayableToInstitutionEnum =
+      InvalidPayableToInstitutionCode,
+    AUS: AutomatedUnderwritingSystem = AutomatedUnderwritingSystem(),
+    ausResult: AutomatedUnderwritingSystemResult =
+      AutomatedUnderwritingSystemResult(),
+    reverseMortgage: MortgageTypeEnum = InvalidMortgageTypeCode,
+    lineOfCredit: LineOfCreditEnum = InvalidLineOfCreditCode,
+    businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum =
+      InvalidBusinessOrCommercialBusinessCode
 ) extends PipeDelimited {
 
   override def toCSV: String = {

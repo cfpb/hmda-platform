@@ -4,7 +4,7 @@ import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.model.filing.lar.LarGenerators._
 import LarCodec._
-import hmda.model.filing.lar.{LarIdentifier, Loan}
+import hmda.model.filing.lar._
 import io.circe.syntax._
 
 class LarCodecSpec extends PropSpec with PropertyChecks with MustMatchers {
@@ -24,40 +24,102 @@ class LarCodecSpec extends PropSpec with PropertyChecks with MustMatchers {
   }
 
   property("LarAction must encode/decode to/from JSON") {
-    pending
+    forAll(larActionGen) { larAction =>
+      val json = larAction.asJson
+      json.as[LarAction].getOrElse(LarAction()) mustBe larAction
+    }
   }
 
   property("Geography must encode/decode to/from JSON") {
-    pending
+    forAll(geographyGen) { geography =>
+      val json = geography.asJson
+      json.as[Geography].getOrElse(Geography()) mustBe geography
+    }
+  }
+
+  property("Ethnicity must encode/decode to/from JSON") {
+    forAll(ethnicityGen) { ethnicity =>
+      val json = ethnicity.asJson
+      json.as[Ethnicity].getOrElse(Ethnicity()) mustBe ethnicity
+    }
+  }
+
+  property("Race must encode/decode to/from JSON") {
+    forAll(raceGen) { race =>
+      val json = race.asJson
+      json.as[Race].getOrElse(Race()) mustBe race
+    }
+  }
+
+  property("Sex must encode/decode to/from JSON") {
+    forAll(sexGen) { sex =>
+      val json = sex.asJson
+      json.as[Sex].getOrElse(Sex()) mustBe sex
+    }
   }
 
   property("Applicant must encode/decode to/from JSON") {
-    pending
+    forAll(applicantGen) { applicant =>
+      val json = applicant.asJson
+      json.as[Applicant].getOrElse(Applicant()) mustBe applicant
+    }
   }
 
   property("Denial must encode/decode to/from JSON") {
-    pending
+    forAll(denialGen) { denial =>
+      val json = denial.asJson
+      json.as[Denial].getOrElse(Denial()) mustBe denial
+    }
   }
 
   property("LoanDisclosure must encode/decode to/from JSON") {
-    pending
+    forAll(loanDisclosureGen) { loanDisclosure =>
+      val json = loanDisclosure.asJson
+      json.as[LoanDisclosure].getOrElse(LoanDisclosure()) mustBe loanDisclosure
+    }
+  }
+
+  property("OtherNonAmortizingFeatures must encode/decode to/from JSON") {
+    forAll(nonAmortizingFeaturesGen) { nonAmortizingFeatures =>
+      val json = nonAmortizingFeatures.asJson
+      json
+        .as[NonAmortizingFeatures]
+        .getOrElse(NonAmortizingFeatures()) mustBe nonAmortizingFeatures
+    }
   }
 
   property("Property must encode/decode to/from JSON") {
-    pending
+    forAll(propertyGen) { property =>
+      val json = property.asJson
+      json.as[Property].getOrElse(Property()) mustBe property
+    }
   }
 
   property("AutomatedUnderwritingSystem must encode/decode to/from JSON") {
-    pending
+    forAll(automatedUnderwritingSystemGen) { aus =>
+      val json = aus.asJson
+      json
+        .as[AutomatedUnderwritingSystem]
+        .getOrElse(AutomatedUnderwritingSystem()) mustBe aus
+    }
   }
 
   property("AutomatedUnderwritingSystemResult must encode/decode to/from JSON") {
-    pending
+    forAll(automatedUnderwritingSystemResultGen) { ausResult =>
+      val json = ausResult.asJson
+      json
+        .as[AutomatedUnderwritingSystemResult]
+        .getOrElse(AutomatedUnderwritingSystemResult()) mustBe ausResult
+    }
   }
 
   property("LoanApplicationRegister must encode/decode to/from JSON") {
-    pending
+    forAll(larGen) { lar =>
+      val json = lar.asJson
+      json
+        .as[LoanApplicationRegister]
+        .getOrElse(LoanApplicationRegister()) mustBe lar
+    }
   }
-
 
 }

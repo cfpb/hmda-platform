@@ -13,6 +13,7 @@ import hmda.api.http.model.public.LarValidateRequest
 import hmda.parser.filing.lar.LarCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
+import hmda.api.http.codec.LarCodec._
 
 import scala.concurrent.ExecutionContext
 
@@ -31,7 +32,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives {
         entity(as[LarValidateRequest]) { req =>
           LarCsvParser(req.lar) match {
             case Right(lar) =>
-              complete("OK") //complete(ToResponseMarshallable(lar))
+              complete(ToResponseMarshallable(lar))
             case Left(errors) =>
               val errorList = errors.map(e => e.errorMessage)
               complete(

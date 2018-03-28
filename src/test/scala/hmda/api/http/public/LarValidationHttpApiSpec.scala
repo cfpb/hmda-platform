@@ -13,17 +13,19 @@ import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
+import hmda.api.http.codec.LarCodec._
 
-class LarValidationHttpApiSpec extends WordSpec with MustMatchers with ScalatestRouteTest with LarValidationHttpApi  {
+class LarValidationHttpApiSpec
+    extends WordSpec
+    with MustMatchers
+    with ScalatestRouteTest
+    with LarValidationHttpApi {
   override val log: LoggingAdapter = NoLogging
   val ec: ExecutionContext = system.dispatcher
   override implicit val timeout: Timeout = Timeout(5.seconds)
 
-
-
   val lar = larGen.sample.get
   val larCsv = lar.toCSV
-
 
   "LAR HTTP Service" must {
     "parse a valid pipe delimited TS and return JSON representation" in {
@@ -34,6 +36,5 @@ class LarValidationHttpApiSpec extends WordSpec with MustMatchers with Scalatest
       }
     }
   }
-
 
 }

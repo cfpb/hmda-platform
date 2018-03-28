@@ -31,7 +31,7 @@ object LarGenerators {
       lienStatus <- lienStatusEnumGen
       denial <- denialGen
       loanDisclosure <- loanDisclosureGen
-      otherNonAmortizingFeatures <- otherNonAmortizingFeaturesGen
+      otherNonAmortizingFeatures <- nonAmortizingFeaturesGen
       property <- propertyGen
       applicationSubmission <- applicationSubmissionEnumGen
       payableToInstitution <- payableToInstitutionEnumGen
@@ -153,7 +153,7 @@ object LarGenerators {
     } yield Geography(street, city, state, zipCode, county, tract)
   }
 
-  implicit def otherNonAmortizingFeaturesGen: Gen[NonAmortizingFeatures] = {
+  implicit def nonAmortizingFeaturesGen: Gen[NonAmortizingFeatures] = {
     for {
       balloonPayment <- ballonPaymentEnumGen
       interestOnlyPayments <- interestOnlyPayementsEnumGen
