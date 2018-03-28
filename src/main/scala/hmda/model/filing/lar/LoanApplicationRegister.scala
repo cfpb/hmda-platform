@@ -1,7 +1,7 @@
 package hmda.model.filing.lar
 
 import enums._
-import hmda.model.filing.{ HmdaFileRow, PipeDelimited }
+import hmda.model.filing.{HmdaFileRow, PipeDelimited}
 
 case class LoanApplicationRegister(
     larIdentifier: LarIdentifier = LarIdentifier(),
@@ -29,7 +29,8 @@ case class LoanApplicationRegister(
     lineOfCredit: LineOfCreditEnum = InvalidLineOfCreditCode,
     businessOrCommercialPurpose: BusinessOrCommercialBusinessEnum =
       InvalidBusinessOrCommercialBusinessCode
-) extends PipeDelimited with HmdaFileRow {
+) extends PipeDelimited
+    with HmdaFileRow {
 
   override def toCSV: String = {
 
