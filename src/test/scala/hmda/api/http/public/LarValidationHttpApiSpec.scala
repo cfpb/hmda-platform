@@ -4,7 +4,7 @@ import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import hmda.api.http.model.public.LarValidateRequest
+import hmda.api.http.model.public.{LarValidateRequest, LarValidateResponse}
 import org.scalatest.{MustMatchers, WordSpec}
 
 import scala.concurrent.ExecutionContext
@@ -43,15 +43,16 @@ class LarValidationHttpApiSpec
       val badCsv = badValues.mkString("|")
       Post("/lar/parse", LarValidateRequest(badCsv)) ~> larRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[List[String]] mustBe List("id is not numeric")
+        responseAs[LarValidateResponse] mustBe LarValidateResponse(
+          List("id is not numeric"))
       }
     }
 
     "fail to parse a valid pipe delimited LAR with too many fields and return an error" in {
       Post("/lar/parse", LarValidateRequest(larCsv + "|too|many|fields")) ~> larRoutes ~> check {
         status mustBe StatusCodes.BadRequest
-        responseAs[List[String]] mustBe List(
-          "An incorrect number of data fields were reported: 113 data fields were found, when 110 data fields were expected.")
+        responseAs[LarValidateResponse] mustBe LarValidateResponse(List(
+          "An incorrect number of data fields were reported: 113 data fields were found, when 110 data fields were expected."))
       }
     }
 
