@@ -43,7 +43,7 @@ object A2 extends AggregateReport with DispositionProtocol {
         s"""
            |{
            |    "table": "${metaData.reportTable}",
-           |    "type": "Disclosure",
+           |    "type": "Aggregate",
            |    "description": "${metaData.description}",
            |    "year": "$year",
            |    "reportDate": "$reportDate",
