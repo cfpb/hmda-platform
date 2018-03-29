@@ -10,11 +10,17 @@ import hmda.api.http.model.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{Sink, Source}
-import hmda.api.http.model.public.{LarValidateRequest, LarValidateResponse}
+import hmda.api.http.model.public.{
+  LarValidateRequest,
+  LarValidateResponse,
+  Validated,
+  ValidatedResponse
+}
 import hmda.parser.filing.lar.LarCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.LarCodec._
+import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.streams.FlowUtils._
 
 import scala.concurrent.ExecutionContext
@@ -47,10 +53,10 @@ trait LarValidationHttpApi extends HmdaTimeDirectives {
         fileUpload("file") {
           case (_, byteSource) =>
             val processF =
-              processLarFile(byteSource).runWith(Sink.seq).map(_.zipWithIndex)
+              processLarFile(byteSource).runWith(Sink.seq)
             onComplete(processF) {
               case Success(parsed) =>
-                complete(ToResponseMarshallable(parsed))
+                complete(ToResponseMarshallable(ValidatedResponse(parsed)))
               case Failure(error) =>
                 complete(
                   ToResponseMarshallable(
@@ -70,16 +76,40 @@ trait LarValidationHttpApi extends HmdaTimeDirectives {
   }
 
   private def processLarFile(byteSource: Source[ByteString, Any]) = {
-    byteSource
+
+    val tsSource = byteSource
       .via(framing("\n"))
       .map(_.utf8String)
       .map(_.trim)
-      .map(s => LarCsvParser(s))
+      .take(1)
+      .zip(Source.fromIterator(() => Iterator.from(1)))
       .map {
-        case Right(_)     => ""
-        case Left(errors) => errors.mkString(",")
+        case (ts, index) =>
+          (index, TsCsvParser(ts))
       }
-      .filterNot(s => s == "")
+      .map {
+        case (i, Right(_))     => Validated(i, "OK")
+        case (i, Left(errors)) => Validated(i, errors.mkString(","))
+      }
+      .filter(x => x.errors != "OK")
+
+    val larSource = byteSource
+      .via(framing("\n"))
+      .map(_.utf8String)
+      .drop(1)
+      .map(_.trim)
+      .zip(Source.fromIterator(() => Iterator.from(2)))
+      .map {
+        case (lar, index) =>
+          (index, LarCsvParser(lar))
+      }
+      .map {
+        case (i, Right(_))     => Validated(i, "OK")
+        case (i, Left(errors)) => Validated(i, errors.mkString(","))
+      }
+      .filter(x => x.errors != "OK")
+
+    tsSource ++ larSource
 
   }
 
