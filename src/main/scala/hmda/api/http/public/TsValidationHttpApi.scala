@@ -11,7 +11,7 @@ import hmda.api.http.model.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.model.public.TsValidateRequest
+import hmda.api.http.model.public.{TsValidateRequest, TsValidateResponse}
 import hmda.api.http.codec.TsCodec._
 import io.circe.generic.auto._
 
@@ -35,7 +35,8 @@ trait TsValidationHttpApi extends HmdaTimeDirectives {
             case Left(errors) =>
               val errorList = errors.map(e => e.errorMessage)
               complete(
-                ToResponseMarshallable(StatusCodes.BadRequest -> errorList))
+                ToResponseMarshallable(
+                  StatusCodes.BadRequest -> TsValidateResponse(errorList)))
           }
         }
       }
