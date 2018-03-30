@@ -13,6 +13,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import io.circe.generic.auto._
+import hmda.api.http.codec.TsCodec._
 
 class TsValidationHttpApiSpec
     extends WordSpec
