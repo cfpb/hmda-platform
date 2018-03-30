@@ -15,8 +15,6 @@
       href: "/institutions/#search-by-domain"
     - title: "Search by institution id"
       href: "/institutions/#search-by-id"
-    - title: "Modified LAR"
-      href: "/institutions/#modified-lar"
 
 - title: "ULI"
   href: "/uli/"
