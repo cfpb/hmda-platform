@@ -10,6 +10,10 @@ sealed trait Agency {
 object Agency {
   val values = List(1, 2, 3, 5, 7, 9, -1)
 
+  def apply(): Agency = {
+    UndeterminedAgency
+  }
+
   def valueOf(code: Int): Agency = {
     code match {
       case 1  => OCC
