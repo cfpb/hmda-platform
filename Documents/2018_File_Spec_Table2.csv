@@ -1,4 +1,4 @@
-TABLE 2,	DATA FIELDS, OCCURS AS APPLICABLE PER RECORD,,,,
+TABLE 2,	DATA FIELDS, OCCURS AS APPLICABLE PER RECORD,,,,,
 Data Field Number, Data Field Name, Data Field Type, Field Type Description, Valid Values, Descriptions and Examples, Data Point Name,
 1, Record Identifier – Value is 2, Numeric, Integer, 2, ,  ,
 2, Legal Entity Identifier (LEI), Alphanumeric. Width is 20 characters, String,  , Example: 12121212121212121212, Legal Entity Identifier (LEI),
