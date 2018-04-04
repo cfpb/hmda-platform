@@ -5,16 +5,14 @@ title: "HMDA Platform API - ULI"
 
 <hgroup>
   <h1>ULI</h1>
-  <h2>Create a check digit and validate a ULI.</h2>
   <p class="usa-font-lead">The <code>/uli</code> endpoint allows for the creation of a check digit and validation of a ULI. These endpoints help to ensure you are submitting valid HMDA data.</p>
 </hgroup>
 
 ---
 
 <hgroup>
-  <h3 id="generate">Generate a check digit</h3>
-  <p class="usa-font-lead">Generate a check digit and full ULI from an application/loan id.</p>
-  <p>Using the <code>/uli/checkDigit</code> endpoint provide an application/loan id and get the check digit and full ULI in a response.</p>
+  <h1 id="generate">Generate a check digit</h1>
+  <p class="usa-font-lead">Using the <code>/uli/checkDigit</code> endpoint provide an application/loan id and get the check digit and full ULI in a response.</p>
 </hgroup>
 
 <h4>Allowed Methods</h4>
@@ -73,9 +71,8 @@ curl https://ffiec-api.cfpb.gov/public/uli/checkDigit \
 ---
 
 <hgroup>
-  <h3 id="generate-batch">Generate Batch</h3>
-  <p class="usa-font-lead">Generate batch check digits and full ULIs from a file.</p>
-  <p>Using the <code>/uli/checkDigit/csv</code> endpoint provide a file with a list of loan ids, each on a new line.</p>
+  <h1 id="generate-batch">Generate Batch</h1>
+  <p class="usa-font-lead">Using the <code>/uli/checkDigit/csv</code> endpoint provide a file with a list of loan ids, each on a new line.</p>
 </hgroup>
 
 <h4>Allowed Methods</h4>
@@ -109,9 +106,8 @@ loanId,checkDigit,uli
 ---
 
 <hgroup>
-  <h3 id="validate">Validate</h3>
-  <p class="usa-font-lead">Validates that a ULI has the correct check digit.</p>
-  <p>Using the <code>/uli/validate</code> endpoint you can provide a ULI and get the response of valid or not.</p>
+  <h1 id="validate">Validate</h1>
+  <p class="usa-font-lead">Using the <code>/uli/validate</code> endpoint you can provide a ULI and get the response of valid or not.</p>
 </hgroup>
 
 <h4>Allowed Methods</h4>
@@ -168,9 +164,8 @@ curl https://ffiec-api.cfpb.gov/public/uli/validate \
 ---
 
 <hgroup>
-  <h3 id="validate-batch">Validate Batch</h3>
-  <p class="usa-font-lead">Validates that a batch of ULIs have the correct check digit.</p>
-  <p>Using the <code>/uli/validate/csv</code> endpoint you can provide a list of ULIs and get the response of valid or not for each.</p>
+  <h1 id="validate-batch">Validate Batch</h1>
+  <p class="usa-font-lead">Using the <code>/uli/validate/csv</code> endpoint you can provide a list of ULIs and get the response of valid or not for each.</p>
 </hgroup>
 
 <h4>Allowed Methods</h4>

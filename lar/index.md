@@ -5,16 +5,14 @@ title: "HMDA Platform API - LAR"
 
 <hgroup>
   <h1>LAR</h1>
-  <h2>Test a single LAR for parsing and validation</h2>
   <p class="usa-font-lead">The <code>/lar</code> endpoint allows testing of a single LAR row. It can used to test for formatting (parsing), edit validation, or both.</p>
 </hgroup>
 
 ---
 
 <hgroup>
-  <h3 id="parse">Parse</h3>
-  <p class="usa-font-lead">Check whether a single LAR parses.</p>
-  <p>Using the <code>/lar/parse</code> endpoint you can check whether or not a single LAR contains formatting errors.</p>
+  <h1 id="parse">Parse</h1>
+  <p class="usa-font-lead">Using the <code>/lar/parse</code> endpoint you can check whether or not a single LAR contains formatting errors.</p>
 </hgroup>
 
 <h4>Allowed Methods</h4>
@@ -104,9 +102,8 @@ curl https://ffiec-api.cfpb.gov/public/lar/parse \
 ---
 
 <hgroup>
-  <h3 id="validate">Validation</h3>
-  <p class="usa-font-lead">Check whether a single LAR passes validation.</p>
-  <p>Using the <code>/lar/validate</code> endpoint you can test whether or not a single LAR passes edit checks.</p>
+  <h1 id="validate">Validation</h1>
+  <p class="usa-font-lead">Using the <code>/lar/validate</code> endpoint you can test whether or not a single LAR passes edit checks.</p>
 </hgroup>
 
 <div class="usa-alert usa-alert-info">
@@ -271,9 +268,8 @@ curl https://ffiec-api.cfpb.gov/public/lar/validate \
 ---
 
 <hgroup>
-  <h3 id="parseAndValidate">Parse and Validate</h3>
-  <p class="usa-font-lead">Check whether a single LAR parses and passes validation.</p>
-  <p>Using the <code>/lar/parseAndValidate</code> endpoint you can test whether a single LAR is formatted correctly AND whether or not it passes many of the edits.</p>
+  <h1 id="parseAndValidate">Parse and Validate</h1>
+  <p class="usa-font-lead">Using the <code>/lar/parseAndValidate</code> endpoint you can test whether a single LAR is formatted correctly AND whether or not it passes many of the edits.</p>
 </hgroup>
 
 <div class="usa-alert usa-alert-info">

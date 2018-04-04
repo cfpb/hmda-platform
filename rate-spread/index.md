@@ -5,7 +5,6 @@ title: "HMDA Platform API - Rate Spread"
 
 <hgroup>
   <h1>Rate Spread</h1>
-  <h2>Calculate the rate spread.</h2>
   <p class="usa-font-lead">The <code>/rateSpread</code> endpoint you can provide information about a loan and have the rate spread calculated.</p>
 </hgroup>
 
@@ -113,7 +112,7 @@ curl https://ffiec-api.cfpb.gov/public/rateSpread \
 ---
 
 <hgroup>
-  <h3 id="batch">Batch</h3>
+  <h1 id="batch">Batch</h1>
 </hgroup>
 
 <h4>Example</h4>
