@@ -16,6 +16,12 @@
     - title: "Search by institution id"
       href: "/institutions/#search-by-id"
 
+- title: "Filers"
+  href: "/filers/"
+  sub:
+    - title: "By filing period"
+      href: "/filers/#by-filing-period"
+
 - title: "ULI"
   href: "/uli/"
   sub:
