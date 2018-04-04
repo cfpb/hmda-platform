@@ -25,7 +25,7 @@ object LarGenerators {
       geography <- geographyGen
       applicant <- applicantGen
       coApplicant <- applicantGen
-      income <- valueOrNA(Gen.choose(1.0, 1000000.0))
+      income <- intValueOrNA(Gen.choose(1, 10000000))
       purchaserType <- purchaserEnumGen
       hoepaStatus <- hOEPAStatusEnumGen
       lienStatus <- lienStatusEnumGen
@@ -69,7 +69,7 @@ object LarGenerators {
   implicit def larIdentifierGen: Gen[LarIdentifier] = {
     for {
       lei <- stringOfN(20, Gen.alphaChar)
-      nmlsrIdentifier <- valueOrNA(Gen.choose(0, Int.MaxValue))
+      nmlsrIdentifier <- intValueOrNA(Gen.choose(0, Int.MaxValue))
     } yield LarIdentifier(2, lei, nmlsrIdentifier)
 
   }
@@ -77,19 +77,19 @@ object LarGenerators {
   implicit def loanGen: Gen[Loan] = {
     for {
       uli <- stringOfUpToN(45, Gen.alphaChar)
-      applicationDate <- valueOrNA(dateGen)
+      applicationDate <- intValueOrNA(dateGen)
       loanType <- loanTypeEnumGen
       loanPurpose <- loanPurposeEnumGen
       constructionMethod <- constructionMethodEnumGen
       occupancy <- occupancyEnumGen
       amount <- Gen.choose(0.0, Double.MaxValue)
-      term <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
-      rateSpread <- valueOrNA(Gen.choose(0.0, 1.0))
-      interestRate <- valueOrNA(Gen.choose(0.0, 30.0))
-      prepaymentPenaltyTerm <- valueOrNA(Gen.alphaNumStr)
-      debtToIncomeRatio <- valueOrNA(Gen.choose(0.0, 1.0))
-      loanToValueRatio <- valueOrNA(Gen.choose(0.0, 100.0))
-      introductoryRatePeriod <- valueOrNA(Gen.alphaNumStr)
+      term <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
+      rateSpread <- doubleValueOrNA(Gen.choose(0.0, 1.0))
+      interestRate <- doubleValueOrNA(Gen.choose(0.0, 30.0))
+      prepaymentPenaltyTerm <- intValueOrNA(Gen.alphaNumStr)
+      debtToIncomeRatio <- doubleValueOrNA(Gen.choose(0.0, 1.0))
+      loanToValueRatio <- doubleValueOrNA(Gen.choose(0.0, 100.0))
+      introductoryRatePeriod <- intValueOrNA(Gen.alphaNumStr)
     } yield
       Loan(
         uli,
@@ -119,11 +119,11 @@ object LarGenerators {
 
   implicit def loanDisclosureGen: Gen[LoanDisclosure] = {
     for {
-      totalLoanCosts <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
-      totalPointsAndFees <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
-      originationCharges <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
-      discountPoints <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
-      lenderCredits <- valueOrNA(Gen.choose(0.0, Double.MaxValue))
+      totalLoanCosts <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
+      totalPointsAndFees <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
+      originationCharges <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
+      discountPoints <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
+      lenderCredits <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
     } yield {
       LoanDisclosure(totalLoanCosts,
                      totalPointsAndFees,
@@ -144,8 +144,8 @@ object LarGenerators {
 
   implicit def geographyGen: Gen[Geography] = {
     for {
-      street <- valueOrNA(Gen.alphaStr)
-      city <- valueOrNA(Gen.alphaStr)
+      street <- strValueOrNA(Gen.alphaStr)
+      city <- strValueOrNA(Gen.alphaStr)
       state <- stateCodeGen
       zipCode <- zipCodeGen
       county <- countyGen
@@ -171,11 +171,11 @@ object LarGenerators {
 
   implicit def propertyGen: Gen[Property] = {
     for {
-      propertyValue <- valueOrNA(Gen.alphaNumStr)
+      propertyValue <- intValueOrNA(Gen.alphaNumStr)
       manufacturedHomeSecuredProperty <- manufacturedHomeSecuredPropertyEnumGen
       manufacturedHomeLandPropertyInterest <- manufacturedHomeLandPropertyInterestEnumGen
       totalUnits <- Gen.choose(1, 100)
-      multiFamilyAffordableUnits <- valueOrNA(Gen.choose(1, 1000))
+      multiFamilyAffordableUnits <- intValueOrNA(Gen.choose(1, 1000))
     } yield
       Property(
         propertyValue,
@@ -187,19 +187,19 @@ object LarGenerators {
   }
 
   implicit def stateCodeGen: Gen[String] = {
-    valueOrNA(Gen.oneOf(Census.states.keys.toList))
+    intValueOrNA(Gen.oneOf(Census.states.keys.toList))
   }
 
   implicit def countyGen: Gen[String] = {
-    valueOrNA(stringOfN(5, Gen.numChar))
+    intValueOrNA(stringOfN(5, Gen.numChar))
   }
 
   implicit def tractGen: Gen[String] = {
-    valueOrNA(stringOfN(11, Gen.numChar))
+    intValueOrNA(stringOfN(11, Gen.numChar))
   }
 
   implicit def zipCodeGen: Gen[String] = {
-    valueOrNA(Gen.oneOf(zip5Gen, zipPlus4Gen))
+    intValueOrNA(Gen.oneOf(zip5Gen, zipPlus4Gen))
   }
 
   private def zip5Gen: Gen[String] = {
@@ -317,8 +317,14 @@ object LarGenerators {
                                         other)
   }
 
-  private def valueOrNA[A](g: Gen[A]): Gen[String] =
+  private def strValueOrNA[A](g: Gen[A]): Gen[String] =
+    valueOrDefault(arbitrary[String], "NA")
+
+  private def intValueOrNA[A](g: Gen[A]): Gen[String] =
     valueOrDefault(arbitrary[Int], "NA")
+
+  private def doubleValueOrNA[A](g: Gen[A]): Gen[String] =
+    valueOrDefault(arbitrary[Double], "NA")
 
   private def valueOrDefault[A](g: Gen[A], value: String) = {
     Gen.oneOf(g.map(_.toString), Gen.const(value))

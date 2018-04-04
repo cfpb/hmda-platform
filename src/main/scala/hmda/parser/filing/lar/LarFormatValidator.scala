@@ -428,7 +428,7 @@ sealed trait LarFormatValidator extends LarParser {
         coAppCreditScoreModel,
         coAppCreditScoreModelOther
       ),
-      validateStrOrNAField(income, InvalidIncome),
+      validateIntStrOrNAField(income, InvalidIncome),
       validateLarCode(PurchaserEnum, purchaserType, InvalidPurchaserType),
       validateLarCode(HOEPAStatusEnum, hoepaStatus, InvalidHoepaStatus),
       validateLarCode(LienStatusEnum, lienStatus, InvalidLienStatus),
@@ -475,10 +475,11 @@ sealed trait LarFormatValidator extends LarParser {
       LEI: String,
       NMLSRIdentifier: String
   ): LarParserValidationResult[LarIdentifier] = {
+    println("NMLS Identifier: " + NMLSRIdentifier)
     (
       validateIntField(id, InvalidId),
       validateStr(LEI),
-      validateStrOrNAField(NMLSRIdentifier, InvalidNMLSRIdentifier)
+      validateIntStrOrNAField(NMLSRIdentifier, InvalidNMLSRIdentifier)
     ).mapN(LarIdentifier)
   }
 
@@ -509,12 +510,12 @@ sealed trait LarFormatValidator extends LarParser {
       validateLarCode(OccupancyEnum, occupancy, InvalidOccupancy),
       validateDoubleField(amount, InvalidAmount),
       validateStr(loanTerm),
-      validateStrOrNAField(rateSpread, InvalidRateSpread),
-      validateStrOrNAField(interestRate, InvalidInterestRate),
-      validateStrOrNAField(prepaymentPenalty, InvalidPrepaymentPenaltyTerm),
-      validateStrOrNAField(debtToIncome, InvalidDebtToIncomeRatio),
-      validateStrOrNAField(loanToValue, InvalidLoanToValueRatio),
-      validateStrOrNAField(introductoryRate, InvalidIntroductoryRatePeriod)
+      validateDoubleStrOrNAField(rateSpread, InvalidRateSpread),
+      validateDoubleStrOrNAField(interestRate, InvalidInterestRate),
+      validateIntStrOrNAField(prepaymentPenalty, InvalidPrepaymentPenaltyTerm),
+      validateDoubleStrOrNAField(debtToIncome, InvalidDebtToIncomeRatio),
+      validateDoubleStrOrNAField(loanToValue, InvalidLoanToValueRatio),
+      validateIntStrOrNAField(introductoryRate, InvalidIntroductoryRatePeriod)
     ).mapN(Loan)
   }
 
@@ -555,9 +556,9 @@ sealed trait LarFormatValidator extends LarParser {
 
     (
       validateLarCode(DenialReasonEnum, denial1, InvalidDenial),
-      validateLarCode(DenialReasonEnum, denial2, InvalidDenial),
-      validateLarCode(DenialReasonEnum, denial3, InvalidDenial),
-      validateLarCode(DenialReasonEnum, denial4, InvalidDenial),
+      validateLarCodeOrEmptyField(DenialReasonEnum, denial2, InvalidDenial),
+      validateLarCodeOrEmptyField(DenialReasonEnum, denial3, InvalidDenial),
+      validateLarCodeOrEmptyField(DenialReasonEnum, denial4, InvalidDenial),
       validateStr(otherDenial)
     ).mapN(Denial)
   }
@@ -570,11 +571,11 @@ sealed trait LarFormatValidator extends LarParser {
       lenderCredits: String
   ): LarParserValidationResult[LoanDisclosure] = {
     (
-      validateStrOrNAField(totalLoanCosts, InvalidTotalLoanCosts),
-      validateStrOrNAField(totalPointsAndFees, InvalidPointsAndFees),
-      validateStrOrNAField(originationCharges, InvalidOriginationCharges),
-      validateStrOrNAField(discountPoints, InvalidDiscountPoints),
-      validateStrOrNAField(lenderCredits, InvalidLenderCredits)
+      validateDoubleStrOrNAField(totalLoanCosts, InvalidTotalLoanCosts),
+      validateDoubleStrOrNAField(totalPointsAndFees, InvalidPointsAndFees),
+      validateDoubleStrOrNAField(originationCharges, InvalidOriginationCharges),
+      validateDoubleStrOrNAField(discountPoints, InvalidDiscountPoints),
+      validateDoubleStrOrNAField(lenderCredits, InvalidLenderCredits)
     ).mapN(LoanDisclosure)
   }
 
@@ -606,7 +607,7 @@ sealed trait LarFormatValidator extends LarParser {
       multifamilyUnits: String
   ): LarParserValidationResult[Property] = {
     (
-      validateStrOrNAField(propertyValue, InvalidPropertyValue),
+      validateIntStrOrNAField(propertyValue, InvalidPropertyValue),
       validateLarCode(ManufacturedHomeSecuredPropertyEnum,
                       manufacturedHomeSecuredProperty,
                       InvalidManufacturedHomeSecuredProperty),
@@ -614,7 +615,7 @@ sealed trait LarFormatValidator extends LarParser {
                       manufacturedHomeLandPropertyInterest,
                       InvalidManufacturedHomeLandPropertyInterest),
       validateIntField(totalUnits, InvalidTotalUnits),
-      validateStrOrNAField(multifamilyUnits, InvalidMultifamilyUnits)
+      validateIntStrOrNAField(multifamilyUnits, InvalidMultifamilyUnits)
     ).mapN(Property)
 
   }
