@@ -8,11 +8,11 @@ import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.common.HttpServer
-import hmda.api.http.public.TsValidationHttpApi
+import hmda.api.http.public.{LarValidationHttpApi, TsValidationHttpApi}
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaPublicApi {
@@ -22,7 +22,8 @@ object HmdaPublicApi {
 class HmdaPublicApi
     extends HttpServer
     with BaseHttpApi
-    with TsValidationHttpApi {
+    with TsValidationHttpApi
+    with LarValidationHttpApi {
 
   val config = ConfigFactory.load()
 
@@ -37,7 +38,7 @@ class HmdaPublicApi
   override val timeout: Timeout = Timeout(
     config.getInt("hmda.http.timeout").seconds)
 
-  override val paths: Route = routes(s"$name") ~ tsRoutes
+  override val paths: Route = routes(s"$name") ~ tsRoutes ~ larRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
