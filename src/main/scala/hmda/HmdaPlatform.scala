@@ -6,7 +6,7 @@ import akka.management.AkkaManagement
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.http.api.HmdaApi
+import hmda.api.http.HmdaApi
 import hmda.persistence.HmdaPersistence
 import hmda.query.HmdaQuery
 import hmda.validation.HmdaValidation

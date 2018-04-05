@@ -1,13 +1,13 @@
-package hmda.http.api
+package hmda.api.http
 
 import akka.actor.{ActorSystem, Props}
-import akka.pattern.pipe
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
+import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.http.model.common.{BaseHttpApi, HttpServer}
+import hmda.api.http.model.common.HttpServer
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -1,4 +1,4 @@
-package hmda.http.model.directives
+package hmda.api.http.model.directives
 
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.server.Directive0
