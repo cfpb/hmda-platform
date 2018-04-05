@@ -475,7 +475,6 @@ sealed trait LarFormatValidator extends LarParser {
       LEI: String,
       NMLSRIdentifier: String
   ): LarParserValidationResult[LarIdentifier] = {
-    println("NMLS Identifier: " + NMLSRIdentifier)
     (
       validateIntField(id, InvalidId),
       validateStr(LEI),
@@ -501,7 +500,7 @@ sealed trait LarFormatValidator extends LarParser {
   ): LarParserValidationResult[Loan] = {
     (
       validateStr(uli),
-      validateStr(applicationDate),
+      validateIntStrOrNAField(applicationDate, InvalidApplicationDate),
       validateLarCode(LoanTypeEnum, loanType, InvalidLoanType),
       validateLarCode(LoanPurposeEnum, loanPurpose, InvalidLoanPurpose),
       validateLarCode(ConstructionMethodEnum,
@@ -509,7 +508,7 @@ sealed trait LarFormatValidator extends LarParser {
                       InvalidConstructionMethod),
       validateLarCode(OccupancyEnum, occupancy, InvalidOccupancy),
       validateDoubleField(amount, InvalidAmount),
-      validateStr(loanTerm),
+      validateIntStrOrNAField(loanTerm, InvalidLoanTerm),
       validateDoubleStrOrNAField(rateSpread, InvalidRateSpread),
       validateDoubleStrOrNAField(interestRate, InvalidInterestRate),
       validateIntStrOrNAField(prepaymentPenalty, InvalidPrepaymentPenaltyTerm),
@@ -574,8 +573,8 @@ sealed trait LarFormatValidator extends LarParser {
       validateDoubleStrOrNAField(totalLoanCosts, InvalidTotalLoanCosts),
       validateDoubleStrOrNAField(totalPointsAndFees, InvalidPointsAndFees),
       validateDoubleStrOrNAField(originationCharges, InvalidOriginationCharges),
-      validateDoubleStrOrNAField(discountPoints, InvalidDiscountPoints),
-      validateDoubleStrOrNAField(lenderCredits, InvalidLenderCredits)
+      validateDoubleStrOrEmptyOrNaField(discountPoints, InvalidDiscountPoints),
+      validateDoubleStrOrEmptyOrNaField(lenderCredits, InvalidLenderCredits)
     ).mapN(LoanDisclosure)
   }
 
@@ -607,7 +606,7 @@ sealed trait LarFormatValidator extends LarParser {
       multifamilyUnits: String
   ): LarParserValidationResult[Property] = {
     (
-      validateIntStrOrNAField(propertyValue, InvalidPropertyValue),
+      validateDoubleStrOrNAField(propertyValue, InvalidPropertyValue),
       validateLarCode(ManufacturedHomeSecuredPropertyEnum,
                       manufacturedHomeSecuredProperty,
                       InvalidManufacturedHomeSecuredProperty),

@@ -109,7 +109,7 @@ object LarParserErrorModel {
   }
 
   case object InvalidLenderCredits extends ParserValidationError {
-    override def errorMessage: String = notStringOrNA("lender credtis")
+    override def errorMessage: String = notStringOrNA("lender credits")
   }
 
   case object InvalidInterestRate extends ParserValidationError {

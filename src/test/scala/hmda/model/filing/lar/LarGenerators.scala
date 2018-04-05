@@ -83,7 +83,7 @@ object LarGenerators {
       constructionMethod <- constructionMethodEnumGen
       occupancy <- occupancyEnumGen
       amount <- Gen.choose(0.0, Double.MaxValue)
-      term <- doubleValueOrNA(Gen.choose(0.0, Double.MaxValue))
+      term <- intValueOrNA(Gen.choose(1, Int.MaxValue))
       rateSpread <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       interestRate <- doubleValueOrNA(Gen.choose(0.0, 30.0))
       prepaymentPenaltyTerm <- intValueOrNA(Gen.alphaNumStr)
@@ -171,7 +171,7 @@ object LarGenerators {
 
   implicit def propertyGen: Gen[Property] = {
     for {
-      propertyValue <- intValueOrNA(Gen.alphaNumStr)
+      propertyValue <- doubleValueOrNA(Gen.alphaNumStr)
       manufacturedHomeSecuredProperty <- manufacturedHomeSecuredPropertyEnumGen
       manufacturedHomeLandPropertyInterest <- manufacturedHomeLandPropertyInterestEnumGen
       totalUnits <- Gen.choose(1, 100)

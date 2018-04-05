@@ -53,6 +53,17 @@ trait LarParser {
     }
   }
 
+  def validateDoubleStrOrEmptyOrNaField(
+      value: String,
+      parserValidationError: ParserValidationError)
+    : LarParserValidationResult[String] = {
+    if (value == "" || value == "NA") {
+      value.validNel
+    } else {
+      validateDoubleField(value, parserValidationError).map(x => x.toString)
+    }
+  }
+
   def validateStr(str: String): LarParserValidationResult[String] = {
     str.validNel
   }
