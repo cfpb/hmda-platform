@@ -1,11 +1,11 @@
 package hmda.model.filing.lar
 
-import hmda.model.filing.lar.enums.DenialReasonEnum
+import hmda.model.filing.lar.enums.{DenialReasonEnum, InvalidDenialReasonCode}
 
 case class Denial(
-    denialReason1: DenialReasonEnum,
-    denialReason2: DenialReasonEnum,
-    denialReason3: DenialReasonEnum,
-    denialReason4: DenialReasonEnum,
-    otherDenialReason: String
+    denialReason1: DenialReasonEnum = InvalidDenialReasonCode,
+    denialReason2: DenialReasonEnum = InvalidDenialReasonCode,
+    denialReason3: DenialReasonEnum = InvalidDenialReasonCode,
+    denialReason4: DenialReasonEnum = InvalidDenialReasonCode,
+    otherDenialReason: String = ""
 )

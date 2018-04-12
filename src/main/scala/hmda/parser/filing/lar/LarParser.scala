@@ -29,8 +29,8 @@ trait LarParser {
     }
   }
 
-  def validateStrOrNAField(value: String,
-                           parserValidationError: ParserValidationError)
+  def validateIntStrOrNAField(value: String,
+                              parserValidationError: ParserValidationError)
     : LarParserValidationResult[String] = {
     if (value == "") {
       parserValidationError.invalidNel
@@ -38,6 +38,29 @@ trait LarParser {
       value.validNel
     } else {
       validateIntField(value, parserValidationError).map(x => x.toString)
+    }
+  }
+
+  def validateDoubleStrOrNAField(value: String,
+                                 parserValidationError: ParserValidationError)
+    : LarParserValidationResult[String] = {
+    if (value == "") {
+      parserValidationError.invalidNel
+    } else if (value == "NA") {
+      value.validNel
+    } else {
+      validateDoubleField(value, parserValidationError).map(x => x.toString)
+    }
+  }
+
+  def validateDoubleStrOrEmptyOrNaField(
+      value: String,
+      parserValidationError: ParserValidationError)
+    : LarParserValidationResult[String] = {
+    if (value == "" || value == "NA") {
+      value.validNel
+    } else {
+      validateDoubleField(value, parserValidationError).map(x => x.toString)
     }
   }
 

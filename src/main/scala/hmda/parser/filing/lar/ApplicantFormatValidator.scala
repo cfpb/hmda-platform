@@ -66,11 +66,11 @@ sealed trait ApplicantFormatValidator extends LarParser {
       ethnicityObserved: String
   ): LarParserValidationResult[Ethnicity] = {
     (
-      validateLarCode(EthnicityEnum, ethnicity1, InvalidEthnicity),
-      validateLarCode(EthnicityEnum, ethnicity2, InvalidEthnicity),
-      validateLarCode(EthnicityEnum, ethnicity3, InvalidEthnicity),
-      validateLarCode(EthnicityEnum, ethnicity4, InvalidEthnicity),
-      validateLarCode(EthnicityEnum, ethnicity5, InvalidEthnicity),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity1, InvalidEthnicity),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity2, InvalidEthnicity),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity3, InvalidEthnicity),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity4, InvalidEthnicity),
+      validateLarCodeOrEmptyField(EthnicityEnum, ethnicity5, InvalidEthnicity),
       validateStr(otherHispanicOrLatino),
       validateLarCode(EthnicityObservedEnum,
                       ethnicityObserved,
@@ -90,11 +90,11 @@ sealed trait ApplicantFormatValidator extends LarParser {
       raceObserved: String): LarParserValidationResult[Race] = {
 
     (
-      validateLarCode(RaceEnum, race1, InvalidRace),
-      validateLarCode(RaceEnum, race2, InvalidRace),
-      validateLarCode(RaceEnum, race3, InvalidRace),
-      validateLarCode(RaceEnum, race4, InvalidRace),
-      validateLarCode(RaceEnum, race5, InvalidRace),
+      validateLarCodeOrEmptyField(RaceEnum, race1, InvalidRace),
+      validateLarCodeOrEmptyField(RaceEnum, race2, InvalidRace),
+      validateLarCodeOrEmptyField(RaceEnum, race3, InvalidRace),
+      validateLarCodeOrEmptyField(RaceEnum, race4, InvalidRace),
+      validateLarCodeOrEmptyField(RaceEnum, race5, InvalidRace),
       validateStr(otherNative),
       validateStr(otherAsian),
       validateStr(otherPacific),

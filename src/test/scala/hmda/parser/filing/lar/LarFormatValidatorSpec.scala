@@ -41,7 +41,7 @@ class LarFormatValidatorSpec
   property("Invalid Application Date") {
     forAll(larGen) { lar =>
       val badAppDate = badValue()
-      validateStrOrNAField(badAppDate, InvalidApplicationDate) mustBe Invalid(
+      validateIntStrOrNAField(badAppDate, InvalidApplicationDate) mustBe Invalid(
         NonEmptyList.of(InvalidApplicationDate))
     }
   }
@@ -97,7 +97,7 @@ class LarFormatValidatorSpec
     )
   }
   property("InvalidLoanTerm") {
-    validateStrOrNAField(badValue(), InvalidLoanTerm) mustBe Invalid(
+    validateIntStrOrNAField(badValue(), InvalidLoanTerm) mustBe Invalid(
       NonEmptyList.of(InvalidLoanTerm)
     )
   }
@@ -138,7 +138,7 @@ class LarFormatValidatorSpec
   }
 
   property("InvalidIncome") {
-    validateStrOrNAField(badValue(), InvalidIncome) mustBe Invalid(
+    validateIntStrOrNAField(badValue(), InvalidIncome) mustBe Invalid(
       NonEmptyList.of(InvalidIncome)
     )
   }
@@ -148,7 +148,7 @@ class LarFormatValidatorSpec
     )
   }
   property("InvalidRateSpread") {
-    validateStrOrNAField(badValue(), InvalidRateSpread) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidRateSpread) mustBe Invalid(
       NonEmptyList.of(InvalidRateSpread)
     )
   }
@@ -176,52 +176,56 @@ class LarFormatValidatorSpec
       InvalidDenialReasonCode)
   }
   property("InvalidTotalLoanCosts") {
-    validateStrOrNAField(badValue(), InvalidTotalLoanCosts) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidTotalLoanCosts) mustBe Invalid(
       NonEmptyList.of(InvalidTotalLoanCosts)
     )
   }
   property("InvalidPointsAndFees") {
-    validateStrOrNAField(badValue(), InvalidPointsAndFees) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidPointsAndFees) mustBe Invalid(
       NonEmptyList.of(InvalidPointsAndFees)
     )
   }
   property("InvalidOriginationCharges") {
-    validateStrOrNAField(badValue(), InvalidOriginationCharges) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidOriginationCharges) mustBe Invalid(
       NonEmptyList.of(InvalidOriginationCharges)
     )
   }
   property("InvalidDiscountPoints") {
-    validateStrOrNAField(badValue(), InvalidDiscountPoints) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidDiscountPoints) mustBe Invalid(
       NonEmptyList.of(InvalidDiscountPoints)
     )
   }
   property("InvalidLenderCredits") {
-    validateStrOrNAField(badValue(), InvalidLenderCredits) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidLenderCredits) mustBe Invalid(
       NonEmptyList.of(InvalidLenderCredits)
     )
   }
   property("InvalidInterestRate") {
-    validateStrOrNAField(badValue(), InvalidInterestRate) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidInterestRate) mustBe Invalid(
       NonEmptyList.of(InvalidInterestRate)
     )
   }
   property("InvalidPrepaymentPenaltyTerm") {
-    validateStrOrNAField(badValue(), InvalidPrepaymentPenaltyTerm) mustBe Invalid(
+    validateIntStrOrNAField(badValue(), InvalidPrepaymentPenaltyTerm) mustBe Invalid(
       NonEmptyList.of(InvalidPrepaymentPenaltyTerm)
     )
   }
   property("InvalidDebtToIncomeRatio") {
-    validateStrOrNAField(badValue(), InvalidDebtToIncomeRatio) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidDebtToIncomeRatio) mustBe Invalid(
       NonEmptyList.of(InvalidDebtToIncomeRatio)
     )
   }
+  property("Valid Debt to Income Ratio") {
+    validateDoubleStrOrNAField("4.125", InvalidDebtToIncomeRatio) mustBe Valid(
+      "4.125")
+  }
   property("InvalidLoanToValueRatio") {
-    validateStrOrNAField(badValue(), InvalidLoanToValueRatio) mustBe Invalid(
+    validateDoubleStrOrNAField(badValue(), InvalidLoanToValueRatio) mustBe Invalid(
       NonEmptyList.of(InvalidLoanToValueRatio)
     )
   }
   property("InvalidIntroductoryRatePeriod") {
-    validateStrOrNAField(badValue(), InvalidIntroductoryRatePeriod) mustBe Invalid(
+    validateIntStrOrNAField(badValue(), InvalidIntroductoryRatePeriod) mustBe Invalid(
       NonEmptyList.of(InvalidIntroductoryRatePeriod)
     )
   }
@@ -252,10 +256,10 @@ class LarFormatValidatorSpec
     )
   }
   property("InvalidPropertyValue") {
-    validateStrOrNAField("", InvalidPropertyValue) mustBe Invalid(
+    validateIntStrOrNAField("", InvalidPropertyValue) mustBe Invalid(
       NonEmptyList.of(InvalidPropertyValue)
     )
-    validateStrOrNAField(badValue(), InvalidPropertyValue) mustBe Invalid(
+    validateIntStrOrNAField(badValue(), InvalidPropertyValue) mustBe Invalid(
       NonEmptyList.of(InvalidPropertyValue)
     )
   }
@@ -279,7 +283,7 @@ class LarFormatValidatorSpec
     )
   }
   property("InvalidMultifamilyUnits") {
-    validateStrOrNAField(badValue(), InvalidMultifamilyUnits) mustBe Invalid(
+    validateIntStrOrNAField(badValue(), InvalidMultifamilyUnits) mustBe Invalid(
       NonEmptyList.of(InvalidMultifamilyUnits)
     )
   }
@@ -298,7 +302,7 @@ class LarFormatValidatorSpec
     )
   }
   property("InvalidNMLSRIdentifier") {
-    validateStrOrNAField(badValue(), InvalidNMLSRIdentifier) mustBe Invalid(
+    validateIntStrOrNAField(badValue(), InvalidNMLSRIdentifier) mustBe Invalid(
       NonEmptyList.of(InvalidNMLSRIdentifier)
     )
   }
