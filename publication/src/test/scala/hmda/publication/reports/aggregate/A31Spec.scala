@@ -1,17 +1,15 @@
-package hmda.publication.reports.disclosure
+package hmda.publication.reports.aggregate
 
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import hmda.model.fi.lar.{ LarGenerators, LoanApplicationRegister }
-import hmda.model.institution.ExternalIdType.RssdId
-import hmda.model.institution.{ ExternalId, Institution, Respondent }
 import org.scalacheck.Gen
 import org.scalatest.{ AsyncWordSpec, BeforeAndAfterAll, MustMatchers }
 import spray.json._
 
-class D31Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
+class A31Spec extends AsyncWordSpec with MustMatchers with LarGenerators with BeforeAndAfterAll {
 
   implicit val system = ActorSystem()
   implicit val ec = system.dispatcher
@@ -22,28 +20,23 @@ class D31Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
     system.terminate()
   }
 
-  val respId = "54345"
   val fips = 11540 // Appleton, WI
-  val resp = Respondent(ExternalId(respId, RssdId), "Fox Valley Test Bank", "", "", "")
-  val inst = Institution.empty.copy(respondent = resp)
   val lars = Gen.listOfN(100, larWithValidGeoGen).sample.get.map { lar: LoanApplicationRegister =>
     val loan = lar.loan.copy(loanType = 2, purpose = 3, propertyType = 1, occupancy = 1)
-    lar.copy(respondentId = respId, loan = loan, lienStatus = 1)
+    lar.copy(loan = loan, lienStatus = 1)
   }
 
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
-  val descriptionD31 = "Loans sold, by characteristics of borrower and census tract in which property is located and by type of purchaser (includes originations and purchased loans)"
+  val descriptionA31 = "Loans sold, by characteristics of borrower and census tract in which property is located and by type of purchaser (includes originations and purchased loans)"
 
-  "Generate a Disclosure 3-1 report" in {
-    D31.generate(source, fips, inst).map { result =>
-      result.report.parseJson.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
-        case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
-          respondentId mustBe respId
-          instName mustBe "Fox Valley Test Bank"
+  "Generate an Aggregate 3-1 report" in {
+    A31.generate(source, fips).map { result =>
+      result.report.parseJson.asJsObject.getFields("table", "description", "msa") match {
+        case Seq(JsString(table), JsString(desc), msa) =>
           table mustBe "3-1"
-          desc mustBe descriptionD31
+          desc mustBe descriptionA31
           msa.asJsObject.getFields("name") match {
             case Seq(JsString(msaName)) => msaName mustBe "Appleton, WI"
           }
@@ -52,7 +45,7 @@ class D31Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   }
 
   "Include correct borrowerCharacteristics json" in {
-    D31.generate(source, fips, inst).map { result =>
+    A31.generate(source, fips).map { result =>
       result.report.parseJson.asJsObject.getFields("borrowerCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
@@ -74,7 +67,7 @@ class D31Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   }
 
   "Include correct censusCharacteristics json" in {
-    D31.generate(source, fips, inst).map { result =>
+    N31.generate(source, fips).map { result =>
       result.report.parseJson.asJsObject.getFields("censusCharacteristics") match {
 
         case Seq(JsArray(characteristics)) =>
@@ -96,7 +89,7 @@ class D31Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
   }
 
   "Include correct totals json" in {
-    D31.generate(source, fips, inst).map { result =>
+    A31.generate(source, fips).map { result =>
       result.report.parseJson.asJsObject.getFields("total") match {
         case Seq(totals) =>
           totals.asJsObject.getFields("purchasers") match {

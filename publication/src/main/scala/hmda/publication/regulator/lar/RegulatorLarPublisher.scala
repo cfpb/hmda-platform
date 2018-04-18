@@ -82,7 +82,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
     Flow[LoanApplicationRegister]
       .filter(lar => lar.respondentId != "Bank0_RID"
         && lar.respondentId != "Bank1_RID")
-        // Outdated Respondent IDs (HMDA-devops issue #678)
+      // Outdated Respondent IDs (HMDA-devops issue #678)
       .filterNot(lar => lar.respondentId == "480266459" && lar.agencyCode == 3)
       .filterNot(lar => lar.respondentId == "1467" && lar.agencyCode == 1)
       .filterNot(lar => lar.respondentId == "3378018" && lar.agencyCode == 9)
