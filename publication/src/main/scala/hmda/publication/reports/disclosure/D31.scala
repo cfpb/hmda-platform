@@ -68,6 +68,7 @@ object D31 extends DisclosureReport {
       r5 <- dispositionsOutput(filterRace(lars, White))
       r6 <- dispositionsOutput(filterRace(lars, TwoOrMoreMinority))
       r7 <- dispositionsOutput(filterRace(lars, JointRace))
+      r8 <- dispositionsOutput(filterRace(lars, NotProvided))
 
       e1 <- dispositionsOutput(filterEthnicity(lars, HispanicOrLatino))
       e2 <- dispositionsOutput(filterEthnicity(lars, NotHispanicOrLatino))
@@ -138,6 +139,10 @@ object D31 extends DisclosureReport {
          |                {
          |                    "race": "Joint (White/Minority Race)",
          |                    "purchasers": $r7
+         |                },
+         |                {
+         |                    "race": "Race Not Available",
+         |                    "purchasers": $r8
          |                }
          |            ]
          |        },
