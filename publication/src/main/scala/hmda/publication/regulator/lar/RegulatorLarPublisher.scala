@@ -80,6 +80,12 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
 
   def filterTestBanks: Flow[LoanApplicationRegister, LoanApplicationRegister, NotUsed] = {
     Flow[LoanApplicationRegister]
-      .filter(lar => lar.respondentId != "Bank0_RID" && lar.respondentId != "Bank1_RID")
+      .filter(lar => lar.respondentId != "Bank0_RID"
+        && lar.respondentId != "Bank1_RID")
+        // Outdated Respondent IDs
+      .filterNot(lar => lar.respondentId == "480266459" && lar.agencyCode == 3)
+      .filterNot(lar => lar.respondentId == "1467" && lar.agencyCode == 1)
+      .filterNot(lar => lar.respondentId == "3378018" && lar.agencyCode == 9)
+      .filterNot(lar => lar.respondentId == "18944" && lar.agencyCode == 5)
   }
 }
