@@ -67,3 +67,15 @@ dcos marathon app add mesos/hmda-platform-host-mode.json
 ```
 
 For more details, please refer to the Marathon Documentation
+
+## Resources
+
+### API Documentation
+
+* [Public API Documentation](api/public-api.md)
+
+### Data Specifications
+
+* [TS File Spec](spec/2018_File_Spec_TS.csv)
+* [LAR File Spec](spec/2018_File_Spec_LAR.csv)
+
