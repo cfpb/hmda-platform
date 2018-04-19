@@ -15,7 +15,9 @@ The documentation for each version is linked below:
 
 * [HMDA Platform V2 Documentation](docs/v2/README.md)
 
-The main `GitHub` branch, `master`, points to the latest version of the HMDA Platform.
+The main `GitHub` branch, `master`, points to the latest version of the HMDA Platform. Previous versions at available at the following branches:
+
+* [HMDA Platform v1 (2017 Data Collection)](https://github.com/cfpb/hmda-platform/tree/v1.x)
 
 
 ## Contributing
