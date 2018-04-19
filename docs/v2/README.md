@@ -57,7 +57,7 @@ This task will create a `Docker` image. To run a container with the `HMDA Platfo
 
 ### Running the application in clustered mode (mesos)
 
-* A couple of scripts in the [mesos](../../mesos) folder describe the deployment through [Marathon](https://mesosphere.github.io/marathon/) on a DCOS / Mesos cluster.
+* The script in the [mesos](../../mesos) folder describes the deployment through [Marathon](https://mesosphere.github.io/marathon/) on a DCOS / Mesos cluster.
 
 For a 3 node cluster deployed through the [DC/OS CLI](https://docs.mesosphere.com/1.10/cli/), the following command can be used:
 
