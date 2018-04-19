@@ -29,8 +29,7 @@ In addition, you'll need Scala's interactive build tool [sbt](https://www.scala-
 
 ```shell
 $ sbt
-sbt:hmda> project cluster
-sbt:cluster> reStart
+sbt:hmda> reStart
 ```
 
 
@@ -58,7 +57,7 @@ This task will create a `Docker` image. To run a container with the `HMDA Platfo
 
 ### Running the application in clustered mode (mesos)
 
-* A couple of scripts in the `mesos` folder describe the deployment through [Marathon](https://mesosphere.github.io/marathon/) on a DCOS / Mesos cluster.
+* A couple of scripts in the [mesos](../../mesos) folder describe the deployment through [Marathon](https://mesosphere.github.io/marathon/) on a DCOS / Mesos cluster.
 
 For a 3 node cluster deployed through the [DC/OS CLI](https://docs.mesosphere.com/1.10/cli/), the following command can be used:
 
@@ -66,7 +65,7 @@ For a 3 node cluster deployed through the [DC/OS CLI](https://docs.mesosphere.co
 dcos marathon app add mesos/hmda-platform-host-mode.json
 ```
 
-For more details, please refer to the Marathon Documentation
+For more details, please refer to the [Marathon Documentation](https://mesosphere.github.io/marathon/)
 
 ## Resources
 
