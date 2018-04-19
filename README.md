@@ -11,9 +11,9 @@ The code contained in this repository covers two distinct versions of the HMDA b
 
 The documentation for each version is linked below:
 
-* [HMDA Platform V1 Documentation](docs/v1/README.md)
+* [HMDA Platform v1 Documentation](docs/v1/README.md)
 
-* [HMDA Platform V2 Documentation](docs/v2/README.md)
+* [HMDA Platform v2 Documentation](docs/v2/README.md)
 
 The main `GitHub` branch, `master`, points to the latest version of the HMDA Platform. Previous versions at available at the following branches:
 
