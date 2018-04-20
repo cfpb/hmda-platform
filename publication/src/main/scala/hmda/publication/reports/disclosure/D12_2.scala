@@ -22,7 +22,7 @@ import hmda.publication.reports.util.ReportsMetaDataLookup
 
 import scala.concurrent.Future
 
-object D12_2 extends D12X {
+object D12_2 extends DisclosureReport {
   val reportId = "D12-2"
   def filters(lar: LoanApplicationRegister): Boolean = {
     lar.loan.loanType == 1 &&
@@ -31,11 +31,6 @@ object D12_2 extends D12X {
       lar.loan.propertyType == 2 &&
       lar.loan.occupancy == 1
   }
-}
-
-trait D12X extends DisclosureReport {
-  val reportId: String
-  def filters(lar: LoanApplicationRegister): Boolean
 
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],

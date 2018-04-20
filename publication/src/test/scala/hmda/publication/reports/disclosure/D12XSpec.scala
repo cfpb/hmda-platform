@@ -34,7 +34,8 @@ class D12XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
   val source: Source[LoanApplicationRegister, NotUsed] = Source
     .fromIterator(() => lars.toIterator)
 
-  val description = "Pricing information for conventional manufactured home-purchase loans, first lien, owner-occupied dwelling, by borrower or census tract characteristics"
+  val description12_2 = "Pricing information for conventional manufactured home-purchase loans, first lien, owner-occupied dwelling, by borrower or census tract characteristics"
+  val description12_1 = "Disposition of applications for conventional manufactured home-purchase loans, first lien, owner-occupied dwelling, by borrower or census tract characteristics"
 
   "Generate a Disclosure 12-2 report" in {
     D12_2.generate(source, fips, inst).map { result =>
@@ -43,7 +44,7 @@ class D12XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
           respondentId mustBe respId
           instName mustBe "Fox Valley Test Bank"
           table mustBe "12-2"
-          desc mustBe description
+          desc mustBe description12_2
           msa.asJsObject.getFields("name") match {
             case Seq(JsString(msaName)) => msaName mustBe "Appleton, WI"
           }
@@ -51,7 +52,7 @@ class D12XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     }
   }
 
-  "Include correct borrower Characteristics" in {
+  "D12-2: Include correct borrower Characteristics" in {
     D12_2.generate(source, fips, inst).map { result =>
       result.report.parseJson.asJsObject.getFields("borrowerCharacteristics") match {
 
@@ -73,7 +74,7 @@ class D12XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     }
   }
 
-  "Include correct Census Tract Characteristics" in {
+  "D12-2: Include correct Census Tract Characteristics" in {
     D12_2.generate(source, fips, inst).map { result =>
       result.report.parseJson.asJsObject.getFields("censusTractCharacteristics") match {
 
@@ -95,4 +96,62 @@ class D12XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with B
     }
   }
 
+  "Generate a Disclosure 12-1 report" in {
+    D12_1.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("respondentId", "institutionName", "table", "description", "msa") match {
+        case Seq(JsString(respondentId), JsString(instName), JsString(table), JsString(desc), msa) =>
+          respondentId mustBe respId
+          instName mustBe "Fox Valley Test Bank"
+          table mustBe "12-1"
+          desc mustBe description12_1
+          msa.asJsObject.getFields("name") match {
+            case Seq(JsString(msaName)) => msaName mustBe "Appleton, WI"
+          }
+      }
+    }
+  }
+
+  "D12-1: Include correct borrower Characteristics" in {
+    D12_1.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("borrowerCharacteristics") match {
+
+        case Seq(JsArray(characteristics)) =>
+          characteristics must have size 5
+          characteristics.head.asJsObject.getFields("characteristic", "races") match {
+
+            case Seq(JsString(char), JsArray(races)) =>
+              char mustBe "Race"
+              races must have size 8
+              races.head.asJsObject.getFields("race", "dispositions") match {
+
+                case Seq(JsString(race), JsArray(pricing)) =>
+                  race mustBe "American Indian/Alaska Native"
+                  pricing must have size 6
+              }
+          }
+      }
+    }
+  }
+
+  "D12-1: Include correct Census Tract Characteristics" in {
+    D12_1.generate(source, fips, inst).map { result =>
+      result.report.parseJson.asJsObject.getFields("censusTractCharacteristics") match {
+
+        case Seq(JsArray(characteristics)) =>
+          characteristics must have size 2
+          characteristics.head.asJsObject.getFields("characteristic", "compositions") match {
+
+            case Seq(JsString(char), JsArray(races)) =>
+              char mustBe "Racial/Ethnic Composition"
+              races must have size 5
+              races.head.asJsObject.getFields("composition", "dispositions") match {
+
+                case Seq(JsString(race), JsArray(pricing)) =>
+                  race mustBe "Less than 10% minority"
+                  pricing must have size 6
+              }
+          }
+      }
+    }
+  }
 }

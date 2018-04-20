@@ -53,9 +53,9 @@ trait A12_1X extends AggregateReport {
 
     val metaData = ReportsMetaDataLookup.values(reportId)
 
-    val lars = larSource.filter(filters).filter(geoFilter(fipsCode))
-    if (metaData.reportType == Aggregate) larSource.filter(filters).filter(geoFilter(fipsCode))
-    else larSource.filter(filters)
+    val lars =
+      if (metaData.reportType == Aggregate) larSource.filter(filters).filter(geoFilter(fipsCode))
+      else larSource.filter(filters)
 
     val larsForIncomeCalculation = lars.filter(lar => lar.applicant.income != "NA" && lar.geography.msa != "NA")
     val incomeIntervals =
