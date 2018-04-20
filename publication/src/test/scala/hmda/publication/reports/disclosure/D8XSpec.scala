@@ -66,7 +66,7 @@ class D8XSpec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
 
                 case Seq(JsString(race), JsArray(reasons)) =>
                   race mustBe "American Indian/Alaska Native"
-                  reasons must have size 11
+                  reasons must have size 10
               }
           }
       }
