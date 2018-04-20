@@ -83,7 +83,7 @@ trait D8X extends DisclosureReport {
 
   val dispositions = List(DebtToIncomeRatio, EmploymentHistory, CreditHistory,
     Collateral, InsufficientCash, UnverifiableInformation, CreditAppIncomplete,
-    MortgageInsuranceDenied, OtherDenialReason, TotalDenied)
+    MortgageInsuranceDenied, OtherDenialReason)
 
   def generate[ec: EC, mat: MAT, as: AS](
     larSource: Source[LoanApplicationRegister, NotUsed],
