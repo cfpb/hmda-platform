@@ -7,7 +7,7 @@ object PayableToInstitutionEnum extends LarCodeEnum[PayableToInstitutionEnum] {
 
   override def valueOf(code: Int): PayableToInstitutionEnum = {
     code match {
-      case 1 => NotInitiallyPayableToInstitution
+      case 1 => InititallyPayableToInstitution
       case 2 => NotInitiallyPayableToInstitution
       case 3 => PayableToInstitutionNotApplicable
       case _ => InvalidPayableToInstitutionCode
