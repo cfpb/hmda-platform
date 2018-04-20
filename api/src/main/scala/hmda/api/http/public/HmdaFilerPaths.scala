@@ -61,48 +61,51 @@ trait HmdaFilerPaths extends HmdaCustomDirectives with HmdaFilerProtocol with Ap
             sendResponse(filersF, uri)
           }
         }
-      } ~
-      path("filers" / Segment / Segment / "msaMds") { (period, instId) =>
-        encodeResponse {
-          timedGet { uri =>
-            val fSubmissions = (supervisor ? FindSubmissions(SubmissionPersistence.name, instId, period)).mapTo[ActorRef]
-            val hmdaFilerPersistenceF = (supervisor ? FindHmdaFilerPersistence(HmdaFilerPersistence.name)).mapTo[ActorRef]
+      }
+  }
 
-            val fMsas = for {
-              subActor <- fSubmissions
-              submissions <- (subActor ? GetState).mapTo[Seq[Submission]]
+  def hmdaFilerMsasPath(supervisor: ActorRef) = {
+    path("filers" / Segment / Segment / "msaMds") { (period, instId) =>
+      encodeResponse {
+        timedGet { uri =>
+          val fSubmissions = (supervisor ? FindSubmissions(SubmissionPersistence.name, instId, period)).mapTo[ActorRef]
+          val hmdaFilerPersistenceF = (supervisor ? FindHmdaFilerPersistence(HmdaFilerPersistence.name)).mapTo[ActorRef]
 
-              manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, getLatestSignedSub(submissions))).mapTo[ActorRef]
-              larStats <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
-              stats <- (larStats ? FindIrsStats(getLatestSignedSub(submissions))).mapTo[Seq[Msa]]
+          val fMsas = for {
+            subActor <- fSubmissions
+            submissions <- (subActor ? GetState).mapTo[Seq[Submission]]
 
-              a <- hmdaFilerPersistenceF
-              filer <- (a ? FindHmdaFiler(instId)).mapTo[Option[HmdaFiler]]
-            } yield (stats, filer)
+            manager <- (supervisor ? FindProcessingActor(SubmissionManager.name, getLatestSignedSub(submissions))).mapTo[ActorRef]
+            larStats <- (manager ? GetActorRef(SubmissionLarStats.name)).mapTo[ActorRef]
+            stats <- (larStats ? FindIrsStats(getLatestSignedSub(submissions))).mapTo[Seq[Msa]]
 
-            onComplete(fMsas) {
-              case Success((msas, instOpt)) =>
-                val msasJson = msas.filterNot(_.id == "NA").map(msa => s"""{"id":"${msa.id}","name":"${msa.name}"}""").mkString("[", ",", "]")
-                val inst = instOpt.getOrElse(HmdaFiler("", "", "", ""))
-                if (inst.institutionId == "") {
-                  complete(ToResponseMarshallable(StatusCodes.NotFound -> s"Unable to find institution $instId"))
-                } else {
-                  val response =
-                    s"""
+            a <- hmdaFilerPersistenceF
+            filer <- (a ? FindHmdaFiler(instId)).mapTo[Option[HmdaFiler]]
+          } yield (stats, filer)
+
+          onComplete(fMsas) {
+            case Success((msas, instOpt)) =>
+              val msasJson = msas.filterNot(_.id == "NA").map(msa => s"""{"id":"${msa.id}","name":"${msa.name}"}""").mkString("[", ",", "]")
+              val inst = instOpt.getOrElse(HmdaFiler("", "", "", ""))
+              if (inst.institutionId == "") {
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> s"Unable to find institution $instId"))
+              } else {
+                val response =
+                  s"""
                        |{
                        |  "year": "$period",
                        |  "institution": {"name":"${inst.name}", "id":"${inst.institutionId}", "respondentId": "${inst.respondentId}"},
                        |  "msaMds": $msasJson
                        |}
                    """.stripMargin.parseJson
-                  complete(ToResponseMarshallable(response))
-                }
-              case Failure(e) =>
-                completeWithInternalError(uri, e)
-            }
+                complete(ToResponseMarshallable(response))
+              }
+            case Failure(e) =>
+              completeWithInternalError(uri, e)
           }
         }
       }
+    }
   }
 
   private def sendResponse(filersF: Future[Set[HmdaFiler]], uri: Uri) = {
