@@ -34,7 +34,7 @@ This documenatation describes de public HMDA Platform HTTP API
      ]
    }
    ```
-   
+
 * `/institutions/<institutionID>`
 
     * `GET`
@@ -123,6 +123,7 @@ This documenatation describes de public HMDA Platform HTTP API
     Retrieves list of HMDA filers, filtered by period.
     Example response with HTTP code 200, in `JSON` format:
 
+    ```json
     {
         "institutions": [
             {
@@ -133,6 +134,32 @@ This documenatation describes de public HMDA Platform HTTP API
             }
         ]
     }
+  ```
+
+* `/filers/<period>/<institutionID>/msaMds`
+    * `GET`
+
+    Retrieves a list of all MSA/MDs for a given institution and period.
+    Example response with HTTP code 200, in `JSON` format:
+
+    ```json
+    {
+            "year": "2017",
+            "institution":
+                {
+                    "name": "bank-0 National Association",
+                    "id": "0",
+                    "respondentId": "Bank0_RID"
+                },
+            "msaMds": [
+                {
+                    "id": "12345",
+                    "name": "Example MSA/MD"
+                }
+          ]
+
+        }
+    ```
 
 
 ## Check Digit
@@ -344,13 +371,13 @@ action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,
 
 `POST` - Returns a JSON representation of a TS, or a list of errors if the TS fails to parse
 
-Example body: 
+Example body:
 
 ```json
 1|0123456789|9|201301171330|2013|12-9379899|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St|Sacramento|CA|99999-9999|MIKES SMALL INC|1234 Kearney St|San Francisco|CA|99999-1234|Mrs. Krabappel|916-999-9999|999-753-9999|krabappel@gmail.com
 ```
 
-Example response 
+Example response
 
 ```json
 {
@@ -467,7 +494,7 @@ Example error response
 | --------------- | ----------- |
 | check | String. Valid entries are: "syntactical", "validity", "quality".  If left blank or any other text is entered, will default to all checks. |
 
-Example body: 
+Example body:
 
 ```json
 {
@@ -501,7 +528,7 @@ Example body:
 }
 ```
 
-Example response: 
+Example response:
 
 ```json
 {
@@ -604,13 +631,13 @@ Example response:
 | --------------- | ----------- |
 | check | String. Valid entries are: "syntactical", "validity", "quality".  If left blank or any other text is entered, will default to all checks. |
 
-Example body: 
+Example body:
 
 ```json
 1|0123456789|9|201301171330|2013|12-9379899|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St|Sacramento|CA|99999-9999|MIKES SMALL INC|1234 Kearney St|San Francisco|CA|99999-1234|Mrs. Krabappel|916-999-9999|999-753-9999|krabappel@gmail.com
 ```
 
-Example response: 
+Example response:
 
 ```json
 {

@@ -57,7 +57,8 @@ class HmdaPublicApi(supervisor: ActorRef)
       larRoutes(supervisor) ~
       tsRoutes(supervisor) ~
       rateSpreadRoutes(supervisor) ~
-      hmdaFilersPath(supervisor)
+      hmdaFilersPath(supervisor) ~
+      hmdaFilerMsasPath(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
