@@ -48,7 +48,6 @@ pipeline {
 
     stage('package') {
       steps {
-        sh
         script {
           docker.build(env.DOCKER_IMAGE_NAME_WITH_TAG)
         }
