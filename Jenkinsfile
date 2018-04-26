@@ -20,7 +20,7 @@ pipeline {
       }
     }
 
-    stage('build, test, and package') {
+    stage('package') {
       steps {
         sh 'sbt clean assembly'
       }
