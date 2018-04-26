@@ -27,7 +27,7 @@ pipeline {
         script {
           // Add additional global envvars here since pipelines do not allow you to reference one another in `environment` section
           env.DOCKER_REGISTRY = env.DOCKER_REGISTRY_URL - 'https://'
-          env.DOCKER_IMAGE_NAME_WITH_TAG = "${env.DOCKER_REGISTRY}/${env.DOCKER_IMAGE_NAME_WITH_REGISTRY}:${env.BRANCH_NAME}-${env.BUILD_ID}"
+          env.DOCKER_IMAGE_NAME_WITH_TAG = "${env.DOCKER_REGISTRY}/${env.DOCKER_IMAGE_NAME}:${env.BRANCH_NAME}-${env.BUILD_ID}"
           env.DOCKER_IMAGE_REPO  = "${env.DOCKER_REGISTRY_URL}/repositories/${env.DOCKER_IMAGE_NAME}"
         }
 
