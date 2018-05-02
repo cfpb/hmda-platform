@@ -61,7 +61,7 @@ class D31Spec extends AsyncWordSpec with MustMatchers with LarGenerators with Be
 
             case Seq(JsString(char), JsArray(races)) =>
               char mustBe "Race"
-              races must have size 7
+              races must have size 8
               races.head.asJsObject.getFields("race", "purchasers") match {
 
                 case Seq(JsString(race), JsArray(disp)) =>

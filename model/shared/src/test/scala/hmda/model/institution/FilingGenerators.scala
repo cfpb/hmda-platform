@@ -20,4 +20,13 @@ object FilingGenerators {
     } yield Filing(id, fid, status, filingRequired, start, end)
   }
 
+  implicit def hmdaFilerGen: Gen[HmdaFiler] = {
+    for {
+      institutionId <- Gen.alphaStr
+      respondentId <- Gen.alphaStr
+      period <- Gen.oneOf("2017", "2018")
+      name <- Gen.alphaStr
+    } yield HmdaFiler(institutionId, respondentId, period, name)
+  }
+
 }

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.model.serialization";
+option optimize_for = SPEED;
+
+import "HmdaFiler.proto";
+
+message HmdaFilerCreatedMessage {
+    HmdaFilerMessage hmdaFiler = 1;
+}
+
+message HmdaFilerDeletedMessage {
+    HmdaFilerMessage hmdaFiler = 1;
+}

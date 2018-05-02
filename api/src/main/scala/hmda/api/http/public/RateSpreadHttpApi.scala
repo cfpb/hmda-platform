@@ -72,6 +72,7 @@ trait RateSpreadHttpApi extends HmdaCustomDirectives with ApiErrorProtocol with 
     byteSource
       .via(framing)
       .map(_.utf8String)
+      .map(_.trim)
       .mapAsync(parallelism)(line => csvResultLine(fAporActor, line))
       .map(s => ByteString(s))
   }

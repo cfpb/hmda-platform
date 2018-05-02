@@ -9,6 +9,7 @@ object InstitutionCommands {
   case class DeleteInstitution(i: Institution) extends Command
   case class GetInstitutionByRespondentId(id: String) extends Command
   case class GetInstitutionById(institutionId: String) extends Command
+  case class GetInstitutionByIdAndPeriod(institutionId: String, period: String) extends Command
   case class GetInstitutionsById(ids: List[String]) extends Command
   case class FindInstitutionByDomain(domain: String) extends Command
 }

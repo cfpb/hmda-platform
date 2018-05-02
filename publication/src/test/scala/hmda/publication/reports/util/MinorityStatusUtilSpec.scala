@@ -1,8 +1,6 @@
 package hmda.publication.reports.util
 
 import hmda.model.publication.reports.MinorityStatusEnum._
-import hmda.model.publication.reports.{ MinorityStatusBorrowerCharacteristic, MinorityStatusCharacteristic }
-import hmda.publication.reports.util.DispositionType.{ LoansOriginated, ApplicationReceived }
 import hmda.publication.reports.util.MinorityStatusUtil._
 import hmda.util.SourceUtils
 import org.scalacheck.Gen
@@ -43,27 +41,6 @@ class MinorityStatusUtilSpec extends AsyncWordSpec with MustMatchers with Source
       val excludedLars = larCollectionWithApplicant(_.copy(ethnicity = appEthnicity, race1 = 5))
       val lars = filterMinorityStatus(source(excludedLars), OtherIncludingHispanic)
       count(lars).map(_ mustBe 0)
-    }
-  }
-
-  "ethnicityBorrowerCharacteristic" must {
-    "generate a MinorityStatusBorrowCharacteristic with both MinorityStatus categories and the specified dispositions" in {
-      val lars = lar100ListGen.sample.get
-      val dispositions = List(ApplicationReceived, LoansOriginated)
-
-      val resultF = minorityStatusBorrowerCharacteristic(source(lars), dispositions)
-
-      resultF.map { result =>
-        result mustBe a[MinorityStatusBorrowerCharacteristic]
-
-        result.minoritystatus.size mustBe 2
-
-        val firstCharacteristic = result.minoritystatus.head
-        firstCharacteristic mustBe a[MinorityStatusCharacteristic]
-        firstCharacteristic.minorityStatus mustBe WhiteNonHispanic
-        firstCharacteristic.dispositions.map(_.dispositionName) mustBe
-          List(ApplicationReceived.value, LoansOriginated.value)
-      }
     }
   }
 

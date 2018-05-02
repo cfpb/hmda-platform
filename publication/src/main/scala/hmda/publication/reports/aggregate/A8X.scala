@@ -139,7 +139,7 @@ trait A8X extends AggregateReport {
 
   val dispositions = List(DebtToIncomeRatio, EmploymentHistory, CreditHistory,
     Collateral, InsufficientCash, UnverifiableInformation, CreditAppIncomplete,
-    MortgageInsuranceDenied, OtherDenialReason, TotalDenied)
+    MortgageInsuranceDenied, OtherDenialReason)
 
   def geoFilter(fips: Int)(lar: LoanApplicationRegister): Boolean =
     lar.geography.msa != "NA" &&
@@ -335,7 +335,9 @@ trait A8X extends AggregateReport {
          |
        """.stripMargin
 
-      AggregateReportPayload(metaData.reportTable, fipsCode.toString, report)
+      val fipsString = if (metaData.reportType == Aggregate) fipsCode.toString else "nationwide"
+
+      AggregateReportPayload(metaData.reportTable, fipsString, report)
     }
   }
 

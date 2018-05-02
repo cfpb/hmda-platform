@@ -25,14 +25,3 @@ trait AggregateReport {
   ): Future[AggregateReportPayload]
 
 }
-
-/*
-abstract class A5XReportCreator {
-  def filters(lar: LoanApplicationRegister): Boolean
-
-  def generate[ec: EC, mat: MAT, as: AS](
-    larSource: Source[LoanApplicationRegister, NotUsed],
-    fipsCode: Int
-  ): Future[A5X]
-}
-*/

@@ -39,20 +39,6 @@ sealed abstract class DispositionType(
 
 object DispositionType {
 
-  val byName: Map[String, DispositionType] = {
-    Map(
-      "received" -> ApplicationReceived,
-      "originated" -> LoansOriginated,
-      "approvedbutnotaccepted" -> ApprovedButNotAccepted,
-      "denied" -> ApplicationsDenied,
-      "withdrawn" -> ApplicationsWithdrawn,
-      "closed" -> ClosedForIncompleteness,
-      "purchased" -> LoanPurchased,
-      "preapprovaldenied" -> PreapprovalDenied,
-      "preapprovalapproved" -> PreapprovalApprovedButNotAccepted
-    )
-  }
-
   //////////////////////////////////
   // Action Taken Type Dispositions
   //////////////////////////////////

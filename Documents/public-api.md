@@ -34,7 +34,7 @@ This documenatation describes de public HMDA Platform HTTP API
      ]
    }
    ```
-   
+
 * `/institutions/<institutionID>`
 
     * `GET`
@@ -88,54 +88,79 @@ This documenatation describes de public HMDA Platform HTTP API
     }
     ```
 
-### Modified LAR
+### HMDA Filers
 
-* `/institutions/<institutionId>/filings/<period>/lar`
+* `/filers`
 
-   * `GET` - Returns the Modified LAR, in CSV format. The schema for the data is as follows:
+    * `GET`
 
-```
-   id
-   respondent_id
-   agency_code
-   preapprovals
-   action_taken_type
-   purchaser_type
-   rate_spread
-   hoepa_status
-   lien_status
-   loan_type
-   property_type
-   purpose
-   occupancy
-   amount
-   msa
-   state
-   county
-   tract
-   ethnicity
-   co_ethnicity
-   race1
-   race2
-   race3
-   race4
-   race5
-   co_race1
-   co_race2
-   co_race3
-   co_race4
-   co_race5
-   sex
-   co_sex
-   income
-   denial_reason1
-   denial_reason2
-   denial_reason3
-   period
-```
+    Retrieves list of HMDA filers.
+    Example response with HTTP code 200, in `JSON` format:
 
-For a definition of these fields, please consult the [HMDA Filing Instructions Guide](http://www.consumerfinance.gov/data-research/hmda/static/for-filers/2017/2017-HMDA-FIG.pdf).
-Please note that the Modified LAR does not include the fields `Loan Application Number`, `Date Application Received` or `Date of Action` described in HMDA Filing Instructions Guide.
+    ```json
+    {
+        "institutions": [
+            {
+                "institutionId": "0",
+                "name": "bank-0 National Association",
+                "period": "2017",
+                "respondentId": "Bank0_RID"
+            },
+            {
+                "institutionId": "1",
+                "name": "Bak 1",
+                "period": "2016",
+                "respondentId": "Bank1_RID"
+            }
+        ]
+    }
+    ```
+
+* `/filers/<period>`
+
+    * `GET`
+
+    Retrieves list of HMDA filers, filtered by period.
+    Example response with HTTP code 200, in `JSON` format:
+
+    ```json
+    {
+        "institutions": [
+            {
+                "institutionId": "0",
+                "name": "bank-0 National Association",
+                "period": "2017",
+                "respondentId": "Bank0_RID"
+            }
+        ]
+    }
+  ```
+
+* `/filers/<period>/<institutionID>/msaMds`
+    * `GET`
+
+    Retrieves a list of all MSA/MDs for a given institution and period.
+    Example response with HTTP code 200, in `JSON` format:
+
+    ```json
+    {
+            "year": "2017",
+            "institution":
+                {
+                    "name": "bank-0 National Association",
+                    "id": "0",
+                    "respondentId": "Bank0_RID"
+                },
+            "msaMds": [
+                {
+                    "id": "12345",
+                    "name": "Example MSA/MD"
+                }
+          ]
+
+        }
+    ```
+
 
 ## Check Digit
 
@@ -346,13 +371,13 @@ action_taken_type,loan_term,amortization_type,apr,lock_in_date,reverse_mortgage,
 
 `POST` - Returns a JSON representation of a TS, or a list of errors if the TS fails to parse
 
-Example body: 
+Example body:
 
 ```json
 1|0123456789|9|201301171330|2013|12-9379899|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St|Sacramento|CA|99999-9999|MIKES SMALL INC|1234 Kearney St|San Francisco|CA|99999-1234|Mrs. Krabappel|916-999-9999|999-753-9999|krabappel@gmail.com
 ```
 
-Example response 
+Example response
 
 ```json
 {
@@ -469,7 +494,7 @@ Example error response
 | --------------- | ----------- |
 | check | String. Valid entries are: "syntactical", "validity", "quality".  If left blank or any other text is entered, will default to all checks. |
 
-Example body: 
+Example body:
 
 ```json
 {
@@ -503,7 +528,7 @@ Example body:
 }
 ```
 
-Example response: 
+Example response:
 
 ```json
 {
@@ -606,13 +631,13 @@ Example response:
 | --------------- | ----------- |
 | check | String. Valid entries are: "syntactical", "validity", "quality".  If left blank or any other text is entered, will default to all checks. |
 
-Example body: 
+Example body:
 
 ```json
 1|0123456789|9|201301171330|2013|12-9379899|900|MIKES SMALL BANK   XXXXXXXXXXX|1234 Main St|Sacramento|CA|99999-9999|MIKES SMALL INC|1234 Kearney St|San Francisco|CA|99999-1234|Mrs. Krabappel|916-999-9999|999-753-9999|krabappel@gmail.com
 ```
 
-Example response: 
+Example response:
 
 ```json
 {

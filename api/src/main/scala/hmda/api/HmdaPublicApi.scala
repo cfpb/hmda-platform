@@ -29,7 +29,8 @@ class HmdaPublicApi(supervisor: ActorRef)
     with RateSpreadHttpApi
     with SingleLarValidationHttpApi
     with SingleTsValidationHttpApi
-    with ULIHttpApi {
+    with ULIHttpApi
+    with HmdaFilerPaths {
 
   val config = ConfigFactory.load()
   override val parallelism = config.getInt("hmda.connectionFlowParallelism")
@@ -55,7 +56,9 @@ class HmdaPublicApi(supervisor: ActorRef)
       uliHttpRoutes ~
       larRoutes(supervisor) ~
       tsRoutes(supervisor) ~
-      rateSpreadRoutes(supervisor)
+      rateSpreadRoutes(supervisor) ~
+      hmdaFilersPath(supervisor) ~
+      hmdaFilerMsasPath(supervisor)
 
   override val http: Future[ServerBinding] = Http(system).bindAndHandle(
     paths,
