@@ -123,6 +123,7 @@ This documenatation describes de public HMDA Platform HTTP API
     Retrieves list of HMDA filers, filtered by period.
     Example response with HTTP code 200, in `JSON` format:
 
+    ```json
     {
         "institutions": [
             {
@@ -133,6 +134,32 @@ This documenatation describes de public HMDA Platform HTTP API
             }
         ]
     }
+  ```
+
+* `/filers/<period>/<institutionID>/msaMds`
+    * `GET`
+
+    Retrieves a list of all MSA/MDs for a given institution and period.
+    Example response with HTTP code 200, in `JSON` format:
+
+    ```json
+    {
+            "year": "2017",
+            "institution":
+                {
+                    "name": "bank-0 National Association",
+                    "id": "0",
+                    "respondentId": "Bank0_RID"
+                },
+            "msaMds": [
+                {
+                    "id": "12345",
+                    "name": "Example MSA/MD"
+                }
+          ]
+
+        }
+    ```
 
 
 ## Check Digit
