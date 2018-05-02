@@ -3,7 +3,6 @@ pipeline {
   agent {
     docker {
       image 'cfpb/jenkinsfile:scala'
-      args '--user jenkins -v /run/docker.sock:/run/docker.sock'
     }
   }
 
