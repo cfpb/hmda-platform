@@ -12,9 +12,8 @@ title: "HMDA Platform API - Institutions"
 ---
 
 <hgroup>
-  <h3 id="search-by-domain">Search by email domain</h3>
-  <p class="usa-font-lead">Query the list of known institutions on the HMDA Platform.</p>
-  <p>Using the <code>/institutions</code> endpoint you can provide an email domain and get a response containing a list of insitutions that use that email domain.</p>
+  <h1 id="search-by-domain">Search by email domain</h1>
+  <p class="usa-font-lead">Using the <code>/institutions</code> endpoint you can provide an email domain and get a response containing a list of insitutions that use that email domain.</p>
 </hgroup>
 
 <h4>Allowed Methods</h4>
@@ -73,9 +72,8 @@ curl https://ffiec-api.cfpb.gov/public/institutions?domain=bank0.com
 ---
 
 <hgroup>
-  <h3 id="search-by-id">Search by institution id</h3>
-  <p class="usa-font-lead">Get details about an institution.</p>
-  <p>Using the <code>/institutions/:institutionId</code> endpoint you can provide an institution id and get the details of an institution.</p>
+  <h1 id="search-by-id">Search by institution id</h1>
+  <p class="usa-font-lead">Using the <code>/institutions/:institutionId</code> endpoint you can provide an institution id and get the details of an institution.</p>
 </hgroup>
 
 <div class="usa-alert usa-alert-info">
@@ -159,5 +157,3 @@ curl https://ffiec-api.cfpb.gov/public/institutions/:institutionId
 }
 {% endhighlight %}
 </section>
-
----
