@@ -1,10 +1,4 @@
-[![Build Status](https://travis-ci.org/cfpb/hmda-platform.svg?branch=1.x)](https://travis-ci.org/cfpb/hmda-platform) [![codecov.io](https://codecov.io/github/cfpb/hmda-platform/coverage.svg?branch=master)](https://codecov.io/github/cfpb/hmda-platform?branch=master)
-
 # HMDA Platform
-
-## This project is a work in progress
-
-Information contained in this repository should be considered provisional and a work in progress, and not the final implementation for the HMDA Platform, unless otherwise indicated.
 
 ## Introduction
 
@@ -248,8 +242,8 @@ After the test is run, some statistics will be presented on the screen. To furth
 
 1. Ensure you have a Docker Machine with sufficient resources, as described in the [Docker](#docker) section above.
 
-1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui),
-    [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth), and [hmda-pub-ui](https://github.com/cfpb/hmda-pub-ui) into the same
+1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui), 
+    [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth), [hmda-pub-ui](https://github.com/cfpb/hmda-pub-ui), and [hmda-platform-tools](https://github.com/cfpb/hmda-platform-tools) into the same
     directory as hmda-platform.
 
         ~/dev/hmda-project$ ls -l
@@ -257,6 +251,7 @@ After the test is run, some statistics will be presented on the screen. To furth
         drwxr-xr-x  25 lortone  staff   850B Jul 25 17:13 hmda-platform-ui/
         drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
         drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-pub-ui/
+        drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-tools/
 
 1. Build hmda-platform-ui
 
@@ -269,6 +264,14 @@ After the test is run, some statistics will be presented on the screen. To furth
 1. Build hmda-pub-ui
 
         cd hmda-pub-ui && \
+        yarn && \
+        cd ..
+
+    **Note:** This requires [yarn](https://yarnpkg.com/lang/en/docs/install/) to be installed.
+
+1. Build hmda-platform-tools
+
+        cd hmda-platform-tools && \
         yarn && \
         cd ..
 
@@ -316,7 +319,8 @@ After the test is run, some statistics will be presented on the screen. To furth
 
     1. Submit a HMDA filing.  Several sample files can be found [here](https://github.com/cfpb/hmda-platform/tree/master/parser/jvm/src/test/resources/txt).
 
-1. To view the publication UI (hmda-pub-ui) go to http://192.168.99.100/reports.
+1. To view the publication UI (hmda-pub-ui) go to http://192.168.99.100/data-publication/.
+1. To view the tools (hmda-platform-tools) go to http://192.168.99.100/tools/.
 
 ##### Updating an existing system
 
@@ -325,6 +329,8 @@ If you've updated any of the hmda-platform services, and would like to see those
     docker-compose stop -t0 && \
     docker-compose rm -vf && \
     cd ../hmda-platform-ui && \
+    yarn && \
+    cd ../hmda-platform-tools && \
     yarn && \
     cd ../hmda-pub-ui && \
     yarn && \
@@ -338,16 +344,17 @@ If you've updated any of the hmda-platform services, and would like to see those
 
 When running the full stack via Docker Compose, the following services are available:
 
-| Service                | URL                                  |
-|------------------------|--------------------------------------|
-| Filing UI              | https://192.168.99.100               |
-| Filing API (Unsecured) | http://192.168.99.100:8080           |
-| Filing API (Secured)   | https://192.168.99.100:4443/hmda/    |
-| Reports UI             | https://192.168.99.100:8443/reports/ |
-| Admin API              | http://192.168.99.100:8081           |
-| Public API             | https://192.168.99.100:4443/public/  |
-| Keycloak               | https://192.168.99.100:8443          |
-| MailDev                | https://192.168.99.100:8443/mail/    |
+| Service                | URL                                           |
+|------------------------|-----------------------------------------------|
+| Filing UI              | https://192.168.99.100                        |
+| Filing API (Unsecured) | http://192.168.99.100:8080                    |
+| Filing API (Secured)   | https://192.168.99.100:4443/hmda/             |
+| Data Publication       | https://192.168.99.100:8443/data-publication/ |
+| Tools                  | https://192.168.99.100:8443/tools/            |
+| Admin API              | http://192.168.99.100:8081                    |
+| Public API             | https://192.168.99.100:4443/public/           |
+| Keycloak               | https://192.168.99.100:8443                   |
+| MailDev                | https://192.168.99.100:8443/mail/             |
 
 #### Development conveniences
 
@@ -356,25 +363,13 @@ When running the full stack via Docker Compose, the following services are avail
 For convenience when doing development on the UI, Auth setup, and API, the `docker-compose` file uses a `volumes` which mounts
 
 - the ui's `dist/` directory into the `hmda-platform-ui` container,
-- the publication ui's `reports/` directory into the `hmda-pub-ui` container,
+- the publication ui's `data-publication/` directory into the `hmda-pub-ui` container,
+- the tools `tools/` directory into the `hmda-platform-tools` container,
 - the `hmda.jar` into `hmda-platform` container,
 - and the `hmda` themes directory in the auth repo into the `keycloak` container.
 
-This means you can make changes to the UI, publication UI, Keycloak theme, or API and (in most cases) view them without needing to rebuild their respective containers.
-
-In order to view changes in the API you need to rebuild the jar and then restart the container:
-
 ```shell
-# from the hmda-platform directory
-sbt clean assembly
-docker-compose stop
-docker-compose up
-```
-
-To allow continued rebuilding of the front-end, you can run the following:
-
-```shell
-# from the hmda-platform-ui and/or hmda-pub-ui directory
+# from the hmda-platform-ui, hmda-pub-ui, and/or hmda-platform-tools directory
 npm run watch
 ```
 
@@ -396,4 +391,3 @@ npm run watch
 * [Modified LAR File Spec](2017_Modified_LAR_Spec.csv)
 * [RID Spec](2017_File_Spec_RID.csv)
 * [Loading 2016 Data](2016_Data_load.md)
-
