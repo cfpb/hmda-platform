@@ -13,7 +13,7 @@ lazy val akkaDeps = Seq(akkaSlf4J,
                         akkaClusterHttpManagement)
 lazy val akkaPersistenceDeps = Seq(akkaPersistence, akkaClusterSharding)
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
-lazy val circeDeps = Seq(circe, circeGeneric)
+lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
 lazy val scalafmtSettings = Seq(
   scalafmtOnCompile in ThisBuild := true,
