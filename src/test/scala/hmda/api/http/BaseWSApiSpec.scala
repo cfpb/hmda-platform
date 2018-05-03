@@ -5,7 +5,6 @@ import akka.http.scaladsl.testkit.{ScalatestRouteTest, WSProbe}
 import hmda.api.http.model.common.HmdaServiceStatus
 import io.circe.Json
 import org.scalatest.{MustMatchers, WordSpec}
-import io.circe.syntax._
 import io.circe.generic.auto._
 import io.circe.parser._
 
