@@ -26,5 +26,6 @@ object Dependencies {
   lazy val akkaClusterHttpManagement = "com.lightbend.akka.management" %% "akka-management-cluster-http" % Version.akkaClusterManagement
   lazy val circe =  "io.circe" %% "circe-core" % Version.circe
   lazy val circeGeneric = "io.circe" %% "circe-generic" % Version.circe
+  lazy val circeParser = "io.circe" %% "circe-parser" % Version.circe
 
 }
