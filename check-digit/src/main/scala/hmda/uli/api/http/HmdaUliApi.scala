@@ -9,14 +9,17 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
+import akka.http.scaladsl.server.Directives._
+import akka.util.Timeout
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 
 object HmdaUliApi {
   def props(): Props = Props(new HmdaUliApi)
 }
 
-class HmdaUliApi extends HttpServer with BaseHttpApi {
+class HmdaUliApi extends HttpServer with BaseHttpApi with ULIHttpApi {
 
   val config = ConfigFactory.load()
 
@@ -25,11 +28,15 @@ class HmdaUliApi extends HttpServer with BaseHttpApi {
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
+  val duration = config.getInt("hmda.uli.http.timeout").seconds
+
+  override implicit val timeout: Timeout = Timeout(duration)
+
   override val name: String = "hmda-uli-api"
   override val host: String = config.getString("hmda.uli.http.host")
   override val port: Int = config.getInt("hmda.uli.http.port")
 
-  override val paths: Route = routes(s"$name")
+  override val paths: Route = routes(s"$name") ~ uliHttpRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,

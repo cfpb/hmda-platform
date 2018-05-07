@@ -1,4 +1,4 @@
-package hmda.api.http
+package hmda.api.http.routes
 
 import java.net.InetAddress
 import java.time.Instant

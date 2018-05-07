@@ -1,4 +1,4 @@
-package hmda.api.http
+package hmda.api.http.routes
 
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.testkit.{ScalatestRouteTest, WSProbe}

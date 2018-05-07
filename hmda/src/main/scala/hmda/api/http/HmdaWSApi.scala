@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
+import hmda.api.http.routes.BaseWsApi
 
 import scala.concurrent.{ExecutionContext, Future}
 
