@@ -85,4 +85,4 @@ lazy val `check-digit` = (project in file("check-digit"))
     ),
     scalafmtSettings,
     packageSettings
-  ).dependsOn(`common-api`)
+  ).dependsOn(`common-api` % "compile->compile;test->test")
