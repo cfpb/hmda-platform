@@ -1,7 +1,42 @@
 package hmda.uli.api.http
 
-import akka.actor.Actor
+import akka.actor.{ActorSystem, Props}
+import akka.event.Logging
+import akka.pattern.pipe
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Route
+import akka.stream.ActorMaterializer
+import com.typesafe.config.ConfigFactory
+import hmda.api.http.HttpServer
+import hmda.api.http.routes.BaseHttpApi
 
-class HmdaUliApi extends Actor {
-  override def receive: Receive = ???
+import scala.concurrent.{ExecutionContext, Future}
+
+object HmdaUliApi {
+  def props(): Props = Props(new HmdaUliApi)
+}
+
+class HmdaUliApi extends HttpServer with BaseHttpApi {
+
+  val config = ConfigFactory.load()
+
+  override implicit val system: ActorSystem = context.system
+  override implicit val materializer: ActorMaterializer = ActorMaterializer()
+  override implicit val ec: ExecutionContext = context.dispatcher
+  override val log = Logging(system, getClass)
+
+  override val name: String = "hmda-uli-api"
+  override val host: String = config.getString("hmda.uli.http.host")
+  override val port: Int = config.getInt("hmda.uli.http.port")
+
+  override val paths: Route = routes(s"$name")
+
+  override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
+    paths,
+    host,
+    port
+  )
+
+  http pipeTo self
+
 }

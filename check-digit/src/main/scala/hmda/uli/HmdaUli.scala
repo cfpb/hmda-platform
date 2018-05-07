@@ -1,9 +1,11 @@
 package hmda.uli
 
+import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
+import hmda.uli.api.http.HmdaUliApi
 import org.slf4j.LoggerFactory
 
-class HmdaUli extends App {
+object HmdaUli extends App {
 
   val log = LoggerFactory.getLogger("hmda")
 
@@ -21,4 +23,7 @@ class HmdaUli extends App {
   val host = config.getString("hmda.uli.http.host")
   val port = config.getInt("hmda.uli.http.port")
 
+  implicit val system = ActorSystem("hmda-uli")
+
+  system.actorOf(HmdaUliApi.props(), "hmda-uli-api")
 }
