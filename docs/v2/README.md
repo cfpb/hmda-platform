@@ -31,6 +31,7 @@ This is the main filing application, exposing the APIs necessary to upload, vali
 
 ### check-digit 
 
+Microservice that exposes functionality to create a check digit from a loan id, and to validate `Univeral Loan Identifiers` 
 
 
 ## Building and Running
@@ -68,9 +69,11 @@ $sbt
 sbt:root> project hmda-platform
 sbt:hmda-platform> docker:publishLocal
 ```
-This task will create a `Docker` image. To run a container with the `HMDA Platform` as a single node cluster, will all dependencies:
+This task will create a `Docker` image. To run a container with the `HMDA Platform` filing application as a single node cluster:
 
-`docker run --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 hmda/hmda-platform`
+`docker run --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 hmda/hmda-platform` 
+
+The same approach can be followed to build and run Docker containers for the other microservices that form the HMDA Platform
 
 ### Running the application in clustered mode (mesos)
 
@@ -88,7 +91,8 @@ For more details, please refer to the [Marathon Documentation](https://mesospher
 
 ### API Documentation
 
-* [Public API Documentation](api/public-api.md)
+* [HMDA Platform Public API Documentation](api/public-api.md)
+* [HMDA Platform ULI API Documentation](api/uli.md)
 
 ### Data Specifications
 

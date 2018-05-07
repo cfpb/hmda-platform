@@ -22,10 +22,7 @@ lazy val scalafmtSettings = Seq(
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Juan Marin Otero",
-  Docker / version := "latest",
   dockerBaseImage := "openjdk:8-jre-alpine",
-  dockerExposedPorts := Vector(8080, 8081, 8082, 19999, 9080),
-  packageName := "hmda-platform",
   dockerRepository := Some("hmda")
 )
 
@@ -75,7 +72,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   ).dependsOn(`common-api` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
-  .enablePlugins(JavaServerAppPackaging)
+  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -84,5 +81,6 @@ lazy val `check-digit` = (project in file("check-digit"))
       }
     ),
     scalafmtSettings,
+    dockerSettings,
     packageSettings
   ).dependsOn(`common-api` % "compile->compile;test->test")
