@@ -13,5 +13,6 @@ class HmdaApi extends HmdaActor {
   val filingApi = context.actorOf(HmdaFilingApi.props)
   val adminApi = context.actorOf(HmdaAdminApi.props)
   val publicApi = context.actorOf(HmdaPublicApi.props)
+  val wsApi = context.actorOf(HmdaWSApi.props)
 
 }

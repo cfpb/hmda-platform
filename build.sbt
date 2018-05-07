@@ -13,7 +13,7 @@ lazy val akkaDeps = Seq(akkaSlf4J,
                         akkaClusterHttpManagement)
 lazy val akkaPersistenceDeps = Seq(akkaPersistence, akkaClusterSharding)
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
-lazy val circeDeps = Seq(circe, circeGeneric)
+lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
 lazy val scalafmtSettings = Seq(
   scalafmtOnCompile in ThisBuild := true,
@@ -24,7 +24,7 @@ lazy val dockerSettings = Seq(
   Docker / maintainer := "Juan Marin Otero",
   Docker / version := "latest",
   dockerBaseImage := "openjdk:8-jre-alpine",
-  dockerExposedPorts := Vector(8080, 8081, 8082, 19999),
+  dockerExposedPorts := Vector(8080, 8081, 8082, 19999, 9080),
   packageName := "hmda-platform",
   dockerRepository := Some("hmda")
 )
