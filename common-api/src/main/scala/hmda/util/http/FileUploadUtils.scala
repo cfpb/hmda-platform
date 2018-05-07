@@ -1,4 +1,4 @@
-package hmda.api.http.util
+package hmda.util.http
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, Multipart}
 

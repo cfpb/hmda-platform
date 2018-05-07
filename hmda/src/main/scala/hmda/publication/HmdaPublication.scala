@@ -1,7 +1,7 @@
 package hmda.publication
 
 import akka.actor.Props
-import hmda.model.actor.HmdaActor
+import hmda.actor.HmdaActor
 
 object HmdaPublication {
   final val name = "HmdaPublication"

@@ -1,4 +1,4 @@
-package hmda.model.messages
+package hmda.messages
 
 object CommonMessages {
   sealed trait Message

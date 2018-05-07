@@ -1,4 +1,4 @@
-package hmda.api.http.model.common
+package hmda.api.http
 
 import java.net.InetSocketAddress
 
@@ -7,7 +7,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import hmda.model.actor.HmdaActor
+import hmda.actor.HmdaActor
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -48,7 +48,15 @@ lazy val packageSettings = Seq(
 
 lazy val `hmda-root` = (project in file("."))
   .settings(hmdaBuildSettings: _*)
-  .aggregate(`hmda-platform`, `check-digit`)
+  .aggregate(`common-api`, `hmda-platform`, `check-digit`)
+
+lazy val `common-api` = (project in file("common-api"))
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps
+    )
+  )
 
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
@@ -58,13 +66,13 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .settings(
     Seq(
       mainClass in Compile := Some("hmda.HmdaPlatform"),
-      assemblyJarName in assembly := "hmda2.jar"
+      assemblyJarName in assembly := "hmda2.jar",
+      libraryDependencies ++= akkaPersistenceDeps
     ),
     scalafmtSettings,
     dockerSettings,
-    packageSettings,
-    libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps
-  )
+    packageSettings
+  ).dependsOn(`common-api` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging)
@@ -76,6 +84,5 @@ lazy val `check-digit` = (project in file("check-digit"))
       }
     ),
     scalafmtSettings,
-    packageSettings,
-    libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps
-  )
+    packageSettings
+  ).dependsOn(`common-api`)

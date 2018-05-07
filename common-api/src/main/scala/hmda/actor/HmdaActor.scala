@@ -1,7 +1,7 @@
-package hmda.model.actor
+package hmda.actor
 
-import akka.actor.{Actor, ActorLogging}
-import hmda.model.messages.CommonMessages.StopActor
+import akka.actor._
+import hmda.messages.CommonMessages.StopActor
 
 abstract class HmdaActor extends Actor with ActorLogging {
 

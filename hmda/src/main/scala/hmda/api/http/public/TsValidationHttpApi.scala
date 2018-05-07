@@ -7,12 +7,12 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.model.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.{TsValidateRequest, TsValidateResponse}
 import hmda.api.http.codec.TsCodec._
+import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext

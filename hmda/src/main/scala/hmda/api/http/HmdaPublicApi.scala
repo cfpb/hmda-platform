@@ -7,7 +7,6 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.model.common.HttpServer
 import hmda.api.http.public.{
   HmdaFileValidationHttpApi,
   LarValidationHttpApi,
@@ -15,6 +14,7 @@ import hmda.api.http.public.{
 }
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
+import hmda.api.http.routes.BaseHttpApi
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

@@ -6,7 +6,6 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.model.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import hmda.api.http.model.public.{LarValidateRequest, LarValidateResponse}
@@ -14,6 +13,7 @@ import hmda.parser.filing.lar.LarCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.LarCodec._
+import hmda.api.http.directives.HmdaTimeDirectives
 
 import scala.concurrent.ExecutionContext
 

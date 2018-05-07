@@ -1,7 +1,7 @@
 package hmda.validation
 
 import akka.actor.Props
-import hmda.model.actor.HmdaActor
+import hmda.actor.HmdaActor
 
 object HmdaValidation {
   final val name = "HmdaValidation"

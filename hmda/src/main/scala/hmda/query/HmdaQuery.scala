@@ -1,7 +1,7 @@
 package hmda.query
 
 import akka.actor.Props
-import hmda.model.actor.HmdaActor
+import hmda.actor.HmdaActor
 
 object HmdaQuery {
   final val name = "HmdaQuery"

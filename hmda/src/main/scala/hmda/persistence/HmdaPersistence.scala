@@ -1,7 +1,7 @@
 package hmda.persistence
 
 import akka.actor.Props
-import hmda.model.actor.HmdaActor
+import hmda.actor.HmdaActor
 
 object HmdaPersistence {
   final val name = "HmdaPersistence"

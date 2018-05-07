@@ -5,7 +5,6 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import hmda.api.http.model.public.ValidatedResponse
-import hmda.api.http.util.FileUploadUtils
 import hmda.model.filing.lar.LarGenerators.{larGen, larNGen}
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.ts.TsGenerators.tsGen
@@ -13,6 +12,7 @@ import org.scalatest.{MustMatchers, WordSpec}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import akka.http.scaladsl.unmarshalling.Unmarshaller._
+import hmda.util.http.FileUploadUtils
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._

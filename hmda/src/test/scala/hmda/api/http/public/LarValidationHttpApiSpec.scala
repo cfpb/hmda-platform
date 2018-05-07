@@ -15,8 +15,8 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.LarCodec._
-import hmda.api.http.util.FileUploadUtils
 import hmda.model.filing.ts.TransmittalSheet
+import hmda.util.http.FileUploadUtils
 
 class LarValidationHttpApiSpec
     extends WordSpec
