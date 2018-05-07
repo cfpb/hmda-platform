@@ -7,11 +7,11 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.Flow
-import hmda.api.http.model.common.HmdaServiceStatus
+import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
 import io.circe.syntax._
 

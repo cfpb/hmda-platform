@@ -2,11 +2,11 @@ package hmda.api.http
 
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.testkit.{ScalatestRouteTest, WSProbe}
-import hmda.api.http.model.common.HmdaServiceStatus
+import hmda.api.http.model.HmdaServiceStatus
 import io.circe.Json
-import org.scalatest.{MustMatchers, WordSpec}
 import io.circe.generic.auto._
 import io.circe.parser._
+import org.scalatest.{MustMatchers, WordSpec}
 
 import scala.concurrent.ExecutionContext
 
