@@ -75,6 +75,54 @@ This task will create a `Docker` image. To run a container with the `HMDA Platfo
 
 The same approach can be followed to build and run Docker containers for the other microservices that form the HMDA Platform
 
+### CI/CD in Kubernetes (local)
+
+To build and run the application in Kubernetes (local development), the following steps must be taken:
+
+1. Make sure that [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) is installed and configured for your system
+2. Make sure that [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) is installed and configured. When properly
+installed, you should be able to do `minikube dashboard` to open up the `kubernetes` cluster dashboard in your browser. Make sure that
+`kubectl` is properly configured to point to `minikube` when working in local development mode.
+3. Make sure that [Helm](https://helm.sh/) is installed, as well as Tiller, the server side component.
+4. Install the `Jenkins` Helm Chart, as follows:
+
+* First, make sure the `Helm` repo is up to date:
+
+```shell
+helm repo update
+```
+
+List Helm Charts installed:
+
+```shell
+helm list
+```
+
+If the previous command doesn't work (usually with an error of "connection refused"), do the following:
+
+```shell
+kubectl --namespace=kube-system edit deployment/tiller-deploy
+```
+
+And change the `aoutomountServiceAccountToken` to `true`. Save and exit
+
+* Install Jenkins Chart
+
+```shell
+helm install --name jenkins -f kubernetes/jenkins-values.yml stable/jenkins
+```
+
+You can access `Jenkins` by issuing `minikube service jenkins` and logging in with `admin/admin`.
+
+Follow the on screen instructions to finalize `Jenkins` setup. When logged in, update plugins if necessary.
+
+* Docker Hub Credentials
+
+Add credentials in Jenkins for `Docker Hub` so that images can be pushed as part of `Jenkins` pipeline builds.
+
+
+
+
 ### Running the application in clustered mode (mesos)
 
 * The script in the [mesos](../../mesos) folder describes the deployment through [Marathon](https://mesosphere.github.io/marathon/) on a DCOS / Mesos cluster.
