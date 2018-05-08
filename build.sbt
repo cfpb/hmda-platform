@@ -23,7 +23,7 @@ lazy val scalafmtSettings = Seq(
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Juan Marin Otero",
   dockerBaseImage := "openjdk:8-jre-alpine",
-  dockerRepository := Some("hmda")
+  dockerRepository := Some("jmarin")
 )
 
 lazy val packageSettings = Seq(
