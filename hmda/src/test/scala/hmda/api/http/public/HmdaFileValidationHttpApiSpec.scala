@@ -2,7 +2,7 @@ package hmda.api.http.public
 
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import akka.util.Timeout
 import hmda.api.http.model.public.ValidatedResponse
 import hmda.model.filing.lar.LarGenerators.{larGen, larNGen}
@@ -16,6 +16,7 @@ import hmda.util.http.FileUploadUtils
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import akka.testkit._
 
 class HmdaFileValidationHttpApiSpec
     extends WordSpec
@@ -26,7 +27,9 @@ class HmdaFileValidationHttpApiSpec
 
   override val log: LoggingAdapter = NoLogging
   val ec: ExecutionContext = system.dispatcher
-  override implicit val timeout: Timeout = Timeout(5.seconds)
+  val duration = 5.seconds
+  implicit val timeout = Timeout(duration)
+  implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 
   val lar = larGen.sample.get
   val larCsv = lar.toCSV
