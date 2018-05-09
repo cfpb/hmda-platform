@@ -3,8 +3,8 @@ Data Field Number, Data Field Name, Data Field Type, Field Type Description,Fiel
 2, Legal Entity Identifier (LEI), Alphanumeric, String,20, Example: 12121212121212121212,N
 3, Agency Code , Numeric, Integer,1, Example: 3,Y
 4, Institution Type , Numeric, Integer,2, Example: 10,Y
-5, 2017 Institution ID, Numeric, String,, Example: 123456,Y
-6, Tax ID , Numeric, String,10, Example: 12-3456789,Y
+5, 2017 Institution ID, Alphanumeric, String,, Example: 123456,Y
+6, Tax ID , Alphanumeric, String,10, Example: 12-3456789,Y
 7, RSSD , Numeric, String ,, Example: 123456,Y
 8, Email Domain, Alphanumeric, String,, Example: cfpb.gov,Y
 9, Respondent Name , Alphanumeric, String,, Example: CFPB,Y
