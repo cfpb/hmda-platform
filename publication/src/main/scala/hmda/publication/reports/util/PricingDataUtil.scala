@@ -23,6 +23,7 @@ object PricingDataUtil extends SourceUtils {
       rs5 <- pricingDisposition(lars, rateSpreadBetween(5, Int.MaxValue), "5 or more")
       mean <- reportedMean(lars)
       median <- reportedMedian(lars)
+      hoepa <- pricingDisposition(lars.filter(_.hoepaStatus == 1), (lar: LoanApplicationRegister) => true, "HOEPA Loans")
     } yield {
       s"""
          |[
@@ -35,7 +36,8 @@ object PricingDataUtil extends SourceUtils {
          |    $rs4,
          |    $rs5,
          |    $mean,
-         |    $median
+         |    $median,
+         |    $hoepa
          |]
      """.stripMargin
     }
@@ -85,7 +87,7 @@ object PricingDataUtil extends SourceUtils {
          |{
          |    "pricing": "Mean",
          |    "count": ${results.head},
-         |    "value": ${results(1).toInt}"
+         |    "value": ${results(1).toInt}
          |}
        """.stripMargin
     }

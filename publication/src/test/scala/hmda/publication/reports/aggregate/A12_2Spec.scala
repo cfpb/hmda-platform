@@ -60,7 +60,7 @@ class A12_2Spec extends AsyncWordSpec with MustMatchers with LarGenerators with 
 
                 case Seq(JsString(race), JsArray(pricing)) =>
                   race mustBe "American Indian/Alaska Native"
-                  pricing must have size 10
+                  pricing must have size 11
               }
           }
       }
@@ -82,7 +82,7 @@ class A12_2Spec extends AsyncWordSpec with MustMatchers with LarGenerators with 
 
                 case Seq(JsString(race), JsArray(pricing)) =>
                   race mustBe "Less than 10% minority"
-                  pricing must have size 10
+                  pricing must have size 11
               }
           }
       }
