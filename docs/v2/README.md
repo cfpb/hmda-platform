@@ -21,6 +21,19 @@ The HMDA Platform is written in [Scala](http://www.scala-lang.org/). To build it
 
 In addition, you'll need Scala's interactive build tool [sbt](https://www.scala-sbt.org/). Please refer to sbt's [installation instructions](https://www.scala-sbt.org/1.x/docs/Setup.html) to get started.
 
+## Project structure
+
+The HMDA Platform is divided into individual projects, each responsible for a subset of the functionality, as follows:
+
+### hmda-platform
+
+This is the main filing application, exposing the APIs necessary to upload, validate and store HMDA files. 
+
+### check-digit 
+
+Microservice that exposes functionality to create a check digit from a loan id, and to validate `Univeral Loan Identifiers` 
+
+
 ## Building and Running
 
 ### Running from the SBT prompt
@@ -29,31 +42,38 @@ In addition, you'll need Scala's interactive build tool [sbt](https://www.scala-
 
 ```shell
 $ sbt
-sbt:hmda> reStart
+sbt:root> project hmda-platform
+sbt:hmda-platform> reStart
 ```
 
 
 ### Building and runnint the .jar
 
-* To build JVM artifacts (the default, includes all projects), from the sbt prompt:
+* To build JVM artifacts, from the sbt prompt first choose the project you want to build and use the assembly command:
 
 ```shell
-> clean assembly
+$ sbt
+sbt:root> project check-digit
+sbt:check-digit>assembly
 ```
 This task will create a `fat jar`, which can be executed on any `JDK9` compliant `JVM`:
 
-`java -jar target/scala-2.12/hmda2.jar`
+`java -jar target/scala-2.12/check-digit.jar`
 
 ### Building and running the Docker image
 
-* To build a `Docker` image that runs as a single node cluster, from the sbt prompt:
+* To build a `Docker` image that runs the `hmda-platform` as a single node cluster, from the sbt prompt:
 
 ```shell
-> docker:publishLocal
+$sbt
+sbt:root> project hmda-platform
+sbt:hmda-platform> docker:publishLocal
 ```
-This task will create a `Docker` image. To run a container with the `HMDA Platform` as a single node cluster, will all dependencies:
+This task will create a `Docker` image. To run a container with the `HMDA Platform` filing application as a single node cluster:
 
-`docker run --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 hmda/hmda-platform`
+`docker run --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 hmda/hmda-platform` 
+
+The same approach can be followed to build and run Docker containers for the other microservices that form the HMDA Platform
 
 ### Running the application in clustered mode (mesos)
 
@@ -71,7 +91,8 @@ For more details, please refer to the [Marathon Documentation](https://mesospher
 
 ### API Documentation
 
-* [Public API Documentation](api/public-api.md)
+* [HMDA Platform Public API Documentation](api/public-api.md)
+* [HMDA Platform ULI API Documentation](api/uli.md)
 
 ### Data Specifications
 

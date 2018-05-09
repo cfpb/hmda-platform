@@ -4,13 +4,13 @@ import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 lazy val akkaDeps = Seq(akkaSlf4J,
-                        akkaCluster,
-                        akkaTyped,
-                        akkaStream,
-                        akkaManagement,
-                        akkaManagementClusterBootstrap,
-                        akkaServiceDiscoveryDNS,
-                        akkaClusterHttpManagement)
+  akkaCluster,
+  akkaTyped,
+  akkaStream,
+  akkaManagement,
+  akkaManagementClusterBootstrap,
+  akkaServiceDiscoveryDNS,
+  akkaClusterHttpManagement)
 lazy val akkaPersistenceDeps = Seq(akkaPersistence, akkaClusterSharding)
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
@@ -22,10 +22,7 @@ lazy val scalafmtSettings = Seq(
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Juan Marin Otero",
-  Docker / version := "latest",
   dockerBaseImage := "openjdk:8-jre-alpine",
-  dockerExposedPorts := Vector(8080, 8081, 8082, 19999, 9080),
-  packageName := "hmda-platform",
   dockerRepository := Some("hmda")
 )
 
@@ -44,23 +41,46 @@ lazy val packageSettings = Seq(
   },
   // the bash scripts classpath only needs the fat jar
   scriptClasspath := Seq((assemblyJarName in assembly).value),
-  dependencyOverrides ++= akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps
 )
 
-lazy val hmda = (project in file("."))
+lazy val `hmda-root` = (project in file("."))
+  .settings(hmdaBuildSettings: _*)
+  .aggregate(`common-api`, `hmda-platform`, `check-digit`)
+
+lazy val `common-api` = (project in file("common-api"))
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps
+    )
+  )
+
+lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
-                 sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+    sbtdocker.DockerPlugin,
+    AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
       mainClass in Compile := Some("hmda.HmdaPlatform"),
+      assemblyJarName in assembly := "hmda2.jar",
+      libraryDependencies ++= akkaPersistenceDeps
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  ).dependsOn(`common-api` % "compile->compile;test->test")
+
+lazy val `check-digit` = (project in file("check-digit"))
+  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
       assemblyJarName in assembly := {
-        s"${name.value}2.jar"
+        s"${name.value}.jar"
       }
     ),
     scalafmtSettings,
     dockerSettings,
-    packageSettings,
-    libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps
-  )
+    packageSettings
+  ).dependsOn(`common-api` % "compile->compile;test->test")
