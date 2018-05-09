@@ -75,31 +75,32 @@ object PricingDataUtil extends SourceUtils {
     Try(lar.rateSpread.toDouble).getOrElse(0)
 
   private def reportedMean[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
-    val loansFiltered = lars.filter(pricingDataReported)
+    val loansFiltered = lars.filter(rateSpreadBetween(1.5, Int.MaxValue))
 
-    calculateMean(loansFiltered, rateSpread).map { mean =>
-      val displayMean = if (mean == 0) "\"\"" else mean
+    val meanCount = calculateMean(loansFiltered, rateSpread)
+    val meanValue = calculateMean(loansFiltered, loanAmount)
+
+    Future.sequence(List(meanCount, meanValue)).map { results =>
       s"""
          |{
          |    "pricing": "Mean",
-         |    "count": $displayMean,
-         |    "value": "None"
+         |    "count": ${results.head},
+         |    "value": ${results(1).toInt}"
          |}
        """.stripMargin
     }
   }
 
   private def reportedMedian[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
-    val median = calculateMedian(lars.filter(pricingDataReported), rateSpread)
+    val medianCount = calculateMedian(lars.filter(rateSpreadBetween(1.5, Int.MaxValue)), rateSpread)
+    val medianValue = calculateMedian(lars.filter(rateSpreadBetween(1.5, Int.MaxValue)), loanAmount)
 
-    median.map { value =>
-      val displayMedian = if (value == 0) "\"\"" else value
-
+    Future.sequence(List(medianCount, medianValue)).map { results =>
       s"""
          |{
          |    "pricing": "Median",
-         |    "count": $displayMedian,
-         |    "value": "None"
+         |    "count": ${results.head},
+         |    "value": ${results(1).toInt}
          |}
        """.stripMargin
     }
