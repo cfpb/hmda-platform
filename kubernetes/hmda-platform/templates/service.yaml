@@ -1,28 +1,9 @@
-apiVersion: v1
 kind: Service
-metadata:
-  name: hmda-remoting
-  labels:
-    app: {{ template "hmda-platform.name" . }}
-    chart: {{ template "hmda-platform.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-spec:
-  clusterIP: None
-  ports:
-    - port: {{ .Values.remoting.port }}
-      targetPort: {{ .Values.remoting.port }}
-      protocol: {{ .Values.remoting.protocol }}
-  selector:
-    app: {{ template "hmda-platform.name" . }}
-    release: {{ .Release.Name }}
----
 apiVersion: v1
-kind: Service
 metadata:
   name: hmda-bootstrap
 spec:
-# by setting the clusterIp to None we are a "headless service"
+  # by setting the clusterIp to None we are a "headless service"
   # and thus the svc ("service") DNS record for the single IP but the IPs of all nodes that we select
   #
   # In other words:
@@ -35,48 +16,38 @@ spec:
   #  Address: 172.17.0.7
   #  Name:	hmda-service.default.svc.cluster.local
   #  Address: 172.17.0.8
-#  Name:	hmda-service.default.svc.cluster.local
+  #  Name:	hmda-service.default.svc.cluster.local
   clusterIP: None
   selector:
-    app: {{ template "hmda-platform.name" . }}
-    release: {{ .Release.Name }}
+    app: hmda
   ports:
-    - port: {{ .Values.bootstrap.port }}
-      targetPort: {{ .Values.bootstrap.port }}
-      protocol: {{ .Values.bootstrap.protocol }}
+  - protocol: TCP
+    port: 8558
+    targetPort: 8558
+
 ---
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
   name: hmda-api
-  labels:
-    app: {{ template "hmda-platform.name" . }}
-    chart: {{ template "hmda-platform.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.filing.port }}
-      targetPort: {{ .Values.filing.port }}
-      protocol: {{ .Values.filing.protocol }}
-      name: {{ .Values.filing.name }}
-    - port: {{ .Values.admin.port }}
-      targetPort: {{ .Values.admin.port }}
-      protocol: {{ .Values.admin.protocol }}
-      name: {{ .Values.admin.name }}
-    - port: {{ .Values.public.port }}
-      targetPort: {{ .Values.public.port }}
-      protocol: {{ .Values.public.protocol }}
-      name: {{ .Values.public.name }}
-    - port: {{ .Values.cluster.port }}
-      targetPort: {{ .Values.cluster.port }}
-      protocol: {{ .Values.cluster.protocol }}
-      name: {{ .Values.cluster.name }}
-    - port: {{ .Values.websockets.port }}
-      targetPort: {{ .Values.websockets.port }}
-      protocol: {{ .Values.websockets.protocol }}
-      name: {{ .Values.websockets.name }}
   selector:
-    app: {{ template "hmda-platform.name" . }}
-    release: {{ .Release.Name }}
+    app: hmda
+  type: NodePort
+  ports:
+  - name: filing
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  - name: admin
+    protocol: TCP
+    port: 8081
+    targetPort: 8081
+  - name: public
+    protocol: TCP
+    port: 8082
+    targetPort: 8082
+  - name: cluster
+    protocol: TCP
+    port: 19999
+    targetPort: 19999

@@ -1,66 +1,46 @@
-apiVersion: apps/v1beta2
+apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "hmda-platform.fullname" . }}
   labels:
-    app: {{ template "hmda-platform.name" . }}
-    chart: {{ template "hmda-platform.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    app: hmda
+  name: hmda
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 3
   selector:
     matchLabels:
-      app: {{ template "hmda-platform.name" . }}
-      release: {{ .Release.Name }}
+      app: hmda
   template:
     metadata:
       labels:
-        app: {{ template "hmda-platform.name" . }}
-        release: {{ .Release.Name }}
-        actorSystemName: {{ .Values.hmda.actorSystemName }}
+        app: hmda
+        actorSystemName: hmda2
     spec:
-      serviceAccountName: {{ .Values.service.account.name }}
+      serviceAccountName: hmda-service-account
       containers:
-        - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-          env:
-          - name: HMDA_RUNTIME_MODE
-            value: {{ .Values.hmda.runtimeMode }}
-          - name: HOST_NAME
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: status.podIP
-          ports:
-            - name: {{ .Values.remoting.name }}
-              containerPort: {{ .Values.remoting.port }}
-              protocol: {{ .Values.remoting.protocol }}
-            - name: {{ .Values.bootstrap.name }}
-              containerPort: {{ .Values.bootstrap.port }}
-              protocol: {{ .Values.bootstrap.protocol }}
-            - name: {{ .Values.cluster.name }}
-              containerPort: {{ .Values.cluster.port }}
-              protocol: {{ .Values.cluster.protocol }}
-          livenessProbe:
-            tcpSocket:
-              port: {{ .Values.cluster.port }}
-          readinessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.filing.port }}
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+      - name: hmda
+        image: jmarin/hmda-platform:2.0.1
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: HMDA_RUNTIME_MODE
+          value: kubernetes
+        - name: HOST_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        livenessProbe:
+          tcpSocket:
+            port: 19999
+        ports:
+        # akka remoting
+        - name: remoting
+          containerPort: 2551
+          protocol: TCP
+        # akka-management bootstrap
+        - name: bootstrap
+          containerPort: 8558
+          protocol: TCP
+        # external http
+        - name: akka-mgmt-http
+          containerPort: 19999
+          protocol: TCP
