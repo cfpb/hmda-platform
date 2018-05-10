@@ -10,6 +10,7 @@ lazy val akkaDeps = Seq(akkaSlf4J,
   akkaManagement,
   akkaManagementClusterBootstrap,
   akkaServiceDiscoveryDNS,
+  akkaServiceDiscoveryKubernetes,
   akkaClusterHttpManagement)
 lazy val akkaPersistenceDeps = Seq(akkaPersistence, akkaClusterSharding)
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)

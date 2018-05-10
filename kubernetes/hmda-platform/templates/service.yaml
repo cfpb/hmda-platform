@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hmda-remoting
+  labels:
+    app: {{ template "hmda-platform.name" . }}
+    chart: {{ template "hmda-platform.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  clusterIP: None
+  ports:
+    - port: {{ .Values.remoting.port }}
+      targetPort: {{ .Values.remoting.name }}
+      protocol: {{ .Values.remoting.protocol }}
+  selector:
+    app: {{ template "hmda-platform.name" . }}
+    release: {{ .Release.Name }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hmda-bootstrap
+spec:
+# by setting the clusterIp to None we are a "headless service"
+  # and thus the svc ("service") DNS record for the single IP but the IPs of all nodes that we select
+  #
+  # In other words:
+  #  POD=$(kubectl get pods | grep hmda | grep Running | head -n1 | awk '{ print $1 }')
+  #  $ kubectl exec -it $POD -- nslookup hmda-service.default.svc.cluster.local
+  #  Server:		10.0.0.10
+  #  Address:	10.0.0.10#53
+  #
+  #  Name:	hmda-service.default.svc.cluster.local
+  #  Address: 172.17.0.7
+  #  Name:	hmda-service.default.svc.cluster.local
+  #  Address: 172.17.0.8
+#  Name:	hmda-service.default.svc.cluster.local
+  clusterIP: None
+  selector:
+    app: {{ template "hmda-platform.name" . }}
+    release: {{ .Release.Name }}
+  ports:
+    - port: {{ .Values.bootstrap.port }}
+      targetPort: {{ .Values.bootstrap.port }}
+      protocol: {{ .Values.bootstrap.protocol }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hmda-api
+  labels:
+    app: {{ template "hmda-platform.name" . }}
+    chart: {{ template "hmda-platform.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.filing.port }}
+      targetPort: {{ .Values.filing.name }}
+      protocol: {{ .Values.filing.protocol }}
+      name: {{ .Values.filing.name }}
+    - port: {{ .Values.admin.port }}
+      targetPort: {{ .Values.admin.name }}
+      protocol: {{ .Values.admin.protocol }}
+      name: {{ .Values.admin.name }}
+    - port: {{ .Values.public.port }}
+      targetPort: {{ .Values.public.name }}
+      protocol: {{ .Values.public.protocol }}
+      name: {{ .Values.public.name }}
+    - port: {{ .Values.cluster.port }}
+      targetPort: {{ .Values.cluster.name }}
+      protocol: {{ .Values.cluster.protocol }}
+      name: {{ .Values.cluster.name }}
+    - port: {{ .Values.websockets.port }}
+      targetPort: {{ .Values.websockets.name }}
+      protocol: {{ .Values.websockets.protocol }}
+      name: {{ .Values.websockets.name }}
+  selector:
+    app: {{ template "hmda-platform.name" . }}
+    release: {{ .Release.Name }}

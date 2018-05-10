@@ -98,13 +98,19 @@ List Helm Charts installed:
 helm list
 ```
 
-If the previous command doesn't work (usually with an error of "connection refused"), do the following:
+In some cases, this command will fail with a permissions error. In that case, run the following:
+
+```shell
+kubectl create clusterrolebinding add-on-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:default
+```
+
+If the `helm list` command doesn't work (usually with an error of "connection refused"), do the following:
 
 ```shell
 kubectl --namespace=kube-system edit deployment/tiller-deploy
 ```
 
-And change the `aoutomountServiceAccountToken` to `true`. Save and exit
+And change the `automountServiceAccountToken` to `true`. Save and exit
 
 * Install Jenkins Chart
 

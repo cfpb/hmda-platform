@@ -1,0 +1,75 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "hmda-platform.fullname" . }}
+  labels:
+    app: {{ template "hmda-platform.name" . }}
+    chart: {{ template "hmda-platform.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "hmda-platform.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "hmda-platform.name" . }}
+        release: {{ .Release.Name }}
+        actorSystemName: {{ .Values.hmda.actorSystemName }}
+    spec:
+      serviceAccountName: {{ .Values.service.account.name }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: HMDA_RUNTIME_MODE
+            value: {{ .Values.hmda.runtimeMode }}
+          - name: HOST_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: status.podIP
+          ports:
+            - name: {{ .Values.filing.name }}
+              containerPort: {{ .Values.filing.port }}
+              protocol: {{ .Values.filing.protocol }}
+            - name: {{ .Values.admin.name }}
+              containerPort: {{ .Values.admin.port }}
+              protocol: {{ .Values.admin.protocol }}
+            - name: {{ .Values.public.name }}
+              containerPort: {{ .Values.public.port }}
+              protocol: {{ .Values.public.protocol }}
+            - name: {{ .Values.cluster.name }}
+              containerPort: {{ .Values.cluster.port }}
+              protocol: {{ .Values.cluster.protocol }}
+            - name: {{ .Values.bootstrap.name }}
+              containerPort: {{ .Values.bootstrap.port }}
+              protocol: {{ .Values.bootstrap.protocol }}
+            - name: {{ .Values.websockets.name }}
+              containerPort: {{ .Values.websockets.port }}
+              protocol: {{ .Values.websockets.protocol }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.cluster.port }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.filing.port }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
