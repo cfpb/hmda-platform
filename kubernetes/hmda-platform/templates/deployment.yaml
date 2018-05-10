@@ -34,24 +34,15 @@ spec:
                 apiVersion: v1
                 fieldPath: status.podIP
           ports:
-            - name: {{ .Values.filing.name }}
-              containerPort: {{ .Values.filing.port }}
-              protocol: {{ .Values.filing.protocol }}
-            - name: {{ .Values.admin.name }}
-              containerPort: {{ .Values.admin.port }}
-              protocol: {{ .Values.admin.protocol }}
-            - name: {{ .Values.public.name }}
-              containerPort: {{ .Values.public.port }}
-              protocol: {{ .Values.public.protocol }}
-            - name: {{ .Values.cluster.name }}
-              containerPort: {{ .Values.cluster.port }}
-              protocol: {{ .Values.cluster.protocol }}
+            - name: {{ .Values.remoting.name }}
+              containerPort: {{ .Values.remoting.port }}
+              protocol: {{ .Values.remoting.protocol }}
             - name: {{ .Values.bootstrap.name }}
               containerPort: {{ .Values.bootstrap.port }}
               protocol: {{ .Values.bootstrap.protocol }}
-            - name: {{ .Values.websockets.name }}
-              containerPort: {{ .Values.websockets.port }}
-              protocol: {{ .Values.websockets.protocol }}
+            - name: {{ .Values.cluster.name }}
+              containerPort: {{ .Values.cluster.port }}
+              protocol: {{ .Values.cluster.protocol }}
           livenessProbe:
             tcpSocket:
               port: {{ .Values.cluster.port }}

@@ -11,7 +11,7 @@ spec:
   clusterIP: None
   ports:
     - port: {{ .Values.remoting.port }}
-      targetPort: {{ .Values.remoting.name }}
+      targetPort: {{ .Values.remoting.port }}
       protocol: {{ .Values.remoting.protocol }}
   selector:
     app: {{ template "hmda-platform.name" . }}
@@ -58,23 +58,23 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.filing.port }}
-      targetPort: {{ .Values.filing.name }}
+      targetPort: {{ .Values.filing.port }}
       protocol: {{ .Values.filing.protocol }}
       name: {{ .Values.filing.name }}
     - port: {{ .Values.admin.port }}
-      targetPort: {{ .Values.admin.name }}
+      targetPort: {{ .Values.admin.port }}
       protocol: {{ .Values.admin.protocol }}
       name: {{ .Values.admin.name }}
     - port: {{ .Values.public.port }}
-      targetPort: {{ .Values.public.name }}
+      targetPort: {{ .Values.public.port }}
       protocol: {{ .Values.public.protocol }}
       name: {{ .Values.public.name }}
     - port: {{ .Values.cluster.port }}
-      targetPort: {{ .Values.cluster.name }}
+      targetPort: {{ .Values.cluster.port }}
       protocol: {{ .Values.cluster.protocol }}
       name: {{ .Values.cluster.name }}
     - port: {{ .Values.websockets.port }}
-      targetPort: {{ .Values.websockets.name }}
+      targetPort: {{ .Values.websockets.port }}
       protocol: {{ .Values.websockets.protocol }}
       name: {{ .Values.websockets.name }}
   selector:
