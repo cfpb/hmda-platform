@@ -21,6 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaPublicApi {
   def props: Props = Props(new HmdaPublicApi)
+  final val publicApiName = "hmda-public-api"
 }
 
 class HmdaPublicApi
@@ -30,6 +31,8 @@ class HmdaPublicApi
     with LarValidationHttpApi
     with HmdaFileValidationHttpApi {
 
+  import HmdaPublicApi._
+
   val config = ConfigFactory.load()
 
   override implicit val system: ActorSystem = context.system
@@ -37,7 +40,7 @@ class HmdaPublicApi
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val name: String = "hmda-public-api"
+  override val name: String = publicApiName
   override val host: String = config.getString("hmda.http.publicHost")
   override val port: Int = config.getInt("hmda.http.publicPort")
   override val timeout: Timeout = Timeout(

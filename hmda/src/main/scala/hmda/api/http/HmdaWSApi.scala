@@ -13,9 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaWSApi {
   def props: Props = Props(new HmdaWSApi)
+  final val wsApiName = "hmda-ws-api"
 }
 
 class HmdaWSApi extends HttpServer with BaseWsApi {
+  import HmdaWSApi._
 
   val config = ConfigFactory.load()
 
@@ -24,7 +26,7 @@ class HmdaWSApi extends HttpServer with BaseWsApi {
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val name: String = "hmda-ws-api"
+  override val name: String = wsApiName
   override val host: String = config.getString("hmda.ws.host")
   override val port: Int = config.getInt("hmda.ws.port")
 

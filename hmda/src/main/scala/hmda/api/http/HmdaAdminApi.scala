@@ -13,9 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaAdminApi {
   def props: Props = Props(new HmdaAdminApi)
+  final val adminApiName = "hmda-admin-api"
 }
 
 class HmdaAdminApi extends HttpServer with BaseHttpApi {
+  import HmdaAdminApi._
 
   val config = ConfigFactory.load()
 
@@ -24,7 +26,7 @@ class HmdaAdminApi extends HttpServer with BaseHttpApi {
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val name: String = "hmda-admin-api"
+  override val name: String = adminApiName
   override val host: String = config.getString("hmda.http.adminHost")
   override val port: Int = config.getInt("hmda.http.adminPort")
 
