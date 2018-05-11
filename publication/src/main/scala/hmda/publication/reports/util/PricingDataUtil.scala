@@ -23,6 +23,7 @@ object PricingDataUtil extends SourceUtils {
       rs5 <- pricingDisposition(lars, rateSpreadBetween(5, Int.MaxValue), "5 or more")
       mean <- reportedMean(lars)
       median <- reportedMedian(lars)
+      hoepa <- pricingDisposition(lars.filter(_.hoepaStatus == 1), (lar: LoanApplicationRegister) => true, "HOEPA Loans")
     } yield {
       s"""
          |[
@@ -35,7 +36,8 @@ object PricingDataUtil extends SourceUtils {
          |    $rs4,
          |    $rs5,
          |    $mean,
-         |    $median
+         |    $median,
+         |    $hoepa
          |]
      """.stripMargin
     }
@@ -75,31 +77,32 @@ object PricingDataUtil extends SourceUtils {
     Try(lar.rateSpread.toDouble).getOrElse(0)
 
   private def reportedMean[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
-    val loansFiltered = lars.filter(pricingDataReported)
+    val loansFiltered = lars.filter(rateSpreadBetween(1.5, Int.MaxValue))
 
-    calculateMean(loansFiltered, rateSpread).map { mean =>
-      val displayMean = if (mean == 0) "\"\"" else mean
+    val meanCount = calculateMean(loansFiltered, rateSpread)
+    val meanValue = calculateMean(loansFiltered, loanAmount)
+
+    Future.sequence(List(meanCount, meanValue)).map { results =>
       s"""
          |{
          |    "pricing": "Mean",
-         |    "count": $displayMean,
-         |    "value": "None"
+         |    "count": ${results.head},
+         |    "value": ${results(1).toInt}
          |}
        """.stripMargin
     }
   }
 
   private def reportedMedian[ec: EC, mat: MAT, as: AS](lars: Source[LoanApplicationRegister, NotUsed]): Future[String] = {
-    val median = calculateMedian(lars.filter(pricingDataReported), rateSpread)
+    val medianCount = calculateMedian(lars.filter(rateSpreadBetween(1.5, Int.MaxValue)), rateSpread)
+    val medianValue = calculateMedian(lars.filter(rateSpreadBetween(1.5, Int.MaxValue)), loanAmount)
 
-    median.map { value =>
-      val displayMedian = if (value == 0) "\"\"" else value
-
+    Future.sequence(List(medianCount, medianValue)).map { results =>
       s"""
          |{
          |    "pricing": "Median",
-         |    "count": $displayMedian,
-         |    "value": "None"
+         |    "count": ${results.head},
+         |    "value": ${results(1).toInt}
          |}
        """.stripMargin
     }
