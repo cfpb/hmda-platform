@@ -1,6 +1,6 @@
 package hmda
 
-import akka.actor.ActorSystem
+import akka.{actor => untyped}
 import akka.cluster.Cluster
 import akka.management.AkkaManagement
 import akka.management.cluster.bootstrap.ClusterBootstrap
@@ -11,6 +11,8 @@ import hmda.persistence.HmdaPersistence
 import hmda.query.HmdaQuery
 import hmda.validation.HmdaValidation
 import org.slf4j.LoggerFactory
+import akka.actor.typed.scaladsl.adapter._
+import hmda.publication.HmdaPublication
 
 object HmdaPlatform extends App {
 
@@ -44,7 +46,8 @@ object HmdaPlatform extends App {
   }
 
   implicit val system =
-    ActorSystem(clusterConfig.getString("hmda.cluster.name"), clusterConfig)
+    untyped.ActorSystem(clusterConfig.getString("hmda.cluster.name"),
+                        clusterConfig)
 
   implicit val mat = ActorMaterializer()
   implicit val cluster = Cluster(system)
@@ -55,13 +58,16 @@ object HmdaPlatform extends App {
   }
 
   //Start Persistence
-  system.actorOf(HmdaPersistence.props, HmdaPersistence.name)
+  system.spawn(HmdaPersistence.behavior, HmdaPersistence.name)
 
   //Start Query
-  system.actorOf(HmdaQuery.props, HmdaQuery.name)
+  system.spawn(HmdaQuery.behavior, HmdaQuery.name)
 
   //Start Validation
-  system.actorOf(HmdaValidation.props, HmdaValidation.name)
+  system.spawn(HmdaValidation.behavior, HmdaValidation.name)
+
+  //Start Publication
+  system.spawn(HmdaPublication.behavior, HmdaPublication.name)
 
   //Start API
   system.actorOf(HmdaApi.props, HmdaApi.name)

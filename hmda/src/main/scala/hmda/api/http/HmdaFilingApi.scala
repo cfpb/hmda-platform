@@ -13,9 +13,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaFilingApi {
   def props: Props = Props(new HmdaFilingApi)
+  final val filingApiName = "hmda-filing-api"
 }
 
 class HmdaFilingApi extends HttpServer with BaseHttpApi {
+  import HmdaFilingApi._
+
   val config = ConfigFactory.load()
 
   override implicit val system: ActorSystem = context.system
@@ -23,7 +26,7 @@ class HmdaFilingApi extends HttpServer with BaseHttpApi {
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  override val name: String = "hmda-filing-api"
+  override val name: String = filingApiName
   override val host: String = config.getString("hmda.http.filingHost")
   override val port: Int = config.getInt("hmda.http.filingPort")
 
