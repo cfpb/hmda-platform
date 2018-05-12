@@ -39,9 +39,24 @@ services:
     volumes:
       - ../hmda-platform-ui/dist:/usr/src/app/dist
     environment:
-      APP_URL: https://192.168.99.100
+      FILING_APP_URL: https://192.168.99.100/filing/
+      HOMEPAGE_URL: https://192.168.99.100
       HMDA_API: https://192.168.99.100:4443/hmda
       KEYCLOAK_URL: https://192.168.99.100:8443/auth/realms/hmda
+      # lb settings
+      VIRTUAL_HOST: 'http://*:80/filing/*, https://*:443/filing/*'
+      VIRTUAL_HOST_WEIGHT: 1
+      EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /filing//?(.*)" "\1\ /\2"'
+      EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
+      FORCE_SSL: 'true' # redirect 80 to 443
+
+  homepage:
+    build: ../hmda-homepage
+    volumes:
+      - ../hmda-homepage/dist:/usr/src/app/dist
+    environment:
+      HOMEPAGE_URL: https://192.168.99.100
+      HMDA_API: https://192.168.99.100:4443/hmda
       # lb settings
       VIRTUAL_HOST: 'http://*:80/*, https://*:443/*'
       VIRTUAL_HOST_WEIGHT: 0
@@ -55,11 +70,11 @@ services:
     volumes:
       - ../hmda-pub-ui/data-publication:/usr/src/app/data-publication
     environment:
-      APP_URL: https://192.168.99.100
+      HOMEPAGE_URL: https://192.168.99.100
       HMDA_API: https://192.168.99.100:4443/hmda
       # lb settings
       VIRTUAL_HOST: 'http://*:80/data-publication/*, https://*:443/data-publication/*'
-      VIRTUAL_HOST_WEIGHT: 1 # make sure this wins over the app UI
+      VIRTUAL_HOST_WEIGHT: 2 # make sure this wins over the homepage and UI
       EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /data-publication//?(.*)" "\1\ /\2"'
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
@@ -75,7 +90,7 @@ services:
       HMDA_API: https://192.168.99.100:4443/hmda
       # lb settings
       VIRTUAL_HOST: 'http://*:80/tools/*, https://*:443/tools/*'
-      VIRTUAL_HOST_WEIGHT: 2 # make sure this wins over the app UI
+      VIRTUAL_HOST_WEIGHT: 2 # make sure this wins over the homepage and UI
       EXTRA_SETTINGS: 'reqirep  "^([^ :]*)\ /tools//?(.*)" "\1\ /\2"'
       EXCLUDE_PORTS: '443' # use lb's ssl instead of ui's nginx
       FORCE_SSL: 'true' # redirect 80 to 443
@@ -95,8 +110,8 @@ services:
       SMTP_PORT: 25
       INSTITUTION_SEARCH_URI: 'https://192.168.99.100:4443/public/'
       INSTITUTION_SEARCH_VALIDATE_SSL: "OFF"
-      HOME_PAGE_URI: 'https://192.168.99.100'
-      REDIRECT_URIS: '[ "https://192.168.99.100", "https://192.168.99.100/oidc-callback", "https://192.168.99.100/silent_renew.html" ]'
+      FILING_APP_URL: 'https://192.168.99.100/filing/'
+      REDIRECT_URIS: '[ "https://192.168.99.100/filing/", "https://192.168.99.100/filing/oidc-callback", "https://192.168.99.100/filing/silent_renew.html" ]'
       SUPPORT_EMAIL: 'support@localhost.localdomain'
       # lb settings
       VIRTUAL_HOST: 'https://*:8443/*'
@@ -180,6 +195,7 @@ services:
       - ui
       - data_publication
       - tools
+      - homepage
     environment:
       # EXTRA_GLOBAL_SETTINGS: 'debug' # enable for request logging
       # Default SSL cert for ALL services served by lb
