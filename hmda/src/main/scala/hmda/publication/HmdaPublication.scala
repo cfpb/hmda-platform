@@ -7,14 +7,14 @@ object HmdaPublication {
 
   final val name = "HmdaPublication"
 
-  sealed trait HmdaPublicationMessage
-  case object StopHmdaPublication extends HmdaPublicationMessage
+  sealed trait HmdaPublicationCommand
+  case object StopHmdaPublication extends HmdaPublicationCommand
 
-  val behavior: Behavior[HmdaPublicationMessage] =
+  val behavior: Behavior[HmdaPublicationCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Actor started at ${ctx.self.path}")
       Behaviors
-        .receive[HmdaPublicationMessage] {
+        .receive[HmdaPublicationCommand] {
           case (_, msg) =>
             msg match {
               case StopHmdaPublication =>

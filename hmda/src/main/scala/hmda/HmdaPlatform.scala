@@ -1,7 +1,6 @@
 package hmda
 
 import akka.{actor => untyped}
-import akka.cluster.Cluster
 import akka.management.AkkaManagement
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.stream.ActorMaterializer
@@ -12,6 +11,7 @@ import hmda.query.HmdaQuery
 import hmda.validation.HmdaValidation
 import org.slf4j.LoggerFactory
 import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.typed.Cluster
 import hmda.publication.HmdaPublication
 
 object HmdaPlatform extends App {
@@ -49,8 +49,10 @@ object HmdaPlatform extends App {
     untyped.ActorSystem(clusterConfig.getString("hmda.cluster.name"),
                         clusterConfig)
 
+  implicit val typedSystem = system.toTyped
+
   implicit val mat = ActorMaterializer()
-  implicit val cluster = Cluster(system)
+  implicit val cluster = Cluster(typedSystem)
 
   if (runtimeMode == "prod") {
     AkkaManagement(system).start()

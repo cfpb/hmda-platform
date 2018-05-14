@@ -1,20 +1,40 @@
 package hmda.persistence
 
-import akka.actor.typed.{Behavior, PostStop, PreRestart}
+import akka.actor.typed.{
+  ActorContext,
+  ActorRef,
+  Behavior,
+  PostStop,
+  PreRestart,
+  Props
+}
 import akka.actor.typed.scaladsl.Behaviors
+import akka.cluster.sharding.typed.{ClusterShardingSettings, ShardingEnvelope}
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
+import hmda.persistence.institutions.InstitutionPersistence.{
+  CounterCommand,
+  GoodByeCounter
+}
 
 object HmdaPersistence {
 
   final val name = "HmdaPersistence"
 
-  sealed trait HmdaPersistenceMessage
-  case object StopHmdaPersistence extends HmdaPersistenceMessage
 
-  val behavior: Behavior[HmdaPersistenceMessage] =
+  sealed trait HmdaPersistenceCommand
+  case object StopHmdaPersistence extends HmdaPersistenceCommand
+
+  val ShardingTypeName = EntityTypeKey[HmdaPersistenceCommand](name)
+  val MaxNumberOfShards = 10
+
+  val behavior: Behavior[HmdaPersistenceCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Actor started at ${ctx.self.path}")
+
+      startInstitutionsSharding(ctx)
+
       Behaviors
-        .receive[HmdaPersistenceMessage] {
+        .receive[HmdaPersistenceCommand] {
           case (_, msg) =>
             msg match {
               case StopHmdaPersistence =>
@@ -30,5 +50,11 @@ object HmdaPersistence {
             Behaviors.same
         }
     }
+
+  def shardingBehavior: Behavior[HmdaPersistenceCommand] = ???
+
+  def startInstitutionsSharding(ctx: ActorContext[_]): Unit = {
+
+  }
 
 }

@@ -5,6 +5,8 @@ import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 lazy val akkaDeps = Seq(akkaSlf4J,
   akkaCluster,
+  akkaClusterSharding,
+  akkaClusterShardingTyped,
   akkaTyped,
   akkaClusterTyped,
   akkaStream,

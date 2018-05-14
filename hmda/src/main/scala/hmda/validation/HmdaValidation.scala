@@ -7,14 +7,14 @@ object HmdaValidation {
 
   final val name = "HmdaValidation"
 
-  sealed trait HmdaValidationMessage
-  case object StopHmdaValidation extends HmdaValidationMessage
+  sealed trait HmdaValidationCommand
+  case object StopHmdaValidation extends HmdaValidationCommand
 
-  val behavior: Behavior[HmdaValidationMessage] =
+  val behavior: Behavior[HmdaValidationCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Actor started at ${ctx.self.path}")
       Behaviors
-        .receive[HmdaValidationMessage] {
+        .receive[HmdaValidationCommand] {
           case (_, msg) =>
             msg match {
               case StopHmdaValidation =>

@@ -16,6 +16,7 @@ object Dependencies {
   lazy val akkaCluster = "com.typesafe.akka" %% "akka-cluster" % Version.akka
   lazy val akkaClusterTyped = "com.typesafe.akka" %% "akka-cluster-typed" % Version.akka
   lazy val akkaClusterSharding = "com.typesafe.akka" %% "akka-cluster-sharding" % Version.akka
+  lazy val akkaClusterShardingTyped = "com.typesafe.akka" %% "akka-cluster-sharding-typed" % Version.akka
   lazy val akkaPersistence = "com.typesafe.akka" %% "akka-persistence" % Version.akka
   lazy val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
   lazy val akkaHttp = "com.typesafe.akka" %% "akka-http" % Version.akkaHttp

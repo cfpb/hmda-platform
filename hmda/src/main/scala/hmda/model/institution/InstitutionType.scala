@@ -18,4 +18,3 @@ case object UndeterminedInstitutionType extends InstitutionType {
   override val code: Int = -1
   override val name: String = "Undetermined Institution Type"
 }
-
