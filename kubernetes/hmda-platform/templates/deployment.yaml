@@ -15,7 +15,7 @@ spec:
         app: hmda
         actorSystemName: hmda2
     spec:
-      serviceAccountName: hmda-service-account
+      serviceAccountName: {{ .Values.service.account.name }}
       containers:
       - name: hmda
         image: jmarin/hmda-platform:2.0.1
