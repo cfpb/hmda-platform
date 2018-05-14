@@ -2,19 +2,12 @@ package hmda.persistence
 
 import akka.actor.typed.{
   ActorContext,
-  ActorRef,
   Behavior,
   PostStop,
-  PreRestart,
-  Props
+  PreRestart
 }
 import akka.actor.typed.scaladsl.Behaviors
-import akka.cluster.sharding.typed.{ClusterShardingSettings, ShardingEnvelope}
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
-import hmda.persistence.institutions.InstitutionPersistence.{
-  CounterCommand,
-  GoodByeCounter
-}
+import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 
 object HmdaPersistence {
 
