@@ -13,7 +13,7 @@ spec:
     metadata:
       labels:
         app: hmda
-        actorSystemName: hmda2
+        actorSystemName: {{ .Values.hmda.actorSystemName }}
     spec:
       serviceAccountName: {{ .Values.service.account.name }}
       containers:
@@ -22,7 +22,7 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: HMDA_RUNTIME_MODE
-          value: kubernetes
+          value: {{ .Values.hmda.runtimeMode }}
         - name: HOST_NAME
           valueFrom:
             fieldRef:
