@@ -17,9 +17,9 @@ spec:
     spec:
       serviceAccountName: {{ .Values.service.account.name }}
       containers:
-      - name: hmda
-        image: jmarin/hmda-platform:2.0.1
-        imagePullPolicy: IfNotPresent
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: HMDA_RUNTIME_MODE
           value: kubernetes
