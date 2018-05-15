@@ -39,9 +39,9 @@ spec:
           containerPort: {{ .Values.remoting.port }}
           protocol: {{ .Values.remoting.protocol }}
         # akka-management bootstrap
-        - name: bootstrap
-          containerPort: 8558
-          protocol: TCP
+        - name: {{ .Values.bootstrap.name }}
+          containerPort: {{ .Values.bootstrap.port }}
+          protocol: {{ .Values.bootstrap.protocol }}
         # external http
         - name: akka-mgmt-http
           containerPort: 19999
