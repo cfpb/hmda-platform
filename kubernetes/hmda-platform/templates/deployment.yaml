@@ -43,6 +43,6 @@ spec:
           containerPort: {{ .Values.bootstrap.port }}
           protocol: {{ .Values.bootstrap.protocol }}
         # external http
-        - name: akka-mgmt-http
-          containerPort: 19999
-          protocol: TCP
+        - name: {{ .Values.cluster.name }}
+          containerPort: {{ .Values.cluster.port }}
+          protocol: {{ .Values.cluster.protocol }}
