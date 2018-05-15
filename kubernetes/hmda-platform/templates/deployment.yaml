@@ -35,9 +35,9 @@ spec:
             port: 19999
         ports:
         # akka remoting
-        - name: remoting
-          containerPort: 2551
-          protocol: TCP
+        - name: {{ .Values.remoting.name }}
+          containerPort: {{ .Values.remoting.port }}
+          protocol: {{ .Values.remoting.protocol }}
         # akka-management bootstrap
         - name: bootstrap
           containerPort: 8558
