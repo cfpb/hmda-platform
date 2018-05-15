@@ -2,17 +2,19 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    app: hmda
-  name: hmda
+    app: {{ template "hmda-platform.name" . }}
+  name: {{ template "hmda-platform.fullname" . }}
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: hmda
+      app: {{ template "hmda-platform.name" . }}
+      release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: hmda
+        app: {{ template "hmda-platform.name" . }}
+        release: {{ .Release.Name }}
         actorSystemName: {{ .Values.hmda.actorSystemName }}
     spec:
       serviceAccountName: {{ .Values.service.account.name }}
