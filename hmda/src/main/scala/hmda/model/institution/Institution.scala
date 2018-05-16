@@ -13,5 +13,6 @@ case class Institution(
     parent: Parent,
     assets: Option[Int],
     otherLenderCode: Option[Int],
-    topHolder: TopHolder
+    topHolder: TopHolder,
+    hmdaFiler: Boolean
 )
