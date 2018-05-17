@@ -2,7 +2,6 @@ package hmda.model.filing.ts
 
 import org.scalacheck.Gen
 import hmda.model.filing.FilingGenerators._
-import hmda.model.census.Census._
 
 object TsGenerators {
 
@@ -45,10 +44,6 @@ object TsGenerators {
     } yield Address(street, city, state, zipCode)
   }
 
-  implicit def activityYearGen: Gen[Int] = {
-    Gen.oneOf(2018, 2019)
-  }
-
   implicit def totalLinesGen: Gen[Int] = {
     Gen.choose(0, Int.MaxValue)
   }
@@ -59,10 +54,6 @@ object TsGenerators {
       sep = "-"
       suffix <- stringOfN(7, Gen.numChar)
     } yield List(prefix, suffix).mkString(sep)
-  }
-
-  implicit def stateGen: Gen[String] = {
-    Gen.oneOf(states.keys.toList)
   }
 
   implicit def zipGen: Gen[String] = {
@@ -88,12 +79,4 @@ object TsGenerators {
     } yield List(p1, p2, p3).mkString(sep)
   }
 
-  implicit def emailGen: Gen[String] = {
-    for {
-      name <- Gen.alphaStr.filter(s => s.nonEmpty)
-      at = "@"
-      domain <- Gen.alphaStr.filter(s => s.nonEmpty)
-      dotCom = ".com"
-    } yield List(name, at, domain, dotCom).mkString
-  }
 }

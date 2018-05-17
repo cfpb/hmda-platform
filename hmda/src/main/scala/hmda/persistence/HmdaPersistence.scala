@@ -1,18 +1,12 @@
 package hmda.persistence
 
-import akka.actor.typed.{
-  ActorContext,
-  Behavior,
-  PostStop,
-  PreRestart
-}
+import akka.actor.typed.{ActorContext, Behavior, PostStop, PreRestart}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 
 object HmdaPersistence {
 
   final val name = "HmdaPersistence"
-
 
   sealed trait HmdaPersistenceCommand
   case object StopHmdaPersistence extends HmdaPersistenceCommand
@@ -46,8 +40,6 @@ object HmdaPersistence {
 
   def shardingBehavior: Behavior[HmdaPersistenceCommand] = ???
 
-  def startInstitutionsSharding(ctx: ActorContext[_]): Unit = {
-
-  }
+  def startInstitutionsSharding(ctx: ActorContext[_]): Unit = {}
 
 }

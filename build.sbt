@@ -3,18 +3,25 @@ import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
-lazy val akkaDeps = Seq(akkaSlf4J,
+lazy val akkaDeps = Seq(
+  akkaSlf4J,
   akkaCluster,
-  akkaClusterSharding,
-  akkaClusterShardingTyped,
   akkaTyped,
   akkaClusterTyped,
   akkaStream,
   akkaManagement,
   akkaManagementClusterBootstrap,
   akkaServiceDiscoveryDNS,
-  akkaClusterHttpManagement)
-lazy val akkaPersistenceDeps = Seq(akkaPersistence, akkaClusterSharding)
+  akkaClusterHttpManagement,
+  akkaTestkitTyped
+)
+lazy val akkaPersistenceDeps =
+  Seq(akkaPersistence,
+      akkaClusterSharding,
+      akkaPersistenceTyped,
+      akkaClusterShardingTyped,
+      akkaPersistenceCassandra,
+      cassandraLauncher)
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
@@ -43,7 +50,7 @@ lazy val packageSettings = Seq(
     filtered :+ (fatJar -> ("lib/" + fatJar.getName))
   },
   // the bash scripts classpath only needs the fat jar
-  scriptClasspath := Seq((assemblyJarName in assembly).value),
+  scriptClasspath := Seq((assemblyJarName in assembly).value)
 )
 
 lazy val `hmda-root` = (project in file("."))
@@ -60,8 +67,8 @@ lazy val `common-api` = (project in file("common-api"))
 
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
-    sbtdocker.DockerPlugin,
-    AshScriptPlugin)
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -72,10 +79,13 @@ lazy val `hmda-platform` = (project in file("hmda"))
     scalafmtSettings,
     dockerSettings,
     packageSettings
-  ).dependsOn(`common-api` % "compile->compile;test->test")
+  )
+  .dependsOn(`common-api` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -86,4 +96,5 @@ lazy val `check-digit` = (project in file("check-digit"))
     scalafmtSettings,
     dockerSettings,
     packageSettings
-  ).dependsOn(`common-api` % "compile->compile;test->test")
+  )
+  .dependsOn(`common-api` % "compile->compile;test->test")

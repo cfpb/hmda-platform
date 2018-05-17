@@ -4,7 +4,7 @@ case class Institution(
     activityYear: Int,
     LEI: Option[String],
     agency: Option[Agency],
-    intitutionType: Option[InstitutionType],
+    institutionType: Option[InstitutionType],
     institutionId_2017: Option[String],
     taxId: Option[String],
     rssd: Option[String],
