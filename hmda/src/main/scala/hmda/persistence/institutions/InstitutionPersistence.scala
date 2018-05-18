@@ -27,7 +27,7 @@ object InstitutionPersistence {
       extends InstitutionCommand
 
   case class InstitutionState(institution: Option[Institution]) {
-    def isEmpty: Boolean = institution.isDefined
+    def isEmpty: Boolean = institution.isEmpty
   }
 
   def behavior(entityId: String): Behavior[InstitutionCommand] =
