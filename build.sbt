@@ -74,6 +74,13 @@ lazy val `hmda-platform` = (project in file("hmda"))
     Seq(
       mainClass in Compile := Some("hmda.HmdaPlatform"),
       assemblyJarName in assembly := "hmda2.jar",
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
       libraryDependencies ++= akkaPersistenceDeps
     ),
     scalafmtSettings,
