@@ -144,11 +144,11 @@ This documenatation describes de public HMDA Platform HTTP API
 
     ```json
     {
-            "year": "2017",
             "institution":
                 {
+                    "institutionId": "0",
                     "name": "bank-0 National Association",
-                    "id": "0",
+                    "period": "2017",
                     "respondentId": "Bank0_RID"
                 },
             "msaMds": [
