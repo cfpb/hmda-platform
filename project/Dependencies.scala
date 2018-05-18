@@ -32,6 +32,6 @@ object Dependencies {
   lazy val circeGeneric = "io.circe" %% "circe-generic" % Version.circe
   lazy val circeParser = "io.circe" %% "circe-parser" % Version.circe
   lazy val akkaPersistenceCassandra = "com.typesafe.akka" %% "akka-persistence-cassandra" % Version.cassandraPluginVersion
-  lazy val cassandraLauncher = "com.typesafe.akka" %% "akka-persistence-cassandra-launcher" % Version.cassandraPluginVersion % Test
+  lazy val cassandraLauncher = "com.typesafe.akka" %% "akka-persistence-cassandra-launcher" % Version.cassandraPluginVersion
 
 }

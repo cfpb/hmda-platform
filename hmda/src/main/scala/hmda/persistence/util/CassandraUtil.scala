@@ -11,12 +11,15 @@ object CassandraUtil {
       databaseDirectory,
       CassandraLauncher.DefaultTestConfigResource,
       clean = true,
-      port = 9042
+      port = 9042,
+      CassandraLauncher.classpathForResources("logback-test.xml")
     )
 
     //shut down Cassandra when JVM stops
-    sys.addShutdownHook(CassandraLauncher.stop())
+    sys.addShutdownHook(shutdown())
 
   }
+
+  def shutdown(): Unit = CassandraLauncher.stop()
 
 }

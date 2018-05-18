@@ -1,5 +1,24 @@
 package hmda.model.institution
 
+object Institution {
+  def empty: Institution = Institution(
+    2018,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    Respondent.empty,
+    Parent.empty,
+    None,
+    None,
+    TopHolder.empty,
+    false
+  )
+}
+
 case class Institution(
     activityYear: Int,
     LEI: Option[String],
