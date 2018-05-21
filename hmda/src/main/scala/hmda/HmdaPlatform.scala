@@ -1,6 +1,5 @@
 package hmda
 
-import akka.actor.typed.ActorRef
 import akka.{actor => untyped}
 import akka.management.AkkaManagement
 import akka.management.cluster.bootstrap.ClusterBootstrap
@@ -13,9 +12,6 @@ import hmda.validation.HmdaValidation
 import org.slf4j.LoggerFactory
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.Cluster
-import hmda.model.institution.Institution
-import hmda.persistence.institutions.InstitutionPersistence
-import hmda.persistence.institutions.InstitutionPersistence.CreateInstitution
 import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
 
