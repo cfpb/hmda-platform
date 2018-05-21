@@ -55,23 +55,23 @@ object InstitutionGenerators {
 
   implicit def institutionRespondentGen: Gen[Respondent] = {
     for {
-      name <- Gen.option(Gen.alphaStr)
+      name <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
       state <- Gen.option(stateGen)
-      city <- Gen.option(Gen.alphaStr)
+      city <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
     } yield Respondent(name, state, city)
   }
 
   implicit def institutionParentGen: Gen[Parent] = {
     for {
       idRssd <- Gen.option(Gen.choose(Int.MinValue, Int.MaxValue))
-      name <- Gen.option(Gen.alphaStr)
+      name <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
     } yield Parent(idRssd, name)
   }
 
   implicit def topHolderGen: Gen[TopHolder] = {
     for {
       idRssd <- Gen.option(Gen.choose(Int.MinValue, Int.MaxValue))
-      name <- Gen.option(Gen.alphaStr)
+      name <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
     } yield TopHolder(idRssd, name)
   }
 
