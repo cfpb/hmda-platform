@@ -93,9 +93,8 @@ class HmdaFilersPathSpec extends WordSpec with MustMatchers with BeforeAndAfterA
     "find msa/mds by period and institution" in {
       Get(s"/filers/2017/${hmdaFiler1.institutionId}/msaMds") ~> hmdaFilerMsasPath(supervisor) ~> check {
         status mustBe StatusCodes.OK
-        responseAs[String].parseJson.asJsObject.getFields("year", "institution", "msaMds") match {
-          case Seq(JsString(year), JsObject(institution), JsArray(msas)) =>
-            year mustBe "2017"
+        responseAs[String].parseJson.asJsObject.getFields("institution", "msaMds") match {
+          case Seq(JsObject(institution), JsArray(msas)) =>
             institution.getOrElse("name", "") mustBe JsString(hmdaFiler1.name)
             msas.toList.length mustBe list.length
         }
