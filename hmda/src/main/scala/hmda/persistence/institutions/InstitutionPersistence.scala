@@ -30,10 +30,10 @@ object InstitutionPersistence {
     def isEmpty: Boolean = institution.isEmpty
   }
 
-  def behavior(entityId: String): Behavior[InstitutionCommand] =
+  def behavior(lei: String): Behavior[InstitutionCommand] =
     PersistentBehaviors
       .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
-        persistenceId = s"$name-$entityId",
+        persistenceId = s"$name-$lei",
         initialState = InstitutionState(None),
         commandHandler = commandHandler,
         eventHandler = eventHandler
