@@ -38,6 +38,8 @@ object InstitutionPersistence {
         commandHandler = commandHandler,
         eventHandler = eventHandler
       )
+      .snapshotEvery(1000)
+      .withTagger(_ => Set("institutions"))
 
   val commandHandler
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
