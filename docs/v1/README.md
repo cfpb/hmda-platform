@@ -243,7 +243,8 @@ After the test is run, some statistics will be presented on the screen. To furth
 1. Ensure you have a Docker Machine with sufficient resources, as described in the [Docker](#docker) section above.
 
 1. Clone [hmda-platform-ui](https://github.com/cfpb/hmda-platform-ui), 
-    [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth), [hmda-pub-ui](https://github.com/cfpb/hmda-pub-ui), and [hmda-platform-tools](https://github.com/cfpb/hmda-platform-tools) into the same
+
+    [hmda-platform-auth](https://github.com/cfpb/hmda-platform-auth), [hmda-pub-ui](https://github.com/cfpb/hmda-pub-ui), [hmda-homepage](https://github.com/cfpb/hmda-homepage), and [hmda-platform-tools](https://github.com/cfpb/hmda-platform-tools) into the same
     directory as hmda-platform.
 
         ~/dev/hmda-project$ ls -l
@@ -252,6 +253,7 @@ After the test is run, some statistics will be presented on the screen. To furth
         drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-auth/
         drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-pub-ui/
         drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-platform-tools/
+        drwxr-xr-x  23 lortone  staff   796B Jul 28 17:15 hmda-homepage/
 
 1. Build hmda-platform-ui
 
@@ -264,6 +266,14 @@ After the test is run, some statistics will be presented on the screen. To furth
 1. Build hmda-pub-ui
 
         cd hmda-pub-ui && \
+        yarn && \
+        cd ..
+
+    **Note:** This requires [yarn](https://yarnpkg.com/lang/en/docs/install/) to be installed.
+
+1. Build hmda-homepage
+
+        cd hmda-homepage && \
         yarn && \
         cd ..
 
@@ -301,8 +311,8 @@ After the test is run, some statistics will be presented on the screen. To furth
     to match the Docker host IP provided by your system.
 
 1. Use it!  Below are steps representing a standard HMDA filing:
-
-    1. Browse to the app at http://192.168.99.100.
+    1. Browse to the homepage at http://192.168.99.100.
+    1. Select the "Get started filing your HMDA data" link. This will redirect your browser to the filing app.
     1. Select the "Login" button.  This will redirect your browser to the Keycloak login screen.
     1. Select "create and account" on the login screen.
     1. Enter you account information and select "Register".
