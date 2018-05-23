@@ -6,6 +6,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.server.Route
 import hmda.model.institution.Institution
@@ -13,6 +14,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.api.http.codec.institution.InstitutionCodec._
+import hmda.persistence.institution.InstitutionPersistence
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -24,6 +26,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val log: LoggingAdapter
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
+  val sharding: ClusterSharding
 
   val institutionsWritePath =
     path("institutions") {
@@ -33,8 +36,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
         val typedSystem = system.toTyped
         implicit val scheduler: Scheduler = typedSystem.scheduler
 
-        val institutionPersistence =
-          createShardedInstitution(typedSystem, institution.LEI.getOrElse(""))
+        val institutionPersistence = sharding.entityRefFor(
+          InstitutionPersistence.ShardingTypeName,
+          s"${InstitutionPersistence.name}-${institution.LEI.getOrElse("")}")
 
         timedPost { uri =>
           val fCreated: Future[InstitutionCreated] = institutionPersistence ? (

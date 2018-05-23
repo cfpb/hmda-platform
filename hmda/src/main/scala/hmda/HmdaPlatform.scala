@@ -40,7 +40,7 @@ object HmdaPlatform extends App {
 
   log.info(s"HMDA_RUNTIME_MODE: $runtimeMode")
 
-  val clusterConfig = if (runtimeMode == "dev") {
+  val clusterConfig = if (runtimeMode == "dev" || runtimeMode == "dev-node") {
     ConfigFactory.parseResources("application-dev.conf").resolve()
   } else {
     config
@@ -66,8 +66,6 @@ object HmdaPlatform extends App {
 
   //Start Persistence
   system.spawn(HmdaPersistence.behavior, HmdaPersistence.name)
-
-  //institution ! CreateInstitution(Institution.empty, )
 
   //Start Query
   system.spawn(HmdaQuery.behavior, HmdaQuery.name)

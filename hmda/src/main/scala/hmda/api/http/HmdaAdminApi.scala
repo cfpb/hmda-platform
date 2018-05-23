@@ -1,6 +1,7 @@
 package hmda.api.http
 
 import akka.actor.{ActorSystem, Props}
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
@@ -11,6 +12,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.http.admin.InstitutionAdminHttpApi
 import hmda.api.http.routes.BaseHttpApi
 import akka.http.scaladsl.server.Directives._
+import akka.actor.typed.scaladsl.adapter._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -34,6 +36,8 @@ class HmdaAdminApi
   override val log = Logging(system, getClass)
   override val timeout: Timeout = Timeout(
     config.getInt("hmda.http.timeout").seconds)
+
+  override val sharding = ClusterSharding(system.toTyped)
 
   override val name: String = adminApiName
   override val host: String = config.getString("hmda.http.adminHost")
