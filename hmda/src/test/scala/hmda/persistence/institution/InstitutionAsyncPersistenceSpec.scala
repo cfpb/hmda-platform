@@ -1,13 +1,13 @@
-package hmda.persistence.institutions
+package hmda.persistence.institution
 
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.Cluster
 import akka.cluster.typed.Join
 import akka.testkit.typed.scaladsl.TestProbe
 import hmda.model.institution.Institution
-import hmda.model.institutions.InstitutionGenerators._
+import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.AkkaCassandraPersistenceSpec
-import hmda.persistence.institutions.InstitutionPersistence._
+import hmda.persistence.institution.InstitutionPersistence._
 
 class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
 

@@ -1,6 +1,5 @@
-package hmda.model.institutions
+package hmda.model.institution
 
-import hmda.model.institution._
 import org.scalacheck.Gen
 import hmda.model.filing.FilingGenerators._
 
@@ -10,11 +9,11 @@ object InstitutionGenerators {
     for {
       activityYear <- activityYearGen
       lei <- Gen.option(leiGen)
-      agency <- Gen.option(agencyGen)
-      institutionType <- Gen.option(institutionTypeGen)
-      id2017 <- Gen.option(Gen.alphaStr)
-      taxId <- Gen.option(Gen.alphaStr)
-      rssd <- Gen.option(Gen.alphaStr)
+      agency <- agencyGen
+      institutionType <- institutionTypeGen
+      id2017 <- Gen.alphaStr
+      taxId <- Gen.alphaStr
+      rssd <- Gen.alphaStr
       email <- Gen.option(emailGen)
       respondent <- institutionRespondentGen
       parent <- institutionParentGen
@@ -26,11 +25,11 @@ object InstitutionGenerators {
       Institution(
         activityYear: Int,
         lei,
-        agency,
-        institutionType,
-        id2017,
-        taxId: Option[String],
-        rssd: Option[String],
+        Some(agency),
+        Some(institutionType),
+        if (id2017 == "") None else Some(id2017),
+        if (taxId == "") None else Some(taxId),
+        if (rssd == "") None else Some(rssd),
         email,
         respondent,
         parent,

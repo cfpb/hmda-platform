@@ -1,4 +1,4 @@
-package hmda.api.http.codec.institutions
+package hmda.api.http.codec.institution
 
 import hmda.model.institution._
 import io.circe.syntax._
@@ -15,9 +15,10 @@ object InstitutionCodec {
       override def apply(i: Institution): Json = Json.obj(
         ("activityYear", Json.fromInt(i.activityYear)),
         ("LEI", Json.fromString(i.LEI.getOrElse(""))),
-        ("agency", Json.fromInt(i.agency.getOrElse(Agency()).code)),
+        ("agency", Json.fromString(i.agency.getOrElse(Agency()).code.toString)),
         ("institutionType",
-         Json.fromInt(i.institutionType.getOrElse(InstitutionType()).code)),
+         Json.fromString(
+           i.institutionType.getOrElse(InstitutionType()).code.toString)),
         ("institutionId2017",
          Json.fromString(i.institutionId_2017.getOrElse(""))),
         ("taxId", Json.fromString(i.taxId.getOrElse(""))),
@@ -25,8 +26,9 @@ object InstitutionCodec {
         ("emailDomain", Json.fromString(i.emailDomain.getOrElse(""))),
         ("respondent", i.respondent.asJson),
         ("parent", i.parent.asJson),
-        ("assets", Json.fromInt(i.assets.getOrElse(0))),
-        ("otherLenderCode", Json.fromInt(i.otherLenderCode.getOrElse(0))),
+        ("assets", Json.fromString(i.assets.map(_.toString).getOrElse(""))),
+        ("otherLenderCode",
+         Json.fromString(i.otherLenderCode.map(_.toString).getOrElse(""))),
         ("topHolder", i.topHolder.asJson),
         ("hmdaFiler", Json.fromBoolean(i.hmdaFiler))
       )
@@ -38,20 +40,26 @@ object InstitutionCodec {
         for {
           activityYear <- c.downField("activityYear").as[Int]
           maybeLEI <- c.downField("LEI").as[String]
-          agency <- c.downField("agency").as[Int]
-          institutionType <- c.downField("institutionType").as[Int]
+          maybeAgency <- c.downField("agency").as[String]
+          maybeInstitutionType <- c.downField("institutionType").as[String]
           maybeInstitutionId2017 <- c.downField("institutionId2017").as[String]
           maybeTaxId <- c.downField("taxId").as[String]
           maybeRssdId <- c.downField("rssd").as[String]
           maybeEmailDomain <- c.downField("emailDomain").as[String]
           respondent <- c.downField("respondent").as[Respondent]
           parent <- c.downField("parent").as[Parent]
-          assets <- c.downField("assets").as[Int]
-          otherLenderCode <- c.downField("otherLenderCode").as[Int]
+          maybeAssets <- c.downField("assets").as[String]
+          maybeOtherLenderCode <- c.downField("otherLenderCode").as[String]
           topHolder <- c.downField("topHolder").as[TopHolder]
           hmdaFiler <- c.downField("hmdaFiler").as[Boolean]
         } yield {
           val lei = if (maybeLEI == "") None else Some(maybeLEI)
+          val agency =
+            if (maybeAgency == "") None
+            else Some(Agency.valueOf(maybeAgency.toInt))
+          val institutionType =
+            if (maybeInstitutionType == "") None
+            else Some(InstitutionType.valueOf(maybeInstitutionType.toInt))
           val institutionId2017 =
             if (maybeInstitutionId2017 == "") None
             else Some(maybeInstitutionId2017)
@@ -59,20 +67,24 @@ object InstitutionCodec {
           val rssd = if (maybeRssdId == "") None else Some(maybeRssdId)
           val emailDomain =
             if (maybeEmailDomain == "") None else Some(maybeEmailDomain)
+          val assets = if (maybeAssets == "") None else Some(maybeAssets.toInt)
+          val otherLenderCode =
+            if (maybeOtherLenderCode == "") None
+            else Some(maybeOtherLenderCode.toInt)
 
           Institution(
             activityYear,
             lei,
-            Some(Agency.valueOf(agency)),
-            Some(InstitutionType.valueOf(institutionType)),
+            agency,
+            institutionType,
             institutionId2017,
             taxId,
             rssd,
             emailDomain,
             respondent,
             parent,
-            Some(assets),
-            Some(otherLenderCode),
+            assets,
+            otherLenderCode,
             topHolder,
             hmdaFiler
           )

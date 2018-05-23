@@ -12,7 +12,7 @@ import hmda.api.http.model.public.{LarValidateRequest, LarValidateResponse}
 import hmda.parser.filing.lar.LarCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import hmda.api.http.codec.LarCodec._
+import hmda.api.http.codec.filing.LarCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 
 import scala.concurrent.ExecutionContext

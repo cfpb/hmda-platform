@@ -1,4 +1,4 @@
-package hmda.api.http.codec.institutions
+package hmda.api.http.codec.institution
 
 import hmda.model.institution.TopHolder
 import io.circe.Decoder.Result
@@ -9,7 +9,7 @@ object TopHolderCodec {
   implicit val topHolderEncoder: Encoder[TopHolder] =
     new Encoder[TopHolder] {
       override def apply(r: TopHolder): Json = Json.obj(
-        ("idRssd", Json.fromInt(r.idRssd.getOrElse(0))),
+        ("idRssd", Json.fromString(r.idRssd.map(_.toString).getOrElse(""))),
         ("name", Json.fromString(r.name.getOrElse("")))
       )
     }
@@ -18,12 +18,12 @@ object TopHolderCodec {
     new Decoder[TopHolder] {
       override def apply(c: HCursor): Result[TopHolder] =
         for {
-          maybeIdRssd <- c.downField("idRssd").as[Int]
+          maybeIdRssd <- c.downField("idRssd").as[String]
           maybeName <- c.downField("name").as[String]
         } yield {
-          val idRssd = if (maybeIdRssd == 0) None else Some(maybeIdRssd)
+          val idRssd = if (maybeIdRssd == "") None else Some(maybeIdRssd)
           val name = if (maybeName == "") None else Some(maybeName)
-          TopHolder(idRssd, name)
+          TopHolder(idRssd.map(_.toInt), name)
         }
     }
 

@@ -1,11 +1,11 @@
-package hmda.api.http.codec.institutions
+package hmda.api.http.codec.institution
 
 import hmda.model.institution.Institution
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
-import hmda.model.institutions.InstitutionGenerators._
+import hmda.model.institution.InstitutionGenerators._
 import io.circe.syntax._
-import InstitutionCodec._
+import hmda.api.http.codec.institution.InstitutionCodec._
 
 class InstitutionCodecSpec
     extends PropSpec

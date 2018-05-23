@@ -1,4 +1,4 @@
-package hmda.api.http.codec.institutions
+package hmda.api.http.codec.institution
 
 import hmda.model.institution.Respondent
 import io.circe.Decoder.Result

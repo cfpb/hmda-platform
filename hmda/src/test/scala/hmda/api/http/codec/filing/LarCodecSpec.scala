@@ -1,11 +1,11 @@
-package hmda.api.http.codec
+package hmda.api.http.codec.filing
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
+import hmda.api.http.codec.filing.LarCodec._
 import hmda.model.filing.lar.LarGenerators._
-import LarCodec._
 import hmda.model.filing.lar._
 import io.circe.syntax._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class LarCodecSpec extends PropSpec with PropertyChecks with MustMatchers {
 

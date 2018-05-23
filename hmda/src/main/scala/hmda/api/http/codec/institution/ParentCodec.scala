@@ -1,4 +1,4 @@
-package hmda.api.http.codec.institutions
+package hmda.api.http.codec.institution
 
 import hmda.model.institution.Parent
 import io.circe.Decoder.Result
@@ -9,7 +9,7 @@ object ParentCodec {
   implicit val parentEncoder: Encoder[Parent] =
     new Encoder[Parent] {
       override def apply(r: Parent): Json = Json.obj(
-        ("idRssd", Json.fromInt(r.idRssd.getOrElse(0))),
+        ("idRssd", Json.fromString(r.idRssd.map(_.toString).getOrElse(""))),
         ("name", Json.fromString(r.name.getOrElse("")))
       )
     }
@@ -18,12 +18,12 @@ object ParentCodec {
     new Decoder[Parent] {
       override def apply(c: HCursor): Result[Parent] =
         for {
-          maybeIdRssd <- c.downField("idRssd").as[Int]
+          maybeIdRssd <- c.downField("idRssd").as[String]
           maybeName <- c.downField("name").as[String]
         } yield {
-          val idRssd = if (maybeIdRssd == 0) None else Some(maybeIdRssd)
+          val idRssd = if (maybeIdRssd == "") None else Some(maybeIdRssd)
           val name = if (maybeName == "") None else Some(maybeName)
-          Parent(idRssd, name)
+          Parent(idRssd.map(_.toInt), name)
         }
     }
 

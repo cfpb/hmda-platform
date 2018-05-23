@@ -11,7 +11,7 @@ import akka.http.scaladsl.server.Directives._
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.{TsValidateRequest, TsValidateResponse}
-import hmda.api.http.codec.TsCodec._
+import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 

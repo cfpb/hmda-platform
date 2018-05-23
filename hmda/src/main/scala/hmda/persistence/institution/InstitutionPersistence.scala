@@ -1,8 +1,7 @@
-package hmda.persistence.institutions
+package hmda.persistence.institution
 
-import akka.actor.typed.scaladsl.ActorContext
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior, Props}
-import akka.cluster.sharding.typed.{ClusterShardingSettings, ShardingEnvelope}
+import akka.cluster.sharding.typed.ClusterShardingSettings
 import akka.cluster.sharding.typed.scaladsl.{
   ClusterSharding,
   EntityRef,
