@@ -113,21 +113,6 @@ object InstitutionPersistence {
       }
   }
 
-  def createShardedInstitution(
-      system: ActorSystem[_],
-      entityId: String): EntityRef[InstitutionCommand] = {
-    ClusterSharding(system).spawn[InstitutionCommand](
-      entityId => behavior(entityId),
-      Props.empty,
-      ShardingTypeName,
-      ClusterShardingSettings(system),
-      maxNumberOfShards = shardNumber,
-      handOffStopMessage = InstitutionStop
-    )
-
-    ClusterSharding(system).entityRefFor(ShardingTypeName, entityId)
-  }
-
   val eventHandler
     : (InstitutionState, InstitutionEvent) => (InstitutionState) = {
     case (state, InstitutionCreated(i))  => state.copy(Some(i))

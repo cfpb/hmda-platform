@@ -48,10 +48,37 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
           onComplete(fCreated) {
             case Success(InstitutionCreated(i)) =>
-              complete(ToResponseMarshallable(i))
+              complete(ToResponseMarshallable(StatusCodes.Created -> i))
             case Failure(error) => complete(error.getLocalizedMessage)
           }
-        }
+        } ~
+          timedPut { uri =>
+            val fModified: Future[InstitutionEvent] = institutionPersistence ? (
+                ref => ModifyInstitution(institution, ref)
+            )
+
+            onComplete(fModified) {
+              case Success(InstitutionModified(i)) =>
+                complete(ToResponseMarshallable(StatusCodes.Accepted -> i))
+              case Success(InstitutionNotExists) =>
+                complete(
+                  ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+              case Failure(error) => complete(error.getLocalizedMessage)
+            }
+          } ~
+          timedDelete { uri =>
+            val fDeleted: Future[InstitutionEvent] = institutionPersistence ? (
+                ref => DeleteInstitution(institution.LEI.getOrElse(""), ref)
+            )
+
+            onComplete(fDeleted) {
+              case Success(InstitutionDeleted(lei)) =>
+                complete(ToResponseMarshallable(StatusCodes.Accepted -> lei))
+              case Success(InstitutionNotExists) =>
+                complete(ToResponseMarshallable(StatusCodes.NotFound))
+              case Failure(error) => complete(error.getLocalizedMessage)
+            }
+          }
 
       }
     }

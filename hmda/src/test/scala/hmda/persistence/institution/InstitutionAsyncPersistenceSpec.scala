@@ -1,6 +1,8 @@
 package hmda.persistence.institution
 
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.actor.typed.{ActorSystem, Props}
+import akka.cluster.sharding.typed.ClusterShardingSettings
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.cluster.typed.Cluster
 import akka.cluster.typed.Join
 import akka.testkit.typed.scaladsl.TestProbe
@@ -79,7 +81,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
     Cluster(system).manager ! Join(Cluster(system).selfMember.address)
     "be created and read back" in {
       val institutionPersistence =
-        InstitutionPersistence.createShardedInstitution(system, "ABC12345")
+        createShardedInstitution(system, "ABC12345")
 
       institutionPersistence ! CreateInstitution(sampleInstitution,
                                                  institutionProbe.ref)
@@ -90,7 +92,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be modified and read back" in {
       val institutionPersistence =
-        InstitutionPersistence.createShardedInstitution(system, "ABC12345")
+        createShardedInstitution(system, "ABC12345")
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionModified(modified))
@@ -100,7 +102,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be deleted" in {
       val institutionPersistence =
-        InstitutionPersistence.createShardedInstitution(system, "ABC12345")
+        createShardedInstitution(system, "ABC12345")
 
       institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
                                                  institutionProbe.ref)
@@ -110,6 +112,21 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
       institutionPersistence ! Get(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
     }
+  }
+
+  private def createShardedInstitution(
+      system: ActorSystem[_],
+      entityId: String): EntityRef[InstitutionCommand] = {
+    ClusterSharding(system).spawn[InstitutionCommand](
+      entityId => behavior(entityId),
+      Props.empty,
+      ShardingTypeName,
+      ClusterShardingSettings(system),
+      maxNumberOfShards = shardNumber,
+      handOffStopMessage = InstitutionStop
+    )
+
+    ClusterSharding(system).entityRefFor(ShardingTypeName, entityId)
   }
 
 }
