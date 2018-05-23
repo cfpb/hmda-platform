@@ -17,21 +17,31 @@ object InstitutionPersistence {
   final val name = "Institution"
 
   sealed trait InstitutionCommand
+
   sealed trait InstitutionEvent
+
   case class CreateInstitution(i: Institution,
                                replyTo: ActorRef[InstitutionCreated])
       extends InstitutionCommand
+
   case class InstitutionCreated(i: Institution) extends InstitutionEvent
+
   case class ModifyInstitution(i: Institution,
-                               replyTo: ActorRef[InstitutionModified])
+                               replyTo: ActorRef[InstitutionEvent])
       extends InstitutionCommand
+
   case class InstitutionModified(i: Institution) extends InstitutionEvent
-  case class DeleteInstitution(LEI: String,
-                               replyTo: ActorRef[InstitutionDeleted])
+
+  case class DeleteInstitution(LEI: String, replyTo: ActorRef[InstitutionEvent])
       extends InstitutionCommand
+
   case class InstitutionDeleted(LEI: String) extends InstitutionEvent
+
+  case object InstitutionNotExists extends InstitutionEvent
+
   case class Get(replyTo: ActorRef[Option[Institution]])
       extends InstitutionCommand
+
   case object InstitutionStop extends InstitutionCommand
 
   val config = ConfigFactory.load()
@@ -59,19 +69,41 @@ object InstitutionPersistence {
     (ctx, state, cmd) =>
       cmd match {
         case CreateInstitution(i, replyTo) =>
-          Effect.persist(InstitutionCreated(i)).andThen {
-            ctx.log.debug(s"Institution Created: ${i.toString}")
-            replyTo ! InstitutionCreated(i)
+          if (!state.institution.contains(i)) {
+            Effect.persist(InstitutionCreated(i)).andThen {
+              ctx.log.debug(s"Institution Created: ${i.toString}")
+              replyTo ! InstitutionCreated(i)
+            }
+          } else {
+            Effect.none.andThen {
+              ctx.log.debug(s"Institution already exists: ${i.toString}")
+              replyTo ! InstitutionCreated(i)
+            }
           }
         case ModifyInstitution(i, replyTo) =>
-          Effect.persist(InstitutionModified(i)).andThen {
-            ctx.log.debug(s"Institution Modified: ${i.toString}")
-            replyTo ! InstitutionModified(i)
+          if (state.institution.map(i => i.LEI).contains(i.LEI)) {
+            Effect.persist(InstitutionModified(i)).andThen {
+              ctx.log.debug(s"Institution Modified: ${i.toString}")
+              replyTo ! InstitutionModified(i)
+            }
+          } else {
+            Effect.none.andThen {
+              ctx.log.warning(
+                s"Institution with LEI: ${i.LEI.getOrElse("")} does not exist")
+              replyTo ! InstitutionNotExists
+            }
           }
         case DeleteInstitution(lei, replyTo) =>
-          Effect.persist(InstitutionDeleted(lei)).andThen {
-            ctx.log.debug(s"Institution Deleted: $lei")
-            replyTo ! InstitutionDeleted(lei)
+          if (state.institution.map(i => i.LEI).contains(Some(lei))) {
+            Effect.persist(InstitutionDeleted(lei)).andThen {
+              ctx.log.debug(s"Institution Deleted: $lei")
+              replyTo ! InstitutionDeleted(lei)
+            }
+          } else {
+            Effect.none.andThen {
+              ctx.log.warning(s"Institution with LEI: $lei does not exist")
+              replyTo ! InstitutionNotExists
+            }
           }
         case Get(replyTo) =>
           replyTo ! state.institution
@@ -101,6 +133,7 @@ object InstitutionPersistence {
     case (state, InstitutionCreated(i))  => state.copy(Some(i))
     case (state, InstitutionModified(i)) => modifyInstitution(i, state)
     case (state, InstitutionDeleted(_))  => state.copy(None)
+    case (state, InstitutionNotExists)   => state
   }
 
   private def modifyInstitution(institution: Institution,

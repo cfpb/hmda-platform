@@ -28,7 +28,8 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val institutionsWritePath =
     path("institutions") {
       entity(as[Institution]) { institution =>
-        require(institution.LEI.isDefined)
+        require(
+          institution.LEI.isDefined && institution.LEI.getOrElse("") != "")
         val typedSystem = system.toTyped
         implicit val scheduler: Scheduler = typedSystem.scheduler
 

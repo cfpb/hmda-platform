@@ -43,6 +43,14 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
       maybeInstitutionProbe.expectMessage(Some(modified))
     }
 
+    "not be modified if it doesn't exist" in {
+      val institutionPersistence =
+        spawn(InstitutionPersistence.behavior("XXXXX"))
+
+      institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
+      institutionProbe.expectMessage(InstitutionNotExists)
+    }
+
     "be deleted" in {
       val institutionPersistence =
         spawn(InstitutionPersistence.behavior("ABC12345"))
@@ -54,6 +62,15 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
       institutionPersistence ! Get(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
+    }
+
+    "not be deleted if it doesn't exist" in {
+      val institutionPersistence =
+        spawn(InstitutionPersistence.behavior("XXXXX"))
+
+      institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
+                                                 institutionProbe.ref)
+      institutionProbe.expectMessage(InstitutionNotExists)
     }
 
   }
