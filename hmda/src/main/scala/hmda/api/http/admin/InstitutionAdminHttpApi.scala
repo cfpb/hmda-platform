@@ -10,9 +10,9 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.server.Route
 import hmda.model.institution.Institution
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import io.circe.generic.auto._
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.persistence.institution.InstitutionPersistence._
+import hmda.api.http.codec.institution.InstitutionCodec._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

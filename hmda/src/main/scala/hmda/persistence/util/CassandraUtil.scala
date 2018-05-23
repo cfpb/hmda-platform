@@ -11,8 +11,7 @@ object CassandraUtil {
       databaseDirectory,
       CassandraLauncher.DefaultTestConfigResource,
       clean = true,
-      port = 9042,
-      CassandraLauncher.classpathForResources("logback-test.xml")
+      port = 9042
     )
 
     //shut down Cassandra when JVM stops
