@@ -8,6 +8,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Route
 import hmda.model.institution.Institution
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -28,9 +29,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val sharding: ClusterSharding
 
-  val institutionsWritePath =
+  val institutionWritePath =
     path("institutions") {
       entity(as[Institution]) { institution =>
+        //TODO: make this check better, it blows up the response
         require(
           institution.LEI.isDefined && institution.LEI.getOrElse("") != "")
         val typedSystem = system.toTyped
@@ -54,8 +56,34 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       }
     }
 
+  val institutionReadPath =
+    path("institutions" / Segment) { lei =>
+      val typedSystem = system.toTyped
+      implicit val scheduler: Scheduler = typedSystem.scheduler
+
+      val institutionPersistence =
+        sharding.entityRefFor(InstitutionPersistence.ShardingTypeName,
+                              s"${InstitutionPersistence.name}-$lei")
+
+      timedGet { uri =>
+        val fInstitution
+          : Future[Option[Institution]] = institutionPersistence ? (
+            ref => Get(ref)
+        )
+
+        onComplete(fInstitution) {
+          case Success(Some(i)) =>
+            complete(ToResponseMarshallable(i))
+          case Success(None) =>
+            complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+          case Failure(error) =>
+            complete(error.getLocalizedMessage)
+        }
+      }
+    }
+
   def institutionAdminRoutes: Route = encodeResponse {
-    institutionsWritePath
+    institutionWritePath ~ institutionReadPath
   }
 
 }

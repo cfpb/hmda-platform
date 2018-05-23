@@ -38,7 +38,7 @@ object HmdaPersistence {
         }
     }
 
-  def startInstitutionsSharding(ctx: ActorContext[_]): Unit = {
+  private def startInstitutionsSharding(ctx: ActorContext[_]): Unit = {
     val typeKey = EntityTypeKey[InstitutionCommand](InstitutionPersistence.name)
     val config = ConfigFactory.load()
     val shardNumber = config.getInt("hmda.institutions.shardNumber")
