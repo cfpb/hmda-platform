@@ -6,6 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.headers.{HttpOrigin, Origin}
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.ErrorResponse
 import hmda.uli.api.model.ULIModel._
@@ -113,7 +114,8 @@ class ULIHttpApiSpec
       }
     }
     "Validate ULI" in {
-      Post("/uli/validate", uliCheck) ~> uliHttpRoutes ~> check {
+      Post("/uli/validate", uliCheck) ~> Origin(
+        HttpOrigin("http://ffiec.cfpb.gov")) ~> uliHttpRoutes ~> check {
         responseAs[ULIValidated] mustBe ULIValidated(true)
       }
       Post("/uli/validate", shortUliCheck) ~> uliHttpRoutes ~> check {

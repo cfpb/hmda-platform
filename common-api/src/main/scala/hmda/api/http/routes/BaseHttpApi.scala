@@ -16,6 +16,7 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.HmdaServiceStatus
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 trait BaseHttpApi extends HmdaTimeDirectives {
 
@@ -36,5 +37,5 @@ trait BaseHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  def routes(apiName: String) = encodeResponse { rootPath(apiName) }
+  def routes(apiName: String) = encodeResponse { cors() { rootPath(apiName) } }
 }

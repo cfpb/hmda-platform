@@ -19,6 +19,7 @@ import hmda.api.http.model.ErrorResponse
 import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -53,8 +54,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             case Success(InstitutionCreated(i)) =>
               complete(ToResponseMarshallable(StatusCodes.Created -> i))
             case Failure(error) =>
-              val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
-              complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+              val errorResponse =
+                ErrorResponse(500, error.getLocalizedMessage, uri.path)
+              complete(ToResponseMarshallable(
+                StatusCodes.InternalServerError -> errorResponse))
           }
         } ~
           timedPut { uri =>
@@ -72,8 +75,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                 complete(
                   ToResponseMarshallable(HttpResponse(StatusCodes.BadRequest)))
               case Failure(error) =>
-                val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
-                complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+                val errorResponse =
+                  ErrorResponse(500, error.getLocalizedMessage, uri.path)
+                complete(ToResponseMarshallable(
+                  StatusCodes.InternalServerError -> errorResponse))
             }
           } ~
           timedDelete { uri =>
@@ -92,8 +97,11 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                 complete(
                   ToResponseMarshallable(HttpResponse(StatusCodes.BadRequest)))
               case Failure(error) =>
-                val errorResponse = ErrorResponse(500, error.getLocalizedMessage, uri.path)
-                complete(ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+                val errorResponse =
+                  ErrorResponse(500, error.getLocalizedMessage, uri.path)
+                complete(
+                  ToResponseMarshallable(
+                    StatusCodes.InternalServerError -> errorResponse))
             }
           }
 
@@ -126,8 +134,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  def institutionAdminRoutes: Route = encodeResponse {
-    institutionWritePath ~ institutionReadPath
+  def institutionAdminRoutes: Route = cors() {
+    encodeResponse {
+      institutionWritePath ~ institutionReadPath
+    }
   }
 
 }
