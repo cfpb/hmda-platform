@@ -15,7 +15,9 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.persistence.institution.InstitutionPersistence._
 import hmda.api.http.codec.institution.InstitutionCodec._
+import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.persistence.institution.InstitutionPersistence
+import io.circe.generic.auto._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -73,7 +75,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
             onComplete(fDeleted) {
               case Success(InstitutionDeleted(lei)) =>
-                complete(ToResponseMarshallable(StatusCodes.Accepted -> lei))
+                complete(
+                  ToResponseMarshallable(
+                    StatusCodes.Accepted -> InstitutionDeletedResponse(lei)))
               case Success(InstitutionNotExists) =>
                 complete(ToResponseMarshallable(StatusCodes.NotFound))
               case Failure(error) => complete(error.getLocalizedMessage)
