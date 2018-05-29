@@ -1,12 +1,7 @@
 package hmda.persistence.institution
 
-import akka.actor.typed.{ActorRef, ActorSystem, Behavior, Props}
-import akka.cluster.sharding.typed.ClusterShardingSettings
-import akka.cluster.sharding.typed.scaladsl.{
-  ClusterSharding,
-  EntityRef,
-  EntityTypeKey
-}
+import akka.actor.typed.{ActorRef, Behavior}
+import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import com.typesafe.config.ConfigFactory

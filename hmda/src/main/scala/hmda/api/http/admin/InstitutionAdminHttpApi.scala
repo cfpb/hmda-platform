@@ -65,6 +65,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
               case Success(InstitutionNotExists) =>
                 complete(
                   ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+              case Success(_) =>
+                complete(
+                  ToResponseMarshallable(HttpResponse(StatusCodes.BadRequest)))
               case Failure(error) => complete(error.getLocalizedMessage)
             }
           } ~
@@ -80,6 +83,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                     StatusCodes.Accepted -> InstitutionDeletedResponse(lei)))
               case Success(InstitutionNotExists) =>
                 complete(ToResponseMarshallable(StatusCodes.NotFound))
+              case Success(_) =>
+                complete(
+                  ToResponseMarshallable(HttpResponse(StatusCodes.BadRequest)))
               case Failure(error) => complete(error.getLocalizedMessage)
             }
           }
