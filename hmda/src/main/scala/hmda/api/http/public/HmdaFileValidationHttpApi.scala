@@ -20,6 +20,7 @@ import io.circe.generic.auto._
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 import hmda.util.streams.FlowUtils._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
 
@@ -69,9 +70,11 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
       }
 
   def hmdaFileRoutes: Route = {
-    encodeResponse {
-      pathPrefix("hmda") {
-        parseHmdaFileRoute
+    cors() {
+      encodeResponse {
+        pathPrefix("hmda") {
+          parseHmdaFileRoute
+        }
       }
     }
   }

@@ -14,6 +14,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.filing.LarCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.ExecutionContext
 
@@ -44,9 +45,11 @@ trait LarValidationHttpApi extends HmdaTimeDirectives {
     }
 
   def larRoutes: Route = {
-    encodeResponse {
-      pathPrefix("lar") {
-        parseLarRoute
+    cors() {
+      encodeResponse {
+        pathPrefix("lar") {
+          parseLarRoute
+        }
       }
     }
   }

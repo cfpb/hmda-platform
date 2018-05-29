@@ -14,6 +14,7 @@ import hmda.api.http.model.public.{TsValidateRequest, TsValidateResponse}
 import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.ExecutionContext
 
@@ -43,9 +44,11 @@ trait TsValidationHttpApi extends HmdaTimeDirectives {
     }
 
   def tsRoutes: Route = {
-    encodeResponse {
-      pathPrefix("ts") {
-        parseTsRoute
+    cors() {
+      encodeResponse {
+        pathPrefix("ts") {
+          parseTsRoute
+        }
       }
     }
   }
