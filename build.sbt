@@ -13,7 +13,8 @@ lazy val akkaDeps = Seq(
   akkaManagementClusterBootstrap,
   akkaServiceDiscoveryDNS,
   akkaClusterHttpManagement,
-  akkaTestkitTyped
+  akkaTestkitTyped,
+  akkaCors
 )
 lazy val akkaPersistenceDeps =
   Seq(akkaPersistence,
