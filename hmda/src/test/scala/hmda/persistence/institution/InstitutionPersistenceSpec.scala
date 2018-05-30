@@ -1,5 +1,6 @@
 package hmda.persistence.institution
 
+import akka.actor
 import akka.actor.typed.{ActorSystem, Props}
 import akka.cluster.sharding.typed.ClusterShardingSettings
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
@@ -10,22 +11,28 @@ import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence._
+import akka.actor.typed.scaladsl.adapter._
+import org.scalacheck.Gen
 
-class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
+class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
+
+  override val system = actor.ActorSystem()
+  override implicit val typedSystem: ActorSystem[_] = system.toTyped
+
+  val sharding = ClusterSharding(typedSystem)
 
   val institutionProbe = TestProbe[InstitutionEvent]("institutions-probe")
   val maybeInstitutionProbe =
     TestProbe[Option[Institution]]("institution-get-probe")
-  val sampleInstitution = institutionGen.sample.getOrElse(Institution.empty)
+  val sampleInstitution =
+    institutionGen.suchThat(i => i.LEI.isDefined).sample.get
   val modified =
     sampleInstitution.copy(emailDomain = Some("sample@bank.com"))
-
-  val sharding = ClusterSharding(system)
 
   "An institution" must {
     "be created and read back" in {
       val institutionPersistence =
-        spawn(InstitutionPersistence.behavior("ABC12345"))
+        system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
       institutionPersistence ! CreateInstitution(sampleInstitution,
                                                  institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
@@ -36,7 +43,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
     "be modified and read back" in {
       val institutionPersistence =
-        spawn(InstitutionPersistence.behavior("ABC12345"))
+        system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionModified(modified))
@@ -47,7 +54,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
     "not be modified if it doesn't exist" in {
       val institutionPersistence =
-        spawn(InstitutionPersistence.behavior("XXXXX"))
+        system.spawn(InstitutionPersistence.behavior("XXXXX"), actorName)
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionNotExists)
@@ -55,7 +62,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
     "be deleted" in {
       val institutionPersistence =
-        spawn(InstitutionPersistence.behavior("ABC12345"))
+        system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
 
       institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
                                                  institutionProbe.ref)
@@ -68,7 +75,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
     "not be deleted if it doesn't exist" in {
       val institutionPersistence =
-        spawn(InstitutionPersistence.behavior("XXXXX"))
+        system.spawn(InstitutionPersistence.behavior("XXXXX"), actorName)
 
       institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
                                                  institutionProbe.ref)
@@ -78,10 +85,10 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
   }
 
   "A Sharded Institution" must {
-    Cluster(system).manager ! Join(Cluster(system).selfMember.address)
+    Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
     "be created and read back" in {
       val institutionPersistence =
-        createShardedInstitution(system, "ABC12345")
+        createShardedInstitution(typedSystem, "ABC12345")
 
       institutionPersistence ! CreateInstitution(sampleInstitution,
                                                  institutionProbe.ref)
@@ -92,7 +99,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be modified and read back" in {
       val institutionPersistence =
-        createShardedInstitution(system, "ABC12345")
+        createShardedInstitution(typedSystem, "ABC12345")
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionModified(modified))
@@ -102,7 +109,7 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be deleted" in {
       val institutionPersistence =
-        createShardedInstitution(system, "ABC12345")
+        createShardedInstitution(typedSystem, "ABC12345")
 
       institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
                                                  institutionProbe.ref)
@@ -127,6 +134,10 @@ class InstitutionAsyncPersistenceSpec extends AkkaCassandraPersistenceSpec {
     )
 
     ClusterSharding(system).entityRefFor(ShardingTypeName, entityId)
+  }
+
+  private def actorName: String = {
+    Gen.alphaStr.suchThat(s => s != "").sample.get
   }
 
 }

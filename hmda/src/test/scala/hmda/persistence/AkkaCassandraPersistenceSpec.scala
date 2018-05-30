@@ -3,24 +3,28 @@ package hmda.persistence
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor
+import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import akka.testkit.typed.scaladsl.{ActorTestKit, TestProbe}
+import akka.testkit.typed.scaladsl.TestProbe
 import hmda.persistence.util.CassandraUtil
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
+import akka.actor.typed.scaladsl.adapter._
 
 import scala.concurrent.duration._
 
 abstract class AkkaCassandraPersistenceSpec
     extends WordSpec
-    with ActorTestKit
     with BeforeAndAfterAll {
 
   sealed trait Command
   sealed trait Event
   case class Request(replyTo: ActorRef[Event]) extends Command
   case object Response extends Event
+
+  implicit val system: actor.ActorSystem
+  implicit val typedSystem: ActorSystem[_]
 
   override def beforeAll(): Unit = {
     CassandraUtil.startEmbeddedCassandra()
@@ -30,7 +34,7 @@ abstract class AkkaCassandraPersistenceSpec
 
   override def afterAll(): Unit = {
     CassandraUtil.shutdown()
-    shutdownTestKit()
+    system.terminate()
     super.afterAll()
   }
 
@@ -41,7 +45,8 @@ abstract class AkkaCassandraPersistenceSpec
 
     probe.within(45.seconds) {
       probe.awaitAssert {
-        val actor = spawn(AwaitPersistenceInit.behavior)
+        val actor =
+          system.spawn(AwaitPersistenceInit.behavior, AwaitPersistenceInit.name)
         actor ! Request(probe.ref)
         probe.expectMessage(5.seconds, Response)
         system.log.debug("awaitPersistenceInit took {} ms {}",
@@ -52,6 +57,8 @@ abstract class AkkaCassandraPersistenceSpec
   }
 
   object AwaitPersistenceInit {
+
+    final val name = "AwaitPersistenceInit"
 
     case class AwaitState(nr: Int = 0)
 
