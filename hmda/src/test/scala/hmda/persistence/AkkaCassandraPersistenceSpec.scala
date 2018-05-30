@@ -91,7 +91,7 @@ abstract class AkkaCassandraPersistenceSpec
   }
 
   protected def actorName: String = {
-    Gen.alphaStr.suchThat(s => s != "").sample.get
+    Gen.alphaStr.suchThat(s => s != "").sample.getOrElse("")
   }
 
 }
