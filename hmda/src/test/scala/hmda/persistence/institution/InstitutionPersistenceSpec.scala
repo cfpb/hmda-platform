@@ -24,7 +24,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
   val maybeInstitutionProbe =
     TestProbe[Option[Institution]]("institution-get-probe")
   val sampleInstitution =
-    institutionGen.suchThat(i => i.LEI.isDefined).sample.get
+    institutionGen.suchThat(i => i.LEI.isDefined).sample.getOrElse(Institution.empty.copy(LEI = Some("")))
   val modified =
     sampleInstitution.copy(emailDomain = Some("sample@bank.com"))
 
