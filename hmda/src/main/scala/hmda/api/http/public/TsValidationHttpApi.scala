@@ -40,14 +40,19 @@ trait TsValidationHttpApi extends HmdaTimeDirectives {
                   StatusCodes.BadRequest -> TsValidateResponse(errorList)))
           }
         }
-      }
+      } ~
+        timedOptions { _ =>
+          complete("OPTIONS")
+        }
     }
 
   def tsRoutes: Route = {
-    cors() {
-      encodeResponse {
-        pathPrefix("ts") {
-          parseTsRoute
+    handleRejections(corsRejectionHandler) {
+      cors() {
+        encodeResponse {
+          pathPrefix("ts") {
+            parseTsRoute
+          }
         }
       }
     }

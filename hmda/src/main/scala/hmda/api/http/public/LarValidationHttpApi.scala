@@ -41,14 +41,19 @@ trait LarValidationHttpApi extends HmdaTimeDirectives {
                   StatusCodes.BadRequest -> LarValidateResponse(errorList)))
           }
         }
-      }
+      } ~
+        timedOptions { _ =>
+          complete("OPTIONS")
+        }
     }
 
   def larRoutes: Route = {
-    cors() {
-      encodeResponse {
-        pathPrefix("lar") {
-          parseLarRoute
+    handleRejections(corsRejectionHandler) {
+      cors() {
+        encodeResponse {
+          pathPrefix("lar") {
+            parseLarRoute
+          }
         }
       }
     }

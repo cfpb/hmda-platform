@@ -44,6 +44,11 @@ class TsValidationHttpApiSpec
     "A|Bank 0|2018|4|Jane Smith|111-111-1111|jane.smith@bank0.com|1600 Pennsylvania Ave NW|Washington|DC|20500|A|100|99-999999|10Bx939c5543TqA1144M"
 
   "TS HTTP Service" must {
+    "return OPTIONS" in {
+      Options("/ts/parse") ~> tsRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+    }
     "parse a valid pipe delimited TS and return JSON representation" in {
       val tsValidateRequest = TsValidateRequest(tsCsv)
       Post("/ts/parse", tsValidateRequest) ~> tsRoutes ~> check {

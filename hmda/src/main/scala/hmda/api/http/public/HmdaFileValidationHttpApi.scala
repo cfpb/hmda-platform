@@ -47,7 +47,10 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
           }
         case _ =>
           complete(ToResponseMarshallable(StatusCodes.BadRequest))
-      }
+      } ~
+        timedOptions { _ =>
+          complete("OPTIONS")
+        }
     } ~
       path("parse" / "csv") {
         timedPost { _ =>
@@ -66,14 +69,19 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             case _ =>
               complete(ToResponseMarshallable(StatusCodes.BadRequest))
           }
-        }
+        } ~
+          timedOptions { _ =>
+            complete("OPTIONS")
+          }
       }
 
   def hmdaFileRoutes: Route = {
-    cors() {
-      encodeResponse {
-        pathPrefix("hmda") {
-          parseHmdaFileRoute
+    handleRejections(corsRejectionHandler) {
+      cors() {
+        encodeResponse {
+          pathPrefix("hmda") {
+            parseHmdaFileRoute
+          }
         }
       }
     }

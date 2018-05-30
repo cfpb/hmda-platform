@@ -45,6 +45,11 @@ class LarValidationHttpApiSpec
   val badFile = multipartFile(badCsv, "bad-lars.txt")
 
   "LAR HTTP Service" must {
+    "return OPTIONS" in {
+      Options("/lar/parse") ~> larRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+    }
     "parse a valid pipe delimited LAR and return JSON representation" in {
       val larValidateRequest = LarValidateRequest(larCsv)
       Post("/lar/parse", larValidateRequest) ~> larRoutes ~> check {

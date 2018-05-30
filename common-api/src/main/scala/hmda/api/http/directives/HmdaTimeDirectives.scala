@@ -12,6 +12,7 @@ trait HmdaTimeDirectives {
   def timedPost = post & time & extractUri
   def timedPut = put & time & extractUri
   def timedDelete = delete & time & extractUri
+  def timedOptions = options & time & extractUri
 
   def time: Directive0 = {
     val startTime = System.currentTimeMillis()
