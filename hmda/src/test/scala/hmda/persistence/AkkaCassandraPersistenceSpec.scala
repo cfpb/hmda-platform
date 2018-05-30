@@ -11,6 +11,7 @@ import akka.testkit.typed.scaladsl.TestProbe
 import hmda.persistence.util.CassandraUtil
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 import akka.actor.typed.scaladsl.adapter._
+import org.scalacheck.Gen
 
 import scala.concurrent.duration._
 
@@ -46,7 +47,7 @@ abstract class AkkaCassandraPersistenceSpec
     probe.within(45.seconds) {
       probe.awaitAssert {
         val actor =
-          system.spawn(AwaitPersistenceInit.behavior, AwaitPersistenceInit.name)
+          system.spawn(AwaitPersistenceInit.behavior, actorName)
         actor ! Request(probe.ref)
         probe.expectMessage(5.seconds, Response)
         system.log.debug("awaitPersistenceInit took {} ms {}",
@@ -87,6 +88,10 @@ abstract class AkkaCassandraPersistenceSpec
       case (state, Response) => state.copy(nr = state.nr + 1)
     }
 
+  }
+
+  protected def actorName: String = {
+    Gen.alphaStr.suchThat(s => s != "").sample.get
   }
 
 }

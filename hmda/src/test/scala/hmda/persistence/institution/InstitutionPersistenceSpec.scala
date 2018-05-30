@@ -12,7 +12,6 @@ import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence._
 import akka.actor.typed.scaladsl.adapter._
-import org.scalacheck.Gen
 
 class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
@@ -136,8 +135,6 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     ClusterSharding(system).entityRefFor(ShardingTypeName, entityId)
   }
 
-  private def actorName: String = {
-    Gen.alphaStr.suchThat(s => s != "").sample.get
-  }
+
 
 }
