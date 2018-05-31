@@ -91,7 +91,8 @@ abstract class AkkaCassandraPersistenceSpec
   }
 
   protected def actorName: String = {
-    Gen.alphaStr.suchThat(s => s != "").sample.getOrElse("")
+    val now = Instant.now().toEpochMilli
+    Gen.alphaStr.suchThat(s => s != "").sample.getOrElse(s"name-$now")
   }
 
 }

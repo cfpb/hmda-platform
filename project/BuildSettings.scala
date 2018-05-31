@@ -18,7 +18,8 @@ object BuildSettings {
         "-unchecked",
         "-feature"),
       aggregate in assembly := false,
-      parallelExecution in Test := true
+      parallelExecution in Test := true,
+      fork in Test := true
     )
 
 }
