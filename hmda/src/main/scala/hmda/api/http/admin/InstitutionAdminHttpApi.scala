@@ -36,9 +36,6 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val institutionWritePath =
     path("institutions") {
       entity(as[Institution]) { institution =>
-        //TODO: make this check better, it blows up the response
-        require(
-          institution.LEI.isDefined && institution.LEI.getOrElse("") != "")
         val typedSystem = system.toTyped
         implicit val scheduler: Scheduler = typedSystem.scheduler
 
@@ -56,6 +53,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             case Failure(error) =>
               val errorResponse =
                 ErrorResponse(500, error.getLocalizedMessage, uri.path)
+              println(errorResponse)
               complete(ToResponseMarshallable(
                 StatusCodes.InternalServerError -> errorResponse))
           }
@@ -101,12 +99,11 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                 complete(ToResponseMarshallable(
                   StatusCodes.InternalServerError -> errorResponse))
             }
-          } ~
-          timedOptions { _ =>
-            complete("OPTIONS")
           }
-
-      }
+      } ~
+        timedOptions { _ =>
+          complete("OPTIONS")
+        }
     }
 
   val institutionReadPath =
