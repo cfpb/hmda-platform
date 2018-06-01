@@ -21,7 +21,7 @@ volumes: [
 
      stage('Build Docker Image') {
        container('docker') {
-         sh "docker build --rm -t=hmda/check-digit check-digit/target/docker/stage/Dockerfile""
+         sh "docker build --rm -t=hmda/check-digit check-digit/target/docker/stage/Dockerfile"
        }
      }
 
