@@ -14,7 +14,9 @@ volumes: [
      def shortGitCommit = "${gitCommit[0..10]}"
 
      stage('Build Scala Code and Generate Dockerfile') {
-       sh "sbt docker:stage"
+       container('sbt') {
+         sh "sbt docker:stage"
+       }
      }
 
    }
