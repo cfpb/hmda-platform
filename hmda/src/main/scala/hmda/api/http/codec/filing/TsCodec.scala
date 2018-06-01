@@ -1,4 +1,4 @@
-package hmda.api.http.codec
+package hmda.api.http.codec.filing
 
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency

@@ -13,7 +13,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import io.circe.generic.auto._
-import hmda.api.http.codec.TsCodec._
+import hmda.api.http.codec.filing.TsCodec._
 
 class TsValidationHttpApiSpec
     extends WordSpec
@@ -44,6 +44,11 @@ class TsValidationHttpApiSpec
     "A|Bank 0|2018|4|Jane Smith|111-111-1111|jane.smith@bank0.com|1600 Pennsylvania Ave NW|Washington|DC|20500|A|100|99-999999|10Bx939c5543TqA1144M"
 
   "TS HTTP Service" must {
+    "return OPTIONS" in {
+      Options("/ts/parse") ~> tsRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+    }
     "parse a valid pipe delimited TS and return JSON representation" in {
       val tsValidateRequest = TsValidateRequest(tsCsv)
       Post("/ts/parse", tsValidateRequest) ~> tsRoutes ~> check {

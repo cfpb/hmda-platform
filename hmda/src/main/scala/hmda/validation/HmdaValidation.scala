@@ -1,15 +1,34 @@
 package hmda.validation
 
-import akka.actor.Props
-import hmda.actor.HmdaActor
+import akka.actor.typed.{Behavior, PostStop, PreRestart}
+import akka.actor.typed.scaladsl.Behaviors
 
 object HmdaValidation {
-  final val name = "HmdaValidation"
-  def props: Props = Props(new HmdaValidation)
-}
 
-class HmdaValidation extends HmdaActor {
-  override def receive = super.receive orElse {
-    case _ =>
-  }
+  final val name = "HmdaValidation"
+
+  sealed trait HmdaValidationCommand
+  case object StopHmdaValidation extends HmdaValidationCommand
+
+  val behavior: Behavior[HmdaValidationCommand] =
+    Behaviors.setup { ctx =>
+      ctx.log.info(s"Actor started at ${ctx.self.path}")
+      Behaviors
+        .receive[HmdaValidationCommand] {
+          case (_, msg) =>
+            msg match {
+              case StopHmdaValidation =>
+                Behaviors.stopped
+            }
+        }
+        .receiveSignal {
+          case (ctx, PreRestart) =>
+            ctx.log.info(s"Actor restarted at ${ctx.self.path}")
+            Behaviors.same
+          case (ctx, PostStop) =>
+            ctx.log.info(s"Actor stopped at ${ctx.self.path}")
+            Behaviors.same
+        }
+    }
+
 }

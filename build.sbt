@@ -3,16 +3,30 @@ import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
-lazy val akkaDeps = Seq(akkaSlf4J,
+lazy val akkaDeps = Seq(
+  akkaSlf4J,
   akkaCluster,
   akkaTyped,
+  akkaClusterTyped,
   akkaStream,
   akkaManagement,
   akkaManagementClusterBootstrap,
   akkaServiceDiscoveryDNS,
   akkaServiceDiscoveryKubernetes,
-  akkaClusterHttpManagement)
-lazy val akkaPersistenceDeps = Seq(akkaPersistence, akkaClusterSharding)
+  akkaClusterHttpManagement,
+  akkaClusterHttpManagement,
+  akkaTestkitTyped,
+  akkaCors
+)
+
+lazy val akkaPersistenceDeps =
+  Seq(akkaPersistence,
+      akkaClusterSharding,
+      akkaPersistenceTyped,
+      akkaClusterShardingTyped,
+      akkaPersistenceCassandra,
+      cassandraLauncher)
+
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
@@ -41,7 +55,7 @@ lazy val packageSettings = Seq(
     filtered :+ (fatJar -> ("lib/" + fatJar.getName))
   },
   // the bash scripts classpath only needs the fat jar
-  scriptClasspath := Seq((assemblyJarName in assembly).value),
+  scriptClasspath := Seq((assemblyJarName in assembly).value)
 )
 
 lazy val `hmda-root` = (project in file("."))
@@ -58,22 +72,32 @@ lazy val `common-api` = (project in file("common-api"))
 
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
-    sbtdocker.DockerPlugin,
-    AshScriptPlugin)
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
       mainClass in Compile := Some("hmda.HmdaPlatform"),
       assemblyJarName in assembly := "hmda2.jar",
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
       libraryDependencies ++= akkaPersistenceDeps
     ),
     scalafmtSettings,
     dockerSettings,
     packageSettings
-  ).dependsOn(`common-api` % "compile->compile;test->test")
+  )
+  .dependsOn(`common-api` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
-  .enablePlugins(JavaServerAppPackaging, sbtdocker.DockerPlugin, AshScriptPlugin)
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -84,4 +108,5 @@ lazy val `check-digit` = (project in file("check-digit"))
     scalafmtSettings,
     dockerSettings,
     packageSettings
-  ).dependsOn(`common-api` % "compile->compile;test->test")
+  )
+  .dependsOn(`common-api` % "compile->compile;test->test")

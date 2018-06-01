@@ -14,6 +14,7 @@ import akka.stream.scaladsl.Flow
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
 import io.circe.syntax._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 trait BaseWsApi {
 
@@ -47,6 +48,6 @@ trait BaseWsApi {
       }
     }
 
-  def routes(apiName: String): Route = rootPath(apiName)
+  def routes(apiName: String): Route = cors() { rootPath(apiName) }
 
 }

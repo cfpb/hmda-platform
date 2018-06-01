@@ -20,6 +20,7 @@ import io.circe.generic.auto._
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 import hmda.util.streams.FlowUtils._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
 
@@ -46,7 +47,10 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
           }
         case _ =>
           complete(ToResponseMarshallable(StatusCodes.BadRequest))
-      }
+      } ~
+        timedOptions { _ =>
+          complete("OPTIONS")
+        }
     } ~
       path("parse" / "csv") {
         timedPost { _ =>
@@ -65,13 +69,20 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
             case _ =>
               complete(ToResponseMarshallable(StatusCodes.BadRequest))
           }
-        }
+        } ~
+          timedOptions { _ =>
+            complete("OPTIONS")
+          }
       }
 
   def hmdaFileRoutes: Route = {
-    encodeResponse {
-      pathPrefix("hmda") {
-        parseHmdaFileRoute
+    handleRejections(corsRejectionHandler) {
+      cors() {
+        encodeResponse {
+          pathPrefix("hmda") {
+            parseHmdaFileRoute
+          }
+        }
       }
     }
   }
