@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: jmarin/hmda-check-digit
+  repository: jmarin/check-digit
   tag: 0.1.0
   pullPolicy: IfNotPresent
 
@@ -22,7 +22,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   ContainerPort: 9091
   hosts:
-    - hmda-check-digit.local
+    - check-digit.local
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:

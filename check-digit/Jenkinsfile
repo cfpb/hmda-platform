@@ -32,4 +32,10 @@ volumes: [
       }
     }
 
+    stage('Deploy Branch: ${gitBranch}') {
+      container('helm') {
+        sh "helm upgrade --install --name check-digit-${gitBranch} -f kubernetes/check-digit/values.yml --set image.tag=${gitBranch} kubernetes/check-digit"
+      }
+    }
+
 }
