@@ -92,12 +92,6 @@ installed, you should be able to do `minikube dashboard` to open up the `kuberne
 kubectl apply -f kubernetes/jenkins-namespace.yaml
 ```
 
-* Create service account for `Jenkins`: 
-
-```bash
-kubectl apply -f kubernetes/jenkins-serviceaccount.yaml
-```
-
 * Bind `default` service account to cluster admin role: 
 
 ```bash
@@ -132,9 +126,6 @@ And change the `automountServiceAccountToken` to `true`. Save and exit
 
 * Create Persistent Volume for Jenkins
 
-```bash
-kubectl create -f minikube/jenkins-volume.yaml
-```
 
 * Install Jenkins Chart
 
