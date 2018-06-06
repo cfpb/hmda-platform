@@ -13,7 +13,7 @@ service:
   type: NodePort
   port: 9091
   targetPort: 9091
-  name: check-digit
+  name: http-chk-digit
 
 ingress:
   enabled: false

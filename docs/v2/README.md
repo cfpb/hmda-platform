@@ -133,7 +133,31 @@ Follow the on screen instructions to finalize `Jenkins` setup. When logged in, u
 Add credentials in Jenkins for `Docker Hub` so that images can be pushed as part of `Jenkins` pipeline builds.
 
 
+5. OPTIONAL: Install [Istio](https://istio.io/) Service Mesh
 
+* Install Istio with Helm. Download the Istio distribution and run from the Istio root path:
+
+```bash
+helm install install/kubernetes/helm/istio --name istio --namespace istio-system
+```
+
+* Make sure automatic sidecar injection is supported: 
+
+```bash
+kubectl api-versions | grep admissionregistration
+```
+
+* Enable automatic sidecar injection in the `default` namespace: 
+
+```bash
+kubectl label namespace default istio-injection=enabled
+``` 
+
+To check that this operation succeeded: 
+
+```bash
+kubectl get namespace -L istio-injection
+```
 
 ### Running the application in clustered mode (mesos)
 
