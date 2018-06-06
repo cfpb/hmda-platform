@@ -86,6 +86,12 @@ installed, you should be able to do `minikube dashboard` to open up the `kuberne
 3. Make sure that [Helm](https://helm.sh/) is installed, as well as Tiller, the server side component.
 4. Install the `Jenkins` Helm Chart, as follows:
 
+* Bind `default` service account to cluster admin role: 
+
+```bash
+kubectl apply -f kubernetes/cluster-admin-rolebinding.yaml
+```
+
 * First, make sure the `Helm` repo is up to date:
 
 ```shell

@@ -32,7 +32,7 @@ metadata:
   name: hmda-api
 spec:
   selector:
-    app: hmda
+    app: hmda-platform
   type: NodePort
   ports:
   - name: {{ .Values.filing.name }}
