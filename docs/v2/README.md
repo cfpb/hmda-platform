@@ -86,6 +86,18 @@ installed, you should be able to do `minikube dashboard` to open up the `kuberne
 3. Make sure that [Helm](https://helm.sh/) is installed, as well as Tiller, the server side component.
 4. Install the `Jenkins` Helm Chart, as follows:
 
+* Create namespace for `Jenkins`: 
+
+```bash
+kubectl apply -f kubernetes/jenkins-namespace.yaml
+```
+
+* Bind `default` service account to cluster admin role: 
+
+```bash
+kubectl apply -f kubernetes/cluster-admin-rolebinding.yaml
+```
+
 * First, make sure the `Helm` repo is up to date:
 
 ```shell
@@ -112,10 +124,13 @@ kubectl --namespace=kube-system edit deployment/tiller-deploy
 
 And change the `automountServiceAccountToken` to `true`. Save and exit
 
+* Create Persistent Volume for Jenkins
+
+
 * Install Jenkins Chart
 
 ```shell
-helm install --name jenkins -f kubernetes/jenkins-values.yml stable/jenkins
+helm install --name jenkins -f kubernetes/jenkins-values.yaml stable/jenkins --namespace jenkins-system
 ```
 
 You can access `Jenkins` by issuing `minikube service jenkins` and logging in with `admin/admin`.
@@ -127,7 +142,31 @@ Follow the on screen instructions to finalize `Jenkins` setup. When logged in, u
 Add credentials in Jenkins for `Docker Hub` so that images can be pushed as part of `Jenkins` pipeline builds.
 
 
+5. OPTIONAL: Install [Istio](https://istio.io/) Service Mesh
 
+* Install Istio with Helm. Download the Istio distribution and run from the Istio root path:
+
+```bash
+helm install install/kubernetes/helm/istio --name istio --namespace istio-system
+```
+
+* Make sure automatic sidecar injection is supported: 
+
+```bash
+kubectl api-versions | grep admissionregistration
+```
+
+* Enable automatic sidecar injection in the `default` namespace: 
+
+```bash
+kubectl label namespace default istio-injection=enabled
+``` 
+
+To check that this operation succeeded: 
+
+```bash
+kubectl get namespace -L istio-injection
+```
 
 ### Running the application in clustered mode (mesos)
 
