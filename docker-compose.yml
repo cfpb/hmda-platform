@@ -68,7 +68,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ../hmda-pub-ui/data-publication:/usr/src/app/data-publication
+      - ../hmda-pub-ui/dist:/usr/src/app/dist
     environment:
       HOMEPAGE_URL: https://192.168.99.100
       HMDA_API: https://192.168.99.100:4443/hmda
@@ -84,7 +84,7 @@ services:
     depends_on:
       - api
     volumes:
-      - ../hmda-platform-tools/tools:/usr/src/app/tools
+      - ../hmda-platform-tools/dist:/usr/src/app/dist
     environment:
       APP_URL: https://192.168.99.100
       HMDA_API: https://192.168.99.100:4443/hmda
