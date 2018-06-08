@@ -10,7 +10,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.{ StatusCodes, Uri }
-import hmda.api.model.public.HmdaFilerResponse
+import hmda.api.model.public.{ HmdaFilerResponse, MsaMd, MsaMdResponse }
 import hmda.api.protocol.public.HmdaFilerProtocol
 import hmda.census.model.Msa
 import hmda.model.fi.{ Signed, Submission, SubmissionId }
@@ -85,20 +85,11 @@ trait HmdaFilerPaths extends HmdaCustomDirectives with HmdaFilerProtocol with Ap
 
           onComplete(fMsas) {
             case Success((msas, instOpt)) =>
-              val msasJson = msas.filterNot(_.id == "NA").map(msa => s"""{"id":"${msa.id}","name":"${msa.name}"}""").mkString("[", ",", "]")
-              val inst = instOpt.getOrElse(HmdaFiler("", "", "", ""))
-              if (inst.institutionId == "") {
+              val msasJson = msas.filterNot(_.id == "NA").map(msa => MsaMd(msa.id, msa.name))
+              if (instOpt.isEmpty) {
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> s"Unable to find institution $instId"))
               } else {
-                val response =
-                  s"""
-                       |{
-                       |  "year": "$period",
-                       |  "institution": {"name":"${inst.name}", "id":"${inst.institutionId}", "respondentId": "${inst.respondentId}"},
-                       |  "msaMds": $msasJson
-                       |}
-                   """.stripMargin.parseJson
-                complete(ToResponseMarshallable(response))
+                complete(ToResponseMarshallable(MsaMdResponse(instOpt.get, msasJson)))
               }
             case Failure(e) =>
               completeWithInternalError(uri, e)
