@@ -5,7 +5,12 @@ import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.MediaTypes.`text/csv`
-import akka.http.scaladsl.model.{HttpCharsets, HttpEntity, StatusCodes}
+import akka.http.scaladsl.model.{
+  ContentTypes,
+  HttpCharsets,
+  HttpEntity,
+  StatusCodes
+}
 import akka.http.scaladsl.server.Route
 import akka.stream.{ActorMaterializer, FlowShape}
 import akka.util.{ByteString, Timeout}
@@ -65,9 +70,23 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
                 .map(v => s"${v.lineNumber}|${v.errors}\n")
                 .map(s => ByteString(s))
 
-              val csv = headerSource.map(s => ByteString(s)).concat(errors)
-              complete(HttpEntity.Chunked
-                .fromData(`text/csv`.toContentType(HttpCharsets.`UTF-8`), csv))
+              val csvF = headerSource
+                .map(s => ByteString(s))
+                .concat(errors)
+                .map(_.utf8String)
+                .runWith(Sink.seq)
+
+              onComplete(csvF) {
+                case Success(csv) =>
+                  complete(
+                    ToResponseMarshallable(
+                      HttpEntity(ContentTypes.`text/csv(UTF-8)`,
+                                 csv.mkString("\n"))))
+                case Failure(error) =>
+                  complete(ToResponseMarshallable(
+                    StatusCodes.BadRequest -> error.getLocalizedMessage))
+              }
+
             case _ =>
               complete(ToResponseMarshallable(StatusCodes.BadRequest))
           }
