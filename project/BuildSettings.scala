@@ -16,7 +16,8 @@ object BuildSettings {
         "-Xlint",
         "-deprecation",
         "-unchecked",
-        "-feature"),
+        "-feature",
+        "-Ypartial-unification"),
       aggregate in assembly := false,
       parallelExecution in Test := true
     )
