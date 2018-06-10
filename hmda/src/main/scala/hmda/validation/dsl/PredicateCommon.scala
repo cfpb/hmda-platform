@@ -2,7 +2,7 @@ package hmda.validation.dsl
 
 import scala.util.Try
 
-object CommonPredicate {
+object PredicateCommon {
 
   def equalTo[A](that: A): Predicate[A] = (_: A) == that
 
@@ -55,7 +55,8 @@ object CommonPredicate {
         "'empty doesn't handle non-string values yet'")
   }
 
-  def when(condition: ValidationResult)(thenTest: => ValidationResult): ValidationResult = {
+  def when(condition: ValidationResult)(
+      thenTest: => ValidationResult): ValidationResult = {
     condition.implies(thenTest)
   }
 
