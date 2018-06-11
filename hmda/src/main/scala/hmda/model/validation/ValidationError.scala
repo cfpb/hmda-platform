@@ -1,7 +1,5 @@
 package hmda.model.validation
 
-import cats.data.NonEmptyList
-
 sealed trait ValidationErrorType
 case object Syntactical extends ValidationErrorType
 case object Validity extends ValidationErrorType

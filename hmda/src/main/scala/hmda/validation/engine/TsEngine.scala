@@ -18,8 +18,8 @@ object TsEngine extends ValidationApi {
   def validateTs(ts: TransmittalSheet): HmdaValidation[TransmittalSheet] = {
     val validations = List(
       checkSyntactical(ts),
-      checkValidity(ts),
-      checkQuality(ts)
+      checkValidity(ts) //,
+      //checkQuality(ts)
     )
 
     validations.reduceLeft(_ combine _)
