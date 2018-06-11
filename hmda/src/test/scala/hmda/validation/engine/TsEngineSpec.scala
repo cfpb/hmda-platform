@@ -4,7 +4,6 @@ import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.model.filing.ts.TsGenerators._
 import TsEngine._
-import cats.data.Validated.Invalid
 import hmda.model.validation.{
   SyntacticalValidationError,
   ValidityValidationError
@@ -36,10 +35,11 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
           ts.contact.address.city != "" &&
           ts.institutionName != "") {
         val validation = validateTs(ts.copy(id = 2, quarter = 2))
-        val errors = validation.leftMap(errors => errors.toList)
-        errors mustBe Invalid(
+        val errors =
+          validation.leftMap(errors => errors.toList).toEither.left.get
+        errors mustBe
           List(SyntacticalValidationError(ts.LEI, "S300"),
-               ValidityValidationError(ts.LEI, "V602")))
+               ValidityValidationError(ts.LEI, "V602"))
       }
     }
   }
