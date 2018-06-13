@@ -5,6 +5,7 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.enums.{
+  LoanOriginated,
   PreapprovalRequestApprovedButNotAccepted,
   PreapprovalRequestDenied,
   PreapprovalRequested
@@ -23,14 +24,17 @@ class V613_2Spec extends LarEditCheckSpec {
     }
   }
 
-  property("Fail if action taken equals 7 or 8, and Preapproval is not 1") {
+  property("Fail if Action Taken equals 7 or 8, and Preapproval is not 1") {
     forAll(larGen) { lar =>
       whenever(lar.action.preapproval != PreapprovalRequested) {
         val larAction1 =
           LarAction(actionTakenType = PreapprovalRequestApprovedButNotAccepted)
         val larAction2 = LarAction(actionTakenType = PreapprovalRequestDenied)
+
         lar.copy(action = larAction1).mustFail
         lar.copy(action = larAction2).mustFail
+
+        lar.copy(action = LarAction(actionTakenType = LoanOriginated)).mustPass
       }
     }
   }
