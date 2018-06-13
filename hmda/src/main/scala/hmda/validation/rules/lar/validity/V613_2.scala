@@ -2,7 +2,8 @@ package hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.{
-  PreapprovalNotRequested,
+  PreapprovalRequestApprovedButNotAccepted,
+  PreapprovalRequestDenied,
   PreapprovalRequested
 }
 import hmda.validation.dsl.ValidationResult
@@ -10,15 +11,18 @@ import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
-object V613_1 extends EditCheck[LoanApplicationRegister] {
+object V613_2 extends EditCheck[LoanApplicationRegister] {
 
-  val preapprovalValues = List(PreapprovalRequested, PreapprovalNotRequested)
-
-  override def name: String = "V613-1"
+  override def name: String = "V613-2"
 
   override def parent: String = "V613"
 
+  val actionsTaken =
+    List(PreapprovalRequestDenied, PreapprovalRequestApprovedButNotAccepted)
+
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.action.preapproval is containedIn(preapprovalValues)
+    when(lar.action.actionTakenType is containedIn(actionsTaken)) {
+      lar.action.preapproval is equalTo(PreapprovalRequested)
+    }
   }
 }
