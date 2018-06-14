@@ -44,20 +44,30 @@ class HmdaFileValidationHttpApiSpec
   val badCsv = tsCsv + larsCsv.mkString("") + s"$badLar"
   val badFile = multipartFile(badCsv, "bad-lars.txt")
 
-  "parse a HMDA file" in {
-    Post("/hmda/parse", badFile) ~> hmdaFileRoutes ~> check {
-      status mustBe StatusCodes.OK
-      val result = responseAs[ValidatedResponse]
-      result.validated.size mustBe 1
+  "HMDA File HTTP Service" must {
+    "return OPTIONS" in {
+      Options("/hmda/parse") ~> hmdaFileRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+      Options("/hmda/parse/csv") ~> hmdaFileRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
     }
-  }
+    "parse a HMDA file" in {
+      Post("/hmda/parse", badFile) ~> hmdaFileRoutes ~> check {
+        status mustBe StatusCodes.OK
+        val result = responseAs[ValidatedResponse]
+        result.validated.size mustBe 1
+      }
+    }
 
-  "parse a HMDA file and return a CSV" in {
-    Post("/hmda/parse/csv", badFile) ~> hmdaFileRoutes ~> check {
-      status mustBe StatusCodes.OK
-      val csv = responseAs[String]
-      csv must include("lineNumber|errors")
-      csv must include("12|NMLSR identifier is not numeric")
+    "parse a HMDA file and return a CSV" in {
+      Post("/hmda/parse/csv", badFile) ~> hmdaFileRoutes ~> check {
+        status mustBe StatusCodes.OK
+        val csv = responseAs[String]
+        csv must include("lineNumber|errors")
+        csv must include("12|NMLSR identifier is not numeric")
+      }
     }
   }
 }

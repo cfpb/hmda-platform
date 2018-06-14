@@ -7,14 +7,14 @@ object HmdaQuery {
 
   final val name = "HmdaQuery"
 
-  sealed trait HmdaQueryMessage
-  case object StopHmdaQuery extends HmdaQueryMessage
+  sealed trait HmdaQueryCommand
+  case object StopHmdaQuery extends HmdaQueryCommand
 
-  val behavior: Behavior[HmdaQueryMessage] =
+  val behavior: Behavior[HmdaQueryCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Actor started at ${ctx.self.path}")
       Behaviors
-        .receive[HmdaQueryMessage] {
+        .receive[HmdaQueryCommand] {
           case (_, msg) =>
             msg match {
               case StopHmdaQuery =>

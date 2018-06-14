@@ -1,6 +1,7 @@
 package hmda.api.http.routes
 
 import akka.event.{LoggingAdapter, NoLogging}
+import akka.http.scaladsl.model.headers.{HttpOrigin, Origin}
 import akka.http.scaladsl.testkit.{ScalatestRouteTest, WSProbe}
 import hmda.api.http.model.HmdaServiceStatus
 import io.circe.Json
@@ -23,7 +24,8 @@ class BaseWSApiSpec
 
   "Websockets API Service" must {
     "Return status" in {
-      WS("/", wsClient.flow) ~> routes("hmda-ws-api") ~> check {
+      WS("/", wsClient.flow) ~> Origin(HttpOrigin("http://ffiec.cfpb.gov")) ~> routes(
+        "hmda-ws-api") ~> check {
         isWebSocketUpgrade mustEqual true
         wsClient.sendMessage("status")
         val messageJson: Json =
