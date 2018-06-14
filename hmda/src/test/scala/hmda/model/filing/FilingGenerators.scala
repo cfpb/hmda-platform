@@ -35,6 +35,10 @@ object FilingGenerators {
     Gen.resize(n, stringGen)
   }
 
+  implicit def emailListGen: Gen[List[String]] = {
+    Gen.listOf(emailGen)
+  }
+
   implicit def emailGen: Gen[String] = {
     for {
       name <- Gen.alphaStr.filter(s => s.nonEmpty)

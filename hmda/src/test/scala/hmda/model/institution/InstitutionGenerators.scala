@@ -14,7 +14,7 @@ object InstitutionGenerators {
       id2017 <- Gen.alphaStr
       taxId <- Gen.alphaStr
       rssd <- Gen.alphaStr
-      email <- Gen.option(emailGen)
+      email <- Gen.option(emailListGen)
       respondent <- institutionRespondentGen
       parent <- institutionParentGen
       assets <- Gen.option(Gen.choose(Int.MinValue, Int.MaxValue))
@@ -25,8 +25,9 @@ object InstitutionGenerators {
       Institution(
         activityYear: Int,
         lei,
-        Some(agency),
-        Some(institutionType),
+        if (agency == UndeterminedAgency) None else Some(agency),
+        if (institutionType == UndeterminedInstitutionType) None
+        else Some(institutionType),
         if (id2017 == "") None else Some(id2017),
         if (taxId == "") None else Some(taxId),
         if (rssd == "") None else Some(rssd),
