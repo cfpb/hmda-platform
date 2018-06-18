@@ -6,6 +6,7 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
 import akka.http.scaladsl.model.Uri.Path
+import akka.http.scaladsl.model.headers.{HttpOrigin, Origin}
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.ErrorResponse
 import hmda.uli.api.model.ULIModel._
@@ -78,6 +79,11 @@ class ULIHttpApiSpec
         response.message mustBe invalidLoanIdLengthMessage
       }
     }
+    "allow OPTIONS for check digit" in {
+      Options("/uli/checkDigit") ~> uliHttpRoutes ~> check {
+        response.status mustBe StatusCodes.OK
+      }
+    }
     "include leading 0 for check digits < 10" in {
       val loanId = "5493001YS08XHF42M0372005203"
       Post("/uli/checkDigit", Loan(loanId)) ~> uliHttpRoutes ~> check {
@@ -113,7 +119,8 @@ class ULIHttpApiSpec
       }
     }
     "Validate ULI" in {
-      Post("/uli/validate", uliCheck) ~> uliHttpRoutes ~> check {
+      Post("/uli/validate", uliCheck) ~> Origin(
+        HttpOrigin("http://ffiec.cfpb.gov")) ~> uliHttpRoutes ~> check {
         responseAs[ULIValidated] mustBe ULIValidated(true)
       }
       Post("/uli/validate", shortUliCheck) ~> uliHttpRoutes ~> check {
@@ -134,6 +141,11 @@ class ULIHttpApiSpec
         val response = responseAs[ErrorResponse]
         response.path mustBe Path("/uli/validate")
         response.message mustBe nonAlphanumericULIMessage
+      }
+    }
+    "allow OPTIONS for uli validation" in {
+      Options("/uli/validate") ~> uliHttpRoutes ~> check {
+        response.status mustBe StatusCodes.OK
       }
     }
     "validate a file of ULIs and return csv" in {

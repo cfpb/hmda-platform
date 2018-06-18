@@ -12,8 +12,9 @@ import hmda.api.http.model.public.{LarValidateRequest, LarValidateResponse}
 import hmda.parser.filing.lar.LarCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import hmda.api.http.codec.LarCodec._
+import hmda.api.http.codec.filing.LarCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 import scala.concurrent.ExecutionContext
 
@@ -40,13 +41,20 @@ trait LarValidationHttpApi extends HmdaTimeDirectives {
                   StatusCodes.BadRequest -> LarValidateResponse(errorList)))
           }
         }
-      }
+      } ~
+        timedOptions { _ =>
+          complete("OPTIONS")
+        }
     }
 
   def larRoutes: Route = {
-    encodeResponse {
-      pathPrefix("lar") {
-        parseLarRoute
+    handleRejections(corsRejectionHandler) {
+      cors() {
+        encodeResponse {
+          pathPrefix("lar") {
+            parseLarRoute
+          }
+        }
       }
     }
   }

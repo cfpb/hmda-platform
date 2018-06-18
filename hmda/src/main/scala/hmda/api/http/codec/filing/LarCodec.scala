@@ -1,4 +1,4 @@
-package hmda.api.http.codec
+package hmda.api.http.codec.filing
 
 import hmda.model.filing.lar._
 import hmda.model.filing.lar.enums._

@@ -19,7 +19,8 @@ object BuildSettings {
         "-feature",
         "-Ypartial-unification"),
       aggregate in assembly := false,
-      parallelExecution in Test := true
+      parallelExecution in Test := true,
+      fork in Test := true
     )
 
 }

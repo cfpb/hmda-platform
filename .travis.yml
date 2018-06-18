@@ -20,8 +20,7 @@ before_install:
   - nvm use 8.9.4
 
 script: 
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test hmda-platform/assembly
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test check-digit/assembly
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - sbt ++$TRAVIS_SCALA_VERSION coverageReport
   - sbt ++$TRAVIS_SCALA_VERSION coverageAggregate
   

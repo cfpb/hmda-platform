@@ -14,7 +14,7 @@ import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import hmda.api.http.codec.LarCodec._
+import hmda.api.http.codec.filing.LarCodec._
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.util.http.FileUploadUtils
 
@@ -45,6 +45,11 @@ class LarValidationHttpApiSpec
   val badFile = multipartFile(badCsv, "bad-lars.txt")
 
   "LAR HTTP Service" must {
+    "return OPTIONS" in {
+      Options("/lar/parse") ~> larRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+    }
     "parse a valid pipe delimited LAR and return JSON representation" in {
       val larValidateRequest = LarValidateRequest(larCsv)
       Post("/lar/parse", larValidateRequest) ~> larRoutes ~> check {

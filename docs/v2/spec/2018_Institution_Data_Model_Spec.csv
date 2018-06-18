@@ -6,7 +6,7 @@ Data Field Number, Data Field Name, Data Field Type, Field Type Description,Fiel
 5, 2017 Institution ID, Alphanumeric, String,, Example: 123456,Y
 6, Tax ID , Alphanumeric, String,10, Example: 12-3456789,Y
 7, RSSD , Numeric, String ,, Example: 123456,Y
-8, Email Domain, Alphanumeric, String,, Example: cfpb.gov,Y
+8, Email Domain, Alphanumeric, List of String,, Example: cfpb.gov,Y
 9, Respondent Name , Alphanumeric, String,, Example: CFPB,Y
 10, Respondent State , Alphanumeric, String,, Example: CA,Y
 11, Respondent City , Alphanumeric, String,, Example: Los Angeles,Y
@@ -16,3 +16,4 @@ Data Field Number, Data Field Name, Data Field Type, Field Type Description,Fiel
 15, Other Lender Code , Numeric, Integer,1, Example: 0,Y
 16, Top Holder ID RSSD , Numeric, Integer,, Example: 123456,Y
 17, Top Holder Name , Alphanumeric, String,, Example: CFPB,Y
+18, HMDA Filer Flag, Boolean,, Example: false, N
