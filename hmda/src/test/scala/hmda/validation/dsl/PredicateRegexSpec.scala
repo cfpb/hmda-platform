@@ -4,6 +4,7 @@ import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.validation.dsl.PredicateRegEx._
 import hmda.model.filing.ts.TsGenerators._
+import hmda.model.filing.FilingGenerators._
 import org.scalacheck.Gen
 
 class PredicateRegexSpec

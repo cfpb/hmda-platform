@@ -4,13 +4,7 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.MediaTypes.`text/csv`
-import akka.http.scaladsl.model.{
-  ContentTypes,
-  HttpCharsets,
-  HttpEntity,
-  StatusCodes
-}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Route
 import akka.stream.{ActorMaterializer, FlowShape}
 import akka.util.{ByteString, Timeout}
