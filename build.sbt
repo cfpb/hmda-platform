@@ -3,8 +3,6 @@ import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 import sbt.librarymanagement.Resolver
 
-resolvers += Resolver.bintrayRepo("tanukkii007", "maven")
-
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 lazy val akkaDeps = Seq(
   akkaSlf4J,
