@@ -62,6 +62,7 @@ object HmdaPlatform extends App {
 
   if (runtimeMode == "dev") {
     CassandraUtil.startEmbeddedCassandra()
+    AkkaManagement(system).start()
   }
 
   //Start Persistence

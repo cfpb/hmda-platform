@@ -10,5 +10,5 @@ object Version {
   val akkaCors = "0.3.0"
   val circe = "0.9.3"
   val cassandraPluginVersion = "0.84"
-
+  val akkaClusterDowning = "0.0.12"
 }
