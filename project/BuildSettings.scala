@@ -20,7 +20,8 @@ object BuildSettings {
         "-Ypartial-unification"),
       aggregate in assembly := false,
       parallelExecution in Test := true,
-      fork in Test := true
+      fork in Test := true,
+      resolvers += Resolver.bintrayRepo("tanukkii007", "maven")
     )
 
 }
