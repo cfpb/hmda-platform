@@ -16,38 +16,38 @@ object TsEngine extends ValidationApi {
   }
 
   def validateTs(ts: TransmittalSheet): HmdaValidation[TransmittalSheet] = {
-    val validations = List(
+    val validations = Vector(
       checkSyntactical(ts),
       checkValidity(ts) //,
       //checkQuality(ts)
     )
 
-    validations.reduceLeft(_ combine _)
+    validations.par.reduceLeft(_ combine _)
   }
 
   def checkSyntactical(
       ts: TransmittalSheet): HmdaValidation[TransmittalSheet] = {
-    val checksToRun = List(
+    val checksToRun = Vector(
       S300
     )
 
     val checks: List[ValidatedNel[ValidationError, TransmittalSheet]] =
-      checksToRun.map(check(_, ts, ts.LEI, Syntactical))
+      checksToRun.par.map(check(_, ts, ts.LEI, Syntactical)).toList
 
-    checks.reduceLeft(_ combine _)
+    checks.par.reduceLeft(_ combine _)
 
   }
 
   def checkValidity(ts: TransmittalSheet): HmdaValidation[TransmittalSheet] = {
-    val checksToRun = List(
+    val checksToRun = Vector(
       V600,
       V601,
       V602
     )
 
-    val checks = checksToRun.map(check(_, ts, ts.LEI, Validity))
+    val checks = checksToRun.par.map(check(_, ts, ts.LEI, Validity)).toList
 
-    checks.reduceLeft(_ combine _)
+    checks.par.reduceLeft(_ combine _)
 
   }
 
