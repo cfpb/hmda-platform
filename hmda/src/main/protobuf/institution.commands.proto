@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+message CreateInstitution {
+
+}
+
+message ModifyInstitution {
+
+}
+
+message DeleteInstitution {
+
+}
+
+message Get {
+
+}
+
+message InstitutionStop {
+
+}

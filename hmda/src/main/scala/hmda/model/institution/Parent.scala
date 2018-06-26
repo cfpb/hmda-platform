@@ -7,4 +7,11 @@ object Parent {
 case class Parent(
     idRssd: Option[Int],
     name: Option[String]
-)
+) {
+  def isEmpty: Boolean = {
+    this match {
+      case Parent(None, None) => true
+      case _                  => false
+    }
+  }
+}
