@@ -29,7 +29,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: hmda-api
+  name: {{ .Values.service.name }}
 spec:
   selector:
     app: hmda-platform
