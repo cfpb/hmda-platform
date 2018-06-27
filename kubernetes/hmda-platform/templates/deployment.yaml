@@ -32,7 +32,7 @@ spec:
               fieldPath: status.podIP
         livenessProbe:
           tcpSocket:
-            port: 19999
+            port: {{ .Values.bootstrap.port }}
         ports:
         # akka remoting
         - name: {{ .Values.remoting.name }}
