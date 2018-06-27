@@ -68,7 +68,7 @@ class InstitutionAdminHttpApiSpec
     institutionGen.sample.getOrElse(Institution.empty).copy(LEI = Some(lei))
 
   val modified =
-    sampleInstitution.copy(emailDomain = Some("email@bank.com"))
+    sampleInstitution.copy(emailDomains = Some(List("email@bank.com")))
 
   "Institutions HTTP Service" must {
     "return OPTIONS" in {

@@ -1,6 +1,7 @@
 import Dependencies._
 import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
+import sbt.librarymanagement.Resolver
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 lazy val akkaDeps = Seq(
@@ -16,7 +17,8 @@ lazy val akkaDeps = Seq(
   akkaClusterHttpManagement,
   akkaClusterHttpManagement,
   akkaTestkitTyped,
-  akkaCors
+  akkaCors,
+  akkaClusterDowning
 )
 
 lazy val akkaPersistenceDeps =

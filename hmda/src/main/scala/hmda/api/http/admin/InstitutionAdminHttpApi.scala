@@ -53,7 +53,6 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             case Failure(error) =>
               val errorResponse =
                 ErrorResponse(500, error.getLocalizedMessage, uri.path)
-              println(errorResponse)
               complete(ToResponseMarshallable(
                 StatusCodes.InternalServerError -> errorResponse))
           }

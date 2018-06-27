@@ -42,6 +42,8 @@ object HmdaPlatform extends App {
 
   val clusterConfig = runtimeMode match {
     case "dev" => ConfigFactory.parseResources("application-dev.conf").resolve()
+    case "dev-node" =>
+      ConfigFactory.parseResources("application-dev.conf").resolve()
     case "kubernetes" => {
       log.info(s"HOSTNAME: ${System.getenv("HOSTNAME")}")
       ConfigFactory.parseResources("application-kubernetes.conf").resolve()
@@ -60,14 +62,14 @@ object HmdaPlatform extends App {
   implicit val mat = ActorMaterializer()
   implicit val cluster = Cluster(typedSystem)
 
-  AkkaManagement(system).start()
-
   if (runtimeMode == "dcos" || runtimeMode == "kubernetes") {
     ClusterBootstrap(system).start()
+    AkkaManagement(system).start()
   }
 
   if (runtimeMode == "dev") {
     CassandraUtil.startEmbeddedCassandra()
+    AkkaManagement(system).start()
   }
 
   //Start Persistence

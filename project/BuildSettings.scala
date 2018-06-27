@@ -16,10 +16,12 @@ object BuildSettings {
         "-Xlint",
         "-deprecation",
         "-unchecked",
-        "-feature"),
+        "-feature",
+        "-Ypartial-unification"),
       aggregate in assembly := false,
       parallelExecution in Test := true,
-      fork in Test := true
+      fork in Test := true,
+      resolvers += Resolver.bintrayRepo("tanukkii007", "maven")
     )
 
 }
