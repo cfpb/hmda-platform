@@ -47,7 +47,7 @@ public:
 cluster:
   name: akka-mgmt-http
   protocol: TCP
-  port: 19999
+  port: 8558
 
 bootstrap:
   name: bootstrap
