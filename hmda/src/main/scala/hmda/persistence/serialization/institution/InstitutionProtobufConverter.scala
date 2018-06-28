@@ -4,76 +4,85 @@ import hmda.model.institution._
 
 object InstitutionProtobufConverter {
 
-  def respondentToProtobuf(
-      respondent: Respondent): Option[RespondentMessage] = {
-    if (respondent.isEmpty) {
-      None
-    } else {
-      val name = respondent.name.getOrElse("")
-      val state = respondent.state.getOrElse("")
-      val city = respondent.city.getOrElse("")
-      Some(RespondentMessage(name, state, city))
-    }
+  def respondentToProtobuf(respondent: Respondent): RespondentMessage = {
+    val name = respondent.name.getOrElse("")
+    val state = respondent.state.getOrElse("")
+    val city = respondent.city.getOrElse("")
+    RespondentMessage(name, state, city)
   }
 
-  def respondentFromProtobuf(
-      msg: Option[RespondentMessage]): Option[Respondent] = {
-    if (msg.isEmpty) {
-      None
-    } else {
-      val name = msg.map(r => r.name)
-      val state = msg.map(r => r.state)
-      val city = msg.map(r => r.city)
-      Some(
-        Respondent(name, state, city)
-      )
-    }
+  def respondentFromProtobuf(msg: RespondentMessage): Respondent = {
+    val name = if (msg.name != "") Some(msg.name) else None
+    val state = if (msg.state != "") Some(msg.state) else None
+    val city = if (msg.city != "") Some(msg.city) else None
+    Respondent(name, state, city)
+
   }
 
-  def parentToProtobuf(parent: Parent): Option[ParentMessage] = {
-    if (parent.isEmpty) {
-      None
-    } else {
-      val idRssd = parent.idRssd.getOrElse(0)
-      val name = parent.name.getOrElse("")
-      Some(ParentMessage(idRssd, name))
-    }
+  def parentToProtobuf(parent: Parent): ParentMessage = {
+    val idRssd = parent.idRssd.getOrElse(0)
+    val name = parent.name.getOrElse("")
+    ParentMessage(idRssd, name)
   }
 
-  def parentFromProtobuf(msg: ParentMessage): Parent = ???
-
-  def topHolderToProtobuf(topHolder: TopHolder): Option[TopHolderMessage] = {
-    if (topHolder.isEmpty) {
-      None
-    } else {
-      val idRssd = topHolder.idRssd.getOrElse(0)
-      val name = topHolder.name.getOrElse("")
-      Some(TopHolderMessage(idRssd, name))
-    }
+  def parentFromProtobuf(msg: ParentMessage): Parent = {
+    val idRssd = if (msg.idRssd != 0) Some(msg.idRssd) else None
+    val name = if (msg.name != "") Some(msg.name) else None
+    Parent(idRssd, name)
   }
 
-  def topHolderFromProtobuf(msg: TopHolderMessage): TopHolder = ???
+  def topHolderToProtobuf(topHolder: TopHolder): TopHolderMessage = {
+    val idRssd = topHolder.idRssd.getOrElse(0)
+    val name = topHolder.name.getOrElse("")
+    TopHolderMessage(idRssd, name)
+  }
+
+  def topHolderFromProtobuf(msg: TopHolderMessage): TopHolder = {
+    val idRssd = if (msg.idRssd != 0) Some(msg.idRssd) else None
+    val name = if (msg.name != "") Some(msg.name) else None
+    TopHolder(idRssd, name)
+  }
 
   def institutionToProtobuf(i: Institution): InstitutionMessage = {
     InstitutionMessage(
       activityYear = i.activityYear,
       lei = i.LEI.getOrElse(""),
-      agency = i.agency.getOrElse(Agency()).code,
-      institutionType = i.institutionType.getOrElse(InstitutionType()).code,
+      agency = i.agency.map(a => a.code).getOrElse(-1),
+      institutionType = i.institutionType.map(x => x.code).getOrElse(-1),
       id2017 = i.institutionId_2017.getOrElse(""),
       taxId = i.taxId.getOrElse(""),
       rssd = i.rssd.getOrElse(""),
       emailDomains = i.emailDomains.getOrElse(Nil),
-      respondent = respondentToProtobuf(i.respondent),
-      parent = parentToProtobuf(i.parent),
+      respondent = Some(respondentToProtobuf(i.respondent)),
+      parent = Some(parentToProtobuf(i.parent)),
       assets = i.assets.getOrElse(0),
       otherLenderCode = i.otherLenderCode.getOrElse(0),
-      topHolder = topHolderToProtobuf(i.topHolder),
+      topHolder = Some(topHolderToProtobuf(i.topHolder)),
       hmdaFilter = i.hmdaFiler
     )
   }
 
-  def institutionFromProtobuf(
-      institution: Option[InstitutionMessage]): Institution = ???
+  def institutionFromProtobuf(msg: InstitutionMessage): Institution = {
+    Institution.empty.copy(
+      activityYear = msg.activityYear,
+      LEI = if (msg.lei == "") None else Some(msg.lei),
+      agency = Some(Agency.valueOf(msg.agency)),
+      institutionType = Some(InstitutionType.valueOf(msg.institutionType)),
+      institutionId_2017 = if (msg.id2017 == "") None else Some(msg.id2017),
+      taxId = if (msg.taxId == "") None else Some(msg.taxId),
+      rssd = if (msg.rssd == "") None else Some(msg.rssd),
+      emailDomains =
+        if (msg.emailDomains.isEmpty) None else Some(msg.emailDomains.toList),
+      respondent =
+        respondentFromProtobuf(msg.respondent.getOrElse(RespondentMessage())),
+      parent = parentFromProtobuf(msg.parent.getOrElse(ParentMessage())),
+      assets = if (msg.assets == 0) None else Some(msg.assets),
+      otherLenderCode =
+        if (msg.otherLenderCode == 0) None else Some(msg.otherLenderCode),
+      topHolder =
+        topHolderFromProtobuf(msg.topHolder.getOrElse(TopHolderMessage())),
+      hmdaFiler = msg.hmdaFilter
+    )
+  }
 
 }
