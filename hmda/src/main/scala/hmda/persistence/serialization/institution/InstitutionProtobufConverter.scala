@@ -52,7 +52,7 @@ object InstitutionProtobufConverter {
       id2017 = i.institutionId_2017.getOrElse(""),
       taxId = i.taxId.getOrElse(""),
       rssd = i.rssd.getOrElse(""),
-      emailDomains = i.emailDomains.getOrElse(Nil),
+      emailDomains = i.emailDomains,
       respondent = Some(respondentToProtobuf(i.respondent)),
       parent = Some(parentToProtobuf(i.parent)),
       assets = i.assets.getOrElse(0),
@@ -71,8 +71,7 @@ object InstitutionProtobufConverter {
       institutionId_2017 = if (msg.id2017 == "") None else Some(msg.id2017),
       taxId = if (msg.taxId == "") None else Some(msg.taxId),
       rssd = if (msg.rssd == "") None else Some(msg.rssd),
-      emailDomains =
-        if (msg.emailDomains.isEmpty) None else Some(msg.emailDomains.toList),
+      emailDomains = msg.emailDomains,
       respondent =
         respondentFromProtobuf(msg.respondent.getOrElse(RespondentMessage())),
       parent = parentFromProtobuf(msg.parent.getOrElse(ParentMessage())),
@@ -83,6 +82,11 @@ object InstitutionProtobufConverter {
         topHolderFromProtobuf(msg.topHolder.getOrElse(TopHolderMessage())),
       hmdaFiler = msg.hmdaFilter
     )
+  }
+
+  private def convertEmails(emailDomains: String): Option[List[String]] = {
+    val emails = emailDomains.split("|")
+    if (emails.isEmpty) None else Some(emails.toList)
   }
 
 }

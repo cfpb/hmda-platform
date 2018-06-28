@@ -29,7 +29,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       .sample
       .getOrElse(Institution.empty.copy(LEI = Some("")))
   val modified =
-    sampleInstitution.copy(emailDomains = Some(List("sample@bank.com")))
+    sampleInstitution.copy(emailDomains = List("sample@bank.com"))
 
   "An institution" must {
     "be created and read back" in {

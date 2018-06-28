@@ -4,12 +4,14 @@ import InstitutionProtobufConverter._
 import hmda.persistence.institution.InstitutionPersistence.{
   InstitutionCreated,
   InstitutionDeleted,
-  InstitutionModified
+  InstitutionModified,
+  InstitutionNotExists
 }
 import hmda.persistence.serialization.institution.events.{
   InstitutionCreatedMessage,
   InstitutionDeletedMessage,
-  InstitutionModifiedMessage
+  InstitutionModifiedMessage,
+  InstitutionNotExistsMessage
 }
 
 object InstitutionEventsProtobufConverter {
@@ -24,7 +26,8 @@ object InstitutionEventsProtobufConverter {
   def institutionCreatedFromProtobuf(
       msg: InstitutionCreatedMessage): InstitutionCreated = {
     InstitutionCreated(
-      i = institutionFromProtobuf(msg.institution)
+      i =
+        institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
     )
   }
 
@@ -38,13 +41,33 @@ object InstitutionEventsProtobufConverter {
   def institutionModifiedFromProtobuf(
       msg: InstitutionModifiedMessage): InstitutionModified = {
     InstitutionModified(
-      i = institutionFromProtobuf(msg.institution)
+      i =
+        institutionFromProtobuf(msg.institution.getOrElse(InstitutionMessage()))
     )
   }
 
   def institutionDeletedToProtobuf(
-      evt: InstitutionDeleted): InstitutionDeletedMessage = ???
+      evt: InstitutionDeleted): InstitutionDeletedMessage = {
+    InstitutionDeletedMessage(
+      lEI = evt.LEI
+    )
+  }
 
   def institutionDeletedFromProtobuf(
-      msg: InstitutionDeletedMessage): InstitutionDeleted = ???
+      msg: InstitutionDeletedMessage): InstitutionDeleted = {
+    InstitutionDeleted(
+      LEI = msg.lEI
+    )
+  }
+
+  def institutionNotExistsToProtobuf(
+      evt: InstitutionNotExists.type): InstitutionNotExistsMessage = {
+    InstitutionNotExistsMessage.defaultInstance
+  }
+
+  def institutionNotExistsFromProtobuf(
+      msg: InstitutionNotExistsMessage): InstitutionNotExists.type = {
+    InstitutionNotExists
+  }
+
 }
