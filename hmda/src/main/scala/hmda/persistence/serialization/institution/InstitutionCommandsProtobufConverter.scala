@@ -2,11 +2,13 @@ package hmda.persistence.serialization.institution
 
 import hmda.persistence.institution.InstitutionPersistence.{
   CreateInstitution,
+  Get,
   InstitutionEvent,
   ModifyInstitution
 }
 import hmda.persistence.serialization.institution.commands.{
   CreateInstitutionMessage,
+  GetMessage,
   ModifyInstitutionMessage
 }
 import InstitutionProtobufConverter._
@@ -54,4 +56,21 @@ object InstitutionCommandsProtobufConverter {
     ModifyInstitution(institution, actorRef)
   }
 
+  def getInstitutionToProtobuf(
+      cmd: Get,
+      resolver: ActorRefResolver
+  ): GetMessage = {
+    GetMessage(
+      resolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def getInstitutionFromProtobuf(
+      bytes: Array[Byte],
+      resolver: ActorRefResolver
+  ): Get = {
+    val msg = GetMessage.parseFrom(bytes)
+    val actorRef = resolver.resolveActorRef(msg.replyTo)
+    Get(actorRef)
+  }
 }
