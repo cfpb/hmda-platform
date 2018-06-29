@@ -44,8 +44,12 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
 
     "be modified and read back" in {
+
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
+      institutionPersistence ! CreateInstitution(sampleInstitution,
+                                                 institutionProbe.ref)
+      institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionModified(modified))
@@ -66,6 +70,10 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     "be deleted" in {
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
+
+      institutionPersistence ! CreateInstitution(sampleInstitution,
+                                                 institutionProbe.ref)
+      institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
       institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
                                                  institutionProbe.ref)
