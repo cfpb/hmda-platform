@@ -3,22 +3,27 @@ syntax = "proto3";
 option java_package = "hmda.persistence.serialization";
 option optimize_for = SPEED;
 
-message CreateInstitution {
+import "institution.proto";
 
+message CreateInstitutionMessage {
+    InstitutionMessage institution = 1;
+    string replyTo = 2;
 }
 
-message ModifyInstitution {
-
+message ModifyInstitutionMessage {
+    InstitutionMessage institution = 1;
+    string replyTo = 2;
 }
 
-message DeleteInstitution {
-
+message DeleteInstitutionMessage {
+    string lei = 1;
+    string replyTo = 2;
 }
 
-message Get {
-
+message GetMessage {
+  string replyTo = 1;
 }
 
-message InstitutionStop {
+message InstitutionStopMessage {
 
 }
