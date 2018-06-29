@@ -7,6 +7,7 @@ import akka.actor.typed.ActorRefResolver
 import akka.serialization.SerializerWithStringManifest
 import hmda.persistence.institution.InstitutionPersistence.{
   CreateInstitution,
+  DeleteInstitution,
   Get,
   ModifyInstitution
 }
@@ -26,6 +27,7 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem)
   final val CreateInstitutionManifest = classOf[CreateInstitution].getName
   final val ModifyInstitutionManifest = classOf[ModifyInstitution].getName
   final val GetManifest = classOf[Get].getName
+  final val DeleteInstitutionManifest = classOf[DeleteInstitution].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -38,6 +40,8 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem)
       modifyInstitutionToProtobuf(cmd, resolver).toByteArray
     case cmd: Get =>
       getInstitutionToProtobuf(cmd, resolver).toByteArray
+    case cmd: DeleteInstitution =>
+      deleteInstitutionToProtobuf(cmd, resolver).toByteArray
     case _ ⇒
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
@@ -53,6 +57,8 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem)
         modifyInstitutionFromProtobuf(bytes, resolver)
       case GetManifest =>
         getInstitutionFromProtobuf(bytes, resolver)
+      case DeleteInstitutionManifest =>
+        deleteInstitutionFromProtobuf(bytes, resolver)
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
