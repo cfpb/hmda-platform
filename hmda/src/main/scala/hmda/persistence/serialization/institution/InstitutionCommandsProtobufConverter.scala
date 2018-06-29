@@ -1,12 +1,7 @@
 package hmda.persistence.serialization.institution
 
 import hmda.persistence.institution.InstitutionPersistence._
-import hmda.persistence.serialization.institution.commands.{
-  CreateInstitutionMessage,
-  DeleteInstitutionMessage,
-  GetMessage,
-  ModifyInstitutionMessage
-}
+import hmda.persistence.serialization.institution.commands._
 import InstitutionProtobufConverter._
 import akka.actor.typed.ActorRefResolver
 
@@ -53,10 +48,10 @@ object InstitutionCommandsProtobufConverter {
   }
 
   def getInstitutionToProtobuf(
-      cmd: Get,
+      cmd: GetInstitution,
       resolver: ActorRefResolver
-  ): GetMessage = {
-    GetMessage(
+  ): GetInstitutionMessage = {
+    GetInstitutionMessage(
       resolver.toSerializationFormat(cmd.replyTo)
     )
   }
@@ -64,10 +59,10 @@ object InstitutionCommandsProtobufConverter {
   def getInstitutionFromProtobuf(
       bytes: Array[Byte],
       resolver: ActorRefResolver
-  ): Get = {
-    val msg = GetMessage.parseFrom(bytes)
+  ): GetInstitution = {
+    val msg = GetInstitutionMessage.parseFrom(bytes)
     val actorRef = resolver.resolveActorRef(msg.replyTo)
-    Get(actorRef)
+    GetInstitution(actorRef)
   }
 
   def deleteInstitutionToProtobuf(

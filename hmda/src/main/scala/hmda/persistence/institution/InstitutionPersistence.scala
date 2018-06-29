@@ -34,7 +34,7 @@ object InstitutionPersistence {
 
   case class InstitutionNotExists(LEI: String) extends InstitutionEvent
 
-  case class Get(replyTo: ActorRef[Option[Institution]])
+  case class GetInstitution(replyTo: ActorRef[Option[Institution]])
       extends InstitutionCommand
 
   case object InstitutionStop extends InstitutionCommand
@@ -100,7 +100,7 @@ object InstitutionPersistence {
               replyTo ! InstitutionNotExists(lei)
             }
           }
-        case Get(replyTo) =>
+        case GetInstitution(replyTo) =>
           replyTo ! state.institution
           Effect.none
         case InstitutionStop =>

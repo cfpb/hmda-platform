@@ -8,7 +8,7 @@ import akka.serialization.SerializerWithStringManifest
 import hmda.persistence.institution.InstitutionPersistence.{
   CreateInstitution,
   DeleteInstitution,
-  Get,
+  GetInstitution,
   ModifyInstitution
 }
 import akka.actor.typed.scaladsl.adapter._
@@ -26,7 +26,7 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem)
   final val InstitutionManifest = classOf[Institution].getName
   final val CreateInstitutionManifest = classOf[CreateInstitution].getName
   final val ModifyInstitutionManifest = classOf[ModifyInstitution].getName
-  final val GetManifest = classOf[Get].getName
+  final val GetManifest = classOf[GetInstitution].getName
   final val DeleteInstitutionManifest = classOf[DeleteInstitution].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
@@ -38,7 +38,7 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem)
       createInstitutionToProtobuf(cmd, resolver).toByteArray
     case cmd: ModifyInstitution =>
       modifyInstitutionToProtobuf(cmd, resolver).toByteArray
-    case cmd: Get =>
+    case cmd: GetInstitution =>
       getInstitutionToProtobuf(cmd, resolver).toByteArray
     case cmd: DeleteInstitution =>
       deleteInstitutionToProtobuf(cmd, resolver).toByteArray

@@ -39,7 +39,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
                                                  institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
-      institutionPersistence ! Get(maybeInstitutionProbe.ref)
+      institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(Some(sampleInstitution))
     }
 
@@ -54,7 +54,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionModified(modified))
 
-      institutionPersistence ! Get(maybeInstitutionProbe.ref)
+      institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(Some(modified))
     }
 
@@ -80,7 +80,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       institutionProbe.expectMessage(
         InstitutionDeleted(modified.LEI.getOrElse("")))
 
-      institutionPersistence ! Get(maybeInstitutionProbe.ref)
+      institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
     }
 
@@ -106,7 +106,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
                                                  institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
-      institutionPersistence ! Get(maybeInstitutionProbe.ref)
+      institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(Some(sampleInstitution))
     }
     "be modified and read back" in {
@@ -116,7 +116,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionModified(modified))
 
-      institutionPersistence ! Get(maybeInstitutionProbe.ref)
+      institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(Some(modified))
     }
     "be deleted" in {
@@ -128,7 +128,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       institutionProbe.expectMessage(
         InstitutionDeleted(modified.LEI.getOrElse("")))
 
-      institutionPersistence ! Get(maybeInstitutionProbe.ref)
+      institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
     }
   }

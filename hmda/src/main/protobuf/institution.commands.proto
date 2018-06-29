@@ -20,7 +20,7 @@ message DeleteInstitutionMessage {
     string replyTo = 2;
 }
 
-message GetMessage {
+message GetInstitutionMessage {
   string replyTo = 1;
 }
 

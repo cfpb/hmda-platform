@@ -116,7 +116,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       timedGet { uri =>
         val fInstitution
           : Future[Option[Institution]] = institutionPersistence ? (
-            ref => Get(ref)
+            ref => GetInstitution(ref)
         )
 
         onComplete(fInstitution) {
