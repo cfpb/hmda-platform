@@ -59,7 +59,8 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
         system.spawn(InstitutionPersistence.behavior("XXXXX"), actorName)
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
-      institutionProbe.expectMessage(InstitutionNotExists)
+      institutionProbe.expectMessage(
+        InstitutionNotExists(modified.LEI.getOrElse("")))
     }
 
     "be deleted" in {
@@ -81,7 +82,8 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
       institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
                                                  institutionProbe.ref)
-      institutionProbe.expectMessage(InstitutionNotExists)
+      institutionProbe.expectMessage(
+        InstitutionNotExists(modified.LEI.getOrElse("")))
     }
 
   }

@@ -18,23 +18,40 @@ class InstitutionEventsSerializerSpec
 
   val serializer = new InstitutionEventsSerializer()
 
-  property("Institution Evetns must serialize to and from binary") {
+  property("InstitutionCreated must serialize to and from binary") {
     forAll(institutionGen) { institution =>
       val created = InstitutionCreated(institution)
-      val modified = InstitutionModified(institution)
-      val deleted = InstitutionDeleted(institution.LEI.getOrElse(""))
       val bytesCreated = serializer.toBinary(created)
-      val bytesModified = serializer.toBinary(modified)
-      val bytesDeleted = serializer.toBinary(deleted)
-      val bytesNotExist = serializer.toBinary(InstitutionNotExists)
       serializer.fromBinary(bytesCreated, serializer.InstitutionCreatedManifest) mustBe created
+    }
+  }
+
+  property("InstitutionModified must serialize to and from binary") {
+    forAll(institutionGen) { institution =>
+      val modified = InstitutionModified(institution)
+      val bytesModified = serializer.toBinary(modified)
       serializer.fromBinary(
         bytesModified,
         serializer.InstitutionModifiedManifest) mustBe modified
+    }
+  }
+
+  property("InstitutionDeleted must serialize to and from binary") {
+    forAll(institutionGen) { institution =>
+      val deleted = InstitutionDeleted(institution.LEI.getOrElse(""))
+      val bytesDeleted = serializer.toBinary(deleted)
       serializer.fromBinary(bytesDeleted, serializer.InstitutionDeletedManifest) mustBe deleted
+    }
+  }
+
+  property("InstitutionNotExists must serialize to and from binary") {
+    forAll(institutionGen) { institution =>
+      val notExists = InstitutionNotExists(institution.LEI.getOrElse(""))
+      val bytesNotExist = serializer.toBinary(notExists)
       serializer.fromBinary(
         bytesNotExist,
-        serializer.InstitutionNotExistsManifest) mustBe InstitutionNotExists
+        serializer.InstitutionNotExistsManifest) mustBe InstitutionNotExists(
+        institution.LEI.getOrElse(""))
     }
   }
 

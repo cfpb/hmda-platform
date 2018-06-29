@@ -19,7 +19,7 @@ import hmda.persistence.serialization.institution.events.{
 
 class InstitutionEventsSerializer extends SerializerWithStringManifest {
 
-  override def identifier: Int = 1
+  override def identifier: Int = 100
 
   final val InstitutionCreatedManifest =
     classOf[InstitutionCreated].getName
@@ -31,7 +31,7 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
     classOf[InstitutionDeleted].getName
 
   final val InstitutionNotExistsManifest =
-    InstitutionNotExists.toString
+    classOf[InstitutionNotExists].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -42,7 +42,7 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
       institutionModifiedToProtobuf(evt).toByteArray
     case evt: InstitutionDeleted =>
       institutionDeletedToProtobuf(evt).toByteArray
-    case evt: InstitutionNotExists.type =>
+    case evt: InstitutionNotExists =>
       institutionNotExistsToProtobuf(evt).toByteArray
     case _ ⇒
       throw new IllegalArgumentException(

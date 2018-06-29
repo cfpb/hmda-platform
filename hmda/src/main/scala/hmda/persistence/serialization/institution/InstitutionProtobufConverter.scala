@@ -84,9 +84,4 @@ object InstitutionProtobufConverter {
     )
   }
 
-  private def convertEmails(emailDomains: String): Option[List[String]] = {
-    val emails = emailDomains.split("|")
-    if (emails.isEmpty) None else Some(emails.toList)
-  }
-
 }

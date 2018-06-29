@@ -49,25 +49,29 @@ object InstitutionEventsProtobufConverter {
   def institutionDeletedToProtobuf(
       evt: InstitutionDeleted): InstitutionDeletedMessage = {
     InstitutionDeletedMessage(
-      lEI = evt.LEI
+      lei = evt.LEI
     )
   }
 
   def institutionDeletedFromProtobuf(
       msg: InstitutionDeletedMessage): InstitutionDeleted = {
     InstitutionDeleted(
-      LEI = msg.lEI
+      LEI = msg.lei
     )
   }
 
   def institutionNotExistsToProtobuf(
-      evt: InstitutionNotExists.type): InstitutionNotExistsMessage = {
-    InstitutionNotExistsMessage.defaultInstance
+      evt: InstitutionNotExists): InstitutionNotExistsMessage = {
+    InstitutionNotExistsMessage(
+      lei = evt.LEI
+    )
   }
 
   def institutionNotExistsFromProtobuf(
-      msg: InstitutionNotExistsMessage): InstitutionNotExists.type = {
-    InstitutionNotExists
+      msg: InstitutionNotExistsMessage): InstitutionNotExists = {
+    InstitutionNotExists(
+      LEI = msg.lei
+    )
   }
 
 }

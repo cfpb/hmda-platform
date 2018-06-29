@@ -32,7 +32,7 @@ object InstitutionPersistence {
 
   case class InstitutionDeleted(LEI: String) extends InstitutionEvent
 
-  case object InstitutionNotExists extends InstitutionEvent
+  case class InstitutionNotExists(LEI: String) extends InstitutionEvent
 
   case class Get(replyTo: ActorRef[Option[Institution]])
       extends InstitutionCommand
@@ -85,7 +85,7 @@ object InstitutionPersistence {
             Effect.none.andThen {
               ctx.log.warning(
                 s"Institution with LEI: ${i.LEI.getOrElse("")} does not exist")
-              replyTo ! InstitutionNotExists
+              replyTo ! InstitutionNotExists(i.LEI.getOrElse(""))
             }
           }
         case DeleteInstitution(lei, replyTo) =>
@@ -97,7 +97,7 @@ object InstitutionPersistence {
           } else {
             Effect.none.andThen {
               ctx.log.warning(s"Institution with LEI: $lei does not exist")
-              replyTo ! InstitutionNotExists
+              replyTo ! InstitutionNotExists(lei)
             }
           }
         case Get(replyTo) =>
@@ -110,10 +110,10 @@ object InstitutionPersistence {
 
   val eventHandler
     : (InstitutionState, InstitutionEvent) => (InstitutionState) = {
-    case (state, InstitutionCreated(i))  => state.copy(Some(i))
-    case (state, InstitutionModified(i)) => modifyInstitution(i, state)
-    case (state, InstitutionDeleted(_))  => state.copy(None)
-    case (state, InstitutionNotExists)   => state
+    case (state, InstitutionCreated(i))   => state.copy(Some(i))
+    case (state, InstitutionModified(i))  => modifyInstitution(i, state)
+    case (state, InstitutionDeleted(_))   => state.copy(None)
+    case (state, InstitutionNotExists(_)) => state
   }
 
   private def modifyInstitution(institution: Institution,

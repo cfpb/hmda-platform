@@ -52,11 +52,15 @@ class InstitutionEventsProtobufConverterSpec
   }
 
   property("InstitutionNotExists must convert to and protobuf") {
-    val protobuf =
-      institutionNotExistsToProtobuf(InstitutionNotExists).toByteArray
-    institutionNotExistsFromProtobuf(
-      InstitutionNotExistsMessage
-        .parseFrom(protobuf)) mustBe InstitutionNotExists
+    forAll(institutionGen) { institution =>
+      val protobuf =
+        institutionNotExistsToProtobuf(
+          InstitutionNotExists(institution.LEI.getOrElse(""))).toByteArray
+      institutionNotExistsFromProtobuf(
+        InstitutionNotExistsMessage
+          .parseFrom(protobuf)) mustBe InstitutionNotExists(
+        institution.LEI.getOrElse(""))
+    }
   }
 
 }

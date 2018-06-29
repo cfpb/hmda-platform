@@ -14,7 +14,9 @@ message InstitutionModifiedMessage {
 }
 
 message InstitutionDeletedMessage {
-    string LEI = 1;
+    string lei = 1;
 }
 
-message InstitutionNotExistsMessage {}
+message InstitutionNotExistsMessage {
+    string lei = 1;
+}

@@ -1,26 +1,11 @@
-<!--<configuration>-->
-    <!--<statusListener class="ch.qos.logback.core.status.NopStatusListener" />-->
-    <!--<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">-->
-        <!--<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">-->
-            <!--<pattern>%msg%n</pattern>-->
-        <!--</encoder>-->
-    <!--</appender>-->
-    <!--<root level="OFF">-->
-        <!--<appender-ref ref="CONSOLE"/>-->
-    <!--</root>-->
-<!--</configuration>-->
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>[%d][%-5level][%thread] %msg%n</pattern>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%msg%n</pattern>
         </encoder>
     </appender>
-
-    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
-        <appender-ref ref="STDOUT" />
-    </appender>
-
-    <root level="INFO">
-        <appender-ref ref="ASYNC" />
+    <root level="OFF">
+        <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>
