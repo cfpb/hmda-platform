@@ -7,4 +7,11 @@ object TopHolder {
 case class TopHolder(
     idRssd: Option[Int],
     name: Option[String]
-)
+) {
+  def isEmpty: Boolean = {
+    this match {
+      case TopHolder(None, None) => true
+      case _                     => false
+    }
+  }
+}

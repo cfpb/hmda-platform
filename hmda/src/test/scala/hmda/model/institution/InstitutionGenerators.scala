@@ -14,7 +14,7 @@ object InstitutionGenerators {
       id2017 <- Gen.alphaStr
       taxId <- Gen.alphaStr
       rssd <- Gen.alphaStr
-      email <- Gen.option(emailListGen)
+      email <- emailListGen
       respondent <- institutionRespondentGen
       parent <- institutionParentGen
       assets <- Gen.option(Gen.choose(Int.MinValue, Int.MaxValue))
