@@ -68,14 +68,9 @@ class InstitutionAdminHttpApiSpec
     institutionGen.sample.getOrElse(Institution.empty).copy(LEI = Some(lei))
 
   val modified =
-    sampleInstitution.copy(emailDomains = Some(List("email@bank.com")))
+    sampleInstitution.copy(emailDomains = List("email@bank.com"))
 
   "Institutions HTTP Service" must {
-    "return OPTIONS" in {
-      Options("/institutions") ~> institutionAdminRoutes ~> check {
-        status mustBe StatusCodes.OK
-      }
-    }
 
     "Create an institution" in {
       Post("/institutions", sampleInstitution) ~> institutionAdminRoutes ~> check {

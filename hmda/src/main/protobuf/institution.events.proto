@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "institution.proto";
+
+message InstitutionCreatedMessage {
+    InstitutionMessage institution = 1;
+}
+
+message InstitutionModifiedMessage {
+    InstitutionMessage institution = 1;
+}
+
+message InstitutionDeletedMessage {
+    string lei = 1;
+}
+
+message InstitutionNotExistsMessage {
+    string lei = 1;
+}
