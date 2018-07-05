@@ -82,7 +82,8 @@ To build and run the application in Kubernetes (local development), the followin
 1. Make sure that [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) is installed and configured for your system
 2. Make sure that [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) is installed and configured. When properly
 installed, you should be able to do `minikube dashboard` to open up the `kubernetes` cluster dashboard in your browser. Make sure that
-`kubectl` is properly configured to point to `minikube` when working in local development mode.
+`kubectl` is properly configured to point to `minikube` when working in local development mode. `Minikube` should have a minimum of 6 GB of RAM
+to be able to run all the necessary containers for the `HMDA Platform`.
 3. Make sure that [Helm](https://helm.sh/) is installed, as well as Tiller, the server side component.
 4. Install the `Jenkins` Helm Chart, as follows:
 
@@ -133,7 +134,7 @@ And change the `automountServiceAccountToken` to `true`. Save and exit
 helm install --name jenkins -f kubernetes/jenkins-values.yaml stable/jenkins --namespace jenkins-system
 ```
 
-You can access `Jenkins` by issuing `minikube service jenkins` and logging in with `admin/admin`.
+You can access `Jenkins` by issuing `minikube service --n jenkins-system jenkins` and logging in with `admin/admin`.
 
 Follow the on screen instructions to finalize `Jenkins` setup. When logged in, update plugins if necessary.
 
