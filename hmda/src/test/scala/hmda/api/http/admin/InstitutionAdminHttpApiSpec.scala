@@ -71,11 +71,6 @@ class InstitutionAdminHttpApiSpec
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
 
   "Institutions HTTP Service" must {
-    "return OPTIONS" in {
-      Options("/institutions") ~> institutionAdminRoutes ~> check {
-        status mustBe StatusCodes.OK
-      }
-    }
 
     "Create an institution" in {
       Post("/institutions", sampleInstitution) ~> institutionAdminRoutes ~> check {
