@@ -1,0 +1,53 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: hmda-bootstrap
+spec:
+  # by setting the clusterIp to None we are a "headless service"
+  # and thus the svc ("service") DNS record for the single IP but the IPs of all nodes that we select
+  #
+  # In other words:
+  #  POD=$(kubectl get pods | grep hmda | grep Running | head -n1 | awk '{ print $1 }')
+  #  $ kubectl exec -it $POD -- nslookup hmda-service.default.svc.cluster.local
+  #  Server:		10.0.0.10
+  #  Address:	10.0.0.10#53
+  #
+  #  Name:	hmda-service.default.svc.cluster.local
+  #  Address: 172.17.0.7
+  #  Name:	hmda-service.default.svc.cluster.local
+  #  Address: 172.17.0.8
+  #  Name:	hmda-service.default.svc.cluster.local
+  clusterIP: None
+  selector:
+    app: hmda
+  ports:
+  - protocol: {{ .Values.bootstrap.protocol }}
+    port: {{ .Values.bootstrap.port }}
+    targetPort: {{ .Values.bootstrap.port }}
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.service.name }}
+spec:
+  selector:
+    app: hmda-platform
+  type: NodePort
+  ports:
+  - name: {{ .Values.filing.name }}
+    protocol: {{ .Values.filing.protocol }}
+    port: {{ .Values.filing.port }}
+    targetPort: {{ .Values.filing.port }}
+  - name: {{ .Values.admin.name }}
+    protocol: {{ .Values.admin.protocol }}
+    port: {{ .Values.admin.port }}
+    targetPort: {{ .Values.admin.port }}
+  - name: {{ .Values.public.name }}
+    protocol: {{ .Values.public.protocol }}
+    port: {{ .Values.public.port }}
+    targetPort: {{ .Values.public.port }}
+  - name: {{ .Values.cluster.name }}
+    protocol: {{ .Values.cluster.protocol }}
+    port: {{ .Values.cluster.port }}
+    targetPort: {{ .Values.cluster.port }}

@@ -13,11 +13,14 @@ lazy val akkaDeps = Seq(
   akkaManagement,
   akkaManagementClusterBootstrap,
   akkaServiceDiscoveryDNS,
+  akkaServiceDiscoveryKubernetes,
+  akkaClusterHttpManagement,
   akkaClusterHttpManagement,
   akkaTestkitTyped,
   akkaCors,
   akkaClusterDowning
 )
+
 lazy val akkaPersistenceDeps =
   Seq(akkaPersistence,
       akkaClusterSharding,
@@ -25,6 +28,7 @@ lazy val akkaPersistenceDeps =
       akkaClusterShardingTyped,
       akkaPersistenceCassandra,
       cassandraLauncher)
+
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
@@ -35,8 +39,8 @@ lazy val scalafmtSettings = Seq(
 
 lazy val dockerSettings = Seq(
   Docker / maintainer := "Juan Marin Otero",
-  dockerBaseImage := "openjdk:8-jre-alpine",
-  dockerRepository := Some("hmda")
+  dockerBaseImage := "openjdk:jre-alpine",
+  dockerRepository := Some("jmarin")
 )
 
 lazy val packageSettings = Seq(
@@ -84,6 +88,9 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
       },
+      PB.targets in Compile := Seq(
+        scalapb.gen() -> (sourceManaged in Compile).value
+      ),
       libraryDependencies ++= akkaPersistenceDeps
     ),
     scalafmtSettings,

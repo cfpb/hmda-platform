@@ -7,7 +7,7 @@ import akka.actor
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import akka.testkit.typed.scaladsl.TestProbe
+import akka.actor.testkit.typed.scaladsl.TestProbe
 import hmda.persistence.util.CassandraUtil
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 import akka.actor.typed.scaladsl.adapter._
@@ -67,7 +67,7 @@ abstract class AkkaCassandraPersistenceSpec
       PersistentBehaviors
         .receive[Command, Event, AwaitState](
           persistenceId = s"await-persistence-id",
-          initialState = AwaitState(),
+          emptyState = AwaitState(),
           commandHandler = commandHandler,
           eventHandler = eventHandler
         )

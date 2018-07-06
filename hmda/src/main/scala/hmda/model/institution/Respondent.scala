@@ -13,4 +13,11 @@ case class Respondent(
     name: Option[String],
     state: Option[String],
     city: Option[String]
-)
+) {
+  def isEmpty: Boolean = {
+    this match {
+      case Respondent(None, None, None) => true
+      case _                            => false
+    }
+  }
+}
