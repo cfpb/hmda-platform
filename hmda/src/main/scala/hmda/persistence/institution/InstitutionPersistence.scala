@@ -52,7 +52,7 @@ object InstitutionPersistence {
     PersistentBehaviors
       .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
         persistenceId = s"$name-$entityId",
-        initialState = InstitutionState(None),
+        emptyState = InstitutionState(None),
         commandHandler = commandHandler,
         eventHandler = eventHandler
       )

@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: {{ template "hmda-platform.name" . }}
+  name: {{ template "hmda-platform.fullname" . }}
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: {{ template "hmda-platform.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "hmda-platform.name" . }}
+        release: {{ .Release.Name }}
+        actorSystemName: {{ .Values.hmda.actorSystemName }}
+    spec:
+      serviceAccountName: {{ .Values.service.account.name }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+        - name: HMDA_RUNTIME_MODE
+          value: {{ .Values.hmda.runtimeMode }}
+        - name: HOST_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.bootstrap.port }}
+        ports:
+        # akka remoting
+        - name: {{ .Values.remoting.name }}
+          containerPort: {{ .Values.remoting.port }}
+          protocol: {{ .Values.remoting.protocol }}
+        # akka-management bootstrap
+        - name: {{ .Values.bootstrap.name }}
+          containerPort: {{ .Values.bootstrap.port }}
+          protocol: {{ .Values.bootstrap.protocol }}
+        # external http
+        - name: {{ .Values.cluster.name }}
+          containerPort: {{ .Values.cluster.port }}
+          protocol: {{ .Values.cluster.protocol }}

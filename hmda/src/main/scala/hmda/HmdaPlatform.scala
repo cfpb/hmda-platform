@@ -40,10 +40,17 @@ object HmdaPlatform extends App {
 
   log.info(s"HMDA_RUNTIME_MODE: $runtimeMode")
 
-  val clusterConfig = if (runtimeMode == "dev" || runtimeMode == "dev-node") {
-    ConfigFactory.parseResources("application-dev.conf").resolve()
-  } else {
-    config
+  val clusterConfig = runtimeMode match {
+    case "dev" => ConfigFactory.parseResources("application-dev.conf").resolve()
+    case "dev-node" =>
+      ConfigFactory.parseResources("application-dev.conf").resolve()
+    case "kubernetes" => {
+      log.info(s"HOSTNAME: ${System.getenv("HOSTNAME")}")
+      ConfigFactory.parseResources("application-kubernetes.conf").resolve()
+    }
+    case "dcos" =>
+      ConfigFactory.parseResources("application-dcos.conf").resolve()
+    case _ => config
   }
 
   implicit val system =
@@ -55,9 +62,9 @@ object HmdaPlatform extends App {
   implicit val mat = ActorMaterializer()
   implicit val cluster = Cluster(typedSystem)
 
-  if (runtimeMode == "prod") {
-    AkkaManagement(system).start()
+  if (runtimeMode == "dcos" || runtimeMode == "kubernetes") {
     ClusterBootstrap(system).start()
+    AkkaManagement(system).start()
   }
 
   if (runtimeMode == "dev") {

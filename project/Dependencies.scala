@@ -19,13 +19,14 @@ object Dependencies {
   lazy val akkaClusterShardingTyped = "com.typesafe.akka" %% "akka-cluster-sharding-typed" % Version.akka
   lazy val akkaPersistence = "com.typesafe.akka" %% "akka-persistence" % Version.akka
   lazy val akkaPersistenceTyped = "com.typesafe.akka" %% "akka-persistence-typed" % Version.akka
-  lazy val akkaTestkitTyped = "com.typesafe.akka" %% "akka-testkit-typed" % Version.akka % Test
+  lazy val akkaTestkitTyped = "com.typesafe.akka" %% "akka-actor-testkit-typed" % Version.akka % Test
   lazy val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
   lazy val akkaHttp = "com.typesafe.akka" %% "akka-http" % Version.akkaHttp
   lazy val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akkaHttp % Test
   lazy val akkaHttpCirce = "de.heikoseeberger" %% "akka-http-circe" % Version.akkaHttpJson
   lazy val akkaManagementClusterBootstrap = "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % Version.akkaClusterManagement
   lazy val akkaServiceDiscoveryDNS = "com.lightbend.akka.discovery" %% "akka-discovery-dns" % Version.akkaClusterManagement
+  lazy val akkaServiceDiscoveryKubernetes = "com.lightbend.akka.discovery" %% "akka-discovery-kubernetes-api" % Version.akkaClusterManagement
   lazy val akkaManagement = "com.lightbend.akka.management" %% "akka-management" % Version.akkaClusterManagement
   lazy val akkaClusterHttpManagement = "com.lightbend.akka.management" %% "akka-management-cluster-http" % Version.akkaClusterManagement
   lazy val akkaCors = "ch.megard" %% "akka-http-cors" % Version.akkaCors

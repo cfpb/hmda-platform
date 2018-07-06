@@ -1,0 +1,133 @@
+# Default values for jenkins.
+# This is a YAML-formatted file.
+# Declare name/value pairs to be passed into your templates.
+# name: value
+
+Master:
+  Name: jenkins-master
+  Image: "jenkinsci/jenkins"
+  ImageTag: "alpine"
+  ImagePullPolicy: "Always"
+  Component: "jenkins-master"
+  UseSecurity: true
+  AdminUser: admin
+  AdminPassword: admin
+  Cpu: "200m"
+  Memory: "256Mi"
+# Set min/max heap here if needed with:
+# JavaOpts: "-Xms512m -Xmx512m"
+  ServicePort: 80
+# For minikube, set this to NodePort, elsewhere use LoadBalancer
+# Use ClusterIP if your setup includes ingress controller
+  ServiceType: NodePort
+# Master Service annotations
+  ServiceAnnotations: {}
+    #   service.beta.kubernetes.io/aws-load-balancer-backend-protocol: https
+# Used to create Ingress record (should used with ServiceType: ClusterIP)
+# HostName: jenkins.radu-matei.com
+# NodePort: <to set explicitly, choose port between 30000-32767
+  ContainerPort: 8080
+  SlaveListenerPort: 50000
+  LoadBalancerSourceRanges:
+  - 0.0.0.0/0
+# Optionally configure a JMX port
+# requires additional JavaOpts, ie
+# JavaOpts: >
+#   -Dcom.sun.management.jmxremote.port=4000
+#   -Dcom.sun.management.jmxremote.authenticate=false
+#   -Dcom.sun.management.jmxremote.ssl=false
+# JMXPort: 4000
+# List of plugins to be install during Jenkins master start
+  InstallPlugins:
+      - kubernetes:1.6.0
+      - workflow-aggregator:2.5
+      - workflow-job:2.21
+      - credentials-binding:1.16
+      - git:3.8.0
+      - ghprb:1.40.0
+      - blueocean:1.5.0
+# Used to approve a list of groovy functions in pipelines used the script-security plugin. Can be viewed under /scriptApproval
+  ScriptApproval:
+    - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
+    - "new groovy.json.JsonSlurperClassic"
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods leftShift java.util.Map java.util.Map"
+    - "staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods split java.lang.String"
+# List of groovy init scripts to be executed during Jenkins master start
+  InitScripts:
+#  - |
+#    print 'adding global pipeline libraries, register properties, bootstrap jobs...'
+  CustomConfigMap: false
+# Node labels and tolerations for pod assignment
+# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature
+  NodeSelector: {}
+  Tolerations: {}
+
+  Ingress:
+    Annotations:
+      kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+
+    TLS:
+      # - secretName: jenkins.cluster.local
+      #   hosts:
+      #     - jenkins.cluster.local
+
+Agent:
+  Enabled: true
+  Image: jenkinsci/jnlp-slave
+  ImageTag: alpine
+  Component: "jenkins-slave"
+  Privileged: false
+  Cpu: "200m"
+  Memory: "256Mi"
+  # You may want to change this to true while testing a new image
+  AlwaysPullImage: false
+  # You can define the volumes that you want to mount for this container
+  # Allowed types are: ConfigMap, EmptyDir, HostPath, Nfs, Pod, Secret
+  # Configure the attributes as they appear in the corresponding Java class for that type
+  # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes
+  volumes:
+    - type: HostPath
+      hostPath: /var/run/docker.sock
+      mountPath: /var/run/docker.sock
+  # - type: Secret
+  #   secretName: mysecret
+  #   mountPath: /var/myapp/mysecret
+
+Persistence:
+  Enabled: true
+  ## A manually managed Persistent Volume and Claim
+  ## Requires Persistence.Enabled: true
+  ## If defined, PVC must be created manually before volume will be bound
+  # ExistingClaim:
+
+  ## If defined, volume.beta.kubernetes.io/storage-class: <StorageClass>
+  ## Default: volume.alpha.kubernetes.io/storage-class: default
+  ##
+  # StorageClass:
+  AccessMode: ReadWriteOnce
+  Size: 8Gi
+  volumes:
+#  - name: nothing
+#    emptyDir: {}
+  mounts:
+#  - mountPath: /var/nothing
+#    name: nothing
+#    readOnly: true
+
+NetworkPolicy:
+  # Enable creation of NetworkPolicy resources.
+  Enabled: false
+  # For Kubernetes v1.4, v1.5 and v1.6, use 'extensions/v1beta1'
+  # For Kubernetes v1.7, use 'networking.k8s.io/v1'
+  ApiVersion: networking.k8s.io/v1
+
+## Install Default RBAC roles and bindings
+rbac:
+  install: true
+  serviceAccount: jenkins
+  # RBAC api version (currently either v1beta1 or v1alpha1)
+  apiVersion: v1beta1
+  # Cluster role reference
+  roleRef: cluster-admin
