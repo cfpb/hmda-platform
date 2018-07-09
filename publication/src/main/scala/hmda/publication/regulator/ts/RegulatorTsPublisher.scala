@@ -15,8 +15,9 @@ import akka.stream.scaladsl.Flow
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.persistence.model.HmdaActor
-import hmda.publication.regulator.messages.PublishRegulatorData
+import hmda.publication.regulator.messages.{ PublishDynamicData, PublishRegulatorData }
 import hmda.query.model.filing.TransmittalSheetWithTimestamp
 import hmda.query.repository.filing.TransmittalSheetCassandraRepository
 
@@ -27,6 +28,7 @@ object RegulatorTsPublisher {
 class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepository {
 
   QuartzSchedulerExtension(system).schedule("TSRegulator", self, PublishRegulatorData)
+  QuartzSchedulerExtension(system).schedule("DynamicRegulator", self, PublishDynamicData)
 
   val decider: Decider = { e =>
     log.error("Unhandled error in stream", e)
@@ -44,6 +46,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
   val region = config.getString("hmda.publication.aws.region")
   val bucket = config.getString("hmda.publication.aws.private-bucket")
   val environment = config.getString("hmda.publication.aws.environment")
+  val filteredRespondentIds = config.getString("hmda.publication.filtered-respondent-ids").split(",")
 
   val awsCredentials = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess)
@@ -71,17 +74,28 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
 
       source.runWith(s3Sink)
 
+    case PublishDynamicData =>
+      val fileName = "ts.txt"
+      log.info(s"Uploading $fileName to S3")
+      val s3Sink = s3Client.multipartUpload(
+        bucket,
+        s"$environment/dynamic-data/$fileName",
+        ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
+        S3Headers(ServerSideEncryption.AES256)
+      )
+
+      val source = readData(fetchSize)
+        .via(filterTestBanks)
+        .map(t => t.ts.toCSVModified + "\n")
+        .map(s => ByteString(s))
+
+      source.runWith(s3Sink)
+
     case _ => //do nothing
   }
 
   def filterTestBanks: Flow[TransmittalSheetWithTimestamp, TransmittalSheetWithTimestamp, NotUsed] = {
     Flow[TransmittalSheetWithTimestamp]
-      .filter(t => t.ts.respondent.name != "bank-0 National Association" && t.ts.respondentId != "Bank0_RID")
-      .filter(t => t.ts.respondent.name != "bank-1 Mortgage Lending" && t.ts.respondentId != "Bank1_RID")
-      // Outdated Respondent IDs (HMDA-devops issue #678)
-      .filterNot(t => t.ts.respondentId == "480266459" && t.ts.agencyCode == 3)
-      .filterNot(t => t.ts.respondentId == "1467" && t.ts.agencyCode == 1)
-      .filterNot(t => t.ts.respondentId == "3378018" && t.ts.agencyCode == 9)
-      .filterNot(t => t.ts.respondentId == "18944" && t.ts.agencyCode == 5)
+      .filterNot(t => filteredRespondentIds.contains(t.ts.respondentId))
   }
 }

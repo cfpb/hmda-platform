@@ -20,7 +20,6 @@ import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.census.model.TractLookup._
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages._
-import hmda.query.model.filing.ModifiedLoanApplicationRegister
 import hmda.query.repository.filing.LarConverter._
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 
@@ -34,6 +33,7 @@ object RegulatorLarPublisher {
 class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   QuartzSchedulerExtension(system).schedule("LARRegulator", self, PublishRegulatorData)
+  QuartzSchedulerExtension(system).schedule("DynamicRegulator", self, PublishDynamicData)
 
   val decider: Decider = { e =>
     log.error("Unhandled error in stream", e)
@@ -81,7 +81,6 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
       source.runWith(s3Sink)
 
     case PublishDynamicData =>
-      val now = LocalDateTime.now()
       val fileName = "lar.txt"
       log.info(s"Uploading $fileName to S3")
       val s3Sink = s3Client.multipartUpload(

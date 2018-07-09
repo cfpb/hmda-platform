@@ -55,6 +55,14 @@ case class TransmittalSheet(
       s"|${parent.zipCode}|${contact.name}|${contact.phone}|${contact.fax}|${contact.email}"
   }
 
+  def toCSVModified: String = {
+    s"$id|${respondent.id}|$agencyCode|$timestamp|$activityYear" +
+      s"|$taxId|$totalLines|${respondent.name}|${respondent.address}" +
+      s"|${respondent.city}|${respondent.state}|${respondent.zipCode}" +
+      s"|${parent.name}|${parent.address}|${parent.city}|${parent.state}" +
+      s"|${parent.zipCode}"
+  }
+
   /**
    * NOTE:  The DAT file format is not supported by CFPB
    */
