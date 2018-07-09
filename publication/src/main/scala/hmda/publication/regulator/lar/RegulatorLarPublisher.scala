@@ -15,9 +15,13 @@ import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import hmda.census.model.TractExtended
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.census.model.TractLookup._
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages._
+import hmda.query.model.filing.ModifiedLoanApplicationRegister
+import hmda.query.repository.filing.LarConverter._
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 
 object RegulatorLarPublisher {
@@ -48,6 +52,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
   val region = config.getString("hmda.publication.aws.region")
   val bucket = config.getString("hmda.publication.aws.private-bucket")
   val environment = config.getString("hmda.publication.aws.environment")
+  val filteredRespondentIds = config.getString("hmda.publication.filtered-respondent-ids").split(",")
 
   val awsCredentials = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess)
@@ -75,17 +80,35 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
 
       source.runWith(s3Sink)
 
+    case PublishDynamicData =>
+      val now = LocalDateTime.now()
+      val fileName = "lar.txt"
+      log.info(s"Uploading $fileName to S3")
+      val s3Sink = s3Client.multipartUpload(
+        bucket,
+        s"$environment/dynamic-data/$fileName",
+        ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
+        S3Headers(ServerSideEncryption.AES256)
+      )
+
+      val source = readData(fetchSize)
+        .via(filterTestBanks)
+        .map(lar => addCensusData(lar))
+        .map(s => ByteString(s))
+
+      source.runWith(s3Sink)
+
     case _ => //do nothing
+  }
+
+  def addCensusData(lar: LoanApplicationRegister): String = {
+    val baseString = toModifiedLar(lar).toCSV
+    val tract = forLarExtended(lar).getOrElse(TractExtended()).toCSV
+    baseString + "|" + tract
   }
 
   def filterTestBanks: Flow[LoanApplicationRegister, LoanApplicationRegister, NotUsed] = {
     Flow[LoanApplicationRegister]
-      .filter(lar => lar.respondentId != "Bank0_RID"
-        && lar.respondentId != "Bank1_RID")
-      // Outdated Respondent IDs (HMDA-devops issue #678)
-      .filterNot(lar => lar.respondentId == "480266459" && lar.agencyCode == 3)
-      .filterNot(lar => lar.respondentId == "1467" && lar.agencyCode == 1)
-      .filterNot(lar => lar.respondentId == "3378018" && lar.agencyCode == 9)
-      .filterNot(lar => lar.respondentId == "18944" && lar.agencyCode == 5)
+      .filterNot(lar => filteredRespondentIds.contains(lar.respondentId))
   }
 }
