@@ -77,7 +77,7 @@ object LarGenerators {
   implicit def loanGen: Gen[Loan] = {
     for {
       uli <- stringOfUpToN(45, Gen.alphaChar)
-      applicationDate <- intValueOrNA(dateGen)
+      applicationDate <- valueOrDefault(dateGen, "NA")
       loanType <- loanTypeEnumGen
       loanPurpose <- loanPurposeEnumGen
       constructionMethod <- constructionMethodEnumGen
