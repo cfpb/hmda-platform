@@ -56,7 +56,7 @@ case class TransmittalSheet(
   }
 
   def toCSVModified: String = {
-    s"$id|${respondent.id}|$agencyCode|$timestamp|$activityYear" +
+    s"$id|${respondent.id}|$agencyCode|$activityYear" +
       s"|$taxId|$totalLines|${respondent.name}|${respondent.address}" +
       s"|${respondent.city}|${respondent.state}|${respondent.zipCode}" +
       s"|${parent.name}|${parent.address}|${parent.city}|${parent.state}" +
