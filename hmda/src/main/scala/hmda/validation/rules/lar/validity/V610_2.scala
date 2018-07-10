@@ -15,6 +15,9 @@ object V610_2 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     when(lar.action.actionTakenType is equalTo(PurchasedLoan)) {
       lar.loan.applicationDate is equalTo("NA")
-    }
+    } and
+      when(lar.loan.applicationDate is equalTo(("NA"))) {
+        lar.action.actionTakenType is equalTo(PurchasedLoan)
+      }
   }
 }
