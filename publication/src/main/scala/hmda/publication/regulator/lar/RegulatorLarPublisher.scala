@@ -10,7 +10,7 @@ import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.{ Flow, Source }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
@@ -33,7 +33,7 @@ object RegulatorLarPublisher {
 class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   QuartzSchedulerExtension(system).schedule("LARRegulator", self, PublishRegulatorData)
-  QuartzSchedulerExtension(system).schedule("DynamicRegulator", self, PublishDynamicData)
+  QuartzSchedulerExtension(system).schedule("DynamicLARRegulator", self, PublishDynamicData)
 
   val decider: Decider = { e =>
     log.error("Unhandled error in stream", e)
@@ -51,6 +51,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
   val secretAccess = config.getString("hmda.publication.aws.secret-access-key ")
   val region = config.getString("hmda.publication.aws.region")
   val bucket = config.getString("hmda.publication.aws.private-bucket")
+  val publicBucket = config.getString("hmda.publication.aws.public-bucket")
   val environment = config.getString("hmda.publication.aws.environment")
   val filteredRespondentIds = config.getString("hmda.publication.filtered-respondent-ids").split(",")
 
@@ -82,9 +83,9 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
 
     case PublishDynamicData =>
       val fileName = "lar.txt"
-      log.info(s"Uploading $fileName to S3")
+      log.info(s"Uploading $fileName to $environment/dynamic-data/$fileName")
       val s3Sink = s3Client.multipartUpload(
-        bucket,
+        publicBucket,
         s"$environment/dynamic-data/$fileName",
         ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
         S3Headers(ServerSideEncryption.AES256)

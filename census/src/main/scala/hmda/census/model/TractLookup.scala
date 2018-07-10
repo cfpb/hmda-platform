@@ -81,19 +81,19 @@ case class Tract(
 )
 
 case class TractExtended(
-  state: String = "",
-  county: String = "",
-  tract: String = "",
-  tractDec: String = "",
-  key: String = "",
-  msa: String = "",
-  ffiecMfi: Int = 0,
-  totalPersons: Int = 0,
-  ownerOccupied: Int = 0,
-  oneToFourUnits: Int = 0,
-  minorityPopulationPercent: Double = 0.0,
-  tractMfiPercentageOfMsaMfi: Double = 0.0,
-  medianYearHomesBuilt: Option[Int] = None
+    state: String = "",
+    county: String = "",
+    tract: String = "",
+    tractDec: String = "",
+    key: String = "",
+    msa: String = "",
+    ffiecMfi: Int = 0,
+    totalPersons: Int = 0,
+    ownerOccupied: Int = 0,
+    oneToFourUnits: Int = 0,
+    minorityPopulationPercent: Double = 0.0,
+    tractMfiPercentageOfMsaMfi: Double = 0.0,
+    medianYearHomesBuilt: Option[Int] = None
 ) {
   def toTract = Tract(state, county, tract,
     tractDec, key, msa, minorityPopulationPercent,

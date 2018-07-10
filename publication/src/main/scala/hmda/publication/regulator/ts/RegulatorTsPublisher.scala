@@ -28,7 +28,7 @@ object RegulatorTsPublisher {
 class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepository {
 
   QuartzSchedulerExtension(system).schedule("TSRegulator", self, PublishRegulatorData)
-  QuartzSchedulerExtension(system).schedule("DynamicRegulator", self, PublishDynamicData)
+  QuartzSchedulerExtension(system).schedule("DynamicTSRegulator", self, PublishDynamicData)
 
   val decider: Decider = { e =>
     log.error("Unhandled error in stream", e)
@@ -45,6 +45,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
   val secretAccess = config.getString("hmda.publication.aws.secret-access-key ")
   val region = config.getString("hmda.publication.aws.region")
   val bucket = config.getString("hmda.publication.aws.private-bucket")
+  val publicBucket = config.getString("hmda.publication.aws.public-bucket")
   val environment = config.getString("hmda.publication.aws.environment")
   val filteredRespondentIds = config.getString("hmda.publication.filtered-respondent-ids").split(",")
 
@@ -76,9 +77,9 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
 
     case PublishDynamicData =>
       val fileName = "ts.txt"
-      log.info(s"Uploading $fileName to S3")
+      log.info(s"Uploading $fileName to $environment/dynamic-data/$fileName")
       val s3Sink = s3Client.multipartUpload(
-        bucket,
+        publicBucket,
         s"$environment/dynamic-data/$fileName",
         ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
         S3Headers(ServerSideEncryption.AES256)
