@@ -98,9 +98,13 @@ case class TractExtended(
   def toTract = Tract(state, county, tract,
     tractDec, key, msa, minorityPopulationPercent,
     tractMfiPercentageOfMsaMfi, medianYearHomesBuilt)
+
   def toCSV = {
     val mPPString = BigDecimal(minorityPopulationPercent).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     val tMfiPString = BigDecimal(tractMfiPercentageOfMsaMfi).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-    s"$totalPersons|$mPPString|$ffiecMfi|$tMfiPString|$ownerOccupied|$oneToFourUnits"
+    if(state == "" || county == "" || tract == "")
+      "|||||"
+    else
+      s"$totalPersons|$mPPString|$ffiecMfi|$tMfiPString|$ownerOccupied|$oneToFourUnits"
   }
 }
