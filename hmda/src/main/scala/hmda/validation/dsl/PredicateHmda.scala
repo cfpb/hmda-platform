@@ -15,7 +15,7 @@ object PredicateHmda {
       val format = new SimpleDateFormat("yyyyMMdd")
       format.setLenient(false)
       format.parse(s)
-      true
+      s.length == 8
     } catch {
       case e: Exception => false
     }

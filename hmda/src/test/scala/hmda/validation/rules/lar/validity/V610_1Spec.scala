@@ -12,6 +12,7 @@ class V610_1Spec extends LarEditCheckSpec {
     "Application Date must be valid YYYMMDD format or NA, and cannot be left blank") {
     forAll(larGen) { lar =>
       lar.mustPass
+      lar.copy(loan = lar.loan.copy(applicationDate = "2016121")).mustFail
     }
   }
 }
