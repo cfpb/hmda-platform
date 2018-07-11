@@ -15,7 +15,7 @@ import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
-import hmda.census.model.TractExtended
+import hmda.census.model.{ TractExtended, TractLookup }
 import hmda.model.fi.lar.LoanApplicationRegister
 import hmda.census.model.TractLookup._
 import hmda.persistence.model.HmdaActor
@@ -61,6 +61,8 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
   val awsSettings = new S3Settings(MemoryBufferType, None, awsCredentials, region, false)
   val s3Client = new S3Client(awsSettings, context.system, materializer)
 
+  val tractMap = TractLookup.valuesExtended.map(t => (t.tractDec + t.county + t.state, t.toCSV)).toMap
+
   override def receive: Receive = {
 
     case PublishRegulatorData =>
@@ -93,7 +95,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
 
       val source = readData(fetchSize)
         .via(filterTestBanks)
-        .map(lar => addCensusData(lar))
+        .map(lar => addCensusDataFromMap(lar))
         .map(s => ByteString(s))
 
       source.runWith(s3Sink)
@@ -101,9 +103,10 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
     case _ => //do nothing
   }
 
-  def addCensusData(lar: LoanApplicationRegister): String = {
+  def addCensusDataFromMap(lar: LoanApplicationRegister): String = {
     val baseString = toModifiedLar(lar).toCSV
-    val tract = forLarExtended(lar).getOrElse(TractExtended()).toCSV
+    val key = lar.geography.tract + lar.geography.county + lar.geography.state
+    val tract = tractMap.getOrElse(key, "|||||")
     baseString + "|" + tract
   }
 

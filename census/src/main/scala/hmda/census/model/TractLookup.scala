@@ -102,7 +102,7 @@ case class TractExtended(
   def toCSV = {
     val mPPString = BigDecimal(minorityPopulationPercent).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
     val tMfiPString = BigDecimal(tractMfiPercentageOfMsaMfi).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
-    if(state == "" || county == "" || tract == "")
+    if (state == "" || county == "" || tract == "")
       "|||||"
     else
       s"$totalPersons|$mPPString|$ffiecMfi|$tMfiPString|$ownerOccupied|$oneToFourUnits"
