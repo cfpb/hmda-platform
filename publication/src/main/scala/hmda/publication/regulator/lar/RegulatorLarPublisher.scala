@@ -107,7 +107,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
     val baseString = toModifiedLar(lar).toCSV
     val key = lar.geography.tract + lar.geography.county + lar.geography.state
     val tract = tractMap.getOrElse(key, "|||||")
-    baseString + "|" + tract
+    baseString + "|" + tract + "\n"
   }
 
   def filterTestBanks: Flow[LoanApplicationRegister, LoanApplicationRegister, NotUsed] = {
