@@ -10,14 +10,17 @@ import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.Flow
+import akka.stream.scaladsl.{ Flow, Source }
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import hmda.census.model.{ TractExtended, TractLookup }
 import hmda.model.fi.lar.LoanApplicationRegister
+import hmda.census.model.TractLookup._
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages._
+import hmda.query.repository.filing.LarConverter._
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 
 object RegulatorLarPublisher {
@@ -30,6 +33,7 @@ object RegulatorLarPublisher {
 class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   QuartzSchedulerExtension(system).schedule("LARRegulator", self, PublishRegulatorData)
+  QuartzSchedulerExtension(system).schedule("DynamicLARRegulator", self, PublishDynamicData)
 
   val decider: Decider = { e =>
     log.error("Unhandled error in stream", e)
@@ -47,13 +51,17 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
   val secretAccess = config.getString("hmda.publication.aws.secret-access-key ")
   val region = config.getString("hmda.publication.aws.region")
   val bucket = config.getString("hmda.publication.aws.private-bucket")
+  val publicBucket = config.getString("hmda.publication.aws.public-bucket")
   val environment = config.getString("hmda.publication.aws.environment")
+  val filteredRespondentIds = config.getString("hmda.publication.filtered-respondent-ids").split(",")
 
   val awsCredentials = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess)
   )
   val awsSettings = new S3Settings(MemoryBufferType, None, awsCredentials, region, false)
   val s3Client = new S3Client(awsSettings, context.system, materializer)
+
+  val tractMap = TractLookup.valuesExtended.map(t => (t.tractDec + t.county + t.state, t.toCSV)).toMap
 
   override def receive: Receive = {
 
@@ -75,17 +83,35 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
 
       source.runWith(s3Sink)
 
+    case PublishDynamicData =>
+      val fileName = "lar.txt"
+      log.info(s"Uploading $fileName to $environment/dynamic-data/$fileName")
+      val s3Sink = s3Client.multipartUpload(
+        publicBucket,
+        s"$environment/dynamic-data/$fileName",
+        ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
+        S3Headers(ServerSideEncryption.AES256)
+      )
+
+      val source = readData(fetchSize)
+        .via(filterTestBanks)
+        .map(lar => addCensusDataFromMap(lar))
+        .map(s => ByteString(s))
+
+      source.runWith(s3Sink)
+
     case _ => //do nothing
+  }
+
+  def addCensusDataFromMap(lar: LoanApplicationRegister): String = {
+    val baseString = toModifiedLar(lar).toCSV
+    val key = lar.geography.tract + lar.geography.county + lar.geography.state
+    val tract = tractMap.getOrElse(key, "|||||")
+    baseString + "|" + tract + "\n"
   }
 
   def filterTestBanks: Flow[LoanApplicationRegister, LoanApplicationRegister, NotUsed] = {
     Flow[LoanApplicationRegister]
-      .filter(lar => lar.respondentId != "Bank0_RID"
-        && lar.respondentId != "Bank1_RID")
-      // Outdated Respondent IDs (HMDA-devops issue #678)
-      .filterNot(lar => lar.respondentId == "480266459" && lar.agencyCode == 3)
-      .filterNot(lar => lar.respondentId == "1467" && lar.agencyCode == 1)
-      .filterNot(lar => lar.respondentId == "3378018" && lar.agencyCode == 9)
-      .filterNot(lar => lar.respondentId == "18944" && lar.agencyCode == 5)
+      .filterNot(lar => filteredRespondentIds.contains(lar.respondentId))
   }
 }
