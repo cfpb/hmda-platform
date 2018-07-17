@@ -54,6 +54,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
   val publicBucket = config.getString("hmda.publication.aws.public-bucket")
   val environment = config.getString("hmda.publication.aws.environment")
   val filteredRespondentIds = config.getString("hmda.publication.filtered-respondent-ids").split(",")
+  val dynamicFilteredRespondentIds = config.getString("hmda.publication.dynamic-filtered-respondent-ids").split(",")
 
   val awsCredentials = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess)
@@ -95,6 +96,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
 
       val source = readData(fetchSize)
         .via(filterTestBanks)
+        .via(filterDynamicTestBanks)
         .map(lar => addCensusDataFromMap(lar))
         .map(s => ByteString(s))
 
@@ -115,5 +117,10 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
       .filterNot(lar => filteredRespondentIds.contains(lar.respondentId) ||
         (lar.respondentId == "954623407" && lar.agencyCode == 9) ||
         (lar.respondentId == "1467" && lar.agencyCode == 1))
+  }
+
+  def filterDynamicTestBanks: Flow[LoanApplicationRegister, LoanApplicationRegister, NotUsed] = {
+    Flow[LoanApplicationRegister]
+      .filterNot(lar => dynamicFilteredRespondentIds.contains(lar.respondentId))
   }
 }
