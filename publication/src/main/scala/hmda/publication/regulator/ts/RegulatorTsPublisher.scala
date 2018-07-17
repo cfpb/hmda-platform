@@ -48,6 +48,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
   val publicBucket = config.getString("hmda.publication.aws.public-bucket")
   val environment = config.getString("hmda.publication.aws.environment")
   val filteredRespondentIds = config.getString("hmda.publication.filtered-respondent-ids").split(",")
+  val dynamicFilteredRespondentIds = config.getString("hmda.publication.dynamic-filtered-respondent-ids").split(",")
 
   val awsCredentials = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess)
@@ -87,6 +88,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
 
       val source = readData(fetchSize)
         .via(filterTestBanks)
+        .via(filterDynamicTestBanks)
         .map(t => t.ts.toCSVModified + "\n")
         .map(s => ByteString(s))
 
@@ -100,5 +102,10 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
       .filterNot(t => filteredRespondentIds.contains(t.ts.respondentId) ||
         (t.ts.respondentId == "954623407" && t.ts.agencyCode == 9) ||
         (t.ts.respondentId == "1467" && t.ts.agencyCode == 1))
+  }
+
+  def filterDynamicTestBanks: Flow[TransmittalSheetWithTimestamp, TransmittalSheetWithTimestamp, NotUsed] = {
+    Flow[TransmittalSheetWithTimestamp]
+      .filterNot(t => dynamicFilteredRespondentIds.contains(t.ts.respondentId))
   }
 }
