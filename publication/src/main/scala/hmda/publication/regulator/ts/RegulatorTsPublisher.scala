@@ -97,6 +97,8 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
 
   def filterTestBanks: Flow[TransmittalSheetWithTimestamp, TransmittalSheetWithTimestamp, NotUsed] = {
     Flow[TransmittalSheetWithTimestamp]
-      .filterNot(t => filteredRespondentIds.contains(t.ts.respondentId))
+      .filterNot(t => filteredRespondentIds.contains(t.ts.respondentId) ||
+        (t.ts.respondentId == "954623407" && t.ts.agencyCode == 9) ||
+        (t.ts.respondentId == "1467" && t.ts.agencyCode == 1))
   }
 }
