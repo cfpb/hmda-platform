@@ -40,5 +40,5 @@ Data Field Number, Data Field Name, Data Field Type, Valid Values , Descriptions
 38, Minority Population %, Numeric, , Percentage of minority popualation to total population in tract (rounded to two decimal places) or blank,
 39, FFIEC Median Family Income, Numeric, , FFIEC Median family income in dollars for the MSA/MD in which the tract is located or blank, 
 40, Tract to MSA/MD Median Family Income %, Numeric, , Percentage of tract median family income compared to MSA/MD median family income (rounded to two decimal places) or blank,
-41, Number of Owner Occupied Units, Numeric, ,  Number of dwellings, including individual condominiums, that are lived in by the owner, 
+41, Number of Owner Occupied Units, Numeric, ,  Number of dwellings - including individual condominiums - that are lived in by the owner, 
 42, Number of 1- to 4-Family units, Numeric, , Dwellings that are built to house fewer than 5 families,  
