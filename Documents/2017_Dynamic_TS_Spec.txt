@@ -1,7 +1,7 @@
 Transmittal Sheet, , , , ,
 Data Field Number, Data Field Name, Data Field Type, Valid Values , Descriptions or Examples,
 1, Record Identifier - Value is 1, Numeric, 1,  ,
-2, Respondent-ID, Alphanumeric,  , Please see “RID for 2017 HMDA Filers” table in the FIG,
+2, Respondent-ID, Alphanumeric,  , Please see RID for 2017 HMDA Filers table in the FIG,
 3, Agency Code, Numeric, 1 2 3 5 7 9, Descriptions: 1.Office of the Comptroller of the Currency (OCC) 2. Federal Reserve System (FRS) 3.Federal Deposit Insurance Corporation (FDIC) 5.National Credit Union Administration (NCUA) 7.United States Department of Housing and Urban Development (HUD) 9. Consumer Financial Protection Bureau (CFPB),
 5, Activity Year, Numeric,  , Four digit year. Example: 2017,
 6, Tax ID, Alphanumeric,  , Example: 99-9999999,
