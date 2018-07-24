@@ -77,7 +77,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
       source.runWith(s3Sink)
 
     case PublishDynamicData =>
-      val fileName = "ts.txt"
+      val fileName = "2017_ts.txt"
       log.info(s"Uploading $fileName to $environment/dynamic-data/$fileName")
       val s3Sink = s3Client.multipartUpload(
         publicBucket,
