@@ -91,7 +91,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
         publicBucket,
         s"$environment/dynamic-data/$fileName",
         ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
-        S3Headers(ServerSideEncryption.AES256)
+        S3Headers(Map("Content-Disposition" -> s"attachment; filename=$fileName;"))
       )
 
       val source = readData(fetchSize)
