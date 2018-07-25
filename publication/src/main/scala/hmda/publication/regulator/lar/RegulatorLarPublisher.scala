@@ -85,7 +85,7 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
       source.runWith(s3Sink)
 
     case PublishDynamicData =>
-      val fileName = "lar.txt"
+      val fileName = "2017_lar.txt"
       log.info(s"Uploading $fileName to $environment/dynamic-data/$fileName")
       val s3Sink = s3Client.multipartUpload(
         publicBucket,
