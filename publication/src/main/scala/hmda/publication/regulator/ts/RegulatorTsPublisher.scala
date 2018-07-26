@@ -83,7 +83,7 @@ class RegulatorTsPublisher extends HmdaActor with TransmittalSheetCassandraRepos
         publicBucket,
         s"$environment/dynamic-data/$fileName",
         ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
-        S3Headers(Map("Content-Disposition" -> s"attachment; filename=$fileName;"))
+        S3Headers(Map("Content-Disposition" -> s"attachment; filename=$fileName;", "x-amz-server-side-encryption" -> "AES256"))
       )
 
       val source = readData(fetchSize)
