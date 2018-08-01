@@ -62,7 +62,7 @@ lazy val packageSettings = Seq(
 
 lazy val `hmda-root` = (project in file("."))
   .settings(hmdaBuildSettings: _*)
-  .aggregate(`common-api`, `hmda-platform`, `check-digit`)
+  .aggregate(`common-api`, `hmda-platform`, `check-digit`, `institutions-api`)
 
 lazy val `common-api` = (project in file("common-api"))
   .settings(hmdaBuildSettings: _*)
@@ -109,6 +109,24 @@ lazy val `check-digit` = (project in file("check-digit"))
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(`common-api` % "compile->compile;test->test")
+
+lazy val `institutions-api` = (project in file("institutions-api"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      },
+      libraryDependencies ++= akkaPersistenceDeps
     ),
     scalafmtSettings,
     dockerSettings,
