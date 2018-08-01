@@ -1,6 +1,7 @@
 package hmda.model.institution
 
 import org.scalacheck.Gen
+import hmda.generators.CommonGenerators._
 import hmda.model.filing.FilingGenerators._
 
 object InstitutionGenerators {

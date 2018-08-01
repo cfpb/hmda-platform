@@ -1,6 +1,6 @@
 package hmda.query.dao
 
-case class User(
+case class UserEntity(
     id: Option[Long],
     name: String
 )

@@ -14,6 +14,8 @@ class UserRepositorySpec
   import H2UserComponent._
   import H2UserComponent.profile.api._
 
+  val timeout = 3.seconds
+
   override def beforeAll = {
     val schema = UserRepository.table.schema
     val f = for {
@@ -22,7 +24,7 @@ class UserRepositorySpec
     } yield {
       size match {
         case 0 =>
-          db.run(UserRepository.table += User(None, "User")) map (Some(_))
+          db.run(UserRepository.table += UserEntity(None, "User")) map (Some(_))
         case _ =>
           Future {
             None
@@ -30,7 +32,7 @@ class UserRepositorySpec
       }
     }
 
-    Await.result(f, 1.seconds)
+    Await.result(f, timeout)
 
   }
 
@@ -41,36 +43,36 @@ class UserRepositorySpec
   "User Repository" must {
     "query users" in {
       val query = UserRepository.table
-      val usersList = Await.result(db run query.result, 1.seconds)
+      val usersList = Await.result(db run query.result, timeout)
       usersList must not be empty
       usersList must have length 1
     }
 
     "find a user by id" in {
       val future = UserRepository.findById(1)
-      val userOption = Await.result(future, 1.seconds)
-      userOption mustBe Some(User(Some(1L), "User"))
+      val userOption = Await.result(future, timeout)
+      userOption mustBe Some(UserEntity(Some(1L), "User"))
     }
 
     "insert a new user" in {
-      val user = User(None, "Test")
-      val insertedRows = Await.result(UserRepository.insert(user), 1.seconds)
+      val user = UserEntity(None, "Test")
+      val insertedRows = Await.result(UserRepository.insert(user), timeout)
       insertedRows mustBe 1
 
       val future = UserRepository.findById(2)
-      val userOption = Await.result(future, 1.seconds)
-      userOption mustBe Some(User(Some(2), "Test"))
+      val userOption = Await.result(future, timeout)
+      userOption mustBe Some(UserEntity(Some(2), "Test"))
 
-      Await.result(db run UserRepository.table.size.result, 1.seconds) mustBe 2
+      Await.result(db run UserRepository.table.size.result, timeout) mustBe 2
     }
 
     "delete an existing user" in {
       val future = UserRepository.deleteById(1)
-      val affectedRows = Await.result(future, 1.seconds)
+      val affectedRows = Await.result(future, timeout)
       affectedRows mustBe 1
 
       val userFuture = UserRepository.findById(1)
-      val userOption = Await.result(userFuture, 1.seconds)
+      val userOption = Await.result(userFuture, timeout)
       userOption mustBe None
     }
 
