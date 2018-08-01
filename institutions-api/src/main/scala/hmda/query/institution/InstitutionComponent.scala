@@ -1,13 +1,15 @@
 package hmda.query.institution
 
-import hmda.query.dao.{DatabaseComponent, ProfileComponent, Repository}
+import hmda.query.DbConfiguration._
+import hmda.query.repository.TableRepository
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
-trait InstitutionComponent { this: DatabaseComponent with ProfileComponent =>
+trait InstitutionComponent {
 
-  import slick.lifted.Tag
-  import profile.api._
+  import config.profile.api._
 
-  class InstitutionTable(tag: Tag)
+  class InstitutionsTable(tag: Tag)
       extends Table[InstitutionEntity](tag, "institutions2018") {
     def lei = column[String]("lei", O.PrimaryKey)
     def activityYear = column[Int]("activity_year")
@@ -26,7 +28,7 @@ trait InstitutionComponent { this: DatabaseComponent with ProfileComponent =>
     def topHolderName = column[String]("topholder_name")
 
     def * =
-      (lei.?,
+      (lei,
        activityYear,
        agency,
        institutionType,
@@ -43,12 +45,14 @@ trait InstitutionComponent { this: DatabaseComponent with ProfileComponent =>
        topHolderName) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 
-  object InstitutionRepository
-      extends Repository[InstitutionTable, String](profile, db) {
-    import this.profile.api._
+  class InstitutionRepository(val config: DatabaseConfig[JdbcProfile])
+      extends TableRepository[InstitutionsTable, String] {
+    val table = TableQuery[InstitutionsTable]
+    def getId(table: InstitutionsTable) = table.lei
+    def deleteById(lei: String) = db.run(filterById(lei).delete)
 
-    val table = TableQuery[InstitutionTable]
-    def getId(table: InstitutionTable) = table.lei
+    def createSchema() = db.run(table.schema.create)
+    def dropSchema() = db.run(table.schema.drop)
   }
 
 }

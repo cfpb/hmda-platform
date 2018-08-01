@@ -1,88 +1,65 @@
 package hmda.query.institution
 
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
-
+import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, MustMatchers}
 import InstitutionEntityGenerators._
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Await
 import scala.concurrent.duration._
 
+import hmda.query.DbConfiguration._
+
 class InstitutionRepositorySpec
-    extends WordSpec
+    extends AsyncWordSpec
     with MustMatchers
-    with BeforeAndAfterAll {
+    with BeforeAndAfterAll
+    with InstitutionComponent {
 
-  import H2InstitutionComponent._
-  import H2InstitutionComponent.profile.api._
+  val timeout = 5.seconds
 
-  val timeout = 3.seconds
-
-  val initialInstitutionEntity =
-    institutionEntityGen.sample
-      .getOrElse(InstitutionEntity())
-      .copy(lei = Some("AAA"))
+  val repository = new InstitutionRepository(config)
 
   override def beforeAll = {
-    val schema = InstitutionRepository.table.schema
-    val f = for {
-      _ <- db.run(DBIO.seq(schema.create))
-      size <- db.run(InstitutionRepository.table.size.result)
-    } yield {
-      size match {
-        case 0 =>
-          db.run(InstitutionRepository.table += initialInstitutionEntity)
-            .map(Some(_))
-        case _ =>
-          Future {
-            None
-          }
-      }
-    }
-
-    Await.result(f, timeout)
+    super.beforeAll()
+    Await.result(repository.createSchema(), timeout)
   }
 
   override def afterAll = {
-    db.close()
+    super.afterAll()
+    Await.result(repository.dropSchema(), timeout)
   }
 
   "Institution Repository" must {
-    "query institution" in {
-      val query = InstitutionRepository.table
-      val institutionList = Await.result(db.run(query.result), timeout)
-      institutionList must not be empty
-      institutionList must have length 1
-    }
-
-    "find an institution by LEI" in {
-      val future = InstitutionRepository.findById(
-        initialInstitutionEntity.lei.getOrElse(""))
-      val institutionOption = Await.result(future, timeout)
-      institutionOption mustBe Some(initialInstitutionEntity)
-    }
-
-    "insert a new institution" in {
-      val institution = institutionEntityGen.sample
+    "insert new record" in {
+      val i = institutionEntityGen.sample
         .getOrElse(InstitutionEntity())
-        .copy(lei = Some("BBB"))
-      val inserterRows =
-        Await.result(InstitutionRepository.insert(institution), timeout)
-      inserterRows mustBe 1
-
-      val future = InstitutionRepository.findById("BBB")
-      val institutionOption = Await.result(future, timeout)
-      institutionOption mustBe Some(institution)
+        .copy(lei = "AAA")
+      repository.insertOrUpdate(i).map(x => x mustBe 1)
     }
 
-    "delete an existing institution" in {
-      val future = InstitutionRepository.deleteById("BBB")
-      val affectedRows = Await.result(future, timeout)
-      affectedRows mustBe 1
+    "modify records and read them back" in {
+      val i = institutionEntityGen.sample
+        .getOrElse(InstitutionEntity())
+        .copy(lei = "BBB", agency = 2)
+      repository.insertOrUpdate(i).map(x => x mustBe 1)
+      val modified = i.copy(agency = 8)
+      repository.insertOrUpdate(modified).map(x => x mustBe 1)
+      repository.findById(i.lei).map {
+        case Some(x) => x.agency mustBe 8
+        case None    => fail
+      }
+    }
 
-      val institutionFuture = InstitutionRepository.findById("BBB")
-      val institutionOption = Await.result(institutionFuture, timeout)
-      institutionOption mustBe None
+    "delete record" in {
+      val i = institutionEntityGen.sample
+        .getOrElse(InstitutionEntity())
+        .copy(lei = "BBB", agency = 2)
+      repository.insertOrUpdate(i).map(x => x mustBe 1)
+
+      repository.deleteById(i.lei).map(x => x mustBe 1)
+      repository.findById(i.lei).map {
+        case Some(_) => fail
+        case None    => succeed
+      }
     }
   }
 

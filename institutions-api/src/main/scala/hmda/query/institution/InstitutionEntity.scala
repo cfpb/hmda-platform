@@ -1,7 +1,7 @@
 package hmda.query.institution
 
 case class InstitutionEntity(
-    lei: Option[String] = None,
+    lei: String = "",
     activityYear: Int = 0,
     agency: Int = 0,
     institutionType: Int = 0,

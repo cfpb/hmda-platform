@@ -7,7 +7,7 @@ object InstitutionEntityGenerators {
 
   implicit def institutionEntityGen: Gen[InstitutionEntity] = {
     for {
-      lei <- Gen.option(leiGen)
+      lei <- leiGen
       activityYear <- activityYearGen
       agency <- agencyGen
       institutionType <- institutionTypeGen
