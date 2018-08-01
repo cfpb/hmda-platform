@@ -22,6 +22,7 @@ object InstitutionEntityGenerators {
       parentName <- Gen.alphaStr.suchThat(!_.isEmpty)
       topHolderIdRssd <- Gen.choose(Int.MinValue, Int.MaxValue)
       topHolderName <- Gen.alphaStr.suchThat(!_.isEmpty)
+      hmdaFiler <- Gen.oneOf(true, false)
     } yield {
       InstitutionEntity(
         lei,
@@ -38,7 +39,8 @@ object InstitutionEntityGenerators {
         parentIdRssd,
         parentName,
         topHolderIdRssd,
-        topHolderName
+        topHolderName,
+        hmdaFiler
       )
     }
   }

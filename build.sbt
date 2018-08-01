@@ -125,6 +125,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      mainClass in Compile := Some("hmda.HmdaInstitutionApi"),
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       }

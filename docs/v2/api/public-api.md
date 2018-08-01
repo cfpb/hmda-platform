@@ -1,6 +1,86 @@
 # HMDA Platform Public API
 
-This documenatation describes de public HMDA Platform HTTP API
+This documentation describes de public HMDA Platform HTTP API
+
+## Institutions
+
+### Search
+
+* `/institutions?domain=<domain>`
+
+   * `GET` - Returns a list of institutions filtered by their email domain. If none are found, an HTTP 404 error code (not found) is returned
+
+   Example response, with HTTP code 200:
+   
+   ```json
+   {
+     "institutions": [
+       {
+         "activityYear" : 2019,
+         "LEI" : "54930084UKLVMY22DS16",
+         "agency" : "1",
+         "institutionType" : "17",
+         "institutionId2017" : "12345",
+         "taxId" : "99-00000000",
+         "rssd" : "Pb",
+         "emailDomains" : ["email@bank0.com"],
+         "respondent" : {
+           "name" : "xvavjuitZa",
+           "state" : "NC",
+           "city" : "Raleigh"
+         },
+         "parent" : {
+           "idRssd" : "1520162208",
+           "name" : "Parent Name"
+         },
+         "assets" : "450",
+         "otherLenderCode" : "1406639146",
+         "topHolder" : {
+           "idRssd" : "442825905",
+           "name" : "TopHolder Name"
+         },
+         "hmdaFiler" : true
+       } 
+     ]
+   } 
+   ```
+   
+* `/institutions/<institutionID>`
+
+    * `GET`
+
+    Retrieves the details of an institution. If not found, returns HTTP code 404
+
+    Example Response with HTTP code 200, in `JSON` format:
+    
+    ```json
+    {
+      "activityYear" : 2019,
+      "LEI" : "54930084UKLVMY22DS16",
+      "agency" : "1",
+      "institutionType" : "17",
+      "institutionId2017" : "12345",
+      "taxId" : "99-00000000",
+      "rssd" : "Pb",
+      "emailDomains" : ["email@bank0.com"],
+      "respondent" : {
+        "name" : "xvavjuitZa",
+        "state" : "NC",
+        "city" : "Raleigh"
+      },
+      "parent" : {
+        "idRssd" : "1520162208",
+        "name" : "Parent Name"
+      },
+      "assets" : "450",
+      "otherLenderCode" : "1406639146",
+      "topHolder" : {
+        "idRssd" : "442825905",
+        "name" : "TopHolder Name"
+      },
+      "hmdaFiler" : true
+    }     
+    ```
 
 ## TS Parsing and Validation
 

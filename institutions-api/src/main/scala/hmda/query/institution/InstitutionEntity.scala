@@ -15,5 +15,6 @@ case class InstitutionEntity(
     parentIdRssd: Int = 0,
     parentName: String = "",
     topHolderIdRssd: Int = 0,
-    topHolderName: String = ""
+    topHolderName: String = "",
+    hmdaFiler: Boolean = false
 )

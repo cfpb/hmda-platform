@@ -26,6 +26,7 @@ trait InstitutionComponent {
     def parentName = column[String]("parent_name")
     def topHolderIdRssd = column[Int]("topholder_id_rssd")
     def topHolderName = column[String]("topholder_name")
+    def hmdaFiler = column[Boolean]("hmda_filer")
 
     def * =
       (lei,
@@ -42,7 +43,8 @@ trait InstitutionComponent {
        parentIdRssd,
        parentName,
        topHolderIdRssd,
-       topHolderName) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
+       topHolderName,
+       hmdaFiler) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 
   class InstitutionRepository(val config: DatabaseConfig[JdbcProfile])
