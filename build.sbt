@@ -32,6 +32,8 @@ lazy val akkaPersistenceDeps =
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
+lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
+
 lazy val scalafmtSettings = Seq(
   scalafmtOnCompile in ThisBuild := true,
   scalafmtTestOnCompile in ThisBuild := true
@@ -68,7 +70,7 @@ lazy val `common-api` = (project in file("common-api"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
   )
 
@@ -125,8 +127,7 @@ lazy val `institutions-api` = (project in file("institutions-api"))
     Seq(
       assemblyJarName in assembly := {
         s"${name.value}.jar"
-      },
-      libraryDependencies ++= akkaPersistenceDeps
+      }
     ),
     scalafmtSettings,
     dockerSettings,
