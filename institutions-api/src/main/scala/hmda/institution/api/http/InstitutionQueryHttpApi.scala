@@ -52,16 +52,37 @@ trait InstitutionQueryHttpApi
       }
     }
 
-  val institutionByDomainPath =
-    path("institutions") {
-      complete("OK")
-    }
+//  val institutionByDomainPath =
+//    path("institutions") {
+//      timedGet { uri =>
+//        parameter('domain.as[String]) { domain =>
+//          val fInstitution = repository.findByEmailDomain(domain)
+//          onComplete(fInstitution) {
+//            case Success(Some(institution)) =>
+//              complete(
+//                ToResponseMarshallable(
+//                  InstitutionConverter.convert(institution)))
+//            case Success(None) =>
+//              complete(
+//                ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+//            case Failure(error) =>
+//              val errorResponse =
+//                ErrorResponse(500, error.getLocalizedMessage, uri.path)
+//              complete(
+//                ToResponseMarshallable(
+//                  StatusCodes.InternalServerError -> errorResponse))
+//          }
+//          complete("OK")
+//        }
+//      }
+//
+//    }
 
   def institutionPublicRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionByIdPath ~ institutionByDomainPath
+          institutionByIdPath //~ institutionByDomainPath
         }
       }
     }

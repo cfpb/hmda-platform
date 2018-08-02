@@ -9,8 +9,16 @@ trait InstitutionComponent {
 
   import config.profile.api._
 
+  object InstitutionsTable {
+    implicit val stringListMapper = MappedColumnType.base[Seq[String], String](
+      list => list.mkString(","),
+      string => string.split(",").toList
+    )
+  }
+
   class InstitutionsTable(tag: Tag)
       extends Table[InstitutionEntity](tag, "institutions2018") {
+    import InstitutionsTable._
     def lei = column[String]("lei", O.PrimaryKey)
     def activityYear = column[Int]("activity_year")
     def agency = column[Int]("agency")
@@ -18,7 +26,7 @@ trait InstitutionComponent {
     def id2017 = column[String]("id2017")
     def taxId = column[String]("tax_id")
     def rssd = column[String]("rssd")
-    def emailDomains = column[String]("email_domains")
+    def emailDomains = column[Seq[String]]("email_domains")
     def respondentName = column[String]("respondent_name")
     def respondentState = column[String]("respondent_state")
     def respondentCity = column[String]("respondent_city")
@@ -59,6 +67,21 @@ trait InstitutionComponent {
 
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
+
+    private def filterByEmailDomain(domain: String) = {}
+
+    //def findByEmailDomain(domain: String) = db.run(
+    //  filterByEmailDomain(domain).result.headOption
+    //)
+
+    private def extractDomain(email: String): String = {
+      val parts = email.toLowerCase.split("@")
+      if (parts.length > 1)
+        parts(1)
+      else
+        parts(0)
+    }
+
   }
 
 }

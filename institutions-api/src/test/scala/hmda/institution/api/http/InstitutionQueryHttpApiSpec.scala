@@ -39,7 +39,7 @@ class InstitutionQueryHttpApiSpec
 
   override def afterAll = {
     super.afterAll()
-    Await.result(repository.dropSchema(), duration)
+    //Await.result(repository.dropSchema(), duration)
   }
 
   "Institution Query HTTP API" must {

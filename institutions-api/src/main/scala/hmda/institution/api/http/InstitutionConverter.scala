@@ -18,7 +18,7 @@ object InstitutionConverter {
       if (entity.id2017 != "") Some(entity.id2017) else None,
       if (entity.taxId != "") Some(entity.taxId) else None,
       if (entity.rssd != "") Some(entity.rssd) else None,
-      entity.emailDomains.split(",").toSeq,
+      entity.emailDomains,
       Respondent(
         if (entity.respondentName != "") Some(entity.respondentName) else None,
         if (entity.respondentState != "") Some(entity.respondentState)
