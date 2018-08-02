@@ -1,19 +1,19 @@
-package hmda.api.http.institution
+package hmda.institution.api.http
 
 import akka.actor.{ActorSystem, Props}
 import akka.event.Logging
-import akka.pattern.pipe
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
+import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaInstitutionQueryApi {
   def props(): Props = Props(new HmdaInstitutionQueryApi)

@@ -1,4 +1,4 @@
-package hmda.query.institution
+package hmda.institution.query
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
@@ -24,6 +24,8 @@ trait InstitutionComponent {
     def respondentCity = column[String]("respondent_city")
     def parentIdRssd = column[Int]("parent_id_rssd")
     def parentName = column[String]("parent_name")
+    def assets = column[Int]("assets")
+    def otherLenderCode = column[Int]("other_lender_code")
     def topHolderIdRssd = column[Int]("topholder_id_rssd")
     def topHolderName = column[String]("topholder_name")
     def hmdaFiler = column[Boolean]("hmda_filer")
@@ -42,6 +44,8 @@ trait InstitutionComponent {
        respondentCity,
        parentIdRssd,
        parentName,
+       assets,
+       otherLenderCode,
        topHolderIdRssd,
        topHolderName,
        hmdaFiler) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)

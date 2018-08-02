@@ -1,4 +1,4 @@
-package hmda.api.http.institution
+package hmda.institution.api.http
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
@@ -8,12 +8,13 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.query.DbConfiguration._
-import hmda.query.institution.InstitutionComponent
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import hmda.api.http.model.ErrorResponse
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.api.http.model.ErrorResponse
+import hmda.institution.query.InstitutionComponent
+import hmda.query.DbConfiguration._
+import hmda.api.http.codec.institution.InstitutionCodec._
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
@@ -36,7 +37,9 @@ trait InstitutionQueryHttpApi
       timedGet { uri =>
         val fInstitution = repository.findById(lei)
         onComplete(fInstitution) {
-          case Success(Some(institution)) => complete("Institution")
+          case Success(Some(institution)) =>
+            complete(
+              ToResponseMarshallable(InstitutionConverter.convert(institution)))
           case Success(None) =>
             complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
           case Failure(error) =>

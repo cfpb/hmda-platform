@@ -1,8 +1,8 @@
-package hmda
+package hmda.institution
 
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.institution.HmdaInstitutionQueryApi
+import hmda.institution.api.http.HmdaInstitutionQueryApi
 import org.slf4j.LoggerFactory
 
 object HmdaInstitutionApi extends App {

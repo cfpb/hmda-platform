@@ -1,4 +1,4 @@
-package hmda.query.institution
+package hmda.institution.query
 
 case class InstitutionEntity(
     lei: String = "",
@@ -14,6 +14,8 @@ case class InstitutionEntity(
     respondentCity: String = "",
     parentIdRssd: Int = 0,
     parentName: String = "",
+    assets: Int = 0,
+    otherLenderCode: Int = 0,
     topHolderIdRssd: Int = 0,
     topHolderName: String = "",
     hmdaFiler: Boolean = false

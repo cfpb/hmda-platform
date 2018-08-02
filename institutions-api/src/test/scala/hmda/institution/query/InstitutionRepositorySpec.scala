@@ -1,12 +1,11 @@
-package hmda.query.institution
+package hmda.institution.query
 
-import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, MustMatchers}
+import hmda.query.DbConfiguration._
 import InstitutionEntityGenerators._
+import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, MustMatchers}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-
-import hmda.query.DbConfiguration._
 
 class InstitutionRepositorySpec
     extends AsyncWordSpec
@@ -25,7 +24,7 @@ class InstitutionRepositorySpec
 
   override def afterAll = {
     super.afterAll()
-    Await.result(repository.dropSchema(), timeout)
+    //Await.result(repository.dropSchema(), timeout)
   }
 
   "Institution Repository" must {

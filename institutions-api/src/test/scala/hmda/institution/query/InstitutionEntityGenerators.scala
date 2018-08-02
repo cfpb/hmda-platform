@@ -1,7 +1,7 @@
-package hmda.query.institution
+package hmda.institution.query
 
-import org.scalacheck.Gen
 import hmda.generators.CommonGenerators._
+import org.scalacheck.Gen
 
 object InstitutionEntityGenerators {
 
@@ -20,6 +20,8 @@ object InstitutionEntityGenerators {
       respondentCity <- Gen.alphaStr.suchThat(!_.isEmpty)
       parentIdRssd <- Gen.choose(Int.MinValue, Int.MaxValue)
       parentName <- Gen.alphaStr.suchThat(!_.isEmpty)
+      assets <- Gen.choose(Int.MinValue, Int.MaxValue)
+      otherLenderCode <- Gen.choose(Int.MinValue, Int.MaxValue)
       topHolderIdRssd <- Gen.choose(Int.MinValue, Int.MaxValue)
       topHolderName <- Gen.alphaStr.suchThat(!_.isEmpty)
       hmdaFiler <- Gen.oneOf(true, false)
@@ -38,6 +40,8 @@ object InstitutionEntityGenerators {
         respondentCity,
         parentIdRssd,
         parentName,
+        assets,
+        otherLenderCode,
         topHolderIdRssd,
         topHolderName,
         hmdaFiler
