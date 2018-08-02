@@ -3,8 +3,8 @@ package hmda.institution.query
 case class InstitutionEntity(
     lei: String = "",
     activityYear: Int = 0,
-    agency: Int = 0,
-    institutionType: Int = 0,
+    agency: Int = -1,
+    institutionType: Int = -1,
     id2017: String = "",
     taxId: String = "",
     rssd: String = "",

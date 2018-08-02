@@ -24,7 +24,7 @@ class InstitutionRepositorySpec
 
   override def afterAll = {
     super.afterAll()
-    //Await.result(repository.dropSchema(), timeout)
+    Await.result(repository.dropSchema(), timeout)
   }
 
   "Institution Repository" must {
