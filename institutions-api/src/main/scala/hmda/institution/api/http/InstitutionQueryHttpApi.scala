@@ -12,7 +12,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.ErrorResponse
-import hmda.institution.query.InstitutionComponent
+import hmda.institution.query.{InstitutionComponent, InstitutionEntity}
 import hmda.query.DbConfiguration._
 import hmda.api.http.codec.institution.InstitutionCodec._
 import io.circe.generic.auto._
@@ -30,19 +30,31 @@ trait InstitutionQueryHttpApi
   implicit val timeout: Timeout
   val log: LoggingAdapter
 
-  val repository = new InstitutionRepository(config)
+  val institutionRepository = new InstitutionRepository(config)
+  val institutionEmailsRepository = new InstitutionEmailsRepository(config)
 
   val institutionByIdPath =
     path("institutions" / Segment) { lei =>
       timedGet { uri =>
-        val fInstitution = repository.findById(lei)
-        onComplete(fInstitution) {
-          case Success(Some(institution)) =>
-            complete(
-              ToResponseMarshallable(InstitutionConverter.convert(institution)))
-          case Success(None) =>
-            complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+        val fInstitution = institutionRepository.findById(lei)
+        val fEmails = institutionEmailsRepository.findByLei(lei)
+        val f = for {
+          institution <- fInstitution
+          emails <- fEmails
+        } yield (institution, emails.map(_.emailDomain))
+
+        onComplete(f) {
+          case Success((institution, emails)) =>
+            if (institution.isEmpty) {
+              complete(
+                ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+            } else {
+              complete(
+                ToResponseMarshallable(InstitutionConverter
+                  .convert(institution.getOrElse(InstitutionEntity()), emails)))
+            }
           case Failure(error) =>
+            println(error.getLocalizedMessage)
             val errorResponse =
               ErrorResponse(500, error.getLocalizedMessage, uri.path)
             complete(

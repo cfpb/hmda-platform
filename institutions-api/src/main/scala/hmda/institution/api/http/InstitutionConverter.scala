@@ -5,7 +5,7 @@ import hmda.model.institution._
 
 object InstitutionConverter {
 
-  def convert(entity: InstitutionEntity): Institution = {
+  def convert(entity: InstitutionEntity, emails: Seq[String]): Institution = {
     Institution(
       entity.activityYear,
       if (entity.lei != "") Some(entity.lei) else None,
@@ -18,8 +18,7 @@ object InstitutionConverter {
       if (entity.id2017 != "") Some(entity.id2017) else None,
       if (entity.taxId != "") Some(entity.taxId) else None,
       if (entity.rssd != "") Some(entity.rssd) else None,
-      //TODO: bring in emails
-      Nil, //entity.emailDomains,
+      emails,
       Respondent(
         if (entity.respondentName != "") Some(entity.respondentName) else None,
         if (entity.respondentState != "") Some(entity.respondentState)

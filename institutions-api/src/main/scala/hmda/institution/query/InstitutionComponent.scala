@@ -5,6 +5,8 @@ import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
+import scala.concurrent.ExecutionContext
+
 trait InstitutionComponent {
 
   import config.profile.api._
@@ -55,10 +57,10 @@ trait InstitutionComponent {
       extends Table[InstitutionEmailEntity](tag, "institutions_emails_2018") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def lei = column[String]("lei")
-    def email = column[String]("email")
+    def emailDomain = column[String]("email_domain")
 
     def * =
-      (id, lei, email) <> (InstitutionEmailEntity.tupled, InstitutionEmailEntity.unapply)
+      (id, lei, emailDomain) <> (InstitutionEmailEntity.tupled, InstitutionEmailEntity.unapply)
 
     def institutionFK =
       foreignKey("INST_FK", lei, institutionsTable)(
@@ -91,17 +93,40 @@ trait InstitutionComponent {
 
     def findByEmail(email: String) = {
       val emailDomain = extractDomain(email)
-      val query = table.filter(_.email === emailDomain)
+      val query = table.filter(_.emailDomain === emailDomain)
       db.run(query.result)
     }
 
-    private def extractDomain(email: String): String = {
-      val parts = email.toLowerCase.split("@")
-      if (parts.length > 1)
-        parts(1)
-      else
-        parts(0)
+    def findByLei(lei: String) = {
+      db.run(table.filter(_.lei === lei).result)
     }
   }
 
+  def findByEmail(email: String)(
+      implicit ec: ExecutionContext,
+      institutionRepository: InstitutionRepository,
+      institutionEmailsRepository: InstitutionEmailsRepository) = {
+    val db = institutionRepository.db
+    val emailDomain = extractDomain(email)
+    val emailQuery =
+      institutionEmailsRepository.table.filter(_.emailDomain === emailDomain)
+
+    def institutionQuery(leis: Seq[String]) =
+      institutionRepository.table.filter(_.lei inSet leis)
+
+    for {
+      a <- db.run(emailQuery.result)
+      leis = a.map(_.lei)
+      i <- db.run(institutionQuery(leis).result)
+    } yield (i, a.map(_.emailDomain))
+
+  }
+
+  private def extractDomain(email: String): String = {
+    val parts = email.toLowerCase.split("@")
+    if (parts.length > 1)
+      parts(1)
+    else
+      parts(0)
+  }
 }
