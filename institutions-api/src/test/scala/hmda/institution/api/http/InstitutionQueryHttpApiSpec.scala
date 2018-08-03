@@ -12,6 +12,8 @@ import hmda.query.DbConfiguration._
 import scala.concurrent.ExecutionContext
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.codec.institution.InstitutionCodec._
+import hmda.institution.api.http.model.InstitutionsResponse
+import io.circe.generic.auto._
 
 class InstitutionQueryHttpApiSpec
     extends WordSpec
@@ -48,6 +50,16 @@ class InstitutionQueryHttpApiSpec
           instA,
           Seq("aaa.com", "bbb.com"))
         responseAs[Institution].emailDomains mustBe Seq("aaa.com", "bbb.com")
+      }
+    }
+
+    "search by email domain" in {
+      Get("/institutions?domain=xxx.com") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+      }
+      Get("/institutions?domain=bbb.com") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[InstitutionsResponse].institutions.size mustBe 2
       }
     }
   }

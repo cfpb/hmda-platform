@@ -1,11 +1,13 @@
 package hmda.institution.query
 
+import hmda.institution.api.http.InstitutionConverter
+import hmda.model.institution.Institution
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 trait InstitutionComponent {
 
@@ -105,7 +107,9 @@ trait InstitutionComponent {
   def findByEmail(email: String)(
       implicit ec: ExecutionContext,
       institutionRepository: InstitutionRepository,
-      institutionEmailsRepository: InstitutionEmailsRepository) = {
+      institutionEmailsRepository: InstitutionEmailsRepository)
+    : Future[Seq[Institution]] = {
+
     val db = institutionRepository.db
     val emailDomain = extractDomain(email)
     val emailQuery =
@@ -115,10 +119,15 @@ trait InstitutionComponent {
       institutionRepository.table.filter(_.lei inSet leis)
 
     for {
-      a <- db.run(emailQuery.result)
-      leis = a.map(_.lei)
-      i <- db.run(institutionQuery(leis).result)
-    } yield (i, a.map(_.emailDomain))
+      emailEntities <- db.run(emailQuery.result)
+      leis = emailEntities.map(_.lei)
+      institutions <- db.run(institutionQuery(leis).result)
+    } yield {
+      institutions.map(
+        institution =>
+          InstitutionConverter.convert(institution,
+                                       emailEntities.map(_.emailDomain)))
+    }
 
   }
 

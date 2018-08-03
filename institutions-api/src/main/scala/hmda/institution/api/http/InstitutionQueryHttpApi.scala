@@ -15,6 +15,7 @@ import hmda.api.http.model.ErrorResponse
 import hmda.institution.query.{InstitutionComponent, InstitutionEntity}
 import hmda.query.DbConfiguration._
 import hmda.api.http.codec.institution.InstitutionCodec._
+import hmda.institution.api.http.model.InstitutionsResponse
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
@@ -30,8 +31,9 @@ trait InstitutionQueryHttpApi
   implicit val timeout: Timeout
   val log: LoggingAdapter
 
-  val institutionRepository = new InstitutionRepository(config)
-  val institutionEmailsRepository = new InstitutionEmailsRepository(config)
+  implicit val institutionRepository = new InstitutionRepository(config)
+  implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
+    config)
 
   val institutionByIdPath =
     path("institutions" / Segment) { lei =>
@@ -54,7 +56,6 @@ trait InstitutionQueryHttpApi
                   .convert(institution.getOrElse(InstitutionEntity()), emails)))
             }
           case Failure(error) =>
-            println(error.getLocalizedMessage)
             val errorResponse =
               ErrorResponse(500, error.getLocalizedMessage, uri.path)
             complete(
@@ -64,37 +65,36 @@ trait InstitutionQueryHttpApi
       }
     }
 
-//  val institutionByDomainPath =
-//    path("institutions") {
-//      timedGet { uri =>
-//        parameter('domain.as[String]) { domain =>
-//          val fInstitution = repository.findByEmailDomain(domain)
-//          onComplete(fInstitution) {
-//            case Success(Some(institution)) =>
-//              complete(
-//                ToResponseMarshallable(
-//                  InstitutionConverter.convert(institution)))
-//            case Success(None) =>
-//              complete(
-//                ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
-//            case Failure(error) =>
-//              val errorResponse =
-//                ErrorResponse(500, error.getLocalizedMessage, uri.path)
-//              complete(
-//                ToResponseMarshallable(
-//                  StatusCodes.InternalServerError -> errorResponse))
-//          }
-//          complete("OK")
-//        }
-//      }
-//
-//    }
+  val institutionByDomainPath =
+    path("institutions") {
+      timedGet { uri =>
+        parameter('domain.as[String]) { domain =>
+          val f = findByEmail(domain)
+          onComplete(f) {
+            case Success(institutions) =>
+              if (institutions.isEmpty) {
+                complete(
+                  ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+              } else {
+                complete(
+                  ToResponseMarshallable(InstitutionsResponse(institutions)))
+              }
+            case Failure(error) =>
+              val errorResponse =
+                ErrorResponse(500, error.getLocalizedMessage, uri.path)
+              complete(
+                ToResponseMarshallable(
+                  StatusCodes.InternalServerError -> errorResponse))
+          }
+        }
+      }
+    }
 
   def institutionPublicRoutes: Route =
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionByIdPath //~ institutionByDomainPath
+          institutionByIdPath ~ institutionByDomainPath
         }
       }
     }

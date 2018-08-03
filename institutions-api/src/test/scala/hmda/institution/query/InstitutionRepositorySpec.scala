@@ -38,21 +38,6 @@ class InstitutionRepositorySpec extends InstitutionAsyncSetup {
         case None    => succeed
       }
     }
-
-//    "find by domain" in {
-//      val i = institutionEntityGen.sample
-//        .getOrElse(InstitutionEntity())
-//        .copy(lei = "BBB", agency = 2)
-//        .copy(emailDomains = List("email@test.com"))
-//      repository.insertOrUpdate(i).map(x => x mustBe 1)
-//
-//      repository.findByDomain("test.com").map {
-//        case Some(x) =>
-//          x.lei mustBe "BBB"
-//          x.emailDomains mustBe List("email@test.com")
-//        case None => fail
-//      }
-//  }
   }
 
 }
