@@ -14,7 +14,6 @@ object InstitutionEntityGenerators {
       id2017 <- Gen.alphaStr
       taxId <- Gen.alphaStr
       rssd <- Gen.alphaStr
-      emailDomains <- emailListGen
       respondentName <- Gen.alphaStr.suchThat(!_.isEmpty)
       respondentState <- stateGen
       respondentCity <- Gen.alphaStr.suchThat(!_.isEmpty)
@@ -34,7 +33,6 @@ object InstitutionEntityGenerators {
         id2017,
         taxId,
         rssd,
-        emailDomains,
         respondentName,
         respondentState,
         respondentCity,

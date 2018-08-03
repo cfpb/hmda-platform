@@ -6,6 +6,7 @@ import slick.dbio.DBIOAction
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import InstitutionEntityGenerators._
 
 class InstitutionEmailsRepositorySpec
     extends AsyncWordSpec
@@ -15,17 +16,26 @@ class InstitutionEmailsRepositorySpec
 
   val timeout = 5.seconds
 
+  val institutionRepository = new InstitutionRepository(config)
   val emailRepository = new InstitutionEmailsRepository(config)
   val db = emailRepository.db
-  val emails = emailRepository.table
 
   override def beforeAll() = {
     import config.profile.api._
     super.beforeAll()
     val setup = db.run(
       DBIOAction.seq(
-        emails.schema.create,
-        emails ++= Seq(
+        institutionsTable.schema.create,
+        institutionsTable ++= Seq(
+          institutionEntityGen.sample
+            .getOrElse(InstitutionEntity())
+            .copy(lei = "AAA"),
+          institutionEntityGen.sample
+            .getOrElse(InstitutionEntity())
+            .copy(lei = "BBB")
+        ),
+        institutionEmailsTable.schema.create,
+        institutionEmailsTable ++= Seq(
           InstitutionEmailEntity(1, "AAA", "aaa.com"),
           InstitutionEmailEntity(2, "AAA", "bbb.com"),
           InstitutionEmailEntity(3, "BBB", "bbb.com")
@@ -37,6 +47,7 @@ class InstitutionEmailsRepositorySpec
   override def afterAll() = {
     super.afterAll()
     Await.result(emailRepository.dropSchema(), timeout)
+    Await.result(institutionRepository.dropSchema(), timeout)
   }
 
   "Institution Emails repository" must {

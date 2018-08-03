@@ -9,16 +9,8 @@ trait InstitutionComponent {
 
   import config.profile.api._
 
-  object InstitutionsTable {
-    implicit val stringListMapper = MappedColumnType.base[Seq[String], String](
-      list => list.mkString(","),
-      string => string.split(",").toList
-    )
-  }
-
   class InstitutionsTable(tag: Tag)
       extends Table[InstitutionEntity](tag, "institutions2018") {
-    import InstitutionsTable._
     def lei = column[String]("lei", O.PrimaryKey)
     def activityYear = column[Int]("activity_year")
     def agency = column[Int]("agency")
@@ -26,7 +18,6 @@ trait InstitutionComponent {
     def id2017 = column[String]("id2017")
     def taxId = column[String]("tax_id")
     def rssd = column[String]("rssd")
-    def emailDomains = column[Seq[String]]("email_domains")
     def respondentName = column[String]("respondent_name")
     def respondentState = column[String]("respondent_state")
     def respondentCity = column[String]("respondent_city")
@@ -46,7 +37,6 @@ trait InstitutionComponent {
        id2017,
        taxId,
        rssd,
-       emailDomains,
        respondentName,
        respondentState,
        respondentCity,
@@ -59,6 +49,8 @@ trait InstitutionComponent {
        hmdaFiler) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 
+  val institutionsTable = TableQuery[InstitutionsTable]
+
   class InstitutionEmailsTable(tag: Tag)
       extends Table[InstitutionEmailEntity](tag, "institutions_emails_2018") {
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
@@ -67,11 +59,20 @@ trait InstitutionComponent {
 
     def * =
       (id, lei, email) <> (InstitutionEmailEntity.tupled, InstitutionEmailEntity.unapply)
+
+    def institutionFK =
+      foreignKey("INST_FK", lei, institutionsTable)(
+        _.lei,
+        onUpdate = ForeignKeyAction.Restrict,
+        onDelete = ForeignKeyAction.Cascade)
+
   }
+
+  val institutionEmailsTable = TableQuery[InstitutionEmailsTable]
 
   class InstitutionRepository(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[InstitutionsTable, String] {
-    val table = TableQuery[InstitutionsTable]
+    val table = institutionsTable
     def getId(table: InstitutionsTable) = table.lei
     def deleteById(lei: String) = db.run(filterById(lei).delete)
 
@@ -81,7 +82,7 @@ trait InstitutionComponent {
 
   class InstitutionEmailsRepository(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[InstitutionEmailsTable, Int] {
-    val table = TableQuery[InstitutionEmailsTable]
+    val table = institutionEmailsTable
     def getId(table: InstitutionEmailsTable) = table.id
     def deleteById(id: Int) = db.run(filterById(id).delete)
 

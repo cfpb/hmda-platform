@@ -8,7 +8,6 @@ case class InstitutionEntity(
     id2017: String = "",
     taxId: String = "",
     rssd: String = "",
-    emailDomains: Seq[String] = Nil,
     respondentName: String = "",
     respondentState: String = "",
     respondentCity: String = "",
