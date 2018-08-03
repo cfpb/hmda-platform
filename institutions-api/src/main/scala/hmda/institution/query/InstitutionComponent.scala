@@ -59,6 +59,16 @@ trait InstitutionComponent {
        hmdaFiler) <> (InstitutionEntity.tupled, InstitutionEntity.unapply)
   }
 
+  class InstitutionEmailsTable(tag: Tag)
+      extends Table[InstitutionEmailEntity](tag, "institutions_emails_2018") {
+    def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
+    def lei = column[String]("lei")
+    def email = column[String]("email")
+
+    def * =
+      (id, lei, email) <> (InstitutionEmailEntity.tupled, InstitutionEmailEntity.unapply)
+  }
+
   class InstitutionRepository(val config: DatabaseConfig[JdbcProfile])
       extends TableRepository[InstitutionsTable, String] {
     val table = TableQuery[InstitutionsTable]
@@ -67,12 +77,22 @@ trait InstitutionComponent {
 
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
+  }
 
-    private def filterByEmailDomain(domain: String) = {}
+  class InstitutionEmailsRepository(val config: DatabaseConfig[JdbcProfile])
+      extends TableRepository[InstitutionEmailsTable, Int] {
+    val table = TableQuery[InstitutionEmailsTable]
+    def getId(table: InstitutionEmailsTable) = table.id
+    def deleteById(id: Int) = db.run(filterById(id).delete)
 
-    //def findByEmailDomain(domain: String) = db.run(
-    //  filterByEmailDomain(domain).result.headOption
-    //)
+    def createSchema() = db.run(table.schema.create)
+    def dropSchema() = db.run(table.schema.drop)
+
+    def findByEmail(email: String) = {
+      val emailDomain = extractDomain(email)
+      val query = table.filter(_.email === emailDomain)
+      db.run(query.result)
+    }
 
     private def extractDomain(email: String): String = {
       val parts = email.toLowerCase.split("@")
@@ -81,7 +101,6 @@ trait InstitutionComponent {
       else
         parts(0)
     }
-
   }
 
 }
