@@ -64,9 +64,9 @@ lazy val packageSettings = Seq(
 
 lazy val `hmda-root` = (project in file("."))
   .settings(hmdaBuildSettings: _*)
-  .aggregate(`common-api`, `hmda-platform`, `check-digit`, `institutions-api`)
+  .aggregate(common, `hmda-platform`, `check-digit`, `institutions-api`)
 
-lazy val `common-api` = (project in file("common-api"))
+lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -99,7 +99,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
     dockerSettings,
     packageSettings
   )
-  .dependsOn(`common-api` % "compile->compile;test->test")
+  .dependsOn(common % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
@@ -116,7 +116,7 @@ lazy val `check-digit` = (project in file("check-digit"))
     dockerSettings,
     packageSettings
   )
-  .dependsOn(`common-api` % "compile->compile;test->test")
+  .dependsOn(common % "compile->compile;test->test")
 
 lazy val `institutions-api` = (project in file("institutions-api"))
   .enablePlugins(JavaServerAppPackaging,
@@ -134,4 +134,4 @@ lazy val `institutions-api` = (project in file("institutions-api"))
     dockerSettings,
     packageSettings
   )
-  .dependsOn(`common-api` % "compile->compile;test->test")
+  .dependsOn(common % "compile->compile;test->test")
