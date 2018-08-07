@@ -20,6 +20,7 @@ import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import hmda.messages.institution.InstitutionEvents._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

@@ -1,14 +1,14 @@
 package hmda.persistence.serialization.institution
 
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
-import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.institution.InstitutionPersistence.{
+import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionDeleted,
   InstitutionModified,
   InstitutionNotExists
 }
+import org.scalatest.{BeforeAndAfterAll, MustMatchers, PropSpec}
+import org.scalatest.prop.PropertyChecks
+import hmda.model.institution.InstitutionGenerators._
 
 class InstitutionEventsSerializerSpec
     extends PropSpec

@@ -1,7 +1,7 @@
 package hmda.persistence.serialization.institution
 
 import InstitutionProtobufConverter._
-import hmda.persistence.institution.InstitutionPersistence.{
+import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionDeleted,
   InstitutionModified,

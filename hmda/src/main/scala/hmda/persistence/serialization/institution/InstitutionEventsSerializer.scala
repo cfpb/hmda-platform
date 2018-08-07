@@ -3,13 +3,13 @@ package hmda.persistence.serialization.institution
 import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.persistence.institution.InstitutionPersistence.{
+import InstitutionEventsProtobufConverter._
+import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionDeleted,
   InstitutionModified,
   InstitutionNotExists
 }
-import InstitutionEventsProtobufConverter._
 import hmda.persistence.serialization.institution.events.{
   InstitutionCreatedMessage,
   InstitutionDeletedMessage,

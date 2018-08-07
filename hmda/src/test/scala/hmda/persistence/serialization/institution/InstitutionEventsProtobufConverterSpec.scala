@@ -4,7 +4,7 @@ import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.model.institution.InstitutionGenerators._
 import InstitutionEventsProtobufConverter._
-import hmda.persistence.institution.InstitutionPersistence.{
+import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionDeleted,
   InstitutionModified,

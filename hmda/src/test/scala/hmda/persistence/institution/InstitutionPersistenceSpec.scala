@@ -12,6 +12,7 @@ import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence._
 import akka.actor.typed.scaladsl.adapter._
+import hmda.messages.institution.InstitutionEvents._
 
 class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
