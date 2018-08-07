@@ -69,6 +69,9 @@ lazy val `hmda-root` = (project in file("."))
 lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
   .settings(
+    PB.targets in Compile := Seq(
+      scalapb.gen() -> (sourceManaged in Compile).value
+    ),
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
@@ -90,9 +93,6 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
       },
-      PB.targets in Compile := Seq(
-        scalapb.gen() -> (sourceManaged in Compile).value
-      ),
       libraryDependencies ++= akkaPersistenceDeps
     ),
     scalafmtSettings,
