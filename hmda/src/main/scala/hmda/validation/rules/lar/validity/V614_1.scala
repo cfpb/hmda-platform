@@ -9,7 +9,11 @@ import hmda.validation.rules.EditCheck
 
 object V614_1 extends EditCheck[LoanApplicationRegister] {
 
-  val purposeValues = List(HomeImprovement, Refinancing, CashOutRefinancing, OtherPurpose, LoanPurposeNotApplicable)
+  val purposeValues = List(HomeImprovement,
+                           Refinancing,
+                           CashOutRefinancing,
+                           OtherPurpose,
+                           LoanPurposeNotApplicable)
 
   override def name: String = "V614-1"
 
