@@ -18,6 +18,7 @@ object InstitutionDBProjector {
 
   final case class StartStreaming() extends InstitutionDBProjectorCommand
 
+  //TODO: finish implementation of resumable projection
   val streamMessages: Behavior[InstitutionDBProjectorCommand] =
     Behaviors.receive { (ctx, msg) =>
       implicit val untypedSystem: ActorSystem = ctx.system.toUntyped
