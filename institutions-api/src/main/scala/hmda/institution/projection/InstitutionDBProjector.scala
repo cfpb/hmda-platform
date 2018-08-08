@@ -26,20 +26,11 @@ object InstitutionDBProjector {
       msg match {
         case StartStreaming() =>
           ctx.log.info(s"Start streaming messages for $name")
-          //eventEnvelopeByTag("Institution", Sequence(0L)).runForeach(e =>
           readJournal(untypedSystem)
             .eventsByTag("institution", Offset.noOffset)
-            //.eventsByPersistenceId(
-            //  "Institution-Institution-54930084UKLVMY22DS16",
-            //  0L,
-            //  Long.MaxValue)
             .runForeach { e =>
               println(e)
             }
-//            .map { e =>
-//              ctx.log.info(e.offset.toString)
-//            }
-//            .runWith(Sink.ignore)
       }
       Behaviors.same
     }
