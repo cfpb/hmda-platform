@@ -31,7 +31,7 @@ object InstitutionPersistence {
         eventHandler = eventHandler
       )
       .snapshotEvery(1000)
-      .withTagger(_ => Set(name))
+      .withTagger(_ => Set(name.toLowerCase()))
 
   val commandHandler
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {

@@ -73,7 +73,7 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
   )
 
@@ -126,6 +126,13 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   .settings(
     Seq(
       mainClass in Compile := Some("hmda.institution.HmdaInstitutionApi"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       }
