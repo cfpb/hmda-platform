@@ -18,7 +18,7 @@ $ psql hmda -h 192.168.99.100 -U postgres
 
 ```
 
-To load the data, issue the commands in the following [script](src/test/resources/institutions.sql)
+To load the data, issue the commands in the following [script](src/test/resources/institutions.sql) from the `psql` prompt
 
 To run the project:
 
