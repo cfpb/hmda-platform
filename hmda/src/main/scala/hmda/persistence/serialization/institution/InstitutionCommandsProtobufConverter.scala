@@ -1,9 +1,14 @@
 package hmda.persistence.serialization.institution
 
-import hmda.persistence.institution.InstitutionPersistence._
 import hmda.persistence.serialization.institution.commands._
 import InstitutionProtobufConverter._
 import akka.actor.typed.ActorRefResolver
+import hmda.messages.institution.InstitutionCommands.{
+  CreateInstitution,
+  DeleteInstitution,
+  GetInstitution,
+  ModifyInstitution
+}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 
 object InstitutionCommandsProtobufConverter {

@@ -5,15 +5,15 @@ import java.io.NotSerializableException
 import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
 import akka.serialization.SerializerWithStringManifest
-import hmda.persistence.institution.InstitutionPersistence.{
+import akka.actor.typed.scaladsl.adapter._
+import InstitutionProtobufConverter._
+import InstitutionCommandsProtobufConverter._
+import hmda.messages.institution.InstitutionCommands.{
   CreateInstitution,
   DeleteInstitution,
   GetInstitution,
   ModifyInstitution
 }
-import akka.actor.typed.scaladsl.adapter._
-import InstitutionProtobufConverter._
-import InstitutionCommandsProtobufConverter._
 import hmda.model.institution.Institution
 
 class InstitutionCommandsSerializer(system: ExtendedActorSystem)
