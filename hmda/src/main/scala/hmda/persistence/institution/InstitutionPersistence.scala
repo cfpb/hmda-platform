@@ -82,8 +82,7 @@ object InstitutionPersistence {
       }
   }
 
-  val eventHandler
-    : (InstitutionState, InstitutionEvent) => (InstitutionState) = {
+  val eventHandler: (InstitutionState, InstitutionEvent) => InstitutionState = {
     case (state, InstitutionCreated(i))   => state.copy(Some(i))
     case (state, InstitutionModified(i))  => modifyInstitution(i, state)
     case (state, InstitutionDeleted(_))   => state.copy(None)

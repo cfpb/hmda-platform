@@ -30,9 +30,8 @@ object HmdaInstitutionApi extends App {
   implicit val system = ActorSystem("hmda-institutions")
 
   system.actorOf(HmdaInstitutionQueryApi.props(), "hmda-institutions-api")
-  val institutionDBProjector = system.spawn(
-    InstitutionDBProjector.streamMessages,
-    InstitutionDBProjector.name)
+  val institutionDBProjector =
+    system.spawn(InstitutionDBProjector.behavior, InstitutionDBProjector.name)
   institutionDBProjector ! StartStreaming()
 
 }
