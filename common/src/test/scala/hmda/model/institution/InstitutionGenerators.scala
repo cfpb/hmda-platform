@@ -1,8 +1,12 @@
 package hmda.model.institution
 
+import hmda.generators.CommonGenerators.{
+  activityYearGen,
+  emailListGen,
+  leiGen,
+  stateGen
+}
 import org.scalacheck.Gen
-import hmda.generators.CommonGenerators._
-import hmda.model.filing.FilingGenerators._
 
 object InstitutionGenerators {
 
@@ -41,6 +45,17 @@ object InstitutionGenerators {
         hmdaFiler: Boolean
       )
     }
+  }
+
+  implicit def agencyCodeGen: Gen[Int] = {
+    Gen.oneOf(Agency.values.filter(x => x != -1))
+  }
+
+  implicit def agencyGen: Gen[Agency] = {
+    for {
+      agencyCode <- agencyCodeGen
+      agency = Agency.valueOf(agencyCode)
+    } yield agency
   }
 
   implicit def institutionTypeCodeGen: Gen[Int] = {

@@ -1,13 +1,11 @@
-package hmda.persistence.serialization.institution
+package hmda.serialization.institution
 
 import java.io.NotSerializableException
 
 import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
-import akka.serialization.SerializerWithStringManifest
 import akka.actor.typed.scaladsl.adapter._
-import InstitutionProtobufConverter._
-import InstitutionCommandsProtobufConverter._
+import akka.serialization.SerializerWithStringManifest
 import hmda.messages.institution.InstitutionCommands.{
   CreateInstitution,
   DeleteInstitution,
@@ -15,6 +13,9 @@ import hmda.messages.institution.InstitutionCommands.{
   ModifyInstitution
 }
 import hmda.model.institution.Institution
+import hmda.persistence.serialization.institution.InstitutionMessage
+import hmda.serialization.institution.InstitutionCommandsProtobufConverter._
+import hmda.serialization.institution.InstitutionProtobufConverter._
 
 class InstitutionCommandsSerializer(system: ExtendedActorSystem)
     extends SerializerWithStringManifest {

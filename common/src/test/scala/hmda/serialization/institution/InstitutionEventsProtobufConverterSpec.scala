@@ -1,9 +1,5 @@
-package hmda.persistence.serialization.institution
+package hmda.serialization.institution
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
-import hmda.model.institution.InstitutionGenerators._
-import InstitutionEventsProtobufConverter._
 import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionDeleted,
@@ -16,6 +12,11 @@ import hmda.persistence.serialization.institution.events.{
   InstitutionModifiedMessage,
   InstitutionNotExistsMessage
 }
+
+import hmda.model.institution.InstitutionGenerators._
+import hmda.serialization.institution.InstitutionEventsProtobufConverter._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class InstitutionEventsProtobufConverterSpec
     extends PropSpec

@@ -1,9 +1,8 @@
-package hmda.persistence.serialization.institution
+package hmda.serialization.institution
 
 import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
-import InstitutionEventsProtobufConverter._
 import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionDeleted,
@@ -16,6 +15,7 @@ import hmda.persistence.serialization.institution.events.{
   InstitutionModifiedMessage,
   InstitutionNotExistsMessage
 }
+import hmda.serialization.institution.InstitutionEventsProtobufConverter._
 
 class InstitutionEventsSerializer extends SerializerWithStringManifest {
 
