@@ -84,8 +84,9 @@ abstract class AkkaCassandraPersistenceSpec
         }
     }
 
-    val eventHandler: (AwaitState, Event) => (AwaitState) = {
+    val eventHandler: (AwaitState, Event) => AwaitState = {
       case (state, Response) => state.copy(nr = state.nr + 1)
+      case _                 => AwaitState()
     }
 
   }

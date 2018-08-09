@@ -7,7 +7,8 @@ import akka.actor.testkit.typed.scaladsl.TestProbe
 import hmda.messages.projection.CommonProjectionMessages.{
   GetOffset,
   OffsetSaved,
-  ProjectionEvent
+  ProjectionEvent,
+  SaveOffset
 }
 
 class InstitutionDBProjectorSpec extends AkkaCassandraPersistenceSpec {
@@ -22,6 +23,14 @@ class InstitutionDBProjectorSpec extends AkkaCassandraPersistenceSpec {
         system.spawn(InstitutionDBProjector.behavior, actorName)
       institutionDBProjector ! GetOffset(probe.ref)
       probe.expectMessage(OffsetSaved(0L))
+    }
+
+    "update offset for projection" in {
+      val institutionDBProjector =
+        system.spawn(InstitutionDBProjector.behavior, actorName)
+      institutionDBProjector ! SaveOffset(1L, probe.ref)
+      institutionDBProjector ! GetOffset(probe.ref)
+      probe.expectMessage(OffsetSaved(1L))
     }
   }
 
