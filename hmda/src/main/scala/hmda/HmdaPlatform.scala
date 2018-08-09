@@ -57,7 +57,7 @@ object HmdaPlatform extends App {
 
   implicit val system =
     untyped.ActorSystem(mergedConfig.getString("hmda.cluster.name"),
-      mergedConfig)
+                        mergedConfig)
 
   implicit val typedSystem = system.toTyped
 
