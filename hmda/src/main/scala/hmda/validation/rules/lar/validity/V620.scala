@@ -11,7 +11,6 @@ object V620 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V620"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    println(lar.geography.street == "")
     lar.geography.street not empty
   }
 }
