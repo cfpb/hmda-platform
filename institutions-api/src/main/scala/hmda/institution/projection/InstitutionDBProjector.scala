@@ -1,7 +1,7 @@
 package hmda.institution.projection
 
 import akka.actor.Scheduler
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.AskPattern._
 import hmda.query.HmdaQuery._
 import akka.actor.typed.scaladsl.adapter._
@@ -71,7 +71,7 @@ object InstitutionDBProjector {
           ctx.log.info("Streaming messages to from {}", name)
           readJournal(system)
               .eventsByTag("institution", Sequence(state.offset))
-              //.map(env => ctx.self ? (ref => SaveOffset(env.sequenceNr, ref)))
+              .map(env => ctx.self ? (ref => SaveOffset(env.sequenceNr, ref.asInstanceOf[ActorRef[OffsetSaved]])))
               .runWith(Sink.ignore)
           Effect.none
 
