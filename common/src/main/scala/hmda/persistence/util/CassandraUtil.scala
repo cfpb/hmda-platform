@@ -1,6 +1,7 @@
 package hmda.persistence.util
 
 import java.io.File
+
 import akka.persistence.cassandra.testkit.CassandraLauncher
 
 object CassandraUtil {

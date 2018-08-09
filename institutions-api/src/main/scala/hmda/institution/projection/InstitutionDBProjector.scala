@@ -1,29 +1,22 @@
 package hmda.institution.projection
 
 import akka.actor.ActorSystem
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import hmda.query.HmdaQuery._
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.query.{Offset, Sequence}
-import akka.persistence.typed.scaladsl.PersistentBehaviors
+import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
+import hmda.messages.projection.CommonProjectionMessages._
 
 object InstitutionDBProjector {
 
   final val name = "InstitutionDBProjector"
 
-  sealed trait InstitutionDBProjectorCommand
-  sealed trait InstitutionDBProjectionEvent
-
-  final case class StartStreaming() extends InstitutionDBProjectorCommand
-  final case class SaveOffset(offset: Offset)
-      extends InstitutionDBProjectorCommand
-  final case class OffsetSaved(seqNr: Long) extends InstitutionDBProjectionEvent
-
-  case class InstitutionDBProjectorState(offset: Long) {
+  case class InstitutionDBProjectorState(offset: Long = 0L) {
     def isEmpty: Boolean = offset == 0L
   }
 
@@ -45,24 +38,36 @@ object InstitutionDBProjector {
 //      Behaviors.same
 //    }
 
-  def behavior: Behavior[InstitutionDBProjectorCommand] =
+  def behavior: Behavior[ProjectionCommand] =
     PersistentBehaviors
-      .receive[InstitutionDBProjectorCommand,
-               InstitutionDBProjectionEvent,
-               InstitutionDBProjectorState](
+      .receive[ProjectionCommand, ProjectionEvent, InstitutionDBProjectorState](
         persistenceId = name,
         emptyState = InstitutionDBProjectorState(),
         commandHandler = commandHandler,
         eventHandler = eventHandler
       )
 
-  val commandHandler: CommandHandler[InstitutionDBProjectorCommand,
-                                     InstitutionDBProjectionEvent,
-                                     InstitutionDBProjectorState] = ???
+  val commandHandler: CommandHandler[ProjectionCommand,
+                                     ProjectionEvent,
+                                     InstitutionDBProjectorState] = {
+    (ctx, state, cmd) =>
+      cmd match {
+        case SaveOffset(seqNr, replyTo) =>
+          Effect.persist(OffsetSaved(seqNr)).andThen {
+            ctx.log.debug("Offset saved: {}", seqNr)
+            replyTo ! OffsetSaved(seqNr)
+          }
 
+        case GetOffset(replyTo) =>
+          replyTo ! OffsetSaved(state.offset)
+          Effect.none
 
-  val eventHandler
-    : (InstitutionDBProjectorState,
-       InstitutionDBProjectionEvent) => InstitutionDBProjectorState = ???
+      }
+  }
+
+  val eventHandler: (InstitutionDBProjectorState,
+                     ProjectionEvent) => InstitutionDBProjectorState = {
+    case (state, OffsetSaved(seqNr)) => state.copy(offset = seqNr)
+  }
 
 }
