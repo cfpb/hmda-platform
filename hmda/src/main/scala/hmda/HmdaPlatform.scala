@@ -55,10 +55,6 @@ object HmdaPlatform extends App {
 
   val mergedConfig = clusterConfig.withFallback(config)
 
-  log.info(s"Config: $config.root().render()")
-  log.info(s"Cluster Config: $clusterConfig.root().render()")
-  log.info(s"Merged Config: $mergedConfig.root().render()")
-
   implicit val system =
     untyped.ActorSystem(mergedConfig.getString("hmda.cluster.name"),
       mergedConfig)
