@@ -32,6 +32,8 @@ lazy val akkaPersistenceDeps =
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
+lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
+
 lazy val scalafmtSettings = Seq(
   scalafmtOnCompile in ThisBuild := true,
   scalafmtTestOnCompile in ThisBuild := true
@@ -62,13 +64,16 @@ lazy val packageSettings = Seq(
 
 lazy val `hmda-root` = (project in file("."))
   .settings(hmdaBuildSettings: _*)
-  .aggregate(`common-api`, `hmda-platform`, `check-digit`)
+  .aggregate(common, `hmda-platform`, `check-digit`, `institutions-api`)
 
-lazy val `common-api` = (project in file("common-api"))
+lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
   .settings(
+    PB.targets in Compile := Seq(
+      scalapb.gen() -> (sourceManaged in Compile).value
+    ),
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
   )
 
@@ -88,16 +93,13 @@ lazy val `hmda-platform` = (project in file("hmda"))
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
       },
-      PB.targets in Compile := Seq(
-        scalapb.gen() -> (sourceManaged in Compile).value
-      ),
       libraryDependencies ++= akkaPersistenceDeps
     ),
     scalafmtSettings,
     dockerSettings,
     packageSettings
   )
-  .dependsOn(`common-api` % "compile->compile;test->test")
+  .dependsOn(common % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
@@ -114,4 +116,29 @@ lazy val `check-digit` = (project in file("check-digit"))
     dockerSettings,
     packageSettings
   )
-  .dependsOn(`common-api` % "compile->compile;test->test")
+  .dependsOn(common % "compile->compile;test->test")
+
+lazy val `institutions-api` = (project in file("institutions-api"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.institution.HmdaInstitutionApi"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")

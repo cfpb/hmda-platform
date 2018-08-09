@@ -1,7 +1,8 @@
 package hmda.model.filing.ts
 
 import org.scalacheck.Gen
-import hmda.model.filing.FilingGenerators._
+import hmda.generators.CommonGenerators._
+import hmda.model.institution.InstitutionGenerators._
 
 object TsGenerators {
 

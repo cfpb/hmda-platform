@@ -6,7 +6,7 @@ import java.util.Date
 import hmda.model.census.Census
 import org.scalacheck.Gen
 import org.scalacheck.Arbitrary.arbitrary
-import hmda.model.filing.FilingGenerators._
+import hmda.generators.CommonGenerators._
 import hmda.model.filing.lar.enums.LarEnumGenerators._
 
 import scala.language.implicitConversions
