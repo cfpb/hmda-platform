@@ -318,7 +318,7 @@ object LarGenerators {
   }
 
   private def strValueOrNA[A](g: Gen[A]): Gen[String] =
-    valueOrDefault(arbitrary[String], "NA")
+    valueOrDefault(arbitrary[String].suchThat(!_.isEmpty), "NA")
 
   private def intValueOrNA[A](g: Gen[A]): Gen[String] =
     valueOrDefault(arbitrary[Int], "NA")
