@@ -11,6 +11,8 @@ import akka.actor.typed.scaladsl.adapter._
 import ProjectionProtobufConverter._
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRefResolver
+import akka.persistence.query.TimeBasedUUID
+import com.datastax.driver.core.utils.UUIDs
 
 class ProjectionProtobufConverterSpec
     extends WordSpec
@@ -26,9 +28,11 @@ class ProjectionProtobufConverterSpec
   private val resolver = ActorRefResolver(systemTyped)
 
   "Projection Protobuf Converter" must {
+    val uuid = UUIDs.timeBased()
+    val offset = TimeBasedUUID(uuid)
     val probe = TestProbe[OffsetSaved](name = "projection-command")
     "convert SaveOffset to and from protobuf" in {
-      val save = SaveOffset(1L, probe.ref)
+      val save = SaveOffset(offset, probe.ref)
       val protobuf = saveOffsetToProtobuf(save, resolver).toByteArray
       saveOffsetFromProtobuf(protobuf, resolver) mustBe save
     }
@@ -40,7 +44,9 @@ class ProjectionProtobufConverterSpec
     }
 
     "convert OffsetSaved to and from protobuf" in {
-      val saved = OffsetSaved(1L)
+      val uuid = UUIDs.timeBased()
+      val offset = TimeBasedUUID(uuid)
+      val saved = OffsetSaved(offset)
       val protobuf = offsetSavedToProtobuf(saved)
       offsetSavedFromProtobuf(protobuf) mustBe saved
     }

@@ -21,7 +21,7 @@ This endpoint deals with institution events. The identifier for each entity is t
       "institutionId2017" : "12345",
       "taxId" : "99-00000000",
       "rssd" : "Pb",
-      "emailDomains" : ["email@bank0.com"],
+      "emailDomains" : ["bank0.com"],
       "respondent" : {
         "name" : "xvavjuitZa",
         "state" : "NC",
@@ -58,7 +58,7 @@ This endpoint deals with institution events. The identifier for each entity is t
           "institutionId2017" : "12345",
           "taxId" : "99-00000000",
           "rssd" : "Pb",
-          "emailDomains" : ["email@bank0.com"],
+          "emailDomains" : ["bank0.com"],
           "respondent" : {
             "name" : "xvavjuitZa",
             "state" : "NC",

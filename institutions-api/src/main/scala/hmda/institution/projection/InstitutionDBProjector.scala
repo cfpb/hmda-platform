@@ -5,7 +5,7 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.AskPattern._
 import hmda.query.HmdaQuery._
 import akka.actor.typed.scaladsl.adapter._
-import akka.persistence.query.{EventEnvelope, Offset, Sequence}
+import akka.persistence.query.{EventEnvelope, NoOffset, Offset, Sequence}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
@@ -33,9 +33,7 @@ object InstitutionDBProjector extends InstitutionComponent {
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
     dbConfig)
 
-  case class InstitutionDBProjectorState(offset: Long = 0L) {
-    def isEmpty: Boolean = offset == 0L
-  }
+  case class InstitutionDBProjectorState(offset: Offset = NoOffset)
 
   val config = ConfigFactory.load()
   val duration = config.getInt("hmda.institution.timeout")
@@ -62,25 +60,24 @@ object InstitutionDBProjector extends InstitutionComponent {
           implicit val scheduler: Scheduler = ctx.system.scheduler
           ctx.log.info("Streaming messages from {}", name)
           readJournal(system)
-            .eventsByTag("institution", Offset.noOffset)
+            .eventsByTag("institution", state.offset)
             .map { env =>
               ctx.log.info(env.toString)
               projectEvent(env)
             }
             .map { env =>
-              println(s"Event Offset: ${env.offset}")
               val actorRef = ctx.self
               val result: Future[OffsetSaved] = actorRef ? (ref =>
-                SaveOffset(env.sequenceNr, ref))
+                SaveOffset(env.offset, ref))
               result
             }
             .runWith(Sink.ignore)
           Effect.none
 
-        case SaveOffset(seqNr, replyTo) =>
-          Effect.persist(OffsetSaved(seqNr)).andThen {
-            ctx.log.info("Offset saved: {}", seqNr)
-            replyTo ! OffsetSaved(seqNr)
+        case SaveOffset(offset, replyTo) =>
+          Effect.persist(OffsetSaved(offset)).andThen {
+            ctx.log.info("Offset saved: {}", offset)
+            replyTo ! OffsetSaved(offset)
           }
 
         case GetOffset(replyTo) =>
@@ -92,7 +89,7 @@ object InstitutionDBProjector extends InstitutionComponent {
 
   val eventHandler: (InstitutionDBProjectorState,
                      ProjectionEvent) => InstitutionDBProjectorState = {
-    case (state, OffsetSaved(seqNr)) => state.copy(offset = seqNr)
+    case (state, OffsetSaved(offset)) => state.copy(offset = offset)
   }
 
   private def projectEvent(envelope: EventEnvelope): EventEnvelope = {

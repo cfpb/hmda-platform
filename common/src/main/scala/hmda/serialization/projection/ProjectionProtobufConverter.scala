@@ -1,6 +1,9 @@
 package hmda.serialization.projection
 
+import java.util.UUID
+
 import akka.actor.typed.ActorRefResolver
+import akka.persistence.query.TimeBasedUUID
 import hmda.messages.projection.CommonProjectionMessages.{
   GetOffset,
   OffsetSaved,
@@ -16,8 +19,11 @@ object ProjectionProtobufConverter {
 
   def saveOffsetToProtobuf(cmd: SaveOffset,
                            resolver: ActorRefResolver): SaveOffsetMessage = {
+    val offset = cmd.offset match {
+      case TimeBasedUUID(uuid) => uuid.toString
+    }
     SaveOffsetMessage(
-      seqNr = cmd.seqNr,
+      offset = offset,
       replyTo = resolver.toSerializationFormat(cmd.replyTo)
     )
   }
@@ -26,7 +32,7 @@ object ProjectionProtobufConverter {
                              resolver: ActorRefResolver): SaveOffset = {
     val msg = SaveOffsetMessage.parseFrom(bytes)
     val actorRef = resolver.resolveActorRef(msg.replyTo)
-    SaveOffset(msg.seqNr, actorRef)
+    SaveOffset(TimeBasedUUID(UUID.fromString(msg.offset)), actorRef)
   }
 
   def getOffsetToProtobuf(cmd: GetOffset,
@@ -44,12 +50,15 @@ object ProjectionProtobufConverter {
   }
 
   def offsetSavedToProtobuf(evt: OffsetSaved): OffsetSavedMessage = {
+    val offset = evt.offset match {
+      case TimeBasedUUID(uuid) => uuid.toString
+    }
     OffsetSavedMessage(
-      seqNr = evt.seqNr
+      offset = offset
     )
   }
 
   def offsetSavedFromProtobuf(msg: OffsetSavedMessage): OffsetSaved = {
-    OffsetSaved(msg.seqNr)
+    OffsetSaved(TimeBasedUUID(UUID.fromString(msg.offset)))
   }
 }

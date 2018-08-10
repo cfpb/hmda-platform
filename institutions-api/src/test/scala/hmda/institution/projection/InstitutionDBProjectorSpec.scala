@@ -4,6 +4,8 @@ import akka.actor.ActorSystem
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
 import akka.actor.testkit.typed.scaladsl.TestProbe
+import akka.persistence.query.{NoOffset, TimeBasedUUID}
+import com.datastax.driver.core.utils.UUIDs
 import hmda.messages.projection.CommonProjectionMessages.{
   GetOffset,
   OffsetSaved,
@@ -18,19 +20,21 @@ class InstitutionDBProjectorSpec extends AkkaCassandraPersistenceSpec {
   val probe = TestProbe[ProjectionEvent](name = "institution-projector-probe")
 
   "Institution Projector" must {
-    "retrieve 0 for empty projection" in {
+    "retrieve offset for empty projection" in {
       val institutionDBProjector =
         system.spawn(InstitutionDBProjector.behavior, actorName)
       institutionDBProjector ! GetOffset(probe.ref)
-      probe.expectMessage(OffsetSaved(0L))
+      probe.expectMessage(OffsetSaved(NoOffset))
     }
 
     "update offset for projection" in {
+      val uuid = UUIDs.timeBased()
+      val offset = TimeBasedUUID(uuid)
       val institutionDBProjector =
         system.spawn(InstitutionDBProjector.behavior, actorName)
-      institutionDBProjector ! SaveOffset(1L, probe.ref)
+      institutionDBProjector ! SaveOffset(offset, probe.ref)
       institutionDBProjector ! GetOffset(probe.ref)
-      probe.expectMessage(OffsetSaved(1L))
+      probe.expectMessage(OffsetSaved(offset))
     }
   }
 

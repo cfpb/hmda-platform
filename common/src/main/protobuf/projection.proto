@@ -4,7 +4,7 @@ option java_package = "hmda.messages.projection";
 option optimize_for = SPEED;
 
 message SaveOffsetMessage {
-    int64 seqNr = 1;
+    string offset = 1;
     string replyTo = 2;
 }
 
@@ -13,5 +13,5 @@ message GetOffsetMessage {
 }
 
 message OffsetSavedMessage {
-    int64 seqNr = 1;
+    string offset = 1;
 }
