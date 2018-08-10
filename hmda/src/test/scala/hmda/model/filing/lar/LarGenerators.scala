@@ -187,7 +187,7 @@ object LarGenerators {
   }
 
   implicit def stateCodeGen: Gen[String] = {
-    intValueOrNA(Gen.oneOf(Census.states.keys.toList))
+    strValueOrNA(Gen.oneOf(Census.states.keys.toList))
   }
 
   implicit def countyGen: Gen[String] = {
@@ -318,10 +318,10 @@ object LarGenerators {
   }
 
   private def strValueOrNA[A](g: Gen[A]): Gen[String] =
-    valueOrDefault(arbitrary[String], "NA")
+    valueOrDefault(g, "NA")
 
   private def intValueOrNA[A](g: Gen[A]): Gen[String] =
-    valueOrDefault(arbitrary[Int], "NA")
+    valueOrDefault(g, "NA")
 
   private def doubleValueOrNA[A](g: Gen[A]): Gen[String] =
     valueOrDefault(arbitrary[Double], "NA")
