@@ -31,9 +31,9 @@ trait InstitutionQueryHttpApi
   implicit val timeout: Timeout
   val log: LoggingAdapter
 
-  implicit val institutionRepository = new InstitutionRepository(config)
+  implicit val institutionRepository = new InstitutionRepository(dbConfig)
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
-    config)
+    dbConfig)
 
   val institutionByIdPath =
     path("institutions" / Segment) { lei =>

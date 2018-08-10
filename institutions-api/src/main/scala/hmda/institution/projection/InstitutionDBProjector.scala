@@ -1,26 +1,37 @@
 package hmda.institution.projection
 
-import akka.actor.Scheduler
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.{ActorSystem, Scheduler}
+import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.AskPattern._
 import hmda.query.HmdaQuery._
 import akka.actor.typed.scaladsl.adapter._
-import akka.persistence.query.Sequence
+import akka.persistence.query.{EventEnvelope, Offset, Sequence}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
+import hmda.institution.api.http.InstitutionConverter
+import hmda.institution.query.InstitutionComponent
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionCreated,
+  InstitutionDeleted,
+  InstitutionModified
+}
 import hmda.messages.projection.CommonProjectionMessages._
+import hmda.query.DbConfiguration._
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
-object InstitutionDBProjector {
+object InstitutionDBProjector extends InstitutionComponent {
 
   final val name = "InstitutionDBProjector"
 
-  case class StartStreaming()
+  implicit val institutionRepository = new InstitutionRepository(dbConfig)
+  implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
+    dbConfig)
 
   case class InstitutionDBProjectorState(offset: Long = 0L) {
     def isEmpty: Boolean = offset == 0L
@@ -30,24 +41,6 @@ object InstitutionDBProjector {
   val duration = config.getInt("hmda.institution.timeout")
 
   implicit val timeout = Timeout(duration.seconds)
-
-  //TODO: finish implementation of resumable projection
-//  val streamMessages: Behavior[InstitutionDBProjectorCommand] =
-//    Behaviors.receive { (ctx, msg) =>
-//      implicit val untypedSystem: ActorSystem = ctx.system.toUntyped
-//      implicit val materializer: ActorMaterializer = ActorMaterializer()
-//      ctx.log.info("message received {}", msg)
-//      msg match {
-//        case StartStreaming() =>
-//          ctx.log.info(s"Start streaming messages for $name")
-//          readJournal(untypedSystem)
-//            .eventsByTag("institution", Offset.noOffset)
-//            .runForeach { e =>
-//              println(e)
-//            }
-//      }
-//      Behaviors.same
-//    }
 
   def behavior: Behavior[ProjectionCommand] =
     PersistentBehaviors
@@ -62,22 +55,31 @@ object InstitutionDBProjector {
                                      ProjectionEvent,
                                      InstitutionDBProjectorState] = {
     (ctx, state, cmd) =>
-      implicit val scheduler: Scheduler = ctx.system.scheduler
       cmd match {
-
-        case StartStreaming() =>
-          implicit val system = ctx.system.toUntyped
-          implicit val materializer = ActorMaterializer()
-          ctx.log.info("Streaming messages to from {}", name)
+        case StartStreaming =>
+          implicit val system: ActorSystem = ctx.system.toUntyped
+          implicit val materializer: ActorMaterializer = ActorMaterializer()
+          implicit val scheduler: Scheduler = ctx.system.scheduler
+          ctx.log.info("Streaming messages from {}", name)
           readJournal(system)
-              .eventsByTag("institution", Sequence(state.offset))
-              .map(env => ctx.self ? (ref => SaveOffset(env.sequenceNr, ref.asInstanceOf[ActorRef[OffsetSaved]])))
-              .runWith(Sink.ignore)
+            .eventsByTag("institution", Offset.noOffset)
+            .map { env =>
+              ctx.log.info(env.toString)
+              projectEvent(env)
+            }
+            .map { env =>
+              println(s"Event Offset: ${env.offset}")
+              val actorRef = ctx.self
+              val result: Future[OffsetSaved] = actorRef ? (ref =>
+                SaveOffset(env.sequenceNr, ref))
+              result
+            }
+            .runWith(Sink.ignore)
           Effect.none
 
         case SaveOffset(seqNr, replyTo) =>
           Effect.persist(OffsetSaved(seqNr)).andThen {
-            ctx.log.debug("Offset saved: {}", seqNr)
+            ctx.log.info("Offset saved: {}", seqNr)
             replyTo ! OffsetSaved(seqNr)
           }
 
@@ -91,6 +93,23 @@ object InstitutionDBProjector {
   val eventHandler: (InstitutionDBProjectorState,
                      ProjectionEvent) => InstitutionDBProjectorState = {
     case (state, OffsetSaved(seqNr)) => state.copy(offset = seqNr)
+  }
+
+  private def projectEvent(envelope: EventEnvelope): EventEnvelope = {
+    val event = envelope.event
+    event match {
+      case InstitutionCreated(i) =>
+        institutionRepository.insertOrUpdate(InstitutionConverter.convert(i))
+        val emails = InstitutionConverter.emailsFromInstitution(i)
+        emails.foreach(email =>
+          institutionEmailsRepository.insertOrUpdate(email))
+
+      case InstitutionModified(i) =>
+        institutionRepository.insertOrUpdate(InstitutionConverter.convert(i))
+      case InstitutionDeleted(lei) =>
+        institutionRepository.deleteById(lei)
+    }
+    envelope
   }
 
 }

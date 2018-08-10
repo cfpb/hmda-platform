@@ -1,6 +1,6 @@
 package hmda.institution.api.http
 
-import hmda.institution.query.InstitutionEntity
+import hmda.institution.query.{InstitutionEmailEntity, InstitutionEntity}
 import hmda.model.institution._
 
 object InstitutionConverter {
@@ -37,5 +37,35 @@ object InstitutionConverter {
       ),
       entity.hmdaFiler
     )
+  }
+
+  def convert(institution: Institution): InstitutionEntity = {
+    InstitutionEntity(
+      institution.LEI.getOrElse(""),
+      institution.activityYear,
+      institution.agency.getOrElse(UndeterminedAgency).code,
+      institution.institutionType.getOrElse(UndeterminedInstitutionType).code,
+      institution.institutionId_2017.getOrElse(""),
+      institution.taxId.getOrElse(""),
+      institution.rssd.getOrElse(""),
+      institution.respondent.name.getOrElse(""),
+      institution.respondent.state.getOrElse(""),
+      institution.respondent.city.getOrElse(""),
+      institution.parent.idRssd.getOrElse(0),
+      institution.parent.name.getOrElse(""),
+      institution.assets.getOrElse(0),
+      institution.otherLenderCode.getOrElse(0),
+      institution.topHolder.idRssd.getOrElse(0),
+      institution.topHolder.name.getOrElse(""),
+      institution.hmdaFiler
+    )
+  }
+
+  def emailsFromInstitution(
+      institution: Institution): Seq[InstitutionEmailEntity] = {
+    institution.emailDomains.map(
+      email =>
+        InstitutionEmailEntity(lei = institution.LEI.getOrElse(""),
+                               emailDomain = email))
   }
 }

@@ -25,7 +25,7 @@ object InstitutionPersistence {
   def behavior(entityId: String): Behavior[InstitutionCommand] =
     PersistentBehaviors
       .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
-        persistenceId = s"$name-$entityId",
+        persistenceId = entityId,
         emptyState = InstitutionState(None),
         commandHandler = commandHandler,
         eventHandler = eventHandler

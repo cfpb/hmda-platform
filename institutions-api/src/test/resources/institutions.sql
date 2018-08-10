@@ -35,7 +35,7 @@ ALTER TABLE public.institutions2018
 
 CREATE TABLE public.institutions_emails_2018
 (
-  id integer NOT NULL,
+  id integer,
   lei character varying NOT NULL,
   email_domain character varying
 )
