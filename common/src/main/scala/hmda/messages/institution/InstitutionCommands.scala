@@ -1,6 +1,7 @@
 package hmda.messages.institution
 
 import akka.actor.typed.ActorRef
+import hmda.messages.CommonMessages.Command
 import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionEvent
@@ -8,7 +9,7 @@ import hmda.messages.institution.InstitutionEvents.{
 import hmda.model.institution.Institution
 
 object InstitutionCommands {
-  sealed trait InstitutionCommand
+  sealed trait InstitutionCommand extends Command
 
   case class CreateInstitution(i: Institution,
                                replyTo: ActorRef[InstitutionCreated])

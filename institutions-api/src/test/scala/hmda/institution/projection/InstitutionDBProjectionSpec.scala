@@ -13,7 +13,7 @@ import hmda.messages.projection.CommonProjectionMessages.{
   SaveOffset
 }
 
-class InstitutionDBProjectorSpec extends AkkaCassandraPersistenceSpec {
+class InstitutionDBProjectionSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system = ActorSystem()
   override implicit val typedSystem = system.toTyped
 
@@ -22,7 +22,7 @@ class InstitutionDBProjectorSpec extends AkkaCassandraPersistenceSpec {
   "Institution Projector" must {
     "retrieve offset for empty projection" in {
       val institutionDBProjector =
-        system.spawn(InstitutionDBProjector.behavior, actorName)
+        system.spawn(InstitutionDBProjection.behavior, actorName)
       institutionDBProjector ! GetOffset(probe.ref)
       probe.expectMessage(OffsetSaved(NoOffset))
     }
@@ -31,7 +31,7 @@ class InstitutionDBProjectorSpec extends AkkaCassandraPersistenceSpec {
       val uuid = UUIDs.timeBased()
       val offset = TimeBasedUUID(uuid)
       val institutionDBProjector =
-        system.spawn(InstitutionDBProjector.behavior, actorName)
+        system.spawn(InstitutionDBProjection.behavior, actorName)
       institutionDBProjector ! SaveOffset(offset, probe.ref)
       institutionDBProjector ! GetOffset(probe.ref)
       probe.expectMessage(OffsetSaved(offset))
