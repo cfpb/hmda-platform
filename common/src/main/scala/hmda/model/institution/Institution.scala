@@ -34,4 +34,17 @@ case class Institution(
     otherLenderCode: Option[Int],
     topHolder: TopHolder,
     hmdaFiler: Boolean
-)
+) {
+  def toCSV: String = {
+    s"$activityYear|${LEI.getOrElse("")}|${agency
+      .getOrElse(UndeterminedAgency)
+      .code}|${institutionType.getOrElse(UndeterminedInstitutionType).code}|" +
+      s"${institutionId_2017.getOrElse("")}|${taxId.getOrElse("")}|${rssd
+        .getOrElse("")}|${emailDomains.mkString(",")}|" +
+      s"${respondent.name.getOrElse("")}|${respondent.state.getOrElse("")}|${respondent.city
+        .getOrElse("")}|" +
+      s"${parent.idRssd.getOrElse(0)}|${parent.name.getOrElse("")}|${assets
+        .getOrElse(0)}|${otherLenderCode.getOrElse(0)}|" +
+      s"${topHolder.idRssd.getOrElse(0)}|${topHolder.name.getOrElse("")}|$hmdaFiler"
+  }
+}
