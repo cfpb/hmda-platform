@@ -11,4 +11,7 @@ object Version {
   val circe = "0.9.3"
   val cassandraPluginVersion = "0.84"
   val akkaClusterDowning = "0.0.12"
+  val slick = "3.2.3"
+  val postgres = "42.2.4"
+  val h2 = "1.4.188"
 }

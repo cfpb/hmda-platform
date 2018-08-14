@@ -1,13 +1,13 @@
 package hmda.api.http.codec.filing
 
 import hmda.api.http.codec.filing.TsCodec._
-import hmda.model.filing.FilingGenerators._
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import io.circe.syntax._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}
+import hmda.model.institution.InstitutionGenerators._
 
 class TsCodecSpec extends PropSpec with PropertyChecks with MustMatchers {
 
