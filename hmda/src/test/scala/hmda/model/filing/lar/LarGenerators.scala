@@ -86,10 +86,12 @@ object LarGenerators {
       term <- intValueOrNA(Gen.choose(1, Int.MaxValue))
       rateSpread <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       interestRate <- doubleValueOrNA(Gen.choose(0.0, 30.0))
-      prepaymentPenaltyTerm <- intValueOrNA(Gen.alphaNumStr)
+      prepaymentPenaltyTerm <- intValueOrNA(
+        Gen.choose(Int.MinValue, Int.MaxValue))
       debtToIncomeRatio <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       loanToValueRatio <- doubleValueOrNA(Gen.choose(0.0, 100.0))
-      introductoryRatePeriod <- intValueOrNA(Gen.alphaNumStr)
+      introductoryRatePeriod <- intValueOrNA(
+        Gen.choose(Int.MinValue, Int.MaxValue))
     } yield
       Loan(
         uli,
@@ -171,7 +173,8 @@ object LarGenerators {
 
   implicit def propertyGen: Gen[Property] = {
     for {
-      propertyValue <- doubleValueOrNA(Gen.alphaNumStr)
+      propertyValue <- doubleValueOrNA(
+        Gen.choose(Double.MinValue, Double.MaxValue))
       manufacturedHomeSecuredProperty <- manufacturedHomeSecuredPropertyEnumGen
       manufacturedHomeLandPropertyInterest <- manufacturedHomeLandPropertyInterestEnumGen
       totalUnits <- Gen.choose(1, 100)
@@ -324,7 +327,7 @@ object LarGenerators {
     valueOrDefault(g, "NA")
 
   private def doubleValueOrNA[A](g: Gen[A]): Gen[String] =
-    valueOrDefault(arbitrary[Double], "NA")
+    valueOrDefault(g, "NA")
 
   private def valueOrDefault[A](g: Gen[A], value: String) = {
     Gen.oneOf(g.map(_.toString), Gen.const(value))
