@@ -5,7 +5,6 @@ import java.util.Date
 
 import hmda.model.census.Census
 import org.scalacheck.Gen
-import org.scalacheck.Arbitrary.arbitrary
 import hmda.generators.CommonGenerators._
 import hmda.model.filing.lar.enums.LarEnumGenerators._
 
@@ -146,8 +145,8 @@ object LarGenerators {
 
   implicit def geographyGen: Gen[Geography] = {
     for {
-      street <- strValueOrNA(Gen.alphaStr)
-      city <- strValueOrNA(Gen.alphaStr)
+      street <- strValueOrNA(Gen.alphaStr.suchThat(!_.isEmpty))
+      city <- strValueOrNA(Gen.alphaStr.suchThat(!_.isEmpty))
       state <- stateCodeGen
       zipCode <- zipCodeGen
       county <- countyGen
