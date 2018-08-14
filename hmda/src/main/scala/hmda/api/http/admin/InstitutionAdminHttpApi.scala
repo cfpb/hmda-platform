@@ -13,13 +13,19 @@ import akka.http.scaladsl.server.Route
 import hmda.model.institution.Institution
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.persistence.institution.InstitutionPersistence._
 import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import hmda.messages.institution.InstitutionCommands.{
+  CreateInstitution,
+  DeleteInstitution,
+  GetInstitution,
+  ModifyInstitution
+}
+import hmda.messages.institution.InstitutionEvents._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

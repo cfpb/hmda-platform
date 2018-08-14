@@ -7,7 +7,6 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.HmdaApi
 import hmda.persistence.HmdaPersistence
-import hmda.query.HmdaQuery
 import hmda.validation.HmdaValidation
 import org.slf4j.LoggerFactory
 import akka.actor.typed.scaladsl.adapter._
@@ -74,9 +73,6 @@ object HmdaPlatform extends App {
 
   //Start Persistence
   system.spawn(HmdaPersistence.behavior, HmdaPersistence.name)
-
-  //Start Query
-  system.spawn(HmdaQuery.behavior, HmdaQuery.name)
 
   //Start Validation
   system.spawn(HmdaValidation.behavior, HmdaValidation.name)

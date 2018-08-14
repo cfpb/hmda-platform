@@ -3,8 +3,8 @@ package hmda.validation.dsl
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.validation.dsl.PredicateRegEx._
+import hmda.generators.CommonGenerators._
 import hmda.model.filing.ts.TsGenerators._
-import hmda.model.filing.FilingGenerators._
 import org.scalacheck.Gen
 
 class PredicateRegexSpec
@@ -85,8 +85,6 @@ class PredicateRegexSpec
                             "1-800-123-4567")
     phoneNumbers.foreach(validPhoneNumber.check(_) mustBe false)
   }
-
-  // Zip code **************
 
   property("A valid zip code must pass the zip code regex") {
     forAll(zipGen) { zip =>

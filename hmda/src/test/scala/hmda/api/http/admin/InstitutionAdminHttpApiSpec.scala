@@ -17,13 +17,13 @@ import hmda.model.institution.InstitutionGenerators._
 import hmda.api.http.codec.institution.InstitutionCodec._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.institution.InstitutionPersistence.{
-  InstitutionCommand,
-  InstitutionStop
-}
 import akka.testkit._
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.admin.InstitutionDeletedResponse
+import hmda.messages.institution.InstitutionCommands.{
+  InstitutionCommand,
+  InstitutionStop
+}
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext

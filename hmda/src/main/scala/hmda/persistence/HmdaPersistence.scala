@@ -5,8 +5,11 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ClusterShardingSettings
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import com.typesafe.config.ConfigFactory
+import hmda.messages.institution.InstitutionCommands.{
+  InstitutionCommand,
+  InstitutionStop
+}
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.institution.InstitutionPersistence._
 
 object HmdaPersistence {
 

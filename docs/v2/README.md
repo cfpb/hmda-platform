@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/cfpb/hmda-platform.svg?branch=1.x)](https://travis-ci.org/cfpb/hmda-platform) [![codecov.io](https://codecov.io/github/cfpb/hmda-platform/coverage.svg?branch=master)](https://codecov.io/github/cfpb/hmda-platform?branch=master)
-
 # The HMDA Platform
 
 ## This project is a work in progress

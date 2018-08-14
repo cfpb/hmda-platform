@@ -1,43 +1,17 @@
 package hmda.persistence.institution
 
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.Behavior
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import com.typesafe.config.ConfigFactory
+import hmda.messages.institution.InstitutionCommands._
+import hmda.messages.institution.InstitutionEvents._
 import hmda.model.institution.Institution
 
 object InstitutionPersistence {
 
   final val name = "Institution"
-
-  sealed trait InstitutionCommand
-
-  sealed trait InstitutionEvent
-
-  case class CreateInstitution(i: Institution,
-                               replyTo: ActorRef[InstitutionCreated])
-      extends InstitutionCommand
-
-  case class InstitutionCreated(i: Institution) extends InstitutionEvent
-
-  case class ModifyInstitution(i: Institution,
-                               replyTo: ActorRef[InstitutionEvent])
-      extends InstitutionCommand
-
-  case class InstitutionModified(i: Institution) extends InstitutionEvent
-
-  case class DeleteInstitution(LEI: String, replyTo: ActorRef[InstitutionEvent])
-      extends InstitutionCommand
-
-  case class InstitutionDeleted(LEI: String) extends InstitutionEvent
-
-  case class InstitutionNotExists(LEI: String) extends InstitutionEvent
-
-  case class GetInstitution(replyTo: ActorRef[Option[Institution]])
-      extends InstitutionCommand
-
-  case object InstitutionStop extends InstitutionCommand
 
   val config = ConfigFactory.load()
 
@@ -57,7 +31,7 @@ object InstitutionPersistence {
         eventHandler = eventHandler
       )
       .snapshotEvery(1000)
-      .withTagger(_ => Set(name))
+      .withTagger(_ => Set(name.toLowerCase()))
 
   val commandHandler
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
