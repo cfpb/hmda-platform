@@ -16,4 +16,4 @@ Data Field Number, Data Field Name, Data Field Type, Field Type Description,Fiel
 15, Other Lender Code , Numeric, Integer,1, Example: 0,Y
 16, Top Holder ID RSSD , Numeric, Integer,, Example: 123456,Y
 17, Top Holder Name , Alphanumeric, String,, Example: CFPB,Y
-18, HMDA Filer Flag, Boolean, List , Example: false, N
+18, HMDA Filer Flag, Boolean, List ,, Example: false, N
