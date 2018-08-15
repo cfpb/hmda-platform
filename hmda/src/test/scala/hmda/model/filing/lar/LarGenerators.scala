@@ -5,7 +5,6 @@ import java.util.Date
 
 import hmda.model.census.Census
 import org.scalacheck.Gen
-import org.scalacheck.Arbitrary.arbitrary
 import hmda.generators.CommonGenerators._
 import hmda.model.filing.lar.enums.LarEnumGenerators._
 
@@ -86,10 +85,12 @@ object LarGenerators {
       term <- intValueOrNA(Gen.choose(1, Int.MaxValue))
       rateSpread <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       interestRate <- doubleValueOrNA(Gen.choose(0.0, 30.0))
-      prepaymentPenaltyTerm <- intValueOrNA(Gen.alphaNumStr)
+      prepaymentPenaltyTerm <- intValueOrNA(
+        Gen.choose(Int.MinValue, Int.MaxValue))
       debtToIncomeRatio <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       loanToValueRatio <- doubleValueOrNA(Gen.choose(0.0, 100.0))
-      introductoryRatePeriod <- intValueOrNA(Gen.alphaNumStr)
+      introductoryRatePeriod <- intValueOrNA(
+        Gen.choose(Int.MinValue, Int.MaxValue))
     } yield
       Loan(
         uli,
@@ -144,8 +145,8 @@ object LarGenerators {
 
   implicit def geographyGen: Gen[Geography] = {
     for {
-      street <- strValueOrNA(Gen.alphaStr)
-      city <- strValueOrNA(Gen.alphaStr)
+      street <- strValueOrNA(Gen.alphaStr.suchThat(!_.isEmpty))
+      city <- strValueOrNA(Gen.alphaStr.suchThat(!_.isEmpty))
       state <- stateCodeGen
       zipCode <- zipCodeGen
       county <- countyGen
@@ -171,7 +172,8 @@ object LarGenerators {
 
   implicit def propertyGen: Gen[Property] = {
     for {
-      propertyValue <- doubleValueOrNA(Gen.alphaNumStr)
+      propertyValue <- doubleValueOrNA(
+        Gen.choose(Double.MinValue, Double.MaxValue))
       manufacturedHomeSecuredProperty <- manufacturedHomeSecuredPropertyEnumGen
       manufacturedHomeLandPropertyInterest <- manufacturedHomeLandPropertyInterestEnumGen
       totalUnits <- Gen.choose(1, 100)
@@ -187,7 +189,7 @@ object LarGenerators {
   }
 
   implicit def stateCodeGen: Gen[String] = {
-    intValueOrNA(Gen.oneOf(Census.states.keys.toList))
+    strValueOrNA(Gen.oneOf(Census.states.keys.toList))
   }
 
   implicit def countyGen: Gen[String] = {
@@ -318,13 +320,13 @@ object LarGenerators {
   }
 
   private def strValueOrNA[A](g: Gen[A]): Gen[String] =
-    valueOrDefault(arbitrary[String], "NA")
+    valueOrDefault(g, "NA")
 
   private def intValueOrNA[A](g: Gen[A]): Gen[String] =
-    valueOrDefault(arbitrary[Int], "NA")
+    valueOrDefault(g, "NA")
 
   private def doubleValueOrNA[A](g: Gen[A]): Gen[String] =
-    valueOrDefault(arbitrary[Double], "NA")
+    valueOrDefault(g, "NA")
 
   private def valueOrDefault[A](g: Gen[A], value: String) = {
     Gen.oneOf(g.map(_.toString), Gen.const(value))
