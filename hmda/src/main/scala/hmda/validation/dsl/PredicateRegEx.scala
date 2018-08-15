@@ -11,6 +11,9 @@ object PredicateRegEx {
   def validPhoneNumber: Predicate[String] =
     stringMatching("^\\d{3}-\\d{3}-\\d{4}$".r)
 
+  def validTaxId: Predicate[String] =
+    stringMatching("^\\d{2}-\\d{7}$".r)
+
   def validZipCode: Predicate[String] = stringMatching("^\\d{5}(?:-\\d{4})?$".r)
 
   def containsDigits: Predicate[String] = stringMatching("\\d{1}".r)

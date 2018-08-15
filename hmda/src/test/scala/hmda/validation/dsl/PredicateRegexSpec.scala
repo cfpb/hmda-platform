@@ -63,6 +63,12 @@ class PredicateRegexSpec
     }
   }
 
+  property("A valid tax id must pass the tax id regex") {
+    forAll(taxIdGen) { taxId =>
+      validTaxId.check(taxId) mustBe true
+    }
+  }
+
   property("A numeric string will fail the phone regex") {
     forAll(Gen.numStr) { phone =>
       validPhoneNumber.check(phone) mustBe false
