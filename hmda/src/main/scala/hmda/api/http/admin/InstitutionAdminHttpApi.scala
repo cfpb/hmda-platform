@@ -42,6 +42,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val institutionWritePath =
     path("institutions") {
       entity(as[Institution]) { institution =>
+        log.info(institution.toCSV)
         val typedSystem = system.toTyped
         implicit val scheduler: Scheduler = typedSystem.scheduler
 
