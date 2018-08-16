@@ -5,8 +5,8 @@ import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.HmdaInstitutionQueryApi
 import org.slf4j.LoggerFactory
 import akka.actor.typed.scaladsl.adapter._
-import hmda.institution.projection.InstitutionDBProjector
-import hmda.institution.projection.InstitutionDBProjector.StartStreaming
+import hmda.institution.projection.InstitutionDBProjection
+import hmda.messages.projection.CommonProjectionMessages.StartStreaming
 
 object HmdaInstitutionApi extends App {
 
@@ -30,9 +30,8 @@ object HmdaInstitutionApi extends App {
   implicit val system = ActorSystem("hmda-institutions")
 
   system.actorOf(HmdaInstitutionQueryApi.props(), "hmda-institutions-api")
-  val institutionDBProjector = system.spawn(
-    InstitutionDBProjector.streamMessages,
-    InstitutionDBProjector.name)
-  institutionDBProjector ! StartStreaming()
+  val institutionDBProjector =
+    system.spawn(InstitutionDBProjection.behavior, InstitutionDBProjection.name)
+  institutionDBProjector ! StartStreaming
 
 }

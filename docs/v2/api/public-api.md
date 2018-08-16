@@ -23,7 +23,7 @@ This documentation describes de public HMDA Platform HTTP API
          "institutionId2017" : "12345",
          "taxId" : "99-00000000",
          "rssd" : "Pb",
-         "emailDomains" : ["email@bank0.com"],
+         "emailDomains" : ["bank0.com"],
          "respondent" : {
            "name" : "xvavjuitZa",
            "state" : "NC",
@@ -62,7 +62,7 @@ This documentation describes de public HMDA Platform HTTP API
       "institutionId2017" : "12345",
       "taxId" : "99-00000000",
       "rssd" : "Pb",
-      "emailDomains" : ["email@bank0.com"],
+      "emailDomains" : ["bank0.com"],
       "respondent" : {
         "name" : "xvavjuitZa",
         "state" : "NC",

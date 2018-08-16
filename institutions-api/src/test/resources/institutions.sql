@@ -35,9 +35,10 @@ ALTER TABLE public.institutions2018
 
 CREATE TABLE public.institutions_emails_2018
 (
-  id integer NOT NULL,
+  id integer NOT NULL DEFAULT nextval('institutions_emails_2018_id_seq'::regclass),
   lei character varying NOT NULL,
-  email_domain character varying
+  email_domain character varying NOT NULL,
+  CONSTRAINT institutions_emails_2018_pkey PRIMARY KEY (id )
 )
 WITH (
   OIDS=FALSE

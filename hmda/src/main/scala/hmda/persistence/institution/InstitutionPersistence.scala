@@ -25,7 +25,7 @@ object InstitutionPersistence {
   def behavior(entityId: String): Behavior[InstitutionCommand] =
     PersistentBehaviors
       .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
-        persistenceId = s"$name-$entityId",
+        persistenceId = entityId,
         emptyState = InstitutionState(None),
         commandHandler = commandHandler,
         eventHandler = eventHandler
@@ -82,8 +82,7 @@ object InstitutionPersistence {
       }
   }
 
-  val eventHandler
-    : (InstitutionState, InstitutionEvent) => (InstitutionState) = {
+  val eventHandler: (InstitutionState, InstitutionEvent) => InstitutionState = {
     case (state, InstitutionCreated(i))   => state.copy(Some(i))
     case (state, InstitutionModified(i))  => modifyInstitution(i, state)
     case (state, InstitutionDeleted(_))   => state.copy(None)

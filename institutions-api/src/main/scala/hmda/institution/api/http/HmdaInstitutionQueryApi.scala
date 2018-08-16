@@ -35,6 +35,13 @@ class HmdaInstitutionQueryApi
 
   override implicit val timeout: Timeout = Timeout(duration)
 
+  val createSchema = config.getBoolean("hmda.institution.createSchema")
+
+  if (createSchema) {
+    institutionRepository.createSchema()
+    institutionEmailsRepository.createSchema()
+  }
+
   override val name: String = "hmda-institution-api"
   override val host: String = config.getString("hmda.institution.http.host")
   override val port: Int = config.getInt("hmda.institution.http.port")

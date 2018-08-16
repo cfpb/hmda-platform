@@ -1,7 +1,7 @@
 package hmda.institution.query
 
 import hmda.institution.query.InstitutionEntityGenerators.institutionEntityGen
-import hmda.query.DbConfiguration.config
+import hmda.query.DbConfiguration.dbConfig
 import slick.dbio.DBIOAction
 import scala.concurrent.duration._
 
@@ -9,8 +9,8 @@ import scala.concurrent.Await
 
 trait InstitutionSetup extends InstitutionComponent {
 
-  implicit val institutionRepository = new InstitutionRepository(config)
-  implicit val emailRepository = new InstitutionEmailsRepository(config)
+  implicit val institutionRepository = new InstitutionRepository(dbConfig)
+  implicit val emailRepository = new InstitutionEmailsRepository(dbConfig)
   val db = emailRepository.db
 
   val duration = 5.seconds
@@ -24,7 +24,7 @@ trait InstitutionSetup extends InstitutionComponent {
     .copy(lei = "BBB")
 
   def setup() = {
-    import config.profile.api._
+    import dbConfig.profile.api._
     val setup = db.run(
       DBIOAction.seq(
         institutionsTable.schema.create,

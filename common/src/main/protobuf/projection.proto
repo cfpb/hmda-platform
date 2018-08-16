@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_package = "hmda.messages.projection";
+option optimize_for = SPEED;
+
+message SaveOffsetMessage {
+    string offset = 1;
+    string replyTo = 2;
+}
+
+message GetOffsetMessage {
+    string replyTo = 1;
+}
+
+message OffsetSavedMessage {
+    string offset = 1;
+}

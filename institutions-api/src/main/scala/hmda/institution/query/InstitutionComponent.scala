@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait InstitutionComponent {
 
-  import config.profile.api._
+  import dbConfig.profile.api._
 
   class InstitutionsTable(tag: Tag)
       extends Table[InstitutionEntity](tag, "institutions2018") {
