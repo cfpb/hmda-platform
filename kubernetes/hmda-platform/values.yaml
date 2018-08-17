@@ -10,7 +10,7 @@ rbac:
 replicaCount: 3
 
 image:
-  repository: jmarin/hmda-platform
+  repository: hmda/hmda-platform
   tag: 2.0.1
   pullPolicy: IfNotPresent
 
