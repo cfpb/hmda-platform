@@ -90,8 +90,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
             onComplete(fDeleted) {
               case Success(InstitutionDeleted(lei)) =>
-                complete(ToResponseMarshallable(
-                  StatusCodes.Accepted -> InstitutionDeletedResponse(lei)))
+                complete(
+                  ToResponseMarshallable(
+                    StatusCodes.Accepted -> InstitutionDeletedResponse(lei)))
               case Success(InstitutionNotExists(lei)) =>
                 complete(ToResponseMarshallable(StatusCodes.NotFound -> lei))
               case Success(_) =>
@@ -100,14 +101,12 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
               case Failure(error) =>
                 val errorResponse =
                   ErrorResponse(500, error.getLocalizedMessage, uri.path)
-                complete(ToResponseMarshallable(
-                  StatusCodes.InternalServerError -> errorResponse))
+                complete(
+                  ToResponseMarshallable(
+                    StatusCodes.InternalServerError -> errorResponse))
             }
           }
-      } ~
-        timedOptions { _ =>
-          complete("OPTIONS")
-        }
+      }
     }
 
   val institutionReadPath =
@@ -131,12 +130,16 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
           case Success(None) =>
             complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
           case Failure(error) =>
-            complete(error.getLocalizedMessage)
+            val errorResponse =
+              ErrorResponse(500, error.getLocalizedMessage, uri.path)
+            complete(
+              ToResponseMarshallable(
+                StatusCodes.InternalServerError -> errorResponse))
         }
       }
     }
 
-  def institutionAdminRoutes: Route =
+  def institutionAdminRoutes: Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
@@ -144,5 +147,6 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
         }
       }
     }
+  }
 
 }

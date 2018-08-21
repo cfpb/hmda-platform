@@ -62,10 +62,7 @@ trait InstitutionQueryHttpApi
               ToResponseMarshallable(
                 StatusCodes.InternalServerError -> errorResponse))
         }
-      } ~
-        timedOptions { _ =>
-          complete("OPTIONS")
-        }
+      }
     }
 
   val institutionByDomainPath =
@@ -90,10 +87,7 @@ trait InstitutionQueryHttpApi
                   StatusCodes.InternalServerError -> errorResponse))
           }
         }
-      } ~
-        timedOptions { _ =>
-          complete("OPTIONS")
-        }
+      }
     }
 
   def institutionPublicRoutes: Route =
