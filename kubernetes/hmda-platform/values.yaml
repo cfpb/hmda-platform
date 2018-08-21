@@ -5,7 +5,7 @@
 namespace: default
 
 cassandra:
-  hosts: hmda-platform-cassandra-0.hmda-platform-cassandra.default.svc.cluster.local
+  hosts: cassandra
 
 rbac:
   enabled: false
