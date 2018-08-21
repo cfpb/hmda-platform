@@ -4,6 +4,9 @@
 
 namespace: default
 
+cassandra:
+  hosts: hmda-platform-cassandra-0.hmda-platform-cassandra.default.svc.cluster.local
+
 rbac:
   enabled: false
 
@@ -11,7 +14,7 @@ replicaCount: 3
 
 image:
   repository: hmda/hmda-platform
-  tag: 2.5.1
+  tag: 2.5.2
   pullPolicy: IfNotPresent
 
 hmda:

@@ -30,6 +30,8 @@ spec:
             fieldRef:
               apiVersion: v1
               fieldPath: status.podIP
+        - name: CASSANDRA_CLUSTER_HOSTS
+          value: {{ .Values.cassandra.hosts }}
         livenessProbe:
           tcpSocket:
             port: {{ .Values.bootstrap.port }}

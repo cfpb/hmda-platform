@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hmda-platform-cassandra
+  labels:
+    app: cassandra
+    chart: cassandra-0.5.2
+    release: hmda-platform
+    heritage: Tiller
+spec:
+  serviceName: hmda-platform-cassandra
+  replicas: 1
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: OnDelete
+  selector:
+    matchLabels:
+      app: cassandra
+  template:
+    metadata:
+      labels:
+        app: cassandra
+        release: hmda-platform
+    spec:
+      containers:
+      - name: hmda-platform-cassandra
+        image: "cassandra:3.11.2"
+        imagePullPolicy: "IfNotPresent"
+        resources:
+          {}
+
+        env:
+        - name: CASSANDRA_SEEDS
+          value: "hmda-platform-cassandra-0.hmda-platform-cassandra.default.svc.cluster.local,hmda-platform-cassandra-1.hmda-platform-cassandra.default.svc.cluster.local,"
+        - name: MAX_HEAP_SIZE
+          value: "2048M"
+        - name: HEAP_NEWSIZE
+          value: "512M"
+        - name: CASSANDRA_ENDPOINT_SNITCH
+          value: "SimpleSnitch"
+        - name: CASSANDRA_CLUSTER_NAME
+          value: "cassandra"
+        - name: CASSANDRA_DC
+          value: "DC1"
+        - name: CASSANDRA_RACK
+          value: "RAC1"
+        - name: CASSANDRA_START_RPC
+          value: "false"
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        livenessProbe:
+          exec:
+            command: [ "/bin/sh", "-c", "nodetool status" ]
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command: [ "/bin/sh", "-c", "nodetool status | grep -E \"^UN\\s+${POD_IP}\"" ]
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        ports:
+        - name: intra
+          containerPort: 7000
+        - name: tls
+          containerPort: 7001
+        - name: jmx
+          containerPort: 7199
+        - name: cql
+          containerPort: 9042
+        - name: thrift
+          containerPort: 9160
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/cassandra
+      terminationGracePeriodSeconds: 30
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+      labels:
+        app: cassandra
+        chart: cassandra-0.5.2
+        release: hmda-platform
+        heritage: Tiller
+    spec:
+      accessModes:
+        - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: "2Gi"
