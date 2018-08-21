@@ -72,6 +72,12 @@ class InstitutionAdminHttpApiSpec
 
   "Institutions HTTP Service" must {
 
+    "Respond to Options request" in {
+      Options("/institutions") ~> institutionAdminRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+    }
+
     "Create an institution" in {
       Post("/institutions", sampleInstitution) ~> institutionAdminRoutes ~> check {
         status mustBe StatusCodes.Created

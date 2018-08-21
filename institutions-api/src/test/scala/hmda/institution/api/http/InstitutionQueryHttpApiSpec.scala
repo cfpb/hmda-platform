@@ -41,6 +41,10 @@ class InstitutionQueryHttpApiSpec
 
   "Institution Query HTTP API" must {
     "search by LEI" in {
+      Options("/institutions/AAA") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
+
       Get("/institutions/XXX") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.NotFound
       }
@@ -54,6 +58,9 @@ class InstitutionQueryHttpApiSpec
     }
 
     "search by email domain" in {
+      Options("/institutions?domain=bbb.com") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.OK
+      }
       Get("/institutions?domain=xxx.com") ~> institutionPublicRoutes ~> check {
         status mustBe StatusCodes.NotFound
       }
