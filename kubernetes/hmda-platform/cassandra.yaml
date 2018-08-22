@@ -86,7 +86,7 @@ spec:
       name: cassandra-data
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      storageClassName: fast
+      storageClassName: slow
       resources:
         requests:
           storage: 1Gi
@@ -94,7 +94,9 @@ spec:
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: fast
-provisioner: k8s.io/minikube-hostpath
+  name: slow
+provisioner: kubernetes.io/gce-pd
 parameters:
-  type: pd-ssd
+  type: pd-standard
+  zones: us-central1-a
+  replication-type: none

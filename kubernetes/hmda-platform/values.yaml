@@ -14,7 +14,7 @@ replicaCount: 3
 
 image:
   repository: hmda/hmda-platform
-  tag: 2.5.2
+  tag: 2.5.3
   pullPolicy: IfNotPresent
 
 hmda:
@@ -25,7 +25,7 @@ service:
   type: NodePort
   account:
     name: hmda-service-account
-  name: hmda-platform-api
+  name: hmda-platform
 
 remoting:
   name: remoting
