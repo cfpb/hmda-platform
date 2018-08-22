@@ -24,16 +24,16 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: POSTGRES_HOST
+            - name: PG_HOST
               valueFrom:
                 configMapKeyRef:
                   name: "{{ .Release.Name }}-inst-api-config"
                   key: instapi.postgres_host
-            - name: POSTGRES_DATABASE
+            - name: PG_DATABASE
               value: "{{ .Values.postgresql.postgresDatabase }}"
-            - name: POSTGRES_USER
+            - name: PG_USER
               value: "{{ .Values.postgresql.postgresUser }}"
-            - name: POSTGRES_PASSWORD
+            - name: PG_PASSWORD
               value: "{{ .Values.postgresql.postgresPassword }}"
           ports:
             - name: {{ .Values.service.name }}
