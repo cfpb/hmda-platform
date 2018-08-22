@@ -51,3 +51,73 @@ spec:
     protocol: {{ .Values.cluster.protocol }}
     port: {{ .Values.cluster.port }}
     targetPort: {{ .Values.cluster.port }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-admin
+  name: ambassador-hmda-admin
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: hmda_admin_mapping
+      prefix: /v2/admin/
+      service: {{ .Values.service.name }}:{{ .Values.admin.port }}
+spec:
+  type: LoadBalancer
+  ports:
+  - name: ambassador-hmda-admin
+    port: 80
+    targetPort: 80
+  selector:
+    service: ambassador-hmda-admin
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-filing
+  name: ambassador-hmda-filing
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: hmda_filing_mapping
+      prefix: /v2/filing/
+      service: {{ .Values.service.name }}:{{ .Values.filing.port }}
+spec:
+  type: LoadBalancer
+  ports:
+  - name: ambassador-hmda-filing
+    port: 80
+    targetPort: 80
+  selector:
+    service: ambassador-hmda-filing
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-public
+  name: ambassador-hmda-public
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: hmda_public_mapping
+      prefix: /v2/public/
+      service: {{ .Values.service.name }}:{{ .Values.public.port }}
+spec:
+  type: LoadBalancer
+  ports:
+  - name: ambassador-hmda-public
+    port: 80
+    targetPort: 80
+  selector:
+    service: ambassador-hmda-public
