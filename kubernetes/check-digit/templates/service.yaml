@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -17,3 +18,27 @@ spec:
   selector:
     app: {{ template "check-digit.name" . }}
     release: {{ .Release.Name }}
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-chk-digit
+  name: ambassador-chk-digit
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: check_digit_mapping
+      prefix: /public/uli/checkDigit/
+      service: hmda-check-digit:9091
+spec:
+  type: LoadBalancer
+  ports:
+  - name: ambassador-chk-digit
+    port: 80
+    targetPort: 80
+  selector:
+    service: ambassador-chk-digit

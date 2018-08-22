@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: jmarin/check-digit
-  tag: 0.1.0
+  repository: hmda/hmda-check-digit
+  tag: 0.1.1
   pullPolicy: IfNotPresent
 
 service:
