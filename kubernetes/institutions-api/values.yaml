@@ -45,3 +45,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+postgresql:
+  postgresDatabase: hmda
+  postgresUser: postgres
+  postgresPassword: postgres
+  enabled: true
