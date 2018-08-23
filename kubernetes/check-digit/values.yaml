@@ -20,6 +20,8 @@ ambassador:
   mapping: check_digit_mapping
   prefix: /v2/public/uli/checkDigit/
   port: 80
+  service:
+    type: NodePort
 
 ingress:
   enabled: false

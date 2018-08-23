@@ -35,7 +35,7 @@ metadata:
       prefix: {{ .Values.ambassador.prefix }}
       service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
 spec:
-  type: NodePort
+  type: {{ .Values.ambassador.service.type }}
   ports:
   - name: {{ .Values.ambassador.name }}
     port: {{ .Values.ambassador.port }}
