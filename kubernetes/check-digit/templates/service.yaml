@@ -29,11 +29,21 @@ metadata:
   name: {{ .Values.ambassador.name }}
   annotations:
     getambassador.io/config: |
+      ---
       apiVersion: ambassador/v0
       kind: Mapping
       name: {{ .Values.ambassador.mapping }}
+      method: POST
       prefix: {{ .Values.ambassador.prefix }}
       rewrite: {{ .Values.ambassador.service.prefix }}
+      service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
+      ---
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: root
+      method: GET
+      prefix: /v2/public/uli/status/
+      rewrite: /
       service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
 spec:
   type: {{ .Values.ambassador.service.type }}
