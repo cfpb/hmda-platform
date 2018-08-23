@@ -12,8 +12,13 @@ object V628_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V628"
 
-  val validEthnicities = List(EmptyEthnicityValue, HispanicOrLatino, Mexican, PuertoRican, Cuban, OtherHispanicOrLatino,
-    NotHispanicOrLatino)
+  val validEthnicities = List(EmptyEthnicityValue,
+                              HispanicOrLatino,
+                              Mexican,
+                              PuertoRican,
+                              Cuban,
+                              OtherHispanicOrLatino,
+                              NotHispanicOrLatino)
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     (lar.applicant.ethnicity.ethnicity2 is containedIn(validEthnicities)) and

@@ -15,7 +15,11 @@ object V628_3 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val appEth = lar.applicant.ethnicity
     val invalidCodes = List(EmptyEthnicityValue, InvalidEthnicityCode)
-    val ethnicities = List(appEth.ethnicity1, appEth.ethnicity2, appEth.ethnicity3, appEth.ethnicity4, appEth.ethnicity5)
+    val ethnicities = List(appEth.ethnicity1,
+                           appEth.ethnicity2,
+                           appEth.ethnicity3,
+                           appEth.ethnicity4,
+                           appEth.ethnicity5)
       .filterNot(invalidCodes.contains(_))
     ethnicities.distinct.size is equalTo(ethnicities.size)
   }

@@ -14,7 +14,9 @@ object V628_4 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val appEth = lar.applicant.ethnicity
-    when(appEth.ethnicity1 is oneOf(InformationNotProvided, EthnicityNotApplicable)) {
+    when(
+      appEth.ethnicity1 is oneOf(InformationNotProvided,
+                                 EthnicityNotApplicable)) {
       (appEth.ethnicity2 is equalTo(EmptyEthnicityValue)) and
         (appEth.ethnicity3 is equalTo(EmptyEthnicityValue)) and
         (appEth.ethnicity4 is equalTo(EmptyEthnicityValue)) and

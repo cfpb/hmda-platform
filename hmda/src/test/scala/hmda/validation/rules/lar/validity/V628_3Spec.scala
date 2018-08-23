@@ -9,29 +9,41 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 class V628_3Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V628_3
 
-  property(
-    "If ethnicity is not applicable, ethnicity observed must not be applicable") {
+  property("Ethnicity codes cannot be repeated") {
     forAll(larGen) { lar =>
-      val applicableLar = lar.copy(
-        applicant = lar.applicant.copy(ethnicity =
-          lar.applicant.ethnicity.copy(ethnicity1 = EthnicityNotApplicable)))
+      val validEthnicity1 = lar.applicant.ethnicity.copy(
+        ethnicity1 = EmptyEthnicityValue,
+        ethnicity2 = EmptyEthnicityValue,
+        ethnicity3 = EmptyEthnicityValue,
+        ethnicity4 = EmptyEthnicityValue,
+        ethnicity5 = EmptyEthnicityValue
+      )
 
-      val unapplicableLar = lar.copy(
-        applicant = lar.applicant.copy(ethnicity =
-          lar.applicant.ethnicity.copy(ethnicity1 = InvalidEthnicityCode)))
-      unapplicableLar.mustPass
+      val validEthnicity2 =
+        lar.applicant.ethnicity.copy(ethnicity1 = HispanicOrLatino,
+                                     ethnicity2 = Mexican,
+                                     ethnicity3 = PuertoRican,
+                                     ethnicity4 = Cuban,
+                                     ethnicity5 = OtherHispanicOrLatino)
 
-      val ethnicityNA = applicableLar.applicant.ethnicity
-        .copy(ethnicityObserved = EthnicityObservedNotApplicable)
-      val ethnicityVis = applicableLar.applicant.ethnicity
-        .copy(ethnicityObserved = VisualOrSurnameEthnicity)
-      lar
-        .copy(applicant = applicableLar.applicant.copy(ethnicity = ethnicityNA))
-        .mustPass
-      lar
-        .copy(
-          applicant = applicableLar.applicant.copy(ethnicity = ethnicityVis))
-        .mustFail
+      val invalidEthnicity =
+        lar.applicant.ethnicity.copy(ethnicity2 = EmptyEthnicityValue,
+                                     ethnicity3 = HispanicOrLatino,
+                                     ethnicity4 = HispanicOrLatino,
+                                     ethnicity5 = EmptyEthnicityValue)
+
+      val validLar1 =
+        lar.copy(applicant = lar.applicant.copy(ethnicity = validEthnicity1))
+      validLar1.mustPass
+
+      val validLar2 =
+        lar.copy(applicant = lar.applicant.copy(ethnicity = validEthnicity2))
+      validLar2.mustPass
+
+      val invalidLar =
+        lar.copy(applicant = lar.applicant.copy(ethnicity = invalidEthnicity))
+      invalidLar.mustFail
+
     }
   }
 }

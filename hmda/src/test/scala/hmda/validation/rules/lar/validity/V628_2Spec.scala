@@ -9,29 +9,27 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 class V628_2Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V628_2
 
-  property(
-    "If ethnicity is not applicable, ethnicity observed must not be applicable") {
+  property("Ethnicities 2-5 must contian valid values") {
     forAll(larGen) { lar =>
-      val applicableLar = lar.copy(
-        applicant = lar.applicant.copy(ethnicity =
-          lar.applicant.ethnicity.copy(ethnicity1 = EthnicityNotApplicable)))
+      val validEthnicity =
+        lar.applicant.ethnicity.copy(ethnicity2 = EmptyEthnicityValue,
+                                     ethnicity3 = EmptyEthnicityValue,
+                                     ethnicity4 = EmptyEthnicityValue,
+                                     ethnicity5 = EmptyEthnicityValue)
 
-      val unapplicableLar = lar.copy(
-        applicant = lar.applicant.copy(ethnicity =
-          lar.applicant.ethnicity.copy(ethnicity1 = InvalidEthnicityCode)))
-      unapplicableLar.mustPass
+      val invalidEthnicity =
+        lar.applicant.ethnicity.copy(ethnicity2 = EmptyEthnicityValue,
+                                     ethnicity3 = EthnicityNoCoApplicant,
+                                     ethnicity4 = InvalidEthnicityCode,
+                                     ethnicity5 = EmptyEthnicityValue)
 
-      val ethnicityNA = applicableLar.applicant.ethnicity
-        .copy(ethnicityObserved = EthnicityObservedNotApplicable)
-      val ethnicityVis = applicableLar.applicant.ethnicity
-        .copy(ethnicityObserved = VisualOrSurnameEthnicity)
-      lar
-        .copy(applicant = applicableLar.applicant.copy(ethnicity = ethnicityNA))
-        .mustPass
-      lar
-        .copy(
-          applicant = applicableLar.applicant.copy(ethnicity = ethnicityVis))
-        .mustFail
+      val validLar =
+        lar.copy(applicant = lar.applicant.copy(ethnicity = validEthnicity))
+      validLar.mustPass
+
+      val invalidLar =
+        lar.copy(applicant = lar.applicant.copy(ethnicity = invalidEthnicity))
+      invalidLar.mustFail
     }
   }
 }
