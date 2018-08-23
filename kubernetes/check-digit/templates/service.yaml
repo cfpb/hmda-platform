@@ -32,10 +32,10 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: check_digit_mapping
-      prefix: /public/uli/checkDigit/
+      prefix: /v2/public/uli/checkDigit/
       service: hmda-check-digit:9091
 spec:
-  type: LoadBalancer
+  type: NodePort
   ports:
   - name: ambassador-chk-digit
     port: 80
