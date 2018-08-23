@@ -33,7 +33,7 @@ volumes: [
 
     stage('Deploy') {
       container('helm') {
-        sh "helm upgrade --install --force --namespace=default --values=kubernetes/institutions-api/values.yaml --set image.tag=${gitBranch} institutions-api-${gitBranch} kubernetes/institutions-api"
+        sh "helm upgrade --install --force --namespace=default --values=kubernetes/institutions-api/values.yaml --set image.tag=${gitBranch} --set postgresql.enabled=false institutions-api-${gitBranch} kubernetes/institutions-api"
       }
     }
 
