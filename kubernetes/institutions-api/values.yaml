@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: hmda/institutions-api
+  repository: hmda/hmda-institutions-api
   tag: 0.1.0
   pullPolicy: IfNotPresent
 
