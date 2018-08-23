@@ -25,20 +25,20 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: ambassador-chk-digit
-  name: ambassador-chk-digit
+    service: {{ .Values.ambassador.name }}
+  name: {{ .Values.ambassador.name }}
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v0
       kind: Mapping
-      name: check_digit_mapping
-      prefix: /v2/public/uli/checkDigit/
-      service: hmda-check-digit:9091
+      name: {{ .Values.ambassador.mapping }}
+      prefix: {{ .Values.ambassador.prefix }}
+      service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
 spec:
   type: NodePort
   ports:
-  - name: ambassador-chk-digit
-    port: 80
-    targetPort: 80
+  - name: {{ .Values.ambassador.name }}
+    port: {{ .Values.ambassador.port }}
+    targetPort: {{ .Values.ambassador.port }}
   selector:
-    service: ambassador-chk-digit
+    service: {{ .Values.ambassador.name }}

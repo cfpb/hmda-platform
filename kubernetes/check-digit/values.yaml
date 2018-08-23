@@ -15,6 +15,12 @@ service:
   targetPort: 9091
   name: http-chk-digit
 
+ambassador:
+  name: ambassador-chk-digit
+  mapping: check_digit_mapping
+  prefix: /v2/public/uli/checkDigit/
+  port: 80
+
 ingress:
   enabled: false
   annotations: {}
