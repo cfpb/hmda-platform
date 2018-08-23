@@ -27,6 +27,11 @@ service:
     name: hmda-service-account
   name: hmda-platform
 
+ambassador:
+  port: 80
+  service:
+    type: NodePort
+
 remoting:
   name: remoting
   protocol: TCP

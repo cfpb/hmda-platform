@@ -67,11 +67,11 @@ metadata:
       prefix: /v2/admin/
       service: {{ .Values.service.name }}:{{ .Values.admin.port }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.ambassador.service.type }}
   ports:
   - name: ambassador-hmda-admin
-    port: 80
-    targetPort: 80
+    port: {{ .Values.ambassador.port }}
+    targetPort: {{ .Values.ambassador.port }}
   selector:
     service: ambassador-hmda-admin
 
@@ -90,11 +90,11 @@ metadata:
       prefix: /v2/filing/
       service: {{ .Values.service.name }}:{{ .Values.filing.port }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.ambassador.service.type }}
   ports:
   - name: ambassador-hmda-filing
-    port: 80
-    targetPort: 80
+    port: {{ .Values.ambassador.port }}
+    targetPort: {{ .Values.ambassador.port }}
   selector:
     service: ambassador-hmda-filing
 
@@ -114,10 +114,10 @@ metadata:
       prefix: /v2/public/
       service: {{ .Values.service.name }}:{{ .Values.public.port }}
 spec:
-  type: LoadBalancer
+  type: {{ .Values.ambassador.service.type }}
   ports:
   - name: ambassador-hmda-public
-    port: 80
-    targetPort: 80
+    port: {{ .Values.ambassador.port }}
+    targetPort: {{ .Values.ambassador.port }}
   selector:
     service: ambassador-hmda-public
