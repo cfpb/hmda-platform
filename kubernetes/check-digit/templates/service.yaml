@@ -33,6 +33,7 @@ metadata:
       kind: Mapping
       name: {{ .Values.ambassador.mapping }}
       prefix: {{ .Values.ambassador.prefix }}
+      rewrite: {{ .Values.ambassador.service.prefix }}
       service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
 spec:
   type: {{ .Values.ambassador.service.type }}
