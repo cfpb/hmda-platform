@@ -32,19 +32,28 @@ metadata:
       ---
       apiVersion: ambassador/v0
       kind: Mapping
-      name: {{ .Values.ambassador.mapping }}
+      name: check_digit_mapping
       method: POST
-      prefix: {{ .Values.ambassador.prefix }}
-      rewrite: {{ .Values.ambassador.service.prefix }}
+      prefix: /v2/public/uli/checkDigit/
+      rewrite: /uli/checkDigit
       service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
       ---
       apiVersion: ambassador/v0
       kind: Mapping
-      name: root
+      name: check_digit_root
       method: GET
       prefix: /v2/public/uli/status/
       rewrite: /
       service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
+      ---
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: check_digit_csv
+      method: POST
+      prefix: /v2/public/uli/checkDigit/csv/
+      rewrite: /uli/checkDigit/csv
+      service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
+
 spec:
   type: {{ .Values.ambassador.service.type }}
   ports:

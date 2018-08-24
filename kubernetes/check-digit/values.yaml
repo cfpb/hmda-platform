@@ -17,12 +17,9 @@ service:
 
 ambassador:
   name: ambassador-chk-digit
-  mapping: check_digit_mapping
-  prefix: /v2/public/uli/checkDigit/
   port: 80
   service:
     type: NodePort
-    prefix: /uli/checkDigit
 
 ingress:
   enabled: false
