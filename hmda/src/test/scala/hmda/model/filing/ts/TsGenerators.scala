@@ -46,7 +46,7 @@ object TsGenerators {
   }
 
   implicit def totalLinesGen: Gen[Int] = {
-    Gen.choose(0, Int.MaxValue)
+    Gen.choose(1, Int.MaxValue)
   }
 
   implicit def taxIdGen: Gen[String] = {
