@@ -5,7 +5,7 @@
 
 Master:
   Name: jenkins-master
-  Image: "jenkinsci/jenkins"
+  Image: "jenkins/jenkins"
   ImageTag: "alpine"
   ImagePullPolicy: "Always"
   Component: "jenkins-master"
@@ -39,13 +39,13 @@ Master:
 # JMXPort: 4000
 # List of plugins to be install during Jenkins master start
   InstallPlugins:
-      - kubernetes:1.6.0
-      - workflow-aggregator:2.5
-      - workflow-job:2.21
-      - credentials-binding:1.16
-      - git:3.8.0
-      - ghprb:1.40.0
-      - blueocean:1.5.0
+     # - kubernetes:1.12.0
+     # - workflow-aggregator:2.5
+     # - workflow-job:2.23
+     # - credentials-binding:1.16
+     # - git:3.9.1
+     # - ghprb:1.40.0
+     # - blueocean:1.5.0
 # Used to approve a list of groovy functions in pipelines used the script-security plugin. Can be viewed under /scriptApproval
   ScriptApproval:
     - "method groovy.json.JsonSlurperClassic parseText java.lang.String"
@@ -100,16 +100,16 @@ Persistence:
   ## A manually managed Persistent Volume and Claim
   ## Requires Persistence.Enabled: true
   ## If defined, PVC must be created manually before volume will be bound
-  # ExistingClaim:
+  ExistingClaim: jenkins-volume-claim
 
   ## If defined, volume.beta.kubernetes.io/storage-class: <StorageClass>
   ## Default: volume.alpha.kubernetes.io/storage-class: default
   ##
-  # StorageClass:
-  AccessMode: ReadWriteOnce
-  Size: 8Gi
+  StorageClass: local-storage
+  #AccessMode: ReadWriteOnce
+  #Size: 8Gi
   volumes:
-#  - name: nothing
+  - name: nothing
 #    emptyDir: {}
   mounts:
 #  - mountPath: /var/nothing
