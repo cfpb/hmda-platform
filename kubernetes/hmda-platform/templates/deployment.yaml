@@ -32,6 +32,16 @@ spec:
               fieldPath: status.podIP
         - name: CASSANDRA_CLUSTER_HOSTS
           value: {{ .Values.cassandra.hosts }}
+        - name: CASSANDRA_CLUSTER_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: cassandra.dev
+              key: username
+        - name: CASSANDRA_CLUSTER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cassandra.dev
+              key: password
         livenessProbe:
           tcpSocket:
             port: {{ .Values.bootstrap.port }}
