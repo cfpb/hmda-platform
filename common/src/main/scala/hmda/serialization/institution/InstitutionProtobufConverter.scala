@@ -26,25 +26,25 @@ object InstitutionProtobufConverter {
   }
 
   def parentToProtobuf(parent: Parent): ParentMessage = {
-    val idRssd = parent.idRssd.getOrElse(0)
+    val idRssd = parent.idRssd
     val name = parent.name.getOrElse("")
     ParentMessage(idRssd, name)
   }
 
   def parentFromProtobuf(msg: ParentMessage): Parent = {
-    val idRssd = if (msg.idRssd != 0) Some(msg.idRssd) else None
+    val idRssd = msg.idRssd
     val name = if (msg.name != "") Some(msg.name) else None
     Parent(idRssd, name)
   }
 
   def topHolderToProtobuf(topHolder: TopHolder): TopHolderMessage = {
-    val idRssd = topHolder.idRssd.getOrElse(0)
+    val idRssd = topHolder.idRssd
     val name = topHolder.name.getOrElse("")
     TopHolderMessage(idRssd, name)
   }
 
   def topHolderFromProtobuf(msg: TopHolderMessage): TopHolder = {
-    val idRssd = if (msg.idRssd != 0) Some(msg.idRssd) else None
+    val idRssd = msg.idRssd
     val name = if (msg.name != "") Some(msg.name) else None
     TopHolder(idRssd, name)
   }
@@ -52,17 +52,17 @@ object InstitutionProtobufConverter {
   def institutionToProtobuf(i: Institution): InstitutionMessage = {
     InstitutionMessage(
       activityYear = i.activityYear,
-      lei = i.LEI.getOrElse(""),
-      agency = i.agency.map(a => a.code).getOrElse(-1),
-      institutionType = i.institutionType.map(x => x.code).getOrElse(-1),
+      lei = i.LEI,
+      agency = i.agency.code,
+      institutionType = i.institutionType.code,
       id2017 = i.institutionId_2017.getOrElse(""),
       taxId = i.taxId.getOrElse(""),
-      rssd = i.rssd.getOrElse(""),
+      rssd = i.rssd,
       emailDomains = i.emailDomains,
       respondent = Some(respondentToProtobuf(i.respondent)),
       parent = Some(parentToProtobuf(i.parent)),
-      assets = i.assets.getOrElse(0),
-      otherLenderCode = i.otherLenderCode.getOrElse(0),
+      assets = i.assets,
+      otherLenderCode = i.otherLenderCode,
       topHolder = Some(topHolderToProtobuf(i.topHolder)),
       hmdaFilter = i.hmdaFiler
     )
@@ -71,19 +71,18 @@ object InstitutionProtobufConverter {
   def institutionFromProtobuf(msg: InstitutionMessage): Institution = {
     Institution.empty.copy(
       activityYear = msg.activityYear,
-      LEI = if (msg.lei == "") None else Some(msg.lei),
-      agency = Some(Agency.valueOf(msg.agency)),
-      institutionType = Some(InstitutionType.valueOf(msg.institutionType)),
+      LEI = msg.lei,
+      agency = Agency.valueOf(msg.agency),
+      institutionType = InstitutionType.valueOf(msg.institutionType),
       institutionId_2017 = if (msg.id2017 == "") None else Some(msg.id2017),
       taxId = if (msg.taxId == "") None else Some(msg.taxId),
-      rssd = if (msg.rssd == "") None else Some(msg.rssd),
+      rssd = msg.rssd,
       emailDomains = msg.emailDomains,
       respondent =
         respondentFromProtobuf(msg.respondent.getOrElse(RespondentMessage())),
       parent = parentFromProtobuf(msg.parent.getOrElse(ParentMessage())),
-      assets = if (msg.assets == 0) None else Some(msg.assets),
-      otherLenderCode =
-        if (msg.otherLenderCode == 0) None else Some(msg.otherLenderCode),
+      assets = msg.assets,
+      otherLenderCode = msg.otherLenderCode,
       topHolder =
         topHolderFromProtobuf(msg.topHolder.getOrElse(TopHolderMessage())),
       hmdaFiler = msg.hmdaFilter
