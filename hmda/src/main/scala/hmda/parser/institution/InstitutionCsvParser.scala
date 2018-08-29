@@ -35,7 +35,7 @@ object InstitutionCsvParser {
       if (instId2017 == "") None else Some(instId2017),
       if (taxId == "") None else Some(taxId),
       if (rssd == "") None else Some(rssd),
-      emailDomains = emailDomains.split(','),
+      emailDomains = emailDomains.split(',').toList,
       Respondent(
         if (respondentName == "") None else Some(respondentName),
         if (respondentState == "") None else Some(respondentState),
