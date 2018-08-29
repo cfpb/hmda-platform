@@ -6,7 +6,7 @@ import hmda.model.filing.lar.enums._
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
-class V635_3Spec extends LarEditCheckSpec {
+class V629_3Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V629_3
 
   property("If other races are blank, race 1 must have a value") {

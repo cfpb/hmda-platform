@@ -6,7 +6,7 @@ import hmda.model.filing.lar.enums._
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
-class V635_1Spec extends LarEditCheckSpec {
+class V629_1Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V629_1
 
   property("The Ethnicity Observed Code must be Valid") {
