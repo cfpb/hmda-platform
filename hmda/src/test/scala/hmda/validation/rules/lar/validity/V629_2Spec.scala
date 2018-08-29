@@ -10,7 +10,7 @@ class V629_2Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V629_2
 
   property(
-    "Is Ethnicity Observed Ethnicity Must Only be Hispanic of Not Hispanic") {
+    "If Ethnicity Observed, Ethnicity Must Only be Hispanic of Not Hispanic") {
     forAll(larGen) { lar =>
       val relevantEthnicityObserved = lar.applicant.ethnicity
         .copy(ethnicityObserved = VisualOrSurnameEthnicity)
