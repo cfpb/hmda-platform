@@ -21,7 +21,7 @@ trait InstitutionComponent {
     def institutionType = column[Int]("institution_type")
     def id2017 = column[String]("id2017")
     def taxId = column[String]("tax_id")
-    def rssd = column[String]("rssd")
+    def rssd = column[Int]("rssd")
     def respondentName = column[String]("respondent_name")
     def respondentState = column[String]("respondent_state")
     def respondentCity = column[String]("respondent_city")
