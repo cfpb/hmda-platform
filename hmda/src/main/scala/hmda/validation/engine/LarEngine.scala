@@ -18,8 +18,8 @@ object LarEngine extends ValidationApi[LoanApplicationRegister] {
       lar: LoanApplicationRegister): HmdaValidation[LoanApplicationRegister] = {
     val validations = Vector(
       checkSyntactical(lar),
-      checkValidity(lar),
-      checkQuality(lar)
+      checkValidity(lar) //,
+      //checkQuality(lar)
     )
 
     validations.par.reduceLeft(_ combine _)

@@ -41,6 +41,9 @@ class LarValidationHttpApiSpec
   val csv = tsCsv + larsCsv.mkString("")
   val badCsv = tsCsv + larsCsv.mkString("") + s"$badLar"
 
+  val validLar =
+    "2|95GVQQ61RS6CWQF0SZD9|95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92|20180914|3|1|2|2|1|57042|1|20180914|1234 Hocus Potato Way|Tatertown|RI|29801|36085|36085011402|3||||||11||14|12|13||2|2|6||||||||8||||||||3|4|2|2|1|1|85|104|NA|4|20.2|2|1|746|8888|7||9||10|||||NA|8536|8597|2362|9120|18.18|29|NA|65|329|34|2|1|2|1|590943|3|5|24|18|1|2|NA|6||||||17||||||2|2|2"
+
   val file = multipartFile(csv, "auto-gen-lars.txt")
   val badFile = multipartFile(badCsv, "bad-lars.txt")
 
@@ -75,6 +78,13 @@ class LarValidationHttpApiSpec
         status mustBe StatusCodes.BadRequest
         responseAs[LarValidateResponse] mustBe LarValidateResponse(List(
           "An incorrect number of data fields were reported: 113 data fields were found, when 110 data fields were expected."))
+      }
+    }
+
+    "validate a lar" in {
+      Post("/lar/validate", LarValidateRequest(validLar)) ~> larRoutes ~> check {
+        status mustBe StatusCodes.OK
+        println(response)
       }
     }
 
