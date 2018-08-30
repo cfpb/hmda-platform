@@ -12,18 +12,12 @@ class V632_1Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val invalidEthnicity1 = lar.coApplicant.ethnicity
         .copy(ethnicityObserved = InvalidEthnicityObservedCode)
-      val invalidEthnicity2 = lar.coApplicant.ethnicity
-        .copy(ethnicityObserved = EthnicityObservedNoCoApplicant)
       val validEthnicity = lar.coApplicant.ethnicity
         .copy(ethnicityObserved = VisualOrSurnameEthnicity)
       val invalidLar1 =
         lar.copy(
           coApplicant = lar.coApplicant.copy(ethnicity = invalidEthnicity1))
       invalidLar1.mustFail
-      val invalidLar2 =
-        lar.copy(
-          coApplicant = lar.coApplicant.copy(ethnicity = invalidEthnicity2))
-      invalidLar2.mustFail
       val validLar =
         lar.copy(coApplicant = lar.coApplicant.copy(ethnicity = validEthnicity))
       validLar.mustPass
