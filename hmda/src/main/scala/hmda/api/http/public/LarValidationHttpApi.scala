@@ -80,10 +80,10 @@ trait LarValidationHttpApi extends HmdaTimeDirectives {
   private def validate(lar: LoanApplicationRegister,
                        checkType: String): Route = {
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
-      case "all"         => validateLar(lar)
-      case "syntactical" => checkSyntactical(lar)
-      case "validity"    => checkValidity(lar)
-      case "quality"     => checkQuality(lar)
+      case "all"         => validateAll(lar)
+      case "syntactical" => checkSyntactical(lar, lar.loan.ULI)
+      case "validity"    => checkValidity(lar, lar.loan.ULI)
+      case "quality"     => checkQuality(lar, lar.loan.ULI)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
