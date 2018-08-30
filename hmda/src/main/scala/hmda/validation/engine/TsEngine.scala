@@ -21,7 +21,7 @@ object TsEngine extends ValidationEngine[TransmittalSheet] {
     V607
   )
 
-  override def validateAll(
+  override def checkAll(
       ts: TransmittalSheet): TsEngine.HmdaValidation[TransmittalSheet] = {
     val validations = Vector(
       checkSyntactical(ts, ts.LEI),

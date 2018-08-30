@@ -80,7 +80,7 @@ trait LarValidationHttpApi extends HmdaTimeDirectives {
   private def validate(lar: LoanApplicationRegister,
                        checkType: String): Route = {
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
-      case "all"         => validateAll(lar)
+      case "all"         => checkAll(lar)
       case "syntactical" => checkSyntactical(lar, lar.loan.ULI)
       case "validity"    => checkValidity(lar, lar.loan.ULI)
       case "quality"     => checkQuality(lar, lar.loan.ULI)

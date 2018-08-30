@@ -61,7 +61,7 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V695
   )
 
-  override def validateAll(
+  override def checkAll(
       lar: LoanApplicationRegister): HmdaValidation[LoanApplicationRegister] = {
     val validations = Vector(
       checkSyntactical(lar, lar.loan.ULI),

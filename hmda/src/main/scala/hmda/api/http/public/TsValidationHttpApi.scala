@@ -78,7 +78,7 @@ trait TsValidationHttpApi extends HmdaTimeDirectives {
 
   private def validate(ts: TransmittalSheet, chekType: String): Route = {
     val validation: HmdaValidation[TransmittalSheet] = chekType match {
-      case "all"         => validateAll(ts)
+      case "all"         => checkAll(ts)
       case "syntactical" => checkSyntactical(ts, ts.LEI)
       case "validity"    => checkValidity(ts, ts.LEI)
     }
