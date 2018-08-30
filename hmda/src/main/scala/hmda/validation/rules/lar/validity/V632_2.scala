@@ -15,8 +15,8 @@ import hmda.validation.dsl.PredicateSyntax._
 object V632_2 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V632_2"
   override def parent: String = "V632"
-  override def apply(input: LoanApplicationRegister): ValidationResult = {
-    val coEthnicity = input.coApplicant.ethnicity
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    val coEthnicity = lar.coApplicant.ethnicity
     val ethnicity1Values = List(HispanicOrLatino, NotHispanicOrLatino)
     val ethnicity2Values =
       List(HispanicOrLatino, NotHispanicOrLatino, EmptyEthnicityValue)

@@ -19,8 +19,8 @@ object V632_3 extends EditCheck[LoanApplicationRegister] {
     NotHispanicOrLatino,
     InformationNotProvided
   )
-  override def apply(input: LoanApplicationRegister): ValidationResult = {
-    val coEthnicity = input.coApplicant.ethnicity
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    val coEthnicity = lar.coApplicant.ethnicity
     when(coEthnicity.ethnicityObserved is equalTo(NotVisualOrSurnameEthnicity)) {
       (coEthnicity.ethnicity1 is containedIn(validEthnicityList)) or
         (coEthnicity.otherHispanicOrLatino not empty)
