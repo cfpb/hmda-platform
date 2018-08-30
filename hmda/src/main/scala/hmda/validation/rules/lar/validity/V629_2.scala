@@ -18,8 +18,8 @@ object V629_2 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V629"
 
-  override def apply(input: LoanApplicationRegister): ValidationResult = {
-    val ethnicity = input.applicant.ethnicity
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    val ethnicity = lar.applicant.ethnicity
     val ethnicity1Values = List(HispanicOrLatino, NotHispanicOrLatino)
     val ethnicity2Values =
       List(HispanicOrLatino, NotHispanicOrLatino, EmptyEthnicityValue)

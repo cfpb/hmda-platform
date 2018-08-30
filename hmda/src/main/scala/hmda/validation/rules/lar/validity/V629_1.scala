@@ -17,11 +17,11 @@ object V629_1 extends EditCheck[LoanApplicationRegister] {
 
   override def parent: String = "V629"
 
-  override def apply(input: LoanApplicationRegister): ValidationResult = {
-    (input.applicant.ethnicity.ethnicityObserved is oneOf(
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    lar.applicant.ethnicity.ethnicityObserved is oneOf(
       VisualOrSurnameEthnicity,
       NotVisualOrSurnameEthnicity,
-      EthnicityObservedNotApplicable))
+      EthnicityObservedNotApplicable)
   }
 
 }

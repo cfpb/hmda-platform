@@ -9,7 +9,8 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 class V629_3Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V629_3
 
-  property("If Ethnicity not Observed There must be a Valid Value for Ethnicity") {
+  property(
+    "If Ethnicity not Observed There must be a Valid Value for Ethnicity") {
     forAll(larGen) { lar =>
       val relevantEthnicityObserved = lar.applicant.ethnicity
         .copy(ethnicityObserved = NotVisualOrSurnameEthnicity)

@@ -23,8 +23,8 @@ object V629_3 extends EditCheck[LoanApplicationRegister] {
     InformationNotProvided
   )
 
-  override def apply(input: LoanApplicationRegister): ValidationResult = {
-    val ethnicity = input.applicant.ethnicity
+  override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    val ethnicity = lar.applicant.ethnicity
 
     when(ethnicity.ethnicityObserved is equalTo(NotVisualOrSurnameEthnicity)) {
       (ethnicity.ethnicity1 is containedIn(validEthnicityList)) or
