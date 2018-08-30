@@ -25,7 +25,7 @@ trait ValidationApi[A] {
                validationErrorType: ValidationErrorType): HmdaValidation[B] = {
     convertResult(input,
                   editCheck(input),
-                  editCheck.parent,
+                  editCheck.name,
                   errorId,
                   validationErrorType)
   }
