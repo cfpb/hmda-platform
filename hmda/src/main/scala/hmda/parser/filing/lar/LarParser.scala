@@ -84,7 +84,7 @@ trait LarParser {
       parserValidationError: ParserValidationError)
     : LarParserValidationResult[A] = {
     if (value == "") {
-      larCodeEnum.valueOf(-1).validNel
+      larCodeEnum.valueOf(0).validNel
     } else {
       validateLarCode(larCodeEnum, value, parserValidationError)
     }
