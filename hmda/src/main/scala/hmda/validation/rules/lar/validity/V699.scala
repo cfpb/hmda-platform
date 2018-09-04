@@ -29,19 +29,19 @@ object V699 extends EditCheck[LoanApplicationRegister] {
       UnableToDetermineOrUnknown,
       OtherAutomatedUnderwritingResult
     )
-    when(lar.AUS.aus1 is equalTo(OtherAUS)){
+    when(lar.AUS.aus1 is equalTo(OtherAUS)) {
       lar.ausResult.ausResult1 is containedIn(validAUSResults)
-    } or
-      when(lar.AUS.aus2 is equalTo(OtherAUS)){
-      lar.ausResult.ausResult2 is containedIn(validAUSResults)
-      } or
-      when(lar.AUS.aus3 is equalTo(OtherAUS)){
+    } and
+      when(lar.AUS.aus2 is equalTo(OtherAUS)) {
+        lar.ausResult.ausResult2 is containedIn(validAUSResults)
+      } and
+      when(lar.AUS.aus3 is equalTo(OtherAUS)) {
         lar.ausResult.ausResult3 is containedIn(validAUSResults)
-      } or
-      when(lar.AUS.aus4 is equalTo(OtherAUS)){
+      } and
+      when(lar.AUS.aus4 is equalTo(OtherAUS)) {
         lar.ausResult.ausResult4 is containedIn(validAUSResults)
-      } or
-      when(lar.AUS.aus5 is equalTo(OtherAUS)){
+      } and
+      when(lar.AUS.aus5 is equalTo(OtherAUS)) {
         lar.ausResult.ausResult5 is containedIn(validAUSResults)
       }
   }
