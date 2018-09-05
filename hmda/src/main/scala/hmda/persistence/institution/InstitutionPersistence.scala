@@ -57,13 +57,12 @@ object InstitutionPersistence {
             }
           } else {
             Effect.none.andThen {
-              ctx.log.warning(
-                s"Institution with LEI: ${i.LEI.getOrElse("")} does not exist")
-              replyTo ! InstitutionNotExists(i.LEI.getOrElse(""))
+              ctx.log.warning(s"Institution with LEI: ${i.LEI} does not exist")
+              replyTo ! InstitutionNotExists(i.LEI)
             }
           }
         case DeleteInstitution(lei, replyTo) =>
-          if (state.institution.map(i => i.LEI).contains(Some(lei))) {
+          if (state.institution.map(i => i.LEI).contains(lei)) {
             Effect.persist(InstitutionDeleted(lei)).andThen {
               ctx.log.debug(s"Institution Deleted: $lei")
               replyTo ! InstitutionDeleted(lei)

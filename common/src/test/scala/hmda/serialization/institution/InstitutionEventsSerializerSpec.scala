@@ -38,7 +38,7 @@ class InstitutionEventsSerializerSpec
 
   property("InstitutionDeleted must serialize to and from binary") {
     forAll(institutionGen) { institution =>
-      val deleted = InstitutionDeleted(institution.LEI.getOrElse(""))
+      val deleted = InstitutionDeleted(institution.LEI)
       val bytesDeleted = serializer.toBinary(deleted)
       serializer.fromBinary(bytesDeleted, serializer.InstitutionDeletedManifest) mustBe deleted
     }
@@ -46,12 +46,12 @@ class InstitutionEventsSerializerSpec
 
   property("InstitutionNotExists must serialize to and from binary") {
     forAll(institutionGen) { institution =>
-      val notExists = InstitutionNotExists(institution.LEI.getOrElse(""))
+      val notExists = InstitutionNotExists(institution.LEI)
       val bytesNotExist = serializer.toBinary(notExists)
       serializer.fromBinary(
         bytesNotExist,
         serializer.InstitutionNotExistsManifest) mustBe InstitutionNotExists(
-        institution.LEI.getOrElse(""))
+        institution.LEI)
     }
   }
 

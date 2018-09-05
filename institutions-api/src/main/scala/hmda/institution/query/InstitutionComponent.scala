@@ -21,7 +21,7 @@ trait InstitutionComponent {
     def institutionType = column[Int]("institution_type")
     def id2017 = column[String]("id2017")
     def taxId = column[String]("tax_id")
-    def rssd = column[String]("rssd")
+    def rssd = column[Int]("rssd")
     def respondentName = column[String]("respondent_name")
     def respondentState = column[String]("respondent_state")
     def respondentCity = column[String]("respondent_city")
@@ -129,6 +129,24 @@ trait InstitutionComponent {
                                        emailEntities.map(_.emailDomain)))
     }
 
+  }
+
+  def findByFields(lei: String,
+                   name: String,
+                   taxId: String,
+                   emailDomain: String)(
+      implicit ec: ExecutionContext,
+      institutionRepository: InstitutionRepository,
+      institutionEmailsRepository: InstitutionEmailsRepository)
+    : Future[Seq[Institution]] = {
+    val emailFiltered = findByEmail(emailDomain)
+    for {
+      emailEntities <- emailFiltered
+      filtered = emailEntities.filter(
+        i =>
+          i.LEI.getOrElse("") == lei && i.respondent.name
+            .getOrElse("") == name && i.taxId.getOrElse("") == taxId)
+    } yield filtered
   }
 
   private def extractDomain(email: String): String = {
