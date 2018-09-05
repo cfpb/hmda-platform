@@ -12,7 +12,15 @@ class InstitutionCsvParserSpec
   property("Institution CSV Parser must parse values into CSV") {
     forAll(institutionGen) { institution =>
       val csv = institution.toCSV
-      InstitutionCsvParser(csv) mustBe institution
+      InstitutionCsvParser(csv) must equal(institution)
+    }
+  }
+
+  property("Empty emails should parse correctly") {
+    forAll(institutionGen) { institution =>
+      val i = institution.copy(emailDomains = List())
+      val csv = i.toCSV
+      InstitutionCsvParser(csv) must equal(i)
     }
   }
 

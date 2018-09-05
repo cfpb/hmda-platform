@@ -25,6 +25,9 @@ object InstitutionCsvParser {
     val topHolderName = values(16)
     val hmdaFiler = values(17)
 
+    val emails =
+      if (emailDomains.isEmpty) List() else emailDomains.split(',').toList
+
     Institution(
       acticityYear,
       lei,
@@ -33,7 +36,7 @@ object InstitutionCsvParser {
       if (instId2017 == "") None else Some(instId2017),
       if (taxId == "") None else Some(taxId),
       rssd.toInt,
-      emailDomains.split(',').toList,
+      emails,
       Respondent(
         if (respondentName == "") None else Some(respondentName),
         if (respondentState == "") None else Some(respondentState),
