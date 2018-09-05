@@ -65,7 +65,7 @@ class InstitutionAdminHttpApiSpec
 
   val lei = "AAA"
   val sampleInstitution =
-    institutionGen.sample.getOrElse(Institution.empty).copy(LEI = Some(lei))
+    institutionGen.sample.getOrElse(Institution.empty).copy(LEI = lei)
 
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
@@ -80,7 +80,7 @@ class InstitutionAdminHttpApiSpec
     }
 
     "Get an institution" in {
-      Get(s"/institutions/${sampleInstitution.LEI.getOrElse("")}") ~> institutionAdminRoutes ~> check {
+      Get(s"/institutions/${sampleInstitution.LEI}") ~> institutionAdminRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[Institution] mustBe sampleInstitution
       }
