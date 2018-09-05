@@ -13,7 +13,7 @@ object InstitutionEntityGenerators {
       institutionType <- institutionTypeGen
       id2017 <- Gen.alphaStr
       taxId <- Gen.alphaStr
-      rssd <- Gen.alphaStr
+      rssd <- Gen.choose(0, Int.MaxValue)
       respondentName <- Gen.alphaStr.suchThat(!_.isEmpty)
       respondentState <- stateGen
       respondentCity <- Gen.alphaStr.suchThat(!_.isEmpty)

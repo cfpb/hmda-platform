@@ -62,6 +62,23 @@ class InstitutionQueryHttpApiSpec
         responseAs[InstitutionsResponse].institutions.size mustBe 2
       }
     }
+
+    "search by fields values" in {
+      Get(
+        "/institutions?domain=aaa.com&lei=AAA&respondentName=RespA&taxId=taxIdA") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.OK
+        val institutions = responseAs[InstitutionsResponse].institutions
+        institutions.size mustBe 1
+        institutions.head.LEI mustBe Some("AAA")
+        institutions.head.taxId mustBe Some("taxIdA")
+        institutions.head.respondent.name mustBe Some("RespA")
+        institutions.head.emailDomains mustBe List("aaa.com")
+      }
+      Get(
+        "/institutions?domain=xxx.com&lei=XXX&respondentName=RespX&taxId=taxIdX") ~> institutionPublicRoutes ~> check {
+        status mustBe StatusCodes.NotFound
+      }
+    }
   }
 
 }

@@ -172,7 +172,7 @@ class LarFormatValidatorSpec
     validateLarCodeOrEmptyField(DenialReasonEnum, badValue(), InvalidDenial) mustBe Invalid(
       NonEmptyList.of(InvalidDenial)
     )
-    validateLarCodeOrEmptyField(DenialReasonEnum, "", InvalidDenial) mustBe Valid(
+    validateLarCodeOrEmptyField(DenialReasonEnum, "-1", InvalidDenial) mustBe Valid(
       InvalidDenialReasonCode)
   }
   property("InvalidTotalLoanCosts") {
@@ -333,7 +333,7 @@ class LarFormatValidatorSpec
     )
     validateLarCodeOrEmptyField(
       AutomatedUnderwritingResultEnum,
-      "",
+      "-1",
       InvalidAutomatedUnderwritingSystem) mustBe Valid(
       InvalidAutomatedUnderwritingResultCode)
 
@@ -370,7 +370,7 @@ class LarFormatValidatorSpec
     )
     validateLarCodeOrEmptyField(
       AutomatedUnderwritingResultEnum,
-      "",
+      "-1",
       InvalidAutomatedUnderwritingSystemResult) mustBe Valid(
       InvalidAutomatedUnderwritingResultCode)
   }

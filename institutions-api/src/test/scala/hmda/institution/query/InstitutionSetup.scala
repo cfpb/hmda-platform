@@ -3,8 +3,8 @@ package hmda.institution.query
 import hmda.institution.query.InstitutionEntityGenerators.institutionEntityGen
 import hmda.query.DbConfiguration.dbConfig
 import slick.dbio.DBIOAction
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent.Await
 
 trait InstitutionSetup extends InstitutionComponent {
@@ -18,10 +18,14 @@ trait InstitutionSetup extends InstitutionComponent {
   val instA = institutionEntityGen.sample
     .getOrElse(InstitutionEntity())
     .copy(lei = "AAA")
+    .copy(respondentName = "RespA")
+    .copy(taxId = "taxIdA")
 
   val instB = institutionEntityGen.sample
     .getOrElse(InstitutionEntity())
     .copy(lei = "BBB")
+    .copy(respondentName = "RespB")
+    .copy(taxId = "taxIdB")
 
   def setup() = {
     import dbConfig.profile.api._

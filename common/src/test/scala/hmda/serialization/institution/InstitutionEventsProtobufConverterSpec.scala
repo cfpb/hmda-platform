@@ -44,7 +44,7 @@ class InstitutionEventsProtobufConverterSpec
 
   property("InstitutionDeleted must convert to and protobuf") {
     forAll(institutionGen) { institution =>
-      val lei = institution.LEI.getOrElse("")
+      val lei = institution.LEI
       val deleted = InstitutionDeleted(lei)
       val protobuf = institutionDeletedToProtobuf(deleted).toByteArray
       institutionDeletedFromProtobuf(
@@ -55,12 +55,10 @@ class InstitutionEventsProtobufConverterSpec
   property("InstitutionNotExists must convert to and protobuf") {
     forAll(institutionGen) { institution =>
       val protobuf =
-        institutionNotExistsToProtobuf(
-          InstitutionNotExists(institution.LEI.getOrElse(""))).toByteArray
+        institutionNotExistsToProtobuf(InstitutionNotExists(institution.LEI)).toByteArray
       institutionNotExistsFromProtobuf(
         InstitutionNotExistsMessage
-          .parseFrom(protobuf)) mustBe InstitutionNotExists(
-        institution.LEI.getOrElse(""))
+          .parseFrom(protobuf)) mustBe InstitutionNotExists(institution.LEI)
     }
   }
 

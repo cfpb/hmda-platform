@@ -1,10 +1,7 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  PreapprovalNotRequested,
-  PreapprovalRequested
-}
+import hmda.model.filing.lar.enums.PreapprovalNotRequested
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult

@@ -48,7 +48,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
         val institutionPersistence = sharding.entityRefFor(
           InstitutionPersistence.ShardingTypeName,
-          s"${InstitutionPersistence.name}-${institution.LEI.getOrElse("")}")
+          s"${InstitutionPersistence.name}-${institution.LEI}")
 
         timedPost { uri =>
           val fCreated: Future[InstitutionCreated] = institutionPersistence ? (
@@ -86,7 +86,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
           } ~
           timedDelete { uri =>
             val fDeleted: Future[InstitutionEvent] = institutionPersistence ? (
-                ref => DeleteInstitution(institution.LEI.getOrElse(""), ref)
+                ref => DeleteInstitution(institution.LEI, ref)
             )
 
             onComplete(fDeleted) {

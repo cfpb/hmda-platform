@@ -9,7 +9,7 @@ object TopHolderCodec {
   implicit val topHolderEncoder: Encoder[TopHolder] =
     new Encoder[TopHolder] {
       override def apply(r: TopHolder): Json = Json.obj(
-        ("idRssd", Json.fromString(r.idRssd.map(_.toString).getOrElse(""))),
+        ("idRssd", Json.fromInt(r.idRssd)),
         ("name", Json.fromString(r.name.getOrElse("")))
       )
     }
@@ -18,12 +18,11 @@ object TopHolderCodec {
     new Decoder[TopHolder] {
       override def apply(c: HCursor): Result[TopHolder] =
         for {
-          maybeIdRssd <- c.downField("idRssd").as[String]
+          idRssd <- c.downField("idRssd").as[Int]
           maybeName <- c.downField("name").as[String]
         } yield {
-          val idRssd = if (maybeIdRssd == "") None else Some(maybeIdRssd)
           val name = if (maybeName == "") None else Some(maybeName)
-          TopHolder(idRssd.map(_.toInt), name)
+          TopHolder(idRssd, name)
         }
     }
 
