@@ -9,6 +9,7 @@ Master:
   ImageTag: "alpine"
   ImagePullPolicy: "Always"
   Component: "jenkins-master"
+  JenkinsUriPrefix: "/jenkins"
   UseSecurity: true
   AdminUser: admin
   AdminPassword: admin
