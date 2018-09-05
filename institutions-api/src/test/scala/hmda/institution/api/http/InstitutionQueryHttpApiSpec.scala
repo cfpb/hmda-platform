@@ -69,7 +69,7 @@ class InstitutionQueryHttpApiSpec
         status mustBe StatusCodes.OK
         val institutions = responseAs[InstitutionsResponse].institutions
         institutions.size mustBe 1
-        institutions.head.LEI mustBe Some("AAA")
+        institutions.head.LEI mustBe "AAA"
         institutions.head.taxId mustBe Some("taxIdA")
         institutions.head.respondent.name mustBe Some("RespA")
         institutions.head.emailDomains mustBe List("aaa.com")
