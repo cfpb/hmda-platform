@@ -144,7 +144,7 @@ trait InstitutionComponent {
       emailEntities <- emailFiltered
       filtered = emailEntities.filter(
         i =>
-          i.LEI.getOrElse("") == lei && i.respondent.name
+          i.LEI == lei && i.respondent.name
             .getOrElse("") == name && i.taxId.getOrElse("") == taxId)
     } yield filtered
   }
