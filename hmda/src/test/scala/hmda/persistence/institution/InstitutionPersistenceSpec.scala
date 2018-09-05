@@ -27,9 +27,9 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     TestProbe[Option[Institution]]("institution-get-probe")
   val sampleInstitution =
     institutionGen
-      .suchThat(i => i.LEI.isDefined)
+      .suchThat(i => i.LEI != "")
       .sample
-      .getOrElse(Institution.empty.copy(LEI = Some("")))
+      .getOrElse(Institution.empty.copy(LEI = ""))
   val modified =
     sampleInstitution.copy(emailDomains = List("sample@bank.com"))
 
@@ -65,8 +65,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
         system.spawn(InstitutionPersistence.behavior("XXXXX"), actorName)
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
-      institutionProbe.expectMessage(
-        InstitutionNotExists(modified.LEI.getOrElse("")))
+      institutionProbe.expectMessage(InstitutionNotExists(modified.LEI))
     }
 
     "be deleted" in {
@@ -77,10 +76,9 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
                                                  institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
-      institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
+      institutionPersistence ! DeleteInstitution(modified.LEI,
                                                  institutionProbe.ref)
-      institutionProbe.expectMessage(
-        InstitutionDeleted(modified.LEI.getOrElse("")))
+      institutionProbe.expectMessage(InstitutionDeleted(modified.LEI))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
@@ -90,10 +88,9 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("XXXXX"), actorName)
 
-      institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
+      institutionPersistence ! DeleteInstitution(modified.LEI,
                                                  institutionProbe.ref)
-      institutionProbe.expectMessage(
-        InstitutionNotExists(modified.LEI.getOrElse("")))
+      institutionProbe.expectMessage(InstitutionNotExists(modified.LEI))
     }
 
   }
@@ -125,10 +122,9 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       val institutionPersistence =
         createShardedInstitution(typedSystem, "ABC12345")
 
-      institutionPersistence ! DeleteInstitution(modified.LEI.getOrElse(""),
+      institutionPersistence ! DeleteInstitution(modified.LEI,
                                                  institutionProbe.ref)
-      institutionProbe.expectMessage(
-        InstitutionDeleted(modified.LEI.getOrElse("")))
+      institutionProbe.expectMessage(InstitutionDeleted(modified.LEI))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)

@@ -2,10 +2,7 @@ package hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{
-  InvalidConstructionMethodCode,
-  InvalidLoanPurposeCode
-}
+import hmda.model.filing.lar.enums.InvalidConstructionMethodCode
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 

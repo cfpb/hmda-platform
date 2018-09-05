@@ -63,6 +63,28 @@ class PredicateRegexSpec
     }
   }
 
+  property("A valid tax id must pass the tax id regex") {
+    forAll(taxIdGen) { taxId =>
+      validTaxId.check(taxId) mustBe true
+    }
+  }
+
+  property("An invalid tax id must fail the tax id regex") {
+    val testCases = List(
+      "11-111111a",
+      "123456789",
+      "1-23456789",
+      "12--3456789",
+      "ab-cdefghi",
+      "",
+      "-",
+      "2-7",
+      "12-cdefghi",
+      "12.3456789"
+    )
+    testCases.foreach(validTaxId.check(_) mustBe false)
+  }
+
   property("A numeric string will fail the phone regex") {
     forAll(Gen.numStr) { phone =>
       validPhoneNumber.check(phone) mustBe false
