@@ -131,6 +131,24 @@ trait InstitutionComponent {
 
   }
 
+  def findByFields(lei: String,
+                   name: String,
+                   taxId: String,
+                   emailDomain: String)(
+      implicit ec: ExecutionContext,
+      institutionRepository: InstitutionRepository,
+      institutionEmailsRepository: InstitutionEmailsRepository)
+    : Future[Seq[Institution]] = {
+    val emailFiltered = findByEmail(emailDomain)
+    for {
+      emailEntities <- emailFiltered
+      filtered = emailEntities.filter(
+        i =>
+          i.LEI == lei && i.respondent.name
+            .getOrElse("") == name && i.taxId.getOrElse("") == taxId)
+    } yield filtered
+  }
+
   private def extractDomain(email: String): String = {
     val parts = email.toLowerCase.split("@")
     if (parts.length > 1)
