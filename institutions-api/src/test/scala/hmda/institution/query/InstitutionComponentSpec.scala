@@ -13,7 +13,7 @@ class InstitutionComponentSpec extends InstitutionAsyncSetup {
       findByFields("AAA", "RespA", "taxIdA", "aaa.com").map { xs =>
         xs.size mustBe 1
         val result = xs.head
-        result.LEI mustBe Some("AAA")
+        result.LEI mustBe "AAA"
         result.taxId mustBe Some("taxIdA")
         result.respondent.name mustBe Some("RespA")
         result.emailDomains mustBe List("aaa.com")
