@@ -4,7 +4,11 @@ import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.util.Timeout
-import hmda.api.http.model.public.{TsValidateRequest, TsValidateResponse}
+import hmda.api.http.model.public.{
+  SingleValidationErrorResult,
+  TsValidateRequest,
+  TsValidateResponse
+}
 import org.scalatest.{MustMatchers, WordSpec}
 
 import scala.concurrent.ExecutionContext
@@ -40,8 +44,11 @@ class TsValidationHttpApiSpec
   )
 
   val tsCsv = ts.toCSV
-  val invalidCsv =
+  val invalidParseCsv =
     "A|Bank 0|2018|4|Jane Smith|111-111-1111|jane.smith@bank0.com|1600 Pennsylvania Ave NW|Washington|DC|20500|A|100|99-999999|10Bx939c5543TqA1144M"
+
+  val invalidCsv =
+    "0|Bank 0|2018|4|Jane|111-111-1111|janesmith@bank.com|123 Main St|Washington|DC|20001|9|100|99-999999|10Bx939c5543TqA1144M"
 
   "TS HTTP Service" must {
     "return OPTIONS" in {
@@ -58,7 +65,7 @@ class TsValidationHttpApiSpec
     }
 
     "fail to parse an invalid pipe delimited TS and return list of errors" in {
-      Post("/ts/parse", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
+      Post("/ts/parse", TsValidateRequest(invalidParseCsv)) ~> tsRoutes ~> check {
         status mustBe StatusCodes.BadRequest
         responseAs[TsValidateResponse].errorMessages mustBe List(
           "id is not numeric",
@@ -73,6 +80,28 @@ class TsValidationHttpApiSpec
         status mustBe StatusCodes.BadRequest
         responseAs[TsValidateResponse].errorMessages mustBe List(
           "An incorrect number of data fields were reported: 18 data fields were found, when 15 data fields were expected.")
+      }
+    }
+
+    "return all errors when TS is invalid" in {
+      Post("/ts/validate", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 1
+        responseAs[SingleValidationErrorResult].validity.errors.size mustBe 1
+      }
+    }
+    "filter syntactical TS errors" in {
+      Post("/ts/validate?check=syntactical", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 1
+        responseAs[SingleValidationErrorResult].validity.errors.size mustBe 0
+      }
+    }
+    "filter validity TS errors" in {
+      Post("/ts/validate?check=validity", TsValidateRequest(invalidCsv)) ~> tsRoutes ~> check {
+        status mustBe StatusCodes.OK
+        responseAs[SingleValidationErrorResult].syntactical.errors.size mustBe 0
+        responseAs[SingleValidationErrorResult].validity.errors.size mustBe 1
       }
     }
   }
