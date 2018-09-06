@@ -137,6 +137,16 @@ helm upgrade --install --wait ambassador datawire/ambassador
 
 * Create Persistent Volume for Jenkins
 
+```shell
+kubectl apply -f kubernetes/jenkins-persistent-volume
+```
+
+* Create Persistent Volume Claim for Jenkins
+
+```shell
+kubectl apply -f kubernetes/jenkins-persistent-volume-claim
+```
+
 
 * Install Jenkins Chart
 
