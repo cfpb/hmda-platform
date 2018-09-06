@@ -82,6 +82,6 @@ object LarValidationUtils {
   }
 
   def badValue(): String = {
-    Gen.alphaStr.sample.getOrElse("a")
+    Gen.alphaStr.suchThat(!_.isEmpty).sample.getOrElse("a")
   }
 }
