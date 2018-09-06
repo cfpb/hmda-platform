@@ -6,7 +6,7 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.validation.{Syntactical, ValidationError, Validity}
 import hmda.validation.api.ValidationApi
 import hmda.validation.rules.ts.syntactical.S300
-import hmda.validation.rules.ts.validity.{V600, V601, V602}
+import hmda.validation.rules.ts.validity._
 
 object TsEngine extends ValidationApi {
 
@@ -18,8 +18,7 @@ object TsEngine extends ValidationApi {
   def validateTs(ts: TransmittalSheet): HmdaValidation[TransmittalSheet] = {
     val validations = Vector(
       checkSyntactical(ts),
-      checkValidity(ts) //,
-      //checkQuality(ts)
+      checkValidity(ts)
     )
 
     validations.par.reduceLeft(_ combine _)
@@ -42,7 +41,12 @@ object TsEngine extends ValidationApi {
     val checksToRun = Vector(
       V600,
       V601,
-      V602
+      V602,
+      V603,
+      V604,
+      V605,
+      V606,
+      V607
     )
 
     val checks = checksToRun.par.map(check(_, ts, ts.LEI, Validity)).toList
@@ -50,7 +54,5 @@ object TsEngine extends ValidationApi {
     checks.par.reduceLeft(_ combine _)
 
   }
-
-  def checkQuality(ts: TransmittalSheet): HmdaValidation[TransmittalSheet] = ???
 
 }

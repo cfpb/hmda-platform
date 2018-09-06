@@ -10,11 +10,20 @@ import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.model.public.{TsValidateRequest, TsValidateResponse}
+import hmda.api.http.model.public.{
+  SingleValidationErrorResult,
+  TsValidateRequest,
+  TsValidateResponse,
+  ValidationErrorSummary
+}
 import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.validation._
+import hmda.parser.ParserErrorModel
+import hmda.validation.engine.TsEngine._
 
 import scala.concurrent.ExecutionContext
 
@@ -29,15 +38,12 @@ trait TsValidationHttpApi extends HmdaTimeDirectives {
   //ts/parse
   val parseTsRoute =
     path("parse") {
-      timedPost { uri =>
+      timedPost { _ =>
         entity(as[TsValidateRequest]) { req =>
           TsCsvParser(req.ts) match {
             case Right(ts) => complete(ToResponseMarshallable(ts))
             case Left(errors) =>
-              val errorList = errors.map(e => e.errorMessage)
-              complete(
-                ToResponseMarshallable(
-                  StatusCodes.BadRequest -> TsValidateResponse(errorList)))
+              completeWithParsingErrors(errors)
           }
         }
       } ~
@@ -46,12 +52,67 @@ trait TsValidationHttpApi extends HmdaTimeDirectives {
         }
     }
 
+  //ts/validate
+  val validateTsRoute =
+    path("validate") {
+      parameters('check.as[String] ? "all") { checkType =>
+        timedPost { _ =>
+          entity(as[TsValidateRequest]) { req =>
+            TsCsvParser(req.ts) match {
+              case Right(ts) => validate(ts, checkType)
+              case Left(errors) =>
+                completeWithParsingErrors(errors)
+            }
+          }
+        }
+      }
+    }
+
+  private def completeWithParsingErrors(
+      errors: List[ParserErrorModel.ParserValidationError]): Route = {
+    val errorList = errors.map(e => e.errorMessage)
+    complete(
+      ToResponseMarshallable(
+        StatusCodes.BadRequest -> TsValidateResponse(errorList)))
+  }
+
+  private def validate(ts: TransmittalSheet, chekType: String): Route = {
+    val validation: HmdaValidation[TransmittalSheet] = chekType match {
+      case "all"         => validateTs(ts)
+      case "syntactical" => checkSyntactical(ts)
+      case "validity"    => checkValidity(ts)
+    }
+
+    val maybeErrors = validation.leftMap(xs => xs.toList).toEither
+
+    maybeErrors match {
+      case Right(t) => complete(t)
+      case Left(errors) =>
+        complete(ToResponseMarshallable(aggregateTsErrors(errors)))
+    }
+  }
+
+  private def aggregateTsErrors(
+      errors: List[ValidationError]): SingleValidationErrorResult = {
+    val groupedErrors = errors.groupBy(_.validationErrorType)
+    def allOfType(errorType: ValidationErrorType): Seq[String] = {
+      groupedErrors.getOrElse(errorType, List()).map(e => e.editName)
+    }
+
+    SingleValidationErrorResult(
+      ValidationErrorSummary(allOfType(Syntactical)),
+      ValidationErrorSummary(allOfType(Validity)),
+      ValidationErrorSummary(allOfType(Quality))
+    )
+
+  }
+
   def tsRoutes: Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
           pathPrefix("ts") {
-            parseTsRoute
+            parseTsRoute ~ validateTsRoute
           }
         }
       }
