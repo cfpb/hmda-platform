@@ -6,7 +6,7 @@ object Version {
   val scalaz     = "7.2.12"
   val akka       = "2.5.8"
   val akkaClusterManagement = "0.3"
-  val akkaHttp   = "10.0.11"
+  val akkaHttp   = "10.0.14"
   val leveldb    = "0.7"
   val leveldbjni = "1.8"
   val cassandra  = "0.54"
