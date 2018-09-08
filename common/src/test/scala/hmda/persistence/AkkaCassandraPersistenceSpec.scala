@@ -76,7 +76,7 @@ abstract class AkkaCassandraPersistenceSpec
       (ctx, _, cmd) =>
         cmd match {
           case Request(replyTo) =>
-            Effect.persist(Response).andThen {
+            Effect.persist(Response).thenRun { _ =>
               ctx.log.debug(s"Persisted: $cmd")
               replyTo ! Response
             }
