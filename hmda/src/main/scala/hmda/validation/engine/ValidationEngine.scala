@@ -8,19 +8,21 @@ import hmda.model.validation.{
   Validity
 }
 import hmda.validation.api.ValidationApi
+import hmda.validation.context.ValidationContext
 import hmda.validation.rules.EditCheck
 
 trait ValidationEngine[A] extends ValidationApi[A] {
 
-  def syntacticalChecks: Vector[EditCheck[A]] = Vector.empty
+  def syntacticalChecks(ctx: ValidationContext): Vector[EditCheck[A]] =
+    Vector.empty
 
   def validityChecks: Vector[EditCheck[A]] = Vector.empty
 
   def qualityChecks: Vector[EditCheck[A]] = Vector.empty
 
-  def checkAll(a: A, id: String): HmdaValidation[A] = {
+  def checkAll(a: A, id: String, ctx: ValidationContext): HmdaValidation[A] = {
     val validations = Vector(
-      checkSyntactical(a, id),
+      checkSyntactical(a, id, ctx),
       checkValidity(a, id),
       checkQuality(a, id)
     )
@@ -28,11 +30,13 @@ trait ValidationEngine[A] extends ValidationApi[A] {
     validations.par.reduceLeft(_ combine _)
   }
 
-  def checkSyntactical(a: A, id: String): HmdaValidation[A] = {
-    if (syntacticalChecks.isEmpty) {
+  def checkSyntactical(a: A,
+                       id: String,
+                       ctx: ValidationContext): HmdaValidation[A] = {
+    if (syntacticalChecks(ctx).isEmpty) {
       Validated.valid(a)
     } else {
-      runChecks(a, syntacticalChecks, Syntactical, id)
+      runChecks(a, syntacticalChecks(ctx), Syntactical, id)
     }
   }
 
