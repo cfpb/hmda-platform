@@ -123,7 +123,29 @@ kubectl --namespace=kube-system edit deployment/tiller-deploy
 
 And change the `automountServiceAccountToken` to `true`. Save and exit
 
+* Add Ambassador Helm Repository
+
+```shell
+helm repo add datawire https://www.getambassador.io
+```
+
+* Install Ambassador Helm Chart
+
+```shell
+helm upgrade --install --wait ambassador datawire/ambassador
+```
+
 * Create Persistent Volume for Jenkins
+
+```shell
+kubectl apply -f kubernetes/jenkins-persistent-volume
+```
+
+* Create Persistent Volume Claim for Jenkins
+
+```shell
+kubectl apply -f kubernetes/jenkins-persistent-volume-claim
+```
 
 
 * Install Jenkins Chart
