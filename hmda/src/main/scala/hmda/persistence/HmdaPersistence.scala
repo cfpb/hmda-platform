@@ -1,6 +1,13 @@
 package hmda.persistence
 
-import akka.actor.typed.{ActorContext, Behavior, PostStop, PreRestart, Props}
+import akka.actor.typed.{
+  ActorContext,
+  Behavior,
+  PostStop,
+  PreRestart,
+  Props,
+  SupervisorStrategy
+}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ClusterShardingSettings
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
@@ -11,11 +18,15 @@ import hmda.messages.institution.InstitutionCommands.{
 }
 import hmda.persistence.institution.InstitutionPersistence
 
+import scala.concurrent.duration._
+
 object HmdaPersistence {
 
   final val name = "HmdaPersistence"
   sealed trait HmdaPersistenceCommand
   case object StopHmdaPersistence extends HmdaPersistenceCommand
+
+  val config = ConfigFactory.load()
 
   val behavior: Behavior[HmdaPersistenceCommand] =
     Behaviors.setup { ctx =>
@@ -48,7 +59,7 @@ object HmdaPersistence {
     val system = ctx.asScala.system
     val sharding = ClusterSharding(system)
     sharding.spawn(
-      behavior = entityId => InstitutionPersistence.behavior(entityId),
+      behavior = entityId => supervisedBehavior(entityId),
       Props.empty,
       typeKey,
       ClusterShardingSettings(system),
@@ -57,4 +68,19 @@ object HmdaPersistence {
     )
   }
 
+  private def supervisedBehavior(
+      entityId: String): Behavior[InstitutionCommand] = {
+    val minBacOff = config.getInt("hmda.supervisor.minBackOff")
+    val maxBacOff = config.getInt("hmda.supervisor.maxBackOff")
+    val rFactor = config.getInt("hmda.supervisor.randomFactor")
+    val supervisorStrategy = SupervisorStrategy.restartWithBackoff(
+      minBackoff = minBacOff.seconds,
+      maxBackoff = maxBacOff.seconds,
+      randomFactor = rFactor
+    )
+
+    Behaviors
+      .supervise(InstitutionPersistence.behavior(entityId))
+      .onFailure(supervisorStrategy)
+  }
 }
