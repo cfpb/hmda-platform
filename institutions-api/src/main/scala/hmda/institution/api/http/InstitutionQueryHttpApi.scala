@@ -3,7 +3,7 @@ package hmda.institution.api.http
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
@@ -16,9 +16,10 @@ import hmda.institution.query.{InstitutionComponent, InstitutionEntity}
 import hmda.query.DbConfiguration._
 import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.institution.api.http.model.InstitutionsResponse
+import hmda.model.institution.Institution
 import io.circe.generic.auto._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait InstitutionQueryHttpApi
@@ -70,25 +71,36 @@ trait InstitutionQueryHttpApi
       timedGet { uri =>
         parameter('domain.as[String]) { domain =>
           val f = findByEmail(domain)
-          onComplete(f) {
-            case Success(institutions) =>
-              if (institutions.isEmpty) {
-                complete(
-                  ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
-              } else {
-                complete(
-                  ToResponseMarshallable(InstitutionsResponse(institutions)))
-              }
-            case Failure(error) =>
-              val errorResponse =
-                ErrorResponse(500, error.getLocalizedMessage, uri.path)
-              complete(
-                ToResponseMarshallable(
-                  StatusCodes.InternalServerError -> errorResponse))
+          completeInstitutionsFuture(f, uri)
+        } ~
+          parameters('domain.as[String],
+                     'lei.as[String],
+                     'respondentName.as[String],
+                     'taxId.as[String]) {
+            (domain, lei, respondentName, taxId) =>
+              val f = findByFields(lei, respondentName, taxId, domain)
+              completeInstitutionsFuture(f, uri)
           }
-        }
       }
     }
+
+  private def completeInstitutionsFuture(f: Future[Seq[Institution]],
+                                         uri: Uri): Route = {
+    onComplete(f) {
+      case Success(institutions) =>
+        if (institutions.isEmpty) {
+          complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
+        } else {
+          complete(ToResponseMarshallable(InstitutionsResponse(institutions)))
+        }
+      case Failure(error) =>
+        val errorResponse =
+          ErrorResponse(500, error.getLocalizedMessage, uri.path)
+        complete(
+          ToResponseMarshallable(
+            StatusCodes.InternalServerError -> errorResponse))
+    }
+  }
 
   def institutionPublicRoutes: Route =
     handleRejections(corsRejectionHandler) {

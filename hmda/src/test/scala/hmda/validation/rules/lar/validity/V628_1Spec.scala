@@ -9,7 +9,7 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 class V628_1Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V628_1
 
-  property("If other ethnicity is blank, ") {
+  property("If other ethnicity is blank, an ethnicity must be provided") {
     forAll(larGen) { lar =>
       val applicableLar = lar.copy(
         applicant = lar.applicant.copy(

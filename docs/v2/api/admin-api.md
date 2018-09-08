@@ -16,11 +16,11 @@ This endpoint deals with institution events. The identifier for each entity is t
     {
       "activityYear" : 2019,
       "LEI" : "54930084UKLVMY22DS16",
-      "agency" : "1",
-      "institutionType" : "17",
+      "agency" : 1,
+      "institutionType" : 17,
       "institutionId2017" : "12345",
       "taxId" : "99-00000000",
-      "rssd" : "Pb",
+      "rssd" : 12345,
       "emailDomains" : ["bank0.com"],
       "respondent" : {
         "name" : "xvavjuitZa",
@@ -28,13 +28,13 @@ This endpoint deals with institution events. The identifier for each entity is t
         "city" : "Raleigh"
       },
       "parent" : {
-        "idRssd" : "1520162208",
+        "idRssd" : 1520162208,
         "name" : "Parent Name"
       },
-      "assets" : "450",
-      "otherLenderCode" : "1406639146",
+      "assets" : 450,
+      "otherLenderCode" : 1406639146,
       "topHolder" : {
-        "idRssd" : "442825905",
+        "idRssd" : 442825905,
         "name" : "TopHolder Name"
       },
       "hmdaFiler" : true
@@ -53,11 +53,11 @@ This endpoint deals with institution events. The identifier for each entity is t
         {
           "activityYear" : 2019,
           "LEI" : "54930084UKLVMY22DS16",
-          "agency" : "1",
-          "institutionType" : "17",
+          "agency" : 1,
+          "institutionType" : 17,
           "institutionId2017" : "12345",
           "taxId" : "99-00000000",
-          "rssd" : "Pb",
+          "rssd" : 12345,
           "emailDomains" : ["bank0.com"],
           "respondent" : {
             "name" : "xvavjuitZa",
@@ -65,13 +65,13 @@ This endpoint deals with institution events. The identifier for each entity is t
             "city" : "Raleigh"
           },
           "parent" : {
-            "idRssd" : "1520162208",
+            "idRssd" : 1520162208,
             "name" : "Parent Name"
           },
-          "assets" : "450",
-          "otherLenderCode" : "1406639146",
+          "assets" : 450,
+          "otherLenderCode" : 1406639146,
           "topHolder" : {
-            "idRssd" : "442825905",
+            "idRssd" : 442825905,
             "name" : "TopHolder Name"
           },
           "hmdaFiler" : true

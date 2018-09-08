@@ -8,16 +8,12 @@ object InstitutionConverter {
   def convert(entity: InstitutionEntity, emails: Seq[String]): Institution = {
     Institution(
       entity.activityYear,
-      if (entity.lei != "") Some(entity.lei) else None,
-      if (Agency.values.contains(entity.agency))
-        Some(Agency.valueOf(entity.agency))
-      else None,
-      if (InstitutionType.values.contains(entity.institutionType))
-        Some(InstitutionType.valueOf(entity.institutionType))
-      else None,
+      entity.lei,
+      Agency.valueOf(entity.agency),
+      InstitutionType.valueOf(entity.institutionType),
       if (entity.id2017 != "") Some(entity.id2017) else None,
       if (entity.taxId != "") Some(entity.taxId) else None,
-      if (entity.rssd != "") Some(entity.rssd) else None,
+      entity.rssd,
       emails,
       Respondent(
         if (entity.respondentName != "") Some(entity.respondentName) else None,
@@ -26,13 +22,13 @@ object InstitutionConverter {
         if (entity.respondentCity != "") Some(entity.respondentCity) else None
       ),
       Parent(
-        if (entity.parentIdRssd != 0) Some(entity.parentIdRssd) else None,
+        entity.parentIdRssd,
         if (entity.parentName != "") Some(entity.parentName) else None
       ),
-      if (entity.assets != 0) Some(entity.assets) else None,
-      if (entity.otherLenderCode != 0) Some(entity.otherLenderCode) else None,
+      entity.assets,
+      entity.otherLenderCode,
       TopHolder(
-        if (entity.topHolderIdRssd != 0) Some(entity.topHolderIdRssd) else None,
+        entity.topHolderIdRssd,
         if (entity.topHolderName != "") Some(entity.topHolderName) else None
       ),
       entity.hmdaFiler
@@ -41,21 +37,21 @@ object InstitutionConverter {
 
   def convert(institution: Institution): InstitutionEntity = {
     InstitutionEntity(
-      institution.LEI.getOrElse(""),
+      institution.LEI,
       institution.activityYear,
-      institution.agency.getOrElse(UndeterminedAgency).code,
-      institution.institutionType.getOrElse(UndeterminedInstitutionType).code,
+      institution.agency.code,
+      institution.institutionType.code,
       institution.institutionId_2017.getOrElse(""),
       institution.taxId.getOrElse(""),
-      institution.rssd.getOrElse(""),
+      institution.rssd,
       institution.respondent.name.getOrElse(""),
       institution.respondent.state.getOrElse(""),
       institution.respondent.city.getOrElse(""),
-      institution.parent.idRssd.getOrElse(0),
+      institution.parent.idRssd,
       institution.parent.name.getOrElse(""),
-      institution.assets.getOrElse(0),
-      institution.otherLenderCode.getOrElse(0),
-      institution.topHolder.idRssd.getOrElse(0),
+      institution.assets,
+      institution.otherLenderCode,
+      institution.topHolder.idRssd,
       institution.topHolder.name.getOrElse(""),
       institution.hmdaFiler
     )
@@ -63,9 +59,7 @@ object InstitutionConverter {
 
   def emailsFromInstitution(
       institution: Institution): Seq[InstitutionEmailEntity] = {
-    institution.emailDomains.map(
-      email =>
-        InstitutionEmailEntity(lei = institution.LEI.getOrElse(""),
-                               emailDomain = email))
+    institution.emailDomains.map(email =>
+      InstitutionEmailEntity(lei = institution.LEI, emailDomain = email))
   }
 }

@@ -4,7 +4,6 @@ import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.{
   HomePurchase,
-  InvalidPreapprovalCode,
   PreapprovalNotRequested,
   PreapprovalRequested
 }
