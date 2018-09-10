@@ -4,7 +4,7 @@ sealed trait RaceEnum extends LarEnum
 
 object RaceEnum extends LarCodeEnum[RaceEnum] {
   override val values =
-    List(0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7)
+    List(0, 1, 2, 21, 22, 23, 24, 25, 26, 27, 3, 4, 41, 42, 43, 44, 5, 6, 7, 8)
 
   override def valueOf(code: Int): RaceEnum = {
     code match {
@@ -27,6 +27,7 @@ object RaceEnum extends LarCodeEnum[RaceEnum] {
       case 5  => White
       case 6  => RaceInformationNotProvided
       case 7  => RaceNotApplicable
+      case 8  => RaceNoCoApplicant
       case _  => InvalidRaceCode
     }
   }
@@ -126,6 +127,11 @@ case object RaceInformationNotProvided extends RaceEnum {
 case object RaceNotApplicable extends RaceEnum {
   override val code: Int = 7
   override val description: String = "Not applicable"
+}
+
+case object RaceNoCoApplicant extends RaceEnum {
+  override val code: Int = 8
+  override val description: String = "No co-applicant"
 }
 
 case object InvalidRaceCode extends RaceEnum {

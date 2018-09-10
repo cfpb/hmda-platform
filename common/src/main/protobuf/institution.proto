@@ -10,7 +10,7 @@ message InstitutionMessage {
     int32 institutionType = 4;
     string id2017 = 5;
     string taxId = 6;
-    string rssd = 7;
+    int32 rssd = 7;
     repeated string emailDomains = 8;
     RespondentMessage respondent = 9;
     ParentMessage parent = 10;

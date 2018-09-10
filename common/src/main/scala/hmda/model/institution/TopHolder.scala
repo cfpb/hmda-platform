@@ -1,17 +1,17 @@
 package hmda.model.institution
 
 object TopHolder {
-  def empty: TopHolder = TopHolder(None, None)
+  def empty: TopHolder = TopHolder(-1, None)
 }
 
 case class TopHolder(
-    idRssd: Option[Int],
+    idRssd: Int,
     name: Option[String]
 ) {
   def isEmpty: Boolean = {
     this match {
-      case TopHolder(None, None) => true
-      case _                     => false
+      case TopHolder(-1, None) => true
+      case _                   => false
     }
   }
 }

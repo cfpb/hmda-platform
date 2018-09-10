@@ -13,36 +13,35 @@ object InstitutionGenerators {
   implicit def institutionGen: Gen[Institution] = {
     for {
       activityYear <- activityYearGen
-      lei <- Gen.option(leiGen)
+      lei <- leiGen
       agency <- agencyGen
       institutionType <- institutionTypeGen
       id2017 <- Gen.alphaStr
       taxId <- Gen.alphaStr
-      rssd <- Gen.alphaStr
+      rssd <- Gen.choose(0, Int.MaxValue)
       email <- emailListGen
       respondent <- institutionRespondentGen
       parent <- institutionParentGen
-      assets <- Gen.option(Gen.choose(Int.MinValue, Int.MaxValue))
-      otherLenderCode <- Gen.option(Gen.choose(Int.MinValue, Int.MaxValue))
+      assets <- Gen.choose(Int.MinValue, Int.MaxValue)
+      otherLenderCode <- Gen.choose(Int.MinValue, Int.MaxValue)
       topHolder <- topHolderGen
       hmdaFiler <- Gen.oneOf(true, false)
     } yield {
       Institution(
         activityYear: Int,
         lei,
-        if (agency == UndeterminedAgency) None else Some(agency),
-        if (institutionType == UndeterminedInstitutionType) None
-        else Some(institutionType),
+        agency,
+        institutionType,
         if (id2017 == "") None else Some(id2017),
         if (taxId == "") None else Some(taxId),
-        if (rssd == "") None else Some(rssd),
+        rssd,
         email,
         respondent,
         parent,
         assets,
-        otherLenderCode: Option[Int],
-        topHolder: TopHolder,
-        hmdaFiler: Boolean
+        otherLenderCode,
+        topHolder,
+        hmdaFiler
       )
     }
   }
@@ -79,14 +78,14 @@ object InstitutionGenerators {
 
   implicit def institutionParentGen: Gen[Parent] = {
     for {
-      idRssd <- Gen.option(Gen.choose(Int.MinValue, Int.MaxValue))
+      idRssd <- Gen.choose(Int.MinValue, Int.MaxValue)
       name <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
     } yield Parent(idRssd, name)
   }
 
   implicit def topHolderGen: Gen[TopHolder] = {
     for {
-      idRssd <- Gen.option(Gen.choose(Int.MinValue, Int.MaxValue))
+      idRssd <- Gen.choose(Int.MinValue, Int.MaxValue)
       name <- Gen.option(Gen.alphaStr.suchThat(!_.isEmpty))
     } yield TopHolder(idRssd, name)
   }

@@ -8,8 +8,11 @@ import hmda.model.validation.{
   SyntacticalValidationError,
   ValidityValidationError
 }
+import hmda.validation.context.ValidationContext
 
 class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
+
+  val ctx = ValidationContext(None)
 
   property("Ts Validation Engine must pass all checks") {
     forAll(tsGen) { ts =>
@@ -19,7 +22,7 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
           ts.contact.address.street != "" &&
           ts.contact.address.city != "" &&
           ts.institutionName != "") {
-        val validation = validateTs(ts)
+        val validation = checkAll(ts, ts.LEI, ctx)
         validation.leftMap(errors => errors.toList.size mustBe 0)
       }
     }
@@ -34,7 +37,7 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
           ts.contact.address.street != "" &&
           ts.contact.address.city != "" &&
           ts.institutionName != "") {
-        val validation = validateTs(ts.copy(id = 2, quarter = 2))
+        val validation = checkAll(ts.copy(id = 2, quarter = 2), ts.LEI, ctx)
         val errors =
           validation.leftMap(errors => errors.toList).toEither.left.get
         errors mustBe

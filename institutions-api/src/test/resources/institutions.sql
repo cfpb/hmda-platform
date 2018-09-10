@@ -14,7 +14,7 @@ CREATE TABLE public.institutions2018
   institution_type integer NOT NULL,
   id2017 character varying NOT NULL,
   tax_id character varying NOT NULL,
-  rssd character varying NOT NULL,
+  rssd integer NOT NULL,
   respondent_name character varying NOT NULL,
   respondent_state character varying NOT NULL,
   respondent_city character varying NOT NULL,
@@ -32,6 +32,8 @@ WITH (
 );
 ALTER TABLE public.institutions2018
   OWNER TO postgres;
+
+CREATE SEQUENCE institutions_emails_2018_id_seq START 1;
 
 CREATE TABLE public.institutions_emails_2018
 (
@@ -54,7 +56,7 @@ INSERT INTO institutions2018 VALUES(
   17,
   '12345',
   '99-00000000',
-  'Pb',
+  12345,
   'xvavjuitZa',
   'NC',
   'Raleigh',
@@ -74,7 +76,7 @@ INSERT INTO institutions2018 VALUES(
   17,
   '12345',
   '99-00000000',
-  'Pb',
+  12345,
   'xvavjuitZa',
   'NC',
   'Raleigh',
