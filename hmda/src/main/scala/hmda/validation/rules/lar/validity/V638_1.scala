@@ -7,13 +7,12 @@ import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 
-object V635_2 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "V635-2"
+object V638_1 extends EditCheck[LoanApplicationRegister] {
+  override def name: String = "V638-1"
 
-  override def parent: String = "V635"
+  override def parent: String = "V638"
 
   val validRaceValues = List(
-    EmptyRaceValue,
     AmericanIndianOrAlaskaNative,
     Asian,
     AsianIndian,
@@ -29,13 +28,18 @@ object V635_2 extends EditCheck[LoanApplicationRegister] {
     GuamanianOrChamorro,
     Samoan,
     OtherPacificIslander,
-    White
+    White,
+    RaceInformationNotProvided,
+    RaceNotApplicable,
+    RaceNoCoApplicant
   )
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    (lar.applicant.race.race2 is containedIn(validRaceValues)) and
-      (lar.applicant.race.race3 is containedIn(validRaceValues)) and
-      (lar.applicant.race.race4 is containedIn(validRaceValues)) and
-      (lar.applicant.race.race5 is containedIn(validRaceValues))
+    when(
+      (lar.coApplicant.race.otherAsianRace is empty) and
+        (lar.coApplicant.race.otherPacificIslanderRace is empty) and
+        (lar.coApplicant.race.otherNativeRace is empty)) {
+      lar.coApplicant.race.race1 is containedIn(validRaceValues)
+    }
   }
 }
