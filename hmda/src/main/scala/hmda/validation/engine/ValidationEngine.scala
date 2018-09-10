@@ -52,7 +52,7 @@ trait ValidationEngine[A] extends ValidationApi[A] {
     if (qualityChecks.isEmpty) {
       Validated.valid(a)
     } else {
-      runChecks(a, validityChecks, Quality, id)
+      runChecks(a, qualityChecks, Quality, id)
     }
   }
 
