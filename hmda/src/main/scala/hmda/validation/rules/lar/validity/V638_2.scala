@@ -7,10 +7,10 @@ import hmda.validation.dsl.PredicateSyntax._
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 
-object V635_2 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "V635-2"
+object V638_2 extends EditCheck[LoanApplicationRegister] {
+  override def name: String = "V638-2"
 
-  override def parent: String = "V635"
+  override def parent: String = "V638"
 
   val validRaceValues = List(
     EmptyRaceValue,
@@ -33,9 +33,9 @@ object V635_2 extends EditCheck[LoanApplicationRegister] {
   )
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    (lar.applicant.race.race2 is containedIn(validRaceValues)) and
-      (lar.applicant.race.race3 is containedIn(validRaceValues)) and
-      (lar.applicant.race.race4 is containedIn(validRaceValues)) and
-      (lar.applicant.race.race5 is containedIn(validRaceValues))
+    (lar.coApplicant.race.race2 is containedIn(validRaceValues)) and
+      (lar.coApplicant.race.race3 is containedIn(validRaceValues)) and
+      (lar.coApplicant.race.race4 is containedIn(validRaceValues)) and
+      (lar.coApplicant.race.race5 is containedIn(validRaceValues))
   }
 }
