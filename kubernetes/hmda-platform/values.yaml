@@ -5,7 +5,7 @@
 namespace: default
 
 cassandra:
-  hosts: cassandra
+  hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
 
 rbac:
   enabled: false
