@@ -15,6 +15,12 @@ service:
   targetPort: 9092
   name: http-inst-api
 
+ambassador:
+  name: institutions-api-ambassador
+  service:
+    type: NodePort
+  port: 80
+
 ingress:
   enabled: false
   annotations: {}
