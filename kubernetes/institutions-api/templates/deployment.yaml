@@ -32,9 +32,30 @@ spec:
             - name: PG_DATABASE
               value: "{{ .Values.postgresql.postgresDatabase }}"
             - name: PG_USER
-              value: "{{ .Values.postgresql.postgresUser }}"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: postgres.username
             - name: PG_PASSWORD
-              value: "{{ .Values.postgresql.postgresPassword }}"
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-credentials
+                  key: postgres.password
+            - name: CASSANDRA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ .Release.Name }}-inst-api-config"
+                  key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.username
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.password
           ports:
             - name: {{ .Values.service.name }}
               containerPort: 9092
