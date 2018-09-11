@@ -39,36 +39,36 @@ object InstitutionPersistence {
       cmd match {
         case CreateInstitution(i, replyTo) =>
           if (!state.institution.contains(i)) {
-            Effect.persist(InstitutionCreated(i)).andThen {
+            Effect.persist(InstitutionCreated(i)).thenRun { _ =>
               ctx.log.debug(s"Institution Created: ${i.toString}")
               replyTo ! InstitutionCreated(i)
             }
           } else {
-            Effect.none.andThen {
+            Effect.none.thenRun { _ =>
               ctx.log.debug(s"Institution already exists: ${i.toString}")
               replyTo ! InstitutionCreated(i)
             }
           }
         case ModifyInstitution(i, replyTo) =>
           if (state.institution.map(i => i.LEI).contains(i.LEI)) {
-            Effect.persist(InstitutionModified(i)).andThen {
+            Effect.persist(InstitutionModified(i)).thenRun { _ =>
               ctx.log.debug(s"Institution Modified: ${i.toString}")
               replyTo ! InstitutionModified(i)
             }
           } else {
-            Effect.none.andThen {
+            Effect.none.thenRun { _ =>
               ctx.log.warning(s"Institution with LEI: ${i.LEI} does not exist")
               replyTo ! InstitutionNotExists(i.LEI)
             }
           }
         case DeleteInstitution(lei, replyTo) =>
           if (state.institution.map(i => i.LEI).contains(lei)) {
-            Effect.persist(InstitutionDeleted(lei)).andThen {
+            Effect.persist(InstitutionDeleted(lei)).thenRun { _ =>
               ctx.log.debug(s"Institution Deleted: $lei")
               replyTo ! InstitutionDeleted(lei)
             }
           } else {
-            Effect.none.andThen {
+            Effect.none.thenRun { _ =>
               ctx.log.warning(s"Institution with LEI: $lei does not exist")
               replyTo ! InstitutionNotExists(lei)
             }
