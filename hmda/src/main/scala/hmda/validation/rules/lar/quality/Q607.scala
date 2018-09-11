@@ -11,8 +11,8 @@ object Q607 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q607"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(lar.lienStatus is equalTo(SecuredBySubordinateLien)){
-      lar.loan.amount is lessThan(250000)
+    when(lar.lienStatus is equalTo(SecuredBySubordinateLien)) {
+      lar.loan.amount is lessThan(250000.0)
     }
   }
 }

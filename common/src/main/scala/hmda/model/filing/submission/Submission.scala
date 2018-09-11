@@ -93,9 +93,3 @@ case class Failed(message: String) extends SubmissionStatus {
   override def code: Int = -1
   override def description: String = failedDescription
 }
-
-
-
-
-
-
