@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: "{{ .Release.Name }}-inst-api-config"
 data:
-  instapi.postgres_host: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
+  instapi.postgres_host: {{ .Values.postgresql.host }}
   cassandra-hosts: "{{ .Values.cassandra.hosts }}"

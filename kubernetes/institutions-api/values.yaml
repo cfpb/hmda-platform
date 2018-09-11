@@ -47,10 +47,11 @@ tolerations: []
 affinity: {}
 
 postgresql:
+  host: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
   postgresDatabase: hmda
   postgresUser: postgres
   postgresPassword: postgres
-  enabled: true
+  enabled: false
 
 cassandra:
   hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
