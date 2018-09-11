@@ -26,8 +26,7 @@ object InstitutionLoader extends App with FlowUtils {
   override implicit val ec: ExecutionContext = system.dispatcher
 
   override def parallelism = config.getInt("hmda.loader.parallelism")
-  val host = config.getString("hmda.loader.institution.host")
-  val port = config.getInt("hmda.loader.institution.port")
+  val url = config.getString("hmda.loader.institution.url")
 
   val log = LoggerFactory.getLogger("institutions-loader")
 
@@ -45,8 +44,7 @@ object InstitutionLoader extends App with FlowUtils {
   val source = FileIO.fromPath(file.toPath)
 
   def request(json: String) =
-    HttpRequest(uri = s"http://$host:$port/institutions",
-                method = HttpMethods.POST)
+    HttpRequest(uri = s"$url", method = HttpMethods.POST)
       .withEntity(ContentTypes.`application/json`, ByteString(json))
 
   source
