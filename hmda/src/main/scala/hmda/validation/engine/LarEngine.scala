@@ -2,6 +2,7 @@ package hmda.validation.engine
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
+import hmda.validation.rules.lar.quality.Q606
 import hmda.validation.rules.lar.syntactical.S300
 import hmda.validation.rules.lar.validity._
 
@@ -88,6 +89,10 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V702_2,
     V703_1,
     V703_2
+  )
+
+  override val qualityChecks = Vector(
+    Q606
   )
 
 }
