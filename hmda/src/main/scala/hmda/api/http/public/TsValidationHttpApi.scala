@@ -15,6 +15,7 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.model.filing.ts.TransmittalSheet
+import hmda.validation.context.ValidationContext
 import hmda.validation.engine.TsEngine._
 
 import scala.concurrent.ExecutionContext
@@ -53,7 +54,7 @@ trait TsValidationHttpApi
         timedPost { _ =>
           entity(as[TsValidateRequest]) { req =>
             TsCsvParser(req.ts) match {
-              case Right(ts) => validate(ts, checkType)
+              case Right(ts) => validate(ts, checkType, ValidationContext(None))
               case Left(errors) =>
                 completeWithParsingErrors(errors)
             }
@@ -62,10 +63,12 @@ trait TsValidationHttpApi
       }
     }
 
-  private def validate(ts: TransmittalSheet, chekType: String): Route = {
+  private def validate(ts: TransmittalSheet,
+                       chekType: String,
+                       ctx: ValidationContext): Route = {
     val validation: HmdaValidation[TransmittalSheet] = chekType match {
-      case "all"         => checkAll(ts, ts.LEI)
-      case "syntactical" => checkSyntactical(ts, ts.LEI)
+      case "all"         => checkAll(ts, ts.LEI, ctx)
+      case "syntactical" => checkSyntactical(ts, ts.LEI, ctx)
       case "validity"    => checkValidity(ts, ts.LEI)
     }
 
