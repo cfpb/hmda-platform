@@ -2,12 +2,11 @@ package hmda.persistence.processing
 
 import java.time.Instant
 
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.ActorRef
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import hmda.messages.CommonMessages.{Command, Event}
 import hmda.model.filing.submission.{Created, Submission, SubmissionId}
-import hmda.persistence.serialization.submission.SubmissionIdMessage
 
 object SubmissionPersistence {
 
