@@ -1,4 +1,4 @@
-package hmda.persistence.processing
+package hmda.persistence.submission
 
 import java.time.Instant
 
@@ -15,7 +15,7 @@ object SubmissionPersistence {
 
   case class GetSubmission(replyTo: ActorRef[Option[Submission]])
       extends SubmissionCommand
-  case class CreateSubmission(submissionId: SubmissionId,
+  case class CreateSubmission(submission: SubmissionId,
                               replyTo: ActorRef[SubmissionEvent])
       extends SubmissionCommand
   case class ModifySubmission(submission: Submission,
@@ -26,6 +26,7 @@ object SubmissionPersistence {
       extends SubmissionEvent
   case class SubmissionCreated(submission: Submission) extends SubmissionEvent
   case class SubmissionModified(submission: Submission) extends SubmissionEvent
+  case object SubmissionNotExists extends SubmissionEvent
 
   case class SubmissionState(submission: Option[Submission])
 
@@ -61,12 +62,16 @@ object SubmissionPersistence {
             replyTo ! SubmissionCreated(submission)
           }
         case ModifySubmission(submission, replyTo) =>
-          Effect.persist(SubmissionModified(submission)).thenRun { _ =>
-            ctx.log.debug(
-              s"persisted modified Submission: ${submission.toString}")
-            replyTo ! SubmissionModified(submission)
+          if (state.submission.map(s => s.id).contains(submission.id)) {
+            Effect.persist(SubmissionModified(submission)).thenRun { _ =>
+              ctx.log.debug(
+                s"persisted modified Submission: ${submission.toString}")
+              replyTo ! SubmissionModified(submission)
+            }
+          } else {
+            replyTo ! SubmissionNotExists
+            Effect.none
           }
-
       }
   }
 
