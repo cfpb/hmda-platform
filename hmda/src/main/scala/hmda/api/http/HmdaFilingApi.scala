@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.institutions.UploadApi
+import hmda.api.http.filing.institutions.UploadApi
 import hmda.api.http.routes.BaseHttpApi
 
 import scala.concurrent.{ExecutionContext, Future}

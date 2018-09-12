@@ -1,4 +1,4 @@
-package hmda.api.http.institutions
+package hmda.api.http.filing.institutions
 
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
