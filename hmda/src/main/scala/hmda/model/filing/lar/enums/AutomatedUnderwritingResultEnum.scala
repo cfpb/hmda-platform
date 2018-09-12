@@ -8,25 +8,26 @@ object AutomatedUnderwritingResultEnum
 
   override def valueOf(code: Int): AutomatedUnderwritingResultEnum = {
     code match {
-      case 0  => EmptyAUSResultValue
-      case 1  => ApproveEligible
-      case 2  => ApproveIneligible
-      case 3  => ReferEligilbe
-      case 4  => ReferIneligible
-      case 5  => ReferWithCaution
-      case 6  => OutOfScope
-      case 7  => Error
-      case 8  => Accept
-      case 9  => Caution
-      case 10 => Ineligible
-      case 11 => Incomplete
-      case 12 => Invalid
-      case 13 => Refer
-      case 14 => Eligible
-      case 15 => UnableToDetermineOrUnknown
-      case 16 => OtherAutomatedUnderwritingResult
-      case 17 => AutomatedUnderwritingResultNotApplicable
-      case _  => InvalidAutomatedUnderwritingResultCode
+      case 0    => EmptyAUSResultValue
+      case 1    => ApproveEligible
+      case 2    => ApproveIneligible
+      case 3    => ReferEligilbe
+      case 4    => ReferIneligible
+      case 5    => ReferWithCaution
+      case 6    => OutOfScope
+      case 7    => Error
+      case 8    => Accept
+      case 9    => Caution
+      case 10   => Ineligible
+      case 11   => Incomplete
+      case 12   => Invalid
+      case 13   => Refer
+      case 14   => Eligible
+      case 15   => UnableToDetermineOrUnknown
+      case 16   => OtherAutomatedUnderwritingResult
+      case 17   => AutomatedUnderwritingResultNotApplicable
+      case 1111 => AUSResultExempt
+      case _    => InvalidAutomatedUnderwritingResultCode
     }
   }
 }
@@ -121,6 +122,11 @@ case object AutomatedUnderwritingResultNotApplicable
     extends AutomatedUnderwritingResultEnum {
   override val code: Int = 17
   override val description: String = "Not applicable"
+}
+
+case object AUSResultExempt extends AutomatedUnderwritingResultEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt AUSResult"
 }
 
 case object InvalidAutomatedUnderwritingResultCode

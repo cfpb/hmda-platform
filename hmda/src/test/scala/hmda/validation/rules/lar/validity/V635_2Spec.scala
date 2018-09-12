@@ -9,7 +9,7 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 class V635_2Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V635_2
 
-  property("Races 2-5 must contian valid values") {
+  property("Races 2-5 must contain valid values") {
     forAll(larGen) { lar =>
       val validRace =
         lar.applicant.race.copy(race2 = EmptyRaceValue,

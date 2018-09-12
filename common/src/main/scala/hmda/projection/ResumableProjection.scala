@@ -58,7 +58,7 @@ trait ResumableProjection {
           Effect.none
 
         case SaveOffset(offset, replyTo) =>
-          Effect.persist(OffsetSaved(offset)).andThen {
+          Effect.persist(OffsetSaved(offset)).thenRun { _ =>
             ctx.log.info("Offset saved: {}", offset)
             replyTo ! OffsetSaved(offset)
           }

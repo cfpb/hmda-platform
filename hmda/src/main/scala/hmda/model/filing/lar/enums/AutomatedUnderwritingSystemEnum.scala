@@ -8,14 +8,15 @@ object AutomatedUnderwritingSystemEnum
 
   override def valueOf(code: Int): AutomatedUnderwritingSystemEnum = {
     code match {
-      case 0 => EmptyAUSValue
-      case 1 => DesktopUnderwriter
-      case 2 => LoanProspector
-      case 3 => TechnologyOpenToApprovedLenders
-      case 4 => GuaranteedUnderwritingSystem
-      case 5 => OtherAUS
-      case 6 => AUSNotApplicable
-      case _ => InvalidAutomatedUnderwritingSystemCode
+      case 0    => EmptyAUSValue
+      case 1    => DesktopUnderwriter
+      case 2    => LoanProspector
+      case 3    => TechnologyOpenToApprovedLenders
+      case 4    => GuaranteedUnderwritingSystem
+      case 5    => OtherAUS
+      case 6    => AUSNotApplicable
+      case 1111 => AUSExempt
+      case _    => InvalidAutomatedUnderwritingSystemCode
 
     }
   }
@@ -58,6 +59,11 @@ case object OtherAUS extends AutomatedUnderwritingSystemEnum {
 case object AUSNotApplicable extends AutomatedUnderwritingSystemEnum {
   override val code: Int = 6
   override val description: String = "Not App"
+}
+
+case object AUSExempt extends AutomatedUnderwritingSystemEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt AUS"
 }
 
 case object InvalidAutomatedUnderwritingSystemCode

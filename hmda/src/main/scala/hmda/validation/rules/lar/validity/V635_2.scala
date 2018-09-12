@@ -29,8 +29,7 @@ object V635_2 extends EditCheck[LoanApplicationRegister] {
     GuamanianOrChamorro,
     Samoan,
     OtherPacificIslander,
-    White,
-    RaceInformationNotProvided
+    White
   )
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {

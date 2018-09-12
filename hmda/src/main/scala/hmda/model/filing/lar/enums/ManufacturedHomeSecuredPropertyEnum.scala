@@ -8,10 +8,11 @@ object ManufacturedHomeSecuredPropertyEnum
 
   override def valueOf(code: Int): ManufacturedHomeSecuredPropertyEnum = {
     code match {
-      case 1 => ManufacturedHomeAndLand
-      case 2 => ManufacturedHomeAndNotLand
-      case 3 => ManufacturedHomeSecuredNotApplicable
-      case _ => InvalidManufacturedHomeSecuredPropertyCode
+      case 1    => ManufacturedHomeAndLand
+      case 2    => ManufacturedHomeAndNotLand
+      case 3    => ManufacturedHomeSecuredNotApplicable
+      case 1111 => ManufacturedHomeSecuredExempt
+      case _    => InvalidManufacturedHomeSecuredPropertyCode
     }
   }
 }
@@ -32,6 +33,12 @@ case object ManufacturedHomeSecuredNotApplicable
     extends ManufacturedHomeSecuredPropertyEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
+}
+
+case object ManufacturedHomeSecuredExempt
+    extends ManufacturedHomeSecuredPropertyEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt Manufactured Home Secured"
 }
 
 case object InvalidManufacturedHomeSecuredPropertyCode
