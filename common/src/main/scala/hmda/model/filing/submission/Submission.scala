@@ -89,13 +89,8 @@ case object Signed extends SubmissionStatus {
   override def description: String = signedDescription
 }
 
-case class Failed(message: String) extends SubmissionStatus {
+case object Failed extends SubmissionStatus {
   override def code: Int = -1
+  override def message: String = failedMsg
   override def description: String = failedDescription
 }
-
-
-
-
-
-
