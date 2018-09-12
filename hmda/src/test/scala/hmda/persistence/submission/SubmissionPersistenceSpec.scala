@@ -80,7 +80,7 @@ class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
           SubmissionPersistence.behavior(SubmissionId("AA", "2018", 1)),
           actorName)
       submissionPersistence ! ModifySubmission(modified, submissionProbe.ref)
-      submissionProbe.expectMessage(SubmissionNotExists)
+      submissionProbe.expectMessage(SubmissionNotExists(modified.id))
     }
 
     "return None if it doesn't exist" in {

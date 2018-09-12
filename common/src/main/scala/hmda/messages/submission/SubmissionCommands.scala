@@ -14,7 +14,7 @@ object SubmissionCommands {
   case class GetSubmission(replyTo: ActorRef[Option[Submission]])
       extends SubmissionCommand
 
-  case class CreateSubmission(submission: SubmissionId,
+  case class CreateSubmission(submissionId: SubmissionId,
                               replyTo: ActorRef[SubmissionCreated])
       extends SubmissionCommand
   case class ModifySubmission(submission: Submission,

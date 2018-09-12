@@ -61,7 +61,7 @@ object SubmissionPersistence {
               replyTo ! SubmissionModified(submission)
             }
           } else {
-            replyTo ! SubmissionNotExists
+            replyTo ! SubmissionNotExists(submission.id)
             Effect.none
           }
       }
