@@ -3,7 +3,7 @@ package hmda.model.filing.submission
 import SubmissionStatusMessages._
 
 case class Submission(
-    id: SubmissionId,
+    id: SubmissionId = SubmissionId(),
     status: SubmissionStatus = Created,
     start: Long = 0,
     end: Long = 0,
