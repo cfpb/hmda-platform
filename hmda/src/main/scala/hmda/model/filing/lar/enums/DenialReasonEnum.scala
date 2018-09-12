@@ -7,18 +7,19 @@ object DenialReasonEnum extends LarCodeEnum[DenialReasonEnum] {
 
   def valueOf(code: Int): DenialReasonEnum = {
     code match {
-      case 0  => EmptyDenialValue
-      case 1  => DebtToIncomeRatio
-      case 2  => EmploymentHistory
-      case 3  => CreditHistory
-      case 4  => Collateral
-      case 5  => InsufficientCash
-      case 6  => UnverifiableInformation
-      case 7  => CreditApplicationIncomplete
-      case 8  => MortgageInsuranceDenied
-      case 9  => OtherDenialReason
-      case 10 => DenialReasonNotApplicable
-      case _  => InvalidDenialReasonCode
+      case 0    => EmptyDenialValue
+      case 1    => DebtToIncomeRatio
+      case 2    => EmploymentHistory
+      case 3    => CreditHistory
+      case 4    => Collateral
+      case 5    => InsufficientCash
+      case 6    => UnverifiableInformation
+      case 7    => CreditApplicationIncomplete
+      case 8    => MortgageInsuranceDenied
+      case 9    => OtherDenialReason
+      case 10   => DenialReasonNotApplicable
+      case 1111 => ExemptDenialReason
+      case _    => InvalidDenialReasonCode
     }
   }
 }
@@ -77,6 +78,11 @@ case object OtherDenialReason extends DenialReasonEnum {
 case object DenialReasonNotApplicable extends DenialReasonEnum {
   override val code: Int = 10
   override val description: String = "Not Applicable"
+}
+
+case object ExemptDenialReason extends DenialReasonEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt Denial Reason"
 }
 
 case object InvalidDenialReasonCode extends DenialReasonEnum {
