@@ -4,13 +4,23 @@ import akka.actor
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
+import hmda.messages.submission.SubmissionCommands.{
+  CreateSubmission,
+  GetSubmission,
+  ModifySubmission
+}
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionCreated,
+  SubmissionEvent,
+  SubmissionModified,
+  SubmissionNotExists
+}
 import hmda.model.filing.submission.{
   Created,
   Submission,
   SubmissionId,
   Uploaded
 }
-import hmda.persistence.submission.SubmissionPersistence._
 import hmda.model.submission.SubmissionGenerator._
 
 import scala.concurrent.duration._

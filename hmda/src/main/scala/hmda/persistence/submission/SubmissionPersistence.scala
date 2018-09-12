@@ -2,31 +2,23 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.typed.ActorRef
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import hmda.messages.CommonMessages.{Command, Event}
+import hmda.messages.submission.SubmissionCommands.{
+  CreateSubmission,
+  GetSubmission,
+  ModifySubmission,
+  SubmissionCommand
+}
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionCreated,
+  SubmissionEvent,
+  SubmissionModified,
+  SubmissionNotExists
+}
 import hmda.model.filing.submission.{Created, Submission, SubmissionId}
 
 object SubmissionPersistence {
-
-  sealed trait SubmissionEvent extends Event
-  sealed trait SubmissionCommand extends Command
-
-  case class GetSubmission(replyTo: ActorRef[Option[Submission]])
-      extends SubmissionCommand
-  case class CreateSubmission(submission: SubmissionId,
-                              replyTo: ActorRef[SubmissionEvent])
-      extends SubmissionCommand
-  case class ModifySubmission(submission: Submission,
-                              replyTo: ActorRef[SubmissionEvent])
-      extends SubmissionCommand
-
-  case class EmptySubmission(submission: Submission = Submission())
-      extends SubmissionEvent
-  case class SubmissionCreated(submission: Submission) extends SubmissionEvent
-  case class SubmissionModified(submission: Submission) extends SubmissionEvent
-  case object SubmissionNotExists extends SubmissionEvent
 
   case class SubmissionState(submission: Option[Submission])
 
