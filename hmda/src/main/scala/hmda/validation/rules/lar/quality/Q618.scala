@@ -15,7 +15,7 @@ object Q618 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     when(lar.loan.constructionMethod is equalTo(ManufacturedHome)) {
-      lar.property.manufacturedHomeSecuredProperty is equalTo(
+      lar.property.manufacturedHomeSecuredProperty not equalTo(
         ManufacturedHomeSecuredNotApplicable)
     }
   }
