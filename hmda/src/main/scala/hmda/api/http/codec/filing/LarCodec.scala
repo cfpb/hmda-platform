@@ -121,7 +121,7 @@ object LarCodec {
       ("interestRate", Json.fromString(a.interestRate)),
       ("prepaymentPenaltyTerm", Json.fromString(a.prepaymentPenaltyTerm)),
       ("debtToIncomeRatio", Json.fromString(a.debtToIncomeRatio)),
-      ("loanToValueRatio", Json.fromString(a.loanToValueRatio)),
+      ("loanToValueRatio", Json.fromString(a.combinedLoanToValueRatio)),
       ("introductoryRatePeriod", Json.fromString(a.introductoryRatePeriod))
     )
   }
