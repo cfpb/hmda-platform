@@ -8,10 +8,11 @@ object ApplicationSubmissionEnum
 
   override def valueOf(code: Int): ApplicationSubmissionEnum = {
     code match {
-      case 1 => SubmittedDirectlyToInstitution
-      case 2 => NotSubmittedDirectlyToInstitution
-      case 3 => ApplicationSubmissionNotApplicable
-      case _ => InvalidApplicationSubmissionCode
+      case 1    => SubmittedDirectlyToInstitution
+      case 2    => NotSubmittedDirectlyToInstitution
+      case 3    => ApplicationSubmissionNotApplicable
+      case 1111 => ApplicationSubmissionExempt
+      case _    => InvalidApplicationSubmissionCode
     }
   }
 }
@@ -32,6 +33,11 @@ case object ApplicationSubmissionNotApplicable
     extends ApplicationSubmissionEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
+}
+
+case object ApplicationSubmissionExempt extends ApplicationSubmissionEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt Application Submission"
 }
 
 case object InvalidApplicationSubmissionCode extends ApplicationSubmissionEnum {

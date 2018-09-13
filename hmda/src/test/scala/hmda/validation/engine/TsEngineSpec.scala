@@ -12,8 +12,6 @@ import hmda.validation.context.ValidationContext
 
 class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
 
-  val ctx = ValidationContext(None)
-
   property("Ts Validation Engine must pass all checks") {
     forAll(tsGen) { ts =>
       whenever(
@@ -22,7 +20,8 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
           ts.contact.address.street != "" &&
           ts.contact.address.city != "" &&
           ts.institutionName != "") {
-        val validation = checkAll(ts, ts.LEI, ctx)
+        val testContext = ValidationContext(None, Some(ts.year))
+        val validation = checkAll(ts, ts.LEI, testContext)
         validation.leftMap(errors => errors.toList.size mustBe 0)
       }
     }
@@ -37,7 +36,9 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
           ts.contact.address.street != "" &&
           ts.contact.address.city != "" &&
           ts.institutionName != "") {
-        val validation = checkAll(ts.copy(id = 2, quarter = 2), ts.LEI, ctx)
+        val testContext = ValidationContext(None, Some(ts.year))
+        val validation =
+          checkAll(ts.copy(id = 2, quarter = 2), ts.LEI, testContext)
         val errors =
           validation.leftMap(errors => errors.toList).toEither.left.get
         errors mustBe

@@ -79,11 +79,6 @@ class ULIHttpApiSpec
         response.message mustBe invalidLoanIdLengthMessage
       }
     }
-    "allow OPTIONS for check digit" in {
-      Options("/uli/checkDigit") ~> uliHttpRoutes ~> check {
-        response.status mustBe StatusCodes.OK
-      }
-    }
     "include leading 0 for check digits < 10" in {
       val loanId = "5493001YS08XHF42M0372005203"
       Post("/uli/checkDigit", Loan(loanId)) ~> uliHttpRoutes ~> check {
@@ -141,11 +136,6 @@ class ULIHttpApiSpec
         val response = responseAs[ErrorResponse]
         response.path mustBe Path("/uli/validate")
         response.message mustBe nonAlphanumericULIMessage
-      }
-    }
-    "allow OPTIONS for uli validation" in {
-      Options("/uli/validate") ~> uliHttpRoutes ~> check {
-        response.status mustBe StatusCodes.OK
       }
     }
     "validate a file of ULIs and return csv" in {
