@@ -7,10 +7,11 @@ object PayableToInstitutionEnum extends LarCodeEnum[PayableToInstitutionEnum] {
 
   override def valueOf(code: Int): PayableToInstitutionEnum = {
     code match {
-      case 1 => InititallyPayableToInstitution
-      case 2 => NotInitiallyPayableToInstitution
-      case 3 => PayableToInstitutionNotApplicable
-      case _ => InvalidPayableToInstitutionCode
+      case 1    => InititallyPayableToInstitution
+      case 2    => NotInitiallyPayableToInstitution
+      case 3    => PayableToInstitutionNotApplicable
+      case 1111 => PayableToInstitutionExempt
+      case _    => InvalidPayableToInstitutionCode
     }
   }
 }
@@ -28,6 +29,11 @@ case object NotInitiallyPayableToInstitution extends PayableToInstitutionEnum {
 case object PayableToInstitutionNotApplicable extends PayableToInstitutionEnum {
   override val code: Int = 3
   override val description: String = "Not applicable"
+}
+
+case object PayableToInstitutionExempt extends PayableToInstitutionEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt Payable to Institution"
 }
 
 case object InvalidPayableToInstitutionCode extends PayableToInstitutionEnum {

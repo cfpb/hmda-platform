@@ -183,7 +183,8 @@ object LarParserErrorModel {
   }
 
   case object InvalidNMLSRIdentifier extends ParserValidationError {
-    override def errorMessage: String = notNumeric("NMLSR identifier")
+    override def errorMessage: String =
+      notStringOrNAOrExempt("NMLSR identifier")
   }
 
   case object InvalidAutomatedUnderwritingSystem extends ParserValidationError {

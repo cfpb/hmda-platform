@@ -8,9 +8,10 @@ object BusinessOrCommercialBusinessEnum
 
   override def valueOf(code: Int): BusinessOrCommercialBusinessEnum = {
     code match {
-      case 1 => PrimarilyBusinessOrCommercialPurpose
-      case 2 => NotPrimarilyBusinessOrCommercialPurpose
-      case _ => InvalidBusinessOrCommercialBusinessCode
+      case 1    => PrimarilyBusinessOrCommercialPurpose
+      case 2    => NotPrimarilyBusinessOrCommercialPurpose
+      case 1111 => ExemptBusinessOrCommercialPurpose
+      case _    => InvalidBusinessOrCommercialBusinessCode
     }
   }
 }
@@ -28,6 +29,13 @@ case object NotPrimarilyBusinessOrCommercialPurpose
   override val description: String =
     "Not primarily for a business or commercial purpose"
 }
+
+case object ExemptBusinessOrCommercialPurpose
+    extends BusinessOrCommercialBusinessEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt business or commercial purpose"
+}
+
 case object InvalidBusinessOrCommercialBusinessCode
     extends BusinessOrCommercialBusinessEnum {
   override def code: Int = -1

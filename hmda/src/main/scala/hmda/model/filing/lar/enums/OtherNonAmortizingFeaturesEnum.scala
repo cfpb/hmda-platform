@@ -8,9 +8,10 @@ object OtherNonAmortizingFeaturesEnum
 
   override def valueOf(code: Int): OtherNonAmortizingFeaturesEnum = {
     code match {
-      case 1 => OtherNonFullyAmortizingFeatures
-      case 2 => NoOtherNonFullyAmortizingFeatures
-      case _ => InvalidOtherNonAmortizingFeaturesCode
+      case 1    => OtherNonFullyAmortizingFeatures
+      case 2    => NoOtherNonFullyAmortizingFeatures
+      case 1111 => OtherNonAmortizingFeaturesExempt
+      case _    => InvalidOtherNonAmortizingFeaturesCode
     }
   }
 }
@@ -25,6 +26,12 @@ case object NoOtherNonFullyAmortizingFeatures
     extends OtherNonAmortizingFeaturesEnum {
   override val code: Int = 2
   override val description: String = "No other non-fully amortizing features"
+}
+
+case object OtherNonAmortizingFeaturesExempt
+    extends OtherNonAmortizingFeaturesEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt Other Non Amortizing Features"
 }
 
 case object InvalidOtherNonAmortizingFeaturesCode
