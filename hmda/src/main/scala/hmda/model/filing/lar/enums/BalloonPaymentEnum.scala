@@ -7,9 +7,10 @@ object BalloonPaymentEnum extends LarCodeEnum[BalloonPaymentEnum] {
 
   override def valueOf(code: Int): BalloonPaymentEnum = {
     code match {
-      case 1 => BalloonPayment
-      case 2 => NoBallonPayment
-      case _ => InvalidBalloonPaymentCode
+      case 1    => BalloonPayment
+      case 2    => NoBallonPayment
+      case 1111 => BalloonPaymentExempt
+      case _    => InvalidBalloonPaymentCode
     }
   }
 }
@@ -22,6 +23,11 @@ case object BalloonPayment extends BalloonPaymentEnum {
 case object NoBallonPayment extends BalloonPaymentEnum {
   override val code: Int = 2
   override val description: String = "No Balloon Payment"
+}
+
+case object BalloonPaymentExempt extends BalloonPaymentEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt Balloon Payment"
 }
 
 case object InvalidBalloonPaymentCode extends BalloonPaymentEnum {
