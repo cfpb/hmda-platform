@@ -4,6 +4,9 @@
 
 namespace: default
 
+cassandra:
+  hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
+
 rbac:
   enabled: false
 
@@ -11,7 +14,7 @@ replicaCount: 3
 
 image:
   repository: hmda/hmda-platform
-  tag: 2.5.1
+  tag: 2.6.0
   pullPolicy: IfNotPresent
 
 hmda:
@@ -22,7 +25,12 @@ service:
   type: NodePort
   account:
     name: hmda-service-account
-  name: hmda-platform-api
+  name: hmda-platform
+
+ambassador:
+  port: 80
+  service:
+    type: NodePort
 
 remoting:
   name: remoting
