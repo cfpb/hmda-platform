@@ -7,6 +7,9 @@ object ParserErrorModel {
   def notStringOrNA(fieldName: String) =
     s"$fieldName is not a non-empty string or NA"
 
+  def notStringOrNAOrExempt(fieldName: String) =
+    s"$fieldName is not a non-empty string, NA or Exempt"
+
   trait ParserValidationError {
     def errorMessage: String
   }

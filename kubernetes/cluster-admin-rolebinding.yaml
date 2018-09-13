@@ -17,7 +17,7 @@ subjects:
     # Reference to upper's `metadata.name`
     name: default
     # Reference to upper's `metadata.namespace`
-    namespace: default
+    namespace: kube-system
 roleRef:
   kind: ClusterRole
   name: cluster-admin
