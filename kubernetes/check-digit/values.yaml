@@ -5,8 +5,8 @@
 replicaCount: 1
 
 image:
-  repository: hmda/check-digit
-  tag: 0.1.0
+  repository: hmda/hmda-check-digit
+  tag: 0.1.3
   pullPolicy: IfNotPresent
 
 service:
@@ -14,6 +14,12 @@ service:
   port: 9091
   targetPort: 9091
   name: http-chk-digit
+
+ambassador:
+  name: ambassador-chk-digit
+  port: 80
+  service:
+    type: NodePort
 
 ingress:
   enabled: false
