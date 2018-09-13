@@ -41,12 +41,38 @@ trait LarParser {
     }
   }
 
+  def validateIntStrOrNAOrExemptField(
+      value: String,
+      parserValidationError: ParserValidationError)
+    : LarParserValidationResult[String] = {
+    if (value == "") {
+      parserValidationError.invalidNel
+    } else if (value == "NA" || value == "Exempt") {
+      value.validNel
+    } else {
+      validateIntField(value, parserValidationError).map(x => x.toString)
+    }
+  }
+
   def validateDoubleStrOrNAField(value: String,
                                  parserValidationError: ParserValidationError)
     : LarParserValidationResult[String] = {
     if (value == "") {
       parserValidationError.invalidNel
     } else if (value == "NA") {
+      value.validNel
+    } else {
+      validateDoubleField(value, parserValidationError).map(x => x.toString)
+    }
+  }
+
+  def validateDoubleStrOrNAOrExemptField(
+      value: String,
+      parserValidationError: ParserValidationError)
+    : LarParserValidationResult[String] = {
+    if (value == "") {
+      parserValidationError.invalidNel
+    } else if (value == "NA" || value == "Exempt") {
       value.validNel
     } else {
       validateDoubleField(value, parserValidationError).map(x => x.toString)
