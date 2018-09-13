@@ -1,5 +1,6 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
 import hmda.validation.dsl.PredicateCommon._
@@ -11,10 +12,13 @@ object Q631 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q631"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    val config = ConfigFactory.load()
+    val units = config.getInt("edits.Q631.units")
+
     when(lar.loan.loanType is oneOf(FHAInsured,
                                     VAGuaranteed,
                                     RHSOrFSAGuaranteed)) {
-      lar.property.totalUnits is lessThanOrEqual(4)
+      lar.property.totalUnits is lessThanOrEqual(units)
     }
   }
 }
