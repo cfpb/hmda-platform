@@ -8,12 +8,13 @@ object ManufacturedHomeLandPropertyInterestEnum
 
   override def valueOf(code: Int): ManufacturedHomeLandPropertyInterestEnum = {
     code match {
-      case 1 => DirectOwnership
-      case 2 => IndirectOwnership
-      case 3 => PaidLeasehold
-      case 4 => UnpaidLeasehold
-      case 5 => ManufacturedHomeLandNotApplicable
-      case _ => InvalidManufacturedHomeLandPropertyCode
+      case 1    => DirectOwnership
+      case 2    => IndirectOwnership
+      case 3    => PaidLeasehold
+      case 4    => UnpaidLeasehold
+      case 5    => ManufacturedHomeLandNotApplicable
+      case 1111 => ManufacturedHomeLoanPropertyInterestExempt
+      case _    => InvalidManufacturedHomeLandPropertyCode
     }
   }
 }
@@ -42,6 +43,13 @@ case object ManufacturedHomeLandNotApplicable
     extends ManufacturedHomeLandPropertyInterestEnum {
   override val code: Int = 5
   override val description: String = "Not applicable"
+}
+
+case object ManufacturedHomeLoanPropertyInterestExempt
+    extends ManufacturedHomeLandPropertyInterestEnum {
+  override def code: Int = 1111
+  override def description: String =
+    "Exempt Manufactured Home Loan Property Interest"
 }
 
 case object InvalidManufacturedHomeLandPropertyCode

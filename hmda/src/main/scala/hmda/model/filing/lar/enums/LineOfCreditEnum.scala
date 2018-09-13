@@ -7,9 +7,10 @@ object LineOfCreditEnum extends LarCodeEnum[LineOfCreditEnum] {
 
   override def valueOf(code: Int): LineOfCreditEnum = {
     code match {
-      case 1 => OpenEndLineOfCredit
-      case 2 => NotOpenEndLineOfCredit
-      case _ => InvalidLineOfCreditCode
+      case 1    => OpenEndLineOfCredit
+      case 2    => NotOpenEndLineOfCredit
+      case 1111 => ExemptLineOfCredit
+      case _    => InvalidLineOfCreditCode
     }
   }
 }
@@ -22,6 +23,11 @@ case object OpenEndLineOfCredit extends LineOfCreditEnum {
 case object NotOpenEndLineOfCredit extends LineOfCreditEnum {
   override val code: Int = 2
   override val description: String = "Not an open-end line of credit"
+}
+
+case object ExemptLineOfCredit extends LineOfCreditEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt line of credit"
 }
 
 case object InvalidLineOfCreditCode extends LineOfCreditEnum {
