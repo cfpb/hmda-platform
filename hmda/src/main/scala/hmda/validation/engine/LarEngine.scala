@@ -2,11 +2,7 @@ package hmda.validation.engine
 
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
-<<<<<<< HEAD
-import hmda.validation.rules.lar.quality.{Q606, Q618, Q630}
-=======
 import hmda.validation.rules.lar.quality._
->>>>>>> master
 import hmda.validation.rules.lar.syntactical.S300
 import hmda.validation.rules.lar.validity._
 
