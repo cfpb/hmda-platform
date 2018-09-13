@@ -83,7 +83,13 @@ installed, you should be able to do `minikube dashboard` to open up the `kuberne
 `kubectl` is properly configured to point to `minikube` when working in local development mode. `Minikube` should have a minimum of 6 GB of RAM
 to be able to run all the necessary containers for the `HMDA Platform`.
 3. Make sure that [Helm](https://helm.sh/) is installed, as well as Tiller, the server side component.
-4. Install the `Jenkins` Helm Chart, as follows:
+4. Add credentials for Cassandra
+
+```shell
+kubectl create secret generic cassandra-credentials --from-literal=cassandra.username=<username> --from-literal=cassandra.password=<password>
+```
+
+5. Install the `Jenkins` Helm Chart, as follows:
 
 * Create namespace for `Jenkins`: 
 
@@ -123,6 +129,18 @@ kubectl --namespace=kube-system edit deployment/tiller-deploy
 
 And change the `automountServiceAccountToken` to `true`. Save and exit
 
+* Add Ambassador Helm Repository
+
+```shell
+helm repo add datawire https://www.getambassador.io
+```
+
+* Install Ambassador Helm Chart
+
+```shell
+helm upgrade --install --wait ambassador datawire/ambassador
+```
+
 * Create Persistent Volume for Jenkins
 
 
@@ -141,7 +159,7 @@ Follow the on screen instructions to finalize `Jenkins` setup. When logged in, u
 Add credentials in Jenkins for `Docker Hub` so that images can be pushed as part of `Jenkins` pipeline builds.
 
 
-5. OPTIONAL: Install [Istio](https://istio.io/) Service Mesh
+6. OPTIONAL: Install [Istio](https://istio.io/) Service Mesh
 
 * Install Istio with Helm. Download the Istio distribution and run from the Istio root path:
 
