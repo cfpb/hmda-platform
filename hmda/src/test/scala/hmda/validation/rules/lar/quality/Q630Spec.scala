@@ -1,5 +1,6 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
@@ -12,10 +13,13 @@ class Q630Spec extends LarEditCheckSpec {
   property(
     "If total units is greater than or equal to 5, hoepa status must be not applicable") {
     forAll(larGen) { lar =>
-      lar.copy(property = lar.property.copy(totalUnits = 4)).mustPass
+      val config = ConfigFactory.load()
+      val units = config.getInt("edits.Q630.units")
+
+      lar.copy(property = lar.property.copy(totalUnits = units - 1)).mustPass
 
       val appLar =
-        lar.copy(property = lar.property.copy(totalUnits = 5))
+        lar.copy(property = lar.property.copy(totalUnits = units))
       appLar.copy(hoepaStatus = HighCostMortgage).mustFail
       appLar.copy(hoepaStatus = HOEPStatusANotApplicable).mustPass
     }

@@ -1,5 +1,6 @@
 package hmda.validation.rules.lar.quality
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums.HOEPStatusANotApplicable
 import hmda.validation.dsl.PredicateCommon._
@@ -11,7 +12,10 @@ object Q630 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "Q630"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    when(lar.property.totalUnits is greaterThanOrEqual(5)) {
+    val config = ConfigFactory.load()
+    val units = config.getInt("edits.Q630.units")
+
+    when(lar.property.totalUnits is greaterThanOrEqual(units)) {
       lar.hoepaStatus is equalTo(HOEPStatusANotApplicable)
     }
   }
