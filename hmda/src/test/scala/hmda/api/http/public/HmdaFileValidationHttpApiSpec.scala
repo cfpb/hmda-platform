@@ -63,7 +63,8 @@ class HmdaFileValidationHttpApiSpec
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
         csv must include("lineNumber|errors")
-        csv must include("2|NMLSR identifier is not numeric")
+        csv must include(
+          "2|NMLSR identifier is not a non-empty string, NA or Exempt")
       }
     }
   }

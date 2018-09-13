@@ -44,11 +44,5 @@ class BaseHttpApiSpec
         serviceStatus.status mustBe "OK"
       }
     }
-    "Return OPTIONS" in {
-      Options() ~> Origin(HttpOrigin("http://ffiec.cfpb.gov")) ~> routes(
-        "hmda-public-api") ~> check {
-        response.status mustBe StatusCodes.OK
-      }
-    }
   }
 }

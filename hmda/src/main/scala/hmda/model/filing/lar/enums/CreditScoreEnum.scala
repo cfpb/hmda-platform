@@ -7,17 +7,18 @@ object CreditScoreEnum extends LarCodeEnum[CreditScoreEnum] {
 
   override def valueOf(code: Int): CreditScoreEnum = {
     code match {
-      case 1  => EquifaxBeacon5
-      case 2  => ExperianFairIsaac
-      case 3  => FICORiskScoreClassic04
-      case 4  => FICORiskScoreClassic98
-      case 5  => VantageScore2
-      case 6  => VantageScore3
-      case 7  => OneOrMoreCreditScoreModels
-      case 8  => OtherCreditScoreModel
-      case 9  => CreditScoreNotApplicable
-      case 10 => CreditScoreNoCoApplicant
-      case _  => InvalidCreditScoreCode
+      case 1    => EquifaxBeacon5
+      case 2    => ExperianFairIsaac
+      case 3    => FICORiskScoreClassic04
+      case 4    => FICORiskScoreClassic98
+      case 5    => VantageScore2
+      case 6    => VantageScore3
+      case 7    => OneOrMoreCreditScoreModels
+      case 8    => OtherCreditScoreModel
+      case 9    => CreditScoreNotApplicable
+      case 10   => CreditScoreNoCoApplicant
+      case 1111 => CreditScoreExempt
+      case _    => InvalidCreditScoreCode
     }
   }
 }
@@ -70,6 +71,11 @@ case object CreditScoreNotApplicable extends CreditScoreEnum {
 case object CreditScoreNoCoApplicant extends CreditScoreEnum {
   override val code: Int = 10
   override val description: String = "No co-applicant"
+}
+
+case object CreditScoreExempt extends CreditScoreEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt Credit Score"
 }
 
 case object InvalidCreditScoreCode extends CreditScoreEnum {
