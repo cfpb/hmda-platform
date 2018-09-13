@@ -7,9 +7,10 @@ object MortgageTypeEnum extends LarCodeEnum[MortgageTypeEnum] {
 
   override def valueOf(code: Int): MortgageTypeEnum = {
     code match {
-      case 1 => ReverseMortgage
-      case 2 => NotReverseMortgage
-      case _ => InvalidMortgageTypeCode
+      case 1    => ReverseMortgage
+      case 2    => NotReverseMortgage
+      case 1111 => ExemptMortgageType
+      case _    => InvalidMortgageTypeCode
     }
   }
 }
@@ -22,6 +23,11 @@ case object ReverseMortgage extends MortgageTypeEnum {
 case object NotReverseMortgage extends MortgageTypeEnum {
   override val code: Int = 2
   override val description: String = "Not a reverse mortgate"
+}
+
+case object ExemptMortgageType extends MortgageTypeEnum {
+  override def code: Int = 1111
+  override def description: String = "Exempt Mortgage Type"
 }
 
 case object InvalidMortgageTypeCode extends MortgageTypeEnum {
