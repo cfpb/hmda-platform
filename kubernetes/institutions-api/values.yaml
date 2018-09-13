@@ -58,6 +58,7 @@ postgresql:
   postgresUser: postgres
   postgresPassword: postgres
   enabled: false
+  ssl: true
 
 cassandra:
   hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
