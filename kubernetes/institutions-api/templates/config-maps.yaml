@@ -5,4 +5,4 @@ metadata:
 data:
   instapi.postgres_host: {{ .Values.postgresql.host }}
   cassandra-hosts: "{{ .Values.cassandra.hosts }}"
-  postgres.ssl: {{ .Values.postgresql.ssl }}
+  postgres.ssl: "{{ .Values.postgresql.ssl }}"

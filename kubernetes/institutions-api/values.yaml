@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: hmda/hmda-institutions-api
-  tag: 0.1.0
+  tag: 0.1.3
   pullPolicy: IfNotPresent
 
 service:
@@ -58,7 +58,7 @@ postgresql:
   postgresUser: postgres
   postgresPassword: postgres
   enabled: false
-  ssl: true
+  ssl: require
 
 cassandra:
   hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
