@@ -15,6 +15,7 @@ import hmda.api.http.codec.filing.LarCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.validation.context.ValidationContext
 import hmda.validation.engine.LarEngine._
 
 import scala.concurrent.ExecutionContext
@@ -65,9 +66,10 @@ trait LarValidationHttpApi
 
   private def validate(lar: LoanApplicationRegister,
                        checkType: String): Route = {
+    val ctx = ValidationContext(None)
     val validation: HmdaValidation[LoanApplicationRegister] = checkType match {
-      case "all"         => checkAll(lar, lar.loan.ULI)
-      case "syntactical" => checkSyntactical(lar, lar.loan.ULI)
+      case "all"         => checkAll(lar, lar.loan.ULI, ctx)
+      case "syntactical" => checkSyntactical(lar, lar.loan.ULI, ctx)
       case "validity"    => checkValidity(lar, lar.loan.ULI)
       case "quality"     => checkQuality(lar, lar.loan.ULI)
     }

@@ -38,7 +38,7 @@ CREATE SEQUENCE institutions_emails_2018_id_seq START 1;
 CREATE TABLE public.institutions_emails_2018
 (
   id integer NOT NULL DEFAULT nextval('institutions_emails_2018_id_seq'::regclass),
-  lei character varying NOT NULL,
+  lei character varying NOT NULL REFERENCES institutions2018 (lei),
   email_domain character varying NOT NULL,
   CONSTRAINT institutions_emails_2018_pkey PRIMARY KEY (id )
 )

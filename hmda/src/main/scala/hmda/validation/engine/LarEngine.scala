@@ -1,12 +1,14 @@
 package hmda.validation.engine
 
 import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.validation.context.ValidationContext
+import hmda.validation.rules.lar.quality._
 import hmda.validation.rules.lar.syntactical.S300
 import hmda.validation.rules.lar.validity._
 
 object LarEngine extends ValidationEngine[LoanApplicationRegister] {
 
-  override val syntacticalChecks = Vector(
+  override def syntacticalChecks(ctx: ValidationContext) = Vector(
     S300
   )
 
@@ -45,29 +47,80 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V635_2,
     V635_3,
     V635_4,
+    V636_1,
+    V636_2,
+    V636_3,
     V637,
+    V638_1,
+    V638_2,
+    V638_3,
+    V638_4,
+    V639_1,
+    V639_2,
+    V639_3,
     V640,
+    V641,
     V642_1,
     V642_2,
     V643,
+    V644_1,
+    V644_2,
     V645,
     V646_1,
     V646_2,
     V647,
+    V648_1,
+    V648_2,
     V649,
     V651_1,
     V651_2,
     V652_1,
     V652_2,
+    V655_1,
+    V655_2,
     V659,
     V691,
     V695,
     V699,
+    V700_1,
+    V700_2,
     V701,
     V702_1,
     V702_2,
     V703_1,
     V703_2
+  )
+
+  override val qualityChecks = Vector(
+    Q601,
+    Q602,
+    Q605_1,
+    Q605_2,
+    Q606,
+    Q618,
+    Q607,
+    Q608,
+    Q610,
+    Q611,
+    Q612,
+    Q613,
+    Q614,
+    Q618,
+    Q619,
+    Q620,
+    Q621,
+    Q623,
+    Q624,
+    Q628,
+    Q629,
+    Q630,
+    Q631,
+    Q632,
+    Q633,
+    Q642_1,
+    Q642_2,
+    Q643,
+    Q644
   )
 
 }
