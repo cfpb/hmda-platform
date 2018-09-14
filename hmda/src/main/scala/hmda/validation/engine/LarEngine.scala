@@ -92,9 +92,26 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
   )
 
   override val qualityChecks = Vector(
+    Q601,
+    Q602,
+    Q605_1,
+    Q605_2,
     Q606,
+    Q607,
+    Q608,
+    Q610,
+    Q611,
+    Q612,
     Q613,
-    Q618
+    Q614,
+    Q618,
+    Q619,
+    Q620,
+    Q621,
+    Q623,
+    Q624,
+    Q628,
+    Q629
   )
 
 }
