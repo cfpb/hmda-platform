@@ -88,7 +88,8 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V702_1,
     V702_2,
     V703_1,
-    V703_2
+    V703_2,
+    V708
   )
 
   override val qualityChecks = Vector(
