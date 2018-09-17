@@ -17,3 +17,37 @@ spec:
   selector:
     app: {{ template "institutions-api.name" . }}
     release: {{ .Release.Name }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: {{ .Values.ambassador.name }}
+  name: {{ .Values.ambassador.name }}
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: institution_api_mapping
+      method: GET
+      prefix: /v2/public/institutions/
+      rewrite: /institutions
+      service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
+      ---
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: institutions_api_root
+      method: GET
+      prefix: /v2/public/institutions/status/
+      rewrite: /
+      service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
+spec:
+  type: {{ .Values.ambassador.service.type }}
+  ports:
+  - name: {{ .Values.ambassador.name }}
+    port: {{ .Values.ambassador.port }}
+    targetPort: {{ .Values.ambassador.port }}
+  selector:
+service: {{ .Values.ambassador.name }}
