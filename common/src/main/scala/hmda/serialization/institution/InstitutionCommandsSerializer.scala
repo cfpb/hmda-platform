@@ -27,7 +27,7 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem)
   final val InstitutionManifest = classOf[Institution].getName
   final val CreateInstitutionManifest = classOf[CreateInstitution].getName
   final val ModifyInstitutionManifest = classOf[ModifyInstitution].getName
-  final val GetManifest = classOf[GetInstitution].getName
+  final val GetInstitutionManifest = classOf[GetInstitution].getName
   final val DeleteInstitutionManifest = classOf[DeleteInstitution].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
@@ -56,7 +56,7 @@ class InstitutionCommandsSerializer(system: ExtendedActorSystem)
         createInstitutionFromProtobuf(bytes, resolver)
       case ModifyInstitutionManifest =>
         modifyInstitutionFromProtobuf(bytes, resolver)
-      case GetManifest =>
+      case GetInstitutionManifest =>
         getInstitutionFromProtobuf(bytes, resolver)
       case DeleteInstitutionManifest =>
         deleteInstitutionFromProtobuf(bytes, resolver)
