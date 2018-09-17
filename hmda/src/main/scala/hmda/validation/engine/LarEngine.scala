@@ -36,6 +36,7 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V620,
     V621,
     V623,
+    V624,
     V628_1,
     V628_2,
     V628_3,
@@ -79,6 +80,8 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V655_1,
     V655_2,
     V659,
+    V660_1,
+    V660_2,
     V691,
     V695,
     V699,
@@ -88,7 +91,8 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V702_1,
     V702_2,
     V703_1,
-    V703_2
+    V703_2,
+    V708
   )
 
   override val qualityChecks = Vector(
@@ -97,16 +101,38 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     Q605_1,
     Q605_2,
     Q606,
+    Q609,
+    Q618,
+    Q607,
     Q608,
     Q610,
     Q611,
     Q612,
+    Q613,
     Q614,
+    Q615_1,
+    Q615_2,
+    Q616_1,
+    Q616_2,
     Q618,
     Q619,
     Q620,
+    Q621,
+    Q622,
+    Q623,
     Q624,
-    Q626
+    Q625,
+    Q626,
+    Q628,
+    Q629,
+    Q630,
+    Q631,
+    Q632,
+    Q633,
+    Q642_1,
+    Q642_2,
+    Q643,
+    Q644
   )
 
 }
