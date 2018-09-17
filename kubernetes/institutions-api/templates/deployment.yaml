@@ -41,6 +41,11 @@ spec:
                 secretKeyRef:
                   name: postgres-credentials
                   key: postgres.password
+            - name: PG_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ .Release.Name }}-inst-api-config"
+                  key: postgres.ssl
             - name: CASSANDRA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:

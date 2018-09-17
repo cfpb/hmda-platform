@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: hmda/hmda-institutions-api
-  tag: 0.1.0
+  tag: 0.1.3
   pullPolicy: IfNotPresent
 
 service:
@@ -14,6 +14,12 @@ service:
   port: 9092
   targetPort: 9092
   name: http-inst-api
+
+ambassador:
+  name: institutions-api-ambassador
+  service:
+    type: NodePort
+  port: 80
 
 ingress:
   enabled: false
@@ -47,10 +53,12 @@ tolerations: []
 affinity: {}
 
 postgresql:
+  host: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
   postgresDatabase: hmda
   postgresUser: postgres
   postgresPassword: postgres
-  enabled: true
+  enabled: false
+  ssl: require
 
 cassandra:
   hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
