@@ -126,6 +126,7 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     Q623,
     Q624,
     Q625,
+    Q626,
     Q628,
     Q629,
     Q630,
