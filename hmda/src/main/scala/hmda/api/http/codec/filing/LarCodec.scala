@@ -121,7 +121,7 @@ object LarCodec {
       ("interestRate", Json.fromString(a.interestRate)),
       ("prepaymentPenaltyTerm", Json.fromString(a.prepaymentPenaltyTerm)),
       ("debtToIncomeRatio", Json.fromString(a.debtToIncomeRatio)),
-      ("loanToValueRatio", Json.fromString(a.combinedLoanToValueRatio)),
+      ("combinedLoanToValueRatio", Json.fromString(a.combinedLoanToValueRatio)),
       ("introductoryRatePeriod", Json.fromString(a.introductoryRatePeriod))
     )
   }
@@ -141,7 +141,9 @@ object LarCodec {
         interestRate <- c.downField("interestRate").as[String]
         prepaymentPenaltyTerm <- c.downField("prepaymentPenaltyTerm").as[String]
         debtToIncomeRatio <- c.downField("debtToIncomeRatio").as[String]
-        loanToValueRatio <- c.downField("loanToValueRatio").as[String]
+        combinedLoanToValueRatio <- c
+          .downField("combinedLoanToValueRatio")
+          .as[String]
         introductoryRatePeriod <- c
           .downField("introductoryRatePeriod")
           .as[String]
@@ -159,7 +161,7 @@ object LarCodec {
           interestRate,
           prepaymentPenaltyTerm,
           debtToIncomeRatio,
-          loanToValueRatio,
+          combinedLoanToValueRatio,
           introductoryRatePeriod
         )
       }
