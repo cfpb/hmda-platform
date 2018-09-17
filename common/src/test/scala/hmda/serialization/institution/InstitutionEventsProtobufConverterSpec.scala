@@ -23,7 +23,7 @@ class InstitutionEventsProtobufConverterSpec
     with PropertyChecks
     with MustMatchers {
 
-  property("InstitutionCreated must convert to and protobuf") {
+  property("InstitutionCreated must convert to and from protobuf") {
     forAll(institutionGen) { institution =>
       val created = InstitutionCreated(institution)
       val protobuf = institutionCreatedToProtobuf(created).toByteArray
@@ -32,7 +32,7 @@ class InstitutionEventsProtobufConverterSpec
     }
   }
 
-  property("InstitutionModified must convert to and protobuf") {
+  property("InstitutionModified must convert to and from protobuf") {
     forAll(institutionGen) { institution =>
       val modified = InstitutionModified(institution)
       val protobuf = institutionModifiedToProtobuf(modified).toByteArray
@@ -42,7 +42,7 @@ class InstitutionEventsProtobufConverterSpec
 
   }
 
-  property("InstitutionDeleted must convert to and protobuf") {
+  property("InstitutionDeleted must convert to and from protobuf") {
     forAll(institutionGen) { institution =>
       val lei = institution.LEI
       val deleted = InstitutionDeleted(lei)
@@ -52,7 +52,7 @@ class InstitutionEventsProtobufConverterSpec
     }
   }
 
-  property("InstitutionNotExists must convert to and protobuf") {
+  property("InstitutionNotExists must convert to and from protobuf") {
     forAll(institutionGen) { institution =>
       val protobuf =
         institutionNotExistsToProtobuf(InstitutionNotExists(institution.LEI)).toByteArray

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "submission.proto";
+
+message SubmissionCreatedMessage {
+    SubmissionMessage submission = 1;
+}
+
+message SubmissionModifiedMessage {
+    SubmissionMessage submission = 1;
+}
+
+message SubmissionNotExistsMessage {
+    SubmissionIdMessage submissionId = 1;
+}
