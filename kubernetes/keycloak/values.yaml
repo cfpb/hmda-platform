@@ -37,7 +37,7 @@ keycloak:
   preStartScript:
 
   ## Additional arguments to start command e.g. -Dkeycloak.import= to load a realm
-  extraArgs: ""
+  extraArgs: "-Dkeycloak.import=/realm/realm.json"
 
   ## Username for the initial Keycloak admin user
   username: keycloak
@@ -167,7 +167,13 @@ keycloak:
 
   ## Add additional volumes and mounts, e. g. for custom themes
   extraVolumes: |
+    - name: realm-secret
+      secret: 
+        secretName: realm-secret
   extraVolumeMounts: |
+    - name: realm-secret
+      mountPath: "/realm/"
+      readOnly: true
 
   podDisruptionBudget: {}
     # maxUnavailable: 1
