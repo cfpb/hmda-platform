@@ -9,7 +9,7 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 class V708Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V708
 
-  property("When AUS is Blank AUS Result must be blank") {
+  property("Business code must be valid") {
     forAll(larGen) { lar =>
       lar.mustPass
       lar
