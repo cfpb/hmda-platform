@@ -15,6 +15,6 @@ case class Loan(
     interestRate: String = "NA",
     prepaymentPenaltyTerm: String = "NA",
     debtToIncomeRatio: String = "NA",
-    loanToValueRatio: String = "NA",
+    combinedLoanToValueRatio: String = "NA",
     introductoryRatePeriod: String = "NA"
 )
