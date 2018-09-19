@@ -82,7 +82,7 @@ object LarFieldMapping {
     "Interest Rate" -> lar.loan.interestRate,
     "Prepayment Penalty Term" -> lar.loan.prepaymentPenaltyTerm,
     "Debt-to-Income Ration" -> lar.loan.debtToIncomeRatio,
-    "Combined Loan-to-Value Ration" -> lar.loan.loanToValueRatio,
+    "Combined Loan-to-Value Ration" -> lar.loan.combinedLoanToValueRatio,
     "Loan Term" -> lar.loan.loanTerm,
     "Introductory Rate Period" -> lar.loan.introductoryRatePeriod,
     "Balloon Payment" -> lar.nonAmortizingFeatures.balloonPayment.code,
