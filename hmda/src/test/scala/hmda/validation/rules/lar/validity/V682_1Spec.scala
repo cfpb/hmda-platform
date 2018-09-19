@@ -5,12 +5,14 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.rules.EditCheck
 import hmda.validation.rules.lar.LarEditCheckSpec
 
-class V660_1Spec extends LarEditCheckSpec {
-  override def check: EditCheck[LoanApplicationRegister] = V660_1
+class V682_1Spec extends LarEditCheckSpec {
+  override def check: EditCheck[LoanApplicationRegister] = V682_1
 
-  property("Credit score must be valid") {
+  property("Loan term must be valid") {
     forAll(larGen) { lar =>
       lar.mustPass
+      val invalidLar = lar.copy(loan = lar.loan.copy(loanTerm = "test"))
+      invalidLar.mustFail
     }
   }
 }
