@@ -85,8 +85,7 @@ object LarGenerators {
       term <- intValueOrNA(Gen.choose(1, Int.MaxValue))
       rateSpread <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       interestRate <- doubleValueOrNA(Gen.choose(0.0, 30.0))
-      prepaymentPenaltyTerm <- intValueOrNA(
-        Gen.choose(Int.MinValue, Int.MaxValue))
+      prepaymentPenaltyTerm <- intValueOrNA(Gen.choose(1, Int.MaxValue))
       debtToIncomeRatio <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       loanToValueRatio <- doubleValueOrNA(Gen.choose(0.0, 100.0))
       introductoryRatePeriod <- intValueOrNA(Gen.choose(1, Int.MaxValue))
