@@ -171,8 +171,7 @@ object LarGenerators {
 
   implicit def propertyGen: Gen[Property] = {
     for {
-      propertyValue <- doubleValueOrNA(
-        Gen.choose(Double.MinValue, Double.MaxValue))
+      propertyValue <- doubleValueOrNA(Gen.choose(1.0, Double.MaxValue))
       manufacturedHomeSecuredProperty <- manufacturedHomeSecuredPropertyEnumGen
       manufacturedHomeLandPropertyInterest <- manufacturedHomeLandPropertyInterestEnumGen
       totalUnits <- Gen.choose(1, 100)

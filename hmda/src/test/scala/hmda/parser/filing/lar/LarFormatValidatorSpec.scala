@@ -118,7 +118,7 @@ class LarFormatValidatorSpec
         loan.interestRate,
         loan.prepaymentPenaltyTerm,
         loan.debtToIncomeRatio,
-        loan.loanToValueRatio,
+        loan.combinedLoanToValueRatio,
         loan.introductoryRatePeriod
       ) mustBe Valid(loan)
     }
