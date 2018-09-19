@@ -89,8 +89,7 @@ object LarGenerators {
         Gen.choose(Int.MinValue, Int.MaxValue))
       debtToIncomeRatio <- doubleValueOrNA(Gen.choose(0.0, 1.0))
       loanToValueRatio <- doubleValueOrNA(Gen.choose(0.0, 100.0))
-      introductoryRatePeriod <- intValueOrNA(
-        Gen.choose(Int.MinValue, Int.MaxValue))
+      introductoryRatePeriod <- intValueOrNA(Gen.choose(1, Int.MaxValue))
     } yield
       Loan(
         uli,
