@@ -14,6 +14,8 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
 
   override val validityChecks = Vector(
     V600,
+    V608_1,
+    V608_2,
     V610_1,
     V610_2,
     V611,
