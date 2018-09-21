@@ -15,7 +15,7 @@ object Q607 extends EditCheck[LoanApplicationRegister] {
 
     val config = ConfigFactory.load()
     val loanAmount =
-      config.getDouble("hmda.validation.quality.Q607.loan.amount")
+      config.getDouble("edits.Q607.amount")
 
     when(lar.lienStatus is equalTo(SecuredBySubordinateLien)) {
       lar.loan.amount is lessThan(loanAmount)
