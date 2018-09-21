@@ -12,22 +12,22 @@
   "offlineSessionMaxLifespanEnabled": false,
   "offlineSessionMaxLifespan": 5184000,
   "accessCodeLifespan": 60,
-  "accessCodeLifespanUserAction": 300,
+  "accessCodeLifespanUserAction": 3600,
   "accessCodeLifespanLogin": 1800,
   "actionTokenGeneratedByAdminLifespan": 43200,
-  "actionTokenGeneratedByUserLifespan": 300,
+  "actionTokenGeneratedByUserLifespan": 3600,
   "enabled": true,
-  "sslRequired": "none",
+  "sslRequired": "all",
   "registrationAllowed": true,
   "registrationEmailAsUsername": true,
-  "rememberMe": true,
+  "rememberMe": false,
   "verifyEmail": true,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
-  "bruteForceProtected": false,
-  "permanentLockout": false,
+  "bruteForceProtected": true,
+  "permanentLockout": true,
   "maxFailureWaitSeconds": 900,
   "minimumQuickLoginWaitSeconds": 60,
   "waitIncrementSeconds": 60,
@@ -69,7 +69,6 @@
       }
     ],
     "client": {
-      "hmda-help": [],
       "realm-management": [
         {
           "id": "65831188-a6dd-47f5-8717-3e5e7bea9c02",
@@ -263,6 +262,22 @@
           "containerId": "c8a7123f-af71-42cc-a4bf-56f6067ea3d2"
         }
       ],
+      "hmda2-api": [
+        {
+          "id": "579a3bfa-84e2-410c-a3ea-186628c3c0ca",
+          "name": "hmda-user",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "c749d73d-de71-42fa-aff3-44456890e908"
+        },
+        {
+          "id": "9e59a596-b2a3-45d9-92aa-720afbfa4867",
+          "name": "hmda-admin",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "c749d73d-de71-42fa-aff3-44456890e908"
+        }
+      ],
       "security-admin-console": [],
       "admin-cli": [],
       "broker": [
@@ -338,6 +353,60 @@
   ],
   "clients": [
     {
+      "id": "c749d73d-de71-42fa-aff3-44456890e908",
+      "clientId": "hmda2-api",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "**********",
+      "redirectUris": [
+        "https://192.168.99.100/silent_renew.html",
+        "https://192.168.99.100/oidc-callback",
+        "https://192.168.99.100"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "publicClient": true,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "saml.assertion.signature": "false",
+        "saml.force.post.binding": "false",
+        "saml.multivalued.roles": "false",
+        "saml.encrypt": "false",
+        "saml.server.signature": "false",
+        "saml.server.signature.keyinfo.ext": "false",
+        "exclude.session.state.from.auth.response": "false",
+        "saml_force_name_id_format": "false",
+        "saml.client.signature": "false",
+        "tls.client.certificate.bound.access.tokens": "false",
+        "saml.authnstatement": "false",
+        "display.on.consent.screen": "false",
+        "saml.onetimeuse.condition": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "role_list",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access"
+      ]
+    },
+    {
       "id": "70a210fc-1f8c-4324-b483-2816407f6f4f",
       "clientId": "broker",
       "name": "${client_broker}",
@@ -410,46 +479,6 @@
       ],
       "defaultClientScopes": [],
       "optionalClientScopes": []
-    },
-    {
-      "id": "0ee3f749-1f73-4b60-b794-7f2136ba915c",
-      "clientId": "hmda-help",
-      "rootUrl": "http://localhost:8080/hmda-help",
-      "adminUrl": "http://localhost:8080/hmda-help",
-      "surrogateAuthRequired": false,
-      "enabled": true,
-      "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
-      "redirectUris": [
-        "http://localhost:8080/hmda-help/*"
-      ],
-      "webOrigins": [
-        "http://localhost:8080"
-      ],
-      "notBefore": 0,
-      "bearerOnly": false,
-      "consentRequired": false,
-      "standardFlowEnabled": true,
-      "implicitFlowEnabled": false,
-      "directAccessGrantsEnabled": true,
-      "serviceAccountsEnabled": false,
-      "publicClient": true,
-      "frontchannelLogout": false,
-      "protocol": "openid-connect",
-      "attributes": {},
-      "authenticationFlowBindingOverrides": {},
-      "fullScopeAllowed": true,
-      "nodeReRegistrationTimeout": -1,
-      "defaultClientScopes": [
-        "role_list",
-        "profile",
-        "email"
-      ],
-      "optionalClientScopes": [
-        "address",
-        "phone",
-        "offline_access"
-      ]
     },
     {
       "id": "71c14599-cecf-47ce-aa16-c7d083c96134",
@@ -928,8 +957,8 @@
     "strictTransportSecurity": "max-age=31536000; includeSubDomains"
   },
   "smtpServer": {
-    "host" : "maildev-smtp.default.svc.cluster.local",
-    "from" : "noreply@cfpb.gov",
+    "host": "maildev-smtp.default.svc.cluster.local",
+    "from": "noreply@cfpb.gov",
     "auth": "",
     "ssl": ""
   },
@@ -974,13 +1003,13 @@
         "config": {
           "allowed-protocol-mapper-types": [
             "saml-user-property-mapper",
-            "oidc-address-mapper",
+            "oidc-sha256-pairwise-sub-mapper",
+            "saml-role-list-mapper",
             "saml-user-attribute-mapper",
             "oidc-usermodel-attribute-mapper",
-            "saml-role-list-mapper",
             "oidc-usermodel-property-mapper",
-            "oidc-full-name-mapper",
-            "oidc-sha256-pairwise-sub-mapper"
+            "oidc-address-mapper",
+            "oidc-full-name-mapper"
           ]
         }
       },
@@ -1024,14 +1053,14 @@
         "subComponents": {},
         "config": {
           "allowed-protocol-mapper-types": [
-            "oidc-address-mapper",
-            "oidc-full-name-mapper",
+            "saml-role-list-mapper",
             "oidc-usermodel-property-mapper",
-            "saml-user-property-mapper",
             "oidc-sha256-pairwise-sub-mapper",
+            "oidc-full-name-mapper",
             "oidc-usermodel-attribute-mapper",
-            "saml-user-attribute-mapper",
-            "saml-role-list-mapper"
+            "saml-user-property-mapper",
+            "oidc-address-mapper",
+            "saml-user-attribute-mapper"
           ]
         }
       },
@@ -1088,7 +1117,7 @@
   "supportedLocales": [],
   "authenticationFlows": [
     {
-      "id": "b4e231ba-7ca3-4c79-be0e-4e07dcc25daa",
+      "id": "07fa790f-4462-4d82-8dd0-318401465e17",
       "alias": "Handle Existing Account",
       "description": "Handle what to do if there is existing account with same email/username like authenticated identity provider",
       "providerId": "basic-flow",
@@ -1119,7 +1148,7 @@
       ]
     },
     {
-      "id": "87872ef8-a5da-4753-8234-047fe4c4e611",
+      "id": "b5b14bed-48cb-4a31-bcb7-0b0000237e74",
       "alias": "Verify Existing Account by Re-authentication",
       "description": "Reauthentication of existing account",
       "providerId": "basic-flow",
@@ -1143,7 +1172,7 @@
       ]
     },
     {
-      "id": "f5607910-7f55-4b9d-a852-21e80ec8e5fe",
+      "id": "1a2f0cc7-8418-407f-b97c-39b5cbdb018a",
       "alias": "browser",
       "description": "browser based authentication",
       "providerId": "basic-flow",
@@ -1181,7 +1210,7 @@
       ]
     },
     {
-      "id": "b2c3ffdf-f550-4ad2-b4ec-9d788f279ee2",
+      "id": "f5d8c62c-c8cd-40bb-afa6-8bf91a9f521e",
       "alias": "clients",
       "description": "Base authentication for clients",
       "providerId": "client-flow",
@@ -1212,7 +1241,7 @@
       ]
     },
     {
-      "id": "c01878aa-3b39-49e0-a663-c43e2d8d2251",
+      "id": "e2bd9dc2-a3b3-4802-b25a-82ce75566294",
       "alias": "direct grant",
       "description": "OpenID Connect Resource Owner Grant",
       "providerId": "basic-flow",
@@ -1243,7 +1272,7 @@
       ]
     },
     {
-      "id": "769b5b9a-e020-4c2c-ba6f-ebc7095f5355",
+      "id": "785bf4a6-5138-4560-a642-3474b2a8b519",
       "alias": "docker auth",
       "description": "Used by Docker clients to authenticate against the IDP",
       "providerId": "basic-flow",
@@ -1260,7 +1289,7 @@
       ]
     },
     {
-      "id": "14d19d58-33b5-41fd-8b54-423c0eacbae4",
+      "id": "9e50e0ab-8120-44ee-b644-c867a567670d",
       "alias": "first broker login",
       "description": "Actions taken after first broker login with identity provider account, which is not yet linked to any Keycloak account",
       "providerId": "basic-flow",
@@ -1293,7 +1322,7 @@
       ]
     },
     {
-      "id": "eae670e9-b8ee-43b6-a9b1-b5d29ccf9e7e",
+      "id": "d443b30d-1ca3-467b-b30d-8f6a855138cc",
       "alias": "forms",
       "description": "Username, password, otp and other auth forms.",
       "providerId": "basic-flow",
@@ -1317,7 +1346,7 @@
       ]
     },
     {
-      "id": "9cdaa18c-67f5-40bd-a01e-f76ebfa87f9f",
+      "id": "2a444878-33e4-45f7-a648-a0bd4b456fa5",
       "alias": "registration",
       "description": "registration flow",
       "providerId": "basic-flow",
@@ -1335,7 +1364,7 @@
       ]
     },
     {
-      "id": "5d38a1db-ca7e-453c-b78b-1d5917c7124e",
+      "id": "84659d43-0db0-4691-a2cb-6f514fc1e559",
       "alias": "registration form",
       "description": "registration form",
       "providerId": "form-flow",
@@ -1373,7 +1402,7 @@
       ]
     },
     {
-      "id": "970422e4-7698-43e8-8567-7da32f9d2f54",
+      "id": "eec1bc48-a789-4846-807b-13bd42ab488a",
       "alias": "reset credentials",
       "description": "Reset credentials for a user if they forgot their password or something",
       "providerId": "basic-flow",
@@ -1411,7 +1440,7 @@
       ]
     },
     {
-      "id": "2c05d3b5-9c4d-4984-abbd-f6e40fa6ca42",
+      "id": "f6d8f0e6-15a6-4e13-9f85-aa15136907f1",
       "alias": "saml ecp",
       "description": "SAML ECP Profile Authentication Flow",
       "providerId": "basic-flow",
@@ -1430,14 +1459,14 @@
   ],
   "authenticatorConfig": [
     {
-      "id": "824d2730-71ff-43b7-b3cf-9c5f4901b5e5",
+      "id": "02438e6a-0bf3-42ba-b484-d2a1b64c4b80",
       "alias": "create unique user config",
       "config": {
         "require.password.update.after.registration": "false"
       }
     },
     {
-      "id": "ae53248a-9fec-4821-8bac-0ec7484964d2",
+      "id": "77fac48e-f63d-4683-a7f8-d876c35cff08",
       "alias": "review profile config",
       "config": {
         "update.profile.on.first.login": "missing"
@@ -1501,18 +1530,18 @@
     "_browser_header.xXSSProtection": "1; mode=block",
     "_browser_header.xFrameOptions": "SAMEORIGIN",
     "_browser_header.strictTransportSecurity": "max-age=31536000; includeSubDomains",
-    "permanentLockout": "false",
     "quickLoginCheckMilliSeconds": "1000",
+    "permanentLockout": "true",
     "_browser_header.xRobotsTag": "none",
     "maxFailureWaitSeconds": "900",
     "minimumQuickLoginWaitSeconds": "60",
     "failureFactor": "30",
-    "actionTokenGeneratedByUserLifespan": "300",
+    "actionTokenGeneratedByUserLifespan": "3600",
     "maxDeltaTimeSeconds": "43200",
     "_browser_header.xContentTypeOptions": "nosniff",
     "offlineSessionMaxLifespan": "5184000",
     "actionTokenGeneratedByAdminLifespan": "43200",
-    "bruteForceProtected": "false",
+    "bruteForceProtected": "true",
     "_browser_header.contentSecurityPolicy": "frame-src 'self'; frame-ancestors 'self'; object-src 'none';",
     "waitIncrementSeconds": "60",
     "offlineSessionMaxLifespanEnabled": "false"
