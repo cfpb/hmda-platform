@@ -130,4 +130,10 @@ class PredicateRegexSpec
     testCases.foreach(validZipCode.check(_) mustBe false)
   }
 
+  property("A non-alphanumeric string will fail the regex") {
+    val testCases =
+      List("a.b", "a+b", "a/b", "a-b", ".", "@", "abcdefg93809asdf-a")
+    testCases.foreach(alphanumeric.check(_) mustBe false)
+  }
+
 }
