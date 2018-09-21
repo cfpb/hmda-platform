@@ -1,5 +1,6 @@
 package hmda.validation.rules.lar.validity
 
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
@@ -12,7 +13,10 @@ object V619_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "V619"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.action.actionTakenDate.toString.slice(0, 4) is equalTo("2018")
+    val config = ConfigFactory.load()
+    val year = config.getInt("edits.V619.year").toString
+
+    lar.action.actionTakenDate.toString.slice(0, 4) is equalTo(year)
   }
 
 }
