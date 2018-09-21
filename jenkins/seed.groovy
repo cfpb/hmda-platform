@@ -1,7 +1,7 @@
 projects = [
-    [name: "cfpb", repo: "hmda-platform", jenkinsfilePath: "hmda/Jenkinsfile", ],
-    [name: "cfpb", repo: "hmda-platform", jenkinsfilePath: "check-digit/Jenkinsfile", ],
-    [name: "cfpb", repo: "hmda-help", jenkinsfilePath: "Jenkinsfile", ]
+    [name: "hmda-platform", repo: "hmda-platform", jenkinsfilePath: "hmda/Jenkinsfile", ],
+    [name: "check-digit", repo: "hmda-platform", jenkinsfilePath: "check-digit/Jenkinsfile", ],
+    [name: "hmda-help", repo: "hmda-help", jenkinsfilePath: "Jenkinsfile", ]
 ]
 
 projects.each { project ->
