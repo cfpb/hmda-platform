@@ -157,6 +157,7 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V682_1,
     V682_2,
     V683,
+    V684,
     V685,
     V686,
     V687,
