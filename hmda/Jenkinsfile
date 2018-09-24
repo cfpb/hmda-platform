@@ -14,12 +14,18 @@ volumes: [
      def shortGitCommit = "${gitCommit[0..10]}"
 
      stage('Build Scala Code and Generate Dockerfile') {
+         when {
+             branch 'master'
+         }
        container('sbt') {
          sh "sbt hmda-platform/docker:stage"
        }
      }
 
     stage('Build And Publish Docker Image') {
+        when {
+            branch 'master'
+        }
       container('docker') {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
             usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
@@ -32,6 +38,9 @@ volumes: [
       }
 
     stage('Deploy') {
+        when {
+            branch 'master'
+        }
       container('helm') {
         sh "helm upgrade --install --force --namespace=default --values=kubernetes/hmda-platform/values.yaml --set image.tag=${gitBranch} --set service.name=hmda-platform-${gitBranch}-api hmda-platform-${gitBranch} kubernetes/hmda-platform"
       }
