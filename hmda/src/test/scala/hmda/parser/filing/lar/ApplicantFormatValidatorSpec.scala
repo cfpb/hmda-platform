@@ -21,7 +21,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(0, "a")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidEthnicity))
+        NonEmptyList.of(InvalidApplicantEthnicity))
     }
   }
 
@@ -30,7 +30,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(7, "a")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidRace))
+        NonEmptyList.of(InvalidApplicantRace))
     }
   }
 
@@ -39,7 +39,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(16, "o")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidSex))
+        NonEmptyList.of(InvalidApplicantSex))
     }
   }
 
@@ -58,7 +58,7 @@ class ApplicantFormatValidatorSpec
       val applicant = lar.applicant
       val badValues = extractValues(applicant).updated(20, "a")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidCreditScore)
+        NonEmptyList.of(InvalidApplicantCreditScoreModel)
       )
     }
   }
@@ -71,7 +71,9 @@ class ApplicantFormatValidatorSpec
         .updated(7, "b")
         .updated(16, "oh")
       validateApplicantValues(badValues) mustBe Invalid(
-        NonEmptyList.of(InvalidEthnicity, InvalidRace, InvalidSex)
+        NonEmptyList.of(InvalidApplicantEthnicity,
+                        InvalidApplicantRace,
+                        InvalidApplicantSex)
       )
     }
   }
@@ -122,7 +124,8 @@ class ApplicantFormatValidatorSpec
       age,
       creditScore,
       creditScoreModel,
-      otherCreditScore
+      otherCreditScore,
+      coApp = false
     )
   }
 

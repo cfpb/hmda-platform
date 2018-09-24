@@ -402,7 +402,8 @@ sealed trait LarFormatValidator extends LarParser {
         appAge,
         appCreditScore,
         appCreditScoreModel,
-        appCreditScoreModelOther
+        appCreditScoreModelOther,
+        coApp = false
       ),
       validateApplicant(
         coAppEth1,
@@ -426,7 +427,8 @@ sealed trait LarFormatValidator extends LarParser {
         coAppAge,
         coAppCreditScore,
         coAppCreditScoreModel,
-        coAppCreditScoreModelOther
+        coAppCreditScoreModelOther,
+        coApp = true
       ),
       validateIntStrOrNAField(income, InvalidIncome),
       validateLarCode(PurchaserEnum, purchaserType, InvalidPurchaserType),
