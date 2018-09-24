@@ -14,7 +14,7 @@ class Q607Spec extends LarEditCheckSpec {
     forAll(larGen) { lar =>
       val config = ConfigFactory.load()
       val loanAmount =
-        config.getDouble("hmda.validation.quality.Q607.loan.amount")
+        config.getDouble("edits.Q607.amount")
 
       val relevantLar = lar.copy(lienStatus = SecuredBySubordinateLien)
       whenever(lar.lienStatus != SecuredBySubordinateLien) {
