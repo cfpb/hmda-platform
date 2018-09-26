@@ -13,6 +13,7 @@ import hmda.messages.institution.InstitutionEvents.{
 import hmda.projection.ResumableProjection
 import hmda.query.DbConfiguration._
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object InstitutionDBProjection
@@ -30,6 +31,8 @@ object InstitutionDBProjection
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
     dbConfig)
 
+  implicit val ec: ExecutionContext = ExecutionContext.global
+
   override def projectEvent(envelope: EventEnvelope): EventEnvelope = {
     val event = envelope.event
     event match {
@@ -42,9 +45,8 @@ object InstitutionDBProjection
       case InstitutionModified(i) =>
         institutionRepository.insertOrUpdate(InstitutionConverter.convert(i))
         val emails = InstitutionConverter.emailsFromInstitution(i)
-        emails.foreach(email =>
-          institutionEmailsRepository.insertOrUpdate(email))
-        
+        emails.foreach(email => updateEmails(email))
+
       case InstitutionDeleted(lei) =>
         institutionRepository.deleteById(lei)
     }

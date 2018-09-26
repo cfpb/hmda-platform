@@ -104,6 +104,21 @@ trait InstitutionComponent {
     }
   }
 
+  def updateEmails(i: InstitutionEmailEntity)(
+      implicit ec: ExecutionContext,
+      institutionEmailsRepository: InstitutionEmailsRepository): Future[Int] = {
+    val db = institutionEmailsRepository.db
+    val table = institutionEmailsRepository.table
+    for {
+      query <- db.run(table.filter(_.lei === i.lei).result)
+      result <- if (!query.toList.map(_.emailDomain).contains(i.emailDomain)) {
+        db.run(table += i)
+      } else Future(0)
+    } yield {
+      result
+    }
+  }
+
   def findByEmail(email: String)(
       implicit ec: ExecutionContext,
       institutionRepository: InstitutionRepository,
