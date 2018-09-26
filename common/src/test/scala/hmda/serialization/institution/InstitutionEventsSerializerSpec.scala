@@ -8,13 +8,12 @@ import hmda.messages.institution.InstitutionEvents.{
 }
 import hmda.model.institution.InstitutionGenerators._
 import org.scalatest.prop.PropertyChecks
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, PropSpec}
+import org.scalatest.{MustMatchers, PropSpec}
 
 class InstitutionEventsSerializerSpec
     extends PropSpec
     with PropertyChecks
-    with MustMatchers
-    with BeforeAndAfterAll {
+    with MustMatchers {
 
   val serializer = new InstitutionEventsSerializer()
 

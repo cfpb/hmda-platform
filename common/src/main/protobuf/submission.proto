@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+message SubmissionMessage {
+    SubmissionIdMessage submissionId = 1;
+    int32 status = 2;
+    int64 start = 3;
+    int64 end = 4;
+    string fileName = 5;
+    string receipt = 6;
+
+}
+
+message SubmissionIdMessage {
+    string lei = 1;
+    string period = 2;
+    int32 sequenceNumber = 3;
+}
