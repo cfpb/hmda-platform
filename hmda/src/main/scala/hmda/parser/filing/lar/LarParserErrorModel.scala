@@ -48,24 +48,81 @@ object LarParserErrorModel {
     override def errorMessage: String = notStringOrNA("loan term")
   }
 
-  case object InvalidEthnicity extends ParserValidationError {
-    override def errorMessage: String = notNumeric("ethnicity")
+  case object InvalidApplicantEthnicity extends ParserValidationError {
+    override def errorMessage: String = notNumeric("applicant ethnicity")
   }
 
-  case object InvalidRace extends ParserValidationError {
-    override def errorMessage: String = notNumeric("race")
+  case object InvalidApplicantEthnicityObserved extends ParserValidationError {
+    override def errorMessage: String =
+      notNumeric("applicant ethnicity visual observation or surname")
   }
 
-  case object InvalidSex extends ParserValidationError {
-    override def errorMessage: String = notNumeric("sex")
+  case object InvalidCoApplicantEthnicity extends ParserValidationError {
+    override def errorMessage: String = notNumeric("co-applicant ethnicity")
+  }
+
+  case object InvalidCoApplicantEthnicityObserved
+      extends ParserValidationError {
+    override def errorMessage: String =
+      notNumeric("co-applicant ethnicity visual observation or surname")
+  }
+
+  case object InvalidApplicantRace extends ParserValidationError {
+    override def errorMessage: String = notNumeric("applicant race")
+  }
+
+  case object InvalidApplicantRaceObserved extends ParserValidationError {
+    override def errorMessage: String =
+      notNumeric("applicant race visual observation or surname")
+  }
+
+  case object InvalidCoApplicantRace extends ParserValidationError {
+    override def errorMessage: String = notNumeric("co-applicant race")
+  }
+
+  case object InvalidCoApplicantRaceObserved extends ParserValidationError {
+    override def errorMessage: String =
+      notNumeric("co-applicant race visual observation or surname")
+  }
+
+  case object InvalidApplicantSex extends ParserValidationError {
+    override def errorMessage: String = notNumeric("applicant sex")
+  }
+
+  case object InvalidApplicantSexObserved extends ParserValidationError {
+    override def errorMessage: String =
+      notNumeric("applicant sex visual observation or surname")
+  }
+
+  case object InvalidCoApplicantSex extends ParserValidationError {
+    override def errorMessage: String = notNumeric("co-applicant sex")
+  }
+
+  case object InvalidCoApplicantSexObserved extends ParserValidationError {
+    override def errorMessage: String =
+      notNumeric("co-applicant sex visual observation or surname")
   }
 
   case object InvalidAge extends ParserValidationError {
     override def errorMessage: String = notNumeric("age")
   }
 
-  case object InvalidCreditScore extends ParserValidationError {
-    override def errorMessage: String = notNumeric("credit score")
+  case object InvalidApplicantCreditScore extends ParserValidationError {
+    override def errorMessage: String = notNumeric("applicant credit score")
+  }
+
+  case object InvalidApplicantCreditScoreModel extends ParserValidationError {
+    override def errorMessage: String =
+      notNumeric("applicant credit scoring model")
+  }
+
+  case object InvalidCoApplicantCreditScore extends ParserValidationError {
+    override def errorMessage: String = notNumeric("co-applicant credit score")
+  }
+
+  case object InvalidCoApplicantCreditScoreModel extends ParserValidationError {
+    override def errorMessage: String =
+      notNumeric("co-applicant credit scoring model")
   }
 
   case object InvalidIncome extends ParserValidationError {
