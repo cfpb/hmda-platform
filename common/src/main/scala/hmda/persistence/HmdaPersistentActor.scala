@@ -1,25 +1,29 @@
 package hmda.persistence
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{Behavior, SupervisorStrategy}
-import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
+import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.{
+  ClusterSharding,
+  EntityTypeKey,
+  ShardedEntity
+}
 import com.typesafe.config.ConfigFactory
-
 import scala.concurrent.duration._
 import scala.reflect.ClassTag
 
-abstract class HmdaPersistentActor[Command, Event, State] {
+abstract class HmdaPersistentActor[C, E, S] {
 
   val name: String
 
-  def typeKey(implicit tag: ClassTag[Command]): EntityTypeKey[Command] =
-    EntityTypeKey[Command](name)
+  def typeKey(implicit tag: ClassTag[C]): EntityTypeKey[C] =
+    EntityTypeKey[C](name)
 
-  def behavior(entityId: String): Behavior[Command]
+  def behavior(entityId: String): Behavior[C]
 
-  val eventHandler: (State, Event) => State
+  val eventHandler: (S, E) => S
 
-  protected def supervisedBehavior(entityId: String): Behavior[Command] = {
+  protected def supervisedBehavior(entityId: String): Behavior[C] = {
     val config = ConfigFactory.load()
     val minBackOff = config.getInt("hmda.supervisor.minBackOff")
     val maxBackOff = config.getInt("hmda.supervisor.maxBackOff")
@@ -35,6 +39,17 @@ abstract class HmdaPersistentActor[Command, Event, State] {
       .supervise(behavior(entityId))
       .onFailure(supervisorStrategy)
 
+  }
+
+  def startShardRegion(sharding: ClusterSharding, stopMessage: C)(
+      implicit tag: ClassTag[C]): ActorRef[ShardingEnvelope[C]] = {
+    sharding.start(
+      ShardedEntity(
+        create = entityId => supervisedBehavior(entityId),
+        typeKey = typeKey,
+        stopMessage = stopMessage
+      )
+    )
   }
 
 }

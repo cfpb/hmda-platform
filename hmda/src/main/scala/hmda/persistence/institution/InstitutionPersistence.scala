@@ -25,6 +25,7 @@ object InstitutionPersistence
 
   override def behavior(entityId: String): Behavior[InstitutionCommand] = {
     Behaviors.setup { ctx =>
+      ctx.log.info(s"Started Institution: $entityId")
       PersistentBehaviors
         .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
           persistenceId = entityId,
@@ -99,12 +100,7 @@ object InstitutionPersistence
 
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[InstitutionCommand]] = {
-    sharding.start(
-      ShardedEntity(
-        create = entityId => supervisedBehavior(entityId),
-        typeKey = typeKey,
-        stopMessage = InstitutionStop
-      ))
+    super.startShardRegion(sharding, InstitutionStop)
   }
 
   private def modifyInstitution(institution: Institution,
