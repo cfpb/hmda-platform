@@ -22,6 +22,17 @@ case object Cancelled extends FilingStatus {
   override def message: String = "cancelled"
 }
 
+object FilingStatus {
+  def valueOf(code: Int): FilingStatus = {
+    code match {
+      case 1  => NotStarted
+      case 2  => InProgress
+      case 3  => Completed
+      case -1 => Cancelled
+    }
+  }
+}
+
 case class Filing(
     period: String = "",
     lei: String = "",
