@@ -21,7 +21,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val sharding: ClusterSharding
 
-  //institutions/<institutionId>/filings/<period>/submissions
+  //institutions/<institutionId>/filings/<period>
   val filingReadPath =
     path("institutions" / Segment / "filings" / Segment) { (lei, period) =>
       complete("OK")

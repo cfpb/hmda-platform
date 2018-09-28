@@ -29,4 +29,7 @@ case class Filing(
     filingRequired: Boolean = false,
     start: Long = 0L,
     end: Long = 0l
-)
+) {
+  def isEmpty: Boolean =
+    period == "" && lei == "" && status == NotStarted && filingRequired == false && start == 0L && end == 0L
+}

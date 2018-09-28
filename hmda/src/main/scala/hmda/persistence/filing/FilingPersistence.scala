@@ -5,21 +5,33 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import hmda.messages.filing.FilingCommands._
-import hmda.messages.filing.FilingEvents.{FilingEvent, SubmissionAdded}
+import hmda.messages.filing.FilingEvents.{
+  FilingCreated,
+  FilingEvent,
+  SubmissionAdded
+}
+import hmda.model.filing.Filing
 import hmda.model.filing.submission.Submission
 
 object FilingPersistence {
 
   final val name = "Filing"
 
-  case class FilingState(submissions: List[Submission] = Nil) {
+  case class FilingState(filing: Filing = Filing(),
+                         submissions: List[Submission] = Nil) {
     def update(event: FilingEvent): FilingState = {
       event match {
+        case FilingCreated(f) =>
+          if (this.filing.isEmpty) {
+            FilingState(f, this.submissions)
+          } else {
+            this
+          }
         case SubmissionAdded(submission) =>
           if (submissions.contains(submission)) {
             this
           } else {
-            FilingState(submission :: submissions)
+            FilingState(this.filing, submission :: submissions)
           }
         case _ => this
       }
@@ -44,6 +56,20 @@ object FilingPersistence {
     : CommandHandler[FilingCommand, FilingEvent, FilingState] = {
     (ctx, state, cmd) =>
       cmd match {
+        case CreateFiling(filing, replyTo) =>
+          Effect.persist(FilingCreated(filing)).thenRun { _ =>
+            ctx.log.debug(s"Filing created: ${filing.lei}-${filing.period}")
+            replyTo ! FilingCreated(filing)
+          }
+
+        case GetFiling(replyTo) =>
+          if (state.filing.isEmpty) {
+            replyTo ! None
+          } else {
+            replyTo ! Some(state.filing)
+          }
+          Effect.none
+
         case AddSubmission(submission, replyTo) =>
           Effect.persist(SubmissionAdded(submission)).thenRun { _ =>
             ctx.log.debug(s"Added submission: ${submission.toString}")
@@ -66,6 +92,7 @@ object FilingPersistence {
 
   val eventHandler: (FilingState, FilingEvent) => FilingState = {
     case (state, evt @ SubmissionAdded(_)) => state.update(evt)
+    case (state, evt @ FilingCreated(_))   => state.update(evt)
     case (state, _)                        => state
   }
 
