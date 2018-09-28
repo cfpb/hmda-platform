@@ -21,4 +21,7 @@ object FilingCommands {
       extends FilingCommand
   case class GetLatestSubmission(replyTo: ActorRef[Option[Submission]])
       extends FilingCommand
+
+  case class GetSubmissions(replyTo: ActorRef[List[Submission]])
+      extends FilingCommand
 }

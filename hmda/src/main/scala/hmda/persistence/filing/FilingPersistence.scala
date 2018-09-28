@@ -1,6 +1,7 @@
 package hmda.persistence.filing
 
 import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import hmda.messages.filing.FilingCommands._
@@ -26,15 +27,17 @@ object FilingPersistence {
   }
 
   def behavior(lei: String, period: String): Behavior[FilingCommand] =
-    PersistentBehaviors
-      .receive[FilingCommand, FilingEvent, FilingState](
-        persistenceId = s"$lei-$period",
-        emptyState = FilingState(),
-        commandHandler = commandHandler,
-        eventHandler = eventHandler
-      )
-      .snapshotEvery(1000)
-      .withTagger(_ => Set(s"$name-$lei-$period"))
+    Behaviors.setup { ctx =>
+      PersistentBehaviors
+        .receive[FilingCommand, FilingEvent, FilingState](
+          persistenceId = s"$lei-$period",
+          emptyState = FilingState(),
+          commandHandler = commandHandler,
+          eventHandler = eventHandler
+        )
+        .snapshotEvery(1000)
+        .withTagger(_ => Set(s"$name-$lei-$period"))
+    }
 
   val commandHandler
     : CommandHandler[FilingCommand, FilingEvent, FilingState] = {
@@ -49,6 +52,10 @@ object FilingPersistence {
         case GetLatestSubmission(replyTo) =>
           val maybeSubmission = state.submissions.headOption
           replyTo ! maybeSubmission
+          Effect.none
+
+        case GetSubmissions(replyTo) =>
+          replyTo ! state.submissions
           Effect.none
 
         case _ =>

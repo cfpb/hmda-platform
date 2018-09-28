@@ -3,7 +3,11 @@ package hmda.persistence.filing
 import akka.actor
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
-import hmda.messages.filing.FilingCommands.{AddSubmission, GetLatestSubmission}
+import hmda.messages.filing.FilingCommands.{
+  AddSubmission,
+  GetLatestSubmission,
+  GetSubmissions
+}
 import hmda.messages.filing.FilingEvents.FilingEvent
 import hmda.model.filing.Filing
 import hmda.persistence.AkkaCassandraPersistenceSpec
@@ -19,6 +23,7 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
   val maybeSubmissionProbe =
     TestProbe[Option[Submission]]("maybe-submission-probe")
   val submissionProbe = TestProbe[Submission]("submission-probe")
+  val submissionsProbe = TestProbe[List[Submission]](name = "submissions-probe")
 
   val sampleFiling = filingGen
     .suchThat(_.lei != "")
@@ -32,16 +37,31 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
     .sample
     .getOrElse(Submission(SubmissionId("12345", "2018", 1)))
 
-  "A Filing" must {
+  "Filings" must {
     "be created and read back" in {
       val filingPersistence = system.spawn(
         FilingPersistence.behavior(sampleFiling.lei, sampleFiling.period),
         actorName)
+
+      filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
+      maybeSubmissionProbe.expectMessage(None)
+
       filingPersistence ! AddSubmission(sampleSubmission, submissionProbe.ref)
       submissionProbe.expectMessage(sampleSubmission)
 
       filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
       maybeSubmissionProbe.expectMessage(Some(sampleSubmission))
+
+      val sampleSubmission2 =
+        sampleSubmission.copy(id = sampleSubmission.id.copy(lei = "AAA"))
+      filingPersistence ! AddSubmission(sampleSubmission2, submissionProbe.ref)
+      submissionProbe.expectMessage(sampleSubmission2)
+
+      filingPersistence ! GetSubmissions(submissionsProbe.ref)
+      submissionsProbe.expectMessage(List(sampleSubmission2, sampleSubmission))
+
+      filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
+      maybeSubmissionProbe.expectMessage(Some(sampleSubmission2))
     }
   }
 }
