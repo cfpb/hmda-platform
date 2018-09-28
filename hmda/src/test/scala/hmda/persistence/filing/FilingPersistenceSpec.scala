@@ -5,7 +5,7 @@ import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
 import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.FilingCreated
-import hmda.model.filing.{Filing, FilingDetails}
+import hmda.model.filing.{Filing, FilingDetails, FilingId}
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.model.filing.FilingGenerator._
 import hmda.model.filing.submission.{Submission, SubmissionId}
@@ -37,9 +37,10 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
   "Filings" must {
     "be created and read back" in {
-      val filingPersistence = system.spawn(
-        FilingPersistence.behavior(sampleFiling.lei, sampleFiling.period),
-        actorName)
+      val filingPersistence =
+        system.spawn(FilingPersistence.behavior(
+                       FilingId(sampleFiling.lei, sampleFiling.period)),
+                     actorName)
 
       filingPersistence ! GetFiling(maybeFilingProbe.ref)
       maybeFilingProbe.expectMessage(None)
@@ -54,9 +55,10 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       maybeFilingProbe.expectMessage(Some(sampleFiling))
     }
     "create submissions and read them back" in {
-      val filingPersistence = system.spawn(
-        FilingPersistence.behavior(sampleFiling.lei, sampleFiling.period),
-        actorName)
+      val filingPersistence =
+        system.spawn(FilingPersistence.behavior(
+                       FilingId(sampleFiling.lei, sampleFiling.period)),
+                     actorName)
 
       filingPersistence ! CreateFiling(sampleFiling, filingCreatedProbe.ref)
       filingCreatedProbe.expectMessage(FilingCreated(sampleFiling))

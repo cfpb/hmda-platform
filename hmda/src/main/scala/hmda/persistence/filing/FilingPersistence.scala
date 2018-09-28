@@ -1,6 +1,6 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
@@ -10,7 +10,7 @@ import hmda.messages.filing.FilingEvents.{
   FilingEvent,
   SubmissionAdded
 }
-import hmda.model.filing.{Filing, FilingDetails}
+import hmda.model.filing.{Filing, FilingDetails, FilingId}
 import hmda.model.filing.submission.Submission
 
 object FilingPersistence {
@@ -38,18 +38,18 @@ object FilingPersistence {
     }
   }
 
-  def behavior(lei: String, period: String): Behavior[FilingCommand] =
+  def behavior(filingId: FilingId): Behavior[FilingCommand] =
     Behaviors.setup { ctx =>
-      ctx.log.debug(s"Started Filing Persistence: s$lei-$period")
+      ctx.log.debug(s"Started Filing Persistence: s${filingId.toString}")
       PersistentBehaviors
         .receive[FilingCommand, FilingEvent, FilingState](
-          persistenceId = s"$lei-$period",
+          persistenceId = s"${filingId.toString}",
           emptyState = FilingState(),
           commandHandler = commandHandler,
           eventHandler = eventHandler
         )
         .snapshotEvery(1000)
-        .withTagger(_ => Set(s"$name-$lei-$period"))
+        .withTagger(_ => Set(s"$name-${filingId.toString}"))
     }
 
   val commandHandler
@@ -99,5 +99,8 @@ object FilingPersistence {
     case (state, evt @ FilingCreated(_))   => state.update(evt)
     case (state, _)                        => state
   }
+
+  def startFilingPersistenceShard(system: ActorSystem[_],
+                                  filingId: FilingId): Unit = {}
 
 }
