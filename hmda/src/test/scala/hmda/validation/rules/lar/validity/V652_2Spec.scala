@@ -11,18 +11,22 @@ class V652_2Spec extends LarEditCheckSpec {
 
   property("If co-applicant does not exist, co-applicant age must be 8888") {
     forAll(larGen) { lar =>
-      val unapplicableLar = lar.copy(
+      val unapplicableLar1 = lar.copy(
         coApplicant = lar.coApplicant.copy(
           race = lar.coApplicant.race.copy(race1 = InvalidRaceCode)))
-      unapplicableLar.mustPass
+      unapplicableLar1.mustPass
+      val unapplicableLar2 =
+        lar.copy(action = lar.action.copy(actionTakenType = PurchasedLoan))
+      unapplicableLar2.mustPass
 
       val ethnicityNA =
         lar.coApplicant.ethnicity.copy(ethnicity1 = EthnicityNotApplicable)
       val raceNA = lar.coApplicant.race.copy(race1 = RaceNotApplicable)
       val sexNA = lar.coApplicant.sex.copy(sexEnum = SexNotApplicable)
-      val applicableLar = lar.copy(
-        coApplicant = lar.coApplicant
-          .copy(race = raceNA, ethnicity = ethnicityNA, sex = sexNA))
+      val applicableLar =
+        lar.copy(coApplicant = lar.coApplicant
+                   .copy(race = raceNA, ethnicity = ethnicityNA, sex = sexNA),
+                 action = lar.action.copy(actionTakenType = LoanOriginated))
       applicableLar.mustFail
 
       val validLar =
