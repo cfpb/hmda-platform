@@ -28,6 +28,7 @@ object FilingPersistence {
 
   def behavior(lei: String, period: String): Behavior[FilingCommand] =
     Behaviors.setup { ctx =>
+      ctx.log.debug(s"Started Filing Persistence: s$lei-$period")
       PersistentBehaviors
         .receive[FilingCommand, FilingEvent, FilingState](
           persistenceId = s"$lei-$period",
