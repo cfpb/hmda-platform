@@ -1,6 +1,6 @@
 import com.typesafe.sbt.packager.docker._
 
-version := "2.6.1"
+version := "latest"
 
 packageName in Docker := "hmda-platform"
 
