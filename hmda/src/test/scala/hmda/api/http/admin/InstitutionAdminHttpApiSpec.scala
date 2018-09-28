@@ -1,13 +1,12 @@
 package hmda.api.http.admin
 
-import akka.actor.typed.{ActorSystem, Props}
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
+import akka.actor.typed.ActorSystem
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.ClusterShardingSettings
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
@@ -18,12 +17,7 @@ import hmda.api.http.codec.institution.InstitutionCodec._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.persistence.institution.InstitutionPersistence
 import akka.testkit._
-import com.typesafe.config.ConfigFactory
 import hmda.api.http.model.admin.InstitutionDeletedResponse
-import hmda.messages.institution.InstitutionCommands.{
-  InstitutionCommand,
-  InstitutionStop
-}
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
@@ -47,18 +41,9 @@ class InstitutionAdminHttpApiSpec
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
 
   override def beforeAll(): Unit = {
-    val config = ConfigFactory.load()
-    val shardNumber = config.getInt("hmda.institutions.shardNumber")
     super.beforeAll()
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
-    sharding.spawn(
-      behavior = entityId => InstitutionPersistence.behavior(entityId),
-      Props.empty,
-      EntityTypeKey[InstitutionCommand](InstitutionPersistence.name),
-      ClusterShardingSettings(typedSystem),
-      maxNumberOfShards = shardNumber,
-      handOffStopMessage = InstitutionStop
-    )
+    InstitutionPersistence.startShardRegion(sharding)
   }
 
   override def afterAll(): Unit = super.afterAll()
