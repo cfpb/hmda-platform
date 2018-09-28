@@ -18,6 +18,9 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import io.circe.generic.auto._
 import hmda.api.http.codec.filing.FilingCodec._
+import hmda.messages.institution.InstitutionCommands.GetInstitution
+import hmda.model.institution.Institution
+import hmda.persistence.institution.InstitutionPersistence
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -34,6 +37,10 @@ trait FilingHttpApi extends HmdaTimeDirectives {
   //institutions/<institutionId>/filings/<period>
   val filingReadPath =
     path("institutions" / Segment / "filings" / Segment) { (lei, period) =>
+      val institutionPersistence =
+        sharding.entityRefFor(InstitutionPersistence.typeKey,
+                              s"${InstitutionPersistence.name}-$lei")
+
       val filingPersistence =
         sharding.entityRefFor(FilingPersistence.typeKey,
                               s"${FilingPersistence.name}-$lei-$period")
@@ -42,9 +49,26 @@ trait FilingHttpApi extends HmdaTimeDirectives {
         val fDetails: Future[FilingDetails] = filingPersistence ? (ref =>
           GetFilingDetails(ref))
 
-        onComplete(fDetails) {
-          case Success(filingDetails) =>
+        val fInstitution
+          : Future[Option[Institution]] = institutionPersistence ? (
+            ref => GetInstitution(ref)
+        )
+
+        val filingDetailsF = for {
+          i <- fInstitution
+          d <- fDetails
+        } yield (i, d)
+
+        onComplete(filingDetailsF) {
+          case Success((Some(_), filingDetails)) =>
             complete(ToResponseMarshallable(filingDetails))
+          case Success((None, _)) =>
+            val errorResponse =
+              ErrorResponse(400,
+                            s"institution with LEI: $lei does not exist",
+                            uri.path)
+            complete(
+              ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
           case Failure(error) =>
             val errorResponse =
               ErrorResponse(500, error.getLocalizedMessage, uri.path)
