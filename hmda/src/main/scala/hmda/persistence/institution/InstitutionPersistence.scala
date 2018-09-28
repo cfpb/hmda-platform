@@ -44,7 +44,7 @@ object InstitutionPersistence {
 
   def commandHandler(ctx: ActorContext[InstitutionCommand])
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
-        val log = ctx.asScala.log
+    val log = ctx.asScala.log
     (state, cmd) =>
       cmd match {
         case CreateInstitution(i, replyTo) =>
