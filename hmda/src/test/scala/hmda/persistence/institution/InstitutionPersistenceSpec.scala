@@ -101,6 +101,8 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
         sharding.entityRefFor(InstitutionPersistence.typeKey,
                               s"${InstitutionPersistence.name}-ABC12345")
 
+      println(institutionPersistence)
+
       institutionPersistence ! CreateInstitution(sampleInstitution,
                                                  institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))

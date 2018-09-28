@@ -23,7 +23,7 @@ object InstitutionPersistence
       ctx.log.info(s"Started Institution: $entityId")
       PersistentBehaviors
         .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
-          persistenceId = entityId,
+          persistenceId = s"$name-$entityId",
           emptyState = InstitutionState(None),
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
