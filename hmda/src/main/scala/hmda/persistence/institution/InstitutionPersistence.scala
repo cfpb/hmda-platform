@@ -44,17 +44,18 @@ object InstitutionPersistence {
 
   def commandHandler(ctx: ActorContext[InstitutionCommand])
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
+        val log = ctx.asScala.log
     (state, cmd) =>
       cmd match {
         case CreateInstitution(i, replyTo) =>
           if (!state.institution.contains(i)) {
             Effect.persist(InstitutionCreated(i)).thenRun { _ =>
-              ctx.asScala.log.debug(s"Institution Created: ${i.toString}")
+              log.debug(s"Institution Created: ${i.toString}")
               replyTo ! InstitutionCreated(i)
             }
           } else {
             Effect.none.thenRun { _ =>
-              ctx.asScala.log
+              log
                 .debug(s"Institution already exists: ${i.toString}")
               replyTo ! InstitutionCreated(i)
             }
@@ -62,12 +63,12 @@ object InstitutionPersistence {
         case ModifyInstitution(i, replyTo) =>
           if (state.institution.map(i => i.LEI).contains(i.LEI)) {
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
-              ctx.asScala.log.debug(s"Institution Modified: ${i.toString}")
+              log.debug(s"Institution Modified: ${i.toString}")
               replyTo ! InstitutionModified(i)
             }
           } else {
             Effect.none.thenRun { _ =>
-              ctx.asScala.log
+              log
                 .warning(s"Institution with LEI: ${i.LEI} does not exist")
               replyTo ! InstitutionNotExists(i.LEI)
             }
@@ -75,12 +76,12 @@ object InstitutionPersistence {
         case DeleteInstitution(lei, replyTo) =>
           if (state.institution.map(i => i.LEI).contains(lei)) {
             Effect.persist(InstitutionDeleted(lei)).thenRun { _ =>
-              ctx.asScala.log.debug(s"Institution Deleted: $lei")
+              log.debug(s"Institution Deleted: $lei")
               replyTo ! InstitutionDeleted(lei)
             }
           } else {
             Effect.none.thenRun { _ =>
-              ctx.asScala.log
+              log
                 .warning(s"Institution with LEI: $lei does not exist")
               replyTo ! InstitutionNotExists(lei)
             }
