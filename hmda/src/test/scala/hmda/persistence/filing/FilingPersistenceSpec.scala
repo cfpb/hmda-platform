@@ -38,9 +38,10 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
   "Filings" must {
     "be created and read back" in {
       val filingPersistence =
-        system.spawn(FilingPersistence.behavior(
-                       FilingId(sampleFiling.lei, sampleFiling.period)),
-                     actorName)
+        system.spawn(
+          FilingPersistence.behavior(
+            FilingId(sampleFiling.lei, sampleFiling.period).toString),
+          actorName)
 
       filingPersistence ! GetFiling(maybeFilingProbe.ref)
       maybeFilingProbe.expectMessage(None)
@@ -56,9 +57,10 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "create submissions and read them back" in {
       val filingPersistence =
-        system.spawn(FilingPersistence.behavior(
-                       FilingId(sampleFiling.lei, sampleFiling.period)),
-                     actorName)
+        system.spawn(
+          FilingPersistence.behavior(
+            FilingId(sampleFiling.lei, sampleFiling.period).toString),
+          actorName)
 
       filingPersistence ! CreateFiling(sampleFiling, filingCreatedProbe.ref)
       filingCreatedProbe.expectMessage(FilingCreated(sampleFiling))
