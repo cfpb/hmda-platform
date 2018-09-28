@@ -9,6 +9,18 @@ class InstitutionComponentSpec extends InstitutionAsyncSetup {
         xs.map(i => i.LEI) mustBe Seq("AAA", "BBB")
       }
     }
+
+    "update institutions" in {
+      val inst = InstitutionEmailEntity(lei = "BBB", emailDomain = "ccc.com")
+      updateEmails(inst).flatMap { t =>
+        t mustBe 1
+        findByEmail("emailTest@ccc.com").map { xs =>
+          xs.size mustBe 1
+          xs.map(i => i.LEI) mustBe Seq("BBB")
+        }
+      }
+    }
+
     "find institutions by field parameters" in {
       findByFields("AAA", "RespA", "taxIdA", "aaa.com").map { xs =>
         xs.size mustBe 1
