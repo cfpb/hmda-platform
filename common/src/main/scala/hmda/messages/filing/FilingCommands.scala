@@ -30,4 +30,6 @@ object FilingCommands {
 
   case class GetSubmissions(replyTo: ActorRef[List[Submission]])
       extends FilingCommand
+
+  case object FilingStop extends FilingCommand
 }
