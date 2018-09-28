@@ -46,7 +46,8 @@ class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
   "A Submission" must {
     "be created and read back" in {
       val submissionPersistence =
-        system.spawn(SubmissionPersistence.behavior(submissionId), actorName)
+        system.spawn(SubmissionPersistence.behavior(submissionId.toString),
+                     actorName)
       submissionPersistence ! CreateSubmission(sampleSubmission.id,
                                                submissionProbe.ref)
       submissionProbe.expectMessageType[SubmissionCreated]
@@ -65,7 +66,8 @@ class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
     "be modified and read back" in {
       val submissionPersistence =
-        system.spawn(SubmissionPersistence.behavior(submissionId), actorName)
+        system.spawn(SubmissionPersistence.behavior(submissionId.toString),
+                     actorName)
       submissionPersistence ! CreateSubmission(sampleSubmission.id,
                                                submissionProbe.ref)
       submissionProbe.expectMessageType[SubmissionCreated]
@@ -76,16 +78,17 @@ class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
     "return not exists message if trying to modify submission that doesn't exist" in {
       val submissionPersistence =
-        system.spawn(
-          SubmissionPersistence.behavior(SubmissionId("AA", "2018", 1)),
-          actorName)
+        system.spawn(SubmissionPersistence.behavior(
+                       SubmissionId("AA", "2018", 1).toString),
+                     actorName)
       submissionPersistence ! ModifySubmission(modified, submissionProbe.ref)
       submissionProbe.expectMessage(SubmissionNotExists(modified.id))
     }
 
     "return None if it doesn't exist" in {
       val submissionPersistence =
-        system.spawn(SubmissionPersistence.behavior(submissionId), actorName)
+        system.spawn(SubmissionPersistence.behavior(submissionId.toString),
+                     actorName)
 
       submissionPersistence ! GetSubmission(maybeSubmissionProbe.ref)
       maybeSubmissionProbe.expectMessageType[Option[Submission]]

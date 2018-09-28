@@ -20,4 +20,6 @@ object SubmissionCommands {
   case class ModifySubmission(submission: Submission,
                               replyTo: ActorRef[SubmissionEvent])
       extends SubmissionCommand
+
+  case object SubmissionStop extends SubmissionCommand
 }

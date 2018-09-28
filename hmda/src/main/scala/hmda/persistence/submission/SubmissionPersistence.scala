@@ -2,41 +2,39 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.typed.{ActorContext, Behavior}
+import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import hmda.messages.submission.SubmissionCommands.{
-  CreateSubmission,
-  GetSubmission,
-  ModifySubmission,
-  SubmissionCommand
-}
+import hmda.messages.submission.SubmissionCommands._
 import hmda.messages.submission.SubmissionEvents.{
   SubmissionCreated,
   SubmissionEvent,
   SubmissionModified,
   SubmissionNotExists
 }
-import hmda.model.filing.submission.{Created, Submission, SubmissionId}
+import hmda.model.filing.submission.{Created, Submission}
+import hmda.persistence.HmdaPersistentActor
 
-object SubmissionPersistence {
-
-  case class SubmissionState(submission: Option[Submission])
+object SubmissionPersistence
+    extends HmdaPersistentActor[SubmissionCommand,
+                                SubmissionEvent,
+                                SubmissionState] {
 
   final val name = "Submission"
 
-  def behavior(submissionId: SubmissionId): Behavior[SubmissionCommand] =
+  def behavior(entityId: String): Behavior[SubmissionCommand] =
     Behaviors.setup { ctx =>
       PersistentBehaviors
         .receive[SubmissionCommand, SubmissionEvent, SubmissionState](
-          persistenceId = submissionId.toString,
+          persistenceId = s"$name-$entityId",
           emptyState = SubmissionState(None),
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
         )
         .snapshotEvery(1000)
-        .withTagger(_ => Set(s"$name-${submissionId.lei}"))
     }
 
   def commandHandler(ctx: ActorContext[SubmissionCommand])
@@ -80,6 +78,11 @@ object SubmissionPersistence {
         state
       }
     case (state, SubmissionNotExists(_)) => state
+  }
+
+  def startShardRegion(sharding: ClusterSharding)
+    : ActorRef[ShardingEnvelope[SubmissionCommand]] = {
+    super.startShardRegion(sharding, SubmissionStop)
   }
 
 }

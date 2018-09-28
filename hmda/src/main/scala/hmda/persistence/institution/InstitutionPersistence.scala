@@ -3,10 +3,9 @@ package hmda.persistence.institution
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, ShardedEntity}
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
-import com.typesafe.config.ConfigFactory
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.model.institution.Institution
@@ -18,10 +17,6 @@ object InstitutionPersistence
                                 InstitutionState] {
 
   final val name = "Institution"
-
-  val config = ConfigFactory.load()
-
-  val shardNumber = config.getInt("hmda.institutions.shardNumber")
 
   override def behavior(entityId: String): Behavior[InstitutionCommand] = {
     Behaviors.setup { ctx =>
