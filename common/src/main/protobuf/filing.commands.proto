@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "filing.proto";
+
+message CreateFilingMessage {
+    FilingMessage filing = 1;
+}
+
+message UpdateFilingStatusMessage {
+    string period = 1;
+    FilingStatusMessage status = 2;
+}
+
+message GetFilingByPeriodMessage {
+    string period = 1;
+}
