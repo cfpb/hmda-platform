@@ -1,35 +1,29 @@
 package hmda.persistence.institution
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, ActorRef, Behavior, SupervisorStrategy}
+import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{
-  ClusterSharding,
-  EntityTypeKey,
-  ShardedEntity
-}
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, ShardedEntity}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import com.typesafe.config.ConfigFactory
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.model.institution.Institution
-import scala.concurrent.duration._
+import hmda.persistence.HmdaPersistentActor
 
-object InstitutionPersistence {
+object InstitutionPersistence
+    extends HmdaPersistentActor[InstitutionCommand,
+                                InstitutionEvent,
+                                InstitutionState] {
 
   final val name = "Institution"
 
   val config = ConfigFactory.load()
 
-  val typeKey = EntityTypeKey[InstitutionCommand](name)
   val shardNumber = config.getInt("hmda.institutions.shardNumber")
 
-  case class InstitutionState(institution: Option[Institution]) {
-    def isEmpty: Boolean = institution.isEmpty
-  }
-
-  def behavior(entityId: String): Behavior[InstitutionCommand] =
+  override def behavior(entityId: String): Behavior[InstitutionCommand] = {
     Behaviors.setup { ctx =>
       PersistentBehaviors
         .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
@@ -41,6 +35,7 @@ object InstitutionPersistence {
         .snapshotEvery(1000)
         .withTagger(_ => Set(name.toLowerCase()))
     }
+  }
 
   def commandHandler(ctx: ActorContext[InstitutionCommand])
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
@@ -94,7 +89,8 @@ object InstitutionPersistence {
       }
   }
 
-  val eventHandler: (InstitutionState, InstitutionEvent) => InstitutionState = {
+  override val eventHandler
+    : (InstitutionState, InstitutionEvent) => InstitutionState = {
     case (state, InstitutionCreated(i))   => state.copy(Some(i))
     case (state, InstitutionModified(i))  => modifyInstitution(i, state)
     case (state, InstitutionDeleted(_))   => state.copy(None)
@@ -109,22 +105,6 @@ object InstitutionPersistence {
         typeKey = typeKey,
         stopMessage = InstitutionStop
       ))
-  }
-
-  private def supervisedBehavior(
-      entityId: String): Behavior[InstitutionCommand] = {
-    val minBacOff = config.getInt("hmda.supervisor.minBackOff")
-    val maxBacOff = config.getInt("hmda.supervisor.maxBackOff")
-    val rFactor = config.getInt("hmda.supervisor.randomFactor")
-    val supervisorStrategy = SupervisorStrategy.restartWithBackoff(
-      minBackoff = minBacOff.seconds,
-      maxBackoff = maxBacOff.seconds,
-      randomFactor = rFactor
-    )
-
-    Behaviors
-      .supervise(InstitutionPersistence.behavior(entityId))
-      .onFailure(supervisorStrategy)
   }
 
   private def modifyInstitution(institution: Institution,
