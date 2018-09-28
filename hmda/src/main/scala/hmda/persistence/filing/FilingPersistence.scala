@@ -1,7 +1,7 @@
 package hmda.persistence.filing
 
 import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
 import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
@@ -48,20 +48,21 @@ object FilingPersistence {
         .receive[FilingCommand, FilingEvent, FilingState](
           persistenceId = s"$name-$filingId",
           emptyState = FilingState(),
-          commandHandler = commandHandler,
+          commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
         )
         .snapshotEvery(1000)
         .withTagger(_ => Set(name.toLowerCase()))
     }
 
-  val commandHandler
+  def commandHandler(ctx: ActorContext[FilingCommand])
     : CommandHandler[FilingCommand, FilingEvent, FilingState] = {
-    (ctx, state, cmd) =>
+    (state, cmd) =>
+      val log = ctx.asScala.log
       cmd match {
         case CreateFiling(filing, replyTo) =>
           Effect.persist(FilingCreated(filing)).thenRun { _ =>
-            ctx.log.debug(s"Filing created: ${filing.lei}-${filing.period}")
+            log.debug(s"Filing created: ${filing.lei}-${filing.period}")
             replyTo ! FilingCreated(filing)
           }
 
@@ -79,7 +80,7 @@ object FilingPersistence {
 
         case AddSubmission(submission, replyTo) =>
           Effect.persist(SubmissionAdded(submission)).thenRun { _ =>
-            ctx.log.debug(s"Added submission: ${submission.toString}")
+            log.debug(s"Added submission: ${submission.toString}")
             replyTo ! submission
           }
 
