@@ -4,7 +4,7 @@ import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.model.filing.submission.Submission
-import hmda.model.filing.{Filing, FilingStatus}
+import hmda.model.filing.{Filing, FilingDetails, FilingStatus}
 
 object FilingCommands {
   sealed trait FilingCommand extends Command
@@ -17,6 +17,9 @@ object FilingCommands {
       extends FilingCommand
 
   case class GetFiling(replyTo: ActorRef[Option[Filing]]) extends FilingCommand
+
+  case class GetFilingDetails(replyTo: ActorRef[FilingDetails])
+      extends FilingCommand
 
   case class AddSubmission(submission: Submission,
                            replyTo: ActorRef[Submission])

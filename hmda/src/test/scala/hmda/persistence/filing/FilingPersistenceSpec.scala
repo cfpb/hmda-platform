@@ -5,7 +5,7 @@ import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
 import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.FilingCreated
-import hmda.model.filing.Filing
+import hmda.model.filing.{Filing, FilingDetails}
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.model.filing.FilingGenerator._
 import hmda.model.filing.submission.{Submission, SubmissionId}
@@ -17,6 +17,7 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
   val filingCreatedProbe = TestProbe[FilingCreated]("filing-created-probe")
   val maybeFilingProbe = TestProbe[Option[Filing]]("maybe-filing-probe")
+  val filingDetailsProbe = TestProbe[FilingDetails]("filing-details-probe")
   val maybeSubmissionProbe =
     TestProbe[Option[Submission]]("maybe-submission-probe")
   val submissionProbe = TestProbe[Submission]("submission-probe")
@@ -43,6 +44,9 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       filingPersistence ! GetFiling(maybeFilingProbe.ref)
       maybeFilingProbe.expectMessage(None)
 
+      filingPersistence ! GetFilingDetails(filingDetailsProbe.ref)
+      filingDetailsProbe.expectMessage(FilingDetails())
+
       filingPersistence ! CreateFiling(sampleFiling, filingCreatedProbe.ref)
       filingCreatedProbe.expectMessage(FilingCreated(sampleFiling))
 
@@ -53,6 +57,9 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       val filingPersistence = system.spawn(
         FilingPersistence.behavior(sampleFiling.lei, sampleFiling.period),
         actorName)
+
+      filingPersistence ! CreateFiling(sampleFiling, filingCreatedProbe.ref)
+      filingCreatedProbe.expectMessage(FilingCreated(sampleFiling))
 
       filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
       maybeSubmissionProbe.expectMessage(None)
@@ -73,6 +80,10 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
       filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
       maybeSubmissionProbe.expectMessage(Some(sampleSubmission2))
+
+      filingPersistence ! GetFilingDetails(filingDetailsProbe.ref)
+      filingDetailsProbe.expectMessage(
+        FilingDetails(sampleFiling, List(sampleSubmission2, sampleSubmission)))
     }
   }
 }

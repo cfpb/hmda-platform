@@ -10,7 +10,7 @@ import hmda.messages.filing.FilingEvents.{
   FilingEvent,
   SubmissionAdded
 }
-import hmda.model.filing.Filing
+import hmda.model.filing.{Filing, FilingDetails}
 import hmda.model.filing.submission.Submission
 
 object FilingPersistence {
@@ -68,6 +68,10 @@ object FilingPersistence {
           } else {
             replyTo ! Some(state.filing)
           }
+          Effect.none
+
+        case GetFilingDetails(replyTo) =>
+          replyTo ! FilingDetails(state.filing, state.submissions)
           Effect.none
 
         case AddSubmission(submission, replyTo) =>

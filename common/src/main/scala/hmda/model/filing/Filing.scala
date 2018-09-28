@@ -1,4 +1,4 @@
-package hmda.model.filing;
+package hmda.model.filing
 
 sealed trait FilingStatus {
   def code: Int
