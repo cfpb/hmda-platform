@@ -2,8 +2,13 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
+import akka.actor.typed.Behavior
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
+import akka.persistence.typed.scaladsl.{
+  Effect,
+  PersistentBehavior,
+  PersistentBehaviors
+}
 import hmda.messages.submission.SubmissionCommands.{
   CreateSubmission,
   GetSubmission,
@@ -24,7 +29,7 @@ object SubmissionPersistence {
 
   final val name = "Submission"
 
-  def behavior(submissionId: SubmissionId) =
+  def behavior(submissionId: SubmissionId): Behavior[SubmissionCommand] =
     PersistentBehaviors
       .receive[SubmissionCommand, SubmissionEvent, SubmissionState](
         persistenceId = submissionId.toString,

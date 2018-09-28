@@ -24,7 +24,7 @@ case object Cancelled extends FilingStatus {
 
 case class Filing(
     period: String = "",
-    institutionId: String = "",
+    lei: String = "",
     status: FilingStatus = NotStarted,
     filingRequired: Boolean = false,
     start: Long = 0L,
