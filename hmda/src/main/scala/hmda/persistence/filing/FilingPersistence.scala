@@ -1,8 +1,9 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
-import akka.cluster.sharding.typed.scaladsl.EntityTypeKey
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import hmda.messages.filing.FilingCommands._
@@ -11,35 +12,15 @@ import hmda.messages.filing.FilingEvents.{
   FilingEvent,
   SubmissionAdded
 }
-import hmda.model.filing.{Filing, FilingDetails}
-import hmda.model.filing.submission.Submission
+import hmda.model.filing.FilingDetails
+import hmda.persistence.HmdaPersistentActor
 
-object FilingPersistence {
+object FilingPersistence
+    extends HmdaPersistentActor[FilingCommand, FilingEvent, FilingState] {
 
   final val name = "Filing"
 
   val ShardingTypeName = EntityTypeKey[FilingCommand](name)
-
-  case class FilingState(filing: Filing = Filing(),
-                         submissions: List[Submission] = Nil) {
-    def update(event: FilingEvent): FilingState = {
-      event match {
-        case FilingCreated(f) =>
-          if (this.filing.isEmpty) {
-            FilingState(f, this.submissions)
-          } else {
-            this
-          }
-        case SubmissionAdded(submission) =>
-          if (submissions.contains(submission)) {
-            this
-          } else {
-            FilingState(this.filing, submission :: submissions)
-          }
-        case _ => this
-      }
-    }
-  }
 
   def behavior(filingId: String): Behavior[FilingCommand] =
     Behaviors.setup { ctx =>
@@ -102,6 +83,11 @@ object FilingPersistence {
     case (state, evt @ SubmissionAdded(_)) => state.update(evt)
     case (state, evt @ FilingCreated(_))   => state.update(evt)
     case (state, _)                        => state
+  }
+
+  def startShardRegion(
+      sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] = {
+    super.startShardRegion(sharding, FilingStop)
   }
 
 }

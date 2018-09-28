@@ -3,6 +3,8 @@ package hmda.persistence.filing
 import akka.actor
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.typed.{Cluster, Join}
 import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.model.filing.{Filing, FilingDetails, FilingId}
@@ -14,6 +16,9 @@ import hmda.model.submission.SubmissionGenerator._
 class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
+
+  val sharding = ClusterSharding(typedSystem)
+  FilingPersistence.startShardRegion(sharding)
 
   val filingCreatedProbe = TestProbe[FilingCreated]("filing-created-probe")
   val maybeFilingProbe = TestProbe[Option[Filing]]("maybe-filing-probe")
@@ -36,12 +41,11 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
     .getOrElse(Submission(SubmissionId("12345", "2018", 1)))
 
   "Filings" must {
+    Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
     "be created and read back" in {
-      val filingPersistence =
-        system.spawn(
-          FilingPersistence.behavior(
-            FilingId(sampleFiling.lei, sampleFiling.period).toString),
-          actorName)
+      val filingPersistence = sharding.entityRefFor(
+        FilingPersistence.typeKey,
+        s"${FilingPersistence.name}-${FilingId(sampleFiling.lei, sampleFiling.period).toString}")
 
       filingPersistence ! GetFiling(maybeFilingProbe.ref)
       maybeFilingProbe.expectMessage(None)
@@ -56,11 +60,9 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       maybeFilingProbe.expectMessage(Some(sampleFiling))
     }
     "create submissions and read them back" in {
-      val filingPersistence =
-        system.spawn(
-          FilingPersistence.behavior(
-            FilingId(sampleFiling.lei, sampleFiling.period).toString),
-          actorName)
+      val filingPersistence = sharding.entityRefFor(
+        FilingPersistence.typeKey,
+        s"${FilingPersistence.name}-${FilingId(sampleFiling.lei, sampleFiling.period).toString}")
 
       filingPersistence ! CreateFiling(sampleFiling, filingCreatedProbe.ref)
       filingCreatedProbe.expectMessage(FilingCreated(sampleFiling))
