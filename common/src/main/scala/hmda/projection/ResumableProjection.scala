@@ -1,7 +1,7 @@
 package hmda.projection
 
 import akka.actor.{ActorSystem, Scheduler}
-import akka.actor.typed.Behavior
+import akka.actor.typed.{ActorContext, Behavior}
 import akka.persistence.query.{EventEnvelope, NoOffset, Offset}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
@@ -9,6 +9,7 @@ import akka.stream.ActorMaterializer
 import hmda.messages.projection.CommonProjectionMessages._
 import hmda.query.HmdaQuery._
 import akka.actor.typed.scaladsl.AskPattern._
+import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.stream.scaladsl.Sink
 import akka.util.Timeout
@@ -24,49 +25,52 @@ trait ResumableProjection {
   case class ResumableProjectionState(offset: Offset = NoOffset)
 
   def behavior: Behavior[ProjectionCommand] =
-    PersistentBehaviors
-      .receive[ProjectionCommand, ProjectionEvent, ResumableProjectionState](
-        persistenceId = name,
-        emptyState = ResumableProjectionState(),
-        commandHandler = commandHandler,
-        eventHandler = eventHandler
-      )
+    Behaviors.setup { ctx =>
+      PersistentBehaviors
+        .receive[ProjectionCommand, ProjectionEvent, ResumableProjectionState](
+          persistenceId = name,
+          emptyState = ResumableProjectionState(),
+          commandHandler = commandHandler(ctx),
+          eventHandler = eventHandler
+        )
+    }
 
-  val commandHandler: CommandHandler[ProjectionCommand,
-                                     ProjectionEvent,
-                                     ResumableProjectionState] = {
-    (ctx, state, cmd) =>
-      cmd match {
-        case StartStreaming =>
-          implicit val system: ActorSystem = ctx.system.toUntyped
-          implicit val materializer: ActorMaterializer = ActorMaterializer()
-          implicit val scheduler: Scheduler = ctx.system.scheduler
-          ctx.log.info("Streaming messages from {}", name)
-          readJournal(system)
-            .eventsByTag("institution", state.offset)
-            .map { env =>
-              ctx.log.info(env.toString)
-              projectEvent(env)
-            }
-            .map { env =>
-              val actorRef = ctx.self
-              val result: Future[OffsetSaved] = actorRef ? (ref =>
-                SaveOffset(env.offset, ref))
-              result
-            }
-            .runWith(Sink.ignore)
-          Effect.none
-
-        case SaveOffset(offset, replyTo) =>
-          Effect.persist(OffsetSaved(offset)).thenRun { _ =>
-            ctx.log.info("Offset saved: {}", offset)
-            replyTo ! OffsetSaved(offset)
+  def commandHandler(ctx: ActorContext[ProjectionCommand])
+    : CommandHandler[ProjectionCommand,
+                     ProjectionEvent,
+                     ResumableProjectionState] = { (state, cmd) =>
+    val log = ctx.asScala.log
+    cmd match {
+      case StartStreaming =>
+        implicit val system: ActorSystem = ctx.asScala.system.toUntyped
+        implicit val materializer: ActorMaterializer = ActorMaterializer()
+        implicit val scheduler: Scheduler = system.scheduler
+        log.info("Streaming messages from {}", name)
+        readJournal(system)
+          .eventsByTag("institution", state.offset)
+          .map { env =>
+            log.info(env.toString)
+            projectEvent(env)
           }
+          .map { env =>
+            val actorRef = ctx.asScala.self
+            val result: Future[OffsetSaved] = actorRef ? (ref =>
+              SaveOffset(env.offset, ref))
+            result
+          }
+          .runWith(Sink.ignore)
+        Effect.none
 
-        case GetOffset(replyTo) =>
-          replyTo ! OffsetSaved(state.offset)
-          Effect.none
-      }
+      case SaveOffset(offset, replyTo) =>
+        Effect.persist(OffsetSaved(offset)).thenRun { _ =>
+          log.info("Offset saved: {}", offset)
+          replyTo ! OffsetSaved(offset)
+        }
+
+      case GetOffset(replyTo) =>
+        replyTo ! OffsetSaved(state.offset)
+        Effect.none
+    }
   }
 
   val eventHandler: (ResumableProjectionState,

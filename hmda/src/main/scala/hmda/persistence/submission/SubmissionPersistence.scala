@@ -2,6 +2,8 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
+import akka.actor.typed.{ActorContext, Behavior}
+import akka.actor.typed.scaladsl.Behaviors
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import hmda.messages.submission.SubmissionCommands.{
@@ -24,20 +26,23 @@ object SubmissionPersistence {
 
   final val name = "Submission"
 
-  def behavior(submissionId: SubmissionId) =
-    PersistentBehaviors
-      .receive[SubmissionCommand, SubmissionEvent, SubmissionState](
-        persistenceId = submissionId.toString,
-        emptyState = SubmissionState(None),
-        commandHandler = commandHandler,
-        eventHandler = eventHandler
-      )
-      .snapshotEvery(1000)
-      .withTagger(_ => Set(s"$name-${submissionId.lei}"))
+  def behavior(submissionId: SubmissionId): Behavior[SubmissionCommand] =
+    Behaviors.setup { ctx =>
+      PersistentBehaviors
+        .receive[SubmissionCommand, SubmissionEvent, SubmissionState](
+          persistenceId = submissionId.toString,
+          emptyState = SubmissionState(None),
+          commandHandler = commandHandler(ctx),
+          eventHandler = eventHandler
+        )
+        .snapshotEvery(1000)
+        .withTagger(_ => Set(s"$name-${submissionId.lei}"))
+    }
 
-  val commandHandler
+  def commandHandler(ctx: ActorContext[SubmissionCommand])
     : CommandHandler[SubmissionCommand, SubmissionEvent, SubmissionState] = {
-    (ctx, state, cmd) =>
+    (state, cmd) =>
+      val log = ctx.asScala.log
       cmd match {
         case GetSubmission(replyTo) =>
           replyTo ! state.submission
@@ -49,14 +54,13 @@ object SubmissionPersistence {
             Instant.now().toEpochMilli
           )
           Effect.persist(SubmissionCreated(submission)).thenRun { _ =>
-            ctx.log.debug(
-              s"persisted new Submission: ${submission.id.toString}")
+            log.debug(s"persisted new Submission: ${submission.id.toString}")
             replyTo ! SubmissionCreated(submission)
           }
         case ModifySubmission(submission, replyTo) =>
           if (state.submission.map(s => s.id).contains(submission.id)) {
             Effect.persist(SubmissionModified(submission)).thenRun { _ =>
-              ctx.log.debug(
+              log.debug(
                 s"persisted modified Submission: ${submission.toString}")
               replyTo ! SubmissionModified(submission)
             }
@@ -75,6 +79,7 @@ object SubmissionPersistence {
       } else {
         state
       }
+    case (state, SubmissionNotExists(_)) => state
   }
 
 }
