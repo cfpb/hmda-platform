@@ -580,8 +580,10 @@ sealed trait LarFormatValidator extends LarParser {
                                          InvalidPointsAndFees),
       validateDoubleStrOrNAOrExemptField(originationCharges,
                                          InvalidOriginationCharges),
-      validateDoubleStrOrNAOrExemptField(discountPoints, InvalidDiscountPoints),
-      validateDoubleStrOrNAOrExemptField(lenderCredits, InvalidLenderCredits)
+      validateDoubleStrOrNAOrExemptOrEmptyField(discountPoints,
+                                                InvalidDiscountPoints),
+      validateDoubleStrOrNAOrExemptOrEmptyField(lenderCredits,
+                                                InvalidLenderCredits)
     ).mapN(LoanDisclosure)
   }
 
