@@ -83,9 +83,7 @@ trait LarParser {
       value: String,
       parserValidationError: ParserValidationError)
     : LarParserValidationResult[String] = {
-    if (value == "") {
-      parserValidationError.invalidNel
-    } else if (value == "NA" || value == "Exempt" || value == "") {
+    if (value == "NA" || value == "Exempt" || value == "") {
       value.validNel
     } else {
       validateDoubleField(value, parserValidationError).map(x => x.toString)
