@@ -1,0 +1,10 @@
+{
+  "realm": "hmda2",
+  "auth-server-url": "http://localhost:808/auth",
+  "realm-public-key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAhWQs3N9OKECxHgOHUZpXniUq3L2jy4dB9I67SRsF2ualR0HRq5g1n4F747rnWUxX73CwVXRb9+EiUGbubp1f0DvBo5WW1t6Ahk2Rz9xLgNWyT2LYdx1smjGQX9S0aNJCzYPJ6f/Ej2vKojBnocICxfMkCVlpSIQ7vlNFgye0SYp29Jf0+yuNJDo35olVu3XAAe33AaVvfCn73gObthj9fkRLC/0AEr0eD3msHLR3Q++Ha1SBMIU/0gaEarsI2NxHn+AxyIu72J1MrrYEv6ouEm3uZZbdklYOvSUl767XuHdVz/dFAxGi537DcfZlEnuL4SVemSZ2h3UO73MPvy83EQIDAQAB",
+  "ssl-required": "all",
+  "resource": "hmda2-api",
+  "bearer-only": true,
+  "use-resource-role-mappings": true,
+  "confidential-port": 0
+}
