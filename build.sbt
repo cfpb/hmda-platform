@@ -4,6 +4,13 @@ import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 import sbt.librarymanagement.Resolver
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
+
+lazy val authDeps = Seq(
+  keycloakAdapter,
+  keycloak,
+  jbossLogging
+)
+
 lazy val akkaDeps = Seq(
   akkaSlf4J,
   akkaCluster,
@@ -73,7 +80,7 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
+      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
   )
 

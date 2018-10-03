@@ -14,4 +14,6 @@ object Version {
   val slick = "3.2.3"
   val postgres = "42.2.4"
   val h2 = "1.4.188"
+  val keycloak = "4.2.1.Final"
+  val jboss = "3.3.2.Final"
 }

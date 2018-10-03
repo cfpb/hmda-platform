@@ -40,5 +40,9 @@ object Dependencies {
   lazy val slickHikaryCP = "com.typesafe.slick" %% "slick-hikaricp" % Version.slick
   lazy val postgres = "org.postgresql" % "postgresql" % Version.postgres
   lazy val h2 = "com.h2database" % "h2" % Version.h2 % Test
+  lazy val keycloakAdapter = "org.keycloak" % "keycloak-adapter-core" % Version.keycloak
+  lazy val keycloak = "org.keycloak" % "keycloak-core"  % Version.keycloak
+  lazy val jbossLogging = "org.jboss.logging" % "jboss-logging" % Version.jboss
+
 
 }
