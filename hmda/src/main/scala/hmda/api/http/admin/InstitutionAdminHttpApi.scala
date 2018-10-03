@@ -19,6 +19,8 @@ import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import com.typesafe.config.ConfigFactory
+import hmda.auth.OAuth2Authorization
 import hmda.messages.institution.InstitutionCommands.{
   CreateInstitution,
   DeleteInstitution,
@@ -39,7 +41,18 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val sharding: ClusterSharding
 
-  val institutionWritePath =
+  val config = ConfigFactory.load()
+  val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
+
+  def test(oAuth2Authorization: OAuth2Authorization): Route = {
+    oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
+      path("test") {
+        complete("AUTH OK")
+      }
+    }
+  }
+
+  def institutionWritePath(oAuth2Authorization: OAuth2Authorization) =
     path("institutions") {
       entity(as[Institution]) { institution =>
         log.info(institution.toCSV)
@@ -140,11 +153,13 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  def institutionAdminRoutes: Route = {
+  def institutionAdminRoutes(
+      oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionWritePath ~ institutionReadPath
+          institutionWritePath(oAuth2Authorization) ~ institutionReadPath ~ test(
+            oAuth2Authorization)
         }
       }
     }
