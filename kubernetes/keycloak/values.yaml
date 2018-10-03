@@ -30,7 +30,7 @@ keycloak:
   ## Additional init containers, e. g. for providing custom themes
   extraInitContainers: |
     - name: theme-provider
-      image: kgudel/theme-provider:latest
+      image: hmda/theme-provider:latest
       imagePullPolicy: Always
       command:
         - sh
