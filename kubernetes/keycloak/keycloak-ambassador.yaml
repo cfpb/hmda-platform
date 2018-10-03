@@ -10,8 +10,8 @@ metadata:
       kind: Mapping
       name: keycloak_https_mapping
       prefix: /auth/
-      rewrite: /auth
-      service: keycloak-https
+      rewrite: /auth/
+      service: keycloak-http
 spec:
   type: NodePort
   ports:

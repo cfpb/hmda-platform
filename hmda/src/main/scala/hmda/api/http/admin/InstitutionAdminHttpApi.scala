@@ -42,12 +42,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val institutionWritePath =
     path("institutions") {
       entity(as[Institution]) { institution =>
-        log.info(institution.toCSV)
         val typedSystem = system.toTyped
-        implicit val scheduler: Scheduler = typedSystem.scheduler
 
         val institutionPersistence = sharding.entityRefFor(
-          InstitutionPersistence.ShardingTypeName,
+          InstitutionPersistence.typeKey,
           s"${InstitutionPersistence.name}-${institution.LEI}")
 
         timedPost { uri =>
@@ -116,7 +114,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       implicit val scheduler: Scheduler = typedSystem.scheduler
 
       val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.ShardingTypeName,
+        sharding.entityRefFor(InstitutionPersistence.typeKey,
                               s"${InstitutionPersistence.name}-$lei")
 
       timedGet { uri =>
