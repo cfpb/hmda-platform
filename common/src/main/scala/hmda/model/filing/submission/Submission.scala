@@ -9,7 +9,9 @@ case class Submission(
     end: Long = 0,
     fileName: String = "",
     receipt: String = ""
-)
+) {
+  def isEmpty: Boolean = id == SubmissionId() && status == Created && start == 0 && end == 0 && fileName == "" && receipt == ""
+}
 
 sealed trait SubmissionStatus {
   def code: Int

@@ -20,14 +20,14 @@ object FilingProtobufConverter {
     Filing(
       filingMessage.period,
       filingMessage.lei,
-      filingStatusFromProtobuf(filingMessage.status),
+      filingStatusFromInt(filingMessage.status),
       filingMessage.filingRequired,
       filingMessage.start,
       filingMessage.end
     )
   }
 
-  private def filingStatusFromProtobuf(code: Int): FilingStatus = {
+  def filingStatusFromInt(code: Int): FilingStatus = {
     code match {
       case 1  => NotStarted
       case 2  => InProgress
