@@ -53,9 +53,6 @@ class LarValidationHttpApiSpec
   val invalidLar =
     "2|95GVQQ61RS6CWQF0SZD90|95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92|20180914|1|1|2|1|1|101000|1|20180916|1234 Hocus Potato Way|Tatertown|XX|29801|36085|36085011402|3||||||11||14|12|13||2|2|6||||||||8||||||||3|4|2|2|1|1|85|104|500|4|1|3|1|746|8888|7||9||10|||||NA|8636|8597|2362|9120|18.18|29|NA|65|329|34|2|1|2|1|590943|3|5|24|NA|1|2|12345678|6||||||17||||||2|2|2"
 
-  val v619_1 =
-    "2|95GVQQ61RS6CWQF0SZD9|95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92|20180914|1|2|2|2|1|570042|3|20180914|1234 Hocus Potato Way|Tatertown|RI|28102|36085|36085011402|4||||||||14|12|13||3|2|6||||||||8||||||||3|4|2|2|1|1|85|104|500|4|1|3|1|746|8888|7||9||10|||||NA|8636|8597|2362|9120|18.18|29|NA|65|329|34|2|1|2|1|590943|2|3|24|NA|1|2|12345678|6||||||17||||||2|1|2"
-
   val file = multipartFile(csv, "auto-gen-lars.txt")
   val badFile = multipartFile(badCsv, "bad-lars.txt")
 
@@ -108,15 +105,6 @@ class LarValidationHttpApiSpec
           validity = ValidationErrorSummary(Seq("V600", "V623")))
       }
     }
-
-    "fail edits V619" in {
-      Post("/lar/validate", LarValidateRequest(v619_1)) ~> larRoutes ~> check {
-        status mustBe StatusCodes.OK
-        responseAs[SingleValidationErrorResult] mustBe SingleValidationErrorResult(
-          validity = ValidationErrorSummary(Seq("V600", "V623")))
-      }
-    }
-
   }
 
 }
