@@ -25,7 +25,21 @@ Example response:
 
 Quick links:
 
-
+- [`/institutions`](#institutions)
+- [`/institutions/<institutionId>`](#institutions-by-id)
+- [`/institutions/<institutionId>/filings/<period>`](#filings)
+- [`/institutions/<institutionId>/filings/<period>/submissions`](#submissions)
+- [`/institutions/<institutionId>/filings/<period>/submissions/latest`](#latest-submission)
+- [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>`](#submission-by-id)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/parseErrors`](#parse-errors)
+- [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits`](#edits)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/edits/<syntactical|validity|quality|macro>`](#edits-by-type)
+- [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/csv`](#edits-csv)
+- [`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<edit>`](#edit-details)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs`](#irs)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs/csv`](#irs-csv)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`](#signature)
+- [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`](#summary)
 
 ### Filings
 
