@@ -52,7 +52,7 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       maybeFilingProbe.expectMessage(None)
 
       filingPersistence ! GetFilingDetails(filingDetailsProbe.ref)
-      filingDetailsProbe.expectMessage(Some(FilingDetails()))
+      filingDetailsProbe.expectMessage(None)
 
       filingPersistence ! CreateFiling(sampleFiling, filingCreatedProbe.ref)
       filingCreatedProbe.expectMessage(FilingCreated(sampleFiling))
