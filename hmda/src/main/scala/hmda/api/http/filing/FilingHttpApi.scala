@@ -46,8 +46,8 @@ trait FilingHttpApi extends HmdaTimeDirectives {
                               s"${FilingPersistence.name}-$lei-$period")
 
       timedGet { uri =>
-        val fDetails: Future[FilingDetails] = filingPersistence ? (ref =>
-          GetFilingDetails(ref))
+        val fDetails: Future[Option[FilingDetails]] = filingPersistence ? (
+            ref => GetFilingDetails(ref))
 
         val fInstitution
           : Future[Option[Institution]] = institutionPersistence ? (
@@ -60,7 +60,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
         } yield (i, d)
 
         onComplete(filingDetailsF) {
-          case Success((Some(_), filingDetails)) =>
+          case Success((Some(_), Some(filingDetails))) =>
             complete(ToResponseMarshallable(filingDetails))
           case Success((None, _)) =>
             val errorResponse =
@@ -69,6 +69,14 @@ trait FilingHttpApi extends HmdaTimeDirectives {
                             uri.path)
             complete(
               ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+          case Success((Some(i), None)) =>
+            val errorResponse = ErrorResponse(
+              404,
+              s"Filing for institution: ${i.LEI} and period: $period does not exist",
+              uri.path)
+            complete(
+              ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
+            )
           case Failure(error) =>
             val errorResponse =
               ErrorResponse(500, error.getLocalizedMessage, uri.path)

@@ -74,11 +74,10 @@ class FilingHttpApiSpec
         status mustBe StatusCodes.BadRequest
       }
     }
-    "return empty Filing Details when institution exists but filing has not been created" in {
+    "return NotFound when institution exists but filing has not been created" in {
       val url = s"/institutions/${sampleInstitution.LEI}/filings/2018"
       Get(url) ~> filingRoutes ~> check {
-        status mustBe StatusCodes.OK
-        responseAs[FilingDetails] mustBe FilingDetails()
+        status mustBe StatusCodes.NotFound
       }
     }
   }
