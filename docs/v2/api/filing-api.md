@@ -117,4 +117,4 @@ Example response:
 
 `POST` - Creates a new filing for the institution and period
 
-Returns the filing details of the filing created (see above for `JSON` format)
+Returns the filing details of the filing created (see above for `JSON` format) with `HTTP` code `201 (Created)`

@@ -85,7 +85,7 @@ class FilingHttpApiSpec
     }
     "create filing and return it" in {
       Post(url) ~> filingRoutes ~> check {
-        status mustBe StatusCodes.OK
+        status mustBe StatusCodes.Created
         val details = responseAs[FilingDetails]
         details.filing.lei mustBe sampleInstitution.LEI
         details.filing.period mustBe period

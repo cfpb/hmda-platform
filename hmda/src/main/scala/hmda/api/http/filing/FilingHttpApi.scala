@@ -86,7 +86,8 @@ trait FilingHttpApi extends HmdaTimeDirectives {
             onComplete(fFiling) {
               case Success(created) =>
                 val filingDetails = FilingDetails(created.filing, Nil)
-                complete(ToResponseMarshallable(filingDetails))
+                complete(
+                  ToResponseMarshallable(StatusCodes.Created -> filingDetails))
               case Failure(error) =>
                 failedResponse(uri, error)
             }
