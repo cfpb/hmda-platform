@@ -76,7 +76,6 @@ class FilingHttpApiSpec
     }
     "return empty Filing Details when institution exists but filing has not been created" in {
       val url = s"/institutions/${sampleInstitution.LEI}/filings/2018"
-      println(url)
       Get(url) ~> filingRoutes ~> check {
         status mustBe StatusCodes.OK
         responseAs[FilingDetails] mustBe FilingDetails()
