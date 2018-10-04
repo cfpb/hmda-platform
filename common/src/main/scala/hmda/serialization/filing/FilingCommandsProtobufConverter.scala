@@ -66,25 +66,43 @@ object FilingCommandsProtobufConverter {
     )
   }
 
+  def getFilingDetailsToProtobuf(
+      cmd: GetFilingDetails,
+      refResolver: ActorRefResolver): GetFilingDetailsMessage = {
+    GetFilingDetailsMessage(
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def getFilingDetailsFromProtobuf(
+      bytes: Array[Byte],
+      refResolver: ActorRefResolver): GetFilingDetails = {
+    val msg = GetFilingDetailsMessage.parseFrom(bytes)
+    GetFilingDetails(
+      refResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
   def addSubmissionToProtobuf(
       cmd: AddSubmission,
       refResolver: ActorRefResolver): AddSubmissionMessage = {
     val submission = cmd.submission
     AddSubmissionMessage(
-      if (submission.isEmpty) None else Some(submissionToProtobuf(cmd.submission)),
+      if (submission.isEmpty) None
+      else Some(submissionToProtobuf(cmd.submission)),
       refResolver.toSerializationFormat(cmd.replyTo)
     )
   }
 
-  def addSubmissionFromProtobuf(bytes: Array[Byte],
-                                refResolver: ActorRefResolver): AddSubmission = {
+  def addSubmissionFromProtobuf(
+      bytes: Array[Byte],
+      refResolver: ActorRefResolver): AddSubmission = {
     val msg = AddSubmissionMessage.parseFrom(bytes)
     AddSubmission(
       submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage())),
       refResolver.resolveActorRef(msg.replyTo)
     )
   }
-
 
   def getLatestSubmissionToProtobuf(
       cmd: GetLatestSubmission,
@@ -117,6 +135,14 @@ object FilingCommandsProtobufConverter {
     val msg = GetSubmissionsMessage.parseFrom(bytes)
     val actorRef = refResolver.resolveActorRef(msg.replyTo)
     GetSubmissions(actorRef)
+  }
+
+  def filingStopToProtobuf(): FilingStopMessage = {
+    FilingStopMessage()
+  }
+
+  def filingStopFromProtobuf(): FilingStop.type = {
+    FilingStop
   }
 
 }
