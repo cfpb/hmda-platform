@@ -79,6 +79,17 @@ trait LarParser {
     }
   }
 
+  def validateDoubleStrOrNAOrExemptOrEmptyField(
+      value: String,
+      parserValidationError: ParserValidationError)
+    : LarParserValidationResult[String] = {
+    if (value == "NA" || value == "Exempt" || value == "") {
+      value.validNel
+    } else {
+      validateDoubleField(value, parserValidationError).map(x => x.toString)
+    }
+  }
+
   def validateDoubleStrOrEmptyOrNaField(
       value: String,
       parserValidationError: ParserValidationError)
