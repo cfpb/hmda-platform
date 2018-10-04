@@ -87,7 +87,7 @@ object FilingPersistence
 
   def startShardRegion(
       sharding: ClusterSharding): ActorRef[ShardingEnvelope[FilingCommand]] = {
-    super.startShardRegion(sharding, FilingStop)
+    super.startShardRegion(sharding, FilingStop())
   }
 
 }

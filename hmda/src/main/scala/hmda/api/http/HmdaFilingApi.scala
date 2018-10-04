@@ -30,11 +30,10 @@ class HmdaFilingApi extends HttpServer with BaseHttpApi with FilingHttpApi {
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = context.dispatcher
-  override val timeout: Timeout = Timeout(
-    config.getInt("hmda.http.timeout").seconds)
+  val timeout: Timeout = Timeout(config.getInt("hmda.http.timeout").seconds)
   override val log = Logging(system, getClass)
 
-  override val sharding = ClusterSharding(system.toTyped)
+  val sharding = ClusterSharding(system.toTyped)
 
   override val name: String = filingApiName
   override val host: String = config.getString("hmda.http.filingHost")
