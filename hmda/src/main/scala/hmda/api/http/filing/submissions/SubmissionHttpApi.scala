@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.Uri
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes, Uri}
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
@@ -94,15 +94,35 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
         }
     }
 
-  //  val submissionLatestPath: Route = ???
-  //
-  //  val submissionByIdPath: Route = ???
+  //institutions/<lei>/filings/<period>/submissions/latest
+  val submissionLatestPath: Route =
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / "latest") {
+      (lei, period) =>
+        timedGet { uri =>
+          val filingPersistence =
+            sharding.entityRefFor(FilingPersistence.typeKey,
+                                  s"${FilingPersistence.name}-$lei-$period")
+
+          val fLatest: Future[Option[Submission]] = filingPersistence ? (ref =>
+            GetLatestSubmission(ref))
+
+          onComplete(fLatest) {
+            case Success(maybeLatest) =>
+              maybeLatest match {
+                case Some(latest) => complete(ToResponseMarshallable(latest))
+                case None         => complete(HttpResponse(StatusCodes.NotFound))
+              }
+            case Failure(error) => failedResponse(uri, error)
+          }
+        }
+    }
 
   def submissionRoutes: Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          submissionCreatePath
+          submissionCreatePath ~ submissionLatestPath
         }
       }
     }
