@@ -6,7 +6,7 @@ import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{StatusCodes, Uri}
+import akka.http.scaladsl.model.StatusCodes
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
@@ -24,6 +24,7 @@ import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
+import FilingResponseUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -63,7 +64,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
       timedPost { uri =>
         onComplete(filingDetailsF) {
           case Success((None, _)) =>
-            institutionNotFoundResponse(lei, uri)
+            entityNotPresentResponse("institution", lei, uri)
           case Success((Some(_), Some(_))) =>
             val errorResponse =
               ErrorResponse(400,
@@ -100,7 +101,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
             case Success((Some(_), Some(filingDetails))) =>
               complete(ToResponseMarshallable(filingDetails))
             case Success((None, _)) =>
-              institutionNotFoundResponse(lei, uri)
+              entityNotPresentResponse("institution", lei, uri)
             case Success((Some(i), None)) =>
               val errorResponse = ErrorResponse(
                 404,
@@ -114,19 +115,6 @@ trait FilingHttpApi extends HmdaTimeDirectives {
           }
         }
     }
-
-  private def failedResponse(uri: Uri, error: Throwable) = {
-    val errorResponse =
-      ErrorResponse(500, error.getLocalizedMessage, uri.path)
-    complete(
-      ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-  }
-
-  private def institutionNotFoundResponse(lei: String, uri: Uri) = {
-    val errorResponse =
-      ErrorResponse(400, s"institution with LEI: $lei does not exist", uri.path)
-    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-  }
 
   def filingRoutes: Route = {
     handleRejections(corsRejectionHandler) {

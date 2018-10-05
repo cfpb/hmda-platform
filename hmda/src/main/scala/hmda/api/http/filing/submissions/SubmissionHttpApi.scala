@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.{StatusCodes, Uri}
+import akka.http.scaladsl.model.Uri
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
@@ -12,7 +12,6 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.model.ErrorResponse
 import hmda.messages.filing.FilingCommands.{GetFiling, GetLatestSubmission}
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
@@ -24,6 +23,7 @@ import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.SubmissionPersistence
 import io.circe.generic.auto._
+import hmda.api.http.filing.FilingResponseUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -122,21 +122,6 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
       case Failure(error) =>
         failedResponse(uri, error)
     }
-  }
-
-  private def failedResponse(uri: Uri, error: Throwable) = {
-    val errorResponse =
-      ErrorResponse(500, error.getLocalizedMessage, uri.path)
-    complete(
-      ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
-  }
-
-  private def entityNotPresentResponse(entityName: String,
-                                       id: String,
-                                       uri: Uri): Route = {
-    val errorResponse =
-      ErrorResponse(400, s"$entityName with ID: $id does not exist", uri.path)
-    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
   }
 
 }
