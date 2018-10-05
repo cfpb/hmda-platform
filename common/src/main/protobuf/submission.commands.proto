@@ -19,3 +19,7 @@ message GetSubmissionMessage {
     string replyTo = 1;
 }
 
+message SubmissionStopMessage {
+
+}
+
