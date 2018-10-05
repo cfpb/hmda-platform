@@ -78,6 +78,9 @@ object FilingPersistence
           replyTo ! state.submissions
           Effect.none
 
+        case FilingStop() =>
+          Effect.stop
+
         case _ =>
           Effect.none
       }
