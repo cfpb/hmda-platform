@@ -29,6 +29,19 @@ keycloak:
 
   ## Additional init containers, e. g. for providing custom themes
   extraInitContainers: |
+    - name: theme-provider
+      image: hmda/theme-provider:latest
+      imagePullPolicy: Always
+      command:
+        - sh
+      args:
+        - -c
+        - |
+          echo "Copying theme..."
+          cp -R /themes/* /theme 
+      volumeMounts:
+        - name: theme
+          mountPath: /theme
 
   ## Additional sidecar containers, e. g. for a database proxy, such as Google's cloudsql-proxy
   extraContainers: |
@@ -172,10 +185,14 @@ keycloak:
     - name: realm-secret
       secret: 
         secretName: realm-secret
+    - name: theme
+      emptyDir: {}
   extraVolumeMounts: |
     - name: realm-secret
       mountPath: "/realm/"
       readOnly: true
+    - name: theme
+      mountPath: /opt/jboss/keycloak/themes/hmda
 
   podDisruptionBudget: {}
     # maxUnavailable: 1
