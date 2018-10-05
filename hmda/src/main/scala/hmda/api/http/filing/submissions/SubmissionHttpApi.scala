@@ -22,6 +22,7 @@ import hmda.model.institution.Institution
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.SubmissionPersistence
+import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import io.circe.generic.auto._
 import hmda.api.http.filing.FilingResponseUtils._
 
