@@ -183,7 +183,7 @@ keycloak:
   ## Add additional volumes and mounts, e. g. for custom themes
   extraVolumes: |
     - name: realm-secret
-      secret: 
+      secret:
         secretName: realm-secret
     - name: theme
       emptyDir: {}
@@ -241,18 +241,18 @@ keycloak:
     deployPostgres: false
 
     # The database vendor. Can be either "postgres", "mysql", "mariadb", or "h2"
-    dbVendor: h2
+    dbVendor: postgres
 
     ## The following values only apply if "deployPostgres" is set to "false"
 
     # Specifies an existing secret to be used for the database password
-    existingSecret: ""
+    existingSecret: "keycloak-credentials"
 
     # The key in the existing secret that stores the password
     existingSecretKey: password
 
-    dbName: keycloak
-    dbHost: mykeycloak
+    dbName: keycloak_v2
+    dbHost: ""
     dbPort: 5432
     dbUser: keycloak
 
