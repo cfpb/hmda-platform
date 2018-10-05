@@ -13,6 +13,7 @@ import hmda.api.http.routes.BaseHttpApi
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
 import akka.actor.typed.scaladsl.adapter._
+import hmda.api.http.filing.submissions.SubmissionHttpApi
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -22,7 +23,11 @@ object HmdaFilingApi {
   final val filingApiName = "hmda-filing-api"
 }
 
-class HmdaFilingApi extends HttpServer with BaseHttpApi with FilingHttpApi {
+class HmdaFilingApi
+    extends HttpServer
+    with BaseHttpApi
+    with FilingHttpApi
+    with SubmissionHttpApi {
   import HmdaFilingApi._
 
   val config = ConfigFactory.load()
@@ -39,7 +44,7 @@ class HmdaFilingApi extends HttpServer with BaseHttpApi with FilingHttpApi {
   override val host: String = config.getString("hmda.http.filingHost")
   override val port: Int = config.getInt("hmda.http.filingPort")
 
-  override val paths: Route = routes(s"$name") ~ filingRoutes
+  override val paths: Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
