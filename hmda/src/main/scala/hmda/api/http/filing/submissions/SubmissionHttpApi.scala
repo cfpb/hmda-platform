@@ -13,11 +13,15 @@ import akka.http.scaladsl.server.Directives._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
-import hmda.messages.filing.FilingCommands.GetLatestSubmission
+import hmda.messages.filing.FilingCommands.{GetFiling, GetLatestSubmission}
+import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
 import hmda.messages.submission.SubmissionEvents.SubmissionCreated
+import hmda.model.filing.Filing
 import hmda.model.filing.submission.{Submission, SubmissionId}
+import hmda.model.institution.Institution
 import hmda.persistence.filing.FilingPersistence
+import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.SubmissionPersistence
 import io.circe.generic.auto._
 
@@ -38,35 +42,61 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
     path("institutions" / Segment / "filings" / Segment / "submissions") {
       (lei, period) =>
         timedPost { uri =>
+          val institutionPersistence =
+            sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                  s"${InstitutionPersistence.name}-$lei")
+
+          val fInstitution
+            : Future[Option[Institution]] = institutionPersistence ? (
+              ref => GetInstitution(ref)
+          )
+
           val filingPersistence =
             sharding.entityRefFor(FilingPersistence.typeKey,
                                   s"${FilingPersistence.name}-$lei-$period")
+
+          val filingF: Future[Option[Filing]] = filingPersistence ? (ref =>
+            GetFiling(ref))
 
           val latestSubmissionF
             : Future[Option[Submission]] = filingPersistence ? (ref =>
             GetLatestSubmission(ref))
 
-          onComplete(latestSubmissionF) {
-            case Failure(error) =>
-              failedResponse(uri, error)
-            case Success(maybeLatest) =>
-              maybeLatest match {
-                case None =>
-                  val submissionId = SubmissionId(lei, period, 0)
-                  createSubmission(uri, submissionId)
-                case Some(submission) =>
-                  val submissionId =
-                    SubmissionId(lei, period, submission.id.sequenceNumber + 1)
-                  createSubmission(uri, submissionId)
-              }
-          }
+          val fCheck = for {
+            i <- fInstitution
+            f <- filingF
+            l <- latestSubmissionF
+          } yield (i, f, l)
 
+          onComplete(fCheck) {
+            case Success(check) =>
+              check match {
+                case (None, _, _) =>
+                  entityNotPresentResponse("institution", lei, uri)
+                case (_, None, _) =>
+                  entityNotPresentResponse("filing", s"$lei-$period", uri)
+                case (_, _, maybeLatest) =>
+                  maybeLatest match {
+                    case None =>
+                      val submissionId = SubmissionId(lei, period, 0)
+                      createSubmission(uri, submissionId)
+                    case Some(submission) =>
+                      val submissionId =
+                        SubmissionId(lei,
+                                     period,
+                                     submission.id.sequenceNumber + 1)
+                      createSubmission(uri, submissionId)
+                  }
+              }
+
+            case Failure(error) => failedResponse(uri, error)
+          }
         }
     }
 
-//  val submissionLatestPath: Route = ???
-//
-//  val submissionByIdPath: Route = ???
+  //  val submissionLatestPath: Route = ???
+  //
+  //  val submissionByIdPath: Route = ???
 
   def submissionRoutes: Route = {
     handleRejections(corsRejectionHandler) {
@@ -99,6 +129,14 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
       ErrorResponse(500, error.getLocalizedMessage, uri.path)
     complete(
       ToResponseMarshallable(StatusCodes.InternalServerError -> errorResponse))
+  }
+
+  private def entityNotPresentResponse(entityName: String,
+                                       id: String,
+                                       uri: Uri): Route = {
+    val errorResponse =
+      ErrorResponse(400, s"$entityName with ID: $id does not exist", uri.path)
+    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
   }
 
 }
