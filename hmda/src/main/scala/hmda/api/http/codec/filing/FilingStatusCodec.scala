@@ -4,7 +4,7 @@ import hmda.model.filing.FilingStatus
 import io.circe._
 import io.circe.Decoder.Result
 
-object FilingCodec {
+object FilingStatusCodec {
 
   implicit val filingStatusEncoder: Encoder[FilingStatus] =
     new Encoder[FilingStatus] {

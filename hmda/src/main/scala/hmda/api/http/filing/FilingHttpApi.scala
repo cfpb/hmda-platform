@@ -19,7 +19,7 @@ import hmda.persistence.filing.FilingPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import io.circe.generic.auto._
-import hmda.api.http.codec.filing.FilingCodec._
+import hmda.api.http.codec.filing.FilingStatusCodec._
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.Institution

@@ -8,6 +8,7 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
+import hmda.messages.filing.FilingCommands.AddSubmission
 import hmda.messages.submission.SubmissionCommands._
 import hmda.messages.submission.SubmissionEvents.{
   SubmissionCreated,
@@ -17,6 +18,7 @@ import hmda.messages.submission.SubmissionEvents.{
 }
 import hmda.model.filing.submission.{Created, Submission}
 import hmda.persistence.HmdaPersistentActor
+import hmda.persistence.filing.FilingPersistence
 
 object SubmissionPersistence
     extends HmdaPersistentActor[SubmissionCommand,
@@ -41,6 +43,7 @@ object SubmissionPersistence
     : CommandHandler[SubmissionCommand, SubmissionEvent, SubmissionState] = {
     (state, cmd) =>
       val log = ctx.asScala.log
+      val sharding = ClusterSharding(ctx.asScala.system)
       cmd match {
         case GetSubmission(replyTo) =>
           replyTo ! state.submission
@@ -53,6 +56,10 @@ object SubmissionPersistence
           )
           Effect.persist(SubmissionCreated(submission)).thenRun { _ =>
             log.debug(s"persisted new Submission: ${submission.id.toString}")
+            val filingPersistence = sharding.entityRefFor(
+              FilingPersistence.typeKey,
+              s"${FilingPersistence.name}-${submission.id.lei}-${submission.id.period}")
+            filingPersistence ! AddSubmission(submission, None)
             replyTo ! SubmissionCreated(submission)
           }
         case ModifySubmission(submission, replyTo) =>

@@ -66,7 +66,10 @@ object FilingPersistence
         case AddSubmission(submission, replyTo) =>
           Effect.persist(SubmissionAdded(submission)).thenRun { _ =>
             log.debug(s"Added submission: ${submission.toString}")
-            replyTo ! submission
+            replyTo match {
+              case Some(ref) => ref ! submission
+              case None      => Effect.none //Do not reply
+            }
           }
 
         case GetLatestSubmission(replyTo) =>
