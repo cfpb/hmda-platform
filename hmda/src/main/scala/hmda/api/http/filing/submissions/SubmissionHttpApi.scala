@@ -139,7 +139,8 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
 
     onComplete(createdF) {
       case Success(created) =>
-        complete(ToResponseMarshallable(created.submission))
+        complete(
+          ToResponseMarshallable(StatusCodes.Created -> created.submission))
       case Failure(error) =>
         failedResponse(uri, error)
     }

@@ -69,6 +69,7 @@ class FilingHttpApiSpec
   }
 
   override def afterAll(): Unit = super.afterAll()
+
   val url = s"/institutions/${sampleInstitution.LEI}/filings/$period"
   val badUrl = s"/institutions/xxxx/filings/$period"
 
