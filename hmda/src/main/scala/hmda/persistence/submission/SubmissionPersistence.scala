@@ -66,6 +66,8 @@ object SubmissionPersistence
             replyTo ! SubmissionNotExists(submission.id)
             Effect.none
           }
+        case SubmissionStop() =>
+          Effect.stop
       }
   }
 
@@ -82,7 +84,7 @@ object SubmissionPersistence
 
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[SubmissionCommand]] = {
-    super.startShardRegion(sharding, SubmissionStop)
+    super.startShardRegion(sharding, SubmissionStop())
   }
 
 }
