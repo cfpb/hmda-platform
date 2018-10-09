@@ -1,7 +1,7 @@
 package hmda.validation.rules.lar.validity
 
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.lar.enums.{OtherAUS, OtherAutomatedUnderwritingResult}
+import hmda.model.filing.lar.enums.OtherAutomatedUnderwritingResult
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
 import hmda.validation.dsl.PredicateCommon._
