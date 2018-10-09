@@ -21,44 +21,44 @@ object SubmissionEventsProtobufConverter {
   def submissionCreatedToProtobuf(
       evt: SubmissionCreated): SubmissionCreatedMessage = {
     SubmissionCreatedMessage(
-      submission = Some(submissionToProtobuf(evt.submission))
+      if (evt.submission.isEmpty) None
+      else Some(submissionToProtobuf(evt.submission))
     )
   }
 
   def submissionCreatedFromProtobuf(
       msg: SubmissionCreatedMessage): SubmissionCreated = {
     SubmissionCreated(
-      submission =
-        submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage()))
+      submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage()))
     )
   }
 
   def submissionModifiedToProtobuf(
       evt: SubmissionModified): SubmissionModifiedMessage = {
     SubmissionModifiedMessage(
-      submission = Some(submissionToProtobuf(evt.submission))
+      if (evt.submission.isEmpty) None
+      else Some(submissionToProtobuf(evt.submission))
     )
   }
 
   def submissionModifiedFromProtobuf(
       msg: SubmissionModifiedMessage): SubmissionModified = {
     SubmissionModified(
-      submission =
-        submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage()))
+      submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage()))
     )
   }
 
   def submissionNotExistsToProtobuf(
       evt: SubmissionNotExists): SubmissionNotExistsMessage = {
     SubmissionNotExistsMessage(
-      submissionId = submissionIdToProtobuf(evt.submissionId)
+      submissionIdToProtobuf(evt.submissionId)
     )
   }
 
   def submissionNotExistsFromProtobuf(
       msg: SubmissionNotExistsMessage): SubmissionNotExists = {
     SubmissionNotExists(
-      submissionId = submissionIdFromProtobuf(
+      submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())))
   }
 
