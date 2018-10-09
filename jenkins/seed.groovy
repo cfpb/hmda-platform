@@ -18,6 +18,9 @@ projects.each { project ->
                     scriptPath(project.jenkinsfilePath)
                 }
             }
+            triggers {
+                periodic(5)
+            }
         }
     }
 }
