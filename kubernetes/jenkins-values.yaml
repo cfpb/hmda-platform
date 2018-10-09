@@ -13,9 +13,10 @@ Master:
   AdminUser: admin
   AdminPassword: admin
   Cpu: "500m"
-  Memory: "1024Mi"
+  Memory: "2048Mi"
 # Set min/max heap here if needed with:
 # JavaOpts: "-Xms512m -Xmx512m"
+  JavaOpts: "-Dorg.apache.commons.jelly.tags.fmt.timeZone=America/New_York"
   ServicePort: 80
 # For minikube, set this to NodePort, elsewhere use LoadBalancer
 # Use ClusterIP if your setup includes ingress controller
@@ -26,6 +27,7 @@ Master:
 # Used to create Ingress record (should used with ServiceType: ClusterIP)
 # HostName: jenkins.radu-matei.com
 # NodePort: <to set explicitly, choose port between 30000-32767
+  NodePort: 32700
   ContainerPort: 8080
   SlaveListenerPort: 50000
   LoadBalancerSourceRanges:
@@ -81,7 +83,7 @@ Agent:
   Component: "jenkins-slave"
   Privileged: false
   Cpu: "500m"
-  Memory: "2048Mi"
+  Memory: "2560Mi"
   # You may want to change this to true while testing a new image
   AlwaysPullImage: false
   # You can define the volumes that you want to mount for this container
