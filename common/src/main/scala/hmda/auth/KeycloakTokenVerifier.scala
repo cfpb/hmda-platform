@@ -11,7 +11,6 @@ import org.keycloak.adapters.KeycloakDeployment
 import org.keycloak.representations.AccessToken
 import io.circe.parser.decode
 import io.circe.generic.auto._
-import io.circe.syntax._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._

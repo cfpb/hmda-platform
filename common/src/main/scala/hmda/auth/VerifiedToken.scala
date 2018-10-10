@@ -6,3 +6,13 @@ case class VerifiedToken(token: String,
                          username: String,
                          email: String,
                          roles: Seq[String])
+
+object VerifiedToken {
+  def apply(): VerifiedToken =
+    VerifiedToken("empty-token",
+                  "dev",
+                  "token",
+                  "dev",
+                  "dev@email.com",
+                  Seq.empty)
+}

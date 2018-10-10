@@ -14,13 +14,19 @@ class OAuth2Authorization(logger: LoggingAdapter,
 
   val config = ConfigFactory.load()
   val clientId = config.getString("keycloak.client.id")
+  val runtimeMode = config.getString("hmda.runtime.mode")
 
   def authorizeTokenWithRole(role: String): Directive1[VerifiedToken] = {
     authorizeToken flatMap {
       case t if t.roles.contains(role) =>
         provide(t)
       case _ =>
-        reject(AuthorizationFailedRejection).toDirective[Tuple1[VerifiedToken]]
+        if (runtimeMode == "dev") {
+          provide(VerifiedToken())
+        } else {
+          reject(AuthorizationFailedRejection)
+            .toDirective[Tuple1[VerifiedToken]]
+        }
     }
   }
 
@@ -45,7 +51,11 @@ class OAuth2Authorization(logger: LoggingAdapter,
           }.get
         }
       case None =>
-        reject(AuthorizationFailedRejection)
+        if (runtimeMode == "dev") {
+          provide(VerifiedToken())
+        } else {
+          reject(AuthorizationFailedRejection)
+        }
     }
   }
 
