@@ -56,7 +56,11 @@ object FilingPersistence
           Effect.none
 
         case GetFilingDetails(replyTo) =>
-          replyTo ! FilingDetails(state.filing, state.submissions)
+          if (state.filing.isEmpty) {
+            replyTo ! None
+          } else {
+            replyTo ! Some(FilingDetails(state.filing, state.submissions))
+          }
           Effect.none
 
         case AddSubmission(submission, replyTo) =>

@@ -8,7 +8,9 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
+import hmda.api.http.filing.FilingHttpApi
 import hmda.api.http.routes.BaseHttpApi
+import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
 import akka.actor.typed.scaladsl.adapter._
 
@@ -20,7 +22,7 @@ object HmdaFilingApi {
   final val filingApiName = "hmda-filing-api"
 }
 
-class HmdaFilingApi extends HttpServer with BaseHttpApi {
+class HmdaFilingApi extends HttpServer with BaseHttpApi with FilingHttpApi {
   import HmdaFilingApi._
 
   val config = ConfigFactory.load()
@@ -37,7 +39,7 @@ class HmdaFilingApi extends HttpServer with BaseHttpApi {
   override val host: String = config.getString("hmda.http.filingHost")
   override val port: Int = config.getInt("hmda.http.filingPort")
 
-  override val paths: Route = routes(s"$name")
+  override val paths: Route = routes(s"$name") ~ filingRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,

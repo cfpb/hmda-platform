@@ -22,7 +22,8 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
   val filingCreatedProbe = TestProbe[FilingCreated]("filing-created-probe")
   val maybeFilingProbe = TestProbe[Option[Filing]]("maybe-filing-probe")
-  val filingDetailsProbe = TestProbe[FilingDetails]("filing-details-probe")
+  val filingDetailsProbe =
+    TestProbe[Option[FilingDetails]]("filing-details-probe")
   val maybeSubmissionProbe =
     TestProbe[Option[Submission]]("maybe-submission-probe")
   val submissionProbe = TestProbe[Submission]("submission-probe")
@@ -51,7 +52,7 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       maybeFilingProbe.expectMessage(None)
 
       filingPersistence ! GetFilingDetails(filingDetailsProbe.ref)
-      filingDetailsProbe.expectMessage(FilingDetails())
+      filingDetailsProbe.expectMessage(None)
 
       filingPersistence ! CreateFiling(sampleFiling, filingCreatedProbe.ref)
       filingCreatedProbe.expectMessage(FilingCreated(sampleFiling))
@@ -88,8 +89,8 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       maybeSubmissionProbe.expectMessage(Some(sampleSubmission2))
 
       filingPersistence ! GetFilingDetails(filingDetailsProbe.ref)
-      filingDetailsProbe.expectMessage(
-        FilingDetails(sampleFiling, List(sampleSubmission2, sampleSubmission)))
+      filingDetailsProbe.expectMessage(Some(
+        FilingDetails(sampleFiling, List(sampleSubmission2, sampleSubmission))))
     }
   }
 }
