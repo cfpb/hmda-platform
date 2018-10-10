@@ -14,7 +14,7 @@ replicaCount: 3
 
 image:
   repository: hmda/hmda-platform
-  tag: 2.6.1
+  tag: latest
   pullPolicy: IfNotPresent
 
 hmda:
