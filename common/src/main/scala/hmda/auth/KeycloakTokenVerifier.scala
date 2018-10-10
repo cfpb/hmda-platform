@@ -1,28 +1,68 @@
 package hmda.auth
 
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpRequest
+import akka.stream.ActorMaterializer
+import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import org.keycloak.RSATokenVerifier
 import org.keycloak.adapters.KeycloakDeployment
 import org.keycloak.representations.AccessToken
+import io.circe.parser.decode
+import io.circe.generic.auto._
+import io.circe.syntax._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 
 class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
-    implicit ec: ExecutionContext)
+    implicit system: ActorSystem,
+    materializer: ActorMaterializer,
+    ec: ExecutionContext)
     extends TokenVerifier {
 
   val config = ConfigFactory.load()
-
-  val kid = config.getString("keycloak.public.key.id")
+  val realm = config.getString("keycloak.realm")
+  val authUrl = config.getString("keycloak.auth.server.url")
+  val timeout = config.getInt("hmda.http.timeout").seconds
 
   override def verifyToken(token: String): Future[AccessToken] = {
-    Future {
+    val fKid = getKid(keycloakDeployment)
+    fKid.map { kid =>
       RSATokenVerifier.verifyToken(
         token,
         keycloakDeployment.getPublicKeyLocator.getPublicKey(kid,
                                                             keycloakDeployment),
         keycloakDeployment.getRealmInfoUrl
       )
+    }
+  }
+
+  private def getKid(keycloakDeployment: KeycloakDeployment): Future[String] = {
+    val certUrl =
+      s"${authUrl}realms/$realm/protocol/openid-connect/certs"
+    val fResponse = Http().singleRequest(HttpRequest(uri = certUrl))
+    val fStrictEntity =
+      fResponse.map(response => response.entity.toStrict(timeout))
+    val f = for {
+      _ <- fResponse
+      s <- fStrictEntity
+      e <- s.map(_.dataBytes)
+      r = e
+        .runFold(ByteString.empty) { case (acc, b) => acc ++ b }
+        .map(parseAuthKey)
+    } yield r
+    f.flatMap(a => a.map(_.kid))
+  }
+
+  private def parseAuthKey(line: ByteString): AuthKey = {
+    val str = line.utf8String
+    val authKeys = decode[AuthKeys](str).getOrElse(AuthKeys())
+    if (authKeys.keys.nonEmpty) {
+      authKeys.keys.head
+    } else {
+      AuthKey()
     }
   }
 }
