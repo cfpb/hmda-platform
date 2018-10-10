@@ -43,6 +43,6 @@ object Dependencies {
   lazy val keycloakAdapter = "org.keycloak" % "keycloak-adapter-core" % Version.keycloak
   lazy val keycloak = "org.keycloak" % "keycloak-core"  % Version.keycloak
   lazy val jbossLogging = "org.jboss.logging" % "jboss-logging" % Version.jboss
-
-
+  lazy val httpClient = "org.apache.httpcomponents" % "httpClient" % Version.httpcomponents
+  
 }

@@ -8,7 +8,8 @@ lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 lazy val authDeps = Seq(
   keycloakAdapter,
   keycloak,
-  jbossLogging
+  jbossLogging,
+  httpClient
 )
 
 lazy val akkaDeps = Seq(
@@ -99,8 +100,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
-      },
-      libraryDependencies ++= akkaPersistenceDeps
+      }
     ),
     scalafmtSettings,
     dockerSettings,
