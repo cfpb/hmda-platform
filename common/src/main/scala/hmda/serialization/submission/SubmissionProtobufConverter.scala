@@ -55,7 +55,7 @@ object SubmissionProtobufConverter {
     )
   }
 
-  private def submissionStatusFromProtobuf(code: Int): SubmissionStatus =
+  private def submissionStatusFromProtobuf(code: Int): SubmissionStatus = {
     code match {
       case 1  => Created
       case 2  => Uploading
@@ -70,7 +70,7 @@ object SubmissionProtobufConverter {
       case 11 => Validated
       case 12 => Signed
       case -1 => Failed
-
     }
+  }
 
 }

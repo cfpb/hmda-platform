@@ -1,16 +1,14 @@
 package hmda.persistence.institution
 
 import akka.actor
-import akka.actor.typed.{ActorSystem, Props}
-import akka.cluster.sharding.typed.ClusterShardingSettings
-import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import akka.actor.typed.ActorSystem
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.Cluster
 import akka.cluster.typed.Join
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators._
 import hmda.persistence.AkkaCassandraPersistenceSpec
-import hmda.persistence.institution.InstitutionPersistence._
 import akka.actor.typed.scaladsl.adapter._
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
@@ -21,6 +19,7 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
   override implicit val typedSystem: ActorSystem[_] = system.toTyped
 
   val sharding = ClusterSharding(typedSystem)
+  InstitutionPersistence.startShardRegion(sharding)
 
   val institutionProbe = TestProbe[InstitutionEvent]("institutions-probe")
   val maybeInstitutionProbe =
@@ -99,7 +98,10 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
     "be created and read back" in {
       val institutionPersistence =
-        createShardedInstitution(typedSystem, "ABC12345")
+        sharding.entityRefFor(InstitutionPersistence.typeKey,
+                              s"${InstitutionPersistence.name}-ABC12345")
+
+      println(institutionPersistence)
 
       institutionPersistence ! CreateInstitution(sampleInstitution,
                                                  institutionProbe.ref)
@@ -110,7 +112,8 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be modified and read back" in {
       val institutionPersistence =
-        createShardedInstitution(typedSystem, "ABC12345")
+        sharding.entityRefFor(InstitutionPersistence.typeKey,
+                              s"${InstitutionPersistence.name}-ABC12345")
 
       institutionPersistence ! ModifyInstitution(modified, institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionModified(modified))
@@ -120,7 +123,8 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be deleted" in {
       val institutionPersistence =
-        createShardedInstitution(typedSystem, "ABC12345")
+        sharding.entityRefFor(InstitutionPersistence.typeKey,
+                              s"${InstitutionPersistence.name}-ABC12345")
 
       institutionPersistence ! DeleteInstitution(modified.LEI,
                                                  institutionProbe.ref)
@@ -129,21 +133,6 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(None)
     }
-  }
-
-  private def createShardedInstitution(
-      system: ActorSystem[_],
-      entityId: String): EntityRef[InstitutionCommand] = {
-    ClusterSharding(system).spawn[InstitutionCommand](
-      entityId => behavior(entityId),
-      Props.empty,
-      ShardingTypeName,
-      ClusterShardingSettings(system),
-      maxNumberOfShards = shardNumber,
-      handOffStopMessage = InstitutionStop
-    )
-
-    ClusterSharding(system).entityRefFor(ShardingTypeName, entityId)
   }
 
 }

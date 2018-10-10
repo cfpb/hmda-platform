@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+message FilingMessage {
+    string period = 1;
+    string lei = 2;
+    int32 status = 3;
+    bool filingRequired = 4;
+    int64 start = 5;
+    int64 end = 6;
+}
