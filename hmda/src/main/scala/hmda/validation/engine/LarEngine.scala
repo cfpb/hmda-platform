@@ -3,13 +3,14 @@ package hmda.validation.engine
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.lar.quality._
-import hmda.validation.rules.lar.syntactical.S300
+import hmda.validation.rules.lar.syntactical.{S300, S301}
 import hmda.validation.rules.lar.validity._
 
 object LarEngine extends ValidationEngine[LoanApplicationRegister] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
-    S300
+    S300,
+    S301.withContext(ctx)
   )
 
   override val validityChecks = Vector(
