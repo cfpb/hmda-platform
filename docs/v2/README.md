@@ -154,6 +154,16 @@ You can access `Jenkins` by issuing `minikube service --n jenkins-system jenkins
 
 Follow the on screen instructions to finalize `Jenkins` setup. When logged in, update plugins if necessary.
 
+* Install Keycloak
+
+Make sure the two secrets are created: `realm` from the file under `/kubernetes/keycloak`, and `keycloak-credentials`
+with the key `password` set to the Postgres password.  Find the URL of the Postgres database, and then install Keycloak with 
+this command:
+
+```bash
+helm upgrade -i -f kubernetes/keycloak/values.yaml keycloak stable/keycloak --set keycloak.persistence.dbHost="<db URL>"
+```
+
 * Docker Hub Credentials
 
 Add credentials in Jenkins for `Docker Hub` so that images can be pushed as part of `Jenkins` pipeline builds.

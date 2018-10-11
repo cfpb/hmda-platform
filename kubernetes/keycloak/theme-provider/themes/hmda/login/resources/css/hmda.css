@@ -1,0 +1,311 @@
+body {
+  overflow-y: scroll;
+}
+
+.usa-display,
+.usa-display-alt,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.usa-font-lead {
+  font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.usa-alert ul {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.usa-alert ul:last-of-type {
+  margin-bottom: 0;
+}
+
+.usa-grid-small {
+  margin-top: 4em;
+  padding-bottom: 4em;
+  max-width: 450px;
+}
+
+.verifyEmailMessage {
+  margin-top: 4em;
+}
+
+.usa-form {
+  max-width: 450px;
+}
+
+.usa-alert-heading {
+  text-transform: capitalize;
+}
+
+.bg-color-hmda-gray {
+  background-color: #f7f7f7;
+}
+
+.usa-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #d6d7d9;
+}
+
+.usa-navbar {
+  height: auto;
+}
+
+.usa-nav {
+  padding-top: 0;
+}
+
+.usa-nav.usa-nav-left {
+  display: inline-block;
+  float: none;
+  padding-left: 3em;
+}
+
+.usa-logo {
+  line-height: 0;
+}
+
+.usa-logo a {
+  color: #1F498F;
+  font-weight: bold;
+}
+
+.usa-logo a:hover {
+  color: #1F498F;
+}
+
+.usa-logo .usa-logo-text {
+  font-size: 2.5rem;
+  font-weight: normal;
+}
+
+.usa-logo .usa-logo-text img {
+  margin-right: .5em;
+  vertical-align: bottom;
+}
+
+.usa-header-basic .usa-logo {
+  bottom: 0;
+  font-weight: bold;
+  margin-top: 3px;
+  position: relative;
+}
+
+.usa-banner-inner {
+  padding-top: .25em;
+  padding-bottom: .25em;
+  max-width: 100%;
+}
+
+.usa-nav-container {
+  padding-top: .5em;
+  padding-bottom: .5em;
+  max-width: 100%;
+}
+
+.usa-nav-primary>li>a {
+  color: #212121;
+  font-size: 1.3rem;
+  margin: 1.3rem 0 1rem;
+  padding: 0;
+  text-transform: uppercase;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin: 0 0 120px;
+}
+
+.usa-footer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.usa-footer .usa-nav-link {
+  font-size: .9em;
+  text-decoration: none;
+  color: #1F498F;
+  font-weight: bold;
+}
+
+.usa-footer > .usa-footer-primary-section {
+  padding-top: 2em;
+  padding-bottom: 2em;
+}
+
+.usa-footer .usa-nav-link img {
+  margin-right: 5px;
+  vertical-align: top;
+}
+
+.usa-alert {
+  width: 100%;
+}
+
+.usa-alert a {
+  color: #205493;
+}
+
+.usa-alert-info,
+.usa-alert-error,
+.usa-alert-info,
+.usa-alert-warning {
+  background-image: none;
+}
+
+.usa-alert-body {
+  padding-left: 0;
+}
+
+.usa-alert-body p:first-child {
+  margin-top: 0;
+}
+
+.usa-alert p {
+  margin: 0;
+}
+
+.usa-alert-error p:not(.usa-alert-text) {
+  margin-top: 1em;
+}
+
+.usa-alert li[data-validator] {
+  margin-bottom: 0;
+}
+
+#validation_list > li {
+  position: relative;
+}
+
+#validation_list > .complete, #validation_list > .missing {
+  list-style: none;
+}
+
+#validation_list img {
+  display: none;
+  position: absolute;
+}
+
+#validation_list > li.complete > .check {
+  display: inline;
+  width: 32px;
+  height: 32px;
+  left: -30px;
+  bottom: -3px;
+}
+
+#validation_list > li.missing > .missing {
+  display: inline;
+  width: 16px;
+  height: 16px;
+  left: -23px;
+  bottom: 5px;
+}
+
+.padding-1 {
+  padding: 1em;
+}
+
+.margin-bottom-1 {
+  margin-bottom: 3em;
+}
+
+.margin-top-0 {
+  margin-top: 0;
+}
+
+.usa-unstyled-list label {
+  margin: .2em;
+}
+
+fieldset fieldset legend {
+  font-size: 1.7rem;
+  font-weight: normal;
+}
+
+#institutions dl {
+  margin-top: 0;
+  margin-left: 2.3em;
+}
+
+#institutions dd,
+#institutions dt {
+  display: inline;
+}
+
+#institutions dt {
+  font-weight: 700;
+}
+
+#institutions dd {
+  margin-left: .5em;
+}
+
+#institutions dd:after {
+  content: '\A';
+  white-space: pre-wrap;
+}
+
+.usa-input-help-message {
+  color: inherit;
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 700;
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+
+.usa-input-error-message {
+  display: none;
+}
+
+.hmda-error-message {
+  color: #dc2026;
+  font-weight: 700;
+  padding: 3px 0;
+}
+  
+@keyframes loading-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+#submit-loader {
+  display: none;
+  position: absolute;
+  margin: 0;
+  margin-top: -3.6em;
+  margin-left: 21em;
+}
+
+.LoadingIconWrapper {
+  position: relative;
+  display: block;
+  height: 30px;
+  width: 30px;
+  margin: 2em auto;
+}
+
+.LoadingIcon {
+  position:absolute;
+  margin: 0 auto;
+  border: 4px solid #f1f1f1;
+  border-left-color: #0071bc;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: loading-spin 1.2s linear infinite;
+}

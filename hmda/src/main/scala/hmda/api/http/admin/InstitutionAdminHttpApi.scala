@@ -1,11 +1,10 @@
 package hmda.api.http.admin
 
-import akka.actor.{ActorSystem, Scheduler}
+import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
-import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
@@ -42,12 +41,8 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   val institutionWritePath =
     path("institutions") {
       entity(as[Institution]) { institution =>
-        log.info(institution.toCSV)
-        val typedSystem = system.toTyped
-        implicit val scheduler: Scheduler = typedSystem.scheduler
-
         val institutionPersistence = sharding.entityRefFor(
-          InstitutionPersistence.ShardingTypeName,
+          InstitutionPersistence.typeKey,
           s"${InstitutionPersistence.name}-${institution.LEI}")
 
         timedPost { uri =>
@@ -112,11 +107,8 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
   val institutionReadPath =
     path("institutions" / Segment) { lei =>
-      val typedSystem = system.toTyped
-      implicit val scheduler: Scheduler = typedSystem.scheduler
-
       val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.ShardingTypeName,
+        sharding.entityRefFor(InstitutionPersistence.typeKey,
                               s"${InstitutionPersistence.name}-$lei")
 
       timedGet { uri =>

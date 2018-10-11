@@ -18,12 +18,13 @@ class V655_1Spec extends LarEditCheckSpec {
 
       val relevantRace = lar.applicant.race.copy(race1 = RaceNotApplicable)
       val relevantSex = lar.applicant.sex.copy(sexEnum = SexNotApplicable)
-      val relevantLar = lar.copy(
-        applicant = lar.applicant.copy(
-          ethnicity = relevantEthnicity,
-          race = relevantRace,
-          sex = relevantSex
-        ))
+      val relevantLar =
+        lar.copy(action = lar.action.copy(actionTakenType = LoanOriginated),
+                 applicant = lar.applicant.copy(
+                   ethnicity = relevantEthnicity,
+                   race = relevantRace,
+                   sex = relevantSex
+                 ))
 
       relevantLar.copy(income = "NA").mustPass
       relevantLar.copy(income = "na").mustFail

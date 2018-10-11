@@ -4,10 +4,11 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 import akka.actor
-import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
+import akka.actor.typed.{ActorContext, ActorRef, ActorSystem, Behavior}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.actor.testkit.typed.scaladsl.TestProbe
+import akka.actor.typed.scaladsl.Behaviors
 import hmda.persistence.util.CassandraUtil
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 import akka.actor.typed.scaladsl.adapter._
@@ -64,24 +65,27 @@ abstract class AkkaCassandraPersistenceSpec
     case class AwaitState(nr: Int = 0)
 
     def behavior: Behavior[Command] =
-      PersistentBehaviors
-        .receive[Command, Event, AwaitState](
-          persistenceId = s"await-persistence-id",
-          emptyState = AwaitState(),
-          commandHandler = commandHandler,
-          eventHandler = eventHandler
-        )
+      Behaviors.setup { ctx =>
+        PersistentBehaviors
+          .receive[Command, Event, AwaitState](
+            persistenceId = s"await-persistence-id",
+            emptyState = AwaitState(),
+            commandHandler = commandHandler(ctx),
+            eventHandler = eventHandler
+          )
+      }
 
-    val commandHandler: CommandHandler[Command, Event, AwaitState] = {
-      (ctx, _, cmd) =>
-        cmd match {
-          case Request(replyTo) =>
-            Effect.persist(Response).thenRun { _ =>
-              ctx.log.debug(s"Persisted: $cmd")
-              replyTo ! Response
-            }
+    def commandHandler(ctx: ActorContext[Command])
+      : CommandHandler[Command, Event, AwaitState] = { (_, cmd) =>
+      val log = ctx.asScala.log
+      cmd match {
+        case Request(replyTo) =>
+          Effect.persist(Response).thenRun { _ =>
+            log.debug(s"Persisted: $cmd")
+            replyTo ! Response
+          }
 
-        }
+      }
     }
 
     val eventHandler: (AwaitState, Event) => AwaitState = {

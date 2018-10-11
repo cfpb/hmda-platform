@@ -16,7 +16,8 @@ object V655_1 extends EditCheck[LoanApplicationRegister] {
     when(
       (lar.applicant.ethnicity.ethnicity1 is equalTo(EthnicityNotApplicable))
         and (lar.applicant.race.race1 is equalTo(RaceNotApplicable))
-        and (lar.applicant.sex.sexEnum is equalTo(SexNotApplicable))) {
+        and (lar.applicant.sex.sexEnum is equalTo(SexNotApplicable))
+        and (lar.action.actionTakenType not equalTo(PurchasedLoan))) {
 
       lar.income is equalTo("NA")
     }
