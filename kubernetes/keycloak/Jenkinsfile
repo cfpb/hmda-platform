@@ -12,7 +12,7 @@ podTemplate(label: 'buildHelm', containers: [
             expression { return gitBranch == 'master' }
         }
         container('helm') {
-            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'keylcloak-admin',
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'keycloak-admin',
             usernameVariable: 'KEYCLOAK_USER', passwordVariable: 'KEYCLOAK_PASSWORD']]) {
                 withCredentials([string(credentialsId: 'keycloak-db', variable: 'POSTGRES_HOST')]) {
                     sh "helm upgrade --install --force --namespace=default \
