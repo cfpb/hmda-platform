@@ -24,6 +24,7 @@ import hmda.model.filing.submission.{
   Uploaded
 }
 import hmda.model.submission.SubmissionGenerator._
+import hmda.persistence.filing.FilingPersistence
 
 import scala.concurrent.duration._
 
@@ -48,6 +49,11 @@ class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     .getOrElse(Submission(submissionId))
 
   val modified = sampleSubmission.copy(status = Uploaded)
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    FilingPersistence.startShardRegion(ClusterSharding(system.toTyped))
+  }
 
   "A Submission" must {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
