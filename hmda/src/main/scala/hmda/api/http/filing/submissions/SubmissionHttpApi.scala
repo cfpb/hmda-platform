@@ -79,7 +79,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
                 case (_, _, maybeLatest) =>
                   maybeLatest match {
                     case None =>
-                      val submissionId = SubmissionId(lei, period, 0)
+                      val submissionId = SubmissionId(lei, period, 1)
                       createSubmission(uri, submissionId)
                     case Some(submission) =>
                       val submissionId =

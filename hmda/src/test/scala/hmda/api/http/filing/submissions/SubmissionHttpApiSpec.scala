@@ -101,7 +101,7 @@ class SubmissionHttpApiSpec
         status mustBe StatusCodes.Created
         responseAs[Submission].id mustBe SubmissionId(sampleInstitution.LEI,
                                                       period,
-                                                      0)
+                                                      1)
       }
     }
     "fail to create a new submission if institutions does not exist" in {
@@ -117,14 +117,14 @@ class SubmissionHttpApiSpec
     "return latest submission" in {
       Get(s"$url/latest") ~> submissionRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Submission].id.sequenceNumber mustBe 0
+        responseAs[Submission].id.sequenceNumber mustBe 1
       }
       Post(url) ~> submissionRoutes ~> check {
         status mustBe StatusCodes.Created
       }
       Get(s"$url/latest") ~> submissionRoutes ~> check {
         status mustBe StatusCodes.OK
-        responseAs[Submission].id.sequenceNumber mustBe 1
+        responseAs[Submission].id.sequenceNumber mustBe 2
       }
     }
   }
