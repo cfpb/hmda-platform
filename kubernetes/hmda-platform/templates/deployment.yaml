@@ -45,6 +45,11 @@ spec:
             secretKeyRef:
               name: cassandra-credentials
               key: cassandra.password
+        - name: KEYCLOAK_AUTH_URL
+          valueFrom:
+            configMapKeyRef:
+              name: keycloak-configmap
+              key: auth.url
         livenessProbe:
           tcpSocket:
             port: {{ .Values.bootstrap.port }}
