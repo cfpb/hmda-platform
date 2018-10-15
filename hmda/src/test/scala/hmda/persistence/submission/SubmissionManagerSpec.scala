@@ -79,8 +79,66 @@ class SubmissionManagerSpec extends AkkaCassandraPersistenceSpec {
       val submissionManager = sharding.entityRefFor(
         SubmissionManager.typeKey,
         s"${SubmissionManager.name}-${submissionId.toString}")
+      submissionManager ! CompleteSyntacticalValidity(submissionId)
       submissionManager ! GetSubmissionStatus(submissionManagerProbe.ref)
-      pending
+      submissionManagerProbe.expectMessage(SyntacticalOrValidity)
+    }
+    "start quality" in {
+      val submissionManager = sharding.entityRefFor(
+        SubmissionManager.typeKey,
+        s"${SubmissionManager.name}-${submissionId.toString}")
+      submissionManager ! CompleteQuality(submissionId)
+      submissionManager ! GetSubmissionStatus(submissionManagerProbe.ref)
+      submissionManagerProbe.expectMessage(Quality)
+
+    }
+    "complete quality with errors" in {
+      val submissionManager = sharding.entityRefFor(
+        SubmissionManager.typeKey,
+        s"${SubmissionManager.name}-${submissionId.toString}")
+      submissionManager ! CompleteQualityWithErrors(submissionId)
+      submissionManager ! GetSubmissionStatus(submissionManagerProbe.ref)
+      submissionManagerProbe.expectMessage(QualityErrors)
+    }
+    "start macro" in {
+      val submissionManager = sharding.entityRefFor(
+        SubmissionManager.typeKey,
+        s"${SubmissionManager.name}-${submissionId.toString}")
+      submissionManager ! CompleteMacro(submissionId)
+      submissionManager ! GetSubmissionStatus(submissionManagerProbe.ref)
+      submissionManagerProbe.expectMessage(Macro)
+    }
+    "complete macro with errors" in {
+      val submissionManager = sharding.entityRefFor(
+        SubmissionManager.typeKey,
+        s"${SubmissionManager.name}-${submissionId.toString}")
+      submissionManager ! CompleteMacroWithErrors(submissionId)
+      submissionManager ! GetSubmissionStatus(submissionManagerProbe.ref)
+      submissionManagerProbe.expectMessage(MacroErrors)
+    }
+    "be verified" in {
+      val submissionManager = sharding.entityRefFor(
+        SubmissionManager.typeKey,
+        s"${SubmissionManager.name}-${submissionId.toString}")
+      submissionManager ! Verify(submissionId)
+      submissionManager ! GetSubmissionStatus(submissionManagerProbe.ref)
+      submissionManagerProbe.expectMessage(Verified)
+    }
+    "be signed" in {
+      val submissionManager = sharding.entityRefFor(
+        SubmissionManager.typeKey,
+        s"${SubmissionManager.name}-${submissionId.toString}")
+      submissionManager ! Sign(submissionId)
+      submissionManager ! GetSubmissionStatus(submissionManagerProbe.ref)
+      submissionManagerProbe.expectMessage(Signed)
+    }
+    "be failed" in {
+      val submissionManager = sharding.entityRefFor(
+        SubmissionManager.typeKey,
+        s"${SubmissionManager.name}-${submissionId.toString}")
+      submissionManager ! Fail(submissionId)
+      submissionManager ! GetSubmissionStatus(submissionManagerProbe.ref)
+      submissionManagerProbe.expectMessage(Failed)
     }
 
   }

@@ -36,6 +36,7 @@ object SubmissionManagerCommands {
       extends SubmissionManagerCommand
   case class CompleteMacroWithErrors(submissionId: SubmissionId)
       extends SubmissionManagerCommand
+  case class Verify(submissionId: SubmissionId) extends SubmissionManagerCommand
   case class Sign(submissionId: SubmissionId) extends SubmissionManagerCommand
   case class Fail(submissionId: SubmissionId) extends SubmissionManagerCommand
   case class GetSubmissionStatus(replyTo: ActorRef[SubmissionStatus])

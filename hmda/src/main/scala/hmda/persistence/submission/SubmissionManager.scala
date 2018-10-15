@@ -62,7 +62,7 @@ object SubmissionManager
       case CompleteSyntacticalValidity(submissionId) =>
         log.debug(
           s"Validated Syntactical and Validity: ${submissionId.toString}")
-        Effect.none
+        Effect.persist(SyntacticalOrValidity)
       case CompleteSyntacticalValidityWithErrors(submissionId) =>
         log.debug(
           s"Validated with Syntactical or Validity Errors: ${submissionId.toString}")
@@ -72,7 +72,7 @@ object SubmissionManager
         Effect.none
       case CompleteQuality(submissionId) =>
         log.debug(s"Validated Quality: ${submissionId.toString}")
-        Effect.none
+        Effect.persist(Quality)
       case CompleteQualityWithErrors(submissionId) =>
         log.debug(s"Validated with Quality Errors: ${submissionId.toString}")
         Effect.persist(QualityErrors)
@@ -81,10 +81,13 @@ object SubmissionManager
         Effect.none
       case CompleteMacro(submissionId) =>
         log.debug(s"Validated Macro: ${submissionId.toString}")
-        Effect.persist(Validated)
+        Effect.persist(Macro)
       case CompleteMacroWithErrors(submissionId) =>
         log.debug(s"Validated with Macro Errors: ${submissionId.toString}")
         Effect.persist(MacroErrors)
+      case Verify(submissionId) =>
+        log.debug(s"Verified: ${submissionId.toString}")
+        Effect.persist(Verified)
       case Sign(submissionId) =>
         log.debug(s"Sign: ${submissionId.toString}")
         Effect.persist(Signed)
