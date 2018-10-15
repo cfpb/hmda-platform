@@ -1,5 +1,5 @@
 package hmda.persistence.submission
 
-import hmda.model.filing.submission.SubmissionStatus
+import hmda.model.filing.submission.{Created, SubmissionStatus}
 
-case class SubmissionManagerState(submissionStatus: SubmissionStatus)
+case class SubmissionManagerState(submissionStatus: SubmissionStatus = Created)

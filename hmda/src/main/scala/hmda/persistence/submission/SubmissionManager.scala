@@ -23,10 +23,11 @@ object SubmissionManager
                  SubmissionStatus,
                  SubmissionManagerState](
           persistenceId = s"$name-$entityId",
-          emptyState = SubmissionManagerState(Created),
+          emptyState = SubmissionManagerState(),
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
         )
+        .snapshotEvery(1000)
     }
 
   def commandHandler(ctx: ActorContext[SubmissionManagerCommand])
