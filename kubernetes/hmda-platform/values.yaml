@@ -7,6 +7,9 @@ namespace: default
 cassandra:
   hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
 
+keycloak:
+  auth.url: https://192.168.99.100:8443/auth
+
 rbac:
   enabled: false
 

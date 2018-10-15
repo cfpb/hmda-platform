@@ -18,6 +18,8 @@ import hmda.api.http.model.admin.InstitutionDeletedResponse
 import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import com.typesafe.config.ConfigFactory
+import hmda.auth.OAuth2Authorization
 import hmda.messages.institution.InstitutionCommands.{
   CreateInstitution,
   DeleteInstitution,
@@ -38,8 +40,11 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val sharding: ClusterSharding
 
-  val institutionWritePath =
-    path("institutions") {
+  val config = ConfigFactory.load()
+  val hmdaAdminRole = config.getString("keycloak.hmda.admin.role")
+
+  def institutionWritePath(oAuth2Authorization: OAuth2Authorization) =
+    oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
       entity(as[Institution]) { institution =>
         val institutionPersistence = sharding.entityRefFor(
           InstitutionPersistence.typeKey,
@@ -59,6 +64,26 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                 StatusCodes.InternalServerError -> errorResponse))
           }
         } ~
+          timedPut { uri =>
+            val fModified: Future[InstitutionEvent] = institutionPersistence ? (
+                ref => ModifyInstitution(institution, ref)
+            )
+
+            onComplete(fModified) {
+              case Success(InstitutionModified(i)) =>
+                complete(ToResponseMarshallable(StatusCodes.Accepted -> i))
+              case Success(InstitutionNotExists(lei)) =>
+                complete(ToResponseMarshallable(StatusCodes.NotFound -> lei))
+              case Success(_) =>
+                complete(
+                  ToResponseMarshallable(HttpResponse(StatusCodes.BadRequest)))
+              case Failure(error) =>
+                val errorResponse =
+                  ErrorResponse(500, error.getLocalizedMessage, uri.path)
+                complete(ToResponseMarshallable(
+                  StatusCodes.InternalServerError -> errorResponse))
+            }
+          } ~
           timedPut { uri =>
             val fModified: Future[InstitutionEvent] = institutionPersistence ? (
                 ref => ModifyInstitution(institution, ref)
@@ -132,11 +157,12 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
       }
     }
 
-  def institutionAdminRoutes: Route = {
+  def institutionAdminRoutes(
+      oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionWritePath ~ institutionReadPath
+          institutionWritePath(oAuth2Authorization) ~ institutionReadPath
         }
       }
     }

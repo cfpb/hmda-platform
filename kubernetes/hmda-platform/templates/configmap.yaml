@@ -1,6 +1,15 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cassandra-configmap
 data:
   cassandra-hosts: {{ .Values.cassandra.hosts }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-configmap
+data:
+  auth.url: {{ .Values.keycloak.url }}
