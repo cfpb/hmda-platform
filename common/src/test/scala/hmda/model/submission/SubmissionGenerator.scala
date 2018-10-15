@@ -17,7 +17,7 @@ object SubmissionGenerator {
       SyntacticalOrValidityErrors,
       QualityErrors,
       MacroErrors,
-      Validated,
+      Verified,
       Signed
     )
   }

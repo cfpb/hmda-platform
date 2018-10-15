@@ -8,10 +8,14 @@ object SubmissionStatusMessages {
   val parsedMsg = "Your data is formatted correctly."
   val parsedWithErrorsMsg = "Your data has formatting errors."
   val validatingMsg = "Your data is being analyzed."
+  val syntacticalOrValidityMsg =
+    "Your data has been analyzed for Syntactical and Validity Errors."
   val syntacticalValidityErrorMsg =
     "Your data has syntactical and/or validity edits that need to be reviewed."
+  val qualityMsg = "Your data has been analyzed for Quality Errors."
   val qualityErrorMsg = "Your data has quality edits that need to be reviewed."
   val validatedWithErrorsMsg = "Your data has edits that need to be reviewed."
+  val macroMsg = "Your data has been analyzed for macro errors."
   val macroErrorMsg = "Your data has macro edits that need to be reviewed."
   val validatedMsg = "Your data is ready for submission."
   val signedMsg = "Your submission has been accepted."
@@ -30,10 +34,16 @@ object SubmissionStatusMessages {
     "Your file meets the formatting requirements specified in the HMDA Filing Instructions Guide. Your data will now be analyzed for any edits."
   val validatingDescription =
     "Your data has been uploaded and is being checked for any edits."
+  val syntacticalOrValidityDescription =
+    "Your file has been analyzed and does not contain any Syntactical or Validity errors."
   val syntactivalValidityErrorDescription =
     "Your file has been uploaded, but the filing process may not proceed until the file is corrected and re-uploaded."
+  val qualityDescription =
+    "Your file has been analyzed, and does not contain quality errors."
   val qualityErrorDescription =
     "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
+  val macroDescription =
+    "Your file has been analyzed, and does not contain macro errors."
   val macroErrorDescription =
     "Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded."
   val validatedWithErrorsDescription =

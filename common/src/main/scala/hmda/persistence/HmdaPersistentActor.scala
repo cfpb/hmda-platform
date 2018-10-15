@@ -51,5 +51,4 @@ abstract class HmdaPersistentActor[C, E, S] {
       )
     )
   }
-
 }

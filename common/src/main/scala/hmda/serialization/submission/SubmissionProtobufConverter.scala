@@ -67,7 +67,7 @@ object SubmissionProtobufConverter {
       case 8  => SyntacticalOrValidityErrors
       case 9  => QualityErrors
       case 10 => MacroErrors
-      case 11 => Validated
+      case 11 => Verified
       case 12 => Signed
       case -1 => Failed
     }
