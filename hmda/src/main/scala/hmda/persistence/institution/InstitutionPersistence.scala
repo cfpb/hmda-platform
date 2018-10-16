@@ -39,7 +39,7 @@ object InstitutionPersistence
     (state, cmd) =>
       cmd match {
         case CreateInstitution(i, replyTo) =>
-          if (!state.institution.contains(i)) {
+          if (state.institution.isEmpty) {
             Effect.persist(InstitutionCreated(i)).thenRun { _ =>
               log.debug(s"Institution Created: ${i.toString}")
               replyTo ! InstitutionCreated(i)
