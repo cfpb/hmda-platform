@@ -44,6 +44,20 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       maybeInstitutionProbe.expectMessage(Some(sampleInstitution))
     }
 
+    "not be created if it already exists" in {
+      val institutionPersistence =
+        system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
+      institutionPersistence ! CreateInstitution(sampleInstitution,
+        institutionProbe.ref)
+      institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
+
+      institutionPersistence ! CreateInstitution(modified, institutionProbe.ref)
+      institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
+
+      institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
+      maybeInstitutionProbe.expectMessage(Some(sampleInstitution))
+    }
+
     "be modified and read back" in {
 
       val institutionPersistence =
