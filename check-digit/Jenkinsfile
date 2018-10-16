@@ -22,10 +22,10 @@ volumes: [
       container('docker') {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
             usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
-              sh "docker build --rm -t=${env.DOCKER_HUB_USER}/check-digit check-digit/target/docker/stage"
-              sh "docker tag ${env.DOCKER_HUB_USER}/check-digit ${env.DOCKER_HUB_USER}/check-digit:${gitBranch}"
+              sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-check-digit check-digit/target/docker/stage"
+              sh "docker tag ${env.DOCKER_HUB_USER}/hmda-check-digit ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
-              sh "docker push ${env.DOCKER_HUB_USER}/check-digit:${gitBranch}"
+              sh "docker push ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
             }
         }
       }
