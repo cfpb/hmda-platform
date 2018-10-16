@@ -13,13 +13,18 @@ projects.each { project ->
                 repository(project.repo)
                 scanCredentialsId('github')
             }
+            orphanedItemStrategy {
+                discardOldItems {
+                    daysToKeep(1)
+                }
+            }
             factory {
                 workflowBranchProjectFactory {
                     scriptPath(project.jenkinsfilePath)
                 }
             }
             triggers {
-                periodic(5)
+                periodic(10)
             }
         }
     }
