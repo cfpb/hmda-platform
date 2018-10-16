@@ -13,10 +13,6 @@ volumes: [
      def gitBranch = repo.GIT_BRANCH
      def shortGitCommit = "${gitCommit[0..10]}"
 
-    options {
-      buildDiscarder(logRotator(numToKeepStr:'1'))
-    }
-
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
          sh "sbt hmda-platform/docker:stage"

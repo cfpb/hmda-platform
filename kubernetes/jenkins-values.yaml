@@ -12,7 +12,7 @@ Master:
   UseSecurity: true
   AdminUser: admin
   AdminPassword: admin
-  Cpu: "500m"
+  Cpu: "700m"
   Memory: "1024Mi"
 # Set min/max heap here if needed with:
 # JavaOpts: "-Xms512m -Xmx512m"
@@ -80,7 +80,7 @@ Agent:
   ImageTag: alpine
   Component: "jenkins-slave"
   Privileged: false
-  Cpu: "500m"
+  Cpu: "700m"
   Memory: "2048Mi"
   # You may want to change this to true while testing a new image
   AlwaysPullImage: false
@@ -108,7 +108,7 @@ Persistence:
   ##
   StorageClass: local-storage
   #AccessMode: ReadWriteOnce
-  #Size: 8Gi
+  Size: 20Gi
   volumes:
   - name: nothing
 #    emptyDir: {}
