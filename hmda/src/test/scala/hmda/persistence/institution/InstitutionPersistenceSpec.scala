@@ -48,11 +48,11 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
       val institutionPersistence =
         system.spawn(InstitutionPersistence.behavior("ABC12345"), actorName)
       institutionPersistence ! CreateInstitution(sampleInstitution,
-        institutionProbe.ref)
+                                                 institutionProbe.ref)
       institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
 
       institutionPersistence ! CreateInstitution(modified, institutionProbe.ref)
-      institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
+      institutionProbe.expectMessage(InstitutionCreated(modified))
 
       institutionPersistence ! GetInstitution(maybeInstitutionProbe.ref)
       maybeInstitutionProbe.expectMessage(Some(sampleInstitution))
