@@ -162,6 +162,43 @@ This documentation describes de public HMDA Platform HTTP API
         "LEI": "10Bx939c5543TqA1144M"
     }
     ```
+    
+### Validation
+
+* `/ts/validate`
+    
+    * `POST` - Returns a `JSON` representation of a TS, or a list of edits if the TS fails to validate
+    
+    Example body, in `JSON` format:
+    
+    ```json
+    {
+      "ts": "1|Bank1|2018|4|testname|555-555-5555|test@email.com|1234 Hocus Potato Way|Testtown|UT|84096|9|1000|02-1234567|BANK1LEIFORTEST12345"
+    }
+    ```
+    
+    Example successful response, in `JSON` format: See above
+
+    Example failed response, in `JSON` format:
+    
+    ```json
+    {
+        "syntactical": {
+            "errors": [
+              "S300"
+            ]
+        },
+        "validity": {
+            "errors": [
+                "V600",
+                "V601"
+            ]
+        },
+        "quality": {
+            "errors": []
+        }
+    }
+    ```
 
 
 ## LAR Parsing and Validation
@@ -331,6 +368,47 @@ This documentation describes de public HMDA Platform HTTP API
         "reverseMortgage": 1,
         "lineOfCredit": 1,
         "businessOrCommercialPurpose": 1
+    }
+    ```
+
+### Validation
+
+* `/lar/validate`
+    
+    * `POST` - Returns a `JSON` representation of a LAR, or a list of edits if the LAR fails to validate
+    
+    Example body, in `JSON` format:
+    
+    ```json
+    {
+      "lar": "2|10Bx939c5543TqA1144M|10Bx939c5543TqA1144M999143X38|20180721|1|1|1|1|1|110500|1|20180721|123 Main St|Beverly Hills|CA|90210|06037|06037264000|1|1|1|1|1||1|1|1|1|1||3|3|5|7|7|7|7||||5|7|7|7|7||||3|3|1|1|3|3|30|30|36|1|0.428|1|1|750|750|1|9|1|9|10|10|10|10||2399.04|NA|NA|NA|NA|4.125|NA|42.95|80.05|360|NA|1|2|1|1|350500|1|1|5|NA|1|1|12345|1|1|1|1|1||1|1|1|1|1||1|1|1"
+    }
+    ```
+    
+    Example successful response, in `JSON` format: See above
+
+    Example failed response, in `JSON` format:
+    
+    ```json
+    {
+        "syntactical": {
+            "errors": []
+        },
+        "validity": {
+            "errors": [
+                "V619-1",
+                "V619-2",
+                "V619-3",
+                "V676-3",
+                "V676-5",
+                "V677-2"
+            ]
+        },
+        "quality": {
+            "errors": [
+                "Q617"
+            ]
+        }
     }
     ```
 
