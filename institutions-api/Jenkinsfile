@@ -1,13 +1,12 @@
-podTemplate(label: 'buildPod', containers: [
+podTemplate(label: 'buildSbtPod', containers: [
   containerTemplate(name: 'sbt', image: 'jenkinsxio/builder-scala', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
-  containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.9.8', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm', ttyEnabled: true, command: 'cat')
 ],
 volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
-   node('buildPod') {
+   node('buildSbtPod') {
      def repo = checkout scm
      def gitCommit = repo.GIT_COMMIT
      def gitBranch = repo.GIT_BRANCH
