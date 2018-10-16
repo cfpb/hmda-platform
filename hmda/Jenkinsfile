@@ -14,7 +14,7 @@ volumes: [
 
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
-         sh "sbt hmda-platform/docker:stage"
+         sh "sbt -batch hmda-platform/docker:stage"
        }
      }
 

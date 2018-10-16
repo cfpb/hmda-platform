@@ -14,7 +14,7 @@ volumes: [
 
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
-         sh "sbt check-digit/docker:stage"
+         sh "sbt -batch check-digit/docker:stage"
        }
      }
 
