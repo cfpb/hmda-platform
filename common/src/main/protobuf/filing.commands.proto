@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "filing.proto";
+import "submission.proto";
+
+message CreateFilingMessage {
+    FilingMessage filing = 1;
+    string replyTo = 2;
+}
+
+message UpdateFilingStatusMessage {
+    string period = 1;
+    int32 status = 2;
+    string replyTo = 3;
+}
+
+message GetFilingMessage {
+    string replyTo = 1;
+}
+
+message GetFilingDetailsMessage {
+    string replyTo = 1;
+}
+
+message AddSubmissionMessage {
+    SubmissionMessage submission = 1;
+    string replyTo = 2;
+}
+
+message GetLatestSubmissionMessage {
+    string replyTo = 1;
+}
+
+message GetSubmissionsMessage {
+    string replyTo = 1;
+}
+
+message FilingStopMessage {
+
+}

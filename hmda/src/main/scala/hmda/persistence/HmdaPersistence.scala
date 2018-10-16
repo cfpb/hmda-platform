@@ -4,8 +4,9 @@ import akka.actor.typed.{Behavior, PostStop, PreRestart}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import com.typesafe.config.ConfigFactory
-
+import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
+import hmda.persistence.submission.SubmissionPersistence
 
 object HmdaPersistence {
 
@@ -20,6 +21,8 @@ object HmdaPersistence {
       ctx.log.info(s"Actor started at ${ctx.self.path}")
 
       InstitutionPersistence.startShardRegion(ClusterSharding(ctx.system))
+      FilingPersistence.startShardRegion(ClusterSharding(ctx.system))
+      SubmissionPersistence.startShardRegion(ClusterSharding(ctx.system))
 
       Behaviors
         .receive[HmdaPersistenceCommand] {

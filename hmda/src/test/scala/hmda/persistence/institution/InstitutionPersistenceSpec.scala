@@ -98,9 +98,10 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
     "be created and read back" in {
       val institutionPersistence =
-        //createShardedInstitution(typedSystem, "ABC12345")
         sharding.entityRefFor(InstitutionPersistence.typeKey,
                               s"${InstitutionPersistence.name}-ABC12345")
+
+      println(institutionPersistence)
 
       institutionPersistence ! CreateInstitution(sampleInstitution,
                                                  institutionProbe.ref)
@@ -111,7 +112,6 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be modified and read back" in {
       val institutionPersistence =
-//        createShardedInstitution(typedSystem, "ABC12345")
         sharding.entityRefFor(InstitutionPersistence.typeKey,
                               s"${InstitutionPersistence.name}-ABC12345")
 
@@ -123,7 +123,6 @@ class InstitutionPersistenceSpec extends AkkaCassandraPersistenceSpec {
     }
     "be deleted" in {
       val institutionPersistence =
-        //createShardedInstitution(typedSystem, "ABC12345")
         sharding.entityRefFor(InstitutionPersistence.typeKey,
                               s"${InstitutionPersistence.name}-ABC12345")
 

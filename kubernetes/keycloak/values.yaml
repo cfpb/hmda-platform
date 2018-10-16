@@ -29,6 +29,19 @@ keycloak:
 
   ## Additional init containers, e. g. for providing custom themes
   extraInitContainers: |
+    - name: theme-provider
+      image: hmda/theme-provider:latest
+      imagePullPolicy: Always
+      command:
+        - sh
+      args:
+        - -c
+        - |
+          echo "Copying theme..."
+          cp -R /themes/* /theme 
+      volumeMounts:
+        - name: theme
+          mountPath: /theme
 
   ## Additional sidecar containers, e. g. for a database proxy, such as Google's cloudsql-proxy
   extraContainers: |
@@ -170,12 +183,16 @@ keycloak:
   ## Add additional volumes and mounts, e. g. for custom themes
   extraVolumes: |
     - name: realm-secret
-      secret: 
+      secret:
         secretName: realm-secret
+    - name: theme
+      emptyDir: {}
   extraVolumeMounts: |
     - name: realm-secret
       mountPath: "/realm/"
       readOnly: true
+    - name: theme
+      mountPath: /opt/jboss/keycloak/themes/hmda
 
   podDisruptionBudget: {}
     # maxUnavailable: 1
@@ -224,18 +241,18 @@ keycloak:
     deployPostgres: false
 
     # The database vendor. Can be either "postgres", "mysql", "mariadb", or "h2"
-    dbVendor: h2
+    dbVendor: postgres
 
     ## The following values only apply if "deployPostgres" is set to "false"
 
     # Specifies an existing secret to be used for the database password
-    existingSecret: ""
+    existingSecret: "keycloak-credentials"
 
     # The key in the existing secret that stores the password
     existingSecretKey: password
 
-    dbName: keycloak
-    dbHost: mykeycloak
+    dbName: keycloak_v2
+    dbHost: ""
     dbPort: 5432
     dbUser: keycloak
 

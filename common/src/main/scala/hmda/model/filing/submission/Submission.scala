@@ -9,7 +9,28 @@ case class Submission(
     end: Long = 0,
     fileName: String = "",
     receipt: String = ""
-)
+) {
+  def isEmpty: Boolean =
+    id == SubmissionId() && status == Created && start == 0 && end == 0 && fileName == "" && receipt == ""
+}
+
+object SubmissionStatus {
+  def valueOf(code: Int): SubmissionStatus = code match {
+    case 1  => Created
+    case 2  => Uploading
+    case 3  => Uploaded
+    case 4  => Parsing
+    case 5  => ParsedWithErrors
+    case 6  => Parsed
+    case 7  => Validating
+    case 8  => SyntacticalOrValidityErrors
+    case 9  => QualityErrors
+    case 10 => MacroErrors
+    case 11 => Validated
+    case 12 => Signed
+    case -1 => Failed
+  }
+}
 
 sealed trait SubmissionStatus {
   def code: Int
