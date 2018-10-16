@@ -14,18 +14,12 @@ volumes: [
      def shortGitCommit = "${gitCommit[0..10]}"
 
      stage('Build Scala Code and Generate Dockerfile') {
-         when {
-             branch 'master'
-         }
        container('sbt') {
          sh "sbt institutions-api/docker:stage"
        }
      }
 
     stage('Build And Publish Docker Image') {
-      when {
-          branch 'master'
-      }
       container('docker') {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
             usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
@@ -38,12 +32,11 @@ volumes: [
       }
 
     stage('Deploy') {
-        when {
-            branch 'master'
+        if (env.BRANCH_NAME == 'master') {
+            container('helm') {
+                sh "helm upgrade --install --force --namespace=default --values=kubernetes/institutions-api/values.yaml --set image.tag=${gitBranch} --set postgresql.enabled=false institutions-api-${gitBranch} kubernetes/institutions-api"
+            }
         }
-      container('helm') {
-        sh "helm upgrade --install --force --namespace=default --values=kubernetes/institutions-api/values.yaml --set image.tag=${gitBranch} --set postgresql.enabled=false institutions-api-${gitBranch} kubernetes/institutions-api"
-      }
     }
 
    }

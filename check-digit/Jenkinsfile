@@ -14,18 +14,12 @@ volumes: [
      def shortGitCommit = "${gitCommit[0..10]}"
 
      stage('Build Scala Code and Generate Dockerfile') {
-         when {
-             branch 'master'
-         }
        container('sbt') {
          sh "sbt check-digit/docker:stage"
        }
      }
 
     stage('Build And Publish Docker Image') {
-        when {
-            branch 'master'
-        }
       container('docker') {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
             usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
@@ -38,12 +32,11 @@ volumes: [
       }
 
     stage('Deploy') {
-        when {
-            branch 'master'
+        if (env.BRANCH_NAME == 'master') {
+            container('helm') {
+                sh "helm upgrade --install --force --namespace=default --values=kubernetes/check-digit/values.yaml --set image.tag=${gitBranch} check-digit-${gitBranch} kubernetes/check-digit"
+            }
         }
-      container('helm') {
-        sh "helm upgrade --install --force --namespace=default --values=kubernetes/check-digit/values.yaml --set image.tag=${gitBranch} check-digit-${gitBranch} kubernetes/check-digit"
-      }
     }
 
    }
