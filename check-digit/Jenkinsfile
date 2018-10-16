@@ -32,9 +32,11 @@ volumes: [
       }
 
     stage('Deploy') {
-      container('helm') {
-        sh "helm upgrade --install --force --namespace=default --values=kubernetes/check-digit/values.yaml --set image.tag=${gitBranch} check-digit-${gitBranch} kubernetes/check-digit"
-      }
+        if (env.BRANCH_NAME == 'master') {
+            container('helm') {
+                sh "helm upgrade --install --force --namespace=default --values=kubernetes/check-digit/values.yaml --set image.tag=${gitBranch} check-digit-${gitBranch} kubernetes/check-digit"
+            }
+        }
     }
 
    }
