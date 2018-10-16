@@ -88,15 +88,24 @@ class KafkaSpec
         }
         .viaMat(Producer.flexiFlow(producerSettings))(Keep.right)
 
-      val publishedF = source.runWith(Sink.ignore)
+      source.runWith(Sink.ignore)
 
-      publishedF.map { done =>
-        Consumer
-          .committableSource(consumerSettings, Subscriptions.topics("topic"))
-          .map(msg => println(msg))
-          .runWith(Sink.ignore)
-        1 mustBe 1
-      }
+      val messages = Consumer
+        .committableSource(consumerSettings, Subscriptions.topics("topic"))
+        .map(msg => println(msg))
+        .runWith(Sink.seq)
+
+      println(messages)
+      messages.map(xs => xs.size mustBe 10)
+
+//      publishedF.map { done =>
+//        val messages = Consumer
+//          .committableSource(consumerSettings, Subscriptions.topics("topic"))
+//          .map(msg => println(msg))
+//          .runWith(Sink.seq)
+//        println(messages)
+//        1 mustBe 1
+//      }
 
     }
   }
