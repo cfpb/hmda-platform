@@ -4,12 +4,14 @@ import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.SubmissionCommands.{
   CreateSubmission,
   GetSubmission,
-  ModifySubmission
+  ModifySubmission,
+  SubmissionStop
 }
 import hmda.persistence.serialization.submission.commands.{
   CreateSubmissionMessage,
   GetSubmissionMessage,
-  ModifySubmissionMessage
+  ModifySubmissionMessage,
+  SubmissionStopMessage
 }
 import SubmissionProtobufConverter._
 import hmda.persistence.serialization.submission.{
@@ -70,6 +72,14 @@ object SubmissionCommandsProtobufConverter {
     val msg = GetSubmissionMessage.parseFrom(bytes)
     val actorRef = resolver.resolveActorRef(msg.replyTo)
     GetSubmission(actorRef)
+  }
+
+  def submissionStopToProtobuf(cmd: SubmissionStop): SubmissionStopMessage = {
+    SubmissionStopMessage()
+  }
+
+  def submissionStopFromProtobuf(msg: SubmissionStopMessage): SubmissionStop = {
+    SubmissionStop()
   }
 
 }

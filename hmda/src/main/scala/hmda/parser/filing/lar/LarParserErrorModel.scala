@@ -162,11 +162,13 @@ object LarParserErrorModel {
   }
 
   case object InvalidDiscountPoints extends ParserValidationError {
-    override def errorMessage: String = notEmptyStringOrNaOrExempt("discount points")
+    override def errorMessage: String =
+      notEmptyStringOrNaOrExempt("discount points")
   }
 
   case object InvalidLenderCredits extends ParserValidationError {
-    override def errorMessage: String = notEmptyStringOrNaOrExempt("lender credits")
+    override def errorMessage: String =
+      notEmptyStringOrNaOrExempt("lender credits")
   }
 
   case object InvalidInterestRate extends ParserValidationError {

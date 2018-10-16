@@ -18,11 +18,11 @@ object FilingCommands {
 
   case class GetFiling(replyTo: ActorRef[Option[Filing]]) extends FilingCommand
 
-  case class GetFilingDetails(replyTo: ActorRef[FilingDetails])
+  case class GetFilingDetails(replyTo: ActorRef[Option[FilingDetails]])
       extends FilingCommand
 
   case class AddSubmission(submission: Submission,
-                           replyTo: ActorRef[Submission])
+                           replyTo: Option[ActorRef[Submission]])
       extends FilingCommand
 
   case class GetLatestSubmission(replyTo: ActorRef[Option[Submission]])

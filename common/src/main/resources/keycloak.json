@@ -1,0 +1,10 @@
+{
+  "realm": "hmda2",
+  "auth-server-url": "${env.KEYCLOAK_AUTH_URL}",
+  "realm-public-key": "${env.KEYCLOAK_PUBLIC_KEY}",
+  "ssl-required": "all",
+  "resource": "hmda2-api",
+  "bearer-only": true,
+  "use-resource-role-mappings": true,
+  "confidential-port": 0
+}
