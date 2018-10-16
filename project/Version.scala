@@ -17,4 +17,5 @@ object Version {
   val keycloak = "4.5.0.Final"
   val jboss = "3.3.2.Final"
   val httpcomponents = "4.5.6"
+  val embeddedKafka = "2.0.0"
 }
