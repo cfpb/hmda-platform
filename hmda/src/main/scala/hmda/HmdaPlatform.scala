@@ -13,6 +13,7 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.Cluster
 import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
+import net.manub.embeddedkafka.EmbeddedKafka
 
 object HmdaPlatform extends App {
 
@@ -68,6 +69,7 @@ object HmdaPlatform extends App {
 
   if (runtimeMode == "dev") {
     CassandraUtil.startEmbeddedCassandra()
+    EmbeddedKafka.start()
     AkkaManagement(system).start()
   }
 
