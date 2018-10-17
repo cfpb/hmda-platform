@@ -1,27 +1,31 @@
 package hmda.parser.filing
 
 import akka.NotUsed
-import akka.stream.scaladsl.Flow
+import akka.stream.FlowShape
+import akka.stream.scaladsl.GraphDSL
+import akka.stream.scaladsl.{Broadcast, Concat, Flow}
 import akka.util.ByteString
-import com.typesafe.config.ConfigFactory
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.ParserErrorModel.ParserValidationError
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.streams.FlowUtils._
 
 object ParserFlow {
 
-  val config = ConfigFactory.load()
+  def parseHmdaFile: Flow[ByteString, ParseValidated, NotUsed] = {
+    Flow.fromGraph(GraphDSL.create() { implicit b =>
+      import GraphDSL.Implicits._
 
-  val kafkaServers = config.getString("kafka.servers")
+      val bcast = b.add(Broadcast[ByteString](2))
+      val concat = b.add(Concat[ParseValidated](2))
 
-  val larRawTopic = "lar-raw"
+      bcast.take(1) ~> parseTsFlow ~> concat.in(0)
+      bcast.drop(1) ~> parseLarFlow ~> concat.in(1)
 
-  def parseTsFlow: Flow[ByteString,
-                        Either[List[ParserValidationError], TransmittalSheet],
-                        NotUsed] = {
+      FlowShape(bcast.in, concat.out)
+    })
+  }
+
+  def parseTsFlow: Flow[ByteString, ParseValidated, NotUsed] = {
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -29,15 +33,11 @@ object ParserFlow {
       .map(l => TsCsvParser(l))
   }
 
-  def parseLarFlow
-    : Flow[ByteString,
-           Either[List[ParserValidationError], LoanApplicationRegister],
-           NotUsed] = {
+  def parseLarFlow: Flow[ByteString, ParseValidated, NotUsed] = {
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
       .map(_.trim)
       .map(l => LarCsvParser(l))
   }
-
 }
