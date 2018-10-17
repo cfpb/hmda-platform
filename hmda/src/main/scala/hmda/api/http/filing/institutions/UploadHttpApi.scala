@@ -8,7 +8,7 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.model.filing.submission.SubmissionId
 
-trait UploadApi extends HmdaTimeDirectives {
+trait UploadHttpApi extends HmdaTimeDirectives {
 
   // institutions/<institutionId>/filings/<period>/submissions/<seqNr>
   def uploadHmdaFileRoute: Route =

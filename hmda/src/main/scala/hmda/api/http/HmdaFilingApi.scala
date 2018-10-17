@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.filing.institutions.UploadApi
+import hmda.api.http.filing.institutions.UploadHttpApi
 import hmda.api.http.filing.FilingHttpApi
 import hmda.api.http.routes.BaseHttpApi
 import akka.http.scaladsl.server.Directives._
@@ -27,7 +27,7 @@ class HmdaFilingApi
     extends HttpServer
     with BaseHttpApi
     with FilingHttpApi
-    with UploadApi {
+    with UploadHttpApi {
   import HmdaFilingApi._
 
   val config = ConfigFactory.load()
