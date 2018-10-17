@@ -12,7 +12,7 @@ Number, Name, Type, Field Type Description,Field Length, Descriptions and Exampl
 11, Respondent City , Alphanumeric, String,, Example: Los Angeles,Y,""""""
 12, Parent ID RSSD , Numeric, Integer,, Example: 123456,N,-1
 13, Parent Name , Alphanumeric, String,, Example: CFPB,Y,""""""
-14, Assets , Numeric, Integer,, Example: 1234567,N,""""""
+14, Assets , Numeric, Integer,, Example: 1234567,N,-1
 15, Other Lender Code , Numeric, Integer,1, Example: 0,N,-1
 16, Top Holder ID RSSD , Numeric, Integer,, Example: 123456,N,-1
 17, Top Holder Name , Alphanumeric, String,, Example: CFPB,Y,""""""
