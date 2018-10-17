@@ -6,7 +6,7 @@ Number, Name, Type, Field Type Description,Field Length, Descriptions and Exampl
 5, 2017 Institution ID, Alphanumeric, String,, Example: 123456,Y,""""""
 6, Tax ID , Alphanumeric, String,10, Example: 12-3456789,Y,""""""
 7, RSSD , Numeric, Integer,, Example: 123456,N,-1
-8, Email Domain, Alphanumeric, List of String,, Example: cfpb.gov,Y,[]
+8, Email Domain, Alphanumeric, List of String,, Example: [cfpb.gov],Y,[]
 9, Respondent Name , Alphanumeric, String,, Example: CFPB,Y,""""""
 10, Respondent State , Alphanumeric, String,, Example: CA,Y,""""""
 11, Respondent City , Alphanumeric, String,, Example: Los Angeles,Y,""""""
