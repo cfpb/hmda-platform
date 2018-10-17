@@ -1,4 +1,4 @@
-Data Field Number, Data Field Name, Data Field Type, Field Type Description,Field Length, Descriptions and Examples,Can Be Null,Default Value
+Number, Name, Type, Field Type Description,Field Length, Descriptions and Examples,Can Be Null,Default Value
 1, Activity Year , Numeric, Integer,4, Example: 2018,N,2018
 2, Legal Entity Identifier (LEI), Alphanumeric, String,20, Example: 12121212121212121212,N,""""""
 3, Agency Code , Numeric, Integer,1, Example: 3,N,-1
