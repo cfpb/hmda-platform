@@ -33,7 +33,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
   val sharding: ClusterSharding
   implicit val timeout: Timeout
 
-  // institutions/<institutionId>/filings/<period>/submissions/<seqNr>
+  // institutions/<lei>/filings/<period>/submissions/<seqNr>
   def uploadHmdaFileRoute: Route =
     path(Segment / "filings" / Segment / "submissions" / IntNumber) {
       (lei, period, seqNr) =>

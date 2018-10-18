@@ -28,8 +28,8 @@ class HmdaFilingApi
     extends HttpServer
     with BaseHttpApi
     with FilingHttpApi
-      with SubmissionHttpApi
-      with UploadHttpApi {
+    with SubmissionHttpApi
+    with UploadHttpApi {
   import HmdaFilingApi._
 
   val config = ConfigFactory.load()
@@ -46,7 +46,8 @@ class HmdaFilingApi
   override val host: String = config.getString("hmda.http.filingHost")
   override val port: Int = config.getInt("hmda.http.filingPort")
 
-  override val paths: Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes
+  override val paths
+    : Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
