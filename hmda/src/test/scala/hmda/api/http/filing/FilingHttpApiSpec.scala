@@ -13,7 +13,7 @@ import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
 import hmda.persistence.filing.FilingPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.codec.filing.FilingCodec._
+import hmda.api.http.codec.filing.FilingStatusCodec._
 import hmda.messages.institution.InstitutionCommands.CreateInstitution
 import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
@@ -69,6 +69,7 @@ class FilingHttpApiSpec
   }
 
   override def afterAll(): Unit = super.afterAll()
+
   val url = s"/institutions/${sampleInstitution.LEI}/filings/$period"
   val badUrl = s"/institutions/xxxx/filings/$period"
 

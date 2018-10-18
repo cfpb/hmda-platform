@@ -18,7 +18,9 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.persistence.institution.InstitutionPersistence
 import akka.testkit._
 import hmda.api.http.model.admin.InstitutionDeletedResponse
+import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
 import io.circe.generic.auto._
+import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -36,7 +38,7 @@ class InstitutionAdminHttpApiSpec
   override implicit val typedSystem: ActorSystem[_] = system.toTyped
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override val log: LoggingAdapter = NoLogging
-  val ec: ExecutionContext = system.dispatcher
+  override val ec: ExecutionContext = system.dispatcher
   override implicit val timeout: Timeout = Timeout(duration)
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
 
@@ -55,17 +57,28 @@ class InstitutionAdminHttpApiSpec
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
 
+  val oAuth2Authorization = OAuth2Authorization(
+    log,
+    new KeycloakTokenVerifier(
+      KeycloakDeploymentBuilder.build(
+        getClass.getResourceAsStream("/keycloak.json")
+      )
+    )
+  )
+
   "Institutions HTTP Service" must {
 
     "Create an institution" in {
-      Post("/institutions", sampleInstitution) ~> institutionAdminRoutes ~> check {
+      Post("/institutions", sampleInstitution) ~> institutionAdminRoutes(
+        oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Created
         responseAs[Institution] mustBe sampleInstitution
       }
     }
 
     "Get an institution" in {
-      Get(s"/institutions/${sampleInstitution.LEI}") ~> institutionAdminRoutes ~> check {
+      Get(s"/institutions/${sampleInstitution.LEI}") ~> institutionAdminRoutes(
+        oAuth2Authorization) ~> check {
         status mustBe StatusCodes.OK
         responseAs[Institution] mustBe sampleInstitution
       }
@@ -73,14 +86,16 @@ class InstitutionAdminHttpApiSpec
 
     "Modify an institution" in {
 
-      Put("/institutions", modified) ~> institutionAdminRoutes ~> check {
+      Put("/institutions", modified) ~> institutionAdminRoutes(
+        oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[Institution] mustBe modified
       }
     }
 
     "Delete an institution" in {
-      Delete("/institutions", modified) ~> institutionAdminRoutes ~> check {
+      Delete("/institutions", modified) ~> institutionAdminRoutes(
+        oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[InstitutionDeletedResponse] mustBe InstitutionDeletedResponse(
           lei)

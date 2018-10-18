@@ -90,7 +90,10 @@ object FilingCommandsProtobufConverter {
     AddSubmissionMessage(
       if (submission.isEmpty) None
       else Some(submissionToProtobuf(cmd.submission)),
-      refResolver.toSerializationFormat(cmd.replyTo)
+      cmd.replyTo match {
+        case None      => ""
+        case Some(ref) => refResolver.toSerializationFormat(ref)
+      }
     )
   }
 
@@ -100,7 +103,8 @@ object FilingCommandsProtobufConverter {
     val msg = AddSubmissionMessage.parseFrom(bytes)
     AddSubmission(
       submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage())),
-      refResolver.resolveActorRef(msg.replyTo)
+      if (msg.replyTo == "") None
+      else Some(refResolver.resolveActorRef(msg.replyTo))
     )
   }
 

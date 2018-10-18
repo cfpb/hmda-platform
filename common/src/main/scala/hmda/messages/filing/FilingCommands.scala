@@ -22,7 +22,7 @@ object FilingCommands {
       extends FilingCommand
 
   case class AddSubmission(submission: Submission,
-                           replyTo: ActorRef[Submission])
+                           replyTo: Option[ActorRef[Submission]])
       extends FilingCommand
 
   case class GetLatestSubmission(replyTo: ActorRef[Option[Submission]])

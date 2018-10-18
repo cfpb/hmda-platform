@@ -9,12 +9,14 @@ import akka.actor.typed.scaladsl.adapter._
 import hmda.messages.submission.SubmissionCommands.{
   CreateSubmission,
   GetSubmission,
-  ModifySubmission
+  ModifySubmission,
+  SubmissionStop
 }
 import hmda.model.filing.submission.Submission
 import SubmissionProtobufConverter._
 import SubmissionCommandsProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionMessage
+import hmda.persistence.serialization.submission.commands.SubmissionStopMessage
 
 class SubmissionCommandsSerializer(system: ExtendedActorSystem)
     extends SerializerWithStringManifest {
@@ -27,6 +29,7 @@ class SubmissionCommandsSerializer(system: ExtendedActorSystem)
   final val CreateSubmissionManifest = classOf[CreateSubmission].getName
   final val ModifySubmissionManifest = classOf[ModifySubmission].getName
   final val GetSubmissionManifest = classOf[GetSubmission].getName
+  final val SubmissionStopManifest = classOf[SubmissionStop].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -39,6 +42,8 @@ class SubmissionCommandsSerializer(system: ExtendedActorSystem)
       modifySubmissionToProtobuf(cmd, resolver).toByteArray
     case cmd: GetSubmission =>
       getSubmissionToProtobuf(cmd, resolver).toByteArray
+    case cmd: SubmissionStop =>
+      submissionStopToProtobuf(cmd).toByteArray
     case _ =>
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
@@ -54,6 +59,8 @@ class SubmissionCommandsSerializer(system: ExtendedActorSystem)
         modifySubmisstionFromProtobuf(bytes, resolver)
       case GetSubmissionManifest =>
         getSubmissionFromProtobuf(bytes, resolver)
+      case SubmissionStopManifest =>
+        submissionStopFromProtobuf(SubmissionStopMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")

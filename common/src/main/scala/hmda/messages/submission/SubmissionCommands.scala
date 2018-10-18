@@ -21,5 +21,5 @@ object SubmissionCommands {
                               replyTo: ActorRef[SubmissionEvent])
       extends SubmissionCommand
 
-  case object SubmissionStop extends SubmissionCommand
+  case class SubmissionStop() extends SubmissionCommand
 }

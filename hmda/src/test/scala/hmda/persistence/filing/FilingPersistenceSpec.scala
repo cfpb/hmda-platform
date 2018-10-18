@@ -71,7 +71,8 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
       maybeSubmissionProbe.expectMessage(None)
 
-      filingPersistence ! AddSubmission(sampleSubmission, submissionProbe.ref)
+      filingPersistence ! AddSubmission(sampleSubmission,
+                                        Some(submissionProbe.ref))
       submissionProbe.expectMessage(sampleSubmission)
 
       filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
@@ -79,7 +80,8 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
       val sampleSubmission2 =
         sampleSubmission.copy(id = sampleSubmission.id.copy(lei = "AAA"))
-      filingPersistence ! AddSubmission(sampleSubmission2, submissionProbe.ref)
+      filingPersistence ! AddSubmission(sampleSubmission2,
+                                        Some(submissionProbe.ref))
       submissionProbe.expectMessage(sampleSubmission2)
 
       filingPersistence ! GetSubmissions(submissionsProbe.ref)
