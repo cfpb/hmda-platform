@@ -181,7 +181,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
         case ProducerMessage.Result(_, message) =>
           val record = message.record
           record.value()
-        case ProducerMessage.MultiResult(parts, passThrough) =>
+        case ProducerMessage.MultiResult(parts, _) =>
           parts
             .map {
               case MultiResultPart(_, record) =>
