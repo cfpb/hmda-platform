@@ -8,16 +8,35 @@ import akka.http.scaladsl.server.Directives._
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{StatusCodes, Uri}
-import akka.http.scaladsl.server.Directives.{complete, encodeResponse, fileUpload, handleRejections, onComplete, path, pathPrefix}
+import akka.http.scaladsl.server.Directives.{
+  complete,
+  encodeResponse,
+  fileUpload,
+  handleRejections,
+  onComplete,
+  path,
+  pathPrefix
+}
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Framing, Sink}
 import akka.util.{ByteString, Timeout}
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
+  cors,
+  corsRejectionHandler
+}
 import hmda.api.http.directives.HmdaTimeDirectives
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import io.circe.generic.auto._
+import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.model.ErrorResponse
 import hmda.messages.submission.SubmissionCommands.GetSubmission
-import hmda.model.filing.submission.{Created, Submission, SubmissionId, Uploaded}
+import hmda.model.filing.submission.{
+  Created,
+  Submission,
+  SubmissionId,
+  Uploaded
+}
 import hmda.persistence.submission.SubmissionPersistence
 
 import scala.concurrent.{ExecutionContext, Future}
