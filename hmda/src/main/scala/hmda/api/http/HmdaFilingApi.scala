@@ -8,13 +8,12 @@ import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.filing.institutions.UploadHttpApi
 import hmda.api.http.filing.FilingHttpApi
 import hmda.api.http.routes.BaseHttpApi
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
 import akka.actor.typed.scaladsl.adapter._
-import hmda.api.http.filing.submissions.SubmissionHttpApi
+import hmda.api.http.filing.submissions.{SubmissionHttpApi, UploadHttpApi}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
