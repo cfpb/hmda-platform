@@ -19,6 +19,7 @@ import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.submission._
 import hmda.persistence.submission.SubmissionPersistence
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import io.circe.generic.auto._
 
 import scala.concurrent.{ExecutionContext, Future}
