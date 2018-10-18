@@ -2,6 +2,7 @@ package hmda.api.http.filing.submissions
 
 import java.time.Instant
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.server.Directives._
@@ -18,13 +19,17 @@ import akka.http.scaladsl.server.Directives.{
   pathPrefix
 }
 import akka.http.scaladsl.server.Route
+import akka.kafka.ProducerMessage.MultiResultPart
+import akka.kafka.{ProducerMessage, ProducerSettings}
+import akka.kafka.scaladsl.Producer
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Framing, Sink}
+import akka.stream.scaladsl.{Flow, Framing, Sink}
 import akka.util.{ByteString, Timeout}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
   cors,
   corsRejectionHandler
 }
+import com.typesafe.config.Config
 import hmda.api.http.directives.HmdaTimeDirectives
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
@@ -38,6 +43,9 @@ import hmda.model.filing.submission.{
   Uploaded
 }
 import hmda.persistence.submission.SubmissionPersistence
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.StringSerializer
+import hmda.messages.pubsub.KafkaTopics._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -50,6 +58,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
   val log: LoggingAdapter
   val sharding: ClusterSharding
   implicit val timeout: Timeout
+  val config: Config
 
   // institutions/<lei>/filings/<period>/submissions/<seqNr>
   def uploadHmdaFileRoute: Route =
@@ -77,7 +86,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
               result match {
                 case Some(submission) =>
                   if (submission.status == Created) {
-                    uploadFile(uploadTimestamp, submission, uri)
+                    uploadFile(uploadTopic, uploadTimestamp, submission, uri)
                   } else {
                     submissionNotAvailable(submissionId, uri)
                   }
@@ -115,7 +124,8 @@ trait UploadHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def uploadFile(uploadTimeStamp: Long,
+  private def uploadFile(topic: String,
+                         uploadTimeStamp: Long,
                          submission: Submission,
                          uri: Uri): Route = {
     val splitLines =
@@ -126,8 +136,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
         val fUploaded = byteSource
           .via(splitLines)
           .map(_.utf8String)
-          //TODO: send messages to Kafka here
-          //.mapAsync(parallelism = flowParallelism)(line =>)
+          .via(uploadProducer(topic, submission.id))
           .runWith(Sink.ignore)
 
         onComplete(fUploaded) {
@@ -148,6 +157,40 @@ trait UploadHttpApi extends HmdaTimeDirectives {
         complete(
           ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
     }
+  }
+
+  private def uploadProducer(
+      topic: String,
+      submissionId: SubmissionId): Flow[String, String, NotUsed] = {
+
+    val kafkaHosts = config.getString("kafka.hosts")
+    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
+    val producerSettings =
+      ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
+        .withBootstrapServers(kafkaHosts)
+
+    Flow[String]
+      .map { value =>
+        ProducerMessage.Message(
+          new ProducerRecord(topic, submissionId.toString, value),
+          value
+        )
+      }
+      .via(Producer.flexiFlow(producerSettings))
+      .map {
+        case ProducerMessage.Result(_, message) =>
+          val record = message.record
+          record.value()
+        case ProducerMessage.MultiResult(parts, passThrough) =>
+          parts
+            .map {
+              case MultiResultPart(_, record) =>
+                record.value()
+            }
+            .mkString(",")
+        case ProducerMessage.PassThroughResult(passThrough) =>
+          passThrough
+      }
   }
 
 }
