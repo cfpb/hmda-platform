@@ -62,7 +62,6 @@ class HmdaFileValidationHttpApiSpec
       Post("/hmda/parse/csv", badFile) ~> hmdaFileRoutes ~> check {
         status mustBe StatusCodes.OK
         val csv = responseAs[String]
-        println(csv)
         csv must include("lineNumber|errors")
         csv must include("2|application date is not numeric")
       }
