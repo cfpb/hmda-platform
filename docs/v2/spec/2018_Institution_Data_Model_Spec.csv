@@ -1,19 +1,19 @@
-Data Field Number, Data Field Name, Data Field Type, Field Type Description,Field Length, Descriptions and Examples,Can Be Null
-1, Activity Year , Numeric, Integer,4, Example: 2018,N
-2, Legal Entity Identifier (LEI), Alphanumeric, String,20, Example: 12121212121212121212,N
-3, Agency Code , Numeric, Integer,1, Example: 3,N
-4, Institution Type , Numeric, Integer,2, Example: 10,N
-5, 2017 Institution ID, Alphanumeric, String,, Example: 123456,Y
-6, Tax ID , Alphanumeric, String,10, Example: 12-3456789,Y
-7, RSSD , Numeric, Integer,, Example: 123456,N
-8, Email Domain, Alphanumeric, List of String,, Example: cfpb.gov,Y
-9, Respondent Name , Alphanumeric, String,, Example: CFPB,Y
-10, Respondent State , Alphanumeric, String,, Example: CA,Y
-11, Respondent City , Alphanumeric, String,, Example: Los Angeles,Y
-12, Parent ID RSSD , Numeric, Integer,, Example: 123456,N
-13, Parent Name , Alphanumeric, String,, Example: CFPB,Y
-14, Assets , Numeric, Integer,, Example: 1234567,N
-15, Other Lender Code , Numeric, Integer,1, Example: 0,N
-16, Top Holder ID RSSD , Numeric, Integer,, Example: 123456,N
-17, Top Holder Name , Alphanumeric, String,, Example: CFPB,Y
-18, HMDA Filer Flag, Boolean, Boolean ,, Example: false, N
+Number, Name, Type, Field Type Description,Field Length, Descriptions and Examples,Can Be Null,Default Value
+1, Activity Year , Numeric, Integer,4, Example: 2018,N,2018
+2, Legal Entity Identifier (LEI), Alphanumeric, String,20, Example: 12121212121212121212,N,""""""
+3, Agency Code , Numeric, Integer,1, Example: 3,N,-1
+4, Institution Type , Numeric, Integer,2, Example: 10,N,-1
+5, 2017 Institution ID, Alphanumeric, String,, Example: 123456,Y,""""""
+6, Tax ID , Alphanumeric, String,10, Example: 12-3456789,Y,""""""
+7, RSSD , Numeric, Integer,, Example: 123456,N,-1
+8, Email Domain, Alphanumeric, List of String,, Example: [cfpb.gov],Y,[]
+9, Respondent Name , Alphanumeric, String,, Example: CFPB,Y,""""""
+10, Respondent State , Alphanumeric, String,, Example: CA,Y,""""""
+11, Respondent City , Alphanumeric, String,, Example: Los Angeles,Y,""""""
+12, Parent ID RSSD , Numeric, Integer,, Example: 123456,N,-1
+13, Parent Name , Alphanumeric, String,, Example: CFPB,Y,""""""
+14, Assets , Numeric, Integer,, Example: 1234567,N,-1
+15, Other Lender Code , Numeric, Integer,1, Example: 0,N,-1
+16, Top Holder ID RSSD , Numeric, Integer,, Example: 123456,N,-1
+17, Top Holder Name , Alphanumeric, String,, Example: CFPB,Y,""""""
+18, HMDA Filer Flag, Boolean, Boolean ,, Example: false, N,false
