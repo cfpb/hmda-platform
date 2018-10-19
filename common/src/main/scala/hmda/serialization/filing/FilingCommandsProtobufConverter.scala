@@ -108,6 +108,32 @@ object FilingCommandsProtobufConverter {
     )
   }
 
+  def modifySubmissionToProtobuf(
+      cmd: UpdateSubmission,
+      refResolver: ActorRefResolver
+  ): UpdateSubmissionMessage = {
+    val submission = cmd.submission
+    UpdateSubmissionMessage(
+      Some(submissionToProtobuf(submission)),
+      cmd.replyTo match {
+        case None      => ""
+        case Some(ref) => refResolver.toSerializationFormat(ref)
+      }
+    )
+  }
+
+  def modifySubmissionFromProtobuf(
+      bytes: Array[Byte],
+      refResolver: ActorRefResolver
+  ): UpdateSubmission = {
+    val msg = UpdateSubmissionMessage.parseFrom(bytes)
+    UpdateSubmission(
+      submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage())),
+      if (msg.replyTo == "") None
+      else Some(refResolver.resolveActorRef(msg.replyTo))
+    )
+  }
+
   def getLatestSubmissionToProtobuf(
       cmd: GetLatestSubmission,
       refResolver: ActorRefResolver): GetLatestSubmissionMessage = {
