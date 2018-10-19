@@ -108,7 +108,7 @@ object FilingCommandsProtobufConverter {
     )
   }
 
-  def modifySubmissionToProtobuf(
+  def updateSubmissionToProtobuf(
       cmd: UpdateSubmission,
       refResolver: ActorRefResolver
   ): UpdateSubmissionMessage = {
@@ -122,7 +122,7 @@ object FilingCommandsProtobufConverter {
     )
   }
 
-  def modifySubmissionFromProtobuf(
+  def updateSubmissionFromProtobuf(
       bytes: Array[Byte],
       refResolver: ActorRefResolver
   ): UpdateSubmission = {
