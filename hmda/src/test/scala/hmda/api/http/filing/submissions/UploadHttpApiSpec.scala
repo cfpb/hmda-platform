@@ -1,6 +1,5 @@
 package hmda.api.http.filing.submissions
 
-import akka.Done
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.{LoggingAdapter, NoLogging}
@@ -11,9 +10,8 @@ import org.scalatest.MustMatchers
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
-import akka.kafka.{ConsumerSettings, Subscriptions}
-import akka.kafka.scaladsl.Consumer
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.kafka.ConsumerSettings
+import akka.stream.scaladsl.Source
 import hmda.api.http.filing.FileUploadUtils
 import hmda.messages.filing.FilingCommands.CreateFiling
 import hmda.messages.filing.FilingEvents.FilingEvent
@@ -49,11 +47,10 @@ import hmda.persistence.submission.SubmissionPersistence
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LarGenerators._
-import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
-import hmda.messages.pubsub.KafkaTopics._
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class UploadHttpApiSpec
@@ -173,23 +170,6 @@ class UploadHttpApiSpec
         submission.start must be < System.currentTimeMillis()
         submission.id mustBe submissionId
         submission.status mustBe Uploaded
-
-//        val kafkaSource =
-//          Consumer.plainSource(consumerSettings,
-//                               Subscriptions.topics(uploadTopic))
-//        val mapFromConsumerRecord =
-//          Flow[ConsumerRecord[String, String]].map(record => record.value)
-//
-//        val fMessages = kafkaSource
-//          .via(mapFromConsumerRecord)
-//          .map { e =>
-//            println(e); e
-//          }
-//          .runWith(Sink.seq)
-//
-//        val messages = Await.result(fMessages, 10.seconds)
-//        println(messages)
-//        messages.size mustBe 10
       }
     }
   }

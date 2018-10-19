@@ -72,7 +72,8 @@ object HmdaPlatform extends App {
     implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(
       9092,
       2182,
-      Map("offsets.topic.replication.factor" -> "1"))
+      Map("offsets.topic.replication.factor" -> "1",
+          "zookeeper.connection.timeout.ms" -> "20000"))
     EmbeddedKafka.start()
     AkkaManagement(system).start()
   }
