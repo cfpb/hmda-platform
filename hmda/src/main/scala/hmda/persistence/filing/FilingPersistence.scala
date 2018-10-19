@@ -74,8 +74,7 @@ object FilingPersistence
           }
 
         case UpdateSubmission(updated, replyTo) =>
-          val submissions = state.submissions
-          if (submissions.map(_.id).contains(updated.id)) {
+          if (state.submissions.map(_.id).contains(updated.id)) {
             Effect.persist(SubmissionUpdated(updated)).thenRun { _ =>
               log.debug(s"Updated submission: ${updated.toString}")
               replyTo match {
@@ -106,9 +105,10 @@ object FilingPersistence
   }
 
   val eventHandler: (FilingState, FilingEvent) => FilingState = {
-    case (state, evt @ SubmissionAdded(_)) => state.update(evt)
-    case (state, evt @ FilingCreated(_))   => state.update(evt)
-    case (state, _)                        => state
+    case (state, evt @ SubmissionAdded(_))   => state.update(evt)
+    case (state, evt @ FilingCreated(_))     => state.update(evt)
+    case (state, evt @ SubmissionUpdated(_)) => state.update(evt)
+    case (state, _)                          => state
   }
 
   def startShardRegion(
