@@ -27,7 +27,7 @@ object FilingPersistence
       ctx.log.debug(s"Started Filing Persistence: s$filingId")
       PersistentBehaviors
         .receive[FilingCommand, FilingEvent, FilingState](
-          persistenceId = s"$name-$filingId",
+          persistenceId = s"$filingId",
           emptyState = FilingState(),
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler

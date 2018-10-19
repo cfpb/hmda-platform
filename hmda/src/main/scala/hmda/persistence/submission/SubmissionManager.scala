@@ -16,13 +16,15 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
   override def behavior(entityId: String): Behavior[SubmissionManagerCommand] =
     Behaviors.setup { ctx =>
       val log = ctx.log
-      log.info(s"Started Submission Manager for $entityId")
+      log.info(s"Started $entityId")
 
       val sharding = ClusterSharding(ctx.system)
 
+      val submissionId = entityId.replaceAll(s"$name-", "")
+
       val submissionPersistence =
         sharding.entityRefFor(SubmissionPersistence.typeKey,
-                              s"${SubmissionPersistence.name}-$entityId")
+                              s"${SubmissionPersistence.name}-$submissionId")
 
       val submissionEventResponseAdapter: ActorRef[SubmissionEvent] =
         ctx.messageAdapter(response => WrappedSubmissionEventResponse(response))
@@ -43,8 +45,6 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
       }
 
     }
-
-  //def updateFilingStatus(status: SubmissionStatus, log:Logger): Behavior[SubmissionManagerCommand] = ???
 
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[SubmissionManagerCommand]] = {

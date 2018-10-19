@@ -31,7 +31,7 @@ object SubmissionPersistence
     Behaviors.setup { ctx =>
       PersistentBehaviors
         .receive[SubmissionCommand, SubmissionEvent, SubmissionState](
-          persistenceId = s"$name-$entityId",
+          persistenceId = s"$entityId",
           emptyState = SubmissionState(None),
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
@@ -63,8 +63,6 @@ object SubmissionPersistence
             replyTo ! SubmissionCreated(submission)
           }
         case ModifySubmission(modified, replyTo) =>
-          println(s"Submission in state: ${state.submission}")
-          println(s"Modified ID: $modified")
           if (state.submission.map(s => s.id).contains(modified.id)) {
             Effect.persist(SubmissionModified(modified)).thenRun { _ =>
               log.debug(s"persisted modified Submission: ${modified.toString}")
