@@ -11,11 +11,13 @@ class V642_1Spec extends LarEditCheckSpec {
 
   property("Applicant sex value must be valid") {
     forAll(larGen) { lar =>
-      lar.mustPass
-      val invalidLar = lar.copy(
-        applicant = lar.applicant.copy(
-          sex = lar.applicant.sex.copy(sexEnum = InvalidSexCode)))
-      invalidLar.mustFail
+      whenever(lar.applicant.sex.sexEnum != SexNoCoApplicant) {
+        lar.mustPass
+        val invalidLar = lar.copy(
+          applicant = lar.applicant.copy(
+            sex = lar.applicant.sex.copy(sexEnum = InvalidSexCode)))
+        invalidLar.mustFail
+      }
     }
   }
 }
