@@ -38,7 +38,7 @@ keycloak:
         - -c
         - |
           echo "Copying theme..."
-          cp -R /themes/* /theme 
+          cp -R /themes/* /theme
       volumeMounts:
         - name: theme
           mountPath: /theme
@@ -63,6 +63,8 @@ keycloak:
   extraEnv: |
     - name: PROXY_ADDRESS_FORWARDING
       value: "true"
+    - name: JDBC_PARAMS
+      value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     # - name: KEYCLOAK_LOGLEVEL
     #   value: DEBUG
     # - name: WILDFLY_LOGLEVEL
