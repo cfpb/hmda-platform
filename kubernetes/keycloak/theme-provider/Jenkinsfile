@@ -1,10 +1,10 @@
-podTemplate(label: 'dockerBuild', containers: [
+podTemplate(label: 'providerBuild', containers: [
   containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat')
 ],
 volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
-   node('buildHmdaHelp') {
+   node('providerBuild') {
      def repo = checkout scm
      def gitCommit = repo.GIT_COMMIT
      def gitBranch = repo.GIT_BRANCH
@@ -15,7 +15,7 @@ volumes: [
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
             usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/theme-provider ."
-              sh "docker tag ${env.DOCKER_HUB_USER}/hmda-help ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
+              sh "docker tag ${env.DOCKER_HUB_USER}/theme-provider ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
             }
