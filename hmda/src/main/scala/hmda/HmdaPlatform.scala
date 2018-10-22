@@ -13,6 +13,7 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.Cluster
 import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
+import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 
 object HmdaPlatform extends App {
 
@@ -68,6 +69,12 @@ object HmdaPlatform extends App {
 
   if (runtimeMode == "dev") {
     CassandraUtil.startEmbeddedCassandra()
+    implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(
+      9092,
+      2182,
+      Map("offsets.topic.replication.factor" -> "1",
+          "zookeeper.connection.timeout.ms" -> "20000"))
+    EmbeddedKafka.start()
     AkkaManagement(system).start()
   }
 

@@ -80,9 +80,9 @@ object SubmissionPersistence
 
   val eventHandler: (SubmissionState, SubmissionEvent) => SubmissionState = {
     case (state, SubmissionCreated(submission)) => state.copy(Some(submission))
-    case (state, SubmissionModified(submission)) =>
-      if (state.submission.getOrElse(Submission()).id == submission.id) {
-        SubmissionState(Some(submission))
+    case (state, SubmissionModified(modified)) =>
+      if (state.submission.getOrElse(Submission()).id == modified.id) {
+        state.copy(Some(modified))
       } else {
         state
       }
