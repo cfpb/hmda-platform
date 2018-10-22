@@ -13,4 +13,5 @@
     <root level="INFO">
         <appender-ref ref="ASYNC" />
     </root>
+    <logger name="org.apache.zookeeper" level="WARN"/>
 </configuration>

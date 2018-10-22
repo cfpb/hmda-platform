@@ -1,7 +1,7 @@
 package hmda.persistence.filing
 
-import akka.actor.typed.{ActorRef, Behavior}
-import akka.actor.typed.scaladsl.{ActorContext, Behaviors}
+import akka.actor.typed.{ActorContext, ActorRef, Behavior}
+import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityTypeKey}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
@@ -14,21 +14,21 @@ import hmda.messages.filing.FilingEvents.{
   SubmissionUpdated
 }
 import hmda.model.filing.FilingDetails
-import hmda.persistence.HmdaPersistentActor
+import hmda.persistence.HmdaTypedPersistentActor
 
 object FilingPersistence
-    extends HmdaPersistentActor[FilingCommand, FilingEvent, FilingState] {
+    extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
 
-  final val name = "Filing"
+  override final val name = "Filing"
 
   val ShardingTypeName = EntityTypeKey[FilingCommand](name)
 
-  def behavior(filingId: String): Behavior[FilingCommand] =
+  override def behavior(filingId: String): Behavior[FilingCommand] =
     Behaviors.setup { ctx =>
       ctx.log.debug(s"Started Filing Persistence: s$filingId")
       PersistentBehaviors
         .receive[FilingCommand, FilingEvent, FilingState](
-          persistenceId = s"$name-$filingId",
+          persistenceId = s"$filingId",
           emptyState = FilingState(),
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
@@ -37,7 +37,7 @@ object FilingPersistence
         .withTagger(_ => Set(name.toLowerCase()))
     }
 
-  def commandHandler(ctx: ActorContext[FilingCommand])
+  override def commandHandler(ctx: ActorContext[FilingCommand])
     : CommandHandler[FilingCommand, FilingEvent, FilingState] = {
     (state, cmd) =>
       val log = ctx.asScala.log
