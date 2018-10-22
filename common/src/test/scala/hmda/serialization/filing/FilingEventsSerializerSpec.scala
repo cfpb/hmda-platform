@@ -3,7 +3,8 @@ package hmda.serialization.filing
 import hmda.messages.filing.FilingEvents.{
   FilingCreated,
   FilingStatusUpdated,
-  SubmissionAdded
+  SubmissionAdded,
+  SubmissionUpdated
 }
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
@@ -43,6 +44,17 @@ class FilingEventsSerializerSpec
         bytesAdded,
         serializer.SubmissionAddedManifest
       ) mustBe added
+    }
+  }
+
+  property("SubmissionUpdated must serialize to and from binary") {
+    forAll(submissionGen) { submission =>
+      val updated = SubmissionUpdated(submission)
+      val bytesUpdated = serializer.toBinary(updated)
+      serializer.fromBinary(
+        bytesUpdated,
+        serializer.SubmissionUpdatedManifest
+      ) mustBe updated
     }
   }
 

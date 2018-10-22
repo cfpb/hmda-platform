@@ -3,12 +3,14 @@ package hmda.serialization.filing
 import hmda.messages.filing.FilingEvents.{
   FilingCreated,
   FilingStatusUpdated,
-  SubmissionAdded
+  SubmissionAdded,
+  SubmissionUpdated
 }
 import hmda.persistence.serialization.filing.events.{
   FilingCreatedMessage,
   FilingStatusUpdatedMessage,
-  SubmissionAddedMessage
+  SubmissionAddedMessage,
+  SubmissionUpdatedMessage
 }
 import FilingProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
@@ -57,4 +59,22 @@ object FilingEventsProtobufConverter {
       submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage()))
     )
   }
+
+  def submissionUpdatedToProtobuf(
+      evt: SubmissionUpdated
+  ): SubmissionUpdatedMessage = {
+    SubmissionUpdatedMessage(
+      if (evt.submission.isEmpty) None
+      else Some(submissionToProtobuf(evt.submission))
+    )
+  }
+
+  def submissionUpdatedFromProtoubf(
+      msg: SubmissionUpdatedMessage
+  ): SubmissionUpdated = {
+    SubmissionUpdated(
+      submissionFromProtobuf(msg.submission.getOrElse(SubmissionMessage()))
+    )
+  }
+
 }

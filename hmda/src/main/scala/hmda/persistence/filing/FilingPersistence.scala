@@ -10,7 +10,8 @@ import hmda.messages.filing.FilingCommands._
 import hmda.messages.filing.FilingEvents.{
   FilingCreated,
   FilingEvent,
-  SubmissionAdded
+  SubmissionAdded,
+  SubmissionUpdated
 }
 import hmda.model.filing.FilingDetails
 import hmda.persistence.HmdaPersistentActor
@@ -72,6 +73,20 @@ object FilingPersistence
             }
           }
 
+        case UpdateSubmission(updated, replyTo) =>
+          if (state.submissions.map(_.id).contains(updated.id)) {
+            Effect.persist(SubmissionUpdated(updated)).thenRun { _ =>
+              log.debug(s"Updated submission: ${updated.toString}")
+              replyTo match {
+                case Some(ref) => ref ! updated
+                case None      => Effect.none //Do not reply
+              }
+            }
+          } else {
+            log.warning(s"Could not update submission wth $updated")
+            Effect.none
+          }
+
         case GetLatestSubmission(replyTo) =>
           val maybeSubmission = state.submissions.headOption
           replyTo ! maybeSubmission
@@ -85,14 +100,15 @@ object FilingPersistence
           Effect.stop
 
         case _ =>
-          Effect.none
+          Effect.unhandled
       }
   }
 
   val eventHandler: (FilingState, FilingEvent) => FilingState = {
-    case (state, evt @ SubmissionAdded(_)) => state.update(evt)
-    case (state, evt @ FilingCreated(_))   => state.update(evt)
-    case (state, _)                        => state
+    case (state, evt @ SubmissionAdded(_))   => state.update(evt)
+    case (state, evt @ FilingCreated(_))     => state.update(evt)
+    case (state, evt @ SubmissionUpdated(_)) => state.update(evt)
+    case (state, _)                          => state
   }
 
   def startShardRegion(

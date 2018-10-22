@@ -18,3 +18,7 @@ message SubmissionAddedMessage {
     SubmissionMessage submission = 1;
 }
 
+message SubmissionUpdatedMessage {
+    SubmissionMessage submission = 1;
+}
+
