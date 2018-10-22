@@ -119,6 +119,18 @@ trait InstitutionComponent {
     }
   }
 
+  def deleteEmails(lei: String)(
+      implicit ec: ExecutionContext,
+      institutionEmailsRepository: InstitutionEmailsRepository): Future[Int] = {
+    val db = institutionEmailsRepository.db
+    val table = institutionEmailsRepository.table
+    for {
+      query <- db.run(table.filter(_.lei === lei).delete)
+    } yield {
+      query
+    }
+  }
+
   def findByEmail(email: String)(
       implicit ec: ExecutionContext,
       institutionRepository: InstitutionRepository,
