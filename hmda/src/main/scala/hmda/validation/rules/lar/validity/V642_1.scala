@@ -16,7 +16,6 @@ object V642_1 extends EditCheck[LoanApplicationRegister] {
                             Female,
                             SexInformationNotProvided,
                             SexNotApplicable,
-                            SexNoCoApplicant,
                             MaleAndFemale)
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {

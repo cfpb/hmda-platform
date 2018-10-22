@@ -13,7 +13,7 @@ case class LoanApplicationRegister(
     income: String = "",
     purchaserType: PurchaserEnum = InvalidPurchaserCode,
     hoepaStatus: HOEPAStatusEnum = InvalidHoepaStatusCode,
-    lienStatus: LienStatusEnum = InvalidLientStatusCode,
+    lienStatus: LienStatusEnum = InvalidLienStatusCode,
     denial: Denial = Denial(),
     loanDisclosure: LoanDisclosure = LoanDisclosure(),
     nonAmortizingFeatures: NonAmortizingFeatures = NonAmortizingFeatures(),

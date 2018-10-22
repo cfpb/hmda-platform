@@ -105,7 +105,6 @@ class LarValidationHttpApiSpec
           validity = ValidationErrorSummary(Seq("V600", "V623")))
       }
     }
-
   }
 
 }

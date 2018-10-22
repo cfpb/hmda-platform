@@ -480,7 +480,7 @@ sealed trait LarFormatValidator extends LarParser {
     (
       validateIntField(id, InvalidId),
       validateStr(LEI),
-      validateIntStrOrNAOrExemptField(NMLSRIdentifier, InvalidNMLSRIdentifier)
+      validateStr(NMLSRIdentifier)
     ).mapN(LarIdentifier)
   }
 

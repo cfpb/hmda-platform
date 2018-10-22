@@ -9,7 +9,7 @@ object LienStatusEnum extends LarCodeEnum[LienStatusEnum] {
     code match {
       case 1 => SecuredByFirstLien
       case 2 => SecuredBySubordinateLien
-      case _ => InvalidLientStatusCode
+      case _ => InvalidLienStatusCode
     }
   }
 }
@@ -24,7 +24,7 @@ case object SecuredBySubordinateLien extends LienStatusEnum {
   override val description: String = "Secured by a subordinate lien"
 }
 
-case object InvalidLientStatusCode extends LienStatusEnum {
+case object InvalidLienStatusCode extends LienStatusEnum {
   override def code: Int = -1
   override def description: String = "Invalid Code"
 }
