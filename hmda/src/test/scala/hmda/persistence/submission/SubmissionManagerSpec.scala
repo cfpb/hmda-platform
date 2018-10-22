@@ -5,6 +5,7 @@ import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
+import hmda.messages.filing.FilingCommands.GetLatestSubmission
 import hmda.messages.submission.SubmissionCommands.{
   CreateSubmission,
   GetSubmission
@@ -14,11 +15,13 @@ import hmda.messages.submission.SubmissionEvents.{
   SubmissionEvent
 }
 import hmda.messages.submission.SubmissionManagerCommands._
+import hmda.model.filing.FilingGenerator.filingGen
+import hmda.model.filing.{Filing, FilingId}
 import hmda.model.filing.submission._
 import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{BeforeAndAfterAll, MustMatchers}
 
 import scala.concurrent.duration._
 
@@ -35,9 +38,16 @@ class SubmissionManagerSpec
 
   val submissionId = SubmissionId("12345", "2018", 1)
 
+  val maybeFilingProbe = TestProbe[Option[Filing]]("maybe-filing-probe")
   val submissionProbe = TestProbe[SubmissionEvent]("submission-probe")
   val maybeSubmissionProbe =
     TestProbe[Option[Submission]]("submission-get-probe")
+
+  val sampleFiling = filingGen
+    .suchThat(_.lei != "")
+    .suchThat(_.period != "")
+    .sample
+    .getOrElse(Filing())
 
   val sampleSubmission = submissionGen
     .suchThat(s => !s.id.isEmpty)
@@ -71,6 +81,10 @@ class SubmissionManagerSpec
           SubmissionPersistence.typeKey,
           s"${SubmissionPersistence.name}-${sampleSubmission.id.toString}")
 
+      val filingPersistence = sharding.entityRefFor(
+        FilingPersistence.typeKey,
+        s"${FilingPersistence.name}-${FilingId(sampleSubmission.id.lei, sampleSubmission.id.period).toString}")
+
       submissionPersistence ! CreateSubmission(sampleSubmission.id,
                                                submissionProbe.ref)
       submissionProbe.expectMessageType[SubmissionCreated]
@@ -85,6 +99,18 @@ class SubmissionManagerSpec
             case None    => fail
           }
       }
+
+      filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
+      maybeSubmissionProbe.within(0.seconds, 5.seconds) {
+        msg: Option[Submission] =>
+          msg match {
+            case Some(s) =>
+              s.id mustBe sampleSubmission.id
+              s.status mustBe sampleSubmission.status
+            case None => fail
+          }
+      }
+
       submissionManager ! UpdateSubmissionStatus(uploaded)
       submissionPersistence ! GetSubmission(maybeSubmissionProbe.ref)
       maybeSubmissionProbe.expectMessageType[Option[Submission]]
@@ -94,6 +120,17 @@ class SubmissionManagerSpec
           msg match {
             case Some(s) => s mustBe uploaded
             case None    => fail
+          }
+      }
+
+      filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
+      maybeSubmissionProbe.within(0.seconds, 5.seconds) {
+        msg: Option[Submission] =>
+          msg match {
+            case Some(s) =>
+              s.id mustBe sampleSubmission.id
+              s.status mustBe uploaded.status
+            case None => fail
           }
       }
     }

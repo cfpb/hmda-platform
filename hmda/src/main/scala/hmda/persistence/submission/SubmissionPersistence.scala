@@ -8,7 +8,7 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import hmda.messages.filing.FilingCommands.AddSubmission
+import hmda.messages.filing.FilingCommands.{AddSubmission, UpdateSubmission}
 import hmda.messages.submission.SubmissionCommands._
 import hmda.messages.submission.SubmissionEvents.{
   SubmissionCreated,
@@ -66,6 +66,10 @@ object SubmissionPersistence
           if (state.submission.map(s => s.id).contains(modified.id)) {
             Effect.persist(SubmissionModified(modified)).thenRun { _ =>
               log.debug(s"persisted modified Submission: ${modified.toString}")
+              val filingPersistence = sharding.entityRefFor(
+                FilingPersistence.typeKey,
+                s"${FilingPersistence.name}-${modified.id.lei}-${modified.id.period}")
+              filingPersistence ! UpdateSubmission(modified, None)
               replyTo ! SubmissionModified(modified)
             }
           } else {
