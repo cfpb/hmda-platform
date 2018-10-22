@@ -64,11 +64,14 @@ object SubmissionProtobufConverter {
       case 5  => ParsedWithErrors
       case 6  => Parsed
       case 7  => Validating
-      case 8  => SyntacticalOrValidityErrors
-      case 9  => QualityErrors
-      case 10 => MacroErrors
-      case 11 => Verified
-      case 12 => Signed
+      case 8  => SyntacticalOrValidity
+      case 9  => SyntacticalOrValidityErrors
+      case 10 => Quality
+      case 11 => QualityErrors
+      case 12 => Macro
+      case 13 => MacroErrors
+      case 14 => Verified
+      case 15 => Signed
       case -1 => Failed
     }
   }

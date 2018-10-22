@@ -12,11 +12,14 @@ object SubmissionStatus {
     case 5  => ParsedWithErrors
     case 6  => Parsed
     case 7  => Validating
-    case 8  => SyntacticalOrValidityErrors
-    case 9  => QualityErrors
-    case 10 => MacroErrors
-    case 11 => Verified
-    case 12 => Signed
+    case 8  => SyntacticalOrValidity
+    case 9  => SyntacticalOrValidityErrors
+    case 10 => Quality
+    case 11 => QualityErrors
+    case 12 => Macro
+    case 13 => MacroErrors
+    case 14 => Verified
+    case 15 => Signed
     case -1 => Failed
   }
 
@@ -71,49 +74,49 @@ case object Validating extends SubmissionStatus {
 }
 
 case object SyntacticalOrValidity extends SubmissionStatus {
-  override def code: Int = 7
+  override def code: Int = 8
   override def message: String = syntacticalOrValidityMsg
   override def description: String = syntacticalOrValidityDescription
 }
 
 case object SyntacticalOrValidityErrors extends SubmissionStatus {
-  override def code: Int = 8
+  override def code: Int = 9
   override def message: String = syntacticalValidityErrorMsg
   override def description: String = syntactivalValidityErrorDescription
 }
 
 case object Quality extends SubmissionStatus {
-  override def code: Int = 9
+  override def code: Int = 10
   override def message: String = qualityMsg
   override def description: String = qualityDescription
 }
 
 case object QualityErrors extends SubmissionStatus {
-  override def code: Int = 10
+  override def code: Int = 11
   override def message: String = qualityErrorMsg
   override def description: String = qualityErrorDescription
 }
 
 case object Macro extends SubmissionStatus {
-  override def code: Int = 11
+  override def code: Int = 12
   override def message: String = macroMsg
   override def description: String = macroDescription
 }
 
 case object MacroErrors extends SubmissionStatus {
-  override def code: Int = 12
+  override def code: Int = 13
   override def message: String = macroErrorMsg
   override def description: String = macroErrorDescription
 }
 
 case object Verified extends SubmissionStatus {
-  override def code: Int = 13
+  override def code: Int = 14
   override def message: String = validatedMsg
   override def description: String = validatedDescription
 }
 
 case object Signed extends SubmissionStatus {
-  override def code: Int = 14
+  override def code: Int = 15
   override def message: String = signedMsg
   override def description: String = signedDescription
 }
