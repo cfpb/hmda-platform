@@ -33,7 +33,7 @@ volumes: [
     stage('Deploy') {
         if (env.BRANCH_NAME == 'master') {
             container('helm') {
-                sh "helm upgrade --install --force --namespace=default --values=kubernetes/hmda-platform/values.yaml --set image.tag=${gitBranch} --set service.name=hmda-platform-${gitBranch}-api hmda-platform-${gitBranch} kubernetes/hmda-platform"
+                sh "helm upgrade --install --force --namespace=default --values=kubernetes/hmda-platform/values.yaml --set image.tag=${gitBranch} --set service.name=hmda-platform-api hmda-platform kubernetes/hmda-platform"
             }
         }
     }
