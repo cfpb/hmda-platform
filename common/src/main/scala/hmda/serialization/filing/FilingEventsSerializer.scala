@@ -6,13 +6,15 @@ import akka.serialization.SerializerWithStringManifest
 import hmda.messages.filing.FilingEvents.{
   FilingCreated,
   FilingStatusUpdated,
-  SubmissionAdded
+  SubmissionAdded,
+  SubmissionUpdated
 }
 import FilingEventsProtobufConverter._
 import hmda.persistence.serialization.filing.events.{
   FilingCreatedMessage,
   FilingStatusUpdatedMessage,
-  SubmissionAddedMessage
+  SubmissionAddedMessage,
+  SubmissionUpdatedMessage
 }
 
 class FilingEventsSerializer extends SerializerWithStringManifest {
@@ -21,6 +23,7 @@ class FilingEventsSerializer extends SerializerWithStringManifest {
   final val FilingCreatedManifest = classOf[FilingCreated].getName
   final val FilingStatusUpdatedManifest = classOf[FilingStatusUpdated].getName
   final val SubmissionAddedManifest = classOf[SubmissionAdded].getName
+  final val SubmissionUpdatedManifest = classOf[SubmissionUpdated].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -31,7 +34,9 @@ class FilingEventsSerializer extends SerializerWithStringManifest {
       filingStatusUpdatedToProtobuf(evt).toByteArray
     case evt: SubmissionAdded =>
       submissionAddedToProtobuf(evt).toByteArray
-    case _ ⇒
+    case evt: SubmissionUpdated =>
+      submissionUpdatedToProtobuf(evt).toByteArray
+    case _ =>
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
 
@@ -46,6 +51,8 @@ class FilingEventsSerializer extends SerializerWithStringManifest {
           FilingStatusUpdatedMessage.parseFrom(bytes))
       case SubmissionAddedManifest =>
         submissionAddedFromProtobuf(SubmissionAddedMessage.parseFrom(bytes))
+      case SubmissionUpdatedManifest =>
+        submissionUpdatedFromProtoubf(SubmissionUpdatedMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")

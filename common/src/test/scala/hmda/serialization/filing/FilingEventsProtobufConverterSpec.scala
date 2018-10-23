@@ -3,7 +3,8 @@ package hmda.serialization.filing
 import hmda.messages.filing.FilingEvents.{
   FilingCreated,
   FilingStatusUpdated,
-  SubmissionAdded
+  SubmissionAdded,
+  SubmissionUpdated
 }
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
@@ -13,7 +14,8 @@ import FilingEventsProtobufConverter._
 import hmda.persistence.serialization.filing.events.{
   FilingCreatedMessage,
   FilingStatusUpdatedMessage,
-  SubmissionAddedMessage
+  SubmissionAddedMessage,
+  SubmissionUpdatedMessage
 }
 
 class FilingEventsProtobufConverterSpec
@@ -44,6 +46,15 @@ class FilingEventsProtobufConverterSpec
       val added = SubmissionAdded(submission)
       val protobuf = submissionAddedToProtobuf(added).toByteArray
       submissionAddedFromProtobuf(SubmissionAddedMessage.parseFrom(protobuf)) mustBe added
+    }
+  }
+
+  property("SubmissionUpdated must convert to and from protobuf") {
+    forAll(submissionGen) { submission =>
+      val updated = SubmissionUpdated(submission)
+      val protobuf = submissionUpdatedToProtobuf(updated).toByteArray
+      submissionUpdatedFromProtoubf(
+        SubmissionUpdatedMessage.parseFrom(protobuf)) mustBe updated
     }
   }
 
