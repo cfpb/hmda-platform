@@ -88,7 +88,9 @@ object FilingPersistence
           }
 
         case GetLatestSubmission(replyTo) =>
-          val maybeSubmission = state.submissions.headOption
+          val maybeSubmission = state.submissions
+            .sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
+            .headOption
           replyTo ! maybeSubmission
           Effect.none
 
