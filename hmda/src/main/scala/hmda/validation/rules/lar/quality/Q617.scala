@@ -29,9 +29,6 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
       val ratioToPrecision =
         BigDecimal(calculatedRatio).setScale(precision, RoundingMode.HALF_UP)
 
-      println(s"CLTV: $combinedLoanValueRatio")
-      println(s"Calc: $ratioToPrecision")
-
       combinedLoanValueRatio is greaterThanOrEqual(ratioToPrecision)
     }
   }
