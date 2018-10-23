@@ -49,6 +49,7 @@ object InstitutionDBProjection
 
       case InstitutionDeleted(lei) =>
         institutionRepository.deleteById(lei)
+        deleteEmails(lei)
     }
     envelope
   }
