@@ -349,6 +349,10 @@
         "https://192.168.99.100/oidc-callback",
         "http://localhost:3000/",
         "https://localhost:3000/",
+        "http://localhost:3000/hmda-help",
+        "https://localhost:3000/hmda-help",
+        "http://localhost:3000/hmda-help/",
+        "https://localhost:3000/hmda-help/",
         "https://192.168.99.100"
       ],
       "webOrigins": ["*"],
