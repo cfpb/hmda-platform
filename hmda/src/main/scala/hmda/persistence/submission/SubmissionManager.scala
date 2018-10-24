@@ -53,6 +53,8 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
               log.info(s"$submissionEvent")
               Behaviors.same
           }
+        case SubmissionManagerStop =>
+          Behaviors.stopped
       }
 
     }
