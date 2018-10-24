@@ -40,4 +40,6 @@ object SubmissionProcessingCommands {
   case class Fail(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
 
+  case object HmdaParserStop extends SubmissionProcessingCommand
+
 }
