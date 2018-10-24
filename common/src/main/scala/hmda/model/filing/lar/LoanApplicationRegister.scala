@@ -1,6 +1,6 @@
 package hmda.model.filing.lar
 
-import enums._
+import hmda.model.filing.lar.enums._
 import hmda.model.filing.{HmdaFileRow, PipeDelimited}
 
 case class LoanApplicationRegister(
