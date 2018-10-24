@@ -4,6 +4,7 @@ import hmda.model.filing.lar.{Applicant, Ethnicity, Race, Sex}
 import hmda.model.filing.lar.enums._
 import hmda.parser.filing.lar.LarParserErrorModel._
 import cats.implicits._
+import hmda.parser.LarParserValidationResult
 
 sealed trait ApplicantFormatValidator extends LarParser {
 
