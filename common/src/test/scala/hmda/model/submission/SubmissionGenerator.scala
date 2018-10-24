@@ -14,10 +14,13 @@ object SubmissionGenerator {
       ParsedWithErrors,
       Parsed,
       Validating,
+      SyntacticalOrValidity,
       SyntacticalOrValidityErrors,
+      Quality,
       QualityErrors,
+      Macro,
       MacroErrors,
-      Validated,
+      Verified,
       Signed
     )
   }

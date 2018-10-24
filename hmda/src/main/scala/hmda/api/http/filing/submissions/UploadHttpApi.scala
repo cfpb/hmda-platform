@@ -4,7 +4,7 @@ import java.time.Instant
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.http.scaladsl.server.Directives._
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
@@ -36,16 +36,15 @@ import io.circe.generic.auto._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.model.ErrorResponse
 import hmda.messages.submission.SubmissionCommands.GetSubmission
-import hmda.model.filing.submission.{
-  Created,
-  Submission,
-  SubmissionId,
-  Uploaded
-}
-import hmda.persistence.submission.SubmissionPersistence
+import hmda.model.filing.submission._
+import hmda.persistence.submission.{SubmissionManager, SubmissionPersistence}
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.StringSerializer
 import hmda.messages.pubsub.KafkaTopics._
+import hmda.messages.submission.SubmissionManagerCommands.{
+  SubmissionManagerCommand,
+  UpdateSubmissionStatus
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -68,6 +67,11 @@ trait UploadHttpApi extends HmdaTimeDirectives {
           val submissionId = SubmissionId(lei, period, seqNr)
           val uploadTimestamp = Instant.now.toEpochMilli
 
+          val submissionManager =
+            sharding.entityRefFor(
+              SubmissionManager.typeKey,
+              s"${SubmissionManager.name}-${submissionId.toString}")
+
           val submissionPersistence =
             sharding.entityRefFor(
               SubmissionPersistence.typeKey,
@@ -86,7 +90,11 @@ trait UploadHttpApi extends HmdaTimeDirectives {
               result match {
                 case Some(submission) =>
                   if (submission.status == Created) {
-                    uploadFile(uploadTopic, uploadTimestamp, submission, uri)
+                    uploadFile(submissionManager,
+                               uploadTopic,
+                               uploadTimestamp,
+                               submission,
+                               uri)
                   } else {
                     submissionNotAvailable(submissionId, uri)
                   }
@@ -124,7 +132,8 @@ trait UploadHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def uploadFile(topic: String,
+  private def uploadFile(submissionManager: EntityRef[SubmissionManagerCommand],
+                         topic: String,
                          uploadTimeStamp: Long,
                          submission: Submission,
                          uri: Uri): Route = {
@@ -133,6 +142,8 @@ trait UploadHttpApi extends HmdaTimeDirectives {
 
     fileUpload("file") {
       case (_, byteSource) =>
+        val modified = submission.copy(status = Uploading)
+        submissionManager ! UpdateSubmissionStatus(modified)
         val fUploaded = byteSource
           .via(splitLines)
           .map(_.utf8String)
@@ -141,10 +152,14 @@ trait UploadHttpApi extends HmdaTimeDirectives {
 
         onComplete(fUploaded) {
           case Success(_) =>
+            val modified = submission.copy(status = Uploaded)
+            submissionManager ! UpdateSubmissionStatus(modified)
             complete(
               ToResponseMarshallable(
                 StatusCodes.Accepted -> submission.copy(status = Uploaded)))
           case Failure(error) =>
+            val failed = submission.copy(status = Failed)
+            submissionManager ! UpdateSubmissionStatus(failed)
             log.error(error.getLocalizedMessage)
             val errorResponse =
               ErrorResponse(400, "Invalid file format", uri.path)

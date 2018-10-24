@@ -43,7 +43,7 @@ import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.submission.SubmissionPersistence
+import hmda.persistence.submission.{SubmissionManager, SubmissionPersistence}
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LarGenerators._
@@ -108,8 +108,10 @@ class UploadHttpApiSpec
     EmbeddedKafka.start()
 
     InstitutionPersistence.startShardRegion(sharding)
+    SubmissionManager.startShardRegion(sharding)
     FilingPersistence.startShardRegion(sharding)
     SubmissionPersistence.startShardRegion(sharding)
+
     val institutionPersistence =
       sharding.entityRefFor(
         InstitutionPersistence.typeKey,
