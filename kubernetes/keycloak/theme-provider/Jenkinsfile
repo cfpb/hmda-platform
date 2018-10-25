@@ -18,7 +18,7 @@ volumes: [
               sh "docker tag ${env.DOCKER_HUB_USER}/theme-provider ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
-              sh "docker rmi ${env.DOCKER_HUB_USER}/hmda-help:${gitBranch}"
+              sh "docker rmi ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
               sh "docker rmi \$(docker images | grep \"^<none>\" | awk '{print \$3}')"
             }
         }
