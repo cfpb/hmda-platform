@@ -5,7 +5,7 @@ import java.util.Date
 
 import hmda.generators.CommonGenerators.{stringOfN, stringOfUpToN}
 import hmda.model.census.Census
-import hmda.model.filing.lar.enums
+import hmda.model.filing.lar.enums.LarEnumGenerators._
 import org.scalacheck.Gen
 
 object LarGenerators {

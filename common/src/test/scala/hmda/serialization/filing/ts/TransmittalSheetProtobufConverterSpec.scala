@@ -2,6 +2,7 @@ package hmda.serialization.filing.ts
 
 import hmda.persistence.serialization.transmittalsheet._
 import hmda.serialization.filing.ts.TransmittalSheetProtobufConverter._
+import hmda.model.filing.ts.TsGenerators._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}
 
