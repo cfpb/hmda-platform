@@ -28,6 +28,7 @@ volumes: [
               sh "docker push ${env.DOCKER_HUB_USER}/institutions-api:${gitBranch}"
               sh "docker rmi ${env.DOCKER_HUB_USER}/institutions-api:${gitBranch}"
               sh "docker rmi \$(docker images | grep \"^<none>\" | awk '{print \$3}')"
+              sh "docker images"
             }
         }
       }
