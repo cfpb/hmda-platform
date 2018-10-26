@@ -1,0 +1,152 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+message LoanApplicationRegisterMessage {
+    LarIdentifierMessage larIdentifier = 1;
+    LoanMessage loan = 2;
+    LarActionMessage action = 3;
+    GeographyMessage geography = 4;
+    ApplicantMessage applicant = 5;
+    ApplicantMessage coApplicant = 6;
+    string income = 7;
+    int32 purchaserType = 8;
+    int32 hoepaStatus = 9;
+    int32 lienStatus = 10;
+    DenialMessage denial = 11;
+    LoanDisclosureMessage loanDisclosure = 12;
+    NonAmortizingFeaturesMessage nonAmortizingFeatures = 13;
+    PropertyMessage property = 14;
+    int32 applicationSubmission = 15;
+    int32 payableToInstitution = 16;
+    AusMessage AUS = 17;
+    AusResultMessage ausResult = 18;
+    int32 reverseMortgage = 19;
+    int32 lineOfCredit = 20;
+    int32 businessOrCommercialPurpose = 21;
+}
+
+message LarIdentifierMessage {
+    int32 id = 1;
+    string LEI = 2;
+    string NMLSRIdentifier = 3;
+}
+
+message LoanMessage {
+    string ULI = 1;
+    string applicationDate = 2;
+    int32 loanType = 3;
+    int32 loanPurpose = 4;
+    int32 constructionMethod = 5;
+    int32 occupancy = 6;
+    double amount = 7;
+    string loanTerm = 8;
+    string rateSpread = 9;
+    string interestRate = 10;
+    string prepaymentPenaltyTerm = 11;
+    string debtToIncomeRatio = 12;
+    string combinedLoanToValueRatio = 13;
+    string introductoryRatePeriod = 14;
+}
+
+message LarActionMessage {
+    int32 preapproval = 1;
+    int32 actionTakenType = 2;
+    int32 actionTakenDate = 3;
+}
+
+message GeographyMessage {
+    string street = 1;
+    string city = 2;
+    string state = 3;
+    string zipCode = 4;
+    string county = 5;
+    string tract = 6;
+}
+
+message ApplicantMessage {
+    EthnicityMessage ethnicty = 1;
+    RaceMessage race = 2;
+    SexMessage sex = 3;
+    int32 age = 4;
+    int32 creditScore = 5;
+    int32 creditScoreType = 6;
+    string otherCreditScoreModel = 7;
+}
+
+message EthnicityMessage {
+    int32 ethnicity1 = 1;
+    int32 ethnicity2 = 2;
+    int32 ethnicity3 = 3;
+    int32 ethnicity4 = 4;
+    int32 ethnicity5 = 5;
+    string otherHispanicOrLatino = 6;
+    int32 ethnicityObserved = 7;
+}
+
+message RaceMessage {
+    int32 race1 = 1;
+    int32 race2 = 2;
+    int32 race3 = 3;
+    int32 race4 = 4;
+    int32 race5 = 5;
+    string otherNativeRace = 6;
+    string otherAsianRace = 7;
+    string otherPacificIslanderRace = 8;
+    int32 raceObserved = 9;
+}
+
+message SexMessage {
+    int32 sexEnum = 1;
+    int32 sexObservedEnum = 2;
+}
+
+message DenialMessage {
+    int32 denialReason1 = 1;
+    int32 denialReason2 = 2;
+    int32 denialReason3 = 3;
+    int32 denialReason4 = 4;
+    string otherDenialReason = 5;
+}
+
+message LoanDisclosureMessage {
+    string totalLoanCosts = 1;
+    string totalPointsAndFees = 2;
+    string originationCharges = 3;
+    string discountPoints = 4;
+    string lenderCredits = 5;
+}
+
+message NonAmortizingFeaturesMessage {
+    int32 balloonPayment = 1;
+    int32 interestOnlyPayments = 2;
+    int32 negativeAmortization = 3;
+    int32 otherNonAmortizingFeatures = 4;
+}
+
+message PropertyMessage {
+    string propertyValue = 1;
+    int32 manufacturedHomeSecuredProperty = 2;
+    int32 manufacturedHomeLandPropertyInterest = 3;
+    int32 totalUnits = 4;
+    string multiFamilyAffordableUnits = 5;
+}
+
+message AusMessage {
+    int32 aus1 = 1;
+    int32 aus2 = 2;
+    int32 aus3 = 3;
+    int32 aus4 = 4;
+    int32 aus5 = 5;
+    string otherAUS = 6;
+}
+
+message AusResultMessage {
+    int32 ausResult1 = 1;
+    int32 ausResult2 = 2;
+    int32 ausResult3 = 3;
+    int32 ausResult4 = 4;
+    int32 ausResult5 = 5;
+    string otherAusResult = 6;
+}
