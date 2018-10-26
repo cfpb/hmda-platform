@@ -1,9 +1,9 @@
 package hmda.model.filing.lar
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
-import LarGenerators._
 import com.typesafe.config.ConfigFactory
+import hmda.model.filing.lar.LarGenerators._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class LoanApplicationRegisterSpec
     extends PropSpec
