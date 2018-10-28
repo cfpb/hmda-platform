@@ -21,6 +21,7 @@ volumes: [
               sh "docker images"
               sh "docker images | grep 'theme-provider' | awk '{print \$3}' | uniq"
               sh "docker rmi -f \$(docker images | grep 'theme-provider' | awk '{print \$3}' | uniq)"
+              sh "docker images"
             }
         }
       }
