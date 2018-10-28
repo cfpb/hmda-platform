@@ -26,7 +26,7 @@ volumes: [
               sh "docker tag ${env.DOCKER_HUB_USER}/institutions-api ${env.DOCKER_HUB_USER}/institutions-api:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/institutions-api:${gitBranch}"
-              sh "docker rmi -f ${env.DOCKER_HUB_USER}/institutions-api:${gitBranch}"
+              sh "docker rmi -f $(docker images --format '{{.Repository}}' | grep "institutions-api")"
               sh "docker images"
             }
         }

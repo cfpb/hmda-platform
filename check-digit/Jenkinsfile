@@ -26,7 +26,7 @@ volumes: [
               sh "docker tag ${env.DOCKER_HUB_USER}/hmda-check-digit ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
-              sh "docker rmi -f ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
+              sh "docker rmi -f $(docker images --format '{{.Repository}}' | grep "hmda-check-digit")"
               sh "docker images"
             }
         }
