@@ -26,8 +26,9 @@ volumes: [
               sh "docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/hmda-platform:${gitBranch}"
-              sh "docker rmi -f \$(docker images --format '{{.Repository}}' | grep 'hmda-platform')"
               sh "docker images"
+              sh "docker images | grep 'hmda-platform' | awk '{print \$3}' | uniq"
+              sh "docker rmi -f \$(docker images | grep 'hmda-platform' | awk '{print \$3}' | uniq)"
             }
         }
       }
