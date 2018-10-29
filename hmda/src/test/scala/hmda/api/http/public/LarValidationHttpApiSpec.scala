@@ -34,7 +34,7 @@ class LarValidationHttpApiSpec
   val ec: ExecutionContext = system.dispatcher
   override implicit val timeout: Timeout = Timeout(5.seconds)
 
-  val lar = larGen.sample.get
+  val lar = larGen.sample.getOrElse(LoanApplicationRegister())
   val larCsv = lar.toCSV
 
   val lars = larNGen(10).sample.getOrElse(Nil)
@@ -71,7 +71,7 @@ class LarValidationHttpApiSpec
     }
 
     "fail to parse an invalid pipe delimited LAR and return a list of errors" in {
-      val csv = larGen.sample.get.toCSV
+      val csv = larGen.sample.getOrElse(LoanApplicationRegister()).toCSV
       val values = csv.split('|').map(_.trim)
       val badValues = values.head.replace("2", "A") ++ values.tail
       val badCsv = badValues.mkString("|")
