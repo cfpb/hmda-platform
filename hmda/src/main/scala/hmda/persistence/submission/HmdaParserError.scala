@@ -16,7 +16,7 @@ import akka.util.ByteString
 import hmda.messages.pubsub.KafkaTopics._
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
-  HmdaRowParsed,
+  HmdaRowParsedCount,
   HmdaRowParsedError,
   SubmissionProcessingEvent
 }
@@ -55,7 +55,7 @@ object HmdaParserError
   override def commandHandler(ctx: ActorContext[SubmissionProcessingCommand])
     : CommandHandler[SubmissionProcessingCommand,
                      SubmissionProcessingEvent,
-                     HmdaParserErrorState] = { (_, cmd) =>
+                     HmdaParserErrorState] = { (state, cmd) =>
     val log = ctx.asScala.log
     cmd match {
       case StartParsing(submissionId) =>
@@ -66,12 +66,11 @@ object HmdaParserError
           .map(_.record.value())
           .map(ByteString(_))
           .via(parseHmdaFile)
-          .filter(x => x.isLeft)
           .zip(Source.fromIterator(() => Iterator.from(1)))
           .map {
             case (Left(errors), rowNumber) =>
               PersistHmdaRowParsedError(rowNumber, errors.map(_.errorMessage))
-            case (Right(hmdaFileRow), _) => PersistHmdaRowParsed(hmdaFileRow)
+            case (Right(hmdaFileRow), _) => HmdaRowParsed(hmdaFileRow)
           }
           .runWith(Sink.actorRef(ctx.asScala.self.toUntyped,
                                  CompleteParsing(submissionId)))
@@ -82,6 +81,14 @@ object HmdaParserError
           log.info(s"Persisted error: $rowNumber, $errors")
         }
 
+      case HmdaRowParsed(hmdaFileRow) =>
+        log.info(s"${hmdaFileRow.toString}")
+        Effect.none
+
+      case GetParsedRowCount(replyTo) =>
+        replyTo ! HmdaRowParsedCount(state.count)
+        Effect.none
+
       case _ =>
         Effect.none
     }
@@ -90,8 +97,7 @@ object HmdaParserError
   override def eventHandler: (
       HmdaParserErrorState,
       SubmissionProcessingEvent) => HmdaParserErrorState = {
-    case (state, HmdaRowParsed(_)) => state
-    case (state, _)                => state
+    case (state, _) => state
   }
 
   def startShardRegion(sharding: ClusterSharding)

@@ -1,3 +1,3 @@
 package hmda.persistence.submission
 
-case class HmdaParserErrorState()
+case class HmdaParserErrorState(count: Int = 0)
