@@ -1,6 +1,7 @@
 package hmda.messages.submission
 
 import hmda.messages.CommonMessages.Command
+import hmda.model.filing.HmdaFileRow
 import hmda.model.filing.submission.SubmissionId
 
 object SubmissionProcessingCommands {
@@ -11,6 +12,13 @@ object SubmissionProcessingCommands {
       extends SubmissionProcessingCommand
   case class StartParsing(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
+
+  case class PersistHmdaRowParsed(hmdaFileRow: HmdaFileRow)
+      extends SubmissionProcessingCommand
+
+  case class PersistHmdaRowParsedError(rowNumber: Int, errors: List[String])
+      extends SubmissionProcessingCommand
+
   case class CompleteParsing(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
   case class CompleteParsingWithErrors(submissionId: SubmissionId)
