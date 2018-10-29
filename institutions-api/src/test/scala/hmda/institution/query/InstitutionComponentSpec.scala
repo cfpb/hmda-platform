@@ -21,6 +21,17 @@ class InstitutionComponentSpec extends InstitutionAsyncSetup {
       }
     }
 
+    "delete institutions" in {
+      findByEmail("email@eee.com").map { xs =>
+        xs.size mustBe 1
+        xs.map(i => i.LEI) mustBe Seq("EEE")
+      }
+      deleteEmails("EEE").map { xs =>
+        xs mustBe 1
+      }
+      findByEmail("email@eee.com").map(xs => xs.size mustBe 0)
+    }
+
     "find institutions by field parameters" in {
       findByFields("AAA", "RespA", "taxIdA", "aaa.com").map { xs =>
         xs.size mustBe 1

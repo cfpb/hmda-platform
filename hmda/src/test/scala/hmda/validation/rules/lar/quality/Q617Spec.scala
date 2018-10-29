@@ -24,10 +24,28 @@ class Q617Spec extends LarEditCheckSpec {
         .mustFail
       appLar
         .copy(property = appLar.property.copy(propertyValue = "20.0"))
-        .mustFail
+        .mustPass
       appLar
         .copy(property = appLar.property.copy(propertyValue = "21.0"))
         .mustPass
+    }
+  }
+
+  property("Calculation should match number of digits reported in CLTV ratio") {
+    forAll(larGen) { lar =>
+      val appLar =
+        lar.copy(
+          loan = lar.loan.copy(combinedLoanToValueRatio = "50", amount = 50.4))
+      appLar
+        .copy(property = appLar.property.copy(propertyValue = "100.0"))
+        .mustPass
+
+      val roundLar =
+        lar.copy(
+          loan = lar.loan.copy(combinedLoanToValueRatio = "50", amount = 50.5))
+      roundLar
+        .copy(property = roundLar.property.copy(propertyValue = "100.0"))
+        .mustFail
     }
   }
 }
