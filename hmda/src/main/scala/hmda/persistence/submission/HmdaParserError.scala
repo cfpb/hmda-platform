@@ -1,6 +1,5 @@
 package hmda.persistence.submission
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
@@ -11,8 +10,8 @@ import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Source}
-import akka.util.ByteString
+import akka.stream.scaladsl.Source
+import akka.util.{ByteString, Timeout}
 import hmda.messages.pubsub.KafkaTopics._
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
@@ -20,16 +19,23 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedError,
   SubmissionProcessingEvent
 }
-import hmda.model.filing.submission.SubmissionId
+import hmda.model.filing.submission.{
+  Parsed,
+  ParsedWithErrors,
+  Submission,
+  SubmissionId
+}
 import hmda.parser.filing.ParserFlow._
 import hmda.persistence.HmdaTypedPersistentActor
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import akka.actor.typed.scaladsl.adapter._
-import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffsetBatch}
-import akka.stream.typed.scaladsl.ActorSink
+import akka.kafka.ConsumerMessage.CommittableMessage
 import com.typesafe.config.ConfigFactory
+import hmda.messages.submission.SubmissionCommands.GetSubmission
+import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
@@ -43,6 +49,9 @@ object HmdaParserError
   val config = ConfigFactory.load()
   val kafkaHosts = config.getString("kafka.hosts")
   val kafkaIdleTimeout = config.getInt("kafka.idle-timeout")
+  val futureTimeout = config.getInt("hmda.actor.timeout")
+
+  implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
 
   override def behavior(
       entityId: String): Behavior[SubmissionProcessingCommand] =
@@ -64,12 +73,12 @@ object HmdaParserError
                      SubmissionProcessingEvent,
                      HmdaParserErrorState] = { (state, cmd) =>
     val log = ctx.asScala.log
+    implicit val system: ActorSystem = ctx.asScala.system.toUntyped
+    implicit val materializer: ActorMaterializer = ActorMaterializer()
+    implicit val ec = system.dispatcher
+
     cmd match {
       case StartParsing(submissionId) =>
-        implicit val system: ActorSystem = ctx.asScala.system.toUntyped
-        implicit val materializer: ActorMaterializer = ActorMaterializer()
-        implicit val ec = system.dispatcher
-
         log.info(s"Start parsing for ${submissionId.toString}")
 
         uploadConsumer(ctx, submissionId)
@@ -106,7 +115,9 @@ object HmdaParserError
         Effect.none
 
       case CompleteParsing(submissionId) =>
-        log.info(s"Completed Parsing for ${submissionId.toString}, total lines with errors: ${state.linesWithErrorCount}")
+        log.info(
+          s"Completed Parsing for ${submissionId.toString}, total lines with errors: ${state.linesWithErrorCount}")
+        updateSubmissionStatus(ctx, state, submissionId)
         Effect.none
 
       case HmdaParserStop =>
@@ -146,6 +157,39 @@ object HmdaParserError
     Consumer
       .committableSource(consumerSettings, Subscriptions.topics(uploadTopic))
       .filter(_.record.key() == submissionId.toString)
+
+  }
+
+  private def updateSubmissionStatus(
+      ctx: ActorContext[_],
+      state: HmdaParserErrorState,
+      submissionId: SubmissionId)(implicit ec: ExecutionContext) = {
+    val sharding = ClusterSharding(ctx.asScala.system)
+
+    val submissionPersistence =
+      sharding.entityRefFor(SubmissionPersistence.typeKey,
+                            s"${SubmissionPersistence.name}-$submissionId")
+
+    val submissionManager =
+      sharding.entityRefFor(
+        SubmissionManager.typeKey,
+        s"${SubmissionManager.name}-${submissionId.toString}")
+
+    val fSubmission: Future[Option[Submission]] = submissionPersistence ? (
+        ref => GetSubmission(ref))
+
+    fSubmission.map {
+      case Some(submission) =>
+        val modified = if (state.linesWithErrorCount == 0) {
+          submission.copy(status = Parsed)
+        } else {
+          submission.copy(status = ParsedWithErrors)
+        }
+        submissionManager ! UpdateSubmissionStatus(modified)
+      case None =>
+        ctx.asScala.log
+          .error(s"Submission ${submissionId.toString} could not be retrieved")
+    }
 
   }
 

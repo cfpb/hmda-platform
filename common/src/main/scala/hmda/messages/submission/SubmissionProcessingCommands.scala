@@ -21,7 +21,8 @@ object SubmissionProcessingCommands {
   case class PersistHmdaRowParsedError(rowNumber: Int, errors: List[String])
       extends SubmissionProcessingCommand
 
-  case class GetParsedWithErrorCount(replyTo: ActorRef[SubmissionProcessingEvent])
+  case class GetParsedWithErrorCount(
+      replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
   case class FailProcessing(ex: Throwable) extends SubmissionProcessingCommand
