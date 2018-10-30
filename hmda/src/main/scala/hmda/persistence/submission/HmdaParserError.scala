@@ -26,9 +26,12 @@ import hmda.persistence.HmdaTypedPersistentActor
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import akka.actor.typed.scaladsl.adapter._
-import akka.kafka.ConsumerMessage.CommittableMessage
+import akka.kafka.ConsumerMessage.{CommittableMessage, CommittableOffsetBatch}
 import akka.stream.typed.scaladsl.ActorSink
 import com.typesafe.config.ConfigFactory
+
+import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 object HmdaParserError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -36,6 +39,10 @@ object HmdaParserError
                                      HmdaParserErrorState] {
 
   override val name: String = "HmdaParserError"
+
+  val config = ConfigFactory.load()
+  val kafkaHosts = config.getString("kafka.hosts")
+  val kafkaIdleTimeout = config.getInt("kafka.idle-timeout")
 
   override def behavior(
       entityId: String): Behavior[SubmissionProcessingCommand] =
@@ -61,13 +68,9 @@ object HmdaParserError
       case StartParsing(submissionId) =>
         implicit val system: ActorSystem = ctx.asScala.system.toUntyped
         implicit val materializer: ActorMaterializer = ActorMaterializer()
-        log.info(s"Start parsing for ${submissionId.toString}")
+        implicit val ec = system.dispatcher
 
-        val sink = ActorSink.actorRef[SubmissionProcessingCommand](
-          ref = ctx.asScala.self,
-          onCompleteMessage = CompleteParsing(submissionId),
-          onFailureMessage = FailProcessing.apply
-        )
+        log.info(s"Start parsing for ${submissionId.toString}")
 
         uploadConsumer(ctx, submissionId)
           .map(_.record.value())
@@ -79,9 +82,14 @@ object HmdaParserError
               PersistHmdaRowParsedError(rowNumber, errors.map(_.errorMessage))
             case (Right(hmdaFileRow), _) => HmdaRowParsed(hmdaFileRow)
           }
-          .runWith(sink)
-        //.runWith(Sink.actorRef(ctx.asScala.self.toUntyped,
-        //                       CompleteParsing(submissionId)))
+          .idleTimeout(kafkaIdleTimeout.seconds)
+          .runForeach(msg => ctx.asScala.self ! msg)
+          .onComplete {
+            case Success(_) =>
+              log.debug(s"stream completed for ${submissionId.toString}")
+            case Failure(_) =>
+              ctx.asScala.self ! CompleteParsing(submissionId)
+          }
         Effect.none
 
       case PersistHmdaRowParsedError(rowNumber, errors) =>
@@ -94,12 +102,15 @@ object HmdaParserError
         Effect.none
 
       case GetParsedRowCount(replyTo) =>
-        replyTo ! HmdaRowParsedCount(state.count)
+        replyTo ! HmdaRowParsedCount(state.errorCount)
         Effect.none
 
       case CompleteParsing(submissionId) =>
         log.info(s"Completed Parsing for ${submissionId.toString}")
         Effect.none
+
+      case HmdaParserStop =>
+        Effect.stop
 
       case _ =>
         Effect.none
@@ -109,6 +120,8 @@ object HmdaParserError
   override def eventHandler: (
       HmdaParserErrorState,
       SubmissionProcessingEvent) => HmdaParserErrorState = {
+    case (state, HmdaRowParsedError(_, _)) =>
+      state.incrementErrorCount
     case (state, _) => state
   }
 
@@ -119,8 +132,7 @@ object HmdaParserError
 
   private def uploadConsumer(ctx: ActorContext[_], submissionId: SubmissionId)
     : Source[CommittableMessage[String, String], Consumer.Control] = {
-    val config = ConfigFactory.load()
-    val kafkaHosts = config.getString("kafka.hosts")
+
     val kafkaConfig =
       ctx.asScala.system.settings.config.getConfig("akka.kafka.consumer")
     val consumerSettings =

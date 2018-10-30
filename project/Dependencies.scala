@@ -46,5 +46,5 @@ object Dependencies {
   lazy val jbossLogging = "org.jboss.logging" % "jboss-logging" % Version.jboss
   lazy val httpClient = "org.apache.httpcomponents" % "httpclient" % Version.httpcomponents
   lazy val kafkaLauncher = "net.manub" %% "scalatest-embedded-kafka" % Version.embeddedKafka
-  lazy val akkaKafkaStreams = "com.typesafe.akka" %% "akka-stream-kafka" % Version.akksStreamKafka
+  lazy val akkaKafkaStreams = "com.typesafe.akka" %% "akka-stream-kafka" % Version.akkaStreamKafka
 }
