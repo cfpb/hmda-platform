@@ -1,5 +1,6 @@
 package hmda.uli.api.http
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.common.{
@@ -12,7 +13,7 @@ import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.MediaTypes._
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{Flow, Source}
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.ErrorResponse
 import hmda.uli.api.model.ULIModel._
@@ -29,8 +30,6 @@ trait ULIHttpApi extends HmdaTimeDirectives {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val ec: ExecutionContext
-  implicit val jsonStreamingSupport: JsonEntityStreamingSupport =
-    EntityStreamingSupport.json()
   implicit val timeout: Timeout
   val log: LoggingAdapter
 
@@ -55,6 +54,18 @@ trait ULIHttpApi extends HmdaTimeDirectives {
             } ~
               fileUpload("file") {
                 case (_, byteSource) =>
+                  val lStart = ByteString.fromString("{\"loanIds\":[")
+                  val lMiddle = ByteString.fromString(",")
+                  val lEnd = ByteString.fromString("]}")
+                  val withLoanWrapper: Flow[ByteString, ByteString, NotUsed] =
+                    Flow[ByteString]
+                      .intersperse(lStart, lMiddle, lEnd)
+                  implicit val jsonStreamingSupport
+                    : JsonEntityStreamingSupport =
+                    EntityStreamingSupport
+                      .json()
+                      .withFramingRenderer(withLoanWrapper)
+
                   val checkDigitSource =
                     processLoanIdFile(byteSource)
                   complete(checkDigitSource)
@@ -104,6 +115,22 @@ trait ULIHttpApi extends HmdaTimeDirectives {
               } ~
                 fileUpload("file") {
                   case (_, byteSource) =>
+                    val uStart = ByteString.fromString("{\"ulis\":[")
+                    val uMiddle = ByteString.fromString(",")
+                    val uEnd = ByteString.fromString("]}")
+                    val withUliWrapper: Flow[ByteString, ByteString, NotUsed] =
+                      Flow[ByteString]
+                        .intersperse(uStart, uMiddle, uEnd)
+                        .map(s => {
+                          println(s.utf8String)
+                          s
+                        })
+                    implicit val jsonStreamingSupport
+                      : JsonEntityStreamingSupport =
+                      EntityStreamingSupport
+                        .json()
+                        .withFramingRenderer(withUliWrapper)
+
                     val validatedStream =
                       processUliFile(byteSource)
                     complete(validatedStream)

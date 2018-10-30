@@ -36,18 +36,20 @@ Example file contents:
 Example response in `JSON` format:
 
 ```json
-[
-    {
-        "loanId": "10Bx939c5543TqA1144M999143X",
-        "checkDigit": 38,
-        "uli": "10Bx939c5543TqA1144M999143X38"
-    },
-    {
-        "loanId": "10Cx939c5543TqA1144M999143X",
-        "checkDigit": 10,
-        "uli": "10Cx939c5543TqA1144M999143X10"
-    }
-]
+{
+    "loanIds": [
+        {
+            "loanId": "10Bx939c5543TqA1144M999143X",
+            "checkDigit": 38,
+            "uli": "10Bx939c5543TqA1144M999143X38"
+        },
+        {
+            "loanId": "10Cx939c5543TqA1144M999143X",
+            "checkDigit": 10,
+            "uli": "10Cx939c5543TqA1144M999143X10"
+        }
+    ]
+}
 ```
 
 * `/uli/checkDigit/csv`
@@ -104,20 +106,22 @@ Example file contents:
 Example response in `JSON` format:
 
 ```json
-[
-    {
-        "uli": "10Cx939c5543TqA1144M999143X10",
-        "isValid": true
-    },
-    {
-        "uli": "10Bx939c5543TqA1144M999143X38",
-        "isValid": true
-    },
-    {
-        "uli": "10Bx939c5543TqA1144M999133X38",
-        "isValid": false
-    }
-]
+{
+    "ulis": [
+        {
+            "uli": "10Cx939c5543TqA1144M999143X10",
+            "isValid": true
+        },
+        {
+            "uli": "10Bx939c5543TqA1144M999143X38",
+            "isValid": true
+        },
+        {
+            "uli": "10Bx939c5543TqA1144M999133X38",
+            "isValid": false
+        }
+    ]
+}
 ```
 
 * `/uli/validate/csv`
