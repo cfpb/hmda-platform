@@ -101,12 +101,12 @@ object HmdaParserError
         log.debug(s"${hmdaFileRow.toString}")
         Effect.none
 
-      case GetParsedRowCount(replyTo) =>
-        replyTo ! HmdaRowParsedCount(state.errorCount)
+      case GetParsedWithErrorCount(replyTo) =>
+        replyTo ! HmdaRowParsedCount(state.linesWithErrorCount)
         Effect.none
 
       case CompleteParsing(submissionId) =>
-        log.info(s"Completed Parsing for ${submissionId.toString}")
+        log.info(s"Completed Parsing for ${submissionId.toString}, total lines with errors: ${state.linesWithErrorCount}")
         Effect.none
 
       case HmdaParserStop =>

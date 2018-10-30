@@ -1,7 +1,7 @@
 package hmda.persistence.submission
 
-case class HmdaParserErrorState(errorCount: Int = 0) {
+case class HmdaParserErrorState(linesWithErrorCount: Int = 0) {
   def incrementErrorCount: HmdaParserErrorState = {
-    HmdaParserErrorState(this.errorCount + 1)
+    HmdaParserErrorState(this.linesWithErrorCount + 1)
   }
 }
