@@ -24,6 +24,8 @@ object SubmissionProcessingCommands {
   case class GetParsedRowCount(replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
+  case class FailProcessing(ex: Throwable) extends SubmissionProcessingCommand
+
   case class CompleteParsing(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
   case class CompleteParsingWithErrors(submissionId: SubmissionId)

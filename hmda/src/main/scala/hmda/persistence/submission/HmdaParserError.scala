@@ -11,7 +11,7 @@ import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import hmda.messages.pubsub.KafkaTopics._
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -21,13 +21,13 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.SubmissionId
-import hmda.parser.ParserErrorModel.ParserValidationError
 import hmda.parser.filing.ParserFlow._
 import hmda.persistence.HmdaTypedPersistentActor
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.ConsumerMessage.CommittableMessage
+import akka.stream.typed.scaladsl.ActorSink
 import com.typesafe.config.ConfigFactory
 
 object HmdaParserError
@@ -62,6 +62,13 @@ object HmdaParserError
         implicit val system: ActorSystem = ctx.asScala.system.toUntyped
         implicit val materializer: ActorMaterializer = ActorMaterializer()
         log.info(s"Start parsing for ${submissionId.toString}")
+
+        val sink = ActorSink.actorRef[SubmissionProcessingCommand](
+          ref = ctx.asScala.self,
+          onCompleteMessage = CompleteParsing(submissionId),
+          onFailureMessage = FailProcessing.apply
+        )
+
         uploadConsumer(ctx, submissionId)
           .map(_.record.value())
           .map(ByteString(_))
@@ -72,8 +79,9 @@ object HmdaParserError
               PersistHmdaRowParsedError(rowNumber, errors.map(_.errorMessage))
             case (Right(hmdaFileRow), _) => HmdaRowParsed(hmdaFileRow)
           }
-          .runWith(Sink.actorRef(ctx.asScala.self.toUntyped,
-                                 CompleteParsing(submissionId)))
+          .runWith(sink)
+        //.runWith(Sink.actorRef(ctx.asScala.self.toUntyped,
+        //                       CompleteParsing(submissionId)))
         Effect.none
 
       case PersistHmdaRowParsedError(rowNumber, errors) =>
@@ -82,11 +90,15 @@ object HmdaParserError
         }
 
       case HmdaRowParsed(hmdaFileRow) =>
-        log.info(s"${hmdaFileRow.toString}")
+        log.debug(s"${hmdaFileRow.toString}")
         Effect.none
 
       case GetParsedRowCount(replyTo) =>
         replyTo ! HmdaRowParsedCount(state.count)
+        Effect.none
+
+      case CompleteParsing(submissionId) =>
+        log.info(s"Completed Parsing for ${submissionId.toString}")
         Effect.none
 
       case _ =>
@@ -124,10 +136,5 @@ object HmdaParserError
       .filter(_.record.key() == submissionId.toString)
 
   }
-
-  private def parserProducer(topic: String, submissionId: SubmissionId)
-    : Flow[List[ParserValidationError], String, NotUsed] =
-    Flow[List[ParserValidationError]]
-      .map(xs => xs.map(_.errorMessage).mkString("\n"))
 
 }
