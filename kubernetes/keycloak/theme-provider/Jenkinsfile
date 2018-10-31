@@ -20,7 +20,7 @@ volumes: [
               sh "docker push ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
               sh "docker images"
               sh "docker images | grep 'theme-provider' | awk '{print \$3}' | uniq"
-              sh "docker rmi -f \$(docker images | grep 'theme-provider' | awk '{print \$3}' | uniq)"
+              sh "docker rmi -f \$(docker images --filter='dangling=true' --filter='name=theme-provider' | awk '{print \$3}' | uniq)"
               sh "docker images"
             }
         }

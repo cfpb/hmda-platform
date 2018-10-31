@@ -27,8 +27,8 @@ volumes: [
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
               sh "docker images"
-              sh "docker images | grep 'hmda-check-digit' | awk '{print \$3}' | uniq"
-              sh "docker rmi -f \$(docker images | grep 'hmda-check-digit' | awk '{print \$3}' | uniq)"
+              sh "docker images | grep 'check-digit' | awk '{print \$3}' | uniq"
+              sh "docker rmi -f \$(docker images --filter='dangling=true' --filter='name=check-digit' | awk '{print \$3}' | uniq)"
               sh "docker images"
             }
         }
