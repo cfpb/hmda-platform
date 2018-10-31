@@ -9,7 +9,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.stream.testkit.scaladsl.TestSink
 import akka.util.ByteString
-import hmda.model.filing.HmdaFileRow
+import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.ParserErrorModel.{
@@ -51,7 +51,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
         .map(ByteString(_))
         .via(parseTsFlow)
         .map(_.getOrElse(TransmittalSheet()))
-        .runWith(TestSink.probe[HmdaFileRow])
+        .runWith(TestSink.probe[PipeDelimited])
         .request(1)
         .expectNext(ts)
     }
@@ -71,7 +71,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
         .map(ByteString(_))
         .via(parseLarFlow)
         .map(_.getOrElse(LoanApplicationRegister()))
-        .runWith(TestSink.probe[HmdaFileRow])
+        .runWith(TestSink.probe[PipeDelimited])
         .request(larCsv.size)
         .expectNextN(larList)
     }
@@ -92,7 +92,7 @@ class ParserFlowSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
         .map(ByteString(_))
         .via(parseHmdaFile)
         .map(_.right.get)
-        .runWith(TestSink.probe[HmdaFileRow])
+        .runWith(TestSink.probe[PipeDelimited])
         .request(hmdaFile.size)
         .expectNextN(hmdaFile)
     }

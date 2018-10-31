@@ -89,7 +89,7 @@ object HmdaParserError
           .map {
             case (Left(errors), rowNumber) =>
               PersistHmdaRowParsedError(rowNumber, errors.map(_.errorMessage))
-            case (Right(hmdaFileRow), _) => HmdaRowParsed(hmdaFileRow)
+            case (Right(pipeDelimited), _) => HmdaRowParsed(pipeDelimited)
           }
           .idleTimeout(kafkaIdleTimeout.seconds)
           .runForeach(msg => ctx.asScala.self ! msg)
@@ -106,8 +106,8 @@ object HmdaParserError
           log.info(s"Persisted error: $rowNumber, $errors")
         }
 
-      case HmdaRowParsed(hmdaFileRow) =>
-        log.debug(s"${hmdaFileRow.toString}")
+      case HmdaRowParsed(pipeDelimited) =>
+        log.debug(s"${pipeDelimited.toString}")
         Effect.none
 
       case GetParsedWithErrorCount(replyTo) =>
