@@ -30,6 +30,7 @@ volumes: [
               sh "docker images | grep 'hmda-platform' | awk '{print \$3}' | uniq"
               sh "docker rmi -f \$(docker images --filter='dangling=true' --filter='name=hmda-platform' | awk '{print \$3}' | uniq)"
               sh "docker images"
+              sh "docker ps -a"
             }
         }
       }
