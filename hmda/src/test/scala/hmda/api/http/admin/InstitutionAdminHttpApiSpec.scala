@@ -9,6 +9,7 @@ import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import hmda.model.institution.Institution
 import org.scalatest.MustMatchers
@@ -54,6 +55,10 @@ class InstitutionAdminHttpApiSpec
   val sampleInstitution =
     institutionGen.sample.getOrElse(Institution.empty).copy(LEI = lei)
 
+  val leiTwo = "BBB"
+  val sampleInstitutionTwo =
+    institutionGen.sample.getOrElse(Institution.empty).copy(LEI = lei)
+
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
 
@@ -76,6 +81,13 @@ class InstitutionAdminHttpApiSpec
       }
     }
 
+    "Return a 404 on a wrongpath to create an institution" in {
+      Post("/wrongpath", sampleInstitution) ~> Route.seal(
+        institutionAdminRoutes(oAuth2Authorization)) ~> check {
+        status mustBe StatusCodes.NotFound
+      }
+    }
+
     "Get an institution" in {
       Get(s"/institutions/${sampleInstitution.LEI}") ~> institutionAdminRoutes(
         oAuth2Authorization) ~> check {
@@ -84,12 +96,25 @@ class InstitutionAdminHttpApiSpec
       }
     }
 
-    "Modify an institution" in {
+    "Return a 400 on a wrongpath to get an institution " in {
+      Get(s"/wrongpath/${sampleInstitution.LEI}") ~> Route.seal(
+        institutionAdminRoutes(oAuth2Authorization)) ~> check {
+        status mustBe StatusCodes.BadRequest
+      }
+    }
 
+    "Modify an institution" in {
       Put("/institutions", modified) ~> institutionAdminRoutes(
         oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Accepted
         responseAs[Institution] mustBe modified
+      }
+    }
+
+    "Return a 404 on a wrongpath to modiy an institution" in {
+      Put("/wrongpath", modified) ~> Route.seal(
+        institutionAdminRoutes(oAuth2Authorization)) ~> check {
+        status mustBe StatusCodes.NotFound
       }
     }
 
@@ -99,6 +124,13 @@ class InstitutionAdminHttpApiSpec
         status mustBe StatusCodes.Accepted
         responseAs[InstitutionDeletedResponse] mustBe InstitutionDeletedResponse(
           lei)
+      }
+    }
+
+    "Return a 404 on a wrongpath to delete an institution" in {
+      Delete("/institutions", modified) ~> Route.seal(
+        institutionAdminRoutes(oAuth2Authorization)) ~> check {
+        status mustBe StatusCodes.NotFound
       }
     }
 
