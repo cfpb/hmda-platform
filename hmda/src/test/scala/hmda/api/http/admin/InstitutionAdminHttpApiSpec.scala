@@ -55,10 +55,6 @@ class InstitutionAdminHttpApiSpec
   val sampleInstitution =
     institutionGen.sample.getOrElse(Institution.empty).copy(LEI = lei)
 
-  val leiTwo = "BBB"
-  val sampleInstitutionTwo =
-    institutionGen.sample.getOrElse(Institution.empty).copy(LEI = lei)
-
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
 
