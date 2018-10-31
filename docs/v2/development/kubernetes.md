@@ -106,6 +106,8 @@ helm upgrade -i -f kubernetes/institutions-api/values.yaml institutions-api ./ku
 ```
 If deploying to HMDA4, run the above command without the `set` flag and it will connect automatically.
 
+If deploying and pointing to a new database, run with the flag `--set postgres.create-schema="true"`
+
 
 6. OPTIONAL: Install [Istio](https://istio.io/) Service Mesh
 
