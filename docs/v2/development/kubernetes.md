@@ -79,7 +79,11 @@ You can access `Jenkins` by issuing `minikube service --n jenkins-system jenkins
 
 Follow the on screen instructions to finalize `Jenkins` setup. When logged in, update plugins if necessary.
 
-* Install Keycloak
+* Docker Hub Credentials
+
+Add credentials in Jenkins for `Docker Hub` so that images can be pushed as part of `Jenkins` pipeline builds.
+
+### Install Keycloak
 
 Make sure the two secrets are created: `realm` from the file under `/kubernetes/keycloak`, and `keycloak-credentials`
 with the key `password` set to the Postgres password.  Find the URL of the Postgres database, and then install Keycloak with 
@@ -89,9 +93,18 @@ this command:
 helm upgrade -i -f kubernetes/keycloak/values.yaml keycloak stable/keycloak --set keycloak.persistence.dbHost="<db URL>"
 ```
 
-* Docker Hub Credentials
+### Install Institutions API
 
-Add credentials in Jenkins for `Docker Hub` so that images can be pushed as part of `Jenkins` pipeline builds.
+The institutions API chart has two secret dependencies: `cassandra-credentials` (which is also needed by the hmda-platform)
+and `inst-postgres-credentials`.  These keys need to be created if they don't already exist.  
+* Cassandra secret keys: `cassandra.username` and `cassandra.password` 
+* InstApi secret keys: `host`, `username` and `password`
+
+If running locally, the Institutions API must be pointed at a local instance of Cassandra.  This can be done in the install command:
+```bash
+helm upgrade -i -f kubernetes/institutions-api/values.yaml institutions-api ./kubernetes/institutions-api/ --set cassandra.hosts="<Docker IP>"
+```
+If deploying to HMDA4, run the above command without the `set` flag and it will connect automatically.
 
 
 6. OPTIONAL: Install [Istio](https://istio.io/) Service Mesh
