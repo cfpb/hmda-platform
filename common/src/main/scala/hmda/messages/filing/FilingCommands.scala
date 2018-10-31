@@ -8,28 +8,30 @@ import hmda.model.filing.{Filing, FilingDetails, FilingStatus}
 
 object FilingCommands {
   sealed trait FilingCommand extends Command
-  case class CreateFiling(filing: Filing, replyTo: ActorRef[FilingCreated])
+  final case class CreateFiling(filing: Filing,
+                                replyTo: ActorRef[FilingCreated])
       extends FilingCommand
 
-  case class UpdateFilingStatus(period: String,
-                                status: FilingStatus,
-                                replyTo: ActorRef[Filing])
+  final case class UpdateFilingStatus(period: String,
+                                      status: FilingStatus,
+                                      replyTo: ActorRef[Filing])
       extends FilingCommand
 
-  case class GetFiling(replyTo: ActorRef[Option[Filing]]) extends FilingCommand
-
-  case class GetFilingDetails(replyTo: ActorRef[Option[FilingDetails]])
+  final case class GetFiling(replyTo: ActorRef[Option[Filing]])
       extends FilingCommand
 
-  case class AddSubmission(submission: Submission,
-                           replyTo: Option[ActorRef[Submission]])
+  final case class GetFilingDetails(replyTo: ActorRef[Option[FilingDetails]])
       extends FilingCommand
 
-  case class GetLatestSubmission(replyTo: ActorRef[Option[Submission]])
+  final case class AddSubmission(submission: Submission,
+                                 replyTo: Option[ActorRef[Submission]])
       extends FilingCommand
 
-  case class GetSubmissions(replyTo: ActorRef[List[Submission]])
+  final case class GetLatestSubmission(replyTo: ActorRef[Option[Submission]])
       extends FilingCommand
 
-  case class FilingStop() extends FilingCommand
+  final case class GetSubmissions(replyTo: ActorRef[List[Submission]])
+      extends FilingCommand
+
+  final case class FilingStop() extends FilingCommand
 }

@@ -11,15 +11,15 @@ import hmda.model.filing.submission.{Submission, SubmissionId}
 object SubmissionCommands {
   sealed trait SubmissionCommand extends Command
 
-  case class GetSubmission(replyTo: ActorRef[Option[Submission]])
+  final case class GetSubmission(replyTo: ActorRef[Option[Submission]])
       extends SubmissionCommand
 
-  case class CreateSubmission(submissionId: SubmissionId,
-                              replyTo: ActorRef[SubmissionCreated])
+  final case class CreateSubmission(submissionId: SubmissionId,
+                                    replyTo: ActorRef[SubmissionCreated])
       extends SubmissionCommand
-  case class ModifySubmission(submission: Submission,
-                              replyTo: ActorRef[SubmissionEvent])
+  final case class ModifySubmission(submission: Submission,
+                                    replyTo: ActorRef[SubmissionEvent])
       extends SubmissionCommand
 
-  case class SubmissionStop() extends SubmissionCommand
+  final case class SubmissionStop() extends SubmissionCommand
 }
