@@ -84,6 +84,13 @@ class InstitutionAdminHttpApiSpec
       }
     }
 
+    "Return a 404 on a wrongpath" in {
+      Post("/wrongpath") ~> Route.seal(
+        institutionAdminRoutes(oAuth2Authorization)) ~> check {
+        status mustBe StatusCodes.NotFound
+      }
+    }
+
     "Get an institution" in {
       Get(s"/institutions/${sampleInstitution.LEI}") ~> institutionAdminRoutes(
         oAuth2Authorization) ~> check {
@@ -92,10 +99,10 @@ class InstitutionAdminHttpApiSpec
       }
     }
 
-    "Return a 400 on a wrongpath to get an institution " in {
+    "Return a 404 on a wrongpath to get an institution " in {
       Get(s"/wrongpath/${sampleInstitution.LEI}") ~> Route.seal(
         institutionAdminRoutes(oAuth2Authorization)) ~> check {
-        status mustBe StatusCodes.BadRequest
+        status mustBe StatusCodes.NotFound
       }
     }
 

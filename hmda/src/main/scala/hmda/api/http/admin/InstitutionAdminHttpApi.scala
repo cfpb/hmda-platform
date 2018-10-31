@@ -45,11 +45,11 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
   def institutionWritePath(oAuth2Authorization: OAuth2Authorization) =
     oAuth2Authorization.authorizeTokenWithRole(hmdaAdminRole) { _ =>
-      entity(as[Institution]) { institution =>
-        val institutionPersistence = sharding.entityRefFor(
-          InstitutionPersistence.typeKey,
-          s"${InstitutionPersistence.name}-${institution.LEI}")
-        path("institutions") {
+      path("institutions") {
+        entity(as[Institution]) { institution =>
+          val institutionPersistence = sharding.entityRefFor(
+            InstitutionPersistence.typeKey,
+            s"${InstitutionPersistence.name}-${institution.LEI}")
           timedPost { uri =>
             val fCreated
               : Future[InstitutionCreated] = institutionPersistence ? (ref =>
@@ -64,49 +64,49 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                   StatusCodes.InternalServerError -> errorResponse))
             }
           } ~
-          timedPut { uri =>
-            val fModified
-              : Future[InstitutionEvent] = institutionPersistence ? (
-                ref => ModifyInstitution(institution, ref)
-            )
+            timedPut { uri =>
+              val fModified
+                : Future[InstitutionEvent] = institutionPersistence ? (
+                  ref => ModifyInstitution(institution, ref)
+              )
 
-            onComplete(fModified) {
-              case Success(InstitutionModified(i)) =>
-                complete(ToResponseMarshallable(StatusCodes.Accepted -> i))
-              case Success(InstitutionNotExists(lei)) =>
-                complete(ToResponseMarshallable(StatusCodes.NotFound -> lei))
-              case Success(_) =>
-                complete(ToResponseMarshallable(
-                  HttpResponse(StatusCodes.BadRequest)))
-              case Failure(error) =>
-                val errorResponse =
-                  ErrorResponse(500, error.getLocalizedMessage, uri.path)
-                complete(ToResponseMarshallable(
-                  StatusCodes.InternalServerError -> errorResponse))
-            }
-          } ~
-          timedDelete { uri =>
-            val fDeleted
-              : Future[InstitutionEvent] = institutionPersistence ? (
-                ref => DeleteInstitution(institution.LEI, ref)
-            )
+              onComplete(fModified) {
+                case Success(InstitutionModified(i)) =>
+                  complete(ToResponseMarshallable(StatusCodes.Accepted -> i))
+                case Success(InstitutionNotExists(lei)) =>
+                  complete(ToResponseMarshallable(StatusCodes.NotFound -> lei))
+                case Success(_) =>
+                  complete(ToResponseMarshallable(
+                    HttpResponse(StatusCodes.BadRequest)))
+                case Failure(error) =>
+                  val errorResponse =
+                    ErrorResponse(500, error.getLocalizedMessage, uri.path)
+                  complete(ToResponseMarshallable(
+                    StatusCodes.InternalServerError -> errorResponse))
+              }
+            } ~
+            timedDelete { uri =>
+              val fDeleted
+                : Future[InstitutionEvent] = institutionPersistence ? (
+                  ref => DeleteInstitution(institution.LEI, ref)
+              )
 
-            onComplete(fDeleted) {
-              case Success(InstitutionDeleted(lei)) =>
-                complete(ToResponseMarshallable(
-                  StatusCodes.Accepted -> InstitutionDeletedResponse(lei)))
-              case Success(InstitutionNotExists(lei)) =>
-                complete(ToResponseMarshallable(StatusCodes.NotFound -> lei))
-              case Success(_) =>
-                complete(ToResponseMarshallable(
-                  HttpResponse(StatusCodes.BadRequest)))
-              case Failure(error) =>
-                val errorResponse =
-                  ErrorResponse(500, error.getLocalizedMessage, uri.path)
-                complete(ToResponseMarshallable(
-                  StatusCodes.InternalServerError -> errorResponse))
+              onComplete(fDeleted) {
+                case Success(InstitutionDeleted(lei)) =>
+                  complete(ToResponseMarshallable(
+                    StatusCodes.Accepted -> InstitutionDeletedResponse(lei)))
+                case Success(InstitutionNotExists(lei)) =>
+                  complete(ToResponseMarshallable(StatusCodes.NotFound -> lei))
+                case Success(_) =>
+                  complete(ToResponseMarshallable(
+                    HttpResponse(StatusCodes.BadRequest)))
+                case Failure(error) =>
+                  val errorResponse =
+                    ErrorResponse(500, error.getLocalizedMessage, uri.path)
+                  complete(ToResponseMarshallable(
+                    StatusCodes.InternalServerError -> errorResponse))
+              }
             }
-          }
         }
       }
     }
