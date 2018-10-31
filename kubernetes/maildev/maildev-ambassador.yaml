@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata: 
+  labels: 
+    service: maildev-ambassador
+  name: maildev-ambassador
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: maildev_mapping
+      prefix: /mail/
+      rewrite: /
+      service: maildev
+spec:
+  type: NodePort
+  ports:
+  - name: maildev-ambassador
+    port: 80
+    targetPort: 80
+  selector:
+    service: maildev-ambassador

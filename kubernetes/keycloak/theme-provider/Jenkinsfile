@@ -18,7 +18,9 @@ volumes: [
               sh "docker tag ${env.DOCKER_HUB_USER}/theme-provider ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
-              sh "docker rmi -f ${env.DOCKER_HUB_USER}/theme-provider:${gitBranch}"
+              sh "docker images"
+              sh "docker images | grep 'theme-provider' | awk '{print \$3}' | uniq"
+              sh "docker rmi -f \$(docker images | grep 'theme-provider' | awk '{print \$3}' | uniq)"
               sh "docker images"
             }
         }
