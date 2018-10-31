@@ -9,4 +9,5 @@ object FilingEvents {
   final case class FilingCreated(filing: Filing) extends FilingEvent
   final case class FilingStatusUpdated(filing: Filing) extends FilingEvent
   final case class SubmissionAdded(submission: Submission) extends FilingEvent
+  final case class SubmissionUpdated(submission: Submission) extends FilingEvent
 }

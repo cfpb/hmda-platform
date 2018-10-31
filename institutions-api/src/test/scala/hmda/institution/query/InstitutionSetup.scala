@@ -27,6 +27,12 @@ trait InstitutionSetup extends InstitutionComponent {
     .copy(respondentName = "RespB")
     .copy(taxId = "taxIdB")
 
+  val instE = institutionEntityGen.sample
+    .getOrElse(InstitutionEntity())
+    .copy(lei = "EEE")
+    .copy(respondentName = "RespE")
+    .copy(taxId = "taxIdE")
+
   def setup() = {
     import dbConfig.profile.api._
     val setup = db.run(
@@ -34,13 +40,15 @@ trait InstitutionSetup extends InstitutionComponent {
         institutionsTable.schema.create,
         institutionsTable ++= Seq(
           instA,
-          instB
+          instB,
+          instE
         ),
         institutionEmailsTable.schema.create,
         institutionEmailsTable ++= Seq(
           InstitutionEmailEntity(1, "AAA", "aaa.com"),
           InstitutionEmailEntity(2, "AAA", "bbb.com"),
-          InstitutionEmailEntity(3, "BBB", "bbb.com")
+          InstitutionEmailEntity(3, "BBB", "bbb.com"),
+          InstitutionEmailEntity(4, "EEE", "eee.com")
         )
       ))
     Await.result(setup, duration)

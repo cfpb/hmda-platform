@@ -37,7 +37,7 @@ class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
   val submissionProbe = TestProbe[SubmissionEvent]("submission-probe")
   val maybeSubmissionProbe =
-    TestProbe[Option[Submission]]("submission-get0-probe")
+    TestProbe[Option[Submission]]("submission-get-probe")
 
   val submissionId = SubmissionId("12345", "2018", 1)
 

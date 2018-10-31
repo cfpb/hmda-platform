@@ -1,5 +1,7 @@
 package hmda.persistence.filing
 
+import java.time.Instant
+
 import akka.actor
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
@@ -60,7 +62,7 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       filingPersistence ! GetFiling(maybeFilingProbe.ref)
       maybeFilingProbe.expectMessage(Some(sampleFiling))
     }
-    "create submissions and read them back" in {
+    "create submissions, modify some and read them back" in {
       val filingPersistence = sharding.entityRefFor(
         FilingPersistence.typeKey,
         s"${FilingPersistence.name}-${FilingId(sampleFiling.lei, sampleFiling.period).toString}")
@@ -90,9 +92,12 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
       maybeSubmissionProbe.expectMessage(Some(sampleSubmission2))
 
+      val updated = sampleSubmission2.copy(end = Instant.now().getEpochSecond)
+      filingPersistence ! UpdateSubmission(updated, Some(submissionProbe.ref))
+
       filingPersistence ! GetFilingDetails(filingDetailsProbe.ref)
-      filingDetailsProbe.expectMessage(Some(
-        FilingDetails(sampleFiling, List(sampleSubmission2, sampleSubmission))))
+      filingDetailsProbe.expectMessage(
+        Some(FilingDetails(sampleFiling, List(updated, sampleSubmission))))
     }
   }
 }

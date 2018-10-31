@@ -9,21 +9,21 @@ import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.model.institution.Institution
-import hmda.persistence.HmdaPersistentActor
+import hmda.persistence.HmdaTypedPersistentActor
 
 object InstitutionPersistence
-    extends HmdaPersistentActor[InstitutionCommand,
-                                InstitutionEvent,
-                                InstitutionState] {
+    extends HmdaTypedPersistentActor[InstitutionCommand,
+                                     InstitutionEvent,
+                                     InstitutionState] {
 
-  final val name = "Institution"
+  override final val name = "Institution"
 
   override def behavior(entityId: String): Behavior[InstitutionCommand] = {
     Behaviors.setup { ctx =>
       ctx.log.info(s"Started Institution: $entityId")
       PersistentBehaviors
         .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
-          persistenceId = s"$name-$entityId",
+          persistenceId = s"$entityId",
           emptyState = InstitutionState(None),
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
@@ -33,7 +33,7 @@ object InstitutionPersistence
     }
   }
 
-  def commandHandler(ctx: ActorContext[InstitutionCommand])
+  override def commandHandler(ctx: ActorContext[InstitutionCommand])
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
     val log = ctx.asScala.log
     (state, cmd) =>

@@ -26,6 +26,10 @@ volumes: [
               sh "docker tag ${env.DOCKER_HUB_USER}/institutions-api ${env.DOCKER_HUB_USER}/institutions-api:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/institutions-api:${gitBranch}"
+              sh "docker images"
+              sh "docker images | grep 'institutions-api' | awk '{print \$3}' | uniq"
+              sh "docker rmi -f \$(docker images | grep 'institutions-api' | awk '{print \$3}' | uniq)"
+              sh "docker images"
             }
         }
       }
@@ -33,7 +37,7 @@ volumes: [
     stage('Deploy') {
         if (env.BRANCH_NAME == 'master') {
             container('helm') {
-                sh "helm upgrade --install --force --namespace=default --values=kubernetes/institutions-api/values.yaml --set image.tag=${gitBranch} --set postgresql.enabled=false institutions-api-${gitBranch} kubernetes/institutions-api"
+                sh "helm upgrade --install --force --namespace=default --values=kubernetes/institutions-api/values.yaml --set image.tag=${gitBranch} --set postgresql.enabled=false institutions-api kubernetes/institutions-api"
             }
         }
     }

@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+message TransmittalSheetMessage {
+    int32 id = 1;
+    string institutionName = 2;
+    int32 year = 3;
+    int32 quarter = 4;
+    ContactMessage contact = 5;
+    AgencyMessage agency = 6;
+    int32 totalLines = 7;
+    string taxId = 8;
+    string LEI = 9;
+}
+
+message ContactMessage {
+    string name = 1;
+    string phone = 2;
+    string email = 3;
+    AddressMessage address = 4;
+}
+
+message AddressMessage {
+    string street = 1;
+    string city = 2;
+    string state = 3;
+    string zipCode = 4;
+}
+
+message AgencyMessage {
+    int32 code = 1;
+    string name = 2;
+    string fullName = 3;
+}

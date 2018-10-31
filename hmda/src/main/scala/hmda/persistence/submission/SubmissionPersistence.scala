@@ -8,7 +8,7 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import hmda.messages.filing.FilingCommands.AddSubmission
+import hmda.messages.filing.FilingCommands.{AddSubmission, UpdateSubmission}
 import hmda.messages.submission.SubmissionCommands._
 import hmda.messages.submission.SubmissionEvents.{
   SubmissionCreated,
@@ -17,21 +17,21 @@ import hmda.messages.submission.SubmissionEvents.{
   SubmissionNotExists
 }
 import hmda.model.filing.submission.{Created, Submission}
-import hmda.persistence.HmdaPersistentActor
+import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.filing.FilingPersistence
 
 object SubmissionPersistence
-    extends HmdaPersistentActor[SubmissionCommand,
-                                SubmissionEvent,
-                                SubmissionState] {
+    extends HmdaTypedPersistentActor[SubmissionCommand,
+                                     SubmissionEvent,
+                                     SubmissionState] {
 
-  final val name = "Submission"
+  override final val name = "Submission"
 
-  def behavior(entityId: String): Behavior[SubmissionCommand] =
+  override def behavior(entityId: String): Behavior[SubmissionCommand] =
     Behaviors.setup { ctx =>
       PersistentBehaviors
         .receive[SubmissionCommand, SubmissionEvent, SubmissionState](
-          persistenceId = s"$name-$entityId",
+          persistenceId = s"$entityId",
           emptyState = SubmissionState(None),
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
@@ -39,7 +39,7 @@ object SubmissionPersistence
         .snapshotEvery(1000)
     }
 
-  def commandHandler(ctx: ActorContext[SubmissionCommand])
+  override def commandHandler(ctx: ActorContext[SubmissionCommand])
     : CommandHandler[SubmissionCommand, SubmissionEvent, SubmissionState] = {
     (state, cmd) =>
       val log = ctx.asScala.log
@@ -62,15 +62,18 @@ object SubmissionPersistence
             filingPersistence ! AddSubmission(submission, None)
             replyTo ! SubmissionCreated(submission)
           }
-        case ModifySubmission(submission, replyTo) =>
-          if (state.submission.map(s => s.id).contains(submission.id)) {
-            Effect.persist(SubmissionModified(submission)).thenRun { _ =>
-              log.debug(
-                s"persisted modified Submission: ${submission.toString}")
-              replyTo ! SubmissionModified(submission)
+        case ModifySubmission(modified, replyTo) =>
+          if (state.submission.map(s => s.id).contains(modified.id)) {
+            Effect.persist(SubmissionModified(modified)).thenRun { _ =>
+              log.debug(s"persisted modified Submission: ${modified.toString}")
+              val filingPersistence = sharding.entityRefFor(
+                FilingPersistence.typeKey,
+                s"${FilingPersistence.name}-${modified.id.lei}-${modified.id.period}")
+              filingPersistence ! UpdateSubmission(modified, None)
+              replyTo ! SubmissionModified(modified)
             }
           } else {
-            replyTo ! SubmissionNotExists(submission.id)
+            replyTo ! SubmissionNotExists(modified.id)
             Effect.none
           }
         case SubmissionStop() =>
@@ -78,11 +81,12 @@ object SubmissionPersistence
       }
   }
 
-  val eventHandler: (SubmissionState, SubmissionEvent) => SubmissionState = {
+  override val eventHandler
+    : (SubmissionState, SubmissionEvent) => SubmissionState = {
     case (state, SubmissionCreated(submission)) => state.copy(Some(submission))
-    case (state, SubmissionModified(submission)) =>
-      if (state.submission.getOrElse(Submission()).id == submission.id) {
-        SubmissionState(Some(submission))
+    case (state, SubmissionModified(modified)) =>
+      if (state.submission.getOrElse(Submission()).id == modified.id) {
+        state.copy(Some(modified))
       } else {
         state
       }

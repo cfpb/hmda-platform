@@ -30,6 +30,11 @@ message AddSubmissionMessage {
     string replyTo = 2;
 }
 
+message UpdateSubmissionMessage {
+    SubmissionMessage submission = 1;
+    string replyTo = 2;
+}
+
 message GetLatestSubmissionMessage {
     string replyTo = 1;
 }
