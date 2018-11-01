@@ -3,7 +3,7 @@ package hmda.messages.submission
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingEvent
-import hmda.model.filing.{HmdaFileRow, PipeDelimited}
+import hmda.model.filing.PipeDelimited
 import hmda.model.filing.submission.SubmissionId
 
 object SubmissionProcessingCommands {
@@ -31,30 +31,30 @@ object SubmissionProcessingCommands {
       extends SubmissionProcessingCommand
   case class CompleteParsingWithErrors(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
-  case class StartSyntacticalValidity(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class CompleteSyntacticalValidity(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class CompleteSyntacticalValidityWithErrors(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class StartQuality(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class CompleteQuality(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class CompleteQualityWithErrors(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class StartMacro(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class CompleteMacro(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class CompleteMacroWithErrors(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class Verify(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class Sign(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
-  case class Fail(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
+  //case class StartSyntacticalValidity(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class CompleteSyntacticalValidity(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class CompleteSyntacticalValidityWithErrors(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class StartQuality(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class CompleteQuality(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class CompleteQualityWithErrors(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class StartMacro(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class CompleteMacro(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class CompleteMacroWithErrors(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class Verify(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+  //case class Sign(submissionId: SubmissionId)
+  //    extends SubmissionProcessingCommand
+//  case class Fail(submissionId: SubmissionId)
+//      extends SubmissionProcessingCommand
 
   case object HmdaParserStop extends SubmissionProcessingCommand
 
