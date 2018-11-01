@@ -28,8 +28,9 @@ volumes: [
               sh "docker push ${env.DOCKER_HUB_USER}/hmda-platform:${gitBranch}"
               sh "docker images"
               sh "docker images | grep 'hmda-platform' | awk '{print \$3}' | uniq"
-              sh "docker rmi -f \$(docker images | grep 'hmda-platform' | awk '{print \$3}' | uniq)"
+              sh "docker rmi -f \$(docker images --filter='dangling=true' --filter='name=hmda-platform' | awk '{print \$3}' | uniq)"
               sh "docker images"
+              sh "docker ps -a"
             }
         }
       }

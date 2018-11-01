@@ -28,8 +28,9 @@ volumes: [
               sh "docker push ${env.DOCKER_HUB_USER}/institutions-api:${gitBranch}"
               sh "docker images"
               sh "docker images | grep 'institutions-api' | awk '{print \$3}' | uniq"
-              sh "docker rmi -f \$(docker images | grep 'institutions-api' | awk '{print \$3}' | uniq)"
+              sh "docker rmi -f \$(docker images --filter='dangling=true' --filter='name=institutions-api' | awk '{print \$3}' | uniq)"
               sh "docker images"
+              sh "docker ps -a"
             }
         }
       }
