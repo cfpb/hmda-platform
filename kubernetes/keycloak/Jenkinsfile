@@ -27,6 +27,7 @@ podTemplate(label: 'buildHelm', containers: [
                                 --set keycloak.persistence.dbHost=${env.POSTGRES_HOST} \
                                 --set keycloak.username=${env.KEYCLOAK_USER} \
                                 --set keycloak.password=${env.KEYCLOAK_PASSWORD} \
+                                --set image.pullPolicy=Always \
                                 keycloak kubernetes/keycloak"
                         }
                     }
