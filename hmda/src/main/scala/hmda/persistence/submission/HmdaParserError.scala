@@ -5,8 +5,8 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.kafka.scaladsl.Consumer
-import akka.kafka.{ConsumerSettings, Subscriptions}
+import akka.kafka.scaladsl.{Consumer, Producer}
+import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
@@ -28,12 +28,22 @@ import hmda.model.filing.submission.{
 import hmda.parser.filing.ParserFlow._
 import hmda.persistence.HmdaTypedPersistentActor
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
+import org.apache.kafka.common.serialization.{
+  StringDeserializer,
+  StringSerializer
+}
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.ConsumerMessage.CommittableMessage
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
+import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.ts.TransmittalSheet
+import hmda.parser.filing.lar.LarCsvParser
+import hmda.parser.filing.ts.TsCsvParser
+import hmda.serialization.kafka.lar.LarKafkaSerializer
+import hmda.serialization.kafka.ts.TsKafkaSerializer
+import org.apache.kafka.clients.producer.ProducerRecord
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -76,29 +86,99 @@ object HmdaParserError
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec = system.dispatcher
-
     cmd match {
       case StartParsing(submissionId) =>
         log.info(s"Start parsing for ${submissionId.toString}")
 
-        uploadConsumer(ctx, submissionId)
+        val kafkaConfig =
+          system.settings.config.getConfig("akka.kafka.producer")
+
+        val tsProducerSettings = ProducerSettings(kafkaConfig,
+                                                  new StringSerializer,
+                                                  new TsKafkaSerializer)
+          .withBootstrapServers(kafkaHosts)
+
+        val preProcess = uploadConsumer(ctx, submissionId)
           .map(_.record.value())
           .map(ByteString(_))
-          .via(parseHmdaFile)
-          .zip(Source.fromIterator(() => Iterator.from(1)))
+
+        val larProducerSettings = ProducerSettings(kafkaConfig,
+                                                   new StringSerializer,
+                                                   new LarKafkaSerializer)
+          .withBootstrapServers(kafkaHosts)
+
+        val tsSource =
+          preProcess
+            .take(1)
+            .via(parseTsFlow)
+            .map {
+              case Left(errors) =>
+                ctx.asScala.self ! PersistHmdaRowParsedError(
+                  1,
+                  errors.map(_.errorMessage))
+              case Right(ts) => ts
+            }
+            .map { ts =>
+              new ProducerRecord[String, TransmittalSheet](
+                parserTopic,
+                submissionId.toString,
+                ts.asInstanceOf[TransmittalSheet])
+            }
+
+        tsSource
+          .idleTimeout(kafkaIdleTimeout.seconds)
+          .runWith(Producer.plainSink(tsProducerSettings))
+
+        val larSource = preProcess
+          .drop(1)
+          .via(parseLarFlow)
+          .zip(Source.fromIterator(() => Iterator.from(2)))
           .map {
             case (Left(errors), rowNumber) =>
-              PersistHmdaRowParsedError(rowNumber, errors.map(_.errorMessage))
-            case (Right(pipeDelimited), _) => HmdaRowParsed(pipeDelimited)
+              ctx.asScala.self ! PersistHmdaRowParsedError(
+                rowNumber,
+                errors.map(_.errorMessage))
+            case (Right(lar), _) => lar
           }
+          .map { lar =>
+            new ProducerRecord[String, LoanApplicationRegister](
+              parserTopic,
+              submissionId.toString,
+              lar.asInstanceOf[LoanApplicationRegister]
+            )
+          }
+
+        larSource
           .idleTimeout(kafkaIdleTimeout.seconds)
-          .runForeach(msg => ctx.asScala.self ! msg)
+          .runWith(Producer.plainSink(larProducerSettings))
           .onComplete {
             case Success(_) =>
               log.debug(s"stream completed for ${submissionId.toString}")
             case Failure(_) =>
               ctx.asScala.self ! CompleteParsing(submissionId)
           }
+
+        //        uploadConsumer(ctx, submissionId)
+        //          .map(_.record.value())
+        //          .map(ByteString(_))
+        //          .via(parseHmdaFile)
+        //          .zip(Source.fromIterator(() => Iterator.from(1)))
+        //          .map {
+        //            case (Left(errors), rowNumber) =>
+        //              ctx.asScala.self ! PersistHmdaRowParsedError(
+        //                rowNumber,
+        //                errors.map(_.errorMessage))
+        //            case (Right(pipeDelimited), _) => HmdaRowParsed(pipeDelimited)
+        //          }
+        //          .idleTimeout(kafkaIdleTimeout.seconds)
+        //          .runForeach(println)
+        //          //.runForeach(msg => ctx.asScala.self ! msg)
+        //          .onComplete {
+        //            case Success(_) =>
+        //              log.debug(s"stream completed for ${submissionId.toString}")
+        //            case Failure(_) =>
+        //              ctx.asScala.self ! CompleteParsing(submissionId)
+        //          }
         Effect.none
 
       case PersistHmdaRowParsedError(rowNumber, errors) =>
@@ -106,9 +186,18 @@ object HmdaParserError
           log.info(s"Persisted error: $rowNumber, $errors")
         }
 
-      case HmdaRowParsed(pipeDelimited) =>
-        log.debug(s"${pipeDelimited.toString}")
-        Effect.none
+//      case HmdaRowParsed(pipeDelimited) =>
+//        log.debug(s"${pipeDelimited.toCSV}")
+//        val csv = pipeDelimited.toCSV
+//        val nrOfFieds = csv.split('|').length
+//        if (nrOfFieds > 15) {
+//          val lar = LarCsvParser(csv).getOrElse(LoanApplicationRegister())
+//        } else {
+//          val ts = TsCsvParser(csv).getOrElse(TransmittalSheet())
+//          val tsRecord =
+//            new ProducerRecord[String, TransmittalSheet](parserTopic, ts)
+//        }
+//        Effect.none
 
       case GetParsedWithErrorCount(replyTo) =>
         replyTo ! HmdaRowParsedCount(state.linesWithErrorCount)
