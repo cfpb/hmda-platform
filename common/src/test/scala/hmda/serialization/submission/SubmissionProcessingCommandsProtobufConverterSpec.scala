@@ -4,14 +4,22 @@ import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import hmda.model.submission.SubmissionGenerator._
 import SubmissionProcessingCommandsProtobufConverter._
+import akka.actor.ActorSystem
+import akka.actor.testkit.typed.scaladsl.TestProbe
+import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.SubmissionProcessingCommands._
+import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingEvent
 import hmda.persistence.serialization.submission.processing.commands._
 import org.scalacheck.Gen
+import akka.actor.typed.scaladsl.adapter._
 
 class SubmissionProcessingCommandsProtobufConverterSpec
     extends PropSpec
     with PropertyChecks
     with MustMatchers {
+
+  implicit val system = ActorSystem()
+  implicit val typedSystem = system.toTyped
 
   property("Start Upload must serialize to protobuf and back") {
     forAll(submissionIdGen) { submissionId =>
@@ -55,7 +63,14 @@ class SubmissionProcessingCommandsProtobufConverterSpec
   }
 
   property("Get Parser Error Count must serialize to protobuf and back") {
-    pending
+    val probe = TestProbe[SubmissionProcessingEvent]
+    val actorRef = probe.ref
+    val resolver = ActorRefResolver(typedSystem)
+    val cmd = GetParsedWithErrorCount(actorRef)
+    val protobuf = getParsedWithErrorCountToProtobuf(cmd, resolver).toByteArray
+    getParsedWithErrorCountFromProtobuf(
+      GetParsedWithErrorCountMessage.parseFrom(protobuf),
+      resolver) mustBe cmd
   }
 
   property("Complete Parsing must serialize to protobuf and back") {
