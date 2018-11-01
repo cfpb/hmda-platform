@@ -15,7 +15,7 @@ import hmda.persistence.serialization.submission.processing.events.{
 
 class SubmissionProcessingEventsSerializer
     extends SerializerWithStringManifest {
-  override def identifier: Int = 107
+  override def identifier: Int = 108
 
   final val ParsedErrorManifest = classOf[HmdaRowParsedError].getName
   final val ParsedErrorCountManifest = classOf[HmdaRowParsedCount].getName
