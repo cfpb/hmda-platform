@@ -10,7 +10,7 @@ import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, Timeout}
 import hmda.messages.pubsub.KafkaTopics._
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -75,7 +75,7 @@ object HmdaParserError
     val log = ctx.asScala.log
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
-    implicit val ec = system.dispatcher
+    implicit val ec: ExecutionContext = system.dispatcher
 
     cmd match {
       case StartParsing(submissionId) =>
@@ -88,11 +88,14 @@ object HmdaParserError
           .zip(Source.fromIterator(() => Iterator.from(1)))
           .map {
             case (Left(errors), rowNumber) =>
-              PersistHmdaRowParsedError(rowNumber, errors.map(_.errorMessage))
-            case (Right(pipeDelimited), _) => HmdaRowParsed(pipeDelimited)
+              ctx.asScala.self ! PersistHmdaRowParsedError(
+                rowNumber,
+                errors.map(_.errorMessage))
+            case (Right(pipeDelimited), _) =>
+              log.debug(s"${pipeDelimited.toCSV}")
           }
           .idleTimeout(kafkaIdleTimeout.seconds)
-          .runForeach(msg => ctx.asScala.self ! msg)
+          .runWith(Sink.ignore)
           .onComplete {
             case Success(_) =>
               log.debug(s"stream completed for ${submissionId.toString}")
