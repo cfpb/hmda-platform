@@ -8,14 +8,14 @@ import hmda.model.filing.submission.SubmissionId
 
 object SubmissionProcessingCommands {
   sealed trait SubmissionProcessingCommand extends Command
+
   case class StartUpload(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
+
   case class CompleteUpload(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
-  case class StartParsing(submissionId: SubmissionId)
-      extends SubmissionProcessingCommand
 
-  case class HmdaRowParsed(pipeDelimited: PipeDelimited)
+  case class StartParsing(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
 
   case class PersistHmdaRowParsedError(rowNumber: Int, errors: List[String])
@@ -25,12 +25,12 @@ object SubmissionProcessingCommands {
       replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
-  case class FailProcessing(ex: Throwable) extends SubmissionProcessingCommand
-
   case class CompleteParsing(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
+
   case class CompleteParsingWithErrors(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
+
   //case class StartSyntacticalValidity(submissionId: SubmissionId)
   //    extends SubmissionProcessingCommand
   //case class CompleteSyntacticalValidity(submissionId: SubmissionId)

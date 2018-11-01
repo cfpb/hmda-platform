@@ -109,10 +109,6 @@ object HmdaParserError
           log.info(s"Persisted error: $rowNumber, $errors")
         }
 
-      case HmdaRowParsed(pipeDelimited) =>
-        log.debug(s"${pipeDelimited.toString}")
-        Effect.none
-
       case GetParsedWithErrorCount(replyTo) =>
         replyTo ! HmdaRowParsedCount(state.linesWithErrorCount)
         Effect.none
