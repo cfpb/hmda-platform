@@ -94,4 +94,19 @@ object SubmissionProcessingCommandsProtobufConverter {
     )
   }
 
+  def completeParsingWithErrorsToProtobuf(
+      cmd: CompleteParsingWithErrors): CompleteParsingWithErrorsMessage = {
+    CompleteParsingWithErrorsMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def completeParsingWithErrorsFromProtobuf(
+      msg: CompleteParsingWithErrorsMessage): CompleteParsingWithErrors = {
+    CompleteParsingWithErrors(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
 }

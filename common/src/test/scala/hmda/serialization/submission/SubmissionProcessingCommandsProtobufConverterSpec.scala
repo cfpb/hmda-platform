@@ -81,4 +81,13 @@ class SubmissionProcessingCommandsProtobufConverterSpec
     }
   }
 
+  property("Complete Parsing With Errors must serialize to protobuf and back") {
+    forAll(submissionIdGen) { submissionId =>
+      val cmd = CompleteParsingWithErrors(submissionId)
+      val protobuf = completeParsingWithErrorsToProtobuf(cmd).toByteArray
+      completeParsingWithErrorsFromProtobuf(
+        CompleteParsingWithErrorsMessage.parseFrom(protobuf)) mustBe cmd
+    }
+  }
+
 }
