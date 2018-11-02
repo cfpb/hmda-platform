@@ -1,10 +1,9 @@
-package hmda.api.http.codec
+package hmda.api.http.codec.authorization
 
 import hmda.auth.AuthKeys
-import org.scalatest.{MustMatchers, WordSpec}
-import io.circe.parser.decode
-import hmda.api.http.codec.authorization.AuthKeyCodec._
 import io.circe.generic.auto._
+import io.circe.parser.decode
+import org.scalatest.{MustMatchers, WordSpec}
 
 class AuthKeyCodecSpec extends WordSpec with MustMatchers {
 
