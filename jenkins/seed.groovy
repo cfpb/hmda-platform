@@ -17,6 +17,8 @@ projects.each { project ->
                 repoOwner('cfpb')
                 repository(project.repo)
                 scanCredentialsId('github')
+                buildForkPRHead(true)
+                buildForkPRMerge(false)
             }
             orphanedItemStrategy {
                 discardOldItems {
