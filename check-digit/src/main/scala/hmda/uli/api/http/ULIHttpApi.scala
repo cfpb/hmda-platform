@@ -121,10 +121,6 @@ trait ULIHttpApi extends HmdaTimeDirectives {
                     val withUliWrapper: Flow[ByteString, ByteString, NotUsed] =
                       Flow[ByteString]
                         .intersperse(uStart, uMiddle, uEnd)
-                        .map(s => {
-                          println(s.utf8String)
-                          s
-                        })
                     implicit val jsonStreamingSupport
                       : JsonEntityStreamingSupport =
                       EntityStreamingSupport
