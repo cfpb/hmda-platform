@@ -1,14 +1,19 @@
 package hmda.uli.api.http
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
+import akka.http.scaladsl.common.{
+  EntityStreamingSupport,
+  JsonEntityStreamingSupport
+}
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{HttpCharsets, HttpEntity, StatusCodes}
 import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.model.MediaTypes.`text/csv`
-import akka.stream.scaladsl.{Sink, Source}
+import akka.http.scaladsl.model.MediaTypes._
+import akka.stream.scaladsl.{Flow, Source}
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.ErrorResponse
 import hmda.uli.api.model.ULIModel._
@@ -49,20 +54,21 @@ trait ULIHttpApi extends HmdaTimeDirectives {
             } ~
               fileUpload("file") {
                 case (_, byteSource) =>
-                  val checkDigitF =
-                    processLoanIdFile(byteSource).runWith(Sink.seq)
-                  onComplete(checkDigitF) {
-                    case Success(checkDigits) => {
-                      complete(ToResponseMarshallable(
-                        LoanCheckDigitResponse(checkDigits)))
-                    }
-                    case Failure(error) =>
-                      log.error(error.getLocalizedMessage)
-                      val errorResponse =
-                        ErrorResponse(400, error.getLocalizedMessage, uri.path)
-                      complete(ToResponseMarshallable(
-                        StatusCodes.BadRequest -> errorResponse))
-                  }
+                  val lStart = ByteString.fromString("{\"loanIds\":[")
+                  val lMiddle = ByteString.fromString(",")
+                  val lEnd = ByteString.fromString("]}")
+                  val withLoanWrapper: Flow[ByteString, ByteString, NotUsed] =
+                    Flow[ByteString]
+                      .intersperse(lStart, lMiddle, lEnd)
+                  implicit val jsonStreamingSupport
+                    : JsonEntityStreamingSupport =
+                    EntityStreamingSupport
+                      .json()
+                      .withFramingRenderer(withLoanWrapper)
+
+                  val checkDigitSource =
+                    processLoanIdFile(byteSource)
+                  complete(checkDigitSource)
                 case _ =>
                   complete(ToResponseMarshallable(StatusCodes.BadRequest))
               }
@@ -109,21 +115,21 @@ trait ULIHttpApi extends HmdaTimeDirectives {
               } ~
                 fileUpload("file") {
                   case (_, byteSource) =>
-                    val validatedF =
-                      processUliFile(byteSource).runWith(Sink.seq)
-                    onComplete(validatedF) {
-                      case Success(validated) =>
-                        complete(ToResponseMarshallable(
-                          ULIBatchValidatedResponse(validated)))
-                      case Failure(error) =>
-                        log.error(error.getLocalizedMessage)
-                        val errorResponse =
-                          ErrorResponse(400,
-                                        error.getLocalizedMessage,
-                                        uri.path)
-                        complete(ToResponseMarshallable(
-                          StatusCodes.BadRequest -> errorResponse))
-                    }
+                    val uStart = ByteString.fromString("{\"ulis\":[")
+                    val uMiddle = ByteString.fromString(",")
+                    val uEnd = ByteString.fromString("]}")
+                    val withUliWrapper: Flow[ByteString, ByteString, NotUsed] =
+                      Flow[ByteString]
+                        .intersperse(uStart, uMiddle, uEnd)
+                    implicit val jsonStreamingSupport
+                      : JsonEntityStreamingSupport =
+                      EntityStreamingSupport
+                        .json()
+                        .withFramingRenderer(withUliWrapper)
+
+                    val validatedStream =
+                      processUliFile(byteSource)
+                    complete(validatedStream)
 
                   case _ =>
                     complete(ToResponseMarshallable(StatusCodes.BadRequest))

@@ -7,7 +7,7 @@ object CommonProjectionMessages {
   sealed trait ProjectionCommand
   sealed trait ProjectionEvent
 
-  case object StartStreaming extends ProjectionCommand
+  final case object StartStreaming extends ProjectionCommand
   final case class SaveOffset(offset: Offset, replyTo: ActorRef[OffsetSaved])
       extends ProjectionCommand
   final case class GetOffset(replyTo: ActorRef[OffsetSaved])

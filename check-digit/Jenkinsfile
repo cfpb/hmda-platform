@@ -26,8 +26,10 @@ volumes: [
               sh "docker tag ${env.DOCKER_HUB_USER}/hmda-check-digit ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
-              sh "docker rmi -f ${env.DOCKER_HUB_USER}/hmda-check-digit:${gitBranch}"
               sh "docker images"
+              sh "docker image prune -f"
+              sh "docker images"
+              sh "docker ps -a"
             }
         }
       }
@@ -35,7 +37,14 @@ volumes: [
     stage('Deploy') {
         if (env.BRANCH_NAME == 'master') {
             container('helm') {
-                sh "helm upgrade --install --force --namespace=default --values=kubernetes/check-digit/values.yaml --set image.tag=${gitBranch} check-digit kubernetes/check-digit"
+                sh """
+                  helm upgrade --install --force --namespace=default 
+                  --values=kubernetes/check-digit/values.yaml \
+                  --set image.tag=${gitBranch} \
+                  --set image.pullPolicy=Always \
+                  check-digit \
+                  kubernetes/check-digit
+                """
             }
         }
     }

@@ -53,11 +53,10 @@ tolerations: []
 affinity: {}
 
 postgresql:
-  host: "{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local"
   postgresDatabase: hmda
-  postgresUser: postgres
-  postgresPassword: postgres
+  postgresUser: hmda
   enabled: false
+  createSchema: false
   ssl: require
 
 cassandra:
