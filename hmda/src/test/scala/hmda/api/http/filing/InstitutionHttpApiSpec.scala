@@ -101,7 +101,7 @@ class InstitutionHttpApiSpec
     "return Institution when found" in {
       Get(url) ~> institutionRoutes ~> check {
         val details = responseAs[InstitutionDetail]
-        details.filings.head.status mustBe InProgress
+        details.filings.head.lei mustBe sampleInstitution.LEI
       }
     }
   }
