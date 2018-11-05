@@ -35,7 +35,7 @@ trait ULIHttpApi extends HmdaTimeDirectives {
 
   val uliHttpRoutes =
     encodeResponse {
-      pathPrefix("udi") {
+      pathPrefix("uli") {
         path("checkDigit") {
           timedPost { uri =>
             entity(as[Loan]) { loan =>
