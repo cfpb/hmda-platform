@@ -6,7 +6,7 @@ import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionEvent
 }
-import hmda.model.filing.{Filing, FilingDetails}
+import hmda.model.filing.Filing
 import hmda.model.institution.{Institution, InstitutionDetail}
 
 object InstitutionCommands {

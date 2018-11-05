@@ -6,25 +6,16 @@ import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import hmda.api.http.codec.filing.FilingStatusCodec._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.api.http.filing.FilingResponseUtils.{
-  entityNotPresentResponse,
-  failedResponse
-}
-import hmda.messages.filing.FilingCommands.GetFilingDetails
-import hmda.messages.institution.InstitutionCommands.{
-  GetInstitution,
-  GetInstitutionDetails
-}
-import hmda.model.filing.FilingDetails
-import hmda.model.institution.{Institution, InstitutionDetail}
-import hmda.persistence.filing.FilingPersistence
+import hmda.api.http.filing.FilingResponseUtils.failedResponse
+
+import hmda.messages.institution.InstitutionCommands.GetInstitutionDetails
+import hmda.model.institution.InstitutionDetail
 import hmda.persistence.institution.InstitutionPersistence
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,17 +39,6 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
       val institutionPersistence =
         sharding.entityRefFor(InstitutionPersistence.typeKey,
                               s"${InstitutionPersistence.name}-$lei")
-
-      val filingPersistence =
-        sharding.entityRefFor(FilingPersistence.typeKey,
-                              s"${FilingPersistence.name}-$lei")
-
-      val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
-          ref => GetInstitution(ref)
-      )
-
-      val fDetails: Future[Option[FilingDetails]] = filingPersistence ? (ref =>
-        GetFilingDetails(ref))
 
       val iDetails
         : Future[Option[InstitutionDetail]] = institutionPersistence ? (ref =>

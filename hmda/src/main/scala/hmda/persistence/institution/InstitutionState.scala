@@ -4,7 +4,7 @@ import hmda.messages.institution.InstitutionEvents.{
   FilingAdded,
   InstitutionEvent
 }
-import hmda.model.filing.{Filing, FilingDetails}
+import hmda.model.filing.Filing
 import hmda.model.institution.Institution
 
 case class InstitutionState(institution: Option[Institution],

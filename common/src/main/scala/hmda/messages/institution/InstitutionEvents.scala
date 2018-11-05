@@ -1,7 +1,7 @@
 package hmda.messages.institution
 
 import hmda.messages.CommonMessages.Event
-import hmda.model.filing.{Filing, FilingDetails}
+import hmda.model.filing.Filing
 import hmda.model.institution.Institution
 
 object InstitutionEvents {

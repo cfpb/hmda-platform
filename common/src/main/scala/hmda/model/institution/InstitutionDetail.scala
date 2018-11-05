@@ -1,7 +1,6 @@
 package hmda.model.institution
 
-import hmda.model.filing.{Filing, FilingDetails}
-import hmda.model.institution.Institution
+import hmda.model.filing.Filing
 
 case class InstitutionDetail(
     institution: Option[Institution],
