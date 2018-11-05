@@ -1,6 +1,7 @@
 package hmda.messages.institution
 
 import hmda.messages.CommonMessages.Event
+import hmda.model.filing.{Filing, FilingDetails}
 import hmda.model.institution.Institution
 
 object InstitutionEvents {
@@ -10,4 +11,5 @@ object InstitutionEvents {
   final case class InstitutionModified(i: Institution) extends InstitutionEvent
   final case class InstitutionDeleted(LEI: String) extends InstitutionEvent
   final case class InstitutionNotExists(LEI: String) extends InstitutionEvent
+  final case class FilingAdded(filing: Filing) extends InstitutionEvent
 }
