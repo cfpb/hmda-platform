@@ -1,4 +1,4 @@
-package hmda.api.http.filing
+package hmda.model.institution
 
 import hmda.model.filing.{Filing, FilingDetails}
 import hmda.model.institution.Institution

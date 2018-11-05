@@ -8,5 +8,5 @@ import "filing.proto";
 
 message InstitutionDetailMessage {
     InstitutionMessage institution = 1;
-    repeated FilingMessage filing = 2;
+    repeated FilingMessage filings = 2;
 }

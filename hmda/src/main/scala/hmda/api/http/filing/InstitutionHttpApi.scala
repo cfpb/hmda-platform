@@ -23,13 +23,14 @@ import hmda.messages.institution.InstitutionCommands.{
   GetInstitutionDetails
 }
 import hmda.model.filing.FilingDetails
-import hmda.model.institution.Institution
+import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.model.ErrorResponse
 import io.circe.generic.auto._
 
 trait InstitutionHttpApi extends HmdaTimeDirectives {
@@ -71,8 +72,12 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
         onComplete(filingDetailsF) {
           case Success((Some(institutionDetails))) =>
             complete(ToResponseMarshallable(institutionDetails))
-          case Success((None)) =>
-            entityNotPresentResponse("institution", lei, uri)
+          case Success(None) =>
+            val errorResponse =
+              ErrorResponse(404, s"Institution: $lei does not exist", uri.path)
+            complete(
+              ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
+            )
           case Failure(error) =>
             failedResponse(uri, error)
         }

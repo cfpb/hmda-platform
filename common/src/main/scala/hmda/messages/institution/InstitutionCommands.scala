@@ -1,14 +1,13 @@
 package hmda.messages.institution
 
 import akka.actor.typed.ActorRef
-import hmda.api.http.filing.InstitutionDetail
 import hmda.messages.CommonMessages.Command
 import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionEvent
 }
 import hmda.model.filing.{Filing, FilingDetails}
-import hmda.model.institution.Institution
+import hmda.model.institution.{Institution, InstitutionDetail}
 
 object InstitutionCommands {
   sealed trait InstitutionCommand extends Command

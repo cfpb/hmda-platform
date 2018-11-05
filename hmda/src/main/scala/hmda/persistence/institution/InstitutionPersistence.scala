@@ -6,10 +6,9 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
-import hmda.api.http.filing.InstitutionDetail
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
-import hmda.model.institution.Institution
+import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.persistence.HmdaTypedPersistentActor
 
 object InstitutionPersistence
