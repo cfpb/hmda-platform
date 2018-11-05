@@ -1,14 +1,13 @@
 package hmda.parser.filing.lar
 
-import cats.data.ValidatedNel
 import hmda.model.filing.lar.enums.LarCodeEnum
 import hmda.parser.ParserErrorModel.ParserValidationError
 import cats.implicits._
+import hmda.parser.LarParserValidationResult
+
 import scala.util.{Failure, Success, Try}
 
 trait LarParser {
-
-  type LarParserValidationResult[A] = ValidatedNel[ParserValidationError, A]
 
   def validateIntField(value: String,
                        parserValidationError: ParserValidationError)

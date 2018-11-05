@@ -1,6 +1,6 @@
 package hmda.model.filing.lar
 
-import hmda.model.filing.lar.enums._
+import hmda.model.filing.lar.enums.{CreditScoreEnum, InvalidCreditScoreCode}
 
 case class Applicant(
     ethnicity: Ethnicity = Ethnicity(),

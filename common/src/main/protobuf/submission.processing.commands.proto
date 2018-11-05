@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "submission.proto";
+
+message StartUploadMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message CompleteUploadMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message StartParsingMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message PersistHmdaRowParsedErrorMessage {
+    int32 rowNumber = 1;
+    repeated string errors = 2;
+}
+
+message GetParsedWithErrorCountMessage {
+    string replyTo = 1;
+}
+
+message CompleteParsingMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message CompleteParsingWithErrorsMessage {
+    SubmissionIdMessage submissionId = 1;
+}

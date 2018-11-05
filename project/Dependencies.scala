@@ -21,6 +21,7 @@ object Dependencies {
   lazy val akkaPersistenceTyped = "com.typesafe.akka" %% "akka-persistence-typed" % Version.akka
   lazy val akkaTestkitTyped = "com.typesafe.akka" %% "akka-actor-testkit-typed" % Version.akka % Test
   lazy val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
+  lazy val akkaStreamTyped = "com.typesafe.akka" %% "akka-stream-typed" % Version.akka
   lazy val akkaHttp = "com.typesafe.akka" %% "akka-http" % Version.akkaHttp
   lazy val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akkaHttp % Test
   lazy val akkaHttpCirce = "de.heikoseeberger" %% "akka-http-circe" % Version.akkaHttpJson
@@ -45,5 +46,5 @@ object Dependencies {
   lazy val jbossLogging = "org.jboss.logging" % "jboss-logging" % Version.jboss
   lazy val httpClient = "org.apache.httpcomponents" % "httpclient" % Version.httpcomponents
   lazy val kafkaLauncher = "net.manub" %% "scalatest-embedded-kafka" % Version.embeddedKafka
-  lazy val akkaKafkaStreams = "com.typesafe.akka" %% "akka-stream-kafka" % Version.akksStreamKafka
+  lazy val akkaKafkaStreams = "com.typesafe.akka" %% "akka-stream-kafka" % Version.akkaStreamKafka
 }
