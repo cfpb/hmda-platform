@@ -8,6 +8,7 @@ import ApplicantFormatValidator._
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar._
 import hmda.parser.LarParserValidationResult
+import hmda.parser._
 
 sealed trait LarFormatValidator extends LarParser {
 
