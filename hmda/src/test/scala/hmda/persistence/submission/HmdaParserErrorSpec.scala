@@ -8,13 +8,16 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
 import hmda.messages.submission.SubmissionProcessingCommands.{
   GetParsedWithErrorCount,
+  GetParsingErrors,
   PersistHmdaRowParsedError
 }
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
+  HmdaRowParsedError,
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.SubmissionId
+import hmda.model.processing.state.HmdaParserErrorState
 import hmda.parser.filing.lar.LarParserErrorModel.{
   InvalidLoanTerm,
   InvalidOccupancy
@@ -33,6 +36,7 @@ class HmdaParserErrorSpec extends AkkaCassandraPersistenceSpec {
   val submissionId = SubmissionId("12345", "2018", 1)
 
   val errorsProbe = TestProbe[SubmissionProcessingEvent]("processing-event")
+  val stateProbe = TestProbe[HmdaParserErrorState]("parser-errors")
 
   "Parser errors" must {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
@@ -46,6 +50,12 @@ class HmdaParserErrorSpec extends AkkaCassandraPersistenceSpec {
       hmdaParserError ! PersistHmdaRowParsedError(2, e2.map(_.errorMessage))
       hmdaParserError ! GetParsedWithErrorCount(errorsProbe.ref)
       errorsProbe.expectMessage(HmdaRowParsedCount(2))
+
+      hmdaParserError ! GetParsingErrors(1, stateProbe.ref)
+      stateProbe.expectMessage(
+        HmdaParserErrorState(Seq(HmdaRowParsedError(1, e1.map(_.errorMessage))),
+                             Seq(HmdaRowParsedError(2, e2.map(_.errorMessage))),
+                             2))
     }
   }
 }
