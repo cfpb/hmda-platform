@@ -1,4 +1,4 @@
-package hmda.api.http.model.filing.submissions
+package hmda.model.filing.submissions
 
 case class PaginatedResource(totalRecords: Int, offset: Int = 0)(page: Int)
     extends WithPagination {

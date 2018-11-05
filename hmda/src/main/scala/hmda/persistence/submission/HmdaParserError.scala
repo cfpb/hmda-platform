@@ -32,9 +32,9 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.ConsumerMessage.CommittableMessage
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.model.filing.submissions.PaginatedResource
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
+import hmda.model.filing.submissions.PaginatedResource
 import hmda.model.processing.state.HmdaParserErrorState
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,5 +1,7 @@
 package hmda.api.http.model.filing.submissions
 
+import hmda.model.filing.submissions.WithPagination
+
 trait PaginatedResponse extends WithPagination {
 
   def path: String
