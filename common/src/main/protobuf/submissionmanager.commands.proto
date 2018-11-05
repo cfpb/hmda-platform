@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "submission.proto";
+import "submission.events.proto";
+
+message UpdateSubmissionStatusMessage {
+    SubmissionMessage submission = 1;
+}
+
+message WrappedSubmissionEventResponseMessage {
+    oneof sub {
+        SubmissionCreatedMessage submissionCreatedField = 1;
+        SubmissionModifiedMessage submissionModifiedField = 2;
+        SubmissionNotExistsMessage submissionNotExistsField = 3;
+    }
+}
+
