@@ -6,8 +6,13 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import hmda.actor.HmdaTypedActor
 import hmda.messages.submission.SubmissionCommands.ModifySubmission
-import hmda.messages.submission.SubmissionEvents.SubmissionEvent
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionEvent,
+  SubmissionModified
+}
 import hmda.messages.submission.SubmissionManagerCommands._
+import hmda.messages.submission.SubmissionProcessingCommands.StartParsing
+import hmda.model.filing.submission.Uploaded
 
 object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
 
@@ -26,6 +31,10 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
         sharding.entityRefFor(SubmissionPersistence.typeKey,
                               s"${SubmissionPersistence.name}-$submissionId")
 
+      val hmdaParserError =
+        sharding.entityRefFor(HmdaParserError.typeKey,
+                              s"${HmdaParserError.name}-$submissionId")
+
       val submissionEventResponseAdapter: ActorRef[SubmissionEvent] =
         ctx.messageAdapter(response => WrappedSubmissionEventResponse(response))
 
@@ -37,11 +46,20 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
           Behaviors.same
 
         case WrappedSubmissionEventResponse(submissionEvent) =>
-          log.info(s"$submissionEvent")
-          Behaviors.same
-
-        case _ =>
-          Behaviors.unhandled
+          submissionEvent match {
+            case SubmissionModified(submission) =>
+              submission.status match {
+                case Uploaded =>
+                  hmdaParserError ! StartParsing(submission.id)
+                case _ =>
+              }
+              Behaviors.same
+            case _ =>
+              log.info(s"$submissionEvent")
+              Behaviors.same
+          }
+        case SubmissionManagerStop =>
+          Behaviors.stopped
       }
 
     }

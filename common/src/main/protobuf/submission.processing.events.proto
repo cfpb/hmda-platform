@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+message HmdaRowParsedErrorMessage {
+    int32 rowNumber = 1;
+    repeated string errors = 2;
+}
+
+message HmdaRowParsedCountMessage {
+    int32 count = 1;
+}

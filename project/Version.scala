@@ -18,5 +18,5 @@ object Version {
   val jboss = "3.3.2.Final"
   val httpcomponents = "4.5.6"
   val embeddedKafka = "2.0.0"
-  val akksStreamKafka = "0.22"
+  val akkaStreamKafka = "0.22"
 }

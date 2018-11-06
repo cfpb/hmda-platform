@@ -18,6 +18,7 @@ lazy val akkaDeps = Seq(
   akkaTyped,
   akkaClusterTyped,
   akkaStream,
+  akkaStreamTyped,
   akkaManagement,
   akkaManagementClusterBootstrap,
   akkaServiceDiscoveryDNS,

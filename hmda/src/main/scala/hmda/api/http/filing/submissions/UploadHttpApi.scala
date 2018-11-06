@@ -146,7 +146,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
         submissionManager ! UpdateSubmissionStatus(modified)
         val fUploaded = byteSource
           .via(splitLines)
-          .map(_.utf8String)
+          .map(_.utf8String + "\n")
           .via(uploadProducer(topic, submission.id))
           .runWith(Sink.ignore)
 

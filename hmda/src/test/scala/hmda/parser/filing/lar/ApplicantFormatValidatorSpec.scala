@@ -8,6 +8,7 @@ import ApplicantFormatValidator._
 import cats.data.NonEmptyList
 import cats.data.Validated.Invalid
 import hmda.model.filing.lar.Applicant
+import hmda.parser.LarParserValidationResult
 import hmda.parser.filing.lar.LarParserErrorModel._
 
 class ApplicantFormatValidatorSpec
