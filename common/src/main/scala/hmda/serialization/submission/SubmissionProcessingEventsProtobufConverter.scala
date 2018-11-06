@@ -15,7 +15,7 @@ object SubmissionProcessingEventsProtobufConverter {
       hmdaRowParsedError: HmdaRowParsedError): HmdaRowParsedErrorMessage = {
     HmdaRowParsedErrorMessage(
       hmdaRowParsedError.rowNumber,
-      hmdaRowParsedError.errors
+      hmdaRowParsedError.errorMessages
     )
   }
 

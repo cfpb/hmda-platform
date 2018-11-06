@@ -63,3 +63,21 @@ case class PaginationLinks(
     next: String,
     last: String
 )
+
+object PaginatedResponse {
+  def staticPath(configurablePath: String): String = {
+    val extractPath = """(.+)\{rel\}""".r
+
+    configurablePath match {
+      case extractPath(path) => path
+    }
+  }
+
+  def currentPage(paginationQueryString: String): Int = {
+    val extractPage = """.*(\d+)""".r
+
+    paginationQueryString match {
+      case extractPage(page) => page.toInt
+    }
+  }
+}

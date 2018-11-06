@@ -224,7 +224,7 @@ Example response, with HTTP code 400:
 
 ### Parse errors
 
-`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/parseErrors`
+`/institutions/<lei>/filings/<period>/submissions/<submissionId>/parseErrors`
 
 `GET` - Returns all parsing errors for a submission
 

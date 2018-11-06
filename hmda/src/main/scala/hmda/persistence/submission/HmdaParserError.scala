@@ -119,8 +119,8 @@ object HmdaParserError
       case GetParsingErrors(page, replyTo) =>
         val p = PaginatedResource(state.totalErrors)(page)
         val larErrorsToReturn =
-          state.larParsingErrors.slice(p.fromIndex, p.toIndex)
-        replyTo ! HmdaParserErrorState(state.tsParsingErrors,
+          state.larErrors.slice(p.fromIndex, p.toIndex)
+        replyTo ! HmdaParserErrorState(state.transmittalSheetErrors,
                                        larErrorsToReturn,
                                        state.totalErrors)
         Effect.none
