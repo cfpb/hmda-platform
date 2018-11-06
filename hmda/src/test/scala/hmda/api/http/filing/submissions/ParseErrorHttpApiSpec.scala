@@ -89,6 +89,9 @@ class ParseErrorHttpApiSpec
         status mustBe StatusCodes.BadRequest
       }
     }
+    "Return paginated response with errors" in {
+
+    }
   }
 
 }
