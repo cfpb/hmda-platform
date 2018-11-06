@@ -8,7 +8,7 @@ import hmda.persistence.serialization.institution.institutiondetail.InstitutionD
 import hmda.serialization.institution.InstitutionDetailProtobufConverter._
 
 class InstitutionDetailSerializer extends SerializerWithStringManifest {
-  override def identifier: Int = 108
+  override def identifier: Int = 110
 
   final val InstitutionDetailManifest = classOf[InstitutionDetail].getName
 
