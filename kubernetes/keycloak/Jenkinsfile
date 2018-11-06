@@ -7,28 +7,31 @@ podTemplate(label: 'buildHelm', containers: [
         def gitCommit = repo.GIT_COMMIT
         def gitBranch = repo.GIT_BRANCH
         def shortGitCommit = "${gitCommit[0..10]}"
-    }
 
-    stage('Ambassador Service') {
-        if (env.BRANCH_NAME == 'master') {
-            container('kubectl') {
-                sh "kubectl create -f kubernetes/keycloak/keycloak-ambassador.yaml"
+        stage('Ambassador Service') {
+            if (env.BRANCH_NAME == 'master') {
+                container('kubectl') {
+                    sh "kubectl create -f kubernetes/keycloak/keycloak-ambassador.yaml"
+                }
             }
         }
-    }
 
-    stage('Deploy') {
-        if (env.BRANCH_NAME == 'master') {
-            container('helm') {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'keycloak-admin',
-                usernameVariable: 'KEYCLOAK_USER', passwordVariable: 'KEYCLOAK_PASSWORD']]) {
-                    withCredentials([string(credentialsId: 'keycloak-db', variable: 'POSTGRES_HOST')]) {
-                        sh "helm upgrade --install --force --namespace=default \
-                            --values=kubernetes/keycloak/values.yaml \
-                            --set keycloak.persistence.dbHost=${env.POSTGRES_HOST} \
-                            --set keycloak.username=${env.KEYCLOAK_USER} \
-                            --set keycloak.password=${env.KEYCLOAK_PASSWORD} \
-                            keycloak kubernetes/keycloak"
+        stage('Deploy') {
+            if (env.BRANCH_NAME == 'master') {
+                container('helm') {
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'keycloak-admin',
+                    usernameVariable: 'KEYCLOAK_USER', passwordVariable: 'KEYCLOAK_PASSWORD']]) {
+                        withCredentials([string(credentialsId: 'keycloak-db', variable: 'POSTGRES_HOST')]) {
+                            sh """
+                                helm upgrade --install --force --namespace=default \
+                                --values=kubernetes/keycloak/values.yaml \
+                                --set keycloak.persistence.dbHost=${env.POSTGRES_HOST} \
+                                --set keycloak.username=${env.KEYCLOAK_USER} \
+                                --set keycloak.password=${env.KEYCLOAK_PASSWORD} \
+                                --set image.pullPolicy=Always \
+                                keycloak kubernetes/keycloak
+                            """
+                        }
                     }
                 }
             }

@@ -27,8 +27,7 @@ volumes: [
               sh "docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} "
               sh "docker push ${env.DOCKER_HUB_USER}/hmda-platform:${gitBranch}"
               sh "docker images"
-              sh "docker images | grep 'hmda-platform' | awk '{print \$3}' | uniq"
-              sh "docker rmi -f \$(docker images --filter='dangling=true' --filter='name=hmda-platform' | awk '{print \$3}' | uniq)"
+              sh "docker image prune -f"
               sh "docker images"
               sh "docker ps -a"
             }
@@ -38,7 +37,15 @@ volumes: [
     stage('Deploy') {
         if (env.BRANCH_NAME == 'master') {
             container('helm') {
-                sh "helm upgrade --install --force --namespace=default --values=kubernetes/hmda-platform/values.yaml --set image.tag=${gitBranch} --set service.name=hmda-platform-api hmda-platform kubernetes/hmda-platform"
+                sh """
+                  helm upgrade --install --force \
+                  --namespace=default \
+                  --values=kubernetes/hmda-platform/values.yaml \
+                  --set image.tag=${gitBranch} \
+                  --set service.name=hmda-platform-api \
+                  --set image.pullPolicy=Always \
+                  hmda-platform kubernetes/hmda-platform
+                """
             }
         }
     }

@@ -3,6 +3,8 @@ kind: ConfigMap
 metadata:
   name: "{{ .Release.Name }}-inst-api-config"
 data:
-  instapi.postgres_host: "{{ .Values.postgresql.host }}"
-  cassandra-hosts: "{{ .Values.cassandra.hosts }}"
+  postgres.create-schema: "{{ .Values.postgresql.createSchema }}"
   postgres.ssl: "{{ .Values.postgresql.ssl }}"
+  postgres.user:  "{{ .Values.postgresql.postgresUser }}"
+  postgres.database: "{{ .Values.postgresql.postgresDatabase }}"
+  cassandra-hosts: "{{ .Values.cassandra.hosts }}"

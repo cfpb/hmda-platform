@@ -5,8 +5,8 @@ import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives.complete
 import akka.http.scaladsl.server.Route
 import hmda.api.http.model.ErrorResponse
+import hmda.api.http.codec.ErrorResponseCodec._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import io.circe.generic.auto._
 
 object FilingResponseUtils {
 
