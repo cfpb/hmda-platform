@@ -34,6 +34,14 @@ metadata:
       prefix: /v2/public/institutions/
       rewrite: /institutions/
       service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
+      ---
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: institution_api_search_mapping
+      method: GET
+      prefix: /v2/public/institutions?
+      rewrite: /institutions?
+      service: {{ template "institutions-api.fullname" .}}:{{ .Values.service.port }}
 spec:
   type: {{ .Values.ambassador.service.type }}
   ports:
