@@ -11,7 +11,7 @@ object ParsingErrorSummaryGenerator {
     for {
       tsErrors <- Gen.listOf(Gen.alphaStr)
       larErrors <- Gen.listOf(hmdaRowParserErrorGen)
-      path <- Gen.alphaStr
+      path <- Gen.alphaStr.suchThat(_.length > 0)
       currentPage <- Gen.choose(1, Int.MaxValue)
       total <- Gen.choose(1, Int.MaxValue)
       status <- submissionStatusGen

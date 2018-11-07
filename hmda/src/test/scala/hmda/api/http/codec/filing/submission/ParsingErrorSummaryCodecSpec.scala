@@ -14,14 +14,18 @@ class ParsingErrorSummaryCodecSpec
 
   property("ParsingErrorSummary must encode/decode to/from JSON") {
     forAll(parsingErrorSummaryGen) { parsingErrorSummary =>
-      val json = parsingErrorSummary.asJson
-      val encoded = json
-        .as[ParsingErrorSummary]
-        .getOrElse(ParsingErrorSummary())
+      whenever(!parsingErrorSummary.isEmpty) {
+        val json = parsingErrorSummary.asJson
+        val encoded = json
+          .as[ParsingErrorSummary]
+          .getOrElse(ParsingErrorSummary())
 
-      if (encoded.isEmpty) encoded mustBe ParsingErrorSummary()
-      else encoded mustBe parsingErrorSummary
-
+        encoded.transmittalSheetErrors mustBe parsingErrorSummary.transmittalSheetErrors
+        encoded.larErrors mustBe parsingErrorSummary.larErrors
+        encoded.path mustBe parsingErrorSummary.path
+        encoded.total mustBe parsingErrorSummary.total
+        encoded.status mustBe parsingErrorSummary.status
+      }
     }
   }
 }
