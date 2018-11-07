@@ -20,6 +20,7 @@ import hmda.uli.api.model.ULIModel._
 import hmda.uli.validation.ULI._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
+import hmda.api.http.codec.ErrorResponseCodec._
 
 import scala.concurrent.ExecutionContext
 import hmda.util.streams.FlowUtils._
