@@ -155,7 +155,8 @@ trait InstitutionComponent {
       emails <- db.run(emailTotalQuery(leis).result)
     } yield {
       institutions.map(institution => {
-        val filteredEmails = emails.filter(_.lei == institution.lei).map(_.emailDomain)
+        val filteredEmails =
+          emails.filter(_.lei == institution.lei).map(_.emailDomain)
         InstitutionConverter.convert(institution, filteredEmails)
       })
     }

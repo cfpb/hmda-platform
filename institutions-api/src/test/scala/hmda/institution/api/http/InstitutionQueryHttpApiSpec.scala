@@ -72,7 +72,7 @@ class InstitutionQueryHttpApiSpec
         institutions.head.LEI mustBe "AAA"
         institutions.head.taxId mustBe Some("taxIdA")
         institutions.head.respondent.name mustBe Some("RespA")
-        institutions.head.emailDomains mustBe List("aaa.com")
+        institutions.head.emailDomains mustBe List("aaa.com", "bbb.com")
       }
       Get(
         "/institutions?domain=xxx.com&lei=XXX&respondentName=RespX&taxId=taxIdX") ~> institutionPublicRoutes ~> check {
