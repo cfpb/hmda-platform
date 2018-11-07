@@ -13,15 +13,14 @@ import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 import io.circe.generic.auto._
 import hmda.Seq
 import hmda.model.filing.submission.SubmissionStatus
-import hmda.model.filing.submissions.PaginatedResource
 
 object ParsingErrorSummaryCodec {
 
   implicit val parsingErrorSummaryEncoder: Encoder[ParsingErrorSummary] =
     new Encoder[ParsingErrorSummary] {
       override def apply(a: ParsingErrorSummary): Json = Json.obj(
-        ("transmittalSheetErrors", Json.arr(a.transmittalSheetErrors.asJson)),
-        ("larErrors", Json.arr(a.larErrors.asJson)),
+        ("transmittalSheetErrors", a.transmittalSheetErrors.asJson),
+        ("larErrors", a.larErrors.asJson),
         ("count", Json.fromInt(a.count)),
         ("total", Json.fromInt(a.total)),
         ("status", a.status.asJson),
@@ -37,7 +36,7 @@ object ParsingErrorSummaryCodec {
           larErrors <- c.downField("larErrors").as[Seq[HmdaRowParsedError]]
           total <- c.downField("total").as[Int]
           status <- c.downField("status").as[SubmissionStatus]
-          links <- c.downField("links").as[PaginationLinks]
+          links <- c.downField("_links").as[PaginationLinks]
         } yield {
           val path = PaginatedResponse.staticPath(links.href)
           val currentPage = PaginatedResponse.currentPage(links.self)
