@@ -24,6 +24,7 @@ import scala.util.{Failure, Success}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import io.circe.generic.auto._
+import hmda.api.http.codec.ErrorResponseCodec._
 
 trait InstitutionHttpApi extends HmdaTimeDirectives {
 
