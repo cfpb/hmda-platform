@@ -53,14 +53,10 @@ Example response:
 {
     "institution": {
         "activityYear": 2014,
-        "LEI": "10Bx939c5543TqA1144M",
-        "agency": {
-            "OCC": {}
-        },
-        "institutionType": {
-            "MBSOfFederalCharteredThrift": {}
-        },
-        "institutionId_2017": "12345",
+        "lei": "10Bx939c5543TqA1144M",
+        "agency": 1,
+        "institutionType": 17,
+        "institutionId2017": "12345",
         "taxId": "99-00000000",
         "rssd": 12345,
         "emailDomains": [
@@ -85,17 +81,6 @@ Example response:
     },
     "filings": [
         {
-            "period": "2019",
-            "lei": "10Bx939c5543TqA1144M",
-            "status": {
-                "code": 2,
-                "message": "in-progress"
-            },
-            "filingRequired": true,
-            "start": 1541521283105,
-            "end": 0
-        },
-        {
             "period": "2018",
             "lei": "10Bx939c5543TqA1144M",
             "status": {
@@ -103,7 +88,7 @@ Example response:
                 "message": "in-progress"
             },
             "filingRequired": true,
-            "start": 1541521278794,
+            "start": 1541558493499,
             "end": 0
         },
         {
@@ -114,18 +99,18 @@ Example response:
                 "message": "in-progress"
             },
             "filingRequired": true,
-            "start": 1541521276817,
+            "start": 1541558491086,
             "end": 0
         },
         {
-            "period": "2020",
+            "period": "2019",
             "lei": "10Bx939c5543TqA1144M",
             "status": {
                 "code": 2,
                 "message": "in-progress"
             },
             "filingRequired": true,
-            "start": 1541521270311,
+            "start": 1541558485816,
             "end": 0
         }
     ]
