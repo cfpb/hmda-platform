@@ -13,6 +13,7 @@ import org.scalatest.MustMatchers
 import akka.actor.typed.scaladsl.adapter._
 import akka.testkit._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.api.http.codec.filing.FilingStatusCodec._
 import io.circe.generic.auto._
 import hmda.model.institution.InstitutionGenerators._

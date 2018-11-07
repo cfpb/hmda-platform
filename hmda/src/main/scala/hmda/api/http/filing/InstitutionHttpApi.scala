@@ -5,6 +5,7 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
+import hmda.api.http.codec.institution.InstitutionCodec._
 import hmda.api.http.codec.filing.FilingStatusCodec._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
