@@ -3,7 +3,7 @@ package hmda.api.http.filing.submissions
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.{LoggingAdapter, NoLogging}
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.MustMatchers
@@ -65,6 +65,7 @@ class UploadHttpApiSpec
   override val log: LoggingAdapter = NoLogging
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
   override implicit val timeout: Timeout = Timeout(10.seconds)
+  private implicit val routeTimeout = RouteTestTimeout(3.seconds)
   override val config: Config = ConfigFactory.load()
 
   val kafkaHosts = config.getString("kafka.hosts")
