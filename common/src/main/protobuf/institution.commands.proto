@@ -4,6 +4,7 @@ option java_package = "hmda.persistence.serialization";
 option optimize_for = SPEED;
 
 import "institution.proto";
+import "filing.proto";
 
 message CreateInstitutionMessage {
     InstitutionMessage institution = 1;
@@ -17,6 +18,11 @@ message ModifyInstitutionMessage {
 
 message DeleteInstitutionMessage {
     string lei = 1;
+    string replyTo = 2;
+}
+
+message AddFilingMessage {
+    FilingMessage filing = 1;
     string replyTo = 2;
 }
 

@@ -1,19 +1,11 @@
 package hmda.serialization.institution
 
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionDeleted,
-  InstitutionModified,
-  InstitutionNotExists
-}
+import hmda.messages.institution.InstitutionEvents._
 import hmda.persistence.serialization.institution.InstitutionMessage
-import hmda.persistence.serialization.institution.events.{
-  InstitutionCreatedMessage,
-  InstitutionDeletedMessage,
-  InstitutionModifiedMessage,
-  InstitutionNotExistsMessage
-}
+import hmda.persistence.serialization.institution.events._
 import InstitutionProtobufConverter._
+import hmda.persistence.serialization.filing.FilingMessage
+import hmda.serialization.filing.FilingProtobufConverter._
 
 object InstitutionEventsProtobufConverter {
 
@@ -73,6 +65,17 @@ object InstitutionEventsProtobufConverter {
     InstitutionNotExists(
       LEI = msg.lei
     )
+  }
+
+  def filingAddedToProtobuf(evt: FilingAdded): FilingAddedMessage = {
+    FilingAddedMessage(
+      if (evt.filing.isEmpty) None
+      else Some(filingToProtobuf(evt.filing))
+    )
+  }
+
+  def filingAddedFromProtobuf(msg: FilingAddedMessage): FilingAdded = {
+    FilingAdded(filingFromProtobuf(msg.filing.getOrElse(FilingMessage())))
   }
 
 }

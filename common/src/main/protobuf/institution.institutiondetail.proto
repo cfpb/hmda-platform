@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "institution.proto";
+import "filing.proto";
+
+message InstitutionDetailMessage {
+    InstitutionMessage institution = 1;
+    repeated FilingMessage filings = 2;
+}

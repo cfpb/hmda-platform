@@ -9,6 +9,7 @@ import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.filing.FilingHttpApi
+import hmda.api.http.filing.InstitutionHttpApi
 import hmda.api.http.routes.BaseHttpApi
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
@@ -33,7 +34,8 @@ class HmdaFilingApi
     with FilingHttpApi
     with SubmissionHttpApi
     with UploadHttpApi
-    with ParseErrorHttpApi {
+    with ParseErrorHttpApi
+    with InstitutionHttpApi {
   import HmdaFilingApi._
 
   val config = ConfigFactory.load()
@@ -51,7 +53,7 @@ class HmdaFilingApi
   override val port: Int = config.getInt("hmda.http.filingPort")
 
   override val paths
-    : Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes ~ parserErrorRoute
+    : Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes ~ institutionRoutes ~ parserErrorRoute
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
