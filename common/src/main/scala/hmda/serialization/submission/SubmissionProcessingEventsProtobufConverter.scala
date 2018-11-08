@@ -4,7 +4,9 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   HmdaRowParsedError
 }
+import hmda.model.processing.state.HmdaParserErrorState
 import hmda.persistence.serialization.submission.processing.events.{
+  HmdaParserErrorStateMessage,
   HmdaRowParsedCountMessage,
   HmdaRowParsedErrorMessage
 }
@@ -40,6 +42,28 @@ object SubmissionProcessingEventsProtobufConverter {
     : HmdaRowParsedCount = {
     HmdaRowParsedCount(
       hmdaRowParsedCountMessage.count
+    )
+  }
+
+  def hmdaParserErrorStateToProtobuf(hmdaParserErrorState: HmdaParserErrorState)
+    : HmdaParserErrorStateMessage = {
+    HmdaParserErrorStateMessage(
+      hmdaParserErrorState.transmittalSheetErrors.map(x =>
+        hmdaRowParsedErrorToProtobuf(x)),
+      hmdaParserErrorState.larErrors.map(x => hmdaRowParsedErrorToProtobuf(x)),
+      hmdaParserErrorState.totalErrors
+    )
+  }
+
+  def hmdaParserErrorStateFromProtobuf(
+      hmdaParserErrorStateMessage: HmdaParserErrorStateMessage)
+    : HmdaParserErrorState = {
+    HmdaParserErrorState(
+      hmdaParserErrorStateMessage.transmittalSheetErrors.map(x =>
+        hmdaRowParsedErrorFromProtobuf(x)),
+      hmdaParserErrorStateMessage.larErrors.map(x =>
+        hmdaRowParsedErrorFromProtobuf(x)),
+      hmdaParserErrorStateMessage.totalErrors
     )
   }
 
