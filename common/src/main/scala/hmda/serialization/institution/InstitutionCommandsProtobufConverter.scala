@@ -1,21 +1,13 @@
 package hmda.serialization.institution
 
 import akka.actor.typed.ActorRefResolver
-import hmda.messages.institution.InstitutionCommands.{
-  CreateInstitution,
-  DeleteInstitution,
-  GetInstitution,
-  ModifyInstitution
-}
+import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.persistence.serialization.institution.InstitutionMessage
-import hmda.persistence.serialization.institution.commands.{
-  CreateInstitutionMessage,
-  DeleteInstitutionMessage,
-  GetInstitutionMessage,
-  ModifyInstitutionMessage
-}
+import hmda.persistence.serialization.institution.commands._
 import InstitutionProtobufConverter._
+import hmda.persistence.serialization.filing.FilingMessage
+import hmda.serialization.filing.FilingProtobufConverter._
 
 object InstitutionCommandsProtobufConverter {
 
@@ -95,4 +87,28 @@ object InstitutionCommandsProtobufConverter {
     val actorRef = resolver.resolveActorRef(msg.replyTo)
     DeleteInstitution(msg.lei, actorRef)
   }
+
+  def addFilingFromProtobuf(bytes: Array[Byte],
+                            refResolver: ActorRefResolver): AddFiling = {
+    val msg = AddFilingMessage.parseFrom(bytes)
+    AddFiling(
+      filingFromProtobuf(msg.filing.getOrElse(FilingMessage())),
+      if (msg.replyTo == "") None
+      else Some(refResolver.resolveActorRef(msg.replyTo))
+    )
+  }
+
+  def addFilingToProtobuf(cmd: AddFiling,
+                          refResolver: ActorRefResolver): AddFilingMessage = {
+    val filing = cmd.filing
+    AddFilingMessage(
+      if (filing.isEmpty) None
+      else Some(filingToProtobuf(cmd.filing)),
+      cmd.replyTo match {
+        case None      => ""
+        case Some(ref) => refResolver.toSerializationFormat(ref)
+      }
+    )
+  }
+
 }
