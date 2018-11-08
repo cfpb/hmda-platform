@@ -35,7 +35,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.codec.ErrorResponseCodec._
-import hmda.api.http.filing.FilingResponseUtils.failedResponse
+import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.model.ErrorResponse
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.submission._
@@ -98,27 +98,13 @@ trait UploadHttpApi extends HmdaTimeDirectives {
                                submission,
                                uri)
                   } else {
-                    val errorResponse = ErrorResponse(
-                      404,
-                      s"Submissidson ${submissionId.toString} not available for upload",
-                      uri.path)
-                    complete(
-                      ToResponseMarshallable(
-                        StatusCodes.NotFound -> errorResponse)
-                    )
+                    submissionNotAvailable(submissionId, uri)
                   }
                 case None =>
-                  val errorResponse = ErrorResponse(
-                    404,
-                    s"Submissiasdfon ${submissionId.toString} not available for upload",
-                    uri.path)
-                  complete(
-                    ToResponseMarshallable(
-                      StatusCodes.NotFound -> errorResponse)
-                  )
+                  submissionNotAvailable(submissionId, uri)
               }
             case Failure(error) =>
-              failedResponse(uri, error)
+              failedResponse(StatusCodes.InternalServerError, uri, error)
           }
         }
     }
