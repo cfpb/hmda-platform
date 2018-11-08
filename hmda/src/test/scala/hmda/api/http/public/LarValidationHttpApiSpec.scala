@@ -37,7 +37,7 @@ class LarValidationHttpApiSpec
   val lar = larGen.sample.getOrElse(LoanApplicationRegister())
   val larCsv = lar.toCSV
 
-  val lars = larNGen(10).sample.getOrElse(Nil)
+  val lars = larNGen(10).sample.getOrElse(List.fill(10)(LoanApplicationRegister()))
   val ts = tsGen.sample.getOrElse(TransmittalSheet())
 
   val tsCsv = s"${ts.toCSV}\n"
