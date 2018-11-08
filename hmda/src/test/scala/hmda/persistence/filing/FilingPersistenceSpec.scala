@@ -12,8 +12,9 @@ import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.model.filing.{Filing, FilingDetails, FilingId}
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.model.filing.FilingGenerator._
-import hmda.model.filing.submission.{Submission, SubmissionId}
+import hmda.model.filing.submission.{Submission, SubmissionId, Uploaded}
 import hmda.model.submission.SubmissionGenerator._
+import hmda.persistence.institution.InstitutionPersistence
 
 class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system = actor.ActorSystem()
@@ -42,6 +43,13 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
     .suchThat(s => s.id.lei != "" && s.id.lei != "AA")
     .sample
     .getOrElse(Submission(SubmissionId("12345", "2018", 1)))
+
+  val modified = sampleSubmission.copy(status = Uploaded)
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    InstitutionPersistence.startShardRegion(ClusterSharding(system.toTyped))
+  }
 
   "Filings" must {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)

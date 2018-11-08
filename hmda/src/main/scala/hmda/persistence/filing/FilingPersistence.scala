@@ -14,8 +14,10 @@ import hmda.messages.filing.FilingEvents.{
   SubmissionAdded,
   SubmissionUpdated
 }
+import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
 import hmda.persistence.HmdaTypedPersistentActor
+import hmda.persistence.institution.InstitutionPersistence
 
 object FilingPersistence
     extends HmdaTypedPersistentActor[FilingCommand, FilingEvent, FilingState] {
@@ -40,10 +42,16 @@ object FilingPersistence
     : CommandHandler[FilingCommand, FilingEvent, FilingState] = {
     (state, cmd) =>
       val log = ctx.asScala.log
+      val sharding = ClusterSharding(ctx.asScala.system)
       cmd match {
         case CreateFiling(filing, replyTo) =>
           Effect.persist(FilingCreated(filing)).thenRun { _ =>
             log.debug(s"Filing created: ${filing.lei}-${filing.period}")
+            val institutionPersistence =
+              sharding.entityRefFor(
+                InstitutionPersistence.typeKey,
+                s"${InstitutionPersistence.name}-${filing.lei}")
+            institutionPersistence ! AddFiling(filing, None)
             replyTo ! FilingCreated(filing)
           }
 
