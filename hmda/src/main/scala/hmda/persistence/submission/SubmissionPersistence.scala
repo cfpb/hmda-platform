@@ -6,8 +6,9 @@ import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
+import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
+import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import hmda.messages.filing.FilingCommands.{AddSubmission, UpdateSubmission}
 import hmda.messages.submission.SubmissionCommands._
 import hmda.messages.submission.SubmissionEvents.{
@@ -29,14 +30,12 @@ object SubmissionPersistence
 
   override def behavior(entityId: String): Behavior[SubmissionCommand] =
     Behaviors.setup { ctx =>
-      PersistentBehaviors
-        .receive[SubmissionCommand, SubmissionEvent, SubmissionState](
-          persistenceId = s"$entityId",
-          emptyState = SubmissionState(None),
-          commandHandler = commandHandler(ctx),
-          eventHandler = eventHandler
-        )
-        .snapshotEvery(1000)
+      PersistentBehavior[SubmissionCommand, SubmissionEvent, SubmissionState](
+        persistenceId = PersistenceId(s"$entityId"),
+        emptyState = SubmissionState(None),
+        commandHandler = commandHandler(ctx),
+        eventHandler = eventHandler
+      ).snapshotEvery(1000)
     }
 
   override def commandHandler(ctx: ActorContext[SubmissionCommand])
@@ -77,7 +76,7 @@ object SubmissionPersistence
             Effect.none
           }
         case SubmissionStop() =>
-          Effect.stop
+          Effect.stop()
       }
   }
 
@@ -95,7 +94,7 @@ object SubmissionPersistence
 
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[SubmissionCommand]] = {
-    super.startShardRegion(sharding, SubmissionStop())
+    super.startShardRegion(sharding)
   }
 
 }

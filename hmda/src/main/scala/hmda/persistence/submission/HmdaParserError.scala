@@ -7,8 +7,6 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.{ConsumerSettings, Subscriptions}
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, Timeout}
@@ -31,6 +29,9 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.ConsumerMessage.CommittableMessage
+import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
+import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
@@ -58,16 +59,14 @@ object HmdaParserError
   override def behavior(
       entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
-      PersistentBehaviors
-        .receive[SubmissionProcessingCommand,
-                 SubmissionProcessingEvent,
-                 HmdaParserErrorState](
-          persistenceId = s"$entityId",
-          emptyState = HmdaParserErrorState(),
-          commandHandler = commandHandler(ctx),
-          eventHandler = eventHandler
-        )
-        .withTagger(_ => Set("parse"))
+      PersistentBehavior[SubmissionProcessingCommand,
+                         SubmissionProcessingEvent,
+                         HmdaParserErrorState](
+        persistenceId = PersistenceId(s"$entityId"),
+        emptyState = HmdaParserErrorState(),
+        commandHandler = commandHandler(ctx),
+        eventHandler = eventHandler
+      ).withTagger(_ => Set("parse"))
         .snapshotEvery(1000)
     }
 
@@ -132,7 +131,7 @@ object HmdaParserError
         Effect.none
 
       case HmdaParserStop =>
-        Effect.stop
+        Effect.stop()
 
       case _ =>
         Effect.none
@@ -149,7 +148,7 @@ object HmdaParserError
 
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] = {
-    super.startShardRegion(sharding, HmdaParserStop)
+    super.startShardRegion(sharding)
   }
 
   private def uploadConsumer(ctx: ActorContext[_], submissionId: SubmissionId)
