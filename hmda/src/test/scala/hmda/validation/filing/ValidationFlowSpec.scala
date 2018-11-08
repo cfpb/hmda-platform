@@ -56,5 +56,19 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
         .request(lars.size)
         .expectNextN(lars)
     }
+
+    "validate a full HMDA File" in {
+      hmdaFileSource
+        .map(ByteString(_))
+        .via(validateHmdaFile("all", ValidationContext(None)))
+        .collect {
+          case Right(p) => p
+        }
+        .runWith(TestSink.probe[PipeDelimited])
+        .request(1)
+        .expectNext(ts)
+        .request(clean10Rows.size - 1)
+        .expectNextN(lars)
+    }
   }
 }
