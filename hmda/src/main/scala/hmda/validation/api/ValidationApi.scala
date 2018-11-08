@@ -1,7 +1,6 @@
 package hmda.validation.api
 
 import cats.Semigroup
-import cats.data._
 import hmda.model.validation._
 import hmda.validation.dsl.{
   ValidationFailure,
@@ -10,14 +9,13 @@ import hmda.validation.dsl.{
 }
 import hmda.validation.rules.EditCheck
 import cats.implicits._
+import hmda.validation.HmdaValidation
 
 trait ValidationApi[A] {
 
   implicit val sg = new Semigroup[A] {
     override def combine(x: A, y: A): A = x
   }
-
-  type HmdaValidation[B] = ValidatedNel[ValidationError, B]
 
   def check[B](editCheck: EditCheck[B],
                input: B,

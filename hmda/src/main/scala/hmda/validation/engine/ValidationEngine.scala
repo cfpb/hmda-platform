@@ -7,6 +7,7 @@ import hmda.model.validation.{
   ValidationErrorType,
   Validity
 }
+import hmda.validation.HmdaValidation
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
 import hmda.validation.rules.EditCheck
