@@ -11,3 +11,14 @@ message HmdaRowParsedErrorMessage {
 message HmdaRowParsedCountMessage {
     int32 count = 1;
 }
+
+message HmdaParserErrorStateMessage {
+    repeated HmdaRowParsedErrorMessage transmittalSheetErrors = 1;
+    repeated HmdaRowParsedErrorMessage larErrors = 2;
+    int32 totalErrors = 3;
+}
+
+message PersistedHmdaRowParsedErrorMessage {
+    int32 rowNumber = 1;
+    repeated string errors = 2;
+}

@@ -39,7 +39,7 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
     case cmd: StartParsing =>
       startParsingToProtobuf(cmd).toByteArray
     case cmd: PersistHmdaRowParsedError =>
-      persistHmdaRowParsedErrorToProtobuf(cmd).toByteArray
+      persistHmdaRowParsedErrorToProtobuf(cmd, resolver).toByteArray
     case cmd: GetParsedWithErrorCount =>
       getParsedWithErrorCountToProtobuf(cmd, resolver).toByteArray
     case cmd: CompleteParsing =>
@@ -61,7 +61,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
         startParsingFromProtobuf(StartParsingMessage.parseFrom(bytes))
       case PersistHmdaRowParsedErrorManifest =>
         persisteHmdaRowParsedErrorFromProtobuf(
-          PersistHmdaRowParsedErrorMessage.parseFrom(bytes))
+          PersistHmdaRowParsedErrorMessage.parseFrom(bytes),
+          resolver)
       case GetParsedWithErrorCountManifest =>
         getParsedWithErrorCountFromProtobuf(
           GetParsedWithErrorCountMessage.parseFrom(bytes),

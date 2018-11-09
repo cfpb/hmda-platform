@@ -2,6 +2,7 @@ package hmda.parser.filing.ts
 
 import hmda.model.filing.ts.TransmittalSheet
 import org.scalacheck.Gen
+import hmda.parser._
 
 object TsValidationUtils {
 

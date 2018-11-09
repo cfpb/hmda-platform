@@ -12,6 +12,7 @@ import cats.implicits._
 import com.typesafe.config.ConfigFactory
 
 import scala.util.{Failure, Success, Try}
+import hmda.parser._
 
 sealed trait TsFormatValidator {
 
