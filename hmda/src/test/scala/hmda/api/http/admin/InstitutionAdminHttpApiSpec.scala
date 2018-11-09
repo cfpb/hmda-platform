@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class InstitutionAdminHttpApiSpec
-  extends AkkaCassandraPersistenceSpec
+    extends AkkaCassandraPersistenceSpec
     with MustMatchers
     with InstitutionAdminHttpApi
     with ScalatestRouteTest {

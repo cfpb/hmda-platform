@@ -53,9 +53,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             s"${InstitutionPersistence.name}-${institution.LEI}")
 
           val fInstitution
-          : Future[Option[Institution]] = institutionPersistence ? (
-            ref => GetInstitution(ref)
-            )
+            : Future[Option[Institution]] = institutionPersistence ? (
+              ref => GetInstitution(ref)
+          )
           timedPost { uri =>
             onComplete(fInstitution) {
               case Success(Some(_)) =>
@@ -67,8 +67,8 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                   StatusCodes.BadRequest -> errorResponse))
               case Success(None) =>
                 val fCreated
-                : Future[InstitutionCreated] = institutionPersistence ? (
-                  ref => CreateInstitution(institution, ref))
+                  : Future[InstitutionCreated] = institutionPersistence ? (
+                    ref => CreateInstitution(institution, ref))
                 onComplete(fCreated) {
                   case Success(InstitutionCreated(i)) =>
                     complete(ToResponseMarshallable(StatusCodes.Created -> i))
@@ -83,9 +83,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
           } ~
             timedPut { uri =>
               val fModified
-              : Future[InstitutionEvent] = institutionPersistence ? (
-                ref => ModifyInstitution(institution, ref)
-                )
+                : Future[InstitutionEvent] = institutionPersistence ? (
+                  ref => ModifyInstitution(institution, ref)
+              )
 
               onComplete(fModified) {
                 case Success(InstitutionModified(i)) =>
@@ -104,9 +104,9 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             } ~
             timedDelete { uri =>
               val fDeleted
-              : Future[InstitutionEvent] = institutionPersistence ? (
-                ref => DeleteInstitution(institution.LEI, ref)
-                )
+                : Future[InstitutionEvent] = institutionPersistence ? (
+                  ref => DeleteInstitution(institution.LEI, ref)
+              )
 
               onComplete(fDeleted) {
                 case Success(InstitutionDeleted(lei)) =>
@@ -132,13 +132,13 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     path("institutions" / Segment) { lei =>
       val institutionPersistence =
         sharding.entityRefFor(InstitutionPersistence.typeKey,
-          s"${InstitutionPersistence.name}-$lei")
+                              s"${InstitutionPersistence.name}-$lei")
 
       timedGet { uri =>
         val fInstitution
-        : Future[Option[Institution]] = institutionPersistence ? (
-          ref => GetInstitution(ref)
-          )
+          : Future[Option[Institution]] = institutionPersistence ? (
+            ref => GetInstitution(ref)
+        )
 
         onComplete(fInstitution) {
           case Success(Some(i)) =>
@@ -156,7 +156,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
     }
 
   def institutionAdminRoutes(
-                              oAuth2Authorization: OAuth2Authorization): Route = {
+      oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
