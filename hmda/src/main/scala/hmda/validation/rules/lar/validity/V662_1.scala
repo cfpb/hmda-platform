@@ -19,7 +19,7 @@ object V662_1 extends EditCheck[LoanApplicationRegister] {
     FICORiskScoreClassic04,
     FICORiskScoreClassic98,
     VantageScore2,
-    VantageScore2,
+    VantageScore3,
     OneOrMoreCreditScoreModels,
     CreditScoreNotApplicable
   )
