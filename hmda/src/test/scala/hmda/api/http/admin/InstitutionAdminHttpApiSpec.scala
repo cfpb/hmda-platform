@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 class InstitutionAdminHttpApiSpec
-    extends AkkaCassandraPersistenceSpec
+  extends AkkaCassandraPersistenceSpec
     with MustMatchers
     with InstitutionAdminHttpApi
     with ScalatestRouteTest {
@@ -74,6 +74,13 @@ class InstitutionAdminHttpApiSpec
         oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Created
         responseAs[Institution] mustBe sampleInstitution
+      }
+    }
+
+    "Return a 400 on a duplicate LEI" in {
+      Post("/institutions", sampleInstitution) ~> Route.seal(
+        institutionAdminRoutes(oAuth2Authorization)) ~> check {
+        status mustBe StatusCodes.BadRequest
       }
     }
 
