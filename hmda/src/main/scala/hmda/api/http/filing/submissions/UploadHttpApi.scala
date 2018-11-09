@@ -34,6 +34,8 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
+import hmda.api.http.codec.ErrorResponseCodec._
+import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.model.ErrorResponse
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.submission._
@@ -60,7 +62,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
   val config: Config
 
   // institutions/<lei>/filings/<period>/submissions/<seqNr>
-  def uploadHmdaFileRoute: Route =
+  val uploadHmdaFileRoute =
     path(Segment / "filings" / Segment / "submissions" / IntNumber) {
       (lei, period, seqNr) =>
         timedPost { uri =>
@@ -102,23 +104,10 @@ trait UploadHttpApi extends HmdaTimeDirectives {
                   submissionNotAvailable(submissionId, uri)
               }
             case Failure(error) =>
-              val errorResponse =
-                ErrorResponse(500, error.getLocalizedMessage, uri.path)
-              complete(
-                ToResponseMarshallable(
-                  StatusCodes.InternalServerError -> errorResponse))
+              failedResponse(StatusCodes.InternalServerError, uri, error)
           }
         }
     }
-
-  private def submissionNotAvailable(submissionId: SubmissionId,
-                                     uri: Uri): Route = {
-    val errorResponse = ErrorResponse(
-      400,
-      s"Submission ${submissionId.toString} not available for upload",
-      uri.path)
-    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-  }
 
   def uploadRoutes: Route = {
     handleRejections(corsRejectionHandler) {

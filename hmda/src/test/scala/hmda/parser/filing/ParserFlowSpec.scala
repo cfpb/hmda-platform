@@ -33,7 +33,8 @@ class ParserFlowSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
   val larCsv = larList.map(lar => lar.toCSV + "\n")
   val larSource = Source.fromIterator(() => larCsv.iterator)
 
-  val badLarList = larNGen(10).sample.getOrElse(Nil)
+  val badLarList =
+    larNGen(10).sample.getOrElse(List.fill(10)(LoanApplicationRegister()))
   val badLarCsv = List(badLarList.head.toCSV + "|too|many|fields\n") ++ badLarList.tail
     .map(lar => lar.toCSV + "\n")
   val badLarSource = Source.fromIterator(() => badLarCsv.iterator)

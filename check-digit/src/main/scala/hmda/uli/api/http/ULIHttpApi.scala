@@ -20,6 +20,8 @@ import hmda.uli.api.model.ULIModel._
 import hmda.uli.validation.ULI._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
+import hmda.api.http.codec.ErrorResponseCodec._
+import hmda.util.http.FilingResponseUtils.failedResponse
 
 import scala.concurrent.ExecutionContext
 import hmda.util.streams.FlowUtils._
@@ -46,10 +48,7 @@ trait ULIHttpApi extends HmdaTimeDirectives {
                   val uli = ULI(loan.loanId, digit, loan.loanId + digit)
                   complete(ToResponseMarshallable(uli))
                 case Failure(error) =>
-                  val errorResponse =
-                    ErrorResponse(400, error.getLocalizedMessage, uri.path)
-                  complete(ToResponseMarshallable(
-                    StatusCodes.BadRequest -> errorResponse))
+                  failedResponse(StatusCodes.BadRequest, uri, error)
               }
             } ~
               fileUpload("file") {
@@ -107,10 +106,7 @@ trait ULIHttpApi extends HmdaTimeDirectives {
                     val validated = ULIValidated(value)
                     complete(ToResponseMarshallable(validated))
                   case Failure(error) =>
-                    val errorResponse =
-                      ErrorResponse(400, error.getLocalizedMessage, uri.path)
-                    complete(ToResponseMarshallable(
-                      StatusCodes.BadRequest -> errorResponse))
+                    failedResponse(StatusCodes.BadRequest, uri, error)
                 }
               } ~
                 fileUpload("file") {
