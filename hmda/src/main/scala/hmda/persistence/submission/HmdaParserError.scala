@@ -17,6 +17,7 @@ import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   HmdaRowParsedError,
+  PersistedHmdaRowParsedError,
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.{
@@ -31,6 +32,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.ConsumerMessage.CommittableMessage
+import akka.stream.typed.scaladsl.ActorFlow
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
@@ -89,14 +91,17 @@ object HmdaParserError
           .map(ByteString(_))
           .via(parseHmdaFile)
           .zip(Source.fromIterator(() => Iterator.from(1)))
-          .map {
+          .collect {
             case (Left(errors), rowNumber) =>
-              ctx.asScala.self ! PersistHmdaRowParsedError(
-                rowNumber,
-                errors.map(_.errorMessage))
-            case (Right(pipeDelimited), _) =>
-              log.debug(s"${pipeDelimited.toCSV}")
+              PersistHmdaRowParsedError(rowNumber,
+                                        errors.map(_.errorMessage),
+                                        None)
           }
+          .via(ActorFlow.ask(ctx.asScala.self)(
+            (el, replyTo: ActorRef[PersistedHmdaRowParsedError]) =>
+              PersistHmdaRowParsedError(el.rowNumber,
+                                        el.errors,
+                                        Some(replyTo))))
           .idleTimeout(kafkaIdleTimeout.seconds)
           .runWith(Sink.ignore)
           .onComplete {
@@ -107,9 +112,14 @@ object HmdaParserError
           }
         Effect.none
 
-      case PersistHmdaRowParsedError(rowNumber, errors) =>
+      case PersistHmdaRowParsedError(rowNumber, errors, maybeReplyTo) =>
         Effect.persist(HmdaRowParsedError(rowNumber, errors)).thenRun { _ =>
-          log.info(s"Persisted error: $rowNumber, $errors")
+          log.debug(s"Persisted error: $rowNumber, $errors")
+          maybeReplyTo match {
+            case Some(replyTo) =>
+              replyTo ! PersistedHmdaRowParsedError(rowNumber, errors)
+            case None => //do nothing
+          }
         }
 
       case GetParsedWithErrorCount(replyTo) =>

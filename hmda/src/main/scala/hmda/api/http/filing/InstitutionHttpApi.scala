@@ -13,7 +13,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.api.http.filing.FilingResponseUtils.failedResponse
+import hmda.util.http.FilingResponseUtils._
 
 import hmda.messages.institution.InstitutionCommands.GetInstitutionDetails
 import hmda.model.institution.InstitutionDetail
@@ -61,7 +61,7 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
               ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
             )
           case Failure(error) =>
-            failedResponse(uri, error)
+            failedResponse(StatusCodes.InternalServerError, uri, error)
         }
 
       }

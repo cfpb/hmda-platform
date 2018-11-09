@@ -3,6 +3,7 @@ package hmda.api.http.filing.submissions
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import hmda.api.http.directives.HmdaTimeDirectives
@@ -14,10 +15,10 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}
 import hmda.api.http.codec.filing.submission.ParsingErrorSummaryCodec._
-import hmda.api.http.filing.FilingResponseUtils._
 import hmda.api.http.model.filing.submissions.ParsingErrorSummary
 import hmda.messages.submission.SubmissionProcessingCommands.GetParsingErrors
 import hmda.model.processing.state.HmdaParserErrorState
+import hmda.util.http.FilingResponseUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -76,7 +77,9 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
                         )
                         complete(parsingErrorSummary)
                       case Failure(error) =>
-                        failedResponse(uri, error)
+                        failedResponse(StatusCodes.InternalServerError,
+                                       uri,
+                                       error)
                     }
 
                   case None =>
@@ -85,7 +88,7 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
                                              uri)
                 }
               case Failure(error) =>
-                failedResponse(uri, error)
+                failedResponse(StatusCodes.InternalServerError, uri, error)
             }
           }
         }
