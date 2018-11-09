@@ -139,21 +139,26 @@ trait InstitutionComponent {
 
     val db = institutionRepository.db
     val emailDomain = extractDomain(email)
-    val emailQuery =
+    val emailSingleQuery =
       institutionEmailsRepository.table.filter(_.emailDomain === emailDomain)
 
     def institutionQuery(leis: Seq[String]) =
       institutionRepository.table.filter(_.lei inSet leis)
 
+    def emailTotalQuery(leis: Seq[String]) =
+      institutionEmailsRepository.table.filter(_.lei inSet leis)
+
     for {
-      emailEntities <- db.run(emailQuery.result)
+      emailEntities <- db.run(emailSingleQuery.result)
       leis = emailEntities.map(_.lei)
       institutions <- db.run(institutionQuery(leis).result)
+      emails <- db.run(emailTotalQuery(leis).result)
     } yield {
-      institutions.map(
-        institution =>
-          InstitutionConverter.convert(institution,
-                                       emailEntities.map(_.emailDomain)))
+      institutions.map { institution =>
+        val filteredEmails =
+          emails.filter(_.lei == institution.lei).map(_.emailDomain)
+        InstitutionConverter.convert(institution, filteredEmails)
+      }
     }
 
   }

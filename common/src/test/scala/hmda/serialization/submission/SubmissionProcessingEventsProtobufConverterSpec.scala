@@ -1,16 +1,14 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.SubmissionProcessingEvents.{
-  HmdaRowParsedCount,
-  HmdaRowParsedError
-}
 import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
 import SubmissionProcessingEventsProtobufConverter._
 import hmda.persistence.serialization.submission.processing.events.{
+  HmdaParserErrorStateMessage,
   HmdaRowParsedCountMessage,
   HmdaRowParsedErrorMessage
 }
+import HmdaParserErrorStateGenerator._
 
 class SubmissionProcessingEventsProtobufConverterSpec
     extends PropSpec
@@ -18,8 +16,7 @@ class SubmissionProcessingEventsProtobufConverterSpec
     with MustMatchers {
 
   property("HMDA parsed errors must convert to protobuf and back") {
-    forAll { (rowNumber: Int, errors: List[String]) =>
-      val parsedError = HmdaRowParsedError(rowNumber, errors)
+    forAll(hmdaRowParsedErrorGen) { parsedError =>
       val protobuf = hmdaRowParsedErrorToProtobuf(parsedError).toByteArray
       hmdaRowParsedErrorFromProtobuf(
         HmdaRowParsedErrorMessage.parseFrom(protobuf)) mustBe parsedError
@@ -27,11 +24,20 @@ class SubmissionProcessingEventsProtobufConverterSpec
   }
 
   property("HMDA parsed row count must convert to protobuf and back") {
-    forAll { i: Int =>
-      val parsedCount = HmdaRowParsedCount(i)
+    forAll(hmdaRowParsedCountGen) { parsedCount =>
       val protobuf = hmdaRowParsedCountToProtobuf(parsedCount).toByteArray
       hmdaRowParsedCountFromProtobuf(
         HmdaRowParsedCountMessage.parseFrom(protobuf)) mustBe parsedCount
+    }
+  }
+
+  property("HMDA Parser Error State must convert to protobuf and back") {
+    forAll(hmdaParserErrorStateGen) { hmdaParserErrorState =>
+      val protobuf =
+        hmdaParserErrorStateToProtobuf(hmdaParserErrorState).toByteArray
+      hmdaParserErrorStateFromProtobuf(
+        HmdaParserErrorStateMessage
+          .parseFrom(protobuf)) mustBe hmdaParserErrorState
     }
   }
 

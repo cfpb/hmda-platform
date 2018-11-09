@@ -26,7 +26,7 @@ import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
-import FilingResponseUtils._
+import hmda.util.http.FilingResponseUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -92,10 +92,10 @@ trait FilingHttpApi extends HmdaTimeDirectives {
                 complete(
                   ToResponseMarshallable(StatusCodes.Created -> filingDetails))
               case Failure(error) =>
-                failedResponse(uri, error)
+                failedResponse(StatusCodes.InternalServerError, uri, error)
             }
           case Failure(error) =>
-            failedResponse(uri, error)
+            failedResponse(StatusCodes.InternalServerError, uri, error)
         }
       } ~
         timedGet { uri =>
@@ -113,7 +113,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
                 ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
               )
             case Failure(error) =>
-              failedResponse(uri, error)
+              failedResponse(StatusCodes.InternalServerError, uri, error)
           }
         }
     }

@@ -3,13 +3,14 @@ package hmda.api.http.filing.submissions
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.{LoggingAdapter, NoLogging}
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest.MustMatchers
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.Uri.Path
 import akka.kafka.ConsumerSettings
 import akka.stream.scaladsl.Source
 import hmda.api.http.filing.FileUploadUtils
@@ -38,6 +39,8 @@ import hmda.model.institution.Institution
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
+import hmda.api.http.model.ErrorResponse
+import hmda.api.http.codec.ErrorResponseCodec._
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
@@ -65,6 +68,7 @@ class UploadHttpApiSpec
   override val log: LoggingAdapter = NoLogging
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
   override implicit val timeout: Timeout = Timeout(10.seconds)
+  private implicit val routeTimeout = RouteTestTimeout(3.seconds)
   override val config: Config = ConfigFactory.load()
 
   val kafkaHosts = config.getString("kafka.hosts")
@@ -145,6 +149,9 @@ class UploadHttpApiSpec
   val url =
     s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions/1"
 
+  val badUrl =
+    s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions/2"
+
   val ts = tsGen.sample.getOrElse(TransmittalSheet())
   val tsCsv = ts.toCSV + "\n"
   val tsSource = Source.fromIterator(() => List(tsCsv).iterator)
@@ -172,6 +179,15 @@ class UploadHttpApiSpec
         submission.start must be < System.currentTimeMillis()
         submission.id mustBe submissionId
         submission.status mustBe Uploaded
+      }
+    }
+
+    "return Bad Request when submission doesn't exist" in {
+      Post(badUrl, hmdaFile) ~> uploadRoutes ~> check {
+        status mustBe StatusCodes.BadRequest
+        val response = responseAs[ErrorResponse]
+        response.path mustBe Path(badUrl)
+        response.message mustBe s"Submission ${sampleInstitution.LEI}-${period}-2 not available for upload"
       }
     }
   }

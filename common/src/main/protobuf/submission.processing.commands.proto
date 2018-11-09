@@ -20,6 +20,7 @@ message StartParsingMessage {
 message PersistHmdaRowParsedErrorMessage {
     int32 rowNumber = 1;
     repeated string errors = 2;
+    string maybeReplyTo = 3;
 }
 
 message GetParsedWithErrorCountMessage {

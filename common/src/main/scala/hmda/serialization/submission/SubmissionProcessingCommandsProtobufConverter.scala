@@ -48,18 +48,26 @@ object SubmissionProcessingCommandsProtobufConverter {
   }
 
   def persistHmdaRowParsedErrorToProtobuf(
-      cmd: PersistHmdaRowParsedError): PersistHmdaRowParsedErrorMessage = {
+      cmd: PersistHmdaRowParsedError,
+      refResolver: ActorRefResolver): PersistHmdaRowParsedErrorMessage = {
     PersistHmdaRowParsedErrorMessage(
       cmd.rowNumber,
-      cmd.errors
+      cmd.errors,
+      cmd.maybeReplyTo match {
+        case None      => ""
+        case Some(ref) => refResolver.toSerializationFormat(ref)
+      }
     )
   }
 
   def persisteHmdaRowParsedErrorFromProtobuf(
-      msg: PersistHmdaRowParsedErrorMessage): PersistHmdaRowParsedError = {
+      msg: PersistHmdaRowParsedErrorMessage,
+      refResolver: ActorRefResolver): PersistHmdaRowParsedError = {
     PersistHmdaRowParsedError(
       msg.rowNumber,
-      msg.errors.toList
+      msg.errors.toList,
+      if (msg.maybeReplyTo == "") None
+      else Some(refResolver.resolveActorRef(msg.maybeReplyTo))
     )
   }
 
