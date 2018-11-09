@@ -26,7 +26,7 @@ Example response:
 Quick links:
 
 - [`/institutions`](#institutions)
-- [`/institutions/<institutionId>`](#institutions-by-id)
+- [`/institutions/<lei>`](#institutions-by-id)
 - [`/institutions/<institutionId>/filings/<period>`](#filings)
 - [`/institutions/<institutionId>/filings/<period>/submissions`](#submissions)
 - [`/institutions/<institutionId>/filings/<period>/submissions/latest`](#latest-submission)
@@ -40,6 +40,83 @@ Quick links:
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/irs/csv`](#irs-csv)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/sign`](#signature)
 - [`/institutions/<institution>/filings/<period>/submissions/<submissionId>/summary`](#summary)
+
+
+### Institutions by id
+`/institutions/<lei>`
+
+`GET` - Returns the institution by its `lei` and its filings
+
+Example response:
+
+```json
+{
+    "institution": {
+        "activityYear": 2014,
+        "lei": "10Bx939c5543TqA1144M",
+        "agency": 1,
+        "institutionType": 17,
+        "institutionId2017": "12345",
+        "taxId": "99-00000000",
+        "rssd": 12345,
+        "emailDomains": [
+            "bank1.com"
+        ],
+        "respondent": {
+            "name": "xvavjuitZa",
+            "state": "NC",
+            "city": "Raleigh"
+        },
+        "parent": {
+            "idRssd": 1520162208,
+            "name": "Parent Name"
+        },
+        "assets": 450,
+        "otherLenderCode": 1406639146,
+        "topHolder": {
+            "idRssd": 442825905,
+            "name": "TopHolder Name"
+        },
+        "hmdaFiler": true
+    },
+    "filings": [
+        {
+            "period": "2018",
+            "lei": "10Bx939c5543TqA1144M",
+            "status": {
+                "code": 2,
+                "message": "in-progress"
+            },
+            "filingRequired": true,
+            "start": 1541558493499,
+            "end": 0
+        },
+        {
+            "period": "2017",
+            "lei": "10Bx939c5543TqA1144M",
+            "status": {
+                "code": 2,
+                "message": "in-progress"
+            },
+            "filingRequired": true,
+            "start": 1541558491086,
+            "end": 0
+        },
+        {
+            "period": "2019",
+            "lei": "10Bx939c5543TqA1144M",
+            "status": {
+                "code": 2,
+                "message": "in-progress"
+            },
+            "filingRequired": true,
+            "start": 1541558485816,
+            "end": 0
+        }
+    ]
+}
+```
+
 
 ### Filings
 

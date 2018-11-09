@@ -14,7 +14,7 @@ object InstitutionCodec {
     new Encoder[Institution] {
       override def apply(i: Institution): Json = Json.obj(
         ("activityYear", Json.fromInt(i.activityYear)),
-        ("LEI", Json.fromString(i.LEI)),
+        ("lei", Json.fromString(i.LEI)),
         ("agency", Json.fromInt(i.agency.code)),
         ("institutionType", Json.fromInt(i.institutionType.code)),
         ("institutionId2017",
@@ -36,7 +36,7 @@ object InstitutionCodec {
       override def apply(c: HCursor): Result[Institution] =
         for {
           activityYear <- c.downField("activityYear").as[Int]
-          lei <- c.downField("LEI").as[String]
+          lei <- c.downField("lei").as[String]
           agency <- c.downField("agency").as[Int]
           institutionType <- c.downField("institutionType").as[Int]
           maybeInstitutionId2017 <- c.downField("institutionId2017").as[String]

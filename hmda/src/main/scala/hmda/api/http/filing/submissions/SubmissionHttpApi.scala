@@ -24,7 +24,7 @@ import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.SubmissionPersistence
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import io.circe.generic.auto._
-import hmda.api.http.filing.FilingResponseUtils._
+import hmda.util.http.FilingResponseUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -90,7 +90,8 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
                   }
               }
 
-            case Failure(error) => failedResponse(uri, error)
+            case Failure(error) =>
+              failedResponse(StatusCodes.InternalServerError, uri, error)
           }
         }
     }
@@ -114,7 +115,8 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
                 case Some(latest) => complete(ToResponseMarshallable(latest))
                 case None         => complete(HttpResponse(StatusCodes.NotFound))
               }
-            case Failure(error) => failedResponse(uri, error)
+            case Failure(error) =>
+              failedResponse(StatusCodes.InternalServerError, uri, error)
           }
         }
     }
@@ -142,7 +144,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
         complete(
           ToResponseMarshallable(StatusCodes.Created -> created.submission))
       case Failure(error) =>
-        failedResponse(uri, error)
+        failedResponse(StatusCodes.InternalServerError, uri, error)
     }
   }
 

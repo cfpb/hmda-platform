@@ -3,17 +3,13 @@ package hmda.serialization.institution
 import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionDeleted,
-  InstitutionModified,
-  InstitutionNotExists
-}
+import hmda.messages.institution.InstitutionEvents._
 import hmda.persistence.serialization.institution.events.{
   InstitutionCreatedMessage,
   InstitutionDeletedMessage,
   InstitutionModifiedMessage,
-  InstitutionNotExistsMessage
+  InstitutionNotExistsMessage,
+  FilingAddedMessage
 }
 import hmda.serialization.institution.InstitutionEventsProtobufConverter._
 
@@ -33,6 +29,9 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
   final val InstitutionNotExistsManifest =
     classOf[InstitutionNotExists].getName
 
+  final val FilingAddedManifest =
+    classOf[FilingAdded].getName
+
   override def manifest(o: AnyRef): String = o.getClass.getName
 
   override def toBinary(o: AnyRef): Array[Byte] = o match {
@@ -44,6 +43,8 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
       institutionDeletedToProtobuf(evt).toByteArray
     case evt: InstitutionNotExists =>
       institutionNotExistsToProtobuf(evt).toByteArray
+    case evt: FilingAdded =>
+      filingAddedToProtobuf(evt).toByteArray
     case _ ⇒
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
@@ -63,6 +64,8 @@ class InstitutionEventsSerializer extends SerializerWithStringManifest {
       case InstitutionNotExistsManifest =>
         institutionNotExistsFromProtobuf(
           InstitutionNotExistsMessage.parseFrom(bytes))
+      case FilingAddedManifest =>
+        filingAddedFromProtobuf(FilingAddedMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
