@@ -17,6 +17,7 @@ import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   HmdaRowParsedError,
+  PersistedHmdaRowParsedError,
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.{
@@ -93,7 +94,8 @@ object HmdaParserError
             case (Left(errors), rowNumber) =>
               ctx.asScala.self ! PersistHmdaRowParsedError(
                 rowNumber,
-                errors.map(_.errorMessage))
+                errors.map(_.errorMessage),
+                None)
             case (Right(pipeDelimited), _) =>
               log.debug(s"${pipeDelimited.toCSV}")
           }
@@ -107,9 +109,14 @@ object HmdaParserError
           }
         Effect.none
 
-      case PersistHmdaRowParsedError(rowNumber, errors) =>
+      case PersistHmdaRowParsedError(rowNumber, errors, maybeReplyTo) =>
         Effect.persist(HmdaRowParsedError(rowNumber, errors)).thenRun { _ =>
           log.info(s"Persisted error: $rowNumber, $errors")
+          maybeReplyTo match {
+            case Some(replyTo) =>
+              replyTo ! PersistedHmdaRowParsedError(rowNumber, errors)
+            case None => //do nothing
+          }
         }
 
       case GetParsedWithErrorCount(replyTo) =>

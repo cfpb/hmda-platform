@@ -17,3 +17,8 @@ message HmdaParserErrorStateMessage {
     repeated HmdaRowParsedErrorMessage larErrors = 2;
     int32 totalErrors = 3;
 }
+
+message PersistedHmdaRowParsedErrorMessage {
+    int32 rowNumber = 1;
+    repeated string errors = 2;
+}

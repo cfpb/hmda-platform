@@ -2,13 +2,15 @@ package hmda.serialization.submission
 
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
-  HmdaRowParsedError
+  HmdaRowParsedError,
+  PersistedHmdaRowParsedError
 }
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.persistence.serialization.submission.processing.events.{
   HmdaParserErrorStateMessage,
   HmdaRowParsedCountMessage,
-  HmdaRowParsedErrorMessage
+  HmdaRowParsedErrorMessage,
+  PersistedHmdaRowParsedErrorMessage
 }
 
 object SubmissionProcessingEventsProtobufConverter {
@@ -64,6 +66,22 @@ object SubmissionProcessingEventsProtobufConverter {
       hmdaParserErrorStateMessage.larErrors.map(x =>
         hmdaRowParsedErrorFromProtobuf(x)),
       hmdaParserErrorStateMessage.totalErrors
+    )
+  }
+
+  def persistedHmdaRowParsedToProtobuf(
+      evt: PersistedHmdaRowParsedError): PersistedHmdaRowParsedErrorMessage = {
+    PersistedHmdaRowParsedErrorMessage(
+      evt.rowNumber,
+      evt.errors
+    )
+  }
+
+  def persistedHmdaRowParsedFromProtobuf(
+      msg: PersistedHmdaRowParsedErrorMessage): PersistedHmdaRowParsedError = {
+    PersistedHmdaRowParsedError(
+      msg.rowNumber,
+      msg.errors.toList
     )
   }
 
