@@ -28,6 +28,7 @@ import hmda.messages.institution.InstitutionCommands.{
   ModifyInstitution
 }
 import hmda.messages.institution.InstitutionEvents._
+import hmda.util.http.FilingResponseUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -59,12 +60,10 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
           timedPost { uri =>
             onComplete(fInstitution) {
               case Success(Some(_)) =>
-                val errorResponse = ErrorResponse(
-                  400,
-                  s"Institution ${institution.LEI} already exists",
-                  uri.path)
-                complete(ToResponseMarshallable(
-                  StatusCodes.BadRequest -> errorResponse))
+                entityAlreadyExists(
+                  StatusCodes.BadRequest,
+                  uri,
+                  s"Institution ${institution.LEI} already exists")
               case Success(None) =>
                 val fCreated
                   : Future[InstitutionCreated] = institutionPersistence ? (
@@ -73,10 +72,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                   case Success(InstitutionCreated(i)) =>
                     complete(ToResponseMarshallable(StatusCodes.Created -> i))
                   case Failure(error) =>
-                    val errorResponse =
-                      ErrorResponse(500, error.getLocalizedMessage, uri.path)
-                    complete(ToResponseMarshallable(
-                      StatusCodes.InternalServerError -> errorResponse))
+                    failedResponse(StatusCodes.InternalServerError, uri, error)
                 }
             }
 
@@ -96,10 +92,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                   complete(ToResponseMarshallable(
                     HttpResponse(StatusCodes.BadRequest)))
                 case Failure(error) =>
-                  val errorResponse =
-                    ErrorResponse(500, error.getLocalizedMessage, uri.path)
-                  complete(ToResponseMarshallable(
-                    StatusCodes.InternalServerError -> errorResponse))
+                  failedResponse(StatusCodes.InternalServerError, uri, error)
               }
             } ~
             timedDelete { uri =>
@@ -118,10 +111,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                   complete(ToResponseMarshallable(
                     HttpResponse(StatusCodes.BadRequest)))
                 case Failure(error) =>
-                  val errorResponse =
-                    ErrorResponse(500, error.getLocalizedMessage, uri.path)
-                  complete(ToResponseMarshallable(
-                    StatusCodes.InternalServerError -> errorResponse))
+                  failedResponse(StatusCodes.InternalServerError, uri, error)
               }
             }
         }
