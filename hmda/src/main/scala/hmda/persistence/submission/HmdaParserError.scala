@@ -17,6 +17,7 @@ import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   HmdaRowParsedError,
+  PersistedHmdaRowParsedError,
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.{
@@ -31,9 +32,12 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import akka.actor.typed.scaladsl.adapter._
 import akka.kafka.ConsumerMessage.CommittableMessage
+import akka.stream.typed.scaladsl.ActorFlow
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
+import hmda.model.filing.submissions.PaginatedResource
+import hmda.model.processing.state.HmdaParserErrorState
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -65,6 +69,7 @@ object HmdaParserError
           commandHandler = commandHandler(ctx),
           eventHandler = eventHandler
         )
+        .withTagger(_ => Set("parse"))
         .snapshotEvery(1000)
     }
 
@@ -86,14 +91,17 @@ object HmdaParserError
           .map(ByteString(_))
           .via(parseHmdaFile)
           .zip(Source.fromIterator(() => Iterator.from(1)))
-          .map {
+          .collect {
             case (Left(errors), rowNumber) =>
-              ctx.asScala.self ! PersistHmdaRowParsedError(
-                rowNumber,
-                errors.map(_.errorMessage))
-            case (Right(pipeDelimited), _) =>
-              log.debug(s"${pipeDelimited.toCSV}")
+              PersistHmdaRowParsedError(rowNumber,
+                                        errors.map(_.errorMessage),
+                                        None)
           }
+          .via(ActorFlow.ask(ctx.asScala.self)(
+            (el, replyTo: ActorRef[PersistedHmdaRowParsedError]) =>
+              PersistHmdaRowParsedError(el.rowNumber,
+                                        el.errors,
+                                        Some(replyTo))))
           .idleTimeout(kafkaIdleTimeout.seconds)
           .runWith(Sink.ignore)
           .onComplete {
@@ -104,18 +112,32 @@ object HmdaParserError
           }
         Effect.none
 
-      case PersistHmdaRowParsedError(rowNumber, errors) =>
+      case PersistHmdaRowParsedError(rowNumber, errors, maybeReplyTo) =>
         Effect.persist(HmdaRowParsedError(rowNumber, errors)).thenRun { _ =>
-          log.info(s"Persisted error: $rowNumber, $errors")
+          log.debug(s"Persisted error: $rowNumber, $errors")
+          maybeReplyTo match {
+            case Some(replyTo) =>
+              replyTo ! PersistedHmdaRowParsedError(rowNumber, errors)
+            case None => //do nothing
+          }
         }
 
       case GetParsedWithErrorCount(replyTo) =>
-        replyTo ! HmdaRowParsedCount(state.linesWithErrorCount)
+        replyTo ! HmdaRowParsedCount(state.totalErrors)
+        Effect.none
+
+      case GetParsingErrors(page, replyTo) =>
+        val p = PaginatedResource(state.totalErrors)(page)
+        val larErrorsToReturn =
+          state.larErrors.slice(p.fromIndex, p.toIndex)
+        replyTo ! HmdaParserErrorState(state.transmittalSheetErrors,
+                                       larErrorsToReturn,
+                                       state.totalErrors)
         Effect.none
 
       case CompleteParsing(submissionId) =>
         log.info(
-          s"Completed Parsing for ${submissionId.toString}, total lines with errors: ${state.linesWithErrorCount}")
+          s"Completed Parsing for ${submissionId.toString}, total lines with errors: ${state.totalErrors}")
         updateSubmissionStatus(ctx, state, submissionId)
         Effect.none
 
@@ -130,8 +152,8 @@ object HmdaParserError
   override def eventHandler: (
       HmdaParserErrorState,
       SubmissionProcessingEvent) => HmdaParserErrorState = {
-    case (state, HmdaRowParsedError(_, _)) =>
-      state.incrementErrorCount
+    case (state, error @ HmdaRowParsedError(_, _)) =>
+      state.update(error)
     case (state, _) => state
   }
 
@@ -179,7 +201,7 @@ object HmdaParserError
 
     fSubmission.map {
       case Some(submission) =>
-        val modified = if (state.linesWithErrorCount == 0) {
+        val modified = if (state.totalErrors == 0) {
           submission.copy(status = Parsed)
         } else {
           submission.copy(status = ParsedWithErrors)

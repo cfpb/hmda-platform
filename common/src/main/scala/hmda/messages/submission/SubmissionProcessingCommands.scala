@@ -2,9 +2,12 @@ package hmda.messages.submission
 
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
-import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingEvent
-import hmda.model.filing.PipeDelimited
+import hmda.messages.submission.SubmissionProcessingEvents.{
+  PersistedHmdaRowParsedError,
+  SubmissionProcessingEvent
+}
 import hmda.model.filing.submission.SubmissionId
+import hmda.model.processing.state.HmdaParserErrorState
 
 object SubmissionProcessingCommands {
   sealed trait SubmissionProcessingCommand extends Command
@@ -18,11 +21,18 @@ object SubmissionProcessingCommands {
   case class StartParsing(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
 
-  case class PersistHmdaRowParsedError(rowNumber: Int, errors: List[String])
+  case class PersistHmdaRowParsedError(
+      rowNumber: Int,
+      errors: List[String],
+      maybeReplyTo: Option[ActorRef[PersistedHmdaRowParsedError]])
       extends SubmissionProcessingCommand
 
   case class GetParsedWithErrorCount(
       replyTo: ActorRef[SubmissionProcessingEvent])
+      extends SubmissionProcessingCommand
+
+  case class GetParsingErrors(page: Int,
+                              replyTo: ActorRef[HmdaParserErrorState])
       extends SubmissionProcessingCommand
 
   case class CompleteParsing(submissionId: SubmissionId)

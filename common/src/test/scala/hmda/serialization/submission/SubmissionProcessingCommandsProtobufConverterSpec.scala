@@ -20,6 +20,7 @@ class SubmissionProcessingCommandsProtobufConverterSpec
 
   implicit val system = ActorSystem()
   implicit val typedSystem = system.toTyped
+  val actorRefResolver: ActorRefResolver = ActorRefResolver(typedSystem)
 
   property("Start Upload must serialize to protobuf and back") {
     forAll(submissionIdGen) { submissionId =>
@@ -52,13 +53,15 @@ class SubmissionProcessingCommandsProtobufConverterSpec
       for {
         rowNumber <- rowNumberGen
         errors <- errorListGen
-      } yield PersistHmdaRowParsedError(rowNumber, errors)
+      } yield PersistHmdaRowParsedError(rowNumber, errors, None)
     }
 
     forAll(persistParsedErrorGen) { cmd =>
-      val protobuf = persistHmdaRowParsedErrorToProtobuf(cmd).toByteArray
+      val protobuf =
+        persistHmdaRowParsedErrorToProtobuf(cmd, actorRefResolver).toByteArray
       persisteHmdaRowParsedErrorFromProtobuf(
-        PersistHmdaRowParsedErrorMessage.parseFrom(protobuf)) mustBe cmd
+        PersistHmdaRowParsedErrorMessage.parseFrom(protobuf),
+        actorRefResolver) mustBe cmd
     }
   }
 

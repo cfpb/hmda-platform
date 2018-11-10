@@ -298,3 +298,70 @@ Example response, with HTTP code 400:
   "end": 0
 }
 ```
+
+### Parse errors
+
+`/institutions/<lei>/filings/<period>/submissions/<submissionId>/parseErrors`
+
+`GET` - Returns all parsing errors for a submission
+
+| Query parameter | Description |
+| --------------- | ----------- |
+| page | Integer. If blank, will default to page 1. Page size is 20 lines of errors. |
+
+
+The `larErrors` array in this endpoint is paginated. The response contains 3 fields of pagination metadata:
+
+ - `total`: total number of LAR parser errors for this file
+ - `count`: number of errors returned on this page. Full page contains errors from 20 LARs of the HMDA file.
+ - `links`: the `href` field is the path to this resource, with a `{rel}` to be replaced with the query strings in the `first`, `prev`, `self`, `next`, `last` fields.
+
+
+Example response, with HTTP code 201:
+
+```json
+{
+  "transmittalSheetErrors": [
+    "Record Identifier is not an Integer",
+    "Agency Code is not an Integer"
+  ],
+  "larErrors": [
+    {
+      "lineNumber": 2,
+      "errorMessages": [
+        "Incorrect number of fields. found: 32, expected: 39"
+      ]
+    },
+    {
+      "lineNumber": 4,
+      "errorMessages": [
+        "Record Identifier is not an Integer"
+      ]
+    },
+    {
+      "lineNumber": 11,
+      "errorMessages": [
+        "Loan Type is not an Integer",
+        "Property Type is not an Integer",
+        "Loan Purpose is not an Integer",
+        "Owner Occupancy is not an Integer"
+      ]
+    }
+  ],
+  "count": 20,
+  "total": 130,
+  "status": {
+      "code": 5,
+      "message": "parsed with errors",
+      "description": "The data are not formatted according to certain formatting requirements specified in the Filing Instructions Guide. The filing process may not proceed until the data have been corrected and the file has been reuploaded."
+  },
+  "_links": {
+    "first": "?page=1",
+    "prev": "?page=1",
+    "self": "?page=1",
+    "next": "?page=2",
+    "last": "?page=7",
+    "href": "/institutions/1/filings/2017/submissions/1/parseErrors{rel}"
+  }
+}
+```
