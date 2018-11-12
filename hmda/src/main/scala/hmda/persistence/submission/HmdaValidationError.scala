@@ -43,6 +43,7 @@ import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.Institution
+import hmda.model.validation.{TsValidationError, ValidationError}
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
@@ -51,9 +52,10 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import hmda.parser.filing.ParserFlow._
 import hmda.persistence.submission.HmdaValidationError.config
 import hmda.validation.HmdaValidated
+import hmda.validation.engine.TsEngine
 import hmda.validation.filing.ValidationFlow._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
 object HmdaValidationError
@@ -105,9 +107,15 @@ object HmdaValidationError
 
         for {
           validationContext <- fValidationContext
+          tsErrors = validateTs("all",
+                                ctx,
+                                sharding,
+                                submissionId,
+                                validationContext)
         } yield {
-          validateTs("all", ctx, sharding, submissionId, validationContext)
-            .runWith(Sink.foreach(println))
+          tsErrors.foreach { error =>
+            ctx.asScala.self ! PersistHmdaRowValidatedError(1, error, None)
+          }
         }
 
         //validateLar(ctx, sharding, submissionId, fTs)
@@ -121,6 +129,7 @@ object HmdaValidationError
           .persist(HmdaRowValidatedError(rowNumber, validationError))
           .thenRun { _ =>
             log.debug(s"Persisted: ${validationError.toCsv}")
+            println(s"Persisted: ${validationError.toCsv}")
             maybeReplyTo match {
               case Some(replyTo) =>
                 replyTo ! HmdaRowValidatedError(rowNumber, validationError)
@@ -148,7 +157,6 @@ object HmdaValidationError
 
   private def uploadConsumer(ctx: ActorContext[_], submissionId: SubmissionId)
     : Source[CommittableMessage[String, String], Consumer.Control] = {
-
     val kafkaConfig =
       ctx.asScala.system.settings.config.getConfig("akka.kafka.consumer")
     val consumerSettings =
@@ -205,6 +213,7 @@ object HmdaValidationError
       implicit materializer: ActorMaterializer,
       ec: ExecutionContext): Future[Option[TransmittalSheet]] = {
     uploadConsumerRawStr(ctx, submissionId)
+      .take(1)
       .via(parseTsFlow)
       .map(_.getOrElse(TransmittalSheet()))
       .runWith(Sink.seq)
@@ -217,18 +226,28 @@ object HmdaValidationError
   //    .via(parseLarFlow)
   //    .map(_.getOrElse(LoanApplicationRegister()))
 
-  private def validateTs(checkType: String,
-                         ctx: ActorContext[SubmissionProcessingCommand],
-                         sharding: ClusterSharding,
-                         submissionId: SubmissionId,
-                         validationContext: ValidationContext) = {
-    uploadConsumerRawStr(ctx, submissionId)
-      .take(1)
-      .via(validateTsFlow(checkType, validationContext))
-      .collect {
-        case Left(errors) =>
-          errors
-      }
+  private def validateTs(
+      checkType: String,
+      ctx: ActorContext[SubmissionProcessingCommand],
+      sharding: ClusterSharding,
+      submissionId: SubmissionId,
+      validationContext: ValidationContext): List[ValidationError] = {
+
+    val ts = validationContext.ts.getOrElse(TransmittalSheet())
+    val tsSyntacticalErrorList: List[ValidationError] = TsEngine
+      .checkSyntactical(ts, ts.LEI, validationContext, TsValidationError)
+      .leftMap(errors => errors.toList)
+      .swap
+      .toList
+      .flatten
+    val tsValidityErrorList: List[ValidationError] = TsEngine
+      .checkValidity(ts, ts.LEI, TsValidationError)
+      .leftMap(errors => errors.toList)
+      .swap
+      .toList
+      .flatten
+    tsSyntacticalErrorList ++ tsValidityErrorList
+
   }
 
   //  private def validateLar(
@@ -276,7 +295,9 @@ object HmdaValidationError
     for {
       ts <- maybeTs(ctx, submissionId)
       institution <- fInstitution
-    } yield ValidationContext(institution, Some(year), ts)
+    } yield {
+      ValidationContext(institution, Some(year), ts)
+    }
   }
 
   private def uploadConsumerRawStr(

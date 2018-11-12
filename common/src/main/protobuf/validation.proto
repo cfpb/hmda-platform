@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+
+message ValidationErrorTypeMessage {
+
+}
+
+message ValidationErrorEntityMessage {
+
+}
+
+message ValidationErrorMessage {
+    string uli = 1;
+    string editName = 2;
+    ValidationErrorTypeMessage validationErrorType = 3;
+    ValidationErrorEntityMessage validationErrorEntity = 4;
+}
