@@ -14,11 +14,7 @@ import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.Seq
-import hmda.model.validation.{
-  SyntacticalValidationError,
-  ValidationError,
-  ValidityValidationError
-}
+import hmda.model.validation._
 
 class ValidationFlowSpec extends WordSpec with MustMatchers {
 
@@ -104,8 +100,12 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
         .runWith(TestSink.probe[List[ValidationError]])
         .request(1)
         .expectNext(
-          List(SyntacticalValidationError("B90YWS6AFX2LGWOXJ1LD", "S300"),
-               ValidityValidationError("B90YWS6AFX2LGWOXJ1LD", "V601")))
+          List(SyntacticalValidationError("B90YWS6AFX2LGWOXJ1LD",
+                                          "S300",
+                                          TsValidationError),
+               ValidityValidationError("B90YWS6AFX2LGWOXJ1LD",
+                                       "V601",
+                                       TsValidationError)))
         .request(1)
         .expectComplete()
     }
@@ -120,8 +120,9 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
         }
         .runWith(TestSink.probe[List[ValidationError]])
         .request(1)
-        .expectNext(List(
-          SyntacticalValidationError("B90YWS6AFX2LGWOXJ1LD", "S300")))
+        .expectNext(List(SyntacticalValidationError("B90YWS6AFX2LGWOXJ1LD",
+                                                    "S300",
+                                                    TsValidationError)))
         .request(1)
         .expectComplete()
     }
@@ -136,8 +137,9 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
         }
         .runWith(TestSink.probe[List[ValidationError]])
         .request(1)
-        .expectNext(List(
-          ValidityValidationError("B90YWS6AFX2LGWOXJ1LD", "V601")))
+        .expectNext(List(ValidityValidationError("B90YWS6AFX2LGWOXJ1LD",
+                                                 "V601",
+                                                 TsValidationError)))
         .request(1)
         .expectComplete()
     }
@@ -154,19 +156,23 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
         .expectNext(List(
           SyntacticalValidationError(
             "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
-            "S300"),
+            "S300",
+            LarValidationError),
           ValidityValidationError(
             "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
-            "V612-1")
+            "V612-1",
+            LarValidationError)
         ))
         .request(1)
         .expectNext(List(
           ValidityValidationError(
             "B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89",
-            "V629-1"),
+            "V629-1",
+            LarValidationError),
           ValidityValidationError(
             "B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89",
-            "V630")
+            "V630",
+            LarValidationError)
         ))
         .request(1)
         .expectComplete()
@@ -181,9 +187,12 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
         }
         .runWith(TestSink.probe[List[ValidationError]])
         .request(1)
-        .expectNext(List(SyntacticalValidationError(
-          "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
-          "S300")))
+        .expectNext(
+          List(
+            SyntacticalValidationError(
+              "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
+              "S300",
+              LarValidationError)))
         .request(1)
         .expectComplete()
     }
@@ -197,17 +206,22 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
         }
         .runWith(TestSink.probe[List[ValidationError]])
         .request(1)
-        .expectNext(List(ValidityValidationError(
-          "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
-          "V612-1")))
+        .expectNext(
+          List(
+            ValidityValidationError(
+              "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
+              "V612-1",
+              LarValidationError)))
         .request(1)
         .expectNext(List(
           ValidityValidationError(
             "B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89",
-            "V629-1"),
+            "V629-1",
+            LarValidationError),
           ValidityValidationError(
             "B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89",
-            "V630")
+            "V630",
+            LarValidationError)
         ))
         .request(1)
         .expectComplete()

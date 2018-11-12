@@ -6,6 +6,7 @@ import hmda.model.filing.ts.TsGenerators._
 import TsEngine._
 import hmda.model.validation.{
   SyntacticalValidationError,
+  TsValidationError,
   ValidityValidationError
 }
 import hmda.validation.context.ValidationContext
@@ -21,7 +22,7 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
           ts.contact.address.city != "" &&
           ts.institutionName != "") {
         val testContext = ValidationContext(None, Some(ts.year))
-        val validation = checkAll(ts, ts.LEI, testContext)
+        val validation = checkAll(ts, ts.LEI, testContext, TsValidationError)
         validation.leftMap(errors => errors.toList.size mustBe 0)
       }
     }
@@ -38,12 +39,15 @@ class TsEngineSpec extends PropSpec with PropertyChecks with MustMatchers {
           ts.institutionName != "") {
         val testContext = ValidationContext(None, Some(ts.year))
         val validation =
-          checkAll(ts.copy(id = 2, quarter = 2), ts.LEI, testContext)
+          checkAll(ts.copy(id = 2, quarter = 2),
+                   ts.LEI,
+                   testContext,
+                   TsValidationError)
         val errors =
           validation.leftMap(errors => errors.toList).toEither.left.get
         errors mustBe
-          List(SyntacticalValidationError(ts.LEI, "S300"),
-               ValidityValidationError(ts.LEI, "V602"))
+          List(SyntacticalValidationError(ts.LEI, "S300", TsValidationError),
+               ValidityValidationError(ts.LEI, "V602", TsValidationError))
       }
     }
   }
