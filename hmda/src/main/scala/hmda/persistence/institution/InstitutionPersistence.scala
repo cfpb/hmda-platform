@@ -25,7 +25,7 @@ object InstitutionPersistence
       PersistentBehavior[InstitutionCommand,
                          InstitutionEvent,
                          InstitutionState](
-        persistenceId = PersistenceId(s"$entityId"),
+        persistenceId = PersistenceId(entityId),
         emptyState = InstitutionState(None),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
