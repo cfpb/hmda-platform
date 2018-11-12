@@ -14,6 +14,7 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.KafkaTopics.uploadTopic
 import hmda.messages.submission.SubmissionProcessingCommands.{
+  GetHmdaValidationErrorState,
   PersistHmdaRowValidatedError,
   StartSyntacticalValidity,
   SubmissionProcessingCommand
@@ -75,6 +76,7 @@ object HmdaValidationError
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
         Effect.none
+
       case PersistHmdaRowValidatedError(rowNumber,
                                         validationError,
                                         maybeReplyTo) =>
@@ -88,6 +90,13 @@ object HmdaValidationError
               case None => //do nothing
             }
           }
+
+      case GetHmdaValidationErrorState(_, replyTo) =>
+        replyTo ! state
+        Effect.none
+
+      case _ =>
+        Effect.none
     }
 
   }

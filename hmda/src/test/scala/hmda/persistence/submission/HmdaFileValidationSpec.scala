@@ -5,9 +5,13 @@ import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
-import hmda.messages.submission.SubmissionProcessingCommands.PersistHmdaRowValidatedError
+import hmda.messages.submission.SubmissionProcessingCommands.{
+  GetHmdaValidationErrorState,
+  PersistHmdaRowValidatedError
+}
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.submission.SubmissionId
+import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.model.validation._
 import hmda.persistence.AkkaCassandraPersistenceSpec
 
@@ -23,6 +27,7 @@ class HmdaFileValidationSpec extends AkkaCassandraPersistenceSpec {
   val submissionId = SubmissionId("12345", "2018", 1)
 
   val errorsProbe = TestProbe[HmdaRowValidatedError]("processing-event")
+  val stateProbe = TestProbe[HmdaValidationErrorState]("state-probe")
 
   "Validation Errors" must {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
@@ -52,6 +57,9 @@ class HmdaFileValidationSpec extends AkkaCassandraPersistenceSpec {
           Some(errorsProbe.ref))
         errorsProbe.expectMessage(HmdaRowValidatedError(index, error))
       }
+      hmdaValidationError ! GetHmdaValidationErrorState(submissionId,
+                                                        stateProbe.ref)
+      stateProbe.expectMessage(HmdaValidationErrorState(5, 3, 1, 1, 0))
     }
   }
 

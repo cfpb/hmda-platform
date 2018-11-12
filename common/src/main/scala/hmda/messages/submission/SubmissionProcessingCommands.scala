@@ -8,7 +8,10 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.processing.state.HmdaParserErrorState
+import hmda.model.processing.state.{
+  HmdaParserErrorState,
+  HmdaValidationErrorState
+}
 import hmda.model.validation.ValidationError
 
 object SubmissionProcessingCommands {
@@ -50,6 +53,11 @@ object SubmissionProcessingCommands {
       rowNumber: Int,
       validationError: ValidationError,
       replyTo: Option[ActorRef[HmdaRowValidatedError]])
+      extends SubmissionProcessingCommand
+
+  case class GetHmdaValidationErrorState(
+      submissionId: SubmissionId,
+      replyTo: ActorRef[HmdaValidationErrorState])
       extends SubmissionProcessingCommand
 
   //case class CompleteSyntacticalValidity(submissionId: SubmissionId)
