@@ -1,6 +1,7 @@
 package hmda.messages.submission
 
 import hmda.messages.CommonMessages.Event
+import hmda.model.validation.ValidationError
 
 object SubmissionProcessingEvents {
   sealed trait SubmissionProcessingEvent extends Event
@@ -8,15 +9,13 @@ object SubmissionProcessingEvents {
   case class HmdaRowParsedError(rowNumber: Int, errorMessages: List[String])
       extends SubmissionProcessingEvent
 
-  case class HmdaRowValidatedError() extends SubmissionProcessingEvent
+  case class HmdaRowValidatedError(rowNumber: Int,
+                                   validationError: ValidationError)
+      extends SubmissionProcessingEvent
 
   case class HmdaRowParsedCount(count: Int) extends SubmissionProcessingEvent
 
   case class PersistedHmdaRowParsedError(rowNumber: Int, errors: List[String])
       extends SubmissionProcessingEvent
 
-  case class PersistedHmdaRowValidatedError(rowNumber: Int,
-                                            uli: String,
-                                            editName: String)
-      extends SubmissionProcessingEvent
 }

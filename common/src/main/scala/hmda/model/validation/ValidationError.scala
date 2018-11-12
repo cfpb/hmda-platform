@@ -15,7 +15,8 @@ trait ValidationError {
   def editName: String
   def validationErrorType: ValidationErrorType
   def validationErrorEntity: ValidationErrorEntity
-  def toCsv: String = s"$validationErrorType, $editName, $uli"
+  def toCsv: String =
+    s"$validationErrorEntity,$validationErrorType, $editName, $uli"
 }
 
 case class SyntacticalValidationError(

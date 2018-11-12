@@ -3,12 +3,11 @@ package hmda.messages.submission
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.submission.SubmissionProcessingEvents.{
+  HmdaRowValidatedError,
   PersistedHmdaRowParsedError,
-  PersistedHmdaRowValidatedError,
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.model.validation.ValidationError
 
@@ -50,7 +49,7 @@ object SubmissionProcessingCommands {
   case class PersistHmdaRowValidatedError(
       rowNumber: Int,
       validationError: ValidationError,
-      replyTo: Option[ActorRef[PersistedHmdaRowValidatedError]])
+      replyTo: Option[ActorRef[HmdaRowValidatedError]])
       extends SubmissionProcessingCommand
 
   //case class CompleteSyntacticalValidity(submissionId: SubmissionId)

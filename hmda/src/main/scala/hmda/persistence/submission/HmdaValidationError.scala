@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, Behavior}
+import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.kafka.ConsumerMessage.CommittableMessage
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.kafka.scaladsl.Consumer
@@ -26,6 +26,8 @@ import hmda.model.filing.submission.SubmissionId
 import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -76,7 +78,16 @@ object HmdaValidationError
       case PersistHmdaRowValidatedError(rowNumber,
                                         validationError,
                                         maybeReplyTo) =>
-        Effect.none
+        Effect
+          .persist(HmdaRowValidatedError(rowNumber, validationError))
+          .thenRun { _ =>
+            log.debug(s"Persisted: ${validationError.toCsv}")
+            maybeReplyTo match {
+              case Some(replyTo) =>
+                replyTo ! HmdaRowValidatedError(rowNumber, validationError)
+              case None => //do nothing
+            }
+          }
     }
 
   }
@@ -84,8 +95,9 @@ object HmdaValidationError
   override def eventHandler
     : (HmdaValidationErrorState,
        SubmissionProcessingEvent) => HmdaValidationErrorState = {
-    case (state, error @ HmdaRowValidatedError()) => state.update(error)
-    case (state, _)                               => state
+    case (state, error @ HmdaRowValidatedError(rowNumber, validationError)) =>
+      state.update(error)
+    case (state, _) => state
   }
 
   private def uploadConsumer(ctx: ActorContext[_], submissionId: SubmissionId)
@@ -105,6 +117,11 @@ object HmdaValidationError
       .committableSource(consumerSettings, Subscriptions.topics(uploadTopic))
       .filter(_.record.key() == submissionId.toString)
 
+  }
+
+  def startShardRegion(sharding: ClusterSharding)
+    : ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] = {
+    super.startShardRegion(sharding)
   }
 
 }
