@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, ActorRef, Behavior}
+import akka.actor.typed.{ActorContext, ActorRef, Behavior, Logger}
 import akka.kafka.ConsumerMessage.CommittableMessage
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.kafka.scaladsl.Consumer
@@ -23,17 +23,27 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowValidatedError,
   SubmissionProcessingEvent
 }
-import hmda.model.filing.submission.SubmissionId
+import hmda.model.filing.submission.{
+  Submission,
+  SubmissionId,
+  SubmissionStatus,
+  Validating
+}
 import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
+import hmda.messages.submission.SubmissionCommands.{
+  GetSubmission,
+  ModifySubmission
+}
+import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 object HmdaValidationError
@@ -72,9 +82,11 @@ object HmdaValidationError
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
+    val sharding = ClusterSharding(ctx.asScala.system)
 
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
+        updateSubmissionStatus(sharding, submissionId, Validating, log)
         Effect.none
 
       case PersistHmdaRowValidatedError(rowNumber,
@@ -104,7 +116,7 @@ object HmdaValidationError
   override def eventHandler
     : (HmdaValidationErrorState,
        SubmissionProcessingEvent) => HmdaValidationErrorState = {
-    case (state, error @ HmdaRowValidatedError(rowNumber, validationError)) =>
+    case (state, error @ HmdaRowValidatedError(_, _)) =>
       state.update(error)
     case (state, _) => state
   }
@@ -131,6 +143,36 @@ object HmdaValidationError
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] = {
     super.startShardRegion(sharding)
+  }
+
+  def updateSubmissionStatus(
+      sharding: ClusterSharding,
+      submissionId: SubmissionId,
+      modified: SubmissionStatus,
+      log: Logger)(implicit ec: ExecutionContext): Unit = {
+    val submissionPersistence =
+      sharding.entityRefFor(SubmissionPersistence.typeKey,
+                            s"${SubmissionPersistence.name}-$submissionId")
+
+    val submissionManager =
+      sharding.entityRefFor(SubmissionManager.typeKey,
+                            s"${SubmissionManager.name}-$submissionId")
+
+    val fSubmission: Future[Option[Submission]] = submissionPersistence ? (
+        ref => GetSubmission(ref))
+
+    for {
+      m <- fSubmission
+      s = m.getOrElse(Submission())
+    } yield {
+      if (s.isEmpty) {
+        log
+          .error(s"Submission $submissionId could not be retrieved")
+      } else {
+        val modifiedSubmission = s.copy(status = modified)
+        submissionManager ! UpdateSubmissionStatus(modifiedSubmission)
+      }
+    }
   }
 
 }

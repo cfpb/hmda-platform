@@ -8,6 +8,7 @@ import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{
   HmdaParserError,
+  HmdaValidationError,
   SubmissionManager,
   SubmissionPersistence
 }
@@ -23,12 +24,13 @@ object HmdaPersistence {
   val behavior: Behavior[HmdaPersistenceCommand] =
     Behaviors.setup { ctx =>
       ctx.log.info(s"Actor started at ${ctx.self.path}")
-
-      InstitutionPersistence.startShardRegion(ClusterSharding(ctx.system))
-      FilingPersistence.startShardRegion(ClusterSharding(ctx.system))
-      SubmissionPersistence.startShardRegion(ClusterSharding(ctx.system))
-      SubmissionManager.startShardRegion(ClusterSharding(ctx.system))
-      HmdaParserError.startShardRegion(ClusterSharding(ctx.system))
+      val sharding = ClusterSharding(ctx.system)
+      InstitutionPersistence.startShardRegion(sharding)
+      FilingPersistence.startShardRegion(sharding)
+      SubmissionPersistence.startShardRegion(sharding)
+      SubmissionManager.startShardRegion(sharding)
+      HmdaParserError.startShardRegion(sharding)
+      HmdaValidationError.startShardRegion(sharding)
 
       Behaviors
         .receive[HmdaPersistenceCommand] {

@@ -11,8 +11,11 @@ import hmda.messages.submission.SubmissionEvents.{
   SubmissionModified
 }
 import hmda.messages.submission.SubmissionManagerCommands._
-import hmda.messages.submission.SubmissionProcessingCommands.StartParsing
-import hmda.model.filing.submission.Uploaded
+import hmda.messages.submission.SubmissionProcessingCommands.{
+  StartParsing,
+  StartSyntacticalValidity
+}
+import hmda.model.filing.submission.{Parsed, Uploaded}
 
 object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
 
@@ -35,6 +38,10 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
         sharding.entityRefFor(HmdaParserError.typeKey,
                               s"${HmdaParserError.name}-$submissionId")
 
+      val hmdaValidationError =
+        sharding.entityRefFor(HmdaValidationError.typeKey,
+                              s"${HmdaValidationError.name}-$submissionId")
+
       val submissionEventResponseAdapter: ActorRef[SubmissionEvent] =
         ctx.messageAdapter(response => WrappedSubmissionEventResponse(response))
 
@@ -51,6 +58,9 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
               submission.status match {
                 case Uploaded =>
                   hmdaParserError ! StartParsing(submission.id)
+                case Parsed =>
+                  hmdaValidationError ! StartSyntacticalValidity(submission.id)
+
                 case _ =>
               }
               Behaviors.same
