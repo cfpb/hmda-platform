@@ -11,7 +11,7 @@ class ValidationProtobufConverterSpec
     with PropertyChecks
     with MustMatchers {
 
-  property("Validation Error must convert to protobuf and back") {
+  property("Validation Error must serialize to protobuf and back") {
     forAll(validationErrorGen) { validationError =>
       val protobuf = validationErrorToProtobuf(validationError).toByteArray
       validationErrorFromProtobuf(ValidationErrorMessage.parseFrom(protobuf)) mustBe validationError

@@ -4,7 +4,10 @@ import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.persistence.serialization.submission.processing.commands._
 import SubmissionProtobufConverter._
+import hmda.model.processing.state.HmdaValidationErrorState
+import hmda.serialization.validation.ValidationProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionIdMessage
+import hmda.persistence.serialization.validation.ValidationErrorMessage
 
 object SubmissionProcessingCommandsProtobufConverter {
 
@@ -114,6 +117,87 @@ object SubmissionProcessingCommandsProtobufConverter {
     CompleteParsingWithErrors(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
+  def startSyntacticalValidityToProtobuf(
+      cmd: StartSyntacticalValidity): StartSyntacticalValidityMessage = {
+    StartSyntacticalValidityMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def startSyntacticalValidityFromProtobuf(
+      msg: StartSyntacticalValidityMessage): StartSyntacticalValidity = {
+    StartSyntacticalValidity(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
+  def persistHmdaRowValidatedErrorToProtobuf(
+      cmd: PersistHmdaRowValidatedError,
+      refResolver: ActorRefResolver): PersistHmdaRowValidatedErrorMessage = {
+    PersistHmdaRowValidatedErrorMessage(
+      cmd.rowNumber,
+      Some(validationErrorToProtobuf(cmd.validationError)),
+      cmd.replyTo match {
+        case None      => ""
+        case Some(ref) => refResolver.toSerializationFormat(ref)
+      }
+    )
+  }
+
+  def persistHmdaRowValidatedErrorFromProtobuf(
+      msg: PersistHmdaRowValidatedErrorMessage,
+      refResolver: ActorRefResolver): PersistHmdaRowValidatedError = {
+    PersistHmdaRowValidatedError(
+      msg.rowNumber,
+      validationErrorFromProtobuf(
+        msg.validationError.getOrElse(ValidationErrorMessage())),
+      if (msg.replyTo == "") None
+      else Some(refResolver.resolveActorRef(msg.replyTo))
+    )
+  }
+
+  def hmdaValidationErrorStateToProtobuf(
+      cmd: HmdaValidationErrorState): HmdaValidationErrorStateMessage = {
+    HmdaValidationErrorStateMessage(
+      cmd.totalErrors,
+      cmd.syntacticalErrors,
+      cmd.validityErrors,
+      cmd.qualityErrors,
+      cmd.macroErrors
+    )
+  }
+
+  def hmdaValidationErrorStateFromProtobuf(
+      msg: HmdaValidationErrorStateMessage): HmdaValidationErrorState = {
+    HmdaValidationErrorState(
+      msg.totalErrors,
+      msg.syntacticalErrors,
+      msg.validityErrors,
+      msg.qualityErrors,
+      msg.macroErrors
+    )
+  }
+
+  def getHmdaValidationErrorStateToProtobuf(cmd: GetHmdaValidationErrorState,
+                                            actorRefResolver: ActorRefResolver)
+    : GetHmdaValidationErrorStateMessage = {
+    GetHmdaValidationErrorStateMessage(
+      submissionIdToProtobuf(cmd.submissionId),
+      actorRefResolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def getHmdaValidationErrorStateFromProtobuf(
+      msg: GetHmdaValidationErrorStateMessage,
+      actorRefResolver: ActorRefResolver): GetHmdaValidationErrorState = {
+    GetHmdaValidationErrorState(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      actorRefResolver.resolveActorRef(msg.replyTo)
     )
   }
 

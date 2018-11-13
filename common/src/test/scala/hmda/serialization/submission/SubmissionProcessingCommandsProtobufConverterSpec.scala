@@ -7,11 +7,15 @@ import SubmissionProcessingCommandsProtobufConverter._
 import akka.actor.ActorSystem
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRefResolver
-import hmda.messages.submission.SubmissionProcessingCommands._
+import hmda.messages.submission.SubmissionProcessingCommands.{
+  PersistHmdaRowValidatedError,
+  _
+}
 import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingEvent
 import hmda.persistence.serialization.submission.processing.commands._
 import org.scalacheck.Gen
 import akka.actor.typed.scaladsl.adapter._
+import hmda.serialization.validation.ValidationErrorGenerator._
 
 class SubmissionProcessingCommandsProtobufConverterSpec
     extends PropSpec
@@ -90,6 +94,28 @@ class SubmissionProcessingCommandsProtobufConverterSpec
       val protobuf = completeParsingWithErrorsToProtobuf(cmd).toByteArray
       completeParsingWithErrorsFromProtobuf(
         CompleteParsingWithErrorsMessage.parseFrom(protobuf)) mustBe cmd
+    }
+  }
+
+  property("Start Syntactical and Validity must serialize to protobuf and back") {
+    forAll(submissionIdGen) { submissionId =>
+      val cmd = StartSyntacticalValidity(submissionId)
+      val protobuf = startSyntacticalValidityToProtobuf(cmd).toByteArray
+      startSyntacticalValidityFromProtobuf(
+        StartSyntacticalValidityMessage.parseFrom(protobuf)) mustBe cmd
+    }
+  }
+
+  property("PersistHmdaRowValidatedError must serialize to protobuf and back") {
+    forAll(validationErrorGen) { validationError =>
+      val persistHmdaRowValidatedError =
+        PersistHmdaRowValidatedError(1, validationError, None)
+      val protobuf =
+        persistHmdaRowValidatedErrorToProtobuf(persistHmdaRowValidatedError,
+                                               actorRefResolver).toByteArray
+      persistHmdaRowValidatedErrorFromProtobuf(
+        PersistHmdaRowValidatedErrorMessage.parseFrom(protobuf),
+        actorRefResolver) mustBe persistHmdaRowValidatedError
     }
   }
 
