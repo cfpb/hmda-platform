@@ -10,7 +10,7 @@ import akka.kafka.scaladsl.Consumer
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.KafkaTopics.uploadTopic
@@ -36,7 +36,6 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
-import akka.stream.typed.scaladsl.ActorFlow
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
@@ -44,19 +43,18 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.model.validation.{TsValidationError, ValidationError}
-import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import hmda.parser.filing.ParserFlow._
-import hmda.persistence.submission.HmdaValidationError.config
 import hmda.validation.HmdaValidated
 import hmda.validation.engine.TsEngine
 import hmda.validation.filing.ValidationFlow._
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.util.Success
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -112,10 +110,16 @@ object HmdaValidationError
                                 sharding,
                                 submissionId,
                                 validationContext)
+          errors = syntacticalValidityErrors(ctx,
+                                             sharding,
+                                             submissionId,
+                                             validationContext.ts)
         } yield {
           tsErrors.foreach { error =>
             ctx.asScala.self ! PersistHmdaRowValidatedError(1, error, None)
           }
+          errors.map(e => e.v)
+
         }
 
         //validateLar(ctx, sharding, submissionId, fTs)
@@ -250,33 +254,53 @@ object HmdaValidationError
 
   }
 
-  //  private def validateLar(
-  //                           ctx: ActorContext[SubmissionProcessingCommand],
-  //                           sharding: ClusterSharding,
-  //                           submissionId: SubmissionId,
-  //                           fTs: Future[Option[TransmittalSheet]])(implicit ec: ExecutionContext) = {
-  //    val institutionPersistence =
-  //      sharding.entityRefFor(
-  //        InstitutionPersistence.typeKey,
-  //        s"${InstitutionPersistence.name}-${submissionId.lei}")
-  //
-  //    val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
-  //      ref => GetInstitution(ref))
-  //
-  //    val config = ConfigFactory.load()
-  //    val processingYear = config.getInt("hmda.filing.year")
-  //
-  //    for {
-  //      ts <- fTs
-  //      institution <- fInstitution
-  //    } yield {
-  //      uploadConsumerRawStr(ctx, submissionId)
-  //        .via(
-  //          validateLarFlow(
-  //            "syntactical",
-  //            ValidationContext(institution, Some(processingYear), ts)))
-  //    }
-  //  }
+  private def syntacticalValidityErrors(
+      ctx: ActorContext[SubmissionProcessingCommand],
+      sharding: ClusterSharding,
+      submissionId: SubmissionId,
+      ts: Option[TransmittalSheet])(implicit materializer: ActorMaterializer,
+                                    ec: ExecutionContext) = {
+    val institutionPersistence =
+      sharding.entityRefFor(
+        InstitutionPersistence.typeKey,
+        s"${InstitutionPersistence.name}-${submissionId.lei}")
+
+    val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
+        ref => GetInstitution(ref))
+
+    for {
+      institution <- fInstitution
+      syntacticalErrors = larErrors("syntactical",
+                                    ctx,
+                                    submissionId,
+                                    ts,
+                                    institution)
+      validityErrors = larErrors("validity", ctx, submissionId, ts, institution)
+
+    } yield {
+      syntacticalErrors.concat(validityErrors)
+    }
+  }
+
+  private def larErrors(checkType: String,
+                        ctx: ActorContext[SubmissionProcessingCommand],
+                        submissionId: SubmissionId,
+                        ts: Option[TransmittalSheet],
+                        institution: Option[Institution])(
+      implicit materializer: ActorMaterializer) = {
+    uploadConsumerRawStr(ctx, submissionId)
+      .drop(1)
+      .via(
+        validateLarFlow(
+          checkType,
+          ValidationContext(institution, Some(processingYear), ts)))
+      .mapConcat(_.swap.getOrElse(Nil))
+      .zip(Source.fromIterator(() => Iterator.from(2)))
+      .map(errorWithIndex =>
+        PersistHmdaRowValidatedError(errorWithIndex._2,
+                                     errorWithIndex._1,
+                                     None))
+  }
 
   private def validationContext(year: Int,
                                 sharding: ClusterSharding,
