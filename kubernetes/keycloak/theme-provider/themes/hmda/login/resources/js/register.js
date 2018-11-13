@@ -108,12 +108,10 @@
             .append(
               $('<span class="hmda-error-message">').append(
                 $(
-                  "<span>Sorry, we couldn't find that email domain. For help getting registered, please contact </span>"
+                  "<span>Sorry, we couldn't find that email domain. For help getting registered, please fill out and submit </span>"
                 ),
-                getEmailLink(),
-                $(
-                  '<span> and provide your institution name, RSSD, and Tax ID. If your institution is a non-depository and does not have an RSSD, please provide your NMLS ID in place of the RSSD.</span>'
-                )
+                getHelpFormLink(),
+                $('<span>.</span>')
               )
             )
         }
