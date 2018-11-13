@@ -10,7 +10,7 @@
         <appender-ref ref="STDOUT" />
     </appender>
 
-    <root level="DEBUG">
+    <root level="${CHECKDIGIT_LOG_LEVEL:-DEBUG}">
         <appender-ref ref="ASYNC" />
     </root>
 </configuration>

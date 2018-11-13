@@ -10,8 +10,8 @@
         <appender-ref ref="STDOUT" />
     </appender>
 
-    <root level="INFO">
+    <root level="${PLATFORM_LOG_LEVEL:-INFO}">
         <appender-ref ref="ASYNC" />
     </root>
-    <logger name="org.apache.zookeeper" level="WARN"/>
+    <logger name="org.apache.zookeeper" level="${ZOOKEEPER_LOG_LEVEL:-WARN}"/>
 </configuration>
