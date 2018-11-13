@@ -1,0 +1,82 @@
+package hmda.serialization.validation
+
+import hmda.model.validation._
+import hmda.persistence.serialization.validation.{
+  ValidationErrorEntityMessage,
+  ValidationErrorMessage,
+  ValidationErrorTypeMessage
+}
+
+object ValidationProtobufConverter {
+
+  def validationErrorToProtobuf(
+      cmd: ValidationError): ValidationErrorMessage = {
+    ValidationErrorMessage(
+      cmd.uli,
+      cmd.editName,
+      validationErrorTypeToProtobuf(cmd.validationErrorType),
+      validationErrorEntityToProtobuf(cmd.validationErrorEntity)
+    )
+  }
+
+  def validationErrorFromProtobuf(
+      msg: ValidationErrorMessage): ValidationError = {
+    val entityErrorFromProtobuf = validationErrorEntityFromProtobuf(
+      msg.validationErrorEntity)
+    msg.validationErrorType match {
+      case ValidationErrorTypeMessage.SYNTACTICAL =>
+        SyntacticalValidationError(msg.uli,
+                                   msg.editName,
+                                   entityErrorFromProtobuf)
+      case ValidationErrorTypeMessage.VALIDITY =>
+        ValidityValidationError(msg.uli, msg.editName, entityErrorFromProtobuf)
+      case ValidationErrorTypeMessage.QUALITY =>
+        QualityValidationError(msg.uli, msg.editName)
+      case ValidationErrorTypeMessage.MACRO =>
+        MacroValidationError(msg.editName)
+      case ValidationErrorTypeMessage.Unrecognized(value) =>
+        throw new Exception("Cannot convert from protobuf")
+    }
+  }
+
+  def validationErrorEntityToProtobuf(
+      cmd: ValidationErrorEntity): ValidationErrorEntityMessage = {
+    cmd match {
+      case TsValidationError  => ValidationErrorEntityMessage.TSVALIDATION
+      case LarValidationError => ValidationErrorEntityMessage.LARVALIDATION
+    }
+  }
+
+  def validationErrorEntityFromProtobuf(
+      msg: ValidationErrorEntityMessage): ValidationErrorEntity = {
+    msg match {
+      case ValidationErrorEntityMessage.TSVALIDATION  => TsValidationError
+      case ValidationErrorEntityMessage.LARVALIDATION => LarValidationError
+      case ValidationErrorEntityMessage.Unrecognized(value) =>
+        throw new Exception("Cannot convert from protobuf")
+    }
+  }
+
+  def validationErrorTypeToProtobuf(
+      cmd: ValidationErrorType): ValidationErrorTypeMessage = {
+    cmd match {
+      case Syntactical => ValidationErrorTypeMessage.SYNTACTICAL
+      case Validity    => ValidationErrorTypeMessage.VALIDITY
+      case Quality     => ValidationErrorTypeMessage.QUALITY
+      case Macro       => ValidationErrorTypeMessage.MACRO
+    }
+  }
+
+  def validationErrorTypeFromProtobuf(
+      msg: ValidationErrorTypeMessage): ValidationErrorType = {
+    msg match {
+      case ValidationErrorTypeMessage.SYNTACTICAL => Syntactical
+      case ValidationErrorTypeMessage.VALIDITY    => Validity
+      case ValidationErrorTypeMessage.QUALITY     => Quality
+      case ValidationErrorTypeMessage.MACRO       => Macro
+      case ValidationErrorTypeMessage.Unrecognized(value) =>
+        throw new Exception("Cannot convert from protobuf")
+    }
+  }
+
+}
