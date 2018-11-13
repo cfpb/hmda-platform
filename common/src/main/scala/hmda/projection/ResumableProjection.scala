@@ -3,14 +3,15 @@ package hmda.projection
 import akka.actor.{ActorSystem, Scheduler}
 import akka.actor.typed.{ActorContext, Behavior}
 import akka.persistence.query.{EventEnvelope, NoOffset, Offset}
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
 import akka.stream.ActorMaterializer
 import hmda.messages.projection.CommonProjectionMessages._
 import hmda.query.HmdaQuery._
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
+import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
+import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import akka.stream.scaladsl.Sink
 import akka.util.Timeout
 
@@ -26,13 +27,14 @@ trait ResumableProjection {
 
   def behavior: Behavior[ProjectionCommand] =
     Behaviors.setup { ctx =>
-      PersistentBehaviors
-        .receive[ProjectionCommand, ProjectionEvent, ResumableProjectionState](
-          persistenceId = name,
-          emptyState = ResumableProjectionState(),
-          commandHandler = commandHandler(ctx),
-          eventHandler = eventHandler
-        )
+      PersistentBehavior[ProjectionCommand,
+                         ProjectionEvent,
+                         ResumableProjectionState](
+        persistenceId = PersistenceId(name),
+        emptyState = ResumableProjectionState(),
+        commandHandler = commandHandler(ctx),
+        eventHandler = eventHandler
+      )
     }
 
   def commandHandler(ctx: ActorContext[ProjectionCommand])

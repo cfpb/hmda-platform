@@ -66,6 +66,6 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
 
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[SubmissionManagerCommand]] = {
-    super.startShardRegion(sharding, SubmissionManagerStop)
+    super.startShardRegion(sharding)
   }
 }

@@ -5,8 +5,8 @@ import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.{
   ClusterSharding,
-  EntityTypeKey,
-  ShardedEntity
+  Entity,
+  EntityTypeKey
 }
 import com.typesafe.config.ConfigFactory
 
@@ -39,13 +39,12 @@ trait HmdaTypedActor[A] {
       .onFailure(supervisorStrategy)
   }
 
-  def startShardRegion(sharding: ClusterSharding, stopMessage: A)(
+  def startShardRegion(sharding: ClusterSharding)(
       implicit tag: ClassTag[A]): ActorRef[ShardingEnvelope[A]] = {
-    sharding.start(
-      ShardedEntity(
-        create = entityId => supervisedBehavior(entityId),
+    sharding.init(
+      Entity(
         typeKey = typeKey,
-        stopMessage = stopMessage
+        createBehavior = ctx => supervisedBehavior(ctx.entityId)
       )
     )
   }
