@@ -77,6 +77,13 @@ class InstitutionAdminHttpApiSpec
       }
     }
 
+    "Return a 400 on a duplicate LEI" in {
+      Post("/institutions", sampleInstitution) ~> Route.seal(
+        institutionAdminRoutes(oAuth2Authorization)) ~> check {
+        status mustBe StatusCodes.BadRequest
+      }
+    }
+
     "Return a 404 on a wrongpath to create an institution" in {
       Post("/wrongpath", sampleInstitution) ~> Route.seal(
         institutionAdminRoutes(oAuth2Authorization)) ~> check {

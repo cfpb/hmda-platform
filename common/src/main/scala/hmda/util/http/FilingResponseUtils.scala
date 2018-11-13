@@ -11,7 +11,6 @@ import hmda.model.filing.submission.SubmissionId
 
 object FilingResponseUtils {
 
-  //meant for 400 or 500 responses
   def failedResponse(status: StatusCode, uri: Uri, error: Throwable) = {
     val errorResponse =
       ErrorResponse(status.intValue(), error.getLocalizedMessage, uri.path)
@@ -23,6 +22,14 @@ object FilingResponseUtils {
                                uri: Uri): Route = {
     val errorResponse =
       ErrorResponse(400, s"$entityName with ID: $id does not exist", uri.path)
+    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+  }
+
+  def entityAlreadyExists(status: StatusCode,
+                          uri: Uri,
+                          errorMessage: String): Route = {
+    val errorResponse =
+      ErrorResponse(status.intValue(), errorMessage, uri.path)
     complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
   }
 
