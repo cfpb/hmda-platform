@@ -30,14 +30,22 @@
       var input = $('<input class="institutionsCheck">').attr({
         type: 'checkbox',
         name: 'institutions',
-        id: institutions[i].id,
-        value: institutions[i].id
+        id: institutions[i].lei,
+        value: institutions[i].lei
       })
       var label = $('<label>').attr({
-        for: institutions[i].id
+        for: institutions[i].lei
       })
-      var strong = $('<strong>').text(institutions[i].name)
-      var dl = makeDataList(institutions[i].externalIds)
+      var strong = $('<strong>').text(institutions[i].respondent.name)
+      // var dl = makeDataList(institutions[i].externalIds)
+      var dl = makeDataList([
+        { value: institutions[i].lei, externalIdType: { name: 'LEI' } },
+        { value: institutions[i].taxId, externalIdType: { name: 'Tax ID' } },
+        {
+          value: institutions[i].agency,
+          externalIdType: { name: 'Agency Code' }
+        }
+      ])
       label.append(strong, dl)
       li.append(input, label)
       list.append(li)
@@ -72,7 +80,7 @@
   //AJAX call to get data, calls buildList with returned institutions
   function getInstitutions(domain) {
     $.ajax({
-      url: '/v2/public/institutions,
+      url: '/v2/public/institutions',
       statusCode: {
         404: function() {
           $('#institutions')
