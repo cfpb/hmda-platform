@@ -7,6 +7,7 @@
       .empty()
       .append(
         makeInstitutionsLabel(institutions),
+        makeHelpContent(),
         makeInstitutionsList(institutions)
       )
     addInstitutionsToInput()
@@ -20,6 +21,25 @@
         'Select all available institutions you wish to file for. You may select more than one.'
     }
     return $('<label>').text(labelContent)
+  }
+
+  function makeHelpContent() {
+    var span = $('<span class="usa-text-small">')
+    span.append(
+      'If any of the information listed is incorrect, please fill out and submit ',
+      getHelpFormLink(),
+      ' with the correct information.'
+    )
+
+    return span
+  }
+
+  function getHelpFormLink() {
+    return $('<a>')
+      .attr({
+        href: 'https://hmdahelp.consumerfinance.gov/accounthelp/'
+      })
+      .text('this form')
   }
 
   function makeInstitutionsList(institutions) {
