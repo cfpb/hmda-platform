@@ -72,7 +72,7 @@
   //AJAX call to get data, calls buildList with returned institutions
   function getInstitutions(domain) {
     $.ajax({
-      url: HMDA.institutionSearchUri,
+      url: '/v2/public/institutions,
       statusCode: {
         404: function() {
           $('#institutions')
