@@ -1,6 +1,6 @@
 package hmda.parser.filing
 
-import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
+import org.scalatest.{MustMatchers, WordSpec}
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LarGenerators._
 import ParserFlow._
@@ -17,7 +17,7 @@ import hmda.parser.ParserErrorModel.{
   ParserValidationError
 }
 
-class ParserFlowSpec extends WordSpec with MustMatchers with BeforeAndAfterAll {
+class ParserFlowSpec extends WordSpec with MustMatchers {
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
