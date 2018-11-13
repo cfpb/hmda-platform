@@ -3,6 +3,8 @@ syntax = "proto3";
 option java_package = "hmda.persistence.serialization";
 option optimize_for = SPEED;
 
+import "validation.proto";
+
 message HmdaRowParsedErrorMessage {
     int32 rowNumber = 1;
     repeated string errors = 2;
@@ -21,4 +23,9 @@ message HmdaParserErrorStateMessage {
 message PersistedHmdaRowParsedErrorMessage {
     int32 rowNumber = 1;
     repeated string errors = 2;
+}
+
+message HmdaRowValidatedErrorMessage {
+    int32 rowNumber = 1;
+    ValidationErrorMessage validationError = 2;
 }

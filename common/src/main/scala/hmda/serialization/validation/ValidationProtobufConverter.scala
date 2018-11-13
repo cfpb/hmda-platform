@@ -1,6 +1,8 @@
 package hmda.serialization.validation
 
+import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.validation._
+import hmda.persistence.serialization.submission.processing.events.HmdaRowValidatedErrorMessage
 import hmda.persistence.serialization.validation.{
   ValidationErrorEntityMessage,
   ValidationErrorMessage,
@@ -77,6 +79,23 @@ object ValidationProtobufConverter {
       case ValidationErrorTypeMessage.Unrecognized(value) =>
         throw new Exception("Cannot convert from protobuf")
     }
+  }
+
+  def hmdaRowValidatedErrorToProtobuf(
+      cmd: HmdaRowValidatedError): HmdaRowValidatedErrorMessage = {
+    HmdaRowValidatedErrorMessage(
+      cmd.rowNumber,
+      Some(validationErrorToProtobuf(cmd.validationError))
+    )
+  }
+
+  def hmdaRowValidatedErrorFromProtobuf(
+      msg: HmdaRowValidatedErrorMessage): HmdaRowValidatedError = {
+    HmdaRowValidatedError(
+      msg.rowNumber,
+      validationErrorFromProtobuf(
+        msg.validationError.getOrElse(ValidationErrorMessage()))
+    )
   }
 
 }

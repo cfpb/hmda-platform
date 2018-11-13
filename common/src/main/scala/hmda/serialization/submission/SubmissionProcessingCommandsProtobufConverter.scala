@@ -160,28 +160,6 @@ object SubmissionProcessingCommandsProtobufConverter {
     )
   }
 
-  def hmdaValidationErrorStateToProtobuf(
-      cmd: HmdaValidationErrorState): HmdaValidationErrorStateMessage = {
-    HmdaValidationErrorStateMessage(
-      cmd.totalErrors,
-      cmd.syntacticalErrors,
-      cmd.validityErrors,
-      cmd.qualityErrors,
-      cmd.macroErrors
-    )
-  }
-
-  def hmdaValidationErrorStateFromProtobuf(
-      msg: HmdaValidationErrorStateMessage): HmdaValidationErrorState = {
-    HmdaValidationErrorState(
-      msg.totalErrors,
-      msg.syntacticalErrors,
-      msg.validityErrors,
-      msg.qualityErrors,
-      msg.macroErrors
-    )
-  }
-
   def getHmdaValidationErrorStateToProtobuf(cmd: GetHmdaValidationErrorState,
                                             actorRefResolver: ActorRefResolver)
     : GetHmdaValidationErrorStateMessage = {
