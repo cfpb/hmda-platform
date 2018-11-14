@@ -29,3 +29,16 @@ message HmdaRowValidatedErrorMessage {
     int32 rowNumber = 1;
     repeated ValidationErrorMessage validationErrors = 2;
 }
+
+message EditSummaryMessage {
+    string editName = 1;
+    ValidationErrorTypeMessage validationErrorType = 2;
+    ValidationErrorEntityMessage validationErrorEntity = 3;
+}
+
+message HmdaValidationErrorStateMessage {
+    repeated EditSummaryMessage syntactical = 1;
+    repeated EditSummaryMessage validity = 2;
+    repeated EditSummaryMessage quality = 3;
+    repeated EditSummaryMessage macro = 4;
+}

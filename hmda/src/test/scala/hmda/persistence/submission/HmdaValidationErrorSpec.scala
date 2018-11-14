@@ -11,11 +11,11 @@ import hmda.messages.submission.SubmissionProcessingCommands.{
 }
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.processing.state.HmdaValidationErrorState
+import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState}
 import hmda.model.validation._
 import hmda.persistence.AkkaCassandraPersistenceSpec
 
-class HmdaFileValidationSpec extends AkkaCassandraPersistenceSpec {
+class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 
@@ -57,9 +57,50 @@ class HmdaFileValidationSpec extends AkkaCassandraPersistenceSpec {
           Some(errorsProbe.ref))
         errorsProbe.expectMessage(HmdaRowValidatedError(index, List(error)))
       }
-//      hmdaValidationError ! GetHmdaValidationErrorState(submissionId,
-//                                                        stateProbe.ref)
-//      stateProbe.expectMessage(HmdaValidationErrorState(5, 3, 1, 1, 0))
+      hmdaValidationError ! GetHmdaValidationErrorState(submissionId,
+                                                        stateProbe.ref)
+
+      val syntacticalEditSummary =
+        Set(
+          EditSummary(
+            "S300",
+            Syntactical,
+            TsValidationError
+          ),
+          EditSummary(
+            "S300",
+            Syntactical,
+            LarValidationError
+          ),
+          EditSummary(
+            "S301",
+            Syntactical,
+            LarValidationError
+          )
+        )
+      val validityEditSummary =
+        Set(
+          EditSummary(
+            "V600",
+            Validity,
+            LarValidationError
+          )
+        )
+      val qualityEditSummary =
+        Set(
+          EditSummary(
+            "Q601",
+            Quality,
+            LarValidationError
+          )
+        )
+
+      stateProbe.expectMessage(
+        HmdaValidationErrorState(
+          syntacticalEditSummary,
+          validityEditSummary,
+          qualityEditSummary
+        ))
     }
   }
 

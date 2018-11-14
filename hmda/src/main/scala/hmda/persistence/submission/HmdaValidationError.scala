@@ -135,6 +135,7 @@ object HmdaValidationError
       case CompleteSyntacticalValidity(submissionId) =>
         log.info(
           s"Syntactical / Validity validation finished for $submissionId")
+        println(state)
 
         //TODO: update submission manager
         Effect.none
@@ -153,7 +154,7 @@ object HmdaValidationError
     : (HmdaValidationErrorState,
        SubmissionProcessingEvent) => HmdaValidationErrorState = {
     case (state, error @ HmdaRowValidatedError(_, _)) =>
-      state.update(error)
+      state.updateErrors(error)
     case (state, _) => state
   }
 
@@ -250,30 +251,6 @@ object HmdaValidationError
                                          Some(replyTo))
         ))
   }
-
-//  private def validateTs(
-//      checkType: String,
-//      ctx: ActorContext[SubmissionProcessingCommand],
-//      sharding: ClusterSharding,
-//      submissionId: SubmissionId,
-//      validationContext: ValidationContext): List[ValidationError] = {
-//
-//    val ts = validationContext.ts.getOrElse(TransmittalSheet())
-//    val tsSyntacticalErrorList: List[ValidationError] = TsEngine
-//      .checkSyntactical(ts, ts.LEI, validationContext, TsValidationError)
-//      .leftMap(errors => errors.toList)
-//      .swap
-//      .toList
-//      .flatten
-//    val tsValidityErrorList: List[ValidationError] = TsEngine
-//      .checkValidity(ts, ts.LEI, TsValidationError)
-//      .leftMap(errors => errors.toList)
-//      .swap
-//      .toList
-//      .flatten
-//    tsSyntacticalErrorList ++ tsValidityErrorList
-//
-//  }
 
   private def maybeTs(ctx: ActorContext[SubmissionProcessingCommand],
                       submissionId: SubmissionId)(

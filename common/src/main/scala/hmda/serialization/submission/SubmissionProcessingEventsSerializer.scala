@@ -15,7 +15,6 @@ import hmda.model.processing.state.{
   HmdaParserErrorState,
   HmdaValidationErrorState
 }
-import hmda.persistence.serialization.submission.processing.commands.HmdaValidationErrorStateMessage
 import hmda.persistence.serialization.submission.processing.events._
 
 class SubmissionProcessingEventsSerializer
@@ -31,8 +30,6 @@ class SubmissionProcessingEventsSerializer
     classOf[HmdaValidationErrorState].getName
   final val HmdaRowValidatedErrorManifest =
     classOf[HmdaRowValidatedError].getName
-  final val hmdaValidationErrorStateManifest =
-    classOf[HmdaValidationErrorState].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -49,8 +46,6 @@ class SubmissionProcessingEventsSerializer
       hmdaValidationErrorStateToProtobuf(evt).toByteArray
     case evt: HmdaRowValidatedError =>
       hmdaRowValidatedErrorToProtobuf(evt).toByteArray
-    case evt: HmdaValidationErrorState =>
-      hmdaValidationErrorStateToProtobuf(evt).toByteArray
     case _ =>
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
@@ -76,9 +71,6 @@ class SubmissionProcessingEventsSerializer
       case HmdaRowValidatedErrorManifest =>
         hmdaRowValidatedErrorFromProtobuf(
           HmdaRowValidatedErrorMessage.parseFrom(bytes))
-      case HmdaValidationErrorStateManifest =>
-        hmdaValidationErrorStateFromProtobuf(
-          HmdaValidationErrorStateMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")

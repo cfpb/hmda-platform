@@ -51,10 +51,3 @@ message GetHmdaValidationErrorStateMessage {
     string replyTo = 2;
 }
 
-message HmdaValidationErrorStateMessage {
-    int32 totalErrors = 1;
-    int32 syntacticalErrors = 2;
-    int32 validityErrors = 3;
-    int32 qualityErrors = 4;
-    int32 macroErrors = 5;
-}

@@ -6,16 +6,13 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   PersistedHmdaRowParsedError
 }
 import hmda.model.processing.state.{
+  EditSummary,
   HmdaParserErrorState,
   HmdaValidationErrorState
 }
-import hmda.persistence.serialization.submission.processing.commands.HmdaValidationErrorStateMessage
-import hmda.persistence.serialization.submission.processing.events.{
-  HmdaParserErrorStateMessage,
-  HmdaRowParsedCountMessage,
-  HmdaRowParsedErrorMessage,
-  PersistedHmdaRowParsedErrorMessage
-}
+import hmda.model.validation.{ValidationErrorEntity, ValidationErrorType}
+import hmda.persistence.serialization.submission.processing.events._
+import hmda.serialization.validation.ValidationProtobufConverter._
 
 object SubmissionProcessingEventsProtobufConverter {
 
@@ -89,25 +86,39 @@ object SubmissionProcessingEventsProtobufConverter {
     )
   }
 
+  def editSummaryToProtobuf(editSummary: EditSummary): EditSummaryMessage = {
+    EditSummaryMessage(
+      editSummary.editName,
+      validationErrorTypeToProtobuf(editSummary.editType),
+      validationErrorEntityToProtobuf(editSummary.entityType)
+    )
+  }
+
+  def editSummaryFromProtobuf(msg: EditSummaryMessage): EditSummary = {
+    EditSummary(
+      msg.editName,
+      validationErrorTypeFromProtobuf(msg.validationErrorType),
+      validationErrorEntityFromProtobuf(msg.validationErrorEntity)
+    )
+  }
+
   def hmdaValidationErrorStateToProtobuf(
       cmd: HmdaValidationErrorState): HmdaValidationErrorStateMessage = {
     HmdaValidationErrorStateMessage(
-      cmd.totalErrors,
-      cmd.syntacticalErrors,
-      cmd.validityErrors,
-      cmd.qualityErrors,
-      cmd.macroErrors
+      cmd.syntactical.map(s => editSummaryToProtobuf(s)).toSeq,
+      cmd.validity.map(s => editSummaryToProtobuf(s)).toSeq,
+      cmd.quality.map(s => editSummaryToProtobuf(s)).toSeq,
+      cmd.`macro`.map(s => editSummaryToProtobuf(s)).toSeq
     )
   }
 
   def hmdaValidationErrorStateFromProtobuf(
       msg: HmdaValidationErrorStateMessage): HmdaValidationErrorState = {
     HmdaValidationErrorState(
-      msg.totalErrors,
-      msg.syntacticalErrors,
-      msg.validityErrors,
-      msg.qualityErrors,
-      msg.macroErrors
+      msg.syntactical.map(m => editSummaryFromProtobuf(m)).toSet,
+      msg.validity.map(m => editSummaryFromProtobuf(m)).toSet,
+      msg.quality.map(m => editSummaryFromProtobuf(m)).toSet,
+      msg.syntactical.map(m => editSummaryFromProtobuf(m)).toSet
     )
   }
 
