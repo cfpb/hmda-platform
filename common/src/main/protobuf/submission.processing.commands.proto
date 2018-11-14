@@ -51,3 +51,7 @@ message GetHmdaValidationErrorStateMessage {
     string replyTo = 2;
 }
 
+message CompleteSyntacticalValidityMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+

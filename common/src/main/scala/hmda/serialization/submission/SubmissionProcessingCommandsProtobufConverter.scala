@@ -4,10 +4,8 @@ import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.persistence.serialization.submission.processing.commands._
 import SubmissionProtobufConverter._
-import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.serialization.validation.ValidationProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionIdMessage
-import hmda.persistence.serialization.validation.ValidationErrorMessage
 
 object SubmissionProcessingCommandsProtobufConverter {
 
@@ -177,6 +175,21 @@ object SubmissionProcessingCommandsProtobufConverter {
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())),
       actorRefResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
+  def completeSyntacticalValidityToProtobuf(
+      cmd: CompleteSyntacticalValidity): CompleteSyntacticalValidityMessage = {
+    CompleteSyntacticalValidityMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def completeSyntacticalValidityFromProtobuf(
+      msg: CompleteSyntacticalValidityMessage): CompleteSyntacticalValidity = {
+    CompleteSyntacticalValidity(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
     )
   }
 
