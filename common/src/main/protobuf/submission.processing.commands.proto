@@ -27,6 +27,11 @@ message GetParsedWithErrorCountMessage {
     string replyTo = 1;
 }
 
+message GetParsingErrorsMessage {
+    int32 page = 1;
+    string replyTo = 2;
+}
+
 message CompleteParsingMessage {
     SubmissionIdMessage submissionId = 1;
 }
