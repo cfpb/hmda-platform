@@ -2,17 +2,13 @@ package hmda.persistence.submission
 
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, ActorRef, Behavior, Logger}
-import akka.kafka.ConsumerMessage.CommittableMessage
-import akka.kafka.{ConsumerSettings, Subscriptions}
-import akka.kafka.scaladsl.Consumer
+import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
-import hmda.messages.pubsub.KafkaTopics.uploadTopic
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowValidatedError,
@@ -27,16 +23,13 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
 import akka.stream.typed.scaladsl.ActorFlow
 import hmda.messages.institution.InstitutionCommands.GetInstitution
-import hmda.messages.submission.SubmissionCommands.GetSubmission
-import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
+import HmdaProcessingUtils._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -156,57 +149,9 @@ object HmdaValidationError
     case (state, _) => state
   }
 
-  private def uploadConsumer(ctx: ActorContext[_], submissionId: SubmissionId)
-    : Source[CommittableMessage[String, String], Consumer.Control] = {
-    val kafkaConfig =
-      ctx.asScala.system.settings.config.getConfig("akka.kafka.consumer")
-    val consumerSettings =
-      ConsumerSettings(kafkaConfig,
-                       new StringDeserializer,
-                       new StringDeserializer)
-        .withBootstrapServers(kafkaHosts)
-        .withGroupId(submissionId.toString)
-        .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
-
-    Consumer
-      .committableSource(consumerSettings, Subscriptions.topics(uploadTopic))
-      .filter(_.record.key() == submissionId.toString)
-
-  }
-
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[SubmissionProcessingCommand]] = {
     super.startShardRegion(sharding)
-  }
-
-  private def updateSubmissionStatus(
-      sharding: ClusterSharding,
-      submissionId: SubmissionId,
-      modified: SubmissionStatus,
-      log: Logger)(implicit ec: ExecutionContext): Unit = {
-    val submissionPersistence =
-      sharding.entityRefFor(SubmissionPersistence.typeKey,
-                            s"${SubmissionPersistence.name}-$submissionId")
-
-    val submissionManager =
-      sharding.entityRefFor(SubmissionManager.typeKey,
-                            s"${SubmissionManager.name}-$submissionId")
-
-    val fSubmission: Future[Option[Submission]] = submissionPersistence ? (
-        ref => GetSubmission(ref))
-
-    for {
-      m <- fSubmission
-      s = m.getOrElse(Submission())
-    } yield {
-      if (s.isEmpty) {
-        log
-          .error(s"Submission $submissionId could not be retrieved")
-      } else {
-        val modifiedSubmission = s.copy(status = modified)
-        submissionManager ! UpdateSubmissionStatus(modifiedSubmission)
-      }
-    }
   }
 
   private def validateTs(ctx: ActorContext[SubmissionProcessingCommand],
