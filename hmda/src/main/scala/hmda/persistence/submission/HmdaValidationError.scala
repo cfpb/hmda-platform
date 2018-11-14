@@ -97,10 +97,56 @@ object HmdaValidationError
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
-            log.debug(s"stream completed for ${submissionId.toString}")
+            log.warning(
+              s"Syntactical / Validity stream completed for ${submissionId.toString}")
           case Failure(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
         }
+
+        Effect.none
+
+      case CompleteSyntacticalValidity(submissionId) =>
+        log.info(
+          s"Syntactical / Validity validation finished for $submissionId")
+        val updatedStatus =
+          if (state.syntactical.nonEmpty || state.validity.nonEmpty) {
+            SyntacticalOrValidityErrors
+          } else {
+            SyntacticalOrValidity
+          }
+        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+        Effect.none
+
+      case StartQuality(submissionId) =>
+        log.info(s"Quality validation started for $submissionId")
+
+        val fQuality = for {
+          larErrors <- validateLar("quality",
+                                   ctx,
+                                   submissionId,
+                                   ValidationContext())
+            .idleTimeout(kafkaIdleTimeout.seconds)
+            .runWith(Sink.ignore)
+        } yield larErrors
+
+        fQuality.onComplete {
+          case Success(_) =>
+            log.warning(
+              s"Quality stream completed for ${submissionId.toString}")
+          case Failure(_) =>
+            ctx.asScala.self ! CompleteQuality(submissionId)
+        }
+        Effect.none
+
+      case CompleteQuality(submissionId) =>
+        log.info(s"Quality validation finished for $submissionId")
+        val updatedStatus =
+          if (state.quality.nonEmpty) {
+            QualityErrors
+          } else {
+            Quality
+          }
+        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
 
         Effect.none
 
@@ -118,18 +164,6 @@ object HmdaValidationError
               case None => //do nothing
             }
           }
-
-      case CompleteSyntacticalValidity(submissionId) =>
-        log.info(
-          s"Syntactical / Validity validation finished for $submissionId")
-        val updatedStatus =
-          if (state.syntactical.nonEmpty || state.validity.nonEmpty) {
-            SyntacticalOrValidityErrors
-          } else {
-            SyntacticalOrValidity
-          }
-        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
-        Effect.none
 
       case GetHmdaValidationErrorState(_, replyTo) =>
         replyTo ! state

@@ -13,9 +13,10 @@ import hmda.messages.submission.SubmissionEvents.{
 import hmda.messages.submission.SubmissionManagerCommands._
 import hmda.messages.submission.SubmissionProcessingCommands.{
   StartParsing,
+  StartQuality,
   StartSyntacticalValidity
 }
-import hmda.model.filing.submission.{Parsed, Uploaded}
+import hmda.model.filing.submission.{Parsed, SyntacticalOrValidity, Uploaded}
 
 object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
 
@@ -60,7 +61,8 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
                   hmdaParserError ! StartParsing(submission.id)
                 case Parsed =>
                   hmdaValidationError ! StartSyntacticalValidity(submission.id)
-
+                case SyntacticalOrValidity =>
+                  hmdaValidationError ! StartQuality(submission.id)
                 case _ =>
               }
               Behaviors.same

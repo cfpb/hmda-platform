@@ -63,13 +63,12 @@ object SubmissionProcessingCommands {
   case class CompleteSyntacticalValidity(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
 
-  //case class CompleteSyntacticalValidityWithErrors(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
+  case class StartQuality(submissionId: SubmissionId)
+      extends SubmissionProcessingCommand
 
-  //case class StartQuality(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
-  //case class CompleteQuality(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
+  case class CompleteQuality(submissionId: SubmissionId)
+      extends SubmissionProcessingCommand
+
   //case class CompleteQualityWithErrors(submissionId: SubmissionId)
   //    extends SubmissionProcessingCommand
   //case class StartMacro(submissionId: SubmissionId)

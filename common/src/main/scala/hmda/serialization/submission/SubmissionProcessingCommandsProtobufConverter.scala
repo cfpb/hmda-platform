@@ -193,4 +193,32 @@ object SubmissionProcessingCommandsProtobufConverter {
     )
   }
 
+  def startQualityToProtobuf(cmd: StartQuality): StartQualityMessage = {
+    StartQualityMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def startQualituFromProtobuf(msg: StartQualityMessage): StartQuality = {
+    StartQuality(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
+  def completeQualityToProtobuf(
+      cmd: CompleteQuality): CompleteQualityMessage = {
+    CompleteQualityMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def completeQualityFromProtobuf(
+      msg: CompleteQualityMessage): CompleteQuality = {
+    CompleteQuality(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
 }
