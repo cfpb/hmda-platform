@@ -6,10 +6,7 @@ import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
 import akka.serialization.SerializerWithStringManifest
 import akka.actor.typed.scaladsl.adapter._
-import hmda.messages.submission.SubmissionProcessingCommands.{
-  GetParsingErrors,
-  _
-}
+import hmda.messages.submission.SubmissionProcessingCommands._
 import SubmissionProcessingCommandsProtobufConverter._
 import hmda.persistence.serialization.submission.processing.commands._
 
