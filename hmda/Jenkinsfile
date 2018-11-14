@@ -10,7 +10,6 @@ volumes: [
      def repo = checkout scm
      def gitCommit = repo.GIT_COMMIT
      def gitBranch = repo.GIT_BRANCH
-     def shortGitCommit = "${gitCommit[0..10]}"
 
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
