@@ -5,13 +5,14 @@ import java.util.concurrent.TimeUnit
 
 import akka.actor
 import akka.actor.typed.{ActorContext, ActorRef, ActorSystem, Behavior}
-import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.Behaviors
 import hmda.persistence.util.CassandraUtil
 import org.scalatest.{BeforeAndAfterAll, WordSpec}
 import akka.actor.typed.scaladsl.adapter._
+import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
+import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import org.scalacheck.Gen
 
 import scala.concurrent.duration._
@@ -66,13 +67,12 @@ abstract class AkkaCassandraPersistenceSpec
 
     def behavior: Behavior[Command] =
       Behaviors.setup { ctx =>
-        PersistentBehaviors
-          .receive[Command, Event, AwaitState](
-            persistenceId = s"await-persistence-id",
-            emptyState = AwaitState(),
-            commandHandler = commandHandler(ctx),
-            eventHandler = eventHandler
-          )
+        PersistentBehavior[Command, Event, AwaitState](
+          persistenceId = PersistenceId(s"await-persistence-id"),
+          emptyState = AwaitState(),
+          commandHandler = commandHandler(ctx),
+          eventHandler = eventHandler
+        )
       }
 
     def commandHandler(ctx: ActorContext[Command])

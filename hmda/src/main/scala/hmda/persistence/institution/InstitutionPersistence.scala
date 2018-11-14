@@ -4,8 +4,9 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehaviors}
-import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
+import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
+import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
 import hmda.model.institution.{Institution, InstitutionDetail}
@@ -21,14 +22,14 @@ object InstitutionPersistence
   override def behavior(entityId: String): Behavior[InstitutionCommand] = {
     Behaviors.setup { ctx =>
       ctx.log.info(s"Started Institution: $entityId")
-      PersistentBehaviors
-        .receive[InstitutionCommand, InstitutionEvent, InstitutionState](
-          persistenceId = s"$entityId",
-          emptyState = InstitutionState(None),
-          commandHandler = commandHandler(ctx),
-          eventHandler = eventHandler
-        )
-        .snapshotEvery(1000)
+      PersistentBehavior[InstitutionCommand,
+                         InstitutionEvent,
+                         InstitutionState](
+        persistenceId = PersistenceId(s"$entityId"),
+        emptyState = InstitutionState(None),
+        commandHandler = commandHandler(ctx),
+        eventHandler = eventHandler
+      ).snapshotEvery(1000)
         .withTagger(_ => Set(name.toLowerCase()))
     }
   }
@@ -98,7 +99,7 @@ object InstitutionPersistence
           replyTo ! state.institution
           Effect.none
         case InstitutionStop =>
-          Effect.stop
+          Effect.stop()
       }
   }
 
@@ -113,7 +114,7 @@ object InstitutionPersistence
 
   def startShardRegion(sharding: ClusterSharding)
     : ActorRef[ShardingEnvelope[InstitutionCommand]] = {
-    super.startShardRegion(sharding, InstitutionStop)
+    super.startShardRegion(sharding)
   }
 
   private def modifyInstitution(institution: Institution,

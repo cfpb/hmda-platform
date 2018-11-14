@@ -42,6 +42,8 @@ This endpoint deals with institution events. The identifier for each entity is t
     ```
 
    The response is the institution created, in `JSON` format, with an HTTP code of 201 (Created)
+   
+   The response code is `400` if the `LEI` already exists
 
 
     * `PUT` Updates an institution, if it already exists. 

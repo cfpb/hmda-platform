@@ -1,7 +1,7 @@
 package hmda.persistence
 
 import akka.actor.typed.ActorContext
-import akka.persistence.typed.scaladsl.PersistentBehaviors.CommandHandler
+import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import hmda.actor.HmdaTypedActor
 
 trait HmdaTypedPersistentActor[C, E, S] extends HmdaTypedActor[C] {

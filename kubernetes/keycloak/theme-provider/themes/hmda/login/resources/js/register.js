@@ -7,6 +7,7 @@
       .empty()
       .append(
         makeInstitutionsLabel(institutions),
+        makeHelpContent(),
         makeInstitutionsList(institutions)
       )
     addInstitutionsToInput()
@@ -22,6 +23,25 @@
     return $('<label>').text(labelContent)
   }
 
+  function makeHelpContent() {
+    var span = $('<span class="usa-text-small">')
+    span.append(
+      'If any of the information listed is incorrect, please fill out and submit ',
+      getHelpFormLink(),
+      ' with the correct information.'
+    )
+
+    return span
+  }
+
+  function getHelpFormLink() {
+    return $('<a>')
+      .attr({
+        href: 'https://hmdahelp.consumerfinance.gov/accounthelp/'
+      })
+      .text('this form')
+  }
+
   function makeInstitutionsList(institutions) {
     var list = $('<ul class="usa-unstyled-list">')
 
@@ -30,14 +50,22 @@
       var input = $('<input class="institutionsCheck">').attr({
         type: 'checkbox',
         name: 'institutions',
-        id: institutions[i].id,
-        value: institutions[i].id
+        id: institutions[i].lei,
+        value: institutions[i].lei
       })
       var label = $('<label>').attr({
-        for: institutions[i].id
+        for: institutions[i].lei
       })
-      var strong = $('<strong>').text(institutions[i].name)
-      var dl = makeDataList(institutions[i].externalIds)
+      var strong = $('<strong>').text(institutions[i].respondent.name)
+      // var dl = makeDataList(institutions[i].externalIds)
+      var dl = makeDataList([
+        { value: institutions[i].lei, externalIdType: { name: 'LEI' } },
+        { value: institutions[i].taxId, externalIdType: { name: 'Tax ID' } },
+        {
+          value: institutions[i].agency,
+          externalIdType: { name: 'Agency Code' }
+        }
+      ])
       label.append(strong, dl)
       li.append(input, label)
       list.append(li)
@@ -72,7 +100,7 @@
   //AJAX call to get data, calls buildList with returned institutions
   function getInstitutions(domain) {
     $.ajax({
-      url: HMDA.institutionSearchUri,
+      url: '/v2/public/institutions',
       statusCode: {
         404: function() {
           $('#institutions')
@@ -80,12 +108,10 @@
             .append(
               $('<span class="hmda-error-message">').append(
                 $(
-                  "<span>Sorry, we couldn't find that email domain. For help getting registered, please contact </span>"
+                  "<span>Sorry, we couldn't find that email domain. For help getting registered, please fill out and submit </span>"
                 ),
-                getEmailLink(),
-                $(
-                  '<span> and provide your institution name, RSSD, and Tax ID. If your institution is a non-depository and does not have an RSSD, please provide your NMLS ID in place of the RSSD.</span>'
-                )
+                getHelpFormLink(),
+                $('<span>.</span>')
               )
             )
         }
