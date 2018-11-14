@@ -18,11 +18,7 @@ projects.each { project ->
                 repository(project.repo)
                 scanCredentialsId('github')
                 buildForkPRHead(true)
-                buildForkPRMerge(false)
-                buildStrategies {
-                    tags()
-                }
-                
+                buildForkPRMerge(false) 
             }
             orphanedItemStrategy {
                 discardOldItems {
