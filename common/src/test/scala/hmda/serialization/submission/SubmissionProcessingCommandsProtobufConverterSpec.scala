@@ -109,7 +109,7 @@ class SubmissionProcessingCommandsProtobufConverterSpec
   property("PersistHmdaRowValidatedError must serialize to protobuf and back") {
     forAll(validationErrorGen) { validationError =>
       val persistHmdaRowValidatedError =
-        PersistHmdaRowValidatedError(1, validationError, None)
+        PersistHmdaRowValidatedError(1, List(validationError), None)
       val protobuf =
         persistHmdaRowValidatedErrorToProtobuf(persistHmdaRowValidatedError,
                                                actorRefResolver).toByteArray

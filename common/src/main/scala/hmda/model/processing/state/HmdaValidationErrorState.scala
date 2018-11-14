@@ -13,7 +13,7 @@ case class HmdaValidationErrorState(totalErrors: Int = 0,
                                     macroErrors: Int = 0) {
   def update(event: SubmissionProcessingEvent): HmdaValidationErrorState =
     event match {
-        //TODO: update state
+      //TODO: update state
 //      case HmdaRowValidatedError(_, validationErrors) =>
 //        validationErrors.head.validationErrorType match {
 //          case Syntactical =>
