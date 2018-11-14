@@ -4,6 +4,7 @@ import akka.NotUsed
 import akka.stream.FlowShape
 import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL}
 import akka.util.ByteString
+import cats.Semigroup
 import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
@@ -17,6 +18,12 @@ import hmda.validation.engine.LarEngine
 import hmda.validation.engine.TsEngine
 
 object ValidationFlow {
+
+  implicit val larSemigroup = new Semigroup[LoanApplicationRegister] {
+    override def combine(x: LoanApplicationRegister,
+                         y: LoanApplicationRegister): LoanApplicationRegister =
+      x
+  }
 
   def validateHmdaFile(checkType: String, ctx: ValidationContext)
     : Flow[ByteString, HmdaValidated[PipeDelimited], NotUsed] = {
@@ -33,7 +40,7 @@ object ValidationFlow {
     })
   }
 
-  def validateTsFlow(checkType: String, ctx: ValidationContext)
+  def validateTsFlow(checkType: String, validationContext: ValidationContext)
     : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
     Flow[ByteString]
       .via(framing("\n"))
@@ -45,9 +52,13 @@ object ValidationFlow {
       }
       .map { ts =>
         checkType match {
-          case "all" => TsEngine.checkAll(ts, ts.LEI, ctx, TsValidationError)
+          case "all" =>
+            TsEngine.checkAll(ts, ts.LEI, validationContext, TsValidationError)
           case "syntactical" =>
-            TsEngine.checkSyntactical(ts, ts.LEI, ctx, TsValidationError)
+            TsEngine.checkSyntactical(ts,
+                                      ts.LEI,
+                                      validationContext,
+                                      TsValidationError)
           case "validity" =>
             TsEngine.checkValidity(ts, ts.LEI, TsValidationError)
         }
@@ -78,6 +89,12 @@ object ValidationFlow {
                                        LarValidationError)
           case "validity" =>
             LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+          case "syntactical-validity" =>
+            LarEngine
+              .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
+              .combine(
+                LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+              )
           case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
         }
       }

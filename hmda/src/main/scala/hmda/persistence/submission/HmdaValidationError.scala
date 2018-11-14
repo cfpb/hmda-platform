@@ -96,14 +96,16 @@ object HmdaValidationError
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
-          errors <- validateTs(ctx, submissionId, validationContext)
-            .concat(
-              validateLar("syntactical", ctx, submissionId, validationContext))
-            .concat(
-              validateLar("validity", ctx, submissionId, validationContext))
+          tsErrors <- validateTs(ctx, submissionId, validationContext)
             .idleTimeout(kafkaIdleTimeout.seconds)
             .runWith(Sink.ignore)
-        } yield errors
+          larSyntacticalValidityErrors <- validateLar("syntactical-validity",
+                                                      ctx,
+                                                      submissionId,
+                                                      validationContext)
+            .idleTimeout(kafkaIdleTimeout.seconds)
+            .runWith(Sink.ignore)
+        } yield (tsErrors, larSyntacticalValidityErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
@@ -133,6 +135,7 @@ object HmdaValidationError
       case CompleteSyntacticalValidity(submissionId) =>
         log.info(
           s"Syntactical / Validity validation finished for $submissionId")
+
         //TODO: update submission manager
         Effect.none
 
