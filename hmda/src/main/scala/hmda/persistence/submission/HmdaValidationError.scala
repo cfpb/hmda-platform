@@ -1,6 +1,5 @@
 package hmda.persistence.submission
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior, Logger}
@@ -10,16 +9,11 @@ import akka.kafka.scaladsl.Consumer
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.KafkaTopics.uploadTopic
-import hmda.messages.submission.SubmissionProcessingCommands.{
-  GetHmdaValidationErrorState,
-  PersistHmdaRowValidatedError,
-  StartSyntacticalValidity,
-  SubmissionProcessingCommand
-}
+import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowValidatedError,
   SubmissionProcessingEvent
@@ -36,25 +30,22 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
+import akka.stream.typed.scaladsl.ActorFlow
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
-import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.institution.Institution
-import hmda.model.validation.{TsValidationError, ValidationError}
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import hmda.parser.filing.ParserFlow._
-import hmda.validation.HmdaValidated
-import hmda.validation.engine.TsEngine
 import hmda.validation.filing.ValidationFlow._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -98,48 +89,52 @@ object HmdaValidationError
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
-        log.info(s"Start Syntactical / Validity validation for $submissionId")
+        log.info(s"Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
 
-        for {
+        val fSyntacticalValidity = for {
           validationContext <- fValidationContext
-          tsErrors = validateTs("all",
-                                ctx,
-                                sharding,
-                                submissionId,
-                                validationContext)
-          errors = syntacticalValidityErrors(ctx,
-                                             sharding,
-                                             submissionId,
-                                             validationContext.ts)
-        } yield {
-          tsErrors.foreach { error =>
-            ctx.asScala.self ! PersistHmdaRowValidatedError(1, error, None)
-          }
-          errors.map(e => e.v)
+          errors <- validateTs(ctx, submissionId, validationContext)
+            .concat(
+              validateLar("syntactical", ctx, submissionId, validationContext))
+            .concat(
+              validateLar("validity", ctx, submissionId, validationContext))
+            .idleTimeout(kafkaIdleTimeout.seconds)
+            .runWith(Sink.ignore)
+        } yield errors
 
+        fSyntacticalValidity.onComplete {
+          case Success(_) =>
+            log.debug(s"stream completed for ${submissionId.toString}")
+          case Failure(_) =>
+            ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
         }
-
-        //validateLar(ctx, sharding, submissionId, fTs)
 
         Effect.none
 
       case PersistHmdaRowValidatedError(rowNumber,
-                                        validationError,
+                                        validationErrors,
                                         maybeReplyTo) =>
         Effect
-          .persist(HmdaRowValidatedError(rowNumber, validationError))
+          .persist(HmdaRowValidatedError(rowNumber, validationErrors))
           .thenRun { _ =>
-            log.debug(s"Persisted: ${validationError.toCsv}")
-            println(s"Persisted: ${validationError.toCsv}")
+            log.info(
+              s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
             maybeReplyTo match {
               case Some(replyTo) =>
-                replyTo ! HmdaRowValidatedError(rowNumber, validationError)
+                replyTo ! HmdaRowValidatedError(rowNumber, validationErrors)
               case None => //do nothing
             }
           }
+
+      //TODO: serialization for this message
+      case CompleteSyntacticalValidity(submissionId) =>
+        log.info(
+          s"Syntactical / Validity validation finished for $submissionId")
+        //TODO: update submission manager
+        Effect.none
 
       case GetHmdaValidationErrorState(_, replyTo) =>
         replyTo ! state
@@ -212,6 +207,71 @@ object HmdaValidationError
     }
   }
 
+  private def validateTs(ctx: ActorContext[SubmissionProcessingCommand],
+                         submissionId: SubmissionId,
+                         validationContext: ValidationContext) = {
+    uploadConsumerRawStr(ctx, submissionId)
+      .take(1)
+      .via(validateTsFlow("all", validationContext))
+      .zip(Source.fromIterator(() => Iterator.from(1)))
+      .collect {
+        case (Left(errors), rowNumber) =>
+          PersistHmdaRowValidatedError(rowNumber, errors, None)
+      }
+      .via(
+        ActorFlow.ask(ctx.asScala.self)(
+          (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
+            PersistHmdaRowValidatedError(el.rowNumber,
+                                         el.validationErrors,
+                                         Some(replyTo))
+        ))
+  }
+
+  private def validateLar(editCheck: String,
+                          ctx: ActorContext[SubmissionProcessingCommand],
+                          submissionId: SubmissionId,
+                          validationContext: ValidationContext) = {
+    uploadConsumerRawStr(ctx, submissionId)
+      .drop(1)
+      .via(validateLarFlow(editCheck, validationContext))
+      .zip(Source.fromIterator(() => Iterator.from(2)))
+      .collect {
+        case (Left(errors), rowNumber) =>
+          PersistHmdaRowValidatedError(rowNumber, errors, None)
+      }
+      .via(
+        ActorFlow.ask(ctx.asScala.self)(
+          (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
+            PersistHmdaRowValidatedError(el.rowNumber,
+                                         el.validationErrors,
+                                         Some(replyTo))
+        ))
+  }
+
+//  private def validateTs(
+//      checkType: String,
+//      ctx: ActorContext[SubmissionProcessingCommand],
+//      sharding: ClusterSharding,
+//      submissionId: SubmissionId,
+//      validationContext: ValidationContext): List[ValidationError] = {
+//
+//    val ts = validationContext.ts.getOrElse(TransmittalSheet())
+//    val tsSyntacticalErrorList: List[ValidationError] = TsEngine
+//      .checkSyntactical(ts, ts.LEI, validationContext, TsValidationError)
+//      .leftMap(errors => errors.toList)
+//      .swap
+//      .toList
+//      .flatten
+//    val tsValidityErrorList: List[ValidationError] = TsEngine
+//      .checkValidity(ts, ts.LEI, TsValidationError)
+//      .leftMap(errors => errors.toList)
+//      .swap
+//      .toList
+//      .flatten
+//    tsSyntacticalErrorList ++ tsValidityErrorList
+//
+//  }
+
   private def maybeTs(ctx: ActorContext[SubmissionProcessingCommand],
                       submissionId: SubmissionId)(
       implicit materializer: ActorMaterializer,
@@ -222,84 +282,6 @@ object HmdaValidationError
       .map(_.getOrElse(TransmittalSheet()))
       .runWith(Sink.seq)
       .map(xs => xs.headOption)
-  }
-
-  //  private def larFlow(ctx: ActorContext[SubmissionProcessingCommand], submissionId: SubmissionId) =
-  //    uploadConsumerRawStr(ctx, submissionId)
-  //    .drop(1)
-  //    .via(parseLarFlow)
-  //    .map(_.getOrElse(LoanApplicationRegister()))
-
-  private def validateTs(
-      checkType: String,
-      ctx: ActorContext[SubmissionProcessingCommand],
-      sharding: ClusterSharding,
-      submissionId: SubmissionId,
-      validationContext: ValidationContext): List[ValidationError] = {
-
-    val ts = validationContext.ts.getOrElse(TransmittalSheet())
-    val tsSyntacticalErrorList: List[ValidationError] = TsEngine
-      .checkSyntactical(ts, ts.LEI, validationContext, TsValidationError)
-      .leftMap(errors => errors.toList)
-      .swap
-      .toList
-      .flatten
-    val tsValidityErrorList: List[ValidationError] = TsEngine
-      .checkValidity(ts, ts.LEI, TsValidationError)
-      .leftMap(errors => errors.toList)
-      .swap
-      .toList
-      .flatten
-    tsSyntacticalErrorList ++ tsValidityErrorList
-
-  }
-
-  private def syntacticalValidityErrors(
-      ctx: ActorContext[SubmissionProcessingCommand],
-      sharding: ClusterSharding,
-      submissionId: SubmissionId,
-      ts: Option[TransmittalSheet])(implicit materializer: ActorMaterializer,
-                                    ec: ExecutionContext) = {
-    val institutionPersistence =
-      sharding.entityRefFor(
-        InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-${submissionId.lei}")
-
-    val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
-        ref => GetInstitution(ref))
-
-    for {
-      institution <- fInstitution
-      syntacticalErrors = larErrors("syntactical",
-                                    ctx,
-                                    submissionId,
-                                    ts,
-                                    institution)
-      validityErrors = larErrors("validity", ctx, submissionId, ts, institution)
-
-    } yield {
-      syntacticalErrors.concat(validityErrors)
-    }
-  }
-
-  private def larErrors(checkType: String,
-                        ctx: ActorContext[SubmissionProcessingCommand],
-                        submissionId: SubmissionId,
-                        ts: Option[TransmittalSheet],
-                        institution: Option[Institution])(
-      implicit materializer: ActorMaterializer) = {
-    uploadConsumerRawStr(ctx, submissionId)
-      .drop(1)
-      .via(
-        validateLarFlow(
-          checkType,
-          ValidationContext(institution, Some(processingYear), ts)))
-      .mapConcat(_.swap.getOrElse(Nil))
-      .zip(Source.fromIterator(() => Iterator.from(2)))
-      .map(errorWithIndex =>
-        PersistHmdaRowValidatedError(errorWithIndex._2,
-                                     errorWithIndex._1,
-                                     None))
   }
 
   private def validationContext(year: Int,

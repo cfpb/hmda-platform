@@ -51,7 +51,7 @@ object SubmissionProcessingCommands {
 
   case class PersistHmdaRowValidatedError(
       rowNumber: Int,
-      validationError: ValidationError,
+      validationErrors: List[ValidationError],
       replyTo: Option[ActorRef[HmdaRowValidatedError]])
       extends SubmissionProcessingCommand
 
@@ -60,8 +60,8 @@ object SubmissionProcessingCommands {
       replyTo: ActorRef[HmdaValidationErrorState])
       extends SubmissionProcessingCommand
 
-  //case class CompleteSyntacticalValidity(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
+  case class CompleteSyntacticalValidity(submissionId: SubmissionId)
+      extends SubmissionProcessingCommand
   //case class CompleteSyntacticalValidityWithErrors(submissionId: SubmissionId)
   //    extends SubmissionProcessingCommand
   //case class StartQuality(submissionId: SubmissionId)

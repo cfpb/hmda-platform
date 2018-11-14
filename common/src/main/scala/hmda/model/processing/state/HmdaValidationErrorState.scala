@@ -13,21 +13,22 @@ case class HmdaValidationErrorState(totalErrors: Int = 0,
                                     macroErrors: Int = 0) {
   def update(event: SubmissionProcessingEvent): HmdaValidationErrorState =
     event match {
-      case HmdaRowValidatedError(_, validationError) =>
-        validationError.validationErrorType match {
-          case Syntactical =>
-            this.copy(totalErrors = this.totalErrors + 1,
-                      syntacticalErrors = this.syntacticalErrors + 1)
-          case Validity =>
-            this.copy(totalErrors = this.totalErrors + 1,
-                      validityErrors = this.validityErrors + 1)
-          case Quality =>
-            this.copy(totalErrors = this.totalErrors + 1,
-                      qualityErrors = this.qualityErrors + 1)
-          case Macro =>
-            this.copy(totalErrors = this.totalErrors + 1,
-                      macroErrors = this.macroErrors + 1)
-        }
+        //TODO: update state
+//      case HmdaRowValidatedError(_, validationErrors) =>
+//        validationErrors.head.validationErrorType match {
+//          case Syntactical =>
+//            this.copy(totalErrors = this.totalErrors + 1,
+//                      syntacticalErrors = this.syntacticalErrors + 1)
+//          case Validity =>
+//            this.copy(totalErrors = this.totalErrors + 1,
+//                      validityErrors = this.validityErrors + 1)
+//          case Quality =>
+//            this.copy(totalErrors = this.totalErrors + 1,
+//                      qualityErrors = this.qualityErrors + 1)
+//          case Macro =>
+//            this.copy(totalErrors = this.totalErrors + 1,
+//                      macroErrors = this.macroErrors + 1)
+//        }
 
       case _ => this
     }

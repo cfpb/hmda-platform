@@ -85,7 +85,7 @@ object ValidationProtobufConverter {
       cmd: HmdaRowValidatedError): HmdaRowValidatedErrorMessage = {
     HmdaRowValidatedErrorMessage(
       cmd.rowNumber,
-      Some(validationErrorToProtobuf(cmd.validationError))
+      cmd.validationErrors.map(e => validationErrorToProtobuf(e))
     )
   }
 
@@ -93,8 +93,7 @@ object ValidationProtobufConverter {
       msg: HmdaRowValidatedErrorMessage): HmdaRowValidatedError = {
     HmdaRowValidatedError(
       msg.rowNumber,
-      validationErrorFromProtobuf(
-        msg.validationError.getOrElse(ValidationErrorMessage()))
+      msg.validationErrors.map(e => validationErrorFromProtobuf(e)).toList
     )
   }
 

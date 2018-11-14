@@ -26,7 +26,7 @@ message PersistHmdaRowParsedErrorMessage {
 
 message PersistHmdaRowValidatedErrorMessage {
     int32 rowNumber = 1;
-    ValidationErrorMessage validationError = 2;
+    repeated ValidationErrorMessage validationErrors = 2;
     string replyTo = 3;
 }
 

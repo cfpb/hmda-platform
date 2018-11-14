@@ -10,7 +10,7 @@ object SubmissionProcessingEvents {
       extends SubmissionProcessingEvent
 
   case class HmdaRowValidatedError(rowNumber: Int,
-                                   validationError: ValidationError)
+                                   validationErrors: List[ValidationError])
       extends SubmissionProcessingEvent
 
   case class HmdaRowParsedCount(count: Int) extends SubmissionProcessingEvent
