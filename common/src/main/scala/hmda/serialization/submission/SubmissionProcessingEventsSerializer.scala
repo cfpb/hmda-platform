@@ -5,16 +5,14 @@ import java.io.NotSerializableException
 import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
-  HmdaRowParsedError,
-  PersistedHmdaRowParsedError
+  HmdaRowParsedError
 }
 import SubmissionProcessingEventsProtobufConverter._
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.persistence.serialization.submission.processing.events.{
   HmdaParserErrorStateMessage,
   HmdaRowParsedCountMessage,
-  HmdaRowParsedErrorMessage,
-  PersistedHmdaRowParsedErrorMessage
+  HmdaRowParsedErrorMessage
 }
 
 class SubmissionProcessingEventsSerializer
@@ -24,8 +22,6 @@ class SubmissionProcessingEventsSerializer
   final val ParsedErrorManifest = classOf[HmdaRowParsedError].getName
   final val ParsedErrorCountManifest = classOf[HmdaRowParsedCount].getName
   final val HmdaParserErrorStateManifest = classOf[HmdaParserErrorState].getName
-  final val PersistedHmdaRowParsedErrorManifest =
-    classOf[PersistedHmdaRowParsedError].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -36,8 +32,6 @@ class SubmissionProcessingEventsSerializer
       hmdaRowParsedCountToProtobuf(evt).toByteArray
     case evt: HmdaParserErrorState =>
       hmdaParserErrorStateToProtobuf(evt).toByteArray
-    case evt: PersistedHmdaRowParsedError =>
-      persistedHmdaRowParsedToProtobuf(evt).toByteArray
     case _ =>
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
@@ -54,9 +48,6 @@ class SubmissionProcessingEventsSerializer
       case HmdaParserErrorStateManifest =>
         hmdaParserErrorStateFromProtobuf(
           HmdaParserErrorStateMessage.parseFrom(bytes))
-      case PersistedHmdaRowParsedErrorManifest =>
-        persistedHmdaRowParsedFromProtobuf(
-          PersistedHmdaRowParsedErrorMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")
