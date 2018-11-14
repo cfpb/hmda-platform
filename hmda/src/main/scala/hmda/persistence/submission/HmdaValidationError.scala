@@ -18,12 +18,7 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowValidatedError,
   SubmissionProcessingEvent
 }
-import hmda.model.filing.submission.{
-  Submission,
-  SubmissionId,
-  SubmissionStatus,
-  Validating
-}
+import hmda.model.filing.submission._
 import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
@@ -131,13 +126,16 @@ object HmdaValidationError
             }
           }
 
-      //TODO: serialization for this message
       case CompleteSyntacticalValidity(submissionId) =>
         log.info(
           s"Syntactical / Validity validation finished for $submissionId")
-        println(state)
-
-        //TODO: update submission manager
+        val updatedStatus =
+          if (state.syntactical.nonEmpty || state.validity.nonEmpty) {
+            SyntacticalOrValidityErrors
+          } else {
+            SyntacticalOrValidity
+          }
+        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
         Effect.none
 
       case GetHmdaValidationErrorState(_, replyTo) =>
