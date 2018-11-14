@@ -2,15 +2,15 @@ package hmda.serialization.submission
 
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
-  HmdaRowParsedError,
-  PersistedHmdaRowParsedError
+  HmdaRowParsedError
 }
-import hmda.model.processing.state.{
-  EditSummary,
-  HmdaParserErrorState,
-  HmdaValidationErrorState
+import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState}
+import hmda.model.processing.state.HmdaParserErrorState
+import hmda.persistence.serialization.submission.processing.events.{
+  HmdaParserErrorStateMessage,
+  HmdaRowParsedCountMessage,
+  HmdaRowParsedErrorMessage
 }
-import hmda.model.validation.{ValidationErrorEntity, ValidationErrorType}
 import hmda.persistence.serialization.submission.processing.events._
 import hmda.serialization.validation.ValidationProtobufConverter._
 
@@ -67,22 +67,6 @@ object SubmissionProcessingEventsProtobufConverter {
       hmdaParserErrorStateMessage.larErrors.map(x =>
         hmdaRowParsedErrorFromProtobuf(x)),
       hmdaParserErrorStateMessage.totalErrors
-    )
-  }
-
-  def persistedHmdaRowParsedToProtobuf(
-      evt: PersistedHmdaRowParsedError): PersistedHmdaRowParsedErrorMessage = {
-    PersistedHmdaRowParsedErrorMessage(
-      evt.rowNumber,
-      evt.errors
-    )
-  }
-
-  def persistedHmdaRowParsedFromProtobuf(
-      msg: PersistedHmdaRowParsedErrorMessage): PersistedHmdaRowParsedError = {
-    PersistedHmdaRowParsedError(
-      msg.rowNumber,
-      msg.errors.toList
     )
   }
 

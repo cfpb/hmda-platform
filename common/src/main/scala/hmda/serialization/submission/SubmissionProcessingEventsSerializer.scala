@@ -6,14 +6,16 @@ import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   HmdaRowParsedError,
-  HmdaRowValidatedError,
-  PersistedHmdaRowParsedError
+  HmdaRowValidatedError
 }
-import SubmissionProcessingEventsProtobufConverter._
 import hmda.serialization.validation.ValidationProtobufConverter._
-import hmda.model.processing.state.{
-  HmdaParserErrorState,
-  HmdaValidationErrorState
+import hmda.model.processing.state.HmdaValidationErrorState
+import SubmissionProcessingEventsProtobufConverter._
+import hmda.model.processing.state.HmdaParserErrorState
+import hmda.persistence.serialization.submission.processing.events.{
+  HmdaParserErrorStateMessage,
+  HmdaRowParsedCountMessage,
+  HmdaRowParsedErrorMessage
 }
 import hmda.persistence.serialization.submission.processing.events._
 
@@ -24,8 +26,6 @@ class SubmissionProcessingEventsSerializer
   final val ParsedErrorManifest = classOf[HmdaRowParsedError].getName
   final val ParsedErrorCountManifest = classOf[HmdaRowParsedCount].getName
   final val HmdaParserErrorStateManifest = classOf[HmdaParserErrorState].getName
-  final val PersistedHmdaRowParsedErrorManifest =
-    classOf[PersistedHmdaRowParsedError].getName
   final val HmdaValidationErrorStateManifest =
     classOf[HmdaValidationErrorState].getName
   final val HmdaRowValidatedErrorManifest =
@@ -40,8 +40,6 @@ class SubmissionProcessingEventsSerializer
       hmdaRowParsedCountToProtobuf(evt).toByteArray
     case evt: HmdaParserErrorState =>
       hmdaParserErrorStateToProtobuf(evt).toByteArray
-    case evt: PersistedHmdaRowParsedError =>
-      persistedHmdaRowParsedToProtobuf(evt).toByteArray
     case evt: HmdaValidationErrorState =>
       hmdaValidationErrorStateToProtobuf(evt).toByteArray
     case evt: HmdaRowValidatedError =>
@@ -62,9 +60,6 @@ class SubmissionProcessingEventsSerializer
       case HmdaParserErrorStateManifest =>
         hmdaParserErrorStateFromProtobuf(
           HmdaParserErrorStateMessage.parseFrom(bytes))
-      case PersistedHmdaRowParsedErrorManifest =>
-        persistedHmdaRowParsedFromProtobuf(
-          PersistedHmdaRowParsedErrorMessage.parseFrom(bytes))
       case HmdaValidationErrorStateManifest =>
         hmdaValidationErrorStateFromProtobuf(
           HmdaValidationErrorStateMessage.parseFrom(bytes))

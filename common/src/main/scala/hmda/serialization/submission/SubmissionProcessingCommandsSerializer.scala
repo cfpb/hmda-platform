@@ -28,6 +28,7 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
     classOf[PersistHmdaRowParsedError].getName
   final val GetParsedWithErrorCountManifest =
     classOf[GetParsedWithErrorCount].getName
+  final val GetParsingErrorsManifest = classOf[GetParsingErrors].getName
   final val CompleteParsingManifest = classOf[CompleteParsing].getName
   final val CompleteParsingWithErrorsManifest =
     classOf[CompleteParsingWithErrors].getName
@@ -58,6 +59,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
       persistHmdaRowParsedErrorToProtobuf(cmd, resolver).toByteArray
     case cmd: GetParsedWithErrorCount =>
       getParsedWithErrorCountToProtobuf(cmd, resolver).toByteArray
+    case cmd: GetParsingErrors =>
+      getParsingErrorsToProtobuf(cmd, resolver).toByteArray
     case cmd: CompleteParsing =>
       completeParsingToProtobuf(cmd).toByteArray
     case cmd: CompleteParsingWithErrors =>
@@ -88,13 +91,16 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
       case StartParsingManifest =>
         startParsingFromProtobuf(StartParsingMessage.parseFrom(bytes))
       case PersistHmdaRowParsedErrorManifest =>
-        persisteHmdaRowParsedErrorFromProtobuf(
+        persistHmdaRowParsedErrorFromProtobuf(
           PersistHmdaRowParsedErrorMessage.parseFrom(bytes),
           resolver)
       case GetParsedWithErrorCountManifest =>
         getParsedWithErrorCountFromProtobuf(
           GetParsedWithErrorCountMessage.parseFrom(bytes),
           resolver)
+      case GetParsingErrorsManifest =>
+        getParsingErrorsFromProtobuf(GetParsingErrorsMessage.parseFrom(bytes),
+                                     resolver)
       case CompleteParsingManifest =>
         completeParsingFromProtobuf(CompleteParsingMessage.parseFrom(bytes))
       case CompleteParsingWithErrorsManifest =>

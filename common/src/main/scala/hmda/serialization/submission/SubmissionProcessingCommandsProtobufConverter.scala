@@ -61,7 +61,7 @@ object SubmissionProcessingCommandsProtobufConverter {
     )
   }
 
-  def persisteHmdaRowParsedErrorFromProtobuf(
+  def persistHmdaRowParsedErrorFromProtobuf(
       msg: PersistHmdaRowParsedErrorMessage,
       refResolver: ActorRefResolver): PersistHmdaRowParsedError = {
     PersistHmdaRowParsedError(
@@ -86,6 +86,19 @@ object SubmissionProcessingCommandsProtobufConverter {
     GetParsedWithErrorCount(
       resolver.resolveActorRef(msg.replyTo)
     )
+  }
+
+  def getParsingErrorsToProtobuf(
+      cmd: GetParsingErrors,
+      resolver: ActorRefResolver): GetParsingErrorsMessage = {
+    GetParsingErrorsMessage(cmd.page,
+                            resolver.toSerializationFormat(cmd.replyTo))
+  }
+
+  def getParsingErrorsFromProtobuf(
+      msg: GetParsingErrorsMessage,
+      resolver: ActorRefResolver): GetParsingErrors = {
+    GetParsingErrors(msg.page, resolver.resolveActorRef(msg.replyTo))
   }
 
   def completeParsingToProtobuf(

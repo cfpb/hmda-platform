@@ -6,6 +6,7 @@ import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.persistence.serialization.institution.InstitutionMessage
 import hmda.persistence.serialization.institution.commands._
 import InstitutionProtobufConverter._
+import hmda.model.institution.InstitutionDetail
 import hmda.persistence.serialization.filing.FilingMessage
 import hmda.serialization.filing.FilingProtobufConverter._
 
@@ -67,6 +68,21 @@ object InstitutionCommandsProtobufConverter {
     val msg = GetInstitutionMessage.parseFrom(bytes)
     val actorRef = resolver.resolveActorRef(msg.replyTo)
     GetInstitution(actorRef)
+  }
+
+  def getInstitutionDetailsToProtobuf(
+      cmd: GetInstitutionDetails,
+      resolver: ActorRefResolver): GetInstitutionDetailsMessage = {
+    GetInstitutionDetailsMessage(resolver.toSerializationFormat(cmd.replyTo))
+  }
+
+  def getInstitutionDetailsFromProtobuf(
+      bytes: Array[Byte],
+      resolver: ActorRefResolver): GetInstitutionDetails = {
+    val msg = GetInstitutionDetailsMessage.parseFrom(bytes)
+    val actorRef =
+      resolver.resolveActorRef[Option[InstitutionDetail]](msg.replyTo)
+    GetInstitutionDetails(actorRef)
   }
 
   def deleteInstitutionToProtobuf(

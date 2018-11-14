@@ -4,7 +4,7 @@ import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowValidatedError,
-  PersistedHmdaRowParsedError,
+  HmdaRowParsedError,
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.SubmissionId
@@ -29,7 +29,7 @@ object SubmissionProcessingCommands {
   case class PersistHmdaRowParsedError(
       rowNumber: Int,
       errors: List[String],
-      maybeReplyTo: Option[ActorRef[PersistedHmdaRowParsedError]])
+      maybeReplyTo: Option[ActorRef[HmdaRowParsedError]])
       extends SubmissionProcessingCommand
 
   case class GetParsedWithErrorCount(

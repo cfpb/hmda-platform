@@ -20,11 +20,6 @@ message HmdaParserErrorStateMessage {
     int32 totalErrors = 3;
 }
 
-message PersistedHmdaRowParsedErrorMessage {
-    int32 rowNumber = 1;
-    repeated string errors = 2;
-}
-
 message HmdaRowValidatedErrorMessage {
     int32 rowNumber = 1;
     repeated ValidationErrorMessage validationErrors = 2;
