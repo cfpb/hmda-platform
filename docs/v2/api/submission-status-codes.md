@@ -36,9 +36,12 @@ In order to track the status of a filing for a financial institution, the follow
 * `5`: `Your data has formatting errors.` - Review these errors and update your file. Then, upload the corrected file.
 * `6`: `Your data is formatted correctly.` - Your file meets the formatting requirements specified in the HMDA Filing Instructions Guide. Your data will now be analyzed for any edits.
 * `7`: `Your data is being analyzed.` - Your data has been uploaded and is being checked for any edits.
-* `8`: `Your data has syntactical and/or validity edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until the file is corrected and re-uploaded.
-* `9`: `Your data has quality edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.
-* `10`: `Your data has macro edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.
-* `11`: `Your data is ready for submission.` - Your financial institution has certified that the data is correct, but it has not been submitted yet.
-* `12`: `Your submission has been accepted. ` - This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted.
+* `8`: `Your data has been analyzed for Syntactical and Validity Errors.` - Your file has been analyzed and does not contain any Syntactical or Validity errors.
+* `9`: `Your data has syntactical and/or validity edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until the file is corrected and re-uploaded.
+* `10`: `Your data has been analyzed for Quality Errors.` - Your file has been analyzed, and does not contain quality errors.
+* `11`: `Your data has quality edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.
+* `12`: `Your data has been analyzed for macro errors. ` - Your file has been analyzed, and does not contain macro errors.
+* `13`: `Your data has macro edits that need to be reviewed.` - Your file has been uploaded, but the filing process may not proceed until edits are verified or the file is corrected and re-uploaded.
+* `14`: `Your data is ready for submission.` - Your financial institution has certified that the data is correct, but it has not been submitted yet.
+* `15`: `Your submission has been accepted.` - This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted.   
 * `-1`: `An error occurred while submitting the data.` - Please re-upload your file.
