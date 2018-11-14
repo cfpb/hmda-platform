@@ -9,7 +9,4 @@ object SubmissionProcessingEvents {
       extends SubmissionProcessingEvent
 
   case class HmdaRowParsedCount(count: Int) extends SubmissionProcessingEvent
-
-  case class PersistedHmdaRowParsedError(rowNumber: Int, errors: List[String])
-      extends SubmissionProcessingEvent
 }
