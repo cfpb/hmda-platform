@@ -53,11 +53,11 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             InstitutionPersistence.typeKey,
             s"${InstitutionPersistence.name}-${institution.LEI}")
 
-          val fInstitution
-            : Future[Option[Institution]] = institutionPersistence ? (
-              ref => GetInstitution(ref)
-          )
           timedPost { uri =>
+            val fInstitution
+              : Future[Option[Institution]] = institutionPersistence ? (
+                ref => GetInstitution(ref)
+            )
             onComplete(fInstitution) {
               case Success(Some(_)) =>
                 entityAlreadyExists(
@@ -74,6 +74,8 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
                   case Failure(error) =>
                     failedResponse(StatusCodes.InternalServerError, uri, error)
                 }
+              case Failure(error) =>
+                failedResponse(StatusCodes.InternalServerError, uri, error)
             }
 
           } ~
