@@ -41,4 +41,15 @@ object FilingResponseUtils {
     complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
   }
 
+  def badRequest(submissionId: SubmissionId,
+                 uri: Uri,
+                 reason: String): Route = {
+    val errorResponse = ErrorResponse(
+      400,
+      reason,
+      uri.path
+    )
+    complete(ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+  }
+
 }
