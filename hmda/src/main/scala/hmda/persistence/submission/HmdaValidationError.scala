@@ -197,6 +197,7 @@ object HmdaValidationError
               updateSubmissionReceipt(
                 sharding,
                 submissionId,
+                signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 log)
               replyTo ! signed

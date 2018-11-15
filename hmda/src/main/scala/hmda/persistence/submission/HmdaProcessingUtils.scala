@@ -76,6 +76,7 @@ object HmdaProcessingUtils {
   def updateSubmissionReceipt(
       sharding: ClusterSharding,
       submissionId: SubmissionId,
+      timestamp: Long,
       receipt: String,
       log: Logger)(implicit ec: ExecutionContext, timeout: Timeout): Unit = {
     val submissionPersistence: EntityRef[SubmissionCommand] =
@@ -87,7 +88,7 @@ object HmdaProcessingUtils {
 
     for {
       s <- fSubmission
-      m = s.map(e => e.copy(receipt = receipt)).getOrElse(Submission())
+      m = s.map(e => e.copy(receipt = receipt, end = timestamp)).getOrElse(Submission())
     } yield {
       if (s.isEmpty) {
         log
