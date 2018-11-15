@@ -88,7 +88,9 @@ object HmdaProcessingUtils {
 
     for {
       s <- fSubmission
-      m = s.map(e => e.copy(receipt = receipt, end = timestamp)).getOrElse(Submission())
+      m = s
+        .map(e => e.copy(receipt = receipt, end = timestamp))
+        .getOrElse(Submission())
     } yield {
       if (s.isEmpty) {
         log
