@@ -111,9 +111,12 @@ object HmdaValidationError
           } else {
             SyntacticalOrValidity
           }
-        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
-        Effect.persist(
-          SyntacticalValidityCompleted(submissionId, updatedStatus.code))
+        Effect
+          .persist(
+            SyntacticalValidityCompleted(submissionId, updatedStatus.code))
+          .thenRun { _ =>
+            updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+          }
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
@@ -144,8 +147,11 @@ object HmdaValidationError
           } else {
             Quality
           }
-        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
-        Effect.persist(QualityCompleted(submissionId, updatedStatus.code))
+        Effect
+          .persist(QualityCompleted(submissionId, updatedStatus.code))
+          .thenRun { _ =>
+            updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+          }
 
       case PersistHmdaRowValidatedError(rowNumber,
                                         validationErrors,
