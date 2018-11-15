@@ -6,10 +6,12 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
 import hmda.messages.submission.SubmissionProcessingCommands.{
+  CompleteQuality,
   GetHmdaValidationErrorState,
-  PersistHmdaRowValidatedError
+  PersistHmdaRowValidatedError,
+  VerifyQuality
 }
-import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
+import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState}
 import hmda.model.validation._
@@ -28,13 +30,14 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
 
   val errorsProbe = TestProbe[HmdaRowValidatedError]("processing-event")
   val stateProbe = TestProbe[HmdaValidationErrorState]("state-probe")
+  val eventsProbe = TestProbe[SubmissionProcessingEvent]("events-probe")
 
   "Validation Errors" must {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
+    val hmdaValidationError = sharding.entityRefFor(
+      HmdaValidationError.typeKey,
+      s"${HmdaValidationError.name}-${submissionId.toString}")
     "be persisted and read back" in {
-      val hmdaValidationError = sharding.entityRefFor(
-        HmdaValidationError.typeKey,
-        s"${HmdaValidationError.name}-${submissionId.toString}")
       val tsError: ValidationError =
         SyntacticalValidationError("12345XXX", "S300", TsValidationError)
       val larErrors: Seq[ValidationError] = Seq(
@@ -102,6 +105,14 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
           validityEditSummary,
           qualityEditSummary
         ))
+    }
+
+    "finish validation, verify and sign" in {
+      hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
+      eventsProbe.expectMessage(NotReadyToBeVerified(submissionId))
+      hmdaValidationError ! CompleteQuality(submissionId)
+      hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
+      eventsProbe.expectMessage(QualityVerified(submissionId, true))
     }
   }
 
