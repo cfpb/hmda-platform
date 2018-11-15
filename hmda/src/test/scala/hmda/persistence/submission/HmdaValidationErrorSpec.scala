@@ -5,12 +5,7 @@ import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
-import hmda.messages.submission.SubmissionProcessingCommands.{
-  CompleteQuality,
-  GetHmdaValidationErrorState,
-  PersistHmdaRowValidatedError,
-  VerifyQuality
-}
+import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState}
@@ -31,6 +26,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   val errorsProbe = TestProbe[HmdaRowValidatedError]("processing-event")
   val stateProbe = TestProbe[HmdaValidationErrorState]("state-probe")
   val eventsProbe = TestProbe[SubmissionProcessingEvent]("events-probe")
+  val signedProbe = TestProbe[SubmissionSignedEvent]("sign-event")
 
   "Validation Errors" must {
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
@@ -111,8 +107,15 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
       hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
       eventsProbe.expectMessage(NotReadyToBeVerified(submissionId))
       hmdaValidationError ! CompleteQuality(submissionId)
+
+      hmdaValidationError ! SignSubmission(submissionId, signedProbe.ref)
+      signedProbe.expectMessage(SubmissionNotReadyToBeSigned(submissionId))
+
       hmdaValidationError ! VerifyQuality(submissionId, true, eventsProbe.ref)
       eventsProbe.expectMessage(QualityVerified(submissionId, true))
+
+      hmdaValidationError ! SignSubmission(submissionId, signedProbe.ref)
+      signedProbe.expectMessageType[SubmissionSigned]
     }
   }
 

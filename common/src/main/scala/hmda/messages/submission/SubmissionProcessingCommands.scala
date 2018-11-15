@@ -75,20 +75,9 @@ object SubmissionProcessingCommands {
                          replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
-  //case class CompleteQualityWithErrors(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
-  //case class StartMacro(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
-  //case class CompleteMacro(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
-  //case class CompleteMacroWithErrors(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
-  //case class Verify(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
-  //case class Sign(submissionId: SubmissionId)
-  //    extends SubmissionProcessingCommand
-//  case class Fail(submissionId: SubmissionId)
-//      extends SubmissionProcessingCommand
+  case class SignSubmission(submissionId: SubmissionId,
+                            replyTo: ActorRef[SubmissionSignedEvent])
+      extends SubmissionProcessingCommand
 
   case object HmdaParserStop extends SubmissionProcessingCommand
 
