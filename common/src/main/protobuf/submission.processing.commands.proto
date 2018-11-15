@@ -70,11 +70,13 @@ message CompleteQualityMessage {
 
 message VerifyQualityMessage {
     SubmissionIdMessage submissionId = 1;
-    string replyTo = 2;
+    bool verified = 2;
+    string replyTo = 3;
 }
 
 message VerifyMacroMessage {
     SubmissionIdMessage submissionId = 1;
-    string replyTo = 2;
+    bool verified = 2;
+    string replyTo = 3;
 }
 

@@ -23,10 +23,10 @@ object SubmissionProcessingEvents {
   case class QualityCompleted(submissionId: SubmissionId, statusCode: Int)
       extends SubmissionProcessingEvent
 
-  case class QualityVerified(submissionId: SubmissionId)
+  case class QualityVerified(submissionId: SubmissionId, verified: Boolean)
       extends SubmissionProcessingEvent
 
-  case class MacroVerified(submissionId: SubmissionId)
+  case class MacroVerified(submissionId: SubmissionId, verified: Boolean)
       extends SubmissionProcessingEvent
 
   case class NotReadyToBeVerified(submissionId: SubmissionId)

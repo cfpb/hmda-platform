@@ -239,6 +239,7 @@ object SubmissionProcessingCommandsProtobufConverter {
       refResolver: ActorRefResolver): VerifyQualityMessage = {
     VerifyQualityMessage(
       submissionIdToProtobuf(cmd.submissionId),
+      cmd.verified,
       refResolver.toSerializationFormat(cmd.replyTo)
     )
   }
@@ -249,6 +250,7 @@ object SubmissionProcessingCommandsProtobufConverter {
     VerifyQuality(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.verified,
       refResolver.resolveActorRef(msg.replyTo)
     )
   }
@@ -258,6 +260,7 @@ object SubmissionProcessingCommandsProtobufConverter {
       refResolver: ActorRefResolver): VerifyMacroMessage = {
     VerifyMacroMessage(
       submissionIdToProtobuf(cmd.submissionId),
+      cmd.verified,
       refResolver.toSerializationFormat(cmd.replyTo)
     )
   }
@@ -267,6 +270,7 @@ object SubmissionProcessingCommandsProtobufConverter {
     VerifyMacro(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.verified,
       refResolver.resolveActorRef(msg.replyTo)
     )
   }

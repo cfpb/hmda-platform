@@ -168,14 +168,14 @@ object HmdaValidationError
             }
           }
 
-      case VerifyQuality(submissionId, replyTo) =>
+      case VerifyQuality(submissionId, verified, replyTo) =>
         if (List(10, 11, 12, 13).contains(state.statusCode)) {
-          Effect.persist(QualityVerified(submissionId)).thenRun { _ =>
+          Effect.persist(QualityVerified(submissionId, verified)).thenRun { _ =>
             if (state.macroVerified) {
               val updatedStatus = Verified
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
             }
-            replyTo ! QualityVerified(submissionId)
+            replyTo ! QualityVerified(submissionId, verified)
           }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
@@ -201,8 +201,8 @@ object HmdaValidationError
       state.updateStatusCode(statusCode)
     case (state, QualityCompleted(_, statusCode)) =>
       state.updateStatusCode(statusCode)
-    case (state, _: QualityVerified) =>
-      state.verifyQuality()
+    case (state, evt: QualityVerified) =>
+      state.verifyQuality(evt)
     case (state, _) => state
   }
 

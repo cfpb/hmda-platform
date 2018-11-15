@@ -66,10 +66,12 @@ object SubmissionProcessingCommands {
       extends SubmissionProcessingCommand
 
   case class VerifyQuality(submissionId: SubmissionId,
+                           verified: Boolean,
                            replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
   case class VerifyMacro(submissionId: SubmissionId,
+                         verified: Boolean,
                          replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
