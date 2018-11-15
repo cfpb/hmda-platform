@@ -365,3 +365,44 @@ Example response, with HTTP code 201:
   }
 }
 ```
+
+### Signature
+
+`/institutions/<lei>/filings/<period>/submissions/<submissionId>/sign`
+
+`GET`  - Returns a receipt
+
+Example response:
+```json
+{
+  "timestamp": 1476809530772,
+  "receipt": "asd0f987134asdlfasdflk",
+  "status": {
+    "code": 15,
+    "message": "Your submission has been accepted.",
+    "description": "Your financial institution has certified that the data is correct. This completes the HMDA filing process for this year."
+  }
+}
+```
+
+`POST`  - Sign the submission
+
+Example body:
+```json
+{
+  "signed": true
+}
+```
+
+Example response:
+```json
+{
+  "timestamp": 1476809530772,
+  "receipt": "asd0f987134asdlfasdflk",
+  "status": {
+    "code": 15,
+    "message": "Your submission has been accepted.",
+    "description": "Your financial institution has certified that the data is correct. This completes the HMDA filing process for this year."
+  }
+}
+```
