@@ -80,3 +80,8 @@ message VerifyMacroMessage {
     string replyTo = 3;
 }
 
+message SignSubmissionMessage {
+    SubmissionIdMessage submissionId = 1;
+    string replyTo = 2;
+}
+

@@ -32,6 +32,9 @@ class SubmissionProcessingEventsSerializer
   final val SyntacticalValidityCompletedManifest =
     classOf[SyntacticalValidityCompleted].getName
   final val QualityCompletedManifest = classOf[QualityCompleted].getName
+  final val SubmissionSignedManifest = classOf[SubmissionSigned].getName
+  final val SubmissionNotReadyToBeSignedManifest =
+    classOf[SubmissionNotReadyToBeSigned].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -56,6 +59,10 @@ class SubmissionProcessingEventsSerializer
       syntacticalValidityCompletedToProtobuf(evt).toByteArray
     case evt: QualityCompleted =>
       qualityCompletedToProtobuf(evt).toByteArray
+    case evt: SubmissionSigned =>
+      submissionSignedToProtobuf(evt).toByteArray
+    case evt: SubmissionNotReadyToBeSigned =>
+      submissionNotReadyToBeSignedToProtobuf(evt).toByteArray
     case _ =>
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
@@ -90,6 +97,11 @@ class SubmissionProcessingEventsSerializer
           SyntacticalValidityCompletedMessage.parseFrom(bytes))
       case QualityCompletedManifest =>
         qualityCompletedFromProtobuf(QualityCompletedMessage.parseFrom(bytes))
+      case SubmissionSignedManifest =>
+        submissionSignedFromProtobuf(SubmissionSignedMessage.parseFrom(bytes))
+      case SubmissionNotReadyToBeSignedManifest =>
+        submissionNotReadyToBeSignedFromProtobuf(
+          SubmissionNotReadyToBeSignedMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")

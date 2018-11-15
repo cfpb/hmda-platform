@@ -66,4 +66,14 @@ message QualityCompletedMessage {
     int32 statusCode = 2;
 }
 
+message SubmissionSignedMessage {
+    SubmissionIdMessage submissionId = 1;
+    int64 timestamp = 2;
+    int32 statusCode = 3;
+}
+
+message SubmissionNotReadyToBeSignedMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
 
