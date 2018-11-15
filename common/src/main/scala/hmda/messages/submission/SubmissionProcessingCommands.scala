@@ -2,11 +2,7 @@ package hmda.messages.submission
 
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
-import hmda.messages.submission.SubmissionProcessingEvents.{
-  HmdaRowValidatedError,
-  HmdaRowParsedError,
-  SubmissionProcessingEvent
-}
+import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.processing.state.{
   HmdaParserErrorState,
@@ -67,6 +63,14 @@ object SubmissionProcessingCommands {
       extends SubmissionProcessingCommand
 
   case class CompleteQuality(submissionId: SubmissionId)
+      extends SubmissionProcessingCommand
+
+  case class VerifyQuality(submissionId: SubmissionId,
+                           replyTo: ActorRef[SubmissionProcessingEvent])
+      extends SubmissionProcessingCommand
+
+  case class VerifyMacro(submissionId: SubmissionId,
+                         replyTo: ActorRef[SubmissionProcessingEvent])
       extends SubmissionProcessingCommand
 
   //case class CompleteQualityWithErrors(submissionId: SubmissionId)

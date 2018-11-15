@@ -97,6 +97,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
 
       stateProbe.expectMessage(
         HmdaValidationErrorState(
+          1,
           syntacticalEditSummary,
           validityEditSummary,
           qualityEditSummary

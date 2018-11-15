@@ -16,7 +16,7 @@ import hmda.messages.submission.SubmissionProcessingCommands.{
   StartQuality,
   StartSyntacticalValidity
 }
-import hmda.model.filing.submission.{Parsed, SyntacticalOrValidity, Uploaded}
+import hmda.model.filing.submission._
 
 object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
 
@@ -63,6 +63,9 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
                   hmdaValidationError ! StartSyntacticalValidity(submission.id)
                 case SyntacticalOrValidity =>
                   hmdaValidationError ! StartQuality(submission.id)
+                case Quality | QualityErrors =>
+                //TODO: Start macro edits
+
                 case _ =>
               }
               Behaviors.same

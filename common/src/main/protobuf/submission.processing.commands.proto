@@ -68,3 +68,13 @@ message CompleteQualityMessage {
     SubmissionIdMessage submissionId = 1;
 }
 
+message VerifyQualityMessage {
+    SubmissionIdMessage submissionId = 1;
+    string replyTo = 2;
+}
+
+message VerifyMacroMessage {
+    SubmissionIdMessage submissionId = 1;
+    string replyTo = 2;
+}
+

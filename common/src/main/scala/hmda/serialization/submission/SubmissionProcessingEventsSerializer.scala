@@ -3,11 +3,7 @@ package hmda.serialization.submission
 import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.submission.SubmissionProcessingEvents.{
-  HmdaRowParsedCount,
-  HmdaRowParsedError,
-  HmdaRowValidatedError
-}
+import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.serialization.validation.ValidationProtobufConverter._
 import hmda.model.processing.state.HmdaValidationErrorState
 import SubmissionProcessingEventsProtobufConverter._
@@ -30,6 +26,12 @@ class SubmissionProcessingEventsSerializer
     classOf[HmdaValidationErrorState].getName
   final val HmdaRowValidatedErrorManifest =
     classOf[HmdaRowValidatedError].getName
+  final val QualityVerifiedManifest = classOf[QualityVerified].getName
+  final val MacroVerifiedManifest = classOf[MacroVerified].getName
+  final val NotReadyToBeVerifiedManifest = classOf[NotReadyToBeVerified].getName
+  final val SyntacticalValidityCompletedManifest =
+    classOf[SyntacticalValidityCompleted].getName
+  final val QualityCompletedManifest = classOf[QualityCompleted].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -44,6 +46,16 @@ class SubmissionProcessingEventsSerializer
       hmdaValidationErrorStateToProtobuf(evt).toByteArray
     case evt: HmdaRowValidatedError =>
       hmdaRowValidatedErrorToProtobuf(evt).toByteArray
+    case evt: QualityVerified =>
+      qualityVerifiedToProtobuf(evt).toByteArray
+    case evt: MacroVerified =>
+      macroVerifiedToProtobuf(evt).toByteArray
+    case evt: NotReadyToBeVerified =>
+      notReadyToBeVerifiedToProtobuf(evt).toByteArray
+    case evt: SyntacticalValidityCompleted =>
+      syntacticalValidityCompletedToProtobuf(evt).toByteArray
+    case evt: QualityCompleted =>
+      qualityCompletedToProtobuf(evt).toByteArray
     case _ =>
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
@@ -66,6 +78,18 @@ class SubmissionProcessingEventsSerializer
       case HmdaRowValidatedErrorManifest =>
         hmdaRowValidatedErrorFromProtobuf(
           HmdaRowValidatedErrorMessage.parseFrom(bytes))
+      case QualityVerifiedManifest =>
+        qualityVerifiedFromProtobuf(QualityVerifiedMessage.parseFrom(bytes))
+      case MacroVerifiedManifest =>
+        macroVerifiedFromProtobuf(MacroVerifiedMessage.parseFrom(bytes))
+      case NotReadyToBeVerifiedManifest =>
+        notReadyToBeVerifiedFromProtobuf(
+          NotReadyToBeVerifiedMessage.parseFrom(bytes))
+      case SyntacticalValidityCompletedManifest =>
+        syntacticalValidityCompletedFromProtobuf(
+          SyntacticalValidityCompletedMessage.parseFrom(bytes))
+      case QualityCompletedManifest =>
+        qualityCompletedFromProtobuf(QualityCompletedMessage.parseFrom(bytes))
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")

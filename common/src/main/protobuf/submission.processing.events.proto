@@ -3,6 +3,7 @@ syntax = "proto3";
 option java_package = "hmda.persistence.serialization";
 option optimize_for = SPEED;
 
+import "submission.proto";
 import "validation.proto";
 
 message HmdaRowParsedErrorMessage {
@@ -32,8 +33,35 @@ message EditSummaryMessage {
 }
 
 message HmdaValidationErrorStateMessage {
-    repeated EditSummaryMessage syntactical = 1;
-    repeated EditSummaryMessage validity = 2;
-    repeated EditSummaryMessage quality = 3;
-    repeated EditSummaryMessage macro = 4;
+    int32 statusCode = 1;
+    repeated EditSummaryMessage syntactical = 2;
+    repeated EditSummaryMessage validity = 3;
+    repeated EditSummaryMessage quality = 4;
+    repeated EditSummaryMessage macro = 5;
+    bool qualityVerified = 6;
+    bool macroVerified = 7;
 }
+
+message QualityVerifiedMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message MacroVerifiedMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message NotReadyToBeVerifiedMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message SyntacticalValidityCompletedMessage {
+    SubmissionIdMessage submissionId = 1;
+    int32 statusCode = 2;
+}
+
+message QualityCompletedMessage {
+    SubmissionIdMessage submissionId = 1;
+    int32 statusCode = 2;
+}
+
+

@@ -1,6 +1,7 @@
 package hmda.messages.submission
 
 import hmda.messages.CommonMessages.Event
+import hmda.model.filing.submission.SubmissionId
 import hmda.model.validation.ValidationError
 
 object SubmissionProcessingEvents {
@@ -14,5 +15,21 @@ object SubmissionProcessingEvents {
       extends SubmissionProcessingEvent
 
   case class HmdaRowParsedCount(count: Int) extends SubmissionProcessingEvent
+
+  case class SyntacticalValidityCompleted(submissionId: SubmissionId,
+                                          statusCode: Int)
+      extends SubmissionProcessingEvent
+
+  case class QualityCompleted(submissionId: SubmissionId, statusCode: Int)
+      extends SubmissionProcessingEvent
+
+  case class QualityVerified(submissionId: SubmissionId)
+      extends SubmissionProcessingEvent
+
+  case class MacroVerified(submissionId: SubmissionId)
+      extends SubmissionProcessingEvent
+
+  case class NotReadyToBeVerified(submissionId: SubmissionId)
+      extends SubmissionProcessingEvent
 
 }

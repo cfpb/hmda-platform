@@ -10,10 +10,7 @@ import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionProcessingCommands._
-import hmda.messages.submission.SubmissionProcessingEvents.{
-  HmdaRowValidatedError,
-  SubmissionProcessingEvent
-}
+import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.submission._
 import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.persistence.HmdaTypedPersistentActor
@@ -115,7 +112,8 @@ object HmdaValidationError
             SyntacticalOrValidity
           }
         updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
-        Effect.none
+        Effect.persist(
+          SyntacticalValidityCompleted(submissionId, updatedStatus.code))
 
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
@@ -147,8 +145,7 @@ object HmdaValidationError
             Quality
           }
         updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
-
-        Effect.none
+        Effect.persist(QualityCompleted(submissionId, updatedStatus.code))
 
       case PersistHmdaRowValidatedError(rowNumber,
                                         validationErrors,
@@ -165,6 +162,20 @@ object HmdaValidationError
             }
           }
 
+      case VerifyQuality(submissionId, replyTo) =>
+        if (List(10, 11, 12, 13).contains(state.statusCode)) {
+          Effect.persist(QualityVerified(submissionId)).thenRun { _ =>
+            if (state.macroVerified) {
+              val updatedStatus = Verified
+              updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+            }
+            replyTo ! QualityVerified(submissionId)
+          }
+        } else {
+          replyTo ! NotReadyToBeVerified(submissionId)
+          Effect.none
+        }
+
       case GetHmdaValidationErrorState(_, replyTo) =>
         replyTo ! state
         Effect.none
@@ -180,6 +191,12 @@ object HmdaValidationError
        SubmissionProcessingEvent) => HmdaValidationErrorState = {
     case (state, error @ HmdaRowValidatedError(_, _)) =>
       state.updateErrors(error)
+    case (state, SyntacticalValidityCompleted(_, statusCode)) =>
+      state.updateStatusCode(statusCode)
+    case (state, QualityCompleted(_, statusCode)) =>
+      state.updateStatusCode(statusCode)
+    case (state, _: QualityVerified) =>
+      state.verifyQuality()
     case (state, _) => state
   }
 

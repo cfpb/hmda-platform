@@ -234,4 +234,41 @@ object SubmissionProcessingCommandsProtobufConverter {
     )
   }
 
+  def verifyQualityToProtobuf(
+      cmd: VerifyQuality,
+      refResolver: ActorRefResolver): VerifyQualityMessage = {
+    VerifyQualityMessage(
+      submissionIdToProtobuf(cmd.submissionId),
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def verifyQualityFromProtobuf(
+      msg: VerifyQualityMessage,
+      refResolver: ActorRefResolver): VerifyQuality = {
+    VerifyQuality(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      refResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
+  def verifyMacroToProtobuf(
+      cmd: VerifyMacro,
+      refResolver: ActorRefResolver): VerifyMacroMessage = {
+    VerifyMacroMessage(
+      submissionIdToProtobuf(cmd.submissionId),
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def verifyMacroFromProtobuf(msg: VerifyMacroMessage,
+                              refResolver: ActorRefResolver): VerifyMacro = {
+    VerifyMacro(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      refResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
 }
