@@ -15,7 +15,6 @@ import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   HmdaRowParsedError,
-  PersistedHmdaRowParsedError,
   SubmissionProcessingEvent
 }
 import hmda.model.filing.submission.{
@@ -97,7 +96,7 @@ object HmdaParserError
                                         None)
           }
           .via(ActorFlow.ask(ctx.asScala.self)(
-            (el, replyTo: ActorRef[PersistedHmdaRowParsedError]) =>
+            (el, replyTo: ActorRef[HmdaRowParsedError]) =>
               PersistHmdaRowParsedError(el.rowNumber,
                                         el.errors,
                                         Some(replyTo))))
@@ -116,7 +115,7 @@ object HmdaParserError
           log.debug(s"Persisted error: $rowNumber, $errors")
           maybeReplyTo match {
             case Some(replyTo) =>
-              replyTo ! PersistedHmdaRowParsedError(rowNumber, errors)
+              replyTo ! HmdaRowParsedError(rowNumber, errors)
             case None => //do nothing
           }
         }

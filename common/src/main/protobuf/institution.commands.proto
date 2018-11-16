@@ -30,6 +30,10 @@ message GetInstitutionMessage {
   string replyTo = 1;
 }
 
+message GetInstitutionDetailsMessage {
+    string replyTo = 1;
+}
+
 message InstitutionStopMessage {
 
 }

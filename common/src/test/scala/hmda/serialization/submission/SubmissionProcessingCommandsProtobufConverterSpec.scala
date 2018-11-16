@@ -12,6 +12,7 @@ import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingE
 import hmda.persistence.serialization.submission.processing.commands._
 import org.scalacheck.Gen
 import akka.actor.typed.scaladsl.adapter._
+import hmda.model.processing.state.HmdaParserErrorState
 
 class SubmissionProcessingCommandsProtobufConverterSpec
     extends PropSpec
@@ -59,7 +60,7 @@ class SubmissionProcessingCommandsProtobufConverterSpec
     forAll(persistParsedErrorGen) { cmd =>
       val protobuf =
         persistHmdaRowParsedErrorToProtobuf(cmd, actorRefResolver).toByteArray
-      persisteHmdaRowParsedErrorFromProtobuf(
+      persistHmdaRowParsedErrorFromProtobuf(
         PersistHmdaRowParsedErrorMessage.parseFrom(protobuf),
         actorRefResolver) mustBe cmd
     }
@@ -74,6 +75,16 @@ class SubmissionProcessingCommandsProtobufConverterSpec
     getParsedWithErrorCountFromProtobuf(
       GetParsedWithErrorCountMessage.parseFrom(protobuf),
       resolver) mustBe cmd
+  }
+
+  property("Get Parsing Errors must serialize to protobuf and back") {
+    val probe = TestProbe[HmdaParserErrorState]
+    val actorRef = probe.ref
+    val resolver = ActorRefResolver(typedSystem)
+    val cmd = GetParsingErrors(2, actorRef)
+    val protobuf = getParsingErrorsToProtobuf(cmd, resolver).toByteArray
+    getParsingErrorsFromProtobuf(GetParsingErrorsMessage.parseFrom(protobuf),
+                                 resolver) mustBe cmd
   }
 
   property("Complete Parsing must serialize to protobuf and back") {
