@@ -77,6 +77,8 @@ Certain environment variables can be passed in to set the log level of the micro
 
 ```
 ZOOKEEPER_LOG_LEVEL (Defaulted to WARN)
+KAFKA_LOG_LEVEL (Defaulted to INFO)
+CASSANDRA_LOG_LEVEL (Defaulted to INFO)
 PLATFORM_LOG_LEVEL (Defaulted to WARN)
 INSTITUTION_LOG_LEVEL (Defaulted to INFO)
 CHECKDIGIT_LOG_LEVEL (Defaulted to DEBUG)
