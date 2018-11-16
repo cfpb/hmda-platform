@@ -9,6 +9,8 @@ import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
 import hmda.api.http.HttpServer
 import hmda.api.ws.routes.BaseWsApi
+import hmda.api.ws.filing.submissions.SubmissionWsApi
+import akka.http.scaladsl.server.Directives._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,7 +19,7 @@ object HmdaWSApi {
   final val wsApiName = "hmda-ws-api"
 }
 
-class HmdaWSApi extends HttpServer with BaseWsApi {
+class HmdaWSApi extends HttpServer with BaseWsApi with SubmissionWsApi {
   import HmdaWSApi._
 
   val config = ConfigFactory.load()
@@ -31,7 +33,7 @@ class HmdaWSApi extends HttpServer with BaseWsApi {
   override val host: String = config.getString("hmda.ws.host")
   override val port: Int = config.getInt("hmda.ws.port")
 
-  override val paths: Route = routes(s"$name")
+  override val paths: Route = routes(s"$name") ~ submissionWsRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
