@@ -17,8 +17,8 @@ object EditDescriptionLookup {
     val lines = fileLines(s"/$editDescriptionFileName")
     lines
       .drop(1)
-      .map { line =>
-        val values = line.split(",")
+      .map { s =>
+        val values = s.split("\\|", -1).map(_.trim).toList
         val editName = values(0)
         val editDetails = values(1)
         val affectedDataFields = values(2).split(",")
