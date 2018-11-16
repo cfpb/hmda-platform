@@ -74,16 +74,12 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
               implicit val system: ActorSystem[_] = ctx.system
               submission.status match {
                 case Uploaded =>
-                  publishSubmissionModified(submissionTopic, submission)
                   hmdaParserError ! StartParsing(submission.id)
                 case Parsed =>
-                  publishSubmissionModified(submissionTopic, submission)
                   hmdaValidationError ! StartSyntacticalValidity(submission.id)
                 case SyntacticalOrValidity =>
-                  publishSubmissionModified(submissionTopic, submission)
                   hmdaValidationError ! StartQuality(submission.id)
                 case Quality | QualityErrors =>
-                  publishSubmissionModified(submissionTopic, submission)
                 //TODO: Start macro edits
 
                 case _ =>
@@ -104,34 +100,4 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
     super.startShardRegion(sharding)
   }
 
-  private def publishSubmissionModified(topic: String, submission: Submission)(
-      implicit system: ActorSystem[_]): Unit = {
-    implicit val unTypedSystem: actor.ActorSystem = system.toUntyped
-    implicit val materializer: ActorMaterializer = ActorMaterializer()
-    implicit val ec: ExecutionContext = system.toUntyped.dispatcher
-    val config = ConfigFactory.load()
-    val kafkaHosts = config.getString("kafka.hosts")
-    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
-    val producerSettings =
-      ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
-        .withBootstrapServers(kafkaHosts)
-
-    val kafkaProducer = producerSettings.createKafkaProducer()
-
-    Source
-      .single(submission.status)
-      .map(_.asJson.noSpaces)
-      .map(
-        value =>
-          new ProducerRecord[String, String](topic,
-                                             submission.id.toString,
-                                             value))
-      .runWith(Producer.plainSink(producerSettings, kafkaProducer))
-      .onComplete {
-        case Success(_) =>
-          kafkaProducer.close()
-        case Failure(_) =>
-          kafkaProducer.close()
-      }
-  }
 }

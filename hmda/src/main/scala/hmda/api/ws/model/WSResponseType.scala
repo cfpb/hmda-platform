@@ -7,3 +7,7 @@ trait WSResponseType {
 case object ServerPing extends WSResponseType {
   override val messageType: String = "ServerPing"
 }
+
+case object SubmissionStatus extends WSResponseType {
+  override val messageType: String = "SubmissionStatus"
+}

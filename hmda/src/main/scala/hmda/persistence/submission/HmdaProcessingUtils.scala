@@ -1,6 +1,6 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.{ActorContext, ActorSystem, Logger}
+import akka.actor.typed.{ActorSystem, Logger}
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.kafka.ConsumerMessage.CommittableMessage
 import akka.kafka.{ConsumerSettings, Subscriptions}
