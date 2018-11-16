@@ -1,4 +1,4 @@
-package hmda.api.http.routes
+package hmda.api.ws.routes
 
 import java.net.InetAddress
 import java.time.Instant
@@ -7,14 +7,18 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.ws.{Message, TextMessage}
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{
+  get,
+  handleWebSocketMessages,
+  pathSingleSlash
+}
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.model.HmdaServiceStatus
-import io.circe.generic.auto._
 import io.circe.syntax._
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import io.circe.generic.auto._
 
 trait BaseWsApi {
 
