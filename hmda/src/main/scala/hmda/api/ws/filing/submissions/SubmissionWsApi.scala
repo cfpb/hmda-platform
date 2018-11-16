@@ -10,6 +10,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.stream.scaladsl.{BroadcastHub, Flow, Keep, Source}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import com.typesafe.config.ConfigFactory
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.filing.submission.SubmissionId
 import hmda.persistence.submission.HmdaProcessingUtils._
@@ -23,18 +24,16 @@ trait SubmissionWsApi {
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
 
+  val config = ConfigFactory.load()
+  val keepAliveTimeout = config.getInt("hmda.ws.keep-alive")
+
   def wsHandler(
-      source: Source[String, NotUsed]): Flow[Message, Message, NotUsed] =
+                 source: Source[String, NotUsed]): Flow[Message, Message, NotUsed] =
     Flow[Message]
       .mapConcat(_ => Nil) //ignore messages sent from client
       .merge(source)
       .map(l => TextMessage(l.toString))
-      .keepAlive(30.seconds, () => TextMessage("keepalive"))
-
-  sealed trait WSSourceProtocol
-  case class WSMessage(msg: String) extends WSSourceProtocol
-  case object Complete extends WSSourceProtocol
-  case class Fail(ex: Exception) extends WSSourceProtocol
+      .keepAlive(keepAliveTimeout.seconds, () => TextMessage("keepalive"))
 
   //institutions/<lei>/filings/<period>/submissions/<seqNr>
   val submissionWsPath: Route = {
