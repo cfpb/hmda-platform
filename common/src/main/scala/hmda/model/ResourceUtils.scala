@@ -7,7 +7,7 @@ import hmda._
 
 object ResourceUtils {
 
-  def using[A <: Closeable, B](a: A)(f: A => B): B  = {
+  def using[A <: Closeable, B](a: A)(f: A => B): B = {
     try {
       f(a)
     } finally {
@@ -20,7 +20,8 @@ object ResourceUtils {
     Source.fromInputStream(file, encoding)
   }
 
-  def fileLines(fileName: String, encoding: String = "UTF-8"): Iterable[String] = {
+  def fileLines(fileName: String,
+                encoding: String = "UTF-8"): Iterable[String] = {
     using(resource(fileName, encoding)) { source =>
       source.getLines().toList
     }
