@@ -4,6 +4,7 @@ option java_package = "hmda.persistence.serialization";
 option optimize_for = SPEED;
 
 import "submission.proto";
+import "validation.proto";
 
 message StartUploadMessage {
     SubmissionIdMessage submissionId = 1;
@@ -23,6 +24,12 @@ message PersistHmdaRowParsedErrorMessage {
     string maybeReplyTo = 3;
 }
 
+message PersistHmdaRowValidatedErrorMessage {
+    int32 rowNumber = 1;
+    repeated ValidationErrorMessage validationErrors = 2;
+    string replyTo = 3;
+}
+
 message GetParsedWithErrorCountMessage {
     string replyTo = 1;
 }
@@ -39,3 +46,37 @@ message CompleteParsingMessage {
 message CompleteParsingWithErrorsMessage {
     SubmissionIdMessage submissionId = 1;
 }
+
+message StartSyntacticalValidityMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message GetHmdaValidationErrorStateMessage {
+    SubmissionIdMessage submissionId = 1;
+    string replyTo = 2;
+}
+
+message CompleteSyntacticalValidityMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message StartQualityMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message CompleteQualityMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
+message VerifyQualityMessage {
+    SubmissionIdMessage submissionId = 1;
+    bool verified = 2;
+    string replyTo = 3;
+}
+
+message VerifyMacroMessage {
+    SubmissionIdMessage submissionId = 1;
+    bool verified = 2;
+    string replyTo = 3;
+}
+

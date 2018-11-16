@@ -4,6 +4,7 @@ import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.persistence.serialization.submission.processing.commands._
 import SubmissionProtobufConverter._
+import hmda.serialization.validation.ValidationProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionIdMessage
 
 object SubmissionProcessingCommandsProtobufConverter {
@@ -127,6 +128,150 @@ object SubmissionProcessingCommandsProtobufConverter {
     CompleteParsingWithErrors(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
+  def startSyntacticalValidityToProtobuf(
+      cmd: StartSyntacticalValidity): StartSyntacticalValidityMessage = {
+    StartSyntacticalValidityMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def startSyntacticalValidityFromProtobuf(
+      msg: StartSyntacticalValidityMessage): StartSyntacticalValidity = {
+    StartSyntacticalValidity(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
+  def persistHmdaRowValidatedErrorToProtobuf(
+      cmd: PersistHmdaRowValidatedError,
+      refResolver: ActorRefResolver): PersistHmdaRowValidatedErrorMessage = {
+    PersistHmdaRowValidatedErrorMessage(
+      cmd.rowNumber,
+      cmd.validationErrors.map(error => validationErrorToProtobuf(error)),
+      cmd.replyTo match {
+        case None      => ""
+        case Some(ref) => refResolver.toSerializationFormat(ref)
+      }
+    )
+  }
+
+  def persistHmdaRowValidatedErrorFromProtobuf(
+      msg: PersistHmdaRowValidatedErrorMessage,
+      refResolver: ActorRefResolver): PersistHmdaRowValidatedError = {
+    PersistHmdaRowValidatedError(
+      msg.rowNumber,
+      msg.validationErrors
+        .map(error => validationErrorFromProtobuf(error))
+        .toList,
+      if (msg.replyTo == "") None
+      else Some(refResolver.resolveActorRef(msg.replyTo))
+    )
+  }
+
+  def getHmdaValidationErrorStateToProtobuf(cmd: GetHmdaValidationErrorState,
+                                            actorRefResolver: ActorRefResolver)
+    : GetHmdaValidationErrorStateMessage = {
+    GetHmdaValidationErrorStateMessage(
+      submissionIdToProtobuf(cmd.submissionId),
+      actorRefResolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def getHmdaValidationErrorStateFromProtobuf(
+      msg: GetHmdaValidationErrorStateMessage,
+      actorRefResolver: ActorRefResolver): GetHmdaValidationErrorState = {
+    GetHmdaValidationErrorState(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      actorRefResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
+  def completeSyntacticalValidityToProtobuf(
+      cmd: CompleteSyntacticalValidity): CompleteSyntacticalValidityMessage = {
+    CompleteSyntacticalValidityMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def completeSyntacticalValidityFromProtobuf(
+      msg: CompleteSyntacticalValidityMessage): CompleteSyntacticalValidity = {
+    CompleteSyntacticalValidity(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
+  def startQualityToProtobuf(cmd: StartQuality): StartQualityMessage = {
+    StartQualityMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def startQualituFromProtobuf(msg: StartQualityMessage): StartQuality = {
+    StartQuality(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
+  def completeQualityToProtobuf(
+      cmd: CompleteQuality): CompleteQualityMessage = {
+    CompleteQualityMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def completeQualityFromProtobuf(
+      msg: CompleteQualityMessage): CompleteQuality = {
+    CompleteQuality(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
+  def verifyQualityToProtobuf(
+      cmd: VerifyQuality,
+      refResolver: ActorRefResolver): VerifyQualityMessage = {
+    VerifyQualityMessage(
+      submissionIdToProtobuf(cmd.submissionId),
+      cmd.verified,
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def verifyQualityFromProtobuf(
+      msg: VerifyQualityMessage,
+      refResolver: ActorRefResolver): VerifyQuality = {
+    VerifyQuality(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.verified,
+      refResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
+  def verifyMacroToProtobuf(
+      cmd: VerifyMacro,
+      refResolver: ActorRefResolver): VerifyMacroMessage = {
+    VerifyMacroMessage(
+      submissionIdToProtobuf(cmd.submissionId),
+      cmd.verified,
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def verifyMacroFromProtobuf(msg: VerifyMacroMessage,
+                              refResolver: ActorRefResolver): VerifyMacro = {
+    VerifyMacro(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.verified,
+      refResolver.resolveActorRef(msg.replyTo)
     )
   }
 

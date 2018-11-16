@@ -6,7 +6,11 @@ import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
 import akka.serialization.SerializerWithStringManifest
 import akka.actor.typed.scaladsl.adapter._
-import hmda.messages.submission.SubmissionProcessingCommands._
+import hmda.messages.submission.SubmissionProcessingCommands.{
+  CompleteSyntacticalValidity,
+  GetHmdaValidationErrorState,
+  _
+}
 import SubmissionProcessingCommandsProtobufConverter._
 import hmda.persistence.serialization.submission.processing.commands._
 
@@ -28,6 +32,22 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
   final val CompleteParsingManifest = classOf[CompleteParsing].getName
   final val CompleteParsingWithErrorsManifest =
     classOf[CompleteParsingWithErrors].getName
+  final val StartSyntacticalValidityManifest =
+    classOf[StartSyntacticalValidity].getName
+  final val PersistHmdaRowValidatedErrorManifest =
+    classOf[PersistHmdaRowValidatedError].getName
+  final val GetHmdaValidationErrorStateManifest =
+    classOf[GetHmdaValidationErrorState].getName
+  final val CompleteSyntacticalValidityManifest =
+    classOf[CompleteSyntacticalValidity].getName
+  final val StartQualityManifest =
+    classOf[StartQuality].getName
+  final val CompleteQualityManifest =
+    classOf[CompleteQuality].getName
+  final val VerifyQualityManifest =
+    classOf[VerifyQuality].getName
+  final val VerifyMacroManifest =
+    classOf[VerifyMacro].getName
 
   override def manifest(o: AnyRef): String = o.getClass.getName
 
@@ -49,6 +69,22 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
       completeParsingToProtobuf(cmd).toByteArray
     case cmd: CompleteParsingWithErrors =>
       completeParsingWithErrorsToProtobuf(cmd).toByteArray
+    case cmd: StartSyntacticalValidity =>
+      startSyntacticalValidityToProtobuf(cmd).toByteArray
+    case cmd: PersistHmdaRowValidatedError =>
+      persistHmdaRowValidatedErrorToProtobuf(cmd, resolver).toByteArray
+    case cmd: GetHmdaValidationErrorState =>
+      getHmdaValidationErrorStateToProtobuf(cmd, resolver).toByteArray
+    case cmd: CompleteSyntacticalValidity =>
+      completeSyntacticalValidityToProtobuf(cmd).toByteArray
+    case cmd: StartQuality =>
+      startQualityToProtobuf(cmd).toByteArray
+    case cmd: CompleteQuality =>
+      completeQualityToProtobuf(cmd).toByteArray
+    case cmd: VerifyQuality =>
+      verifyQualityToProtobuf(cmd, resolver).toByteArray
+    case cmd: VerifyMacro =>
+      verifyMacroToProtobuf(cmd, resolver).toByteArray
     case _ =>
       throw new IllegalArgumentException(
         s"Cannot serialize object of type [${o.getClass.getName}]")
@@ -78,6 +114,29 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
       case CompleteParsingWithErrorsManifest =>
         completeParsingWithErrorsFromProtobuf(
           CompleteParsingWithErrorsMessage.parseFrom(bytes))
+      case StartSyntacticalValidityManifest =>
+        startSyntacticalValidityFromProtobuf(
+          StartSyntacticalValidityMessage.parseFrom(bytes))
+      case PersistHmdaRowValidatedErrorManifest =>
+        persistHmdaRowValidatedErrorFromProtobuf(
+          PersistHmdaRowValidatedErrorMessage.parseFrom(bytes),
+          resolver)
+      case GetHmdaValidationErrorStateManifest =>
+        getHmdaValidationErrorStateFromProtobuf(
+          GetHmdaValidationErrorStateMessage.parseFrom(bytes),
+          resolver)
+      case CompleteSyntacticalValidityManifest =>
+        completeSyntacticalValidityFromProtobuf(
+          CompleteSyntacticalValidityMessage.parseFrom(bytes))
+      case StartQualityManifest =>
+        startQualituFromProtobuf(StartQualityMessage.parseFrom(bytes))
+      case CompleteQualityManifest =>
+        completeQualityFromProtobuf(CompleteQualityMessage.parseFrom(bytes))
+      case VerifyQualityManifest =>
+        verifyQualityFromProtobuf(VerifyQualityMessage.parseFrom(bytes),
+                                  resolver)
+      case VerifyMacroManifest =>
+        verifyMacroFromProtobuf(VerifyMacroMessage.parseFrom(bytes), resolver)
       case _ =>
         throw new NotSerializableException(
           s"Unimplemented deserialization of message with manifest [$manifest] in [${getClass.getName}]")

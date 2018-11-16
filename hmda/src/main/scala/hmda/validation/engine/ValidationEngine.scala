@@ -1,12 +1,7 @@
 package hmda.validation.engine
 
 import cats.data.Validated
-import hmda.model.validation.{
-  Quality,
-  Syntactical,
-  ValidationErrorType,
-  Validity
-}
+import hmda.model.validation._
 import hmda.validation.HmdaValidation
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
@@ -21,31 +16,44 @@ trait ValidationEngine[A] extends ValidationApi[A] {
 
   def qualityChecks: Vector[EditCheck[A]] = Vector.empty
 
-  def checkAll(a: A, id: String, ctx: ValidationContext): HmdaValidation[A] = {
+  def checkAll(
+      a: A,
+      id: String,
+      ctx: ValidationContext,
+      validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] = {
     val validations = Vector(
-      checkSyntactical(a, id, ctx),
-      checkValidity(a, id),
+      checkSyntactical(a, id, ctx, validationErrorEntity),
+      checkValidity(a, id, validationErrorEntity),
       checkQuality(a, id)
     )
 
     validations.par.reduceLeft(_ combine _)
   }
 
-  def checkSyntactical(a: A,
-                       id: String,
-                       ctx: ValidationContext): HmdaValidation[A] = {
+  def checkSyntactical(
+      a: A,
+      id: String,
+      ctx: ValidationContext,
+      validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] = {
     if (syntacticalChecks(ctx).isEmpty) {
       Validated.valid(a)
     } else {
-      runChecks(a, syntacticalChecks(ctx), Syntactical, id)
+      runChecks(a,
+                syntacticalChecks(ctx),
+                Syntactical,
+                validationErrorEntity,
+                id)
     }
   }
 
-  def checkValidity(a: A, id: String): HmdaValidation[A] = {
+  def checkValidity(
+      a: A,
+      id: String,
+      validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] = {
     if (validityChecks.isEmpty) {
       Validated.valid(a)
     } else {
-      runChecks(a, validityChecks, Validity, id)
+      runChecks(a, validityChecks, Validity, validationErrorEntity, id)
     }
   }
 
@@ -53,16 +61,19 @@ trait ValidationEngine[A] extends ValidationApi[A] {
     if (qualityChecks.isEmpty) {
       Validated.valid(a)
     } else {
-      runChecks(a, qualityChecks, Quality, id)
+      runChecks(a, qualityChecks, Quality, LarValidationError, id)
     }
   }
 
   private def runChecks(a: A,
                         checksToRun: Vector[EditCheck[A]],
                         validationErrorType: ValidationErrorType,
+                        validationErrorEntity: ValidationErrorEntity,
                         id: String): HmdaValidation[A] = {
     val checks =
-      checksToRun.par.map(check(_, a, id, validationErrorType)).toList
+      checksToRun.par
+        .map(check(_, a, id, validationErrorType, validationErrorEntity))
+        .toList
 
     checks.par.reduceLeft(_ combine _)
   }
