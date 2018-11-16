@@ -130,7 +130,8 @@ trait UploadHttpApi extends HmdaTimeDirectives {
       Framing.delimiter(ByteString("\n"), 2048, allowTruncation = true)
 
     fileUpload("file") {
-      case (metadata, byteSource) if metadata.fileName.toLowerCase.endsWith(".txt") =>
+      case (metadata, byteSource)
+          if metadata.fileName.toLowerCase.endsWith(".txt") =>
         val modified = submission.copy(status = Uploading)
         submissionManager ! UpdateSubmissionStatus(modified)
         val fUploaded = byteSource
@@ -142,7 +143,8 @@ trait UploadHttpApi extends HmdaTimeDirectives {
         onComplete(fUploaded) {
           case Success(_) =>
             val fileName = metadata.fileName
-            val modified = submission.copy(status = Uploaded, fileName = fileName)
+            val modified =
+              submission.copy(status = Uploaded, fileName = fileName)
             submissionManager ! UpdateSubmissionStatus(modified)
             complete(
               ToResponseMarshallable(
