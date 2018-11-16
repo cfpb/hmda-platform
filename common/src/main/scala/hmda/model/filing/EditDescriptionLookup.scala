@@ -5,8 +5,9 @@ import hmda.model.ResourceUtils._
 
 object EditDescriptionLookup {
 
-  case class EditDescription(editName: String, description: String, affectedFields: List[String])
-
+  case class EditDescription(editName: String,
+                             description: String,
+                             affectedFields: List[String])
 
   val config = ConfigFactory.load()
   val editDescriptionFileName =
@@ -26,12 +27,10 @@ object EditDescriptionLookup {
 
   }
 
-
   val editDescriptionMap: Map[String, String] =
     editDescriptionList.map(e => (e.editName, e.description)).toMap
 
   def lookupDescription(editName: String): String =
     editDescriptionMap.getOrElse(editName, "")
-
 
 }

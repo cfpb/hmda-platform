@@ -24,6 +24,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import io.circe.generic.auto._
+import hmda.model.filing.EditDescriptionLookup._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -87,9 +88,7 @@ trait EdtisHttpApi extends HmdaTimeDirectives {
   }
 
   private def toEditSummaryResponse(e: EditSummary): EditSummaryResponse = {
-    EditSummaryResponse(e.editName, description(e.editName))
+    EditSummaryResponse(e.editName, lookupDescription(e.editName))
   }
-
-  private def description(editName: String): String = ""
 
 }
