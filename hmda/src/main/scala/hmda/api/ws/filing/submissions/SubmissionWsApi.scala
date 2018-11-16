@@ -57,8 +57,6 @@ trait SubmissionWsApi {
       "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) {
       (lei, period, seqNr) =>
         val submissionId = SubmissionId(lei, period, seqNr)
-        val typedSystem = system.toTyped
-
         val persistenceId = s"${SubmissionPersistence.name}-$submissionId"
 
         val source =
