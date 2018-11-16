@@ -17,7 +17,8 @@ import akka.actor.typed.scaladsl.adapter._
 import hmda.api.http.filing.submissions.{
   ParseErrorHttpApi,
   SubmissionHttpApi,
-  UploadHttpApi
+  UploadHttpApi,
+  VerifyHttpApi
 }
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,7 +36,8 @@ class HmdaFilingApi
     with SubmissionHttpApi
     with UploadHttpApi
     with ParseErrorHttpApi
-    with InstitutionHttpApi {
+    with InstitutionHttpApi
+    with VerifyHttpApi {
   import HmdaFilingApi._
 
   val config = ConfigFactory.load()
@@ -53,7 +55,7 @@ class HmdaFilingApi
   override val port: Int = config.getInt("hmda.http.filingPort")
 
   override val paths
-    : Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes ~ institutionRoutes ~ parserErrorRoute
+    : Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes ~ institutionRoutes ~ parserErrorRoute ~ verifyRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,

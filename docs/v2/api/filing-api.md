@@ -365,3 +365,31 @@ Example response, with HTTP code 201:
   }
 }
 ```
+
+### Edits By Type
+
+`POST` - Provides verification for quality or macro edits
+
+_Specific to the `/institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/<quality|macro>` endpoint._
+
+Example payload, in `JSON` format:
+
+```json
+{
+  "verified": true
+}
+```
+
+Example response:
+
+```json
+{
+  "verified": true,
+  "status": {
+    "code": 14,
+    "message": "Your data is ready for submission.",
+    "description": "Your financial institution has certified that the data is correct, but it has not been submitted yet."
+  }
+}
+```
+
