@@ -50,7 +50,7 @@ trait SubmissionWsApi {
         val typedSystem = system.toTyped
 
         def source =
-          uploadConsumer(typedSystem, submissionId, uploadTopic)
+          uploadConsumer(typedSystem, submissionId, submissionTopic)
             .toMat(BroadcastHub.sink)(Keep.right)
             .run()
             .map(c => c.record.value())
