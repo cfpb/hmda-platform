@@ -1,0 +1,2 @@
+# Registers HmdaValidInstitutionsFormAction as a FormActionFactory
+gov.cfpb.keycloak.authenticator.hmda.HmdaValidInstitutionsFormAction
