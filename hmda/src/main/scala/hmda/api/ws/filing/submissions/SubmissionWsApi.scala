@@ -1,36 +1,40 @@
 package hmda.api.ws.filing.submissions
 
-import akka.NotUsed
-import akka.actor.ActorSystem
+import akka.{NotUsed, actor}
 import akka.event.LoggingAdapter
+import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.model.ws.TextMessage
 import akka.http.scaladsl.model.ws.Message
-import akka.stream.{ActorMaterializer, ThrottleMode}
+import akka.stream.ActorMaterializer
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
-import akka.stream.scaladsl.{Flow, Source}
+import akka.stream.scaladsl.{BroadcastHub, Flow, Keep, Source}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.filing.submission.SubmissionId
+import hmda.persistence.submission.HmdaProcessingUtils._
+import hmda.messages.pubsub.KafkaTopics._
 
 import scala.concurrent.duration._
 
 trait SubmissionWsApi {
 
-  implicit val system: ActorSystem
+  implicit val system: actor.ActorSystem
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
 
-  def producer(submissionId: SubmissionId): Source[String, NotUsed] =
-    Source(1 to 1000)
-      .throttle(1, 1.second, 1, ThrottleMode.Shaping)
-      .map(_.toString)
-
-  def wsHandler(submissionId: SubmissionId): Flow[Message, Message, NotUsed] =
+  def wsHandler(
+      source: Source[String, NotUsed]): Flow[Message, Message, NotUsed] =
     Flow[Message]
-      .mapConcat(_ => Nil)
-      .merge(producer(submissionId))
+      .mapConcat(_ => Nil) //ignore messages sent from client
+      .merge(source)
       .map(l => TextMessage(l.toString))
+      .keepAlive(30.seconds, () => TextMessage("keepalive"))
+
+  sealed trait WSSourceProtocol
+  case class WSMessage(msg: String) extends WSSourceProtocol
+  case object Complete extends WSSourceProtocol
+  case class Fail(ex: Exception) extends WSSourceProtocol
 
   //institutions/<lei>/filings/<period>/submissions/<seqNr>
   val submissionWsPath: Route = {
@@ -38,7 +42,15 @@ trait SubmissionWsApi {
       "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber) {
       (lei, period, seqNr) =>
         val submissionId = SubmissionId(lei, period, seqNr)
-        handleWebSocketMessages(wsHandler(submissionId))
+        val typedSystem = system.toTyped
+
+        def source =
+          uploadConsumer(typedSystem, submissionId, uploadTopic)
+            .toMat(BroadcastHub.sink)(Keep.right)
+            .run()
+            .map(c => c.record.value())
+
+        handleWebSocketMessages(wsHandler(source))
     }
   }
 
