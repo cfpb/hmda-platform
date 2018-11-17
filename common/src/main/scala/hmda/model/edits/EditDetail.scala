@@ -1,3 +1,3 @@
-package hmda.model.processing.edits
+package hmda.model.edits
 
 case class EditDetail(edit: String, rows: Seq[EditDetailRow])
