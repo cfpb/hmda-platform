@@ -24,6 +24,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
+import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
 import hmda.messages.filing.FilingCommands.CreateFiling
 import hmda.messages.filing.FilingEvents.{FilingCreated, FilingEvent}
 import hmda.persistence.institution.InstitutionPersistence
@@ -34,6 +35,7 @@ import hmda.messages.institution.InstitutionEvents.{
 }
 import hmda.model.filing.{Filing, InProgress}
 import hmda.persistence.filing.FilingPersistence
+import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 class InstitutionHttpApiSpec
     extends AkkaCassandraPersistenceSpec
@@ -50,6 +52,15 @@ class InstitutionHttpApiSpec
   val ec: ExecutionContext = system.dispatcher
   override implicit val timeout: Timeout = Timeout(duration)
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
+
+  val oAuth2Authorization = OAuth2Authorization(
+    log,
+    new KeycloakTokenVerifier(
+      KeycloakDeploymentBuilder.build(
+        getClass.getResourceAsStream("/keycloak.json")
+      )
+    )
+  )
 
   val sampleInstitution = institutionGen
     .suchThat(_.LEI != "")
@@ -94,13 +105,13 @@ class InstitutionHttpApiSpec
 
   "Institutions" must {
     "return NotFound when institution does not exist" in {
-      Get(badUrl) ~> institutionRoutes ~> check {
+      Get(badUrl) ~> institutionRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.NotFound
       }
     }
 
     "return Institution when found" in {
-      Get(url) ~> institutionRoutes ~> check {
+      Get(url) ~> institutionRoutes(oAuth2Authorization) ~> check {
         val details = responseAs[InstitutionDetail]
         details.filings.head.lei mustBe sampleInstitution.LEI
       }

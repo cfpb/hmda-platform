@@ -37,6 +37,7 @@ import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.codec.ErrorResponseCodec._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.model.ErrorResponse
+import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.submission._
 import hmda.persistence.submission.{SubmissionManager, SubmissionPersistence}
@@ -62,59 +63,61 @@ trait UploadHttpApi extends HmdaTimeDirectives {
   val config: Config
 
   // institutions/<lei>/filings/<period>/submissions/<seqNr>
-  val uploadHmdaFileRoute =
-    path(Segment / "filings" / Segment / "submissions" / IntNumber) {
-      (lei, period, seqNr) =>
-        timedPost { uri =>
-          val submissionId = SubmissionId(lei, period, seqNr)
-          val uploadTimestamp = Instant.now.toEpochMilli
+  def uploadHmdaFileRoute(oAuth2Authorization: OAuth2Authorization) =
+    oAuth2Authorization.authorizeToken { _ =>
+      path(Segment / "filings" / Segment / "submissions" / IntNumber) {
+        (lei, period, seqNr) =>
+          timedPost { uri =>
+            val submissionId = SubmissionId(lei, period, seqNr)
+            val uploadTimestamp = Instant.now.toEpochMilli
 
-          val submissionManager =
-            sharding.entityRefFor(
-              SubmissionManager.typeKey,
-              s"${SubmissionManager.name}-${submissionId.toString}")
+            val submissionManager =
+              sharding.entityRefFor(
+                SubmissionManager.typeKey,
+                s"${SubmissionManager.name}-${submissionId.toString}")
 
-          val submissionPersistence =
-            sharding.entityRefFor(
-              SubmissionPersistence.typeKey,
-              s"${SubmissionPersistence.name}-${submissionId.toString}")
+            val submissionPersistence =
+              sharding.entityRefFor(
+                SubmissionPersistence.typeKey,
+                s"${SubmissionPersistence.name}-${submissionId.toString}")
 
-          val fSubmission
-            : Future[Option[Submission]] = submissionPersistence ? (ref =>
-            GetSubmission(ref))
+            val fSubmission
+              : Future[Option[Submission]] = submissionPersistence ? (ref =>
+              GetSubmission(ref))
 
-          val fCheckSubmission = for {
-            s <- fSubmission.mapTo[Option[Submission]]
-          } yield s
+            val fCheckSubmission = for {
+              s <- fSubmission.mapTo[Option[Submission]]
+            } yield s
 
-          onComplete(fCheckSubmission) {
-            case Success(result) =>
-              result match {
-                case Some(submission) =>
-                  if (submission.status == Created) {
-                    uploadFile(submissionManager,
-                               uploadTopic,
-                               uploadTimestamp,
-                               submission,
-                               uri)
-                  } else {
+            onComplete(fCheckSubmission) {
+              case Success(result) =>
+                result match {
+                  case Some(submission) =>
+                    if (submission.status == Created) {
+                      uploadFile(submissionManager,
+                                 uploadTopic,
+                                 uploadTimestamp,
+                                 submission,
+                                 uri)
+                    } else {
+                      submissionNotAvailable(submissionId, uri)
+                    }
+                  case None =>
                     submissionNotAvailable(submissionId, uri)
-                  }
-                case None =>
-                  submissionNotAvailable(submissionId, uri)
-              }
-            case Failure(error) =>
-              failedResponse(StatusCodes.InternalServerError, uri, error)
+                }
+              case Failure(error) =>
+                failedResponse(StatusCodes.InternalServerError, uri, error)
+            }
           }
-        }
+      }
     }
 
-  def uploadRoutes: Route = {
+  def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
           pathPrefix("institutions") {
-            uploadHmdaFileRoute
+            uploadHmdaFileRoute(oAuth2Authorization)
           }
         }
       }

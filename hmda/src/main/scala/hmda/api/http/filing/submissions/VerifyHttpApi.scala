@@ -31,6 +31,7 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
 }
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
+import hmda.auth.OAuth2Authorization
 import io.circe.generic.auto._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,84 +49,88 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
 
   //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/<quality|macro>
   private val editTypeRegex = new Regex("quality|macro")
-  val verifyPath: Route =
-    path(
-      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) {
-      (lei, period, seqNr, editType) =>
-        timedPost { uri =>
-          entity(as[EditsVerification]) { editsVerification =>
-            val submissionId = SubmissionId(lei, period, seqNr)
+  def verifyPath(oAuth2Authorization: OAuth2Authorization): Route =
+    oAuth2Authorization.authorizeToken { _ =>
+      path(
+        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) {
+        (lei, period, seqNr, editType) =>
+          timedPost { uri =>
+            entity(as[EditsVerification]) { editsVerification =>
+              val submissionId = SubmissionId(lei, period, seqNr)
 
-            val submissionPersistence =
-              sharding.entityRefFor(
-                SubmissionPersistence.typeKey,
-                s"${SubmissionPersistence.name}-${submissionId.toString}")
+              val submissionPersistence =
+                sharding.entityRefFor(
+                  SubmissionPersistence.typeKey,
+                  s"${SubmissionPersistence.name}-${submissionId.toString}")
 
-            val fSubmission
-              : Future[Option[Submission]] = submissionPersistence ? (ref =>
-              GetSubmission(ref))
+              val fSubmission
+                : Future[Option[Submission]] = submissionPersistence ? (ref =>
+                GetSubmission(ref))
 
-            val validationPersistence = sharding.entityRefFor(
-              HmdaValidationError.typeKey,
-              s"${HmdaValidationError.name}-$submissionId")
+              val validationPersistence = sharding.entityRefFor(
+                HmdaValidationError.typeKey,
+                s"${HmdaValidationError.name}-$submissionId")
 
-            val fVerified
-              : Future[SubmissionProcessingEvent] = validationPersistence ? {
-              ref =>
-                editType match {
-                  case "quality" =>
-                    VerifyQuality(submissionId, editsVerification.verified, ref)
-                  case "macro" =>
-                    VerifyMacro(submissionId, editsVerification.verified, ref)
-                }
-            }
+              val fVerified
+                : Future[SubmissionProcessingEvent] = validationPersistence ? {
+                ref =>
+                  editType match {
+                    case "quality" =>
+                      VerifyQuality(submissionId,
+                                    editsVerification.verified,
+                                    ref)
+                    case "macro" =>
+                      VerifyMacro(submissionId, editsVerification.verified, ref)
+                  }
+              }
 
-            val fVerification = for {
-              submission <- fSubmission
-              verified <- fVerified
-            } yield (submission, verified)
+              val fVerification = for {
+                submission <- fSubmission
+                verified <- fVerified
+              } yield (submission, verified)
 
-            onComplete(fVerification) {
-              case Success(result) =>
-                result match {
-                  case (None, _) =>
-                    submissionNotAvailable(submissionId, uri)
-                  case (Some(s), verifiedStatus) =>
-                    verifiedStatus match {
-                      case NotReadyToBeVerified(_) =>
-                        badRequest(
-                          submissionId,
-                          uri,
-                          s"Submission $submissionId is not ready to be verified")
+              onComplete(fVerification) {
+                case Success(result) =>
+                  result match {
+                    case (None, _) =>
+                      submissionNotAvailable(submissionId, uri)
+                    case (Some(s), verifiedStatus) =>
+                      verifiedStatus match {
+                        case NotReadyToBeVerified(_) =>
+                          badRequest(
+                            submissionId,
+                            uri,
+                            s"Submission $submissionId is not ready to be verified")
 
-                      case QualityVerified(_, verified) =>
-                        val response =
-                          EditsVerificationResponse(verified, s.status)
-                        complete(ToResponseMarshallable(response))
+                        case QualityVerified(_, verified) =>
+                          val response =
+                            EditsVerificationResponse(verified, s.status)
+                          complete(ToResponseMarshallable(response))
 
-                      case MacroVerified(_, verified) =>
-                        val response =
-                          EditsVerificationResponse(verified, s.status)
-                        complete(ToResponseMarshallable(response))
+                        case MacroVerified(_, verified) =>
+                          val response =
+                            EditsVerificationResponse(verified, s.status)
+                          complete(ToResponseMarshallable(response))
 
-                      case _ =>
-                        badRequest(submissionId,
-                                   uri,
-                                   "Incorrect response event")
-                    }
-                }
-              case Failure(e) =>
-                failedResponse(StatusCodes.InternalServerError, uri, e)
+                        case _ =>
+                          badRequest(submissionId,
+                                     uri,
+                                     "Incorrect response event")
+                      }
+                  }
+                case Failure(e) =>
+                  failedResponse(StatusCodes.InternalServerError, uri, e)
+              }
             }
           }
-        }
+      }
     }
 
-  def verifyRoutes: Route = {
+  def verifyRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          verifyPath
+          verifyPath(oAuth2Authorization)
         }
       }
     }

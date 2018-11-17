@@ -19,6 +19,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
 }
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.filing.submissions.{EditsSign, SignedResponse}
+import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.messages.submission.SubmissionProcessingCommands.SignSubmission
 import hmda.messages.submission.SubmissionProcessingEvents.{
@@ -43,81 +44,84 @@ trait SignHttpApi extends HmdaTimeDirectives {
   val sharding: ClusterSharding
 
   //institutions/<lei>/filings/<period>/submissions/<submissionId>/sign
-  val signPath: Route =
-    path(
-      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "sign") {
-      (lei, period, seqNr) =>
-        val submissionId = SubmissionId(lei, period, seqNr)
-        timedGet { uri =>
-          val submissionPersistence =
-            sharding.entityRefFor(
-              SubmissionPersistence.typeKey,
-              s"${SubmissionPersistence.name}-$submissionId")
+  def signPath(oAuth2Authorization: OAuth2Authorization): Route =
+    oAuth2Authorization.authorizeToken { _ =>
+      path(
+        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "sign") {
+        (lei, period, seqNr) =>
+          val submissionId = SubmissionId(lei, period, seqNr)
+          timedGet { uri =>
+            val submissionPersistence =
+              sharding.entityRefFor(
+                SubmissionPersistence.typeKey,
+                s"${SubmissionPersistence.name}-$submissionId")
 
-          val fSubmission
-            : Future[Option[Submission]] = submissionPersistence ? (ref =>
-            GetSubmission(ref))
+            val fSubmission
+              : Future[Option[Submission]] = submissionPersistence ? (ref =>
+              GetSubmission(ref))
 
-          val fDetails = for {
-            s <- fSubmission.map(s => s.getOrElse(Submission()))
-          } yield s
+            val fDetails = for {
+              s <- fSubmission.map(s => s.getOrElse(Submission()))
+            } yield s
 
-          onComplete(fDetails) {
-            case Success(submission) =>
-              if (submission.isEmpty) {
-                submissionNotAvailable(submissionId, uri)
-              } else {
-                val signed = SubmissionSigned(submissionId,
-                                              submission.end,
-                                              submission.status)
-                complete(ToResponseMarshallable(signed))
-              }
-
-            case Failure(e) =>
-              failedResponse(StatusCodes.InternalServerError, uri, e)
-          }
-        } ~
-          timedPost { uri =>
-            entity(as[EditsSign]) { editsSign =>
-              if (editsSign.signed) {
-                val submissionSignPersistence = sharding
-                  .entityRefFor(HmdaValidationError.typeKey,
-                                s"${HmdaValidationError.name}-$submissionId")
-
-                val fSigned
-                  : Future[SubmissionSignedEvent] = submissionSignPersistence ? (
-                    ref => SignSubmission(submissionId, ref))
-
-                onComplete(fSigned) {
-                  case Success(submissionSignedEvent) =>
-                    submissionSignedEvent match {
-                      case signed @ SubmissionSigned(_, _, _) =>
-                        val signedResponse = SignedResponse(signed.timestamp,
-                                                            signed.receipt,
-                                                            signed.status)
-                        complete(ToResponseMarshallable(signedResponse))
-                      case SubmissionNotReadyToBeSigned(id) =>
-                        badRequest(id,
-                                   uri,
-                                   s"Submission $id is not ready to be signed")
-                    }
-                  case Failure(e) =>
-                    failedResponse(StatusCodes.InternalServerError, uri, e)
+            onComplete(fDetails) {
+              case Success(submission) =>
+                if (submission.isEmpty) {
+                  submissionNotAvailable(submissionId, uri)
+                } else {
+                  val signed = SubmissionSigned(submissionId,
+                                                submission.end,
+                                                submission.status)
+                  complete(ToResponseMarshallable(signed))
                 }
-              } else {
-                badRequest(submissionId,
-                           uri,
-                           "Illegal argument: signed = false")
+
+              case Failure(e) =>
+                failedResponse(StatusCodes.InternalServerError, uri, e)
+            }
+          } ~
+            timedPost { uri =>
+              entity(as[EditsSign]) { editsSign =>
+                if (editsSign.signed) {
+                  val submissionSignPersistence = sharding
+                    .entityRefFor(HmdaValidationError.typeKey,
+                                  s"${HmdaValidationError.name}-$submissionId")
+
+                  val fSigned
+                    : Future[SubmissionSignedEvent] = submissionSignPersistence ? (
+                      ref => SignSubmission(submissionId, ref))
+
+                  onComplete(fSigned) {
+                    case Success(submissionSignedEvent) =>
+                      submissionSignedEvent match {
+                        case signed @ SubmissionSigned(_, _, _) =>
+                          val signedResponse = SignedResponse(signed.timestamp,
+                                                              signed.receipt,
+                                                              signed.status)
+                          complete(ToResponseMarshallable(signedResponse))
+                        case SubmissionNotReadyToBeSigned(id) =>
+                          badRequest(
+                            id,
+                            uri,
+                            s"Submission $id is not ready to be signed")
+                      }
+                    case Failure(e) =>
+                      failedResponse(StatusCodes.InternalServerError, uri, e)
+                  }
+                } else {
+                  badRequest(submissionId,
+                             uri,
+                             "Illegal argument: signed = false")
+                }
               }
             }
-          }
+      }
     }
 
-  def signRoutes: Route = {
+  def signRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          signPath
+          signPath(oAuth2Authorization)
         }
       }
 

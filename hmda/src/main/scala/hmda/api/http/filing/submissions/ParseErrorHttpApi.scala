@@ -16,6 +16,7 @@ import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}
 import hmda.api.http.codec.filing.submission.ParsingErrorSummaryCodec._
 import hmda.api.http.model.filing.submissions.ParsingErrorSummary
+import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionProcessingCommands.GetParsingErrors
 import hmda.model.processing.state.HmdaParserErrorState
 import hmda.util.http.FilingResponseUtils._
@@ -33,73 +34,75 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
   val sharding: ClusterSharding
 
   //institutions/<lei>/filings/<period>/submissions/<submissionId>/parseErrors
-  val parseErrorPath =
-    path(
-      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "parseErrors") {
-      (lei, period, seqNr) =>
-        timedGet { uri =>
-          parameters('page.as[Int] ? 1) { page =>
-            val submissionId = SubmissionId(lei, period, seqNr)
+  def parseErrorPath(oAuth2Authorization: OAuth2Authorization): Route =
+    oAuth2Authorization.authorizeToken { _ =>
+      path(
+        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "parseErrors") {
+        (lei, period, seqNr) =>
+          timedGet { uri =>
+            parameters('page.as[Int] ? 1) { page =>
+              val submissionId = SubmissionId(lei, period, seqNr)
 
-            val submissionPersistence =
-              sharding.entityRefFor(
-                SubmissionPersistence.typeKey,
-                s"${SubmissionPersistence.name}-${submissionId.toString}")
+              val submissionPersistence =
+                sharding.entityRefFor(
+                  SubmissionPersistence.typeKey,
+                  s"${SubmissionPersistence.name}-${submissionId.toString}")
 
-            val fSubmission
-              : Future[Option[Submission]] = submissionPersistence ? (ref =>
-              GetSubmission(ref))
+              val fSubmission
+                : Future[Option[Submission]] = submissionPersistence ? (ref =>
+                GetSubmission(ref))
 
-            val fCheckSubmission = for {
-              s <- fSubmission.mapTo[Option[Submission]]
-            } yield s
+              val fCheckSubmission = for {
+                s <- fSubmission.mapTo[Option[Submission]]
+              } yield s
 
-            onComplete(fCheckSubmission) {
-              case Success(check) =>
-                check match {
-                  case Some(submission) =>
-                    val hmdaParserError =
-                      sharding.entityRefFor(
-                        HmdaParserError.typeKey,
-                        s"${HmdaParserError.name}-${submissionId.toString}")
-                    val fErrors
-                      : Future[HmdaParserErrorState] = hmdaParserError ? (ref =>
-                      GetParsingErrors(page, ref))
-                    onComplete(fErrors) {
-                      case Success(state) =>
-                        val parsingErrorSummary = ParsingErrorSummary(
-                          state.transmittalSheetErrors.flatMap(_.errorMessages),
-                          state.larErrors,
-                          uri.path.toString,
-                          page,
-                          state.totalErrors,
-                          submission.status
-                        )
-                        complete(parsingErrorSummary)
-                      case Failure(error) =>
-                        failedResponse(StatusCodes.InternalServerError,
-                                       uri,
-                                       error)
-                    }
+              onComplete(fCheckSubmission) {
+                case Success(check) =>
+                  check match {
+                    case Some(submission) =>
+                      val hmdaParserError =
+                        sharding.entityRefFor(
+                          HmdaParserError.typeKey,
+                          s"${HmdaParserError.name}-${submissionId.toString}")
+                      val fErrors
+                        : Future[HmdaParserErrorState] = hmdaParserError ? (
+                          ref => GetParsingErrors(page, ref))
+                      onComplete(fErrors) {
+                        case Success(state) =>
+                          val parsingErrorSummary = ParsingErrorSummary(
+                            state.transmittalSheetErrors.flatMap(
+                              _.errorMessages),
+                            state.larErrors,
+                            uri.path.toString,
+                            page,
+                            state.totalErrors,
+                            submission.status
+                          )
+                          complete(parsingErrorSummary)
+                        case Failure(error) =>
+                          failedResponse(StatusCodes.InternalServerError,
+                                         uri,
+                                         error)
+                      }
 
-                  case None =>
-                    entityNotPresentResponse("submission",
-                                             submissionId.toString,
-                                             uri)
-                }
-              case Failure(error) =>
-                failedResponse(StatusCodes.InternalServerError, uri, error)
+                    case None =>
+                      entityNotPresentResponse("submission",
+                                               submissionId.toString,
+                                               uri)
+                  }
+                case Failure(error) =>
+                  failedResponse(StatusCodes.InternalServerError, uri, error)
+              }
             }
           }
-        }
-
+      }
     }
 
-  def parserErrorRoute: Route = {
+  def parserErrorRoute(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          parseErrorPath
+          parseErrorPath(oAuth2Authorization)
         }
       }
     }

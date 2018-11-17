@@ -22,6 +22,7 @@ import io.circe.generic.auto._
 import hmda.api.http.codec.filing.FilingStatusCodec._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.codec.ErrorResponseCodec._
+import hmda.auth.OAuth2Authorization
 import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.model.institution.Institution
@@ -41,88 +42,91 @@ trait FilingHttpApi extends HmdaTimeDirectives {
   val sharding: ClusterSharding
 
   //institutions/<lei>/filings/<period>
-  val filingReadPath =
-    path("institutions" / Segment / "filings" / Segment) { (lei, period) =>
-      val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.typeKey,
-                              s"${InstitutionPersistence.name}-$lei")
+  def filingReadPath(oAuth2Authorization: OAuth2Authorization) =
+    oAuth2Authorization.authorizeToken { _ =>
+      path("institutions" / Segment / "filings" / Segment) { (lei, period) =>
+        val institutionPersistence =
+          sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                s"${InstitutionPersistence.name}-$lei")
 
-      val filingPersistence =
-        sharding.entityRefFor(FilingPersistence.typeKey,
-                              s"${FilingPersistence.name}-$lei-$period")
+        val filingPersistence =
+          sharding.entityRefFor(FilingPersistence.typeKey,
+                                s"${FilingPersistence.name}-$lei-$period")
 
-      val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
-          ref => GetInstitution(ref)
-      )
+        val fInstitution
+          : Future[Option[Institution]] = institutionPersistence ? (
+            ref => GetInstitution(ref)
+        )
 
-      val fDetails: Future[Option[FilingDetails]] = filingPersistence ? (ref =>
-        GetFilingDetails(ref))
+        val fDetails: Future[Option[FilingDetails]] = filingPersistence ? (
+            ref => GetFilingDetails(ref))
 
-      val filingDetailsF = for {
-        i <- fInstitution
-        d <- fDetails
-      } yield (i, d)
+        val filingDetailsF = for {
+          i <- fInstitution
+          d <- fDetails
+        } yield (i, d)
 
-      timedPost { uri =>
-        onComplete(filingDetailsF) {
-          case Success((None, _)) =>
-            entityNotPresentResponse("institution", lei, uri)
-          case Success((Some(_), Some(_))) =>
-            val errorResponse =
-              ErrorResponse(400,
-                            s"Filing $lei-$period already exists",
-                            uri.path)
-            complete(
-              ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
-          case Success((Some(_), None)) =>
-            val now = Instant.now().toEpochMilli
-            val filing = Filing(
-              period,
-              lei,
-              InProgress,
-              true,
-              now,
-              0L
-            )
-            val fFiling: Future[FilingCreated] = filingPersistence ? (ref =>
-              CreateFiling(filing, ref))
-            onComplete(fFiling) {
-              case Success(created) =>
-                val filingDetails = FilingDetails(created.filing, Nil)
-                complete(
-                  ToResponseMarshallable(StatusCodes.Created -> filingDetails))
-              case Failure(error) =>
-                failedResponse(StatusCodes.InternalServerError, uri, error)
-            }
-          case Failure(error) =>
-            failedResponse(StatusCodes.InternalServerError, uri, error)
-        }
-      } ~
-        timedGet { uri =>
+        timedPost { uri =>
           onComplete(filingDetailsF) {
-            case Success((Some(_), Some(filingDetails))) =>
-              complete(ToResponseMarshallable(filingDetails))
             case Success((None, _)) =>
               entityNotPresentResponse("institution", lei, uri)
-            case Success((Some(i), None)) =>
-              val errorResponse = ErrorResponse(
-                404,
-                s"Filing for institution: ${i.LEI} and period: $period does not exist",
-                uri.path)
+            case Success((Some(_), Some(_))) =>
+              val errorResponse =
+                ErrorResponse(400,
+                              s"Filing $lei-$period already exists",
+                              uri.path)
               complete(
-                ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
+                ToResponseMarshallable(StatusCodes.BadRequest -> errorResponse))
+            case Success((Some(_), None)) =>
+              val now = Instant.now().toEpochMilli
+              val filing = Filing(
+                period,
+                lei,
+                InProgress,
+                true,
+                now,
+                0L
               )
+              val fFiling: Future[FilingCreated] = filingPersistence ? (ref =>
+                CreateFiling(filing, ref))
+              onComplete(fFiling) {
+                case Success(created) =>
+                  val filingDetails = FilingDetails(created.filing, Nil)
+                  complete(ToResponseMarshallable(
+                    StatusCodes.Created -> filingDetails))
+                case Failure(error) =>
+                  failedResponse(StatusCodes.InternalServerError, uri, error)
+              }
             case Failure(error) =>
               failedResponse(StatusCodes.InternalServerError, uri, error)
           }
-        }
+        } ~
+          timedGet { uri =>
+            onComplete(filingDetailsF) {
+              case Success((Some(_), Some(filingDetails))) =>
+                complete(ToResponseMarshallable(filingDetails))
+              case Success((None, _)) =>
+                entityNotPresentResponse("institution", lei, uri)
+              case Success((Some(i), None)) =>
+                val errorResponse = ErrorResponse(
+                  404,
+                  s"Filing for institution: ${i.LEI} and period: $period does not exist",
+                  uri.path)
+                complete(
+                  ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
+                )
+              case Failure(error) =>
+                failedResponse(StatusCodes.InternalServerError, uri, error)
+            }
+          }
+      }
     }
 
-  def filingRoutes: Route = {
+  def filingRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          filingReadPath
+          filingReadPath(oAuth2Authorization)
         }
       }
     }
