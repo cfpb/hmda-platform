@@ -7,7 +7,7 @@ import hmda.persistence.serialization.edit.details.{
   FieldDetailsMessage
 }
 
-class EditDetailsProtobufConverter {
+object EditDetailsProtobufConverter {
 
   def editDetailsToProtobuf(cmd: EditDetails): EditDetailsMessage = {
     EditDetailsMessage(

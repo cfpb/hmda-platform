@@ -15,7 +15,8 @@ import hmda.messages.submission.EditDetailPersistenceCommands.{
 }
 import hmda.messages.submission.EditDetailPersistenceEvents.{
   EditDetailsAdded,
-  EditDetailsPersistenceEvent
+  EditDetailsPersistenceEvent,
+  EditDetailsRowCounted
 }
 
 object EditDetailsPersistence
@@ -55,7 +56,8 @@ object EditDetailsPersistence
         }
 
       case GetEditRowCount(editName, replyTo) =>
-        replyTo ! state.totalErrorMap.getOrElse(editName, 0)
+        replyTo ! EditDetailsRowCounted(
+          state.totalErrorMap.getOrElse(editName, 0))
         Effect.none
     }
   }

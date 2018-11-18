@@ -7,4 +7,7 @@ object EditDetailPersistenceEvents {
 
   case class EditDetailsAdded(editDetails: EditDetails)
       extends EditDetailsPersistenceEvent
+
+  case class EditDetailsRowCounted(count: Int)
+      extends EditDetailsPersistenceEvent
 }

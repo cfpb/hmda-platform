@@ -1,7 +1,10 @@
 package hmda.messages.submission
 
 import akka.actor.typed.ActorRef
-import hmda.messages.submission.EditDetailPersistenceEvents.EditDetailsPersistenceEvent
+import hmda.messages.submission.EditDetailPersistenceEvents.{
+  EditDetailsPersistenceEvent,
+  EditDetailsRowCounted
+}
 import hmda.model.edits.EditDetails
 import hmda.model.filing.submission.SubmissionId
 
@@ -16,7 +19,8 @@ object EditDetailPersistenceCommands {
       replyTo: Option[ActorRef[EditDetailsPersistenceEvent]])
       extends EditDetailsPersistenceCommand
 
-  case class GetEditRowCount(editName: String, replyTo: ActorRef[Int])
+  case class GetEditRowCount(editName: String,
+                             replyTo: ActorRef[EditDetailsRowCounted])
       extends EditDetailsPersistenceCommand
 
   case class GetEditDetails(submissionId: SubmissionId,
