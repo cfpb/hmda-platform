@@ -1,13 +1,12 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.{ActorContext, Logger}
+import akka.actor.typed.{ActorSystem, Logger}
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.kafka.ConsumerMessage.CommittableMessage
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.kafka.scaladsl.Consumer
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
-import hmda.messages.pubsub.KafkaTopics.uploadTopic
 import hmda.messages.submission.SubmissionCommands.{
   GetSubmission,
   ModifySubmission,
@@ -24,11 +23,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaProcessingUtils {
 
-  def uploadConsumer(ctx: ActorContext[_], submissionId: SubmissionId)
+  def uploadConsumer(system: ActorSystem[_],
+                     submissionId: SubmissionId,
+                     topic: String)
     : Source[CommittableMessage[String, String], Consumer.Control] = {
 
     val kafkaConfig =
-      ctx.asScala.system.settings.config.getConfig("akka.kafka.consumer")
+      system.settings.config.getConfig("akka.kafka.consumer")
     val consumerSettings =
       ConsumerSettings(kafkaConfig,
                        new StringDeserializer,
@@ -38,7 +39,7 @@ object HmdaProcessingUtils {
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
-      .committableSource(consumerSettings, Subscriptions.topics(uploadTopic))
+      .committableSource(consumerSettings, Subscriptions.topics(topic))
       .filter(_.record.key() == submissionId.toString)
 
   }

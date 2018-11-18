@@ -29,6 +29,7 @@ import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
 import HmdaProcessingUtils._
+import hmda.messages.pubsub.KafkaTopics.uploadTopic
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -320,7 +321,7 @@ object HmdaValidationError
   private def uploadConsumerRawStr(
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId) = {
-    uploadConsumer(ctx, submissionId)
+    uploadConsumer(ctx.asScala.system, submissionId, uploadTopic)
       .map(_.record.value())
       .map(ByteString(_))
   }

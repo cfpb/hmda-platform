@@ -1,4 +1,4 @@
-Edit #|Edit Details|Affected Data Fields 
+Edit #|Edit Details|Affected Data Fields
 S300|The first row of your file must begin with a 1; and 2) Any subsequent rows must begin with a 2.|Record Identifier
 S301|The LEI in this row does not match the reported LEI in the transmittal sheet (the first row of your file). Please update your file accordingly.|Legal Entity Identifier (LEI)
 S302|The reported Calendar Year does not match the filing year indicated at the start of the filing. Please confirm the information below and update your file accordingly. 1) The correct file has been uploaded; and 2) The correct filing year was chosen at the start of the filing; and 3) The calendar year is listed correctly in the file.|Calendar Year

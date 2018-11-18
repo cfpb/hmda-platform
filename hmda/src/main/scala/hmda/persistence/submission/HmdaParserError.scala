@@ -26,6 +26,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submissions.PaginatedResource
 import hmda.model.processing.state.HmdaParserErrorState
 import HmdaProcessingUtils._
+import hmda.messages.pubsub.KafkaTopics.uploadTopic
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -73,7 +74,7 @@ object HmdaParserError
       case StartParsing(submissionId) =>
         log.info(s"Start parsing for ${submissionId.toString}")
 
-        uploadConsumer(ctx, submissionId)
+        uploadConsumer(ctx.asScala.system, submissionId, uploadTopic)
           .map(_.record.value())
           .map(ByteString(_))
           .via(parseHmdaFile)

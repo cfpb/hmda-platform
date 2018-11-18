@@ -41,6 +41,7 @@ object SubmissionPersistence
   override def commandHandler(ctx: ActorContext[SubmissionCommand])
     : CommandHandler[SubmissionCommand, SubmissionEvent, SubmissionState] = {
     (state, cmd) =>
+      implicit val system = ctx.asScala.system
       val log = ctx.asScala.log
       val sharding = ClusterSharding(ctx.asScala.system)
       cmd match {

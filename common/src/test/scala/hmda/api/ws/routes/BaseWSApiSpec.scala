@@ -1,4 +1,4 @@
-package hmda.api.http.routes
+package hmda.api.ws.routes
 
 import akka.event.{LoggingAdapter, NoLogging}
 import akka.http.scaladsl.model.headers.{HttpOrigin, Origin}

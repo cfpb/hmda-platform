@@ -5,12 +5,12 @@ import akka.management.AkkaManagement
 import akka.management.cluster.bootstrap.ClusterBootstrap
 import akka.stream.ActorMaterializer
 import com.typesafe.config.ConfigFactory
-import hmda.api.http.HmdaApi
 import hmda.persistence.HmdaPersistence
 import hmda.validation.HmdaValidation
 import org.slf4j.LoggerFactory
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.Cluster
+import hmda.api.HmdaApi
 import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}

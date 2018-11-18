@@ -1,7 +1,9 @@
-package hmda.api.http
+package hmda.api
 
 import akka.actor.Props
 import hmda.actor.HmdaActor
+import hmda.api.http.{HmdaAdminApi, HmdaFilingApi, HmdaPublicApi}
+import hmda.api.ws.HmdaWSApi
 
 object HmdaApi {
   final val name = "HmdaApi"
