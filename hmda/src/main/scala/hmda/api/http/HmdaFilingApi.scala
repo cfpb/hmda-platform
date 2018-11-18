@@ -33,7 +33,8 @@ class HmdaFilingApi
     with ParseErrorHttpApi
     with InstitutionHttpApi
     with VerifyHttpApi
-    with SignHttpApi {
+    with SignHttpApi
+    with EdtisHttpApi {
   import HmdaFilingApi._
 
   val config = ConfigFactory.load()
@@ -51,7 +52,7 @@ class HmdaFilingApi
   override val port: Int = config.getInt("hmda.http.filingPort")
 
   override val paths
-    : Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes ~ institutionRoutes ~ parserErrorRoute ~ verifyRoutes ~ signRoutes
+    : Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes ~ institutionRoutes ~ parserErrorRoute ~ verifyRoutes ~ signRoutes ~ editsRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
