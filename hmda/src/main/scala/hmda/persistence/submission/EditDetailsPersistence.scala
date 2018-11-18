@@ -5,50 +5,20 @@ import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import hmda.model.edits.EditDetail
 import hmda.persistence.HmdaTypedPersistentActor
-import hmda.model.filing.submission.SubmissionId
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-
-import scala.concurrent.Future
-
-trait EditDetailPersistenceCommand
-
-case class PersistEditDetail(
-    editDetail: EditDetail,
-    replyTo: Option[ActorRef[EditDetailPersistenceEvent]])
-    extends EditDetailPersistenceCommand
-
-case class GetEditRowCount(editName: String, replyTo: ActorRef[Int])
-    extends EditDetailPersistenceCommand
-
-case class GetEditDetails(submissionId: SubmissionId,
-                          editName: String,
-                          page: Int,
-                          replyTo: ActorRef[Future[Seq[EditDetail]]])
-    extends EditDetailPersistenceCommand
-
-trait EditDetailPersistenceEvent
-
-case class EditDetailAdded(editDetail: EditDetail)
-    extends EditDetailPersistenceEvent
-
-case class EditDetailPersistenceState(
-    totalErrorMap: Map[String, Int] = Map.empty) {
-  def update(evt: EditDetailPersistenceEvent): EditDetailPersistenceState = {
-    evt match {
-      case EditDetailAdded(editDetail) =>
-        val editName = editDetail.edit
-        val rowCount = editDetail.rows.size
-        val editCount = totalErrorMap.getOrElse(editName, 0) + rowCount
-        EditDetailPersistenceState(totalErrorMap.updated(editName, editCount))
-      case _ => this
-    }
-  }
+import hmda.messages.submission.EditDetailPersistenceCommands.{
+  EditDetailPersistenceCommand,
+  GetEditRowCount,
+  PersistEditDetail
+}
+import hmda.messages.submission.EditDetailPersistenceEvents.{
+  EditDetailAdded,
+  EditDetailPersistenceEvent
 }
 
-object EditDetailPersistence
+object EditDetailsPersistence
     extends HmdaTypedPersistentActor[EditDetailPersistenceCommand,
                                      EditDetailPersistenceEvent,
                                      EditDetailPersistenceState] {
