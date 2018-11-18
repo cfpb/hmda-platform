@@ -1,5 +1,7 @@
 package hmda.persistence.submission
 
+import java.time.Instant
+
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
@@ -169,16 +171,43 @@ object HmdaValidationError
           }
 
       case VerifyQuality(submissionId, verified, replyTo) =>
-        if (List(10, 11, 12, 13).contains(state.statusCode)) {
+        if (List(Quality.code, QualityErrors.code, Macro.code, MacroErrors.code)
+              .contains(state.statusCode)) {
           Effect.persist(QualityVerified(submissionId, verified)).thenRun { _ =>
             if (state.macroVerified) {
               val updatedStatus = Verified
               updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+              replyTo ! QualityVerified(submissionId, verified)
             }
-            replyTo ! QualityVerified(submissionId, verified)
           }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
+          Effect.none
+        }
+
+      case SignSubmission(submissionId, replyTo) =>
+        if (state.statusCode == Verified.code) {
+          val timestamp = Instant.now().toEpochMilli
+          val signed = SubmissionSigned(submissionId, timestamp, Signed)
+          if (state.qualityVerified && state.macroVerified) {
+            Effect.persist(signed).thenRun { _ =>
+              log.info(
+                s"Submission $submissionId sined at ${Instant.ofEpochMilli(timestamp)}")
+              updateSubmissionStatus(sharding, submissionId, Signed, log)
+              updateSubmissionReceipt(
+                sharding,
+                submissionId,
+                signed.timestamp,
+                s"${signed.submissionId}-${signed.timestamp}",
+                log)
+              replyTo ! signed
+            }
+          } else {
+            replyTo ! SubmissionNotReadyToBeSigned(submissionId)
+            Effect.none
+          }
+        } else {
+          replyTo ! SubmissionNotReadyToBeSigned(submissionId)
           Effect.none
         }
 
@@ -203,6 +232,8 @@ object HmdaValidationError
       state.updateStatusCode(statusCode)
     case (state, evt: QualityVerified) =>
       state.verifyQuality(evt)
+    case (state, SubmissionSigned(_, _, _)) =>
+      state.updateStatusCode(Signed.code)
     case (state, _) => state
   }
 

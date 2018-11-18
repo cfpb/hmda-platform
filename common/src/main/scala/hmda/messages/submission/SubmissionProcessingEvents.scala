@@ -1,7 +1,7 @@
 package hmda.messages.submission
 
 import hmda.messages.CommonMessages.Event
-import hmda.model.filing.submission.SubmissionId
+import hmda.model.filing.submission.{SubmissionId, SubmissionStatus}
 import hmda.model.validation.ValidationError
 
 object SubmissionProcessingEvents {
@@ -31,5 +31,17 @@ object SubmissionProcessingEvents {
 
   case class NotReadyToBeVerified(submissionId: SubmissionId)
       extends SubmissionProcessingEvent
+
+  sealed trait SubmissionSignedEvent extends SubmissionProcessingEvent
+
+  case class SubmissionSigned(submissionId: SubmissionId,
+                              timestamp: Long,
+                              status: SubmissionStatus)
+      extends SubmissionSignedEvent {
+    def receipt: String = s"$submissionId-$timestamp"
+  }
+
+  case class SubmissionNotReadyToBeSigned(submissionId: SubmissionId)
+      extends SubmissionSignedEvent
 
 }

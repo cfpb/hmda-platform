@@ -11,6 +11,7 @@ import hmda.persistence.serialization.submission.processing.events.{
 import hmda.persistence.serialization.submission.processing.events._
 import hmda.serialization.validation.ValidationProtobufConverter._
 import SubmissionProtobufConverter._
+import hmda.model.filing.submission.SubmissionStatus
 import hmda.persistence.serialization.submission.SubmissionIdMessage
 
 object SubmissionProcessingEventsProtobufConverter {
@@ -185,4 +186,38 @@ object SubmissionProcessingEventsProtobufConverter {
     )
   }
 
+  def submissionSignedToProtobuf(
+      evt: SubmissionSigned): SubmissionSignedMessage = {
+    SubmissionSignedMessage(
+      submissionIdToProtobuf(evt.submissionId),
+      evt.timestamp,
+      evt.status.code
+    )
+  }
+
+  def submissionSignedFromProtobuf(
+      msg: SubmissionSignedMessage): SubmissionSigned = {
+    SubmissionSigned(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.timestamp,
+      SubmissionStatus.valueOf(msg.statusCode)
+    )
+  }
+
+  def submissionNotReadyToBeSignedToProtobuf(cmd: SubmissionNotReadyToBeSigned)
+    : SubmissionNotReadyToBeSignedMessage = {
+    SubmissionNotReadyToBeSignedMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def submissionNotReadyToBeSignedFromProtobuf(
+      msg: SubmissionNotReadyToBeSignedMessage)
+    : SubmissionNotReadyToBeSigned = {
+    SubmissionNotReadyToBeSigned(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
 }
