@@ -16,7 +16,7 @@ import SubmissionProtobufConverter._
 import hmda.persistence.serialization.edit.details.EditDetailsMessage
 import hmda.persistence.serialization.submission.SubmissionIdMessage
 
-class EditDetailsCommandsProtobufConverter {
+object EditDetailsCommandsProtobufConverter {
 
   def persistEditDetailsToProtobuf(
       cmd: PersistEditDetails,
@@ -42,7 +42,7 @@ class EditDetailsCommandsProtobufConverter {
 
   }
 
-  def getEditRowCountMessageToProtobuf(
+  def getEditRowCountToProtobuf(
       cmd: GetEditRowCount,
       refResolver: ActorRefResolver): GetEditRowCountMessage = {
     GetEditRowCountMessage(
@@ -51,7 +51,7 @@ class EditDetailsCommandsProtobufConverter {
     )
   }
 
-  def getEditRowCountMessageFromProtobuf(
+  def getEditRowCountFromProtobuf(
       msg: GetEditRowCountMessage,
       refResolver: ActorRefResolver): GetEditRowCount = {
     GetEditRowCount(
