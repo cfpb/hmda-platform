@@ -32,7 +32,11 @@ import HmdaProcessingUtils._
 import hmda.messages.pubsub.KafkaTopics.uploadTopic
 import EditDetailsConverter._
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.model.edits.EditDetail
+import hmda.messages.submission.EditDetailPersistenceCommands.{
+  EditDetailsPersistenceCommand,
+  PersistEditDetails
+}
+import hmda.messages.submission.EditDetailPersistenceEvents.EditDetailsPersistenceEvent
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -164,8 +168,8 @@ object HmdaValidationError
                                         validationErrors,
                                         maybeReplyTo) =>
         val editDetailPersistence = sharding
-          .entityRefFor(EditDetailPersistence.typeKey,
-                        s"${EditDetailPersistence.name}-$submissionId")
+          .entityRefFor(EditDetailsPersistence.typeKey,
+                        s"${EditDetailsPersistence.name}-$submissionId")
 
         Effect
           .persist(HmdaRowValidatedError(rowNumber, validationErrors))
@@ -346,17 +350,17 @@ object HmdaValidationError
   }
 
   private def persistEditDetails(
-      editDetailPersistence: EntityRef[EditDetailPersistenceCommand],
+      editDetailPersistence: EntityRef[EditDetailsPersistenceCommand],
       hmdaRowValidatedError: HmdaRowValidatedError)(
       implicit ec: ExecutionContext)
-    : Future[Iterable[EditDetailPersistenceEvent]] = {
+    : Future[Iterable[EditDetailsPersistenceEvent]] = {
 
     val details = validatedRowToEditDetails(hmdaRowValidatedError)
 
     val fDetails = details.map { detail =>
       val fDetailEvent
-        : Future[EditDetailPersistenceEvent] = editDetailPersistence ? (ref =>
-        PersistEditDetail(detail, Some(ref)))
+        : Future[EditDetailsPersistenceEvent] = editDetailPersistence ? (ref =>
+        PersistEditDetails(detail, Some(ref)))
       fDetailEvent
     }
 

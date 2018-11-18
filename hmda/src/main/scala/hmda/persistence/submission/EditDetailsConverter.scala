@@ -1,13 +1,13 @@
 package hmda.persistence.submission
 
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
-import hmda.model.edits.{EditDetail, EditDetailRow, FieldDetail}
+import hmda.model.edits.{EditDetails, EditDetailsRow, FieldDetails}
 import hmda.model.validation.ValidationError
 
 object EditDetailsConverter {
 
   def validatedRowToEditDetails(
-      hmdaRowValidatedError: HmdaRowValidatedError): Iterable[EditDetail] = {
+      hmdaRowValidatedError: HmdaRowValidatedError): Iterable[EditDetails] = {
 
     val validationErrors = hmdaRowValidatedError.validationErrors
     val vEditsMap: Map[String, List[ValidationError]] =
@@ -17,12 +17,12 @@ object EditDetailsConverter {
 
   private def validationErrorsToEditDetail(
       editName: String,
-      errors: List[ValidationError]): EditDetail = {
+      errors: List[ValidationError]): EditDetails = {
 
     val editDetailRows = errors
-      .map(e => EditDetailRow(e.uli, validationErrorToFieldDetails(e)))
+      .map(e => EditDetailsRow(e.uli, validationErrorToFieldDetails(e)))
 
-    EditDetail(
+    EditDetails(
       editName,
       editDetailRows
     )
@@ -30,9 +30,9 @@ object EditDetailsConverter {
 
   //TODO: perform mapping Validation Error --> Field Details (name, value)
   private def validationErrorToFieldDetails(
-      validationError: ValidationError): Seq[FieldDetail] =
+      validationError: ValidationError): Seq[FieldDetails] =
     Seq(
-      FieldDetail("name", 1)
+      FieldDetails("name", 1)
     )
 
 }

@@ -26,7 +26,7 @@ object HmdaPersistence {
       SubmissionManager.startShardRegion(sharding)
       HmdaParserError.startShardRegion(sharding)
       HmdaValidationError.startShardRegion(sharding)
-      EditDetailPersistence.startShardRegion(sharding)
+      EditDetailsPersistence.startShardRegion(sharding)
 
       Behaviors
         .receive[HmdaPersistenceCommand] {
