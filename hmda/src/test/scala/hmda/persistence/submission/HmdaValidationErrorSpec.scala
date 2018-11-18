@@ -20,6 +20,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   SubmissionManager.startShardRegion(sharding)
   SubmissionPersistence.startShardRegion(sharding)
   HmdaValidationError.startShardRegion(sharding)
+  EditDetailPersistence.startShardRegion(sharding)
 
   val submissionId = SubmissionId("12345", "2018", 1)
 
@@ -42,7 +43,8 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
         ValidityValidationError("", "V600", LarValidationError),
         QualityValidationError("12345XXX", "Q601")
       )
-      hmdaValidationError ! PersistHmdaRowValidatedError(1,
+      hmdaValidationError ! PersistHmdaRowValidatedError(submissionId,
+                                                         1,
                                                          List(tsError),
                                                          Some(errorsProbe.ref))
       errorsProbe.expectMessage(HmdaRowValidatedError(1, List(tsError)))
@@ -51,6 +53,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
         val index = errorWithIndex._1
         val error = errorWithIndex._2
         hmdaValidationError ! PersistHmdaRowValidatedError(
+          submissionId,
           index,
           List(error),
           Some(errorsProbe.ref))

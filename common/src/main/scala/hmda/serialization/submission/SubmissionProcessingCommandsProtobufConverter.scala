@@ -150,6 +150,7 @@ object SubmissionProcessingCommandsProtobufConverter {
       cmd: PersistHmdaRowValidatedError,
       refResolver: ActorRefResolver): PersistHmdaRowValidatedErrorMessage = {
     PersistHmdaRowValidatedErrorMessage(
+      submissionIdToProtobuf(cmd.submissionId),
       cmd.rowNumber,
       cmd.validationErrors.map(error => validationErrorToProtobuf(error)),
       cmd.replyTo match {
@@ -163,6 +164,8 @@ object SubmissionProcessingCommandsProtobufConverter {
       msg: PersistHmdaRowValidatedErrorMessage,
       refResolver: ActorRefResolver): PersistHmdaRowValidatedError = {
     PersistHmdaRowValidatedError(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
       msg.rowNumber,
       msg.validationErrors
         .map(error => validationErrorFromProtobuf(error))

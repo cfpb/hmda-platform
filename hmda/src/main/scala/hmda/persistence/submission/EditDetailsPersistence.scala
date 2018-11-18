@@ -7,20 +7,20 @@ import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import hmda.model.edits.EditDetail
 import hmda.persistence.HmdaTypedPersistentActor
-import akka.actor
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.filing.submissions.PaginatedResource
-import akka.actor.typed.scaladsl.adapter._
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
-import hmda.query.HmdaQuery._
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 
 import scala.concurrent.Future
 
 trait EditDetailPersistenceCommand
 
-case class PersistEditDetail(editDetail: EditDetail,
-                             replyTo: ActorRef[EditDetailPersistenceEvent])
+case class PersistEditDetail(
+    editDetail: EditDetail,
+    replyTo: Option[ActorRef[EditDetailPersistenceEvent]])
+    extends EditDetailPersistenceCommand
+
+case class GetEditRowCount(editName: String, replyTo: ActorRef[Int])
     extends EditDetailPersistenceCommand
 
 case class GetEditDetails(submissionId: SubmissionId,
@@ -35,7 +35,18 @@ case class EditDetailAdded(editDetail: EditDetail)
     extends EditDetailPersistenceEvent
 
 case class EditDetailPersistenceState(
-    totalErrorMap: Map[String, Int] = Map.empty)
+    totalErrorMap: Map[String, Int] = Map.empty) {
+  def update(evt: EditDetailPersistenceEvent): EditDetailPersistenceState = {
+    evt match {
+      case EditDetailAdded(editDetail) =>
+        val editName = editDetail.edit
+        val rowCount = editDetail.rows.size
+        val editCount = totalErrorMap.getOrElse(editName, 0) + rowCount
+        EditDetailPersistenceState(totalErrorMap.updated(editName, editCount))
+      case _ => this
+    }
+  }
+}
 
 object EditDetailPersistence
     extends HmdaTypedPersistentActor[EditDetailPersistenceCommand,
@@ -62,30 +73,19 @@ object EditDetailPersistence
                      EditDetailPersistenceState] = { (state, cmd) =>
     val log = ctx.asScala.log
     cmd match {
-      case PersistEditDetail(editDetail, replyTo) =>
+      case PersistEditDetail(editDetail, maybeReplyTo) =>
         val evt = EditDetailAdded(editDetail)
         Effect.persist(evt).thenRun { _ =>
-          log.debug(s"Persisted: $evt")
-          replyTo ! evt
+          log.info(s"Persisted: $evt")
+          maybeReplyTo match {
+            case Some(replyTo) =>
+              replyTo ! evt
+            case None => //Do nothing
+          }
         }
 
-      //TODO: this won't work, would require serializing a Future with protobuf. Execute stream in the web layer instead
-      case GetEditDetails(submissionId, editName, page, replyTo) =>
-        implicit val untypedSystem: actor.ActorSystem =
-          ctx.asScala.system.toUntyped
-        implicit val materializer: ActorMaterializer = ActorMaterializer()
-        val totalRowCount = state.totalErrorMap.getOrElse(editName, 0)
-        val p = PaginatedResource(totalRowCount)(page)
-        val persistenceId = s"${EditDetailPersistence.name}-$submissionId"
-        val editDetailSource = eventEnvelopeByPersistenceId(persistenceId)
-          .drop(p.fromIndex)
-          .take(p.toIndex)
-          .map(envelope =>
-            envelope.event.asInstanceOf[EditDetailPersistenceEvent])
-          .collect {
-            case EditDetailAdded(editDetail) => editDetail
-          }
-        replyTo ! editDetailSource.runWith(Sink.seq)
+      case GetEditRowCount(editName, replyTo) =>
+        replyTo ! state.totalErrorMap.getOrElse(editName, 0)
         Effect.none
     }
   }
@@ -93,9 +93,13 @@ object EditDetailPersistence
   override def eventHandler
     : (EditDetailPersistenceState,
        EditDetailPersistenceEvent) => EditDetailPersistenceState = {
-    //TODO: update state
-    case (state, EditDetailAdded(e)) => state
-    case (state, _)                  => state
+    case (state, evt @ EditDetailAdded(_)) => state.update(evt)
+    case (state, _)                        => state
+  }
+
+  def startShardRegion(sharding: ClusterSharding)
+    : ActorRef[ShardingEnvelope[EditDetailPersistenceCommand]] = {
+    super.startShardRegion(sharding)
   }
 
 }

@@ -25,9 +25,10 @@ message PersistHmdaRowParsedErrorMessage {
 }
 
 message PersistHmdaRowValidatedErrorMessage {
-    int32 rowNumber = 1;
-    repeated ValidationErrorMessage validationErrors = 2;
-    string replyTo = 3;
+    SubmissionIdMessage submissionId = 1;
+    int32 rowNumber = 2;
+    repeated ValidationErrorMessage validationErrors = 3;
+    string replyTo = 4;
 }
 
 message GetParsedWithErrorCountMessage {

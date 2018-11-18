@@ -30,6 +30,9 @@ import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
 import HmdaProcessingUtils._
 import hmda.messages.pubsub.KafkaTopics.uploadTopic
+import EditDetailsConverter._
+import akka.cluster.sharding.typed.scaladsl.EntityRef
+import hmda.model.edits.EditDetail
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -156,9 +159,14 @@ object HmdaValidationError
             updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
           }
 
-      case PersistHmdaRowValidatedError(rowNumber,
+      case PersistHmdaRowValidatedError(submissionId,
+                                        rowNumber,
                                         validationErrors,
                                         maybeReplyTo) =>
+        val editDetailPersistence = sharding
+          .entityRefFor(EditDetailPersistence.typeKey,
+                        s"${EditDetailPersistence.name}-$submissionId")
+
         Effect
           .persist(HmdaRowValidatedError(rowNumber, validationErrors))
           .thenRun { _ =>
@@ -166,7 +174,16 @@ object HmdaValidationError
               s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
             maybeReplyTo match {
               case Some(replyTo) =>
-                replyTo ! HmdaRowValidatedError(rowNumber, validationErrors)
+                val hmdaRowValidatedError =
+                  HmdaRowValidatedError(rowNumber, validationErrors)
+
+                for {
+                  _ <- persistEditDetails(editDetailPersistence,
+                                          hmdaRowValidatedError)
+                } yield {
+                  replyTo ! hmdaRowValidatedError
+                }
+
               case None => //do nothing
             }
           }
@@ -252,12 +269,13 @@ object HmdaValidationError
       .zip(Source.fromIterator(() => Iterator.from(1)))
       .collect {
         case (Left(errors), rowNumber) =>
-          PersistHmdaRowValidatedError(rowNumber, errors, None)
+          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
       }
       .via(
         ActorFlow.ask(ctx.asScala.self)(
           (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
-            PersistHmdaRowValidatedError(el.rowNumber,
+            PersistHmdaRowValidatedError(submissionId,
+                                         el.rowNumber,
                                          el.validationErrors,
                                          Some(replyTo))
         ))
@@ -273,12 +291,13 @@ object HmdaValidationError
       .zip(Source.fromIterator(() => Iterator.from(2)))
       .collect {
         case (Left(errors), rowNumber) =>
-          PersistHmdaRowValidatedError(rowNumber, errors, None)
+          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
       }
       .via(
         ActorFlow.ask(ctx.asScala.self)(
           (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
-            PersistHmdaRowValidatedError(el.rowNumber,
+            PersistHmdaRowValidatedError(submissionId,
+                                         el.rowNumber,
                                          el.validationErrors,
                                          Some(replyTo))
         ))
@@ -324,6 +343,25 @@ object HmdaValidationError
     uploadConsumer(ctx.asScala.system, submissionId, uploadTopic)
       .map(_.record.value())
       .map(ByteString(_))
+  }
+
+  private def persistEditDetails(
+      editDetailPersistence: EntityRef[EditDetailPersistenceCommand],
+      hmdaRowValidatedError: HmdaRowValidatedError)(
+      implicit ec: ExecutionContext)
+    : Future[Iterable[EditDetailPersistenceEvent]] = {
+
+    val details = validatedRowToEditDetails(hmdaRowValidatedError)
+
+    val fDetails = details.map { detail =>
+      val fDetailEvent
+        : Future[EditDetailPersistenceEvent] = editDetailPersistence ? (ref =>
+        PersistEditDetail(detail, Some(ref)))
+      fDetailEvent
+    }
+
+    Future.sequence(fDetails)
+
   }
 
 }
