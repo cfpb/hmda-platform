@@ -2,7 +2,7 @@ package hmda.messages.submission
 
 import hmda.model.edits.EditDetails
 
-object EditDetailPersistenceEvents {
+object EditDetailsEvents {
   trait EditDetailsPersistenceEvent
 
   case class EditDetailsAdded(editDetails: EditDetails)

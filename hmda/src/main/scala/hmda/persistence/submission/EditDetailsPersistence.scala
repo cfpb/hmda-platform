@@ -8,12 +8,12 @@ import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import hmda.messages.submission.EditDetailPersistenceCommands.{
+import hmda.messages.submission.EditDetailsCommands.{
   EditDetailsPersistenceCommand,
   GetEditRowCount,
   PersistEditDetails
 }
-import hmda.messages.submission.EditDetailPersistenceEvents.{
+import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsAdded,
   EditDetailsPersistenceEvent,
   EditDetailsRowCounted

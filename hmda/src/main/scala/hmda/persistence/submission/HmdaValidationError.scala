@@ -32,11 +32,11 @@ import HmdaProcessingUtils._
 import hmda.messages.pubsub.KafkaTopics.uploadTopic
 import EditDetailsConverter._
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.messages.submission.EditDetailPersistenceCommands.{
+import hmda.messages.submission.EditDetailsCommands.{
   EditDetailsPersistenceCommand,
   PersistEditDetails
 }
-import hmda.messages.submission.EditDetailPersistenceEvents.EditDetailsPersistenceEvent
+import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._

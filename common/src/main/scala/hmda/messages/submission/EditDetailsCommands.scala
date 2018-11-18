@@ -1,7 +1,7 @@
 package hmda.messages.submission
 
 import akka.actor.typed.ActorRef
-import hmda.messages.submission.EditDetailPersistenceEvents.{
+import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsPersistenceEvent,
   EditDetailsRowCounted
 }
@@ -10,7 +10,7 @@ import hmda.model.filing.submission.SubmissionId
 
 import scala.concurrent.Future
 
-object EditDetailPersistenceCommands {
+object EditDetailsCommands {
 
   trait EditDetailsPersistenceCommand
 

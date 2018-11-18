@@ -20,7 +20,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   SubmissionManager.startShardRegion(sharding)
   SubmissionPersistence.startShardRegion(sharding)
   HmdaValidationError.startShardRegion(sharding)
-  EditDetailPersistence.startShardRegion(sharding)
+  EditDetailsPersistence.startShardRegion(sharding)
 
   val submissionId = SubmissionId("12345", "2018", 1)
 

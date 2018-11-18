@@ -1,6 +1,6 @@
 package hmda.persistence.submission
 
-import hmda.messages.submission.EditDetailPersistenceEvents.{
+import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsAdded,
   EditDetailsPersistenceEvent
 }
