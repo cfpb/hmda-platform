@@ -69,6 +69,7 @@ object EditDetailPersistence
           replyTo ! evt
         }
 
+      //TODO: this won't work, would require serializing a Future with protobuf. Execute stream in the web layer instead
       case GetEditDetails(submissionId, editName, page, replyTo) =>
         implicit val untypedSystem: actor.ActorSystem =
           ctx.asScala.system.toUntyped
