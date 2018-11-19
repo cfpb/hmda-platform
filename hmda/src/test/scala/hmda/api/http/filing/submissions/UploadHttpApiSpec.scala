@@ -41,6 +41,7 @@ import io.circe.generic.auto._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.codec.ErrorResponseCodec._
+import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
@@ -52,6 +53,7 @@ import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LarGenerators._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -70,6 +72,15 @@ class UploadHttpApiSpec
   override implicit val timeout: Timeout = Timeout(10.seconds)
   private implicit val routeTimeout = RouteTestTimeout(3.seconds)
   override val config: Config = ConfigFactory.load()
+
+  val oAuth2Authorization = OAuth2Authorization(
+    log,
+    new KeycloakTokenVerifier(
+      KeycloakDeploymentBuilder.build(
+        getClass.getResourceAsStream("/keycloak.json")
+      )
+    )
+  )
 
   val kafkaHosts = config.getString("kafka.hosts")
 
@@ -173,7 +184,7 @@ class UploadHttpApiSpec
 
   "Upload API" must {
     "upload HMDA File" in {
-      Post(url, hmdaFile) ~> uploadRoutes ~> check {
+      Post(url, hmdaFile) ~> uploadRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Accepted
         val submission = responseAs[Submission]
         submission.start must be < System.currentTimeMillis()
@@ -183,7 +194,7 @@ class UploadHttpApiSpec
     }
 
     "return Bad Request when submission doesn't exist" in {
-      Post(badUrl, hmdaFile) ~> uploadRoutes ~> check {
+      Post(badUrl, hmdaFile) ~> uploadRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.BadRequest
         val response = responseAs[ErrorResponse]
         response.path mustBe Path(badUrl)

@@ -15,6 +15,9 @@ import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
 import akka.actor.typed.scaladsl.adapter._
 import hmda.api.http.filing.submissions._
+import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
+import org.keycloak.adapters.KeycloakDeploymentBuilder
+import org.keycloak.representations.adapters.config.AdapterConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -45,14 +48,37 @@ class HmdaFilingApi
   val timeout: Timeout = Timeout(config.getInt("hmda.http.timeout").seconds)
   override val log = Logging(system, getClass)
 
+  val authUrl = config.getString("keycloak.auth.server.url")
+  val keycloakRealm = config.getString("keycloak.realm")
+  val apiClientId = config.getString("keycloak.client.id")
+
+  val adapterConfig = new AdapterConfig()
+  adapterConfig.setRealm(keycloakRealm)
+  adapterConfig.setAuthServerUrl(authUrl)
+  adapterConfig.setResource(apiClientId)
+  println(adapterConfig.getClientKeystore)
+  val keycloakDeployment = KeycloakDeploymentBuilder.build(adapterConfig)
+
+  val oAuth2Authorization = OAuth2Authorization(
+    log,
+    new KeycloakTokenVerifier(keycloakDeployment)
+  )
+
   val sharding = ClusterSharding(system.toTyped)
 
   override val name: String = filingApiName
   override val host: String = config.getString("hmda.http.filingHost")
   override val port: Int = config.getInt("hmda.http.filingPort")
 
-  override val paths
-    : Route = routes(s"$name") ~ filingRoutes ~ submissionRoutes ~ uploadRoutes ~ institutionRoutes ~ parserErrorRoute ~ verifyRoutes ~ signRoutes ~ editsRoutes
+  override val paths: Route = routes(s"$name") ~
+    filingRoutes(oAuth2Authorization) ~
+    submissionRoutes(oAuth2Authorization) ~
+    uploadRoutes(oAuth2Authorization) ~
+    institutionRoutes(oAuth2Authorization) ~
+    parserErrorRoute(oAuth2Authorization) ~
+    verifyRoutes(oAuth2Authorization) ~
+    signRoutes(oAuth2Authorization) ~
+    editsRoutes(oAuth2Authorization)
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,

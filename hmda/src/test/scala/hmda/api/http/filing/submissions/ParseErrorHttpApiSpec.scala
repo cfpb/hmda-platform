@@ -40,10 +40,12 @@ import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.{HmdaParserError, SubmissionPersistence}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.codec.filing.submission.ParsingErrorSummaryCodec._
+import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
   SubmissionProcessingEvent
 }
+import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -61,6 +63,15 @@ class ParseErrorHttpApiSpec
   override implicit val timeout: Timeout = Timeout(duration)
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
   val ec: ExecutionContext = system.dispatcher
+
+  val oAuth2Authorization = OAuth2Authorization(
+    log,
+    new KeycloakTokenVerifier(
+      KeycloakDeploymentBuilder.build(
+        getClass.getResourceAsStream("/keycloak.json")
+      )
+    )
+  )
 
   val period = "2018"
 
@@ -137,7 +148,7 @@ class ParseErrorHttpApiSpec
   "Parser HTTP API" must {
     "Return Bad Request when requesting parsing errors from submission that doesn't exist" in {
       val badUrl = "/institutions/XXX/filings/2019/submissions/1/parseErrors"
-      Get(badUrl) ~> parserErrorRoute ~> check {
+      Get(badUrl) ~> parserErrorRoute(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.BadRequest
       }
     }
@@ -145,7 +156,7 @@ class ParseErrorHttpApiSpec
       val firstPage =
         s"/institutions/${sampleInstitution.LEI}/filings/${sampleSubmission.id.period}/submissions/${sampleSubmission.id.sequenceNumber}/parseErrors"
 
-      Get(firstPage) ~> parserErrorRoute ~> check {
+      Get(firstPage) ~> parserErrorRoute(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.OK
         val result = responseAs[ParsingErrorSummary]
         result.total mustBe 100
@@ -157,7 +168,7 @@ class ParseErrorHttpApiSpec
       val secondPage =
         s"/institutions/${sampleInstitution.LEI}/filings/${sampleSubmission.id.period}/submissions/${sampleSubmission.id.sequenceNumber}/parseErrors?page=2"
 
-      Get(secondPage) ~> parserErrorRoute ~> check {
+      Get(secondPage) ~> parserErrorRoute(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.OK
         val result = responseAs[ParsingErrorSummary]
         result.total mustBe 100

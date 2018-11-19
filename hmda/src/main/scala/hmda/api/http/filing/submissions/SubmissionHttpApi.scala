@@ -23,6 +23,7 @@ import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.SubmissionPersistence
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
+import hmda.auth.OAuth2Authorization
 import io.circe.generic.auto._
 import hmda.util.http.FilingResponseUtils._
 
@@ -39,93 +40,98 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
   val sharding: ClusterSharding
 
   //institutions/<lei>/filings/<period>/submissions
-  val submissionCreatePath: Route =
-    path("institutions" / Segment / "filings" / Segment / "submissions") {
-      (lei, period) =>
-        timedPost { uri =>
-          val institutionPersistence =
-            sharding.entityRefFor(InstitutionPersistence.typeKey,
-                                  s"${InstitutionPersistence.name}-$lei")
+  def submissionCreatePath(oAuth2Authorization: OAuth2Authorization): Route =
+    oAuth2Authorization.authorizeToken { _ =>
+      path("institutions" / Segment / "filings" / Segment / "submissions") {
+        (lei, period) =>
+          timedPost { uri =>
+            val institutionPersistence =
+              sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                    s"${InstitutionPersistence.name}-$lei")
 
-          val fInstitution
-            : Future[Option[Institution]] = institutionPersistence ? (
-              ref => GetInstitution(ref)
-          )
+            val fInstitution
+              : Future[Option[Institution]] = institutionPersistence ? (
+                ref => GetInstitution(ref)
+            )
 
-          val filingPersistence =
-            sharding.entityRefFor(FilingPersistence.typeKey,
-                                  s"${FilingPersistence.name}-$lei-$period")
+            val filingPersistence =
+              sharding.entityRefFor(FilingPersistence.typeKey,
+                                    s"${FilingPersistence.name}-$lei-$period")
 
-          val filingF: Future[Option[Filing]] = filingPersistence ? (ref =>
-            GetFiling(ref))
+            val filingF: Future[Option[Filing]] = filingPersistence ? (ref =>
+              GetFiling(ref))
 
-          val latestSubmissionF
-            : Future[Option[Submission]] = filingPersistence ? (ref =>
-            GetLatestSubmission(ref))
+            val latestSubmissionF
+              : Future[Option[Submission]] = filingPersistence ? (ref =>
+              GetLatestSubmission(ref))
 
-          val fCheck = for {
-            i <- fInstitution
-            f <- filingF
-            l <- latestSubmissionF
-          } yield (i, f, l)
+            val fCheck = for {
+              i <- fInstitution
+              f <- filingF
+              l <- latestSubmissionF
+            } yield (i, f, l)
 
-          onComplete(fCheck) {
-            case Success(check) =>
-              check match {
-                case (None, _, _) =>
-                  entityNotPresentResponse("institution", lei, uri)
-                case (_, None, _) =>
-                  entityNotPresentResponse("filing", s"$lei-$period", uri)
-                case (_, _, maybeLatest) =>
-                  maybeLatest match {
-                    case None =>
-                      val submissionId = SubmissionId(lei, period, 1)
-                      createSubmission(uri, submissionId)
-                    case Some(submission) =>
-                      val submissionId =
-                        SubmissionId(lei,
-                                     period,
-                                     submission.id.sequenceNumber + 1)
-                      createSubmission(uri, submissionId)
-                  }
-              }
+            onComplete(fCheck) {
+              case Success(check) =>
+                check match {
+                  case (None, _, _) =>
+                    entityNotPresentResponse("institution", lei, uri)
+                  case (_, None, _) =>
+                    entityNotPresentResponse("filing", s"$lei-$period", uri)
+                  case (_, _, maybeLatest) =>
+                    maybeLatest match {
+                      case None =>
+                        val submissionId = SubmissionId(lei, period, 1)
+                        createSubmission(uri, submissionId)
+                      case Some(submission) =>
+                        val submissionId =
+                          SubmissionId(lei,
+                                       period,
+                                       submission.id.sequenceNumber + 1)
+                        createSubmission(uri, submissionId)
+                    }
+                }
 
-            case Failure(error) =>
-              failedResponse(StatusCodes.InternalServerError, uri, error)
+              case Failure(error) =>
+                failedResponse(StatusCodes.InternalServerError, uri, error)
+            }
           }
-        }
+      }
     }
 
   //institutions/<lei>/filings/<period>/submissions/latest
-  val submissionLatestPath: Route =
-    path(
-      "institutions" / Segment / "filings" / Segment / "submissions" / "latest") {
-      (lei, period) =>
-        timedGet { uri =>
-          val filingPersistence =
-            sharding.entityRefFor(FilingPersistence.typeKey,
-                                  s"${FilingPersistence.name}-$lei-$period")
+  def submissionLatestPath(oAuth2Authorization: OAuth2Authorization): Route =
+    oAuth2Authorization.authorizeToken { _ =>
+      path(
+        "institutions" / Segment / "filings" / Segment / "submissions" / "latest") {
+        (lei, period) =>
+          timedGet { uri =>
+            val filingPersistence =
+              sharding.entityRefFor(FilingPersistence.typeKey,
+                                    s"${FilingPersistence.name}-$lei-$period")
 
-          val fLatest: Future[Option[Submission]] = filingPersistence ? (ref =>
-            GetLatestSubmission(ref))
+            val fLatest: Future[Option[Submission]] = filingPersistence ? (
+                ref => GetLatestSubmission(ref))
 
-          onComplete(fLatest) {
-            case Success(maybeLatest) =>
-              maybeLatest match {
-                case Some(latest) => complete(ToResponseMarshallable(latest))
-                case None         => complete(HttpResponse(StatusCodes.NotFound))
-              }
-            case Failure(error) =>
-              failedResponse(StatusCodes.InternalServerError, uri, error)
+            onComplete(fLatest) {
+              case Success(maybeLatest) =>
+                maybeLatest match {
+                  case Some(latest) => complete(ToResponseMarshallable(latest))
+                  case None         => complete(HttpResponse(StatusCodes.NotFound))
+                }
+              case Failure(error) =>
+                failedResponse(StatusCodes.InternalServerError, uri, error)
+            }
           }
-        }
+      }
     }
 
-  def submissionRoutes: Route = {
+  def submissionRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          submissionCreatePath ~ submissionLatestPath
+          submissionCreatePath(oAuth2Authorization) ~ submissionLatestPath(
+            oAuth2Authorization)
         }
       }
     }

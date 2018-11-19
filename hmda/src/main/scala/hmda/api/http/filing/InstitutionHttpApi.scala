@@ -14,7 +14,6 @@ import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.util.http.FilingResponseUtils._
-
 import hmda.messages.institution.InstitutionCommands.GetInstitutionDetails
 import hmda.model.institution.InstitutionDetail
 import hmda.persistence.institution.InstitutionPersistence
@@ -25,6 +24,7 @@ import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
 import io.circe.generic.auto._
 import hmda.api.http.codec.ErrorResponseCodec._
+import hmda.auth.OAuth2Authorization
 
 trait InstitutionHttpApi extends HmdaTimeDirectives {
 
@@ -36,43 +36,46 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
   val sharding: ClusterSharding
 
   //institutions/<lei>
-  val institutionReadPath =
-    path("institutions" / Segment) { (lei) =>
-      val institutionPersistence =
-        sharding.entityRefFor(InstitutionPersistence.typeKey,
-                              s"${InstitutionPersistence.name}-$lei")
+  def institutionReadPath(oAuth2Authorization: OAuth2Authorization): Route =
+    oAuth2Authorization.authorizeToken { _ =>
+      path("institutions" / Segment) { (lei) =>
+        val institutionPersistence =
+          sharding.entityRefFor(InstitutionPersistence.typeKey,
+                                s"${InstitutionPersistence.name}-$lei")
 
-      val iDetails
-        : Future[Option[InstitutionDetail]] = institutionPersistence ? (ref =>
-        GetInstitutionDetails(ref))
+        val iDetails
+          : Future[Option[InstitutionDetail]] = institutionPersistence ? (ref =>
+          GetInstitutionDetails(ref))
 
-      val filingDetailsF = for {
-        i <- iDetails
-      } yield (i)
+        val filingDetailsF = for {
+          i <- iDetails
+        } yield (i)
 
-      timedGet { uri =>
-        onComplete(filingDetailsF) {
-          case Success((Some(institutionDetails))) =>
-            complete(ToResponseMarshallable(institutionDetails))
-          case Success(None) =>
-            val errorResponse =
-              ErrorResponse(404, s"Institution: $lei does not exist", uri.path)
-            complete(
-              ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
-            )
-          case Failure(error) =>
-            failedResponse(StatusCodes.InternalServerError, uri, error)
+        timedGet { uri =>
+          onComplete(filingDetailsF) {
+            case Success((Some(institutionDetails))) =>
+              complete(ToResponseMarshallable(institutionDetails))
+            case Success(None) =>
+              val errorResponse =
+                ErrorResponse(404,
+                              s"Institution: $lei does not exist",
+                              uri.path)
+              complete(
+                ToResponseMarshallable(StatusCodes.NotFound -> errorResponse)
+              )
+            case Failure(error) =>
+              failedResponse(StatusCodes.InternalServerError, uri, error)
+          }
+
         }
-
       }
-
     }
 
-  def institutionRoutes: Route = {
+  def institutionRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          institutionReadPath
+          institutionReadPath(oAuth2Authorization)
         }
       }
     }

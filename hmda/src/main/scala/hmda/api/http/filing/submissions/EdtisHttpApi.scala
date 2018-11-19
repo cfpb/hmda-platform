@@ -23,6 +23,7 @@ import hmda.util.http.FilingResponseUtils._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
+import hmda.auth.OAuth2Authorization
 import io.circe.generic.auto._
 import hmda.model.filing.EditDescriptionLookup._
 
@@ -39,49 +40,53 @@ trait EdtisHttpApi extends HmdaTimeDirectives {
   val sharding: ClusterSharding
 
   //institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits
-  val editsSummaryPath: Route =
-    path(
-      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits") {
-      (lei, period, seqNr) =>
-        timedGet { uri =>
-          val submissionId = SubmissionId(lei, period, seqNr)
-          val hmdaValidationError = sharding
-            .entityRefFor(HmdaValidationError.typeKey,
-                          s"${HmdaValidationError.name}-$submissionId")
+  def editsSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
+    oAuth2Authorization.authorizeToken { _ =>
+      path(
+        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits") {
+        (lei, period, seqNr) =>
+          timedGet { uri =>
+            val submissionId = SubmissionId(lei, period, seqNr)
+            val hmdaValidationError = sharding
+              .entityRefFor(HmdaValidationError.typeKey,
+                            s"${HmdaValidationError.name}-$submissionId")
 
-          val fEdits: Future[HmdaValidationErrorState] = hmdaValidationError ? (
-              ref => GetHmdaValidationErrorState(submissionId, ref))
+            val fEdits
+              : Future[HmdaValidationErrorState] = hmdaValidationError ? (ref =>
+              GetHmdaValidationErrorState(submissionId, ref))
 
-          onComplete(fEdits) {
-            case Success(edits) =>
-              val syntactical = SyntacticalEditSummaryResponse(
-                edits.syntactical.map(toEditSummaryResponse).toSeq)
-              val validity = ValidityEditSummaryResponse(
-                edits.validity.map(toEditSummaryResponse).toSeq)
-              val quality = QualityEditSummaryResponse(
-                edits.quality.map(toEditSummaryResponse).toSeq,
-                edits.qualityVerified)
-              val `macro` = MacroEditSummaryResponse(
-                edits.`macro`.map(toEditSummaryResponse).toSeq,
-                edits.macroVerified)
-              val editsSummaryResponse =
-                EditsSummaryResponse(syntactical,
-                                     validity,
-                                     quality,
-                                     `macro`,
-                                     SubmissionStatus.valueOf(edits.statusCode))
-              complete(ToResponseMarshallable(editsSummaryResponse))
-            case Failure(e) =>
-              failedResponse(StatusCodes.InternalServerError, uri, e)
+            onComplete(fEdits) {
+              case Success(edits) =>
+                val syntactical = SyntacticalEditSummaryResponse(
+                  edits.syntactical.map(toEditSummaryResponse).toSeq)
+                val validity = ValidityEditSummaryResponse(
+                  edits.validity.map(toEditSummaryResponse).toSeq)
+                val quality = QualityEditSummaryResponse(
+                  edits.quality.map(toEditSummaryResponse).toSeq,
+                  edits.qualityVerified)
+                val `macro` = MacroEditSummaryResponse(
+                  edits.`macro`.map(toEditSummaryResponse).toSeq,
+                  edits.macroVerified)
+                val editsSummaryResponse =
+                  EditsSummaryResponse(
+                    syntactical,
+                    validity,
+                    quality,
+                    `macro`,
+                    SubmissionStatus.valueOf(edits.statusCode))
+                complete(ToResponseMarshallable(editsSummaryResponse))
+              case Failure(e) =>
+                failedResponse(StatusCodes.InternalServerError, uri, e)
+            }
           }
-        }
+      }
     }
 
-  def editsRoutes: Route = {
+  def editsRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          editsSummaryPath
+          editsSummaryPath(oAuth2Authorization)
         }
       }
     }

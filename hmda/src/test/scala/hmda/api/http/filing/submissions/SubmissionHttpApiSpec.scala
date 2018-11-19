@@ -26,10 +26,12 @@ import hmda.model.filing.FilingGenerator._
 import hmda.model.filing.submission.{Submission, SubmissionId}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
+import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
 import io.circe.generic.auto._
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.SubmissionPersistence
+import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -49,6 +51,15 @@ class SubmissionHttpApiSpec
   val ec: ExecutionContext = system.dispatcher
   override implicit val timeout: Timeout = Timeout(duration)
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
+
+  val oAuth2Authorization = OAuth2Authorization(
+    log,
+    new KeycloakTokenVerifier(
+      KeycloakDeploymentBuilder.build(
+        getClass.getResourceAsStream("/keycloak.json")
+      )
+    )
+  )
 
   val period = "2018"
 
@@ -97,7 +108,7 @@ class SubmissionHttpApiSpec
 
   "Submissions HTTP API" must {
     "create new submission" in {
-      Post(url) ~> submissionRoutes ~> check {
+      Post(url) ~> submissionRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Created
         responseAs[Submission].id mustBe SubmissionId(sampleInstitution.LEI,
                                                       period,
@@ -105,24 +116,24 @@ class SubmissionHttpApiSpec
       }
     }
     "fail to create a new submission if institutions does not exist" in {
-      Post(noInstitutionUrl) ~> submissionRoutes ~> check {
+      Post(noInstitutionUrl) ~> submissionRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.BadRequest
       }
     }
     "fail to create a new submission if filing does not exist" in {
-      Post(noFilingUrl) ~> submissionRoutes ~> check {
+      Post(noFilingUrl) ~> submissionRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.BadRequest
       }
     }
     "return latest submission" in {
-      Get(s"$url/latest") ~> submissionRoutes ~> check {
+      Get(s"$url/latest") ~> submissionRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.OK
         responseAs[Submission].id.sequenceNumber mustBe 1
       }
-      Post(url) ~> submissionRoutes ~> check {
+      Post(url) ~> submissionRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Created
       }
-      Get(s"$url/latest") ~> submissionRoutes ~> check {
+      Get(s"$url/latest") ~> submissionRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.OK
         responseAs[Submission].id.sequenceNumber mustBe 2
       }

@@ -24,7 +24,9 @@ import hmda.persistence.institution.InstitutionPersistence
 import io.circe.generic.auto._
 import hmda.model.institution.InstitutionGenerators._
 import akka.testkit._
+import hmda.auth.{KeycloakTokenVerifier, OAuth2Authorization}
 import hmda.model.filing.{FilingDetails, InProgress}
+import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -44,6 +46,15 @@ class FilingHttpApiSpec
   val ec: ExecutionContext = system.dispatcher
   override implicit val timeout: Timeout = Timeout(duration)
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
+
+  val oAuth2Authorization = OAuth2Authorization(
+    log,
+    new KeycloakTokenVerifier(
+      KeycloakDeploymentBuilder.build(
+        getClass.getResourceAsStream("/keycloak.json")
+      )
+    )
+  )
 
   val sampleInstitution = institutionGen
     .suchThat(_.LEI != "")
@@ -75,17 +86,17 @@ class FilingHttpApiSpec
 
   "Filings" must {
     "return Bad Request when institution does not exist" in {
-      Get(badUrl) ~> filingRoutes ~> check {
+      Get(badUrl) ~> filingRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.BadRequest
       }
     }
     "return NotFound when institution exists but filing has not been created" in {
-      Get(url) ~> filingRoutes ~> check {
+      Get(url) ~> filingRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.NotFound
       }
     }
     "create filing and return it" in {
-      Post(url) ~> filingRoutes ~> check {
+      Post(url) ~> filingRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.Created
         val details = responseAs[FilingDetails]
         details.filing.lei mustBe sampleInstitution.LEI
@@ -93,10 +104,10 @@ class FilingHttpApiSpec
         details.filing.status mustBe InProgress
         details.submissions mustBe Nil
       }
-      Post(url) ~> filingRoutes ~> check {
+      Post(url) ~> filingRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.BadRequest
       }
-      Post(badUrl) ~> filingRoutes ~> check {
+      Post(badUrl) ~> filingRoutes(oAuth2Authorization) ~> check {
         status mustBe StatusCodes.BadRequest
       }
     }
