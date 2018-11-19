@@ -6,12 +6,7 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import com.typesafe.config.ConfigFactory
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.submission.{
-  HmdaParserError,
-  HmdaValidationError,
-  SubmissionManager,
-  SubmissionPersistence
-}
+import hmda.persistence.submission._
 
 object HmdaPersistence {
 
@@ -31,6 +26,7 @@ object HmdaPersistence {
       SubmissionManager.startShardRegion(sharding)
       HmdaParserError.startShardRegion(sharding)
       HmdaValidationError.startShardRegion(sharding)
+      EditDetailsPersistence.startShardRegion(sharding)
 
       Behaviors
         .receive[HmdaPersistenceCommand] {

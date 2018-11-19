@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "edit.details.proto";
+
+message EditDetailsAddedMessage {
+    EditDetailsMessage editDetails = 1;
+}
+
+message EditDetailsRowCountedMessage {
+    int32 count = 1;
+}
