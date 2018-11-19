@@ -1,1 +1,0 @@
-{"activityYear":2018,"LEI":"BANK1LEIFORTEST12345","agency":9,"institutionType":-1,"institutionId2017":"","taxId":"02-1234567","rssd":-1,"emailDomains":["bank1.com"],"respondent":{"name":"Bank 1","state":"","city":""},"parent":{"idRssd":-1,"name":""},"assets":-1,"otherLenderCode":-1,"topHolder":{"idRssd":-1,"name":""},"hmdaFiler":false}
