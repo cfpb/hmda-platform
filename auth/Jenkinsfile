@@ -14,7 +14,7 @@ volumes: [
 
      stage('Build and package Java Code') {
        container('maven') {
-         sh "mvn -B -f ./auth/ clean package"
+         sh "mvn -f ./auth/ clean package"
        }
      }
 

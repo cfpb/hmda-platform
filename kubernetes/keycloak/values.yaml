@@ -43,7 +43,7 @@ keycloak:
         - name: theme
           mountPath: /theme
     - name: spi-provider
-      image:hmda/spi-provider:latest
+      image: hmda/spi-provider:latest
       imagePullPolicy: Always
       command:
         - sh
@@ -79,9 +79,9 @@ keycloak:
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     - name: FILING_APP_URL
-      value: ""
+      value: "hmda4.demo.cfpb.gov/filing/"
     - name: INSTITUTION_SEARCH_URI
-      value: ""
+      value: "hmda4.demo.cfpb.gov/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
       value: "ON"
     # - name: KEYCLOAK_LOGLEVEL
@@ -211,6 +211,8 @@ keycloak:
       secret:
         secretName: realm-secret
     - name: theme
+      emptyDir: {}
+    - name: spi
       emptyDir: {}
   extraVolumeMounts: |
     - name: realm-secret
