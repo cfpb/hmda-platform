@@ -42,6 +42,19 @@ keycloak:
       volumeMounts:
         - name: theme
           mountPath: /theme
+    - name: spi-provider
+      image:hmda/spi-provider:latest
+      imagePullPolicy: Always
+      command:
+        - sh
+      args:
+        - -c
+        - |
+          echo "Copying SPI..."
+          cp -rv keycloak-authenticator-hmda-4.2.1.Final.jar /spi
+      volumeMounts:
+        - name: spi
+          mountPath: /spi
 
   ## Additional sidecar containers, e. g. for a database proxy, such as Google's cloudsql-proxy
   extraContainers: |
@@ -65,6 +78,12 @@ keycloak:
       value: "true"
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
+    - name: FILING_APP_URL
+      value: ""
+    - name: INSTITUTION_SEARCH_URI
+      value: ""
+    - name: INSTITUTION_SEARCH_VALIDATE_SSL
+      value: "ON"
     # - name: KEYCLOAK_LOGLEVEL
     #   value: DEBUG
     # - name: WILDFLY_LOGLEVEL
@@ -180,7 +199,11 @@ keycloak:
       /subsystem=jgroups/stack=tcp/protocol=JDBC_PING/property=insert_single_sql:add(value="INSERT INTO JGROUPSPING (own_addr, creation_timestamp, cluster_name, ping_data) values (?, NOW(), ?, ?)")
 
     # Custom CLI script
-    custom: ""
+    custom: |
+      # Statements for our custom spi
+      /subsystem=keycloak-server/spi=form-action:add()
+      /subsystem=keycloak-server/spi=form-action/provider=registration-institution-action:add(properties={institutionSearchUri => "${env.INSTITUTION_SEARCH_URI}", institutionSearchValidateSsl => "${env.INSTITUTION_SEARCH_VALIDATE_SSL}"}, enabled=true)
+
 
   ## Add additional volumes and mounts, e. g. for custom themes
   extraVolumes: |
@@ -195,6 +218,8 @@ keycloak:
       readOnly: true
     - name: theme
       mountPath: /opt/jboss/keycloak/themes/hmda
+    - name: spi
+      mountPath: /opt/jboss/keycloak/standalone/deployments
 
   podDisruptionBudget: {}
     # maxUnavailable: 1

@@ -14,19 +14,42 @@ volumes: [
 
      stage('Build and package Java Code') {
        container('maven') {
-         sh "mvn -B clean package"
+         sh "mvn -B -f ./auth/ clean package"
        }
      }
 
     stage('Build And Publish Docker Image') {
       container('docker') {
         withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
-            usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
-             sh ""
+          usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+          withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
+            usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
+            withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
+              sh "docker build --rm -t=${env.DOCKER_HUB_USER}/spi-provider ./auth/"
+              if (env.TAG_NAME != null || gitBranch == "master") {
+                if (gitBranch == "master") {
+                  env.DOCKER_TAG = "latest"
+                } else {
+                  env.DOCKER_TAG = env.TAG_NAME
+                }
+                sh """
+                  docker tag ${env.DOCKER_HUB_USER}/spi-provider ${env.DOCKER_HUB_USER}/check-digit:${env.DOCKER_TAG}
+                  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
+                  docker push ${env.DOCKER_HUB_USER}/spi-provider:${env.DOCKER_TAG}
+                  docker tag ${env.DOCKER_HUB_USER}/spi-provider:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/spi-provider:${env.DOCKER_TAG}
+                  docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD} 
+                  docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/spi-provider:${env.DOCKER_TAG}
+                  docker images
+                  docker image prune -f
+                  docker images
+                  docker ps -a
+                """
+              }
             }
+          }
         }
       }
-   }
+    }
 
 
 
