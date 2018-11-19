@@ -1,4 +1,4 @@
-podTemplate(label: 'buildSbtPod', containers: [
+podTemplate(label: 'buildMavenPod', containers: [
   containerTemplate(name: 'maven', image: 'maven:3.3.9-jdk-8-alpine', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, command: 'cat'),
   containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm', ttyEnabled: true, command: 'cat')
@@ -6,7 +6,7 @@ podTemplate(label: 'buildSbtPod', containers: [
 volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
-   node('buildSbtPod') {
+   node('buildMavenPod') {
      def repo = checkout scm
      def gitCommit = repo.GIT_COMMIT
      def gitBranch = repo.GIT_BRANCH
