@@ -98,17 +98,23 @@ services:
   keycloak:
     build: ../hmda-platform-auth/keycloak
     environment:
-      KEYCLOAK_USER: admin
-      KEYCLOAK_PASSWORD: admin
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: password
-      POSTGRES_SERVER: keycloak_db
-      POSTGRES_PORT: 5432
+      # 4.5.0 upgrade
+      KEYCLOAK_HOSTNAME: 192.168.99.100
+      DB_VENDOR: postgres
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: password
+      DB_ADDR: keycloak_db
+      DB_PORT: 5432
+      PROXY_ADDRESS_FORWARDING: 'true'
       PROXY_HTTPS_PORT: 8443
       SMTP_SERVER: mail_dev
       SMTP_PORT: 25
-      INSTITUTION_SEARCH_URI: 'https://192.168.99.100:4443/public/'
+      KEYCLOAK_LOGLEVEL: INFO
+      ROOT_LOGLEVEL: INFO
+      KEYCLOAK_USER: admin
+      KEYCLOAK_PASSWORD: admin
+      INSTITUTION_SEARCH_URI: 'https://192.168.99.100:4443/public'
       INSTITUTION_SEARCH_VALIDATE_SSL: "OFF"
       FILING_APP_URL: 'https://192.168.99.100/filing/'
       REDIRECT_URIS: '[ "https://192.168.99.100/filing/", "https://192.168.99.100/filing/oidc-callback", "https://192.168.99.100/filing/silent_renew.html" ]'
@@ -118,9 +124,6 @@ services:
       VIRTUAL_HOST_WEIGHT: 0
     volumes:
       - '../hmda-platform-auth/keycloak/themes/hmda:/opt/jboss/keycloak/themes/hmda'
-
-    # Set action to "export" to dump Keycloak realm data
-    command: './docker-entrypoint.sh'
     links:
       - keycloak_db
 
