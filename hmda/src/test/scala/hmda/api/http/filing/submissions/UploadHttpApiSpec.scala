@@ -54,6 +54,7 @@ import hmda.model.filing.lar.LarGenerators._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.keycloak.adapters.KeycloakDeploymentBuilder
+import akka.testkit._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -64,6 +65,10 @@ class UploadHttpApiSpec
     with UploadHttpApi
     with ScalatestRouteTest
     with FileUploadUtils {
+
+  val duration = 10.seconds
+
+  implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 
   implicit val typedSystem = system.toTyped
   override val ec: ExecutionContext = system.dispatcher
