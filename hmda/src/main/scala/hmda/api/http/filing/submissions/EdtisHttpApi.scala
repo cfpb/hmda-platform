@@ -24,6 +24,7 @@ import hmda.util.http.FilingResponseUtils._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.filing.submissions._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
+import hmda.api.http.codec.filing.submission.EditDetailsSummaryCodec._
 import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
 import hmda.messages.submission.EditDetailsEvents.{
@@ -126,7 +127,7 @@ trait EdtisHttpApi extends HmdaTimeDirectives {
                 case Success((editRowCount, details)) =>
                   val detailsSummary = EditDetailsSummary(
                     editName,
-                    details,
+                    details.flatMap(d => d.rows),
                     uri.path.toString(),
                     page,
                     editRowCount.count
