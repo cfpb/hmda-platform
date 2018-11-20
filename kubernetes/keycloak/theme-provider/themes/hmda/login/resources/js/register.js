@@ -50,16 +50,16 @@
       var input = $('<input class="institutionsCheck">').attr({
         type: 'checkbox',
         name: 'institutions',
-        id: institutions[i].lei,
-        value: institutions[i].lei
+        id: institutions[i].LEI,
+        value: institutions[i].LEI
       })
       var label = $('<label>').attr({
-        for: institutions[i].lei
+        for: institutions[i].LEI
       })
       var strong = $('<strong>').text(institutions[i].respondent.name)
       // var dl = makeDataList(institutions[i].externalIds)
       var dl = makeDataList([
-        { value: institutions[i].lei, externalIdType: { name: 'LEI' } },
+        { value: institutions[i].LEI, externalIdType: { name: 'LEI' } },
         { value: institutions[i].taxId, externalIdType: { name: 'Tax ID' } },
         {
           value: institutions[i].agency,
