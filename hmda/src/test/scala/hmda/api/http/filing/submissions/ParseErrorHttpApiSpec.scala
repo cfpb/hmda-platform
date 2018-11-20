@@ -30,7 +30,12 @@ import hmda.messages.submission.SubmissionProcessingCommands.{
 }
 import hmda.model.filing.Filing
 import hmda.model.filing.FilingGenerator.filingGen
-import hmda.model.filing.submission.{ParsedWithErrors, Submission, SubmissionId}
+import hmda.model.filing.submission.{
+  Created,
+  ParsedWithErrors,
+  Submission,
+  SubmissionId
+}
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
@@ -49,6 +54,7 @@ import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.util.Random
 
 class ParseErrorHttpApiSpec
     extends AkkaCassandraPersistenceSpec
@@ -75,26 +81,26 @@ class ParseErrorHttpApiSpec
 
   val period = "2018"
 
-  val sId = SubmissionId("12345", period, 1)
-
   val sampleInstitution = institutionGen
     .suchThat(_.LEI != "")
     .sample
-    .map(_.copy(LEI = sId.lei))
-    .getOrElse(Institution.empty.copy(LEI = sId.lei))
+    .getOrElse(
+      Institution.empty.copy(LEI = Random.alphanumeric.take(10).mkString))
 
   val sampleFiling = filingGen.sample
     .getOrElse(Filing())
-    .copy(lei = sId.lei)
+    .copy(lei = sampleInstitution.LEI)
     .copy(period = period)
+  println("This is sample institution LEI: " + sampleInstitution.LEI)
+  val submissionId = SubmissionId(sampleInstitution.LEI, period, 1)
 
   val sampleSubmission = submissionGen
     .suchThat(s => !s.id.isEmpty)
-    .suchThat(s => s.id.lei != "")
-    .suchThat(s => s.status == ParsedWithErrors)
+    .suchThat(s => s.id.lei != "" && s.id.lei != "AA")
+    .suchThat(s => s.status == Created)
     .sample
-    .map(_.copy(id = sId))
-    .getOrElse(Submission(sId))
+    .getOrElse(Submission(submissionId))
+    .copy(id = submissionId)
 
   val institutionProbe = TestProbe[InstitutionEvent]("institution-probe")
   val filingProbe = TestProbe[FilingEvent]("filing-probe")
@@ -110,8 +116,9 @@ class ParseErrorHttpApiSpec
     HmdaParserError.startShardRegion(sharding)
 
     val institutionPersistence =
-      sharding.entityRefFor(InstitutionPersistence.typeKey,
-                            s"${InstitutionPersistence.name}-${sId.lei}")
+      sharding.entityRefFor(
+        InstitutionPersistence.typeKey,
+        s"${InstitutionPersistence.name}-${sampleInstitution.LEI}")
     institutionPersistence ! CreateInstitution(sampleInstitution,
                                                institutionProbe.ref)
     institutionProbe.expectMessage(InstitutionCreated(sampleInstitution))
@@ -119,19 +126,21 @@ class ParseErrorHttpApiSpec
     val filingPersistence =
       sharding.entityRefFor(
         FilingPersistence.typeKey,
-        s"${FilingPersistence.name}-${sId.lei}-$period"
+        s"${FilingPersistence.name}-${sampleInstitution.LEI}-$period"
       )
     filingPersistence ! CreateFiling(sampleFiling, filingProbe.ref)
 
     val submissionPersistence =
-      sharding.entityRefFor(SubmissionPersistence.typeKey,
-                            s"${SubmissionPersistence.name}-${sId.toString}")
-    submissionPersistence ! CreateSubmission(sId, submissionProbe.ref)
+      sharding.entityRefFor(
+        SubmissionPersistence.typeKey,
+        s"${SubmissionPersistence.name}-${sampleSubmission.id.toString}")
+    submissionPersistence ! CreateSubmission(sampleSubmission.id,
+                                             submissionProbe.ref)
     submissionProbe.expectMessageType[SubmissionCreated]
 
     val hmdaParserError = sharding.entityRefFor(
       HmdaParserError.typeKey,
-      s"${HmdaParserError.name}-${sId.toString}")
+      s"${HmdaParserError.name}-${sampleSubmission.id.toString}")
     for (i <- 1 to 100) {
       val errorList = List(InvalidId)
       hmdaParserError ! PersistHmdaRowParsedError(i,
