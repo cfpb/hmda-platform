@@ -11,7 +11,7 @@ import io.circe.syntax._
 import SubmissionStatusCodec._
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowParsedError
 import io.circe.generic.auto._
-import hmda.Seq
+import hmda.parser.Seq
 import hmda.model.filing.submission.SubmissionStatus
 
 object ParsingErrorSummaryCodec {
