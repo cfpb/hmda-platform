@@ -6,7 +6,6 @@ podTemplate(label: 'buildHelm', containers: [
         def repo = checkout scm
         def gitCommit = repo.GIT_COMMIT
         def gitBranch = repo.GIT_BRANCH
-        def shortGitCommit = "${gitCommit[0..10]}"
 
         stage('Ambassador Service') {
             if (env.BRANCH_NAME == 'master') {
