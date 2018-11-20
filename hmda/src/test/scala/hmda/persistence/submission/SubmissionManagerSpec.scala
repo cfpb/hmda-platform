@@ -7,8 +7,14 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.testkit.RouteTestTimeout
 import hmda.messages.filing.FilingCommands.GetLatestSubmission
-import hmda.messages.submission.SubmissionCommands.{CreateSubmission, GetSubmission}
-import hmda.messages.submission.SubmissionEvents.{SubmissionCreated, SubmissionEvent}
+import hmda.messages.submission.SubmissionCommands.{
+  CreateSubmission,
+  GetSubmission
+}
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionCreated,
+  SubmissionEvent
+}
 import hmda.messages.submission.SubmissionManagerCommands._
 import hmda.model.filing.FilingGenerator.filingGen
 import hmda.model.filing.{Filing, FilingId}
