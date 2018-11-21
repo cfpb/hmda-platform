@@ -28,7 +28,7 @@
 
         <div id="institutions"></div>
 
-        <input id="user.attributes.institutions" name="user.attributes.lei" class="usa-skipnav" hidden style="display:none;"/>
+        <input id="user.attributes.lei" name="user.attributes.lei" class="usa-skipnav" hidden style="display:none;"/>
 
         <div class="usa-alert usa-alert-info">
           <div class="usa-alert-body">
