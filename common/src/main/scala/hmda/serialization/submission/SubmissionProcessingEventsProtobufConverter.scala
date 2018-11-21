@@ -112,7 +112,8 @@ object SubmissionProcessingEventsProtobufConverter {
       evt: QualityVerified): QualityVerifiedMessage = {
     QualityVerifiedMessage(
       submissionIdToProtobuf(evt.submissionId),
-      evt.verified
+      evt.verified,
+      evt.status.code
     )
   }
 
@@ -120,7 +121,8 @@ object SubmissionProcessingEventsProtobufConverter {
       msg: QualityVerifiedMessage): QualityVerified = {
     QualityVerified(submissionIdFromProtobuf(
                       msg.submissionId.getOrElse(SubmissionIdMessage())),
-                    msg.verified)
+                    msg.verified,
+                    SubmissionStatus.valueOf(msg.statusCode))
   }
 
   def macroVerifiedToProtobuf(evt: MacroVerified): MacroVerifiedMessage = {
