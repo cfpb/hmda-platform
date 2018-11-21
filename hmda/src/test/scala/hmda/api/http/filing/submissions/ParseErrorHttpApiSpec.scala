@@ -91,7 +91,6 @@ class ParseErrorHttpApiSpec
     .getOrElse(Filing())
     .copy(lei = sampleInstitution.LEI)
     .copy(period = period)
-  println("This is sample institution LEI: " + sampleInstitution.LEI)
   val submissionId = SubmissionId(sampleInstitution.LEI, period, 1)
 
   val sampleSubmission = submissionGen
