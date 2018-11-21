@@ -154,6 +154,8 @@ object HmdaValidationError
         val updatedStatus =
           if (state.quality.nonEmpty) {
             QualityErrors
+          } else if (state.macroVerified) {
+            Verified
           } else {
             Quality
           }
