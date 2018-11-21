@@ -100,5 +100,5 @@ For more details, please refer to the [Marathon Documentation](https://mesospher
 
 * [TS File Spec](spec/2018_File_Spec_TS.csv)
 * [LAR File Spec](spec/2018_File_Spec_LAR.csv)
-* [Institution Data Model Spec](spec/2018_Institution_Data_Model_Spec)
+* [Institution Data Model Spec](spec/2018_Institution_Data_Model_Spec.csv)
 
