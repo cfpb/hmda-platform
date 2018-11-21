@@ -19,7 +19,7 @@ import java.util.*;
 public class HmdaValidInstitutionsFormAction implements FormAction, FormActionFactory, ConfiguredProvider {
 
     public static final String PROVIDER_ID = "registration-institution-action";
-    public static final String FIELD_INSTITUTIONS = "user.attributes.institutions";
+    public static final String FIELD_INSTITUTIONS = "user.attributes.lei";
     public static final String MISSING_INSTITUTION_MESSAGE = "missingInstitutionMessage";
     public static final String INVALID_INSTITUTION_MESSAGE = "invalidInstitutionMessage";
     public static final String UNKNOWN_EMAIL_DOMAIN_MESSAGE = "unknownEmailDomainMessage";

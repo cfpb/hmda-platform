@@ -94,7 +94,7 @@
         listOfInstitutions.push($(this).val())
       }
     })
-    $('#user\\.attributes\\.institutions').val(listOfInstitutions.join(','))
+    $('#user\\.attributes\\.lei').val(listOfInstitutions.join(','))
   }
 
   //AJAX call to get data, calls buildList with returned institutions

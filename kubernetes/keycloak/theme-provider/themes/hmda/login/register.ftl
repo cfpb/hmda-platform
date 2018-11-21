@@ -13,22 +13,22 @@
         <span>or <a href="${url.loginUrl}">go back to login</a></span>
         <#if !realm.registrationEmailAsUsername>
           <label for="username" class="${properties.kcLabelClass!}">${msg("username")}</label>
-          <input type="text" id="username" class="${properties.kcInputClass!}" name="username" value="${(register.formData.username!'')?html}" />
+          <input type="text" id="username" class="${properties.kcInputClass!}" name="username" value="${(register.formData.username!'')}" />
         </#if>
 
         <label for="firstName">${msg("firstName")}</label>
-        <input type="text" id="firstName" class="${properties.kcInputClass!}" name="firstName" value="${(register.formData.firstName!'')?html}" autofocus />
+        <input type="text" id="firstName" class="${properties.kcInputClass!}" name="firstName" value="${(register.formData.firstName!'')}" autofocus />
 
         <label for="lastName">${msg("lastName")}</label>
-        <input type="text" id="lastName" name="lastName" value="${(register.formData.lastName!'')?html}" />
+        <input type="text" id="lastName" name="lastName" value="${(register.formData.lastName!'')}" />
 
         <label for="email">${msg("email")}</label>
         <span class="usa-form-hint">The provided email address will be used to notify you of any HMDA related technology updates.</span>
-        <input type="text" id="email" name="email" value="${(register.formData.email!'')?html}" />
+        <input type="text" id="email" name="email" value="${(register.formData.email!'')}" />
 
         <div id="institutions"></div>
 
-        <input id="user.attributes.institutions" name="user.attributes.institutions" class="usa-skipnav" hidden style="display:none;"/>
+        <input id="user.attributes.institutions" name="user.attributes.lei" class="usa-skipnav" hidden style="display:none;"/>
 
         <div class="usa-alert usa-alert-info">
           <div class="usa-alert-body">

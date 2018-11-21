@@ -42,12 +42,64 @@ keycloak:
       volumeMounts:
         - name: theme
           mountPath: /theme
+    - name: spi-provider
+      image: hmda/spi-provider:latest
+      imagePullPolicy: Always
+      command:
+        - sh
+      args:
+        - -c
+        - |
+          echo "Copying SPI..."
+          ls
+          cp -rv keycloak-authenticator-hmda-4.2.1.Final.jar /spi
+      volumeMounts:
+        - name: spi
+          mountPath: /spi
 
   ## Additional sidecar containers, e. g. for a database proxy, such as Google's cloudsql-proxy
   extraContainers: |
 
   ## Custom script that is run before Keycloak is started.
-  preStartScript:
+  preStartScript: |
+        #!/bin/bash
+
+        LOGIN_THEME=keycloak/themes/hmda/login/theme.properties
+
+        # Update Keycloak config files based on envvars
+        if [ -z ${INSTITUTION_SEARCH_URI+x} ]; then
+            echo 'INSTITUTION_SEARCH_URI environment variable not set' >&2
+            exit 1
+        else
+            sed -i "s@{{INSTITUTION_SEARCH_URI}}@$INSTITUTION_SEARCH_URI@g" $LOGIN_THEME
+            echo "Set institutionSearchUri=$INSTITUTION_SEARCH_URI"
+        fi
+
+        if [ -z ${FILING_APP_URL+x} ]; then
+            echo 'FILING_APP_URL environment variable not set' >&2
+            exit 1
+        else
+            sed -i "s@{{FILING_APP_URL}}@$FILING_APP_URL@g" $LOGIN_THEME
+            echo "Set filingAppUrl=$FILING_APP_URL"
+        fi
+
+        if [ -z ${SUPPORT_EMAIL+x} ]; then
+            echo 'SUPPORT_EMAIL environment variable not set' >&2
+            exit 1
+        else
+            sed -i "s/{{SUPPORT_EMAIL}}/$SUPPORT_EMAIL/g" $LOGIN_THEME
+            echo "Set supportEmailTo=$SUPPORT_EMAIL"
+        fi
+
+        printf "\nEnvironment:\n"
+        env | sort
+
+        echo "Updated $LOGIN_THEME:"
+        cat $LOGIN_THEME
+
+        echo "Cleaning history"
+        rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history/current/*
+
 
   ## Additional arguments to start command e.g. -Dkeycloak.import= to load a realm
   extraArgs: "-Dkeycloak.import=/realm/realm.json"
@@ -65,6 +117,14 @@ keycloak:
       value: "true"
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
+    - name: FILING_APP_URL
+      value: "https//hmda4.demo.cfpb.gov/filing/"
+    - name: INSTITUTION_SEARCH_URI
+      value: "https://hmda4.demo.cfpb.gov/v2/public"
+    - name: INSTITUTION_SEARCH_VALIDATE_SSL
+      value: "ON"
+    - name: SUPPORT_EMAIL
+      value: "noreply@cfpb.gov"
     # - name: KEYCLOAK_LOGLEVEL
     #   value: DEBUG
     # - name: WILDFLY_LOGLEVEL
@@ -180,7 +240,11 @@ keycloak:
       /subsystem=jgroups/stack=tcp/protocol=JDBC_PING/property=insert_single_sql:add(value="INSERT INTO JGROUPSPING (own_addr, creation_timestamp, cluster_name, ping_data) values (?, NOW(), ?, ?)")
 
     # Custom CLI script
-    custom: ""
+    custom: |
+      # Statements for our custom spi
+      /subsystem=keycloak-server/spi=form-action:add()
+      /subsystem=keycloak-server/spi=form-action/provider=registration-institution-action:add(properties={institutionSearchUri => "${env.INSTITUTION_SEARCH_URI}", institutionSearchValidateSsl => "${env.INSTITUTION_SEARCH_VALIDATE_SSL}"}, enabled=true)
+
 
   ## Add additional volumes and mounts, e. g. for custom themes
   extraVolumes: |
@@ -189,12 +253,16 @@ keycloak:
         secretName: realm-secret
     - name: theme
       emptyDir: {}
+    - name: spi
+      emptyDir: {}
   extraVolumeMounts: |
     - name: realm-secret
       mountPath: "/realm/"
       readOnly: true
     - name: theme
       mountPath: /opt/jboss/keycloak/themes/hmda
+    - name: spi
+      mountPath: /opt/jboss/keycloak/standalone/deployments
 
   podDisruptionBudget: {}
     # maxUnavailable: 1
