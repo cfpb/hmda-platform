@@ -26,9 +26,9 @@
         <span class="usa-form-hint">The provided email address will be used to notify you of any HMDA related technology updates.</span>
         <input type="text" id="email" name="email" value="${(register.formData.email!'')}" />
 
-        <div id="institutions"></div>
+        <div id="lei"></div>
 
-        <input id="user.attributes.institutions" name="user.attributes.institutions" class="usa-skipnav" hidden style="display:none;"/>
+        <input id="user.attributes.lei" name="user.attributes.lei" class="usa-skipnav" hidden style="display:none;"/>
 
         <div class="usa-alert usa-alert-info">
           <div class="usa-alert-body">
