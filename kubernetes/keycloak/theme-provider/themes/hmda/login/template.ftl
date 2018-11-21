@@ -47,7 +47,7 @@
     <div class="usa-banner">
       <header class="usa-banner-header">
         <div class="usa-grid usa-banner-inner">
-          <img src="${properties.filingAppUrl!}/../img/favicons/favicon-57.png" alt="U.S. flag" />
+          <img src="${properties.filingAppUrl!}/favicon-57.png" alt="U.S. flag" />
           <p>An official website of the United States government</p>
         </div>
       </header>
@@ -56,7 +56,7 @@
       <div class="usa-logo" id="logo">
         <em class="usa-logo-text">
           <a class="usa-nav-link" href="${properties.filingAppUrl!}">
-              <img src="${properties.filingAppUrl!}../img/ffiec-logo.svg" height="32px" alt="FFIEC"/>HMDA Filing Platform
+              <img src="${properties.filingAppUrl!}/ffiec-logo.svg" height="32px" alt="FFIEC"/>HMDA Filing Platform
           </a>
         </em>
       </div>
@@ -130,7 +130,7 @@
           <ul class="usa-unstyled-list">
             <li class="usa-footer-primary-content">
               <a class="usa-nav-link" href="${properties.filingAppUrl!}">
-                <img src="${properties.filingAppUrl!}../img/ffiec-logo.svg" height="21px" alt="FFIEC"/>Home Mortgage Disclosure Act
+                <img src="${properties.filingAppUrl!}/ffiec-logo.svg" height="21px" alt="FFIEC"/>Home Mortgage Disclosure Act
               </a>
             </li>
           </ul>

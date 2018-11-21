@@ -94,6 +94,9 @@ keycloak:
         printf "\nEnvironment:\n"
         env | sort
 
+        echo "Updated $LOGIN_THEME:"
+        cat $LOGIN_THEME
+
         echo "Cleaning history"
         rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history/current/*
 
@@ -115,9 +118,9 @@ keycloak:
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     - name: FILING_APP_URL
-      value: "hmda4.demo.cfpb.gov/filing/"
+      value: "https//hmda4.demo.cfpb.gov/filing/"
     - name: INSTITUTION_SEARCH_URI
-      value: "hmda4.demo.cfpb.gov/v2/public"
+      value: "https://hmda4.demo.cfpb.gov/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
       value: "ON"
     - name: SUPPORT_EMAIL

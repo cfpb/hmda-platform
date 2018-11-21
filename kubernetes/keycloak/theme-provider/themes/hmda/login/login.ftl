@@ -13,9 +13,9 @@
 
                     <label for="username"><#if !realm.loginWithEmailAllowed>${msg("username")}<#elseif !realm.registrationEmailAsUsername>${msg("usernameOrEmail")}<#else>${msg("email")}</#if></label>
                     <#if usernameEditDisabled??>
-                        <input tabindex="1" id="username" name="username" type="text" autocapitalize="off" autocorrect="off" value="${(login.username!'')?html}" disabled>
+                        <input tabindex="1" id="username" name="username" type="text" autocapitalize="off" autocorrect="off" value="${(login.username!'')}" disabled>
                     <#else>
-                        <input tabindex="1" id="username" name="username" value="${(login.username!'')?html}" type="text" autofocus />
+                        <input tabindex="1" id="username" name="username" value="${(login.username!'')}" type="text" autofocus />
                     </#if>
 
                     <label for="password">${msg("password")}</label>
