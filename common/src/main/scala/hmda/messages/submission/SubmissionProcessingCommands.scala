@@ -46,6 +46,7 @@ object SubmissionProcessingCommands {
       extends SubmissionProcessingCommand
 
   case class PersistHmdaRowValidatedError(
+      submissionId: SubmissionId,
       rowNumber: Int,
       validationErrors: List[ValidationError],
       replyTo: Option[ActorRef[HmdaRowValidatedError]])

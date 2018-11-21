@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "edit.details.proto";
+import "submission.proto";
+
+message PersistEditDetailsMessage {
+    EditDetailsMessage editDetails = 1;
+    string replyTo = 2;
+}
+
+message GetEditRowCountMessage {
+    string editName = 1;
+    string replyTo = 2;
+}
+
+message GetEditDetailsMessage {
+    SubmissionIdMessage submissionId = 1;
+    string editName = 2;
+    int32 page = 3;
+    string replyTo = 4;
+}

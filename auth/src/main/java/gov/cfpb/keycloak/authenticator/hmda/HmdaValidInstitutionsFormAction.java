@@ -77,16 +77,16 @@ public class HmdaValidInstitutionsFormAction implements FormAction, FormActionFa
                 return;
             }
 
-            // Get a set of institutionId(s) for a given domain
-            Set<String> domainInstIds = new HashSet<>(domainInsts.size());
+            // Get a set of lei(s) for a given domain
+            Set<String> leis = new HashSet<>(domainInsts.size());
             for (Institution domainInst : domainInsts) {
-                domainInstIds.add(domainInst.getId());
+                leis.add(domainInst.getLei());
             }
 
             // Add error for every institution submitted not associated with domain
             if (!domainInsts.containsAll(userInstIds)) {
                 Set<String> invalidInstIds = new HashSet<>(userInstIds);
-                invalidInstIds.removeAll(domainInstIds);
+                invalidInstIds.removeAll(leis);
 
                 for (String invalidInstId : invalidInstIds) {
                     logger.warn("User submitted invalid institution ID " + invalidInstId + " for domain \"" + domain + "\"");

@@ -13,7 +13,7 @@ import akka.stream.testkit.scaladsl.TestSink
 import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
-import hmda.Seq
+import hmda.validation.Seq
 import hmda.model.validation._
 
 class ValidationFlowSpec extends WordSpec with MustMatchers {

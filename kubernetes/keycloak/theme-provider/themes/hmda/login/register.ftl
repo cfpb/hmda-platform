@@ -11,11 +11,6 @@
         <input type="password" readonly value="this is not a login form" style="display: none;">
         <legend class="usa-drop_text">Create a test account</legend>
         <span>or <a href="${url.loginUrl}">go back to login</a></span>
-        <div class="usa-alert usa-alert-warning">
-          <div class="usa-alert-body">
-            <p class="usa-alert-text">Any test account created during the beta period will be removed from the system when the filing period opens in January 2019.</p>
-          </div>
-        </div>
         <#if !realm.registrationEmailAsUsername>
           <label for="username" class="${properties.kcLabelClass!}">${msg("username")}</label>
           <input type="text" id="username" class="${properties.kcInputClass!}" name="username" value="${(register.formData.username!'')}" />
