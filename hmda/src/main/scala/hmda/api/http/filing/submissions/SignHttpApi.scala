@@ -93,10 +93,10 @@ trait SignHttpApi extends HmdaTimeDirectives {
                   onComplete(fSigned) {
                     case Success(submissionSignedEvent) =>
                       submissionSignedEvent match {
-                        case signed @ SubmissionSigned(_, _, _) =>
+                        case signed @ SubmissionSigned(_, _, status) =>
                           val signedResponse = SignedResponse(signed.timestamp,
                                                               signed.receipt,
-                                                              signed.status)
+                                                              status)
                           complete(ToResponseMarshallable(signedResponse))
                         case SubmissionNotReadyToBeSigned(id) =>
                           badRequest(
