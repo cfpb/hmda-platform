@@ -102,9 +102,9 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
                             uri,
                             s"Submission $submissionId is not ready to be verified")
 
-                        case QualityVerified(_, verified) =>
+                        case QualityVerified(_, verified, status) =>
                           val response =
-                            EditsVerificationResponse(verified, s.status)
+                            EditsVerificationResponse(verified, status)
                           complete(ToResponseMarshallable(response))
 
                         case MacroVerified(_, verified) =>
