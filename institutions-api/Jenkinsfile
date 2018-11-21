@@ -24,7 +24,7 @@ volumes: [
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-              sh "docker build --rm -t=${env.DOCKER_HUB_USER}/institutions-api ."
+              sh "docker build --rm -t=${env.DOCKER_HUB_USER}/institutions-api institutions-api/target/docker/stage"
               if (env.TAG_NAME != null || gitBranch == "master") {
                 if (gitBranch == "master") {
                   env.DOCKER_TAG = "latest"
