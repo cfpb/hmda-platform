@@ -50,7 +50,6 @@ object EditDetailsSummaryCodec {
       override def apply(a: EditDetailsRow): Json = Json.obj(
         ("id", Json.fromString(a.id)),
         ("fields", a.fields.asJson)
-        //TODO: Include field details
       )
     }
 
