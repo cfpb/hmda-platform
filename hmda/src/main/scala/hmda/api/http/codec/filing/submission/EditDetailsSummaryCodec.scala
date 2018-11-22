@@ -5,7 +5,7 @@ import hmda.api.http.model.filing.submissions.{
   PaginatedResponse,
   PaginationLinks
 }
-import hmda.model.edits.EditDetailsRow
+import hmda.model.edits.{EditDetailsRow, FieldDetails}
 import io.circe.Decoder.Result
 import io.circe.{Decoder, Encoder, HCursor, Json}
 import io.circe.syntax._
@@ -17,7 +17,7 @@ object EditDetailsSummaryCodec {
     new Encoder[EditDetailsSummary] {
       override def apply(a: EditDetailsSummary): Json = Json.obj(
         ("edit", Json.fromString(a.editName)),
-        ("rows", Json.arr(a.rows.asJson)),
+        ("rows", a.rows.asJson),
         ("count", Json.fromInt(a.count)),
         ("total", Json.fromInt(a.total)),
         ("_links", a.links.asJson)
@@ -48,8 +48,17 @@ object EditDetailsSummaryCodec {
   implicit val editDetailsRowEncoder: Encoder[EditDetailsRow] =
     new Encoder[EditDetailsRow] {
       override def apply(a: EditDetailsRow): Json = Json.obj(
-        ("id", Json.fromString(a.id))
+        ("id", Json.fromString(a.id)),
+        ("fields", a.fields.asJson)
         //TODO: Include field details
+      )
+    }
+
+  implicit val fieldDetailsEncoder: Encoder[FieldDetails] =
+    new Encoder[FieldDetails] {
+      override def apply(a: FieldDetails): Json = Json.obj(
+        ("name", Json.fromString(a.name)),
+        ("value", Json.fromInt(a.value))
       )
     }
 
@@ -58,7 +67,17 @@ object EditDetailsSummaryCodec {
       override def apply(c: HCursor): Result[EditDetailsRow] =
         for {
           id <- c.downField("id").as[String]
-        } yield EditDetailsRow(id)
+          fields <- c.downField("fields").as[Seq[FieldDetails]]
+        } yield EditDetailsRow(id, fields)
+    }
+
+  implicit val fieldDetails: Decoder[FieldDetails] =
+    new Decoder[FieldDetails] {
+      override def apply(c: HCursor): Result[FieldDetails] =
+        for {
+          name <- c.downField("name").as[String]
+          value <- c.downField("value").as[Int]
+        } yield FieldDetails(name, value)
     }
 
 }
