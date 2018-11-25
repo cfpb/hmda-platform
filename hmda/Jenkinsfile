@@ -26,8 +26,12 @@ volumes: [
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform hmda/target/docker/stage"
-              if (gitBranch == "master") {
-                env.DOCKER_TAG = commitId
+              if (env.TAG_NAME != null || gitBranch == "master") {
+                if (gitBranch == "master") {
+                  env.DOCKER_TAG = "latest"
+                } else {
+                  env.DOCKER_TAG = env.TAG_NAME
+                }
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
