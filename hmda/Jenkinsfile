@@ -10,6 +10,7 @@ volumes: [
      def repo = checkout scm
      def gitCommit = repo.GIT_COMMIT
      def gitBranch = repo.GIT_BRANCH
+     def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
 
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
@@ -25,12 +26,8 @@ volumes: [
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform hmda/target/docker/stage"
-              if (env.TAG_NAME != null || gitBranch == "master") {
-                if (gitBranch == "master") {
-                  env.DOCKER_TAG = "latest"
-                } else {
-                  env.DOCKER_TAG = env.TAG_NAME
-                }
+              if (gitBranch == "master") {
+                env.DOCKER_TAG = commitId
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
