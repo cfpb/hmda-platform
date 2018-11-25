@@ -10,7 +10,7 @@ volumes: [
      def repo = checkout scm
      def gitCommit = repo.GIT_COMMIT
      def gitBranch = repo.GIT_BRANCH
-     def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
+     def commitId = sh(returnStdout: true, script: 'git rev-parse --short HEAD')
 
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
