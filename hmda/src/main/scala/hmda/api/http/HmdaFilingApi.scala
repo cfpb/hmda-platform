@@ -37,7 +37,7 @@ class HmdaFilingApi
     with InstitutionHttpApi
     with VerifyHttpApi
     with SignHttpApi
-    with EdtisHttpApi {
+    with EditsHttpApi {
   import HmdaFilingApi._
 
   val config = ConfigFactory.load()
