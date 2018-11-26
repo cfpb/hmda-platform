@@ -18,6 +18,8 @@ import hmda.messages.submission.EditDetailsEvents.{
 import hmda.model.edits.{EditDetails, EditDetailsRow}
 import hmda.model.filing.submission.SubmissionId
 
+import scala.util.Random
+
 class EditDetailsPersistenceSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
@@ -33,7 +35,7 @@ class EditDetailsPersistenceSpec extends AkkaCassandraPersistenceSpec {
   }
 
   "Edit Details" must {
-    val submissionId = SubmissionId("ABCD", "2018", 1)
+    val submissionId = SubmissionId(Random.nextInt(12345).toString, "2018", 1)
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
     "be persisted and read back" in {
       val editDetail1 = EditDetails("S300",

@@ -54,6 +54,7 @@ import hmda.model.filing.lar.LarGenerators._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.keycloak.adapters.KeycloakDeploymentBuilder
+import akka.testkit._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
@@ -69,8 +70,9 @@ class UploadHttpApiSpec
   override val ec: ExecutionContext = system.dispatcher
   override val log: LoggingAdapter = NoLogging
   override val sharding: ClusterSharding = ClusterSharding(typedSystem)
+  val duration = 10.seconds
+  implicit val routeTimeout = RouteTestTimeout(duration.dilated)
   override implicit val timeout: Timeout = Timeout(10.seconds)
-  private implicit val routeTimeout = RouteTestTimeout(3.seconds)
   override val config: Config = ConfigFactory.load()
 
   val oAuth2Authorization = OAuth2Authorization(

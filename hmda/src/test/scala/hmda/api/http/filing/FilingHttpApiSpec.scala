@@ -30,6 +30,7 @@ import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.util.Random
 
 class FilingHttpApiSpec
     extends AkkaCassandraPersistenceSpec
@@ -59,7 +60,8 @@ class FilingHttpApiSpec
   val sampleInstitution = institutionGen
     .suchThat(_.LEI != "")
     .sample
-    .getOrElse(Institution.empty.copy(LEI = "AAA"))
+    .getOrElse(
+      Institution.empty.copy(LEI = Random.alphanumeric.take(10).mkString))
 
   val period = "2018"
 

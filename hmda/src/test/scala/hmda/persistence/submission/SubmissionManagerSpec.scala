@@ -5,6 +5,7 @@ import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
+import akka.http.scaladsl.testkit.RouteTestTimeout
 import hmda.messages.filing.FilingCommands.GetLatestSubmission
 import hmda.messages.submission.SubmissionCommands.{
   CreateSubmission,
@@ -22,6 +23,7 @@ import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import org.scalatest.{BeforeAndAfterAll, MustMatchers}
+import akka.testkit._
 
 import scala.concurrent.duration._
 
@@ -31,6 +33,10 @@ class SubmissionManagerSpec
     with BeforeAndAfterAll {
   implicit val system = actor.ActorSystem()
   implicit val typedSystem = system.toTyped
+
+  val duration = 10.seconds
+
+  implicit val routeTimeout = RouteTestTimeout(duration.dilated)
 
   val sharding = ClusterSharding(typedSystem)
 
