@@ -33,12 +33,12 @@ volumes: [
                   env.DOCKER_TAG = env.TAG_NAME
                 }
                 sh """
-                  docker tag ${env.DOCKER_HUB_USER}/spi-provider ${env.DOCKER_HUB_USER}/check-digit:${env.DOCKER_TAG}
+                  docker tag ${env.DOCKER_HUB_USER}/keycloak-spi-provider ${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
-                  docker push ${env.DOCKER_HUB_USER}/spi-provider:${env.DOCKER_TAG}
-                  docker tag ${env.DOCKER_HUB_USER}/spi-provider:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/spi-provider:${env.DOCKER_TAG}
+                  docker push ${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG}
+                  docker tag ${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG}
                   docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD} 
-                  docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/spi-provider:${env.DOCKER_TAG}
+                  docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/keycloak-spi-provider:${env.DOCKER_TAG}
                   docker images
                   docker image prune -f
                   docker images
