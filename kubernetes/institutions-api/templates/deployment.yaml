@@ -69,6 +69,11 @@ spec:
                 secretKeyRef:
                   name: cassandra-credentials
                   key: cassandra.password
+            - name: JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: url
           ports:
             - name: {{ .Values.service.name }}
               containerPort: 9092
