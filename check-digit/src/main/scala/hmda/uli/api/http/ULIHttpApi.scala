@@ -15,12 +15,10 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.MediaTypes._
 import akka.stream.scaladsl.{Flow, Source}
 import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.api.http.model.ErrorResponse
 import hmda.uli.api.model.ULIModel._
 import hmda.uli.validation.ULI._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import hmda.api.http.codec.ErrorResponseCodec._
 import hmda.util.http.FilingResponseUtils.failedResponse
 
 import scala.concurrent.ExecutionContext
