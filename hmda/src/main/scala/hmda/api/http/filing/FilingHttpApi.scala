@@ -43,8 +43,8 @@ trait FilingHttpApi extends HmdaTimeDirectives {
 
   //institutions/<lei>/filings/<period>
   def filingReadPath(oAuth2Authorization: OAuth2Authorization) =
-    oAuth2Authorization.authorizeToken { _ =>
-      path("institutions" / Segment / "filings" / Segment) { (lei, period) =>
+    path("institutions" / Segment / "filings" / Segment) { (lei, period) =>
+      oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
         val institutionPersistence =
           sharding.entityRefFor(InstitutionPersistence.typeKey,
                                 s"${InstitutionPersistence.name}-$lei")

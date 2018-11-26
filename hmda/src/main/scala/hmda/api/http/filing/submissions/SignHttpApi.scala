@@ -45,10 +45,10 @@ trait SignHttpApi extends HmdaTimeDirectives {
 
   //institutions/<lei>/filings/<period>/submissions/<submissionId>/sign
   def signPath(oAuth2Authorization: OAuth2Authorization): Route =
-    oAuth2Authorization.authorizeToken { _ =>
-      path(
-        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "sign") {
-        (lei, period, seqNr) =>
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "sign") {
+      (lei, period, seqNr) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           val submissionId = SubmissionId(lei, period, seqNr)
           timedGet { uri =>
             val submissionPersistence =
@@ -114,7 +114,7 @@ trait SignHttpApi extends HmdaTimeDirectives {
                 }
               }
             }
-      }
+        }
     }
 
   def signRoutes(oAuth2Authorization: OAuth2Authorization): Route = {

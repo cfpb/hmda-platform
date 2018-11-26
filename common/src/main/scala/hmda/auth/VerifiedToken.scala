@@ -5,7 +5,8 @@ case class VerifiedToken(token: String,
                          name: String,
                          username: String,
                          email: String,
-                         roles: Seq[String])
+                         roles: Seq[String],
+                         lei: String)
 
 object VerifiedToken {
   def apply(): VerifiedToken =
@@ -14,5 +15,6 @@ object VerifiedToken {
                   "token",
                   "dev",
                   "dev@email.com",
-                  Seq.empty)
+                  Seq.empty,
+                  "lei")
 }

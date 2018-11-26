@@ -64,9 +64,9 @@ trait UploadHttpApi extends HmdaTimeDirectives {
 
   // institutions/<lei>/filings/<period>/submissions/<seqNr>
   def uploadHmdaFileRoute(oAuth2Authorization: OAuth2Authorization) =
-    oAuth2Authorization.authorizeToken { _ =>
-      path(Segment / "filings" / Segment / "submissions" / IntNumber) {
-        (lei, period, seqNr) =>
+    path(Segment / "filings" / Segment / "submissions" / IntNumber) {
+      (lei, period, seqNr) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedPost { uri =>
             val submissionId = SubmissionId(lei, period, seqNr)
             val uploadTimestamp = Instant.now.toEpochMilli
@@ -109,7 +109,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
                 failedResponse(StatusCodes.InternalServerError, uri, error)
             }
           }
-      }
+        }
     }
 
   def uploadRoutes(oAuth2Authorization: OAuth2Authorization): Route = {

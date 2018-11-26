@@ -41,9 +41,9 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
 
   //institutions/<lei>/filings/<period>/submissions
   def submissionCreatePath(oAuth2Authorization: OAuth2Authorization): Route =
-    oAuth2Authorization.authorizeToken { _ =>
-      path("institutions" / Segment / "filings" / Segment / "submissions") {
-        (lei, period) =>
+    path("institutions" / Segment / "filings" / Segment / "submissions") {
+      (lei, period) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedPost { uri =>
             val institutionPersistence =
               sharding.entityRefFor(InstitutionPersistence.typeKey,
@@ -96,15 +96,15 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
                 failedResponse(StatusCodes.InternalServerError, uri, error)
             }
           }
-      }
+        }
     }
 
   //institutions/<lei>/filings/<period>/submissions/latest
   def submissionLatestPath(oAuth2Authorization: OAuth2Authorization): Route =
-    oAuth2Authorization.authorizeToken { _ =>
-      path(
-        "institutions" / Segment / "filings" / Segment / "submissions" / "latest") {
-        (lei, period) =>
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / "latest") {
+      (lei, period) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedGet { uri =>
             val filingPersistence =
               sharding.entityRefFor(FilingPersistence.typeKey,
@@ -123,7 +123,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
                 failedResponse(StatusCodes.InternalServerError, uri, error)
             }
           }
-      }
+        }
     }
 
   def submissionRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
