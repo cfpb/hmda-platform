@@ -1,15 +1,9 @@
 package hmda.persistence.submission
 
-import akka.{Done, actor}
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.kafka.scaladsl.Producer
-import akka.kafka.ProducerSettings
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Source
-import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaTypedActor
 import hmda.messages.submission.SubmissionCommands.ModifySubmission
 import hmda.messages.submission.SubmissionEvents.{
@@ -23,15 +17,6 @@ import hmda.messages.submission.SubmissionProcessingCommands.{
   StartSyntacticalValidity
 }
 import hmda.model.filing.submission._
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringSerializer
-import hmda.messages.pubsub.KafkaTopics._
-import akka.actor.typed.scaladsl.adapter._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
-import io.circe.syntax._
-
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
 
