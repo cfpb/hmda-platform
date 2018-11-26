@@ -50,10 +50,10 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
   //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/<quality|macro>
   private val editTypeRegex = new Regex("quality|macro")
   def verifyPath(oAuth2Authorization: OAuth2Authorization): Route =
-    oAuth2Authorization.authorizeToken { _ =>
-      path(
-        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) {
-        (lei, period, seqNr, editType) =>
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editTypeRegex) {
+      (lei, period, seqNr, editType) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedPost { uri =>
             entity(as[EditsVerification]) { editsVerification =>
               val submissionId = SubmissionId(lei, period, seqNr)
@@ -123,7 +123,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
               }
             }
           }
-      }
+        }
     }
 
   def verifyRoutes(oAuth2Authorization: OAuth2Authorization): Route = {

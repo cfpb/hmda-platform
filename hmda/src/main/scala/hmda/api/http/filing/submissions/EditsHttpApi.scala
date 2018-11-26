@@ -53,10 +53,10 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
   //institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits
   def editsSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
-    oAuth2Authorization.authorizeToken { _ =>
-      path(
-        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits") {
-        (lei, period, seqNr) =>
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits") {
+      (lei, period, seqNr) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedGet { uri =>
             val submissionId = SubmissionId(lei, period, seqNr)
             val hmdaValidationError = sharding
@@ -91,16 +91,16 @@ trait EditsHttpApi extends HmdaTimeDirectives {
                 failedResponse(StatusCodes.InternalServerError, uri, e)
             }
           }
-      }
+        }
     }
 
   //institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/edit
-  def editDetailsPath(oAuth2Authorization: OAuth2Authorization): Route =
-    oAuth2Authorization.authorizeToken { _ =>
-      val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d""")
-      path(
-        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editNameRegex) {
-        (lei, period, seqNr, editName) =>
+  def editDetailsPath(oAuth2Authorization: OAuth2Authorization): Route = {
+    val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d""")
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editNameRegex) {
+      (lei, period, seqNr, editName) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedGet { uri =>
             parameters('page.as[Int] ? 1) { page =>
               val submissionId = SubmissionId(lei, period, seqNr)
@@ -138,9 +138,10 @@ trait EditsHttpApi extends HmdaTimeDirectives {
               }
             }
           }
-      }
+        }
 
     }
+  }
 
   def editsRoutes(oAuth2Authorization: OAuth2Authorization): Route = {
     handleRejections(corsRejectionHandler) {

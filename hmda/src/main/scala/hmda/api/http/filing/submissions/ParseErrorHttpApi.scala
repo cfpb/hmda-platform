@@ -35,10 +35,10 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
 
   //institutions/<lei>/filings/<period>/submissions/<submissionId>/parseErrors
   def parseErrorPath(oAuth2Authorization: OAuth2Authorization): Route =
-    oAuth2Authorization.authorizeToken { _ =>
-      path(
-        "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "parseErrors") {
-        (lei, period, seqNr) =>
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "parseErrors") {
+      (lei, period, seqNr) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedGet { uri =>
             parameters('page.as[Int] ? 1) { page =>
               val submissionId = SubmissionId(lei, period, seqNr)
@@ -95,7 +95,7 @@ trait ParseErrorHttpApi extends HmdaTimeDirectives {
               }
             }
           }
-      }
+        }
     }
 
   def parserErrorRoute(oAuth2Authorization: OAuth2Authorization): Route = {

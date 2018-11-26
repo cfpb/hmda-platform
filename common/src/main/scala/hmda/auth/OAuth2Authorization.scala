@@ -30,11 +30,40 @@ class OAuth2Authorization(logger: LoggingAdapter,
     }
   }
 
+  def authorizeTokenWithLei(lei: String): Directive1[VerifiedToken] = {
+    authorizeToken flatMap {
+      case t if t.lei.nonEmpty =>
+        if (runtimeMode == "dev") {
+          provide(t)
+        } else {
+          val leiList = t.lei.split(',')
+          if (leiList.contains(lei)) {
+            provide(t)
+          } else {
+            reject(AuthorizationFailedRejection)
+              .toDirective[Tuple1[VerifiedToken]]
+          }
+        }
+
+      case _ =>
+        if (runtimeMode == "dev") {
+          provide(VerifiedToken())
+        } else {
+          reject(AuthorizationFailedRejection)
+            .toDirective[Tuple1[VerifiedToken]]
+        }
+    }
+  }
+
   def authorizeToken: Directive1[VerifiedToken] = {
     bearerToken.flatMap {
       case Some(token) =>
         onComplete(tokenVerifier.verifyToken(token)).flatMap {
           _.map { t =>
+            val lei: String = if (t.getOtherClaims.containsKey("lei")) {
+              t.getOtherClaims.get("lei").toString
+            } else ""
+
             provide(
               VerifiedToken(
                 token,
@@ -42,7 +71,8 @@ class OAuth2Authorization(logger: LoggingAdapter,
                 t.getName,
                 t.getPreferredUsername,
                 t.getEmail,
-                t.getResourceAccess().get(clientId).getRoles.asScala.toSeq))
+                t.getResourceAccess().get(clientId).getRoles.asScala.toSeq,
+                lei))
           }.recover {
             case ex: Throwable =>
               logger.error("Authorization Token could not be verified {}", ex)
