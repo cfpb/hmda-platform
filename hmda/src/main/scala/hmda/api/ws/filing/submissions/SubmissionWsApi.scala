@@ -4,7 +4,6 @@ import java.time.Instant
 
 import akka.{NotUsed, actor}
 import akka.event.LoggingAdapter
-import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.model.ws.TextMessage
 import akka.http.scaladsl.model.ws.Message
 import akka.stream.ActorMaterializer
@@ -19,7 +18,6 @@ import hmda.api.ws.model.{
   SubmissionStatus,
   SubmissionStatusWSResponse
 }
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import io.circe.syntax._
 import io.circe.generic.auto._
 import hmda.model.filing.submission.SubmissionId

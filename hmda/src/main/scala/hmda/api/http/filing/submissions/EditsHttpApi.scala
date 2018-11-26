@@ -42,7 +42,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
 import scala.util.{Failure, Success}
 
-trait EdtisHttpApi extends HmdaTimeDirectives {
+trait EditsHttpApi extends HmdaTimeDirectives {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer

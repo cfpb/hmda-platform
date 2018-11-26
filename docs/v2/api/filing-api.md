@@ -365,6 +365,65 @@ Example response, with HTTP code 201:
   }
 }
 ```
+
+### Edits
+
+`/institutions/<lei>/filings/<period>/submissions/<submissionId>/edits`
+
+`GET`  - Returns a list of all edits for a given submission, including the edit name and description
+
+Results are grouped by edit type.
+
+Example response:
+
+```json
+{
+  "syntactical": {
+    "edits": [
+      {
+        "edit": "S020",
+        "description": "Agency code must = 1, 2, 3, 5, 7, 9. The agency that submits the data must be the same as the reported agency code.",
+      }
+      {
+        "edit": "S010",
+        "description": "The first record identifier in the file must = 1 (TS). The second and all subsequent record identifiers must = 2 (LAR).",
+      }
+    ]
+  },
+  "validity": {
+    "edits": [
+      {
+        "edit": "V555",
+        "description": "If loan purpose = 1 or 3, then lien status must = 1, 2, or 4.",
+      },
+      {
+        "edit": "V560",
+        "description": "If action taken type = 1-5, 7 or 8, then lien status must = 1, 2, or 3.",
+      }
+    ]
+  },
+  "quality": {
+    "verified": false,
+    "edits": []
+  },
+  "macro": {
+    "verified": false,
+    "edits": [
+      {
+        "edit": "Q023",
+        "description": "The number of loan applications that report MSA/MD = NA should be ≤ 30% of the total number of loan applications."
+      }
+    ]
+  },
+  "status": {
+      "code": 8,
+      "message": "Your data has been analyzed for Syntactical and Validity Errors.",
+      "description": "Your file has been analyzed and does not contain any Syntactical or Validity errors."
+  }
+}
+```
+
+
 ### Edits By Type
 
 `POST` - Provides verification for quality or macro edits

@@ -224,7 +224,7 @@ object HmdaValidationError
           if (state.qualityVerified && state.macroVerified) {
             Effect.persist(signed).thenRun { _ =>
               log.info(
-                s"Submission $submissionId sined at ${Instant.ofEpochMilli(timestamp)}")
+                s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
               updateSubmissionStatus(sharding, submissionId, Signed, log)
               updateSubmissionReceipt(
                 sharding,

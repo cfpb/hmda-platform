@@ -25,6 +25,7 @@ import org.keycloak.adapters.KeycloakDeploymentBuilder
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.util.Random
 
 class InstitutionAdminHttpApiSpec
     extends AkkaCassandraPersistenceSpec
@@ -51,7 +52,7 @@ class InstitutionAdminHttpApiSpec
 
   override def afterAll(): Unit = super.afterAll()
 
-  val lei = "AAA"
+  val lei = Random.alphanumeric.take(10).mkString
   val sampleInstitution =
     institutionGen.sample.getOrElse(Institution.empty).copy(LEI = lei)
 

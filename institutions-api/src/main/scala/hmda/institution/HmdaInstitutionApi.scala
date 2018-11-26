@@ -27,6 +27,9 @@ object HmdaInstitutionApi extends App {
   val host = config.getString("hmda.institution.http.host")
   val port = config.getString("hmda.institution.http.port")
 
+  val jdbcUrl = config.getString("db.db.url")
+  log.info(s"Connection URL is \n\n$jdbcUrl\n")
+
   implicit val system = ActorSystem("hmda-institutions")
 
   system.actorOf(HmdaInstitutionQueryApi.props(), "hmda-institutions-api")
