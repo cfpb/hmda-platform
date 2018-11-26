@@ -36,7 +36,7 @@ class OAuth2Authorization(logger: LoggingAdapter,
         if (runtimeMode == "dev") {
           provide(t)
         } else {
-          val leiList = t.lei.mkString(",")
+          val leiList = t.lei.split(',')
           if (leiList.contains(lei)) {
             provide(t)
           } else {
