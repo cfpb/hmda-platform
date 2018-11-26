@@ -38,7 +38,7 @@ trait InstitutionHttpApi extends HmdaTimeDirectives {
   //institutions/<lei>
   def institutionReadPath(oAuth2Authorization: OAuth2Authorization): Route =
     oAuth2Authorization.authorizeToken { _ =>
-      path("institutions" / Segment) { lei=>
+      path("institutions" / Segment) { lei =>
         val institutionPersistence =
           sharding.entityRefFor(InstitutionPersistence.typeKey,
                                 s"${InstitutionPersistence.name}-$lei")
