@@ -35,7 +35,6 @@ object FilingPersistence
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
       ).snapshotEvery(1000)
-        .withTagger(_ => Set(name.toLowerCase()))
     }
 
   override def commandHandler(ctx: ActorContext[FilingCommand])

@@ -56,8 +56,7 @@ object HmdaParserError
         emptyState = HmdaParserErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withTagger(_ => Set("parse"))
-        .snapshotEvery(1000)
+      ).snapshotEvery(1000)
     }
 
   override def commandHandler(ctx: ActorContext[SubmissionProcessingCommand])
