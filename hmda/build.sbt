@@ -17,3 +17,8 @@ dockerCommands :=
       Seq(Cmd("ENTRYPOINT", args.mkString(" ")))
     case v => Seq(v)
   }
+
+javaOptions in Universal ++= Seq(
+  "-J-XX:+UnlockExperimentalVMOptions",
+  "-J-XX:+UseCGroupMemoryLimitForHeap"
+)
