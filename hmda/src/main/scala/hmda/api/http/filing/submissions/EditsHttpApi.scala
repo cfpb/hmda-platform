@@ -96,7 +96,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
   //institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/edit
   def editDetailsPath(oAuth2Authorization: OAuth2Authorization): Route = {
-    val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d""")
+    val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d(?:-\d)?""")
     path(
       "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / editNameRegex) {
       (lei, period, seqNr, editName) =>
