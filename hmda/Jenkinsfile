@@ -58,7 +58,7 @@ volumes: [
                   helm upgrade --install --force \
                   --namespace=default \
                   --values=kubernetes/hmda-platform/values.yaml \
-                  --set image.tag=latest \
+                  --set image.tag=${env.DOCKER_TAG} \
                   --set service.name=hmda-platform-api \
                   --set image.pullPolicy=Always \
                   hmda-platform kubernetes/hmda-platform
