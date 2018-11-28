@@ -67,8 +67,7 @@ object HmdaValidationError
         emptyState = HmdaValidationErrorState(),
         commandHandler = commandHandler(ctx),
         eventHandler = eventHandler
-      ).withTagger(_ => Set("validate"))
-        .snapshotEvery(1000)
+      ).snapshotEvery(1000)
     }
 
   override def commandHandler(ctx: ActorContext[SubmissionProcessingCommand])
