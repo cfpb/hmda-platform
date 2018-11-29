@@ -20,7 +20,7 @@ replicaCount: 3
 
 image:
   repository: hmda/hmda-platform
-  tag: latest
+  tag: 2.7.0
   pullPolicy: IfNotPresent
 
 hmda:
