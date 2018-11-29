@@ -32,10 +32,8 @@ import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsPersistenceEvent,
   EditDetailsRowCounted
 }
-import hmda.model.edits.EditDetails
 import io.circe.generic.auto._
 import hmda.model.filing.EditDescriptionLookup._
-import hmda.model.filing.submissions.PaginatedResource
 import hmda.query.HmdaQuery._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -116,23 +114,17 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
               val fDetails = for {
                 editRowCount <- fEditRowCount
-                p = PaginatedResource(editRowCount.count)(page)
-                details <- editDetails(persistenceId,
-                                       editName,
-                                       p.fromIndex,
-                                       p.toIndex)
-              } yield (editRowCount, details)
+                s = EditDetailsSummary(editName,
+                                       Nil,
+                                       uri.path.toString(),
+                                       page,
+                                       editRowCount.count)
+                summary <- editDetails(persistenceId, s)
+              } yield summary
 
               onComplete(fDetails) {
-                case Success((editRowCount, details)) =>
-                  val detailsSummary = EditDetailsSummary(
-                    editName,
-                    details.flatMap(d => d.rows),
-                    uri.path.toString(),
-                    page,
-                    editRowCount.count
-                  )
-                  complete(ToResponseMarshallable(detailsSummary))
+                case Success(summary) =>
+                  complete(ToResponseMarshallable(summary))
                 case Failure(e) =>
                   failedResponse(StatusCodes.InternalServerError, uri, e)
               }
@@ -158,19 +150,19 @@ trait EditsHttpApi extends HmdaTimeDirectives {
     EditSummaryResponse(e.editName, lookupDescription(e.editName))
   }
 
-  private def editDetails(persistenceId: String,
-                          editName: String,
-                          from: Int,
-                          to: Int): Future[Seq[EditDetails]] = {
-    eventEnvelopeByPersistenceId(persistenceId)
+  private def editDetails(
+      persistenceId: String,
+      summary: EditDetailsSummary): Future[EditDetailsSummary] = {
+    val editDetails = eventEnvelopeByPersistenceId(persistenceId)
       .map(envelope => envelope.event.asInstanceOf[EditDetailsPersistenceEvent])
       .collect {
         case EditDetailsAdded(editDetail) => editDetail
       }
-      .filter(e => e.edit == editName)
-      .drop(from)
-      .take(to)
+      .filter(e => e.edit == summary.editName)
+      .drop(summary.fromIndex)
+      .take(summary.count)
       .runWith(Sink.seq)
+    editDetails.map(e => summary.copy(rows = e.flatMap(r => r.rows)))
   }
 
 }

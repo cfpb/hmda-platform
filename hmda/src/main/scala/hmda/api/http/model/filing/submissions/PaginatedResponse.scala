@@ -24,6 +24,9 @@ trait PaginatedResponse extends WithPagination {
     } else 0
   }
 
+  def fromIndex: Int = calculateStartIndex(total, 0, currentPage)
+  def toIndex: Int = calculateEndIndex(total, 0, currentPage)
+
   private def validPage: Boolean = currentPage >= 1 && currentPage <= lastPage
 
   private def configurablePath: String = s"$path{rel}"
