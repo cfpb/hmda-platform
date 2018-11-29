@@ -190,13 +190,13 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       .runWith(Sink.seq)
   }
 
-  private def validationErrorEventStream(
-      submissionId: SubmissionId): Source[HmdaRowValidatedError, NotUsed] = {
+  private def validationErrorEventStream(submissionId: SubmissionId) = {
     val persistenceId = s"${HmdaValidationError.name}-$submissionId"
     eventsByPersistenceId(persistenceId)
       .collect {
-        case evt @ HmdaRowValidatedError(rowNumber, validationErrors) => evt
+        case evt @ HmdaRowValidatedError(_, _) => evt
       }
+      .map(e => (e.rowNumber, e.validationErrors.map(e => e.toCsv)))
   }
 
 }
