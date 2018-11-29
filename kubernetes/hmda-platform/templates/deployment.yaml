@@ -16,6 +16,8 @@ spec:
         app: {{ template "hmda-platform.name" . }}
         release: {{ .Release.Name }}
         actorSystemName: {{ .Values.hmda.actorSystemName }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       serviceAccountName: {{ .Values.service.account.name }}
       containers:

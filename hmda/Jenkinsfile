@@ -28,7 +28,7 @@ volumes: [
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform hmda/target/docker/stage"
               if (env.TAG_NAME != null || gitBranch == "master") {
                 if (gitBranch == "master") {
-                  env.DOCKER_TAG = "latest"+commitId
+                  env.DOCKER_TAG = "latest"
                 } else {
                   env.DOCKER_TAG = env.TAG_NAME
                 }
@@ -59,13 +59,10 @@ volumes: [
                   --namespace=default \
                   --values=kubernetes/hmda-platform/values.yaml \
                   --set image.tag=${env.DOCKER_TAG} \
+                  --set sha256.id=${commitId} \
                   --set service.name=hmda-platform-api \
                   --set image.pullPolicy=Always \
                   hmda-platform kubernetes/hmda-platform
-                """
-                // for easy matching of helm installed version and built version
-                println "latest"+commitId
-                sh """
                   helm list -a
                 """
             }
