@@ -71,7 +71,18 @@ This task will create a `Docker` image. To run a container with the `HMDA Platfo
 
 `docker run --rm -ti -p 8080:8080 -p 8081:8081 -p 8082:8082 -p 19999:19999 hmda/hmda-platform` 
 
-The same approach can be followed to build and run Docker containers for the other microservices that form the HMDA Platform
+The same approach can be followed to build and run Docker containers for the other microservices that form the HMDA Platform. 
+
+Certain environment variables can be passed in to set the log level of the micro service
+
+```
+ZOOKEEPER_LOG_LEVEL (Defaulted to WARN)
+KAFKA_LOG_LEVEL (Defaulted to INFO)
+CASSANDRA_LOG_LEVEL (Defaulted to INFO)
+PLATFORM_LOG_LEVEL (Defaulted to WARN)
+INSTITUTION_LOG_LEVEL (Defaulted to INFO)
+CHECKDIGIT_LOG_LEVEL (Defaulted to DEBUG)
+```
 
 ### Running the application in clustered mode (mesos)
 
