@@ -392,7 +392,7 @@ Example response:
 }
 ```
 
-### Edits Details
+### Edit Details
 
 `/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<edit>`
 
