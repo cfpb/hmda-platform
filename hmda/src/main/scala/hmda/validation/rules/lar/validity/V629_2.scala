@@ -14,7 +14,7 @@ import hmda.validation.dsl.PredicateSyntax._
 
 object V629_2 extends EditCheck[LoanApplicationRegister] {
 
-  override def name: String = "V629_2"
+  override def name: String = "V629-2"
 
   override def parent: String = "V629"
 
