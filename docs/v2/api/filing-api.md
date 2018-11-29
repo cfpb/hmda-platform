@@ -451,6 +451,39 @@ Example response:
 }
 ```
 
+### Edit Details
+
+`/institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/<edit>`
+
+`GET` - Returns details for an edit
+
+```json
+{
+    "edit": "Q613",
+    "rows": [
+        {
+            "id": "B90YWS6AFX2LGWOXJ1LDFXNYXTW0X1EMV6356JR1UAJ66",
+            "fields": [
+                {
+                    "name": "name",
+                    "value": 1
+                }
+            ]
+        }
+    ],
+    "count": 1,
+    "total": 1,
+    "_links": {
+        "href": "/institutions/B90YWS6AFX2LGWOXJ1LD/filings/2018/submissions/5/edits/Q613{rel}",
+        "self": "?page=1",
+        "first": "?page=1",
+        "prev": "?page=1",
+        "next": "?page=1",
+        "last": "?page=1"
+    }
+}
+```
+
 ### Signature
 
 `/institutions/<lei>/filings/<period>/submissions/<submissionId>/sign`
