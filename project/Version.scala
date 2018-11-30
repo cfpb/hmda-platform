@@ -1,7 +1,7 @@
 object Version {
 
-  val logback    = "1.2.1"
-  val scalaTest  = "3.0.5"
+  val logback = "1.2.1"
+  val scalaTest = "3.0.5"
   val scalaCheck = "1.14.0"
   val akka = "2.5.18"
   val akkaHttp = "10.1.5"
@@ -17,6 +17,4 @@ object Version {
   val keycloak = "4.5.0.Final"
   val jboss = "3.3.2.Final"
   val httpcomponents = "4.5.6"
-  val embeddedKafka = "2.0.0"
-  val akkaStreamKafka = "1.0-M1"
 }

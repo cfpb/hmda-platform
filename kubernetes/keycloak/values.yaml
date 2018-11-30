@@ -43,7 +43,7 @@ keycloak:
         - name: theme
           mountPath: /theme
     - name: spi-provider
-      image: hmda/spi-provider:latest
+      image: hmda/keycloak-spi-provider:latest
       imagePullPolicy: Always
       command:
         - sh

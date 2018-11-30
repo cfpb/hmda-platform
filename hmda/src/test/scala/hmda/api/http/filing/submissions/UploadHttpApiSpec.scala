@@ -11,7 +11,6 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.typed.{Cluster, Join}
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.Uri.Path
-import akka.kafka.ConsumerSettings
 import akka.stream.scaladsl.Source
 import hmda.api.http.filing.FileUploadUtils
 import hmda.messages.filing.FilingCommands.CreateFiling
@@ -47,12 +46,13 @@ import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.submission.{SubmissionManager, SubmissionPersistence}
-import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
+import hmda.persistence.submission.{
+  HmdaRawData,
+  SubmissionManager,
+  SubmissionPersistence
+}
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LarGenerators._
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 import akka.testkit._
 
@@ -83,8 +83,6 @@ class UploadHttpApiSpec
       )
     )
   )
-
-  val kafkaHosts = config.getString("kafka.hosts")
 
   val period = "2018"
 
@@ -117,17 +115,11 @@ class UploadHttpApiSpec
   override def beforeAll(): Unit = {
     super.beforeAll()
     Cluster(typedSystem).manager ! Join(Cluster(typedSystem).selfMember.address)
-    implicit val embeddedKafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(
-      9092,
-      2182,
-      Map("offsets.topic.replication.factor" -> "1",
-          "zookeeper.connection.timeout.ms" -> "20000"))
-    EmbeddedKafka.start()
-
     InstitutionPersistence.startShardRegion(sharding)
     SubmissionManager.startShardRegion(sharding)
     FilingPersistence.startShardRegion(sharding)
     SubmissionPersistence.startShardRegion(sharding)
+    HmdaRawData.startShardRegion(sharding)
 
     val institutionPersistence =
       sharding.entityRefFor(
@@ -155,7 +147,6 @@ class UploadHttpApiSpec
   }
 
   override def afterAll(): Unit = {
-    EmbeddedKafka.stop()
     super.afterAll()
   }
 
@@ -175,14 +166,6 @@ class UploadHttpApiSpec
 
   val hmdaFileCsv = List(tsCsv) ++ larCsv
   val hmdaFile = multiPartFile(hmdaFileCsv.mkString(""), "sample.txt")
-
-  val consumerConfig = system.settings.config.getConfig("akka.kafka.consumer")
-  val consumerSettings =
-    ConsumerSettings(consumerConfig,
-                     new StringDeserializer,
-                     new StringDeserializer)
-      .withBootstrapServers(kafkaHosts)
-      .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   "Upload API" must {
     "upload HMDA File" in {

@@ -3,8 +3,8 @@ import sbt._
 object Dependencies {
 
   val repos = Seq(
-   "Local Maven Repo"  at "file://" + Path.userHome.absolutePath + "/.m2/repository",
-    "Typesafe Repo"     at "http://repo.typesafe.com/typesafe/releases/",
+    "Local Maven Repo" at "file://" + Path.userHome.absolutePath + "/.m2/repository",
+    "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/",
     "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases"
   )
 
@@ -31,7 +31,7 @@ object Dependencies {
   lazy val akkaManagement = "com.lightbend.akka.management" %% "akka-management" % Version.akkaClusterManagement
   lazy val akkaClusterHttpManagement = "com.lightbend.akka.management" %% "akka-management-cluster-http" % Version.akkaClusterManagement
   lazy val akkaCors = "ch.megard" %% "akka-http-cors" % Version.akkaCors
-  lazy val circe =  "io.circe" %% "circe-core" % Version.circe
+  lazy val circe = "io.circe" %% "circe-core" % Version.circe
   lazy val circeGeneric = "io.circe" %% "circe-generic" % Version.circe
   lazy val circeParser = "io.circe" %% "circe-parser" % Version.circe
   lazy val akkaPersistenceCassandra = "com.typesafe.akka" %% "akka-persistence-cassandra" % Version.cassandraPluginVersion
@@ -42,9 +42,7 @@ object Dependencies {
   lazy val postgres = "org.postgresql" % "postgresql" % Version.postgres
   lazy val h2 = "com.h2database" % "h2" % Version.h2 % Test
   lazy val keycloakAdapter = "org.keycloak" % "keycloak-adapter-core" % Version.keycloak
-  lazy val keycloak = "org.keycloak" % "keycloak-core"  % Version.keycloak
+  lazy val keycloak = "org.keycloak" % "keycloak-core" % Version.keycloak
   lazy val jbossLogging = "org.jboss.logging" % "jboss-logging" % Version.jboss
   lazy val httpClient = "org.apache.httpcomponents" % "httpclient" % Version.httpcomponents
-  lazy val kafkaLauncher = "net.manub" %% "scalatest-embedded-kafka" % Version.embeddedKafka
-  lazy val akkaKafkaStreams = "com.typesafe.akka" %% "akka-stream-kafka" % Version.akkaStreamKafka
 }

@@ -27,8 +27,7 @@ lazy val akkaDeps = Seq(
   akkaClusterHttpManagement,
   akkaTestkitTyped,
   akkaCors,
-  akkaClusterDowning,
-  akkaKafkaStreams
+  akkaClusterDowning
 )
 
 lazy val akkaPersistenceDeps =
@@ -37,8 +36,7 @@ lazy val akkaPersistenceDeps =
       akkaPersistenceTyped,
       akkaClusterShardingTyped,
       akkaPersistenceCassandra,
-      cassandraLauncher,
-      kafkaLauncher)
+      cassandraLauncher)
 
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)

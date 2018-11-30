@@ -29,15 +29,14 @@ import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
 import HmdaProcessingUtils._
-import hmda.messages.pubsub.KafkaTopics.uploadTopic
 import EditDetailsConverter._
+import akka.NotUsed
 import akka.cluster.sharding.typed.scaladsl.EntityRef
 import hmda.messages.submission.EditDetailsCommands.{
   EditDetailsPersistenceCommand,
   PersistEditDetails
 }
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
@@ -50,8 +49,6 @@ object HmdaValidationError
   override val name: String = "HmdaValidationError"
 
   val config = ConfigFactory.load()
-  val kafkaHosts = config.getString("kafka.hosts")
-  val kafkaIdleTimeout = config.getInt("kafka.idle-timeout")
   val futureTimeout = config.getInt("hmda.actor.timeout")
   val processingYear = config.getInt("hmda.filing.year")
 
@@ -91,22 +88,19 @@ object HmdaValidationError
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext)
-            .idleTimeout(kafkaIdleTimeout.seconds)
             .runWith(Sink.ignore)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
                                                       validationContext)
-            .idleTimeout(kafkaIdleTimeout.seconds)
             .runWith(Sink.ignore)
         } yield (tsErrors, larSyntacticalValidityErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
-            log.warning(
-              s"Syntactical / Validity stream completed for ${submissionId.toString}")
-          case Failure(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
+          case Failure(e) =>
+            log.error(e.getLocalizedMessage)
         }
 
         Effect.none
@@ -135,17 +129,16 @@ object HmdaValidationError
                                    ctx,
                                    submissionId,
                                    ValidationContext())
-            .idleTimeout(kafkaIdleTimeout.seconds)
             .runWith(Sink.ignore)
         } yield larErrors
 
         fQuality.onComplete {
           case Success(_) =>
-            log.warning(
-              s"Quality stream completed for ${submissionId.toString}")
-          case Failure(_) =>
             ctx.asScala.self ! CompleteQuality(submissionId)
+          case Failure(e) =>
+            log.error(e.getLocalizedMessage)
         }
+
         Effect.none
 
       case CompleteQuality(submissionId) =>
@@ -273,9 +266,10 @@ object HmdaValidationError
     super.startShardRegion(sharding)
   }
 
-  private def validateTs(ctx: ActorContext[SubmissionProcessingCommand],
-                         submissionId: SubmissionId,
-                         validationContext: ValidationContext) = {
+  private def validateTs(
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId,
+      validationContext: ValidationContext)(implicit system: ActorSystem) = {
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(validateTsFlow("all", validationContext))
@@ -294,10 +288,11 @@ object HmdaValidationError
         ))
   }
 
-  private def validateLar(editCheck: String,
-                          ctx: ActorContext[SubmissionProcessingCommand],
-                          submissionId: SubmissionId,
-                          validationContext: ValidationContext) = {
+  private def validateLar(
+      editCheck: String,
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId,
+      validationContext: ValidationContext)(implicit system: ActorSystem) = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateLarFlow(editCheck, validationContext))
@@ -318,7 +313,8 @@ object HmdaValidationError
 
   private def maybeTs(ctx: ActorContext[SubmissionProcessingCommand],
                       submissionId: SubmissionId)(
-      implicit materializer: ActorMaterializer,
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer,
       ec: ExecutionContext): Future[Option[TransmittalSheet]] = {
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
@@ -332,7 +328,8 @@ object HmdaValidationError
                                 sharding: ClusterSharding,
                                 ctx: ActorContext[SubmissionProcessingCommand],
                                 submissionId: SubmissionId)(
-      implicit materializer: ActorMaterializer,
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer,
       ec: ExecutionContext): Future[ValidationContext] = {
     val institutionPersistence =
       sharding.entityRefFor(
@@ -352,9 +349,10 @@ object HmdaValidationError
 
   private def uploadConsumerRawStr(
       ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId) = {
-    uploadConsumer(ctx.asScala.system, submissionId, uploadTopic)
-      .map(_.record.value())
+      submissionId: SubmissionId)(
+      implicit system: ActorSystem): Source[ByteString, NotUsed] = {
+    readRawData(submissionId)
+      .map(line => line.data)
       .map(ByteString(_))
   }
 
