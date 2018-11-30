@@ -1,7 +1,11 @@
 package hmda.serialization.submission
 
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
-import hmda.persistence.serialization.raw.data.events.LineAddedMessage
+import hmda.model.processing.state.HmdaRawDataState
+import hmda.persistence.serialization.raw.data.events.{
+  HmdaRawDataStateMessage,
+  LineAddedMessage
+}
 
 object HmdaRawDataEventsProtobufConverter {
 
@@ -16,6 +20,19 @@ object HmdaRawDataEventsProtobufConverter {
     LineAdded(
       msg.timestamp,
       msg.data
+    )
+  }
+
+  def rawDataStateToProtobuf(evt: HmdaRawDataState): HmdaRawDataStateMessage = {
+    HmdaRawDataStateMessage(
+      evt.size
+    )
+  }
+
+  def rawDataStateFromProtobuf(
+      msg: HmdaRawDataStateMessage): HmdaRawDataState = {
+    HmdaRawDataState(
+      msg.size
     )
   }
 

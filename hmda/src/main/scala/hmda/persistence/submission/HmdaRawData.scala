@@ -12,15 +12,8 @@ import hmda.messages.submission.HmdaRawDataCommands.{
   HmdaRawDataCommand
 }
 import hmda.messages.submission.HmdaRawDataEvents.{HmdaRawDataEvent, LineAdded}
+import hmda.model.processing.state.HmdaRawDataState
 import hmda.persistence.HmdaTypedPersistentActor
-
-case class HmdaRawDataState(size: Int = 0) {
-  def update(event: HmdaRawDataEvent): HmdaRawDataState = event match {
-    case LineAdded(_, _) =>
-      HmdaRawDataState(size + 1)
-    case _ => this
-  }
-}
 
 object HmdaRawData
     extends HmdaTypedPersistentActor[HmdaRawDataCommand,
