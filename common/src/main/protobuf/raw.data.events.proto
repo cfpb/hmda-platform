@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+message LineAddedMessage {
+    int64 timestamp = 1;
+    string data = 2;
+}
+
+message HmdaRawDataStateMessage {
+    int32 size = 1;
+}

@@ -50,11 +50,6 @@ spec:
             configMapKeyRef:
               name: keycloak-configmap
               key: auth.url
-        - name: KAFKA_CLUSTER_HOSTS
-          valueFrom:
-            configMapKeyRef:
-              name: kafka-configmap
-              key: kafka.hosts
         livenessProbe:
           tcpSocket:
             port: {{ .Values.bootstrap.port }}

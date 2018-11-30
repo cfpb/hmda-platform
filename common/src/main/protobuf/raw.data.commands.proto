@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "hmda.persistence.serialization";
+option optimize_for = SPEED;
+
+import "submission.proto";
+
+message AddLineMessage {
+    SubmissionIdMessage submissionId = 1;
+    int64 timestamp = 2;
+    string data = 3;
+    string maybeReplyTo = 4;
+}

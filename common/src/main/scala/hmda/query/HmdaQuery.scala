@@ -6,6 +6,7 @@ import akka.persistence.query.{EventEnvelope, Offset, PersistenceQuery}
 import akka.persistence.query.scaladsl._
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
+import hmda.messages.CommonMessages.Event
 
 object HmdaQuery {
 
@@ -28,6 +29,13 @@ object HmdaQuery {
   def eventEnvelopeByPersistenceId(persistenceId: String)(
       implicit system: ActorSystem): Source[EventEnvelope, NotUsed] = {
     readJournal(system).eventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
+  }
+
+  def eventsByPersistenceId(persistenceId: String)(
+      implicit system: ActorSystem): Source[Event, NotUsed] = {
+    readJournal(system)
+      .currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
+      .map(e => e.event.asInstanceOf[Event])
   }
 
 }

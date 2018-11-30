@@ -1,12 +1,12 @@
 package hmda.persistence.submission
 
-import akka.actor.typed.{ActorSystem, Logger}
+import akka.NotUsed
+import akka.actor.ActorSystem
+import akka.actor.typed.Logger
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
-import akka.kafka.ConsumerMessage.CommittableMessage
-import akka.kafka.{ConsumerSettings, Subscriptions}
-import akka.kafka.scaladsl.Consumer
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
+import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.messages.submission.SubmissionCommands.{
   GetSubmission,
   ModifySubmission,
@@ -15,32 +15,21 @@ import hmda.messages.submission.SubmissionCommands.{
 import hmda.messages.submission.SubmissionEvents.SubmissionEvent
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
 import hmda.model.filing.submission.{Submission, SubmissionId, SubmissionStatus}
-import hmda.persistence.submission.HmdaParserError.kafkaHosts
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.StringDeserializer
+import hmda.query.HmdaQuery._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaProcessingUtils {
 
-  def uploadConsumer(system: ActorSystem[_],
-                     submissionId: SubmissionId,
-                     topic: String)
-    : Source[CommittableMessage[String, String], Consumer.Control] = {
+  def readRawData(submissionId: SubmissionId)(
+      implicit system: ActorSystem): Source[LineAdded, NotUsed] = {
 
-    val kafkaConfig =
-      system.settings.config.getConfig("akka.kafka.consumer")
-    val consumerSettings =
-      ConsumerSettings(kafkaConfig,
-                       new StringDeserializer,
-                       new StringDeserializer)
-        .withBootstrapServers(kafkaHosts)
-        .withGroupId(submissionId.toString)
-        .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+    val persistenceId = s"${HmdaRawData.name}-$submissionId"
 
-    Consumer
-      .committableSource(consumerSettings, Subscriptions.topics(topic))
-      .filter(_.record.key() == submissionId.toString)
+    eventsByPersistenceId(persistenceId)
+      .collect {
+        case evt: LineAdded => evt
+      }
 
   }
 

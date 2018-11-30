@@ -23,6 +23,7 @@ object HmdaPersistence {
       InstitutionPersistence.startShardRegion(sharding)
       FilingPersistence.startShardRegion(sharding)
       SubmissionPersistence.startShardRegion(sharding)
+      HmdaRawData.startShardRegion(sharding)
       SubmissionManager.startShardRegion(sharding)
       HmdaParserError.startShardRegion(sharding)
       HmdaValidationError.startShardRegion(sharding)

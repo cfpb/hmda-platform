@@ -30,12 +30,7 @@ import hmda.messages.submission.SubmissionProcessingCommands.{
 }
 import hmda.model.filing.Filing
 import hmda.model.filing.FilingGenerator.filingGen
-import hmda.model.filing.submission.{
-  Created,
-  ParsedWithErrors,
-  Submission,
-  SubmissionId
-}
+import hmda.model.filing.submission.{Created, Submission, SubmissionId}
 import hmda.model.institution.Institution
 import hmda.model.institution.InstitutionGenerators.institutionGen
 import hmda.model.submission.SubmissionGenerator.submissionGen
