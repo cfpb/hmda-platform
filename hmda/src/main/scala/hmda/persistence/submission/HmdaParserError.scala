@@ -35,8 +35,6 @@ object HmdaParserError
   override val name: String = "HmdaParserError"
 
   val config = ConfigFactory.load()
-  val kafkaHosts = config.getString("kafka.hosts")
-  val kafkaIdleTimeout = config.getInt("kafka.idle-timeout")
   val futureTimeout = config.getInt("hmda.actor.timeout")
 
   implicit val timeout: Timeout = Timeout(futureTimeout.seconds)

@@ -7,21 +7,12 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import hmda.messages.CommonMessages.{Command, Event}
-import hmda.model.filing.submission.SubmissionId
+import hmda.messages.submission.HmdaRawDataCommands.{
+  AddLine,
+  HmdaRawDataCommand
+}
+import hmda.messages.submission.HmdaRawDataEvents.{HmdaRawDataEvent, LineAdded}
 import hmda.persistence.HmdaTypedPersistentActor
-
-sealed trait HmdaRawDataCommand extends Command
-
-case class AddLine(submissionId: SubmissionId,
-                   timestamp: Long,
-                   data: String,
-                   replyTo: Option[ActorRef[HmdaRawDataEvent]])
-    extends HmdaRawDataCommand
-case class CompleteUpload(submissionId: SubmissionId) extends HmdaRawDataCommand
-
-sealed trait HmdaRawDataEvent extends Event
-case class LineAdded(timestamp: Long, data: String) extends HmdaRawDataEvent
 
 case class HmdaRawDataState(size: Int = 0) {
   def update(event: HmdaRawDataEvent): HmdaRawDataState = event match {
@@ -58,17 +49,13 @@ object HmdaRawData
         case AddLine(_, timestamp, data, maybeReplyTo) =>
           val evt = LineAdded(timestamp, data)
           Effect.persist(evt).thenRun { _ =>
-            log.debug(s"Persisted: $data")
+            log.info(s"Persisted: $data")
             maybeReplyTo match {
               case Some(replyTo) =>
                 replyTo ! evt
               case None => //Do Nothing
             }
           }
-
-        case CompleteUpload(submissionId) =>
-          log.debug(s"Upload completed for $submissionId")
-          Effect.none
       }
   }
 

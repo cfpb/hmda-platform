@@ -8,6 +8,8 @@ import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
+import hmda.messages.submission.HmdaRawDataCommands.AddLine
+import hmda.messages.submission.HmdaRawDataEvents.{HmdaRawDataEvent, LineAdded}
 import hmda.model.filing.submission.SubmissionId
 
 class HmdaRawDataSpec extends AkkaCassandraPersistenceSpec {

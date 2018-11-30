@@ -50,8 +50,6 @@ object HmdaValidationError
   override val name: String = "HmdaValidationError"
 
   val config = ConfigFactory.load()
-  val kafkaHosts = config.getString("kafka.hosts")
-  val kafkaIdleTimeout = config.getInt("kafka.idle-timeout")
   val futureTimeout = config.getInt("hmda.actor.timeout")
   val processingYear = config.getInt("hmda.filing.year")
 
