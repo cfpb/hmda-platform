@@ -13,9 +13,6 @@ keycloak:
 kafka:
   hosts: broker.kafka.l4lb.thisdcos.directory:9092
 
-sha256:
-  id: gitcommitid
-
 rbac:
   enabled: false
 

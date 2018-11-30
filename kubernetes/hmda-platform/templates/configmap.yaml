@@ -26,6 +26,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: sha256-configmap
+  name: imagetag-configmap
 data:
-  sha256.id: {{ .Values.sha256.id }}
+  image.tag: {{ .Values.image.tag }}
