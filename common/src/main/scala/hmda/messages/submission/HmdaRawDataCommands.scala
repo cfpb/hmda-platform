@@ -12,6 +12,6 @@ object HmdaRawDataCommands {
   case class AddLine(submissionId: SubmissionId,
                      timestamp: Long,
                      data: String,
-                     replyTo: Option[ActorRef[HmdaRawDataEvent]])
+                     maybeReplyTo: Option[ActorRef[HmdaRawDataEvent]])
       extends HmdaRawDataCommand
 }

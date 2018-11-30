@@ -46,7 +46,11 @@ import hmda.model.submission.SubmissionGenerator.submissionGen
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
-import hmda.persistence.submission.{SubmissionManager, SubmissionPersistence}
+import hmda.persistence.submission.{
+  HmdaRawData,
+  SubmissionManager,
+  SubmissionPersistence
+}
 import hmda.model.filing.ts.TsGenerators._
 import hmda.model.filing.lar.LarGenerators._
 import org.keycloak.adapters.KeycloakDeploymentBuilder
@@ -79,8 +83,6 @@ class UploadHttpApiSpec
       )
     )
   )
-
-  val kafkaHosts = config.getString("kafka.hosts")
 
   val period = "2018"
 
@@ -117,6 +119,7 @@ class UploadHttpApiSpec
     SubmissionManager.startShardRegion(sharding)
     FilingPersistence.startShardRegion(sharding)
     SubmissionPersistence.startShardRegion(sharding)
+    HmdaRawData.startShardRegion(sharding)
 
     val institutionPersistence =
       sharding.entityRefFor(
@@ -163,8 +166,6 @@ class UploadHttpApiSpec
 
   val hmdaFileCsv = List(tsCsv) ++ larCsv
   val hmdaFile = multiPartFile(hmdaFileCsv.mkString(""), "sample.txt")
-
-  val consumerConfig = system.settings.config.getConfig("akka.kafka.consumer")
 
   "Upload API" must {
     "upload HMDA File" in {
