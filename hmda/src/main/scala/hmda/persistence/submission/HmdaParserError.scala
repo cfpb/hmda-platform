@@ -6,7 +6,7 @@ import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
-import akka.util.Timeout
+import akka.util.{ByteString, Timeout}
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents.{
   HmdaRowParsedCount,
@@ -23,9 +23,13 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submissions.PaginatedResource
 import hmda.model.processing.state.HmdaParserErrorState
 import HmdaProcessingUtils._
+import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.typed.scaladsl.ActorFlow
+import hmda.parser.filing.ParserFlow._
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 
 object HmdaParserError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -66,36 +70,36 @@ object HmdaParserError
       case StartParsing(submissionId) =>
         log.info(s"Start parsing for ${submissionId.toString}")
 
-        //TODO: read raw events from Cassandra
-//        uploadConsumer(ctx.asScala.system, submissionId, uploadTopic)
-//          .map(_.record.value())
-//          .map(ByteString(_))
-//          .via(parseHmdaFile)
-//          .zip(Source.fromIterator(() => Iterator.from(1)))
-//          .collect {
-//            case (Left(errors), rowNumber) =>
-//              PersistHmdaRowParsedError(rowNumber,
-//                                        errors.map(_.errorMessage),
-//                                        None)
-//          }
-//          .via(ActorFlow.ask(ctx.asScala.self)(
-//            (el, replyTo: ActorRef[HmdaRowParsedError]) =>
-//              PersistHmdaRowParsedError(el.rowNumber,
-//                                        el.errors,
-//                                        Some(replyTo))))
-//          .idleTimeout(kafkaIdleTimeout.seconds)
-//          .runWith(Sink.ignore)
-//          .onComplete {
-//            case Success(_) =>
-//              log.debug(s"stream completed for ${submissionId.toString}")
-//            case Failure(_) =>
-//              ctx.asScala.self ! CompleteParsing(submissionId)
-//          }
+        readRawData(submissionId)
+          .map(line => line.data)
+          .map(ByteString(_))
+          .via(parseHmdaFile)
+          .zip(Source.fromIterator(() => Iterator.from(1)))
+          .collect {
+            case (Left(errors), rowNumber) =>
+              PersistHmdaRowParsedError(rowNumber,
+                                        errors.map(_.errorMessage),
+                                        None)
+          }
+          .via(
+            ActorFlow.ask(ctx.asScala.self)(
+              (el, replyTo: ActorRef[HmdaRowParsedError]) =>
+                PersistHmdaRowParsedError(el.rowNumber,
+                                          el.errors,
+                                          Some(replyTo))))
+          .runWith(Sink.ignore)
+          .onComplete {
+            case Success(_) =>
+              ctx.asScala.self ! CompleteParsing(submissionId)
+            case Failure(_) =>
+              log.error(s"Uploading failed for $submissionId")
+          }
+
         Effect.none
 
       case PersistHmdaRowParsedError(rowNumber, errors, maybeReplyTo) =>
         Effect.persist(HmdaRowParsedError(rowNumber, errors)).thenRun { _ =>
-          log.debug(s"Persisted error: $rowNumber, $errors")
+          log.info(s"Persisted error: $rowNumber, $errors")
           maybeReplyTo match {
             case Some(replyTo) =>
               replyTo ! HmdaRowParsedError(rowNumber, errors)

@@ -30,6 +30,7 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import hmda.api.http.codec.ErrorResponseCodec._
+import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
@@ -37,7 +38,7 @@ import hmda.messages.submission.HmdaRawDataCommands.{
   AddLine,
   HmdaRawDataCommand
 }
-import hmda.messages.submission.HmdaRawDataEvents.{HmdaRawDataEvent, LineAdded}
+import hmda.messages.submission.HmdaRawDataEvents.HmdaRawDataEvent
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.submission._
 import hmda.persistence.submission.{

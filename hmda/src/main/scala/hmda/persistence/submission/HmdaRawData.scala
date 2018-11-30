@@ -49,7 +49,7 @@ object HmdaRawData
         case AddLine(_, timestamp, data, maybeReplyTo) =>
           val evt = LineAdded(timestamp, data)
           Effect.persist(evt).thenRun { _ =>
-            log.info(s"Persisted: $data")
+            log.debug(s"Persisted: $data")
             maybeReplyTo match {
               case Some(replyTo) =>
                 replyTo ! evt
