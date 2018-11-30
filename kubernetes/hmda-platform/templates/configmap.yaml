@@ -13,11 +13,3 @@ metadata:
   name: keycloak-configmap
 data:
   auth.url: {{ .Values.keycloak.url }}
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: kafka-configmap
-data:
-  kafka.hosts: {{ .Values.kafka.hosts }}
