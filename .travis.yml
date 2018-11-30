@@ -8,10 +8,10 @@ cache:
 
 language: scala
 
-scala: 2.12.4
+scala: 2.12.7
 
 jdk:
-- oraclejdk9
+- openjdk11
 - oraclejdk8
 
 before_install:
