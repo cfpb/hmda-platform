@@ -19,9 +19,6 @@ import akka.http.scaladsl.server.Directives.{
   pathPrefix
 }
 import akka.http.scaladsl.server.Route
-import akka.kafka.ProducerMessage.MultiResultPart
-import akka.kafka.{ProducerMessage, ProducerSettings}
-import akka.kafka.scaladsl.Producer
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Framing, Sink}
 import akka.util.{ByteString, Timeout}
@@ -41,9 +38,6 @@ import hmda.auth.OAuth2Authorization
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.submission._
 import hmda.persistence.submission.{SubmissionManager, SubmissionPersistence}
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringSerializer
-import hmda.messages.pubsub.KafkaTopics._
 import hmda.messages.submission.SubmissionManagerCommands.{
   SubmissionManagerCommand,
   UpdateSubmissionStatus
@@ -95,7 +89,6 @@ trait UploadHttpApi extends HmdaTimeDirectives {
                   case Some(submission) =>
                     if (submission.status == Created) {
                       uploadFile(submissionManager,
-                                 uploadTopic,
                                  uploadTimestamp,
                                  submission,
                                  uri)
@@ -125,7 +118,6 @@ trait UploadHttpApi extends HmdaTimeDirectives {
   }
 
   private def uploadFile(submissionManager: EntityRef[SubmissionManagerCommand],
-                         topic: String,
                          uploadTimeStamp: Long,
                          submission: Submission,
                          uri: Uri): Route = {
@@ -140,7 +132,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
         val fUploaded = byteSource
           .via(splitLines)
           .map(_.utf8String + "\n")
-          .via(uploadProducer(topic, submission.id))
+          .via(uploadFile)
           .runWith(Sink.ignore)
 
         onComplete(fUploaded) {
@@ -169,38 +161,41 @@ trait UploadHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def uploadProducer(
-      topic: String,
-      submissionId: SubmissionId): Flow[String, String, NotUsed] = {
+  //TODO: Implement upload to Cassandra
+  private def uploadFile: Flow[String, String, NotUsed] = ???
 
-    val kafkaHosts = config.getString("kafka.hosts")
-    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
-    val producerSettings =
-      ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
-        .withBootstrapServers(kafkaHosts)
-
-    Flow[String]
-      .map { value =>
-        ProducerMessage.Message(
-          new ProducerRecord(topic, submissionId.toString, value),
-          value
-        )
-      }
-      .via(Producer.flexiFlow(producerSettings))
-      .map {
-        case ProducerMessage.Result(_, message) =>
-          val record = message.record
-          record.value()
-        case ProducerMessage.MultiResult(parts, _) =>
-          parts
-            .map {
-              case MultiResultPart(_, record) =>
-                record.value()
-            }
-            .mkString(",")
-        case ProducerMessage.PassThroughResult(passThrough) =>
-          passThrough
-      }
-  }
+//  private def uploadProducer(
+//      topic: String,
+//      submissionId: SubmissionId): Flow[String, String, NotUsed] = {
+//
+//    val kafkaHosts = config.getString("kafka.hosts")
+//    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
+//    val producerSettings =
+//      ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
+//        .withBootstrapServers(kafkaHosts)
+//
+//    Flow[String]
+//      .map { value =>
+//        ProducerMessage.Message(
+//          new ProducerRecord(topic, submissionId.toString, value),
+//          value
+//        )
+//      }
+//      .via(Producer.flexiFlow(producerSettings))
+//      .map {
+//        case ProducerMessage.Result(_, message) =>
+//          val record = message.record
+//          record.value()
+//        case ProducerMessage.MultiResult(parts, _) =>
+//          parts
+//            .map {
+//              case MultiResultPart(_, record) =>
+//                record.value()
+//            }
+//            .mkString(",")
+//        case ProducerMessage.PassThroughResult(passThrough) =>
+//          passThrough
+//      }
+//  }
 
 }

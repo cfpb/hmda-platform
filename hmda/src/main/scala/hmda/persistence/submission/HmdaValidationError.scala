@@ -8,7 +8,7 @@ import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -29,8 +29,8 @@ import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
 import HmdaProcessingUtils._
-import hmda.messages.pubsub.KafkaTopics.uploadTopic
 import EditDetailsConverter._
+import akka.NotUsed
 import akka.cluster.sharding.typed.scaladsl.EntityRef
 import hmda.messages.submission.EditDetailsCommands.{
   EditDetailsPersistenceCommand,
@@ -88,26 +88,27 @@ object HmdaValidationError
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
 
-        val fSyntacticalValidity = for {
-          validationContext <- fValidationContext
-          tsErrors <- validateTs(ctx, submissionId, validationContext)
-            .idleTimeout(kafkaIdleTimeout.seconds)
-            .runWith(Sink.ignore)
-          larSyntacticalValidityErrors <- validateLar("syntactical-validity",
-                                                      ctx,
-                                                      submissionId,
-                                                      validationContext)
-            .idleTimeout(kafkaIdleTimeout.seconds)
-            .runWith(Sink.ignore)
-        } yield (tsErrors, larSyntacticalValidityErrors)
-
-        fSyntacticalValidity.onComplete {
-          case Success(_) =>
-            log.warning(
-              s"Syntactical / Validity stream completed for ${submissionId.toString}")
-          case Failure(_) =>
-            ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
-        }
+        //TODO: implement syntactical / validity
+//        val fSyntacticalValidity = for {
+//          validationContext <- fValidationContext
+//          tsErrors <- validateTs(ctx, submissionId, validationContext)
+//            .idleTimeout(kafkaIdleTimeout.seconds)
+//            .runWith(Sink.ignore)
+//          larSyntacticalValidityErrors <- validateLar("syntactical-validity",
+//                                                      ctx,
+//                                                      submissionId,
+//                                                      validationContext)
+//            .idleTimeout(kafkaIdleTimeout.seconds)
+//            .runWith(Sink.ignore)
+//        } yield (tsErrors, larSyntacticalValidityErrors)
+//
+//        fSyntacticalValidity.onComplete {
+//          case Success(_) =>
+//            log.warning(
+//              s"Syntactical / Validity stream completed for ${submissionId.toString}")
+//          case Failure(_) =>
+//            ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
+//        }
 
         Effect.none
 
@@ -130,22 +131,23 @@ object HmdaValidationError
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
 
-        val fQuality = for {
-          larErrors <- validateLar("quality",
-                                   ctx,
-                                   submissionId,
-                                   ValidationContext())
-            .idleTimeout(kafkaIdleTimeout.seconds)
-            .runWith(Sink.ignore)
-        } yield larErrors
-
-        fQuality.onComplete {
-          case Success(_) =>
-            log.warning(
-              s"Quality stream completed for ${submissionId.toString}")
-          case Failure(_) =>
-            ctx.asScala.self ! CompleteQuality(submissionId)
-        }
+        //TODO: implement quality validation
+//        val fQuality = for {
+//          larErrors <- validateLar("quality",
+//                                   ctx,
+//                                   submissionId,
+//                                   ValidationContext())
+//            .idleTimeout(kafkaIdleTimeout.seconds)
+//            .runWith(Sink.ignore)
+//        } yield larErrors
+//
+//        fQuality.onComplete {
+//          case Success(_) =>
+//            log.warning(
+//              s"Quality stream completed for ${submissionId.toString}")
+//          case Failure(_) =>
+//            ctx.asScala.self ! CompleteQuality(submissionId)
+//        }
         Effect.none
 
       case CompleteQuality(submissionId) =>
@@ -320,12 +322,13 @@ object HmdaValidationError
                       submissionId: SubmissionId)(
       implicit materializer: ActorMaterializer,
       ec: ExecutionContext): Future[Option[TransmittalSheet]] = {
-    uploadConsumerRawStr(ctx, submissionId)
-      .take(1)
-      .via(parseTsFlow)
-      .map(_.getOrElse(TransmittalSheet()))
-      .runWith(Sink.seq)
-      .map(xs => xs.headOption)
+//    uploadConsumerRawStr(ctx, submissionId)
+//      .take(1)
+//      .via(parseTsFlow)
+//      .map(_.getOrElse(TransmittalSheet()))
+//      .runWith(Sink.seq)
+//      .map(xs => xs.headOption)
+    ???
   }
 
   private def validationContext(year: Int,
@@ -352,10 +355,12 @@ object HmdaValidationError
 
   private def uploadConsumerRawStr(
       ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId) = {
-    uploadConsumer(ctx.asScala.system, submissionId, uploadTopic)
-      .map(_.record.value())
-      .map(ByteString(_))
+      submissionId: SubmissionId): Flow[String, ByteString, NotUsed] = {
+//    uploadConsumer(ctx.asScala.system, submissionId, uploadTopic)
+//      .map(_.record.value())
+//      .map(ByteString(_))
+    //TODO: read raw data from Cassandra
+    ???
   }
 
   private def persistEditDetails(
