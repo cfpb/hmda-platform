@@ -11,13 +11,7 @@ import hmda.messages.CommonMessages.Event
 object HmdaQuery {
 
   type RJ =
-    ReadJournal
-      with PersistenceIdsQuery
-      with CurrentPersistenceIdsQuery
-      with EventsByPersistenceIdQuery
-      with CurrentEventsByPersistenceIdQuery
-      with EventsByTagQuery
-      with CurrentEventsByTagQuery
+    ReadJournal with PersistenceIdsQuery with CurrentPersistenceIdsQuery with EventsByPersistenceIdQuery with CurrentEventsByPersistenceIdQuery with EventsByTagQuery with CurrentEventsByTagQuery
 
   val configuration = ConfigFactory.load()
 
