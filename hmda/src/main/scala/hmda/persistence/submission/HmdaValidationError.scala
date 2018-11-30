@@ -8,7 +8,7 @@ import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import akka.stream.scaladsl.{Flow, Sink, Source}
+import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -37,7 +37,6 @@ import hmda.messages.submission.EditDetailsCommands.{
   PersistEditDetails
 }
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
-
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
@@ -86,27 +85,23 @@ object HmdaValidationError
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
 
-        //TODO: implement syntactical / validity
-//        val fSyntacticalValidity = for {
-//          validationContext <- fValidationContext
-//          tsErrors <- validateTs(ctx, submissionId, validationContext)
-//            .idleTimeout(kafkaIdleTimeout.seconds)
-//            .runWith(Sink.ignore)
-//          larSyntacticalValidityErrors <- validateLar("syntactical-validity",
-//                                                      ctx,
-//                                                      submissionId,
-//                                                      validationContext)
-//            .idleTimeout(kafkaIdleTimeout.seconds)
-//            .runWith(Sink.ignore)
-//        } yield (tsErrors, larSyntacticalValidityErrors)
-//
-//        fSyntacticalValidity.onComplete {
-//          case Success(_) =>
-//            log.warning(
-//              s"Syntactical / Validity stream completed for ${submissionId.toString}")
-//          case Failure(_) =>
-//            ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
-//        }
+        val fSyntacticalValidity = for {
+          validationContext <- fValidationContext
+          tsErrors <- validateTs(ctx, submissionId, validationContext)
+            .runWith(Sink.ignore)
+          larSyntacticalValidityErrors <- validateLar("syntactical-validity",
+                                                      ctx,
+                                                      submissionId,
+                                                      validationContext)
+            .runWith(Sink.ignore)
+        } yield (tsErrors, larSyntacticalValidityErrors)
+
+        fSyntacticalValidity.onComplete {
+          case Success(_) =>
+            ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
+          case Failure(e) =>
+            log.error(e.getLocalizedMessage)
+        }
 
         Effect.none
 
@@ -129,23 +124,21 @@ object HmdaValidationError
       case StartQuality(submissionId) =>
         log.info(s"Quality validation started for $submissionId")
 
-        //TODO: implement quality validation
-//        val fQuality = for {
-//          larErrors <- validateLar("quality",
-//                                   ctx,
-//                                   submissionId,
-//                                   ValidationContext())
-//            .idleTimeout(kafkaIdleTimeout.seconds)
-//            .runWith(Sink.ignore)
-//        } yield larErrors
-//
-//        fQuality.onComplete {
-//          case Success(_) =>
-//            log.warning(
-//              s"Quality stream completed for ${submissionId.toString}")
-//          case Failure(_) =>
-//            ctx.asScala.self ! CompleteQuality(submissionId)
-//        }
+        val fQuality = for {
+          larErrors <- validateLar("quality",
+                                   ctx,
+                                   submissionId,
+                                   ValidationContext())
+            .runWith(Sink.ignore)
+        } yield larErrors
+
+        fQuality.onComplete {
+          case Success(_) =>
+            ctx.asScala.self ! CompleteQuality(submissionId)
+          case Failure(e) =>
+            log.error(e.getLocalizedMessage)
+        }
+
         Effect.none
 
       case CompleteQuality(submissionId) =>
@@ -273,9 +266,10 @@ object HmdaValidationError
     super.startShardRegion(sharding)
   }
 
-  private def validateTs(ctx: ActorContext[SubmissionProcessingCommand],
-                         submissionId: SubmissionId,
-                         validationContext: ValidationContext) = {
+  private def validateTs(
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId,
+      validationContext: ValidationContext)(implicit system: ActorSystem) = {
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(validateTsFlow("all", validationContext))
@@ -294,10 +288,11 @@ object HmdaValidationError
         ))
   }
 
-  private def validateLar(editCheck: String,
-                          ctx: ActorContext[SubmissionProcessingCommand],
-                          submissionId: SubmissionId,
-                          validationContext: ValidationContext) = {
+  private def validateLar(
+      editCheck: String,
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId,
+      validationContext: ValidationContext)(implicit system: ActorSystem) = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateLarFlow(editCheck, validationContext))
@@ -318,22 +313,23 @@ object HmdaValidationError
 
   private def maybeTs(ctx: ActorContext[SubmissionProcessingCommand],
                       submissionId: SubmissionId)(
-      implicit materializer: ActorMaterializer,
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer,
       ec: ExecutionContext): Future[Option[TransmittalSheet]] = {
-//    uploadConsumerRawStr(ctx, submissionId)
-//      .take(1)
-//      .via(parseTsFlow)
-//      .map(_.getOrElse(TransmittalSheet()))
-//      .runWith(Sink.seq)
-//      .map(xs => xs.headOption)
-    ???
+    uploadConsumerRawStr(ctx, submissionId)
+      .take(1)
+      .via(parseTsFlow)
+      .map(_.getOrElse(TransmittalSheet()))
+      .runWith(Sink.seq)
+      .map(xs => xs.headOption)
   }
 
   private def validationContext(year: Int,
                                 sharding: ClusterSharding,
                                 ctx: ActorContext[SubmissionProcessingCommand],
                                 submissionId: SubmissionId)(
-      implicit materializer: ActorMaterializer,
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer,
       ec: ExecutionContext): Future[ValidationContext] = {
     val institutionPersistence =
       sharding.entityRefFor(
@@ -353,12 +349,11 @@ object HmdaValidationError
 
   private def uploadConsumerRawStr(
       ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId): Flow[String, ByteString, NotUsed] = {
-//    uploadConsumer(ctx.asScala.system, submissionId, uploadTopic)
-//      .map(_.record.value())
-//      .map(ByteString(_))
-    //TODO: read raw data from Cassandra
-    ???
+      submissionId: SubmissionId)(
+      implicit system: ActorSystem): Source[ByteString, NotUsed] = {
+    readRawData(submissionId)
+      .map(line => line.data)
+      .map(ByteString(_))
   }
 
   private def persistEditDetails(
