@@ -345,8 +345,6 @@
       "secret": "**********",
       "defaultRoles": ["hmda-user"],
       "redirectUris": [
-        "https://192.168.99.100/silent_renew.html",
-        "https://192.168.99.100/oidc-callback",
         "http://192.168.99.100/*",
         "http://localhost:3000/*",
         "/*",
