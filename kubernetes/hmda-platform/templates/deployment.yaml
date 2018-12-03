@@ -21,7 +21,7 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-       imagePullPolicy: {{ .Values.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: HMDA_RUNTIME_MODE
           value: {{ .Values.hmda.runtimeMode }}
@@ -50,11 +50,6 @@ spec:
             configMapKeyRef:
               name: keycloak-configmap
               key: auth.url
-        - name: KAFKA_CLUSTER_HOSTS
-          valueFrom:
-            configMapKeyRef:
-              name: kafka-configmap
-              key: kafka.hosts
         livenessProbe:
           tcpSocket:
             port: {{ .Values.bootstrap.port }}

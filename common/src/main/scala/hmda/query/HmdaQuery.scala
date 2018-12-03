@@ -32,8 +32,16 @@ object HmdaQuery {
   }
 
   def eventsByPersistenceId(persistenceId: String)(
+<<<<<<< HEAD
       implicit system: ActorSystem): Source[Event, NotUsed] =
     eventEnvelopeByPersistenceId(persistenceId)
       .map(_.event.asInstanceOf[Event])
+=======
+      implicit system: ActorSystem): Source[Event, NotUsed] = {
+    readJournal(system)
+      .currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
+      .map(e => e.event.asInstanceOf[Event])
+  }
+>>>>>>> master
 
 }

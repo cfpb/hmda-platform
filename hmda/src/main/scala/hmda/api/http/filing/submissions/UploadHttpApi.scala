@@ -2,8 +2,7 @@ package hmda.api.http.filing.submissions
 
 import java.time.Instant
 
-import akka.NotUsed
-import akka.actor.ActorSystem
+import akka.actor
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
 import akka.http.scaladsl.server.Directives._
 import akka.event.LoggingAdapter
@@ -19,9 +18,6 @@ import akka.http.scaladsl.server.Directives.{
   pathPrefix
 }
 import akka.http.scaladsl.server.Route
-import akka.kafka.ProducerMessage.MultiResultPart
-import akka.kafka.{ProducerMessage, ProducerSettings}
-import akka.kafka.scaladsl.Producer
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Framing, Sink}
 import akka.util.{ByteString, Timeout}
@@ -33,17 +29,23 @@ import com.typesafe.config.Config
 import hmda.api.http.directives.HmdaTimeDirectives
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
-import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.codec.ErrorResponseCodec._
+import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.util.http.FilingResponseUtils._
 import hmda.api.http.model.ErrorResponse
 import hmda.auth.OAuth2Authorization
+import hmda.messages.submission.HmdaRawDataCommands.{
+  AddLine,
+  HmdaRawDataCommand
+}
+import hmda.messages.submission.HmdaRawDataEvents.HmdaRawDataEvent
 import hmda.messages.submission.SubmissionCommands.GetSubmission
 import hmda.model.filing.submission._
-import hmda.persistence.submission.{SubmissionManager, SubmissionPersistence}
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringSerializer
-import hmda.messages.pubsub.KafkaTopics._
+import hmda.persistence.submission.{
+  HmdaRawData,
+  SubmissionManager,
+  SubmissionPersistence
+}
 import hmda.messages.submission.SubmissionManagerCommands.{
   SubmissionManagerCommand,
   UpdateSubmissionStatus
@@ -54,7 +56,7 @@ import scala.util.{Failure, Success}
 
 trait UploadHttpApi extends HmdaTimeDirectives {
 
-  implicit val system: ActorSystem
+  implicit val system: actor.ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val ec: ExecutionContext
   val log: LoggingAdapter
@@ -81,6 +83,12 @@ trait UploadHttpApi extends HmdaTimeDirectives {
                 SubmissionPersistence.typeKey,
                 s"${SubmissionPersistence.name}-${submissionId.toString}")
 
+            val hmdaRaw =
+              sharding.entityRefFor(
+                HmdaRawData.typeKey,
+                s"${HmdaRawData.name}-${submissionId.toString}"
+              )
+
             val fSubmission
               : Future[Option[Submission]] = submissionPersistence ? (ref =>
               GetSubmission(ref))
@@ -94,8 +102,8 @@ trait UploadHttpApi extends HmdaTimeDirectives {
                 result match {
                   case Some(submission) =>
                     if (submission.status == Created) {
-                      uploadFile(submissionManager,
-                                 uploadTopic,
+                      uploadFile(hmdaRaw,
+                                 submissionManager,
                                  uploadTimestamp,
                                  submission,
                                  uri)
@@ -124,8 +132,8 @@ trait UploadHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def uploadFile(submissionManager: EntityRef[SubmissionManagerCommand],
-                         topic: String,
+  private def uploadFile(hmdaRaw: EntityRef[HmdaRawDataCommand],
+                         submissionManager: EntityRef[SubmissionManagerCommand],
                          uploadTimeStamp: Long,
                          submission: Submission,
                          uri: Uri): Route = {
@@ -140,7 +148,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
         val fUploaded = byteSource
           .via(splitLines)
           .map(_.utf8String + "\n")
-          .via(uploadProducer(topic, submission.id))
+          .via(uploadFile(submission.id, hmdaRaw))
           .runWith(Sink.ignore)
 
         onComplete(fUploaded) {
@@ -169,38 +177,19 @@ trait UploadHttpApi extends HmdaTimeDirectives {
     }
   }
 
-  private def uploadProducer(
-      topic: String,
-      submissionId: SubmissionId): Flow[String, String, NotUsed] = {
-
-    val kafkaHosts = config.getString("kafka.hosts")
-    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
-    val producerSettings =
-      ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
-        .withBootstrapServers(kafkaHosts)
-
+  private def uploadFile(submissionId: SubmissionId,
+                         hmdaRaw: EntityRef[HmdaRawDataCommand]) = {
     Flow[String]
-      .map { value =>
-        ProducerMessage.Message(
-          new ProducerRecord(topic, submissionId.toString, value),
-          value
-        )
-      }
-      .via(Producer.flexiFlow(producerSettings))
-      .map {
-        case ProducerMessage.Result(_, message) =>
-          val record = message.record
-          record.value()
-        case ProducerMessage.MultiResult(parts, _) =>
-          parts
-            .map {
-              case MultiResultPart(_, record) =>
-                record.value()
-            }
-            .mkString(",")
-        case ProducerMessage.PassThroughResult(passThrough) =>
-          passThrough
-      }
+      .mapAsync(2)(line => persistLine(hmdaRaw, submissionId, line))
+  }
+
+  private def persistLine(entityRef: EntityRef[HmdaRawDataCommand],
+                          submissionId: SubmissionId,
+                          data: String): Future[HmdaRawDataEvent] = {
+
+    val response: Future[HmdaRawDataEvent] = entityRef ? (ref =>
+      AddLine(submissionId, Instant.now.toEpochMilli, data, Some(ref)))
+    response
   }
 
 }
