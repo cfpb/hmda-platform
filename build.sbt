@@ -112,7 +112,9 @@ lazy val `hmda-platform` = (project in file("hmda"))
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin,
+                 JavaAgent)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -129,9 +131,11 @@ lazy val `check-digit` = (project in file("check-digit"))
     ),
     scalafmtSettings,
     dockerSettings,
-    packageSettings
+    packageSettings,
+    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "runtime;test"
   )
   .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `institutions-api` = (project in file("institutions-api"))
   .enablePlugins(JavaServerAppPackaging,
@@ -157,3 +161,10 @@ lazy val `institutions-api` = (project in file("institutions-api"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+
+lazy val `hmda-protocol` = (project in file("protocol"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
+  .settings(hmdaBuildSettings: _*)
