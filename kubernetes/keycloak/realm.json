@@ -579,7 +579,7 @@
       "enabled": true,
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
-      "defaultRoles": ["view-profile", "manage-account"],
+      "defaultRoles": [],
       "redirectUris": ["/auth/realms/hmda2/account/*"],
       "webOrigins": [],
       "notBefore": 0,
