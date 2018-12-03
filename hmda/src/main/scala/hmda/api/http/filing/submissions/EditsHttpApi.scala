@@ -1,16 +1,17 @@
 package hmda.api.http.filing.submissions
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
-import akka.util.Timeout
+import akka.stream.scaladsl.{Sink, Source}
+import akka.util.{ByteString, Timeout}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
   cors,
   corsRejectionHandler
@@ -101,9 +102,11 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       (lei, period, seqNr) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           val submissionId = SubmissionId(lei, period, seqNr)
-          validationErrorEventStream(submissionId).runWith(
-            Sink.foreach(println))
-          complete("CSV")
+          val csv = csvHeaderSource
+            .concat(validationErrorEventStream(submissionId))
+            .map(ByteString(_))
+          complete(
+            HttpEntity.Chunked.fromData(ContentTypes.`text/csv(UTF-8)`, csv))
         }
     }
 
@@ -180,13 +183,20 @@ trait EditsHttpApi extends HmdaTimeDirectives {
     editDetails.map(e => summary.copy(rows = e.flatMap(r => r.rows)))
   }
 
-  private def validationErrorEventStream(submissionId: SubmissionId) = {
+  private val csvHeaderSource =
+    Source.fromIterator(() => Iterator("editType, editId, ULI\n"))
+
+  private def validationErrorEventStream(
+      submissionId: SubmissionId): Source[String, NotUsed] = {
     val persistenceId = s"${HmdaValidationError.name}-$submissionId"
     eventsByPersistenceId(persistenceId)
       .collect {
         case evt @ HmdaRowValidatedError(_, _) => evt
       }
-      .map(e => (e.rowNumber, e.validationErrors.map(e => e.toCsv)))
+      .mapConcat(e =>
+        e.validationErrors.map(e =>
+          EditsCsvResponse(e.validationErrorType.toString, e.editName, e.uli)))
+      .map(_.toCsv)
   }
 
 }
