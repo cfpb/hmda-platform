@@ -1,6 +1,5 @@
 package hmda.api.http.filing.submissions
 
-import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
@@ -10,7 +9,7 @@ import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.Sink
 import akka.util.Timeout
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
   cors,
@@ -27,18 +26,13 @@ import hmda.api.http.model.filing.submissions._
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.api.http.codec.filing.submission.EditDetailsSummaryCodec._
 import hmda.auth.OAuth2Authorization
-import hmda.messages.CommonMessages.Event
 import hmda.messages.submission.EditDetailsCommands.GetEditRowCount
 import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsAdded,
   EditDetailsPersistenceEvent,
   EditDetailsRowCounted
 }
-<<<<<<< HEAD
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
-import hmda.model.edits.EditDetails
-=======
->>>>>>> master
 import io.circe.generic.auto._
 import hmda.model.filing.EditDescriptionLookup._
 import hmda.query.HmdaQuery._
