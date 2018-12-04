@@ -39,8 +39,7 @@ object InstitutionDBProjection
       case InstitutionCreated(i) =>
         institutionRepository.insertOrUpdate(InstitutionConverter.convert(i))
         val emails = InstitutionConverter.emailsFromInstitution(i)
-        emails.foreach(email =>
-          institutionEmailsRepository.insertOrUpdate(email))
+        emails.foreach(email => updateEmails(email))
 
       case InstitutionModified(i) =>
         institutionRepository.insertOrUpdate(InstitutionConverter.convert(i))
