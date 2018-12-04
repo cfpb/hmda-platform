@@ -1,16 +1,17 @@
 package hmda.api.http.filing.submissions
 
+import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
 import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
-import akka.util.Timeout
+import akka.stream.scaladsl.{Sink, Source}
+import akka.util.{ByteString, Timeout}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
   cors,
   corsRejectionHandler
@@ -32,6 +33,7 @@ import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsPersistenceEvent,
   EditDetailsRowCounted
 }
+import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import io.circe.generic.auto._
 import hmda.model.filing.EditDescriptionLookup._
 import hmda.query.HmdaQuery._
@@ -49,7 +51,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val sharding: ClusterSharding
 
-  //institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits
+  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits
   def editsSummaryPath(oAuth2Authorization: OAuth2Authorization): Route =
     path(
       "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits") {
@@ -92,7 +94,23 @@ trait EditsHttpApi extends HmdaTimeDirectives {
         }
     }
 
-  //institutions/<institutionId>/filings/<period>/submissions/<submissionId>/edits/edit
+  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/csv
+
+  def editsSummaryCsvPath(oAuth2Authorization: OAuth2Authorization): Route =
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "edits" / "csv") {
+      (lei, period, seqNr) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          val submissionId = SubmissionId(lei, period, seqNr)
+          val csv = csvHeaderSource
+            .concat(validationErrorEventStream(submissionId))
+            .map(ByteString(_))
+          complete(
+            HttpEntity.Chunked.fromData(ContentTypes.`text/csv(UTF-8)`, csv))
+        }
+    }
+
+  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/edit
   def editDetailsPath(oAuth2Authorization: OAuth2Authorization): Route = {
     val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d(?:-\d)?""")
     path(
@@ -140,7 +158,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       cors() {
         encodeResponse {
           editsSummaryPath(oAuth2Authorization) ~ editDetailsPath(
-            oAuth2Authorization)
+            oAuth2Authorization) ~ editsSummaryCsvPath(oAuth2Authorization)
         }
       }
     }
@@ -163,6 +181,22 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       .take(summary.count)
       .runWith(Sink.seq)
     editDetails.map(e => summary.copy(rows = e.flatMap(r => r.rows)))
+  }
+
+  private val csvHeaderSource =
+    Source.fromIterator(() => Iterator("editType, editId, ULI\n"))
+
+  private def validationErrorEventStream(
+      submissionId: SubmissionId): Source[String, NotUsed] = {
+    val persistenceId = s"${HmdaValidationError.name}-$submissionId"
+    eventsByPersistenceId(persistenceId)
+      .collect {
+        case evt @ HmdaRowValidatedError(_, _) => evt
+      }
+      .mapConcat(e =>
+        e.validationErrors.map(e =>
+          EditsCsvResponse(e.validationErrorType.toString, e.editName, e.uli)))
+      .map(_.toCsv)
   }
 
 }

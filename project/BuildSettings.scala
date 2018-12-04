@@ -4,20 +4,19 @@ import sbtassembly.AssemblyPlugin.autoImport._
 
 object BuildSettings {
   val buildOrganization = "cfpb"
-  val buildVersion      = "2.0.0"
-  val buildScalaVersion = "2.12.4"
+  val buildVersion = "2.0.0"
+  val buildScalaVersion = "2.12.7"
 
   val hmdaBuildSettings = Defaults.coreDefaultSettings ++
     Seq(
       organization := buildOrganization,
-      version      := buildVersion,
+      version := buildVersion,
       scalaVersion := buildScalaVersion,
-      scalacOptions ++= Seq(
-        "-Xlint",
-        "-deprecation",
-        "-unchecked",
-        "-feature",
-        "-Ypartial-unification"),
+      scalacOptions ++= Seq("-Xlint",
+                            "-deprecation",
+                            "-unchecked",
+                            "-feature",
+                            "-Ypartial-unification"),
       aggregate in assembly := false,
       parallelExecution in Test := true,
       fork in Test := true,
