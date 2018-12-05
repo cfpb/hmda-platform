@@ -108,7 +108,8 @@ object ValidationFlow {
   def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError]) {
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
-      affectedFields.map(field => (field, lar.valueOf(field))).toMap
+      val fieldMap = affectedFields.map(field => (field, lar.valueOf(field))).toMap
+      error.copy(fi)
     })
   }
 }
