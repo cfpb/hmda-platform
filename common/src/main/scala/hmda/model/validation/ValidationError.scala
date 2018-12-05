@@ -15,6 +15,7 @@ trait ValidationError {
   def editName: String
   def validationErrorType: ValidationErrorType
   def validationErrorEntity: ValidationErrorEntity
+  def fields: Map[String, String] = Map()
   def toCsv: String =
     s"$validationErrorEntity,$validationErrorType, $editName, $uli"
 }
