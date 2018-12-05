@@ -15,6 +15,12 @@ service:
   targetPort: 9091
   name: http-chk-digit
 
+grpc:
+  type: ClusterIP
+  port: 60080
+  targetPort: 60080
+  name: http2-chk-digit
+
 ambassador:
   name: ambassador-chk-digit
   port: 80
