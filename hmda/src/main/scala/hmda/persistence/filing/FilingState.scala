@@ -45,8 +45,4 @@ case class FilingState(filing: Filing = Filing(),
       case _ => this
     }
   }
-
-  def somecheck(updted: String): Boolean = {
-    return true
-  }
 }
