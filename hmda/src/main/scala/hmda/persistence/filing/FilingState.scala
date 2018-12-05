@@ -31,7 +31,7 @@ case class FilingState(filing: Filing = Filing(),
         if (submissions.map(_.id).contains(updated.id)
             && (updated.end == 0 && updated.status != SubmissionStatus.valueOf(
               Signed.code))) {
-          val updatedList = updated.copy(end = 0) :: submissions.filterNot(s =>
+          val updatedList = updated :: submissions.filterNot(s =>
             s.id == updated.id)
           FilingState(this.filing, updatedList)
         } else if (submissions.map(_.id).contains(updated.id)
