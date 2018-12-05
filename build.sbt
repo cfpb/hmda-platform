@@ -108,6 +108,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
