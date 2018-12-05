@@ -6,8 +6,8 @@ import hmda.uli.validation.ULI._
 
 import scala.concurrent.Future
 
-class CheckDigitServiceImpl(materializer: Materializer) extends CheckDigitService {
-  import materializer.executionContext
+class CheckDigitServiceImpl(materializer: Materializer)
+    extends CheckDigitService {
   private implicit val mat: Materializer = materializer
 
   override def validateUli(in: ValidUliRequest): Future[ValidUliResponse] = {
