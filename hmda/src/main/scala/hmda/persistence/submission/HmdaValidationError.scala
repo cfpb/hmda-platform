@@ -178,19 +178,19 @@ object HmdaValidationError
             .thenRun { _ =>
               log.info(
                 s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
-              maybeReplyTo match {
-                case Some(replyTo) =>
-                  val hmdaRowValidatedError =
-                    HmdaRowValidatedError(rowNumber, validationErrors)
 
-                  for {
-                    _ <- persistEditDetails(editDetailPersistence,
-                                            hmdaRowValidatedError)
-                  } yield {
+              val hmdaRowValidatedError =
+                HmdaRowValidatedError(rowNumber, validationErrors)
+
+              for {
+                _ <- persistEditDetails(editDetailPersistence,
+                                        hmdaRowValidatedError)
+              } yield {
+                maybeReplyTo match {
+                  case Some(replyTo) =>
                     replyTo ! hmdaRowValidatedError
-                  }
-
-                case None => //do nothing
+                  case None => //Do nothing
+                }
               }
             }
         } else {
