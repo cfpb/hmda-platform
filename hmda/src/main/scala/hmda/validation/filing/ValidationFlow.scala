@@ -11,11 +11,13 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.validation.{LarValidationError, TsValidationError}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
-import hmda.validation.HmdaValidated
+import hmda.validation.{AS, EC, HmdaValidated, MAT}
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
 import hmda.validation.engine.LarEngine
 import hmda.validation.engine.TsEngine
+
+import scala.concurrent.Future
 
 object ValidationFlow {
 
@@ -70,14 +72,7 @@ object ValidationFlow {
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)
     : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
-    Flow[ByteString]
-      .via(framing("\n"))
-      .map(_.utf8String)
-      .map(_.trim)
-      .map(s => LarCsvParser(s))
-      .collect {
-        case Right(lar) => lar
-      }
+    collectLar
       .map { lar =>
         checkType match {
           case "all" =>
@@ -100,6 +95,30 @@ object ValidationFlow {
       }
       .map { x =>
         x.leftMap(xs => xs.toList).toEither
+      }
+  }
+
+  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC]
+    : Flow[ByteString,
+           Future[HmdaValidated[LoanApplicationRegister]],
+           NotUsed] = {
+    collectLar
+      .map { lar =>
+        LarEngine.checkValidityAsync(lar, lar.loan.ULI)
+      }
+      .map { x =>
+        x.map(y => y.leftMap(xs => xs.toList).toEither)
+      }
+  }
+
+  private def collectLar = {
+    Flow[ByteString]
+      .via(framing("\n"))
+      .map(_.utf8String)
+      .map(_.trim)
+      .map(s => LarCsvParser(s))
+      .collect {
+        case Right(lar) => lar
       }
   }
 }
