@@ -34,7 +34,8 @@ object EditDetailsConverter {
       .map(fieldKey => {
         val fieldValue =
           validationError.fields.getOrElse(fieldKey, "Detail not found")
-        val fieldValueFriendly = if (fieldValue == "-1") "Invalid input" else fieldValue
+        val fieldValueFriendly =
+          if (fieldValue == "-1") "Invalid input" else fieldValue
         FieldDetails(fieldKey, fieldValueFriendly)
       })
       .toSeq
