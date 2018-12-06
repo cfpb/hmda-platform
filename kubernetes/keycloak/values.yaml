@@ -124,7 +124,7 @@ keycloak:
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
       value: "ON"
     - name: SUPPORT_EMAIL
-      value: "noreply@cfpb.gov"
+      value: "hmdahelp@cfpb.gov"
     # - name: KEYCLOAK_LOGLEVEL
     #   value: DEBUG
     # - name: WILDFLY_LOGLEVEL
