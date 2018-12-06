@@ -31,9 +31,12 @@ object ValidationProtobufConverter {
         SyntacticalValidationError(msg.uli,
                                    msg.editName,
                                    entityErrorFromProtobuf,
-          msg.fields)
+                                   msg.fields)
       case ValidationErrorTypeMessage.VALIDITY =>
-        ValidityValidationError(msg.uli, msg.editName, entityErrorFromProtobuf, msg.fields)
+        ValidityValidationError(msg.uli,
+                                msg.editName,
+                                entityErrorFromProtobuf,
+                                msg.fields)
       case ValidationErrorTypeMessage.QUALITY =>
         QualityValidationError(msg.uli, msg.editName, msg.fields)
       case ValidationErrorTypeMessage.MACRO =>

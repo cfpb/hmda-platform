@@ -29,11 +29,18 @@ object ValidationErrorGenerator {
     } yield {
       validationErrorType match {
         case Syntactical =>
-          SyntacticalValidationError(uli, editName, validationErrorEntity, validationErrorFields)
+          SyntacticalValidationError(uli,
+                                     editName,
+                                     validationErrorEntity,
+                                     validationErrorFields)
         case Validity =>
-          ValidityValidationError(uli, editName, validationErrorEntity, validationErrorFields)
-        case Quality => QualityValidationError(uli, editName, validationErrorFields)
-        case Macro   => MacroValidationError(editName)
+          ValidityValidationError(uli,
+                                  editName,
+                                  validationErrorEntity,
+                                  validationErrorFields)
+        case Quality =>
+          QualityValidationError(uli, editName, validationErrorFields)
+        case Macro => MacroValidationError(editName)
       }
     }
 

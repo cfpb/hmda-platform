@@ -16,5 +16,5 @@ message EditDetailsRowMessage {
 
 message FieldDetailsMessage {
     string name = 1;
-    int32 value = 2;
+    string value = 2;
 }
