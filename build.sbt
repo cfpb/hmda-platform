@@ -38,7 +38,7 @@ lazy val akkaPersistenceDeps =
       akkaPersistenceCassandra,
       cassandraLauncher)
 
-lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
+lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
@@ -114,11 +114,11 @@ lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
                  AshScriptPlugin,
-                 AkkaGrpcPlugin,
-                 JavaAgent)
+                 AkkaGrpcPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      mainClass in Compile := Some("hmda.uli.HmdaUli"),
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       },
@@ -132,8 +132,7 @@ lazy val `check-digit` = (project in file("check-digit"))
     ),
     scalafmtSettings,
     dockerSettings,
-    packageSettings,
-    javaAgents += "org.mortbay.jetty.alpn" % "jetty-alpn-agent" % "2.0.9" % "runtime;test"
+    packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")

@@ -11,8 +11,8 @@ language: scala
 scala: 2.12.4
 
 jdk:
-- oraclejdk9
-- oraclejdk8
+- openjdk-ea
+- openjdk8
 
 before_install:
   - . $HOME/.nvm/nvm.sh
