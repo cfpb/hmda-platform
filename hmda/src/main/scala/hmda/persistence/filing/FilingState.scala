@@ -28,14 +28,12 @@ case class FilingState(filing: Filing = Filing(),
           FilingState(this.filing, submission :: submissions)
         }
       case SubmissionUpdated(updated) =>
-        if (submissions.map(_.id).contains(updated.id)
-            && (updated.end == 0 && updated.status != SubmissionStatus.valueOf(
-              Signed.code))) {
+        if (submissions.map(_.id).contains(updated.id) && !isSigned(updated)) {
           val updatedList = updated :: submissions.filterNot(s =>
             s.id == updated.id)
           FilingState(this.filing, updatedList)
-        } else if (submissions.map(_.id).contains(updated.id)
-                   && updated.status == SubmissionStatus.valueOf(Signed.code)) {
+        } else if (submissions.map(_.id).contains(updated.id) && isSigned(
+                     updated)) {
           val updatedList = updated.copy(end = Instant.now().toEpochMilli) :: submissions
             .filterNot(s => s.id == updated.id)
           FilingState(this.filing, updatedList)
@@ -43,6 +41,17 @@ case class FilingState(filing: Filing = Filing(),
           this
         }
       case _ => this
+    }
+  }
+
+  private def isSigned(updated: Submission): Boolean = {
+    if (updated.end == 0 && updated.status != SubmissionStatus.valueOf(
+          Signed.code)) {
+      return false
+    } else if (updated.status == SubmissionStatus.valueOf(Signed.code)) {
+      return true
+    } else {
+      return false
     }
   }
 }
