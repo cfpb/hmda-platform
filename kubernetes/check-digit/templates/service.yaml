@@ -51,8 +51,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  name: {{ template "check-digit.fullname" . }}-grpc
   labels:
-    app: {{ template "check-digit.name" . }}
+    app: {{ template "check-digit.fullname" . }}
     chart: {{ template "check-digit.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}

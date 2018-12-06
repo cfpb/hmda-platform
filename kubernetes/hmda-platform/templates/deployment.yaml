@@ -50,6 +50,16 @@ spec:
             configMapKeyRef:
               name: keycloak-configmap
               key: auth.url
+        - name: GRPC_CHECK_DIGIT_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: grpc-configmap
+              key: check.digit.host
+        - name: GRPC_CHECK_DIGIT_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: grpc-configmap
+              key: check.digit.port
         livenessProbe:
           tcpSocket:
             port: {{ .Values.bootstrap.port }}
