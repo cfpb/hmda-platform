@@ -1,7 +1,5 @@
 package hmda.model.validation
 
-import slick.collection.heterogeneous.Zero.+
-
 sealed trait ValidationErrorType
 case object Syntactical extends ValidationErrorType
 case object Validity extends ValidationErrorType
@@ -27,34 +25,41 @@ case class SyntacticalValidationError(
     uli: String,
     editName: String,
     validationErrorEntity: ValidationErrorEntity,
-    fields: Map[String, String])
+    fields: Map[String, String] = Map.empty)
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Syntactical
-  override def copyWithFields(fields: Map[String, String]): SyntacticalValidationError = this.copy(fields = fields)
+  override def copyWithFields(
+      fields: Map[String, String]): SyntacticalValidationError =
+    this.copy(fields = fields)
 }
 
 case class ValidityValidationError(uli: String,
                                    editName: String,
                                    validationErrorEntity: ValidationErrorEntity,
-                                   fields: Map[String, String])
+                                   fields: Map[String, String] = Map.empty)
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Validity
-  override def copyWithFields(fields: Map[String, String]): ValidityValidationError = this.copy(fields = fields)
+  override def copyWithFields(
+      fields: Map[String, String]): ValidityValidationError =
+    this.copy(fields = fields)
 }
 
 case class QualityValidationError(uli: String,
                                   editName: String,
-                                  fields: Map[String, String])
+                                  fields: Map[String, String] = Map.empty)
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Quality
   override def validationErrorEntity: ValidationErrorEntity = LarValidationError
-  override def copyWithFields(fields: Map[String, String]): QualityValidationError = this.copy(fields = fields)
+  override def copyWithFields(
+      fields: Map[String, String]): QualityValidationError =
+    this.copy(fields = fields)
 }
 
 case class MacroValidationError(editName: String) extends ValidationError {
   override def uli: String = ""
-  override def fields: Map[String, String] = Map()
+  override def fields: Map[String, String] = Map.empty
   override def validationErrorType: ValidationErrorType = Macro
   override def validationErrorEntity: ValidationErrorEntity = LarValidationError
-  override def copyWithFields(fields: Map[String, String]): MacroValidationError = this.copy()
+  override def copyWithFields(
+      fields: Map[String, String]): MacroValidationError = this.copy()
 }

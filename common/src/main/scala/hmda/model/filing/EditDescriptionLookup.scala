@@ -31,9 +31,13 @@ object EditDescriptionLookup {
     editDescriptionList.map(e => (e.editName, e)).toMap
 
   def lookupDescription(editName: String): String =
-    editDescriptionMap.getOrElse(editName, EditDescription("", "", List())).description
+    editDescriptionMap
+      .getOrElse(editName, EditDescription("", "", List()))
+      .description
 
   def lookupFields(editName: String): List[String] =
-    editDescriptionMap.getOrElse(editName, EditDescription("", "", List())).affectedFields
+    editDescriptionMap
+      .getOrElse(editName, EditDescription("", "", List()))
+      .affectedFields
 
 }

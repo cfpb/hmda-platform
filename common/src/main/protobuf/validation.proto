@@ -8,6 +8,7 @@ message ValidationErrorMessage {
     string editName = 2;
     ValidationErrorTypeMessage validationErrorType = 3;
     ValidationErrorEntityMessage validationErrorEntity = 4;
+    map<string, string> fields = 5;
 }
 
 enum ValidationErrorTypeMessage {

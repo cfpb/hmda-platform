@@ -17,7 +17,8 @@ object ValidationProtobufConverter {
       cmd.uli,
       cmd.editName,
       validationErrorTypeToProtobuf(cmd.validationErrorType),
-      validationErrorEntityToProtobuf(cmd.validationErrorEntity)
+      validationErrorEntityToProtobuf(cmd.validationErrorEntity),
+      cmd.fields
     )
   }
 
@@ -29,11 +30,12 @@ object ValidationProtobufConverter {
       case ValidationErrorTypeMessage.SYNTACTICAL =>
         SyntacticalValidationError(msg.uli,
                                    msg.editName,
-                                   entityErrorFromProtobuf)
+                                   entityErrorFromProtobuf,
+          msg.fields)
       case ValidationErrorTypeMessage.VALIDITY =>
-        ValidityValidationError(msg.uli, msg.editName, entityErrorFromProtobuf)
+        ValidityValidationError(msg.uli, msg.editName, entityErrorFromProtobuf, msg.fields)
       case ValidationErrorTypeMessage.QUALITY =>
-        QualityValidationError(msg.uli, msg.editName)
+        QualityValidationError(msg.uli, msg.editName, msg.fields)
       case ValidationErrorTypeMessage.MACRO =>
         MacroValidationError(msg.editName)
       case ValidationErrorTypeMessage.Unrecognized(value) =>

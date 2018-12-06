@@ -59,6 +59,8 @@ case class LoanApplicationRegister(
   }
 
   override def valueOf(field: String): String = {
-    LarFieldMapping.mapping(this).getOrElse(field, s"error: field name mismatch for $field")
+    LarFieldMapping
+      .mapping(this)
+      .getOrElse(field, s"error: field name mismatch for $field")
   }
 }

@@ -20,6 +20,8 @@ case class TransmittalSheet(
   }
 
   override def valueOf(field: String): String = {
-    TsFieldMapping.mapping(this).getOrElse(field, s"error: field name mismatch for $field")
+    TsFieldMapping
+      .mapping(this)
+      .getOrElse(field, s"error: field name mismatch for $field")
   }
 }
