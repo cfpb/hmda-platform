@@ -14,8 +14,8 @@ object TsFieldMapping {
     "Contact Person's Office State" -> ts.contact.address.state,
     "Contact Person's Office Zip Code" -> ts.contact.address.zipCode,
     "Federal Agency" -> ts.agency.code.toString,
-    "Total Line Entries" -> ts.totalLines.toString,
-    "Tax ID" -> ts.taxId,
-    "Legal Entity Identifier" -> ts.LEI
+    "Total Number of Entries Contained in Submission" -> ts.totalLines.toString,
+    "Federal Taxpayer Identification Number" -> ts.taxId,
+    "Legal Entity Identifier (LEI)" -> ts.LEI
   )
 }
