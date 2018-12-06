@@ -65,7 +65,9 @@ object ValidationFlow {
         (ts, errors)
       }
       .map { x =>
-        x._2.leftMap(xs => xs.toList).toEither
+        x._2.leftMap(xs => {
+          addTsFieldInformation(x._1, xs.toList)
+        }).toEither
       }
   }
 
@@ -101,15 +103,25 @@ object ValidationFlow {
         (lar, errors)
       }
       .map { x =>
-        x._2.leftMap(xs => xs.toList).toEither
+        x._2.leftMap(xs => {
+          addLarFieldInformation(x._1, xs.toList)
+        }).toEither
       }
   }
 
-  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError]) {
+  def addLarFieldInformation(lar: LoanApplicationRegister, errors: List[ValidationError]): List[ValidationError] = {
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap = affectedFields.map(field => (field, lar.valueOf(field))).toMap
-      error.copy(fi)
+      error.copyWithFields(fieldMap)
+    })
+  }
+
+  def addTsFieldInformation(ts: TransmittalSheet, errors: List[ValidationError]): List[ValidationError] = {
+    errors.map(error => {
+      val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
+      val fieldMap = affectedFields.map(field => (field, ts.valueOf(field))).toMap
+      error.copyWithFields(fieldMap)
     })
   }
 }

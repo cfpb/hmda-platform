@@ -1,5 +1,7 @@
 package hmda.model.validation
 
+import slick.collection.heterogeneous.Zero.+
+
 sealed trait ValidationErrorType
 case object Syntactical extends ValidationErrorType
 case object Validity extends ValidationErrorType
@@ -18,6 +20,7 @@ sealed trait ValidationError {
   def fields: Map[String, String]
   def toCsv: String =
     s"$validationErrorEntity,$validationErrorType, $editName, $uli"
+  def copyWithFields(fields: Map[String, String]): ValidationError
 }
 
 case class SyntacticalValidationError(
@@ -27,6 +30,7 @@ case class SyntacticalValidationError(
     fields: Map[String, String])
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Syntactical
+  override def copyWithFields(fields: Map[String, String]): SyntacticalValidationError = this.copy(fields = fields)
 }
 
 case class ValidityValidationError(uli: String,
@@ -35,6 +39,7 @@ case class ValidityValidationError(uli: String,
                                    fields: Map[String, String])
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Validity
+  override def copyWithFields(fields: Map[String, String]): ValidityValidationError = this.copy(fields = fields)
 }
 
 case class QualityValidationError(uli: String,
@@ -43,6 +48,7 @@ case class QualityValidationError(uli: String,
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Quality
   override def validationErrorEntity: ValidationErrorEntity = LarValidationError
+  override def copyWithFields(fields: Map[String, String]): QualityValidationError = this.copy(fields = fields)
 }
 
 case class MacroValidationError(editName: String) extends ValidationError {
@@ -50,4 +56,5 @@ case class MacroValidationError(editName: String) extends ValidationError {
   override def fields: Map[String, String] = Map()
   override def validationErrorType: ValidationErrorType = Macro
   override def validationErrorEntity: ValidationErrorEntity = LarValidationError
+  override def copyWithFields(fields: Map[String, String]): MacroValidationError = this.copy()
 }
