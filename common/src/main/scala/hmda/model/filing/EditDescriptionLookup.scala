@@ -21,7 +21,7 @@ object EditDescriptionLookup {
         val values = s.split("\\|", -1).map(_.trim).toList
         val editName = values(0)
         val editDetails = values(1)
-        val affectedDataFields = values(2).split(",")
+        val affectedDataFields = values(2).split(";").map(_.trim)
         EditDescription(editName, editDetails, affectedDataFields.toList)
       }
 
