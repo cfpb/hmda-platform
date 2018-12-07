@@ -3,10 +3,16 @@ package hmda.validation.filing
 import akka.NotUsed
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import cats.data.OptionT
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.lar.enums._
-import hmda.model.validation.MacroValidationError
-import hmda.validation.{EC, MAT}
+import hmda.model.validation.{
+  EmptyMacroValidationError,
+  MacroValidationError,
+  ValidationError
+}
+import hmda.util.SourceUtils._
+import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
@@ -14,6 +20,11 @@ import scala.util.{Failure, Success, Try}
 object MacroValidationFlow {
 
   type LarPredicate = LoanApplicationRegister => Boolean
+
+  final val q635Name = "Q635"
+
+  val config = ConfigFactory.load()
+  final val q635Ratio = config.getDouble("edits.Q635.ratio")
 
 //  def macroValidation[mat: MAT, ec: EC](
 //      source: Source[LoanApplicationRegister, NotUsed]) = {
@@ -28,35 +39,23 @@ object MacroValidationFlow {
 //    }
 //  }
 
-  def Q635[mat: MAT, ec: EC](
+  def macroEdit[as: AS, mat: MAT, ec: EC](
       source: Source[LoanApplicationRegister, NotUsed],
-      total: Int): OptionT[Future, MacroValidationError] = {
-    val fValidation = for {
-      q635 <- source
-        .via(count(applicationApprovedButNotAccepted))
-        .runWith(Sink.head)
-      ratio = q635 / total
+      total: Int,
+      editRatio: Double,
+      editName: String): Future[ValidationError] = {
+    for {
+      editCount <- count(
+        source
+          .filter(applicationApprovedButNotAccepted))
     } yield {
-      if (ratio > 0.15) Some(MacroValidationError("Q635")) else None
+      val ratio = editCount.toDouble / total.toDouble
+      if (ratio > editRatio) MacroValidationError(editName)
+      else EmptyMacroValidationError()
     }
-    OptionT(fValidation)
   }
 
-  def Q636[mat: MAT, ec: EC](
-      source: Source[LoanApplicationRegister, NotUsed],
-      total: Int): OptionT[Future, MacroValidationError] = {
-    val fValidation = for {
-      q636 <- source
-        .via(count(applicationWithdrawnByApplicant))
-        .runWith(Sink.head)
-      ratio = q636 / total
-    } yield {
-      if (ratio > 0.30) Some(MacroValidationError("Q636")) else None
-    }
-    OptionT(fValidation)
-  }
-
-  def count(
+  def countInPredicate(
       larPredicate: LarPredicate): Flow[LoanApplicationRegister, Int, NotUsed] =
     Flow[LoanApplicationRegister]
       .filter(larPredicate)
