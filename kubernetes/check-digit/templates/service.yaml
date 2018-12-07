@@ -64,4 +64,7 @@ spec:
       targetPort: {{ .Values.grpc.targetPort }}
       protocol: {{ .Values.service.protocol }}
       name: {{ .Values.grpc.name }}
+  selector:
+    app: {{ template "check-digit.name" . }}
+    release: {{ .Release.Name }}
 

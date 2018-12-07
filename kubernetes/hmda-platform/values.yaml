@@ -56,7 +56,7 @@ public:
   port: 8082
 
 cluster:
-  name: akka-mgmt-http
+  name: management
   protocol: TCP
   port: 8558
 
