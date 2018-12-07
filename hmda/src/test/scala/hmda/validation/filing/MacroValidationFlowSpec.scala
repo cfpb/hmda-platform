@@ -12,6 +12,7 @@ import hmda.util.SourceUtils._
 import hmda.model.filing.lar.enums.{
   ApplicationApprovedButNotAccepted,
   ApplicationWithdrawnByApplicant,
+  FileClosedForIncompleteness,
   LoanOriginated
 }
 import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError}
@@ -67,13 +68,14 @@ class MacroValidationFlowSpec
     }
 
     "fail Q635" in {
-      val q635Fail = loanOriginatedSource.take(200).map { lar =>
+      val totalFailing = 200
+      val q635Fail = loanOriginatedSource.take(totalFailing).map { lar =>
         val larAction =
           lar.action.copy(actionTakenType = ApplicationApprovedButNotAccepted)
         lar.copy(action = larAction)
       }
 
-      val q635Source = loanOriginatedSource.drop(200) concat q635Fail
+      val q635Source = loanOriginatedSource.drop(totalFailing) concat q635Fail
       count(q635Source).map(t => t mustBe total)
       macroEdit(q635Source,
                 total,
@@ -93,13 +95,14 @@ class MacroValidationFlowSpec
     }
 
     "fail Q636" in {
-      val q636Fail = loanOriginatedSource.take(310).map { lar =>
+      val totalFailing = 310
+      val q636Fail = loanOriginatedSource.take(totalFailing).map { lar =>
         val larAction =
           lar.action.copy(actionTakenType = ApplicationWithdrawnByApplicant)
         lar.copy(action = larAction)
       }
 
-      val q636Source = loanOriginatedSource.drop(310) concat q636Fail
+      val q636Source = loanOriginatedSource.drop(totalFailing) concat q636Fail
       count(q636Source).map(t => t mustBe total)
       macroEdit(q636Source,
                 total,
@@ -118,6 +121,24 @@ class MacroValidationFlowSpec
                 q637Name,
                 fileClosedForIncompleteness).map(e =>
         e mustBe EmptyMacroValidationError())
+    }
+
+    "fail Q637" in {
+      val totalFailing = 200
+      val q637Fail = loanOriginatedSource.take(totalFailing).map { lar =>
+        val larAction =
+          lar.action.copy(actionTakenType = FileClosedForIncompleteness)
+        lar.copy(action = larAction)
+      }
+
+      val q637Source = loanOriginatedSource.drop(totalFailing) concat q637Fail
+      count(q637Source).map(t => t mustBe total)
+      macroEdit(q637Source,
+                total,
+                q637Ratio,
+                q637Name,
+                fileClosedForIncompleteness).map(e =>
+        e mustBe MacroValidationError(q637Name))
     }
 
     "pass Q640" in {
