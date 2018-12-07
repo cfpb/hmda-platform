@@ -162,6 +162,32 @@ class MacroValidationFlowSpec
         e => e mustBe MacroValidationError(q640Name))
     }
 
+    "collect macro edits" in {
+      val q635Failing = 200
+      val q536Failing = 310
+      val q635Fail = loanOriginatedSource.take(q635Failing).map { lar =>
+        val larAction =
+          lar.action.copy(actionTakenType = ApplicationApprovedButNotAccepted)
+        lar.copy(action = larAction)
+      }
+
+      val q636Fail = loanOriginatedSource.take(q536Failing).map { lar =>
+        val larAction =
+          lar.action.copy(actionTakenType = ApplicationWithdrawnByApplicant)
+        lar.copy(action = larAction)
+      }
+
+      val failSource = q635Fail concat q636Fail
+
+      macroValidation(failSource).map(
+        xs =>
+          xs mustBe List(MacroValidationError(q635Name),
+                         MacroValidationError(q636Name),
+                         MacroValidationError(q637Name),
+                         MacroValidationError(q640Name)))
+
+    }
+
   }
 
 }

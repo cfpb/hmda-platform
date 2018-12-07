@@ -35,18 +35,36 @@ object MacroValidationFlow {
   final val q640Ratio = config.getDouble("edits.Q640.ratio")
   final val q640Income = config.getInt("edits.Q640.income")
 
-//  def macroValidation[mat: MAT, ec: EC](
-//      source: Source[LoanApplicationRegister, NotUsed]) = {
-//    val fTotal = source.via(total).runWith(Sink.head)
-//
-//    for {
-//      total <- fTotal
-//      q635 <- Q635(source, total)
-//      q636 <- Q636(source, total)
-//    } yield {
-//      (q635, q636)
-//    }
-//  }
+  def macroValidation[as: AS, mat: MAT, ec: EC](
+      source: Source[LoanApplicationRegister, NotUsed]
+  ): Future[List[ValidationError]] = {
+    val fTotal = count(source)
+    for {
+      total <- fTotal
+      q635 <- macroEdit(source,
+                        total,
+                        q635Ratio,
+                        q635Name,
+                        applicationApprovedButNotAccepted)
+      q636 <- macroEdit(source,
+                        total,
+                        q636Ratio,
+                        q636Name,
+                        applicationWithdrawnByApplicant)
+      q637 <- macroEdit(source,
+                        total,
+                        q637Ratio,
+                        q637Name,
+                        applicationWithdrawnByApplicant)
+      q640 <- macroEdit(source,
+                        total,
+                        q640Ratio,
+                        q640Name,
+                        applicationWithdrawnByApplicant)
+    } yield {
+      List(q635, q636, q637, q640).filter(e => e != EmptyMacroValidationError())
+    }
+  }
 
   def macroEdit[as: AS, mat: MAT, ec: EC](
       source: Source[LoanApplicationRegister, NotUsed],
