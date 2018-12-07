@@ -62,54 +62,53 @@ keycloak:
 
   ## Custom script that is run before Keycloak is started.
   preStartScript: |
-        #!/bin/bash
+    #!/bin/bash
 
-        LOGIN_THEME=keycloak/themes/hmda/login/theme.properties
+    LOGIN_THEME=keycloak/themes/hmda/login/theme.properties
 
-        # Update Keycloak config files based on envvars
-        if [ -z ${INSTITUTION_SEARCH_URI+x} ]; then
-            echo 'INSTITUTION_SEARCH_URI environment variable not set' >&2
-            exit 1
-        else
-            sed -i "s@{{INSTITUTION_SEARCH_URI}}@$INSTITUTION_SEARCH_URI@g" $LOGIN_THEME
-            echo "Set institutionSearchUri=$INSTITUTION_SEARCH_URI"
-        fi
+    # Update Keycloak config files based on envvars
+    if [ -z ${INSTITUTION_SEARCH_URI+x} ]; then
+        echo 'INSTITUTION_SEARCH_URI environment variable not set' >&2
+        exit 1
+    else
+        sed -i "s@{{INSTITUTION_SEARCH_URI}}@$INSTITUTION_SEARCH_URI@g" $LOGIN_THEME
+        echo "Set institutionSearchUri=$INSTITUTION_SEARCH_URI"
+    fi
 
-        if [ -z ${FILING_APP_URL+x} ]; then
-            echo 'FILING_APP_URL environment variable not set' >&2
-            exit 1
-        else
-            sed -i "s@{{FILING_APP_URL}}@$FILING_APP_URL@g" $LOGIN_THEME
-            echo "Set filingAppUrl=$FILING_APP_URL"
-        fi
+    if [ -z ${FILING_APP_URL+x} ]; then
+        echo 'FILING_APP_URL environment variable not set' >&2
+        exit 1
+    else
+        sed -i "s@{{FILING_APP_URL}}@$FILING_APP_URL@g" $LOGIN_THEME
+        echo "Set filingAppUrl=$FILING_APP_URL"
+    fi
 
-        if [ -z ${SUPPORT_EMAIL+x} ]; then
-            echo 'SUPPORT_EMAIL environment variable not set' >&2
-            exit 1
-        else
-            sed -i "s/{{SUPPORT_EMAIL}}/$SUPPORT_EMAIL/g" $LOGIN_THEME
-            echo "Set supportEmailTo=$SUPPORT_EMAIL"
-        fi
+    if [ -z ${SUPPORT_EMAIL+x} ]; then
+        echo 'SUPPORT_EMAIL environment variable not set' >&2
+        exit 1
+    else
+        sed -i "s/{{SUPPORT_EMAIL}}/$SUPPORT_EMAIL/g" $LOGIN_THEME
+        echo "Set supportEmailTo=$SUPPORT_EMAIL"
+    fi
 
-        printf "\nEnvironment:\n"
-        env | sort
+    printf "\nEnvironment:\n"
+    env | sort
 
-        echo "Updated $LOGIN_THEME:"
-        cat $LOGIN_THEME
+    echo "Updated $LOGIN_THEME:"
+    cat $LOGIN_THEME
 
-        echo "Cleaning history"
-        rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history/current/*
-
+    echo "Cleaning history"
+    rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history/current/*
 
   ## Additional arguments to start command e.g. -Dkeycloak.import= to load a realm
-  extraArgs: "-Dkeycloak.import=/realm/realm.json"
+  extraArgs: '-Dkeycloak.import=/realm/realm.json'
 
   ## Username for the initial Keycloak admin user
   username: keycloak
 
   ## Password for the initial Keycloak admin user
   ## If not set, a random 10 characters password will be used
-  password: "keycloak"
+  password: 'keycloak'
 
   ## Allows the specification of additional environment variables for Keycloak
   extraEnv: |
@@ -118,7 +117,7 @@ keycloak:
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     - name: FILING_APP_URL
-      value: "https//hmda4.demo.cfpb.gov/filing/"
+      value: "https//hmda4.demo.cfpb.gov/filing/2018/"
     - name: INSTITUTION_SEARCH_URI
       value: "https://hmda4.demo.cfpb.gov/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
@@ -172,7 +171,8 @@ keycloak:
     initialDelaySeconds: 30
     timeoutSeconds: 1
 
-  resources: {}
+  resources:
+    {}
     # limits:
     #   cpu: "100m"
     #   memory: "1024Mi"
@@ -245,7 +245,6 @@ keycloak:
       /subsystem=keycloak-server/spi=form-action:add()
       /subsystem=keycloak-server/spi=form-action/provider=registration-institution-action:add(properties={institutionSearchUri => "${env.INSTITUTION_SEARCH_URI}", institutionSearchValidateSsl => "${env.INSTITUTION_SEARCH_VALIDATE_SSL}"}, enabled=true)
 
-
   ## Add additional volumes and mounts, e. g. for custom themes
   extraVolumes: |
     - name: realm-secret
@@ -264,7 +263,8 @@ keycloak:
     - name: spi
       mountPath: /opt/jboss/keycloak/standalone/deployments
 
-  podDisruptionBudget: {}
+  podDisruptionBudget:
+    {}
     # maxUnavailable: 1
     # minAvailable: 1
 
@@ -290,7 +290,8 @@ keycloak:
     enabled: false
     path: /
 
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
       # ingress.kubernetes.io/affinity: cookie
@@ -316,18 +317,18 @@ keycloak:
     ## The following values only apply if "deployPostgres" is set to "false"
 
     # Specifies an existing secret to be used for the database password
-    existingSecret: "keycloak-credentials"
+    existingSecret: 'keycloak-credentials'
 
     # The key in the existing secret that stores the password
     existingSecretKey: password
 
     dbName: keycloak_v2
-    dbHost: ""
+    dbHost: ''
     dbPort: 5432
     dbUser: keycloak
 
     # Only used if no existing secret is specified. In this case a new secret is created
-    dbPassword: ""
+    dbPassword: ''
 
 postgresql:
   ### PostgreSQL User to create.
@@ -337,7 +338,7 @@ postgresql:
   ## PostgreSQL Password for the new user.
   ## If not set, a random 10 characters password will be used.
   ##
-  postgresPassword: ""
+  postgresPassword: ''
 
   ## PostgreSQL Database to create.
   ##
@@ -356,4 +357,3 @@ test:
     repository: unguiculus/docker-python3-phantomjs-selenium
     tag: v1
     pullPolicy: IfNotPresent
-
