@@ -149,6 +149,19 @@ class MacroValidationFlowSpec
                 incomeLessThan10).map(e => e mustBe EmptyMacroValidationError())
     }
 
+    "fail Q640" in {
+      val totalFailing = 210
+      val q640Fail = source.take(totalFailing).map { lar =>
+        val failIncome = "5"
+        lar.copy(income = failIncome)
+      }
+
+      val q640Source = source.drop(totalFailing) concat q640Fail
+      count(q640Source).map(t => t mustBe total)
+      macroEdit(q640Source, total, q640Ratio, q640Name, incomeLessThan10).map(
+        e => e mustBe MacroValidationError(q640Name))
+    }
+
   }
 
 }
