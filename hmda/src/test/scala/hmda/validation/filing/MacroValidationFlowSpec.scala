@@ -157,6 +157,14 @@ class MacroValidationFlowSpec
         e mustBe MacroValidationError(q637Name))
     }
 
+    "pass Q638" in {
+      Q638(source).map(e => e mustBe EmptyMacroValidationError())
+    }
+
+    "pass Q639" in {
+      Q639(source).map(e => e mustBe EmptyMacroValidationError())
+    }
+
     "pass Q640" in {
       macroEdit(incomeGreaterThan10,
                 total,
@@ -205,5 +213,4 @@ class MacroValidationFlowSpec
     }
 
   }
-
 }
