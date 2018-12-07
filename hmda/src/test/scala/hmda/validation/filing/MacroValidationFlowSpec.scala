@@ -11,6 +11,7 @@ import MacroValidationFlow._
 import hmda.util.SourceUtils._
 import hmda.model.filing.lar.enums.{
   ApplicationApprovedButNotAccepted,
+  ApplicationWithdrawnByApplicant,
   LoanOriginated
 }
 import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError}
@@ -47,15 +48,24 @@ class MacroValidationFlowSpec
     lar.copy(action = larAction)
   }
 
+  val incomeGreaterThan10 = source.map { lar =>
+    lar.copy(income = "20")
+  }
+
   "Macro Validation" must {
     "count total number of LARs" in {
       count(source).map(t => t mustBe total)
     }
 
     "pass Q635" in {
-      macroEdit(loanOriginatedSource, total, q635Ratio, q635Name).map(e =>
+      macroEdit(loanOriginatedSource,
+                total,
+                q635Ratio,
+                q635Name,
+                applicationApprovedButNotAccepted).map(e =>
         e mustBe EmptyMacroValidationError())
     }
+
     "fail Q635" in {
       val q635Fail = loanOriginatedSource.take(200).map { lar =>
         val larAction =
@@ -65,9 +75,59 @@ class MacroValidationFlowSpec
 
       val q635Source = loanOriginatedSource.drop(200) concat q635Fail
       count(q635Source).map(t => t mustBe total)
-      macroEdit(q635Source, total, q635Ratio, q635Name).map(e =>
-        e mustBe MacroValidationError("Q635"))
+      macroEdit(q635Source,
+                total,
+                q635Ratio,
+                q635Name,
+                applicationApprovedButNotAccepted).map(e =>
+        e mustBe MacroValidationError(q635Name))
     }
+
+    "pass Q636" in {
+      macroEdit(loanOriginatedSource,
+                total,
+                q636Ratio,
+                q636Name,
+                applicationWithdrawnByApplicant).map(e =>
+        e mustBe EmptyMacroValidationError())
+    }
+
+    "fail Q636" in {
+      val q636Fail = loanOriginatedSource.take(310).map { lar =>
+        val larAction =
+          lar.action.copy(actionTakenType = ApplicationWithdrawnByApplicant)
+        lar.copy(action = larAction)
+      }
+
+      val q636Source = loanOriginatedSource.drop(310) concat q636Fail
+      count(q636Source).map(t => t mustBe total)
+      macroEdit(q636Source,
+                total,
+                q636Ratio,
+                q636Name,
+                applicationWithdrawnByApplicant).map(e =>
+        e mustBe MacroValidationError(q636Name))
+
+      1 mustBe 1
+    }
+
+    "pass Q637" in {
+      macroEdit(loanOriginatedSource,
+                total,
+                q637Ratio,
+                q637Name,
+                fileClosedForIncompleteness).map(e =>
+        e mustBe EmptyMacroValidationError())
+    }
+
+    "pass Q640" in {
+      macroEdit(incomeGreaterThan10,
+                total,
+                q640Ratio,
+                q640Name,
+                incomeLessThan10).map(e => e mustBe EmptyMacroValidationError())
+    }
+
   }
 
 }
