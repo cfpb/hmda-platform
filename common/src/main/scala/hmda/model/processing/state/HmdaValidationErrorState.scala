@@ -45,10 +45,13 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
   def verifyQuality(evt: QualityVerified): HmdaValidationErrorState =
     this.copy(qualityVerified = evt.verified, statusCode = Verified.code)
 
-  def verifyMacro(evt: MacroVerified): HmdaValidationErrorState =
+  def verifyMacro(evts: MacroVerified): HmdaValidationErrorState =
     this.copy(macroVerified = evt.verified, statusCode = Verified.code)
 
   def updateStatusCode(code: Int): HmdaValidationErrorState =
     this.copy(statusCode = code)
+
+  def noEditsFound(): Boolean =
+   syntactical.isEmpty && validity.isEmpty && quality.isEmpty && `macro`.isEmpty
 
 }
