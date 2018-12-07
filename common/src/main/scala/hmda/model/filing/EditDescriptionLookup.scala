@@ -21,16 +21,23 @@ object EditDescriptionLookup {
         val values = s.split("\\|", -1).map(_.trim).toList
         val editName = values(0)
         val editDetails = values(1)
-        val affectedDataFields = values(2).split(",")
+        val affectedDataFields = values(2).split(";").map(_.trim)
         EditDescription(editName, editDetails, affectedDataFields.toList)
       }
 
   }
 
-  val editDescriptionMap: Map[String, String] =
-    editDescriptionList.map(e => (e.editName, e.description)).toMap
+  val editDescriptionMap: Map[String, EditDescription] =
+    editDescriptionList.map(e => (e.editName, e)).toMap
 
   def lookupDescription(editName: String): String =
-    editDescriptionMap.getOrElse(editName, "")
+    editDescriptionMap
+      .getOrElse(editName, EditDescription("", "", List()))
+      .description
+
+  def lookupFields(editName: String): List[String] =
+    editDescriptionMap
+      .getOrElse(editName, EditDescription("", "", List()))
+      .affectedFields
 
 }

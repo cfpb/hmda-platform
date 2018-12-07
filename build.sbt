@@ -26,8 +26,7 @@ lazy val akkaDeps = Seq(
   akkaClusterHttpManagement,
   akkaClusterHttpManagement,
   akkaTestkitTyped,
-  akkaCors,
-  akkaClusterDowning
+  akkaCors
 )
 
 lazy val akkaPersistenceDeps =

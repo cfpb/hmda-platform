@@ -37,7 +37,6 @@ object Dependencies {
   lazy val circeParser = "io.circe" %% "circe-parser" % Version.circe
   lazy val akkaPersistenceCassandra = "com.typesafe.akka" %% "akka-persistence-cassandra" % Version.cassandraPluginVersion
   lazy val cassandraLauncher = "com.typesafe.akka" %% "akka-persistence-cassandra-launcher" % Version.cassandraPluginVersion
-  lazy val akkaClusterDowning = "com.github.TanUkkii007" %% "akka-cluster-custom-downing" % Version.akkaClusterDowning
   lazy val slick = "com.typesafe.slick" %% "slick" % Version.slick
   lazy val slickHikaryCP = "com.typesafe.slick" %% "slick-hikaricp" % Version.slick
   lazy val postgres = "org.postgresql" % "postgresql" % Version.postgres

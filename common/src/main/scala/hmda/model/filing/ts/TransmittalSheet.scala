@@ -19,7 +19,9 @@ case class TransmittalSheet(
     s"$id|$institutionName|$year|$quarter|${contact.toCSV}|${agency.code}|$totalLines|$taxId|$LEI"
   }
 
-  override def valueOf(field: String): Any = {
-    TsFieldMapping.mapping(this).getOrElse(field, "error: field name mismatch")
+  override def valueOf(field: String): String = {
+    TsFieldMapping
+      .mapping(this)
+      .getOrElse(field, s"error: field name mismatch for $field")
   }
 }
