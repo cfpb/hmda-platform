@@ -13,6 +13,14 @@ class V676_1Spec extends LarEditCheckSpec {
       lar.mustPass
 
       lar
+        .copy(loanDisclosure = lar.loanDisclosure.copy(lenderCredits = ""))
+        .mustPass
+
+      lar
+        .copy(loanDisclosure = lar.loanDisclosure.copy(lenderCredits = "0"))
+        .mustFail
+
+      lar
         .copy(loanDisclosure = lar.loanDisclosure.copy(lenderCredits = "test"))
         .mustFail
       lar

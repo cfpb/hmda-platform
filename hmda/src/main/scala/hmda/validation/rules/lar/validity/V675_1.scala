@@ -16,7 +16,7 @@ object V675_1 extends EditCheck[LoanApplicationRegister] {
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     val discount =
       Try(lar.loanDisclosure.discountPoints.toDouble).getOrElse(-1.0)
-    lar.loanDisclosure.discountPoints is oneOf("Exempt", "NA") or
-      (discount is greaterThanOrEqual(0.0))
+    lar.loanDisclosure.discountPoints is oneOf("Exempt", "NA", "") or
+      (discount is greaterThan(0.0))
   }
 }

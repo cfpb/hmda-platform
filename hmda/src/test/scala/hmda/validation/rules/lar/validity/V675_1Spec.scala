@@ -11,6 +11,13 @@ class V675_1Spec extends LarEditCheckSpec {
   property("Discount points must be valid") {
     forAll(larGen) { lar =>
       lar.mustPass
+      lar
+        .copy(loanDisclosure = lar.loanDisclosure.copy(discountPoints = ""))
+        .mustPass
+
+      lar
+        .copy(loanDisclosure = lar.loanDisclosure.copy(discountPoints = "0"))
+        .mustFail
 
       lar
         .copy(loanDisclosure = lar.loanDisclosure.copy(discountPoints = "test"))
