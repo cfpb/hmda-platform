@@ -9,12 +9,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
 import MacroValidationFlow._
 import hmda.util.SourceUtils._
-import hmda.model.filing.lar.enums.{
-  ApplicationApprovedButNotAccepted,
-  ApplicationWithdrawnByApplicant,
-  FileClosedForIncompleteness,
-  LoanOriginated
-}
+import hmda.model.filing.lar.enums._
 import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError}
 
 class MacroValidationFlowSpec
@@ -56,6 +51,27 @@ class MacroValidationFlowSpec
   "Macro Validation" must {
     "count total number of LARs" in {
       count(source).map(t => t mustBe total)
+    }
+
+    "pass Q634" in {
+      Q634(source).map(e => e mustBe EmptyMacroValidationError())
+    }
+
+    "fail Q634" in {
+      val homePurchaseSource = source.take(100).map { lar =>
+        val homePurchaseLoan = lar.loan.copy(loanPurpose = HomePurchase)
+        val approved =
+          lar.action.copy(actionTakenType = ApplicationApprovedButNotAccepted)
+        lar.copy(loan = homePurchaseLoan, action = approved)
+      }
+
+      val originatedSource = homePurchaseSource.take(30).map { lar =>
+        val originated = lar.action.copy(actionTakenType = LoanOriginated)
+        lar.copy(action = originated)
+      }
+
+      val q634Source = homePurchaseSource.drop(30) concat originatedSource
+      Q634(q634Source).map(e => e mustBe MacroValidationError(q634Name))
     }
 
     "pass Q635" in {

@@ -34,6 +34,8 @@ object MacroValidationFlow {
   final val q637Ratio = config.getDouble("edits.Q637.ratio")
   final val q640Ratio = config.getDouble("edits.Q640.ratio")
   final val q640Income = config.getInt("edits.Q640.income")
+  final val q634Threshold = config.getInt("edits.Q634.threshold")
+  final val q634Ratio = config.getDouble("edits.Q634.ratio")
 
   def macroValidation[as: AS, mat: MAT, ec: EC](
       source: Source[LoanApplicationRegister, NotUsed]
@@ -41,6 +43,7 @@ object MacroValidationFlow {
     val fTotal = count(source)
     for {
       total <- fTotal
+      q634 <- Q634(source)
       q635 <- macroEdit(source,
                         total,
                         q635Ratio,
@@ -62,7 +65,8 @@ object MacroValidationFlow {
                         q640Name,
                         applicationWithdrawnByApplicant)
     } yield {
-      List(q635, q636, q637, q640).filter(e => e != EmptyMacroValidationError())
+      List(q634, q635, q636, q637, q640).filter(e =>
+        e != EmptyMacroValidationError())
     }
   }
 
@@ -80,6 +84,29 @@ object MacroValidationFlow {
       val ratio = editCount.toDouble / total.toDouble
       if (ratio > editRatio) MacroValidationError(editName)
       else EmptyMacroValidationError()
+    }
+  }
+
+  def Q634[as: AS, mat: MAT, ec: EC](
+      source: Source[LoanApplicationRegister, NotUsed]
+  ): Future[ValidationError] = {
+
+    val countPredicateF = count(source.filter(homePurchaseLoanOriginated))
+    val countComparisonF = count(source.filter(loanOriginated))
+
+    for {
+      countPredicate <- countPredicateF
+      countComparison <- countComparisonF
+    } yield {
+      if (countPredicate <= q634Threshold) {
+        EmptyMacroValidationError()
+      } else {
+        if (countPredicate <= q634Ratio * countComparison) {
+          EmptyMacroValidationError()
+        } else {
+          MacroValidationError(q634Name)
+        }
+      }
     }
   }
 
