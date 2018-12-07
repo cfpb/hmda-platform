@@ -12,7 +12,7 @@ import hmda.messages.filing.FilingEvents.FilingCreated
 import hmda.model.filing.{Filing, FilingDetails, FilingId}
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.model.filing.FilingGenerator._
-import hmda.model.filing.submission.{Submission, SubmissionId, Uploaded}
+import hmda.model.filing.submission._
 import hmda.model.submission.SubmissionGenerator._
 import hmda.persistence.institution.InstitutionPersistence
 
@@ -41,6 +41,7 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
   val sampleSubmission = submissionGen
     .suchThat(s => !s.id.isEmpty)
     .suchThat(s => s.id.lei != "" && s.id.lei != "AA")
+    .suchThat(s => s.status == SubmissionStatus.valueOf(QualityErrors.code))
     .sample
     .getOrElse(Submission(SubmissionId("12345", "2018", 1)))
 
@@ -100,7 +101,8 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       filingPersistence ! GetLatestSubmission(maybeSubmissionProbe.ref)
       maybeSubmissionProbe.expectMessage(Some(sampleSubmission2))
 
-      val updated = sampleSubmission2.copy(end = Instant.now().getEpochSecond)
+      val updated =
+        sampleSubmission2.copy(status = SubmissionStatus.valueOf(Verified.code))
       filingPersistence ! UpdateSubmission(updated, Some(submissionProbe.ref))
 
       filingPersistence ! GetFilingDetails(filingDetailsProbe.ref)
