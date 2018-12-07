@@ -98,7 +98,7 @@
           <div class="usa-width-one-whole margin-bottom-1">
             <div class="usa-alert usa-alert-${message.type}">
               <div class="usa-alert-body">
-                <p class="usa-alert-text">${message.summary}</p>
+                <p class="usa-alert-text">${kcSanitize(message.summary)?no_esc}</p>
                 <p>For help with account-related issues, please contact
                     <strong><a href="mailto:${properties.supportEmailTo!}?subject=${properties.supportEmailSubject?url('UTF-8')}">${properties.supportEmailTo}</a></strong>.
                 </p>
