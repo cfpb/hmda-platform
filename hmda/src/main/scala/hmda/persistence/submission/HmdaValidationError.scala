@@ -199,13 +199,21 @@ object HmdaValidationError
 
       case VerifyQuality(submissionId, verified, replyTo) =>
         if (List(Quality.code, QualityErrors.code, Macro.code, MacroErrors.code)
-              .contains(state.statusCode)) {
+              .contains(state.statusCode) || !verified) {
           Effect
             .persist(
               QualityVerified(submissionId,
                               verified,
                               SubmissionStatus.valueOf(state.statusCode)))
             .thenRun { _ =>
+              if (!verified) {
+                val updatedStatus = QualityErrors
+                updateSubmissionStatus(sharding,
+                                       submissionId,
+                                       updatedStatus,
+                                       log)
+                replyTo ! QualityVerified(submissionId, verified, updatedStatus)
+              }
               if (state.macroVerified) {
                 val updatedStatus = Verified
                 updateSubmissionStatus(sharding,

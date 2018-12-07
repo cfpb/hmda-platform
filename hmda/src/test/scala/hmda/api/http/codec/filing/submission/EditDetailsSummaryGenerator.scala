@@ -24,7 +24,7 @@ object EditDetailsSummaryGenerator {
   implicit def fieldDetailsGen: Gen[FieldDetails] =
     for {
       name <- Gen.alphaStr
-      value <- Gen.choose(1, Int.MaxValue)
+      value <- Gen.alphaStr
     } yield FieldDetails(name, value)
 
 }

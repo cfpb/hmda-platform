@@ -8,7 +8,7 @@ import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 object V632_3 extends EditCheck[LoanApplicationRegister] {
-  override def name: String = "V632_3"
+  override def name: String = "V632-3"
   override def parent: String = "V632"
   val validEthnicityList = List(
     HispanicOrLatino,
