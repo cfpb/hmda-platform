@@ -36,13 +36,14 @@ class HmdaCensusQueryApi
   override val name: String = "hmda-census-api"
   override val host: String = config.getString("hmda.census.http.host")
   override val port: Int = config.getInt("hmda.census.http.port")
+
+  override val paths: Route = routes(s"$name") ~ censusRoutes
+
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
     host,
     port
   )
 
-  override val paths: Route = routes(s"$name") ~ censusRoutes
   http pipeTo self
-
 }
