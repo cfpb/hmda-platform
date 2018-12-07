@@ -35,25 +35,11 @@ trait CensusQueryHttpApi extends HmdaTimeDirectives {
   val censusByIdPath =
     path("census" / Segment) { id =>
       timedGet { uri =>
-        println("get HEREsdf!!!")
+        println("entred in path")
         complete(ToResponseMarshallable(HttpResponse(StatusCodes.NotFound)))
       }
     }
-//  val censusByIdPath =
-//    path("institutions" / Segment) { lei =>
-//      timedGet { uri =>
-//
-//      }
-//    }
 
-//  def institutionPublicRoutes: Route =
-//    handleRejections(corsRejectionHandler) {
-//      cors() {
-//        encodeResponse {
-//          censusByIdPath
-//        }
-//      }
-//    }
 
   def censusRoutes: Route =
     handleRejections(corsRejectionHandler) {
