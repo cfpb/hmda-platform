@@ -60,7 +60,7 @@ trait ResumableProjection {
               SaveOffset(env.offset, ref))
             result
           }
-          .runWith(Sink.ignore)
+          .runWith(Sink.onComplete(_ => log.error("The Institutions API has stopped streaming")))
         Effect.none
 
       case SaveOffset(offset, replyTo) =>
