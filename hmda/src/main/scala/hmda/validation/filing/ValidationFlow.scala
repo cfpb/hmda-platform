@@ -5,10 +5,14 @@ import akka.stream.FlowShape
 import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL}
 import akka.util.ByteString
 import cats.Semigroup
-import hmda.model.filing.PipeDelimited
+import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
-import hmda.model.validation.{LarValidationError, TsValidationError}
+import hmda.model.validation.{
+  LarValidationError,
+  TsValidationError,
+  ValidationError
+}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation.HmdaValidated
@@ -51,7 +55,7 @@ object ValidationFlow {
         case Right(ts) => ts
       }
       .map { ts =>
-        checkType match {
+        val errors = checkType match {
           case "all" =>
             TsEngine.checkAll(ts, ts.LEI, validationContext, TsValidationError)
           case "syntactical" =>
@@ -62,9 +66,14 @@ object ValidationFlow {
           case "validity" =>
             TsEngine.checkValidity(ts, ts.LEI, TsValidationError)
         }
+        (ts, errors)
       }
       .map { x =>
-        x.leftMap(xs => xs.toList).toEither
+        x._2
+          .leftMap(xs => {
+            addTsFieldInformation(x._1, xs.toList)
+          })
+          .toEither
       }
   }
 
@@ -79,14 +88,12 @@ object ValidationFlow {
         case Right(lar) => lar
       }
       .map { lar =>
-        checkType match {
+        def errors = checkType match {
           case "all" =>
             LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
           case "syntactical" =>
-            LarEngine.checkSyntactical(lar,
-                                       lar.loan.ULI,
-                                       ctx,
-                                       LarValidationError)
+            LarEngine
+              .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
           case "validity" =>
             LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
           case "syntactical-validity" =>
@@ -97,9 +104,36 @@ object ValidationFlow {
               )
           case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
         }
+        (lar, errors)
       }
       .map { x =>
-        x.leftMap(xs => xs.toList).toEither
+        x._2
+          .leftMap(xs => {
+            addLarFieldInformation(x._1, xs.toList)
+          })
+          .toEither
       }
+  }
+
+  def addLarFieldInformation(
+      lar: LoanApplicationRegister,
+      errors: List[ValidationError]): List[ValidationError] = {
+    errors.map(error => {
+      val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
+      val fieldMap =
+        affectedFields.map(field => (field, lar.valueOf(field))).toMap
+      error.copyWithFields(fieldMap)
+    })
+  }
+
+  def addTsFieldInformation(
+      ts: TransmittalSheet,
+      errors: List[ValidationError]): List[ValidationError] = {
+    errors.map(error => {
+      val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
+      val fieldMap =
+        affectedFields.map(field => (field, ts.valueOf(field))).toMap
+      error.copyWithFields(fieldMap)
+    })
   }
 }

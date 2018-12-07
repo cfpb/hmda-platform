@@ -11,20 +11,36 @@ object ValidationErrorGenerator {
   implicit def validationErrorEntityGen: Gen[ValidationErrorEntity] =
     Gen.oneOf(Seq(TsValidationError, LarValidationError))
 
+  implicit def validationErrorFieldsGen: Gen[Map[String, String]] = {
+    val keyGen = Gen.listOf(Gen.alphaStr)
+    for {
+      keys <- keyGen
+      values <- Gen.containerOfN[List, String](keys.length, Gen.alphaStr)
+    } yield (keys zip values).toMap
+  }
+
   implicit def validationErrorGen: Gen[ValidationError] =
     for {
       uli <- Gen.alphaStr
       editName <- Gen.alphaStr
       validationErrorType <- validationErrorTypeGen
-      valiationErrorEntity <- validationErrorEntityGen
+      validationErrorEntity <- validationErrorEntityGen
+      validationErrorFields <- validationErrorFieldsGen
     } yield {
       validationErrorType match {
         case Syntactical =>
-          SyntacticalValidationError(uli, editName, valiationErrorEntity)
+          SyntacticalValidationError(uli,
+                                     editName,
+                                     validationErrorEntity,
+                                     validationErrorFields)
         case Validity =>
-          ValidityValidationError(uli, editName, valiationErrorEntity)
-        case Quality => QualityValidationError(uli, editName)
-        case Macro   => MacroValidationError(editName)
+          ValidityValidationError(uli,
+                                  editName,
+                                  validationErrorEntity,
+                                  validationErrorFields)
+        case Quality =>
+          QualityValidationError(uli, editName, validationErrorFields)
+        case Macro => MacroValidationError(editName)
       }
     }
 

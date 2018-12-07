@@ -28,11 +28,16 @@ object EditDetailsConverter {
     )
   }
 
-  //TODO: perform mapping Validation Error --> Field Details (name, value)
   private def validationErrorToFieldDetails(
       validationError: ValidationError): Seq[FieldDetails] =
-    Seq(
-      FieldDetails("name", 1)
-    )
+    validationError.fields.keys
+      .map(fieldKey => {
+        val fieldValue =
+          validationError.fields.getOrElse(fieldKey, "Detail not found")
+        val fieldValueFriendly =
+          if (fieldValue == "-1") "Invalid input" else fieldValue
+        FieldDetails(fieldKey, fieldValueFriendly)
+      })
+      .toSeq
 
 }

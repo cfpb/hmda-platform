@@ -57,7 +57,7 @@ object EditDetailsSummaryCodec {
     new Encoder[FieldDetails] {
       override def apply(a: FieldDetails): Json = Json.obj(
         ("name", Json.fromString(a.name)),
-        ("value", Json.fromInt(a.value))
+        ("value", Json.fromString(a.value))
       )
     }
 
@@ -75,7 +75,7 @@ object EditDetailsSummaryCodec {
       override def apply(c: HCursor): Result[FieldDetails] =
         for {
           name <- c.downField("name").as[String]
-          value <- c.downField("value").as[Int]
+          value <- c.downField("value").as[String]
         } yield FieldDetails(name, value)
     }
 
