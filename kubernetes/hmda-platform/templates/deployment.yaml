@@ -57,6 +57,11 @@ spec:
             configMapKeyRef:
               name: kafka-configmap
               key: kafka.hosts
+        - name: GIT_DESCRIBE_TAG
+          valueFrom:
+            configMapKeyRef:
+              name: imagetag-configmap
+              key: image-tag
         livenessProbe:
           tcpSocket:
             port: {{ .Values.bootstrap.port }}

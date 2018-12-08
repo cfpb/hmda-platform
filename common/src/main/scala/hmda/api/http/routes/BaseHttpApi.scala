@@ -19,22 +19,22 @@ trait BaseHttpApi extends HmdaTimeDirectives {
   implicit val materializer: ActorMaterializer
   val log: LoggingAdapter
 
-  def rootPath(name: String) =
+  def rootPath(name: String, gitTag: String) =
     pathSingleSlash {
       timedGet { _ =>
         complete {
           val now = Instant.now.toString
           val host = InetAddress.getLocalHost.getHostName
-          val status = HmdaServiceStatus("OK", name, now, host)
+          val status = HmdaServiceStatus("OK", name, now, host, gitTag)
           log.debug(status.toString)
           ToResponseMarshallable(status)
         }
       }
     }
 
-  def routes(apiName: String) =
+  def routes(apiName: String, gitTag: String = "") =
     encodeResponse {
-      rootPath(apiName)
+      rootPath(apiName, gitTag)
     }
 
 }

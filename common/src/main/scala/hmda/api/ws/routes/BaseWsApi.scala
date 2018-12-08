@@ -34,7 +34,8 @@ trait BaseWsApi {
             case "status" =>
               val now = Instant.now.toString
               val host = InetAddress.getLocalHost.getHostName
-              val status = HmdaServiceStatus("OK", name, now, host)
+              //TODO Once changes to filing api are tested, hange to passing git tag information similar to hmda-platform.
+              val status = HmdaServiceStatus("OK", name, now, host, "")
               TextMessage.Strict(status.asJson.toString)
 
             case _ => TextMessage.Strict("Message not supported")

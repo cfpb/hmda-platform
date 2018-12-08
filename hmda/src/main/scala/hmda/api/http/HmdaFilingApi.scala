@@ -69,8 +69,9 @@ class HmdaFilingApi
   override val name: String = filingApiName
   override val host: String = config.getString("hmda.http.filingHost")
   override val port: Int = config.getInt("hmda.http.filingPort")
+  val gitTag: String = config.getString("hmda.git.describe")
 
-  override val paths: Route = routes(s"$name") ~
+  override val paths: Route = routes(s"$name", s"$gitTag") ~
     filingRoutes(oAuth2Authorization) ~
     submissionRoutes(oAuth2Authorization) ~
     uploadRoutes(oAuth2Authorization) ~
