@@ -29,16 +29,20 @@ class HmdaCensusQueryApi
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
   val duration = config.getInt("hmda.census.http.timeout").seconds
-  println(duration)
   override implicit val timeout: Timeout = Timeout(duration)
 
   val createSchema = config.getBoolean("hmda.census.createSchema")
+
+  if (createSchema) {
+    println("entered in create")
+    censusRepository.createSchema()
+  }
   override val name: String = "hmda-census-api"
   override val host: String = config.getString("hmda.census.http.host")
   override val port: Int = config.getInt("hmda.census.http.port")
 
   override val paths: Route = routes(s"$name") ~ censusRoutes
-
+  println("ehres")
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
     host,

@@ -23,13 +23,10 @@ object HmdaCensusApi extends App {
       |                                         |_|
     """.stripMargin)
   val config = ConfigFactory.load()
-  println(config)
   val host = config.getString("hmda.census.http.host")
-  println(host)
   val port = config.getString("hmda.census.http.port")
-  println(port)
   val jdbcUrl = config.getString("db.db.url")
-  println(jdbcUrl)
+  log.info(s"Connection URL is \n\n$jdbcUrl\n")
   implicit val system = ActorSystem("hmda-census")
   system.actorOf(HmdaCensusQueryApi.props(), "hmda-census-api")
 }
