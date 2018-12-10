@@ -182,10 +182,15 @@ object HmdaValidationError
             } else {
               updateSubmissionStatus(sharding, submissionId, Macro, log)
             }
+            ctx.asScala.self ! CompleteMacro(submissionId)
           case Failure(e) =>
             log.error(e.getLocalizedMessage)
 
         }
+        Effect.none
+
+      case CompleteMacro(submissionId) =>
+        log.info(s"Completed Macro Validation for $submissionId")
         Effect.none
 
       case PersistHmdaRowValidatedError(submissionId,
@@ -299,6 +304,8 @@ object HmdaValidationError
        SubmissionProcessingEvent) => HmdaValidationErrorState = {
     case (state, error @ HmdaRowValidatedError(_, _)) =>
       state.updateErrors(error)
+    case (state, error @ HmdaMacroValidatedError(_)) =>
+      state.updateMacroErrors(error)
     case (state, SyntacticalValidityCompleted(_, statusCode)) =>
       state.updateStatusCode(statusCode)
     case (state, QualityCompleted(_, statusCode)) =>

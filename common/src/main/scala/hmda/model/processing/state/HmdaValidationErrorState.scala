@@ -1,6 +1,7 @@
 package hmda.model.processing.state
 
 import hmda.messages.submission.SubmissionProcessingEvents.{
+  HmdaMacroValidatedError,
   HmdaRowValidatedError,
   MacroVerified,
   QualityVerified
@@ -40,6 +41,13 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
       this.quality ++ editSummaries.getOrElse(Quality, Nil).toSet,
       this.`macro` ++ editSummaries.getOrElse(Macro, Nil).toSet
     )
+  }
+
+  def updateMacroErrors(
+      error: HmdaMacroValidatedError): HmdaValidationErrorState = {
+    this.copy(
+      `macro` = this.`macro` ++ Set(
+        EditSummary(error.error.editName, Macro, LarValidationError)))
   }
 
   def verifyQuality(evt: QualityVerified): HmdaValidationErrorState =

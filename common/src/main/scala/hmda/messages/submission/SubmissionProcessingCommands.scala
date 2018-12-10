@@ -75,6 +75,9 @@ object SubmissionProcessingCommands {
   case class CompleteQuality(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
 
+  case class CompleteMacro(submissionId: SubmissionId)
+      extends SubmissionProcessingCommand
+
   case class VerifyQuality(submissionId: SubmissionId,
                            verified: Boolean,
                            replyTo: ActorRef[SubmissionProcessingEvent])

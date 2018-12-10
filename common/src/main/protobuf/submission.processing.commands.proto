@@ -75,6 +75,10 @@ message CompleteQualityMessage {
     SubmissionIdMessage submissionId = 1;
 }
 
+message CompleteMacroMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
 message VerifyQualityMessage {
     SubmissionIdMessage submissionId = 1;
     bool verified = 2;

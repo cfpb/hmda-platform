@@ -266,6 +266,18 @@ object SubmissionProcessingCommandsProtobufConverter {
     )
   }
 
+  def completeMacroToProtobuf(cmd: CompleteMacro): CompleteMacroMessage = {
+    CompleteMacroMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def completeMacroFromProtobuf(msg: CompleteMacroMessage): CompleteMacro = {
+    CompleteMacro(
+      submissionIdFromProtobuf(msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
   def verifyQualityToProtobuf(
       cmd: VerifyQuality,
       refResolver: ActorRefResolver): VerifyQualityMessage = {
