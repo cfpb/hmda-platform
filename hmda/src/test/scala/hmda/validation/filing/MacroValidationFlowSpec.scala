@@ -157,7 +157,26 @@ class MacroValidationFlowSpec
     }
 
     "pass Q638" in {
-      Q638(source).map(e => e mustBe EmptyMacroValidationError())
+      val q638Source = source.map(lar =>
+        lar.copy(action = LarAction(actionTakenType = LoanOriginated)))
+      Q638(q638Source)
+        .map(e => e mustBe EmptyMacroValidationError())
+    }
+
+    "fail Q638" in {
+      val originated = source
+        .take(100)
+        .map(lar =>
+          lar.copy(action = LarAction(actionTakenType = LoanOriginated)))
+      val rest = source
+        .drop(100)
+        .map(lar =>
+          lar.copy(action =
+            LarAction(actionTakenType = ApplicationApprovedButNotAccepted)))
+
+      val q638Fail = originated concat rest
+
+      Q638(q638Fail).map(e => e mustBe MacroValidationError("Q638"))
     }
 
     "pass Q639" in {
@@ -219,10 +238,13 @@ class MacroValidationFlowSpec
 
       macroValidation(failSource).map(
         xs =>
-          xs mustBe List(MacroValidationError(q635Name),
-                         MacroValidationError(q636Name),
-                         MacroValidationError(q637Name),
-                         MacroValidationError(q640Name)))
+          xs mustBe List(
+            MacroValidationError(q635Name),
+            MacroValidationError(q636Name),
+            MacroValidationError(q637Name),
+            MacroValidationError(q638Name),
+            MacroValidationError(q640Name)
+        ))
 
     }
 

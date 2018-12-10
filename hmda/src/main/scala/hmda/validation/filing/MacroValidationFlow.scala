@@ -126,10 +126,10 @@ object MacroValidationFlow {
       countComparison <- countComparisonF
       ratio = countPredicate.toDouble / countComparison.toDouble
     } yield {
-      if (ratio > q638Ratio)
-        MacroValidationError(q638Name)
-      else
+      if (ratio >= q638Ratio)
         EmptyMacroValidationError()
+      else
+        MacroValidationError(q638Name)
     }
   }
 
