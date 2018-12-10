@@ -76,6 +76,7 @@ object HmdaPlatform extends App {
       Map("offsets.topic.replication.factor" -> "1",
           "zookeeper.connection.timeout.ms" -> "20000")
     )
+    EmbeddedKafka.start()
   }
 
   //Start Persistence
