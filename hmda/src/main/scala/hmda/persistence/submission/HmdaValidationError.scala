@@ -190,7 +190,7 @@ object HmdaValidationError
         Effect.none
 
       case CompleteMacro(submissionId) =>
-        log.info(s"Completed Macro Validation for $submissionId")
+        log.info(s"Macro Validation finished for $submissionId")
         Effect.none
 
       case PersistHmdaRowValidatedError(submissionId,

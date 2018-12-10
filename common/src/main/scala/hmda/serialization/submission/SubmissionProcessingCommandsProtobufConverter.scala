@@ -274,7 +274,8 @@ object SubmissionProcessingCommandsProtobufConverter {
 
   def completeMacroFromProtobuf(msg: CompleteMacroMessage): CompleteMacro = {
     CompleteMacro(
-      submissionIdFromProtobuf(msg.submissionId.getOrElse(SubmissionIdMessage()))
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
     )
   }
 
