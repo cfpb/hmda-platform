@@ -5,12 +5,13 @@ import org.scalatest.{AsyncWordSpec, BeforeAndAfterAll, MustMatchers}
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar.{LarAction, LoanApplicationRegister}
 import hmda.parser.filing.lar.LarCsvParser
 import MacroValidationFlow._
 import hmda.util.SourceUtils._
 import hmda.model.filing.lar.enums._
 import hmda.model.validation.{EmptyMacroValidationError, MacroValidationError}
+import hmda.model.filing.lar.LarGenerators._
 
 class MacroValidationFlowSpec
     extends AsyncWordSpec
@@ -126,8 +127,6 @@ class MacroValidationFlowSpec
                 q636Name,
                 applicationWithdrawnByApplicant).map(e =>
         e mustBe MacroValidationError(q636Name))
-
-      1 mustBe 1
     }
 
     "pass Q637" in {
@@ -163,6 +162,21 @@ class MacroValidationFlowSpec
 
     "pass Q639" in {
       Q639(source).map(e => e mustBe EmptyMacroValidationError())
+    }
+
+    "fail Q639" in {
+      val action1 = LarAction(preapproval = PreapprovalRequested,
+                              actionTakenType = PurchasedLoan)
+      val extraLar = larGen.sample
+        .getOrElse(LoanApplicationRegister())
+        .copy(action = action1)
+      val q639Fail = source.map { lar =>
+        val larAction = lar.action.copy(actionTakenType = PurchasedLoan,
+                                        preapproval = PreapprovalRequested)
+        lar.copy(action = larAction)
+      } concat Source.fromIterator(() => List(extraLar).toIterator)
+
+      Q639(q639Fail).map(e => e mustBe MacroValidationError("Q639"))
     }
 
     "pass Q640" in {

@@ -137,14 +137,9 @@ object MacroValidationFlow {
       source: Source[LoanApplicationRegister, NotUsed]
   ): Future[ValidationError] = {
 
-    val requested = source.filter(preapprovalRequested)
-    val denied = requested.filter(preapprovalDenied)
-    val countRequestedF = count(requested)
-    val countDeniedF = count(denied)
-
     for {
-      countRequested <- countRequestedF
-      countDenied <- countDeniedF
+      countRequested <- count(source.filter(preapprovalRequested))
+      countDenied <- count(source.filter(preapprovalDenied))
     } yield {
       if (countRequested > 1000) {
         if (countDenied >= 1)
