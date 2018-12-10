@@ -266,4 +266,9 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     Q644
   )
 
+  override def asyncChecks =
+    Vector(
+      V609
+    )
+
 }

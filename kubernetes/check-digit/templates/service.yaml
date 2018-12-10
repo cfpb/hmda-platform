@@ -45,3 +45,26 @@ spec:
     targetPort: {{ .Values.ambassador.port }}
   selector:
     service: {{ .Values.ambassador.name }}
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "check-digit.fullname" . }}-grpc
+  labels:
+    app: {{ template "check-digit.fullname" . }}
+    chart: {{ template "check-digit.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.grpc.type }}
+  ports:
+    - port: {{ .Values.grpc.port }}
+      targetPort: {{ .Values.grpc.targetPort }}
+      protocol: {{ .Values.service.protocol }}
+      name: {{ .Values.grpc.name }}
+  selector:
+    app: {{ template "check-digit.name" . }}
+    release: {{ .Release.Name }}
+

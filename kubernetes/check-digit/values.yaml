@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: hmda/check-digit
-  tag: v2.7.1
+  tag: grpc
   pullPolicy: IfNotPresent
 
 service:
@@ -14,6 +14,12 @@ service:
   port: 9091
   targetPort: 9091
   name: http-chk-digit
+
+grpc:
+  type: ClusterIP
+  port: 60080
+  targetPort: 60080
+  name: http2-chk-digit
 
 ambassador:
   name: ambassador-chk-digit
