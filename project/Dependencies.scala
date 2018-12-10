@@ -45,4 +45,6 @@ object Dependencies {
   lazy val keycloak = "org.keycloak" % "keycloak-core" % Version.keycloak
   lazy val jbossLogging = "org.jboss.logging" % "jboss-logging" % Version.jboss
   lazy val httpClient = "org.apache.httpcomponents" % "httpclient" % Version.httpcomponents
+  lazy val akkaKafkaStreams = "com.typesafe.akka" %% "akka-stream-kafka" % Version.alpakkaKafka
+  lazy val embeddedKafka = "net.manub" %% "scalatest-embedded-kafka" % Version.embeddedKafka
 }
