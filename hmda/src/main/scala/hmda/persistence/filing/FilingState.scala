@@ -45,6 +45,13 @@ case class FilingState(filing: Filing = Filing(),
   }
 
   private def isSigned(updated: Submission): Boolean = {
-    return updated.status == SubmissionStatus.valueOf(Signed.code)
+    if (updated.end == 0 && updated.status != SubmissionStatus.valueOf(
+      Signed.code)) {
+      return false
+    } else if (updated.status == SubmissionStatus.valueOf(Signed.code)) {
+      return true
+    } else {
+      return false
+    }
   }
 }
