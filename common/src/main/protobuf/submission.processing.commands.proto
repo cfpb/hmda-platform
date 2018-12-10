@@ -31,6 +31,12 @@ message PersistHmdaRowValidatedErrorMessage {
     string replyTo = 4;
 }
 
+message PersistMacroErrorMessage {
+    SubmissionIdMessage submissionId = 1;
+    ValidationErrorMessage validationError = 2;
+    string maybeReplyTo = 3;
+}
+
 message GetParsedWithErrorCountMessage {
     string replyTo = 1;
 }

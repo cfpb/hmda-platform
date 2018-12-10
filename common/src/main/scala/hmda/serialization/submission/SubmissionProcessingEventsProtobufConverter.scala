@@ -12,7 +12,9 @@ import hmda.persistence.serialization.submission.processing.events._
 import hmda.serialization.validation.ValidationProtobufConverter._
 import SubmissionProtobufConverter._
 import hmda.model.filing.submission.SubmissionStatus
+import hmda.model.validation.MacroValidationError
 import hmda.persistence.serialization.submission.SubmissionIdMessage
+import hmda.persistence.serialization.validation.ValidationErrorMessage
 
 object SubmissionProcessingEventsProtobufConverter {
 
@@ -222,4 +224,22 @@ object SubmissionProcessingEventsProtobufConverter {
         msg.submissionId.getOrElse(SubmissionIdMessage()))
     )
   }
+
+  def hmdaMacroValidatedErrorToProtobuf(
+      evt: HmdaMacroValidatedError
+  ): HmdaMacroValidatedErrorMessage = {
+    HmdaMacroValidatedErrorMessage(
+      Some(validationErrorToProtobuf(evt.error))
+    )
+  }
+
+  def hmdaMacroValidatedErrorFromProtobuf(
+      msg: HmdaMacroValidatedErrorMessage): HmdaMacroValidatedError = {
+    HmdaMacroValidatedError(
+      validationErrorFromProtobuf(
+        msg.validationError.getOrElse(ValidationErrorMessage()))
+        .asInstanceOf[MacroValidationError]
+    )
+  }
+
 }

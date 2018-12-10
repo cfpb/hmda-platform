@@ -4,8 +4,10 @@ import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.persistence.serialization.submission.processing.commands._
 import SubmissionProtobufConverter._
+import hmda.model.validation.MacroValidationError
 import hmda.serialization.validation.ValidationProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionIdMessage
+import hmda.persistence.serialization.validation.ValidationErrorMessage
 
 object SubmissionProcessingCommandsProtobufConverter {
 
@@ -67,6 +69,33 @@ object SubmissionProcessingCommandsProtobufConverter {
     PersistHmdaRowParsedError(
       msg.rowNumber,
       msg.errors.toList,
+      if (msg.maybeReplyTo == "") None
+      else Some(refResolver.resolveActorRef(msg.maybeReplyTo))
+    )
+  }
+
+  def persisteMacroErrorToProtobuf(
+      cmd: PersistMacroError,
+      refResolver: ActorRefResolver): PersistMacroErrorMessage = {
+    PersistMacroErrorMessage(
+      submissionIdToProtobuf(cmd.submissionId),
+      Some(validationErrorToProtobuf(cmd.validationError)),
+      cmd.maybeReplyTo match {
+        case None      => ""
+        case Some(ref) => refResolver.toSerializationFormat(ref)
+      }
+    )
+  }
+
+  def persistMacroErrorFromProtobuf(
+      msg: PersistMacroErrorMessage,
+      refResolver: ActorRefResolver): PersistMacroError = {
+    PersistMacroError(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      validationErrorFromProtobuf(
+        msg.validationError.getOrElse(ValidationErrorMessage()))
+        .asInstanceOf[MacroValidationError],
       if (msg.maybeReplyTo == "") None
       else Some(refResolver.resolveActorRef(msg.maybeReplyTo))
     )
