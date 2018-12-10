@@ -168,7 +168,8 @@ lazy val `institutions-api` = (project in file("institutions-api"))
 lazy val `census-api` = (project in file("census-api"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -189,6 +190,7 @@ lazy val `census-api` = (project in file("census-api"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+
 lazy val `hmda-protocol` = (project in file("protocol"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
