@@ -34,7 +34,9 @@ case class FilingState(filing: Filing = Filing(),
           FilingState(this.filing, updatedList)
         } else if (submissions.map(_.id).contains(updated.id) && isSigned(
                      updated)) {
-          val updatedList = updated.copy(end = Instant.now().toEpochMilli) :: submissions
+          val updatedList = updated.copy(
+            end = Instant.now().toEpochMilli,
+            status = SubmissionStatus.valueOf(Signed.code)) :: submissions
             .filterNot(s => s.id == updated.id)
           FilingState(this.filing, updatedList)
         } else {
@@ -45,6 +47,7 @@ case class FilingState(filing: Filing = Filing(),
   }
 
   private def isSigned(updated: Submission): Boolean = {
-    return updated.status == SubmissionStatus.valueOf(Signed.code)
+    return updated.end != 0 || updated.status == SubmissionStatus
+      .valueOf(Signed.code) || updated.receipt.isEmpty
   }
 }
