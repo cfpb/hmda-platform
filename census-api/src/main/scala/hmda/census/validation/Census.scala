@@ -1,12 +1,11 @@
-package hmda.census.api
+package hmda.census.validation
 
 object Census {
 
   def testSomething(something: String): Boolean = {
-    if (something != null) {
+    if (something == "tet") {
       return true
-    }
-    else {
+    } else {
       return false
     }
   }

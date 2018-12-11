@@ -29,4 +29,5 @@ object HmdaCensusApi extends App {
   log.info(s"Connection URL is \n\n$jdbcUrl\n")
   implicit val system = ActorSystem("hmda-census")
   system.actorOf(HmdaCensusQueryApi.props(), "hmda-census-api")
+  system.actorOf(HmdaCensusGrpc.props(), name = "hmda-census-grpc")
 }

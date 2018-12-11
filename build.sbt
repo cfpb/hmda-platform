@@ -190,6 +190,7 @@ lazy val `census-api` = (project in file("census-api"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol`)
 
 lazy val `hmda-protocol` = (project in file("protocol"))
   .enablePlugins(JavaServerAppPackaging,

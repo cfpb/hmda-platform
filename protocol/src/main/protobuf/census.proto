@@ -5,9 +5,8 @@ option java_package = "hmda.grpc.services";
 option java_outer_classname = "CensusApiProto";
 
 message ValidTractRequest {
-    string uli = 1;
+    string tract = 1;
 }
-
 message ValidTractResponse {
     bool isValid = 1;
 }
