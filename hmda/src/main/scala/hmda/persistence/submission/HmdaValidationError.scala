@@ -30,11 +30,15 @@ import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
 import HmdaProcessingUtils._
 import EditDetailsConverter._
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import akka.kafka.ProducerSettings
-import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
+import hmda.messages.submission.EditDetailsCommands.{
+  EditDetailsPersistenceCommand,
+  PersistEditDetails
+}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
+import hmda.publication.KafkaUtils._
+import hmda.messages.pubsub.HmdaTopics._
 import org.apache.kafka.common.serialization.StringSerializer
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -233,6 +237,8 @@ object HmdaValidationError
                 signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 log)
+              publishSignEvent(submissionId).map(signed =>
+                log.info(s"Published signed event for $submissionId"))
               replyTo ! signed
             }
           } else {
@@ -384,12 +390,10 @@ object HmdaValidationError
 
   }
 
-  private def publishSignEvent(system: ActorSystem, topic: String, submissionId: SubmissionId, signed: SubmissionSigned) = {
-    val kafkaHosts = config.getString("kafka.hosts")
-    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
-    val producerSettings =
-      ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
-        .withBootstrapServers(kafkaHosts)
+  private def publishSignEvent(submissionId: SubmissionId)(
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer): Future[Done] = {
+    produceRecord(signTopic, submissionId.lei, submissionId.toString)
 
   }
 
