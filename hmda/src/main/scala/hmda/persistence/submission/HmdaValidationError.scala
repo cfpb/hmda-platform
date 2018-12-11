@@ -32,11 +32,11 @@ import HmdaProcessingUtils._
 import EditDetailsConverter._
 import akka.NotUsed
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.messages.submission.EditDetailsCommands.{
-  EditDetailsPersistenceCommand,
-  PersistEditDetails
-}
+import akka.kafka.ProducerSettings
+import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
+import org.apache.kafka.common.serialization.StringSerializer
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
@@ -381,6 +381,15 @@ object HmdaValidationError
     }
 
     Future.sequence(fDetails)
+
+  }
+
+  private def publishSignEvent(system: ActorSystem, topic: String, submissionId: SubmissionId, signed: SubmissionSigned) = {
+    val kafkaHosts = config.getString("kafka.hosts")
+    val kafkaConfig = system.settings.config.getConfig("akka.kafka.producer")
+    val producerSettings =
+      ProducerSettings(kafkaConfig, new StringSerializer, new StringSerializer)
+        .withBootstrapServers(kafkaHosts)
 
   }
 
