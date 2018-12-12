@@ -6,12 +6,13 @@ import hmda.query.HmdaQuery._
 import akka.actor.typed.scaladsl.adapter._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
-import hmda.messages.submission.HmdaRawDataEvents.LineAdded
+import hmda.model.filing.submission.SubmissionId
+import hmda.query.HmdaQuery._
 
 import scala.util.{Failure, Success}
 
 sealed trait ModifiedLarCommand
-case class UploadToS3(submissionId: String) extends ModifiedLarCommand
+case class UploadToS3(submissionId: SubmissionId) extends ModifiedLarCommand
 
 object ModifiedLarPublisher {
 
@@ -28,10 +29,10 @@ object ModifiedLarPublisher {
       Behaviors.receiveMessage {
 
         case UploadToS3(submissionId) =>
-          eventsByPersistenceId(s"HmdaRawData-$submissionId")
-            .map(e => e.asInstanceOf[LineAdded])
+          readRawData(submissionId)
             .map(l => l.data)
             .drop(1)
+            //TODO: transform into Modified LAR and push to S3
             .runWith(Sink.foreach(println))
 
           Behaviors.same

@@ -39,7 +39,7 @@ import hmda.messages.submission.EditDetailsCommands.{
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
-import org.apache.kafka.common.serialization.StringSerializer
+import hmda.query.HmdaQuery._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._

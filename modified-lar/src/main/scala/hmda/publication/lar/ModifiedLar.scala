@@ -4,6 +4,7 @@ import java.util.UUID
 
 import akka.Done
 import akka.actor.ActorSystem
+import akka.pattern.ask
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.scaladsl.Consumer.DrainingControl
@@ -14,8 +15,11 @@ import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
+import akka.actor.typed.scaladsl.adapter._
+import akka.util.Timeout
+import hmda.model.filing.submission.SubmissionId
 
-import scala.concurrent.Future
+import scala.concurrent.duration._
 
 object ModifiedLar extends App {
 
@@ -37,11 +41,12 @@ object ModifiedLar extends App {
   implicit val materializer = ActorMaterializer()
   implicit val ec = system.dispatcher
 
-  def business(key: String, value: String): Future[Done] = {
-    Source.single(value).toMat(Sink.foreach(println))(Keep.right).run()
-  }
+  implicit val timeout = Timeout(5.seconds)
 
   val config = system.settings.config.getConfig("akka.kafka.consumer")
+
+  val modifiedLarPublisher =
+    system.spawn(ModifiedLarPublisher.behavior, ModifiedLarPublisher.name)
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(config, new StringDeserializer, new StringDeserializer)
@@ -62,8 +67,10 @@ object ModifiedLar extends App {
   def processData(msg: String) = {
     Source
       .single(msg)
-      .map { e =>
-        println(e); e
+      .map { msg =>
+        val submissionId = SubmissionId(msg)
+        modifiedLarPublisher.toUntyped ! UploadToS3(submissionId)
+        msg
       }
       .toMat(Sink.ignore)(Keep.right)
       .run()
