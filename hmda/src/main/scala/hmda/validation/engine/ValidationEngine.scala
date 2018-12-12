@@ -2,10 +2,12 @@ package hmda.validation.engine
 
 import cats.data.Validated
 import hmda.model.validation._
-import hmda.validation.HmdaValidation
+import hmda.validation._
 import hmda.validation.api.ValidationApi
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.EditCheck
+import hmda.validation.rules.{AsyncEditCheck, EditCheck}
+
+import scala.concurrent.Future
 
 trait ValidationEngine[A] extends ValidationApi[A] {
 
@@ -15,6 +17,8 @@ trait ValidationEngine[A] extends ValidationApi[A] {
   def validityChecks: Vector[EditCheck[A]] = Vector.empty
 
   def qualityChecks: Vector[EditCheck[A]] = Vector.empty
+
+  def asyncChecks: Vector[AsyncEditCheck[A]] = Vector.empty
 
   def checkAll(
       a: A,
@@ -65,6 +69,16 @@ trait ValidationEngine[A] extends ValidationApi[A] {
     }
   }
 
+  def checkValidityAsync[as: AS, mat: MAT, ec: EC](
+      a: A,
+      id: String): Future[HmdaValidation[A]] = {
+    if (asyncChecks.isEmpty) {
+      Future.successful(Validated.valid(a))
+    } else {
+      runAsyncChecks(a, asyncChecks, Validity, LarValidationError, id)
+    }
+  }
+
   private def runChecks(a: A,
                         checksToRun: Vector[EditCheck[A]],
                         validationErrorType: ValidationErrorType,
@@ -76,6 +90,21 @@ trait ValidationEngine[A] extends ValidationApi[A] {
         .toList
 
     checks.par.reduceLeft(_ combine _)
+  }
+
+  private def runAsyncChecks[as: AS, mat: MAT, ec: EC](
+      a: A,
+      checksToRun: Vector[AsyncEditCheck[A]],
+      validationErrorType: ValidationErrorType,
+      validationErrorEntity: ValidationErrorEntity,
+      id: String): Future[HmdaValidation[A]] = {
+    val fChecks =
+      checksToRun.par
+        .map(checkAsync(_, a, id, validationErrorType, validationErrorEntity))
+        .toList
+
+    val xs = Future.sequence(fChecks)
+    xs.map(x => x.reduceLeft(_ combine _))
   }
 
 }

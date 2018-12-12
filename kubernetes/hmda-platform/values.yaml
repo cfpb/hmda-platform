@@ -56,7 +56,7 @@ public:
   port: 8082
 
 cluster:
-  name: akka-mgmt-http
+  name: management
   protocol: TCP
   port: 8558
 
@@ -69,6 +69,11 @@ websockets:
   name: websockets
   protocol: TCP
   port: 9080
+
+grpc:
+  check_digit:
+    port: 60080
+    host: check-digit-grpc.default.svc.cluster.local
 
 
 ingress:

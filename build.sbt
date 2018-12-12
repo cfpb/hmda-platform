@@ -26,8 +26,7 @@ lazy val akkaDeps = Seq(
   akkaClusterHttpManagement,
   akkaClusterHttpManagement,
   akkaTestkitTyped,
-  akkaCors,
-  akkaClusterDowning
+  akkaCors
 )
 
 lazy val akkaPersistenceDeps =
@@ -38,7 +37,7 @@ lazy val akkaPersistenceDeps =
       akkaPersistenceCassandra,
       cassandraLauncher)
 
-lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttpTestkit, akkaHttpCirce)
+lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
@@ -108,14 +107,17 @@ lazy val `hmda-platform` = (project in file("hmda"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      mainClass in Compile := Some("hmda.uli.HmdaUli"),
       assemblyJarName in assembly := {
         s"${name.value}.jar"
       },
@@ -132,6 +134,7 @@ lazy val `check-digit` = (project in file("check-digit"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
 
 lazy val `institutions-api` = (project in file("institutions-api"))
   .enablePlugins(JavaServerAppPackaging,
@@ -157,3 +160,10 @@ lazy val `institutions-api` = (project in file("institutions-api"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+
+lazy val `hmda-protocol` = (project in file("protocol"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
+  .settings(hmdaBuildSettings: _*)
