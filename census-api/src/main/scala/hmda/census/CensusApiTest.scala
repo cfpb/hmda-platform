@@ -3,7 +3,11 @@ package hmda.census
 import akka.actor.ActorSystem
 import akka.grpc.GrpcClientSettings
 import akka.stream.ActorMaterializer
-import hmda.grpc.services.{CensusServiceClient, ValidTractRequest}
+import hmda.grpc.services.{
+  CensusServiceClient,
+  ValidCountyRequest,
+  ValidTractRequest
+}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -17,10 +21,15 @@ object CensusApiTest extends App {
     GrpcClientSettings.connectToServiceAt("127.0.0.1", 60081).withTls(false))
 
   val replyF =
-    client.validateTract(ValidTractRequest("test"))
-//      validateUli(ValidUliRequest("10Cx939c5543TqA1144M999143X10"))
+    client.validateTract(ValidTractRequest("78030961200"))
 
   val result = Await.result(replyF, 2.seconds)
-  println("ULI IS VALID?: " + result)
+  println("Tract IS VALID?: " + result)
+
+  val replyC =
+    client.validateCounty(ValidCountyRequest("78030"))
+
+  val resultCounty = Await.result(replyC, 2.seconds)
+  println("County IS VALID?: " + resultCounty)
 
 }

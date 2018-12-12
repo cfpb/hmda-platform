@@ -10,13 +10,14 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.grpc.GrpcServer
 import hmda.api.grpc.GrpcServer
 import hmda.census.api.grpc.CensusServiceImpl
+import hmda.census.query.CensusComponent
 import hmda.grpc.services.CensusServiceHandler
 
 import scala.concurrent.{ExecutionContext, Future}
 object HmdaCensusGrpc {
   def props(): Props = Props(new HmdaCensusGrpc)
 }
-class HmdaCensusGrpc extends GrpcServer {
+class HmdaCensusGrpc extends GrpcServer with CensusComponent {
   val config = ConfigFactory.load()
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -25,7 +26,8 @@ class HmdaCensusGrpc extends GrpcServer {
   override val host: String = config.getString("hmda.census.grpc.host")
   override val port: Int = config.getInt("hmda.census.grpc.port")
   override val service: HttpRequest => Future[HttpResponse] =
-    CensusServiceHandler(new CensusServiceImpl(materializer))
+    CensusServiceHandler(
+      new CensusServiceImpl(materializer, indexedTract, indexedCouty))
   override val http: Future[Http.ServerBinding] = Http().bindAndHandleAsync(
     service,
     interface = host,

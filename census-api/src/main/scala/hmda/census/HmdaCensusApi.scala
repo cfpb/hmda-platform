@@ -3,12 +3,8 @@ package hmda.census
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 import hmda.census.api.http.HmdaCensusQueryApi
-//import hmda.institution.api.http.HmdaInstitutionQueryApi
+import hmda.census.query.CensusComponent
 import org.slf4j.LoggerFactory
-import akka.actor.typed.scaladsl.adapter._
-//import hmda.institution.projection.InstitutionDBProjection
-import hmda.messages.projection.CommonProjectionMessages.StartStreaming
-//import main.scala.hmda.institution.api.http.HmdaInstitutionQueryApi
 
 object HmdaCensusApi extends App {
 
@@ -25,8 +21,6 @@ object HmdaCensusApi extends App {
   val config = ConfigFactory.load()
   val host = config.getString("hmda.census.http.host")
   val port = config.getString("hmda.census.http.port")
-  val jdbcUrl = config.getString("db.db.url")
-  log.info(s"Connection URL is \n\n$jdbcUrl\n")
   implicit val system = ActorSystem("hmda-census")
   system.actorOf(HmdaCensusQueryApi.props(), "hmda-census-api")
   system.actorOf(HmdaCensusGrpc.props(), name = "hmda-census-grpc")

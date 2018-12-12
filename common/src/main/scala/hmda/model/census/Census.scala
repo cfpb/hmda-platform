@@ -69,7 +69,7 @@ case class Census(
     msaMd: Int = 0,
     state: String = "",
     county: String = "",
-    tract: Int = 0,
+    tract: String = "",
     medianIncome: Int = 0,
     population: Int = 0,
     minorityPopulationPercent: Double = 0F,
@@ -78,4 +78,7 @@ case class Census(
     tractMfi: Int = 0,
     tracttoMsaIncomePercent: Double = 0F,
     medianAge: Int = 0
-)
+) {
+  def toHmdaTract: String = s"${state}${county}${tract}"
+  def toHmdaCounty: String = s"${state}${county}"
+}
