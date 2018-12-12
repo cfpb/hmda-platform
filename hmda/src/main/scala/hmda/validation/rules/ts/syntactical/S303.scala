@@ -20,7 +20,7 @@ class S303 private (institution: Institution)
   override def name: String = "S303"
 
   override def apply(ts: TransmittalSheet): ValidationResult = {
-    (ts.LEI is equalTo(institution.LEI)) and
+    (ts.LEI.toLowerCase is equalTo(institution.LEI.toLowerCase)) and
       (ts.agency.code is equalTo(institution.agency.code)) and
       (ts.taxId is equalTo(institution.taxId.getOrElse("")))
   }
