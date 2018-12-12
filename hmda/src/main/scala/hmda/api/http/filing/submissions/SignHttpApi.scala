@@ -69,9 +69,9 @@ trait SignHttpApi extends HmdaTimeDirectives {
                 if (submission.isEmpty) {
                   submissionNotAvailable(submissionId, uri)
                 } else {
-                  val signed = SubmissionSigned(submissionId,
-                                                submission.end,
-                                                submission.status)
+                  val signed = SignedResponse(submission.end,
+                                              submission.receipt,
+                                              submission.status)
                   complete(ToResponseMarshallable(signed))
                 }
 
