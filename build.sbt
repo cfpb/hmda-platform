@@ -171,7 +171,7 @@ lazy val `modified-lar` = (project in file("modified-lar"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      mainClass in Compile := Some("hmda.publication.lar.ModifiedLar"),
+      mainClass in Compile := Some("hmda.publication.lar.ModifiedLarApp"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
