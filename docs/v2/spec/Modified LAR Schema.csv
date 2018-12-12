@@ -41,7 +41,7 @@ Data Field Number, Data Field Name, Data Field Type, Field Type Description, Val
 41, Age of Applicant or Borrower, Alphanumeric, String, <25; 25-34; 35-44; 45-54; 55-64; 65-74; >74, Bin the age reported into one of the ranged provided. Report 8888 if Age is NA., Age,
 42, Age of Applicant >= 62, Alphanumeric, String, Yes; No; NA,  Enter Yes in the new field if the age of applicant is >= 62. Enter No if the age is <= 62. Enter NA if the Age of Applicant or Borrower is 8888, Age,
 43, Age of Co-Applicant or Co-Borrower, Alphanumeric, String, <25; 25-34; 35-44; 45-54; 55-64; 65-74; >74, Bin the age reported into one of the ranged provided. Report 8888 if Age is NA or 9999 if No-Co-Applicant, Age,
-44, Age of Co-Applicant >= 62, Alphanumeric, String, Yes; No; NA, Enter Yes in the new field if the age of the co-applicant is >= 62. Enter No if the age is <=62. Enter NA if Age of Co-Applicant or Co-Borrower is 8888 or 9999, Age
+44, Age of Co-Applicant >= 62, Alphanumeric, String, Yes; No; NA, Enter Yes in the new field if the age of the co-applicant is >= 62. Enter No if the age is <=62. Enter NA if Age of Co-Applicant or Co-Borrower is 8888 or 9999, Age,
 45, Income, Alphanumeric, Integer or NA, , Example: 36 (or) NA, Income,
 46, Type of Purchaser, Numeric, Integer, 0 1 2 3 4 5 6 71 72 8 9, Descriptions: 0. Not applicable 1. Fannie Mae 2. Ginnie Mae 3. Freddie Mac 4. Farmer Mac 5. Private securitizer 6. Commercial bank  savings bank or savings association 71. Credit union mortgage company or finance company 72.  Life insurance Company  8. Affiliate institution 9. Other type of purchaser, Type of Purchaser,
 47, Rate Spread, Alphanumeric, Double or NA or Exempt, , Example: 3.29524 (or) NA, Rate Spread,
