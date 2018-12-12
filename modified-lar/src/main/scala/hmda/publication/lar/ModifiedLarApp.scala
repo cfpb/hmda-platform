@@ -18,10 +18,11 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import akka.actor.typed.scaladsl.adapter._
 import akka.util.Timeout
 import hmda.model.filing.submission.SubmissionId
+import hmda.publication.lar.publication.{ModifiedLarPublisher, UploadToS3}
 
 import scala.concurrent.duration._
 
-object ModifiedLar extends App {
+object ModifiedLarApp extends App {
 
   val log = LoggerFactory.getLogger("hmda")
 

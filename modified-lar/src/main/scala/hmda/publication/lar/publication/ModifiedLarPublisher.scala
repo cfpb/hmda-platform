@@ -1,15 +1,13 @@
-package hmda.publication.lar
+package hmda.publication.lar.publication
 
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import hmda.query.HmdaQuery._
 import akka.actor.typed.scaladsl.adapter._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Sink
 import hmda.model.filing.submission.SubmissionId
+import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
-
-import scala.util.{Failure, Success}
 
 sealed trait ModifiedLarCommand
 case class UploadToS3(submissionId: SubmissionId) extends ModifiedLarCommand
@@ -32,7 +30,8 @@ object ModifiedLarPublisher {
           readRawData(submissionId)
             .map(l => l.data)
             .drop(1)
-            //TODO: transform into Modified LAR and push to S3
+            .map(s => ModifiedLarCsvParser(s))
+            //TODO: push to S3
             .runWith(Sink.foreach(println))
 
           Behaviors.same
