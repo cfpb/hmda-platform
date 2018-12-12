@@ -1,5 +1,5 @@
 Data Field Number, Data Field Name, Data Field Type, Field Type Description, Valid Values, Descriptions and Examples, Data Point Name,
-1, Record Identifier – Value is 2, Numeric, Integer, 2, ,  ,
+1, Record Identifier â€“ Value is 2, Numeric, Integer, 2, ,  ,
 2, Legal Entity Identifier (LEI), Alphanumeric. Width is 20 characters, String,  , Example: 12121212121212121212, Legal Entity Identifier (LEI),
 3, Loan Type, Numeric, Integer, 1 2 3 4, Descriptions: 1. Conventional (not insured or guaranteed by FHA VA RHS or FSA) 2. Federal Housing Administration insured (FHA) 3. Veterans Affairs guaranteed (VA) 4. USDA Rural Housing Service or the Farm Service Agency guaranteed (RHS or FSA), Loan Type,
 4, Loan Purpose, Numeric, Integer, 1 2 31 32 4 5, Descriptions:  1. Home purchase 2. Home improvement 31. Refinancing  32. Cash-out refinancing 4. Other purpose 5. Not applicable, Loan Purpose,
@@ -39,7 +39,7 @@ Data Field Number, Data Field Name, Data Field Type, Field Type Description, Val
 39, Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname, Numeric, Integer, 1 2 3, Descriptions: 1. Collected on the basis of visual observation or surname 2. Not collected on the basis of visual observation or surname 3. Not applicable, Sex,
 40, Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname, Numeric, Integer, 1 2 3 4, Descriptions:  1. Collected on the basis of visual observation or surname 2. Not collected on the basis of visual observation or surname 3. Not applicable 4. No co-applicant, Sex,
 41, Age of Applicant or Borrower, Alphanumeric, String, <25; 25-34; 35-44; 45-54; 55-64; 65-74; >74, Bin the age reported into one of the ranged provided. Report 8888 if Age is NA., Age,
-42, Age of Applicant >= 62, Alphanumeric, String, Yes; No; NA,  Enter Yes in the new field if the age of applicant is >= 62. Enter No if the age is <= 62. Enter NA if the Age of Applicant or Borrower is 8888, Age
+42, Age of Applicant >= 62, Alphanumeric, String, Yes; No; NA,  Enter Yes in the new field if the age of applicant is >= 62. Enter No if the age is <= 62. Enter NA if the Age of Applicant or Borrower is 8888, Age,
 43, Age of Co-Applicant or Co-Borrower, Alphanumeric, String, <25; 25-34; 35-44; 45-54; 55-64; 65-74; >74, Bin the age reported into one of the ranged provided. Report 8888 if Age is NA or 9999 if No-Co-Applicant, Age,
 44, Age of Co-Applicant >= 62, Alphanumeric, String, Yes; No; NA, Enter Yes in the new field if the age of the co-applicant is >= 62. Enter No if the age is <=62. Enter NA if Age of Co-Applicant or Co-Borrower is 8888 or 9999, Age
 45, Income, Alphanumeric, Integer or NA, , Example: 36 (or) NA, Income,
