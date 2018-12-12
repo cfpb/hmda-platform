@@ -27,12 +27,16 @@ object ModifiedLarPublisher {
       Behaviors.receiveMessage {
 
         case UploadToS3(submissionId) =>
+          log.info(s"Publishing Modified LAR for $submissionId")
           readRawData(submissionId)
             .map(l => l.data)
             .drop(1)
             .map(s => ModifiedLarCsvParser(s))
+            .map { e =>
+              println(e); e
+            }
             //TODO: push to S3
-            .runWith(Sink.foreach(println))
+            .runWith(Sink.ignore)
 
           Behaviors.same
 
