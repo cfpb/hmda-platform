@@ -369,7 +369,8 @@ object ModifiedLarCsvParser {
       lar.property.manufacturedHomeSecuredProperty.code,
       lar.property.manufacturedHomeLandPropertyInterest.code,
       convertTotalUnits(lar.property.totalUnits),
-      convertMultifamilyAffordableUnits(lar.property.multiFamilyAffordableUnits, lar.property.totalUnits),
+      convertMultifamilyAffordableUnits(lar.property.multiFamilyAffordableUnits,
+                                        lar.property.totalUnits),
       lar.applicationSubmission.code,
       lar.payableToInstitution.code,
       lar.AUS.aus1.code,
@@ -384,13 +385,13 @@ object ModifiedLarCsvParser {
   }
 
   private def convertAge(age: Int): String = age match {
-    case x if 0 until 25 contains x  => "<25"
-    case x if 25 to 34 contains x => "25-34"
-    case x if 35 to 44 contains x => "35-44"
-    case x if 45 to 54 contains x => "45-54"
-    case x if 55 to 64 contains x => "55-64"
-    case x if 65 to 74 contains x => "65-74"
-    case x if x > 74                 => ">74"
+    case x if 0 until 25 contains x => "<25"
+    case x if 25 to 34 contains x   => "25-34"
+    case x if 35 to 44 contains x   => "35-44"
+    case x if 45 to 54 contains x   => "45-54"
+    case x if 55 to 64 contains x   => "55-64"
+    case x if 65 to 74 contains x   => "65-74"
+    case x if x > 74                => ">74"
   }
 
   private def isAgeGreaterThan62(age: Int): String = age match {
@@ -401,41 +402,44 @@ object ModifiedLarCsvParser {
 
   private def converDebtToIncomeRatio(ratio: String): String = ratio match {
     case x if x == "NA" || x == "Exempt" => x
-    case _ => ratio.toInt match {
-      case x if x < 20 => "<20%"
-      case x if 20 until 30 contains x => "20-30%"
-      case x if 30 until 36 contains x => "30-36%"
-      case x if 36 until 50 contains x => x.toString
-      case x if 50 until 60 contains x => "50-60%"
-      case x if x >= 60 => "+60%"
-    }
+    case _ =>
+      ratio.toInt match {
+        case x if x < 20                 => "<20%"
+        case x if 20 until 30 contains x => "20-30%"
+        case x if 30 until 36 contains x => "30-36%"
+        case x if 36 until 50 contains x => x.toString
+        case x if 50 until 60 contains x => "50-60%"
+        case x if x >= 60                => "+60%"
+      }
   }
 
   private def convertTotalUnits(totalUnits: Int): String = totalUnits match {
-    case x if x < 5 => x.toString
-    case x if 5 to 23 contains x => "5-23"
-    case x if 24 to 49 contains x => "24-49"
-    case x if 50 to 99 contains x => "50-99"
+    case x if x < 5                 => x.toString
+    case x if 5 to 23 contains x    => "5-23"
+    case x if 24 to 49 contains x   => "24-49"
+    case x if 50 to 99 contains x   => "50-99"
     case x if 100 to 149 contains x => "100-149"
-    case x if x >= 150 => "150+"
+    case x if x >= 150              => "150+"
   }
 
-  private def convertMultifamilyAffordableUnits(multifamilyUnits: String, totalUnits: Int): String = multifamilyUnits match {
-    case x if x == "NA" || x == "Exempt" => x
-    case _ =>
-      val percentage = (multifamilyUnits.toFloat / totalUnits.toFloat) * 100
-      round(percentage).toString
-  }
+  private def convertMultifamilyAffordableUnits(multifamilyUnits: String,
+                                                totalUnits: Int): String =
+    multifamilyUnits match {
+      case x if x == "NA" || x == "Exempt" => x
+      case _ =>
+        val percentage = (multifamilyUnits.toFloat / totalUnits.toFloat) * 100
+        round(percentage).toString
+    }
 
-  private def convertPropertyValue(propertyValue: String): String = propertyValue match {
-    case x if x == "NA" || x == "Exempt" => x
-    case x => roundToMidPoint(x.toInt).toString
-  }
+  private def convertPropertyValue(propertyValue: String): String =
+    propertyValue match {
+      case x if x == "NA" || x == "Exempt" => x
+      case x                               => roundToMidPoint(x.toInt).toString
+    }
 
   private def roundToMidPoint(x: Int): Int = {
     val rounded = 10000 * Math.floor(x / 10000) + 5000
     rounded.toInt
   }
-
 
 }
