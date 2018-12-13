@@ -20,7 +20,6 @@ object ModifiedLarPublisher {
     Behaviors.setup { ctx =>
       implicit val system = ctx.system.toUntyped
       implicit val materializer = ActorMaterializer()
-      implicit val ec = system.dispatcher
       val log = ctx.log
       log.info(s"Started $name")
 
