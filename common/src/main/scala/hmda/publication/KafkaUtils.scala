@@ -10,12 +10,10 @@ import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.typesafe.config.ConfigFactory
+import hmda.model.institution.Institution
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.apache.kafka.common.serialization.{
-  StringDeserializer,
-  StringSerializer
-}
+import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,6 +30,20 @@ object KafkaUtils {
         .withBootstrapServers(kafkaHosts)
 
     producerSettings.createKafkaProducer()
+  }
+
+  def produceInstitutionRecord(topic: String, key: String, value: Institution)(
+    implicit system: ActorSystem,
+    materializer: ActorMaterializer): Future[Done] = {
+
+    val producerSettings =
+      ProducerSettings(system, new StringSerializer)
+        .withBootstrapServers(kafkaHosts)
+
+    Source
+      .single(new ProducerRecord(topic, key, value))
+      .toMat(Producer.plainSink(producerSettings))(Keep.right)
+      .run()
   }
 
   def produceRecord(topic: String, key: String, value: String)(

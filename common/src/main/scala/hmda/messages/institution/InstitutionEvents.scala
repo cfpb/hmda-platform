@@ -12,4 +12,5 @@ object InstitutionEvents {
   final case class InstitutionDeleted(LEI: String) extends InstitutionEvent
   final case class InstitutionNotExists(LEI: String) extends InstitutionEvent
   final case class FilingAdded(filing: Filing) extends InstitutionEvent
+  final case class KafkaInstitutionEvent(eventType: String, institutionEvent: InstitutionEvent)
 }

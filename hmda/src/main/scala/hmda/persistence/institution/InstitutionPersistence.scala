@@ -18,7 +18,6 @@ import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.publication.KafkaUtils._
 import hmda.persistence.HmdaTypedPersistentActor
 
-
 import scala.concurrent.{ExecutionContext, Future}
 
 object InstitutionPersistence
@@ -69,7 +68,7 @@ object InstitutionPersistence
           if (state.institution.map(i => i.LEI).contains(i.LEI)) {
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
               log.debug(s"Institution Modified: ${i.toString}")
-              publishInstitutionEvent(i.LEI, "ModifyInstitution")
+              publishInstitutionEvent(i.LEI, "InstitutionModified")
               replyTo ! InstitutionModified(i)
             }
           } else {
@@ -83,7 +82,7 @@ object InstitutionPersistence
           if (state.institution.map(i => i.LEI).contains(lei)) {
             Effect.persist(InstitutionDeleted(lei)).thenRun { _ =>
               log.debug(s"Institution Deleted: $lei")
-              publishInstitutionEvent(lei, "DeleteInstitution")
+              publishInstitutionEvent(lei, s"InstitutionDeleted-$")
               replyTo ! InstitutionDeleted(lei)
             }
           } else {
@@ -133,8 +132,8 @@ object InstitutionPersistence
   }
 
   private def publishInstitutionEvent(institutionID: String, event: String)(
-    implicit system: ActorSystem,
-    materializer: ActorMaterializer): Future[Done] = {
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer): Future[Done] = {
     produceRecord(institutionTopic, institutionID, event)
   }
 
