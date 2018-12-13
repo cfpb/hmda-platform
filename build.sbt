@@ -29,7 +29,8 @@ lazy val akkaDeps = Seq(
   akkaCors,
   akkaClusterDowning,
   akkaKafkaStreams,
-  embeddedKafka
+  embeddedKafka,
+  alpakkaS3
 )
 
 lazy val akkaPersistenceDeps =
