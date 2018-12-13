@@ -12,6 +12,7 @@ object ModifiedLarCsvParser {
   //TODO: Parse LAR
   private def parseLar(s: String): LoanApplicationRegister = ???
 
+  //TODO: perform final conversion (i.e. binning)
   private def convert(
       lar: LoanApplicationRegister): ModifiedLoanApplicationRegister = {
     ModifiedLoanApplicationRegister(
