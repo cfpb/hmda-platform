@@ -31,7 +31,7 @@ object ModifiedLarPublisher {
           readRawData(submissionId)
             .map(l => l.data)
             .drop(1)
-            .map(s => ModifiedLarCsvParser(s))
+            .map(s => ModifiedLarCsvParser(s).toCSV + "\n")
             .map { e =>
               println(e); e
             }
