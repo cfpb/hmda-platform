@@ -2,55 +2,6 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "census-api.fullname" . }}
-  labels:
-    app: {{ template "census-api.name" . }}
-    chart: {{ template "census-api.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.service.targetPort }}
-      protocol: {{ .Values.service.protocol }}
-      name: {{ .Values.service.name }}
-  selector:
-    app: {{ template "census-api.name" . }}
-    release: {{ .Release.Name }}
-
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    service: {{ .Values.ambassador.name }}
-  name: {{ .Values.ambassador.name }}
-  annotations:
-    getambassador.io/config: |
-      ---
-      apiVersion: ambassador/v0
-      kind: Mapping
-      name: check_digit_mapping
-      prefix: /v2/public/census/
-      rewrite: /census/
-      service: {{ template "census-api.fullname" .}}:{{ .Values.service.port }}
-
-spec:
-  type: {{ .Values.ambassador.service.type }}
-  ports:
-  - name: {{ .Values.ambassador.name }}
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
-  selector:
-    service: {{ .Values.ambassador.name }}
-
-
----
-apiVersion: v1
-kind: Service
-metadata:
   name: {{ template "census-api.fullname" . }}-grpc
   labels:
     app: {{ template "census-api.fullname" . }}

@@ -9,23 +9,11 @@ image:
   tag: grpc
   pullPolicy: IfNotPresent
 
-service:
-  type: NodePort
-  port: 9098
-  targetPort: 9098
-  name: http-census-api
-
 grpc:
   type: ClusterIP
-  port: 60080
-  targetPort: 60080
+  port: 60081
+  targetPort: 60081
   name: http2-census-api
-
-ambassador:
-  name: ambassador-census-api
-  port: 80
-  service:
-    type: NodePort
 
 ingress:
   enabled: false

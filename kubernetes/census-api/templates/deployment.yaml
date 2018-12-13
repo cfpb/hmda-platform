@@ -24,11 +24,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: {{ .Values.service.name }}
-              containerPort: 9098
-              protocol: {{ .Values.service.protocol }}
             - name: {{ .Values.grpc.name }}
-              containerPort: 60080
+              containerPort: 60081
               protocol: {{ .Values.service.protocol }}
           livenessProbe:
             httpGet:
