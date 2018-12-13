@@ -366,7 +366,7 @@ object ModifiedLarCsvParser {
       lar.property.propertyValue,
       lar.property.manufacturedHomeSecuredProperty.code,
       lar.property.manufacturedHomeLandPropertyInterest.code,
-      lar.property.totalUnits.toString,
+      convertTotalUnits(lar.property.totalUnits),
       lar.property.multiFamilyAffordableUnits,
       lar.applicationSubmission.code,
       lar.payableToInstitution.code,
@@ -405,8 +405,18 @@ object ModifiedLarCsvParser {
       case x if 30 until 36 contains x => "30-36%"
       case x if 36 until 50 contains x => x.toString
       case x if 50 until 60 contains x => "50-60%"
-      case x if x >= 60 => ">60%"
+      case x if x >= 60 => "+60%"
     }
+  }
+
+  private def convertTotalUnits(totalUnits: Int): String = totalUnits match {
+    case x if x < 5 => x.toString
+    case x if 5 to 23 contains x => "5-23"
+    case x if 24 to 49 contains x => "24-49"
+    case x if 50 to 99 contains x => "50-99"
+    case x if 100 to 149 contains x => "100-149"
+    case x if x >= 150 => "150+"
+
   }
 
 }
