@@ -18,13 +18,16 @@ class CensusServiceImpl(materializer: Materializer,
       in: ValidTractRequest): Future[ValidTractResponse] = {
     val tract = in.tract
     val isValid = isTractValid(tract, indexedTract)
+    println("CAME IN validate tract: " + in.tract + isValid)
     Future.successful(ValidTractResponse(isValid))
   }
 
   override def validateCounty(
       in: ValidCountyRequest): Future[ValidCountyResponse] = {
+
     val county = in.county
     val isValid = isCountyValid(county, indexedCounty)
+    println("CAME IN validate county: " + in.county + isValid)
     Future.successful(ValidCountyResponse(isValid))
   }
 

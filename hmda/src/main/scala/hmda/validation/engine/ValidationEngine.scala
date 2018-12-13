@@ -71,11 +71,12 @@ trait ValidationEngine[A] extends ValidationApi[A] {
 
   def checkValidityAsync[as: AS, mat: MAT, ec: EC](
       a: A,
-      id: String): Future[HmdaValidation[A]] = {
+      id: String,
+      tract: String): Future[HmdaValidation[A]] = {
     if (asyncChecks.isEmpty) {
       Future.successful(Validated.valid(a))
     } else {
-      runAsyncChecks(a, asyncChecks, Validity, LarValidationError, id)
+      runAsyncChecks(a, asyncChecks, Validity, LarValidationError, id, tract)
     }
   }
 
@@ -97,7 +98,8 @@ trait ValidationEngine[A] extends ValidationApi[A] {
       checksToRun: Vector[AsyncEditCheck[A]],
       validationErrorType: ValidationErrorType,
       validationErrorEntity: ValidationErrorEntity,
-      id: String): Future[HmdaValidation[A]] = {
+      id: String,
+      tract: String): Future[HmdaValidation[A]] = {
     val fChecks =
       checksToRun.par
         .map(checkAsync(_, a, id, validationErrorType, validationErrorEntity))

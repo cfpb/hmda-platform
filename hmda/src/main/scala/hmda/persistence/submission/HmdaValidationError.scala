@@ -337,7 +337,7 @@ object HmdaValidationError
   ) = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
-      .via(validateAsyncLarFlow("test"))
+      .via(validateAsyncLarFlow)
       .map { x =>
         x.collect {
           case Left(errors) => errors

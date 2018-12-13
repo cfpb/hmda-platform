@@ -8,7 +8,7 @@ trait CensusComponent {
 
   val config = ConfigFactory.load()
   val censusFileName =
-    config.getString("hmda.filing.edits.descriptions.filename")
+    config.getString("hmda.census.fields.filename")
 
   def parseCensusFile: List[Census] = {
     val lines = fileLines(s"/$censusFileName")

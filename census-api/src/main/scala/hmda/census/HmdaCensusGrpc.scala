@@ -18,7 +18,6 @@ object HmdaCensusGrpc {
   def props(): Props = Props(new HmdaCensusGrpc)
 }
 class HmdaCensusGrpc extends GrpcServer with CensusComponent {
-  val config = ConfigFactory.load()
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = context.dispatcher
