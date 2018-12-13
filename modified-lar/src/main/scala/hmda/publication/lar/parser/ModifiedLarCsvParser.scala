@@ -91,7 +91,7 @@ object ModifiedLarCsvParser {
     val lenderCredits = values(76)
     val interestRate = values(77)
     val prepaymentPenaltyTerm = values(78)
-    val debtToIncomeRatio = values(79)
+    val debtToIncomeRatio = converDebtToIncomeRatio(values(79))
     val loanToValueRatio = values(80)
     val loanTerm = values(81)
     val introductoryRatePeriod = values(82)
@@ -395,7 +395,18 @@ object ModifiedLarCsvParser {
     case x if x == 8888 || x == 9999 => "NA"
     case x if x >= 62                => "Yes"
     case x if x < 62                 => "No"
+  }
 
+  private def converDebtToIncomeRatio(ratio: String): String = ratio match {
+    case x if x == "NA" || x == "Exempt" => x
+    case _ => ratio.toInt match {
+      case x if x < 20 => "<20%"
+      case x if 20 until 30 contains x => "20-30%"
+      case x if 30 until 36 contains x => "30-36%"
+      case x if 36 until 50 contains x => x.toString
+      case x if 50 until 60 contains x => "50-60%"
+      case x if x >= 60 => ">60%"
+    }
   }
 
 }
