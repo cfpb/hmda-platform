@@ -4,6 +4,8 @@ import hmda.model.filing.lar.enums._
 import hmda.model.filing.lar._
 import hmda.publication.lar.model.ModifiedLoanApplicationRegister
 
+import Math._
+
 object ModifiedLarCsvParser {
 
   def apply(s: String): ModifiedLoanApplicationRegister = {
@@ -367,7 +369,7 @@ object ModifiedLarCsvParser {
       lar.property.manufacturedHomeSecuredProperty.code,
       lar.property.manufacturedHomeLandPropertyInterest.code,
       convertTotalUnits(lar.property.totalUnits),
-      lar.property.multiFamilyAffordableUnits,
+      convertMultifamilyAffordableUnits(lar.property.multiFamilyAffordableUnits, lar.property.totalUnits),
       lar.applicationSubmission.code,
       lar.payableToInstitution.code,
       lar.AUS.aus1.code,
@@ -416,7 +418,14 @@ object ModifiedLarCsvParser {
     case x if 50 to 99 contains x => "50-99"
     case x if 100 to 149 contains x => "100-149"
     case x if x >= 150 => "150+"
-
   }
+
+  private def convertMultifamilyAffordableUnits(multifamilyUnits: String, totalUnits: Int): String = multifamilyUnits match {
+    case x if x == "NA" || x == "Exempt" => x
+    case _ =>
+      val percentage = (multifamilyUnits.toFloat / totalUnits.toFloat) * 100
+      round(percentage).toString
+  }
+
 
 }
