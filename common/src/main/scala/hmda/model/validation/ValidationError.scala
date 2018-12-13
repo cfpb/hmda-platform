@@ -63,3 +63,13 @@ case class MacroValidationError(editName: String) extends ValidationError {
   override def copyWithFields(
       fields: Map[String, String]): MacroValidationError = this.copy()
 }
+
+case class EmptyMacroValidationError() extends ValidationError {
+  override def uli: String = ""
+  override def editName: String = ""
+  override def validationErrorType: ValidationErrorType = Macro
+  override def validationErrorEntity: ValidationErrorEntity = LarValidationError
+  override def fields: Map[String, String] = Map.empty
+  override def copyWithFields(fields: Map[String, String]): ValidationError =
+    this
+}
