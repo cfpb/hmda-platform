@@ -433,8 +433,8 @@ object ModifiedLarCsvParser {
   }
 
   private def roundToMidPoint(x: Int): Int = {
-    
-    ???
+    val rounded = 10000 * Math.floor(x / 10000) + 5000
+    rounded.toInt
   }
 
 
