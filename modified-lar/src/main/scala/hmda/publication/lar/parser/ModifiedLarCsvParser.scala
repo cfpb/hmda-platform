@@ -302,7 +302,7 @@ object ModifiedLarCsvParser {
       lar.action.preapproval.code,
       lar.loan.constructionMethod.code,
       lar.loan.occupancy.code,
-      lar.loan.amount.toInt,
+      roundToMidPoint(lar.loan.amount.toInt),
       lar.action.actionTakenType.code,
       lar.geography.state,
       lar.geography.county,
@@ -365,7 +365,7 @@ object ModifiedLarCsvParser {
       lar.nonAmortizingFeatures.interestOnlyPayments.code,
       lar.nonAmortizingFeatures.negativeAmortization.code,
       lar.nonAmortizingFeatures.otherNonAmortizingFeatures.code,
-      lar.property.propertyValue,
+      convertPropertyValue(lar.property.propertyValue),
       lar.property.manufacturedHomeSecuredProperty.code,
       lar.property.manufacturedHomeLandPropertyInterest.code,
       convertTotalUnits(lar.property.totalUnits),
@@ -425,6 +425,16 @@ object ModifiedLarCsvParser {
     case _ =>
       val percentage = (multifamilyUnits.toFloat / totalUnits.toFloat) * 100
       round(percentage).toString
+  }
+
+  private def convertPropertyValue(propertyValue: String): String = propertyValue match {
+    case x if x == "NA" || x == "Exempt" => x
+    case x => roundToMidPoint(x.toInt).toString
+  }
+
+  private def roundToMidPoint(x: Int): Int = {
+    
+    ???
   }
 
 
