@@ -272,6 +272,14 @@ object HmdaValidationError
           Effect.none
         }
 
+      case VerifyMacro(submissionId, verified, replyTo) =>
+        Effect.persist(MacroVerified(submissionId, verified)).thenRun { _ =>
+          val updatedStatus = if(verified) Verified else MacroErrors
+          updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+          replyTo ! MacroVerified(submissionId, verified)
+        }
+
+
       case SignSubmission(submissionId, replyTo) =>
         if (state.statusCode == Verified.code) {
           val timestamp = Instant.now().toEpochMilli

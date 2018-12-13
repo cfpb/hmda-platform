@@ -19,8 +19,7 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
                                     quality: Set[EditSummary] = Set.empty,
                                     `macro`: Set[EditSummary] = Set.empty,
                                     qualityVerified: Boolean = false,
-                                    //TODO: change this default to false when macro is implemented
-                                    macroVerified: Boolean = true) {
+                                    macroVerified: Boolean = false) {
   def updateErrors(
       hmdaRowError: HmdaRowValidatedError): HmdaValidationErrorState = {
 
