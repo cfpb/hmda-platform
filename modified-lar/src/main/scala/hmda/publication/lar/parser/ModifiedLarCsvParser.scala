@@ -333,10 +333,10 @@ object ModifiedLarCsvParser {
       lar.coApplicant.sex.sexEnum.code,
       lar.applicant.sex.sexObservedEnum.code,
       lar.coApplicant.sex.sexObservedEnum.code,
-      lar.applicant.age.toString,
-      "",
-      lar.coApplicant.age.toString,
-      "",
+      convertAge(lar.applicant.age),
+      isAgeGreaterThan62(lar.applicant.age),
+      convertAge(lar.coApplicant.age),
+      isAgeGreaterThan62(lar.coApplicant.age),
       lar.income,
       lar.purchaserType.code,
       lar.loan.rateSpread,
@@ -379,6 +379,23 @@ object ModifiedLarCsvParser {
       lar.lineOfCredit.code,
       lar.businessOrCommercialPurpose.code
     )
+  }
+
+  private def convertAge(age: Int): String = age match {
+    case x if 0 until 25 contains x  => "<25"
+    case x if 25 to 34 contains x => "25-34"
+    case x if 35 to 44 contains x => "35-44"
+    case x if 45 to 54 contains x => "45-54"
+    case x if 55 to 64 contains x => "55-64"
+    case x if 65 to 74 contains x => "65-74"
+    case x if x > 74                 => ">74"
+  }
+
+  private def isAgeGreaterThan62(age: Int): String = age match {
+    case x if x == 8888 || x == 9999 => "NA"
+    case x if x >= 62                => "Yes"
+    case x if x < 62                 => "No"
+
   }
 
 }
