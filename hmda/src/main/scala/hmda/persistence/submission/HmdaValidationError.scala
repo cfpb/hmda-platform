@@ -3,6 +3,7 @@ package hmda.persistence.submission
 import java.time.Instant
 
 import akka.actor.ActorSystem
+import akka.pattern.ask
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
@@ -40,8 +41,8 @@ import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.util.streams.FlowUtils.framing
-import hmda.validation.{AS, EC, MAT}
 import hmda.validation.filing.MacroValidationFlow._
+import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -100,12 +101,15 @@ object HmdaValidationError
                                                       submissionId,
                                                       validationContext)
             .runWith(Sink.ignore)
-        } yield (tsErrors, larSyntacticalValidityErrors)
+          larAsyncErrors <- validateAsyncLar(ctx, submissionId).runWith(
+            Sink.ignore)
+        } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
           case Failure(e) =>
+            updateSubmissionStatus(sharding, submissionId, Failed, log)
             log.error(e.getLocalizedMessage)
         }
 
@@ -142,6 +146,7 @@ object HmdaValidationError
           case Success(_) =>
             ctx.asScala.self ! CompleteQuality(submissionId)
           case Failure(e) =>
+            updateSubmissionStatus(sharding, submissionId, Failed, log)
             log.error(e.getLocalizedMessage)
         }
 
@@ -201,26 +206,30 @@ object HmdaValidationError
           .entityRefFor(EditDetailsPersistence.typeKey,
                         s"${EditDetailsPersistence.name}-$submissionId")
 
-        Effect
-          .persist(HmdaRowValidatedError(rowNumber, validationErrors))
-          .thenRun { _ =>
-            log.debug(
-              s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
-            maybeReplyTo match {
-              case Some(replyTo) =>
-                val hmdaRowValidatedError =
-                  HmdaRowValidatedError(rowNumber, validationErrors)
+        if (validationErrors.nonEmpty) {
+          Effect
+            .persist(HmdaRowValidatedError(rowNumber, validationErrors))
+            .thenRun { _ =>
+              log.info(
+                s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
 
-                for {
-                  _ <- persistEditDetails(editDetailPersistence,
-                                          hmdaRowValidatedError)
-                } yield {
-                  replyTo ! hmdaRowValidatedError
+              val hmdaRowValidatedError =
+                HmdaRowValidatedError(rowNumber, validationErrors)
+
+              for {
+                _ <- persistEditDetails(editDetailPersistence,
+                                        hmdaRowValidatedError)
+              } yield {
+                maybeReplyTo match {
+                  case Some(replyTo) =>
+                    replyTo ! hmdaRowValidatedError
+                  case None => //Do nothing
                 }
-
-              case None => //do nothing
+              }
             }
-          }
+        } else {
+          Effect.none
+        }
 
       case PersistMacroError(_, validationError, maybeReplyTo) =>
         Effect.persist(HmdaMacroValidatedError(validationError)).thenRun { _ =>
@@ -267,7 +276,8 @@ object HmdaValidationError
         if (state.statusCode == Verified.code) {
           val timestamp = Instant.now().toEpochMilli
           val signed = SubmissionSigned(submissionId, timestamp, Signed)
-          if (state.qualityVerified && state.macroVerified) {
+          if ((state.qualityVerified && state.macroVerified) || state
+                .noEditsFound()) {
             Effect.persist(signed).thenRun { _ =>
               log.info(
                 s"Submission $submissionId signed at ${Instant.ofEpochMilli(timestamp)}")
@@ -387,9 +397,34 @@ object HmdaValidationError
     }
   }
 
-  private def maybeTs[as: AS, mat: MAT, ec: EC](
+  private def validateAsyncLar[as: AS, mat: MAT, ec: EC](
       ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId): Future[Option[TransmittalSheet]] = {
+      submissionId: SubmissionId
+  ) = {
+    uploadConsumerRawStr(ctx, submissionId)
+      .drop(1)
+      .via(validateAsyncLarFlow)
+      .map { x =>
+        x.collect {
+          case Left(errors) => errors
+          case Right(_)     => Nil
+        }
+      }
+      .zip(Source.fromIterator(() => Iterator.from(2)))
+      .map { x =>
+        x._1
+          .map { errors =>
+            PersistHmdaRowValidatedError(submissionId, x._2, errors, None)
+          }
+      }
+      .mapAsync(2)(f => f.map(x => ctx.asScala.self.toUntyped ? x))
+  }
+
+  private def maybeTs(ctx: ActorContext[SubmissionProcessingCommand],
+                      submissionId: SubmissionId)(
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer,
+      ec: ExecutionContext): Future[Option[TransmittalSheet]] = {
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(parseTsFlow)

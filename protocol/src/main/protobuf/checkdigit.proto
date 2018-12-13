@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "hmda.grpc.services";
+option java_outer_classname = "CheckDigitProto";
+
+message ValidUliRequest {
+    string uli = 1;
+}
+
+message ValidUliResponse {
+    bool isValid = 1;
+}
+
+service CheckDigitService {
+    rpc validateUli (ValidUliRequest) returns (ValidUliResponse) {}
+}

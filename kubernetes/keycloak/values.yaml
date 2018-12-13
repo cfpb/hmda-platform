@@ -118,7 +118,7 @@ keycloak:
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     - name: FILING_APP_URL
-      value: "https//hmda4.demo.cfpb.gov/filing/"
+      value: "https//hmda4.demo.cfpb.gov/filing/2018/"
     - name: INSTITUTION_SEARCH_URI
       value: "https://hmda4.demo.cfpb.gov/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
@@ -356,4 +356,3 @@ test:
     repository: unguiculus/docker-python3-phantomjs-selenium
     tag: v1
     pullPolicy: IfNotPresent
-

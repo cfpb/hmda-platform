@@ -6,7 +6,7 @@
         ${msg("errorTitleHtml")}
     <#elseif section = "form">
         <div id="kc-error-message">
-            <p class="instruction">${message.summary}</p>
+            <p class="instruction">${message.summary?no_esc}</p>
             <p><a class="usa-button" id="backToApplication" href="${properties.filingAppUrl}/institutions">${msg("doLogIn")}</a></p>
         </div>
     </#if>

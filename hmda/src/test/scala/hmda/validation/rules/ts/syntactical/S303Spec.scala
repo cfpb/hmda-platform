@@ -21,6 +21,15 @@ class S303Spec extends TsEditCheckSpec {
     }
   }
 
+  property("Pass when LEI is a different case") {
+    forAll(tsGen) { ts =>
+      whenInstitution(ts.LEI.toLowerCase, ts.agency, ts.taxId)
+      ts.mustPass
+      val upperCaseTs = ts.copy(LEI = ts.LEI.toUpperCase)
+      upperCaseTs.mustPass
+    }
+  }
+
   property("Fail when LEI is reported incorrectly") {
     forAll(tsGen) { ts =>
       whenInstitution(ts.LEI + "x", ts.agency, ts.taxId)

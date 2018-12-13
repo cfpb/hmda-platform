@@ -20,6 +20,14 @@ class S301Spec extends LarEditCheckSpec {
     }
   }
 
+  property("Pass when LEI is reported correctly in a different case") {
+    forAll(larGen) { lar =>
+      val validLar =
+        lar.copy(larIdentifier = lar.larIdentifier.copy(LEI = "TEST"))
+      validLar.mustPass
+    }
+  }
+
   property("Fail when LEI is reported incorrectly") {
     forAll(larGen) { lar =>
       whenever(lar.larIdentifier.LEI != "test") {
