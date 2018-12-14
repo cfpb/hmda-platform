@@ -24,7 +24,8 @@ class CensusServiceImplSpec
   val system = ActorSystem("CensusService")
   implicit val mat = ActorMaterializer.create(system)
 
-  val service = new CensusServiceImpl(mat, indexedTract, indexedCounty, indexedLargeCounty)
+  val service =
+    new CensusServiceImpl(mat, indexedTract, indexedCounty, indexedSmallCounty)
 
   override def afterAll(): Unit = {
     Await.ready(system.terminate(), 5.seconds)

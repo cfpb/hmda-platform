@@ -27,7 +27,7 @@ class HmdaCensusGrpc extends GrpcServer with CensusRecords {
       new CensusServiceImpl(materializer,
                             indexedTract,
                             indexedCounty,
-                            indexedLargeCounty))
+                            indexedSmallCounty))
   override val http: Future[Http.ServerBinding] = Http().bindAndHandleAsync(
     service,
     interface = host,

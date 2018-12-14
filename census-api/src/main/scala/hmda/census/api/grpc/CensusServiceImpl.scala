@@ -10,7 +10,7 @@ import scala.concurrent.Future
 class CensusServiceImpl(materializer: Materializer,
                         indexedTract: Map[String, Census],
                         indexedCounty: Map[String, Census],
-                        indexedLargeCounty: Map[String, Census])
+                        indexedSmallCounty: Map[String, Census])
     extends CensusService {
 
   private implicit val mat: Materializer = materializer
@@ -32,7 +32,7 @@ class CensusServiceImpl(materializer: Materializer,
   override def validatePopulation(
       in: ValidPopulationRequest): Future[ValidPopulationResponse] = {
     val county = in.county
-    val isValid = isPopulationGt30k(county, indexedLargeCounty)
+    val isValid = isCountySmall(county, indexedSmallCounty)
     Future.successful(ValidPopulationResponse(isValid))
   }
 

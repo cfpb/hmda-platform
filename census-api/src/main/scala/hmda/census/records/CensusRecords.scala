@@ -41,16 +41,14 @@ trait CensusRecords {
       .toList
   }
 
-  val populationSizeDeterminator = 30000
-
-  val (indexedTract, indexedCounty, indexedLargeCounty) =
+  val (indexedTract, indexedCounty, indexedSmallCounty) =
     parseCensusFile.foldLeft(
       (Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
       case ((m1, m2, m3), c) =>
         (
           m1 + (c.toHmdaTract -> c),
           m2 + (c.toHmdaCounty -> c),
-          if (!c.smallCounty && c.population > populationSizeDeterminator)
+          if (c.smallCounty)
             m3 + (c.toHmdaCounty -> c)
           else m3
         )
