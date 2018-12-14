@@ -2,7 +2,7 @@ package hmda.census.api.grpc
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import hmda.census.records.CensusRecords
+import hmda.census.records.CensusRecords._
 import hmda.grpc.services._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.Span
@@ -15,8 +15,7 @@ class CensusServiceImplSpec
     extends WordSpec
     with MustMatchers
     with BeforeAndAfterAll
-    with ScalaFutures
-    with CensusRecords {
+    with ScalaFutures {
 
   implicit val patience =
     PatienceConfig(5.seconds, Span(100, org.scalatest.time.Millis))
