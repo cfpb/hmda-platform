@@ -1,4 +1,6 @@
 projects = [
+    [name: "census-api", repo: "hmda-platform", jenkinsfilePath: "census-api/Jenkinsfile"],
+    [name: "auth", repo: "hmda-platform", jenkinsfilePath: "auth/Jenkinsfile"],
     [name: "hmda-platform", repo: "hmda-platform", jenkinsfilePath: "hmda/Jenkinsfile"],
     [name: "check-digit", repo: "hmda-platform", jenkinsfilePath: "check-digit/Jenkinsfile"],
     [name: "institutions-api", repo: "hmda-platform", jenkinsfilePath: "institutions-api/Jenkinsfile"],
