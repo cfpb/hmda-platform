@@ -1,21 +1,21 @@
 package hmda.parser.filing
 
-import org.scalatest.{MustMatchers, WordSpec}
-import hmda.model.filing.ts.TsGenerators._
-import hmda.model.filing.lar.LarGenerators._
-import ParserFlow._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
 import akka.stream.testkit.scaladsl.TestSink
 import akka.util.ByteString
 import hmda.model.filing.PipeDelimited
+import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts.TsGenerators._
 import hmda.parser.ParserErrorModel.{
   IncorrectNumberOfFields,
   ParserValidationError
 }
+import hmda.parser.filing.ParserFlow._
+import org.scalatest.{MustMatchers, WordSpec}
 
 class ParserFlowSpec extends WordSpec with MustMatchers {
 

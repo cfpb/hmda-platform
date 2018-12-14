@@ -1,6 +1,8 @@
 package hmda.parser.filing.ts
 
 import cats.data.ValidatedNel
+import cats.implicits._
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
 import hmda.parser.ParserErrorModel.{
@@ -8,11 +10,8 @@ import hmda.parser.ParserErrorModel.{
   ParserValidationError
 }
 import hmda.parser.filing.ts.TsParserErrorModel._
-import cats.implicits._
-import com.typesafe.config.ConfigFactory
 
 import scala.util.{Failure, Success, Try}
-import hmda.parser._
 
 sealed trait TsFormatValidator {
 

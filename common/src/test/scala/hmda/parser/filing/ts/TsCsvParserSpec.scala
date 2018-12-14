@@ -1,10 +1,10 @@
 package hmda.parser.filing.ts
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
 import hmda.model.filing.ts.TsGenerators._
-import TsValidationUtils._
 import hmda.parser.filing.ts.TsParserErrorModel.{InvalidAgencyCode, InvalidId}
+import hmda.parser.filing.ts.TsValidationUtils._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
 

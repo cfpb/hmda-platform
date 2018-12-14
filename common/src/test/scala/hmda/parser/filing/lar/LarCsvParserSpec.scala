@@ -1,8 +1,8 @@
 package hmda.parser.filing.lar
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
 import hmda.model.filing.lar.LarGenerators._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
 

@@ -1,15 +1,15 @@
 package hmda.parser.filing.ts
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
-import hmda.model.filing.ts.TsGenerators._
-import TsFormatValidator._
-import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
-import hmda.parser.filing.ts.TsParserErrorModel._
-import TsValidationUtils._
 import cats.data.NonEmptyList
-import com.typesafe.config.ConfigFactory
 import cats.data.Validated.{Invalid, Valid}
+import com.typesafe.config.ConfigFactory
+import hmda.model.filing.ts.TsGenerators._
+import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
+import hmda.parser.filing.ts.TsFormatValidator._
+import hmda.parser.filing.ts.TsParserErrorModel._
+import hmda.parser.filing.ts.TsValidationUtils._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class TsFormatValidatorSpec
     extends PropSpec

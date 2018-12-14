@@ -1,15 +1,15 @@
 package hmda.parser.filing.lar
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
-import hmda.model.filing.lar.LarGenerators._
-import LarValidationUtils._
-import ApplicantFormatValidator._
 import cats.data.NonEmptyList
 import cats.data.Validated.Invalid
 import hmda.model.filing.lar.Applicant
+import hmda.model.filing.lar.LarGenerators._
 import hmda.parser.LarParserValidationResult
+import hmda.parser.filing.lar.ApplicantFormatValidator._
 import hmda.parser.filing.lar.LarParserErrorModel._
+import hmda.parser.filing.lar.LarValidationUtils._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class ApplicantFormatValidatorSpec
     extends PropSpec

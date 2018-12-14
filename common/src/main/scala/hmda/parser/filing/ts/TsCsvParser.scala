@@ -2,7 +2,7 @@ package hmda.parser.filing.ts
 
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.ParserErrorModel.ParserValidationError
-import TsFormatValidator._
+import hmda.parser.filing.ts.TsFormatValidator.validateTs
 
 object TsCsvParser {
   def apply(

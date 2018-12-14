@@ -2,15 +2,14 @@ package hmda.parser.filing
 
 import akka.NotUsed
 import akka.stream.FlowShape
-import akka.stream.scaladsl.GraphDSL
-import akka.stream.scaladsl.{Broadcast, Concat, Flow}
+import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL}
 import akka.util.ByteString
 import hmda.model.filing.PipeDelimited
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
-import hmda.util.streams.FlowUtils._
+import hmda.util.streams.FlowUtils.framing
 
 object ParserFlow {
 

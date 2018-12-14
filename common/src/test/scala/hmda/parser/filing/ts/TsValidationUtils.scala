@@ -1,8 +1,8 @@
 package hmda.parser.filing.ts
 
 import hmda.model.filing.ts.TransmittalSheet
+import hmda.parser.Seq
 import org.scalacheck.Gen
-import hmda.parser._
 
 object TsValidationUtils {
 

@@ -1,16 +1,16 @@
 package hmda.parser.filing.lar
 
-import com.typesafe.config.ConfigFactory
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
-import LarFormatValidator._
 import cats.data.NonEmptyList
 import cats.data.Validated.{Invalid, Valid}
-import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
+import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar.LarGenerators._
-import LarValidationUtils._
 import hmda.model.filing.lar.enums._
+import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
+import hmda.parser.filing.lar.LarFormatValidator._
 import hmda.parser.filing.lar.LarParserErrorModel._
+import hmda.parser.filing.lar.LarValidationUtils._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class LarFormatValidatorSpec
     extends PropSpec

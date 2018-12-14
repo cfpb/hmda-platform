@@ -1,14 +1,13 @@
 package hmda.parser.filing.lar
 
-import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
 import cats.implicits._
-import hmda.model.filing.lar.enums._
-import hmda.parser.filing.lar.LarParserErrorModel._
-import ApplicantFormatValidator._
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.lar._
+import hmda.model.filing.lar.enums._
 import hmda.parser.LarParserValidationResult
-import hmda.parser._
+import hmda.parser.ParserErrorModel.IncorrectNumberOfFields
+import hmda.parser.filing.lar.ApplicantFormatValidator._
+import hmda.parser.filing.lar.LarParserErrorModel._
 
 sealed trait LarFormatValidator extends LarParser {
 
