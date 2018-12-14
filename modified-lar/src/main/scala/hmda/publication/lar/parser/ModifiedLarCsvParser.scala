@@ -123,7 +123,7 @@ object ModifiedLarCsvParser {
   private def converDebtToIncomeRatio(ratio: String): String = ratio match {
     case x if x == "NA" || x == "Exempt" => x
     case _ =>
-      ratio.toInt match {
+      ratio.toDouble.toInt match {
         case x if x < 20                 => "<20%"
         case x if 20 until 30 contains x => "20-30%"
         case x if 30 until 36 contains x => "30-36%"
@@ -159,7 +159,7 @@ object ModifiedLarCsvParser {
 
   private def roundToMidPoint(x: Int): Int = {
     val rounded = 10000 * Math.floor(x / 10000) + 5000
-    rounded.toInt
+    rounded.toDouble.toInt
   }
 
 }
