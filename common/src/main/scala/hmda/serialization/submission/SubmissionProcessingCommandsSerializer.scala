@@ -36,6 +36,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
     classOf[StartSyntacticalValidity].getName
   final val PersistHmdaRowValidatedErrorManifest =
     classOf[PersistHmdaRowValidatedError].getName
+  final val PersistMacroErrorManifest =
+    classOf[PersistMacroError].getName
   final val GetHmdaValidationErrorStateManifest =
     classOf[GetHmdaValidationErrorState].getName
   final val CompleteSyntacticalValidityManifest =
@@ -74,6 +76,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
       startSyntacticalValidityToProtobuf(cmd).toByteArray
     case cmd: PersistHmdaRowValidatedError =>
       persistHmdaRowValidatedErrorToProtobuf(cmd, resolver).toByteArray
+    case cmd: PersistMacroError =>
+      persisteMacroErrorToProtobuf(cmd, resolver).toByteArray
     case cmd: GetHmdaValidationErrorState =>
       getHmdaValidationErrorStateToProtobuf(cmd, resolver).toByteArray
     case cmd: CompleteSyntacticalValidity =>
@@ -124,6 +128,9 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
         persistHmdaRowValidatedErrorFromProtobuf(
           PersistHmdaRowValidatedErrorMessage.parseFrom(bytes),
           resolver)
+      case PersistMacroErrorManifest =>
+        persistMacroErrorFromProtobuf(PersistMacroErrorMessage.parseFrom(bytes),
+                                      resolver)
       case GetHmdaValidationErrorStateManifest =>
         getHmdaValidationErrorStateFromProtobuf(
           GetHmdaValidationErrorStateMessage.parseFrom(bytes),

@@ -26,6 +26,8 @@ class SubmissionProcessingEventsSerializer
     classOf[HmdaValidationErrorState].getName
   final val HmdaRowValidatedErrorManifest =
     classOf[HmdaRowValidatedError].getName
+  final val HmdaMacroValidatedErrorManifest =
+    classOf[HmdaMacroValidatedError].getName
   final val QualityVerifiedManifest = classOf[QualityVerified].getName
   final val MacroVerifiedManifest = classOf[MacroVerified].getName
   final val NotReadyToBeVerifiedManifest = classOf[NotReadyToBeVerified].getName
@@ -49,6 +51,8 @@ class SubmissionProcessingEventsSerializer
       hmdaValidationErrorStateToProtobuf(evt).toByteArray
     case evt: HmdaRowValidatedError =>
       hmdaRowValidatedErrorToProtobuf(evt).toByteArray
+    case evt: HmdaMacroValidatedError =>
+      hmdaMacroValidatedErrorToProtobuf(evt).toByteArray
     case evt: QualityVerified =>
       qualityVerifiedToProtobuf(evt).toByteArray
     case evt: MacroVerified =>
@@ -85,6 +89,9 @@ class SubmissionProcessingEventsSerializer
       case HmdaRowValidatedErrorManifest =>
         hmdaRowValidatedErrorFromProtobuf(
           HmdaRowValidatedErrorMessage.parseFrom(bytes))
+      case HmdaMacroValidatedErrorManifest =>
+        hmdaMacroValidatedErrorFromProtobuf(
+          HmdaMacroValidatedErrorMessage.parseFrom(bytes))
       case QualityVerifiedManifest =>
         qualityVerifiedFromProtobuf(QualityVerifiedMessage.parseFrom(bytes))
       case MacroVerifiedManifest =>

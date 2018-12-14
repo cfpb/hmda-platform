@@ -21,6 +21,6 @@ class S301 private (ts: TransmittalSheet)
   override def name: String = "S301"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.larIdentifier.LEI is equalTo(ts.LEI)
+    lar.larIdentifier.LEI.toLowerCase is equalTo(ts.LEI.toLowerCase)
   }
 }
