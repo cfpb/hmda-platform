@@ -58,7 +58,6 @@ volumes: [
                         --namespace=default \
                         --values=kubernetes/census-api/values.yaml \
                         --set image.tag=latest \
-                        --set postgresql.enabled=false \
                         --set image.pullPolicy=Always \
                         census-api \
                         kubernetes/census-api

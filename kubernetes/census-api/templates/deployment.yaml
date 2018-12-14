@@ -26,15 +26,13 @@ spec:
           ports:
             - name: {{ .Values.grpc.name }}
               containerPort: 60081
-              protocol: {{ .Values.service.protocol }}
+              protocol: {{ .Values.grpc.protocol }}
           livenessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.service.port }}
+            tcpSocket:
+              port: {{ .Values.grpc.port }}
           readinessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.service.port }}
+            tcpSocket:
+              port: {{ .Values.grpc.port }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
