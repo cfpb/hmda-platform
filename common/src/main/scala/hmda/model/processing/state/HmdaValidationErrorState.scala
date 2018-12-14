@@ -6,7 +6,12 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   MacroVerified,
   QualityVerified
 }
-import hmda.model.filing.submission.{QualityErrors, Verified}
+import hmda.model.filing.submission.{
+  MacroErrors,
+  QualityErrors,
+  SubmissionStatus,
+  Verified
+}
 import hmda.model.validation._
 
 case class EditSummary(editName: String,
@@ -49,15 +54,25 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
         EditSummary(error.error.editName, Macro, LarValidationError)))
   }
 
-  def verifyQuality(evt: QualityVerified): HmdaValidationErrorState =
-    if (evt.verified) {
-      this.copy(qualityVerified = evt.verified, statusCode = Verified.code)
+  def verifyQuality(evt: QualityVerified): HmdaValidationErrorState = {
+    val status = if (evt.verified) {
+      if (macroVerified) Verified.code
+      else if (`macro`.isEmpty) hmda.model.filing.submission.Macro.code
+      else MacroErrors.code
     } else {
-      this.copy(qualityVerified = evt.verified, statusCode = QualityErrors.code)
+      if (quality.isEmpty) hmda.model.filing.submission.Quality.code
+      else QualityErrors.code
     }
+    this.copy(qualityVerified = evt.verified, statusCode = status)
+  }
 
-  def verifyMacro(evt: MacroVerified): HmdaValidationErrorState =
-    this.copy(macroVerified = evt.verified, statusCode = Verified.code)
+  def verifyMacro(evt: MacroVerified): HmdaValidationErrorState = {
+    val status =
+      if (evt.verified) Verified.code
+      else if (`macro`.isEmpty) hmda.model.filing.submission.Macro.code
+      else MacroErrors.code
+    this.copy(macroVerified = evt.verified, statusCode = status)
+  }
 
   def updateStatusCode(code: Int): HmdaValidationErrorState =
     this.copy(statusCode = code)

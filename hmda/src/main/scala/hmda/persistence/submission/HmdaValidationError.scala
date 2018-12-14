@@ -258,7 +258,7 @@ object HmdaValidationError
                                        log)
                 replyTo ! QualityVerified(submissionId, verified, updatedStatus)
               }
-              if (state.macroVerified) {
+              else if (state.macroVerified) {
                 val updatedStatus = Verified
                 updateSubmissionStatus(sharding,
                                        submissionId,
@@ -335,6 +335,8 @@ object HmdaValidationError
       state.updateStatusCode(statusCode)
     case (state, evt: QualityVerified) =>
       state.verifyQuality(evt)
+    case (state, evt: MacroVerified) =>
+      state.verifyMacro(evt)
     case (state, SubmissionSigned(_, _, _)) =>
       state.updateStatusCode(Signed.code)
     case (state, _) => state
