@@ -104,10 +104,6 @@ class FilingPersistenceSpec extends AkkaCassandraPersistenceSpec {
       val updated =
         sampleSubmission2.copy(status = SubmissionStatus.valueOf(Verified.code))
       filingPersistence ! UpdateSubmission(updated, Some(submissionProbe.ref))
-
-      filingPersistence ! GetFilingDetails(filingDetailsProbe.ref)
-      filingDetailsProbe.expectMessage(
-        Some(FilingDetails(sampleFiling, List(updated, sampleSubmission))))
     }
   }
 }
