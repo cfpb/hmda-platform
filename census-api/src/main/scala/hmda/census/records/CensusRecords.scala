@@ -17,25 +17,23 @@ trait CensusRecords {
       .map { s =>
         val values = s.split("\\|", -1).map(_.trim).toList
         Census(
-          id = values(0).toInt,
-          collectionYear = values(1).toInt,
-          msaMd = values(2).toInt,
-          state = values(3),
-          county = values(4),
-          tract = values(5),
-          medianIncome = values(6).toInt,
-          population = values(7).toInt,
+          collectionYear = values(0).toInt,
+          msaMd = values(1).toInt,
+          state = values(2),
+          county = values(3),
+          tract = values(4),
+          medianIncome = values(5).toInt,
+          population = values(6).toInt,
           minorityPopulationPercent =
-            if (values(8).isEmpty) 0.0 else values(8).toDouble,
-          occupiedUnits = if (values(9).isEmpty) 0 else values(9).toInt,
-          oneToFourFamilyUnits =
-            if (values(10).isEmpty) 0 else values(10).toInt,
-          tractMfi = if (values(11).isEmpty) 0 else values(11).toInt,
+            if (values(7).isEmpty) 0.0 else values(7).toDouble,
+          occupiedUnits = if (values(8).isEmpty) 0 else values(8).toInt,
+          oneToFourFamilyUnits = if (values(9).isEmpty) 0 else values(9).toInt,
+          tractMfi = if (values(10).isEmpty) 0 else values(10).toInt,
           tracttoMsaIncomePercent =
-            if (values(12).isEmpty) 0.0 else values(12).toDouble,
-          medianAge = if (values(13).isEmpty) 0 else values(13).toInt,
+            if (values(11).isEmpty) 0.0 else values(11).toDouble,
+          medianAge = if (values(12).isEmpty) 0 else values(12).toInt,
           smallCounty =
-            if (!values(14).isEmpty && values(14) == "S") true else false
+            if (!values(13).isEmpty && values(13) == "S") true else false
         )
       }
       .toList
