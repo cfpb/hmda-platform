@@ -6,12 +6,7 @@ import hmda.messages.submission.SubmissionProcessingEvents.{
   MacroVerified,
   QualityVerified
 }
-import hmda.model.filing.submission.{
-  MacroErrors,
-  QualityErrors,
-  SubmissionStatus,
-  Verified
-}
+import hmda.model.filing.submission.{MacroErrors, QualityErrors, Verified}
 import hmda.model.validation._
 
 case class EditSummary(editName: String,
@@ -23,8 +18,8 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
                                     validity: Set[EditSummary] = Set.empty,
                                     quality: Set[EditSummary] = Set.empty,
                                     `macro`: Set[EditSummary] = Set.empty,
-                                    qualityVerified: Boolean = false,
-                                    macroVerified: Boolean = false) {
+                                    qualityVerified: Boolean = true,
+                                    macroVerified: Boolean = true) {
   def updateErrors(
       hmdaRowError: HmdaRowValidatedError): HmdaValidationErrorState = {
 
@@ -38,20 +33,27 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
       }
       .groupBy(_.editType)
 
+    val qualityErrors = this.quality ++ editSummaries
+      .getOrElse(Quality, Nil)
+      .toSet
+    val macroErrors = this.`macro` ++ editSummaries.getOrElse(Macro, Nil).toSet
+
     HmdaValidationErrorState(
       this.statusCode,
       this.syntactical ++ editSummaries.getOrElse(Syntactical, Nil).toSet,
       this.validity ++ editSummaries.getOrElse(Validity, Nil).toSet,
-      this.quality ++ editSummaries.getOrElse(Quality, Nil).toSet,
-      this.`macro` ++ editSummaries.getOrElse(Macro, Nil).toSet
+      qualityErrors,
+      macroErrors,
+      qualityVerified = qualityErrors.isEmpty,
+      macroVerified = macroErrors.isEmpty
     )
   }
 
   def updateMacroErrors(
       error: HmdaMacroValidatedError): HmdaValidationErrorState = {
-    this.copy(
-      `macro` = this.`macro` ++ Set(
-        EditSummary(error.error.editName, Macro, LarValidationError)))
+    this.copy(`macro` = this.`macro` ++ Set(
+                EditSummary(error.error.editName, Macro, LarValidationError)),
+              macroVerified = false)
   }
 
   def verifyQuality(evt: QualityVerified): HmdaValidationErrorState = {

@@ -26,12 +26,17 @@ object SubmissionProcessingEvents {
   case class QualityCompleted(submissionId: SubmissionId, statusCode: Int)
       extends SubmissionProcessingEvent
 
+  case class MacroCompleted(submissionId: SubmissionId, statusCode: Int)
+      extends SubmissionProcessingEvent
+
   case class QualityVerified(submissionId: SubmissionId,
                              verified: Boolean,
                              status: SubmissionStatus)
       extends SubmissionProcessingEvent
 
-  case class MacroVerified(submissionId: SubmissionId, verified: Boolean)
+  case class MacroVerified(submissionId: SubmissionId,
+                           verified: Boolean,
+                           status: SubmissionStatus)
       extends SubmissionProcessingEvent
 
   case class NotReadyToBeVerified(submissionId: SubmissionId)
