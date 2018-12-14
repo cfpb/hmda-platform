@@ -4,7 +4,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.census.Census
 import hmda.model.ResourceUtils._
 
-trait CensusRecords {
+object CensusRecords {
 
   val config = ConfigFactory.load()
   val censusFileName =
