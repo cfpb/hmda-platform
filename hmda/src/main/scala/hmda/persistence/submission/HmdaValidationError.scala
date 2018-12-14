@@ -273,12 +273,17 @@ object HmdaValidationError
         }
 
       case VerifyMacro(submissionId, verified, replyTo) =>
-        Effect.persist(MacroVerified(submissionId, verified)).thenRun { _ =>
-          val updatedStatus = if(verified) Verified else MacroErrors
-          updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
-          replyTo ! MacroVerified(submissionId, verified)
+        if (List(Macro.code, MacroErrors.code)
+          .contains(state.statusCode) || !verified) {
+          Effect.persist(MacroVerified(submissionId, verified)).thenRun { _ =>
+            val updatedStatus = if(verified) Verified else MacroErrors
+            updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+            replyTo ! MacroVerified(submissionId, verified)
+          }
+        } else {
+          replyTo ! NotReadyToBeVerified(submissionId)
+          Effect.none
         }
-
 
       case SignSubmission(submissionId, replyTo) =>
         if (state.statusCode == Verified.code) {
