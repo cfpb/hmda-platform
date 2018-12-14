@@ -6,18 +6,16 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
-import hmda.api.grpc.GrpcServer
 import hmda.api.grpc.GrpcServer
 import hmda.census.api.grpc.CensusServiceImpl
-import hmda.census.query.CensusComponent
+import hmda.census.records.CensusRecords
 import hmda.grpc.services.CensusServiceHandler
 
 import scala.concurrent.{ExecutionContext, Future}
 object HmdaCensusGrpc {
   def props(): Props = Props(new HmdaCensusGrpc)
 }
-class HmdaCensusGrpc extends GrpcServer with CensusComponent {
+class HmdaCensusGrpc extends GrpcServer with CensusRecords {
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = context.dispatcher
@@ -26,7 +24,10 @@ class HmdaCensusGrpc extends GrpcServer with CensusComponent {
   override val port: Int = config.getInt("hmda.census.grpc.port")
   override val service: HttpRequest => Future[HttpResponse] =
     CensusServiceHandler(
-      new CensusServiceImpl(materializer, indexedTract, indexedCouty))
+      new CensusServiceImpl(materializer,
+                            indexedTract,
+                            indexedCounty,
+                            indexedSmallCounty))
   override val http: Future[Http.ServerBinding] = Http().bindAndHandleAsync(
     service,
     interface = host,

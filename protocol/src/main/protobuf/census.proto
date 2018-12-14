@@ -18,8 +18,17 @@ message ValidCountyResponse {
     bool isValid = 1;
 }
 
+message ValidPopulationRequest {
+    string county = 1;
+}
+message ValidPopulationResponse {
+    bool isValid = 1;
+}
+
 service CensusService {
     rpc validateTract (ValidTractRequest) returns (ValidTractResponse) {}
 
     rpc validateCounty (ValidCountyRequest) returns (ValidCountyResponse) {}
+
+    rpc validatePopulation (ValidPopulationRequest) returns (ValidPopulationResponse) {}
 }

@@ -17,7 +17,7 @@ replicaCount: 3
 
 image:
   repository: hmda/hmda-platform
-  tag: grpc
+  tag: v2.7.2
   pullPolicy: IfNotPresent
 
 hmda:
@@ -74,6 +74,9 @@ grpc:
   check_digit:
     port: 60080
     host: check-digit-grpc.default.svc.cluster.local
+  census:
+    port: 60081
+    host: census-grpc.default.svc.cluster.local
 
 
 ingress:

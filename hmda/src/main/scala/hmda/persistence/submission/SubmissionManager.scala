@@ -12,6 +12,7 @@ import hmda.messages.submission.SubmissionEvents.{
 }
 import hmda.messages.submission.SubmissionManagerCommands._
 import hmda.messages.submission.SubmissionProcessingCommands.{
+  StartMacro,
   StartParsing,
   StartQuality,
   StartSyntacticalValidity
@@ -65,7 +66,7 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
                 case SyntacticalOrValidity =>
                   hmdaValidationError ! StartQuality(submission.id)
                 case Quality | QualityErrors =>
-                //TODO: Start macro edits
+                  hmdaValidationError ! StartMacro(submission.id)
 
                 case _ =>
               }

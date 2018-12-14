@@ -132,16 +132,22 @@ object ValidationFlow {
     })
   }
 
-  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC]
-    : Flow[ByteString,
-           Future[HmdaValidated[LoanApplicationRegister]],
-           NotUsed] = {
+  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](
+      checkType: String): Flow[ByteString,
+                               Future[HmdaValidated[LoanApplicationRegister]],
+                               NotUsed] = {
     collectLar
       .map { lar =>
-        LarEngine.checkValidityAsync(lar, lar.loan.ULI, lar.geography.tract)
+        def errors = checkType match {
+          case "syntactical-validity" =>
+            LarEngine.checkValidityAsync(lar, lar.loan.ULI)
+          case "quality" =>
+            LarEngine.checkQualityAsync(lar, lar.loan.ULI)
+        }
+        (lar, errors)
       }
       .map { x =>
-        x.map(y => y.leftMap(xs => xs.toList).toEither)
+        x._2.map(y => y.leftMap(xs => xs.toList).toEither)
       }
   }
 

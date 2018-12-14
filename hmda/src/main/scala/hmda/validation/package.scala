@@ -15,5 +15,4 @@ package object validation {
   type AS[_] = ActorSystem
   type MAT[_] = ActorMaterializer
   type EC[_] = ExecutionContext
-
 }

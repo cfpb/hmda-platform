@@ -44,8 +44,9 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
     V622,
     V623,
     V624,
-    V627,
     V625_1,
+    V626,
+    V627,
     V628_1,
     V628_2,
     V628_3,
@@ -270,9 +271,14 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
 
   override def asyncChecks =
     Vector(
-//      V609,
+      V609,
       V625_2,
-      V626
+    )
+
+  override def asyncQualityChecks =
+    Vector(
+      Q603,
+      Q604
     )
 
 }

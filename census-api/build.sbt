@@ -1,5 +1,5 @@
 packageName in Docker := "hmda-census-api"
 
-dockerExposedPorts := Vector(9098)
+dockerExposedPorts := Vector(60081)
 
-version in Docker := "0.1.3"
+version in Docker := "latest"

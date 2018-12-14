@@ -8,7 +8,7 @@ import hmda.model.processing.state.{
   HmdaParserErrorState,
   HmdaValidationErrorState
 }
-import hmda.model.validation.ValidationError
+import hmda.model.validation.{MacroValidationError, ValidationError}
 
 object SubmissionProcessingCommands {
   sealed trait SubmissionProcessingCommand extends Command
@@ -52,6 +52,12 @@ object SubmissionProcessingCommands {
       replyTo: Option[ActorRef[HmdaRowValidatedError]])
       extends SubmissionProcessingCommand
 
+  case class PersistMacroError(
+      submissionId: SubmissionId,
+      validationError: MacroValidationError,
+      maybeReplyTo: Option[ActorRef[MacroValidationError]]
+  ) extends SubmissionProcessingCommand
+
   case class GetHmdaValidationErrorState(
       submissionId: SubmissionId,
       replyTo: ActorRef[HmdaValidationErrorState])
@@ -63,7 +69,13 @@ object SubmissionProcessingCommands {
   case class StartQuality(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
 
+  case class StartMacro(submissionId: SubmissionId)
+      extends SubmissionProcessingCommand
+
   case class CompleteQuality(submissionId: SubmissionId)
+      extends SubmissionProcessingCommand
+
+  case class CompleteMacro(submissionId: SubmissionId)
       extends SubmissionProcessingCommand
 
   case class VerifyQuality(submissionId: SubmissionId,
