@@ -79,9 +79,6 @@ object ModifiedLarPublisher {
           readRawData(submissionId)
             .map(l => l.data)
             .drop(1)
-            .map { e =>
-              println(e); e
-            }
             .map(s => ModifiedLarCsvParser(s).toCSV + "\n")
             .map(s => ByteString(s))
             .runWith(s3Sink)
