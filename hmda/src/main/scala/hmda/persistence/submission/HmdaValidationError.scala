@@ -274,9 +274,9 @@ object HmdaValidationError
 
       case VerifyMacro(submissionId, verified, replyTo) =>
         if (List(Macro.code, MacroErrors.code)
-          .contains(state.statusCode) || !verified) {
+              .contains(state.statusCode) || !verified) {
           Effect.persist(MacroVerified(submissionId, verified)).thenRun { _ =>
-            val updatedStatus = if(verified) Verified else MacroErrors
+            val updatedStatus = if (verified) Verified else MacroErrors
             updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
             replyTo ! MacroVerified(submissionId, verified)
           }
