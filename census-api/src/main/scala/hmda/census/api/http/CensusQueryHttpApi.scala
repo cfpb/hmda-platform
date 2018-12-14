@@ -1,7 +1,7 @@
 package hmda.census.api.http
 
 import akka.actor.ActorSystem
-import hmda.census.query.CensusComponent
+import hmda.census.records.CensusRecords
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.server.Directives._
@@ -14,7 +14,7 @@ import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
 
-trait CensusQueryHttpApi extends HmdaTimeDirectives with CensusComponent {
+trait CensusQueryHttpApi extends HmdaTimeDirectives with CensusRecords {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer

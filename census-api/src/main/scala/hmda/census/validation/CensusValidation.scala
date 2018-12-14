@@ -14,4 +14,9 @@ object CensusValidation {
     indexedCounty.contains(county)
   }
 
+  def isPopulationGt30k(county: String,
+                        indexedCounties: Map[String, Census]): Boolean = {
+    indexedCounties.contains(county)
+  }
+
 }

@@ -20,6 +20,8 @@ trait ValidationEngine[A] extends ValidationApi[A] {
 
   def asyncChecks: Vector[AsyncEditCheck[A]] = Vector.empty
 
+  def asyncQualityChecks: Vector[AsyncEditCheck[A]] = Vector.empty
+
   def checkAll(
       a: A,
       id: String,
@@ -71,12 +73,21 @@ trait ValidationEngine[A] extends ValidationApi[A] {
 
   def checkValidityAsync[as: AS, mat: MAT, ec: EC](
       a: A,
-      id: String,
-      tract: String): Future[HmdaValidation[A]] = {
+      id: String): Future[HmdaValidation[A]] = {
     if (asyncChecks.isEmpty) {
       Future.successful(Validated.valid(a))
     } else {
-      runAsyncChecks(a, asyncChecks, Validity, LarValidationError, id, tract)
+      runAsyncChecks(a, asyncChecks, Validity, LarValidationError, id)
+    }
+  }
+
+  def checkQualityAsync[as: AS, mat: MAT, ec: EC](
+      a: A,
+      id: String): Future[HmdaValidation[A]] = {
+    if (asyncQualityChecks.isEmpty) {
+      Future.successful(Validated.valid(a))
+    } else {
+      runAsyncChecks(a, asyncQualityChecks, Quality, LarValidationError, id)
     }
   }
 
@@ -98,8 +109,7 @@ trait ValidationEngine[A] extends ValidationApi[A] {
       checksToRun: Vector[AsyncEditCheck[A]],
       validationErrorType: ValidationErrorType,
       validationErrorEntity: ValidationErrorEntity,
-      id: String,
-      tract: String): Future[HmdaValidation[A]] = {
+      id: String): Future[HmdaValidation[A]] = {
     val fChecks =
       checksToRun.par
         .map(checkAsync(_, a, id, validationErrorType, validationErrorEntity))

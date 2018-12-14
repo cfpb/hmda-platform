@@ -29,7 +29,6 @@ object V625_2 extends AsyncEditCheck[LoanApplicationRegister] {
   override def apply[as: AS, mat: MAT, ec: EC](
       lar: LoanApplicationRegister): Future[ValidationResult] = {
 
-    val uli = lar.loan.ULI
     val tract = lar.geography.tract
 
     if (tract.toLowerCase != "na") {
@@ -43,8 +42,6 @@ object V625_2 extends AsyncEditCheck[LoanApplicationRegister] {
   }
 
   def tractIsValid[as: AS, mat: MAT, ec: EC](tract: String): Future[Boolean] = {
-    println("This is the host: " + host)
-    println("this is the port: " + port)
     val client = CensusServiceClient(
       GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
     )

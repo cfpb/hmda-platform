@@ -3,7 +3,7 @@ package hmda.census
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
 import hmda.census.api.http.HmdaCensusQueryApi
-import hmda.census.query.CensusComponent
+import hmda.census.records.CensusRecords
 import org.slf4j.LoggerFactory
 
 object HmdaCensusApi extends App {

@@ -75,7 +75,7 @@ trait ValidationApi[A] {
       uli: String,
       validationErrorType: ValidationErrorType,
       validationErrorEntity: ValidationErrorEntity
-  ): Future[HmdaValidation[B]] =
+  ): Future[HmdaValidation[B]] = {
     fResult.map(
       result =>
         resultToValidationError(input,
@@ -84,6 +84,7 @@ trait ValidationApi[A] {
                                 uli,
                                 validationErrorType,
                                 validationErrorEntity))
+  }
 
   private def resultToValidationError[B](
       input: B,
