@@ -5,10 +5,8 @@ import hmda.grpc.services.{
   CheckDigitService,
   ValidUliRequest,
   ValidUliResponse,
-  CensusService
 }
 import hmda.uli.validation.ULI._
-import hmda.grpc.services._
 import scala.concurrent.Future
 
 class CheckDigitServiceImpl(materializer: Materializer)

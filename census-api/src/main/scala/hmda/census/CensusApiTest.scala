@@ -28,10 +28,10 @@ object CensusApiTest extends App {
   val resultCounty = Await.result(replyC, 2.seconds)
   println("County IS VALID?: " + resultCounty)
 
-  val reply30k =
+  val replyPopulationk =
     client.validatePopulation(ValidPopulationRequest("18030"))
 
-  val result30k = Await.result(reply30k, 2.seconds)
-  println("County30k IS VALID?: " + result30k)
+  val resultPopulationk = Await.result(replyPopulationk, 2.seconds)
+  println("County30k IS VALID?: " + resultPopulationk)
 
 }
