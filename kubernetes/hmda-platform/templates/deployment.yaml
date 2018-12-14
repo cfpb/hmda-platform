@@ -10,6 +10,11 @@ spec:
     matchLabels:
       app: {{ template "hmda-platform.name" . }}
       release: {{ .Release.Name }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -59,9 +64,23 @@ spec:
             configMapKeyRef:
               name: kafka-configmap
               key: kafka.hosts
-        livenessProbe:
-          tcpSocket:
-            port: {{ .Values.bootstrap.port }}
+        - name: GRPC_CHECK_DIGIT_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: grpc-configmap
+              key: check.digit.host
+        - name: GRPC_CHECK_DIGIT_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: grpc-configmap
+              key: check.digit.port
+#        livenessProbe:
+#          tcpSocket:
+#            port: {{ .Values.bootstrap.port }}
+#        readinessProbe:
+#          httpGet:
+#            path: /ready
+#            port: {{ .Values.bootstrap.name }}
         ports:
         # akka remoting
         - name: {{ .Values.remoting.name }}

@@ -21,3 +21,12 @@ metadata:
   name: kafka-configmap
 data:
 kafka.hosts: {{ .Values.kafka.hosts }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grpc-configmap
+data:
+  check.digit.host: {{ .Values.grpc.check_digit.host }}
+  check.digit.port: "{{ .Values.grpc.check_digit.port }}"

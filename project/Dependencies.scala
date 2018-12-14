@@ -23,6 +23,7 @@ object Dependencies {
   lazy val akkaStream = "com.typesafe.akka" %% "akka-stream" % Version.akka
   lazy val akkaStreamTyped = "com.typesafe.akka" %% "akka-stream-typed" % Version.akka
   lazy val akkaHttp = "com.typesafe.akka" %% "akka-http" % Version.akkaHttp
+  lazy val akkaHttp2 = "com.typesafe.akka" %% "akka-http2-support" % Version.akkaHttp
   lazy val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akkaHttp % Test
   lazy val akkaHttpCirce = "de.heikoseeberger" %% "akka-http-circe" % Version.akkaHttpJson
   lazy val akkaManagementClusterBootstrap = "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % Version.akkaClusterManagement
@@ -36,7 +37,6 @@ object Dependencies {
   lazy val circeParser = "io.circe" %% "circe-parser" % Version.circe
   lazy val akkaPersistenceCassandra = "com.typesafe.akka" %% "akka-persistence-cassandra" % Version.cassandraPluginVersion
   lazy val cassandraLauncher = "com.typesafe.akka" %% "akka-persistence-cassandra-launcher" % Version.cassandraPluginVersion
-  lazy val akkaClusterDowning = "com.github.TanUkkii007" %% "akka-cluster-custom-downing" % Version.akkaClusterDowning
   lazy val slick = "com.typesafe.slick" %% "slick" % Version.slick
   lazy val slickHikaryCP = "com.typesafe.slick" %% "slick-hikaricp" % Version.slick
   lazy val postgres = "org.postgresql" % "postgresql" % Version.postgres

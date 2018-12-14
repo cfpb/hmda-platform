@@ -27,6 +27,9 @@ spec:
             - name: {{ .Values.service.name }}
               containerPort: 9091
               protocol: {{ .Values.service.protocol }}
+            - name: {{ .Values.grpc.name }}
+              containerPort: 60080
+              protocol: {{ .Values.service.protocol }}
           livenessProbe:
             httpGet:
               path: /
