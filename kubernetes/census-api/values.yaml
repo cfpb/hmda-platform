@@ -13,7 +13,7 @@ grpc:
   type: ClusterIP
   port: 60081
   targetPort: 60081
-  name: http2-census-api
+  name: http2-census
 
 ingress:
   enabled: false

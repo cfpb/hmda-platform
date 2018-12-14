@@ -13,7 +13,7 @@ spec:
   ports:
     - port: {{ .Values.grpc.port }}
       targetPort: {{ .Values.grpc.targetPort }}
-      protocol: {{ .Values.service.protocol }}
+      protocol: {{ .Values.grpc.protocol }}
       name: {{ .Values.grpc.name }}
   selector:
     app: {{ template "census-api.name" . }}
