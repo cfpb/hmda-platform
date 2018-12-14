@@ -50,7 +50,8 @@ trait CensusRecords {
         (
           m1 + (c.toHmdaTract -> c),
           m2 + (c.toHmdaCounty -> c),
-          if (!c.smallCounty && c.population > populationSizeDeterminator) m3 + (c.toHmdaCounty -> c)
+          if (!c.smallCounty && c.population > populationSizeDeterminator)
+            m3 + (c.toHmdaCounty -> c)
           else m3
         )
     }

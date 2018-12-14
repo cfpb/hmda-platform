@@ -29,10 +29,11 @@ class CensusServiceImpl(materializer: Materializer,
     Future.successful(ValidCountyResponse(isValid))
   }
 
-  override def validate30k(in: Valid30kRequest): Future[Valid30kResponse] = {
+  override def validatePopulation(
+      in: ValidPopulationRequest): Future[ValidPopulationResponse] = {
     val county = in.county
     val isValid = isPopulationGt30k(county, indexedLargeCounty)
-    Future.successful(Valid30kResponse(isValid))
+    Future.successful(ValidPopulationResponse(isValid))
   }
 
 }

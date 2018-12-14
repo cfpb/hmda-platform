@@ -3,12 +3,7 @@ package hmda.census
 import akka.actor.ActorSystem
 import akka.grpc.GrpcClientSettings
 import akka.stream.ActorMaterializer
-import hmda.grpc.services.{
-  CensusServiceClient,
-  Valid30kRequest,
-  ValidCountyRequest,
-  ValidTractRequest
-}
+import hmda.grpc.services._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -34,7 +29,7 @@ object CensusApiTest extends App {
   println("County IS VALID?: " + resultCounty)
 
   val reply30k =
-    client.validate30k(Valid30kRequest("18030"))
+    client.validatePopulation(ValidPopulationRequest("18030"))
 
   val result30k = Await.result(reply30k, 2.seconds)
   println("County30k IS VALID?: " + result30k)

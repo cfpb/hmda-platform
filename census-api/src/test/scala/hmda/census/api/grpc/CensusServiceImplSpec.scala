@@ -3,12 +3,7 @@ package hmda.census.api.grpc
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import hmda.census.records.CensusRecords
-import hmda.grpc.services.{
-  ValidCountyRequest,
-  ValidCountyResponse,
-  ValidTractRequest,
-  ValidTractResponse
-}
+import hmda.grpc.services._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.Span
 import org.scalatest.{BeforeAndAfterAll, MustMatchers, WordSpec}
@@ -29,7 +24,7 @@ class CensusServiceImplSpec
   val system = ActorSystem("CensusService")
   implicit val mat = ActorMaterializer.create(system)
 
-  val service = new CensusServiceImpl(mat, indexedTract, indexedCounty)
+  val service = new CensusServiceImpl(mat, indexedTract, indexedCounty, indexedLargeCounty)
 
   override def afterAll(): Unit = {
     Await.ready(system.terminate(), 5.seconds)
@@ -57,6 +52,13 @@ class CensusServiceImplSpec
         service.validateCounty(ValidCountyRequest("00001"))
       reply.futureValue mustBe ValidCountyResponse(false)
     }
+
+    "check large County" in {
+      val reply =
+        service.validatePopulation(ValidPopulationRequest("00000"))
+      reply.futureValue mustBe ValidPopulationResponse(false)
+    }
+
   }
 
 }
