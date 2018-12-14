@@ -8,14 +8,14 @@ import akka.pattern.pipe
 import akka.stream.ActorMaterializer
 import hmda.api.grpc.GrpcServer
 import hmda.census.api.grpc.CensusServiceImpl
-import hmda.census.records.CensusRecords
+import hmda.census.records.CensusRecords._
 import hmda.grpc.services.CensusServiceHandler
 
 import scala.concurrent.{ExecutionContext, Future}
 object HmdaCensusGrpc {
   def props(): Props = Props(new HmdaCensusGrpc)
 }
-class HmdaCensusGrpc extends GrpcServer with CensusRecords {
+class HmdaCensusGrpc extends GrpcServer {
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
   override implicit val ec: ExecutionContext = context.dispatcher
