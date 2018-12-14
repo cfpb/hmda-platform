@@ -29,16 +29,16 @@ object Q603 extends AsyncEditCheck[LoanApplicationRegister] {
     val tract = lar.geography.tract
 
     if (tract.toLowerCase == "na" && county.toLowerCase != "na") {
-      isPopulationGt30k(county).map {
-        case true  => ValidationFailure
-        case false => ValidationSuccess
+      isCountySmall(county).map {
+        case true  => ValidationSuccess
+        case false => ValidationFailure
       }
     } else {
       Future.successful(ValidationSuccess)
     }
   }
 
-  def isPopulationGt30k[as: AS, mat: MAT, ec: EC](
+  def isCountySmall[as: AS, mat: MAT, ec: EC](
       county: String): Future[Boolean] = {
     val client = CensusServiceClient(
       GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
