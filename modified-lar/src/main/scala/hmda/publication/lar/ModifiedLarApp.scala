@@ -62,7 +62,7 @@ object ModifiedLarApp extends App {
 
   Consumer
     .committableSource(consumerSettings,
-                       Subscriptions.topics(signTopic, signAdminTopic))
+                       Subscriptions.topics(signTopic, modifiedLarTopic))
     .mapAsync(parallelism) { msg =>
       processData(msg.record.value()).map(_ => msg.committableOffset)
     }
