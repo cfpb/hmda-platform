@@ -77,7 +77,7 @@ object ModifiedLarCsvParser {
       lar.loanDisclosure.lenderCredits,
       lar.loan.interestRate,
       lar.loan.prepaymentPenaltyTerm,
-      lar.loan.debtToIncomeRatio,
+      converDebtToIncomeRatio(lar.loan.debtToIncomeRatio),
       lar.loan.combinedLoanToValueRatio,
       lar.loan.loanTerm,
       lar.loan.introductoryRatePeriod,
