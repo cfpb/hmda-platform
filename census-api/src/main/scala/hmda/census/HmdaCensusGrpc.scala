@@ -6,8 +6,6 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
-import hmda.api.grpc.GrpcServer
 import hmda.api.grpc.GrpcServer
 import hmda.census.api.grpc.CensusServiceImpl
 import hmda.census.records.CensusRecords
@@ -29,7 +27,7 @@ class HmdaCensusGrpc extends GrpcServer with CensusRecords {
       new CensusServiceImpl(materializer,
                             indexedTract,
                             indexedCounty,
-                            indexedSmallCounty))
+                            indexedLargeCounty))
   override val http: Future[Http.ServerBinding] = Http().bindAndHandleAsync(
     service,
     interface = host,
