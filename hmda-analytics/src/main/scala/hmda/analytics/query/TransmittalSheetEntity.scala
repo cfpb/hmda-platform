@@ -1,21 +1,21 @@
 package hmda.analytics.query
 
 case class TransmittalSheetEntity(
-    lei: String,
-    id: Int,
-    institutionName: String,
-    year: Int,
-    quarter: Int,
-    name: String,
-    phone: String,
-    email: String,
-    street: String,
-    city: String,
-    state: String,
-    zipCode: String,
-    agency: Int,
-    totalLines: Int,
-    taxId: String,
+    lei: String = "",
+    id: Int = 0,
+    institutionName: String = "",
+    year: Int = 0,
+    quarter: Int = 0,
+    name: String = "",
+    phone: String = "",
+    email: String = "",
+    street: String = "",
+    city: String = "",
+    state: String = "",
+    zipCode: String = "",
+    agency: Int = 0,
+    totalLines: Int = 0,
+    taxId: String = "",
 ) {
   def isEmpty: Boolean = lei == ""
 }

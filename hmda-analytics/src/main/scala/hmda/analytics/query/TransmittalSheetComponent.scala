@@ -5,6 +5,8 @@ import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
+import scala.concurrent.Future
+
 trait TransmittalSheetComponent {
 
   import dbConfig.profile.api._
@@ -61,6 +63,14 @@ trait TransmittalSheetComponent {
 
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
+
+    def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] = {
+      db.run(table.filter(_.lei === lei).result)
+    }
+
+    def deleteByLei(lei: String): Future[Int] = {
+      db.run(table.filter(_.lei === lei).delete)
+    }
   }
 
 }

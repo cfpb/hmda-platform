@@ -224,4 +224,4 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
     dockerSettings,
     packageSettings
   )
-  .dependsOn(common)
+  .dependsOn(common % "compile->compile;test->test")
