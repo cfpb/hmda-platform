@@ -545,10 +545,10 @@ Example response:
             "message": "Your submission has been accepted.",
             "description": "This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."
         },
-        "start": 1544849644571,
-        "end": 1544849718269,
+        "start": 1544875860983,
+        "end": 1544875869861,
         "fileName": "clean_file_100_rows_Bank0_syntax_validity.txt",
-        "receipt": "B90YWS6AFX2LGWOXJ1LD-2018-3-1544849718269"
+        "receipt": "B90YWS6AFX2LGWOXJ1LD-2018-3-1544875869861"
     },
     "ts": {
         "id": 1,
@@ -566,9 +566,7 @@ Example response:
                 "zipCode": "84096"
             }
         },
-        "agency": {
-            "CFPB": {}
-        },
+        "agency": 9,
         "totalLines": 100,
         "taxId": "01-0123456",
         "LEI": "B90YWS6AFX2LGWOXJ1LD"

@@ -37,6 +37,7 @@ import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.filing.ParserFlow.parseTsFlow
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.submission.HmdaProcessingUtils.readRawData
+import hmda.api.http.codec.filing.TsCodec._
 import io.circe.generic.auto._
 import hmda.util.http.FilingResponseUtils._
 import hmda.util.streams.FlowUtils.framing
