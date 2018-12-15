@@ -525,3 +525,54 @@ Example response:
 }
 ```
 
+### Summary
+
+`/institutions/<lei>/filings/<year>/submissions/<submissionId>/summary`
+
+`GET` - Returns Summary
+
+Example response:
+```json
+{
+    "submission": {
+        "id": {
+            "lei": "B90YWS6AFX2LGWOXJ1LD",
+            "period": "2018",
+            "sequenceNumber": 3
+        },
+        "status": {
+            "code": 15,
+            "message": "Your submission has been accepted.",
+            "description": "This completes your HMDA filing process for this year. If you need to upload a new HMDA file, the previously completed filing will not be overridden until all edits have been cleared and verified, and the new file has been submitted."
+        },
+        "start": 1544849644571,
+        "end": 1544849718269,
+        "fileName": "clean_file_100_rows_Bank0_syntax_validity.txt",
+        "receipt": "B90YWS6AFX2LGWOXJ1LD-2018-3-1544849718269"
+    },
+    "ts": {
+        "id": 1,
+        "institutionName": "Bank0",
+        "year": 2018,
+        "quarter": 4,
+        "contact": {
+            "name": "Mr. Smug Pockets",
+            "phone": "555-555-5555",
+            "email": "pockets@ficus.com",
+            "address": {
+                "street": "1234 Hocus Potato Way",
+                "city": "Tatertown",
+                "state": "UT",
+                "zipCode": "84096"
+            }
+        },
+        "agency": {
+            "CFPB": {}
+        },
+        "totalLines": 100,
+        "taxId": "01-0123456",
+        "LEI": "B90YWS6AFX2LGWOXJ1LD"
+    }
+}
+```
+
