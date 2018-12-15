@@ -34,6 +34,7 @@ class SubmissionProcessingEventsSerializer
   final val SyntacticalValidityCompletedManifest =
     classOf[SyntacticalValidityCompleted].getName
   final val QualityCompletedManifest = classOf[QualityCompleted].getName
+  final val MacroCompletedManifest = classOf[MacroCompleted].getName
   final val SubmissionSignedManifest = classOf[SubmissionSigned].getName
   final val SubmissionNotReadyToBeSignedManifest =
     classOf[SubmissionNotReadyToBeSigned].getName
@@ -63,6 +64,8 @@ class SubmissionProcessingEventsSerializer
       syntacticalValidityCompletedToProtobuf(evt).toByteArray
     case evt: QualityCompleted =>
       qualityCompletedToProtobuf(evt).toByteArray
+    case evt: MacroCompleted =>
+      macroCompletedToProtobuf(evt).toByteArray
     case evt: SubmissionSigned =>
       submissionSignedToProtobuf(evt).toByteArray
     case evt: SubmissionNotReadyToBeSigned =>
@@ -104,6 +107,8 @@ class SubmissionProcessingEventsSerializer
           SyntacticalValidityCompletedMessage.parseFrom(bytes))
       case QualityCompletedManifest =>
         qualityCompletedFromProtobuf(QualityCompletedMessage.parseFrom(bytes))
+      case MacroCompletedManifest =>
+        macroCompletedFromProtobuf(MacroCompletedMessage.parseFrom(bytes))
       case SubmissionSignedManifest =>
         submissionSignedFromProtobuf(SubmissionSignedMessage.parseFrom(bytes))
       case SubmissionNotReadyToBeSignedManifest =>
