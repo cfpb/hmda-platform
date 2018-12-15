@@ -10,7 +10,6 @@ import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics.{analyticsTopic, signTopic}
-import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils.kafkaHosts
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -19,7 +18,7 @@ import org.slf4j.LoggerFactory
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-object HmdaAnalyticsApp {
+object HmdaAnalyticsApp extends App {
 
   val log = LoggerFactory.getLogger("hmda")
 
