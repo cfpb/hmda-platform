@@ -16,6 +16,7 @@ import hmda.messages.filing.FilingEvents.{
 }
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
+import hmda.model.filing.submission.SubmissionSummary
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 
@@ -96,6 +97,13 @@ object FilingPersistence
         case GetLatestSubmission(replyTo) =>
           val maybeSubmission = state.submissions
             .sortWith(_.id.sequenceNumber > _.id.sequenceNumber)
+            .headOption
+          replyTo ! maybeSubmission
+          Effect.none
+
+        case GetSubmissionSummary(submissionId, replyTo) =>
+          val maybeSubmission = state.submissions
+            .filter(_.id.sequenceNumber == submissionId.sequenceNumber)
             .headOption
           replyTo ! maybeSubmission
           Effect.none
