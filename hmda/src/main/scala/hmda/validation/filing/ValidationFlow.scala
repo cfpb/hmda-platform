@@ -10,7 +10,11 @@ import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
-import hmda.model.validation.{LarValidationError, TsValidationError, ValidationError}
+import hmda.model.validation.{
+  LarValidationError,
+  TsValidationError,
+  ValidationError
+}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation.{AS, EC, HmdaValidated, MAT}
@@ -84,8 +88,9 @@ object ValidationFlow {
   }
 
   def validateTsLarEdits(tsLar: TransmittalLar,
-                        checkType: String,
-                        validationContext: ValidationContext): Validated[List[ValidationError], TransmittalLar] = {
+                         checkType: String,
+                         validationContext: ValidationContext)
+    : Either[List[ValidationError], TransmittalLar] = {
     val errors = checkType match {
       case "all" =>
         TsLarEngine.checkAll(tsLar,
@@ -100,9 +105,11 @@ object ValidationFlow {
       case "validity" =>
         TsLarEngine.checkValidity(tsLar, tsLar.ts.LEI, TsValidationError)
     }
-    errors.leftMap(xs => {
-      addTsFieldInformation(tsLar.ts, xs.toList)
-    })
+    errors
+      .leftMap(xs => {
+        addTsFieldInformation(tsLar.ts, xs.toList)
+      })
+      .toEither
   }
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)
@@ -151,8 +158,6 @@ object ValidationFlow {
       ts: TransmittalSheet,
       errors: List[ValidationError]): List[ValidationError] = {
     errors.map(error => {
-      println("This is the ts: " + ts)
-      println("This is the error: " + error)
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
         affectedFields.map(field => (field, ts.valueOf(field))).toMap

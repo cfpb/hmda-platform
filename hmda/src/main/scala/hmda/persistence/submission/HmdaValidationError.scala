@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.ActorSystem
+import akka.actor.{Actor, ActorSystem}
 import akka.pattern.ask
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
@@ -411,15 +411,14 @@ object HmdaValidationError
       rest <- restResult
     } yield {
       val tsLar = TransmittalLar(header, rest)
-      validateTsLarEdits(tsLar, "all", validationContext)
-      //Call Actor.Ask here
-//      ActorFlow.ask(ctx.asScala.self)(
-//        (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
-//          PersistHmdaRowValidatedError(submissionId,
-//            el.rowNumber,
-//            el.validationErrors,
-//            Some(replyTo))
-//      ))
+      println("about to print")
+      validateTsLarEdits(tsLar, "all", validationContext) match {
+        case Left(errors) =>
+          println("Came in here!!: " + errors)
+//            .mapAsync(2)(f => f.map(x => ctx.asScala.self.toUntyped ? x))
+          
+          PersistHmdaRowValidatedError(submissionId, 1, errors, None)
+      }
     }
 
   }
