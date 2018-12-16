@@ -20,12 +20,10 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation.{AS, EC, HmdaValidated, MAT}
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
-import hmda.validation.engine.LarEngine
-import hmda.validation.engine.TsEngine
+import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
 
 import scala.concurrent.Future
 import hmda.util.SourceUtils._
-
 import hmda.persistence.submission.HmdaProcessingUtils.readRawData
 
 import scala.util.{Failure, Success}
@@ -47,17 +45,15 @@ object ValidationFlow {
       val bcast = b.add(Broadcast[ByteString](2))
       val concat = b.add(Concat[HmdaValidated[PipeDelimited]](2))
 
-//      bcast.take(1) ~> validateTsFlow(checkType, ctx) ~> concat.in(0)
+      bcast.take(1) ~> validateTsFlow(checkType, ctx) ~> concat.in(0)
       bcast.drop(1) ~> validateLarFlow(checkType, ctx) ~> concat.in(1)
 
       FlowShape(bcast.in, concat.out)
     })
   }
 
-  private def test[as: AS, mat: MAT, ec: EC](
-      checkType: String,
-      validationContext: ValidationContext)
-    : Flow[ByteString, HmdaValidated[TransmittalLar], NotUsed] = {
+  def validateTsFlow(checkType: String, validationContext: ValidationContext)
+    : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -67,19 +63,17 @@ object ValidationFlow {
         case Right(ts) => ts
       }
       .map { ts =>
+        val tsLar = TransmittalLar(ts)
         val errors = checkType match {
           case "all" =>
-            TsEngine.checkAll(TransmittalLar(),
-                              ts.LEI,
-                              validationContext,
-                              TsValidationError)
+            TsEngine.checkAll(ts, ts.LEI, validationContext, TsValidationError)
           case "syntactical" =>
-            TsEngine.checkSyntactical(TransmittalLar(),
+            TsEngine.checkSyntactical(ts,
                                       ts.LEI,
                                       validationContext,
                                       TsValidationError)
           case "validity" =>
-            TsEngine.checkValidity(TransmittalLar(), ts.LEI, TsValidationError)
+            TsEngine.checkValidity(ts, ts.LEI, TsValidationError)
         }
         (ts, errors)
       }
@@ -92,44 +86,63 @@ object ValidationFlow {
       }
   }
 
-  def validateTsFlow[as: AS, mat: MAT, ec: EC](
-      checkType: String,
-      validationContext: ValidationContext,
-      larSource: Source[LoanApplicationRegister, NotUsed],
-      tsSource: Source[TransmittalSheet, NotUsed])
-    : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
-    for {
-      lars <- runWithSeq(larSource)
-    } yield {
-      val t =runWithSeq(tsSource)
-        .map { ts =>
-          val tsLar = TransmittalLar(ts.head, lars)
-          val errors = checkType match {
-            case "all" =>
-              TsEngine.checkAll(tsLar,
-                                tsLar.ts.LEI,
-                                validationContext,
-                                TsValidationError)
-            case "syntactical" =>
-              TsEngine.checkSyntactical(tsLar,
-                                        tsLar.ts.LEI,
-                                        validationContext,
-                                        TsValidationError)
-            case "validity" =>
-              TsEngine.checkValidity(tsLar,
+  def validateTsLarTest(tsLar: TransmittalLar,
+                        checkType: String,
+                        validationContext: ValidationContext) = {
+    val errors = checkType match {
+      case "all" =>
+        TsLarEngine.checkAll(tsLar,
+                             tsLar.ts.LEI,
+                             validationContext,
+                             TsValidationError)
+      case "syntactical" =>
+        TsLarEngine.checkSyntactical(tsLar,
                                      tsLar.ts.LEI,
+                                     validationContext,
                                      TsValidationError)
-          }
-          (ts, errors)
-        }
-        .map { x =>
-          x._2
-            .leftMap(xs => {
-              addTsFieldInformation(x._1.head, xs.toList)
-            })
-            .toEither
-        }
+      case "validity" =>
+        TsLarEngine.checkValidity(tsLar, tsLar.ts.LEI, TsValidationError)
     }
+    errors.leftMap(xs => {
+      addTsFieldInformation(tsLar.ts, xs.toList)
+    })
+  }
+
+  def validateTsLarFlow(checkType: String, validationContext: ValidationContext)
+    : Flow[ByteString, HmdaValidated[TransmittalLar], NotUsed] = {
+    Flow[ByteString]
+      .via(framing("\n"))
+      .map(_.utf8String)
+      .map(_.trim)
+      .map(s => TsCsvParser(s))
+      .collect {
+        case Right(ts) => ts
+      }
+      .map { ts =>
+        val tsLar = TransmittalLar(ts)
+        val errors = checkType match {
+          case "all" =>
+            TsLarEngine.checkAll(tsLar,
+                                 ts.LEI,
+                                 validationContext,
+                                 TsValidationError)
+          case "syntactical" =>
+            TsLarEngine.checkSyntactical(tsLar,
+                                         ts.LEI,
+                                         validationContext,
+                                         TsValidationError)
+          case "validity" =>
+            TsLarEngine.checkValidity(tsLar, ts.LEI, TsValidationError)
+        }
+        (ts, errors)
+      }
+      .map { x =>
+        x._2
+          .leftMap(xs => {
+            addTsFieldInformation(x._1, xs.toList)
+          })
+          .toEither
+      }
   }
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)
@@ -178,6 +191,8 @@ object ValidationFlow {
       ts: TransmittalSheet,
       errors: List[ValidationError]): List[ValidationError] = {
     errors.map(error => {
+      println("This is the ts: " + ts)
+      println("This is the error: " + error)
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
         affectedFields.map(field => (field, ts.valueOf(field))).toMap

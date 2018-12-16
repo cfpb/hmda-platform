@@ -68,18 +68,18 @@ trait TsValidationHttpApi
   private def validate(ts: TransmittalSheet,
                        chekType: String,
                        ctx: ValidationContext): Route = {
-    val validation: HmdaValidation[TransmittalLar] = chekType match {
-      case "all" => checkAll(TransmittalLar(), ts.LEI, ctx, TsValidationError)
+    val validation: HmdaValidation[TransmittalSheet] = chekType match {
+      case "all" => checkAll(ts, ts.LEI, ctx, TsValidationError)
       case "syntactical" =>
-        checkSyntactical(TransmittalLar(), ts.LEI, ctx, TsValidationError)
+        checkSyntactical(ts, ts.LEI, ctx, TsValidationError)
       case "validity" =>
-        checkValidity(TransmittalLar(), ts.LEI, TsValidationError)
+        checkValidity(ts, ts.LEI, TsValidationError)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
 
     maybeErrors match {
-      case Right(t) => complete(t.ts)
+      case Right(t) => complete(ts)
       case Left(errors) =>
         complete(ToResponseMarshallable(aggregateErrors(errors)))
     }
