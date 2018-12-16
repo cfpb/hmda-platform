@@ -36,7 +36,7 @@ import hmda.auth.OAuth2Authorization
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.parser.filing.ParserFlow.parseTsFlow
 import hmda.parser.filing.ts.TsCsvParser
-import hmda.persistence.submission.HmdaProcessingUtils.readRawData
+import hmda.persistence.submission.HmdaProcessingUtils._
 import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.model.ErrorResponse
 import hmda.api.http.codec.ErrorResponseCodec._
