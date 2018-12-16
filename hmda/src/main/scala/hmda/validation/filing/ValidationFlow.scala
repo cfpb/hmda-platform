@@ -2,12 +2,14 @@ package hmda.validation.filing
 
 import akka.NotUsed
 import akka.stream.FlowShape
-import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL}
+import akka.stream.javadsl.Sink
+import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL, Sink, Source}
 import akka.util.ByteString
 import cats.Semigroup
 import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.submission.SubmissionId
+import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.validation.{
   LarValidationError,
   TsValidationError,
@@ -22,6 +24,12 @@ import hmda.validation.engine.LarEngine
 import hmda.validation.engine.TsEngine
 
 import scala.concurrent.Future
+import hmda.util.SourceUtils._
+
+import hmda.persistence.submission.HmdaProcessingUtils.readRawData
+
+import scala.util.{Failure, Success}
+import akka.stream.scaladsl.{Flow, Sink}
 
 object ValidationFlow {
 
@@ -39,15 +47,17 @@ object ValidationFlow {
       val bcast = b.add(Broadcast[ByteString](2))
       val concat = b.add(Concat[HmdaValidated[PipeDelimited]](2))
 
-      bcast.take(1) ~> validateTsFlow(checkType, ctx) ~> concat.in(0)
+//      bcast.take(1) ~> validateTsFlow(checkType, ctx) ~> concat.in(0)
       bcast.drop(1) ~> validateLarFlow(checkType, ctx) ~> concat.in(1)
 
       FlowShape(bcast.in, concat.out)
     })
   }
 
-  def validateTsFlow(checkType: String, validationContext: ValidationContext)
-    : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
+  private def test[as: AS, mat: MAT, ec: EC](
+      checkType: String,
+      validationContext: ValidationContext)
+    : Flow[ByteString, HmdaValidated[TransmittalLar], NotUsed] = {
     Flow[ByteString]
       .via(framing("\n"))
       .map(_.utf8String)
@@ -59,14 +69,17 @@ object ValidationFlow {
       .map { ts =>
         val errors = checkType match {
           case "all" =>
-            TsEngine.checkAll(ts, ts.LEI, validationContext, TsValidationError)
+            TsEngine.checkAll(TransmittalLar(),
+                              ts.LEI,
+                              validationContext,
+                              TsValidationError)
           case "syntactical" =>
-            TsEngine.checkSyntactical(ts,
+            TsEngine.checkSyntactical(TransmittalLar(),
                                       ts.LEI,
                                       validationContext,
                                       TsValidationError)
           case "validity" =>
-            TsEngine.checkValidity(ts, ts.LEI, TsValidationError)
+            TsEngine.checkValidity(TransmittalLar(), ts.LEI, TsValidationError)
         }
         (ts, errors)
       }
@@ -77,6 +90,49 @@ object ValidationFlow {
           })
           .toEither
       }
+  }
+
+  def validateTsFlow[as: AS, mat: MAT, ec: EC](
+      checkType: String,
+      validationContext: ValidationContext,
+      larSource: Source[LoanApplicationRegister, NotUsed],
+      tsSource: Source[TransmittalSheet, NotUsed])
+    : Future[Future[Either[List[ValidationError], TransmittalLar]]] = {
+    println("entered in flowwww!!!!!!!!!!!!")
+    for {
+      lars <- stuff(larSource)
+    } yield {
+//      lars.map { println _ }
+      stuff(tsSource)
+        .map { ts =>
+          println("inside the flow!!!!!!!!!!!!: " + lars)
+          val errors = checkType match {
+            case "all" =>
+              TsEngine.checkAll(TransmittalLar(),
+                                ts.head.LEI,
+                                validationContext,
+                                TsValidationError)
+            case "syntactical" =>
+              TsEngine.checkSyntactical(TransmittalLar(),
+                                        ts.head.LEI,
+                                        validationContext,
+                                        TsValidationError)
+            case "validity" =>
+              TsEngine.checkValidity(TransmittalLar(),
+                                     ts.head.LEI,
+                                     TsValidationError)
+          }
+          (ts, errors)
+        }
+        .map { x =>
+          x._2
+            .leftMap(xs => {
+              addTsFieldInformation(x._1.head, xs.toList)
+            })
+            .toEither
+        }
+    }
+//    }
   }
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)

@@ -14,7 +14,7 @@ import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.validation.TsValidationError
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
@@ -68,16 +68,18 @@ trait TsValidationHttpApi
   private def validate(ts: TransmittalSheet,
                        chekType: String,
                        ctx: ValidationContext): Route = {
-    val validation: HmdaValidation[TransmittalSheet] = chekType match {
-      case "all"         => checkAll(ts, ts.LEI, ctx, TsValidationError)
-      case "syntactical" => checkSyntactical(ts, ts.LEI, ctx, TsValidationError)
-      case "validity"    => checkValidity(ts, ts.LEI, TsValidationError)
+    val validation: HmdaValidation[TransmittalLar] = chekType match {
+      case "all" => checkAll(TransmittalLar(), ts.LEI, ctx, TsValidationError)
+      case "syntactical" =>
+        checkSyntactical(TransmittalLar(), ts.LEI, ctx, TsValidationError)
+      case "validity" =>
+        checkValidity(TransmittalLar(), ts.LEI, TsValidationError)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
 
     maybeErrors match {
-      case Right(t) => complete(t)
+      case Right(t) => complete(t.ts)
       case Left(errors) =>
         complete(ToResponseMarshallable(aggregateErrors(errors)))
     }

@@ -39,8 +39,10 @@ import hmda.messages.submission.EditDetailsCommands.{
 }
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingEvents
+import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
+import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.{AS, EC, MAT}
@@ -48,6 +50,7 @@ import hmda.validation.{AS, EC, MAT}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
+import hmda.util.SourceUtils.count
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -96,7 +99,7 @@ object HmdaValidationError
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext)
-            .runWith(Sink.ignore)
+//            .runWith(Sink.ignore)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
@@ -348,25 +351,114 @@ object HmdaValidationError
     super.startShardRegion(sharding)
   }
 
-  private def validateTs[as: AS](ctx: ActorContext[SubmissionProcessingCommand],
-                                 submissionId: SubmissionId,
-                                 validationContext: ValidationContext) = {
-    uploadConsumerRawStr(ctx, submissionId)
-      .take(1)
-      .via(validateTsFlow("all", validationContext))
-      .zip(Source.fromIterator(() => Iterator.from(1)))
+//  private def validateTs[as: AS, mat: MAT, ec: EC](
+//      ctx: ActorContext[SubmissionProcessingCommand],
+//      submissionId: SubmissionId,
+//      validationContext: ValidationContext) = {
+//    val larSource1 = uploadConsumerRawStr(ctx, submissionId)
+//      .drop(1)
+//      .via(framing("\n"))
+//      .map(_.utf8String)
+//      .map(_.trim)
+//      .map(s => LarCsvParser(s))
+//      .collect {
+//        case Right(lar) => lar
+//      }
+//
+//    val larSource: Future[Seq[LoanApplicationRegister]] =
+//      uploadConsumerRawStr(ctx, submissionId)
+//        .drop(1)
+//        .via(framing("\n"))
+//        .map(_.utf8String)
+//        .map(_.trim)
+//        .map(s => LarCsvParser(s))
+//        .collect {
+//          case Right(lar) => lar
+//        }
+//        .runWith(Sink.seq)
+////      .map(xs => xs.headOption)
+//
+////    println("This is source in validateTs!!!!!!!!: " + larSource.map(println _))
+//
+////    val colorList: Future[List[Color]] =
+////      colorSource
+////        .runWith(Sink.seq[Color])
+////        .map(_.toList)
+//
+////    val total = for {
+////      t <- larSource.runWith(Sink.ignore)
+////    } yield t
+////    total.map(println _)
+//
+//    uploadConsumerRawStr(ctx, submissionId)
+//      .take(1)
+//      .via(validateTsFlow("all", validationContext))
+//      .zip(Source.fromIterator(() => Iterator.from(1))
+//      .collect {
+//        case (Left(errors), rowNumber) =>
+//          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+//      }
+//      .via(
+//        ActorFlow.ask(ctx.asScala.self)(
+//          (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
+//            PersistHmdaRowValidatedError(submissionId,
+//                                         el.rowNumber,
+//                                         el.validationErrors,
+//                                         Some(replyTo))
+//        ))
+//  }
+
+  private def validateTs[as: AS, mat: MAT, ec: EC](
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId,
+      validationContext: ValidationContext) = {
+    val larSource = uploadConsumerRawStr(ctx, submissionId)
+      .drop(1)
+      .via(framing("\n"))
+      .map(_.utf8String)
+      .map(_.trim)
+      .map(s => LarCsvParser(s))
       .collect {
-        case (Left(errors), rowNumber) =>
-          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+        case Right(lar) => lar
       }
-      .via(
-        ActorFlow.ask(ctx.asScala.self)(
-          (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
-            PersistHmdaRowValidatedError(submissionId,
-                                         el.rowNumber,
-                                         el.validationErrors,
-                                         Some(replyTo))
-        ))
+
+    val tsSource = readRawData(submissionId)
+      .map(line => line.data)
+      .map(ByteString(_))
+      .take(1)
+      .via(framing("\n"))
+      .map(_.utf8String)
+      .map(_.trim)
+      .map(s => TsCsvParser(s))
+      .collect {
+        case Right(ts) => ts
+      }
+//    val fFlow =
+
+    for {
+      flowStuff <- validateTsFlow("all", validationContext, larSource, tsSource)
+    } yield {
+      flowStuff.map {
+        println _
+      }
+    }
+
+//    uploadConsumerRawStr(ctx, submissionId)
+//      .take(1)
+//      .via(validateTsFlow("all", validationContext, larSource))
+//      .zip(Source.fromIterator(() => Iterator.from(1)))
+//      .collect {
+//        case (Left(errors), rowNumber) =>
+//          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+//      }
+//      .via(
+//        ActorFlow.ask(ctx.asScala.self)(
+//          (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
+//            PersistHmdaRowValidatedError(submissionId,
+//                                         el.rowNumber,
+//                                         el.validationErrors,
+//                                         Some(replyTo))
+//        ))
   }
 
   private def validateLar[as: AS](

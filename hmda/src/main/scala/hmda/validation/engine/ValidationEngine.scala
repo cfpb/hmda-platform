@@ -25,6 +25,7 @@ trait ValidationEngine[A] extends ValidationApi[A] {
       id: String,
       ctx: ValidationContext,
       validationErrorEntity: ValidationErrorEntity): HmdaValidation[A] = {
+    println("This is TS!!!!!!!!!!!!!!!!!!" + a)
     val validations = Vector(
       checkSyntactical(a, id, ctx, validationErrorEntity),
       checkValidity(a, id, validationErrorEntity),

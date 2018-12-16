@@ -10,6 +10,7 @@ import hmda.parser.ParserErrorModel.{
 import hmda.parser.filing.ts.TsParserErrorModel._
 import cats.implicits._
 import com.typesafe.config.ConfigFactory
+import hmda.model.filing.lar.LoanApplicationRegister
 
 import scala.util.{Failure, Success, Try}
 import hmda.parser._
@@ -93,9 +94,13 @@ sealed trait TsFormatValidator {
       validateAgencyCode(agencyCode),
       validateTotalLines(totalLines),
       validateStr(taxId),
-      validateStr(lei)
+      validateStr(lei),
     ).mapN(TransmittalSheet)
 
+  }
+
+  private def validateList(str: String): TsParserValidationResult[String] = {
+    str.validNel
   }
 
   private def validateStr(str: String): TsParserValidationResult[String] = {

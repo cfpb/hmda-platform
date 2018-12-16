@@ -5,7 +5,11 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
 import hmda.institution.query.{InstitutionComponent, InstitutionEmailEntity}
-import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionDeleted, InstitutionModified}
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionCreated,
+  InstitutionDeleted,
+  InstitutionModified
+}
 import hmda.model.institution.Institution
 import hmda.projection.ResumableProjection
 import hmda.query.DbConfiguration._
@@ -47,7 +51,8 @@ object InstitutionDBProjection
   }
 
   private def updateTables(inst: Institution): Future[List[Int]] = {
-    val insertResult = institutionRepository.insertOrUpdate(InstitutionConverter.convert(inst))
+    val insertResult =
+      institutionRepository.insertOrUpdate(InstitutionConverter.convert(inst))
     val emails = InstitutionConverter.emailsFromInstitution(inst).toList
     for {
       institutionRow <- insertResult
@@ -55,13 +60,13 @@ object InstitutionDBProjection
     } yield emailsRows :+ institutionRow
   }
 
-  private def updateEmailsInSerial(emails: List[InstitutionEmailEntity]): Future[List[Int]] = {
-    emails.foldLeft(Future(List.empty[Int])) {
-      (previousInserts, nextEmail) =>
-        for {
-          completedInserts <- previousInserts
-          insertResult <- updateEmails(nextEmail)
-        } yield completedInserts :+ insertResult
+  private def updateEmailsInSerial(
+      emails: List[InstitutionEmailEntity]): Future[List[Int]] = {
+    emails.foldLeft(Future(List.empty[Int])) { (previousInserts, nextEmail) =>
+      for {
+        completedInserts <- previousInserts
+        insertResult <- updateEmails(nextEmail)
+      } yield completedInserts :+ insertResult
     }
   }
 

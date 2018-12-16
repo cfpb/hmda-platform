@@ -1,7 +1,11 @@
 package hmda.model.filing.ts
 
+import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.{HmdaFileRow, PipeDelimited}
 import hmda.model.institution.{Agency, UndeterminedAgency}
+//import hmda.validation.{AS, EC, MAT}
+
+import scala.concurrent.Future
 
 case class TransmittalSheet(
     id: Int = 1,
@@ -13,6 +17,7 @@ case class TransmittalSheet(
     totalLines: Int = 0,
     taxId: String = "",
     LEI: String = ""
+//    LARs: List[LoanApplicationRegister] = List.empty
 ) extends PipeDelimited
     with HmdaFileRow {
   override def toCSV: String = {
@@ -24,4 +29,5 @@ case class TransmittalSheet(
       .mapping(this)
       .getOrElse(field, s"error: field name mismatch for $field")
   }
+
 }
