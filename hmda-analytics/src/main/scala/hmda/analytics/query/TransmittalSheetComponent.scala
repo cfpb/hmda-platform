@@ -64,6 +64,10 @@ trait TransmittalSheetComponent {
     def createSchema() = db.run(table.schema.create)
     def dropSchema() = db.run(table.schema.drop)
 
+    def insert(ts: TransmittalSheetEntity): Future[Int] = {
+      db.run(table += ts)
+    }
+
     def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] = {
       db.run(table.filter(_.lei === lei).result)
     }

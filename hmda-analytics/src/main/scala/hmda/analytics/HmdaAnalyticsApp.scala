@@ -9,18 +9,39 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
+import hmda.analytics.query.{
+  TransmittalSheetComponent,
+  TransmittalSheetConverter,
+}
 import hmda.messages.pubsub.HmdaTopics.{analyticsTopic, signTopic}
+import hmda.model.filing.submission.SubmissionId
+import hmda.model.filing.ts.TransmittalSheet
+import hmda.parser.filing.ts.TsCsvParser
 import hmda.publication.KafkaUtils.kafkaHosts
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
+import hmda.query.DbConfiguration.dbConfig
+import hmda.query.HmdaQuery.readRawData
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-object HmdaAnalyticsApp extends App {
+object HmdaAnalyticsApp extends App with TransmittalSheetComponent {
 
   val log = LoggerFactory.getLogger("hmda")
+
+  log.info(
+    """
+      | _    _ __  __ _____                                 _       _   _          
+      || |  | |  \/  |  __ \   /\         /\               | |     | | (_)         
+      || |__| | \  / | |  | | /  \       /  \   _ __   __ _| |_   _| |_ _  ___ ___ 
+      ||  __  | |\/| | |  | |/ /\ \     / /\ \ | '_ \ / _` | | | | | __| |/ __/ __|
+      || |  | | |  | | |__| / ____ \   / ____ \| | | | (_| | | |_| | |_| | (__\__ \
+      ||_|  |_|_|  |_|_____/_/    \_\ /_/    \_\_| |_|\__,_|_|\__, |\__|_|\___|jmo/
+      |                                                        __/ |               
+      |                                                       |___/
+    """.stripMargin)
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -32,6 +53,9 @@ object HmdaAnalyticsApp extends App {
   val config = ConfigFactory.load()
 
   val parallelism = config.getInt("hmda.analytics.parallelism")
+
+  val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
+  val db = transmittalSheetRepository.db
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(kafkaConfig,
@@ -55,12 +79,24 @@ object HmdaAnalyticsApp extends App {
   def processData(msg: String): Future[Done] = {
     Source
       .single(msg)
-//      .map { msg =>
-//        val submissionId = SubmissionId(msg)
-//        modifiedLarPublisher.toUntyped ? UploadToS3(submissionId)
-//      }
+      .map(msg => SubmissionId(msg))
+      .map(id => addTs(id))
       .toMat(Sink.ignore)(Keep.right)
       .run()
   }
 
+  private def addTs(submissionId: SubmissionId): Future[Done] = {
+    readRawData(submissionId)
+      .map(l => l.data)
+      .take(1)
+      .map(s => TsCsvParser(s))
+      .map(_.getOrElse(TransmittalSheet()))
+      .filter(t => t.LEI != "" && t.institutionName != "")
+      .map(ts => TransmittalSheetConverter(ts))
+      .mapAsync(1)(ts => transmittalSheetRepository.insert(ts))
+      .map { e =>
+        log.info(s"Inserted: $e"); e
+      }
+      .runWith(Sink.ignore)
+  }
 }
