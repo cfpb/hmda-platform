@@ -106,20 +106,21 @@ object ValidationFlow {
       stuff(tsSource)
         .map { ts =>
           println("inside the flow!!!!!!!!!!!!: " + lars)
+          val tsLar = TransmittalLar(ts.head, lars)
           val errors = checkType match {
             case "all" =>
-              TsEngine.checkAll(TransmittalLar(),
-                                ts.head.LEI,
+              TsEngine.checkAll(tsLar,
+                                tsLar.ts.LEI,
                                 validationContext,
                                 TsValidationError)
             case "syntactical" =>
-              TsEngine.checkSyntactical(TransmittalLar(),
-                                        ts.head.LEI,
+              TsEngine.checkSyntactical(tsLar,
+                                        tsLar.ts.LEI,
                                         validationContext,
                                         TsValidationError)
             case "validity" =>
-              TsEngine.checkValidity(TransmittalLar(),
-                                     ts.head.LEI,
+              TsEngine.checkValidity(tsLar,
+                                     tsLar.ts.LEI,
                                      TsValidationError)
           }
           (ts, errors)
