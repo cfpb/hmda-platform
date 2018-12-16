@@ -38,6 +38,8 @@ import hmda.parser.filing.ParserFlow.parseTsFlow
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.submission.HmdaProcessingUtils.readRawData
 import hmda.api.http.codec.filing.TsCodec._
+import hmda.api.http.model.ErrorResponse
+import hmda.api.http.codec.ErrorResponseCodec._
 import io.circe.generic.auto._
 import hmda.util.http.FilingResponseUtils._
 import hmda.util.streams.FlowUtils.framing
@@ -152,8 +154,24 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
             onComplete(fCheck) {
               case Success(check) =>
                 check match {
-                  case (maybeSummary) =>
-                    complete(ToResponseMarshallable(maybeSummary))
+                  case (SubmissionSummary(None, _)) =>
+                    val errorResponse = ErrorResponse(
+                      404,
+                      s"Submission ${submissionId.toString} not available",
+                      uri.path)
+                    complete(
+                      ToResponseMarshallable(
+                        StatusCodes.NotFound -> errorResponse))
+                  case (SubmissionSummary(_, None)) =>
+                    val errorResponse =
+                      ErrorResponse(404,
+                                    s"Transmittal Sheet not found",
+                                    uri.path)
+                    complete(
+                      ToResponseMarshallable(
+                        StatusCodes.NotFound -> errorResponse))
+                  case _ =>
+                    complete(ToResponseMarshallable(check))
                 }
               case Failure(error) =>
                 failedResponse(StatusCodes.InternalServerError, uri, error)
