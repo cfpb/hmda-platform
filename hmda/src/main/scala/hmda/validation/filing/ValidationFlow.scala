@@ -97,7 +97,7 @@ object ValidationFlow {
       validationContext: ValidationContext,
       larSource: Source[LoanApplicationRegister, NotUsed],
       tsSource: Source[TransmittalSheet, NotUsed])
-    : Future[Future[Either[List[ValidationError], TransmittalLar]]] = {
+    : Flow[ByteString, HmdaValidated[TransmittalSheet], NotUsed] = {
     for {
       lars <- runWithSeq(larSource)
     } yield {

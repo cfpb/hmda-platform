@@ -434,31 +434,31 @@ object HmdaValidationError
         case Right(ts) => ts
       }
 
-    for {
-      flowStuff <- validateTsFlow("all", validationContext, larSource, tsSource)
-    } yield {
-      flowStuff.collect{
-        case(Left(errors), rowNumber) =>
-          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
-      }
-    }
-
-//    uploadConsumerRawStr(ctx, submissionId)
-//      .take(1)
-//      .via(validateTsFlow("all", validationContext, larSource))
-//      .zip(Source.fromIterator(() => Iterator.from(1)))
-//      .collect {
-//        case (Left(errors), rowNumber) =>
+//    for {
+//      flowStuff <- validateTsFlow("all", validationContext, larSource, tsSource)
+//    } yield {
+//      flowStuff.collect{
+//        case(Left(errors), rowNumber) =>
 //          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
 //      }
-//      .via(
-//        ActorFlow.ask(ctx.asScala.self)(
-//          (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
-//            PersistHmdaRowValidatedError(submissionId,
-//                                         el.rowNumber,
-//                                         el.validationErrors,
-//                                         Some(replyTo))
-//        ))
+//    }
+
+    uploadConsumerRawStr(ctx, submissionId)
+      .take(1)
+      .via(validateTsFlow("all", validationContext, larSource, tsSource))
+      .zip(Source.fromIterator(() => Iterator.from(1)))
+      .collect {
+        case (Left(errors), rowNumber) =>
+          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+      }
+      .via(
+        ActorFlow.ask(ctx.asScala.self)(
+          (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
+            PersistHmdaRowValidatedError(submissionId,
+                                         el.rowNumber,
+                                         el.validationErrors,
+                                         Some(replyTo))
+        ))
   }
 
   private def validateLar[as: AS](
