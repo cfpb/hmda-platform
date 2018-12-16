@@ -31,13 +31,16 @@ import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
 import HmdaProcessingUtils._
 import EditDetailsConverter._
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
 import hmda.messages.submission.EditDetailsCommands.{
   EditDetailsPersistenceCommand,
   PersistEditDetails
 }
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
+import hmda.publication.KafkaUtils._
+import hmda.messages.pubsub.HmdaTopics._
+import hmda.query.HmdaQuery._
 import hmda.messages.submission.SubmissionProcessingEvents
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
@@ -300,6 +303,8 @@ object HmdaValidationError
                 signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 log)
+              publishSignEvent(submissionId).map(signed =>
+                log.info(s"Published signed event for $submissionId"))
               replyTo ! signed
             }
           } else {
@@ -493,6 +498,13 @@ object HmdaValidationError
     }
 
     Future.sequence(fDetails)
+
+  }
+
+  private def publishSignEvent(submissionId: SubmissionId)(
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer): Future[Done] = {
+    produceRecord(signTopic, submissionId.lei, submissionId.toString)
 
   }
 

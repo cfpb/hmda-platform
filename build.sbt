@@ -26,7 +26,10 @@ lazy val akkaDeps = Seq(
   akkaClusterHttpManagement,
   akkaClusterHttpManagement,
   akkaTestkitTyped,
-  akkaCors
+  akkaCors,
+  akkaKafkaStreams,
+  embeddedKafka,
+  alpakkaS3
 )
 
 lazy val akkaPersistenceDeps =
@@ -72,7 +75,11 @@ lazy val packageSettings = Seq(
 
 lazy val `hmda-root` = (project in file("."))
   .settings(hmdaBuildSettings: _*)
-  .aggregate(common, `hmda-platform`, `check-digit`, `institutions-api`)
+  .aggregate(common,
+             `hmda-platform`,
+             `check-digit`,
+             `institutions-api`,
+             `modified-lar`)
 
 lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
@@ -160,6 +167,31 @@ lazy val `institutions-api` = (project in file("institutions-api"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+
+lazy val `modified-lar` = (project in file("modified-lar"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.publication.lar.ModifiedLarApp"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common)
 
 lazy val `hmda-protocol` = (project in file("protocol"))
   .enablePlugins(JavaServerAppPackaging,
