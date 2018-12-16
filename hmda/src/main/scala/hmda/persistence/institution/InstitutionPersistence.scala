@@ -54,8 +54,11 @@ object InstitutionPersistence
           if (state.institution.isEmpty) {
             Effect.persist(InstitutionCreated(i)).thenRun { _ =>
               log.debug(s"Institution Created: ${i.toString}")
-              publishInstitutionEvent(i.LEI, "InstitutionCreated")
-              replyTo ! InstitutionCreated(i)
+              val event = InstitutionCreated(i)
+              publishInstitutionEvent(
+                i.LEI,
+                InstitutionKafkaEvent("InstitutionCreated", event))
+              replyTo ! event
             }
           } else {
             Effect.none.thenRun { _ =>
@@ -68,8 +71,11 @@ object InstitutionPersistence
           if (state.institution.map(i => i.LEI).contains(i.LEI)) {
             Effect.persist(InstitutionModified(i)).thenRun { _ =>
               log.debug(s"Institution Modified: ${i.toString}")
-              publishInstitutionEvent(i.LEI, "InstitutionModified")
-              replyTo ! InstitutionModified(i)
+              val event = InstitutionModified(i)
+              publishInstitutionEvent(
+                i.LEI,
+                InstitutionKafkaEvent("InstitutionDeleted", event))
+              replyTo ! event
             }
           } else {
             Effect.none.thenRun { _ =>
@@ -82,8 +88,11 @@ object InstitutionPersistence
           if (state.institution.map(i => i.LEI).contains(lei)) {
             Effect.persist(InstitutionDeleted(lei)).thenRun { _ =>
               log.debug(s"Institution Deleted: $lei")
-              publishInstitutionEvent(lei, s"InstitutionDeleted-$")
-              replyTo ! InstitutionDeleted(lei)
+              val event = InstitutionDeleted(lei)
+              publishInstitutionEvent(
+                lei,
+                InstitutionKafkaEvent("InstitutionDeleted", event))
+              replyTo ! event
             }
           } else {
             Effect.none.thenRun { _ =>
@@ -131,10 +140,11 @@ object InstitutionPersistence
     super.startShardRegion(sharding)
   }
 
-  private def publishInstitutionEvent(institutionID: String, event: String)(
+  private def publishInstitutionEvent(institutionID: String,
+                                      event: InstitutionKafkaEvent)(
       implicit system: ActorSystem,
       materializer: ActorMaterializer): Future[Done] = {
-    produceRecord(institutionTopic, institutionID, event)
+    produceInstitutionRecord(institutionTopic, institutionID, event)
   }
 
   private def modifyInstitution(institution: Institution,

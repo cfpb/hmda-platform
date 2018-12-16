@@ -10,10 +10,17 @@ import akka.kafka.{ConsumerSettings, ProducerSettings, Subscriptions}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.typesafe.config.ConfigFactory
-import hmda.model.institution.Institution
+import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
+import hmda.serialization.kafka.{
+  InstitutionKafkaEventsDeserializer,
+  InstitutionKafkaEventsSerializer
+}
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization.{
+  StringDeserializer,
+  StringSerializer
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,12 +39,16 @@ object KafkaUtils {
     producerSettings.createKafkaProducer()
   }
 
-  def produceInstitutionRecord(topic: String, key: String, value: Institution)(
-    implicit system: ActorSystem,
-    materializer: ActorMaterializer): Future[Done] = {
+  def produceInstitutionRecord(topic: String,
+                               key: String,
+                               value: InstitutionKafkaEvent)(
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer): Future[Done] = {
 
     val producerSettings =
-      ProducerSettings(system, new StringSerializer)
+      ProducerSettings(system,
+                       new StringSerializer,
+                       new InstitutionKafkaEventsSerializer)
         .withBootstrapServers(kafkaHosts)
 
     Source
@@ -70,6 +81,35 @@ object KafkaUtils {
 
     val consumerSettings: ConsumerSettings[String, String] =
       ConsumerSettings(config, new StringDeserializer, new StringDeserializer)
+        .withBootstrapServers(kafkaHosts)
+        .withGroupId(UUID.randomUUID().toString)
+        .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+
+    Consumer
+      .committableSource(consumerSettings, Subscriptions.topics(topic))
+      .mapAsync(parallelism * 2) { msg =>
+        f.map(_ => msg.committableOffset)
+      }
+      .mapAsync(parallelism)(offset => offset.commitScaladsl())
+      .toMat(Sink.seq)(Keep.both)
+      .mapMaterializedValue(DrainingControl.apply)
+      .run()
+
+  }
+
+  def consumeInstitutionRecords(topic: String,
+                                f: Future[Done],
+                                parallelism: Int)(
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer,
+      ec: ExecutionContext) = {
+
+    val config = system.settings.config.getConfig("akka.kafka.consumer")
+
+    val consumerSettings: ConsumerSettings[String, InstitutionKafkaEvent] =
+      ConsumerSettings(config,
+                       new StringDeserializer,
+                       new InstitutionKafkaEventsDeserializer)
         .withBootstrapServers(kafkaHosts)
         .withGroupId(UUID.randomUUID().toString)
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
