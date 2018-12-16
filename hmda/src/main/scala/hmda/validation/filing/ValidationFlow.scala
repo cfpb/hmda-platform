@@ -10,11 +10,7 @@ import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
-import hmda.model.validation.{
-  LarValidationError,
-  TsValidationError,
-  ValidationError
-}
+import hmda.model.validation.{LarValidationError, TsValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation.{AS, EC, HmdaValidated, MAT}
@@ -28,6 +24,7 @@ import hmda.persistence.submission.HmdaProcessingUtils.readRawData
 
 import scala.util.{Failure, Success}
 import akka.stream.scaladsl.{Flow, Sink}
+import cats.data.Validated
 
 object ValidationFlow {
 
@@ -86,9 +83,9 @@ object ValidationFlow {
       }
   }
 
-  def validateTsLarTest(tsLar: TransmittalLar,
+  def validateTsLarEdits(tsLar: TransmittalLar,
                         checkType: String,
-                        validationContext: ValidationContext) = {
+                        validationContext: ValidationContext): Validated[List[ValidationError], TransmittalLar] = {
     val errors = checkType match {
       case "all" =>
         TsLarEngine.checkAll(tsLar,
@@ -106,43 +103,6 @@ object ValidationFlow {
     errors.leftMap(xs => {
       addTsFieldInformation(tsLar.ts, xs.toList)
     })
-  }
-
-  def validateTsLarFlow(checkType: String, validationContext: ValidationContext)
-    : Flow[ByteString, HmdaValidated[TransmittalLar], NotUsed] = {
-    Flow[ByteString]
-      .via(framing("\n"))
-      .map(_.utf8String)
-      .map(_.trim)
-      .map(s => TsCsvParser(s))
-      .collect {
-        case Right(ts) => ts
-      }
-      .map { ts =>
-        val tsLar = TransmittalLar(ts)
-        val errors = checkType match {
-          case "all" =>
-            TsLarEngine.checkAll(tsLar,
-                                 ts.LEI,
-                                 validationContext,
-                                 TsValidationError)
-          case "syntactical" =>
-            TsLarEngine.checkSyntactical(tsLar,
-                                         ts.LEI,
-                                         validationContext,
-                                         TsValidationError)
-          case "validity" =>
-            TsLarEngine.checkValidity(tsLar, ts.LEI, TsValidationError)
-        }
-        (ts, errors)
-      }
-      .map { x =>
-        x._2
-          .leftMap(xs => {
-            addTsFieldInformation(x._1, xs.toList)
-          })
-          .toEither
-      }
   }
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)

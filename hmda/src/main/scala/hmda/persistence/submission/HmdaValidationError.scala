@@ -411,8 +411,15 @@ object HmdaValidationError
       rest <- restResult
     } yield {
       val tsLar = TransmittalLar(header, rest)
-      validateTsLarTest(tsLar, "all", validationContext)
+      validateTsLarEdits(tsLar, "all", validationContext)
       //Call Actor.Ask here
+//      ActorFlow.ask(ctx.asScala.self)(
+//        (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
+//          PersistHmdaRowValidatedError(submissionId,
+//            el.rowNumber,
+//            el.validationErrors,
+//            Some(replyTo))
+//      ))
     }
 
   }
