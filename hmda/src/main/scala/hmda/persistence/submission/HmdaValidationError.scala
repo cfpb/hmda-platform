@@ -413,11 +413,13 @@ object HmdaValidationError
       val tsLar = TransmittalLar(header, rest)
       println("about to print")
       validateTsLarEdits(tsLar, "all", validationContext) match {
-        case Left(errors) =>
+        case Left(errors) => {
           println("Came in here!!: " + errors)
-//            .mapAsync(2)(f => f.map(x => ctx.asScala.self.toUntyped ? x))
-          
-          PersistHmdaRowValidatedError(submissionId, 1, errors, None)
+
+
+        }
+
+
       }
     }
 
