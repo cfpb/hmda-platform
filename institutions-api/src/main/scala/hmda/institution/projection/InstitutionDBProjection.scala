@@ -1,32 +1,29 @@
 package hmda.institution.projection
 
-import akka.persistence.query.EventEnvelope
+import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.adapter._
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
 import hmda.institution.query.{InstitutionComponent, InstitutionEmailEntity}
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionCreated,
-  InstitutionDeleted,
-  InstitutionModified
-}
+import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionDeleted, InstitutionEvent, InstitutionModified}
 import hmda.model.institution.Institution
-import hmda.projection.ResumableProjection
 import hmda.query.DbConfiguration._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
+sealed trait InstitutionProjectionCommand
+case class ProjectEvent(evt: InstitutionEvent) extends InstitutionProjectionCommand
+
 object InstitutionDBProjection
-    extends ResumableProjection
-    with InstitutionComponent {
+    extends InstitutionComponent {
 
   val config = ConfigFactory.load()
-  val duration = config.getInt("hmda.institution.timeout")
 
-  override val name = "InstitutionDBProjector"
-
-  override implicit val timeout = Timeout(duration.seconds)
+  val name = "InstitutionDBProjector"
 
   implicit val institutionRepository = new InstitutionRepository(dbConfig)
   implicit val institutionEmailsRepository = new InstitutionEmailsRepository(
@@ -34,8 +31,31 @@ object InstitutionDBProjection
 
   implicit val ec: ExecutionContext = ExecutionContext.global
 
-  override def projectEvent(envelope: EventEnvelope): EventEnvelope = {
-    val event = envelope.event
+  val behavior: Behavior[InstitutionProjectionCommand] =
+    Behaviors.setup { ctx =>
+      val log = ctx.log
+      val decider: Supervision.Decider = {
+        case e: Throwable =>
+          log.error(e.getLocalizedMessage)
+          Supervision.Resume
+      }
+      implicit val system = ctx.system.toUntyped
+      implicit val materializer = ActorMaterializer(
+        ActorMaterializerSettings(system).withSupervisionStrategy(decider))
+
+      log.info(s"Started $name")
+
+      Behaviors.receiveMessage {
+        case ProjectEvent(evt) =>
+          log.info(s"Projecting event to Postgres: $evt")
+          projectEvent(evt)
+          Behaviors.same
+        case _ =>
+          Behaviors.ignore
+      }
+    }
+
+  def projectEvent(event: InstitutionEvent): InstitutionEvent = {
     event match {
       case InstitutionCreated(i) =>
         updateTables(i)
@@ -47,7 +67,7 @@ object InstitutionDBProjection
         institutionRepository.deleteById(lei)
         deleteEmails(lei)
     }
-    envelope
+    event
   }
 
   private def updateTables(inst: Institution): Future[List[Int]] = {
