@@ -72,6 +72,11 @@ message QualityCompletedMessage {
     int32 statusCode = 2;
 }
 
+message MacroCompletedMessage {
+    SubmissionIdMessage submissionId = 1;
+    int32 statusCode = 2;
+}
+
 message SubmissionSignedMessage {
     SubmissionIdMessage submissionId = 1;
     int64 timestamp = 2;

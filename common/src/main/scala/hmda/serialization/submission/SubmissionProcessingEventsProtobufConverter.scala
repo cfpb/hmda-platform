@@ -130,14 +130,16 @@ object SubmissionProcessingEventsProtobufConverter {
   def macroVerifiedToProtobuf(evt: MacroVerified): MacroVerifiedMessage = {
     MacroVerifiedMessage(
       submissionIdToProtobuf(evt.submissionId),
-      evt.verified
+      evt.verified,
+      evt.status.code
     )
   }
 
   def macroVerifiedFromProtobuf(msg: MacroVerifiedMessage): MacroVerified = {
     MacroVerified(submissionIdFromProtobuf(
                     msg.submissionId.getOrElse(SubmissionIdMessage())),
-                  msg.verified)
+                  msg.verified,
+                  SubmissionStatus.valueOf(msg.statusCode))
   }
 
   def notReadyToBeVerifiedToProtobuf(
@@ -184,6 +186,21 @@ object SubmissionProcessingEventsProtobufConverter {
   def qualityCompletedFromProtobuf(
       msg: QualityCompletedMessage): QualityCompleted = {
     QualityCompleted(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.statusCode
+    )
+  }
+
+  def macroCompletedToProtobuf(evt: MacroCompleted): MacroCompletedMessage = {
+    MacroCompletedMessage(
+      submissionIdToProtobuf(evt.submissionId),
+      evt.statusCode
+    )
+  }
+
+  def macroCompletedFromProtobuf(msg: MacroCompletedMessage): MacroCompleted = {
+    MacroCompleted(
       submissionIdFromProtobuf(
         msg.submissionId.getOrElse(SubmissionIdMessage())),
       msg.statusCode

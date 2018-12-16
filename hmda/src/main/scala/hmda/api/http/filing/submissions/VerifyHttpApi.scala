@@ -107,9 +107,9 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
                             EditsVerificationResponse(verified, status)
                           complete(ToResponseMarshallable(response))
 
-                        case MacroVerified(_, verified) =>
+                        case MacroVerified(_, verified, status) =>
                           val response =
-                            EditsVerificationResponse(verified, s.status)
+                            EditsVerificationResponse(verified, status)
                           complete(ToResponseMarshallable(response))
 
                         case _ =>
