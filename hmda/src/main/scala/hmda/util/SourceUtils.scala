@@ -8,7 +8,7 @@ import scala.concurrent.Future
 
 object SourceUtils {
 
-  def stuff[T: AS: MAT](source: Source[T, NotUsed]) = {
+  def runWithSeq[T: AS: MAT](source: Source[T, NotUsed]) = {
     source.runWith(Sink.seq)
   }
 

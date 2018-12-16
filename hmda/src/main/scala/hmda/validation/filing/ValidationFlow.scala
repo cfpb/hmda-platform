@@ -98,14 +98,11 @@ object ValidationFlow {
       larSource: Source[LoanApplicationRegister, NotUsed],
       tsSource: Source[TransmittalSheet, NotUsed])
     : Future[Future[Either[List[ValidationError], TransmittalLar]]] = {
-    println("entered in flowwww!!!!!!!!!!!!")
     for {
-      lars <- stuff(larSource)
+      lars <- runWithSeq(larSource)
     } yield {
-//      lars.map { println _ }
-      stuff(tsSource)
+      val t =runWithSeq(tsSource)
         .map { ts =>
-          println("inside the flow!!!!!!!!!!!!: " + lars)
           val tsLar = TransmittalLar(ts.head, lars)
           val errors = checkType match {
             case "all" =>
@@ -133,7 +130,6 @@ object ValidationFlow {
             .toEither
         }
     }
-//    }
   }
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)

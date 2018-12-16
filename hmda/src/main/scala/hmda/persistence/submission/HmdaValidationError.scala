@@ -433,13 +433,13 @@ object HmdaValidationError
       .collect {
         case Right(ts) => ts
       }
-//    val fFlow =
 
     for {
       flowStuff <- validateTsFlow("all", validationContext, larSource, tsSource)
     } yield {
-      flowStuff.map {
-        println _
+      flowStuff.collect{
+        case(Left(errors), rowNumber) =>
+          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
       }
     }
 
