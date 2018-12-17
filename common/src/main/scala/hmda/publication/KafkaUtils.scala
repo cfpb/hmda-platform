@@ -111,7 +111,7 @@ object KafkaUtils {
                        new StringDeserializer,
                        new InstitutionKafkaEventsDeserializer)
         .withBootstrapServers(kafkaHosts)
-        .withGroupId(UUID.randomUUID().toString)
+        .withGroupId("institution")
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
