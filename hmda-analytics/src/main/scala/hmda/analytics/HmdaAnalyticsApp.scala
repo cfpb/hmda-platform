@@ -93,12 +93,11 @@ object HmdaAnalyticsApp extends App with TransmittalSheetComponent {
       .map(_.getOrElse(TransmittalSheet()))
       .filter(t => t.LEI != "" && t.institutionName != "")
       .map(ts => TransmittalSheetConverter(ts))
-      .map { e =>
-        println(e); e
-      }
-      .mapAsync(1)(ts => transmittalSheetRepository.insert(ts))
-      .map { e =>
-        log.info(s"Inserted: $e"); e
+      .mapAsync(1) { ts =>
+        for {
+          delete <- transmittalSheetRepository.deleteByLei(ts.lei)
+          insert <- transmittalSheetRepository.insert(ts)
+        } yield insert
       }
       .runWith(Sink.ignore)
   }
