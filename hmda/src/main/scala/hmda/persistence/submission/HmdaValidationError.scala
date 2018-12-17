@@ -109,17 +109,18 @@ object HmdaValidationError
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext)
             .runWith(Sink.ignore)
-          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
+//          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
-            ctx,
-            submissionId,
-            validationContext)
+                                                      ctx,
+                                                      submissionId,
+                                                      validationContext)
             .runWith(Sink.ignore)
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
-            ctx,
-            submissionId).runWith(Sink.ignore)
-        } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
-
+                                             ctx,
+                                             submissionId).runWith(Sink.ignore)
+        } yield
+//          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
+        (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
           case Success(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
