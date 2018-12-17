@@ -223,7 +223,7 @@ object HmdaValidationError
             .persist(HmdaRowValidatedError(rowNumber, validationErrors))
             .thenRun { _ =>
               log.info(
-                s"Persisted(came here!!!!): ${HmdaRowValidatedError(rowNumber, validationErrors)}")
+                s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
 
               val hmdaRowValidatedError =
                 HmdaRowValidatedError(rowNumber, validationErrors)

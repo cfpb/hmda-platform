@@ -1,11 +1,9 @@
 package hmda.validation.rules.lar.syntactical
 
-import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
+import hmda.model.filing.ts.TransmittalLar
 import hmda.validation.dsl.PredicateCommon.equalTo
 import hmda.validation.dsl.ValidationResult
 import hmda.validation.rules.EditCheck
-import hmda.validation.dsl.PredicateCommon._
 import hmda.validation.dsl.PredicateSyntax._
 
 object S304 extends EditCheck[TransmittalLar] {

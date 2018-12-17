@@ -1,8 +1,7 @@
 package hmda.validation.engine
 
-import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
+import hmda.model.filing.ts.TransmittalSheet
 import hmda.validation.context.ValidationContext
-import hmda.validation.rules.lar.syntactical.S304
 import hmda.validation.rules.ts.syntactical.{S300, S302, S303}
 import hmda.validation.rules.ts.validity._
 

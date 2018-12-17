@@ -1,9 +1,7 @@
 package hmda.model.filing.ts
 
-import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.{HmdaFileRow, PipeDelimited}
 import hmda.model.institution.{Agency, UndeterminedAgency}
-//import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.Future
 
@@ -24,7 +22,6 @@ case class TransmittalSheet(
   }
 
   override def valueOf(field: String): String = {
-    println("This is the string: " + field)
     TsFieldMapping
       .mapping(this)
       .getOrElse(field, s"error: field name mismatch for $field")

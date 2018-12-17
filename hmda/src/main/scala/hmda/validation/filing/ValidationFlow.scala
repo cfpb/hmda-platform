@@ -64,7 +64,6 @@ object ValidationFlow {
         case Right(ts) => ts
       }
       .map { ts =>
-        val tsLar = TransmittalLar(ts)
         val errors = checkType match {
           case "all" =>
             TsEngine.checkAll(ts, ts.LEI, validationContext, TsValidationError)

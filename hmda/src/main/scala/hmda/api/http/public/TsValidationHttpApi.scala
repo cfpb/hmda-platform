@@ -14,7 +14,7 @@ import hmda.api.http.codec.filing.TsCodec._
 import hmda.api.http.directives.HmdaTimeDirectives
 import io.circe.generic.auto._
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
-import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
+import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.validation.TsValidationError
 import hmda.validation.HmdaValidation
 import hmda.validation.context.ValidationContext
@@ -79,7 +79,7 @@ trait TsValidationHttpApi
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
 
     maybeErrors match {
-      case Right(t) => complete(ts)
+      case Right(t) => complete(t)
       case Left(errors) =>
         complete(ToResponseMarshallable(aggregateErrors(errors)))
     }
