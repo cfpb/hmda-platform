@@ -15,7 +15,7 @@ object S305 extends EditCheck[TransmittalLar] {
     println("Came inside S305 totalLines!: " + tsLar.ts.totalLines)
     println("Came inside S305 lars size!!!: " + tsLar.lars.size)
 
-    tsLar.ts.totalLines is equalTo(tsLar.lars.size)
+    tsLar.lars.size is equalTo(tsLar.lars.distinct.size)
 
   }
 
