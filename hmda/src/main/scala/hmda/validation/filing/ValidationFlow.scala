@@ -126,8 +126,6 @@ object ValidationFlow {
               )
           case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
         }
-        val tsLar = TransmittalLar()
-        TsEngine.checkQuality(tsLar.ts, tsLar.lars.head.loan.ULI)
         (lar, errors)
       }
       .map { x =>
