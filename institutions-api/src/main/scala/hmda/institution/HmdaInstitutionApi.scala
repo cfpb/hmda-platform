@@ -14,7 +14,12 @@ import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import hmda.institution.projection.{InstitutionDBProjection, ProjectEvent}
-import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionDeleted, InstitutionKafkaEvent, InstitutionModified}
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionCreated,
+  InstitutionDeleted,
+  InstitutionKafkaEvent,
+  InstitutionModified
+}
 import hmda.messages.projection.CommonProjectionMessages.StartStreaming
 import hmda.publication.KafkaUtils.kafkaHosts
 import hmda.messages.pubsub.HmdaTopics._
@@ -41,25 +46,24 @@ object HmdaInstitutionApi extends App {
 
   val config = ConfigFactory.load()
 
-  val host = config.getString("hmda.institution.http.host")
-  val port = config.getString("hmda.institution.http.port")
-
-  val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
-  val parallelism = config.getInt("hmda.lar.modified.parallelism")
-
-  val jdbcUrl = config.getString("db.db.url")
-  log.info(s"Connection URL is \n\n$jdbcUrl\n")
-
   implicit val system = ActorSystem("hmda-institutions")
   implicit val materializer = ActorMaterializer()
   implicit val ec = system.dispatcher
 
+  val host = config.getString("hmda.institution.http.host")
+  val port = config.getString("hmda.institution.http.port")
+
+  val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
+
+  val jdbcUrl = config.getString("db.db.url")
+  log.info(s"Connection URL is \n\n$jdbcUrl\n")
+
   system.actorOf(HmdaInstitutionQueryApi.props(), "hmda-institutions-api")
 
   val consumerSettings: ConsumerSettings[String, InstitutionKafkaEvent] =
-    ConsumerSettings(config,
-      new StringDeserializer,
-      new InstitutionKafkaEventsDeserializer)
+    ConsumerSettings(kafkaConfig,
+                     new StringDeserializer,
+                     new InstitutionKafkaEventsDeserializer)
       .withBootstrapServers(kafkaHosts)
       .withGroupId(UUID.randomUUID().toString)
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
@@ -74,7 +78,6 @@ object HmdaInstitutionApi extends App {
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-
   val institutionDBProjector =
     system.spawn(InstitutionDBProjection.behavior, InstitutionDBProjection.name)
 
@@ -83,9 +86,12 @@ object HmdaInstitutionApi extends App {
       .single(evt)
       .map { evt =>
         val evtType = evt.eventType match {
-          case "InstitutionCreated" => evt.institutionEvent.asInstanceOf[InstitutionCreated]
-          case "InstitutionModified" => evt.institutionEvent.asInstanceOf[InstitutionModified]
-          case "InstitutionDeleted" => evt.institutionEvent.asInstanceOf[InstitutionDeleted]
+          case "InstitutionCreated" =>
+            evt.institutionEvent.asInstanceOf[InstitutionCreated]
+          case "InstitutionModified" =>
+            evt.institutionEvent.asInstanceOf[InstitutionModified]
+          case "InstitutionDeleted" =>
+            evt.institutionEvent.asInstanceOf[InstitutionDeleted]
           case _ => evt.institutionEvent
         }
         institutionDBProjector ! ProjectEvent(evtType)

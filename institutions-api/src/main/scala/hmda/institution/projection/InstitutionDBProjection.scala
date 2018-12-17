@@ -8,7 +8,12 @@ import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.institution.api.http.InstitutionConverter
 import hmda.institution.query.{InstitutionComponent, InstitutionEmailEntity}
-import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionDeleted, InstitutionEvent, InstitutionModified}
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionCreated,
+  InstitutionDeleted,
+  InstitutionEvent,
+  InstitutionModified
+}
 import hmda.model.institution.Institution
 import hmda.query.DbConfiguration._
 
@@ -16,10 +21,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 sealed trait InstitutionProjectionCommand
-case class ProjectEvent(evt: InstitutionEvent) extends InstitutionProjectionCommand
+case class ProjectEvent(evt: InstitutionEvent)
+    extends InstitutionProjectionCommand
 
-object InstitutionDBProjection
-    extends InstitutionComponent {
+object InstitutionDBProjection extends InstitutionComponent {
 
   val config = ConfigFactory.load()
 
