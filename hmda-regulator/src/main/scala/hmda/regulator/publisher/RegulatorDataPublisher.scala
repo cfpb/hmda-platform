@@ -17,6 +17,7 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submission.SubmissionId
 import hmda.regulator.data.RegulatorDataEntity
+import hmda.query.HmdaQuery.
 
 sealed trait RegulatorDataPublisher
 case class UploadToS3(regulatorDataEntity: RegulatorDataEntity)

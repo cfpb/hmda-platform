@@ -9,4 +9,9 @@ class RegulatorDataEntity() {
     _dataType = value
   }
 
+  def toCSV: String = {
+
+    s"testing|1|32|3"
+  }
+
 }
