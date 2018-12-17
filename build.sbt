@@ -171,6 +171,33 @@ lazy val `institutions-api` = (project in file("institutions-api"))
   )
   .dependsOn(common % "compile->compile;test->test")
 
+lazy val `hmda-regulator` = (project in file("hmda-regulator"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.regulator.HmdaRegulatorApp"),
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      },
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol` % "compile->compile;test->test")
+
 lazy val `census-api` = (project in file("census-api"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
@@ -231,30 +258,3 @@ lazy val `hmda-protocol` = (project in file("protocol"))
                  AshScriptPlugin,
                  AkkaGrpcPlugin)
   .settings(hmdaBuildSettings: _*)
-
-lazy val `hmda-regulator` = (project in file("hmda-regulator"))
-  .enablePlugins(JavaServerAppPackaging,
-                 sbtdocker.DockerPlugin,
-                 AshScriptPlugin,
-                 AkkaGrpcPlugin)
-  .settings(hmdaBuildSettings: _*)
-  .settings(
-    Seq(
-      mainClass in Compile := Some("hmda.regulator.HmdaRegulatorApp"),
-      assemblyJarName in assembly := {
-        s"${name.value}.jar"
-      },
-      assemblyMergeStrategy in assembly := {
-        case "application.conf"                      => MergeStrategy.concat
-        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
-        case x =>
-          val oldStrategy = (assemblyMergeStrategy in assembly).value
-          oldStrategy(x)
-      }
-    ),
-    scalafmtSettings,
-    dockerSettings,
-    packageSettings
-  )
-  .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(`hmda-protocol` % "compile->compile;test->test")

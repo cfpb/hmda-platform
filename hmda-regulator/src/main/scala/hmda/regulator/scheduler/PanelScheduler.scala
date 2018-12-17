@@ -14,8 +14,6 @@ import hmda.regulator.data.model.PanelRegulatorData
 import hmda.regulator.publisher.{RegulatorDataPublisher, UploadToS3}
 class PanelScheduler extends HmdaActor with ActorLogging {
 
-  val childActor = context.actorOf(Props[TeacherActor], "teacherActor")
-
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
       .schedule("PanelScheduler", self, PanelScheduler)
@@ -26,20 +24,9 @@ class PanelScheduler extends HmdaActor with ActorLogging {
     QuartzSchedulerExtension(context.system).cancelJob("PanelScheduler")
   }
 
-  implicit def akkaSystem = context.system
-  val regulatorDataPublisher = {
-    akkaSystem.spawn(RegulatorDataPublisher.behavior,
-                     RegulatorDataPublisher.name)
-  }
-
   override def receive: Receive = {
 
     case PanelScheduler =>
-      //get filer data and convert it to RegulatorData
-      val data = new PanelRegulatorData
-
-      data.`dataType _` = "PANEL"
-
     //UploadToS3(data)
 
   }

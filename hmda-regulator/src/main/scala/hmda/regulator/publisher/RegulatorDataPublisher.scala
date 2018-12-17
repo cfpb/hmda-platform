@@ -17,7 +17,7 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submission.SubmissionId
 import hmda.regulator.data.RegulatorDataEntity
-import hmda.query.HmdaQuery.
+import hmda.query.HmdaQuery._
 
 sealed trait RegulatorDataPublisher
 case class UploadToS3(regulatorDataEntity: RegulatorDataEntity)
@@ -77,16 +77,16 @@ object RegulatorDataPublisher {
 
           log.info(s"Uploading Regulator Data file : $fileName" + "  to S3.")
 
-          val s3Sink =
-            s3Client.multipartUpload(bucket,
-                                     s"$environment/regulator+/$year/$fileName")
+//          val s3Sink =
+//            s3Client.multipartUpload(bucket,
+//                                     s"$environment/regulator+/$year/$fileName")
 
-          readRawData(regulatorDataEntity)
-            .map(l => l.data)
-            .drop(1)
-            .map(s => regulatorDataEntity.toCSV + "\n")
-            .map(s => ByteString(s))
-            .runWith(s3Sink)
+//          readRawData(regulatorDataEntity)
+//            .map(l => l.data)
+//            .drop(1)
+//            .map(s => regulatorDataEntity.toCSV + "\n")
+//            .map(s => ByteString(s))
+//            .runWith(s3Sink)
 
           Behaviors.same
 
