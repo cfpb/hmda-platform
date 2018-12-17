@@ -102,7 +102,8 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
           1,
           syntacticalEditSummary,
           validityEditSummary,
-          qualityEditSummary
+          qualityEditSummary,
+          qualityVerified = false
         ))
     }
 

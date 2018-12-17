@@ -7,25 +7,42 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes, Uri}
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import akka.util.Timeout
+import akka.util.{ByteString, Timeout}
 import hmda.api.http.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
+import akka.stream.scaladsl.{Flow, Sink}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.messages.filing.FilingCommands.{GetFiling, GetLatestSubmission}
+import hmda.messages.filing.FilingCommands.{
+  GetFiling,
+  GetLatestSubmission,
+  GetSubmissionSummary
+}
 import hmda.messages.institution.InstitutionCommands.GetInstitution
 import hmda.messages.submission.SubmissionCommands.CreateSubmission
 import hmda.messages.submission.SubmissionEvents.SubmissionCreated
 import hmda.model.filing.Filing
-import hmda.model.filing.submission.{Submission, SubmissionId}
+import hmda.model.filing.submission.{
+  Submission,
+  SubmissionId,
+  SubmissionSummary
+}
 import hmda.model.institution.Institution
 import hmda.persistence.filing.FilingPersistence
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.SubmissionPersistence
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.auth.OAuth2Authorization
+import hmda.model.filing.ts.TransmittalSheet
+import hmda.parser.filing.ParserFlow.parseTsFlow
+import hmda.parser.filing.ts.TsCsvParser
+import hmda.persistence.submission.HmdaProcessingUtils._
+import hmda.api.http.codec.filing.TsCodec._
+import hmda.api.http.model.ErrorResponse
+import hmda.api.http.codec.ErrorResponseCodec._
 import io.circe.generic.auto._
 import hmda.util.http.FilingResponseUtils._
+import hmda.util.streams.FlowUtils.framing
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -99,6 +116,70 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
         }
     }
 
+  def submissionSummary(oAuth2Authorization: OAuth2Authorization): Route =
+    path(
+      "institutions" / Segment / "filings" / Segment / "submissions" / IntNumber / "summary") {
+      (lei, period, seqNr) =>
+        oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
+          timedGet { uri =>
+            val submissionId = SubmissionId(lei, period, seqNr)
+
+            val filingPersistence =
+              sharding.entityRefFor(FilingPersistence.typeKey,
+                                    s"${FilingPersistence.name}-$lei-$period")
+
+            val fSummary: Future[Option[Submission]] = filingPersistence ? (
+                ref => GetSubmissionSummary(submissionId, ref))
+
+            val fTs: Future[Option[TransmittalSheet]] =
+              readRawData(submissionId)
+                .map(line => line.data)
+                .map(ByteString(_))
+                .take(1)
+                .via(framing("\n"))
+                .map(_.utf8String)
+                .map(_.trim)
+                .map(s => TsCsvParser(s))
+                .map { s =>
+                  s.getOrElse(TransmittalSheet())
+                }
+                .runWith(Sink.seq)
+                .map(xs => xs.headOption)
+
+            val fCheck = for {
+              t <- fTs
+              s <- fSummary
+            } yield SubmissionSummary(s, t)
+
+            onComplete(fCheck) {
+              case Success(check) =>
+                check match {
+                  case (SubmissionSummary(None, _)) =>
+                    val errorResponse = ErrorResponse(
+                      404,
+                      s"Submission ${submissionId.toString} not available",
+                      uri.path)
+                    complete(
+                      ToResponseMarshallable(
+                        StatusCodes.NotFound -> errorResponse))
+                  case (SubmissionSummary(_, None)) =>
+                    val errorResponse =
+                      ErrorResponse(404,
+                                    s"Transmittal Sheet not found",
+                                    uri.path)
+                    complete(
+                      ToResponseMarshallable(
+                        StatusCodes.NotFound -> errorResponse))
+                  case _ =>
+                    complete(ToResponseMarshallable(check))
+                }
+              case Failure(error) =>
+                failedResponse(StatusCodes.InternalServerError, uri, error)
+            }
+          }
+        }
+    }
+
   //institutions/<lei>/filings/<period>/submissions/latest
   def submissionLatestPath(oAuth2Authorization: OAuth2Authorization): Route =
     path(
@@ -131,7 +212,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
       cors() {
         encodeResponse {
           submissionCreatePath(oAuth2Authorization) ~ submissionLatestPath(
-            oAuth2Authorization)
+            oAuth2Authorization) ~ submissionSummary(oAuth2Authorization)
         }
       }
     }

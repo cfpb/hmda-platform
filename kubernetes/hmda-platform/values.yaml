@@ -77,6 +77,9 @@ grpc:
   check_digit:
     port: 60080
     host: check-digit-grpc.default.svc.cluster.local
+  census:
+    port: 60081
+    host: census-api-grpc.default.svc.cluster.local
 
 
 ingress:
