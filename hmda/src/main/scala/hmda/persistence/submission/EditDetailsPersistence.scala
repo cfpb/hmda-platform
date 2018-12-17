@@ -47,7 +47,7 @@ object EditDetailsPersistence
       case PersistEditDetails(editDetail, maybeReplyTo) =>
         val evt = EditDetailsAdded(editDetail)
         Effect.persist(evt).thenRun { _ =>
-          log.info(s"Persisted: $evt")
+          log.debug(s"Persisted: $evt")
           maybeReplyTo match {
             case Some(replyTo) =>
               replyTo ! evt
