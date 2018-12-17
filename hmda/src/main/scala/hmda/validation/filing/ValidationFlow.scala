@@ -2,13 +2,11 @@ package hmda.validation.filing
 
 import akka.NotUsed
 import akka.stream.FlowShape
-import akka.stream.javadsl.Sink
-import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL, Sink, Source}
+import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL}
 import akka.util.ByteString
 import cats.Semigroup
 import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.submission.SubmissionId
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.validation.{
   LarValidationError,
@@ -23,12 +21,7 @@ import hmda.util.streams.FlowUtils._
 import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
 
 import scala.concurrent.Future
-import hmda.util.SourceUtils._
-import hmda.persistence.submission.HmdaProcessingUtils.readRawData
 
-import scala.util.{Failure, Success}
-import akka.stream.scaladsl.{Flow, Sink}
-import cats.data.Validated
 
 object ValidationFlow {
 
