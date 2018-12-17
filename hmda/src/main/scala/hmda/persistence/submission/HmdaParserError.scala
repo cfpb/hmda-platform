@@ -30,6 +30,7 @@ import hmda.parser.filing.ParserFlow._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
+import hmda.query.HmdaQuery._
 
 object HmdaParserError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
