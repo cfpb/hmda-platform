@@ -74,7 +74,7 @@ object InstitutionPersistence
               val event = InstitutionModified(i)
               publishInstitutionEvent(
                 i.LEI,
-                InstitutionKafkaEvent("InstitutionDeleted", event))
+                InstitutionKafkaEvent("InstitutionModified", event))
               replyTo ! event
             }
           } else {
