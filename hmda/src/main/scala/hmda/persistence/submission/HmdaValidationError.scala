@@ -214,9 +214,6 @@ object HmdaValidationError
                                         rowNumber,
                                         validationErrors,
                                         maybeReplyTo) =>
-        println("CAME IN HERE!!!!!! : " + validationErrors)
-        println("rownumber: " + rowNumber)
-        println("submissionId: " + submissionId)
         val editDetailPersistence = sharding
           .entityRefFor(EditDetailsPersistence.typeKey,
                         s"${EditDetailsPersistence.name}-$submissionId")
@@ -414,7 +411,6 @@ object HmdaValidationError
       rest <- restResult
     } yield {
       val tsLar = TransmittalLar(header, rest)
-      println("about to print")
       validateTsLarEdits(tsLar, "all", validationContext) match {
         case Left(errors) => {
           ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(

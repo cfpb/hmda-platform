@@ -12,9 +12,6 @@ object S305 extends EditCheck[TransmittalLar] {
   override def name: String = "S305"
   override def apply(tsLar: TransmittalLar): ValidationResult = {
 
-    println("Came inside S305 totalLines!: " + tsLar.ts.totalLines)
-    println("Came inside S305 lars size!!!: " + tsLar.lars.size)
-
     tsLar.lars.size is equalTo(tsLar.lars.distinct.size)
 
   }

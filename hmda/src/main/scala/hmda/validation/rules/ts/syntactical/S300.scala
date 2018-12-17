@@ -10,8 +10,6 @@ object S300 extends EditCheck[TransmittalSheet] {
   override def name: String = "S300"
 
   override def apply(ts: TransmittalSheet): ValidationResult = {
-
-    println("Came in S300!!!!")
     ts.id is equalTo(1)
   }
 }
