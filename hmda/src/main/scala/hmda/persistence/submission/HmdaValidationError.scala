@@ -109,16 +109,20 @@ object HmdaValidationError
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext)
             .runWith(Sink.ignore)
-          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
+          tsLarErrors <- validateTsLar(ctx,
+                                       submissionId,
+                                       "all",
+                                       validationContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
-            ctx,
-            submissionId,
-            validationContext)
+                                                      ctx,
+                                                      submissionId,
+                                                      validationContext)
             .runWith(Sink.ignore)
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
-            ctx,
-            submissionId).runWith(Sink.ignore)
-        } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
+                                             ctx,
+                                             submissionId).runWith(Sink.ignore)
+        } yield
+          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
@@ -393,6 +397,7 @@ object HmdaValidationError
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
+      editType: String,
       validationContext: ValidationContext): Future[Unit] = {
 
     val headerResultTest: Future[TransmittalSheet] =
@@ -424,7 +429,7 @@ object HmdaValidationError
       rest <- restResult
     } yield {
       val tsLar = TransmittalLar(header, rest)
-      validateTsLarEdits(tsLar, "all", validationContext) match {
+      validateTsLarEdits(tsLar, editType, validationContext) match {
         case Left(errors) => {
           ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(
             submissionId,
@@ -438,12 +443,15 @@ object HmdaValidationError
 
   }
 
-  private def validateLar[as: AS](
+  private def validateLar[as: AS, mat: MAT, ec: EC](
       editCheck: String,
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
       validationContext: ValidationContext)
     : Source[HmdaRowValidatedError, NotUsed] = {
+
+    validateTsLar(ctx, submissionId, "quality", validationContext)
+
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateLarFlow(editCheck, validationContext))
@@ -460,6 +468,7 @@ object HmdaValidationError
                                          el.validationErrors,
                                          Some(replyTo))
         ))
+
   }
 
   private def validateMacro[as: AS, mat: MAT, ec: EC](

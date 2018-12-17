@@ -22,7 +22,6 @@ import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
 
 import scala.concurrent.Future
 
-
 object ValidationFlow {
 
   implicit val larSemigroup = new Semigroup[LoanApplicationRegister] {
@@ -96,6 +95,8 @@ object ValidationFlow {
                                      TsValidationError)
       case "validity" =>
         TsLarEngine.checkValidity(tsLar, tsLar.ts.LEI, TsValidationError)
+      case "quality" =>
+        TsLarEngine.checkQuality(tsLar, tsLar.ts.LEI)
     }
     errors
       .leftMap(xs => {
@@ -106,8 +107,10 @@ object ValidationFlow {
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)
     : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+    val lars = List[LoanApplicationRegister]()
     collectLar
       .map { lar =>
+        println("This is the lar here: " + lar)
         def errors = checkType match {
           case "all" =>
             LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
@@ -124,6 +127,8 @@ object ValidationFlow {
               )
           case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
         }
+        val tsLar = TransmittalLar()
+        TsEngine.checkQuality(tsLar.ts, tsLar.lars.head.loan.ULI)
         (lar, errors)
       }
       .map { x =>
