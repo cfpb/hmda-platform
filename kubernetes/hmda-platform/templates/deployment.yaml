@@ -59,6 +59,11 @@ spec:
             configMapKeyRef:
               name: keycloak-configmap
               key: auth.url
+        - name: KAFKA_CLUSTER_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: kafka-configmap
+              key: kafka.hosts
         - name: GRPC_CHECK_DIGIT_HOST
           valueFrom:
             configMapKeyRef:
@@ -79,13 +84,12 @@ spec:
             configMapKeyRef:
               name: grpc-configmap
               key: census.port
+#        livenessProbe:
+#          tcpSocket:
+#            port: {{ .Values.bootstrap.port }}
 #        readinessProbe:
 #          httpGet:
 #            path: /ready
-#            port: {{ .Values.bootstrap.name }}
-#        livenessProbe:
-#          httpGet:
-#            path: /alive
 #            port: {{ .Values.bootstrap.name }}
         ports:
         # akka remoting

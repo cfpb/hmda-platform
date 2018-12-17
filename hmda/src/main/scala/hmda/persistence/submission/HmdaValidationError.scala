@@ -31,13 +31,17 @@ import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
 import HmdaProcessingUtils._
 import EditDetailsConverter._
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
 import hmda.messages.submission.EditDetailsCommands.{
   EditDetailsPersistenceCommand,
   PersistEditDetails
 }
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
+import hmda.publication.KafkaUtils._
+import hmda.messages.pubsub.HmdaTopics._
+import hmda.query.HmdaQuery._
+import hmda.messages.submission.SubmissionProcessingEvents
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.util.streams.FlowUtils.framing
@@ -162,8 +166,6 @@ object HmdaValidationError
         val updatedStatus =
           if (state.quality.nonEmpty) {
             QualityErrors
-          } else if (state.macroVerified) {
-            Verified
           } else {
             Quality
           }
@@ -189,6 +191,8 @@ object HmdaValidationError
             }
             if (edits.nonEmpty) {
               updateSubmissionStatus(sharding, submissionId, MacroErrors, log)
+            } else if (state.qualityVerified) {
+              updateSubmissionStatus(sharding, submissionId, Verified, log)
             } else {
               updateSubmissionStatus(sharding, submissionId, Macro, log)
             }
@@ -201,7 +205,11 @@ object HmdaValidationError
 
       case CompleteMacro(submissionId) =>
         log.info(s"Macro Validation finished for $submissionId")
-        Effect.none
+        val updatedStatus =
+          if (!state.macroVerified) MacroErrors
+          else if (state.qualityVerified) Verified
+          else Macro
+        Effect.persist(MacroCompleted(submissionId, updatedStatus.code))
 
       case PersistHmdaRowValidatedError(submissionId,
                                         rowNumber,
@@ -254,23 +262,30 @@ object HmdaValidationError
               QualityVerified(submissionId,
                               verified,
                               SubmissionStatus.valueOf(state.statusCode)))
-            .thenRun { _ =>
-              if (!verified) {
-                val updatedStatus = QualityErrors
-                updateSubmissionStatus(sharding,
-                                       submissionId,
-                                       updatedStatus,
-                                       log)
-                replyTo ! QualityVerified(submissionId, verified, updatedStatus)
-              }
-              if (state.macroVerified) {
-                val updatedStatus = Verified
-                updateSubmissionStatus(sharding,
-                                       submissionId,
-                                       updatedStatus,
-                                       log)
-                replyTo ! QualityVerified(submissionId, verified, updatedStatus)
-              }
+            .thenRun { validationState =>
+              val updatedStatus =
+                SubmissionStatus.valueOf(validationState.statusCode)
+              updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+              replyTo ! QualityVerified(submissionId, verified, updatedStatus)
+            }
+        } else {
+          replyTo ! NotReadyToBeVerified(submissionId)
+          Effect.none
+        }
+
+      case VerifyMacro(submissionId, verified, replyTo) =>
+        if (List(Macro.code, MacroErrors.code)
+              .contains(state.statusCode) || !verified) {
+          Effect
+            .persist(
+              MacroVerified(submissionId,
+                            verified,
+                            SubmissionStatus.valueOf(state.statusCode)))
+            .thenRun { validationState =>
+              val updatedStatus =
+                SubmissionStatus.valueOf(validationState.statusCode)
+              updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+              replyTo ! MacroVerified(submissionId, verified, updatedStatus)
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
@@ -293,6 +308,8 @@ object HmdaValidationError
                 signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 log)
+              publishSignEvent(submissionId).map(signed =>
+                log.info(s"Published signed event for $submissionId"))
               replyTo ! signed
             }
           } else {
@@ -325,8 +342,12 @@ object HmdaValidationError
       state.updateStatusCode(statusCode)
     case (state, QualityCompleted(_, statusCode)) =>
       state.updateStatusCode(statusCode)
+    case (state, MacroCompleted(_, statusCode)) =>
+      state.updateStatusCode(statusCode)
     case (state, evt: QualityVerified) =>
       state.verifyQuality(evt)
+    case (state, evt: MacroVerified) =>
+      state.verifyMacro(evt)
     case (state, SubmissionSigned(_, _, _)) =>
       state.updateStatusCode(Signed.code)
     case (state, _) => state
@@ -483,6 +504,13 @@ object HmdaValidationError
     }
 
     Future.sequence(fDetails)
+
+  }
+
+  private def publishSignEvent(submissionId: SubmissionId)(
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer): Future[Done] = {
+    produceRecord(signTopic, submissionId.lei, submissionId.toString)
 
   }
 

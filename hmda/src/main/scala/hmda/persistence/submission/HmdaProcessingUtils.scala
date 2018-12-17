@@ -1,12 +1,8 @@
 package hmda.persistence.submission
 
-import akka.NotUsed
-import akka.actor.ActorSystem
 import akka.actor.typed.Logger
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
-import akka.stream.scaladsl.Source
 import akka.util.Timeout
-import hmda.messages.submission.HmdaRawDataEvents.LineAdded
 import hmda.messages.submission.SubmissionCommands.{
   GetSubmission,
   ModifySubmission,
@@ -15,23 +11,10 @@ import hmda.messages.submission.SubmissionCommands.{
 import hmda.messages.submission.SubmissionEvents.SubmissionEvent
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
 import hmda.model.filing.submission.{Submission, SubmissionId, SubmissionStatus}
-import hmda.query.HmdaQuery._
 
 import scala.concurrent.{ExecutionContext, Future}
 
 object HmdaProcessingUtils {
-
-  def readRawData(submissionId: SubmissionId)(
-      implicit system: ActorSystem): Source[LineAdded, NotUsed] = {
-
-    val persistenceId = s"${HmdaRawData.name}-$submissionId"
-
-    eventsByPersistenceId(persistenceId)
-      .collect {
-        case evt: LineAdded => evt
-      }
-
-  }
 
   def updateSubmissionStatus(
       sharding: ClusterSharding,
