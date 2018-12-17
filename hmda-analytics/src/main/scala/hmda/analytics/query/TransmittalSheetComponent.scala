@@ -75,6 +75,10 @@ trait TransmittalSheetComponent {
     def deleteByLei(lei: String): Future[Int] = {
       db.run(table.filter(_.lei === lei).delete)
     }
+
+    def count(): Future[Int] = {
+      db.run(table.size.result)
+    }
   }
 
 }
