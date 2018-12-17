@@ -4,7 +4,7 @@ object TsFieldMapping {
   def mapping(ts: TransmittalSheet): Map[String, String] = Map(
     "Record Identifier" -> ts.id.toString,
     "Financial Institution Name" -> ts.institutionName,
-    "Calendar Year" -> ts.year.toString,
+    "Calendar Year" -> ts.yevvvvvvar.toString,
     "Calendar Quarter" -> ts.quarter.toString,
     "Contact Person's Name" -> ts.contact.name,
     "Contact Person's Phone Number" -> ts.contact.phone,
@@ -16,6 +16,8 @@ object TsFieldMapping {
     "Federal Agency" -> ts.agency.code.toString,
     "Total Number of Entries Contained in Submission" -> ts.totalLines.toString,
     "Federal Taxpayer Identification Number" -> ts.taxId,
-    "Legal Entity Identifier (LEI)" -> ts.LEI
+    "Legal Entity Identifier (LEI)" -> ts.LEI,
+    "All data fields in the LAR" -> ts.toCSV
+
   )
 }

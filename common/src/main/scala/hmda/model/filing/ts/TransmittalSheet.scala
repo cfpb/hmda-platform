@@ -17,7 +17,6 @@ case class TransmittalSheet(
     totalLines: Int = 0,
     taxId: String = "",
     LEI: String = ""
-//    LARs: List[LoanApplicationRegister] = List.empty
 ) extends PipeDelimited
     with HmdaFileRow {
   override def toCSV: String = {
@@ -25,6 +24,7 @@ case class TransmittalSheet(
   }
 
   override def valueOf(field: String): String = {
+    println("This is the string: " + field)
     TsFieldMapping
       .mapping(this)
       .getOrElse(field, s"error: field name mismatch for $field")
