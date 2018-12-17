@@ -7,6 +7,8 @@ import akka.persistence.query.scaladsl._
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.messages.CommonMessages.Event
+import hmda.messages.submission.HmdaRawDataEvents.LineAdded
+import hmda.model.filing.submission.SubmissionId
 
 object HmdaQuery {
 
@@ -36,6 +38,18 @@ object HmdaQuery {
     readJournal(system)
       .currentEventsByPersistenceId(persistenceId, 0L, Long.MaxValue)
       .map(e => e.event.asInstanceOf[Event])
+  }
+
+  def readRawData(submissionId: SubmissionId)(
+      implicit system: ActorSystem): Source[LineAdded, NotUsed] = {
+
+    val persistenceId = s"HmdaRawData-$submissionId"
+
+    eventsByPersistenceId(persistenceId)
+      .collect {
+        case evt: LineAdded => evt
+      }
+
   }
 
 }

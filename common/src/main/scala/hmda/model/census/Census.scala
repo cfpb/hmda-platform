@@ -63,3 +63,24 @@ object Census {
     "VI" -> State("78", "Virgin Islands")
   )
 }
+
+case class Census(
+    id: Int = 0,
+    collectionYear: Int = 0,
+    msaMd: Int = 0,
+    state: String = "",
+    county: String = "",
+    tract: String = "",
+    medianIncome: Int = 0,
+    population: Int = 0,
+    minorityPopulationPercent: Double = 0F,
+    occupiedUnits: Int = 0,
+    oneToFourFamilyUnits: Int = 0,
+    tractMfi: Int = 0,
+    tracttoMsaIncomePercent: Double = 0F,
+    medianAge: Int = 0,
+    smallCounty: Boolean = false
+) {
+  def toHmdaTract: String = s"${state}${county}${tract}"
+  def toHmdaCounty: String = s"${state}${county}"
+}

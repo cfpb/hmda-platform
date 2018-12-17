@@ -20,6 +20,8 @@ trait ValidationEngine[A] extends ValidationApi[A] {
 
   def asyncChecks: Vector[AsyncEditCheck[A]] = Vector.empty
 
+  def asyncQualityChecks: Vector[AsyncEditCheck[A]] = Vector.empty
+
   def checkAll(
       a: A,
       id: String,
@@ -76,6 +78,16 @@ trait ValidationEngine[A] extends ValidationApi[A] {
       Future.successful(Validated.valid(a))
     } else {
       runAsyncChecks(a, asyncChecks, Validity, LarValidationError, id)
+    }
+  }
+
+  def checkQualityAsync[as: AS, mat: MAT, ec: EC](
+      a: A,
+      id: String): Future[HmdaValidation[A]] = {
+    if (asyncQualityChecks.isEmpty) {
+      Future.successful(Validated.valid(a))
+    } else {
+      runAsyncChecks(a, asyncQualityChecks, Quality, LarValidationError, id)
     }
   }
 

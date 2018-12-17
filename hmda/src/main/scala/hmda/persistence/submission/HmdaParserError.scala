@@ -22,7 +22,7 @@ import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submissions.PaginatedResource
 import hmda.model.processing.state.HmdaParserErrorState
-import HmdaProcessingUtils._
+import HmdaProcessingUtils.{readRawData, updateSubmissionStatus}
 import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.typed.scaladsl.ActorFlow
 import hmda.parser.filing.ParserFlow._
@@ -30,6 +30,7 @@ import hmda.parser.filing.ParserFlow._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
+import hmda.query.HmdaQuery._
 
 object HmdaParserError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,

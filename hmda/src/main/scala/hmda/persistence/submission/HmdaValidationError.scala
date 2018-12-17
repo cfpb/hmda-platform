@@ -29,15 +29,22 @@ import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
-import HmdaProcessingUtils._
+import HmdaProcessingUtils.{
+  readRawData,
+  updateSubmissionStatus,
+  updateSubmissionReceipt
+}
 import EditDetailsConverter._
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
 import hmda.messages.submission.EditDetailsCommands.{
   EditDetailsPersistenceCommand,
   PersistEditDetails
 }
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
+import hmda.publication.KafkaUtils._
+import hmda.messages.pubsub.HmdaTopics._
+import hmda.query.HmdaQuery._
 import hmda.messages.submission.SubmissionProcessingEvents
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.{MacroValidationError, ValidationError}
@@ -100,18 +107,18 @@ object HmdaValidationError
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
-          tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
-            Sink.ignore)
+          tsErrors <- validateTs(ctx, submissionId, validationContext)
+            .runWith(Sink.ignore)
           tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
-                                                      ctx,
-                                                      submissionId,
-                                                      validationContext)
+            ctx,
+            submissionId,
+            validationContext)
             .runWith(Sink.ignore)
-          larAsyncErrors <- validateAsyncLar(ctx, submissionId).runWith(
-            Sink.ignore)
-        } yield
-          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
+          larAsyncErrors <- validateAsyncLar("syntactical-validity",
+            ctx,
+            submissionId).runWith(Sink.ignore)
+        } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
@@ -148,7 +155,11 @@ object HmdaValidationError
                                    submissionId,
                                    ValidationContext())
             .runWith(Sink.ignore)
-        } yield larErrors
+          larAsyncErrorsQuality <- validateAsyncLar("quality",
+                                                    ctx,
+                                                    submissionId)
+            .runWith(Sink.ignore)
+        } yield (larErrors, larAsyncErrorsQuality)
 
         fQuality.onComplete {
           case Success(_) =>
@@ -307,6 +318,8 @@ object HmdaValidationError
                 signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 log)
+              publishSignEvent(submissionId).map(signed =>
+                log.info(s"Published signed event for $submissionId"))
               replyTo ! signed
             }
           } else {
@@ -471,12 +484,13 @@ object HmdaValidationError
   }
 
   private def validateAsyncLar[as: AS, mat: MAT, ec: EC](
+      editCheck: String,
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId
   ) = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
-      .via(validateAsyncLarFlow)
+      .via(validateAsyncLarFlow(editCheck))
       .map { x =>
         x.collect {
           case Left(errors) => errors
@@ -550,6 +564,13 @@ object HmdaValidationError
     }
 
     Future.sequence(fDetails)
+
+  }
+
+  private def publishSignEvent(submissionId: SubmissionId)(
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer): Future[Done] = {
+    produceRecord(signTopic, submissionId.lei, submissionId.toString)
 
   }
 
