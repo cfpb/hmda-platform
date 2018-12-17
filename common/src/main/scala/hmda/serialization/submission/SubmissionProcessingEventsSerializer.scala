@@ -26,12 +26,15 @@ class SubmissionProcessingEventsSerializer
     classOf[HmdaValidationErrorState].getName
   final val HmdaRowValidatedErrorManifest =
     classOf[HmdaRowValidatedError].getName
+  final val HmdaMacroValidatedErrorManifest =
+    classOf[HmdaMacroValidatedError].getName
   final val QualityVerifiedManifest = classOf[QualityVerified].getName
   final val MacroVerifiedManifest = classOf[MacroVerified].getName
   final val NotReadyToBeVerifiedManifest = classOf[NotReadyToBeVerified].getName
   final val SyntacticalValidityCompletedManifest =
     classOf[SyntacticalValidityCompleted].getName
   final val QualityCompletedManifest = classOf[QualityCompleted].getName
+  final val MacroCompletedManifest = classOf[MacroCompleted].getName
   final val SubmissionSignedManifest = classOf[SubmissionSigned].getName
   final val SubmissionNotReadyToBeSignedManifest =
     classOf[SubmissionNotReadyToBeSigned].getName
@@ -49,6 +52,8 @@ class SubmissionProcessingEventsSerializer
       hmdaValidationErrorStateToProtobuf(evt).toByteArray
     case evt: HmdaRowValidatedError =>
       hmdaRowValidatedErrorToProtobuf(evt).toByteArray
+    case evt: HmdaMacroValidatedError =>
+      hmdaMacroValidatedErrorToProtobuf(evt).toByteArray
     case evt: QualityVerified =>
       qualityVerifiedToProtobuf(evt).toByteArray
     case evt: MacroVerified =>
@@ -59,6 +64,8 @@ class SubmissionProcessingEventsSerializer
       syntacticalValidityCompletedToProtobuf(evt).toByteArray
     case evt: QualityCompleted =>
       qualityCompletedToProtobuf(evt).toByteArray
+    case evt: MacroCompleted =>
+      macroCompletedToProtobuf(evt).toByteArray
     case evt: SubmissionSigned =>
       submissionSignedToProtobuf(evt).toByteArray
     case evt: SubmissionNotReadyToBeSigned =>
@@ -85,6 +92,9 @@ class SubmissionProcessingEventsSerializer
       case HmdaRowValidatedErrorManifest =>
         hmdaRowValidatedErrorFromProtobuf(
           HmdaRowValidatedErrorMessage.parseFrom(bytes))
+      case HmdaMacroValidatedErrorManifest =>
+        hmdaMacroValidatedErrorFromProtobuf(
+          HmdaMacroValidatedErrorMessage.parseFrom(bytes))
       case QualityVerifiedManifest =>
         qualityVerifiedFromProtobuf(QualityVerifiedMessage.parseFrom(bytes))
       case MacroVerifiedManifest =>
@@ -97,6 +107,8 @@ class SubmissionProcessingEventsSerializer
           SyntacticalValidityCompletedMessage.parseFrom(bytes))
       case QualityCompletedManifest =>
         qualityCompletedFromProtobuf(QualityCompletedMessage.parseFrom(bytes))
+      case MacroCompletedManifest =>
+        macroCompletedFromProtobuf(MacroCompletedMessage.parseFrom(bytes))
       case SubmissionSignedManifest =>
         submissionSignedFromProtobuf(SubmissionSignedMessage.parseFrom(bytes))
       case SubmissionNotReadyToBeSignedManifest =>

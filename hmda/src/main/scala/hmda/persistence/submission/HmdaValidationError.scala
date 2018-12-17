@@ -29,15 +29,27 @@ import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
-import HmdaProcessingUtils._
+import HmdaProcessingUtils.{
+  readRawData,
+  updateSubmissionStatus,
+  updateSubmissionReceipt
+}
 import EditDetailsConverter._
-import akka.NotUsed
+import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
 import hmda.messages.submission.EditDetailsCommands.{
   EditDetailsPersistenceCommand,
   PersistEditDetails
 }
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
+import hmda.publication.KafkaUtils._
+import hmda.messages.pubsub.HmdaTopics._
+import hmda.query.HmdaQuery._
+import hmda.messages.submission.SubmissionProcessingEvents
+import hmda.model.validation.{MacroValidationError, ValidationError}
+import hmda.parser.filing.lar.LarCsvParser
+import hmda.util.streams.FlowUtils.framing
+import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -97,8 +109,9 @@ object HmdaValidationError
                                                       submissionId,
                                                       validationContext)
             .runWith(Sink.ignore)
-          larAsyncErrors <- validateAsyncLar(ctx, submissionId).runWith(
-            Sink.ignore)
+          larAsyncErrors <- validateAsyncLar("syntactical-validity",
+                                             ctx,
+                                             submissionId).runWith(Sink.ignore)
         } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
@@ -136,7 +149,11 @@ object HmdaValidationError
                                    submissionId,
                                    ValidationContext())
             .runWith(Sink.ignore)
-        } yield larErrors
+          larAsyncErrorsQuality <- validateAsyncLar("quality",
+                                                    ctx,
+                                                    submissionId)
+            .runWith(Sink.ignore)
+        } yield (larErrors, larAsyncErrorsQuality)
 
         fQuality.onComplete {
           case Success(_) =>
@@ -153,8 +170,6 @@ object HmdaValidationError
         val updatedStatus =
           if (state.quality.nonEmpty) {
             QualityErrors
-          } else if (state.macroVerified) {
-            Verified
           } else {
             Quality
           }
@@ -163,6 +178,42 @@ object HmdaValidationError
           .thenRun { _ =>
             updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
           }
+
+      case StartMacro(submissionId) =>
+        log.info(s"Macro validation started for $submissionId")
+
+        val fMacroEdits: Future[List[ValidationError]] =
+          validateMacro(ctx, submissionId)
+
+        fMacroEdits.onComplete {
+          case Success(edits) =>
+            edits.foreach { edit =>
+              ctx.asScala.self ! PersistMacroError(
+                submissionId,
+                edit.asInstanceOf[MacroValidationError],
+                None)
+            }
+            if (edits.nonEmpty) {
+              updateSubmissionStatus(sharding, submissionId, MacroErrors, log)
+            } else if (state.qualityVerified) {
+              updateSubmissionStatus(sharding, submissionId, Verified, log)
+            } else {
+              updateSubmissionStatus(sharding, submissionId, Macro, log)
+            }
+            ctx.asScala.self ! CompleteMacro(submissionId)
+          case Failure(e) =>
+            log.error(e.getLocalizedMessage)
+
+        }
+        Effect.none
+
+      case CompleteMacro(submissionId) =>
+        log.info(s"Macro Validation finished for $submissionId")
+        val updatedStatus =
+          if (!state.macroVerified) MacroErrors
+          else if (state.qualityVerified) Verified
+          else Macro
+        Effect.persist(MacroCompleted(submissionId, updatedStatus.code))
 
       case PersistHmdaRowValidatedError(submissionId,
                                         rowNumber,
@@ -197,6 +248,16 @@ object HmdaValidationError
           Effect.none
         }
 
+      case PersistMacroError(_, validationError, maybeReplyTo) =>
+        Effect.persist(HmdaMacroValidatedError(validationError)).thenRun { _ =>
+          log.debug(s"Persisted: $validationError")
+          maybeReplyTo match {
+            case Some(replyTo) =>
+              replyTo ! validationError
+            case None => //do nothing
+          }
+        }
+
       case VerifyQuality(submissionId, verified, replyTo) =>
         if (List(Quality.code, QualityErrors.code, Macro.code, MacroErrors.code)
               .contains(state.statusCode) || !verified) {
@@ -205,23 +266,30 @@ object HmdaValidationError
               QualityVerified(submissionId,
                               verified,
                               SubmissionStatus.valueOf(state.statusCode)))
-            .thenRun { _ =>
-              if (!verified) {
-                val updatedStatus = QualityErrors
-                updateSubmissionStatus(sharding,
-                                       submissionId,
-                                       updatedStatus,
-                                       log)
-                replyTo ! QualityVerified(submissionId, verified, updatedStatus)
-              }
-              if (state.macroVerified) {
-                val updatedStatus = Verified
-                updateSubmissionStatus(sharding,
-                                       submissionId,
-                                       updatedStatus,
-                                       log)
-                replyTo ! QualityVerified(submissionId, verified, updatedStatus)
-              }
+            .thenRun { validationState =>
+              val updatedStatus =
+                SubmissionStatus.valueOf(validationState.statusCode)
+              updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+              replyTo ! QualityVerified(submissionId, verified, updatedStatus)
+            }
+        } else {
+          replyTo ! NotReadyToBeVerified(submissionId)
+          Effect.none
+        }
+
+      case VerifyMacro(submissionId, verified, replyTo) =>
+        if (List(Macro.code, MacroErrors.code)
+              .contains(state.statusCode) || !verified) {
+          Effect
+            .persist(
+              MacroVerified(submissionId,
+                            verified,
+                            SubmissionStatus.valueOf(state.statusCode)))
+            .thenRun { validationState =>
+              val updatedStatus =
+                SubmissionStatus.valueOf(validationState.statusCode)
+              updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
+              replyTo ! MacroVerified(submissionId, verified, updatedStatus)
             }
         } else {
           replyTo ! NotReadyToBeVerified(submissionId)
@@ -244,6 +312,8 @@ object HmdaValidationError
                 signed.timestamp,
                 s"${signed.submissionId}-${signed.timestamp}",
                 log)
+              publishSignEvent(submissionId).map(signed =>
+                log.info(s"Published signed event for $submissionId"))
               replyTo ! signed
             }
           } else {
@@ -270,12 +340,18 @@ object HmdaValidationError
        SubmissionProcessingEvent) => HmdaValidationErrorState = {
     case (state, error @ HmdaRowValidatedError(_, _)) =>
       state.updateErrors(error)
+    case (state, error @ HmdaMacroValidatedError(_)) =>
+      state.updateMacroErrors(error)
     case (state, SyntacticalValidityCompleted(_, statusCode)) =>
       state.updateStatusCode(statusCode)
     case (state, QualityCompleted(_, statusCode)) =>
       state.updateStatusCode(statusCode)
+    case (state, MacroCompleted(_, statusCode)) =>
+      state.updateStatusCode(statusCode)
     case (state, evt: QualityVerified) =>
       state.verifyQuality(evt)
+    case (state, evt: MacroVerified) =>
+      state.verifyMacro(evt)
     case (state, SubmissionSigned(_, _, _)) =>
       state.updateStatusCode(Signed.code)
     case (state, _) => state
@@ -286,10 +362,9 @@ object HmdaValidationError
     super.startShardRegion(sharding)
   }
 
-  private def validateTs(
-      ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId,
-      validationContext: ValidationContext)(implicit system: ActorSystem) = {
+  private def validateTs[as: AS](ctx: ActorContext[SubmissionProcessingCommand],
+                                 submissionId: SubmissionId,
+                                 validationContext: ValidationContext) = {
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(validateTsFlow("all", validationContext))
@@ -331,13 +406,35 @@ object HmdaValidationError
         ))
   }
 
+  private def validateMacro[as: AS, mat: MAT, ec: EC](
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId
+  ): Future[List[ValidationError]] = {
+    val larSource = uploadConsumerRawStr(ctx, submissionId)
+      .drop(1)
+      .via(framing("\n"))
+      .map(_.utf8String)
+      .map(_.trim)
+      .map(s => LarCsvParser(s))
+      .collect {
+        case Right(lar) => lar
+      }
+
+    for {
+      macroEdits <- macroValidation(larSource)
+    } yield {
+      macroEdits
+    }
+  }
+
   private def validateAsyncLar[as: AS, mat: MAT, ec: EC](
+      editCheck: String,
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId
   ) = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
-      .via(validateAsyncLarFlow)
+      .via(validateAsyncLarFlow(editCheck))
       .map { x =>
         x.collect {
           case Left(errors) => errors
@@ -367,13 +464,11 @@ object HmdaValidationError
       .map(xs => xs.headOption)
   }
 
-  private def validationContext(year: Int,
-                                sharding: ClusterSharding,
-                                ctx: ActorContext[SubmissionProcessingCommand],
-                                submissionId: SubmissionId)(
-      implicit system: ActorSystem,
-      materializer: ActorMaterializer,
-      ec: ExecutionContext): Future[ValidationContext] = {
+  private def validationContext[as: AS, mat: MAT, ec: EC](
+      year: Int,
+      sharding: ClusterSharding,
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId): Future[ValidationContext] = {
     val institutionPersistence =
       sharding.entityRefFor(
         InstitutionPersistence.typeKey,
@@ -390,19 +485,17 @@ object HmdaValidationError
     }
   }
 
-  private def uploadConsumerRawStr(
+  private def uploadConsumerRawStr[as: AS](
       ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId)(
-      implicit system: ActorSystem): Source[ByteString, NotUsed] = {
+      submissionId: SubmissionId): Source[ByteString, NotUsed] = {
     readRawData(submissionId)
       .map(line => line.data)
       .map(ByteString(_))
   }
 
-  private def persistEditDetails(
+  private def persistEditDetails[ec: EC](
       editDetailPersistence: EntityRef[EditDetailsPersistenceCommand],
-      hmdaRowValidatedError: HmdaRowValidatedError)(
-      implicit ec: ExecutionContext)
+      hmdaRowValidatedError: HmdaRowValidatedError)
     : Future[Iterable[EditDetailsPersistenceEvent]] = {
 
     val details = validatedRowToEditDetails(hmdaRowValidatedError)
@@ -415,6 +508,13 @@ object HmdaValidationError
     }
 
     Future.sequence(fDetails)
+
+  }
+
+  private def publishSignEvent(submissionId: SubmissionId)(
+      implicit system: ActorSystem,
+      materializer: ActorMaterializer): Future[Done] = {
+    produceRecord(signTopic, submissionId.lei, submissionId.toString)
 
   }
 

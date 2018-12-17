@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d][%-5level][%thread] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="STDOUT" />
+    </appender>
+
+    <root level="${PLATFORM_LOG_LEVEL:-INFO}">
+        <appender-ref ref="ASYNC" />
+    </root>
+    <logger name="org.apache.zookeeper" level="${ZOOKEEPER_LOG_LEVEL:-WARN}"/>
+    <logger name="org.apache.kafka" level="${KAFKA_LOG_LEVEL:-INFO}" />
+    <logger name="org.apache.cassandra" level="${CASSANDRA_LOG_LEVEL:-INFO}" />
+</configuration>

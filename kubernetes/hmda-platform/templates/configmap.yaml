@@ -14,6 +14,13 @@ metadata:
 data:
   auth.url: {{ .Values.keycloak.url }}
 
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-configmap
+data:
+kafka.hosts: {{ .Values.kafka.hosts }}
 
 ---
 apiVersion: v1
@@ -23,3 +30,5 @@ metadata:
 data:
   check.digit.host: {{ .Values.grpc.check_digit.host }}
   check.digit.port: "{{ .Values.grpc.check_digit.port }}"
+  census.host: {{ .Values.grpc.census.host }}
+  census.port: "{{ .Values.grpc.census.port }}"

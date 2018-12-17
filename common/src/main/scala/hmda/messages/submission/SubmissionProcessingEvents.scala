@@ -2,7 +2,7 @@ package hmda.messages.submission
 
 import hmda.messages.CommonMessages.Event
 import hmda.model.filing.submission.{SubmissionId, SubmissionStatus}
-import hmda.model.validation.ValidationError
+import hmda.model.validation.{MacroValidationError, ValidationError}
 
 object SubmissionProcessingEvents {
   sealed trait SubmissionProcessingEvent extends Event
@@ -14,6 +14,9 @@ object SubmissionProcessingEvents {
                                    validationErrors: List[ValidationError])
       extends SubmissionProcessingEvent
 
+  case class HmdaMacroValidatedError(error: MacroValidationError)
+      extends SubmissionProcessingEvent
+
   case class HmdaRowParsedCount(count: Int) extends SubmissionProcessingEvent
 
   case class SyntacticalValidityCompleted(submissionId: SubmissionId,
@@ -23,12 +26,17 @@ object SubmissionProcessingEvents {
   case class QualityCompleted(submissionId: SubmissionId, statusCode: Int)
       extends SubmissionProcessingEvent
 
+  case class MacroCompleted(submissionId: SubmissionId, statusCode: Int)
+      extends SubmissionProcessingEvent
+
   case class QualityVerified(submissionId: SubmissionId,
                              verified: Boolean,
                              status: SubmissionStatus)
       extends SubmissionProcessingEvent
 
-  case class MacroVerified(submissionId: SubmissionId, verified: Boolean)
+  case class MacroVerified(submissionId: SubmissionId,
+                           verified: Boolean,
+                           status: SubmissionStatus)
       extends SubmissionProcessingEvent
 
   case class NotReadyToBeVerified(submissionId: SubmissionId)

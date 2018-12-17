@@ -80,6 +80,8 @@ lazy val `hmda-root` = (project in file("."))
              `hmda-platform`,
              `check-digit`,
              `institutions-api`,
+             `census-api`,
+             `modified-lar`,
              `hmda-regulator`)
 
 lazy val common = (project in file("common"))
@@ -168,6 +170,60 @@ lazy val `institutions-api` = (project in file("institutions-api"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
+
+lazy val `census-api` = (project in file("census-api"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.census.HmdaCensusApi"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol`)
+
+lazy val `modified-lar` = (project in file("modified-lar"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.publication.lar.ModifiedLarApp"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol`)
+  .dependsOn(common)
 
 lazy val `hmda-protocol` = (project in file("protocol"))
   .enablePlugins(JavaServerAppPackaging,

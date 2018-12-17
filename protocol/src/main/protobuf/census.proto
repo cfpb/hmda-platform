@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "hmda.grpc.services";
+option java_outer_classname = "CensusApiProto";
+
+message ValidTractRequest {
+    string tract = 1;
+}
+message ValidTractResponse {
+    bool isValid = 1;
+}
+
+message ValidCountyRequest {
+    string county = 1;
+}
+message ValidCountyResponse {
+    bool isValid = 1;
+}
+
+message ValidPopulationRequest {
+    string county = 1;
+}
+message ValidPopulationResponse {
+    bool isValid = 1;
+}
+
+service CensusService {
+    rpc validateTract (ValidTractRequest) returns (ValidTractResponse) {}
+
+    rpc validateCounty (ValidCountyRequest) returns (ValidCountyResponse) {}
+
+    rpc validatePopulation (ValidPopulationRequest) returns (ValidPopulationResponse) {}
+}

@@ -12,7 +12,9 @@ import hmda.persistence.serialization.submission.processing.events._
 import hmda.serialization.validation.ValidationProtobufConverter._
 import SubmissionProtobufConverter._
 import hmda.model.filing.submission.SubmissionStatus
+import hmda.model.validation.MacroValidationError
 import hmda.persistence.serialization.submission.SubmissionIdMessage
+import hmda.persistence.serialization.validation.ValidationErrorMessage
 
 object SubmissionProcessingEventsProtobufConverter {
 
@@ -128,14 +130,16 @@ object SubmissionProcessingEventsProtobufConverter {
   def macroVerifiedToProtobuf(evt: MacroVerified): MacroVerifiedMessage = {
     MacroVerifiedMessage(
       submissionIdToProtobuf(evt.submissionId),
-      evt.verified
+      evt.verified,
+      evt.status.code
     )
   }
 
   def macroVerifiedFromProtobuf(msg: MacroVerifiedMessage): MacroVerified = {
     MacroVerified(submissionIdFromProtobuf(
                     msg.submissionId.getOrElse(SubmissionIdMessage())),
-                  msg.verified)
+                  msg.verified,
+                  SubmissionStatus.valueOf(msg.statusCode))
   }
 
   def notReadyToBeVerifiedToProtobuf(
@@ -188,6 +192,21 @@ object SubmissionProcessingEventsProtobufConverter {
     )
   }
 
+  def macroCompletedToProtobuf(evt: MacroCompleted): MacroCompletedMessage = {
+    MacroCompletedMessage(
+      submissionIdToProtobuf(evt.submissionId),
+      evt.statusCode
+    )
+  }
+
+  def macroCompletedFromProtobuf(msg: MacroCompletedMessage): MacroCompleted = {
+    MacroCompleted(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
+      msg.statusCode
+    )
+  }
+
   def submissionSignedToProtobuf(
       evt: SubmissionSigned): SubmissionSignedMessage = {
     SubmissionSignedMessage(
@@ -222,4 +241,22 @@ object SubmissionProcessingEventsProtobufConverter {
         msg.submissionId.getOrElse(SubmissionIdMessage()))
     )
   }
+
+  def hmdaMacroValidatedErrorToProtobuf(
+      evt: HmdaMacroValidatedError
+  ): HmdaMacroValidatedErrorMessage = {
+    HmdaMacroValidatedErrorMessage(
+      Some(validationErrorToProtobuf(evt.error))
+    )
+  }
+
+  def hmdaMacroValidatedErrorFromProtobuf(
+      msg: HmdaMacroValidatedErrorMessage): HmdaMacroValidatedError = {
+    HmdaMacroValidatedError(
+      validationErrorFromProtobuf(
+        msg.validationError.getOrElse(ValidationErrorMessage()))
+        .asInstanceOf[MacroValidationError]
+    )
+  }
+
 }
