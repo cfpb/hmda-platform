@@ -54,6 +54,11 @@ spec:
                 configMapKeyRef:
                   name: "{{ .Release.Name }}-inst-api-config"
                   key: postgres.create-schema
+            - name: KAFKA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-configmap
+                  key: kafka.hosts
             - name: CASSANDRA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:
