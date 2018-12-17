@@ -110,7 +110,6 @@ object ValidationFlow {
     val lars = List[LoanApplicationRegister]()
     collectLar
       .map { lar =>
-        println("This is the lar here: " + lar)
         def errors = checkType match {
           case "all" =>
             LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
