@@ -25,3 +25,12 @@ message InstitutionDeletedMessage {
 message InstitutionNotExistsMessage {
     string lei = 1;
 }
+
+message InstitutionKafkaEventMessage {
+    string eventType = 1;
+    oneof institutionEventField {
+        InstitutionCreatedMessage institutionCreatedField = 2;
+        InstitutionModifiedMessage institutionModifiedField = 3;
+        InstitutionDeletedMessage institutionDeletedField = 4;
+    }
+}
