@@ -4,18 +4,17 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.actor.typed.Logger
 import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
-import akka.stream.scaladsl.Source
-import akka.util.Timeout
+import akka.stream.scaladsl.{Sink, Source}
+import akka.util.{ByteString, Timeout}
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
-import hmda.messages.submission.SubmissionCommands.{
-  GetSubmission,
-  ModifySubmission,
-  SubmissionCommand
-}
+import hmda.messages.submission.SubmissionCommands.{GetSubmission, ModifySubmission, SubmissionCommand}
 import hmda.messages.submission.SubmissionEvents.SubmissionEvent
 import hmda.messages.submission.SubmissionManagerCommands.UpdateSubmissionStatus
 import hmda.model.filing.submission.{Submission, SubmissionId, SubmissionStatus}
+import hmda.model.filing.ts.TransmittalSheet
+import hmda.parser.filing.ts.TsCsvParser
 import hmda.query.HmdaQuery._
+import hmda.util.streams.FlowUtils.framing
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,6 +30,22 @@ object HmdaProcessingUtils {
         case evt: LineAdded => evt
       }
 
+  }
+
+  def readTsData(submissionId: SubmissionId): Future[Option[TransmittalSheet]] = {
+    readRawData(submissionId)
+      .map(line => line.data)
+      .map(ByteString(_))
+      .take(1)
+      .via(framing("\n"))
+      .map(_.utf8String)
+      .map(_.trim)
+      .map(s => TsCsvParser(s))
+      .map { s =>
+        s.getOrElse(TransmittalSheet())
+      }
+      .runWith(Sink.seq)
+      .map(xs => xs.headOption)
   }
 
   def updateSubmissionStatus(

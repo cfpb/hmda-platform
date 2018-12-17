@@ -131,20 +131,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
             val fSummary: Future[Option[Submission]] = filingPersistence ? (
                 ref => GetSubmissionSummary(submissionId, ref))
 
-            val fTs: Future[Option[TransmittalSheet]] =
-              readRawData(submissionId)
-                .map(line => line.data)
-                .map(ByteString(_))
-                .take(1)
-                .via(framing("\n"))
-                .map(_.utf8String)
-                .map(_.trim)
-                .map(s => TsCsvParser(s))
-                .map { s =>
-                  s.getOrElse(TransmittalSheet())
-                }
-                .runWith(Sink.seq)
-                .map(xs => xs.headOption)
+            val fTs: Future[Option[TransmittalSheet]] = readTsData(submissionId)
 
             val fCheck = for {
               t <- fTs
