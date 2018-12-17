@@ -74,6 +74,16 @@ spec:
             configMapKeyRef:
               name: grpc-configmap
               key: check.digit.port
+        - name: GRPC_CENSUS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: grpc-configmap
+              key: census.host
+        - name: GRPC_CENSUS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: grpc-configmap
+              key: census.port
 #        livenessProbe:
 #          tcpSocket:
 #            port: {{ .Values.bootstrap.port }}

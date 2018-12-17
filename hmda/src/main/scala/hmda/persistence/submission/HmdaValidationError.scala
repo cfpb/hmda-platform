@@ -105,8 +105,9 @@ object HmdaValidationError
                                                       submissionId,
                                                       validationContext)
             .runWith(Sink.ignore)
-          larAsyncErrors <- validateAsyncLar(ctx, submissionId).runWith(
-            Sink.ignore)
+          larAsyncErrors <- validateAsyncLar("syntactical-validity",
+                                             ctx,
+                                             submissionId).runWith(Sink.ignore)
         } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
@@ -144,7 +145,11 @@ object HmdaValidationError
                                    submissionId,
                                    ValidationContext())
             .runWith(Sink.ignore)
-        } yield larErrors
+          larAsyncErrorsQuality <- validateAsyncLar("quality",
+                                                    ctx,
+                                                    submissionId)
+            .runWith(Sink.ignore)
+        } yield (larErrors, larAsyncErrorsQuality)
 
         fQuality.onComplete {
           case Success(_) =>
@@ -419,12 +424,13 @@ object HmdaValidationError
   }
 
   private def validateAsyncLar[as: AS, mat: MAT, ec: EC](
+      editCheck: String,
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId
   ) = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
-      .via(validateAsyncLarFlow)
+      .via(validateAsyncLarFlow(editCheck))
       .map { x =>
         x.collect {
           case Left(errors) => errors
