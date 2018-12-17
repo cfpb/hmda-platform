@@ -7,7 +7,7 @@ import akka.util.ByteString
 import cats.Semigroup
 import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.validation.{
   LarValidationError,
   TsValidationError,
@@ -18,10 +18,10 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation.{AS, EC, HmdaValidated, MAT}
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
-import hmda.validation.engine.LarEngine
-import hmda.validation.engine.TsEngine
+import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
 
 import scala.concurrent.Future
+
 
 object ValidationFlow {
 
@@ -77,6 +77,31 @@ object ValidationFlow {
           })
           .toEither
       }
+  }
+
+  def validateTsLarEdits(tsLar: TransmittalLar,
+                         checkType: String,
+                         validationContext: ValidationContext)
+    : Either[List[ValidationError], TransmittalLar] = {
+    val errors = checkType match {
+      case "all" =>
+        TsLarEngine.checkAll(tsLar,
+                             tsLar.ts.LEI,
+                             validationContext,
+                             TsValidationError)
+      case "syntactical" =>
+        TsLarEngine.checkSyntactical(tsLar,
+                                     tsLar.ts.LEI,
+                                     validationContext,
+                                     TsValidationError)
+      case "validity" =>
+        TsLarEngine.checkValidity(tsLar, tsLar.ts.LEI, TsValidationError)
+    }
+    errors
+      .leftMap(xs => {
+        addTsFieldInformation(tsLar.ts, xs.toList)
+      })
+      .toEither
   }
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)

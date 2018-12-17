@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.ActorSystem
+import akka.actor.{Actor, ActorSystem}
 import akka.pattern.ask
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
@@ -23,7 +23,7 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
 import akka.stream.typed.scaladsl.ActorFlow
 import hmda.messages.institution.InstitutionCommands.GetInstitution
-import hmda.model.filing.ts.TransmittalSheet
+import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
@@ -46,15 +46,20 @@ import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
 import hmda.query.HmdaQuery._
 import hmda.messages.submission.SubmissionProcessingEvents
+import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
+import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.filing.MacroValidationFlow._
-import hmda.validation.{AS, EC, MAT}
+import hmda.validation.{AS, EC, HmdaValidated, MAT}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
+import hmda.util.SourceUtils.count
+
+import scala.collection.immutable
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -104,15 +109,16 @@ object HmdaValidationError
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext)
             .runWith(Sink.ignore)
+          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
-                                                      ctx,
-                                                      submissionId,
-                                                      validationContext)
+            ctx,
+            submissionId,
+            validationContext)
             .runWith(Sink.ignore)
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
-                                             ctx,
-                                             submissionId).runWith(Sink.ignore)
-        } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
+            ctx,
+            submissionId).runWith(Sink.ignore)
+        } yield (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
 
         fSyntacticalValidity.onComplete {
           case Success(_) =>
@@ -364,7 +370,8 @@ object HmdaValidationError
 
   private def validateTs[as: AS](ctx: ActorContext[SubmissionProcessingCommand],
                                  submissionId: SubmissionId,
-                                 validationContext: ValidationContext) = {
+                                 validationContext: ValidationContext)
+    : Source[HmdaRowValidatedError, NotUsed] = {
     uploadConsumerRawStr(ctx, submissionId)
       .take(1)
       .via(validateTsFlow("all", validationContext))
@@ -383,11 +390,60 @@ object HmdaValidationError
         ))
   }
 
+  private def validateTsLar[as: AS, mat: MAT, ec: EC](
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId,
+      validationContext: ValidationContext): Future[Unit] = {
+
+    val headerResultTest: Future[TransmittalSheet] =
+      uploadConsumerRawStr(ctx, submissionId)
+        .take(1)
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
+        .map(s => TsCsvParser(s))
+        .collect {
+          case Right(ts) => ts
+        }
+        .runWith(Sink.head)
+
+    val restResult: Future[immutable.Seq[LoanApplicationRegister]] =
+      uploadConsumerRawStr(ctx, submissionId)
+        .drop(1)
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
+        .map(s => LarCsvParser(s))
+        .collect {
+          case Right(lar) => lar
+        }
+        .runWith(Sink.seq)
+
+    for {
+      header <- headerResultTest
+      rest <- restResult
+    } yield {
+      val tsLar = TransmittalLar(header, rest)
+      validateTsLarEdits(tsLar, "all", validationContext) match {
+        case Left(errors) => {
+          ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(
+            submissionId,
+            1,
+            errors,
+            None)
+        }
+
+      }
+    }
+
+  }
+
   private def validateLar[as: AS](
       editCheck: String,
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
-      validationContext: ValidationContext) = {
+      validationContext: ValidationContext)
+    : Source[HmdaRowValidatedError, NotUsed] = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateLarFlow(editCheck, validationContext))
