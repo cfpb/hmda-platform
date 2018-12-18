@@ -107,9 +107,9 @@ object HmdaValidationError
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
-          tsErrors <- validateTs(ctx, submissionId, validationContext)
-            .runWith(Sink.ignore)
-//          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
+          tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
+            Sink.ignore)
+          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
@@ -119,8 +119,7 @@ object HmdaValidationError
                                              ctx,
                                              submissionId).runWith(Sink.ignore)
         } yield
-//          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
-        (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
+          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
           case Success(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
@@ -425,13 +424,16 @@ object HmdaValidationError
       rest <- restResult
     } yield {
       val tsLar = TransmittalLar(header, rest)
-      validateTsLarEdits(tsLar, "all", validationContext) match {
+      validateTsLarEdits(tsLar, "syntactical", validationContext) match {
         case Left(errors) => {
           ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(
             submissionId,
             1,
             errors,
             None)
+        }
+        case Right(_) => {
+          Nil
         }
 
       }

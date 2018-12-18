@@ -14,7 +14,7 @@ object CensusApiTest extends App {
   implicit val ec = clientSystem.dispatcher
 
   val client = CensusServiceClient(
-    GrpcClientSettings.connectToServiceAt("0.0.0.0", 60081).withTls(false))
+    GrpcClientSettings.connectToServiceAt("127.0.0.1", 60081).withTls(false))
 
   val replyF =
     client.validateTract(ValidTractRequest("78030961200"))
