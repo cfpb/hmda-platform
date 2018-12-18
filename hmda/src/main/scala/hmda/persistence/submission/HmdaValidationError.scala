@@ -566,9 +566,9 @@ object HmdaValidationError
 
   }
 
-  private def publishInstitutionEvent[as: AS, mat: MAT, ec: EC](institutionID: String, sharding: ClusterSharding)(
-    implicit system: ActorSystem,
-    materializer: ActorMaterializer): Unit = {
+  private def publishInstitutionEvent[as: AS, mat: MAT, ec: EC](
+      institutionID: String,
+      sharding: ClusterSharding): Unit = {
 
     val institutionPersistence =
       sharding.entityRefFor(
