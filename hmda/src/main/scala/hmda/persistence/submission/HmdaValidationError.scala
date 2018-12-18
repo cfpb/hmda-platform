@@ -4,6 +4,7 @@ import java.time.Instant
 
 import akka.actor.{Actor, ActorSystem}
 import akka.pattern.ask
+import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
@@ -233,7 +234,7 @@ object HmdaValidationError
           Effect
             .persist(HmdaRowValidatedError(rowNumber, validationErrors))
             .thenRun { _ =>
-              log.debug(
+              log.info(
                 s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
 
               val hmdaRowValidatedError =
@@ -393,7 +394,7 @@ object HmdaValidationError
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
-      validationContext: ValidationContext): Future[Unit] = {
+      validationContext: ValidationContext): Future[List[ValidationError]] = {
 
     val headerResultTest: Future[TransmittalSheet] =
       uploadConsumerRawStr(ctx, submissionId)
@@ -425,20 +426,20 @@ object HmdaValidationError
     } yield {
       val tsLar = TransmittalLar(header, rest)
       validateTsLarEdits(tsLar, "syntactical", validationContext) match {
-        case Left(errors) => {
-          ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(
+        case Left(errors: Seq[ValidationError]) => {
+          //TODO Figure out how to get the actor to reply back before moving on
+          val k: Future[Any] = ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(
             submissionId,
             1,
             errors,
             None)
+          errors
         }
         case Right(_) => {
           Nil
         }
-
       }
     }
-
   }
 
   private def validateLar[as: AS](
