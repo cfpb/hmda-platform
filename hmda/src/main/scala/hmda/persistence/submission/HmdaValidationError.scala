@@ -123,7 +123,6 @@ object HmdaValidationError
                                              submissionId).runWith(Sink.ignore)
         } yield
           (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
-
         fSyntacticalValidity.onComplete {
           case Success(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
@@ -237,7 +236,7 @@ object HmdaValidationError
           Effect
             .persist(HmdaRowValidatedError(rowNumber, validationErrors))
             .thenRun { _ =>
-              log.info(
+              log.debug(
                 s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
 
               val hmdaRowValidatedError =

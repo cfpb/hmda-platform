@@ -1,11 +1,23 @@
 package hmda.serialization.institution
 
 import hmda.messages.institution.InstitutionEvents._
-import hmda.persistence.serialization.institution.InstitutionMessage
+import hmda.persistence.serialization.institution.{InstitutionMessage, events}
 import hmda.persistence.serialization.institution.events._
 import InstitutionProtobufConverter._
 import hmda.persistence.serialization.filing.FilingMessage
+import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField
+import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField.{
+  InstitutionCreatedField,
+  InstitutionDeletedField,
+  InstitutionModifiedField
+}
+import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField.{
+  InstitutionCreatedField,
+  InstitutionDeletedField,
+  InstitutionModifiedField
+}
 import hmda.serialization.filing.FilingProtobufConverter._
+import jnr.ffi.annotations.In
 
 object InstitutionEventsProtobufConverter {
 
@@ -76,6 +88,35 @@ object InstitutionEventsProtobufConverter {
 
   def filingAddedFromProtobuf(msg: FilingAddedMessage): FilingAdded = {
     FilingAdded(filingFromProtobuf(msg.filing.getOrElse(FilingMessage())))
+  }
+
+  def institutionKafkaEventToProtobuf(
+      evt: InstitutionKafkaEvent): InstitutionKafkaEventMessage = {
+    evt.institutionEvent match {
+      case ic: InstitutionCreated =>
+        val field = InstitutionCreatedField(institutionCreatedToProtobuf(ic))
+        InstitutionKafkaEventMessage(evt.eventType, field)
+      case im: InstitutionModified =>
+        val field = InstitutionModifiedField(institutionModifiedToProtobuf(im))
+        InstitutionKafkaEventMessage(evt.eventType, field)
+      case id: InstitutionDeleted =>
+        val field = InstitutionDeletedField(institutionDeletedToProtobuf(id))
+        InstitutionKafkaEventMessage(evt.eventType, field)
+    }
+  }
+
+  def institutionKafkaEventFromProtobuf(
+      bytes: Array[Byte]): InstitutionKafkaEvent = {
+    val msg = InstitutionKafkaEventMessage.parseFrom(bytes)
+    msg.institutionEventField match {
+      case InstitutionEventField.InstitutionCreatedField(ic) =>
+        InstitutionKafkaEvent(msg.eventType, institutionCreatedFromProtobuf(ic))
+      case InstitutionEventField.InstitutionModifiedField(im) =>
+        InstitutionKafkaEvent(msg.eventType,
+                              institutionModifiedFromProtobuf(im))
+      case InstitutionEventField.InstitutionDeletedField(id) =>
+        InstitutionKafkaEvent(msg.eventType, institutionDeletedFromProtobuf(id))
+    }
   }
 
 }
