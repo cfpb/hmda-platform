@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
@@ -44,20 +44,17 @@ import hmda.messages.submission.EditDetailsCommands.{
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.query.HmdaQuery._
-import hmda.messages.submission.SubmissionProcessingEvents
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.filing.MacroValidationFlow._
-import hmda.validation.{AS, EC, HmdaValidated, MAT}
+import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
-import hmda.util.SourceUtils.count
 
 import scala.collection.immutable
 
@@ -194,20 +191,15 @@ object HmdaValidationError
 
         fMacroEdits.onComplete {
           case Success(edits) =>
-            edits.foreach { edit =>
-              ctx.asScala.self ! PersistMacroError(
+            val persistedEdits = Future.sequence(edits.map { edit =>
+              ctx.asScala.self.toUntyped ? PersistMacroError(
                 submissionId,
                 edit.asInstanceOf[MacroValidationError],
                 None)
-            }
-            if (edits.nonEmpty) {
-              updateSubmissionStatus(sharding, submissionId, MacroErrors, log)
-            } else if (state.qualityVerified) {
-              updateSubmissionStatus(sharding, submissionId, Verified, log)
-            } else {
-              updateSubmissionStatus(sharding, submissionId, Macro, log)
-            }
-            ctx.asScala.self ! CompleteMacro(submissionId)
+            })
+            persistedEdits.onComplete(_ => {
+              ctx.asScala.self ! CompleteMacro(submissionId)
+            })
           case Failure(e) =>
             log.error(e.getLocalizedMessage)
 
@@ -220,6 +212,7 @@ object HmdaValidationError
           if (!state.macroVerified) MacroErrors
           else if (state.qualityVerified) Verified
           else Macro
+        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
         Effect.persist(MacroCompleted(submissionId, updatedStatus.code))
 
       case PersistHmdaRowValidatedError(submissionId,
