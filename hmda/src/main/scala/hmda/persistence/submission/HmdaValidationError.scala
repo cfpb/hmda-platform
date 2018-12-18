@@ -22,7 +22,7 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
 import akka.stream.typed.scaladsl.ActorFlow
-import hmda.messages.institution.InstitutionCommands.GetInstitution
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
@@ -33,7 +33,7 @@ import HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissi
 import EditDetailsConverter._
 import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.messages.institution.InstitutionEvents.{InstitutionKafkaEvent, InstitutionModified}
+import hmda.messages.institution.InstitutionEvents.{InstitutionEvent, InstitutionKafkaEvent, InstitutionModified}
 import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.publication.KafkaUtils._
@@ -49,7 +49,6 @@ import hmda.validation.{AS, EC, MAT}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
-
 import scala.collection.immutable
 
 object HmdaValidationError
@@ -311,7 +310,7 @@ object HmdaValidationError
                 log)
               publishSignEvent(submissionId).map(signed =>
                 log.info(s"Published signed event for $submissionId"))
-              publishInstitutionEvent(submissionId.lei, sharding)
+              setHmdaFilerFlag(submissionId.lei, sharding)
               replyTo ! signed
             }
           } else {
@@ -566,7 +565,7 @@ object HmdaValidationError
 
   }
 
-  private def publishInstitutionEvent[as: AS, mat: MAT, ec: EC](
+  private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](
       institutionID: String,
       sharding: ClusterSharding): Unit = {
 
@@ -583,9 +582,12 @@ object HmdaValidationError
     } yield {
       val institution = maybeInst.getOrElse(Institution.empty)
       val modifiedInstitution = institution.copy(hmdaFiler = true)
-      val kafkaMessage = InstitutionKafkaEvent("InstitutionModified", InstitutionModified(modifiedInstitution))
-      if(institution.LEI.nonEmpty)
-        produceInstitutionRecord(institutionTopic, institutionID, kafkaMessage)
+      if (institution.LEI.nonEmpty) {
+        val modified: Future[InstitutionEvent] =
+          institutionPersistence ? (ref =>
+            ModifyInstitution(modifiedInstitution, ref))
+        modified
+      }
     }
   }
 
