@@ -6,7 +6,10 @@ import hmda.persistence.serialization.filing.commands._
 import FilingProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
 import hmda.persistence.serialization.filing.FilingMessage
-import hmda.persistence.serialization.submission.SubmissionMessage
+import hmda.persistence.serialization.submission.{
+  SubmissionIdMessage,
+  SubmissionMessage
+}
 
 object FilingCommandsProtobufConverter {
 
@@ -137,7 +140,9 @@ object FilingCommandsProtobufConverter {
   def getSubmissionSummaryToProtobuf(
       cmd: GetSubmissionSummary,
       refResolver: ActorRefResolver): GetSubmissionSummaryMessage = {
+    val submissionId = cmd.submissionId
     GetSubmissionSummaryMessage(
+      submissionIdToProtobuf(submissionId),
       refResolver.toSerializationFormat(cmd.replyTo)
     )
   }
@@ -147,6 +152,8 @@ object FilingCommandsProtobufConverter {
       refResolver: ActorRefResolver): GetSubmissionSummary = {
     val msg = GetSubmissionSummaryMessage.parseFrom(bytes)
     GetSubmissionSummary(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage())),
       refResolver.resolveActorRef(msg.replyTo)
     )
   }
