@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.{Actor, ActorSystem}
+import akka.actor.ActorSystem
 import akka.pattern.ask
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
@@ -22,43 +22,33 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
 import akka.stream.typed.scaladsl.ActorFlow
-import hmda.messages.institution.InstitutionCommands.GetInstitution
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
-import HmdaProcessingUtils.{
-  readRawData,
-  updateSubmissionStatus,
-  updateSubmissionReceipt
-}
+import HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
 import EditDetailsConverter._
 import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.messages.submission.EditDetailsCommands.{
-  EditDetailsPersistenceCommand,
-  PersistEditDetails
-}
+import hmda.messages.institution.InstitutionEvents.{InstitutionEvent, InstitutionKafkaEvent, InstitutionModified}
+import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.query.HmdaQuery._
-import hmda.messages.submission.SubmissionProcessingEvents
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.filing.MacroValidationFlow._
-import hmda.validation.{AS, EC, HmdaValidated, MAT}
+import hmda.validation.{AS, EC, MAT}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
-import hmda.util.SourceUtils.count
-
 import scala.collection.immutable
 
 object HmdaValidationError
@@ -321,6 +311,7 @@ object HmdaValidationError
                 log)
               publishSignEvent(submissionId).map(signed =>
                 log.info(s"Published signed event for $submissionId"))
+              setHmdaFilerFlag(submissionId.lei, sharding)
               replyTo ! signed
             }
           } else {
@@ -573,6 +564,32 @@ object HmdaValidationError
       materializer: ActorMaterializer): Future[Done] = {
     produceRecord(signTopic, submissionId.lei, submissionId.toString)
 
+  }
+
+  private def setHmdaFilerFlag[as: AS, mat: MAT, ec: EC](
+      institutionID: String,
+      sharding: ClusterSharding): Unit = {
+
+    val institutionPersistence =
+      sharding.entityRefFor(
+        InstitutionPersistence.typeKey,
+        s"${InstitutionPersistence.name}-$institutionID")
+
+    val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
+      ref => GetInstitution(ref))
+
+    for {
+      maybeInst <- fInstitution
+    } yield {
+      val institution = maybeInst.getOrElse(Institution.empty)
+      val modifiedInstitution = institution.copy(hmdaFiler = true)
+      if (institution.LEI.nonEmpty) {
+        val modified: Future[InstitutionEvent] =
+          institutionPersistence ? (ref =>
+            ModifyInstitution(modifiedInstitution, ref))
+        modified
+      }
+    }
   }
 
 }
