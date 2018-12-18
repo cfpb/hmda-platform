@@ -39,6 +39,11 @@ message GetLatestSubmissionMessage {
     string replyTo = 1;
 }
 
+message GetSubmissionSummaryMessage {
+    SubmissionIdMessage submissionId = 1;
+    string replyTo = 2;
+}
+
 message GetSubmissionsMessage {
     string replyTo = 1;
 }

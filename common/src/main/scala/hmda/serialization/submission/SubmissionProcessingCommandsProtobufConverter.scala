@@ -251,6 +251,19 @@ object SubmissionProcessingCommandsProtobufConverter {
     )
   }
 
+  def startMacroToProtobuf(cmd: StartMacro): StartMacroMessage = {
+    StartMacroMessage(
+      submissionIdToProtobuf(cmd.submissionId)
+    )
+  }
+
+  def startMacroFromProtobuf(msg: StartMacroMessage): StartMacro = {
+    StartMacro(
+      submissionIdFromProtobuf(
+        msg.submissionId.getOrElse(SubmissionIdMessage()))
+    )
+  }
+
   def completeQualityToProtobuf(
       cmd: CompleteQuality): CompleteQualityMessage = {
     CompleteQualityMessage(

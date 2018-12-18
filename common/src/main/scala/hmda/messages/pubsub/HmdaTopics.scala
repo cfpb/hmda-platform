@@ -4,4 +4,5 @@ object HmdaTopics {
   val institutionTopic = "institution"
   val signTopic = "hmda-sign"
   val modifiedLarTopic = "hmda-modified-lar"
+  val analyticsTopic = "hmda-analytics"
 }
