@@ -18,6 +18,5 @@ object TsFieldMapping {
     "Federal Taxpayer Identification Number" -> ts.taxId,
     "Legal Entity Identifier (LEI)" -> ts.LEI,
     "All data fields in the LAR" -> ts.toCSV
-
   )
 }
