@@ -234,7 +234,7 @@ object HmdaValidationError
           Effect
             .persist(HmdaRowValidatedError(rowNumber, validationErrors))
             .thenRun { _ =>
-              log.info(
+              log.debug(
                 s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
 
               val hmdaRowValidatedError =
