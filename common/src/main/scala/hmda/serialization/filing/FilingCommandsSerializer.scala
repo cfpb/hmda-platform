@@ -80,6 +80,8 @@ class FilingCommandsSerializer(system: ExtendedActorSystem)
         updateSubmissionFromProtobuf(bytes, resolver)
       case GetLatestSubmissionManifest =>
         getLatestSubmissionFromProtobuf(bytes, resolver)
+      case GetSubmissionSummaryManifest =>
+        getSubmissionSummaryFromProtobuf(bytes, resolver)
       case GetSubmissionsManifest =>
         getSubmissionsFromProtobuf(bytes, resolver)
       case FilingStopManifest =>
