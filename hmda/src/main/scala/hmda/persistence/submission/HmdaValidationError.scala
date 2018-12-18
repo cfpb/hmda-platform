@@ -4,6 +4,7 @@ import java.time.Instant
 
 import akka.actor.ActorSystem
 import akka.pattern.ask
+import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
@@ -97,9 +98,9 @@ object HmdaValidationError
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
-          tsErrors <- validateTs(ctx, submissionId, validationContext)
-            .runWith(Sink.ignore)
-//          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
+          tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
+            Sink.ignore)
+          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
@@ -109,8 +110,7 @@ object HmdaValidationError
                                              ctx,
                                              submissionId).runWith(Sink.ignore)
         } yield
-//          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
-        (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
+          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
           case Success(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
@@ -381,7 +381,7 @@ object HmdaValidationError
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
-      validationContext: ValidationContext): Future[Unit] = {
+      validationContext: ValidationContext): Future[List[ValidationError]] = {
 
     val headerResultTest: Future[TransmittalSheet] =
       uploadConsumerRawStr(ctx, submissionId)
@@ -412,18 +412,21 @@ object HmdaValidationError
       rest <- restResult
     } yield {
       val tsLar = TransmittalLar(header, rest)
-      validateTsLarEdits(tsLar, "all", validationContext) match {
-        case Left(errors) => {
-          ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(
+      validateTsLarEdits(tsLar, "syntactical", validationContext) match {
+        case Left(errors: Seq[ValidationError]) => {
+          //TODO Figure out how to get the actor to reply back before moving on
+          val k: Future[Any] = ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(
             submissionId,
             1,
             errors,
             None)
+          errors
         }
-
+        case Right(_) => {
+          Nil
+        }
       }
     }
-
   }
 
   private def validateLar[as: AS](
