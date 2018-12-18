@@ -568,7 +568,7 @@ object HmdaValidationError
 
   private def publishInstitutionEvent[as: AS, mat: MAT, ec: EC](institutionID: String, sharding: ClusterSharding)(
     implicit system: ActorSystem,
-    materializer: ActorMaterializer): Future[Done] = {
+    materializer: ActorMaterializer): Unit = {
 
     val institutionPersistence =
       sharding.entityRefFor(
@@ -584,7 +584,8 @@ object HmdaValidationError
       val institution = maybeInst.getOrElse(Institution.empty)
       val modifiedInstitution = institution.copy(hmdaFiler = true)
       val kafkaMessage = InstitutionKafkaEvent("InstitutionModified", InstitutionModified(modifiedInstitution))
-      produceInstitutionRecord(institutionTopic, institutionID, kafkaMessage)
+      if(institution.LEI.nonEmpty)
+        produceInstitutionRecord(institutionTopic, institutionID, kafkaMessage)
     }
   }
 
