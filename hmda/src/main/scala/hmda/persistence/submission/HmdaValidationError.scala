@@ -184,20 +184,15 @@ object HmdaValidationError
 
         fMacroEdits.onComplete {
           case Success(edits) =>
-            edits.foreach { edit =>
-              ctx.asScala.self ! PersistMacroError(
+            val persistedEdits = Future.sequence(edits.map { edit =>
+              ctx.asScala.self.toUntyped ? PersistMacroError(
                 submissionId,
                 edit.asInstanceOf[MacroValidationError],
                 None)
-            }
-            if (edits.nonEmpty) {
-              updateSubmissionStatus(sharding, submissionId, MacroErrors, log)
-            } else if (state.qualityVerified) {
-              updateSubmissionStatus(sharding, submissionId, Verified, log)
-            } else {
-              updateSubmissionStatus(sharding, submissionId, Macro, log)
-            }
-            ctx.asScala.self ! CompleteMacro(submissionId)
+            })
+            persistedEdits.onComplete(_ => {
+              ctx.asScala.self ! CompleteMacro(submissionId)
+            })
           case Failure(e) =>
             log.error(e.getLocalizedMessage)
 
@@ -210,6 +205,7 @@ object HmdaValidationError
           if (!state.macroVerified) MacroErrors
           else if (state.qualityVerified) Verified
           else Macro
+        updateSubmissionStatus(sharding, submissionId, updatedStatus, log)
         Effect.persist(MacroCompleted(submissionId, updatedStatus.code))
 
       case PersistHmdaRowValidatedError(submissionId,
