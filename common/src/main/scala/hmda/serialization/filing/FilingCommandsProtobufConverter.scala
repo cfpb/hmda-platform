@@ -134,6 +134,23 @@ object FilingCommandsProtobufConverter {
     )
   }
 
+  def getSubmissionSummaryToProtobuf(
+      cmd: GetSubmissionSummary,
+      refResolver: ActorRefResolver): GetSubmissionSummaryMessage = {
+    GetSubmissionSummaryMessage(
+      refResolver.toSerializationFormat(cmd.replyTo)
+    )
+  }
+
+  def getSubmissionSummaryFromProtobuf(
+      bytes: Array[Byte],
+      refResolver: ActorRefResolver): GetSubmissionSummary = {
+    val msg = GetSubmissionSummaryMessage.parseFrom(bytes)
+    GetSubmissionSummary(
+      refResolver.resolveActorRef(msg.replyTo)
+    )
+  }
+
   def getLatestSubmissionToProtobuf(
       cmd: GetLatestSubmission,
       refResolver: ActorRefResolver): GetLatestSubmissionMessage = {

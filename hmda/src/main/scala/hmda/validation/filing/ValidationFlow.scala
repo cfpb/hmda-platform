@@ -22,7 +22,6 @@ import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
 
 import scala.concurrent.Future
 
-
 object ValidationFlow {
 
   implicit val larSemigroup = new Semigroup[LoanApplicationRegister] {
