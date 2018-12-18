@@ -79,8 +79,9 @@ lazy val `hmda-root` = (project in file("."))
              `hmda-platform`,
              `check-digit`,
              `institutions-api`,
-             `census-api`,
-             `modified-lar`)
+             `modified-lar`,
+             `hmda-analytics`,
+             `census-api`)
 
 lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
@@ -229,3 +230,28 @@ lazy val `hmda-protocol` = (project in file("protocol"))
                  AshScriptPlugin,
                  AkkaGrpcPlugin)
   .settings(hmdaBuildSettings: _*)
+
+lazy val `hmda-analytics` = (project in file("hmda-analytics"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.analytics.HmdaAnalyticsApp"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
