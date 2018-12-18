@@ -3,31 +3,25 @@ package hmda.regulator.scheduler
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import akka.NotUsed
-import akka.actor.Actor.Receive
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.{ActorLogging, ActorSystem, Props}
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
-import akka.stream.scaladsl.Source
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
-import hmda.query.HmdaQuery.readJournal
-import hmda.regulator.HmdaRegulatorApp.log
+import hmda.regulator.query.{InstitutionEntity, RegulatorComponent}
 import hmda.regulator.scheduler.schedules.Schedules.PanelScheduler
-import hmda.regulator.data.model.PanelRegulatorData
-import hmda.regulator.publisher.{RegulatorDataPublisher, UploadToS3}
-import hmda.regulator.query.{InstitutionComponent, InstitutionEntity}
-import hmda.regulator.query.InstitutionEntity
 
-class PanelScheduler extends HmdaActor with InstitutionComponent {
+import scala.concurrent.Future
+
+class PanelScheduler extends HmdaActor with RegulatorComponent {
+
+  implicit val ec = context.system.dispatcher
+  implicit val materializer = ActorMaterializer()
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -42,9 +36,34 @@ class PanelScheduler extends HmdaActor with InstitutionComponent {
   override def receive: Receive = {
 
     case PanelScheduler =>
-      implicit val materializer = ActorMaterializer()
 
-      implicit val institutionRepository = new InstitutionRepository(dbConfig)
+      val fileHeader ="lei|activityYear|agency|institutionType|" +
+        "id2017|taxId|rssd|respondentName|respondentState|respondentCity|" +
+        "parentIdRssd|parentName|assets|otherLenderCode|topHolderIdRssd|topHolderName|hmdaFiler"
+
+
+      val institutionRepository = new InstitutionRepository(dbConfig)
+
+      val db = institutionRepository.db
+
+      val count = institutionRepository.count()
+
+      val countResults: Future[Int] = institutionRepository.count()
+      countResults.foreach(count => { println(s"Filer Found: ($count)") })
+
+      val institutionResults: Future[Seq[InstitutionEntity]] =
+        institutionRepository.findActiveFilers()
+      institutionResults.foreach(institutions => {
+        for (institution <- institutions)
+          println(s"Filer Found:" + institution.toPSV)
+      })
+
+      val allResults: Future[Seq[InstitutionEntity]] =
+        institutionRepository.getAllInstitutions()
+      allResults.foreach(institutions => {
+        for (institution <- institutions)
+          println(s"All Found:" + institution.toPSV)
+      })
 
       val config = ConfigFactory.load("application.conf").getConfig("aws")
 

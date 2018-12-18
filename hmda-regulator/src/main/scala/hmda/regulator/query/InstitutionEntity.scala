@@ -20,4 +20,8 @@ case class InstitutionEntity(
     hmdaFiler: Boolean = false
 ) {
   def isEmpty: Boolean = lei == ""
+
+  def toPSV: String = {
+    s"$lei|$activityYear|$agency|$institutionType|$id2017|$taxId|$rssd|$respondentName|$respondentState|$respondentCity|$parentIdRssd|$parentName|$assets|$otherLenderCode|$topHolderIdRssd|$topHolderName|$hmdaFiler"
+  }
 }

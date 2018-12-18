@@ -1,40 +1,8 @@
 package hmda.regulator.query
 
-import hmda.model.institution._
-import hmda.regulator.query.{InstitutionEmailEntity, InstitutionEntity}
+import hmda.model.institution.Institution
 
 object InstitutionConverter {
-
-  def convert(entity: InstitutionEntity, emails: Seq[String]): Institution = {
-    Institution(
-      entity.activityYear,
-      entity.lei,
-      Agency.valueOf(entity.agency),
-      InstitutionType.valueOf(entity.institutionType),
-      if (entity.id2017 != "") Some(entity.id2017) else None,
-      if (entity.taxId != "") Some(entity.taxId) else None,
-      entity.rssd,
-      emails,
-      Respondent(
-        if (entity.respondentName != "") Some(entity.respondentName) else None,
-        if (entity.respondentState != "") Some(entity.respondentState)
-        else None,
-        if (entity.respondentCity != "") Some(entity.respondentCity) else None
-      ),
-      Parent(
-        entity.parentIdRssd,
-        if (entity.parentName != "") Some(entity.parentName) else None
-      ),
-      entity.assets,
-      entity.otherLenderCode,
-      TopHolder(
-        entity.topHolderIdRssd,
-        if (entity.topHolderName != "") Some(entity.topHolderName) else None
-      ),
-      entity.hmdaFiler
-    )
-  }
-
   def convert(institution: Institution): InstitutionEntity = {
     InstitutionEntity(
       institution.LEI,
@@ -55,11 +23,5 @@ object InstitutionConverter {
       institution.topHolder.name.getOrElse(""),
       institution.hmdaFiler
     )
-  }
-
-  def emailsFromInstitution(
-      institution: Institution): Seq[InstitutionEmailEntity] = {
-    institution.emailDomains.map(email =>
-      InstitutionEmailEntity(lei = institution.LEI, emailDomain = email))
   }
 }
