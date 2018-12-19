@@ -7,6 +7,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
@@ -71,7 +72,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
         bucket,
         s"$environment/regulator-panel/$year/$fileName")
 
-
       val institutionRepository = new InstitutionRepository(dbConfig)
 
       val allResults: Future[Seq[InstitutionEntity]] =
@@ -82,10 +82,11 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
           val source = institutions
             .map(institution => institution.toPSV + "\n")
             .map(s => addHeader(s))
+            .map(s => ByteString(s))
+            .toList
 
           log.info(s"Uploading Regulator Data file : $fileName" + "  to S3.")
-          // ByteString(source).runWith(s3Sink)
-          println(source)
+          Source(source).runWith(s3Sink)
         }
         case Failure(t) => println("An error has occurred: " + t.getMessage)
       }
