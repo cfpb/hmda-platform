@@ -157,7 +157,8 @@ object ModifiedLarCsvParser {
       case x                               => roundToMidPoint(x.toDouble.toInt).toString
     }
 
-  private def convertEmptyField(code: Int)=  if(code == 0) "" else code.toString
+  private def convertEmptyField(code: Int) =
+    if (code == 0) "" else code.toString
 
   private def roundToMidPoint(x: Int): Int = {
     val rounded = 10000 * Math.floor(x / 10000) + 5000
