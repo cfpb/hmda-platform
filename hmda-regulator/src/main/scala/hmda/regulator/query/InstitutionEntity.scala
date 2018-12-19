@@ -22,6 +22,10 @@ case class InstitutionEntity(
   def isEmpty: Boolean = lei == ""
 
   def toPSV: String = {
-    s"$lei|$activityYear|$agency|$institutionType|$id2017|$taxId|$rssd|$respondentName|$respondentState|$respondentCity|$parentIdRssd|$parentName|$assets|$otherLenderCode|$topHolderIdRssd|$topHolderName|$hmdaFiler"
+    s"$lei|$activityYear|$agency|" +
+      s"$institutionType|$id2017|$taxId|" +
+      s"$rssd|$respondentName|$respondentState|" +
+      s"$respondentCity|$parentIdRssd|$parentName|" +
+      s"$assets|$otherLenderCode|$topHolderIdRssd|$topHolderName|$hmdaFiler"
   }
 }
