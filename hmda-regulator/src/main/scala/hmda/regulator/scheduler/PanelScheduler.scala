@@ -82,14 +82,23 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
 
       allResults onComplete {
         case Success(institutions) => {
-          val source = fileHeader + institutions.map(institution =>
-            institution.toPSV + "\n")
-
+          val source = institutions
+            .map(institution => institution.toPSV + "\n")
+            .map(s => addHeader(s))
 
           log.info(s"Uploading Regulator Data file : $fileName" + "  to S3.")
-          ByteString(source)runWith(s3Sink)
+          // ByteString(source)runWith(s3Sink)
+          println(source)
         }
         case Failure(t) => println("An error has occurred: " + t.getMessage)
       }
   }
+  def addHeader(panelData: String): String = {
+    val fileHeader = "lei|activityYear|agency|institutionType|" +
+      "id2017|taxId|rssd|respondentName|respondentState|respondentCity|" +
+      "parentIdRssd|parentName|assets|otherLenderCode|topHolderIdRssd|topHolderName|hmdaFiler" + "\n"
+
+    fileHeader + panelData
+  }
+
 }
