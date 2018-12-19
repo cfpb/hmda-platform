@@ -2,7 +2,9 @@ package hmda.regulator.scheduler
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
+import akka.http.scaladsl.model.{ContentType, HttpCharsets, MediaTypes}
+import akka.stream.Supervision.Decider
+import akka.stream.alpakka.s3.impl.{S3Headers, ServerSideEncryption}
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.javadsl.S3Client
@@ -67,7 +69,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
 
       val now = LocalDateTime.now()
       val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}" + "_PANEL_" + ".txt"
-
       val s3Sink = s3Client.multipartUpload(
         bucket,
         s"$environment/regulator-panel/$year/$fileName")
