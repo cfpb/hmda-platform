@@ -11,6 +11,7 @@ import hmda.model.filing.submission.{SubmissionId, Verified}
 import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState}
 import hmda.model.validation._
 import hmda.persistence.AkkaCassandraPersistenceSpec
+import hmda.persistence.institution.InstitutionPersistence
 
 class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   override implicit val system = actor.ActorSystem()
@@ -21,6 +22,7 @@ class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
   SubmissionPersistence.startShardRegion(sharding)
   HmdaValidationError.startShardRegion(sharding)
   EditDetailsPersistence.startShardRegion(sharding)
+  InstitutionPersistence.startShardRegion(sharding)
 
   val submissionId = SubmissionId("12345", "2018", 1)
 

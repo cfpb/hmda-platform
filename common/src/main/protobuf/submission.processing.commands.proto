@@ -71,6 +71,10 @@ message StartQualityMessage {
     SubmissionIdMessage submissionId = 1;
 }
 
+message StartMacroMessage {
+    SubmissionIdMessage submissionId = 1;
+}
+
 message CompleteQualityMessage {
     SubmissionIdMessage submissionId = 1;
 }

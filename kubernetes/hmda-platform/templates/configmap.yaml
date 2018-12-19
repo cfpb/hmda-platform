@@ -20,7 +20,7 @@ kind: ConfigMap
 metadata:
   name: kafka-configmap
 data:
-kafka.hosts: {{ .Values.kafka.hosts }}
+  kafka.hosts: {{ .Values.kafka.hosts }}
 
 ---
 apiVersion: v1

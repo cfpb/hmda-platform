@@ -69,9 +69,11 @@ trait TsValidationHttpApi
                        chekType: String,
                        ctx: ValidationContext): Route = {
     val validation: HmdaValidation[TransmittalSheet] = chekType match {
-      case "all"         => checkAll(ts, ts.LEI, ctx, TsValidationError)
-      case "syntactical" => checkSyntactical(ts, ts.LEI, ctx, TsValidationError)
-      case "validity"    => checkValidity(ts, ts.LEI, TsValidationError)
+      case "all" => checkAll(ts, ts.LEI, ctx, TsValidationError)
+      case "syntactical" =>
+        checkSyntactical(ts, ts.LEI, ctx, TsValidationError)
+      case "validity" =>
+        checkValidity(ts, ts.LEI, TsValidationError)
     }
 
     val maybeErrors = validation.leftMap(xs => xs.toList).toEither
