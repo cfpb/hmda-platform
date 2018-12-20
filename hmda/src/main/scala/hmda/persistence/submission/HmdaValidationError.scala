@@ -232,8 +232,9 @@ object HmdaValidationError
           Effect
             .persist(HmdaRowValidatedError(rowNumber, validationErrors))
             .thenRun { _ =>
-              log.debug(
+              log.info(
                 s"Persisted: ${HmdaRowValidatedError(rowNumber, validationErrors)}")
+              log.info(s"The state is $state")
 
               val hmdaRowValidatedError =
                 HmdaRowValidatedError(rowNumber, validationErrors)
@@ -256,7 +257,7 @@ object HmdaValidationError
       case PersistMacroError(_, validationError, maybeReplyTo) =>
         Effect.persist(HmdaMacroValidatedError(validationError)).thenRun { _ =>
           log.info(s"Persisted: $validationError")
-          Thread.sleep(10000)
+          log.info(s"State is: $state")
           maybeReplyTo match {
             case Some(replyTo) =>
               replyTo ! validationError

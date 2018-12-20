@@ -83,7 +83,7 @@ object FilingPersistence
         case UpdateSubmission(updated, replyTo) =>
           if (state.submissions.map(_.id).contains(updated.id)) {
             Effect.persist(SubmissionUpdated(updated)).thenRun { _ =>
-              log.debug(s"Updated submission: ${updated.toString}")
+              log.info(s"Updated submission: ${updated.toString}")
               replyTo match {
                 case Some(ref) => ref ! updated
                 case None      => Effect.none //Do not reply
