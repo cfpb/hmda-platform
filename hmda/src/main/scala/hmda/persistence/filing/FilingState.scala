@@ -28,6 +28,7 @@ case class FilingState(filing: Filing = Filing(),
           FilingState(this.filing, submission :: submissions)
         }
       case SubmissionUpdated(updated) =>
+        println(s"\nUpdating status with $updated\n")
         if (submissions.map(_.id).contains(updated.id) && !isSigned(updated)) {
           val updatedList = updated :: submissions.filterNot(s =>
             s.id == updated.id)

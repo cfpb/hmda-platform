@@ -38,7 +38,7 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
       .toSet
     val macroErrors = this.`macro` ++ editSummaries.getOrElse(Macro, Nil).toSet
 
-    HmdaValidationErrorState(
+    val updatedState = HmdaValidationErrorState(
       this.statusCode,
       this.syntactical ++ editSummaries.getOrElse(Syntactical, Nil).toSet,
       this.validity ++ editSummaries.getOrElse(Validity, Nil).toSet,
@@ -47,13 +47,20 @@ case class HmdaValidationErrorState(statusCode: Int = 1,
       qualityVerified = qualityErrors.isEmpty,
       macroVerified = macroErrors.isEmpty
     )
+    println(
+      s"\nState is at ${updatedState.statusCode} with ${qualityErrors.toList.length} quality errors, ${macroErrors.toList.length} macro errors, and quality/macro verified is ${updatedState.qualityVerified}/${updatedState.macroVerified}\n")
+    updatedState
   }
 
   def updateMacroErrors(
       error: HmdaMacroValidatedError): HmdaValidationErrorState = {
-    this.copy(`macro` = this.`macro` ++ Set(
-                EditSummary(error.error.editName, Macro, LarValidationError)),
-              macroVerified = false)
+    val updatedState = this.copy(
+      `macro` = this.`macro` ++ Set(
+        EditSummary(error.error.editName, Macro, LarValidationError)),
+      macroVerified = false)
+    println(
+      s"\nState is at ${updatedState.statusCode} with ${updatedState.quality.toList.length} quality errors, ${updatedState.`macro`.toList.length} macro errors, and quality/macro verified is ${updatedState.qualityVerified}/${updatedState.macroVerified}\n")
+    updatedState
   }
 
   def verifyQuality(evt: QualityVerified): HmdaValidationErrorState = {

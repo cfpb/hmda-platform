@@ -23,19 +23,33 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
 import akka.stream.typed.scaladsl.ActorFlow
-import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
+import hmda.messages.institution.InstitutionCommands.{
+  GetInstitution,
+  ModifyInstitution
+}
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
-import HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
+import HmdaProcessingUtils.{
+  readRawData,
+  updateSubmissionReceipt,
+  updateSubmissionStatus
+}
 import EditDetailsConverter._
 import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.messages.institution.InstitutionEvents.{InstitutionEvent, InstitutionKafkaEvent, InstitutionModified}
-import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionEvent,
+  InstitutionKafkaEvent,
+  InstitutionModified
+}
+import hmda.messages.submission.EditDetailsCommands.{
+  EditDetailsPersistenceCommand,
+  PersistEditDetails
+}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
@@ -190,7 +204,8 @@ object HmdaValidationError
                 edit.asInstanceOf[MacroValidationError],
                 None)
             })
-            persistedEdits.onComplete(_ => {
+            persistedEdits.onComplete(a => {
+              println(a.get)
               ctx.asScala.self ! CompleteMacro(submissionId)
             })
           case Failure(e) =>
@@ -246,6 +261,7 @@ object HmdaValidationError
           log.debug(s"Persisted: $validationError")
           maybeReplyTo match {
             case Some(replyTo) =>
+              Thread.sleep(4000)
               replyTo ! validationError
             case None => //do nothing
           }
@@ -570,12 +586,11 @@ object HmdaValidationError
       sharding: ClusterSharding): Unit = {
 
     val institutionPersistence =
-      sharding.entityRefFor(
-        InstitutionPersistence.typeKey,
-        s"${InstitutionPersistence.name}-$institutionID")
+      sharding.entityRefFor(InstitutionPersistence.typeKey,
+                            s"${InstitutionPersistence.name}-$institutionID")
 
     val fInstitution: Future[Option[Institution]] = institutionPersistence ? (
-      ref => GetInstitution(ref))
+        ref => GetInstitution(ref))
 
     for {
       maybeInst <- fInstitution
