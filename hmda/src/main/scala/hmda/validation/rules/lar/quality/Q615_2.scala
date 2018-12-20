@@ -14,13 +14,15 @@ object Q615_2 extends EditCheck[LoanApplicationRegister] {
   override def parent: String = "Q615"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
+    val oC =
+      Try(lar.loanDisclosure.originationCharges.toDouble).getOrElse(0.0)
+    val tpf =
+      Try(lar.loanDisclosure.totalPointsAndFees.toDouble).getOrElse(0.0)
     when(
       lar.loanDisclosure.originationCharges not oneOf("NA", "Exempt") and
-        (lar.loanDisclosure.totalPointsAndFees not oneOf("NA", "Exempt"))) {
-      val oC =
-        Try(lar.loanDisclosure.originationCharges.toDouble).getOrElse(0.0)
-      val tpf =
-        Try(lar.loanDisclosure.totalPointsAndFees.toDouble).getOrElse(0.0)
+        (lar.loanDisclosure.totalPointsAndFees not oneOf("NA", "Exempt")) and
+        (oC not equalTo(0.0)) and (tpf not equalTo(0.0))) {
+
       tpf is greaterThan(oC)
     }
   }
