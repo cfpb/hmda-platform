@@ -15,8 +15,8 @@ object V627 extends EditCheck[LoanApplicationRegister] {
       lar.geography.county.toLowerCase not equalTo("na") and (lar.geography.tract.toLowerCase not equalTo(
         "na"))) {
       when(
-        lar.geography.county.size is equalTo(5) and (lar.geography.tract.size is equalTo(
-          11))) {
+        lar.geography.county.size is greaterThanOrEqual(5) and (lar.geography.tract.size is greaterThanOrEqual(
+          5))) {
         lar.geography.tract.substring(0, 5) is equalTo(lar.geography.county)
       }
     }

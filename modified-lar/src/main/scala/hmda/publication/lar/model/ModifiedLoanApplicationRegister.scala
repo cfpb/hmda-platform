@@ -102,6 +102,7 @@ case class ModifiedLoanApplicationRegister(
       s"$race3|$race4|$race5|" +
       s"$coRace1|$coRace2|$coRace3|$coRace4|$coRace5|" +
       s"$raceVisualObservation|$coRaceVisualObservation|$sex|$coSex|" +
+      s"$sexVisualObservation|$coSexVisualObservation|" +
       s"$age|$ageGreaterThanOrEqual62|$coAge|$coAgeGreaterThanOrEqual62|$income|" +
       s"$purchaserType|$rateSpread|$hoepaStatus|" +
       s"$lienStatus|$applicantCredisScoreModel|$coApplicantCreditScoreModel|$denial1|" +

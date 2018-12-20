@@ -44,6 +44,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
     classOf[CompleteSyntacticalValidity].getName
   final val StartQualityManifest =
     classOf[StartQuality].getName
+  final val StartMacroManifest =
+    classOf[StartMacro].getName
   final val CompleteQualityManifest =
     classOf[CompleteQuality].getName
   final val VerifyQualityManifest =
@@ -84,6 +86,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
       completeSyntacticalValidityToProtobuf(cmd).toByteArray
     case cmd: StartQuality =>
       startQualityToProtobuf(cmd).toByteArray
+    case cmd: StartMacro =>
+      startMacroToProtobuf(cmd).toByteArray
     case cmd: CompleteQuality =>
       completeQualityToProtobuf(cmd).toByteArray
     case cmd: VerifyQuality =>
@@ -140,6 +144,8 @@ class SubmissionProcessingCommandsSerializer(system: ExtendedActorSystem)
           CompleteSyntacticalValidityMessage.parseFrom(bytes))
       case StartQualityManifest =>
         startQualituFromProtobuf(StartQualityMessage.parseFrom(bytes))
+      case StartMacroManifest =>
+        startMacroFromProtobuf(StartMacroMessage.parseFrom(bytes))
       case CompleteQualityManifest =>
         completeQualityFromProtobuf(CompleteQualityMessage.parseFrom(bytes))
       case VerifyQualityManifest =>

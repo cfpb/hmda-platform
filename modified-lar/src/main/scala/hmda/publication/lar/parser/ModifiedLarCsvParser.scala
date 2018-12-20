@@ -135,8 +135,8 @@ object ModifiedLarCsvParser {
 
   private def convertTotalUnits(totalUnits: Int): String = totalUnits match {
     case x if x < 5                 => x.toString
-    case x if 5 to 23 contains x    => "5-23"
-    case x if 24 to 49 contains x   => "24-49"
+    case x if 5 to 24 contains x    => "5-24"
+    case x if 25 to 49 contains x   => "25-49"
     case x if 50 to 99 contains x   => "50-99"
     case x if 100 to 149 contains x => "100-149"
     case x if x >= 150              => "150+"

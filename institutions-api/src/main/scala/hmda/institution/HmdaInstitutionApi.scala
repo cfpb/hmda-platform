@@ -1,7 +1,5 @@
 package hmda.institution
 
-import java.util.UUID
-
 import akka.Done
 import akka.actor.ActorSystem
 import com.typesafe.config.ConfigFactory
@@ -20,10 +18,8 @@ import hmda.messages.institution.InstitutionEvents.{
   InstitutionKafkaEvent,
   InstitutionModified
 }
-import hmda.messages.projection.CommonProjectionMessages.StartStreaming
 import hmda.publication.KafkaUtils.kafkaHosts
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.model.filing.submission.SubmissionId
 import hmda.serialization.kafka.InstitutionKafkaEventsDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer

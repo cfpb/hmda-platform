@@ -50,6 +50,6 @@ case class FilingState(filing: Filing = Filing(),
 
   private def isSigned(updated: Submission): Boolean = {
     return updated.end != 0 || updated.status == SubmissionStatus
-      .valueOf(Signed.code) || updated.receipt.isEmpty
+      .valueOf(Signed.code) || !updated.receipt.isEmpty
   }
 }
