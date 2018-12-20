@@ -95,7 +95,9 @@ object SubmissionProcessingEventsProtobufConverter {
       cmd.syntactical.map(s => editSummaryToProtobuf(s)).toSeq,
       cmd.validity.map(s => editSummaryToProtobuf(s)).toSeq,
       cmd.quality.map(s => editSummaryToProtobuf(s)).toSeq,
-      cmd.`macro`.map(s => editSummaryToProtobuf(s)).toSeq
+      cmd.`macro`.map(s => editSummaryToProtobuf(s)).toSeq,
+      cmd.qualityVerified,
+      cmd.macroVerified
     )
   }
 
@@ -106,7 +108,9 @@ object SubmissionProcessingEventsProtobufConverter {
       msg.syntactical.map(m => editSummaryFromProtobuf(m)).toSet,
       msg.validity.map(m => editSummaryFromProtobuf(m)).toSet,
       msg.quality.map(m => editSummaryFromProtobuf(m)).toSet,
-      msg.syntactical.map(m => editSummaryFromProtobuf(m)).toSet
+      msg.`macro`.map(m => editSummaryFromProtobuf(m)).toSet,
+      msg.qualityVerified,
+      msg.macroVerified
     )
   }
 
