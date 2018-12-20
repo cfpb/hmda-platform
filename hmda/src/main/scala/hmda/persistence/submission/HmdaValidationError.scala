@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import java.time.Instant
 
-import akka.actor.ActorSystem
+import akka.actor.{ActorSystem, Scheduler}
 import akka.pattern.ask
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
@@ -397,6 +397,8 @@ object HmdaValidationError
       submissionId: SubmissionId,
       validationContext: ValidationContext): Future[List[ValidationError]] = {
 
+    implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
+
     val headerResultTest: Future[TransmittalSheet] =
       uploadConsumerRawStr(ctx, submissionId)
         .take(1)
@@ -421,26 +423,31 @@ object HmdaValidationError
         }
         .runWith(Sink.seq)
 
+    def validateAndPersistErrors(
+        tsLar: TransmittalLar,
+        checkType: String,
+        vc: ValidationContext): Future[List[ValidationError]] =
+      validateTsLarEdits(tsLar, checkType, validationContext) match {
+        case Left(errors: Seq[ValidationError]) =>
+          val persisted: Future[HmdaRowValidatedError] = ctx.asScala.self ? (
+              (ref: ActorRef[HmdaRowValidatedError]) =>
+                PersistHmdaRowValidatedError(submissionId,
+                                             1,
+                                             errors,
+                                             Some(ref)))
+          persisted.map(_ => errors)
+
+        case Right(_) =>
+          Future.successful(Nil)
+      }
+
     for {
       header <- headerResultTest
       rest <- restResult
-    } yield {
-      val tsLar = TransmittalLar(header, rest)
-      validateTsLarEdits(tsLar, "syntactical", validationContext) match {
-        case Left(errors: Seq[ValidationError]) => {
-          //TODO Figure out how to get the actor to reply back before moving on
-          val k: Future[Any] = ctx.asScala.self.toUntyped ? PersistHmdaRowValidatedError(
-            submissionId,
-            1,
-            errors,
-            None)
-          errors
-        }
-        case Right(_) => {
-          Nil
-        }
-      }
-    }
+      res <- validateAndPersistErrors(TransmittalLar(header, rest),
+                                      "syntactical",
+                                      validationContext)
+    } yield res
   }
 
   private def validateLar[as: AS](
