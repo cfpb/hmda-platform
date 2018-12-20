@@ -2,10 +2,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "check-digit.fullname" . }}
+  name: {{ template "hmda-regulator.fullname" . }}
   labels:
-    app: {{ template "check-digit.name" . }}
-    chart: {{ template "check-digit.chart" . }}
+    app: {{ template "hmda-regulator.name" . }}
+    chart: {{ template "hmda-regulator.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -16,7 +16,7 @@ spec:
       protocol: {{ .Values.service.protocol }}
       name: {{ .Values.service.name }}
   selector:
-    app: {{ template "check-digit.name" . }}
+    app: {{ template "hmda-regulator.name" . }}
     release: {{ .Release.Name }}
 
 
@@ -35,7 +35,7 @@ metadata:
       name: check_digit_mapping
       prefix: /v2/public/uli/
       rewrite: /uli/
-      service: {{ template "check-digit.fullname" .}}:{{ .Values.service.port }}
+      service: {{ template "hmda-regulator.fullname" .}}:{{ .Values.service.port }}
 
 spec:
   type: {{ .Values.ambassador.service.type }}
@@ -51,10 +51,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "check-digit.fullname" . }}-grpc
+  name: {{ template "hmda-regulator.fullname" . }}-grpc
   labels:
-    app: {{ template "check-digit.fullname" . }}
-    chart: {{ template "check-digit.chart" . }}
+    app: {{ template "hmda-regulator.fullname" . }}
+    chart: {{ template "hmda-regulator.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -65,6 +65,6 @@ spec:
       protocol: {{ .Values.service.protocol }}
       name: {{ .Values.grpc.name }}
   selector:
-    app: {{ template "check-digit.name" . }}
+    app: {{ template "hmda-regulator.name" . }}
     release: {{ .Release.Name }}
 

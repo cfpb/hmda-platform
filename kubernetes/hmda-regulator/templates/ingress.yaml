@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "check-digit.fullname" . -}}
+{{- $fullName := include "hmda-regulator.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    app: {{ template "check-digit.name" . }}
-    chart: {{ template "check-digit.chart" . }}
+    app: {{ template "hmda-regulator.name" . }}
+    chart: {{ template "hmda-regulator.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}
