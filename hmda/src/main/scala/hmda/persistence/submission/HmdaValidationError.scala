@@ -77,7 +77,7 @@ object HmdaValidationError
   val futureTimeout = config.getInt("hmda.actor.timeout")
   val processingYear = config.getInt("hmda.filing.year")
 
-  implicit val timeout: Timeout = Timeout(futureTimeout.seconds)
+  implicit val timeout: Timeout = Timeout(180.seconds)
 
   override def behavior(
       entityId: String): Behavior[SubmissionProcessingCommand] =
@@ -198,16 +198,13 @@ object HmdaValidationError
 
         fMacroEdits.onComplete {
           case Success(edits) =>
-            val persistedEdits = Future.sequence(edits.map { edit =>
-              ctx.asScala.self.toUntyped ? PersistMacroError(
+            edits.foreach { edit =>
+              ctx.asScala.self ! PersistMacroError(
                 submissionId,
                 edit.asInstanceOf[MacroValidationError],
                 None)
-            })
-            persistedEdits.onComplete(a => {
-              println(a.get)
-              ctx.asScala.self ! CompleteMacro(submissionId)
-            })
+            }
+            ctx.asScala.self ! CompleteMacro(submissionId)
           case Failure(e) =>
             log.error(e.getLocalizedMessage)
 
@@ -258,10 +255,10 @@ object HmdaValidationError
 
       case PersistMacroError(_, validationError, maybeReplyTo) =>
         Effect.persist(HmdaMacroValidatedError(validationError)).thenRun { _ =>
-          log.debug(s"Persisted: $validationError")
+          log.info(s"Persisted: $validationError")
+          Thread.sleep(10000)
           maybeReplyTo match {
             case Some(replyTo) =>
-              Thread.sleep(4000)
               replyTo ! validationError
             case None => //do nothing
           }
