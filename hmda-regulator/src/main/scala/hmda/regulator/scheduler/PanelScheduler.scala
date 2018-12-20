@@ -82,7 +82,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
         case Success(institutions) => {
           val source = institutions
             .map(institution => institution.toPSV + "\n")
-            .map(s => addHeader(s))
             .map(s => ByteString(s))
             .toList
 
@@ -92,12 +91,4 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
         case Failure(t) => println("An error has occurred: " + t.getMessage)
       }
   }
-  def addHeader(panelData: String): String = {
-    val fileHeader = "lei|activityYear|agency|institutionType|" +
-      "id2017|taxId|rssd|respondentName|respondentState|respondentCity|" +
-      "parentIdRssd|parentName|assets|otherLenderCode|topHolderIdRssd|topHolderName|hmdaFiler" + "\n"
-
-    fileHeader + panelData
-  }
-
 }
