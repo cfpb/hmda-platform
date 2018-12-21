@@ -2,11 +2,7 @@ package hmda.validation.rules.lar.validity
 
 import akka.grpc.GrpcClientSettings
 import com.typesafe.config.ConfigFactory
-import hmda.grpc.services.{
-  CensusServiceClient,
-  ValidTractRequest,
-  ValidCountyRequest
-}
+import hmda.grpc.services.{CensusServiceClient, ValidTractRequest}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.{AS, EC, MAT}
 import hmda.validation.dsl.{
@@ -45,9 +41,13 @@ object V625_2 extends AsyncEditCheck[LoanApplicationRegister] {
     val client = CensusServiceClient(
       GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
     )
-    client
-      .validateTract(ValidTractRequest(tract))
-      .map(response => response.isValid)
+    for {
+      response <- client
+        .validateTract(ValidTractRequest(tract))
+        .map(response => response.isValid)
+      _ <- client.close()
+      closed <- client.closed()
+    } yield (response, closed)._1
   }
 
 }

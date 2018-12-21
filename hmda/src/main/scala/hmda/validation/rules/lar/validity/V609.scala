@@ -42,9 +42,13 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] {
     val client = CheckDigitServiceClient(
       GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
     )
-    client
-      .validateUli(ValidUliRequest(uli))
-      .map(response => response.isValid)
+    for {
+      response <- client
+        .validateUli(ValidUliRequest(uli))
+        .map(response => response.isValid)
+      _ <- client.close()
+      closed <- client.closed()
+    } yield (response, closed)._1
   }
 
 }
