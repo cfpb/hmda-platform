@@ -57,7 +57,7 @@ object ModifiedLarPublisher {
         None,
         awsCredentialsProvider,
         awsRegionProvider,
-        false,
+        true,
         None,
         ListBucketVersion2
       )
