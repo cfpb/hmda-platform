@@ -29,7 +29,12 @@ class Q615_1Spec extends LarEditCheckSpec {
         .copy(
           loanDisclosure = lar.loanDisclosure.copy(totalLoanCosts = "0.0",
                                                    originationCharges = "1.0"))
-        .mustFail
+        .mustPass
+      lar
+        .copy(
+          loanDisclosure = lar.loanDisclosure.copy(totalLoanCosts = "0.0",
+                                                   originationCharges = "0.0"))
+        .mustPass
     }
   }
 }
