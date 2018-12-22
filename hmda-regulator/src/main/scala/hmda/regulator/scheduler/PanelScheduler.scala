@@ -31,6 +31,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def institutionRepository = new InstitutionRepository(dbConfig)
   def emailRepository = new InstitutionEmailsRepository(dbConfig)
+
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
       .schedule("PanelScheduler", self, PanelScheduler)
@@ -90,7 +91,8 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
             .map(s => ByteString(s))
             .toList
 
-          log.info(s"Uploading Regulator Data file : $fileName" + "  to S3.")
+          log.info(
+            s"Uploading Panel Regulator Data file : $fileName" + "  to S3.")
           Source(source).runWith(s3Sink)
         }
         case Failure(t) =>
