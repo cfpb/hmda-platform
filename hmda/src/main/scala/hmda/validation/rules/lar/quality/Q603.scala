@@ -13,6 +13,7 @@ import hmda.validation.dsl.{
 import hmda.validation.rules.AsyncEditCheck
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 object Q603 extends AsyncEditCheck[LoanApplicationRegister] {
   override def name: String = "Q603"
@@ -41,7 +42,9 @@ object Q603 extends AsyncEditCheck[LoanApplicationRegister] {
   def isCountySmall[as: AS, mat: MAT, ec: EC](
       county: String): Future[Boolean] = {
     val client = CensusServiceClient(
-      GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
+      GrpcClientSettings.connectToServiceAt(host, port)
+        .withDeadline(10.seconds)
+        .withTls(false)
     )
     for {
       response <- client

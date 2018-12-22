@@ -13,6 +13,7 @@ import hmda.validation.dsl.{
 import hmda.validation.rules.AsyncEditCheck
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 object V625_2 extends AsyncEditCheck[LoanApplicationRegister] {
   override def name: String = "V625-2"
@@ -39,7 +40,9 @@ object V625_2 extends AsyncEditCheck[LoanApplicationRegister] {
 
   def tractIsValid[as: AS, mat: MAT, ec: EC](tract: String): Future[Boolean] = {
     val client = CensusServiceClient(
-      GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
+      GrpcClientSettings.connectToServiceAt(host, port)
+        .withDeadline(10.seconds)
+        .withTls(false)
     )
     for {
       response <- client
