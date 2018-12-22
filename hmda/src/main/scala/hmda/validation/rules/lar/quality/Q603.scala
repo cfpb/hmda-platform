@@ -43,9 +43,13 @@ object Q603 extends AsyncEditCheck[LoanApplicationRegister] {
     val client = CensusServiceClient(
       GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
     )
-    client
-      .validatePopulation(ValidPopulationRequest(county))
-      .map(response => response.isValid)
+    for {
+      response <- client
+        .validatePopulation(ValidPopulationRequest(county))
+        .map(response => response.isValid)
+      _ <- client.close()
+      closed <- client.closed()
+    } yield (response, closed)._1
   }
 
 }
