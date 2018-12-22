@@ -21,11 +21,18 @@ case class InstitutionEntity(
 ) {
   def isEmpty: Boolean = lei == ""
 
+  private var _emailDomains: String = ""
+
+  def emailDomains = _emailDomains
+
+  def emailDomains_=(value: String): Unit = _emailDomains = value
+
   def toPSV: String = {
     s"$lei|$activityYear|$agency|" +
       s"$institutionType|$id2017|$taxId|" +
-      s"$rssd|$respondentName|$respondentState|" +
+      s"$rssd|" + emailDomains + s"|$respondentName|$respondentState|" +
       s"$respondentCity|$parentIdRssd|$parentName|" +
       s"$assets|$otherLenderCode|$topHolderIdRssd|$topHolderName|$hmdaFiler"
+
   }
 }

@@ -1,7 +1,8 @@
 package hmda.regulator.scheduler
 
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
+
 import akka.http.scaladsl.model.{ContentType, HttpCharsets, MediaTypes}
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{S3Headers, ServerSideEncryption}
@@ -27,7 +28,9 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
-
+  private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
+  def institutionRepository = new InstitutionRepository(dbConfig)
+  def emailRepository = new InstitutionEmailsRepository(dbConfig)
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
       .schedule("PanelScheduler", self, PanelScheduler)
@@ -68,12 +71,13 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       val s3Client = new S3Client(s3Settings, context.system, materializer)
 
       val now = LocalDateTime.now()
-      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}" + "_PANEL_" + ".txt"
+
+      val formattedDate = fullDate.format(now)
+
+      val fileName = s"$formattedDate" + s"$year" + "_panel" + ".txt"
       val s3Sink = s3Client.multipartUpload(
         bucket,
         s"$environment/regulator-panel/$year/$fileName")
-
-      val institutionRepository = new InstitutionRepository(dbConfig)
 
       val allResults: Future[Seq[InstitutionEntity]] =
         institutionRepository.getAllInstitutions()
@@ -81,6 +85,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       allResults onComplete {
         case Success(institutions) => {
           val source = institutions
+            .map(institution => appendEmailDomains(institution))
             .map(institution => institution.toPSV + "\n")
             .map(s => ByteString(s))
             .toList
@@ -88,7 +93,25 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
           log.info(s"Uploading Regulator Data file : $fileName" + "  to S3.")
           Source(source).runWith(s3Sink)
         }
-        case Failure(t) => println("An error has occurred: " + t.getMessage)
+        case Failure(t) =>
+          println("An error has occurred getting Panel Data: " + t.getMessage)
       }
+  }
+
+  def appendEmailDomains(institution: InstitutionEntity): InstitutionEntity = {
+    val emails = emailRepository.findByLei(institution.lei)
+
+    emails onComplete {
+      case Success(emails) => {
+
+        val emailList = emails.map(email => email.emailDomain)
+
+        institution.emailDomains = emailList.mkString(",")
+        institution
+      }
+      case Failure(t) =>
+        println("An error has occurred getting Email by LEI: " + t.getMessage)
+    }
+    institution
   }
 }
