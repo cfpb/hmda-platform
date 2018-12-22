@@ -13,7 +13,7 @@ import hmda.validation.dsl.{
 import hmda.validation.rules.AsyncEditCheck
 
 import scala.concurrent.Future
-
+import scala.concurrent.duration._
 object V609 extends AsyncEditCheck[LoanApplicationRegister] {
   override def name: String = "V609"
 
@@ -40,7 +40,7 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] {
 
   def uliIsValid[as: AS, mat: MAT, ec: EC](uli: String): Future[Boolean] = {
     val client = CheckDigitServiceClient(
-      GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
+      GrpcClientSettings.connectToServiceAt(host, port).withDeadline(10.seconds).withTls(false)
     )
     for {
       response <- client
