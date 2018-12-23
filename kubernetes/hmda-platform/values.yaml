@@ -87,7 +87,7 @@ http:
     host: check-digit.default.svc.cluster.local
   census:
     port: 9093
-    host: census-api-http.default.svc.cluster.local
+    host: census-api.default.svc.cluster.local
 
 
 ingress:
