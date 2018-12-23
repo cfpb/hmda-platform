@@ -43,7 +43,7 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] {
   val port = config.getInt("hmda.uli.http.port")
 
   override def apply[as: AS, mat: MAT, ec: EC](
-                                                lar: LoanApplicationRegister): Future[ValidationResult] = {
+      lar: LoanApplicationRegister): Future[ValidationResult] = {
 
     val uli = lar.loan.ULI
 
@@ -51,7 +51,7 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] {
       Future.successful(ValidationSuccess)
     } else {
       uliIsValid(uli).map {
-        case true  =>
+        case true =>
           println("IT WAS TRUEEEE")
           ValidationSuccess
         case false =>
@@ -63,7 +63,7 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] {
   }
 
   private def sendMessageRequest[as: AS, mat: MAT, ec: EC](
-                                                            message: ULIValidate): Future[HttpRequest] = {
+      message: ULIValidate): Future[HttpRequest] = {
     val uri1 = s"http://$host:$port/uli/validate"
     println("This is the URI")
     println(uri1)
@@ -76,12 +76,12 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] {
     }
   }
   protected def executeRequest[as: AS, mat: MAT, ec: EC](
-                                                          httpRequest: HttpRequest): Future[HttpResponse] = {
+      httpRequest: HttpRequest): Future[HttpResponse] = {
     Http().singleRequest(httpRequest)
   }
 
   private def unmarshallResponse[as: AS, mat: MAT, ec: EC](
-                                                            response: HttpResponse): Future[ULIValidated] = {
+      response: HttpResponse): Future[ULIValidated] = {
     val unmarshalledResponse = Unmarshal(response.entity)
 
     if (response.status == StatusCodes.OK) {

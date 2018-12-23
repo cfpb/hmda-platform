@@ -278,7 +278,7 @@ object LarEngine extends ValidationEngine[LoanApplicationRegister] {
   override def asyncQualityChecks =
     Vector(
 //      Q603,
-//      Q604
+      Q604
     )
 
 }
