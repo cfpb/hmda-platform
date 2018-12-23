@@ -84,7 +84,7 @@ grpc:
 http:
   check_digit:
     port: 9091
-    host: check-digit-http.default.svc.cluster.local
+    host: check-digit.default.svc.cluster.local
   census:
     port: 9093
     host: census-api-http.default.svc.cluster.local
