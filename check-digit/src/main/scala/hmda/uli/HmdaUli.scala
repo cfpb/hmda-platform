@@ -26,5 +26,5 @@ object HmdaUli extends App {
   implicit val system = ActorSystem("hmda-uli")
 
   system.actorOf(HmdaUliApi.props(), "hmda-uli-api")
-  system.actorOf(HmdaUliGrpc.props(), name = "hmda-uli-grpc")
+//  system.actorOf(HmdaUliGrpc.props(), name = "hmda-uli-grpc")
 }

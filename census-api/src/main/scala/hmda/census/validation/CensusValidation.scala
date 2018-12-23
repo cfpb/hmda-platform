@@ -9,6 +9,10 @@ object CensusValidation {
     indexedTract.contains(tract)
   }
 
+  def isTractValidTest(tract: String): Boolean = {
+    true
+  }
+
   def isCountyValid(county: String,
                     indexedCounty: Map[String, Census]): Boolean = {
     indexedCounty.contains(county)

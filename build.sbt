@@ -178,7 +178,7 @@ lazy val `census-api` = (project in file("census-api"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      mainClass in Compile := Some("hmda.census.HmdaCensusApi"),
+      mainClass in Compile := Some("hmda.census.HmdaCensus"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
