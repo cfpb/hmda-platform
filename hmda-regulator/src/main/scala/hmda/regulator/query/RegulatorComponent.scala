@@ -2,6 +2,9 @@ package hmda.regulator.query
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
+import hmda.regulator.query.lar.LarEntity
+import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
+import hmda.regulator.query.ts.TransmittalSheetEntity
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -192,5 +195,16 @@ trait RegulatorComponent {
     def getAllSheets(): Future[Seq[TransmittalSheetEntity]] = {
       db.run(table.result)
     }
+  }
+
+  class LarRepository(schema: String,
+                      tableName: String,
+                      config: DatabaseConfig[JdbcProfile]) {
+
+    def getAllLAR(): Future[Seq[LarEntity]] =
+      config.db.run {
+        sql"select * from #${schema}.#${tableName}".as[LarEntity]
+      }
+
   }
 }

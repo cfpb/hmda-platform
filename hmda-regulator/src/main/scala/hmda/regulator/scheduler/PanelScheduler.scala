@@ -1,11 +1,8 @@
 package hmda.regulator.scheduler
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import akka.http.scaladsl.model.{ContentType, HttpCharsets, MediaTypes}
-import akka.stream.Supervision.Decider
-import akka.stream.alpakka.s3.impl.{S3Headers, ServerSideEncryption}
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.javadsl.S3Client
@@ -18,7 +15,8 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
-import hmda.regulator.query.{InstitutionEntity, RegulatorComponent}
+import hmda.regulator.query.RegulatorComponent
+import hmda.regulator.query.panel.InstitutionEntity
 import hmda.regulator.scheduler.schedules.Schedules.PanelScheduler
 
 import scala.concurrent.Future
@@ -31,6 +29,30 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def institutionRepository = new InstitutionRepository(dbConfig)
   def emailRepository = new InstitutionEmailsRepository(dbConfig)
+
+  val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+  val accessKeyId = awsConfig.getString("access-key-id")
+  val secretAccess = awsConfig.getString("secret-access-key ")
+  val region = awsConfig.getString("region")
+  val bucket = awsConfig.getString("public-bucket")
+  val environment = awsConfig.getString("environment")
+  val year = awsConfig.getString("year")
+  val awsCredentialsProvider = new AWSStaticCredentialsProvider(
+    new BasicAWSCredentials(accessKeyId, secretAccess))
+
+  val awsRegionProvider = new AwsRegionProvider {
+    override def getRegion: String = region
+  }
+
+  val s3Settings = new S3Settings(
+    MemoryBufferType,
+    None,
+    awsCredentialsProvider,
+    awsRegionProvider,
+    false,
+    None,
+    ListBucketVersion2
+  )
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -45,30 +67,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case PanelScheduler =>
-      val config = ConfigFactory.load("application.conf").getConfig("aws")
-      val accessKeyId = config.getString("access-key-id")
-      val secretAccess = config.getString("secret-access-key ")
-      val region = config.getString("region")
-      val bucket = config.getString("public-bucket")
-      val environment = config.getString("environment")
-      val year = config.getString("year")
-      val awsCredentialsProvider = new AWSStaticCredentialsProvider(
-        new BasicAWSCredentials(accessKeyId, secretAccess))
-
-      val awsRegionProvider = new AwsRegionProvider {
-        override def getRegion: String = region
-      }
-
-      val s3Settings = new S3Settings(
-        MemoryBufferType,
-        None,
-        awsCredentialsProvider,
-        awsRegionProvider,
-        false,
-        None,
-        ListBucketVersion2
-      )
-
       val s3Client = new S3Client(s3Settings, context.system, materializer)
 
       val now = LocalDateTime.now()

@@ -1,4 +1,4 @@
-package hmda.regulator.query
+package hmda.regulator.query.panel
 
 import hmda.model.institution.Institution
 
