@@ -39,7 +39,7 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] {
 
   val config = ConfigFactory.load()
 
-  val host = config.getString("hmda.uli.http.host")
+  val host = config.getString("hmda.uli.grpc.host")
   val port = config.getInt("hmda.uli.http.port")
 
   override def apply[as: AS, mat: MAT, ec: EC](
