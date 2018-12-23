@@ -65,7 +65,7 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] {
   private def sendMessageRequest[as: AS, mat: MAT, ec: EC](
       message: ULIValidate): Future[HttpRequest] = {
     val uri1 = s"http://$host:$port/uli/validate"
-    println("This is the URI")
+    println("Calling V609: " + uri1)
     println(uri1)
     Marshal(message).to[RequestEntity].map { entity =>
       HttpRequest(
