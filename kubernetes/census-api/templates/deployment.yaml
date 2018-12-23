@@ -32,10 +32,10 @@ spec:
               protocol: {{ .Values.grpc.protocol }}
           livenessProbe:
             tcpSocket:
-              port: {{ .Values.grpc.port }}
+              port: {{ .Values.service.port }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.grpc.port }}
+              port: {{ .Values.service.port }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

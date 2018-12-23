@@ -9,11 +9,11 @@ image:
   tag: grpc
   pullPolicy: IfNotPresent
 
-service:
-  type: NodePort
-  port: 9093
-  targetPort: 9093
-  name: http-census
+#service:
+#  type: NodePort
+#  port: 9093
+#  targetPort: 9093
+#  name: http-census
 
 grpc:
   type: ClusterIP
