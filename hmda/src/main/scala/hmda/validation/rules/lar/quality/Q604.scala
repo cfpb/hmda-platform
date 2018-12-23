@@ -50,7 +50,7 @@ object Q604 extends AsyncEditCheck[LoanApplicationRegister] {
   private def sendMessageRequest[as: AS, mat: MAT, ec: EC](
       message: CountyValidate): Future[HttpRequest] = {
     val uri1 = s"http://$host:$port/census/validate/county"
-    println("This is the URI")
+//    println("This is the URI")
     println(uri1)
     Marshal(message).to[RequestEntity].map { entity =>
       HttpRequest(

@@ -52,7 +52,7 @@ object V625_2 extends AsyncEditCheck[LoanApplicationRegister] {
   private def sendMessageRequest[as: AS, mat: MAT, ec: EC](
       message: TractValidate): Future[HttpRequest] = {
     val uri1 = s"http://$host:$port/census/validate/tract"
-    println("This is the URI")
+//    println("This is the URI")
     println(uri1)
     Marshal(message).to[RequestEntity].map { entity =>
       HttpRequest(
