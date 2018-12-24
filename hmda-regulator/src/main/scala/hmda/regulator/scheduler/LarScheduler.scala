@@ -16,7 +16,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.regulator.query.RegulatorComponent
-import hmda.regulator.query.lar.LarEntity
+import hmda.regulator.query.lar.LarEntityImpl
 import hmda.regulator.scheduler.schedules.Schedules.LarScheduler
 
 import scala.concurrent.Future
@@ -28,9 +28,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def larRepository =
-    new LarRepository(schema = "public",
-                      tableName = "loanapplicationregister2018",
-                      dbConfig)
+    new LarRepository(dbConfig)
 
   val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
   val accessKeyId = awsConfig.getString("access-key-id")
@@ -80,7 +78,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
         bucket,
         s"$environment/regulator-lar/$year/$fileName")
 
-      val allResults: Future[Seq[LarEntity]] = larRepository.getAllLAR()
+      val allResults: Future[Seq[LarEntityImpl]] = larRepository.getAllLARs()
 
       allResults onComplete {
         case Success(lars) => {

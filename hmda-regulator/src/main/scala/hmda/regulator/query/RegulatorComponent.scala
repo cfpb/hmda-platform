@@ -2,7 +2,7 @@ package hmda.regulator.query
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
-import hmda.regulator.query.lar.LarEntity
+import hmda.regulator.query.lar._
 import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
 import hmda.regulator.query.ts.TransmittalSheetEntity
 import slick.basic.DatabaseConfig
@@ -197,14 +197,290 @@ trait RegulatorComponent {
     }
   }
 
-  class LarRepository(schema: String,
-                      tableName: String,
-                      config: DatabaseConfig[JdbcProfile]) {
+  class LarTable(tag: Tag)
+      extends Table[LarEntityImpl](tag, "loanapplicationregister2018") {
 
-    def getAllLAR(): Future[Seq[LarEntity]] =
-      config.db.run {
-        sql"select * from #${schema}.#${tableName}".as[LarEntity]
-      }
+    def id = column[Int]("id")
+    def lei = column[String]("lei")
+    def uli = column[String]("uli")
+    def appDate = column[String]("appDate")
+    def loanType = column[Int]("loanType")
+    def loanPurpose = column[Int]("loanPurpose")
+    def preapproval = column[Int]("preapproval")
+    def constructionMethod = column[Int]("constructionMethod")
+    def occupancyType = column[Int]("occupancyType")
+    def loanAmount = column[Double]("loanAmount")
+    def actionTakenType = column[Int]("actionTakenType")
+    def actionTakenDate = column[Int]("actionTakenDate")
+    def street = column[String]("street")
+    def city = column[String]("city")
+    def state = column[String]("state")
+    def zip = column[String]("zip")
+    def county = column[String]("county")
+    def tract = column[String]("tract")
+    def ethnicityApplicant1 = column[Int]("ethnicityApplicant1")
+    def ethnicityApplicant2 = column[Int]("ethnicityApplicant2")
+    def ethnicityApplicant3 = column[Int]("ethnicityApplicant3")
+    def ethnicityApplicant4 = column[Int]("ethnicityApplicant4")
+    def ethnicityApplicant5 = column[Int]("ethnicityApplicant5")
+    def otherHispanicApplicant = column[String]("otherHispanicApplicant")
+    def ethnicityCoApplicant1 = column[Int]("ethnicityCoApplicant1")
+    def ethnicityCoApplicant2 = column[Int]("ethnicityCoApplicant2")
+    def ethnicityCoApplicant3 = column[Int]("ethnicityCoApplicant3")
+    def ethnicityCoApplicant4 = column[Int]("ethnicityCoApplicant4")
+    def ethnicityCoApplicant5 = column[Int]("ethnicityCoApplicant5")
+    def otherHispanicCoApplicant = column[String]("otherHispanicCoApplicant")
+    def ethnicityObservedApplicant = column[Int]("ethnicityObservedApplicant")
+    def ethnicityObservedCoApplicant =
+      column[Int]("ethnicityObservedCoApplicant")
+    def raceApplicant1 = column[Int]("raceApplicant1")
+    def raceApplicant2 = column[Int]("raceApplicant2")
+    def raceApplicant3 = column[Int]("raceApplicant3")
+    def raceApplicant4 = column[Int]("raceApplicant4")
+    def raceApplicant5 = column[Int]("raceApplicant5")
+    def otherNativeRaceApplicant = column[String]("otherNativeRaceApplicant")
+    def otherAsianRaceApplicant = column[String]("otherAsianRaceApplicant")
+    def otherPacificRaceApplicant = column[String]("otherPacificRaceApplicant")
+    def rateCoApplicant1 = column[Int]("rateCoApplicant1")
+    def rateCoApplicant2 = column[Int]("rateCoApplicant2")
+    def rateCoApplicant3 = column[Int]("rateCoApplicant3")
+    def rateCoApplicant4 = column[Int]("rateCoApplicant4")
+    def rateCoApplicant5 = column[Int]("rateCoApplicant5")
+    def otherNativeRaceCoApplicant =
+      column[String]("otherNativeRaceCoApplicant")
+    def otherAsianRaceCoApplicant = column[String]("otherAsianRaceCoApplicant")
+    def otherPacificRaceCoApplicant =
+      column[String]("otherPacificRaceCoApplicant")
+    def raceObservedApplicant = column[Int]("raceObservedApplicant")
+    def raceObservedCoApplicant = column[Int]("raceObservedCoApplicant")
+    def sexApplicant = column[Int]("sexApplicant")
+    def sexCoApplicant = column[Int]("sexCoApplicant")
+    def observedSexApplicant = column[Int]("observedSexApplicant")
+    def observedSexCoApplicant = column[Int]("observedSexCoApplicant")
+    def ageApplicant = column[Int]("ageApplicant")
+    def ageCoApplicant = column[Int]("ageCoApplicant")
+    def income = column[String]("income")
+    def purchaserType = column[Int]("purchaserType")
+    def rateSpread = column[String]("rateSpread")
+    def hoepaStatus = column[Int]("hoepaStatus")
+    def lienStatus = column[Int]("lienStatus")
+    def creditScoreApplicant = column[Int]("creditScoreApplicant")
+    def creditScoreCoApplicant = column[Int]("creditScoreCoApplicant")
+    def creditScoreTypeApplicant = column[Int]("creditScoreTypeApplicant")
+    def creditScoreModelApplicant = column[String]("creditScoreModelApplicant")
+    def creditScoreTypeCoApplicant = column[Int]("creditScoreTypeCoApplicant")
+    def creditScoreModelCoApplicant =
+      column[String]("creditScoreModelCoApplicant")
+    def denialReason1 = column[Int]("denialReason1")
+    def denialReason2 = column[Int]("denialReason2")
+    def denialReason3 = column[Int]("denialReason3")
+    def denialReason4 = column[Int]("denialReason4")
+    def otherDenialReason = column[String]("otherDenialReason")
+    def totalLoanCosts = column[String]("totalLoanCosts")
+    def totalPoints = column[String]("totalPoints")
+    def originationCharges = column[String]("originationCharges")
+    def discountPoints = column[String]("discountPoints")
+    def lenderCredits = column[String]("lenderCredits")
+    def interestRate = column[String]("interestRate")
+    def paymentPenalty = column[String]("paymentPenalty")
+    def debtToIncome = column[String]("debtToIncome")
+    def loanValueRatio = column[String]("loanValueRatio")
+    def loanTerm = column[String]("loanTerm")
+    def rateSpreadIntro = column[String]("rateSpreadIntro")
+    def baloonPayment = column[Int]("baloonPayment")
+    def insertOnlyPayment = column[Int]("insertOnlyPayment")
+    def amortization = column[Int]("amortization")
+    def otherAmortization = column[Int]("otherAmortization")
+    def propertyValues = column[String]("propertyValues")
+    def homeSecurityPolicy = column[Int]("homeSecurityPolicy")
+    def landPropertyInterest = column[Int]("landPropertyInterest")
+    def totalUnits = column[Int]("totalUnits")
+    def mfAffordable = column[String]("mfAffordable")
+    def applicationSubmission = column[Int]("applicationSubmission")
+    def payable = column[Int]("payable")
+    def nmls = column[String]("nmls")
+    def aus1 = column[Int]("aus1")
+    def aus2 = column[Int]("aus2")
+    def aus3 = column[Int]("aus3")
+    def aus4 = column[Int]("aus4")
+    def aus5 = column[Int]("aus5")
+    def otheraus = column[String]("otheraus")
+    def aus1Result = column[Int]("aus1Result")
+    def aus2Result = column[Int]("aus2Result")
+    def aus3Result = column[Int]("aus3Result")
+    def aus4Result = column[Int]("aus4Result")
+    def aus5Result = column[Int]("aus5Result")
+    def otherAusResult = column[String]("otherAusResult")
+    def reverseMortgage = column[Int]("reverseMortgage")
+    def lineOfCredits = column[Int]("lineOfCredits")
+    def businessOrCommercial = column[Int]("businessOrCommercial")
+
+    def * =
+      (larPartOneProjection,
+       larPartTwoProjection,
+       larPartThreeProjection,
+       larPartFourProjection,
+       larPartFiveProjection,
+       larPartSixProjection) <> ((LarEntityImpl.apply _).tupled, LarEntityImpl.unapply)
+
+    def larPartOneProjection =
+      (id,
+       lei,
+       uli,
+       appDate,
+       loanType,
+       loanPurpose,
+       preapproval,
+       constructionMethod,
+       occupancyType,
+       loanAmount,
+       actionTakenType,
+       actionTakenDate,
+       street,
+       city,
+       state,
+       zip,
+       county,
+       tract) <> ((LarPartOne.apply _).tupled, LarPartOne.unapply)
+
+    def larPartTwoProjection =
+      (ethnicityApplicant1,
+       ethnicityApplicant2,
+       ethnicityApplicant3,
+       ethnicityApplicant4,
+       ethnicityApplicant5,
+       otherHispanicApplicant,
+       ethnicityCoApplicant1,
+       ethnicityCoApplicant2,
+       ethnicityCoApplicant3,
+       ethnicityCoApplicant4,
+       ethnicityCoApplicant5,
+       otherHispanicCoApplicant,
+       ethnicityObservedApplicant,
+       ethnicityObservedCoApplicant,
+       raceApplicant1,
+       raceApplicant2,
+       raceApplicant3,
+       raceApplicant4,
+       raceApplicant5) <> ((LarPartTwo.apply _).tupled, LarPartTwo.unapply)
+
+    def larPartThreeProjection =
+      (otherNativeRaceApplicant,
+       otherAsianRaceApplicant,
+       otherPacificRaceApplicant,
+       rateCoApplicant1,
+       rateCoApplicant2,
+       rateCoApplicant3,
+       rateCoApplicant4,
+       rateCoApplicant5,
+       otherNativeRaceCoApplicant,
+       otherAsianRaceCoApplicant,
+       otherPacificRaceCoApplicant,
+       raceObservedApplicant,
+       raceObservedCoApplicant,
+       sexApplicant,
+       sexCoApplicant,
+       observedSexApplicant,
+       observedSexCoApplicant,
+       ageApplicant,
+       ageCoApplicant,
+       income) <> ((LarPartThree.apply _).tupled, LarPartThree.unapply)
+
+    def larPartFourProjection =
+      (purchaserType,
+       rateSpread,
+       hoepaStatus,
+       lienStatus,
+       creditScoreApplicant,
+       creditScoreCoApplicant,
+       creditScoreTypeApplicant,
+       creditScoreModelApplicant,
+       creditScoreTypeCoApplicant,
+       creditScoreModelCoApplicant,
+       denialReason1,
+       denialReason2,
+       denialReason3,
+       denialReason4,
+       otherDenialReason,
+       totalLoanCosts,
+       totalPoints,
+       originationCharges,
+      ) <> ((LarPartFour.apply _).tupled, LarPartFour.unapply)
+
+    def larPartFiveProjection =
+      (discountPoints,
+       lenderCredits,
+       interestRate,
+       paymentPenalty,
+       debtToIncome,
+       loanValueRatio,
+       loanTerm,
+       rateSpreadIntro,
+       baloonPayment,
+       insertOnlyPayment,
+       amortization,
+       otherAmortization,
+       propertyValues,
+       homeSecurityPolicy,
+       landPropertyInterest,
+       totalUnits,
+       mfAffordable,
+       applicationSubmission) <> ((LarPartFive.apply _).tupled, LarPartFive.unapply)
+
+    def larPartSixProjection =
+      (payable,
+       nmls,
+       aus1,
+       aus2,
+       aus3,
+       aus4,
+       aus5,
+       otheraus,
+       aus1Result,
+       aus2Result,
+       aus3Result,
+       aus4Result,
+       aus5Result,
+       otherAusResult,
+       reverseMortgage,
+       lineOfCredits,
+       businessOrCommercial) <> ((LarPartSix.apply _).tupled, LarPartSix.unapply)
 
   }
+
+  val larTable = TableQuery[LarTable]
+
+  class LarRepository(val config: DatabaseConfig[JdbcProfile])
+      extends TableRepository[LarTable, String] {
+
+    override val table: config.profile.api.TableQuery[LarTable] =
+      larTable
+
+    override def getId(row: LarTable): config.profile.api.Rep[Id] =
+      row.lei
+
+    def createSchema() = db.run(table.schema.create)
+    def dropSchema() = db.run(table.schema.drop)
+
+    def insert(ts: LarEntityImpl): Future[Int] = {
+      db.run(table += ts)
+    }
+
+    def findByLei(lei: String): Future[Seq[LarEntityImpl]] = {
+      db.run(table.filter(_.lei === lei).result)
+    }
+
+    def deleteByLei(lei: String): Future[Int] = {
+      db.run(table.filter(_.lei === lei).delete)
+    }
+
+    def count(): Future[Int] = {
+      db.run(table.size.result)
+    }
+
+    def getAllLARs(): Future[Seq[LarEntityImpl]] = {
+      db.run(table.result)
+    }
+  }
+
 }
