@@ -3,7 +3,7 @@ package hmda.regulator.query.lar
 case class LarPartOne(id: Int = 0,
                       lei: String = "",
                       uli: String = "",
-                      appDate: String = "",
+                      applicationDate: String = "",
                       loanType: Int = 0,
                       loanPurpose: Int = 0,
                       preapproval: Int = 0,
@@ -21,7 +21,7 @@ case class LarPartOne(id: Int = 0,
   def isEmpty: Boolean = lei == ""
 
   def toPSV: String = {
-    s"$id|$lei|$uli|$appDate|$loanType|" +
+    s"$id|$lei|$uli|$applicationDate|$loanType|" +
       s"$loanPurpose|$preapproval|$constructionMethod|$occupancyType|" +
       s"$loanAmount|$actionTakenType|$actionTakenDate|$street|$city|$state|" +
       s"$zip|$county|$tract|"
@@ -126,7 +126,7 @@ case class LarPartFive(discountPoints: String = "",
                        insertOnlyPayment: Int = 0,
                        amortization: Int = 0,
                        otherAmortization: Int = 0,
-                       propertyValues: String = "",
+                       propertyValue: String = "",
                        homeSecurityPolicy: Int = 0,
                        landPropertyInterest: Int = 0,
                        totalUnits: Int = 0,
@@ -135,7 +135,7 @@ case class LarPartFive(discountPoints: String = "",
 
   def toPSV: String = {
     s"$discountPoints|$lenderCredits|$interestRate|$paymentPenalty|$debtToIncome|$loanValueRatio|$loanTerm|" +
-      s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|$propertyValues|" +
+      s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|$propertyValue|" +
       s"$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|$applicationSubmission|"
   }
 }
@@ -154,6 +154,8 @@ case class LarPartSix(payable: Int = 0,
                       aus4Result: Int = 0,
                       aus5Result: Int = 0,
                       otherAusResult: String = "",
+                      reverse: Int = 0,
+                      ausResult: Int = 0,
                       reverseMortgage: Int = 0,
                       lineOfCredits: Int = 0,
                       businessOrCommercial: Int = 0) {
@@ -161,7 +163,7 @@ case class LarPartSix(payable: Int = 0,
   def toPSV: String = {
     s"$payable|" +
       s"$nmls|$aus1|$aus2|$aus3|$aus4|$aus5|$otheraus|$aus1Result|$aus2Result|$aus3Result|$aus4Result|$aus5Result|" +
-      s"$otherAusResult|$reverseMortgage|$lineOfCredits|$businessOrCommercial"
+      s"$otherAusResult|$reverse|$ausResult|$reverseMortgage|$lineOfCredits|$businessOrCommercial"
   }
 }
 
