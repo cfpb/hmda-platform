@@ -44,9 +44,12 @@ object V625_2
   def tractIsValid[as: AS, mat: MAT, ec: EC](tract: String): Future[Boolean] = {
     val tractValidate = TractValidate(tract)
     for {
-      messageRequest <- sendMessageRequest(tractValidate, host, port)
+      messageRequest <- sendMessageRequestTract(tractValidate,
+                                                host,
+                                                port,
+                                                "/census/validate/tract")
       response <- executeRequest(messageRequest)
-      messageOrErrorResponse <- unmarshallResponse(response)
+      messageOrErrorResponse <- unmarshallResponse(response, "tract")
     } yield messageOrErrorResponse.isValid
   }
 

@@ -45,9 +45,12 @@ object V609 extends AsyncEditCheck[LoanApplicationRegister] with AsyncRequest {
 
     val uliValidate = ULIValidate(uli)
     for {
-      messageRequest <- sendMessageRequest(uliValidate, host, port)
+      messageRequest <- sendMessageRequestUli(uliValidate,
+                                              host,
+                                              port,
+                                              "/uli/validate")
       response <- executeRequest(messageRequest)
-      messageOrErrorResponse <- unmarshallResponse(response)
+      messageOrErrorResponse <- unmarshallResponse(response, "uli")
     } yield messageOrErrorResponse.isValid
 
   }

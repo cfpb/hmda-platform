@@ -45,9 +45,12 @@ object Q603 extends AsyncEditCheck[LoanApplicationRegister] with AsyncRequest {
 
     val countyValidate = CountyValidate(county)
     for {
-      messageRequest <- sendMessageRequest(countyValidate, host, port)
+      messageRequest <- sendMessageRequestCounty(countyValidate,
+                                                 host,
+                                                 port,
+                                                 "/census/validate/smallcounty")
       response <- executeRequest(messageRequest)
-      messageOrErrorResponse <- unmarshallResponse(response)
+      messageOrErrorResponse <- unmarshallResponse(response, "county")
     } yield messageOrErrorResponse.isValid
 
   }
