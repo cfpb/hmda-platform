@@ -11,7 +11,6 @@ object CensusRecords {
     config.getString("hmda.census.fields.filename")
 
   def parseCensusFile: List[Census] = {
-    println("file is read")
     val lines = fileLines(s"/$censusFileName")
     lines
       .drop(1)
