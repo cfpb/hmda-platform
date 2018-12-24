@@ -11,18 +11,15 @@ import hmda.validation.dsl.{
   ValidationResult,
   ValidationSuccess
 }
-import hmda.validation.rules.AsyncEditCheck
+import hmda.validation.rules.{AsyncEditCheck, AsyncRequest}
 import hmda.validation.{AS, EC, MAT}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.validation.model.AsyncModel.CountyValidate
 import io.circe.generic.auto._
+
 import scala.concurrent.Future
 
-object Q604 extends AsyncEditCheck[LoanApplicationRegister] {
-
-  case class TractValidate(tract: String)
-  case class Tractvalidated(isValid: Boolean)
-  case class CountyValidate(county: String)
-  case class Countyvalidated(isValid: Boolean)
+object Q604 extends AsyncEditCheck[LoanApplicationRegister] with AsyncRequest {
 
   override def name: String = "Q604"
 
@@ -47,55 +44,15 @@ object Q604 extends AsyncEditCheck[LoanApplicationRegister] {
     }
   }
 
-  private def sendMessageRequest[as: AS, mat: MAT, ec: EC](
-      message: CountyValidate): Future[HttpRequest] = {
-    val uri1 = s"http://$host:$port/census/validate/county"
-    println("Calling Q604: " + uri1)
-    println(uri1)
-    Marshal(message).to[RequestEntity].map { entity =>
-      HttpRequest(
-        method = HttpMethods.POST,
-        uri = uri1,
-        entity = entity
-      )
-    }
-  }
-
-  protected def executeRequest[as: AS, mat: MAT, ec: EC](
-      httpRequest: HttpRequest): Future[HttpResponse] = {
-    Http().singleRequest(httpRequest)
-  }
-
-  private def unmarshallResponse[as: AS, mat: MAT, ec: EC](
-      response: HttpResponse): Future[Countyvalidated] = {
-    val unmarshalledResponse = Unmarshal(response.entity)
-
-    if (response.status == StatusCodes.OK) {
-      unmarshalledResponse.to[Countyvalidated]
-    } else {
-      unmarshalledResponse.to[Countyvalidated]
-    }
-  }
-
   def countyIsValid[as: AS, mat: MAT, ec: EC](
       county: String): Future[Boolean] = {
 
     val countyValidate = CountyValidate(county)
     for {
-      messageRequest <- sendMessageRequest(countyValidate)
+      messageRequest <- sendMessageRequest(countyValidate, host, port)
       response <- executeRequest(messageRequest)
       messageOrErrorResponse <- unmarshallResponse(response)
     } yield messageOrErrorResponse.isValid
-//    val client = CensusServiceClient(
-//      GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
-//    )
-//    for {
-//      response <- client
-//        .validateCounty(ValidCountyRequest(county))
-//        .map(response => response.isValid)
-//      _ <- client.close()
-//      closed <- client.closed()
-//    } yield (response, closed)._1
   }
 
 }
