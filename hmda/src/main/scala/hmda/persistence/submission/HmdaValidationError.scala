@@ -100,6 +100,8 @@ object HmdaValidationError
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
+    val blockingExecutionContext: ExecutionContext =
+      system.dispatchers.lookup("blocking-io-dispatcher")
     val sharding = ClusterSharding(ctx.asScala.system)
 
     cmd match {
@@ -114,7 +116,10 @@ object HmdaValidationError
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
-          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
+          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)(
+            system,
+            materializer,
+            blockingExecutionContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
@@ -392,10 +397,12 @@ object HmdaValidationError
         ))
   }
 
-  private def validateTsLar[as: AS, mat: MAT, ec: EC](
-      ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId,
-      validationContext: ValidationContext): Future[List[ValidationError]] = {
+  private def validateTsLar(ctx: ActorContext[SubmissionProcessingCommand],
+                            submissionId: SubmissionId,
+                            validationContext: ValidationContext)(
+      implicit system: ActorSystem,
+      mat: ActorMaterializer,
+      ec: ExecutionContext): Future[List[ValidationError]] = {
 
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
 
