@@ -114,7 +114,9 @@ object HmdaValidationError
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
+
           tsLarErrors <- validateTsLar(ctx, submissionId, "all",validationContext)
+
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
             ctx,
             submissionId,
@@ -392,12 +394,12 @@ object HmdaValidationError
         ))
   }
 
+
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
                                                        ctx: ActorContext[SubmissionProcessingCommand],
                                                        submissionId: SubmissionId,
                                                        editType: String,
                                                        validationContext: ValidationContext): Future[List[ValidationError]] = {
-
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
 
     val headerResultTest: Future[TransmittalSheet] =

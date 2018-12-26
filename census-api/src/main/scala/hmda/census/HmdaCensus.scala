@@ -1,9 +1,11 @@
 package hmda.census
 
 import akka.actor.ActorSystem
+import com.typesafe.config.ConfigFactory
+import hmda.census.api.http.HmdaCensusApi
 import org.slf4j.LoggerFactory
 
-object HmdaCensusApi extends App {
+object HmdaCensus extends App {
 
   val log = LoggerFactory.getLogger("hmda")
 
@@ -15,6 +17,7 @@ object HmdaCensusApi extends App {
       |  \____\___|_| |_|___/\__,_|___/ /_/   \_\ .__/|_|
       |                                         |_|
     """.stripMargin)
+
   implicit val system = ActorSystem("hmda-census")
-  system.actorOf(HmdaCensusGrpc.props(), name = "hmda-census-grpc")
+  system.actorOf(HmdaCensusApi.props(), "hmda-census-api")
 }

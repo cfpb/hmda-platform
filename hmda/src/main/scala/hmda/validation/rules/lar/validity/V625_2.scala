@@ -1,8 +1,6 @@
 package hmda.validation.rules.lar.validity
 
-import akka.grpc.GrpcClientSettings
 import com.typesafe.config.ConfigFactory
-import hmda.grpc.services.{CensusServiceClient, ValidTractRequest}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.{AS, EC, MAT}
 import hmda.validation.dsl.{
@@ -10,17 +8,23 @@ import hmda.validation.dsl.{
   ValidationResult,
   ValidationSuccess
 }
-import hmda.validation.rules.AsyncEditCheck
+import hmda.validation.rules.{AsyncEditCheck, AsyncRequest}
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.validation.model.AsyncModel.TractValidate
+import io.circe.generic.auto._
 
 import scala.concurrent.Future
 
-object V625_2 extends AsyncEditCheck[LoanApplicationRegister] {
+object V625_2
+    extends AsyncEditCheck[LoanApplicationRegister]
+    with AsyncRequest {
+
   override def name: String = "V625-2"
 
   val config = ConfigFactory.load()
 
-  val host = config.getString("hmda.census.grpc.host")
-  val port = config.getInt("hmda.census.grpc.port")
+  val host = config.getString("hmda.census.http.host")
+  val port = config.getInt("hmda.census.http.port")
 
   override def apply[as: AS, mat: MAT, ec: EC](
       lar: LoanApplicationRegister): Future[ValidationResult] = {
@@ -38,16 +42,15 @@ object V625_2 extends AsyncEditCheck[LoanApplicationRegister] {
   }
 
   def tractIsValid[as: AS, mat: MAT, ec: EC](tract: String): Future[Boolean] = {
-    val client = CensusServiceClient(
-      GrpcClientSettings.connectToServiceAt(host, port).withTls(false)
-    )
+    val tractValidate = TractValidate(tract)
     for {
-      response <- client
-        .validateTract(ValidTractRequest(tract))
-        .map(response => response.isValid)
-      _ <- client.close()
-      closed <- client.closed()
-    } yield (response, closed)._1
+      messageRequest <- sendMessageRequestTract(tractValidate,
+                                                host,
+                                                port,
+                                                "/census/validate/tract")
+      response <- executeRequest(messageRequest)
+      messageOrErrorResponse <- unmarshallResponse(response, "tract")
+    } yield messageOrErrorResponse.isValid
   }
 
 }
