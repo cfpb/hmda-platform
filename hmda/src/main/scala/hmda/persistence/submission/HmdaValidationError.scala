@@ -108,44 +108,28 @@ object HmdaValidationError
         updateSubmissionStatus(sharding, submissionId, Validating, log)
         log.info(s"Syntactical / Validity validation started for $submissionId")
 
-        val sink1 = Sink.foreach(println)
-        val sink2 = Sink.fold[Int, ByteString](0)((acc, _) => {
-          println("What acc   " + acc)
-          acc + 1
-        })
-
-        val g = RunnableGraph.fromGraph(GraphDSL.create(sink1, sink2)((_, _)) {
-          implicit builder => (s1, s2) =>
-            import GraphDSL.Implicits._
-
-            val broadcast = builder.add(Broadcast[ByteString](2))
-
-            val source: Source[ByteString, NotUsed] =
-              Source(1 to 10)
-                .map(i => List(i.toString))
-                .via(CsvFormatting.format())
-
-            source ~> broadcast.in
-            broadcast.out(0) ~> s1
-            broadcast.out(1) ~> s2
-            ClosedShape
-        }) // RunnableGraph[(Future[Done], Future[Int])]
-
-        val (fut1, fut2) = g.run()
-
-        fut2 onComplete {
-          case Success(count) => println(s"Number of elements: $count")
-          case Failure(_)     =>
-        }
-
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
-
+        val sink2 = Sink.fold[Int, LoanApplicationRegister](0)((acc, _) => {
+          acc + 1
+        })
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
-          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
+
+          tsLarErrors <- uploadConsumerRawStr(ctx, submissionId)
+            .drop(1)
+            .via(framing("\n"))
+            .map(_.utf8String)
+            .map(_.trim)
+            .map(s => LarCsvParser(s))
+            .collect {
+              case Right(lar) => lar
+            }
+            .runWith(sink2)
+
+//          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
@@ -157,7 +141,8 @@ object HmdaValidationError
         } yield
           (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
-          case Success(_) =>
+          case Success(count) =>
+            println(s"Number of elements: $count")
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
           case Failure(e) =>
             updateSubmissionStatus(sharding, submissionId, Failed, log)
@@ -423,6 +408,21 @@ object HmdaValidationError
         ))
   }
 
+//  private def something[as: AS, mat: MAT, ec: EC](      ctx: ActorContext[SubmissionProcessingCommand],
+//                                                        submissionId: SubmissionId,
+//                                                        validationContext: ValidationContext): Unit = {
+//
+//      uploadConsumerRawStr(ctx, submissionId)
+//        .drop(1)
+//        .via(framing("\n"))
+//        .map(_.utf8String)
+//        .map(_.trim)
+//        .map(s => LarCsvParser(s))
+//        .collect {
+//          case Right(lar) => lar
+//        }
+//  }
+
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
@@ -453,6 +453,64 @@ object HmdaValidationError
           case Right(lar) => lar
         }
         .runWith(Sink.seq)
+
+    val sink1 = Sink.fold[Int, LoanApplicationRegister](0)((acc, _) => {
+      acc + 1
+    })
+    val sink2 = Sink.fold[Int, LoanApplicationRegister](0)((acc, _) => {
+      acc + 1
+    })
+
+    val restResult1: Future[Int] =
+      uploadConsumerRawStr(ctx, submissionId)
+        .drop(1)
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
+        .map(s => LarCsvParser(s))
+        .collect {
+          case Right(lar) => lar
+        }
+        .runWith(sink2)
+
+    restResult1.onComplete {
+      case Success(count) => println(s"Number of elements: $count")
+      case Failure(_)     => println("error happened")
+    }
+
+//    val g = RunnableGraph.fromGraph(GraphDSL.create(sink1, sink2)((_, _)) {
+//      implicit builder => (s1, s2) =>
+//        import GraphDSL.Implicits._
+//
+//        val broadcast = builder.add(Broadcast[LoanApplicationRegister](2))
+//
+////        val source: Source[ByteString, NotUsed] =
+////          Source(1 to 1000000)
+////            .map(i => List(i.toString))
+////            .via(CsvFormatting.format())
+//        val source: Source[LoanApplicationRegister, NotUsed] =
+//          uploadConsumerRawStr(ctx, submissionId)
+//            .drop(1)
+//            .via(framing("\n"))
+//            .map(_.utf8String)
+//            .map(_.trim)
+//            .map(s => LarCsvParser(s))
+//            .collect {
+//              case Right(lar) => lar
+//            }
+//
+//        source ~> broadcast.in
+//        broadcast.out(0) ~> s1
+//        broadcast.out(1) ~> s2
+//        ClosedShape
+//    }) // RunnableGraph[(Future[Done], Future[Int])]
+//
+//    val (fut1, fut2) = g.run()
+//
+//    fut2 onComplete {
+//      case Success(count) => println(s"Number of elements: $count")
+//      case Failure(_)     =>
+//    }
 
     def validateAndPersistErrors(
         tsLar: TransmittalLar,
