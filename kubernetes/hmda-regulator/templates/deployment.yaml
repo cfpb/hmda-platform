@@ -23,6 +23,42 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+          - name: CASSANDRA_CLUSTER_HOSTS
+          valueFrom:
+            configMapKeyRef:
+              name: cassandra-configmap
+              key: cassandra-hosts
+          - name: CASSANDRA_CLUSTER_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: cassandra-credentials
+                key: cassandra.username
+          - name: CASSANDRA_CLUSTER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cassandra-credentials
+                key: cassandra.password
+          - name: AWS_ACCESS_KEY_ID
+            configMapKeyRef:
+              name: s3-configmap
+              key: aws-access-key
+          - name: AWS_SECRET_ACCESS_KEY
+            configMapKeyRef:
+              name: s3-configmap
+              key: aws-secret-access-key
+          - name: AWS_ENVIRONMENT
+            configMapKeyRef:
+              name: š3-configmap
+              key: aws-environment
+          - name: S3_PUBLIC_BUCKET
+            configMapKeyRef:
+              name: s3-configmap
+              key: s3-public-bucket
+          - name: AWS_REGION
+            configMapKeyRef:
+              name: s3-configmap
+              key: aws-region
           ports:
             - name: {{ .Values.service.name }}
               containerPort: 9099

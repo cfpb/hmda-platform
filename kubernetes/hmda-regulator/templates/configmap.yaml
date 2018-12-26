@@ -1,0 +1,12 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s3-configmap
+data:
+  aws-access-key: ""
+  aws-secret-access-key: ""
+  aws-environment: ""
+  s3-public-bucket: ""
+  aws-region: ""
+
