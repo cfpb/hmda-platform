@@ -137,8 +137,6 @@ CREATE TABLE public.loanapplicationregister2018
     aus4_result integer,
     aus5_result integer,
     other_aus_result character varying,
-    reverse integer,
-    aus_result integer,
     reverse_mortgage integer,
     line_of_credits integer,
     business_or_commercial integer
