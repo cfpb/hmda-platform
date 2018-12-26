@@ -47,7 +47,7 @@ object ModifiedLarCsvParser {
       convertEmptyField(lar.coApplicant.race.race1.code),
       convertEmptyField(lar.coApplicant.race.race2.code),
       convertEmptyField(lar.coApplicant.race.race3.code),
-      convertEmptyField(lar.coApplicant.race.race1.code),
+      convertEmptyField(lar.coApplicant.race.race4.code),
       convertEmptyField(lar.coApplicant.race.race5.code),
       lar.applicant.race.raceObserved.code,
       lar.coApplicant.race.raceObserved.code,
