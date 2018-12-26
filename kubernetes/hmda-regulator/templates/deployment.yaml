@@ -25,10 +25,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
           - name: CASSANDRA_CLUSTER_HOSTS
-          valueFrom:
-            configMapKeyRef:
-              name: cassandra-configmap
-              key: cassandra-hosts
+            valueFrom:
+              configMapKeyRef:
+                name: cassandra-configmap
+                key: cassandra-hosts
           - name: CASSANDRA_CLUSTER_USERNAME
             valueFrom:
               secretKeyRef:
@@ -40,12 +40,12 @@ spec:
                 name: cassandra-credentials
                 key: cassandra.password
           - name: AWS_ACCESS_KEY_ID
-            configMapKeyRef:
-              name: s3-configmap
+            secretKeyRef:
+              name: s3-credentials
               key: aws-access-key
           - name: AWS_SECRET_ACCESS_KEY
-            configMapKeyRef:
-              name: s3-configmap
+            secretKeyRef:
+              name: s3-credentials
               key: aws-secret-access-key
           - name: AWS_ENVIRONMENT
             configMapKeyRef:
