@@ -95,6 +95,8 @@ object ValidationFlow {
                                      TsValidationError)
       case "validity" =>
         TsLarEngine.checkValidity(tsLar, tsLar.ts.LEI, TsValidationError)
+      case "quality" =>
+        TsLarEngine.checkQuality(tsLar, tsLar.ts.LEI)
     }
     errors
       .leftMap(xs => {
@@ -105,6 +107,7 @@ object ValidationFlow {
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)
     : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+    val lars = List[LoanApplicationRegister]()
     collectLar
       .map { lar =>
         def errors = checkType match {
