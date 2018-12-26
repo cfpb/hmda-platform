@@ -12,6 +12,7 @@ metadata:
       prefix: /auth/
       rewrite: /auth/
       service: keycloak-http
+      timeout_ms: 20000
 spec:
   type: NodePort
   ports:

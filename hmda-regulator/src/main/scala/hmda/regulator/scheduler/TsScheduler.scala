@@ -1,22 +1,98 @@
 package hmda.regulator.scheduler
 
-import akka.actor.ActorLogging
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+import akka.stream.ActorMaterializer
+import akka.stream.alpakka.s3.impl.ListBucketVersion2
+import akka.stream.alpakka.s3.javadsl.S3Client
+import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
+import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
+import hmda.query.DbConfiguration.dbConfig
+import hmda.regulator.query.RegulatorComponent
+import hmda.regulator.query.ts.TransmittalSheetEntity
 import hmda.regulator.scheduler.schedules.Schedules.TsScheduler
 
-class TsScheduler extends HmdaActor with ActorLogging {
+import scala.concurrent.Future
+import scala.util.{Failure, Success}
+
+class TsScheduler extends HmdaActor with RegulatorComponent {
+
+  implicit val ec = context.system.dispatcher
+  implicit val materializer = ActorMaterializer()
+  private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
+  def tsRepository = new TransmittalSheetRepository(dbConfig)
+
+  val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+  val accessKeyId = awsConfig.getString("access-key-id")
+  val secretAccess = awsConfig.getString("secret-access-key ")
+  val region = awsConfig.getString("region")
+  val bucket = awsConfig.getString("public-bucket")
+  val environment = awsConfig.getString("environment")
+  val year = awsConfig.getString("year")
+  val awsCredentialsProvider = new AWSStaticCredentialsProvider(
+    new BasicAWSCredentials(accessKeyId, secretAccess))
+
+  val awsRegionProvider = new AwsRegionProvider {
+    override def getRegion: String = region
+  }
+
+  val s3Settings = new S3Settings(
+    MemoryBufferType,
+    None,
+    awsCredentialsProvider,
+    awsRegionProvider,
+    false,
+    None,
+    ListBucketVersion2
+  )
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
       .schedule("TsScheduler", self, TsScheduler)
+
   }
 
   override def postStop() = {
     QuartzSchedulerExtension(context.system).cancelJob("TsScheduler")
   }
 
-  override def receive = {
-    case x => log.info(s"Received $x")
+  override def receive: Receive = {
+
+    case TsScheduler =>
+      val s3Client = new S3Client(s3Settings, context.system, materializer)
+
+      val now = LocalDateTime.now()
+
+      val formattedDate = fullDate.format(now)
+
+      val fileName = s"$formattedDate" + s"$year" + "_ts" + ".txt"
+      val s3Sink = s3Client.multipartUpload(
+        bucket,
+        s"$environment/regulator-ts/$year/$fileName")
+
+      val allResults: Future[Seq[TransmittalSheetEntity]] =
+        tsRepository.getAllSheets()
+
+      allResults onComplete {
+        case Success(transmittalSheets) => {
+          val source = transmittalSheets
+            .map(transmittalSheet => transmittalSheet.toPSV + "\n")
+            .map(s => ByteString(s))
+            .toList
+
+          log.info(s"Uploading TS Regulator Data file : $fileName" + "  to S3.")
+          Source(source).runWith(s3Sink)
+        }
+        case Failure(t) =>
+          println(
+            "An error has occurred getting Transmittal Sheet Data: " + t.getMessage)
+      }
   }
 }

@@ -2,9 +2,7 @@ package hmda.regulator.scheduler
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import akka.http.scaladsl.model.{ContentType, HttpCharsets, MediaTypes}
-import akka.stream.Supervision.Decider
-import akka.stream.alpakka.s3.impl.{S3Headers, ServerSideEncryption}
+
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.javadsl.S3Client
@@ -17,7 +15,8 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
-import hmda.regulator.query.{InstitutionEntity, RegulatorComponent}
+import hmda.regulator.query.RegulatorComponent
+import hmda.regulator.query.panel.InstitutionEntity
 import hmda.regulator.scheduler.schedules.Schedules.PanelScheduler
 
 import scala.concurrent.Future
@@ -27,6 +26,33 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
+  private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
+  def institutionRepository = new InstitutionRepository(dbConfig)
+  def emailRepository = new InstitutionEmailsRepository(dbConfig)
+
+  val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+  val accessKeyId = awsConfig.getString("access-key-id")
+  val secretAccess = awsConfig.getString("secret-access-key ")
+  val region = awsConfig.getString("region")
+  val bucket = awsConfig.getString("public-bucket")
+  val environment = awsConfig.getString("environment")
+  val year = awsConfig.getString("year")
+  val awsCredentialsProvider = new AWSStaticCredentialsProvider(
+    new BasicAWSCredentials(accessKeyId, secretAccess))
+
+  val awsRegionProvider = new AwsRegionProvider {
+    override def getRegion: String = region
+  }
+
+  val s3Settings = new S3Settings(
+    MemoryBufferType,
+    None,
+    awsCredentialsProvider,
+    awsRegionProvider,
+    false,
+    None,
+    ListBucketVersion2
+  )
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -41,39 +67,16 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case PanelScheduler =>
-      val config = ConfigFactory.load("application.conf").getConfig("aws")
-      val accessKeyId = config.getString("access-key-id")
-      val secretAccess = config.getString("secret-access-key ")
-      val region = config.getString("region")
-      val bucket = config.getString("public-bucket")
-      val environment = config.getString("environment")
-      val year = config.getString("year")
-      val awsCredentialsProvider = new AWSStaticCredentialsProvider(
-        new BasicAWSCredentials(accessKeyId, secretAccess))
-
-      val awsRegionProvider = new AwsRegionProvider {
-        override def getRegion: String = region
-      }
-
-      val s3Settings = new S3Settings(
-        MemoryBufferType,
-        None,
-        awsCredentialsProvider,
-        awsRegionProvider,
-        false,
-        None,
-        ListBucketVersion2
-      )
-
       val s3Client = new S3Client(s3Settings, context.system, materializer)
 
       val now = LocalDateTime.now()
-      val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}" + "_PANEL_" + ".txt"
+
+      val formattedDate = fullDate.format(now)
+
+      val fileName = s"$formattedDate" + s"$year" + "_panel" + ".txt"
       val s3Sink = s3Client.multipartUpload(
         bucket,
         s"$environment/regulator-panel/$year/$fileName")
-
-      val institutionRepository = new InstitutionRepository(dbConfig)
 
       val allResults: Future[Seq[InstitutionEntity]] =
         institutionRepository.getAllInstitutions()
@@ -81,23 +84,34 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       allResults onComplete {
         case Success(institutions) => {
           val source = institutions
+            .map(institution => appendEmailDomains(institution))
             .map(institution => institution.toPSV + "\n")
-            .map(s => addHeader(s))
             .map(s => ByteString(s))
             .toList
 
-          log.info(s"Uploading Regulator Data file : $fileName" + "  to S3.")
+          log.info(
+            s"Uploading Panel Regulator Data file : $fileName" + "  to S3.")
           Source(source).runWith(s3Sink)
         }
-        case Failure(t) => println("An error has occurred: " + t.getMessage)
+        case Failure(t) =>
+          println("An error has occurred getting Panel Data: " + t.getMessage)
       }
   }
-  def addHeader(panelData: String): String = {
-    val fileHeader = "lei|activityYear|agency|institutionType|" +
-      "id2017|taxId|rssd|respondentName|respondentState|respondentCity|" +
-      "parentIdRssd|parentName|assets|otherLenderCode|topHolderIdRssd|topHolderName|hmdaFiler" + "\n"
 
-    fileHeader + panelData
+  def appendEmailDomains(institution: InstitutionEntity): InstitutionEntity = {
+    val emails = emailRepository.findByLei(institution.lei)
+
+    emails onComplete {
+      case Success(emails) => {
+
+        val emailList = emails.map(email => email.emailDomain)
+
+        institution.emailDomains = emailList.mkString(",")
+        institution
+      }
+      case Failure(t) =>
+        println("An error has occurred getting Email by LEI: " + t.getMessage)
+    }
+    institution
   }
-
 }
