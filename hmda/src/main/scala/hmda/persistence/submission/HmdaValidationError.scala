@@ -10,7 +10,7 @@ import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{Broadcast, GraphDSL, RunnableGraph, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -21,7 +21,7 @@ import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.stream.ActorMaterializer
+import akka.stream.{ActorMaterializer, ClosedShape}
 import akka.stream.typed.scaladsl.ActorFlow
 import hmda.messages.institution.InstitutionCommands.{
   GetInstitution,
@@ -65,6 +65,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 import scala.collection.immutable
+import akka.stream.alpakka.csv.scaladsl.CsvFormatting
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -106,6 +107,36 @@ object HmdaValidationError
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
         log.info(s"Syntactical / Validity validation started for $submissionId")
+
+        val sink1 = Sink.foreach(println)
+        val sink2 = Sink.fold[Int, ByteString](0)((acc, _) => {
+          println("What acc   " + acc)
+          acc + 1
+        })
+
+        val g = RunnableGraph.fromGraph(GraphDSL.create(sink1, sink2)((_, _)) {
+          implicit builder => (s1, s2) =>
+            import GraphDSL.Implicits._
+
+            val broadcast = builder.add(Broadcast[ByteString](2))
+
+            val source: Source[ByteString, NotUsed] =
+              Source(1 to 10)
+                .map(i => List(i.toString))
+                .via(CsvFormatting.format())
+
+            source ~> broadcast.in
+            broadcast.out(0) ~> s1
+            broadcast.out(1) ~> s2
+            ClosedShape
+        }) // RunnableGraph[(Future[Done], Future[Int])]
+
+        val (fut1, fut2) = g.run()
+
+        fut2 onComplete {
+          case Success(count) => println(s"Number of elements: $count")
+          case Failure(_)     =>
+        }
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
