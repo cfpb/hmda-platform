@@ -40,25 +40,55 @@ spec:
                 name: cassandra-credentials
                 key: cassandra.password
           - name: AWS_ACCESS_KEY_ID
-            secretKeyRef:
-              name: s3-credentials
-              key: aws-access-key
+            valueFrom:
+              secretKeyRef:
+                name: s3-credentials
+                key: aws-access-key
           - name: AWS_SECRET_ACCESS_KEY
-            secretKeyRef:
-              name: s3-credentials
-              key: aws-secret-access-key
+            valueFrom:
+              secretKeyRef:
+                name: s3-credentials
+                key: aws-secret-access-key
           - name: AWS_ENVIRONMENT
-            configMapKeyRef:
-              name: š3-configmap
-              key: aws-environment
+            valueFrom:
+              configMapKeyRef:
+                name: s3-configmap
+                key: aws-environment
           - name: S3_PUBLIC_BUCKET
-            configMapKeyRef:
-              name: s3-configmap
-              key: s3-public-bucket
+            valueFrom:
+              configMapKeyRef:
+                name: s3-configmap
+                key: s3-public-bucket
           - name: AWS_REGION
-            configMapKeyRef:
-              name: s3-configmap
-              key: aws-region
+            valueFrom:
+              configMapKeyRef:
+                name: s3-configmap
+                key: aws-region
+          - name: PG_HOST
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: host
+          - name: PG_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: "institutions-api-inst-api-config"
+                key: postgres.database
+          - name: PG_USER
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: username
+          - name: PG_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inst-postgres-credentials
+                key: password
+          - name: PG_SSL
+            valueFrom:
+              configMapKeyRef:
+                name: "institutions-api-inst-api-config"
+                key: postgres.ssl
           ports:
             - name: {{ .Values.service.name }}
               containerPort: 9099
