@@ -23,6 +23,10 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            limits:
+              cpu: "4"
+              memory: "2200Mi"
           env:
             - name: CASSANDRA_CLUSTER_HOSTS
               valueFrom:

@@ -39,6 +39,9 @@ spec:
               path: /
               port: {{ .Values.service.port }}
           resources:
+            limits:
+              cpu: "6"
+              memory: "3200Mi"
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
       nodeSelector:

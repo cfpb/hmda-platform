@@ -55,6 +55,9 @@ spec:
                   name: aws-credentials
                   key: aws-secret-access-key
           resources:
+            limits:
+              cpu: "6"
+              memory: "3200Mi"
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
       nodeSelector:

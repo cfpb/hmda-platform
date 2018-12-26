@@ -26,6 +26,10 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        resources:
+          limits:
+            cpu: "8"
+            memory: "6200Mi"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: HMDA_RUNTIME_MODE
