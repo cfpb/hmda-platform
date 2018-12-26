@@ -19,6 +19,5 @@ object HmdaCensus extends App {
     """.stripMargin)
 
   implicit val system = ActorSystem("hmda-census")
-//  system.actorOf(HmdaCensusGrpc.props(), name = "hmda-census-grpc")
   system.actorOf(HmdaCensusApi.props(), "hmda-census-api")
 }
