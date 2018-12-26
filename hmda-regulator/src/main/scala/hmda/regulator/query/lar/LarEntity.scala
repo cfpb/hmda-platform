@@ -154,8 +154,6 @@ case class LarPartSix(payable: Int = 0,
                       aus4Result: Int = 0,
                       aus5Result: Int = 0,
                       otherAusResult: String = "",
-                      reverse: Int = 0,
-                      ausResult: Int = 0,
                       reverseMortgage: Int = 0,
                       lineOfCredits: Int = 0,
                       businessOrCommercial: Int = 0) {
@@ -163,7 +161,7 @@ case class LarPartSix(payable: Int = 0,
   def toPSV: String = {
     s"$payable|" +
       s"$nmls|$aus1|$aus2|$aus3|$aus4|$aus5|$otheraus|$aus1Result|$aus2Result|$aus3Result|$aus4Result|$aus5Result|" +
-      s"$otherAusResult|$reverse|$ausResult|$reverseMortgage|$lineOfCredits|$businessOrCommercial"
+      s"$otherAusResult|$reverseMortgage|$lineOfCredits|$businessOrCommercial"
   }
 }
 

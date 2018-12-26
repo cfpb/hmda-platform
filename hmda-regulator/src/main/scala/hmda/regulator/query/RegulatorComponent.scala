@@ -315,8 +315,6 @@ trait RegulatorComponent {
     def aus4Result = column[Int]("aus4_result")
     def aus5Result = column[Int]("aus5_result")
     def otherAusResult = column[String]("other_aus_result")
-    def reverse = column[Int]("reverse")
-    def ausResult = column[Int]("aus_result")
     def reverseMortgage = column[Int]("reverse_mortgage")
     def lineOfCredits = column[Int]("line_of_credits")
     def businessOrCommercial = column[Int]("business_or_commercial")
@@ -448,8 +446,6 @@ trait RegulatorComponent {
        aus4Result,
        aus5Result,
        otherAusResult,
-       reverse,
-       ausResult,
        reverseMortgage,
        lineOfCredits,
        businessOrCommercial) <> ((LarPartSix.apply _).tupled, LarPartSix.unapply)
