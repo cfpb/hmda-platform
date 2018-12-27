@@ -35,7 +35,7 @@ volumes: [
                   docker tag ${env.DOCKER_HUB_USER}/hmda-analytics ${env.DOCKER_HUB_USER}/hmda-analytics:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD}
                   docker push ${env.DOCKER_HUB_USER}/hmda-analytics:${env.DOCKER_TAG}
-                  docker tag ${env.DOCKER_HUB_USER}/hmda-analytics:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/modified-lar:${env.DOCKER_TAG}
+                  docker tag ${env.DOCKER_HUB_USER}/hmda-analytics:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-analytics:${env.DOCKER_TAG}
                   docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD}
                   docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-analytics:${env.DOCKER_TAG}
                   docker images
