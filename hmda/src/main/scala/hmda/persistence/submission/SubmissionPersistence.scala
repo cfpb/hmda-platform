@@ -17,7 +17,12 @@ import hmda.messages.submission.SubmissionEvents.{
   SubmissionModified,
   SubmissionNotExists
 }
-import hmda.model.filing.submission.{Created, Submission}
+import hmda.model.filing.submission.{
+  Created,
+  Signed,
+  Submission,
+  SubmissionStatus
+}
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.filing.FilingPersistence
 
@@ -64,13 +69,36 @@ object SubmissionPersistence
           }
         case ModifySubmission(modified, replyTo) =>
           if (state.submission.map(s => s.id).contains(modified.id)) {
-            Effect.persist(SubmissionModified(modified)).thenRun { _ =>
-              log.debug(s"persisted modified Submission: ${modified.toString}")
-              val filingPersistence = sharding.entityRefFor(
-                FilingPersistence.typeKey,
-                s"${FilingPersistence.name}-${modified.id.lei}-${modified.id.period}")
-              filingPersistence ! UpdateSubmission(modified, None)
-              replyTo ! SubmissionModified(modified)
+            if (modified.status == SubmissionStatus.valueOf(Signed.code) && (modified.end == 0 || modified.receipt.isEmpty)) {
+              //for when submission is signed but end date and receipt are empty
+              val timestamp = Instant.now().toEpochMilli
+              val modifiedSigned = modified.copy(end = timestamp,
+                                                 receipt =
+                                                   s"${modified.id}-$timestamp")
+              Effect.persist(SubmissionModified(modifiedSigned)).thenRun { _ =>
+                log.debug(
+                  s"persisted modified Submission: ${modifiedSigned.toString}")
+                val filingPersistence = sharding.entityRefFor(
+                  FilingPersistence.typeKey,
+                  s"${FilingPersistence.name}-${modified.id.lei}-${modifiedSigned.id.period}")
+                filingPersistence ! UpdateSubmission(modifiedSigned, None)
+                replyTo ! SubmissionModified(modifiedSigned)
+              }
+            } else if (modified.end == 0 && modified.receipt.isEmpty) {
+              //for all statuses other than signed
+              Effect.persist(SubmissionModified(modified)).thenRun { _ =>
+                log.debug(s"persisted modified Submission: ${modified.toString}")
+                val filingPersistence = sharding.entityRefFor(
+                  FilingPersistence.typeKey,
+                  s"${FilingPersistence.name}-${modified.id.lei}-${modified.id.period}")
+                filingPersistence ! UpdateSubmission(modified, None)
+                replyTo ! SubmissionModified(modified)
+              }
+            } else {
+              //if entered here with end date not 0 and receipt not empty and status other than signed, then don't do anything.
+              //Since enddate is not 0 and receipt is not empty, the submission has already been signed
+              log.debug(s"No effect: ${modified.toString}")
+              Effect.none
             }
           } else {
             replyTo ! SubmissionNotExists(modified.id)
