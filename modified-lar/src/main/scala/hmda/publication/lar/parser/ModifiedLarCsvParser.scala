@@ -125,11 +125,11 @@ object ModifiedLarCsvParser {
     case _ =>
       ratio.toDouble.toInt match {
         case x if x < 20                 => "<20%"
-        case x if 20 until 30 contains x => "20-30%"
-        case x if 30 until 36 contains x => "30-36%"
+        case x if 20 until 30 contains x => "20%-<30%"
+        case x if 30 until 36 contains x => "30%-<36%"
         case x if 36 until 50 contains x => x.toString
-        case x if 50 until 60 contains x => "50-60%"
-        case x if x >= 60                => "+60%"
+        case x if 50 to 60 contains x    => "50%-60%"
+        case x if x >= 60                => ">60%"
       }
   }
 
@@ -139,7 +139,7 @@ object ModifiedLarCsvParser {
     case x if 25 to 49 contains x   => "25-49"
     case x if 50 to 99 contains x   => "50-99"
     case x if 100 to 149 contains x => "100-149"
-    case x if x >= 150              => "150+"
+    case x if x >= 150              => ">149"
   }
 
   private def convertMultifamilyAffordableUnits(multifamilyUnits: String,
