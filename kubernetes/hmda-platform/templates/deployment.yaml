@@ -28,7 +28,8 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         resources:
           limits:
-            cpu: "8"
+            memory: "6200Mi"
+          requests:
             memory: "6200Mi"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:

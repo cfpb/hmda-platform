@@ -37,9 +37,6 @@ spec:
             tcpSocket:
               port: {{ .Values.service.port }}
           resources:
-            limits:
-              cpu: "4"
-              memory: "2200Mi"
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
