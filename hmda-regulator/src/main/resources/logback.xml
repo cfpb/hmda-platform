@@ -10,11 +10,11 @@
         <appender-ref ref="STDOUT" />
     </appender>
 
-    <root level="${CENSUS_LOG_LEVEL:-INFO}">
+    <root level="${REGULATOR_LOG_LEVEL:-ERROR}">
         <appender-ref ref="ASYNC" />
     </root>
-    <logger name="logger.slick.session" level="DEBUG"/>
-    <logger name="slick.jdbc.DriverDataSource" level="DEBUG"/>
-    <logger name="slick.basic.BasicBackend.stream" level="DEBUG"/>
-    <logger name="slick.basic.BasicBackend.action" level="DEBUG"/>
+    <logger name="logger.slick.session" level="ERROR"/>
+    <logger name="slick.jdbc.DriverDataSource" level="ERROR"/>
+    <logger name="slick.basic.BasicBackend.stream" level="ERROR"/>
+    <logger name="slick.basic.BasicBackend.action" level="ERROR"/>
 </configuration>

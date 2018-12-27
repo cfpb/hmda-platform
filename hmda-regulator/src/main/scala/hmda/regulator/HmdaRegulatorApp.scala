@@ -41,10 +41,4 @@ object HmdaRegulatorApp extends App {
   val tsActorSystem = ActorSystem("tsTask", ConfigFactory.parseString(tsTimer))
   tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
-//  Thread.sleep(60000)
-//
-//  panelActorSystem.terminate()
-//  larActorSystem.terminate()
-//  tsActorSystem.terminate()
-
 }
