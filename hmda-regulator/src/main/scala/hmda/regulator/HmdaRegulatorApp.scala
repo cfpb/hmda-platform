@@ -22,9 +22,6 @@ object HmdaRegulatorApp extends App {
 
   val config = ConfigFactory.load()
 
-  val host = config.getString("hmda.regulator.http.host")
-  val port = config.getString("hmda.regulator.http.port")
-
   val panelTimer = config.getString("akka.PanelScheduler")
   val larTimer = config.getString("akka.LarScheduler")
   val tsTimer = config.getString("akka.TsScheduler")
