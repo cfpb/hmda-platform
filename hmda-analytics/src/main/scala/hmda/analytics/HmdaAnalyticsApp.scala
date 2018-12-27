@@ -105,7 +105,6 @@ object HmdaAnalyticsApp
       .filter(t => t.LEI != "" && t.institutionName != "")
       .map(ts => TransmittalSheetConverter(ts))
       .mapAsync(1) { ts =>
-        println("This is the ts: " + ts)
         for {
           delete <- transmittalSheetRepository.deleteByLei(ts.lei)
           insert <- transmittalSheetRepository.insert(ts)
@@ -134,7 +133,6 @@ object HmdaAnalyticsApp
       .filter(lar => lar.larIdentifier.LEI != "" && lar.larIdentifier.id != "")
       .map(lar => LarConverter(lar))
       .mapAsync(1) { lar =>
-        println("This is the lar: " + lar)
         larRepository.insert(lar)
       }
       .runWith(Sink.ignore)
