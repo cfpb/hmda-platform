@@ -62,10 +62,8 @@ object HmdaAnalyticsApp
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
   val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
-  val larRepository = new LarRepository(schema = "public",
-                                        tableName =
-                                          "loanapplicationregister2018",
-                                        dbConfig)
+  val larRepository =
+    new LarRepository(tableName = "loanapplicationregister2018", dbConfig)
   val db = transmittalSheetRepository.db
   val larDb = transmittalSheetRepository.db
 

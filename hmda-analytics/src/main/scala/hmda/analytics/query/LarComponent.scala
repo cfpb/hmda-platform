@@ -9,17 +9,15 @@ import scala.concurrent.Future
 trait LarComponent {
   import dbConfig.profile.api._
 
-  class LarRepository(schema: String,
-                      tableName: String,
-                      config: DatabaseConfig[JdbcProfile]) {
+  class LarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) {
     def deleteByLei(lei: String): Future[Int] =
       config.db.run {
-        sqlu"DELETE FROM #${schema}.#${tableName} WHERE lei = ${lei}"
+        sqlu"DELETE FROM #${tableName} WHERE lei = ${lei}"
       }
 
     def insert(le: LarEntity): Future[Int] =
       config.db.run {
-        sqlu"""INSERT INTO #${schema}.#${tableName}
+        sqlu"""INSERT INTO #${tableName}
         VALUES (
           ${le.id},
           ${le.lei},
