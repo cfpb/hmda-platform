@@ -53,6 +53,14 @@ volumes: [
     stage('Deploy') {
         if (env.BRANCH_NAME == 'master') {
             container('helm') {
+                dir("kubernetes/hmda-analytics") {
+                    sh """
+                        helm init --client-only
+                    """
+                    sh """
+                        helm dependency update
+                    """
+                }
                 sh """
                   helm upgrade --install --force --namespace=default \
                   --values=kubernetes/hmda-analytics/values.yaml \
