@@ -89,13 +89,6 @@ spec:
               configMapKeyRef:
                 name: "institutions-api-inst-api-config"
                 key: postgres.ssl
-          ports:
-            - name: {{ .Values.service.name }}
-              containerPort: 9099
-              protocol: {{ .Values.service.protocol }}
-            - name: {{ .Values.grpc.name }}
-              containerPort: 60082
-              protocol: {{ .Values.service.protocol }}
           livenessProbe:
             httpGet:
               path: /
