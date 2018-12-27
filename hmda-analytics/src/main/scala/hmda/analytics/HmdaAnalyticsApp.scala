@@ -32,7 +32,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object HmdaAnalyticsApp
-  extends App
+    extends App
     with TransmittalSheetComponent
     with LarComponent {
 
@@ -62,24 +62,22 @@ object HmdaAnalyticsApp
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
   val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
-  val larRepository = new LarRepository(schema = "public",
-    tableName =
-      "loanapplicationregister2018",
-    dbConfig)
+  val larRepository =
+    new LarRepository(tableName = "loanapplicationregister2018", dbConfig)
   val db = transmittalSheetRepository.db
   val larDb = transmittalSheetRepository.db
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(kafkaConfig,
-      new StringDeserializer,
-      new StringDeserializer)
+                     new StringDeserializer,
+                     new StringDeserializer)
       .withBootstrapServers(kafkaHosts)
       .withGroupId("hmda-analytics")
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer
     .committableSource(consumerSettings,
-      Subscriptions.topics(signTopic, analyticsTopic))
+                       Subscriptions.topics(signTopic, analyticsTopic))
     .mapAsync(parallelism) { msg =>
       processData(msg.record.value()).map(_ => msg.committableOffset)
     }
@@ -107,7 +105,6 @@ object HmdaAnalyticsApp
       .filter(t => t.LEI != "" && t.institutionName != "")
       .map(ts => TransmittalSheetConverter(ts))
       .mapAsync(1) { ts =>
-        println("This is the ts: " + ts)
         for {
           delete <- transmittalSheetRepository.deleteByLei(ts.lei)
           insert <- transmittalSheetRepository.insert(ts)
