@@ -32,7 +32,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 
 object HmdaAnalyticsApp
-  extends App
+    extends App
     with TransmittalSheetComponent
     with LarComponent {
 
@@ -63,23 +63,23 @@ object HmdaAnalyticsApp
 
   val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
   val larRepository = new LarRepository(schema = "public",
-    tableName =
-      "loanapplicationregister2018",
-    dbConfig)
+                                        tableName =
+                                          "loanapplicationregister2018",
+                                        dbConfig)
   val db = transmittalSheetRepository.db
   val larDb = transmittalSheetRepository.db
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(kafkaConfig,
-      new StringDeserializer,
-      new StringDeserializer)
+                     new StringDeserializer,
+                     new StringDeserializer)
       .withBootstrapServers(kafkaHosts)
       .withGroupId("hmda-analytics")
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   Consumer
     .committableSource(consumerSettings,
-      Subscriptions.topics(signTopic, analyticsTopic))
+                       Subscriptions.topics(signTopic, analyticsTopic))
     .mapAsync(parallelism) { msg =>
       processData(msg.record.value()).map(_ => msg.committableOffset)
     }
@@ -136,6 +136,7 @@ object HmdaAnalyticsApp
       .filter(lar => lar.larIdentifier.LEI != "" && lar.larIdentifier.id != "")
       .map(lar => LarConverter(lar))
       .mapAsync(1) { lar =>
+        println("This is the lar: " + lar)
         larRepository.insert(lar)
       }
       .runWith(Sink.ignore)
