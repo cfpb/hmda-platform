@@ -29,37 +29,24 @@ trait CensusHttpApi extends HmdaTimeDirectives {
 
   val censusHttpRoutes =
     encodeResponse {
-      pathPrefix("census" / "tract" / Segment ) { tract =>
+      pathPrefix("census" / "tract" / Segment) { tract =>
         timedGet { uri =>
           val census = CensusRecords.indexedTract.get(tract)
           census match {
             case Some(t) => complete(t)
-            case _ => failedResponse(StatusCodes.NotFound, uri, new Exception("Tract not found"))
+            case _ =>
+              failedResponse(StatusCodes.NotFound,
+                             uri,
+                             new Exception("Tract not found"))
           }
         }
       } ~
-      pathPrefix("census" / "validate") {
-        path("tract") {
-          timedPost { uri =>
-            entity(as[TractCheck]) { tc =>
-              val tract = tc.tract
-              val isValid = Try(isTractValid(tract, indexedTract))
-              isValid match {
-                case Success(value) =>
-                  val c = CensusRecords
-                  val validated = TractValidated(value)
-                  complete(ToResponseMarshallable(validated))
-                case Failure(error) =>
-                  failedResponse(StatusCodes.BadRequest, uri, error)
-              }
-            }
-          }
-        } ~
-          path("county") {
+        pathPrefix("census" / "validate") {
+          path("tract") {
             timedPost { uri =>
-              entity(as[CountyCheck]) { tc =>
-                val county = tc.county
-                val isValid = Try(isCountyValid(county, indexedCounty))
+              entity(as[TractCheck]) { tc =>
+                val tract = tc.tract
+                val isValid = Try(isTractValid(tract, indexedTract))
                 isValid match {
                   case Success(value) =>
                     val c = CensusRecords
@@ -71,22 +58,38 @@ trait CensusHttpApi extends HmdaTimeDirectives {
               }
             }
           } ~
-          path("smallcounty") {
-            timedPost { uri =>
-              entity(as[CountyCheck]) { tc =>
-                val county = tc.county
-                val isValid = Try(isCountySmall(county, indexedSmallCounty))
-                isValid match {
-                  case Success(value) =>
-                    val c = CensusRecords
-                    val validated = TractValidated(value)
-                    complete(ToResponseMarshallable(validated))
-                  case Failure(error) =>
-                    failedResponse(StatusCodes.BadRequest, uri, error)
+            path("county") {
+              timedPost { uri =>
+                entity(as[CountyCheck]) { tc =>
+                  val county = tc.county
+                  val isValid = Try(isCountyValid(county, indexedCounty))
+                  isValid match {
+                    case Success(value) =>
+                      val c = CensusRecords
+                      val validated = TractValidated(value)
+                      complete(ToResponseMarshallable(validated))
+                    case Failure(error) =>
+                      failedResponse(StatusCodes.BadRequest, uri, error)
+                  }
+                }
+              }
+            } ~
+            path("smallcounty") {
+              timedPost { uri =>
+                entity(as[CountyCheck]) { tc =>
+                  val county = tc.county
+                  val isValid = Try(isCountySmall(county, indexedSmallCounty))
+                  isValid match {
+                    case Success(value) =>
+                      val c = CensusRecords
+                      val validated = TractValidated(value)
+                      complete(ToResponseMarshallable(validated))
+                    case Failure(error) =>
+                      failedResponse(StatusCodes.BadRequest, uri, error)
+                  }
                 }
               }
             }
-          }
-      }
+        }
     }
 }

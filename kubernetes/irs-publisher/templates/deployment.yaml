@@ -58,7 +58,16 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: aws-secret-access-key
-          resources:
+            - name: HTTP_CENSUS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: http-configmap
+                  key: census.host
+            - name: HTTP_CENSUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: http-configmap
+                  key: census.port
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
       nodeSelector:

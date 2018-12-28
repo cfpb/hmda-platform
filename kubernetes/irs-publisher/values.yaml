@@ -46,3 +46,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+http:
+  census:
+    port: 9093
+    host: census-api.default.svc.cluster.local
+

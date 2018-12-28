@@ -56,10 +56,9 @@ case class Msa(
 case class MsaMap(
  msas: Map[String, Msa] = Map[String, Msa]()
 ) {
-  def +(lar: LoanApplicationRegister): MsaMap = {
-    //TODO: Need census lookup, or flat file
-    val id = ""
-    val original = msas.getOrElse(id, Msa(id, ""))
+  def addLar(lar: LoanApplicationRegister, msa: Msa): MsaMap = {
+    val id = msa.id
+    val original = msas.getOrElse(id, Msa(msa.id, msa.name))
     val modified = original.addLar(lar)
     MsaMap(msas + ((id, modified)))
   }

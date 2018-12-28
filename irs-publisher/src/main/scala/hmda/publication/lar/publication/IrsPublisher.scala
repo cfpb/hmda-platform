@@ -1,8 +1,12 @@
 package hmda.publication.lar.publication
 
+import akka.actor.Actor
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.javadsl.S3Client
@@ -12,13 +16,18 @@ import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
+import hmda.model.census.Census
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.parser.filing.lar.LarCsvParser
-import hmda.publication.lar.model.{MsaMap, MsaSummary}
+import hmda.publication.lar.model.{Msa, MsaMap, MsaSummary}
 import hmda.query.HmdaQuery._
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
+
+import io.circe.generic.auto._
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
 sealed trait IrsPublisherCommand
 case class PublishIrs(submissionId: SubmissionId) extends IrsPublisherCommand
@@ -35,6 +44,9 @@ object IrsPublisher {
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
   val year = config.getInt("hmda.lar.irs.year")
+
+  val censusHost = config.getString("hmda.census.http.host")
+  val censusPort = config.getInt("hmda.census.http.port")
 
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
@@ -70,6 +82,15 @@ object IrsPublisher {
 
       val s3Client = new S3Client(s3Settings, system, materializer)
 
+      def getCensus(hmdaCensus: String): Future[Msa] = {
+        val request = HttpRequest(uri = s"http://$censusHost:$censusPort/census/tract/$hmdaCensus")
+
+        for {
+          r <- Http().singleRequest(request)
+          census <- Unmarshal(r.entity).to[Census]
+        } yield Msa(census.id.toString, census.name)
+      }
+
       Behaviors.receiveMessage {
 
         case PublishIrs(submissionId) =>
@@ -83,7 +104,11 @@ object IrsPublisher {
             .map(l => l.data)
             .drop(1)
             .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
-            .fold(MsaMap())((map, lar) => map + lar)
+            .foldAsync(MsaMap())((map, lar) => {
+              val censusKey = lar.geography.state + lar.geography.county + lar.geography.tract
+              val msaF = getCensus(censusKey)
+              msaF.map(msa => map.addLar(lar, msa))
+            })
             .runWith(Sink.last)
 
           msaMapF.onComplete(_ => {

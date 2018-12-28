@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: http-configmap
+data:
+  census.host: {{ .Values.http.census.host }}
+  census.port: "{{ .Values.http.census.port }}"
