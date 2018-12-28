@@ -93,9 +93,9 @@ this command:
 helm upgrade -i -f kubernetes/keycloak/values.yaml keycloak stable/keycloak --set keycloak.persistence.dbHost="<db URL>"
 ```
 
-### Install Institutions API
+### Install institutions-api
 
-The institutions API chart has two secret dependencies: `cassandra-credentials` (which is also needed by the hmda-platform)
+The institutions-api chart has two secret dependencies: `cassandra-credentials` (which is also needed by the hmda-platform)
 and `inst-postgres-credentials`.  These keys need to be created if they don't already exist.  
 * Cassandra secret keys: `cassandra.username` and `cassandra.password` 
 * InstApi secret keys: `host`, `username` and `password`
@@ -108,7 +108,44 @@ If deploying to HMDA4, run the above command without the `set` flag and it will 
 
 If deploying and pointing to a new database, run with the flag `--set postgres.create-schema="true"`
 
-
+### Install modified-lar
+```bash
+helm upgrade --install --force --namespace=default \
+ --values=kubernetes/modified-lar/values.yaml \
+ --set image.tag=latest \
+ --set image.pullPolicy=Always \
+modified-lar \
+kubernetes/modified-lar
+```
+### Install census-api
+```bash
+helm upgrade --install --force \
+--namespace=default \
+--values=kubernetes/census-api/values.yaml \
+--set image.tag=latest \
+--set image.pullPolicy=Always \
+census-api \
+kubernetes/census-api
+```
+### Install hmda-regulator
+```bash
+helm upgrade --install --force --namespace=default \
+--values=kubernetes/hmda-regulator/values.yaml \
+--set image.tag=latest \
+--set image.pullPolicy=Always \
+hmda-regulator \
+kubernetes/hmda-regulator
+```
+### Install hmda-analytics
+```bash
+helm upgrade --install --force --namespace=default \
+--values=kubernetes/hmda-analytics/values.yaml \
+--set image.tag=latest \
+--set image.pullPolicy=Always \
+hmda-analytics \
+kubernetes/hmda-analytics
+```
+### Install Institutions API
 6. OPTIONAL: Install [Istio](https://istio.io/) Service Mesh
 
 * Install Istio with Helm. Download the Istio distribution and run from the Istio root path:
