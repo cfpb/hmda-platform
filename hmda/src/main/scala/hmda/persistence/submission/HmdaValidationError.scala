@@ -392,7 +392,7 @@ object HmdaValidationError
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
 
     val futRowCount: Future[Int] =
-      uploadConsumerRawStr(ctx, submissionId).drop(1) // header
+      uploadConsumerRawStr(ctx, submissionId).drop(1) // body count
         .via(framing("\n"))
         .map(_.utf8String)
         .map(_.trim)
@@ -407,8 +407,20 @@ object HmdaValidationError
       hashedString
     }
 
+    val headerResultTest: Future[TransmittalSheet] =
+      uploadConsumerRawStr(ctx, submissionId)
+        .take(1)
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
+        .map(s => TsCsvParser(s))
+        .collect {
+          case Right(ts) => ts
+        }
+        .runWith(Sink.head)
+
     val futDistinctCount: Future[Int] =
-      uploadConsumerRawStr(ctx, submissionId).drop(1) // body
+      uploadConsumerRawStr(ctx, submissionId).drop(1) // body distinct
         .via(framing("\n"))
         .map(_.utf8String)
         .map(_.trim)
@@ -437,9 +449,10 @@ object HmdaValidationError
       }
 
     for {
+      header <- headerResultTest
       count <- futDistinctCount
-      rest <- futDistinctCount
-      res <- validateAndPersistErrors(TransmittalLar(header, rest),
+      distinctCount <- futDistinctCount
+      res <- validateAndPersistErrors(TransmittalLar(header, count, distinctCount),
                                       "syntactical",
                                       validationContext)
     } yield res
