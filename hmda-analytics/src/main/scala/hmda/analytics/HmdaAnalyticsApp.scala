@@ -91,6 +91,7 @@ object HmdaAnalyticsApp
       .single(msg)
       .map(msg => SubmissionId(msg))
       .map { id =>
+        log.info(s"Adding data for  $id")
         addTs(id)
       }
       .toMat(Sink.ignore)(Keep.right)
