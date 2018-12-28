@@ -101,7 +101,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
             s"Uploaded Panel Regulator Data file : $fileName" + "  to S3.")
         }
         case Failure(t) =>
-          println("An error has occurred getting PANEL Data: " + t.getMessage)
+          println("An error has occurred getting Panel Data: " + t.getMessage)
       }
 
   }

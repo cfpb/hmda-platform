@@ -84,7 +84,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
         .fromFuture(allResults)
         .map(seek => seek.toList)
         .mapConcat(identity)
-        .map(institution => institution.toPSV + "\n")
+        .map(larEntity => larEntity.toPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
 

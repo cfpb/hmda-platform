@@ -4,7 +4,6 @@ kind: ConfigMap
 metadata:
   name: s3-configmap
 data:
-  aws-environment: ""
-  s3-public-bucket: ""
-  aws-region: ""
-
+  aws-environment: "{{ .Values.aws.environment }}"
+  s3-public-bucket: "{{ .Values.aws.bucket }}"
+  aws-region: "{{ .Values.aws.region }}"

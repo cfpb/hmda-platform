@@ -57,3 +57,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+aws:
+  environment: dev
+  bucket: cfpb-hmda-public
+  region: us-east-1
