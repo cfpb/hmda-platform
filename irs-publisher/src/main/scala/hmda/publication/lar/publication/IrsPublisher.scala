@@ -83,12 +83,18 @@ object IrsPublisher {
       val s3Client = new S3Client(s3Settings, system, materializer)
 
       def getCensus(hmdaCensus: String): Future[Msa] = {
-        val request = HttpRequest(uri = s"http://$censusHost:$censusPort/census/tract/$hmdaCensus")
+        val request = HttpRequest(
+          uri = s"http://$censusHost:$censusPort/census/tract/$hmdaCensus")
 
         for {
           r <- Http().singleRequest(request)
           census <- Unmarshal(r.entity).to[Census]
-        } yield Msa(census.id.toString, census.name)
+        } yield {
+          val censusID = if (census.id == 0) "-----" else census.id.toString
+          val censusName =
+            if (census.name.isEmpty) "MSA/MD NOT AVAILABLE" else census.name
+          Msa(censusID, censusName)
+        }
       }
 
       Behaviors.receiveMessage {
@@ -111,16 +117,18 @@ object IrsPublisher {
             })
             .runWith(Sink.last)
 
-          msaMapF.onComplete(_ => {
+          msaMapF.onComplete {
             case Success(msaMap: MsaMap) =>
               log.info(s"Uploading IRS to S3 for $submissionId")
               val msaSeq = msaMap.msas.values.toSeq
               val msaSummary = MsaSummary.fromMsaCollection(msaSeq)
               //TODO: Maybe add a header row here?
-              val bytes = msaSeq.map(msa => ByteString(msa.toCsv + "\n")) :+ ByteString(msaSummary.toCsv)
+              val bytes = msaSeq.map(msa => ByteString(msa.toCsv + "\n")) :+ ByteString(
+                msaSummary.toCsv)
               Source(bytes.toList).runWith(s3Sink)
-            case Failure(e) => log.error(s"Reading Cassandra journal failed: $e")
-          })
+            case Failure(e) =>
+              log.error(s"Reading Cassandra journal failed: $e")
+          }
 
           Behaviors.same
 

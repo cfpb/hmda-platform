@@ -6,24 +6,24 @@ import hmda.model.filing.lar.enums._
 import scala.language.implicitConversions
 
 case class Msa(
-  id: String = "",
-  name: String = "",
-  totalLars: Int = 0,
-  totalAmount: Double = 0,
-  conv: Int = 0,
-  FHA: Int = 0,
-  VA: Int = 0,
-  FSA: Int = 0,
-  siteBuilt: Int = 0,
-  manufactured: Int = 0,
-  oneToFour: Int = 0,
-  fivePlus: Int = 0,
-  homePurchase: Int = 0,
-  homeImprovement: Int = 0,
-  refinancing: Int = 0,
-  cashOutRefinancing: Int = 0,
-  otherPurpose: Int = 0,
-  notApplicablePurpose: Int = 0
+    id: String = "",
+    name: String = "",
+    totalLars: Int = 0,
+    totalAmount: Double = 0,
+    conv: Int = 0,
+    FHA: Int = 0,
+    VA: Int = 0,
+    FSA: Int = 0,
+    siteBuilt: Int = 0,
+    manufactured: Int = 0,
+    oneToFour: Int = 0,
+    fivePlus: Int = 0,
+    homePurchase: Int = 0,
+    homeImprovement: Int = 0,
+    refinancing: Int = 0,
+    cashOutRefinancing: Int = 0,
+    otherPurpose: Int = 0,
+    notApplicablePurpose: Int = 0
 ) {
   def addLar(lar: LoanApplicationRegister): Msa = {
     implicit def bool2int(b: Boolean): Int = if (b) 1 else 0
@@ -50,11 +50,12 @@ case class Msa(
     )
   }
 
-  def toCsv: String = s"""$id,\"$name\", $totalLars, $totalAmount, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"""
+  def toCsv: String =
+    s"""$id,\"$name\", $totalLars, $totalAmount, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"""
 }
 
 case class MsaMap(
- msas: Map[String, Msa] = Map[String, Msa]()
+    msas: Map[String, Msa] = Map[String, Msa]()
 ) {
   def addLar(lar: LoanApplicationRegister, msa: Msa): MsaMap = {
     val id = msa.id
@@ -65,22 +66,22 @@ case class MsaMap(
 }
 
 case class MsaSummary(
- lars: Int = 0,
- amount: Double = 0,
- conv: Int = 0,
- FHA: Int = 0,
- VA: Int = 0,
- FSA: Int = 0,
- siteBuilt: Int = 0,
- manufactured: Int = 0,
- oneToFour: Int = 0,
- fivePlus: Int = 0,
- homePurchase: Int = 0,
- homeImprovement: Int = 0,
- refinancing: Int = 0,
- cashOutRefinancing: Int = 0,
- otherPurpose: Int = 0,
- notApplicablePurpose: Int = 0
+    lars: Int = 0,
+    amount: Double = 0,
+    conv: Int = 0,
+    FHA: Int = 0,
+    VA: Int = 0,
+    FSA: Int = 0,
+    siteBuilt: Int = 0,
+    manufactured: Int = 0,
+    oneToFour: Int = 0,
+    fivePlus: Int = 0,
+    homePurchase: Int = 0,
+    homeImprovement: Int = 0,
+    refinancing: Int = 0,
+    cashOutRefinancing: Int = 0,
+    otherPurpose: Int = 0,
+    notApplicablePurpose: Int = 0
 ) {
   def +(elem: Msa): MsaSummary = {
     new MsaSummary(
@@ -103,11 +104,14 @@ case class MsaSummary(
     )
   }
 
-  def toCsv: String = s"Totals,, $lars, $amount, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"
+  def toCsv: String =
+    s"Totals,, $lars, $amount, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"
 }
 
 case object MsaSummary {
   def fromMsaCollection(msas: Seq[Msa]): MsaSummary = {
-    msas.foldLeft(MsaSummary()) { (summary, msa) => summary + msa }
+    msas.foldLeft(MsaSummary()) { (summary, msa) =>
+      summary + msa
+    }
   }
 }

@@ -15,6 +15,7 @@ import hmda.census.validation.CensusValidation._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.census.records.CensusRecords
 import hmda.census.records.CensusRecords._
+import hmda.model.census.Census
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
@@ -33,11 +34,8 @@ trait CensusHttpApi extends HmdaTimeDirectives {
         timedGet { uri =>
           val census = CensusRecords.indexedTract.get(tract)
           census match {
-            case Some(t) => complete(t)
-            case _ =>
-              failedResponse(StatusCodes.NotFound,
-                             uri,
-                             new Exception("Tract not found"))
+            case Some(t) => complete(ToResponseMarshallable(t))
+            case _       => complete(ToResponseMarshallable(Census()))
           }
         }
       } ~
