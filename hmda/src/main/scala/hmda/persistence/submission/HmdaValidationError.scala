@@ -25,19 +25,33 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.{ActorMaterializer, ClosedShape}
 import akka.stream.typed.scaladsl.ActorFlow
-import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
+import hmda.messages.institution.InstitutionCommands.{
+  GetInstitution,
+  ModifyInstitution
+}
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
-import HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
+import HmdaProcessingUtils.{
+  readRawData,
+  updateSubmissionReceipt,
+  updateSubmissionStatus
+}
 import EditDetailsConverter._
 import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.messages.institution.InstitutionEvents.{InstitutionEvent, InstitutionKafkaEvent, InstitutionModified}
-import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionEvent,
+  InstitutionKafkaEvent,
+  InstitutionModified
+}
+import hmda.messages.submission.EditDetailsCommands.{
+  EditDetailsPersistenceCommand,
+  PersistEditDetails
+}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
@@ -383,7 +397,6 @@ object HmdaValidationError
         ))
   }
 
-
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
@@ -391,18 +404,10 @@ object HmdaValidationError
 
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
 
-    val futRowCount: Future[Int] =
-      uploadConsumerRawStr(ctx, submissionId).drop(1) // body count
-        .via(framing("\n"))
-        .map(_.utf8String)
-        .map(_.trim)
-        .filter(line => LarCsvParser(line).isRight)
-        .runWith(Sink.fold(0)((acc, _) => acc + 1))
-
     def md5HashString(s: String): String = {
       val md = MessageDigest.getInstance("MD5")
       val digest = md.digest(s.getBytes)
-      val bigInt = new BigInteger(1,digest)
+      val bigInt = new BigInteger(1, digest)
       val hashedString = bigInt.toString(16)
       hashedString
     }
@@ -419,16 +424,17 @@ object HmdaValidationError
         }
         .runWith(Sink.head)
 
-    val futDistinctCount: Future[Int] =
-      uploadConsumerRawStr(ctx, submissionId).drop(1) // body distinct
+    val futElements: Future[immutable.Seq[String]] =
+      uploadConsumerRawStr(ctx, submissionId).drop(1) // header
         .via(framing("\n"))
         .map(_.utf8String)
         .map(_.trim)
         .filter(line => LarCsvParser(line).isRight)
         .map(md5HashString)
         .runWith(Sink.seq)
-        .map(_.distinct.length)
 
+    val futRowCount2: Future[Int] = futElements.map(_.length)
+    val futDistinctCount: Future[Int] = futElements.map(_.distinct.length)
 
     def validateAndPersistErrors(
         tsLar: TransmittalLar,
@@ -448,13 +454,15 @@ object HmdaValidationError
           Future.successful(Nil)
       }
 
+
     for {
       header <- headerResultTest
-      count <- futDistinctCount
+      count <- futRowCount2
       distinctCount <- futDistinctCount
-      res <- validateAndPersistErrors(TransmittalLar(header, count, distinctCount),
-                                      "syntactical",
-                                      validationContext)
+      res <- validateAndPersistErrors(
+        TransmittalLar(header, count, distinctCount),
+        "syntactical",
+        validationContext)
     } yield res
   }
 
