@@ -30,7 +30,7 @@ keycloak:
   ## Additional init containers, e. g. for providing custom themes
   extraInitContainers: |
     - name: theme-provider
-      image: hmda/theme-provider:v2.7.3
+      image: hmda/theme-provider:latest
       imagePullPolicy: Always
       command:
         - sh
@@ -43,7 +43,7 @@ keycloak:
         - name: theme
           mountPath: /theme
     - name: spi-provider
-      image: hmda/keycloak-spi-provider:v2.7.3
+      image: hmda/keycloak-spi-provider:latest
       imagePullPolicy: Always
       command:
         - sh
@@ -174,11 +174,17 @@ keycloak:
 
   resources:
     limits:
-      cpu: "1"
-      memory: "4096Mi"
+      memory: "4200Mi"
+      cpu: "2"
     requests:
-      cpu: "500m"
-      memory: "1024Mi"
+      memory: "4200Mi"
+      cpu: "1"
+    # limits:
+    #   cpu: "100m"
+    #   memory: "1024Mi"
+    # requests:
+    #   cpu: "100m"
+    #   memory: "1024Mi"
 
   ## WildFly CLI configurations. They all end up in the file 'keycloak.cli' configured in the configmap whichn is
   ## executed on server startup.
