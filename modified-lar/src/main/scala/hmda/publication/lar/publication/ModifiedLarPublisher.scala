@@ -62,7 +62,7 @@ object ModifiedLarPublisher {
         ListBucketVersion2
       )
 
-      val s3Client = new S3Client(s3Settings, system, materializer)
+      val s3Client = new S3Client(s3Settings)( system, materializer)
 
       Behaviors.receiveMessage {
 
