@@ -29,6 +29,15 @@ trait CensusHttpApi extends HmdaTimeDirectives {
 
   val censusHttpRoutes =
     encodeResponse {
+      pathPrefix("census" / "tract" / Segment ) { tract =>
+        timedGet { uri =>
+          val census = CensusRecords.indexedTract.get(tract)
+          census match {
+            case Some(t) => complete(t)
+            case _ => failedResponse(StatusCodes.NotFound, uri, new Exception("Tract not found"))
+          }
+        }
+      } ~
       pathPrefix("census" / "validate") {
         path("tract") {
           timedPost { uri =>
