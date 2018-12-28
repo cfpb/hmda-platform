@@ -84,7 +84,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
         s"$environment/regulator-panel/$year/$fileName")
 
       val allResults: Future[Seq[InstitutionEntity]] =
-        institutionRepository.getAllInstitutions()
+        institutionRepository.findActiveFilers()
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
