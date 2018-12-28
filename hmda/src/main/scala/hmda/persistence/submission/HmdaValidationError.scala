@@ -110,26 +110,13 @@ object HmdaValidationError
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
-        val sink2 = Sink.fold[Int, LoanApplicationRegister](0)((acc, _) => {
-          acc + 1
-        })
+
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
 
-          tsLarErrors <- uploadConsumerRawStr(ctx, submissionId)
-            .drop(1)
-            .via(framing("\n"))
-            .map(_.utf8String)
-            .map(_.trim)
-            .map(s => LarCsvParser(s))
-            .collect {
-              case Right(lar) => lar
-            }
-            .runWith(sink2)
-
-//          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
+          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
@@ -408,20 +395,6 @@ object HmdaValidationError
         ))
   }
 
-//  private def something[as: AS, mat: MAT, ec: EC](      ctx: ActorContext[SubmissionProcessingCommand],
-//                                                        submissionId: SubmissionId,
-//                                                        validationContext: ValidationContext): Unit = {
-//
-//      uploadConsumerRawStr(ctx, submissionId)
-//        .drop(1)
-//        .via(framing("\n"))
-//        .map(_.utf8String)
-//        .map(_.trim)
-//        .map(s => LarCsvParser(s))
-//        .collect {
-//          case Right(lar) => lar
-//        }
-//  }
 
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
       ctx: ActorContext[SubmissionProcessingCommand],
@@ -430,17 +403,21 @@ object HmdaValidationError
 
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
 
-    val headerResultTest: Future[TransmittalSheet] =
-      uploadConsumerRawStr(ctx, submissionId)
-        .take(1)
+    val futRowCount: Future[Int] =
+      uploadConsumerRawStr(ctx, submissionId).drop(1) // header
         .via(framing("\n"))
         .map(_.utf8String)
         .map(_.trim)
-        .map(s => TsCsvParser(s))
-        .collect {
-          case Right(ts) => ts
-        }
-        .runWith(Sink.head)
+        .filter(line => LarCsvParser(line).isRight)
+        .runWith(Sink.fold(0)((acc, _) => acc + 1))
+
+    def md5HashString(s: String): String = {
+      val md = MessageDigest.getInstance("MD5")
+      val digest = md.digest(s.getBytes)
+      val bigInt = new BigInteger(1,digest)
+      val hashedString = bigInt.toString(16)
+      hashedString
+    }
 
     val restResult: Future[immutable.Seq[LoanApplicationRegister]] =
       uploadConsumerRawStr(ctx, submissionId)
