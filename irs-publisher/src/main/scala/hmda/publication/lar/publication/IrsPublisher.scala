@@ -104,7 +104,7 @@ object IrsPublisher {
 
           val s3Sink = s3Client.multipartUpload(
             bucket,
-            s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.txt")
+            s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
 
           val msaMapF = readRawData(submissionId)
             .map(l => l.data)
@@ -122,9 +122,10 @@ object IrsPublisher {
               log.info(s"Uploading IRS to S3 for $submissionId")
               val msaSeq = msaMap.msas.values.toSeq
               val msaSummary = MsaSummary.fromMsaCollection(msaSeq)
-              //TODO: Maybe add a header row here?
-              val bytes = msaSeq.map(msa => ByteString(msa.toCsv + "\n")) :+ ByteString(
-                msaSummary.toCsv)
+              val header = "MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A\n"
+              val bytes = ByteString(header) +:
+                msaSeq.map(msa => ByteString(msa.toCsv + "\n")) :+
+                ByteString(msaSummary.toCsv)
               Source(bytes.toList).runWith(s3Sink)
             case Failure(e) =>
               log.error(s"Reading Cassandra journal failed: $e")
