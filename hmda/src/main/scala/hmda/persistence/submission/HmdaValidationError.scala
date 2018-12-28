@@ -1,5 +1,7 @@
 package hmda.persistence.submission
 
+import java.math.BigInteger
+import java.security.MessageDigest
 import java.time.Instant
 
 import akka.actor.{ActorSystem, Scheduler}
@@ -23,33 +25,19 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.{ActorMaterializer, ClosedShape}
 import akka.stream.typed.scaladsl.ActorFlow
-import hmda.messages.institution.InstitutionCommands.{
-  GetInstitution,
-  ModifyInstitution
-}
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
-import HmdaProcessingUtils.{
-  readRawData,
-  updateSubmissionReceipt,
-  updateSubmissionStatus
-}
+import HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
 import EditDetailsConverter._
 import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionEvent,
-  InstitutionKafkaEvent,
-  InstitutionModified
-}
-import hmda.messages.submission.EditDetailsCommands.{
-  EditDetailsPersistenceCommand,
-  PersistEditDetails
-}
+import hmda.messages.institution.InstitutionEvents.{InstitutionEvent, InstitutionKafkaEvent, InstitutionModified}
+import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
@@ -419,75 +407,16 @@ object HmdaValidationError
       hashedString
     }
 
-    val restResult: Future[immutable.Seq[LoanApplicationRegister]] =
-      uploadConsumerRawStr(ctx, submissionId)
-        .drop(1)
+    val futDistinctCount: Future[Int] =
+      uploadConsumerRawStr(ctx, submissionId).drop(1) // body
         .via(framing("\n"))
         .map(_.utf8String)
         .map(_.trim)
-        .map(s => LarCsvParser(s))
-        .collect {
-          case Right(lar) => lar
-        }
+        .filter(line => LarCsvParser(line).isRight)
+        .map(md5HashString)
         .runWith(Sink.seq)
+        .map(_.distinct.length)
 
-    val sink1 = Sink.fold[Int, LoanApplicationRegister](0)((acc, _) => {
-      acc + 1
-    })
-    val sink2 = Sink.fold[Int, LoanApplicationRegister](0)((acc, _) => {
-      acc + 1
-    })
-
-    val restResult1: Future[Int] =
-      uploadConsumerRawStr(ctx, submissionId)
-        .drop(1)
-        .via(framing("\n"))
-        .map(_.utf8String)
-        .map(_.trim)
-        .map(s => LarCsvParser(s))
-        .collect {
-          case Right(lar) => lar
-        }
-        .runWith(sink2)
-
-    restResult1.onComplete {
-      case Success(count) => println(s"Number of elements: $count")
-      case Failure(_)     => println("error happened")
-    }
-
-//    val g = RunnableGraph.fromGraph(GraphDSL.create(sink1, sink2)((_, _)) {
-//      implicit builder => (s1, s2) =>
-//        import GraphDSL.Implicits._
-//
-//        val broadcast = builder.add(Broadcast[LoanApplicationRegister](2))
-//
-////        val source: Source[ByteString, NotUsed] =
-////          Source(1 to 1000000)
-////            .map(i => List(i.toString))
-////            .via(CsvFormatting.format())
-//        val source: Source[LoanApplicationRegister, NotUsed] =
-//          uploadConsumerRawStr(ctx, submissionId)
-//            .drop(1)
-//            .via(framing("\n"))
-//            .map(_.utf8String)
-//            .map(_.trim)
-//            .map(s => LarCsvParser(s))
-//            .collect {
-//              case Right(lar) => lar
-//            }
-//
-//        source ~> broadcast.in
-//        broadcast.out(0) ~> s1
-//        broadcast.out(1) ~> s2
-//        ClosedShape
-//    }) // RunnableGraph[(Future[Done], Future[Int])]
-//
-//    val (fut1, fut2) = g.run()
-//
-//    fut2 onComplete {
-//      case Success(count) => println(s"Number of elements: $count")
-//      case Failure(_)     =>
-//    }
 
     def validateAndPersistErrors(
         tsLar: TransmittalLar,
@@ -508,8 +437,8 @@ object HmdaValidationError
       }
 
     for {
-      header <- headerResultTest
-      rest <- restResult
+      count <- futDistinctCount
+      rest <- futDistinctCount
       res <- validateAndPersistErrors(TransmittalLar(header, rest),
                                       "syntactical",
                                       validationContext)
