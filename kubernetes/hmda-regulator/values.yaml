@@ -9,15 +9,30 @@ image:
   tag: v2.7.2
   pullPolicy: IfNotPresent
 
-nameOverride: ""
-fullnameOverride: ""
+service:
+  type: NodePort
+  port: 9099
+  targetPort: 9099
+  name: http-regulator
+
+grpc:
+  type: ClusterIP
+  port: 60082
+  targetPort: 60082
+  name: http2-regulator
+
+ambassador:
+  name: ambassador-regulator
+  port: 80
+  service:
+    type: NodePort
 
 ingress:
   enabled: false
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  path: /
+  ContainerPort: 9099
   hosts:
     - hmda-regulator.local
   tls: []
