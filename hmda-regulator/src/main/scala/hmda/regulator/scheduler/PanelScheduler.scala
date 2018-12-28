@@ -2,10 +2,11 @@ package hmda.regulator.scheduler
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.CompletionStage
 
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.javadsl.S3Client
+import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
@@ -16,7 +17,11 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.regulator.query.RegulatorComponent
-import hmda.regulator.query.panel.InstitutionEntity
+import hmda.regulator.query.panel.{
+  InstitutionAltEntity,
+  InstitutionEmailEntity,
+  InstitutionEntity
+}
 import hmda.regulator.scheduler.schedules.Schedules.PanelScheduler
 
 import scala.concurrent.Future
@@ -67,7 +72,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case PanelScheduler =>
-      val s3Client = new S3Client(s3Settings, context.system, materializer)
+      val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now()
 
@@ -81,37 +86,53 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       val allResults: Future[Seq[InstitutionEntity]] =
         institutionRepository.getAllInstitutions()
 
-      allResults onComplete {
-        case Success(institutions) => {
-          val source = institutions
-            .map(institution => appendEmailDomains(institution))
-            .map(institution => institution.toPSV + "\n")
-            .map(s => ByteString(s))
-            .toList
+      val results: Future[MultipartUploadResult] = Source
+        .fromFuture(allResults)
+        .map(seek => seek.toList)
+        .mapConcat(identity)
+        .mapAsync(1)(institution => appendEmailDomains(institution))
+        .map(institution => institution.toPSV + "\n")
+        .map(s => ByteString(s))
+        .runWith(s3Sink)
 
+      results onComplete {
+        case Success(result) => {
           log.info(
-            s"Uploading Panel Regulator Data file : $fileName" + "  to S3.")
-          Source(source).runWith(s3Sink)
+            s"Uploaded Panel Regulator Data file : $fileName" + "  to S3.")
         }
         case Failure(t) =>
-          println("An error has occurred getting Panel Data: " + t.getMessage)
+          println("An error has occurred getting PANEL Data: " + t.getMessage)
       }
+
   }
 
-  def appendEmailDomains(institution: InstitutionEntity): InstitutionEntity = {
-    val emails = emailRepository.findByLei(institution.lei)
+  def appendEmailDomains(
+      institution: InstitutionEntity): Future[InstitutionAltEntity] = {
 
-    emails onComplete {
-      case Success(emails) => {
+    val emails: Future[Seq[InstitutionEmailEntity]] =
+      emailRepository.findByLei(institution.lei)
 
-        val emailList = emails.map(email => email.emailDomain)
-
-        institution.emailDomains = emailList.mkString(",")
-        institution
-      }
-      case Failure(t) =>
-        println("An error has occurred getting Email by LEI: " + t.getMessage)
-    }
-    institution
+    emails.map(
+      emailList =>
+        InstitutionAltEntity(
+          lei = institution.lei,
+          activityYear = institution.activityYear,
+          agency = institution.agency,
+          institutionType = institution.institutionType,
+          id2017 = institution.id2017,
+          taxId = institution.taxId,
+          rssd = institution.rssd,
+          respondentName = institution.respondentName,
+          respondentState = institution.respondentState,
+          respondentCity = institution.respondentCity,
+          parentIdRssd = institution.parentIdRssd,
+          parentName = institution.parentName,
+          assets = institution.assets,
+          otherLenderCode = institution.otherLenderCode,
+          topHolderIdRssd = institution.topHolderIdRssd,
+          topHolderName = institution.topHolderName,
+          hmdaFiler = institution.hmdaFiler,
+          emailDomains = emailList.map(email => email.emailDomain).mkString(",")
+      ))
   }
 }

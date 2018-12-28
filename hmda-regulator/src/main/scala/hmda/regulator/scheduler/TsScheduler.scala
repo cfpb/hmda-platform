@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.javadsl.S3Client
+import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
@@ -66,7 +66,7 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case TsScheduler =>
-      val s3Client = new S3Client(s3Settings, context.system, materializer)
+      val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now()
 
@@ -80,19 +80,20 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
       val allResults: Future[Seq[TransmittalSheetEntity]] =
         tsRepository.getAllSheets()
 
-      allResults onComplete {
-        case Success(transmittalSheets) => {
-          val source = transmittalSheets
-            .map(transmittalSheet => transmittalSheet.toPSV + "\n")
-            .map(s => ByteString(s))
-            .toList
+      val results: Future[MultipartUploadResult] = Source
+        .fromFuture(allResults)
+        .map(seek => seek.toList)
+        .mapConcat(identity)
+        .map(transmittalSheet => transmittalSheet.toPSV + "\n")
+        .map(s => ByteString(s))
+        .runWith(s3Sink)
 
-          log.info(s"Uploading TS Regulator Data file : $fileName" + "  to S3.")
-          Source(source).runWith(s3Sink)
+      results onComplete {
+        case Success(result) => {
+          log.info(s"Uploaded TS Regulator Data file : $fileName" + "  to S3.")
         }
         case Failure(t) =>
-          println(
-            "An error has occurred getting Transmittal Sheet Data: " + t.getMessage)
+          println("An error has occurred getting TS Data: " + t.getMessage)
       }
   }
 }

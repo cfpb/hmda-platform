@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.javadsl.S3Client
+import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
@@ -67,7 +67,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case LarScheduler =>
-      val s3Client = new S3Client(s3Settings, context.system, materializer)
+      val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now()
 
@@ -80,20 +80,20 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
 
       val allResults: Future[Seq[LarEntityImpl]] = larRepository.getAllLARs()
 
-      allResults onComplete {
-        case Success(lars) => {
-          val source = lars
-            .map(lar => lar.toPSV + "\n")
-            .map(s => ByteString(s))
-            .toList
+      val results: Future[MultipartUploadResult] = Source
+        .fromFuture(allResults)
+        .map(seek => seek.toList)
+        .mapConcat(identity)
+        .map(institution => institution.toPSV + "\n")
+        .map(s => ByteString(s))
+        .runWith(s3Sink)
 
-          log.info(
-            s"Uploading LAR Regulator Data file : $fileName" + "  to S3.")
-          Source(source).runWith(s3Sink)
+      results onComplete {
+        case Success(result) => {
+          log.info(s"Uploaded LAR Regulator Data file : $fileName" + "  to S3.")
         }
         case Failure(t) =>
-          println(
-            "An error has occurred getting LAR Sheet Data: " + t.getMessage)
+          println("An error has occurred getting LAR Data: " + t.getMessage)
       }
   }
 }

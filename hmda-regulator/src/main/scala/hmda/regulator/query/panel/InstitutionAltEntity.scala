@@ -1,6 +1,6 @@
 package hmda.regulator.query.panel
 
-case class InstitutionEntity(
+case class InstitutionAltEntity(
     lei: String = "",
     activityYear: Int = 0,
     agency: Int = -1,
@@ -17,14 +17,15 @@ case class InstitutionEntity(
     otherLenderCode: Int = -1,
     topHolderIdRssd: Int = -1,
     topHolderName: String = "",
-    hmdaFiler: Boolean = false
+    hmdaFiler: Boolean = false,
+    emailDomains: String = ""
 ) {
   def isEmpty: Boolean = lei == ""
 
   def toPSV: String = {
     s"$lei|$activityYear|$agency|" +
       s"$institutionType|$id2017|$taxId|" +
-      s"$rssd|" + s"|$respondentName|$respondentState|" +
+      s"$rssd|$emailDomains|$respondentName|$respondentState|" +
       s"$respondentCity|$parentIdRssd|$parentName|" +
       s"$assets|$otherLenderCode|$topHolderIdRssd|$topHolderName|$hmdaFiler"
 

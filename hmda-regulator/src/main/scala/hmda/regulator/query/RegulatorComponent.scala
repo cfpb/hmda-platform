@@ -122,6 +122,10 @@ trait RegulatorComponent {
     def findByLei(lei: String) = {
       db.run(table.filter(_.lei === lei).result)
     }
+
+    def getAllDomains(): Future[Seq[InstitutionEmailEntity]] = {
+      db.run(table.result)
+    }
   }
   class TransmittalSheetTable(tag: Tag)
       extends Table[TransmittalSheetEntity](tag, "transmittalsheet2018") {
