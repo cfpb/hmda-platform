@@ -1,0 +1,74 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "irs-publisher.fullname" . }}
+  labels:
+    app: {{ include "irs-publisher.name" . }}
+    chart: {{ include "irs-publisher.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "irs-publisher.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "irs-publisher.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            limits:
+              cpu: "4"
+              memory: "2200Mi"
+          env:
+            - name: CASSANDRA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.username
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.password
+            - name: KAFKA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-configmap
+                  key: kafka.hosts
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-secret-access-key
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

@@ -33,7 +33,8 @@ object CensusRecords {
             if (values(11).isEmpty) 0.0 else values(11).toDouble,
           medianAge = if (values(12).isEmpty) 0 else values(12).toInt,
           smallCounty =
-            if (!values(13).isEmpty && values(13) == "S") true else false
+            if (!values(13).isEmpty && values(13) == "S") true else false,
+          name = values(14)
         )
       }
       .toList
