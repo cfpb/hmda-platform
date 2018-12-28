@@ -89,14 +89,6 @@ spec:
               configMapKeyRef:
                 name: "institutions-api-inst-api-config"
                 key: postgres.ssl
-          livenessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.service.port }}
-          readinessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.service.port }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
