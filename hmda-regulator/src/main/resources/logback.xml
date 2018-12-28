@@ -10,7 +10,7 @@
         <appender-ref ref="STDOUT" />
     </appender>
 
-    <root level="${REGULATOR_LOG_LEVEL:-DEBUG}">
+    <root level="${CENSUS_LOG_LEVEL:-INFO}">
         <appender-ref ref="ASYNC" />
     </root>
     <logger name="logger.slick.session" level="DEBUG"/>
