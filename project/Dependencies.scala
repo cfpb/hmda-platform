@@ -48,4 +48,5 @@ object Dependencies {
   lazy val akkaKafkaStreams = "com.typesafe.akka" %% "akka-stream-kafka" % Version.alpakkaKafka
   lazy val embeddedKafka = "net.manub" %% "scalatest-embedded-kafka" % Version.embeddedKafka
   lazy val alpakkaS3 = "com.lightbend.akka" %% "akka-stream-alpakka-s3" % Version.alpakka
+  lazy val akkaQuartzScheduler = "com.enragedginger" %% "akka-quartz-scheduler" % Version.akkaQuartzScheduler
 }

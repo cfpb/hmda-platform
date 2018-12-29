@@ -20,4 +20,5 @@ object Version {
   val alpakka = "1.0-M1"
   val alpakkaKafka = "1.0-M1"
   val embeddedKafka = "2.0.0"
+  val akkaQuartzScheduler = "1.6.1-akka-2.5.x"
 }
