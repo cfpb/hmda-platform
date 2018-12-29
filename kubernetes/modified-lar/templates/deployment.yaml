@@ -58,6 +58,11 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: aws-secret-access-key
+            - name: AWS_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-environment
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
