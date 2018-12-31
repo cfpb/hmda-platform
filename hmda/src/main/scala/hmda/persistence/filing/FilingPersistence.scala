@@ -14,6 +14,7 @@ import hmda.messages.filing.FilingEvents.{
   SubmissionAdded,
   SubmissionUpdated
 }
+
 import hmda.messages.institution.InstitutionCommands.AddFiling
 import hmda.model.filing.FilingDetails
 import hmda.model.filing.submission.SubmissionSummary

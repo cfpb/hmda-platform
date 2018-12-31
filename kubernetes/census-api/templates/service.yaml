@@ -2,6 +2,28 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: {{ template "census-api.fullname" . }}
+  labels:
+    app: {{ template "census-api.name" . }}
+    chart: {{ template "census-api.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: {{ .Values.service.protocol }}
+      name: {{ .Values.service.name }}
+  selector:
+    app: {{ template "census-api.name" . }}
+    release: {{ .Release.Name }}
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: {{ template "census-api.fullname" . }}-grpc
   labels:
     app: {{ template "census-api.fullname" . }}

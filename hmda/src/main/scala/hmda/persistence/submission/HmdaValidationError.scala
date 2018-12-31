@@ -118,7 +118,11 @@ object HmdaValidationError
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
 
-          tsLarErrors <- validateTsLar(ctx, submissionId, validationContext)
+          tsLarErrors <- validateTsLar(ctx,
+                                       submissionId,
+                                       "all",
+                                       validationContext)
+
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
@@ -400,8 +404,8 @@ object HmdaValidationError
   private def validateTsLar[as: AS, mat: MAT, ec: EC](
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
+      editType: String,
       validationContext: ValidationContext): Future[List[ValidationError]] = {
-
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
 
     def md5HashString(s: String): String = {
@@ -466,12 +470,15 @@ object HmdaValidationError
     } yield res
   }
 
-  private def validateLar[as: AS](
+  private def validateLar[as: AS, mat: MAT, ec: EC](
       editCheck: String,
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
       validationContext: ValidationContext)
     : Source[HmdaRowValidatedError, NotUsed] = {
+
+    validateTsLar(ctx, submissionId, "quality", validationContext)
+
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateLarFlow(editCheck, validationContext))

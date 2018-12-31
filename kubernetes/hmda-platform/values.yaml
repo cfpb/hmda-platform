@@ -81,6 +81,14 @@ grpc:
     port: 60081
     host: census-api-grpc.default.svc.cluster.local
 
+http:
+  check_digit:
+    port: 9091
+    host: check-digit.default.svc.cluster.local
+  census:
+    port: 9093
+    host: census-api.default.svc.cluster.local
+
 
 ingress:
   enabled: false

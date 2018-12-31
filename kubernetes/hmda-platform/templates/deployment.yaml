@@ -26,6 +26,13 @@ spec:
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        resources:
+          limits:
+            memory: "6200Mi"
+            cpu: "2"
+          requests:
+            memory: "6200Mi"
+            cpu: "1"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: HMDA_RUNTIME_MODE
@@ -84,6 +91,26 @@ spec:
             configMapKeyRef:
               name: grpc-configmap
               key: census.port
+        - name: HTTP_CENSUS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: census.host
+        - name: HTTP_CENSUS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: census.port
+        - name: HTTP_CHECK_DIGIT_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: check.digit.host
+        - name: HTTP_CHECK_DIGIT_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: http-configmap
+              key: check.digit.port
 #        livenessProbe:
 #          tcpSocket:
 #            port: {{ .Values.bootstrap.port }}

@@ -24,15 +24,18 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
+            - name: {{ .Values.service.name }}
+              containerPort: 9093
+              protocol: {{ .Values.service.protocol }}
             - name: {{ .Values.grpc.name }}
               containerPort: 60081
               protocol: {{ .Values.grpc.protocol }}
           livenessProbe:
             tcpSocket:
-              port: {{ .Values.grpc.port }}
+              port: {{ .Values.service.port }}
           readinessProbe:
             tcpSocket:
-              port: {{ .Values.grpc.port }}
+              port: {{ .Values.service.port }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

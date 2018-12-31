@@ -172,7 +172,13 @@ keycloak:
     initialDelaySeconds: 30
     timeoutSeconds: 1
 
-  resources: {}
+  resources:
+    limits:
+      memory: "4200Mi"
+      cpu: "2"
+    requests:
+      memory: "4200Mi"
+      cpu: "1"
     # limits:
     #   cpu: "100m"
     #   memory: "1024Mi"
