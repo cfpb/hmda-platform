@@ -60,14 +60,14 @@ object MacroValidationFlow {
                         total,
                         q637Ratio,
                         q637Name,
-                        applicationWithdrawnByApplicant)
+                        fileClosedForIncompleteness)
       q638 <- Q638(source)
       q639 <- Q639(source)
       q640 <- macroEdit(source,
                         total,
                         q640Ratio,
                         q640Name,
-                        applicationWithdrawnByApplicant)
+                        incomeLessThan10)
     } yield {
       List(q634, q635, q636, q637, q638, q639, q640).filter(e =>
         e != EmptyMacroValidationError())
