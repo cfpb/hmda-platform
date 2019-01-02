@@ -11,6 +11,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: bank-filter
+  name: bank-filter-configmap
 data:
-   bank-filter-list: "{{ .Values.filter.bank-filter-list }}"
+   bank-filter: "{{ .Values.filter.bank-filter-list }}"
