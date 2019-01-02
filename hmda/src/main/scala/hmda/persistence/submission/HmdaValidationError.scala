@@ -117,10 +117,10 @@ object HmdaValidationError
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
 
-//          tsLarErrors <- validateTsLar(ctx,
-//                                       submissionId,
-//                                       "all",
-//                                       validationContext)
+          tsLarErrors <- validateTsLar(ctx,
+                                       submissionId,
+                                       "all",
+                                       validationContext)
 
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
