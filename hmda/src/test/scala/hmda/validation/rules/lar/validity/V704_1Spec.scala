@@ -8,7 +8,7 @@ import hmda.validation.rules.lar.LarEditCheckSpec
 
 class V704_1Spec extends LarEditCheckSpec {
   override def check: EditCheck[LoanApplicationRegister] = V704_1
-  property("If loan is purchased, AUS must be NA") {
+  property("If loan is purchased, AUS must be NA or Exempt") {
     forAll(larGen) { lar =>
       whenever(lar.action.actionTakenType != PurchasedLoan) {
         lar.mustPass
@@ -19,6 +19,7 @@ class V704_1Spec extends LarEditCheckSpec {
 
       appLar.copy(AUS = appLar.AUS.copy(aus1 = EmptyAUSValue)).mustFail
       appLar.copy(AUS = appLar.AUS.copy(aus1 = AUSNotApplicable)).mustPass
+      appLar.copy(AUS = appLar.AUS.copy(aus1 = AUSExempt)).mustPass
     }
   }
 }
