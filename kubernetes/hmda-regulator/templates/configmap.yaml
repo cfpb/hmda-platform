@@ -13,4 +13,4 @@ kind: ConfigMap
 metadata:
   name: bank-filter-configmap
 data:
-   bank-filter: "{{ .Values.filter.bank-filter-list }}"
+  bank-filter: "{{ .Values.filter.bankfilterlist }}"
