@@ -2,7 +2,6 @@ package hmda.regulator.scheduler
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.concurrent.CompletionStage
 
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
@@ -42,6 +41,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   val bucket = awsConfig.getString("public-bucket")
   val environment = awsConfig.getString("environment")
   val year = awsConfig.getString("year")
+  val bankFilterList = awsConfig.getString("bank-filter-list").split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -72,6 +72,8 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case PanelScheduler =>
+      log.info(s"Testing bank filter list Panel : $bankFilterList" + "  to S3.")
+
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now()
@@ -79,9 +81,8 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       val formattedDate = fullDate.format(now)
 
       val fileName = s"$formattedDate" + s"$year" + "_panel" + ".txt"
-      val s3Sink = s3Client.multipartUpload(
-        bucket,
-        s"$environment/regulator-panel/$year/$fileName")
+      val s3Sink =
+        s3Client.multipartUpload(bucket, s"$environment/panel/$year/$fileName")
 
       val allResults: Future[Seq[InstitutionEntity]] =
         institutionRepository.findActiveFilers()
@@ -89,7 +90,7 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
         .map(seek => seek.toList)
-        .mapConcat(identity)
+        .mapConcat(identity).filterNot(institution=>bankFilterList.contains(institution.lei))
         .mapAsync(1)(institution => appendEmailDomains(institution))
         .map(institution => institution.toPSV + "\n")
         .map(s => ByteString(s))

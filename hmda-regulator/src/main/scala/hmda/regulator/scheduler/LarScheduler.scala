@@ -37,6 +37,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   val bucket = awsConfig.getString("public-bucket")
   val environment = awsConfig.getString("environment")
   val year = awsConfig.getString("year")
+  val bankFilterList = awsConfig.getString("bank-filter-list").split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -67,6 +68,8 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case LarScheduler =>
+      log.info(s"Testing bank filter list LAR : $bankFilterList" + "  to S3.")
+
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now()
@@ -74,16 +77,15 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val formattedDate = fullDate.format(now)
 
       val fileName = s"$formattedDate" + s"$year" + "_lar" + ".txt"
-      val s3Sink = s3Client.multipartUpload(
-        bucket,
-        s"$environment/regulator-lar/$year/$fileName")
+      val s3Sink =
+        s3Client.multipartUpload(bucket, s"$environment/lar/$year/$fileName")
 
       val allResults: Future[Seq[LarEntityImpl]] = larRepository.getAllLARs()
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
         .map(seek => seek.toList)
-        .mapConcat(identity)
+        .mapConcat(identity).filterNot(larEntity=>bankFilterList.contains(larEntity.larPartOne.lei))
         .map(larEntity => larEntity.toPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
