@@ -72,8 +72,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case PanelScheduler =>
-      log.info(s"Testing bank filter list Panel : $bankFilterList" + "  to S3.")
-
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now()
@@ -82,15 +80,15 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
 
       val fileName = s"$formattedDate" + s"$year" + "_panel" + ".txt"
       val s3Sink =
-        s3Client.multipartUpload(bucket, s"$environment/panel/$year/$fileName")
+        s3Client.multipartUpload(bucket, s"$environment/panel/$fileName")
 
       val allResults: Future[Seq[InstitutionEntity]] =
-        institutionRepository.findActiveFilers()
+        institutionRepository.findActiveFilers(bankFilterList)
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
         .map(seek => seek.toList)
-        .mapConcat(identity).filterNot(institution=>bankFilterList.contains(institution.lei))
+        .mapConcat(identity)
         .mapAsync(1)(institution => appendEmailDomains(institution))
         .map(institution => institution.toPSV + "\n")
         .map(s => ByteString(s))

@@ -68,8 +68,6 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case LarScheduler =>
-      log.info(s"Testing bank filter list LAR : $bankFilterList" + "  to S3.")
-
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now()
@@ -78,14 +76,15 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
 
       val fileName = s"$formattedDate" + s"$year" + "_lar" + ".txt"
       val s3Sink =
-        s3Client.multipartUpload(bucket, s"$environment/lar/$year/$fileName")
+        s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
 
-      val allResults: Future[Seq[LarEntityImpl]] = larRepository.getAllLARs()
+      val allResults: Future[Seq[LarEntityImpl]] =
+        larRepository.getAllLARs(bankFilterList)
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
         .map(seek => seek.toList)
-        .mapConcat(identity).filterNot(larEntity=>bankFilterList.contains(larEntity.larPartOne.lei))
+        .mapConcat(identity)
         .map(larEntity => larEntity.toPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)

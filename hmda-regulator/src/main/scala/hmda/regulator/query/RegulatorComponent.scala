@@ -75,8 +75,13 @@ trait RegulatorComponent {
       db.run(table.filter(_.lei === lei).result)
     }
 
-    def findActiveFilers(): Future[Seq[InstitutionEntity]] = {
-      db.run(table.filter(_.hmdaFiler === true).result)
+    //(x => (x.isX && x.name == "xyz"))
+    def findActiveFilers(
+        bankIgnoreList: Array[String]): Future[Seq[InstitutionEntity]] = {
+      db.run(
+        table
+          .filter(institutionEnity => (institutionEnity.hmdaFiler === true))
+          .result)
     }
 
     def getAllInstitutions(): Future[Seq[InstitutionEntity]] = {
@@ -126,6 +131,7 @@ trait RegulatorComponent {
     def getAllDomains(): Future[Seq[InstitutionEmailEntity]] = {
       db.run(table.result)
     }
+
   }
   class TransmittalSheetTable(tag: Tag)
       extends Table[TransmittalSheetEntity](tag, "transmittalsheet2018") {
@@ -196,9 +202,11 @@ trait RegulatorComponent {
       db.run(table.size.result)
     }
 
-    def getAllSheets(): Future[Seq[TransmittalSheetEntity]] = {
+    def getAllSheets(
+        bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] = {
       db.run(table.result)
     }
+
   }
 
   class LarTable(tag: Tag)
@@ -486,7 +494,8 @@ trait RegulatorComponent {
       db.run(table.size.result)
     }
 
-    def getAllLARs(): Future[Seq[LarEntityImpl]] = {
+    def getAllLARs(
+        bankIgnoreList: Array[String]): Future[Seq[LarEntityImpl]] = {
       db.run(table.result)
     }
   }

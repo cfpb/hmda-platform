@@ -67,8 +67,6 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case TsScheduler =>
-      log.info(s"Testing bank filter list TS : $bankFilterList" + "  to S3.")
-
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now()
@@ -77,15 +75,15 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
 
       val fileName = s"$formattedDate" + s"$year" + "_ts" + ".txt"
       val s3Sink =
-        s3Client.multipartUpload(bucket, s"$environment/ts/$year/$fileName")
+        s3Client.multipartUpload(bucket, s"$environment/ts/$fileName")
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
-        tsRepository.getAllSheets()
+        tsRepository.getAllSheets(bankFilterList)
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
         .map(seek => seek.toList)
-        .mapConcat(identity).filterNot(transmittalSheet=>bankFilterList.contains(transmittalSheet.lei))
+        .mapConcat(identity)
         .map(transmittalSheet => transmittalSheet.toPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
