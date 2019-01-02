@@ -180,8 +180,8 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
     }
 
     val aporData = aporList.find { apor =>
-      weekOfYear(apor.rateDate) == weekOfYear(lockInDate) &&
-        apor.rateDate.getYear == lockInDate.getYear
+      weekNumberForDate(apor.rateDate) == weekNumberForDate(lockInDate) &&
+        weekYearForDate(apor.rateDate) == weekYearForDate(lockInDate)
     }
 
     aporData match {
@@ -202,9 +202,16 @@ class HmdaAPORPersistence extends HmdaPersistentActor {
       (reverseMortgage != 2)
   }
 
-  private def weekOfYear(date: LocalDate): Int = {
+  private def weekNumberForDate(date: LocalDate): Int = {
     val zoneId = ZoneId.systemDefault()
     val weekField = IsoFields.WEEK_OF_WEEK_BASED_YEAR
+    val dateTime = date.atStartOfDay(zoneId)
+    dateTime.get(weekField)
+  }
+
+  private def weekYearForDate(date: LocalDate): Int = {
+    val zoneId = ZoneId.systemDefault()
+    val weekField = IsoFields.WEEK_BASED_YEAR
     val dateTime = date.atStartOfDay(zoneId)
     dateTime.get(weekField)
   }
