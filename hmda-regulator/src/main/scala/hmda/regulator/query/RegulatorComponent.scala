@@ -2,7 +2,7 @@ package hmda.regulator.query
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
-import hmda.regulator.query.lar._
+import hmda.regulator.query.lar.{LarEntityImpl, _}
 import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
 import hmda.regulator.query.ts.TransmittalSheetEntity
 import slick.basic.DatabaseConfig
@@ -80,7 +80,8 @@ trait RegulatorComponent {
         bankIgnoreList: Array[String]): Future[Seq[InstitutionEntity]] = {
       db.run(
         table
-          .filter(institutionEnity => (institutionEnity.hmdaFiler === true))
+          .filter(_.hmdaFiler === true)
+          .filterNot(_.lei inSet bankIgnoreList)
           .result)
     }
 
@@ -204,7 +205,7 @@ trait RegulatorComponent {
 
     def getAllSheets(
         bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] = {
-      db.run(table.result)
+      db.run(table.filterNot(_.lei inSet bankIgnoreList).result)
     }
 
   }
@@ -496,7 +497,7 @@ trait RegulatorComponent {
 
     def getAllLARs(
         bankIgnoreList: Array[String]): Future[Seq[LarEntityImpl]] = {
-      db.run(table.result)
+      db.run(table.filterNot(_.lei inSet bankIgnoreList).result)
     }
   }
 
