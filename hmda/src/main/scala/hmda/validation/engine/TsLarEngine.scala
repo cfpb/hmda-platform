@@ -13,7 +13,7 @@ object TsLarEngine extends ValidationEngine[TransmittalLar] {
   )
 
   override val qualityChecks = Vector(
-    Q600
+//    Q600
   )
 
 }

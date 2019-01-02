@@ -67,7 +67,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 import scala.collection.immutable
-import akka.stream.alpakka.csv.scaladsl.CsvFormatting
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -118,10 +117,10 @@ object HmdaValidationError
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
 
-          tsLarErrors <- validateTsLar(ctx,
-                                       submissionId,
-                                       "all",
-                                       validationContext)
+//          tsLarErrors <- validateTsLar(ctx,
+//                                       submissionId,
+//                                       "all",
+//                                       validationContext)
 
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
@@ -131,8 +130,7 @@ object HmdaValidationError
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
                                              ctx,
                                              submissionId).runWith(Sink.ignore)
-        } yield
-          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
+        } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
           case Success(count) =>
             println(s"Number of elements: $count")
@@ -169,11 +167,12 @@ object HmdaValidationError
                                    submissionId,
                                    ValidationContext())
             .runWith(Sink.ignore)
-          larAsyncErrorsQuality <- validateAsyncLar("quality",
-                                                    ctx,
-                                                    submissionId)
-            .runWith(Sink.ignore)
-        } yield (larErrors, larAsyncErrorsQuality)
+//          larAsyncErrorsQuality <- validateAsyncLar("quality",
+//                                                    ctx,
+//                                                    submissionId)
+//            .runWith(Sink.ignore)
+//        } yield (larErrors, larAsyncErrorsQuality)
+        } yield (larErrors)
 
         fQuality.onComplete {
           case Success(_) =>
@@ -429,7 +428,8 @@ object HmdaValidationError
         .runWith(Sink.head)
 
     val futElements: Future[immutable.Seq[String]] =
-      uploadConsumerRawStr(ctx, submissionId).drop(1) // header
+      uploadConsumerRawStr(ctx, submissionId)
+        .drop(1) // header
         .via(framing("\n"))
         .map(_.utf8String)
         .map(_.trim)
@@ -457,7 +457,6 @@ object HmdaValidationError
         case Right(_) =>
           Future.successful(Nil)
       }
-
 
     for {
       header <- headerResultTest
