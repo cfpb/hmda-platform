@@ -61,13 +61,14 @@ spec:
             - name: HTTP_CENSUS_HOST
               valueFrom:
                 configMapKeyRef:
-                  name: http-configmap
+                  name: irs-http-configmap
                   key: census.host
             - name: HTTP_CENSUS_PORT
               valueFrom:
                 configMapKeyRef:
-                  name: http-configmap
+                  name: irs-http-configmap
                   key: census.port
+          resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
