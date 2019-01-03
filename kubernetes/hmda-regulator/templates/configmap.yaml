@@ -14,3 +14,10 @@ metadata:
   name: bank-filter-configmap
 data:
   bank-filter: "{{ .Values.filter.bankfilterlist }}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filing-year
+data:
+  filing-year: "{{ .Values.filter.year }}"  
