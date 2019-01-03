@@ -111,8 +111,7 @@ object IrsPublisher {
             .drop(1)
             .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
             .foldAsync(MsaMap())((map, lar) => {
-              val censusKey = lar.geography.state + lar.geography.county + lar.geography.tract
-              val msaF = getCensus(censusKey)
+              val msaF = getCensus(lar.geography.tract)
               msaF.map(msa => map.addLar(lar, msa))
             })
             .runWith(Sink.last)
