@@ -31,12 +31,15 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
     new LarRepository(dbConfig)
 
   val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+
   val accessKeyId = awsConfig.getString("access-key-id")
   val secretAccess = awsConfig.getString("secret-access-key ")
   val region = awsConfig.getString("region")
   val bucket = awsConfig.getString("public-bucket")
   val environment = awsConfig.getString("environment")
   val year = awsConfig.getString("year")
+  val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -69,16 +72,16 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
     case LarScheduler =>
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
-      val now = LocalDateTime.now()
+      val now = LocalDateTime.now().minusDays(1)
 
       val formattedDate = fullDate.format(now)
 
       val fileName = s"$formattedDate" + s"$year" + "_lar" + ".txt"
-      val s3Sink = s3Client.multipartUpload(
-        bucket,
-        s"$environment/regulator-lar/$year/$fileName")
+      val s3Sink =
+        s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
 
-      val allResults: Future[Seq[LarEntityImpl]] = larRepository.getAllLARs()
+      val allResults: Future[Seq[LarEntityImpl]] =
+        larRepository.getAllLARs(bankFilterList)
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
@@ -90,7 +93,8 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
 
       results onComplete {
         case Success(result) => {
-          log.info(s"Uploaded LAR Regulator Data file : $fileName" + "  to S3.")
+          log.info(
+            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         }
         case Failure(t) =>
           println("An error has occurred getting LAR Data: " + t.getMessage)

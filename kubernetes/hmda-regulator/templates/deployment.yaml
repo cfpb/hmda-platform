@@ -54,11 +54,16 @@ spec:
               configMapKeyRef:
                 name: s3-configmap
                 key: aws-environment
-          - name: S3_PUBLIC_BUCKET
+          - name: S3_PRIVATE_BUCKET
             valueFrom:
               configMapKeyRef:
                 name: s3-configmap
-                key: s3-public-bucket
+                key: s3-private-bucket
+          - name: BANK_FILTER_LIST
+            valueFrom:
+              configMapKeyRef:
+                name: bank-filter-configmap
+                key: bank-filter
           - name: AWS_REGION
             valueFrom:
               configMapKeyRef:

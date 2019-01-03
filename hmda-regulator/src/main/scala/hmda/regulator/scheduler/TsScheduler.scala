@@ -30,12 +30,15 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
   def tsRepository = new TransmittalSheetRepository(dbConfig)
 
   val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+
   val accessKeyId = awsConfig.getString("access-key-id")
   val secretAccess = awsConfig.getString("secret-access-key ")
   val region = awsConfig.getString("region")
   val bucket = awsConfig.getString("public-bucket")
   val environment = awsConfig.getString("environment")
   val year = awsConfig.getString("year")
+  val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -68,17 +71,16 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
     case TsScheduler =>
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
-      val now = LocalDateTime.now()
+      val now = LocalDateTime.now().minusDays(1)
 
       val formattedDate = fullDate.format(now)
 
       val fileName = s"$formattedDate" + s"$year" + "_ts" + ".txt"
-      val s3Sink = s3Client.multipartUpload(
-        bucket,
-        s"$environment/regulator-ts/$year/$fileName")
+      val s3Sink =
+        s3Client.multipartUpload(bucket, s"$environment/ts/$fileName")
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
-        tsRepository.getAllSheets()
+        tsRepository.getAllSheets(bankFilterList)
 
       val results: Future[MultipartUploadResult] = Source
         .fromFuture(allResults)
@@ -90,7 +92,8 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
 
       results onComplete {
         case Success(result) => {
-          log.info(s"Uploaded TS Regulator Data file : $fileName" + "  to S3.")
+          log.info(
+            "Pushing to S3: " + s"$bucket/$environment/ts/$fileName" + ".")
         }
         case Failure(t) =>
           println("An error has occurred getting TS Data: " + t.getMessage)
