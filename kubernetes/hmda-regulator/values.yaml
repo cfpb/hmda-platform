@@ -65,7 +65,8 @@ tolerations: []
 affinity: {}
 aws:
   environment: prod
-  bucket: cfpb-hmda-export
+  s3-private-bucket: cfpb-hmda-export
+  s3-public-bucket: cfpb-hmda-public
   region: us-east-1
 
 filter:
