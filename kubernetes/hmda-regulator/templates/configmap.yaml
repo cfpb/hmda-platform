@@ -5,7 +5,8 @@ metadata:
   name: s3-configmap
 data:
   aws-environment: "{{ .Values.aws.environment }}"
-  s3-private-bucket: "{{ .Values.aws.bucket }}"
+  s3-private-bucket: "{{ .Values.aws.s3-private-bucket }}"
+  s3-public-bucket: "{{ .Values.aws.s3-private-bucket }}"
   aws-region: "{{ .Values.aws.region }}"
 ---
 apiVersion: v1
