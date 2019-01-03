@@ -80,10 +80,26 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
 
           } ~
             timedPut { uri =>
-              val fModified
-                : Future[InstitutionEvent] = institutionPersistence ? (
-                  ref => ModifyInstitution(institution, ref)
+              val originalInst
+                : Future[Option[Institution]] = institutionPersistence ? (
+                  ref => GetInstitution(ref)
               )
+
+              def modifyCall(originalInstOpt: Option[Institution])
+                : Future[InstitutionEvent] = {
+                val originalFilerFlag =
+                  originalInstOpt.getOrElse(Institution.empty).hmdaFiler
+                val iFilerFlagSet =
+                  institution.copy(hmdaFiler = originalFilerFlag)
+                institutionPersistence ? (
+                    ref => ModifyInstitution(iFilerFlagSet, ref)
+                )
+              }
+
+              val fModified = for {
+                i <- originalInst
+                m <- modifyCall(i)
+              } yield m
 
               onComplete(fModified) {
                 case Success(InstitutionModified(i)) =>
