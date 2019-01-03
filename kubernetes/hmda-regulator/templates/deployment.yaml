@@ -70,7 +70,7 @@ spec:
             valueFrom:
               configMapKeyRef:
                 name: bank-filter-configmap
-                key: bank-filter
+                key: bank-filter-list
           - name: AWS_REGION
             valueFrom:
               configMapKeyRef:
