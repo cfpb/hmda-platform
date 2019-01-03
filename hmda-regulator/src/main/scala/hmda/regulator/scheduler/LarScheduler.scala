@@ -3,6 +3,7 @@ package hmda.regulator.scheduler
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
@@ -27,35 +28,8 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
-  def larRepository =
-    new LarRepository(dbConfig)
+  def larRepository = new LarRepository(dbConfig)
 
-  val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
-
-  val accessKeyId = awsConfig.getString("access-key-id")
-  val secretAccess = awsConfig.getString("secret-access-key ")
-  val region = awsConfig.getString("region")
-  val bucket = awsConfig.getString("public-bucket")
-  val environment = awsConfig.getString("environment")
-  val year = awsConfig.getString("year")
-  val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
-  val awsCredentialsProvider = new AWSStaticCredentialsProvider(
-    new BasicAWSCredentials(accessKeyId, secretAccess))
-
-  val awsRegionProvider = new AwsRegionProvider {
-    override def getRegion: String = region
-  }
-
-  val s3Settings = new S3Settings(
-    MemoryBufferType,
-    None,
-    awsCredentialsProvider,
-    awsRegionProvider,
-    false,
-    None,
-    ListBucketVersion2
-  )
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -70,6 +44,33 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case LarScheduler =>
+      val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+      val accessKeyId = awsConfig.getString("access-key-id")
+      val secretAccess = awsConfig.getString("secret-access-key ")
+      val region = awsConfig.getString("region")
+      val bucket = awsConfig.getString("public-bucket")
+      val environment = awsConfig.getString("environment")
+      val year = awsConfig.getString("year")
+      val awsCredentialsProvider = new AWSStaticCredentialsProvider(
+        new BasicAWSCredentials(accessKeyId, secretAccess))
+
+
+      val awsRegionProvider = new AwsRegionProvider {
+        override def getRegion: String = region
+      }
+
+      val s3Settings = new S3Settings(
+        MemoryBufferType,
+        None,
+        awsCredentialsProvider,
+        awsRegionProvider,
+        false,
+        None,
+        ListBucketVersion2
+      )
+      val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+      val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
+
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now().minusDays(1)
@@ -79,6 +80,13 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val fileName = s"$formattedDate" + s"$year" + "_lar" + ".txt"
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
+
+      val recordCounterResult = larRepository.count()
+
+      val countSource: Source[Int, NotUsed] = Source
+        .fromFuture(recordCounterResult)
+
+      log.info("Lar Table Count: " + s"$countSource")
 
       val allResults: Future[Seq[LarEntityImpl]] =
         larRepository.getAllLARs(bankFilterList)

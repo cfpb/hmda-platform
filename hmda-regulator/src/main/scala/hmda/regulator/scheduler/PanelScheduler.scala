@@ -3,6 +3,7 @@ package hmda.regulator.scheduler
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
@@ -34,32 +35,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   def institutionRepository = new InstitutionRepository(dbConfig)
   def emailRepository = new InstitutionEmailsRepository(dbConfig)
 
-  val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
-
-  val accessKeyId = awsConfig.getString("access-key-id")
-  val secretAccess = awsConfig.getString("secret-access-key ")
-  val region = awsConfig.getString("region")
-  val bucket = awsConfig.getString("public-bucket")
-  val environment = awsConfig.getString("environment")
-  val year = awsConfig.getString("year")
-  val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
-  val awsCredentialsProvider = new AWSStaticCredentialsProvider(
-    new BasicAWSCredentials(accessKeyId, secretAccess))
-
-  val awsRegionProvider = new AwsRegionProvider {
-    override def getRegion: String = region
-  }
-
-  val s3Settings = new S3Settings(
-    MemoryBufferType,
-    None,
-    awsCredentialsProvider,
-    awsRegionProvider,
-    false,
-    None,
-    ListBucketVersion2
-  )
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -74,6 +49,36 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case PanelScheduler =>
+
+      val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
+      val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+
+      val accessKeyId = awsConfig.getString("access-key-id")
+      val secretAccess = awsConfig.getString("secret-access-key ")
+      val region = awsConfig.getString("region")
+      val bucket = awsConfig.getString("public-bucket")
+      val environment = awsConfig.getString("environment")
+      val year = awsConfig.getString("year")
+      val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
+      val awsCredentialsProvider = new AWSStaticCredentialsProvider(
+        new BasicAWSCredentials(accessKeyId, secretAccess))
+
+
+      val awsRegionProvider = new AwsRegionProvider {
+        override def getRegion: String = region
+      }
+
+      val s3Settings = new S3Settings(
+        MemoryBufferType,
+        None,
+        awsCredentialsProvider,
+        awsRegionProvider,
+        false,
+        None,
+        ListBucketVersion2
+      )
+
+
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now().minusDays(1)
@@ -83,6 +88,13 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       val fileName = s"$formattedDate" + s"$year" + "_panel" + ".txt"
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/panel/$fileName")
+
+      val recordCounterResult = institutionRepository.count()
+
+      val countSource: Source[Int, NotUsed] = Source
+        .fromFuture(recordCounterResult)
+
+      log.info("Institutions Table Count: " + s"$countSource")
 
       val allResults: Future[Seq[InstitutionEntity]] =
         institutionRepository.findActiveFilers(bankFilterList)
