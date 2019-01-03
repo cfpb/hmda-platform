@@ -18,7 +18,7 @@ object Q607 extends EditCheck[LoanApplicationRegister] {
       config.getDouble("edits.Q607.amount")
 
     when(lar.lienStatus is equalTo(SecuredBySubordinateLien)) {
-      lar.loan.amount is lessThan(loanAmount)
+      lar.loan.amount is lessThanOrEqual(loanAmount)
     }
   }
 }
