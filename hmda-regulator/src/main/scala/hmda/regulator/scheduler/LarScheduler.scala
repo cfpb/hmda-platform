@@ -81,13 +81,6 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
 
-      val recordCounterResult = larRepository.count()
-
-      val countSource: Source[Int, NotUsed] = Source
-        .fromFuture(recordCounterResult)
-
-      log.info("Lar Table Count: " + s"$countSource")
-
       val allResults: Future[Seq[LarEntityImpl]] =
         larRepository.getAllLARs(bankFilterList)
 

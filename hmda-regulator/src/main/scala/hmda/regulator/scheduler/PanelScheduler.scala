@@ -89,13 +89,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/panel/$fileName")
 
-      val recordCounterResult = institutionRepository.count()
-
-      val countSource: Source[Int, NotUsed] = Source
-        .fromFuture(recordCounterResult)
-
-      log.info("Institutions Table Count: " + s"$countSource")
-
       val allResults: Future[Seq[InstitutionEntity]] =
         institutionRepository.findActiveFilers(bankFilterList)
 
