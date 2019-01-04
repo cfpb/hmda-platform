@@ -9,7 +9,7 @@ case class Msa(
     id: String = "",
     name: String = "",
     totalLars: Int = 0,
-    totalAmount: Double = 0,
+    totalAmount: BigDecimal = 0,
     conv: Int = 0,
     FHA: Int = 0,
     VA: Int = 0,
@@ -32,7 +32,7 @@ case class Msa(
       id = id,
       name = name,
       totalLars = totalLars + 1,
-      totalAmount = totalAmount + lar.loan.amount,
+      totalAmount = totalAmount + (lar.loan.amount / 1000),
       conv = conv + (lar.loan.loanType == Conventional),
       FHA = FHA + (lar.loan.loanType == FHAInsured),
       VA = VA + (lar.loan.loanType == VAGuaranteed),
@@ -67,7 +67,7 @@ case class MsaMap(
 
 case class MsaSummary(
     lars: Int = 0,
-    amount: Double = 0,
+    amount: BigDecimal = 0,
     conv: Int = 0,
     FHA: Int = 0,
     VA: Int = 0,
