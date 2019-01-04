@@ -4,6 +4,7 @@ import hmda.model.filing.lar._
 import hmda.model.filing.lar.enums._
 
 import scala.language.implicitConversions
+import scala.math.BigDecimal.RoundingMode
 
 case class Msa(
     id: String = "",
@@ -28,11 +29,13 @@ case class Msa(
   def addLar(lar: LoanApplicationRegister): Msa = {
     implicit def bool2int(b: Boolean): Int = if (b) 1 else 0
 
+    val loanAmountThousands = BigDecimal.valueOf(lar.loan.amount) / 1000
+
     Msa(
       id = id,
       name = name,
       totalLars = totalLars + 1,
-      totalAmount = totalAmount + (lar.loan.amount / 1000),
+      totalAmount = totalAmount + loanAmountThousands,
       conv = conv + (lar.loan.loanType == Conventional),
       FHA = FHA + (lar.loan.loanType == FHAInsured),
       VA = VA + (lar.loan.loanType == VAGuaranteed),
@@ -50,8 +53,10 @@ case class Msa(
     )
   }
 
-  def toCsv: String =
-    s"""$id,\"$name\", $totalLars, $totalAmount, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"""
+  def toCsv: String = {
+    val amountRounded = totalAmount.setScale(2, RoundingMode.HALF_UP)
+    s"""$id,\"$name\", $totalLars, $amountRounded, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"""
+  }
 }
 
 case class MsaMap(
@@ -104,8 +109,10 @@ case class MsaSummary(
     )
   }
 
-  def toCsv: String =
-    s"Totals,, $lars, $amount, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"
+  def toCsv: String = {
+    val amountRounded = amount.setScale(2, RoundingMode.HALF_UP)
+    s"Totals,, $lars, $amountRounded, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"
+  }
 }
 
 case object MsaSummary {
