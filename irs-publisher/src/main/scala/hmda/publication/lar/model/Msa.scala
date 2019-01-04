@@ -54,7 +54,7 @@ case class Msa(
   }
 
   def toCsv: String = {
-    val amountRounded = totalAmount.setScale(2, RoundingMode.HALF_UP)
+    val amountRounded = totalAmount.setScale(0, RoundingMode.HALF_UP)
     s"""$id,\"$name\", $totalLars, $amountRounded, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"""
   }
 }
@@ -110,7 +110,7 @@ case class MsaSummary(
   }
 
   def toCsv: String = {
-    val amountRounded = amount.setScale(2, RoundingMode.HALF_UP)
+    val amountRounded = amount.setScale(0, RoundingMode.HALF_UP)
     s"Totals,, $lars, $amountRounded, $conv, $FHA, $VA, $FSA, $siteBuilt, $manufactured, $oneToFour, $fivePlus, $homePurchase, $homeImprovement, $refinancing, $cashOutRefinancing, $otherPurpose, $notApplicablePurpose"
   }
 }
