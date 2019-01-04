@@ -90,7 +90,7 @@ object IrsPublisher {
           r <- Http().singleRequest(request)
           census <- Unmarshal(r.entity).to[Census]
         } yield {
-          val censusID = if (census.id == 0) "-----" else census.id.toString
+          val censusID = if (census.msaMd == 0) "-----" else census.msaMd.toString
           val censusName =
             if (census.name.isEmpty) "MSA/MD NOT AVAILABLE" else census.name
           Msa(censusID, censusName)
