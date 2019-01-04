@@ -15,6 +15,7 @@ import hmda.census.validation.CensusValidation._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.census.records.CensusRecords
 import hmda.census.records.CensusRecords._
+import hmda.model.census.Census
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
@@ -29,28 +30,21 @@ trait CensusHttpApi extends HmdaTimeDirectives {
 
   val censusHttpRoutes =
     encodeResponse {
-      pathPrefix("census" / "validate") {
-        path("tract") {
-          timedPost { uri =>
-            entity(as[TractCheck]) { tc =>
-              val tract = tc.tract
-              val isValid = Try(isTractValid(tract, indexedTract))
-              isValid match {
-                case Success(value) =>
-                  val c = CensusRecords
-                  val validated = TractValidated(value)
-                  complete(ToResponseMarshallable(validated))
-                case Failure(error) =>
-                  failedResponse(StatusCodes.BadRequest, uri, error)
-              }
-            }
+      pathPrefix("census" / "tract" / Segment) { tract =>
+        timedGet { uri =>
+          val census = CensusRecords.indexedTract.get(tract)
+          census match {
+            case Some(t) => complete(ToResponseMarshallable(t))
+            case _       => complete(ToResponseMarshallable(Census()))
           }
-        } ~
-          path("county") {
+        }
+      } ~
+        pathPrefix("census" / "validate") {
+          path("tract") {
             timedPost { uri =>
-              entity(as[CountyCheck]) { tc =>
-                val county = tc.county
-                val isValid = Try(isCountyValid(county, indexedCounty))
+              entity(as[TractCheck]) { tc =>
+                val tract = tc.tract
+                val isValid = Try(isTractValid(tract, indexedTract))
                 isValid match {
                   case Success(value) =>
                     val c = CensusRecords
@@ -62,22 +56,38 @@ trait CensusHttpApi extends HmdaTimeDirectives {
               }
             }
           } ~
-          path("smallcounty") {
-            timedPost { uri =>
-              entity(as[CountyCheck]) { tc =>
-                val county = tc.county
-                val isValid = Try(isCountySmall(county, indexedSmallCounty))
-                isValid match {
-                  case Success(value) =>
-                    val c = CensusRecords
-                    val validated = TractValidated(value)
-                    complete(ToResponseMarshallable(validated))
-                  case Failure(error) =>
-                    failedResponse(StatusCodes.BadRequest, uri, error)
+            path("county") {
+              timedPost { uri =>
+                entity(as[CountyCheck]) { tc =>
+                  val county = tc.county
+                  val isValid = Try(isCountyValid(county, indexedCounty))
+                  isValid match {
+                    case Success(value) =>
+                      val c = CensusRecords
+                      val validated = TractValidated(value)
+                      complete(ToResponseMarshallable(validated))
+                    case Failure(error) =>
+                      failedResponse(StatusCodes.BadRequest, uri, error)
+                  }
+                }
+              }
+            } ~
+            path("smallcounty") {
+              timedPost { uri =>
+                entity(as[CountyCheck]) { tc =>
+                  val county = tc.county
+                  val isValid = Try(isCountySmall(county, indexedSmallCounty))
+                  isValid match {
+                    case Success(value) =>
+                      val c = CensusRecords
+                      val validated = TractValidated(value)
+                      complete(ToResponseMarshallable(validated))
+                    case Failure(error) =>
+                      failedResponse(StatusCodes.BadRequest, uri, error)
+                  }
                 }
               }
             }
-          }
-      }
+        }
     }
 }
