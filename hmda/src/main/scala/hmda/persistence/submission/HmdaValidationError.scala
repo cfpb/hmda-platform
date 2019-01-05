@@ -450,7 +450,7 @@ object HmdaValidationError
       header <- headerResultTest
       rest <- restResult
       res <- validateAndPersistErrors(TransmittalLar(header, rest),
-                                      "syntactical",
+        editType,
                                       validationContext)
     } yield res
   }

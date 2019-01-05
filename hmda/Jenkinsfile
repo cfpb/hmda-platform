@@ -10,6 +10,7 @@ volumes: [
      def repo = checkout scm
      def gitCommit = repo.GIT_COMMIT
      def gitBranch = repo.GIT_BRANCH
+     def gitDescribe = sh(returnStdout: true, script: 'git describe --always --tags')
 
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
@@ -31,16 +32,32 @@ volumes: [
                 } else {
                   env.DOCKER_TAG = env.TAG_NAME
                 }
+                //push latest or tag to Docker Hub
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
                   docker push ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                """
+                //push git describe to docker hub
+                sh """
+                  docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${gitDescribe}
+                  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD}
+                  docker push ${env.DOCKER_HUB_USER}/hmda-platform:${gitDescribe}
+                """
+                //push latest or tag to DTR
+                sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                  docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD} 
+                  docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD}
                   docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                """
+                //cleanup
+                sh """
                   docker images
                   docker image prune -f
                   docker images
+                """
+                //show running containers
+                sh """
                   docker ps -a
                 """
               }
@@ -53,6 +70,15 @@ volumes: [
     stage('Deploy') {
         if (env.BRANCH_NAME == 'master') {
             container('helm') {
+                //run packaging with app version and version
+                dir("kubernetes/hmda-platform") {
+                    sh """
+                        helm package --app-version=${gitDescribe} --version=${env.TAG_NAME} .
+                        tar --strip-components=1 -zxf hmda-platform-*
+                        rm -rf hmda-platform-*.tgz
+                    """
+                }
+
                 sh """
                   helm upgrade --install --force \
                   --namespace=default \
