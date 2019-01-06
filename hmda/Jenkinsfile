@@ -13,6 +13,20 @@ volumes: [
      def gitDescribe = sh(returnStdout: true, script: 'git describe --always --tags')
      def gitTag = sh(returnStdout: true, script: "git tag --sort version:refname | tail -1").trim()
      def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
+     def result = sh(returnStatus: true, script: "git log -1 | grep '\\[deploy pr\\]'")
+     def isDeployPR = result == 0 ? true : false
+     if (gitBranch == "master") {
+       env.DOCKER_TAG = "latest"
+     }
+     else if (isDeployPR) {
+        env.DOCKER_TAG = "${env.JOB_NAME?.split('/')[1]}${env.BUILD_NUMBER}""
+        gitTag = env.DOCKER_TAG+gitTag
+     }
+     else {
+       env.DOCKER_TAG = env.TAG_NAME
+     }
+
+     println "DOCKER_TAG: ${env.DOCKER_TAG}, gitDescribe: ${gitDescribe}, gitTag: ${gitTag}, commitId: ${commitId}, isDeployPR: ${isDeployPR}"
 
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
@@ -28,12 +42,8 @@ volumes: [
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform hmda/target/docker/stage"
-              if (env.TAG_NAME != null || gitBranch == "master") {
-                if (gitBranch == "master") {
-                  env.DOCKER_TAG = "latest"
-                } else {
-                  env.DOCKER_TAG = env.TAG_NAME
-                }
+              if (env.TAG_NAME != null || gitBranch == "master" || isDeployPR) {
+
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
@@ -54,7 +64,7 @@ volumes: [
     }
 
     stage('Deploy') {
-        if (env.BRANCH_NAME == 'master') {
+        if (env.BRANCH_NAME == 'master' || isDeployPR) {
             container('helm') {
                 //run packaging with app version and version
                 dir("kubernetes/hmda-platform") {
@@ -70,7 +80,7 @@ volumes: [
                   helm upgrade --install --force \
                   --namespace=default \
                   --values=kubernetes/hmda-platform/values.yaml \
-                  --set image.tag=latest \
+                  --set image.tag="${DOCKER_TAG}" \
                   --set service.name=hmda-platform-api \
                   --set image.pullPolicy=Always \
                   hmda-platform kubernetes/hmda-platform
