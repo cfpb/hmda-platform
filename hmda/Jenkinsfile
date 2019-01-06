@@ -71,7 +71,7 @@ volumes: [
                 dir("kubernetes/hmda-platform") {
                     sh """
                         helm init --client-only
-                        helm package --app-version="${commitId[0..7]}" --version=${gitTag} .
+                        helm package --app-version="${shortCommit}" --version=${gitTag} .
                         tar --strip-components=1 -zxf hmda-platform-*
                         rm -rf hmda-platform-*.tgz
                     """
