@@ -13,14 +13,15 @@ volumes: [
      def gitDescribe = sh(returnStdout: true, script: 'git describe --always --tags')
      def gitTag = sh(returnStdout: true, script: "git tag --sort version:refname | tail -1").trim()
      def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
+     def shortCommit = commitId[0..7]
      def result = sh(returnStatus: true, script: "git log -1 | grep '\\[deploy pr\\]'")
      def isDeployPR = result == 0 ? true : false
      if (gitBranch == "master") {
        env.DOCKER_TAG = "latest"
      }
      else if (isDeployPR) {
-        env.DOCKER_TAG = "${env.JOB_NAME?.split('/')[1]}${env.BUILD_NUMBER}"
-        gitTag = env.DOCKER_TAG+gitTag
+        env.DOCKER_TAG = "${env.JOB_NAME?.split('/')[1]}-${env.BUILD_NUMBER}"
+        shortCommit = env.DOCKER_TAG+shortCommit
      }
      else {
        env.DOCKER_TAG = env.TAG_NAME
