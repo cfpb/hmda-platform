@@ -11,6 +11,8 @@ volumes: [
      def gitCommit = repo.GIT_COMMIT
      def gitBranch = repo.GIT_BRANCH
      def gitDescribe = sh(returnStdout: true, script: 'git describe --always --tags')
+     def gitTag = sh(returnStdout: true, script: "git tag --sort version:refname | tail -1").trim()
+     def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
 
      stage('Build Scala Code and Generate Dockerfile') {
        container('sbt') {
@@ -74,8 +76,7 @@ volumes: [
                 dir("kubernetes/hmda-platform") {
                     sh """
                         helm init --client-only
-                        helm package --app-version="${gitDescribe}" \--version=${env.TAG_NAME} \
-                        .
+                        helm package --app-version="${commitId[0..7]}" --version=${gitTag} .
                         tar --strip-components=1 -zxf hmda-platform-*
                         rm -rf hmda-platform-*.tgz
                     """
@@ -85,7 +86,7 @@ volumes: [
                   helm upgrade --install --force \
                   --namespace=default \
                   --values=kubernetes/hmda-platform/values.yaml \
-                  --set image.tag=latest \
+                  --set image.tag="${gitDescribe}" \
                   --set service.name=hmda-platform-api \
                   --set image.pullPolicy=Always \
                   hmda-platform kubernetes/hmda-platform
