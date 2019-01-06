@@ -19,7 +19,7 @@ volumes: [
        env.DOCKER_TAG = "latest"
      }
      else if (isDeployPR) {
-        env.DOCKER_TAG = "${env.JOB_NAME?.split('/')[1]}${env.BUILD_NUMBER}""
+        env.DOCKER_TAG = "${env.JOB_NAME?.split('/')[1]}${env.BUILD_NUMBER}"
         gitTag = env.DOCKER_TAG+gitTag
      }
      else {
