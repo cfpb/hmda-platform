@@ -34,32 +34,16 @@ volumes: [
                 } else {
                   env.DOCKER_TAG = env.TAG_NAME
                 }
-                //push latest or tag to Docker Hub
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
                   docker push ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                """
-                //push git describe to docker hub
-                sh """
-                  docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${gitDescribe}
-                  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD}
-                  docker push ${env.DOCKER_HUB_USER}/hmda-platform:${gitDescribe}
-                """
-                //push latest or tag to DTR
-                sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
                   docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD}
                   docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                """
-                //cleanup
-                sh """
                   docker images
                   docker image prune -f
                   docker images
-                """
-                //show running containers
-                sh """
                   docker ps -a
                 """
               }
@@ -86,7 +70,7 @@ volumes: [
                   helm upgrade --install --force \
                   --namespace=default \
                   --values=kubernetes/hmda-platform/values.yaml \
-                  --set image.tag="${gitDescribe}" \
+                  --set image.tag=latest \
                   --set service.name=hmda-platform-api \
                   --set image.pullPolicy=Always \
                   hmda-platform kubernetes/hmda-platform
