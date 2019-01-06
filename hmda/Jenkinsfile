@@ -73,7 +73,9 @@ volumes: [
                 //run packaging with app version and version
                 dir("kubernetes/hmda-platform") {
                     sh """
-                        helm package --app-version=${gitDescribe} --version=${env.TAG_NAME} .
+                        helm init --client-only
+                        helm package --app-version="${gitDescribe}" \--version=${env.TAG_NAME} \
+                        .
                         tar --strip-components=1 -zxf hmda-platform-*
                         rm -rf hmda-platform-*.tgz
                     """
