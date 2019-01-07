@@ -107,7 +107,8 @@ object HmdaValidationError
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
-        log.info(s"Syntactical / Validity validation started for $submissionId")
+        log.info(
+          s"omni Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
@@ -117,20 +118,20 @@ object HmdaValidationError
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
 
-          tsLarErrors <- validateTsLar(ctx,
-                                       submissionId,
-                                       "all",
-                                       validationContext)
+//          tsLarErrors <- validateTsLar(ctx,
+//                                       submissionId,
+//                                       "all",
+//                                       validationContext)
 
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
                                                       submissionId,
                                                       validationContext)
             .runWith(Sink.ignore)
-          larAsyncErrors <- validateAsyncLar("syntactical-validity",
-                                             ctx,
-                                             submissionId).runWith(Sink.ignore)
-        } yield (tsErrors, larSyntacticalValidityErrors, larAsyncErrors)
+//          larAsyncErrors <- validateAsyncLar("syntactical-validity",
+//                                             ctx,
+//                                             submissionId).runWith(Sink.ignore)
+        } yield (tsErrors, larSyntacticalValidityErrors)
         fSyntacticalValidity.onComplete {
           case Success(count) =>
             println(s"Number of elements: $count")
@@ -159,7 +160,7 @@ object HmdaValidationError
           }
 
       case StartQuality(submissionId) =>
-        log.info(s"Quality validation started for $submissionId")
+        log.info(s"omni Quality validation started for $submissionId")
 
         val fQuality = for {
           larErrors <- validateLar("quality",
@@ -171,8 +172,8 @@ object HmdaValidationError
 //                                                    ctx,
 //                                                    submissionId)
 //            .runWith(Sink.ignore)
-//        } yield (larErrors, larAsyncErrorsQuality)
         } yield (larErrors)
+//        } yield (larErrors)
 
         fQuality.onComplete {
           case Success(_) =>
@@ -476,7 +477,7 @@ object HmdaValidationError
       validationContext: ValidationContext)
     : Source[HmdaRowValidatedError, NotUsed] = {
 
-    validateTsLar(ctx, submissionId, "quality", validationContext)
+//    validateTsLar(ctx, submissionId, "quality", validationContext)
 
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
@@ -484,6 +485,7 @@ object HmdaValidationError
       .zip(Source.fromIterator(() => Iterator.from(2)))
       .collect {
         case (Left(errors), rowNumber) =>
+          println("Total errors: " + errors.size)
           PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
       }
       .via(

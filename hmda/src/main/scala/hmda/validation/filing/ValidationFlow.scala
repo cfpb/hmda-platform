@@ -110,22 +110,23 @@ object ValidationFlow {
     val lars = List[LoanApplicationRegister]()
     collectLar
       .map { lar =>
-        def errors = checkType match {
-          case "all" =>
-            LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
-          case "syntactical" =>
-            LarEngine
-              .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
-          case "validity" =>
-            LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
-          case "syntactical-validity" =>
-            LarEngine
-              .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
-              .combine(
-                LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
-              )
-          case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
-        }
+        def errors =
+          checkType match {
+            case "all" =>
+              LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
+            case "syntactical" =>
+              LarEngine
+                .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
+            case "validity" =>
+              LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+            case "syntactical-validity" =>
+              LarEngine
+                .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
+                .combine(
+                  LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+                )
+            case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
+          }
         (lar, errors)
       }
       .map { x =>
