@@ -49,4 +49,6 @@ object Dependencies {
   lazy val embeddedKafka = "net.manub" %% "scalatest-embedded-kafka" % Version.embeddedKafka
   lazy val alpakkaS3 = "com.lightbend.akka" %% "akka-stream-alpakka-s3" % Version.alpakka
   lazy val akkaQuartzScheduler = "com.enragedginger" %% "akka-quartz-scheduler" % Version.akkaQuartzScheduler
+  lazy val phantomDSL = "com.outworkers" %% "phantom-dsl" % Version.phantom
+  lazy val phantomJDK8 = "com.outworkers" %% "phantom-jdk8" % Version.phantom
 }

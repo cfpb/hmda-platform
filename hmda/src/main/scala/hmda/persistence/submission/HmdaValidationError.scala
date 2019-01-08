@@ -25,33 +25,20 @@ import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.{ActorMaterializer, ClosedShape}
 import akka.stream.typed.scaladsl.ActorFlow
-import hmda.messages.institution.InstitutionCommands.{
-  GetInstitution,
-  ModifyInstitution
-}
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.validation.context.ValidationContext
 import hmda.parser.filing.ParserFlow._
 import hmda.validation.filing.ValidationFlow._
-import HmdaProcessingUtils.{
-  readRawData,
-  updateSubmissionReceipt,
-  updateSubmissionStatus
-}
+import HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
 import EditDetailsConverter._
 import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionEvent,
-  InstitutionKafkaEvent,
-  InstitutionModified
-}
-import hmda.messages.submission.EditDetailsCommands.{
-  EditDetailsPersistenceCommand,
-  PersistEditDetails
-}
+import hmda.HmdaPlatform.config
+import hmda.messages.institution.InstitutionEvents.{InstitutionEvent, InstitutionKafkaEvent, InstitutionModified}
+import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.publication.KafkaUtils._
 import hmda.messages.pubsub.HmdaTopics._
@@ -59,6 +46,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.validation.{MacroValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
+import hmda.persistence.submission.repositories.SyntacticalDb
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.filing.MacroValidationFlow._
 import hmda.validation.{AS, EC, MAT}
@@ -118,10 +106,10 @@ object HmdaValidationError
           tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
             Sink.ignore)
 
-//          tsLarErrors <- validateTsLar(ctx,
-//                                       submissionId,
-//                                       "all",
-//                                       validationContext)
+          tsLarErrors <- validateTsLar(ctx,
+                                       submissionId,
+                                       "all",
+                                       validationContext)
 
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
                                                       ctx,
@@ -408,6 +396,8 @@ object HmdaValidationError
       validationContext: ValidationContext): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
 
+    val appDb = SyntacticalDb(config)
+
     def md5HashString(s: String): String = {
       val md = MessageDigest.getInstance("MD5")
       val digest = md.digest(s.getBytes)
@@ -428,18 +418,28 @@ object HmdaValidationError
         }
         .runWith(Sink.head)
 
-    val futElements: Future[immutable.Seq[String]] =
+    val persistElements =
       uploadConsumerRawStr(ctx, submissionId)
         .drop(1) // header
         .via(framing("\n"))
         .map(_.utf8String)
         .map(_.trim)
-        .filter(line => LarCsvParser(line).isRight)
-        .map(md5HashString)
-        .runWith(Sink.seq)
-
-    val futRowCount2: Future[Int] = futElements.map(_.length)
-    val futDistinctCount: Future[Int] = futElements.map(_.distinct.length)
+        .map(line => (LarCsvParser(line), line))
+        .collect {
+          case (Right(parsed), line) => (parsed, line)
+        }
+        .map{ x =>
+          ( md5HashString(x._1.loan.ULI), md5HashString(x._2) )
+        }
+        .mapAsync(1) { x =>
+          for {
+            header <- headerResultTest
+            line <- appDb.distinctCountRepository.persistIfNotExists(submissionId.toString, x._2, 10)
+            uli <- appDb.distinctCountRepository.persistIfNotExists(submissionId.toString+"uli", x._1, 10)
+          } yield (line, uli) {
+          }
+        }
+        .runWith(Sink.fold(0)((acc, _) => acc + 1))
 
     def validateAndPersistErrors(
         tsLar: TransmittalLar,
@@ -461,10 +461,11 @@ object HmdaValidationError
 
     for {
       header <- headerResultTest
-      count <- futRowCount2
-      distinctCount <- futDistinctCount
+      count <- persistElements
+      distinctCount <-appDb.distinctCountRepository(submissionId)
+      distinctUliCount <-appDb.distinctCountRepository(submissionId+"uli")
       res <- validateAndPersistErrors(
-        TransmittalLar(header, count, distinctCount),
+        TransmittalLar(header, count, distinctCount, distinctUliCount),
         "syntactical",
         validationContext)
     } yield res

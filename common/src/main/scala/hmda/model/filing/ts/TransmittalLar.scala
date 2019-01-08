@@ -1,9 +1,6 @@
 package hmda.model.filing.ts
 
-import hmda.model.filing.lar.LoanApplicationRegister
-
-import scala.concurrent.Future
-
-case class TransmittalLar(ts: TransmittalSheet = TransmittalSheet(),
-                          larsCount: Int = 0,
-                          distinctcount: Int = 0)
+case class TransmittalLar(ts: TransmittalSheet, larsCount: Int = 0, larsDistinctCount: Int = 0, distinctUliCount: Int = 0)
+//S304 => ts.totalLines == larsCount
+//S305 => larsCount == larsDistinctCount
+//Q600 => larsCount == distinctUliCount

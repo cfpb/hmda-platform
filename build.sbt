@@ -30,7 +30,9 @@ lazy val akkaDeps = Seq(
   akkaKafkaStreams,
   embeddedKafka,
   alpakkaS3,
-  akkaQuartzScheduler
+  akkaQuartzScheduler,
+  phantomDSL,
+  phantomJDK8
 )
 
 lazy val akkaPersistenceDeps =
