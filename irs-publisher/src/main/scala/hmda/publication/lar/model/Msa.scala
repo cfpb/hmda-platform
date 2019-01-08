@@ -5,6 +5,7 @@ import hmda.model.filing.lar.enums._
 
 import scala.language.implicitConversions
 import scala.math.BigDecimal.RoundingMode
+import Math._
 
 case class Msa(
     id: String = "",
@@ -29,7 +30,9 @@ case class Msa(
   def addLar(lar: LoanApplicationRegister): Msa = {
     implicit def bool2int(b: Boolean): Int = if (b) 1 else 0
 
-    val loanAmountThousands = BigDecimal.valueOf(lar.loan.amount) / 1000
+    val loanAmountBinned = 10000 * Math.floor(lar.loan.amount / 10000) + 5000
+
+    val loanAmountThousands = BigDecimal.valueOf(loanAmountBinned) / 1000
 
     Msa(
       id = id,
