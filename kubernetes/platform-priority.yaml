@@ -1,0 +1,7 @@
+apiVersion: scheduling.k8s.io/v1alpha1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 3
+globalDefault: false
+description: "Hightest priority class used for hmda-platform"
