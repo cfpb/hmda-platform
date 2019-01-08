@@ -53,6 +53,11 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: aws-access-key-id
+            - name: AWS_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: s3-configmap
+                  key: aws-environment
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
