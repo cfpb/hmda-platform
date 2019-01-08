@@ -8,12 +8,12 @@ import hmda.validation.rules.lar.syntactical.{S304, S305}
 object TsLarEngine extends ValidationEngine[TransmittalLar] {
 
   override def syntacticalChecks(ctx: ValidationContext) = Vector(
-//    S304,
-//    S305
+    S304,
+    S305
   )
 
   override val qualityChecks = Vector(
-//    Q600
+    Q600
   )
 
 }

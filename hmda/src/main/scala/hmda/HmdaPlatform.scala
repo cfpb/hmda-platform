@@ -83,7 +83,6 @@ object HmdaPlatform extends App {
     EmbeddedKafka.start()
   }
 
-
   val appDb = SyntacticalDb(config)
   appDb.create()
 
