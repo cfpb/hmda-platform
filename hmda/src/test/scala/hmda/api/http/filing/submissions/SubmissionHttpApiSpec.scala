@@ -36,7 +36,7 @@ import org.keycloak.adapters.KeycloakDeploymentBuilder
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class SubmissionHttpApiSpec 
+class SubmissionHttpApiSpec
     extends AkkaCassandraPersistenceSpec
     with MustMatchers
     with SubmissionHttpApi

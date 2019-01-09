@@ -133,7 +133,8 @@ object HmdaValidationError
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
                                              ctx,
                                              submissionId).runWith(Sink.ignore)
-        } yield (tsErrors, tsLarErrors , larSyntacticalValidityErrors, larAsyncErrors)
+        } yield
+          (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
           case Success(count) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
@@ -161,7 +162,7 @@ object HmdaValidationError
           }
 
       case StartQuality(submissionId) =>
-        log.info(s"omni Quality validation started for $submissionId")
+        log.info(s"Quality validation started for $submissionId")
 
         val fQuality = for {
           larErrors <- validateLar("quality",
@@ -408,6 +409,7 @@ object HmdaValidationError
       validationContext: ValidationContext): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
 
+    val log = ctx.asScala.log
     val appDb = SyntacticalDb(config)
 
     def md5HashString(s: String): String = {
@@ -446,14 +448,13 @@ object HmdaValidationError
         .mapAsync(1) { x =>
           for {
             header <- headerResultTest
-            line <- appDb.distinctCountRepository.persistIfNotExists(
-              submissionId.toString,
-              x._2,
-              100)
-            uli <- appDb.distinctCountRepository.persistIfNotExists(
+            line <- appDb.distinctCountRepository.persist(submissionId.toString,
+                                                          x._2,
+                                                          30.minutes)
+            uli <- appDb.distinctCountRepository.persist(
               submissionId.toString + "uli",
               x._1,
-              100)
+              30.minutes)
           } yield (line, uli)
         }
         .runWith(Sink.fold(0)((acc, _) => acc + 1))
@@ -462,8 +463,7 @@ object HmdaValidationError
         tsLar: TransmittalLar,
         checkType: String,
         vc: ValidationContext): Future[List[ValidationError]] = {
-      println(
-        "inside validateandPersistErrors: " + tsLar.ts.totalLines + " " + tsLar.larsCount + " " + tsLar.larsDistinctCount + " " + tsLar.distinctUliCount)
+      log.info(s"Syntactical counts - ${submissionId}: ${tsLar.ts.totalLines} ${tsLar.larsCount} ${tsLar.larsDistinctCount} ${tsLar.distinctUliCount}")
       validateTsLarEdits(tsLar, checkType, validationContext) match {
 
         case Left(errors: Seq[ValidationError]) =>
@@ -487,6 +487,8 @@ object HmdaValidationError
         submissionId.toString)
       distinctUliCount <- appDb.distinctCountRepository.count(
         submissionId.toString + "uli")
+      _ <- appDb.distinctCountRepository.remove(submissionId.toString)
+      _ <- appDb.distinctCountRepository.remove(submissionId.toString + "uli")
       res <- validateAndPersistErrors(
         TransmittalLar(header, count, distinctCount, distinctUliCount),
         "syntactical",

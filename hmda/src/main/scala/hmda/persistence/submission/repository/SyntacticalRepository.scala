@@ -3,6 +3,7 @@ package hmda.persistence.submission.repositories
 import com.outworkers.phantom.dsl._
 
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 
 case class SyntacticalCheck(submissionId: String, hashedLar: String)
 
@@ -11,50 +12,52 @@ abstract class SyntacticalRepository
     with RootConnector {
 
   /**
-    * CREATE TABLE distinct_count_storage (
-    *   submissionid string,
-    *   hashedinfo string
-    *   PRIMARY KEY((submissionid), hashedinfo)
-    * )
+    CREATE TABLE distinct_count_storage (submissionId text, hashedLar text, PRIMARY KEY (submissionId, hashedInfo));
     */
   object submissionId extends StringColumn with PartitionKey
-  object hashedLar extends StringColumn with ClusteringOrder
+  object hashedInfo extends StringColumn with ClusteringOrder
 
   override def tableName: String = "distinct_count_storage"
 
   def find(submissionId: String,
-           hashedLar: String): Future[Option[SyntacticalCheck]] =
+           hashedInfo: String): Future[Option[SyntacticalCheck]] =
     select
       .where(_.submissionId eqs submissionId)
-      .and(_.hashedLar eqs hashedLar)
+      .and(_.hashedInfo eqs hashedInfo)
       .consistencyLevel_=(ConsistencyLevel.QUORUM)
       .one()
 
   def persist(submissionId: String,
-              hashedLar: String,
-              timeoutInSeconds: Long): Future[SyntacticalCheck] =
+              hashedInfo: String,
+              timeout: FiniteDuration): Future[SyntacticalCheck] =
     insert
       .value(_.submissionId, submissionId)
-      .value(_.hashedLar, hashedLar)
-      .ttl(timeoutInSeconds)
+      .value(_.hashedInfo, hashedInfo)
+      .ttl(timeout)
       .consistencyLevel_=(ConsistencyLevel.QUORUM)
       .future()
-      .map(_ => SyntacticalCheck(submissionId, hashedLar))
+      .map(_ => SyntacticalCheck(submissionId, hashedInfo))
 
   // if the record was inserted then this evaluates to true otherwise false
   def persistIfNotExists(submissionId: String,
-                         hashedLar: String,
-                         timeoutInSeconds: Long): Future[Boolean] = {
+                         hashedInfo: String,
+                         timeout: FiniteDuration): Future[Boolean] = {
     insert
       .value(_.submissionId, submissionId)
-      .value(_.hashedLar, hashedLar)
-      .ttl(timeoutInSeconds)
+      .value(_.hashedInfo, hashedInfo)
+      .ttl(timeout)
       .ifNotExists()
       .future()
-      .map(rs => rs.value().exists(row => row.isNull(1))) // the second column appears if the row is already present
+      .map(rs => rs.wasApplied())
   }
 
-  // this will be a distinct count since we upsert entries that are the same
+  def remove(submissionId: String): Future[Unit] =
+    delete
+      .where(_.submissionId eqs submissionId)
+      .consistencyLevel_=(ConsistencyLevel.QUORUM)
+      .future()
+      .map(_ => ())
+
   def count(submissionId: String): Future[Long] =
     select
       .count()
