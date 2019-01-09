@@ -449,12 +449,13 @@ object HmdaValidationError
             header <- headerResultTest
             line <- appDb.distinctCountRepository.persist(submissionId.toString,
                                                           x._2,
-                                                          30.minutes)
+//                                                          x._1,
+                                                          160.minutes)
             uli <- appDb.distinctCountRepository.persist(
               submissionId.toString + "uli",
               x._1,
-              30.minutes)
-          } yield (line, uli)
+              160.minutes)
+          } yield (line)
         }
         .runWith(Sink.fold(0)((acc, _) => acc + 1))
 

@@ -29,6 +29,7 @@ abstract class SyntacticalRepository
 
   def persist(submissionId: String,
               hashedInfo: String,
+//              hashedInfoULI: String,
               timeout: FiniteDuration): Future[SyntacticalCheck] =
     insert
       .value(_.submissionId, submissionId)
