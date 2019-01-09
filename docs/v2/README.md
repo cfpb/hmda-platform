@@ -45,7 +45,7 @@ sbt:hmda-platform> reStart
 ```
 
 
-### Building and runnint the .jar
+### Building and running the .jar
 
 * To build JVM artifacts, from the sbt prompt first choose the project you want to build and use the assembly command:
 

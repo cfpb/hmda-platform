@@ -41,7 +41,7 @@ object LarFieldMapping {
     "Race of Applicant or Borrower: 4" -> lar.applicant.race.race4.code.toString,
     "Race of Applicant or Borrower: 5" -> lar.applicant.race.race5.code.toString,
     "Race of Applicant or Borrower: Free Form Text Field for American Indian or Alaska Native Enrolled or Principal Tribe" -> lar.applicant.race.otherNativeRace,
-    "Race of Applicant or Borrower: Free Form Text Field for Other Asian; Race of Applicant or Borrower" -> lar.applicant.race.otherAsianRace,
+    "Race of Applicant or Borrower: Free Form Text Field for Other Asian" -> lar.applicant.race.otherAsianRace,
     "Race of Applicant or Borrower: Free Form Text Field for Other Pacific Islander" -> lar.applicant.race.otherPacificIslanderRace,
     "Race of Co-Applicant or Co-Borrower: 1" -> lar.coApplicant.race.race1.code.toString,
     "Race of Co-Applicant or Co-Borrower: 2" -> lar.coApplicant.race.race2.code.toString,

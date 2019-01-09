@@ -59,6 +59,9 @@ class InstitutionAdminHttpApiSpec
   val modified =
     sampleInstitution.copy(emailDomains = List("email@bank.com"))
 
+  val filerFlagNegated =
+    modified.copy(hmdaFiler = !modified.hmdaFiler)
+
   val oAuth2Authorization = OAuth2Authorization(
     log,
     new KeycloakTokenVerifier(
@@ -122,10 +125,18 @@ class InstitutionAdminHttpApiSpec
       }
     }
 
-    "Return a 404 on a wrongpath to modiy an institution" in {
+    "Return a 404 on a wrongpath to modify an institution" in {
       Put("/wrongpath", modified) ~> Route.seal(
         institutionAdminRoutes(oAuth2Authorization)) ~> check {
         status mustBe StatusCodes.NotFound
+      }
+    }
+
+    "Ignore filer flag for an institution with filer flag set" in {
+      Put("/institutions", filerFlagNegated) ~> institutionAdminRoutes(
+        oAuth2Authorization) ~> check {
+        status mustBe StatusCodes.Accepted
+        responseAs[Institution] mustBe modified
       }
     }
 

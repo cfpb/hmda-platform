@@ -20,10 +20,10 @@ class Q607Spec extends LarEditCheckSpec {
       whenever(lar.lienStatus != SecuredBySubordinateLien) {
         lar.mustPass
       }
-      whenever(lar.loan.amount >= loanAmount) {
+      whenever(lar.loan.amount > loanAmount) {
         lar.copy(lienStatus = SecuredBySubordinateLien).mustFail
       }
-      relevantLar.copy(loan = lar.loan.copy(amount = loanAmount)).mustFail
+      relevantLar.copy(loan = lar.loan.copy(amount = loanAmount)).mustPass
       relevantLar.copy(loan = lar.loan.copy(amount = loanAmount - 1)).mustPass
     }
   }

@@ -64,6 +64,10 @@ tolerations: []
 
 affinity: {}
 aws:
-  environment: dev
-  bucket: cfpb-hmda-public
+  environment: prod
+  s3privatebucket: cfpb-hmda-export
+  s3publicbucket: cfpb-hmda-public
   region: us-east-1
+
+filter:
+    bankfilterlist: BANK1LEIFORTEST12345,BANK3LEIFORTEST12345,BANK4LEIFORTEST12345,999999LE3ZOZXUS7W648,28133080042813308004,B90YWS6AFX2LGWOXJ1LD

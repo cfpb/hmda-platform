@@ -2,7 +2,7 @@ package hmda.regulator.query
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
-import hmda.regulator.query.lar._
+import hmda.regulator.query.lar.{LarEntityImpl, _}
 import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
 import hmda.regulator.query.ts.TransmittalSheetEntity
 import slick.basic.DatabaseConfig
@@ -75,8 +75,14 @@ trait RegulatorComponent {
       db.run(table.filter(_.lei === lei).result)
     }
 
-    def findActiveFilers(): Future[Seq[InstitutionEntity]] = {
-      db.run(table.filter(_.hmdaFiler === true).result)
+    //(x => (x.isX && x.name == "xyz"))
+    def findActiveFilers(
+        bankIgnoreList: Array[String]): Future[Seq[InstitutionEntity]] = {
+      db.run(
+        table
+          .filter(_.hmdaFiler === true)
+          .filterNot(_.lei inSet bankIgnoreList)
+          .result)
     }
 
     def getAllInstitutions(): Future[Seq[InstitutionEntity]] = {
@@ -126,6 +132,7 @@ trait RegulatorComponent {
     def getAllDomains(): Future[Seq[InstitutionEmailEntity]] = {
       db.run(table.result)
     }
+
   }
   class TransmittalSheetTable(tag: Tag)
       extends Table[TransmittalSheetEntity](tag, "transmittalsheet2018") {
@@ -196,9 +203,11 @@ trait RegulatorComponent {
       db.run(table.size.result)
     }
 
-    def getAllSheets(): Future[Seq[TransmittalSheetEntity]] = {
-      db.run(table.result)
+    def getAllSheets(
+        bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] = {
+      db.run(table.filterNot(_.lei inSet bankIgnoreList).result)
     }
+
   }
 
   class LarTable(tag: Tag)
@@ -486,8 +495,9 @@ trait RegulatorComponent {
       db.run(table.size.result)
     }
 
-    def getAllLARs(): Future[Seq[LarEntityImpl]] = {
-      db.run(table.result)
+    def getAllLARs(
+        bankIgnoreList: Array[String]): Future[Seq[LarEntityImpl]] = {
+      db.run(table.filterNot(_.lei inSet bankIgnoreList).result)
     }
   }
 

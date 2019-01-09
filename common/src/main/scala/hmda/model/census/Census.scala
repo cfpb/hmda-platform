@@ -79,7 +79,8 @@ case class Census(
     tractMfi: Int = 0,
     tracttoMsaIncomePercent: Double = 0F,
     medianAge: Int = 0,
-    smallCounty: Boolean = false
+    smallCounty: Boolean = false,
+    name: String = ""
 ) {
   def toHmdaTract: String = s"${state}${county}${tract}"
   def toHmdaCounty: String = s"${state}${county}"

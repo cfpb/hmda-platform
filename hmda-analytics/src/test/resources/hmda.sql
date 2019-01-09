@@ -22,6 +22,7 @@ CREATE TABLE public.transmittalsheet2018 (
     total_lines integer,
     tax_id character varying,
     lei character varying NOT NULL,
+    created_at timestamp default current_timestamp,
     CONSTRAINT ts2018_pkey PRIMARY KEY (lei)
 )
 WITH (
@@ -139,7 +140,8 @@ CREATE TABLE public.loanapplicationregister2018
     other_aus_result character varying,
     reverse_mortgage integer,
     line_of_credits integer,
-    business_or_commercial integer
+    business_or_commercial integer,
+    created_at timestamp default current_timestamp
 )
 WITH (
     OIDS = FALSE
