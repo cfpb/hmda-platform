@@ -491,7 +491,7 @@ object HmdaValidationError
       _ <- appDb.distinctCountRepository.remove(submissionId.toString + "uli")
       res <- validateAndPersistErrors(
         TransmittalLar(header, count, distinctCount, distinctUliCount),
-        "syntactical",
+        editType,
         validationContext)
     } yield res
   }
