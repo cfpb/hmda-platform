@@ -82,7 +82,6 @@ object ValidationFlow {
                          checkType: String,
                          validationContext: ValidationContext)
     : Either[List[ValidationError], TransmittalLar] = {
-    println("ENTERED IN validateTsLarEdits: " + checkType)
     val errors = checkType match {
       case "all" =>
         TsLarEngine.checkAll(tsLar,

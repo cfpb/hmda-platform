@@ -407,7 +407,6 @@ object HmdaValidationError
       editType: String,
       validationContext: ValidationContext): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
-    println("ENTERED IN VALIDATETSLAR!!!! " + editType)
     val log = ctx.asScala.log
     val appDb = SyntacticalDb(config)
 
@@ -449,7 +448,6 @@ object HmdaValidationError
             header <- headerResultTest
             line <- appDb.distinctCountRepository.persist(submissionId.toString,
                                                           x._2,
-//                                                          x._1,
                                                           160.minutes)
             uli <- appDb.distinctCountRepository.persist(
               submissionId.toString + "uli",
