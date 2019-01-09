@@ -5,14 +5,14 @@ import com.outworkers.phantom.dsl._
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
-case class SyntacticalCheck(submissionId: String, hashedLar: String)
+case class SyntacticalCheck(submissionId: String, hashedInfo: String)
 
 abstract class SyntacticalRepository
     extends Table[SyntacticalRepository, SyntacticalCheck]
     with RootConnector {
 
   /**
-    CREATE TABLE distinct_count_storage (submissionId text, hashedLar text, PRIMARY KEY (submissionId, hashedInfo));
+    CREATE TABLE distinct_count_storage (submissionId text, hashedInfo text, PRIMARY KEY (submissionId, hashedInfo));
     */
   object submissionId extends StringColumn with PartitionKey
   object hashedInfo extends StringColumn with ClusteringOrder

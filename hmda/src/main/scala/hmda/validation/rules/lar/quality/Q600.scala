@@ -9,6 +9,6 @@ import hmda.validation.dsl.PredicateSyntax._
 object Q600 extends EditCheck[TransmittalLar] {
   override def name: String = "Q600"
   override def apply(tsLar: TransmittalLar): ValidationResult = {
-    tsLar.larsCount is equalTo(tsLar.distinctUliCount.toInt)
+    tsLar.ts.totalLines is equalTo(tsLar.distinctUliCount.toInt)
   }
 }

@@ -109,8 +109,7 @@ object HmdaValidationError
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
-        log.info(
-          s"Syntactical / Validity validation started for $submissionId")
+        log.info(s"Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
@@ -122,7 +121,7 @@ object HmdaValidationError
 
           tsLarErrors <- validateTsLar(ctx,
                                        submissionId,
-                                       "all",
+                                       "syntactical-validity",
                                        validationContext)
 
           larSyntacticalValidityErrors <- validateLar("syntactical-validity",
@@ -408,7 +407,7 @@ object HmdaValidationError
       editType: String,
       validationContext: ValidationContext): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
-
+    println("ENTERED IN VALIDATETSLAR!!!! " + editType)
     val log = ctx.asScala.log
     val appDb = SyntacticalDb(config)
 
@@ -463,7 +462,8 @@ object HmdaValidationError
         tsLar: TransmittalLar,
         checkType: String,
         vc: ValidationContext): Future[List[ValidationError]] = {
-      log.info(s"Syntactical counts - ${submissionId}: ${tsLar.ts.totalLines} ${tsLar.larsCount} ${tsLar.larsDistinctCount} ${tsLar.distinctUliCount}")
+      log.info(
+        s"ValidateTsLar counts ${checkType} - ${submissionId}: ${tsLar.ts.totalLines} ${tsLar.larsCount} ${tsLar.larsDistinctCount} ${tsLar.distinctUliCount}")
       validateTsLarEdits(tsLar, checkType, validationContext) match {
 
         case Left(errors: Seq[ValidationError]) =>
@@ -480,20 +480,32 @@ object HmdaValidationError
       }
     }
 
-    for {
-      header <- headerResultTest
-      count <- persistElements
-      distinctCount <- appDb.distinctCountRepository.count(
-        submissionId.toString)
-      distinctUliCount <- appDb.distinctCountRepository.count(
-        submissionId.toString + "uli")
-      _ <- appDb.distinctCountRepository.remove(submissionId.toString)
-      _ <- appDb.distinctCountRepository.remove(submissionId.toString + "uli")
-      res <- validateAndPersistErrors(
-        TransmittalLar(header, count, distinctCount, distinctUliCount),
-        editType,
-        validationContext)
-    } yield res
+    editType match {
+      case "syntactical-validity" =>
+        for {
+          header <- headerResultTest
+          count <- persistElements
+          distinctCount <- appDb.distinctCountRepository.count(
+            submissionId.toString) //S304 and //S305
+          res <- validateAndPersistErrors(
+            TransmittalLar(header, count, distinctCount, -1),
+            editType,
+            validationContext)
+        } yield res
+      case "quality" =>
+        for {
+          header <- headerResultTest
+          distinctUliCount <- appDb.distinctCountRepository.count(
+            submissionId.toString + "uli")
+          _ <- appDb.distinctCountRepository.remove(submissionId.toString)
+          _ <- appDb.distinctCountRepository.remove(
+            submissionId.toString + "uli")
+          res <- validateAndPersistErrors(
+            TransmittalLar(header, -1, -1, distinctUliCount),
+            editType,
+            validationContext)
+        } yield res
+    }
   }
 
   private def validateLar[as: AS, mat: MAT, ec: EC](
@@ -503,7 +515,9 @@ object HmdaValidationError
       validationContext: ValidationContext)
     : Source[HmdaRowValidatedError, NotUsed] = {
 
-    validateTsLar(ctx, submissionId, "quality", validationContext)
+    if (editCheck == "quality") {
+      validateTsLar(ctx, submissionId, "quality", validationContext)
+    }
 
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)

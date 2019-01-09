@@ -88,13 +88,11 @@ object ValidationFlow {
                              tsLar.ts.LEI,
                              validationContext,
                              TsValidationError)
-      case "syntactical" =>
+      case "syntactical-validity" =>
         TsLarEngine.checkSyntactical(tsLar,
                                      tsLar.ts.LEI,
                                      validationContext,
                                      TsValidationError)
-      case "validity" =>
-        TsLarEngine.checkValidity(tsLar, tsLar.ts.LEI, TsValidationError)
       case "quality" =>
         TsLarEngine.checkQuality(tsLar, tsLar.ts.LEI)
     }
