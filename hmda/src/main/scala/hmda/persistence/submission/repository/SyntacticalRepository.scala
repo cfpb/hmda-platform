@@ -38,19 +38,6 @@ abstract class SyntacticalRepository
       .future()
       .map(_ => SyntacticalCheck(submissionId, hashedInfo))
 
-  // if the record was inserted then this evaluates to true otherwise false
-  def persistIfNotExists(submissionId: String,
-                         hashedInfo: String,
-                         timeout: FiniteDuration): Future[Boolean] = {
-    insert
-      .value(_.submissionId, submissionId)
-      .value(_.hashedInfo, hashedInfo)
-      .ttl(timeout)
-      .ifNotExists()
-      .future()
-      .map(rs => rs.wasApplied())
-  }
-
   def remove(submissionId: String): Future[Unit] =
     delete
       .where(_.submissionId eqs submissionId)
