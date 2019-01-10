@@ -8,7 +8,11 @@ import cats.Semigroup
 import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
-import hmda.model.validation.{LarValidationError, TsValidationError, ValidationError}
+import hmda.model.validation.{
+  LarValidationError,
+  TsValidationError,
+  ValidationError
+}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.validation._
@@ -155,7 +159,7 @@ object ValidationFlow {
   }
 
   def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](checkType: String)
-  : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
+    : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     collectLar
       .mapAsync(1) { lar =>
         val futValidation: Future[HmdaValidation[LoanApplicationRegister]] =

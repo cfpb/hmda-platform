@@ -13,9 +13,8 @@ import hmda.model.validation._
 import hmda.persistence.AkkaCassandraPersistenceSpec
 import hmda.persistence.institution.InstitutionPersistence
 
-class HmdaValidationErrorSpec
-  extends AkkaCassandraPersistenceSpec {
-   override implicit val system = actor.ActorSystem()
+class HmdaValidationErrorSpec extends AkkaCassandraPersistenceSpec {
+  override implicit val system = actor.ActorSystem()
   override implicit val typedSystem = system.toTyped
 
   val sharding = ClusterSharding(typedSystem)

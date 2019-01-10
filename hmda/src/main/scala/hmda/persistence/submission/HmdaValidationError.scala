@@ -513,34 +513,34 @@ object HmdaValidationError
       editCheck: String,
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
-      validationContext: ValidationContext)
-    : Future[Unit] = {
+      validationContext: ValidationContext): Future[Unit] = {
 
-    def qualityChecks: Future[List[ValidationError]] = if (editCheck == "quality") {
-      validateTsLar(ctx, submissionId, "quality", validationContext)
-    } //backpressure #1
-    else {
-      Future.successful(Nil)
-    }
-
-
-    def errorPersisting: Future[Done] = uploadConsumerRawStr(ctx, submissionId)
-      .drop(1)
-      .via(validateLarFlow(editCheck, validationContext))
-      .zip(Source.fromIterator(() => Iterator.from(2)))
-      .collect {
-        case (Left(errors), rowNumber) =>
-          PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+    def qualityChecks: Future[List[ValidationError]] =
+      if (editCheck == "quality") {
+        validateTsLar(ctx, submissionId, "quality", validationContext)
+      } //backpressure #1
+      else {
+        Future.successful(Nil)
       }
-      .via(
-        ActorFlow.ask(ctx.asScala.self)(
-          (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
-            PersistHmdaRowValidatedError(submissionId,
-                                         el.rowNumber,
-                                         el.validationErrors,
-                                         Some(replyTo))
-        ))
-      .runWith(Sink.ignore)
+
+    def errorPersisting: Future[Done] =
+      uploadConsumerRawStr(ctx, submissionId)
+        .drop(1)
+        .via(validateLarFlow(editCheck, validationContext))
+        .zip(Source.fromIterator(() => Iterator.from(2)))
+        .collect {
+          case (Left(errors), rowNumber) =>
+            PersistHmdaRowValidatedError(submissionId, rowNumber, errors, None)
+        }
+        .via(
+          ActorFlow.ask(ctx.asScala.self)(
+            (el, replyTo: ActorRef[HmdaRowValidatedError]) =>
+              PersistHmdaRowValidatedError(submissionId,
+                                           el.rowNumber,
+                                           el.validationErrors,
+                                           Some(replyTo))
+          ))
+        .runWith(Sink.ignore)
 
     for {
       quality <- qualityChecks
@@ -570,10 +570,10 @@ object HmdaValidationError
   }
 
   private def validateAsyncLar[as: AS, mat: MAT, ec: EC](
-                                                          editCheck: String,
-                                                          ctx: ActorContext[SubmissionProcessingCommand],
-                                                          submissionId: SubmissionId
-                                                        ): Source[HmdaRowValidatedError, NotUsed] = {
+      editCheck: String,
+      ctx: ActorContext[SubmissionProcessingCommand],
+      submissionId: SubmissionId
+  ): Source[HmdaRowValidatedError, NotUsed] = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateAsyncLarFlow(editCheck))
@@ -582,11 +582,11 @@ object HmdaValidationError
       .zip(Source.fromIterator(() => Iterator.from(2)))
       .via(ActorFlow.ask(ctx.asScala.self) {
         case ((message: Seq[ValidationError], index: Int),
-        replyTo: ActorRef[HmdaRowValidatedError]) =>
+              replyTo: ActorRef[HmdaRowValidatedError]) =>
           PersistHmdaRowValidatedError(submissionId,
-            index,
-            message,
-            Some(replyTo))
+                                       index,
+                                       message,
+                                       Some(replyTo))
       })
   }
 
