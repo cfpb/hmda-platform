@@ -128,7 +128,7 @@ object HmdaValidationError
                                                       ctx,
                                                       submissionId,
                                                       validationContext)
-            .runWith(Sink.ignore)
+
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
                                              ctx,
                                              submissionId).runWith(Sink.ignore)
@@ -164,15 +164,17 @@ object HmdaValidationError
         log.info(s"Quality validation started for $submissionId")
 
         val fQuality = for {
+
           larErrors <- validateLar("quality",
                                    ctx,
                                    submissionId,
                                    ValidationContext())
-            .runWith(Sink.ignore)
+          _ = log.info("Finished ValidateLar Quality")
           larAsyncErrorsQuality <- validateAsyncLar("quality",
                                                     ctx,
                                                     submissionId)
             .runWith(Sink.ignore)
+          _ = log.info("Finished ValidateAsyncLar Quality")
         } yield (larErrors, larAsyncErrorsQuality)
 
         fQuality.onComplete {
@@ -512,13 +514,17 @@ object HmdaValidationError
       ctx: ActorContext[SubmissionProcessingCommand],
       submissionId: SubmissionId,
       validationContext: ValidationContext)
-    : Source[HmdaRowValidatedError, NotUsed] = {
+    : Future[Unit] = {
 
-    if (editCheck == "quality") {
+    def qualityChecks: Future[List[ValidationError]] = if (editCheck == "quality") {
       validateTsLar(ctx, submissionId, "quality", validationContext)
+    } //backpressure #1
+    else {
+      Future.successful(Nil)
     }
 
-    uploadConsumerRawStr(ctx, submissionId)
+
+    def errorPersisting: Future[Done] = uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateLarFlow(editCheck, validationContext))
       .zip(Source.fromIterator(() => Iterator.from(2)))
@@ -534,6 +540,12 @@ object HmdaValidationError
                                          el.validationErrors,
                                          Some(replyTo))
         ))
+      .runWith(Sink.ignore)
+
+    for {
+      quality <- qualityChecks
+      qualityErrors <- errorPersisting
+    } yield ()
   }
 
   private def validateMacro[as: AS, mat: MAT, ec: EC](
