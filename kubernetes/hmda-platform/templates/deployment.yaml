@@ -22,6 +22,16 @@ spec:
         release: {{ .Release.Name }}
         actorSystemName: {{ .Values.hmda.actorSystemName }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - "hmda-platform"
+            topologyKey: kubernetes.io/hostname
       volumes:
         - name: tz-config
           hostPath:
