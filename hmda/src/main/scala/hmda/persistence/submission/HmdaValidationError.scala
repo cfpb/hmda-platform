@@ -558,27 +558,24 @@ object HmdaValidationError
   }
 
   private def validateAsyncLar[as: AS, mat: MAT, ec: EC](
-      editCheck: String,
-      ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId
-  ) = {
+                                                          editCheck: String,
+                                                          ctx: ActorContext[SubmissionProcessingCommand],
+                                                          submissionId: SubmissionId
+                                                        ): Source[HmdaRowValidatedError, NotUsed] = {
     uploadConsumerRawStr(ctx, submissionId)
       .drop(1)
       .via(validateAsyncLarFlow(editCheck))
-      .map { x =>
-        x.collect {
-          case Left(errors) => errors
-          case Right(_)     => Nil
-        }
-      }
+      .filter(_.isLeft)
+      .map(_.left.get)
       .zip(Source.fromIterator(() => Iterator.from(2)))
-      .map { x =>
-        x._1
-          .map { errors =>
-            PersistHmdaRowValidatedError(submissionId, x._2, errors, None)
-          }
-      }
-      .mapAsync(2)(f => f.map(x => ctx.asScala.self.toUntyped ? x))
+      .via(ActorFlow.ask(ctx.asScala.self) {
+        case ((message: Seq[ValidationError], index: Int),
+        replyTo: ActorRef[HmdaRowValidatedError]) =>
+          PersistHmdaRowValidatedError(submissionId,
+            index,
+            message,
+            Some(replyTo))
+      })
   }
 
   private def maybeTs(ctx: ActorContext[SubmissionProcessingCommand],

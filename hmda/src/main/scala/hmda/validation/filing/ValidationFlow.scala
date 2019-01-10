@@ -8,14 +8,10 @@ import cats.Semigroup
 import hmda.model.filing.{EditDescriptionLookup, PipeDelimited}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
-import hmda.model.validation.{
-  LarValidationError,
-  TsValidationError,
-  ValidationError
-}
+import hmda.model.validation.{LarValidationError, TsValidationError, ValidationError}
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
-import hmda.validation.{AS, EC, HmdaValidated, MAT}
+import hmda.validation._
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
 import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
@@ -158,22 +154,22 @@ object ValidationFlow {
     })
   }
 
-  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](
-      checkType: String): Flow[ByteString,
-                               Future[HmdaValidated[LoanApplicationRegister]],
-                               NotUsed] = {
+  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](checkType: String)
+  : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     collectLar
-      .map { lar =>
-        def errors = checkType match {
-          case "syntactical-validity" =>
-            LarEngine.checkValidityAsync(lar, lar.loan.ULI)
-          case "quality" =>
-            LarEngine.checkQualityAsync(lar, lar.loan.ULI)
-        }
-        (lar, errors)
+      .mapAsync(1) { lar =>
+        val futValidation: Future[HmdaValidation[LoanApplicationRegister]] =
+          checkType match {
+            case "syntactical-validity" =>
+              LarEngine.checkValidityAsync(lar, lar.loan.ULI)
+            case "quality" =>
+              LarEngine.checkQualityAsync(lar, lar.loan.ULI)
+          }
+        futValidation.map(validation => (lar, validation))
       }
-      .map { x =>
-        x._2.map(y => y.leftMap(xs => xs.toList).toEither)
+      .map {
+        x: (LoanApplicationRegister, HmdaValidation[LoanApplicationRegister]) =>
+          x._2.leftMap(xs => xs.toList).toEither
       }
   }
 
