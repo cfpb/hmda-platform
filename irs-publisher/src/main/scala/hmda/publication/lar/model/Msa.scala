@@ -29,11 +29,11 @@ case class Msa(
 ) {
   def addLar(lar: LoanApplicationRegister): Msa = {
     implicit def bool2int(b: Boolean): Int = if (b) 1 else 0
-
+    log.info(lar.loan.amount)
     val loanAmountBinned = 10000 * Math.floor(lar.loan.amount / 10000) + 5000
-
+    log.info(loanAmountBinned)
     val loanAmountThousands = BigDecimal.valueOf(loanAmountBinned) / 1000
-
+    log.info(loanAmountThousands)
     Msa(
       id = id,
       name = name,
