@@ -106,6 +106,7 @@ object IrsPublisher {
           val s3Sink = s3Client.multipartUpload(
             bucket,
             s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
+          log.info(s"address $environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
 
           val msaMapF = readRawData(submissionId)
             .map(l => l.data)
