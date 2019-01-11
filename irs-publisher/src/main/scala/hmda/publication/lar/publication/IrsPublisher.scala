@@ -122,6 +122,7 @@ object IrsPublisher {
               log.info(s"Uploading IRS to S3 for $submissionId")
               val msaSeq = msaMap.msas.values.toSeq
               val msaSummary = MsaSummary.fromMsaCollection(msaSeq)
+              log.info(s"$msaSummary")
               val header =
                 "MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A\n"
               val bytes = ByteString(header) +:
