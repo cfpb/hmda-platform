@@ -518,7 +518,7 @@ object HmdaValidationError
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
         validateTsLar(ctx, submissionId, "quality", validationContext)
-      } //backpressure #1
+      } 
       else {
         Future.successful(Nil)
       }
