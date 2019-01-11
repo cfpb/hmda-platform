@@ -90,7 +90,8 @@ object IrsPublisher {
           r <- Http().singleRequest(request)
           census <- Unmarshal(r.entity).to[Census]
         } yield {
-          val censusID = if (census.msaMd == 0) "-----" else census.msaMd.toString
+          val censusID =
+            if (census.msaMd == 0) "-----" else census.msaMd.toString
           val censusName =
             if (census.name.isEmpty) "MSA/MD NOT AVAILABLE" else census.name
           Msa(censusID, censusName)
@@ -121,7 +122,8 @@ object IrsPublisher {
               log.info(s"Uploading IRS to S3 for $submissionId")
               val msaSeq = msaMap.msas.values.toSeq
               val msaSummary = MsaSummary.fromMsaCollection(msaSeq)
-              val header = "MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A\n"
+              val header =
+                "MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A\n"
               val bytes = ByteString(header) +:
                 msaSeq.map(msa => ByteString(msa.toCsv + "\n")) :+
                 ByteString(msaSummary.toCsv)
