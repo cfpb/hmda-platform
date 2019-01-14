@@ -25,7 +25,6 @@ import hmda.query.HmdaQuery._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
-
 import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
@@ -37,7 +36,8 @@ object IrsPublisher {
   final val name: String = "IrsPublisher"
 
   val config = ConfigFactory.load()
-
+  val bankFilter =config.getConfig("filter")
+  val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")

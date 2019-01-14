@@ -23,7 +23,8 @@ object ModifiedLarPublisher {
   final val name: String = "ModifiedLarPublisher"
 
   val config = ConfigFactory.load()
-
+  val bankFilter =config.getConfig("filter")
+  val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")

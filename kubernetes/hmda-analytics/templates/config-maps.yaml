@@ -6,3 +6,10 @@ data:
   postgres.ssl: "{{ .Values.postgresql.ssl }}"
   postgres.user:  "{{ .Values.postgresql.postgresUser }}"
   postgres.database: "{{ .Values.postgresql.postgresDatabase }}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bank-filter-configmap
+data:
+  bank-filter-list: "{{ .Values.filter.bankfilterlist }}"
