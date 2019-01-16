@@ -118,9 +118,9 @@ keycloak:
     - name: JDBC_PARAMS
       value: "ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory"
     - name: FILING_APP_URL
-      value: "https//hmda4.demo.cfpb.gov/filing/2018/"
+      value: "/filing/2018/"
     - name: INSTITUTION_SEARCH_URI
-      value: "https://hmda4.demo.cfpb.gov/v2/public"
+      value: "/v2/public"
     - name: INSTITUTION_SEARCH_VALIDATE_SSL
       value: "ON"
     - name: SUPPORT_EMAIL
