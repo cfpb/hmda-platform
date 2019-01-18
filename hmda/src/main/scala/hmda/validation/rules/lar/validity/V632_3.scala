@@ -23,7 +23,7 @@ object V632_3 extends EditCheck[LoanApplicationRegister] {
     val coEthnicity = lar.coApplicant.ethnicity
     when(coEthnicity.ethnicityObserved is equalTo(NotVisualOrSurnameEthnicity)) {
       (coEthnicity.ethnicity1 is containedIn(validEthnicityList)) or
-        ((coEthnicity.ethnicity1 is equalTo(EmptyEthnicityValue)) and
+        (coEthnicity.ethnicity1 is equalTo(EmptyEthnicityValue) and
           (coEthnicity.otherHispanicOrLatino not empty))
 
     }
