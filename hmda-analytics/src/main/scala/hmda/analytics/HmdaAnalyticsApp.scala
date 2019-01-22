@@ -90,7 +90,7 @@ object HmdaAnalyticsApp
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
-      .map { id =>
+      .mapAsync(1) { id =>
         log.info(s"Adding data for  $id")
         addTs(id)
       }
@@ -98,7 +98,8 @@ object HmdaAnalyticsApp
       .run()
   }
   private def addTs(submissionId: SubmissionId): Future[Done] = {
-    def step1: Future[Done] =
+
+    def step0: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .take(1)
@@ -110,9 +111,24 @@ object HmdaAnalyticsApp
           for {
 
             delete <- transmittalSheetRepository.deleteByLei(ts.lei)
-            insert <- transmittalSheetRepository.insert(ts)
 
-          } yield insert
+          } yield delete
+        }
+        .runWith(Sink.ignore)
+    def step1: Future[Done] =
+      readRawData(submissionId)
+        .map(l => l.data)
+        .take(1)
+        .map(s => TsCsvParser(s))
+        .map(_.getOrElse(TransmittalSheet()))
+        .filter(t => t.LEI != "" && t.institutionName != "")
+        .map(ts => TransmittalSheetConverter(ts))
+        .mapAsync(1) { ts =>
+          for {
+
+            insertorupdate <- transmittalSheetRepository.insert(ts)
+
+          } yield insertorupdate
         }
         .runWith(Sink.ignore)
 
@@ -123,8 +139,7 @@ object HmdaAnalyticsApp
         .take(1)
         .map(s => LarCsvParser(s))
         .map(_.getOrElse(LoanApplicationRegister()))
-        .filter(lar =>
-          lar.larIdentifier.LEI != "" && lar.larIdentifier.id != "")
+        .filter(lar => lar.larIdentifier.LEI != "")
         .map(lar => LarConverter(lar))
         .mapAsync(1) { lar =>
           larRepository.deleteByLei(lar.lei)
@@ -137,19 +152,24 @@ object HmdaAnalyticsApp
         .drop(1)
         .map(s => LarCsvParser(s))
         .map(_.getOrElse(LoanApplicationRegister()))
-        .filter(lar =>
-          lar.larIdentifier.LEI != "" && lar.larIdentifier.id != "")
+        .filter(lar => lar.larIdentifier.LEI != "")
         .map(lar => LarConverter(lar))
         .mapAsync(1) { lar =>
           larRepository.insert(lar)
         }
         .runWith(Sink.ignore)
 
-    val result = for {
-      _ <- step1
-      _ <- step2
-      res <- step3
-    } yield res
+    def result =
+      for {
+        _ <- step0
+        _ = log.info(s"Deleting data from TS for  $submissionId")
+        _ <- step1
+        _ = log.info(s"Adding data into TS for  $submissionId")
+        _ <- step2
+        _ = log.info(s"Done deleting data from LAR for  $submissionId")
+        res <- step3
+        _ = log.info(s"Done inserting data into LAR for  $submissionId")
+      } yield res
     result.recover {
       case t: Throwable =>
         log.error("Error happened in inserting: ", t)

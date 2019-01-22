@@ -73,7 +73,11 @@ trait TransmittalSheetComponent {
     }
 
     def deleteByLei(lei: String): Future[Int] = {
-      db.run(table.filter(_.lei === lei).delete)
+      db.run(table.filter(_.lei.toUpperCase === lei.toUpperCase).delete)
+    }
+
+    def updateByLei(ts: TransmittalSheetEntity): Future[Int] = {
+      db.run(table.insertOrUpdate(ts))
     }
 
     def count(): Future[Int] = {
