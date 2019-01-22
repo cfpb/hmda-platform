@@ -99,7 +99,7 @@ object HmdaAnalyticsApp
   }
   private def addTs(submissionId: SubmissionId): Future[Done] = {
 
-    def step0: Future[Done] =
+    def deleteTsRow: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .take(1)
@@ -115,7 +115,7 @@ object HmdaAnalyticsApp
           } yield delete
         }
         .runWith(Sink.ignore)
-    def step1: Future[Done] =
+    def insertTsRow: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .take(1)
@@ -132,7 +132,7 @@ object HmdaAnalyticsApp
         }
         .runWith(Sink.ignore)
 
-    def step2: Future[Done] =
+    def deleteLeiRows: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .drop(1)
@@ -146,7 +146,7 @@ object HmdaAnalyticsApp
         }
         .runWith(Sink.ignore)
 
-    def step3: Future[Done] =
+    def insertLeiRows: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .drop(1)
@@ -161,13 +161,13 @@ object HmdaAnalyticsApp
 
     def result =
       for {
-        _ <- step0
+        _ <- deleteTsRow
         _ = log.info(s"Deleting data from TS for  $submissionId")
-        _ <- step1
+        _ <- insertTsRow
         _ = log.info(s"Adding data into TS for  $submissionId")
-        _ <- step2
+        _ <- deleteLeiRows
         _ = log.info(s"Done deleting data from LAR for  $submissionId")
-        res <- step3
+        res <- insertLeiRows
         _ = log.info(s"Done inserting data into LAR for  $submissionId")
       } yield res
     result.recover {
