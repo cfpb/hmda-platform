@@ -27,10 +27,10 @@ class TransmittalSheetComponentSpec extends TransmittalSheetAsyncSetup {
       }
       transmittalSheetRepository.count().map(i => i mustBe 3)
     }
-//    "delete new TS Entity" in {
-//      transmittalSheetRepository.deleteByLei(ts.lei).map(i => i mustBe 1)
-//      transmittalSheetRepository.count().map(i => i mustBe 2)
-//    }
+    "delete new TS Entity" in {
+      transmittalSheetRepository.deleteByLei(ts.lei).map(i => i mustBe 1)
+      transmittalSheetRepository.count().map(i => i mustBe 2)
+    }
 
   }
 
