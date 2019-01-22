@@ -4,10 +4,7 @@ import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
-import scala.concurrent.Await
-import scala.concurrent.duration._
-
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 trait TransmittalSheetComponent {
 
