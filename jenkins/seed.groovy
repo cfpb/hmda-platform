@@ -4,11 +4,7 @@ projects = [
 
 projects.each { project ->
     multibranchPipelineJob(project.name) {
-        properties([
-            parameters([
-                string(name: 'test', defaultValue: 'test')
-            ])
-        ])
+        properties([[$class: 'ParametersDefinitionProperty', parameterDefinitions: [[$class: 'StringParameterDefinition', name: 'myparam', defaultValue: 'default value']]]])
         branchSources {
             github {
                 repoOwner('cfpb')
