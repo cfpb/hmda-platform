@@ -112,7 +112,7 @@ object HmdaValidationError
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
-        log.info(s"Syntactical / Validity validation started for $submissionId")
+        log.info(s"Syntactical / Validity validation started for 1M $submissionId")
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
@@ -420,6 +420,8 @@ object HmdaValidationError
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
     val log = ctx.asScala.log
     val appDb = HmdaPlatform.appDb
+
+    log.info(s"Starting validateTsLar for $submissionId")
 
     def md5HashString(s: String): String = {
       val md = MessageDigest.getInstance("MD5")
