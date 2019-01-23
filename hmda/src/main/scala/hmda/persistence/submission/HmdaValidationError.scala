@@ -132,11 +132,13 @@ object HmdaValidationError
             ctx,
             submissionId,
             validationContext)(system, materializer, blockingEc)
-          _ = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
+          _ = log.info(
+            s"Starting validateAsycLar - Syntactical for $submissionId")
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
                                              ctx,
                                              submissionId).runWith(Sink.ignore)
-          _ = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
+          _ = log.info(
+            s"Finished validateAsycLar - Syntactical for $submissionId")
         } yield
           (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
