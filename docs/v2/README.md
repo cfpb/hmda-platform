@@ -1,8 +1,62 @@
-# The HMDA Platform
+# HMDA Platform
 
-## This project is a work in progress
+## Introduction
 
-Information contained in this repository should be considered provisional and a work in progress, and not the final implementation for the HMDA Platform, unless otherwise indicated.
+For more information on HMDA, checkout the [About HMDA page](http://www.consumerfinance.gov/data-research/hmda/learn-more) on the CFPB website.
+
+## The HMDA Platform
+
+The new HMDA Platform (“V2”) was totally updated over the past year to utilize a more flexible and resilient approach (Kubernetes Microservices) in order to better serve our customers. This repository contains the code for the entirety of the HMDA platform backend. This platform has been designed to accommodate the needs of the HMDA filing process by financial institutions, as well as the data management and publication needs of the HMDA data asset.
+
+The HMDA Platform uses sbt's multi-project builds, each project representing a specific task. The platform is an Akka Cluster application that can be deployed on a single node or as a distributed application. For more information on how Akka Cluster is used, see the documentation [here](Documents/cluster.md)
+
+The HMDA Platform is composed of the following modules:
+
+### Parser (JS/JVM)
+
+Module responsible for reading incoming data and making sure that it conforms to the HMDA File Specification
+
+### Data Validation
+
+Module responsible for validating incoming data by executing validation rules as per the Edit Checks documentation
+
+### Persistence
+
+Module responsible for persisting information into the system. It becomes the system of record for HMDA data
+
+### Cluster
+
+Module responsible for managing the various cluster roles, as well as starting the Hmda Platform
+
+### API
+
+This module contains both public APIs for HMDA data for general use by third party clients and web applications, as well as endpoints for receiving data and providing information about the filing process for Financial Institutions
+
+### API Model
+
+This module contains objects and JSON protocols for use by the API project
+
+### Query
+
+This module is responsible for interacting with the back-end database, as well as conversion between model objects and database objects.
+
+### Panel
+
+This module is responsible for parsing and persisting a CSV-format panel file
+
+### Model (JS/JVM)
+
+This module is responsible for maintaining the objects used in our platform
+
+### Census
+
+This module is responsible for geographic translation (e.g. state number -> state code)
+
+### Publication
+
+This module generates Aggregate and Disclosure reports, as required by HMDA statute.
+
+## Dependencies
 
 
 ## Dependencies
@@ -45,7 +99,7 @@ sbt:hmda-platform> reStart
 ```
 
 
-### Building and runnint the .jar
+### Building and running the .jar
 
 * To build JVM artifacts, from the sbt prompt first choose the project you want to build and use the assembly command:
 

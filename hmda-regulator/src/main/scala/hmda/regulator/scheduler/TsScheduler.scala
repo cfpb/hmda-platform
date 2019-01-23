@@ -84,13 +84,6 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/ts/$fileName")
 
-      val recordCounterResult = tsRepository.count()
-
-      val countSource: Source[Int, NotUsed] = Source
-        .fromFuture(recordCounterResult)
-
-      log.info("TransmittalSheet  Table Count: " + s"$countSource")
-
       val allResults: Future[Seq[TransmittalSheetEntity]] =
         tsRepository.getAllSheets(bankFilterList)
 

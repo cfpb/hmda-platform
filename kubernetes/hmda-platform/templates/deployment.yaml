@@ -22,6 +22,16 @@ spec:
         release: {{ .Release.Name }}
         actorSystemName: {{ .Values.hmda.actorSystemName }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - "hmda-platform"
+            topologyKey: kubernetes.io/hostname
       volumes:
         - name: tz-config
           hostPath:
@@ -36,7 +46,7 @@ spec:
         resources:
           limits:
             memory: "6200Mi"
-            cpu: "2"
+            cpu: "4"
           requests:
             memory: "6200Mi"
             cpu: "1"
