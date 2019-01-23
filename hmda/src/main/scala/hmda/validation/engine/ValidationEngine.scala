@@ -33,7 +33,7 @@ trait ValidationEngine[A] extends ValidationApi[A] {
       checkQuality(a, id)
     )
 
-    validations.par.reduceLeft(_ combine _)
+    validations.reduceLeft(_ combine _)
   }
 
   def checkSyntactical(
@@ -97,11 +97,11 @@ trait ValidationEngine[A] extends ValidationApi[A] {
                         validationErrorEntity: ValidationErrorEntity,
                         id: String): HmdaValidation[A] = {
     val checks =
-      checksToRun.par
+      checksToRun
         .map(check(_, a, id, validationErrorType, validationErrorEntity))
         .toList
 
-    checks.par.reduceLeft(_ combine _)
+    checks.reduceLeft(_ combine _)
   }
 
   private def runAsyncChecks[as: AS, mat: MAT, ec: EC](
@@ -111,7 +111,7 @@ trait ValidationEngine[A] extends ValidationApi[A] {
       validationErrorEntity: ValidationErrorEntity,
       id: String): Future[HmdaValidation[A]] = {
     val fChecks =
-      checksToRun.par
+      checksToRun
         .map(checkAsync(_, a, id, validationErrorType, validationErrorEntity))
         .toList
 

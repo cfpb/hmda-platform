@@ -43,6 +43,7 @@ import HmdaProcessingUtils.{
 import EditDetailsConverter._
 import akka.{Done, NotUsed}
 import akka.cluster.sharding.typed.scaladsl.EntityRef
+import hmda.HmdaPlatform
 import hmda.HmdaPlatform.config
 import hmda.messages.institution.InstitutionEvents.{
   InstitutionEvent,
@@ -104,6 +105,8 @@ object HmdaValidationError
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
+    val blockingEc: ExecutionContext =
+      system.dispatchers.lookup("akka.blocking-quality-dispatcher")
     val sharding = ClusterSharding(ctx.asScala.system)
 
     cmd match {
@@ -123,16 +126,17 @@ object HmdaValidationError
                                        submissionId,
                                        "syntactical-validity",
                                        validationContext)
-          _ = log.info("Starting validateLar - Syntactical")
-          larSyntacticalValidityErrors <- validateLar("syntactical-validity",
-                                                      ctx,
-                                                      submissionId,
-                                                      validationContext)
-          _ = log.info("Starting validateAsycLar - Syntactical")
+          _ = log.info(s"Starting validateLar - Syntactical for $submissionId")
+          larSyntacticalValidityErrors <- validateLar(
+            "syntactical-validity",
+            ctx,
+            submissionId,
+            validationContext)(system, materializer, blockingEc)
+          _ = log.info(s"Starting validateAsycLar - Syntactical for $submissionId")
           larAsyncErrors <- validateAsyncLar("syntactical-validity",
                                              ctx,
                                              submissionId).runWith(Sink.ignore)
-          _ = log.info("Finished validateAsycLar - Syntactical")
+          _ = log.info(s"Finished validateAsycLar - Syntactical for $submissionId")
         } yield
           (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
@@ -166,16 +170,18 @@ object HmdaValidationError
 
         val fQuality = for {
 
-          larErrors <- validateLar("quality",
-                                   ctx,
-                                   submissionId,
-                                   ValidationContext())
-          _ = log.info("Finished ValidateLar Quality")
+          larErrors <- validateLar(
+            "quality",
+            ctx,
+            submissionId,
+            ValidationContext())(system, materializer, blockingEc)
+          _ = log.info(s"Finished ValidateLar Quality for $submissionId")
+          _ = log.info(s"Started validateAsyncLar - Quality for $submissionId")
           larAsyncErrorsQuality <- validateAsyncLar("quality",
                                                     ctx,
                                                     submissionId)
             .runWith(Sink.ignore)
-          _ = log.info("Finished ValidateAsyncLar Quality")
+          _ = log.info(s"Finished ValidateAsyncLar Quality for $submissionId")
         } yield (larErrors, larAsyncErrorsQuality)
 
         fQuality.onComplete {
@@ -411,7 +417,7 @@ object HmdaValidationError
       validationContext: ValidationContext): Future[List[ValidationError]] = {
     implicit val scheduler: Scheduler = ctx.asScala.system.scheduler
     val log = ctx.asScala.log
-    val appDb = SyntacticalDb(config)
+    val appDb = HmdaPlatform.appDb
 
     def md5HashString(s: String): String = {
       val md = MessageDigest.getInstance("MD5")
@@ -448,14 +454,13 @@ object HmdaValidationError
         }
         .mapAsync(1) { x =>
           for {
-            header <- headerResultTest
             line <- appDb.distinctCountRepository.persist(submissionId.toString,
                                                           x._2,
-                                                          160.minutes)
+                                                          260.minutes)
             uli <- appDb.distinctCountRepository.persist(
               submissionId.toString + "uli",
               x._1,
-              160.minutes)
+              260.minutes)
           } yield (line)
         }
         .runWith(Sink.fold(0)((acc, _) => acc + 1))
@@ -510,11 +515,13 @@ object HmdaValidationError
     }
   }
 
-  private def validateLar[as: AS, mat: MAT, ec: EC](
-      editCheck: String,
-      ctx: ActorContext[SubmissionProcessingCommand],
-      submissionId: SubmissionId,
-      validationContext: ValidationContext): Future[Unit] = {
+  private def validateLar(editCheck: String,
+                          ctx: ActorContext[SubmissionProcessingCommand],
+                          submissionId: SubmissionId,
+                          validationContext: ValidationContext)(
+      implicit actorSystem: ActorSystem,
+      materializer: ActorMaterializer,
+      executionContext: ExecutionContext): Future[Unit] = {
 
     def qualityChecks: Future[List[ValidationError]] =
       if (editCheck == "quality") {
