@@ -132,7 +132,7 @@ object HmdaAnalyticsApp
         }
         .runWith(Sink.ignore)
 
-    def deleteLeiRows: Future[Done] =
+    def deleteLarRows: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .drop(1)
@@ -146,7 +146,7 @@ object HmdaAnalyticsApp
         }
         .runWith(Sink.ignore)
 
-    def insertLeiRows: Future[Done] =
+    def insertLarRows: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .drop(1)
@@ -165,9 +165,9 @@ object HmdaAnalyticsApp
         _ = log.info(s"Deleting data from TS for  $submissionId")
         _ <- insertTsRow
         _ = log.info(s"Adding data into TS for  $submissionId")
-        _ <- deleteLeiRows
+        _ <- deleteLarRows
         _ = log.info(s"Done deleting data from LAR for  $submissionId")
-        res <- insertLeiRows
+        res <- insertLarRows
         _ = log.info(s"Done inserting data into LAR for  $submissionId")
       } yield res
     result.recover {
