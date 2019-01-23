@@ -37,7 +37,7 @@ V617|Loan Amount must be a number greater than or equal to 0, and cannot be left
 V618|Action Taken must equal 1, 2, 3, 4, 5, 6, 7, or 8, and cannot be left blank.|Action Taken
 V619-1|Action Taken Date must be a valid date using YYYYMMDD format, and cannot be left blank.|Action Taken Date; Application Date
 V619-2|The Action Taken Date must be in the reporting year.|Action Taken Date; Application Date
-V619-3|If Action Taken equals 1, 2, 3, 4, 5, 7 or 8, then the Action Taken Date must be on or after the Application Date.|Action Taken Date; Application Date
+V619-3|If Action Taken equals 1, 2, 3, 4, 5, 7 or 8, then the Action Taken Date must be on or after the Application Date.|Action Taken; Action Taken Date; Application Date
 V620|Street Address cannot be left blank.|Street Address
 V621|City cannot be left blank.|City
 V622|If Street Address was not reported NA or Exempt, then City, State and Zip Code must be provided, and not reported NA.|Street Address; City; State; Zip Code
