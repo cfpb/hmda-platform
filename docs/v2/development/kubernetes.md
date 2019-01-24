@@ -148,9 +148,10 @@ kubernetes/hmda-analytics
 ### Install hmda-platform
 ```bash
 helm upgrade --install --force --namespace=default \
---values=kubernetes/hmda-platform/values.yaml \
---set image.tag=master \
---set service.name=hmda-platform-api \
+--values=kubernetes/hmda-platform/values.yaml 
+--set image.tag=latest 
+--set service.name=hmda-platform-api 
+--set image.pullPolicy=Always \
 hmda-platform \
 kubernetes/hmda-platform
 ```
@@ -162,7 +163,6 @@ helm upgrade --install --force --namespace=default \
 check-digit \
 kubernetes/check-digit
 ```
-
 ### Install Institutions API
 6. OPTIONAL: Install [Istio](https://istio.io/) Service Mesh
 
