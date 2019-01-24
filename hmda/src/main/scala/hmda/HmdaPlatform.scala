@@ -17,8 +17,6 @@ import hmda.publication.HmdaPublication
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import com.outworkers.phantom.dsl._
 
-import scala.concurrent.Await
-
 object HmdaPlatform extends App {
 
   val log = LoggerFactory.getLogger("hmda")

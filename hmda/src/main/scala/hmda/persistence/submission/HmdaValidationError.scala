@@ -12,7 +12,7 @@ import akka.actor.typed.{ActorContext, ActorRef, Behavior}
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import akka.stream.scaladsl.{Broadcast, GraphDSL, RunnableGraph, Sink, Source}
+import akka.stream.scaladsl.{Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionProcessingCommands._
@@ -23,7 +23,7 @@ import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.stream.{ActorMaterializer, ClosedShape}
+import akka.stream.{ActorMaterializer}
 import akka.stream.typed.scaladsl.ActorFlow
 import hmda.messages.institution.InstitutionCommands.{
   GetInstitution,
@@ -113,7 +113,7 @@ object HmdaValidationError
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
         log.info(
-          s"Syntactical / Validity validation started for [large-file-test] $submissionId")
+          s"Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
@@ -143,7 +143,7 @@ object HmdaValidationError
         } yield
           (tsErrors, tsLarErrors, larSyntacticalValidityErrors, larAsyncErrors)
         fSyntacticalValidity.onComplete {
-          case Success(count) =>
+          case Success(_) =>
             ctx.asScala.self ! CompleteSyntacticalValidity(submissionId)
           case Failure(e) =>
             updateSubmissionStatus(sharding, submissionId, Failed, log)
@@ -475,7 +475,7 @@ object HmdaValidationError
         checkType: String,
         vc: ValidationContext): Future[List[ValidationError]] = {
       log.info(
-        s"ValidateTsLar counts ${checkType} - ${submissionId}: ${tsLar.ts.totalLines} ${tsLar.larsCount} ${tsLar.larsDistinctCount} ${tsLar.distinctUliCount}")
+        s"ValidateTsLar counts ${checkType} - ${submissionId}: TS Total Lines ${tsLar.ts.totalLines} Lars Count ${tsLar.larsCount} ${tsLar.larsDistinctCount} Distinct ULI Count ${tsLar.distinctUliCount}")
       validateTsLarEdits(tsLar, checkType, validationContext) match {
 
         case Left(errors: Seq[ValidationError]) =>
@@ -508,7 +508,7 @@ object HmdaValidationError
         for {
           header <- headerResultTest
           distinctUliCount <- appDb.distinctCountRepository.count(
-            submissionId.toString + "uli")
+            submissionId.toString + "uli") //Q600
           _ <- appDb.distinctCountRepository.remove(submissionId.toString)
           _ <- appDb.distinctCountRepository.remove(
             submissionId.toString + "uli")
