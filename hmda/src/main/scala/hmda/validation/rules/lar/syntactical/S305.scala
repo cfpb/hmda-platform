@@ -10,7 +10,7 @@ object S305 extends EditCheck[TransmittalLar] {
   override def name: String = "S305"
   override def apply(tsLar: TransmittalLar): ValidationResult = {
 
-    tsLar.lars.size is equalTo(tsLar.lars.distinct.size)
+    tsLar.larsCount is equalTo(tsLar.larsDistinctCount.toInt)
 
   }
 
