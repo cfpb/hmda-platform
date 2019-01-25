@@ -22,7 +22,6 @@ image:
   repository: hmda/hmda-platform
   tag: v2.7.2
   pullPolicy: IfNotPresent
-  commitId: 
 
 hmda:
   actorSystemName: hmda2

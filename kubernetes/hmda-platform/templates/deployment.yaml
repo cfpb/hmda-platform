@@ -52,8 +52,6 @@ spec:
             cpu: "1"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-        - name: COMMIT_ID
-          value: {{ .Values.image.commitId }}
         - name: HMDA_RUNTIME_MODE
           value: {{ .Values.hmda.runtimeMode }}
         - name: KUBERNETES_HMDA_POD_NAMESPACE
