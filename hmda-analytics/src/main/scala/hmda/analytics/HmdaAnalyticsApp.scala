@@ -110,12 +110,8 @@ object HmdaAnalyticsApp
         .map(ts => TransmittalSheetConverter(ts))
         .mapAsync(1) { ts =>
           for {
-          if (bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))) {true
-          }
-
-          delete <- transmittalSheetRepository.deleteByLei(ts.lei)
+            delete <- transmittalSheetRepository.deleteByLei(ts.lei)
             insert <- transmittalSheetRepository.insert(ts)
-
           } yield insert
         }
         .runWith(Sink.ignore)
