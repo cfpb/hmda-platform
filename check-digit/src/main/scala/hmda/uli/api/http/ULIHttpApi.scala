@@ -37,7 +37,7 @@ trait ULIHttpApi extends HmdaTimeDirectives {
     encodeResponse {
       pathPrefix("uli") {
         path("checkDigit") {
-          timedPost { uri =>
+          extractUri { uri =>
             entity(as[Loan]) { loan =>
               val loanId = loan.loanId
               val maybeDigit = Try(checkDigit(loanId))
@@ -95,7 +95,7 @@ trait ULIHttpApi extends HmdaTimeDirectives {
             }
           } ~
           path("validate") {
-            timedPost { uri =>
+            extractUri { uri =>
               entity(as[ULICheck]) { uc =>
                 val uli = uc.uli
                 val isValid = Try(validateULI(uli))

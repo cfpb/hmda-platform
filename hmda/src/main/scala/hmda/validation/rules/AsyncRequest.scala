@@ -1,5 +1,6 @@
 package hmda.validation.rules
 
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
@@ -63,11 +64,16 @@ trait AsyncRequest {
                                                    responseType: String) = {
     val unmarshalledResponse = Unmarshal(response.entity)
 
+    if (response.status != StatusCodes.OK) {
+      implicitly[ActorSystem].log.error("Status code is: " + response.status.intValue() +  " responseType: " + responseType)
+    }
+
     responseType match {
       case "uli" =>
         if (response.status == StatusCodes.OK) {
           unmarshalledResponse.to[ULIValidated]
         } else {
+
           unmarshalledResponse.to[ULIValidated]
         }
       case "county" =>
