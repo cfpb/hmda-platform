@@ -3,7 +3,6 @@ package hmda.regulator.scheduler
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
@@ -16,21 +15,19 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
-import hmda.regulator.query.RegulatorComponent
+import hmda.regulator.query.repository.TransmittalSheetRepository
 import hmda.regulator.query.ts.TransmittalSheetEntity
 import hmda.regulator.scheduler.schedules.Schedules.TsScheduler
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class TsScheduler extends HmdaActor with RegulatorComponent {
+class TsScheduler extends HmdaActor with TransmittalSheetRepository {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def tsRepository = new TransmittalSheetRepository(dbConfig)
-
-
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -45,9 +42,9 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case TsScheduler =>
-
       val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-      val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+      val bankFilter =
+        ConfigFactory.load("application.conf").getConfig("filter")
 
       val accessKeyId = awsConfig.getString("access-key-id")
       val secretAccess = awsConfig.getString("secret-access-key ")
@@ -58,7 +55,6 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
       val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
       val awsCredentialsProvider = new AWSStaticCredentialsProvider(
         new BasicAWSCredentials(accessKeyId, secretAccess))
-
 
       val awsRegionProvider = new AwsRegionProvider {
         override def getRegion: String = region

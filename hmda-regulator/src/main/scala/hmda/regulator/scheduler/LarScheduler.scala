@@ -16,20 +16,19 @@ import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
-import hmda.regulator.query.RegulatorComponent
+import hmda.regulator.query.repository.LarRepository
 import hmda.regulator.query.lar.LarEntityImpl
 import hmda.regulator.scheduler.schedules.Schedules.LarScheduler
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class LarScheduler extends HmdaActor with RegulatorComponent {
+class LarScheduler extends HmdaActor with LarRepository {
 
   implicit val ec = context.system.dispatcher
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def larRepository = new LarRepository(dbConfig)
-
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -54,7 +53,6 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val awsCredentialsProvider = new AWSStaticCredentialsProvider(
         new BasicAWSCredentials(accessKeyId, secretAccess))
 
-
       val awsRegionProvider = new AwsRegionProvider {
         override def getRegion: String = region
       }
@@ -68,7 +66,8 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
         None,
         ListBucketVersion2
       )
-      val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+      val bankFilter =
+        ConfigFactory.load("application.conf").getConfig("filter")
       val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
 
       val s3Client = new S3Client(s3Settings)(context.system, materializer)

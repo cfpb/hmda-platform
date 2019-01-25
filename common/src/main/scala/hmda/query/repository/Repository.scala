@@ -4,6 +4,8 @@ import hmda.query.Db
 import slick.ast.BaseTypedType
 import slick.lifted.AbstractTable
 
+import scala.concurrent.Future
+
 abstract class Repository[T <: AbstractTable[_], I: BaseTypedType] extends Db {
   import config.profile.api._
 
@@ -14,6 +16,10 @@ abstract class Repository[T <: AbstractTable[_], I: BaseTypedType] extends Db {
 
   def filterById(id: Id) = table.filter(getId(_) === id)
   def findById(id: Id) = db.run(filterById(id).result.headOption)
+
+  def count(): Future[Int] = {
+    db.run(table.size.result)
+  }
 
 }
 
