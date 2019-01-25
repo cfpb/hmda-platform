@@ -6,11 +6,10 @@ import hmda.model.ResourceUtils._
 
 object CensusRecords {
 
-  val config = ConfigFactory.load()
-  val censusFileName =
-    config.getString("hmda.census.fields.filename")
-
   def parseCensusFile: List[Census] = {
+    val config = ConfigFactory.load()
+    val censusFileName =
+      config.getString("hmda.census.fields.filename")
     val lines = fileLines(s"/$censusFileName")
     lines
       .drop(1)

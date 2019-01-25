@@ -112,8 +112,7 @@ object HmdaValidationError
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
-        log.info(
-          s"Syntactical / Validity validation started for $submissionId")
+        log.info(s"Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
@@ -455,7 +454,7 @@ object HmdaValidationError
           case (Right(parsed), line) => (parsed, line)
         }
         .map { x =>
-          (md5HashString(x._1.loan.ULI), md5HashString(x._2))
+          (md5HashString(x._1.loan.ULI.toUpperCase), md5HashString(x._2.toUpperCase))
         }
         .mapAsync(1) { x =>
           for {

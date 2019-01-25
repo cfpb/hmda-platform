@@ -110,6 +110,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case "logback.xml"                           => MergeStrategy.concat
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
           oldStrategy(x)
@@ -121,6 +122,8 @@ lazy val `hmda-platform` = (project in file("hmda"))
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
+  .dependsOn(`check-digit` % "compile->compile;test->test")
+  .dependsOn(`census-api` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
