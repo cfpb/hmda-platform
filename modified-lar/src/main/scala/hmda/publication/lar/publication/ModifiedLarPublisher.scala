@@ -85,8 +85,11 @@ object ModifiedLarPublisher {
               .map(s => ByteString(s))
               .runWith(s3Sink)
 
+            Behaviors.same
           }
-          Behaviors.same
+          else {
+            Behaviors.ignore
+          }
         case _ =>
           Behaviors.ignore
       }
