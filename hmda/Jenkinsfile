@@ -7,17 +7,21 @@ volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
    node('buildSbtPod') {
-     sh(env | sort)
-
+     def repo = checkout scm
+     def gitCommit = repo.GIT_COMMIT
+     def gitBranch = repo.GIT_BRANCH
+     def gitDescribe = sh(returnStdout: true, script: 'git describe --always --tags')
+     def gitTag = sh(returnStdout: true, script: "git tag --sort version:refname | tail -1").trim()
      def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
      def shortCommit = commitId[0..7]
-     def result = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
-     
+     def result = sh(returnStatus: true, script: "git log -1 | grep '\\[deploy pr\\]'")
+     def isDeployPR = result == 0 ? true : false
      if (gitBranch == "master") {
        env.DOCKER_TAG = "latest"
      }
      else if (isDeployPR) {
         env.DOCKER_TAG = "${env.JOB_NAME?.split('/')[1]}-${env.BUILD_NUMBER}"
+        shortCommit = env.DOCKER_TAG+shortCommit
      }
      else {
        env.DOCKER_TAG = env.TAG_NAME
@@ -61,21 +65,31 @@ volumes: [
     }
 
     stage('Deploy') {
-      if (env.BRANCH_NAME == 'master' || isDeployPR) {
-        container('helm') {
-          sh """
-            helm upgrade --install --force \
-            --namespace=default \
-            --values=kubernetes/hmda-platform/values.yaml \
-            --set commitId=$shortCommit \
-            --set image.tag="latest" \
-            --set image.pullPolicy=Always \
-            hmda-platform kubernetes/hmda-platform
-          """
+        if (env.BRANCH_NAME == 'master' || isDeployPR) {
+            container('helm') {
+                //run packaging with app version and version
+                dir("kubernetes/hmda-platform") {
+                    sh """
+                        helm init --client-only
+                        helm package --app-version="${shortCommit}" --version=${gitTag} .
+                        tar --strip-components=1 -zxf hmda-platform-*
+                        rm -rf hmda-platform-*.tgz
+                    """
+                }
+
+                sh """
+                  helm upgrade --install --force \
+                  --namespace=default \
+                  --values=kubernetes/hmda-platform/values.yaml \
+                  --set image.tag="${DOCKER_TAG}" \
+                  --set service.name=hmda-platform-api \
+                  --set image.pullPolicy=Always \
+                  hmda-platform kubernetes/hmda-platform
+                """
+            }
         }
-      }
     }
 
-  }
+   }
 
 }
