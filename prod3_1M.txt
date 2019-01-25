@@ -1,5 +1,0 @@
-census-api-6646666868-tr8zk                       3m           296Mi           
-check-digit-555d9cf685-cjgzt                      4m           269Mi           
-hmda-platform-68dcf98fdf-dbrft                    14m          455Mi           
-hmda-platform-68dcf98fdf-j95xl                    108m         629Mi           
-hmda-platform-68dcf98fdf-pvs64                    267m         451Mi           
