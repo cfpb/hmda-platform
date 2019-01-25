@@ -68,7 +68,7 @@ object ModifiedLarPublisher {
       Behaviors.receiveMessage {
 
         case UploadToS3(submissionId) =>
-          if (bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))){
+          if (!bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))){
 
             log.info(s"Publishing Modified LAR for $submissionId")
 

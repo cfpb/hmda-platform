@@ -91,8 +91,8 @@ object HmdaAnalyticsApp
       .single(msg)
       .map(msg => SubmissionId(msg))
       .map { id =>
-        log.info(s"Adding data for  $id")
-        if (bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei))){
+        if (!bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei))){
+          log.info(s"Adding data for  $id")
           addTs(id)
         }
       }
