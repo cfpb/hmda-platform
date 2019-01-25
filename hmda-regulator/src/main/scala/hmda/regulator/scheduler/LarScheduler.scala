@@ -69,7 +69,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
         ListBucketVersion2
       )
       val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
-      val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
+      val bankFilterList = bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 

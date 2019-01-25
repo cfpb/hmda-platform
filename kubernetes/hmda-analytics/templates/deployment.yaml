@@ -61,6 +61,11 @@ spec:
                 secretKeyRef:
                   name: inst-postgres-credentials
                   key: url
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: bank-filter-configmap
+                  key: bank-filter-list
             - name: CASSANDRA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:

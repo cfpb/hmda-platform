@@ -6,3 +6,4 @@ data:
   postgres.ssl: "{{ .Values.postgresql.ssl }}"
   postgres.user:  "{{ .Values.postgresql.postgresUser }}"
   postgres.database: "{{ .Values.postgresql.postgresDatabase }}"
+  bank-filter-list: "{{ .Values.filter.bankfilterlist }}"

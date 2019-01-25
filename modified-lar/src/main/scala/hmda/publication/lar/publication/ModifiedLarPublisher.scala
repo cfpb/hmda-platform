@@ -30,7 +30,8 @@ object ModifiedLarPublisher {
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
   val year = config.getInt("hmda.lar.modified.year")
-
+  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilterList = bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -67,23 +68,25 @@ object ModifiedLarPublisher {
       Behaviors.receiveMessage {
 
         case UploadToS3(submissionId) =>
-          log.info(s"Publishing Modified LAR for $submissionId")
+          if (bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))){
 
-          val fileName = s"${submissionId.lei}.txt"
+            log.info(s"Publishing Modified LAR for $submissionId")
 
-          val s3Sink = s3Client.multipartUpload(
-            bucket,
-            s"$environment/modified-lar/$year/$fileName")
+            val fileName = s"${submissionId.lei}.txt"
 
-          readRawData(submissionId)
-            .map(l => l.data)
-            .drop(1)
-            .map(s => ModifiedLarCsvParser(s).toCSV + "\n")
-            .map(s => ByteString(s))
-            .runWith(s3Sink)
+            val s3Sink = s3Client.multipartUpload(
+              bucket,
+              s"$environment/modified-lar/$year/$fileName")
 
+            readRawData(submissionId)
+              .map(l => l.data)
+              .drop(1)
+              .map(s => ModifiedLarCsvParser(s).toCSV + "\n")
+              .map(s => ByteString(s))
+              .runWith(s3Sink)
+
+          }
           Behaviors.same
-
         case _ =>
           Behaviors.ignore
       }

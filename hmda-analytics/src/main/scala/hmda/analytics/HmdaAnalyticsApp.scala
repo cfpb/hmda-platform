@@ -58,14 +58,14 @@ object HmdaAnalyticsApp
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config = ConfigFactory.load()
-
+  val bankFilter = config.getConfig("filter")
+  val bankFilterList = bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
   val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
   val larRepository =
     new LarRepository(tableName = "loanapplicationregister2018", dbConfig)
   val db = transmittalSheetRepository.db
-  val larDb = transmittalSheetRepository.db
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(kafkaConfig,
@@ -79,20 +79,22 @@ object HmdaAnalyticsApp
     .committableSource(consumerSettings,
                        Subscriptions.topics(signTopic, analyticsTopic))
     .mapAsync(parallelism) { msg =>
-      processData(msg.record.value()).map(_ => msg.committableOffset)
+      processData(msg.record.value(),bankFilterList).map(_ => msg.committableOffset,)
     }
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
     .toMat(Sink.seq)(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-  def processData(msg: String): Future[Done] = {
+  def processData(msg: String, bankIgnoreList: Array[String]): Future[Done] = {
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
       .map { id =>
         log.info(s"Adding data for  $id")
-        addTs(id)
+        if (bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei))){
+          addTs(id)
+        }
       }
       .toMat(Sink.ignore)(Keep.right)
       .run()
@@ -108,8 +110,10 @@ object HmdaAnalyticsApp
         .map(ts => TransmittalSheetConverter(ts))
         .mapAsync(1) { ts =>
           for {
+          if (bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))) {true
+          }
 
-            delete <- transmittalSheetRepository.deleteByLei(ts.lei)
+          delete <- transmittalSheetRepository.deleteByLei(ts.lei)
             insert <- transmittalSheetRepository.insert(ts)
 
           } yield insert
