@@ -130,7 +130,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
                 : Future[EditDetailsRowCounted] = editDetailsPersistence ? (
                   ref => GetEditRowCount(editName, ref))
 
-              val fDetails = for {
+              val fDetails: Future[EditDetailsSummary] = for {
                 editRowCount <- fEditRowCount
                 s = EditDetailsSummary(editName,
                                        Nil,

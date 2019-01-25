@@ -24,7 +24,8 @@ projects.each { project ->
                 repository(project.repo)
                 scanCredentialsId('github')
                 buildForkPRHead(true)
-                buildForkPRMerge(false) 
+                buildForkPRMerge(false)
+                excludes("^((?!v1).)*$") 
             }
             orphanedItemStrategy {
                 discardOldItems {

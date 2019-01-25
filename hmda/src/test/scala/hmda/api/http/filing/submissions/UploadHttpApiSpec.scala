@@ -154,7 +154,7 @@ class UploadHttpApiSpec
     s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions/1"
 
   val badUrl =
-    s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions/2"
+    s"/institutions/${sampleInstitution.LEI}/filings/$period/submissions/200"
 
   val ts = tsGen.sample.getOrElse(TransmittalSheet())
   val tsCsv = ts.toCSV + "\n"
@@ -183,7 +183,7 @@ class UploadHttpApiSpec
         status mustBe StatusCodes.BadRequest
         val response = responseAs[ErrorResponse]
         response.path mustBe Path(badUrl)
-        response.message mustBe s"Submission ${sampleInstitution.LEI}-${period}-2 not available for upload"
+        response.message mustBe s"Submission ${sampleInstitution.LEI}-${period}-200 not available for upload"
       }
     }
   }

@@ -92,7 +92,7 @@ metadata:
       name: hmda_filing_mapping
       prefix: /v2/filing/
       service: {{ .Values.service.name }}:{{ .Values.filing.port }}
-      timeout_ms: 20000
+      timeout_ms: 60000
 spec:
   type: {{ .Values.ambassador.service.type }}
   ports:

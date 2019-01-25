@@ -9,8 +9,6 @@ import hmda.validation.dsl.PredicateSyntax._
 object S304 extends EditCheck[TransmittalLar] {
   override def name: String = "S304"
   override def apply(tsLar: TransmittalLar): ValidationResult = {
-    tsLar.ts.totalLines is equalTo(tsLar.lars.size)
-
+    tsLar.ts.totalLines is equalTo(tsLar.larsCount)
   }
-
 }
