@@ -112,8 +112,7 @@ object HmdaValidationError
     cmd match {
       case StartSyntacticalValidity(submissionId) =>
         updateSubmissionStatus(sharding, submissionId, Validating, log)
-        log.info(
-          s"Syntactical / Validity validation started for $submissionId")
+        log.info(s"Syntactical / Validity validation started for $submissionId")
 
         val fValidationContext =
           validationContext(processingYear, sharding, ctx, submissionId)
