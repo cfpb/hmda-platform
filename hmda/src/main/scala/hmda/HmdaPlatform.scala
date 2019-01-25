@@ -16,6 +16,8 @@ import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import com.outworkers.phantom.dsl._
+import hmda.census.records.CensusRecords.parseCensusFile
+import hmda.model.census.Census
 
 object HmdaPlatform extends App {
 
@@ -83,6 +85,20 @@ object HmdaPlatform extends App {
 
   val appDb = SyntacticalDb(config)
   appDb.create()
+
+  val (indexedTract, indexedCounty, indexedSmallCounty) =
+    parseCensusFile.foldLeft(
+      (Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
+      case ((m1, m2, m3), c) =>
+        (
+          m1 + (c.toHmdaTract -> c),
+          m2 + (c.toHmdaCounty -> c),
+          if (c.smallCounty)
+            m3 + (c.toHmdaCounty -> c)
+          else m3
+        )
+    }
+
 
   //Start Persistence
   system.spawn(HmdaPersistence.behavior, HmdaPersistence.name)
