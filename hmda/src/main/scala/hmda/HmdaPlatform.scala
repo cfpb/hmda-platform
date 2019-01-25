@@ -84,21 +84,7 @@ object HmdaPlatform extends App {
   }
 
   val appDb = SyntacticalDb(config)
-  appDb.create()
-
-  val (indexedTract, indexedCounty, indexedSmallCounty) =
-    parseCensusFile.foldLeft(
-      (Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
-      case ((m1, m2, m3), c) =>
-        (
-          m1 + (c.toHmdaTract -> c),
-          m2 + (c.toHmdaCounty -> c),
-          if (c.smallCounty)
-            m3 + (c.toHmdaCounty -> c)
-          else m3
-        )
-    }
-
+  appDb.create() //TODO: Fix this warning
 
   //Start Persistence
   system.spawn(HmdaPersistence.behavior, HmdaPersistence.name)
