@@ -454,7 +454,8 @@ object HmdaValidationError
           case (Right(parsed), line) => (parsed, line)
         }
         .map { x =>
-          (md5HashString(x._1.loan.ULI.toUpperCase), md5HashString(x._2.toUpperCase))
+          (md5HashString(x._1.loan.ULI.toUpperCase),
+           md5HashString(x._2.toUpperCase))
         }
         .mapAsync(1) { x =>
           for {
