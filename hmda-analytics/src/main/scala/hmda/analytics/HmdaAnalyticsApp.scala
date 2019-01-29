@@ -80,20 +80,21 @@ object HmdaAnalyticsApp
     .committableSource(consumerSettings,
                        Subscriptions.topics(signTopic, analyticsTopic))
     .mapAsync(parallelism) { msg =>
-      processData(msg.record.value()).map(_ =>
-        msg.committableOffset)
+      processData(msg.record.value()).map(_ => msg.committableOffset)
     }
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
     .toMat(Sink.seq)(Keep.both)
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-  def processData(msg: String,): Future[Done] = {
+  def processData(msg: String): Future[Done] = {
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
       .mapAsync(1) {
-        case id if (!bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei)))  => {
+        case id
+            if (!bankFilterList.exists(
+              bankLEI => bankLEI.equalsIgnoreCase(id.lei))) => {
           log.info(s"Adding data for  $id")
           addTs(id)
         }
