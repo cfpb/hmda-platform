@@ -8,7 +8,13 @@ message ValidationErrorMessage {
     string editName = 2;
     ValidationErrorTypeMessage validationErrorType = 3;
     ValidationErrorEntityMessage validationErrorEntity = 4;
-    map<string, string> fields = 5;
+    repeated string fieldsKey = 5;
+    repeated string fieldsValue = 6;
+}
+
+message ProtoDetailsPair {
+    string name = 1;
+    string value = 2;
 }
 
 enum ValidationErrorTypeMessage {
