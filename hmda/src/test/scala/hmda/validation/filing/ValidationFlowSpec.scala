@@ -47,13 +47,13 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
     "Contact Person's Name" -> "Mr. Smug Pockets"
   )
   val mapV629_1 = ListMap(
+    "Ethnicity of Applicant or Borrower: 1" -> "4",
     "Ethnicity of Applicant or Borrower: 2" -> "0",
     "Ethnicity of Applicant or Borrower: 3" -> "0",
-    "Ethnicity of Applicant or Borrower: Free Form Text Field for Other Hispanic or Latino" -> "ZUDIP0BD1KDWWIF5E96QGIRIQLRBMLT1CEU42OY6R21HA7LDCI080",
     "Ethnicity of Applicant or Borrower: 4" -> "0",
-    "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "-1",
-    "Ethnicity of Applicant or Borrower: 1" -> "4",
-    "Ethnicity of Applicant or Borrower: 5" -> "0"
+    "Ethnicity of Applicant or Borrower: 5" -> "0",
+    "Ethnicity of Applicant or Borrower: Free Form Text Field for Other Hispanic or Latino" -> "ZUDIP0BD1KDWWIF5E96QGIRIQLRBMLT1CEU42OY6R21HA7LDCI080",
+    "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "-1"
   )
   val mapV630 = ListMap(
     "Ethnicity of Applicant or Borrower: 1" -> "4",
