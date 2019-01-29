@@ -30,8 +30,6 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def tsRepository = new TransmittalSheetRepository(dbConfig)
 
-
-
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
       .schedule("TsScheduler", self, TsScheduler)
@@ -45,7 +43,6 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case TsScheduler =>
-
       val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
 
       val accessKeyId = awsConfig.getString("access-key-id")
@@ -54,11 +51,12 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
       val bucket = awsConfig.getString("public-bucket")
       val environment = awsConfig.getString("environment")
       val year = awsConfig.getString("year")
-      val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
-      val bankFilterList = bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+      val bankFilter =
+        ConfigFactory.load("application.conf").getConfig("filter")
+      val bankFilterList =
+        bankFilter.getString("bank-filter-list").toUpperCase.split(",")
       val awsCredentialsProvider = new AWSStaticCredentialsProvider(
         new BasicAWSCredentials(accessKeyId, secretAccess))
-
 
       val awsRegionProvider = new AwsRegionProvider {
         override def getRegion: String = region

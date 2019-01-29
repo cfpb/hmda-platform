@@ -31,7 +31,8 @@ object ModifiedLarPublisher {
   val environment = config.getString("aws.environment")
   val year = config.getInt("hmda.lar.modified.year")
   val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
-  val bankFilterList = bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -68,7 +69,8 @@ object ModifiedLarPublisher {
       Behaviors.receiveMessage {
 
         case UploadToS3(submissionId) =>
-          if (!bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))){
+          if (!bankFilterList.exists(
+                bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))) {
 
             log.info(s"Publishing Modified LAR for $submissionId")
 
@@ -86,8 +88,7 @@ object ModifiedLarPublisher {
               .runWith(s3Sink)
 
             Behaviors.same
-          }
-          else {
+          } else {
             Behaviors.ignore
           }
         case _ =>

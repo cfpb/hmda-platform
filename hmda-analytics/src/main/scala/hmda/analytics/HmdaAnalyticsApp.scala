@@ -59,7 +59,8 @@ object HmdaAnalyticsApp
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config = ConfigFactory.load()
   val bankFilter = config.getConfig("filter")
-  val bankFilterList = bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
   val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
@@ -79,7 +80,8 @@ object HmdaAnalyticsApp
     .committableSource(consumerSettings,
                        Subscriptions.topics(signTopic, analyticsTopic))
     .mapAsync(parallelism) { msg =>
-      processData(msg.record.value(),bankFilterList).map(_ => msg.committableOffset,)
+      processData(msg.record.value(), bankFilterList).map(_ =>
+        msg.committableOffset)
     }
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
     .toMat(Sink.seq)(Keep.both)
@@ -91,7 +93,7 @@ object HmdaAnalyticsApp
       .single(msg)
       .map(msg => SubmissionId(msg))
       .map { id =>
-        if (!bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei))){
+        if (!bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei))) {
           log.info(s"Adding data for  $id")
           addTs(id)
         }
