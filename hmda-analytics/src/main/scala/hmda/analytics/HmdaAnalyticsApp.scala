@@ -91,13 +91,10 @@ object HmdaAnalyticsApp
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
-      .mapAsync(1) {
-        case id
-            if (!bankFilterList.exists(
-              bankLEI => bankLEI.equalsIgnoreCase(id.lei))) => {
-          log.info(s"Adding data for  $id")
-          addTs(id)
-        }
+      .filter(id => !bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei)))
+      .mapAsync(1) { id =>
+        log.info(s"Adding data for  $id")
+        addTs(id)
       }
       .toMat(Sink.ignore)(Keep.right)
       .run()
