@@ -31,7 +31,7 @@ trait CensusHttpApi extends HmdaTimeDirectives {
   val censusHttpRoutes =
     encodeResponse {
       pathPrefix("census" / "tract" / Segment) { tract =>
-        timedGet { uri =>
+        extractUri { uri =>
           val census = CensusRecords.indexedTract.get(tract)
           census match {
             case Some(t) => complete(ToResponseMarshallable(t))
@@ -41,7 +41,7 @@ trait CensusHttpApi extends HmdaTimeDirectives {
       } ~
         pathPrefix("census" / "validate") {
           path("tract") {
-            timedPost { uri =>
+            extractUri { uri =>
               entity(as[TractCheck]) { tc =>
                 val tract = tc.tract
                 val isValid = Try(isTractValid(tract, indexedTract))
@@ -57,7 +57,7 @@ trait CensusHttpApi extends HmdaTimeDirectives {
             }
           } ~
             path("county") {
-              timedPost { uri =>
+              extractUri { uri =>
                 entity(as[CountyCheck]) { tc =>
                   val county = tc.county
                   val isValid = Try(isCountyValid(county, indexedCounty))
@@ -73,7 +73,7 @@ trait CensusHttpApi extends HmdaTimeDirectives {
               }
             } ~
             path("smallcounty") {
-              timedPost { uri =>
+              extractUri { uri =>
                 entity(as[CountyCheck]) { tc =>
                   val county = tc.county
                   val isValid = Try(isCountySmall(county, indexedSmallCounty))

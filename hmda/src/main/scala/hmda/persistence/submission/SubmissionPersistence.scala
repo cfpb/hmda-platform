@@ -87,7 +87,8 @@ object SubmissionPersistence
             } else if (modified.end == 0 && modified.receipt.isEmpty) {
               //for all statuses other than signed
               Effect.persist(SubmissionModified(modified)).thenRun { _ =>
-                log.debug(s"persisted modified Submission: ${modified.toString}")
+                log.debug(
+                  s"persisted modified Submission: ${modified.toString}")
                 val filingPersistence = sharding.entityRefFor(
                   FilingPersistence.typeKey,
                   s"${FilingPersistence.name}-${modified.id.lei}-${modified.id.period}")

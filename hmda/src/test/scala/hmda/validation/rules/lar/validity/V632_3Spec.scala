@@ -15,15 +15,22 @@ class V632_3Spec extends LarEditCheckSpec {
         .copy(ethnicityObserved = NotVisualOrSurnameEthnicity)
       val irrelevantEthnicityObserved = lar.coApplicant.ethnicity
         .copy(ethnicityObserved = VisualOrSurnameEthnicity)
-      val validOtherEthnicity =
-        lar.coApplicant.ethnicity.copy(otherHispanicOrLatino = "other")
       val validEthnicity1 = relevantEthnicityObserved.copy(
         ethnicity1 = HispanicOrLatino
       )
-      val invalidEthnicity = relevantEthnicityObserved.copy(
+      val validEthnicity2 = relevantEthnicityObserved.copy(
         ethnicity1 = EmptyEthnicityValue,
-        otherHispanicOrLatino = ""
+        otherHispanicOrLatino = "other"
       )
+      val invalidEthnicity1 = relevantEthnicityObserved.copy(
+        ethnicity1 = EthnicityNotApplicable,
+        otherHispanicOrLatino = "other"
+      )
+      val invalidEthnicity2 = relevantEthnicityObserved.copy(
+        ethnicity1 = InvalidEthnicityCode,
+        otherHispanicOrLatino = "other"
+      )
+
       val validLar1 =
         lar.copy(
           coApplicant =
@@ -34,12 +41,15 @@ class V632_3Spec extends LarEditCheckSpec {
           coApplicant = lar.coApplicant.copy(ethnicity = validEthnicity1))
       validLar2.mustPass
       val validLar3 = lar.copy(
-        coApplicant = lar.coApplicant.copy(ethnicity = validOtherEthnicity))
+        coApplicant = lar.coApplicant.copy(ethnicity = validEthnicity2))
       validLar3.mustPass
-      val invalidLar =
-        lar.copy(
-          coApplicant = lar.coApplicant.copy(ethnicity = invalidEthnicity))
-      invalidLar.mustFail
+
+      val invalidLar2 = lar.copy(
+        coApplicant = lar.coApplicant.copy(ethnicity = invalidEthnicity2))
+      invalidLar2.mustFail
+      val invalidLar1 = lar.copy(
+        coApplicant = lar.coApplicant.copy(ethnicity = invalidEthnicity1))
+      invalidLar1.mustFail
     }
   }
 }

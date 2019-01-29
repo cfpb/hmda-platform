@@ -15,7 +15,7 @@ import hmda.model.validation.{
 }
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
-import hmda.validation.{AS, EC, HmdaValidated, MAT}
+import hmda.validation._
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
 import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
@@ -88,13 +88,11 @@ object ValidationFlow {
                              tsLar.ts.LEI,
                              validationContext,
                              TsValidationError)
-      case "syntactical" =>
+      case "syntactical-validity" =>
         TsLarEngine.checkSyntactical(tsLar,
                                      tsLar.ts.LEI,
                                      validationContext,
                                      TsValidationError)
-      case "validity" =>
-        TsLarEngine.checkValidity(tsLar, tsLar.ts.LEI, TsValidationError)
       case "quality" =>
         TsLarEngine.checkQuality(tsLar, tsLar.ts.LEI)
     }
@@ -110,22 +108,23 @@ object ValidationFlow {
     val lars = List[LoanApplicationRegister]()
     collectLar
       .map { lar =>
-        def errors = checkType match {
-          case "all" =>
-            LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
-          case "syntactical" =>
-            LarEngine
-              .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
-          case "validity" =>
-            LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
-          case "syntactical-validity" =>
-            LarEngine
-              .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
-              .combine(
-                LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
-              )
-          case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
-        }
+        def errors =
+          checkType match {
+            case "all" =>
+              LarEngine.checkAll(lar, lar.loan.ULI, ctx, LarValidationError)
+            case "syntactical" =>
+              LarEngine
+                .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
+            case "validity" =>
+              LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+            case "syntactical-validity" =>
+              LarEngine
+                .checkSyntactical(lar, lar.loan.ULI, ctx, LarValidationError)
+                .combine(
+                  LarEngine.checkValidity(lar, lar.loan.ULI, LarValidationError)
+                )
+            case "quality" => LarEngine.checkQuality(lar, lar.loan.ULI)
+          }
         (lar, errors)
       }
       .map { x =>
@@ -159,22 +158,22 @@ object ValidationFlow {
     })
   }
 
-  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](
-      checkType: String): Flow[ByteString,
-                               Future[HmdaValidated[LoanApplicationRegister]],
-                               NotUsed] = {
+  def validateAsyncLarFlow[as: AS, mat: MAT, ec: EC](checkType: String)
+    : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
     collectLar
-      .map { lar =>
-        def errors = checkType match {
-          case "syntactical-validity" =>
-            LarEngine.checkValidityAsync(lar, lar.loan.ULI)
-          case "quality" =>
-            LarEngine.checkQualityAsync(lar, lar.loan.ULI)
-        }
-        (lar, errors)
+      .mapAsync(1) { lar =>
+        val futValidation: Future[HmdaValidation[LoanApplicationRegister]] =
+          checkType match {
+            case "syntactical-validity" =>
+              LarEngine.checkValidityAsync(lar, lar.loan.ULI)
+            case "quality" =>
+              LarEngine.checkQualityAsync(lar, lar.loan.ULI)
+          }
+        futValidation.map(validation => (lar, validation))
       }
-      .map { x =>
-        x._2.map(y => y.leftMap(xs => xs.toList).toEither)
+      .map {
+        x: (LoanApplicationRegister, HmdaValidation[LoanApplicationRegister]) =>
+          x._2.leftMap(xs => xs.toList).toEither
       }
   }
 

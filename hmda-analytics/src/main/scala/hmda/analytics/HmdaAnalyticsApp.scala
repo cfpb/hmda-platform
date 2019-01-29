@@ -80,7 +80,7 @@ object HmdaAnalyticsApp
     .committableSource(consumerSettings,
                        Subscriptions.topics(signTopic, analyticsTopic))
     .mapAsync(parallelism) { msg =>
-      processData(msg.record.value(), bankFilterList).map(_ =>
+      processData(msg.record.value()).map(_ =>
         msg.committableOffset)
     }
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
@@ -88,12 +88,12 @@ object HmdaAnalyticsApp
     .mapMaterializedValue(DrainingControl.apply)
     .run()
 
-  def processData(msg: String, bankIgnoreList: Array[String]): Future[Done] = {
+  def processData(msg: String,): Future[Done] = {
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
-      .map { id =>
-        if (!bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei))) {
+      .mapAsync(1) {
+        case id if (!bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei)))  => {
           log.info(s"Adding data for  $id")
           addTs(id)
         }
@@ -102,7 +102,8 @@ object HmdaAnalyticsApp
       .run()
   }
   private def addTs(submissionId: SubmissionId): Future[Done] = {
-    def step1: Future[Done] =
+
+    def deleteTsRow: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .take(1)
@@ -112,46 +113,67 @@ object HmdaAnalyticsApp
         .map(ts => TransmittalSheetConverter(ts))
         .mapAsync(1) { ts =>
           for {
+
             delete <- transmittalSheetRepository.deleteByLei(ts.lei)
-            insert <- transmittalSheetRepository.insert(ts)
-          } yield insert
+
+          } yield delete
+        }
+        .runWith(Sink.ignore)
+    def insertTsRow: Future[Done] =
+      readRawData(submissionId)
+        .map(l => l.data)
+        .take(1)
+        .map(s => TsCsvParser(s))
+        .map(_.getOrElse(TransmittalSheet()))
+        .filter(t => t.LEI != "" && t.institutionName != "")
+        .map(ts => TransmittalSheetConverter(ts))
+        .mapAsync(1) { ts =>
+          for {
+
+            insertorupdate <- transmittalSheetRepository.insert(ts)
+
+          } yield insertorupdate
         }
         .runWith(Sink.ignore)
 
-    def step2: Future[Done] =
+    def deleteLarRows: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .drop(1)
         .take(1)
         .map(s => LarCsvParser(s))
         .map(_.getOrElse(LoanApplicationRegister()))
-        .filter(lar =>
-          lar.larIdentifier.LEI != "" && lar.larIdentifier.id != "")
+        .filter(lar => lar.larIdentifier.LEI != "")
         .map(lar => LarConverter(lar))
         .mapAsync(1) { lar =>
           larRepository.deleteByLei(lar.lei)
         }
         .runWith(Sink.ignore)
 
-    def step3: Future[Done] =
+    def insertLarRows: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
         .drop(1)
         .map(s => LarCsvParser(s))
         .map(_.getOrElse(LoanApplicationRegister()))
-        .filter(lar =>
-          lar.larIdentifier.LEI != "" && lar.larIdentifier.id != "")
+        .filter(lar => lar.larIdentifier.LEI != "")
         .map(lar => LarConverter(lar))
         .mapAsync(1) { lar =>
           larRepository.insert(lar)
         }
         .runWith(Sink.ignore)
 
-    val result = for {
-      _ <- step1
-      _ <- step2
-      res <- step3
-    } yield res
+    def result =
+      for {
+        _ <- deleteTsRow
+        _ = log.info(s"Deleting data from TS for  $submissionId")
+        _ <- insertTsRow
+        _ = log.info(s"Adding data into TS for  $submissionId")
+        _ <- deleteLarRows
+        _ = log.info(s"Done deleting data from LAR for  $submissionId")
+        res <- insertLarRows
+        _ = log.info(s"Done inserting data into LAR for  $submissionId")
+      } yield res
     result.recover {
       case t: Throwable =>
         log.error("Error happened in inserting: ", t)

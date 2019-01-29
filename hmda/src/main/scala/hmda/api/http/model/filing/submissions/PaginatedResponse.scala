@@ -73,6 +73,7 @@ object PaginatedResponse {
 
     configurablePath match {
       case extractPath(path) => path
+      case _                 => ""
     }
   }
 
@@ -81,6 +82,7 @@ object PaginatedResponse {
 
     paginationQueryString match {
       case extractPage(page) => page.toInt
+      case _                 => 1
     }
   }
 }

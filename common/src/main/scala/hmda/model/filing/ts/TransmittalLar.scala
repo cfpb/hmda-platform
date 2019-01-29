@@ -1,8 +1,6 @@
 package hmda.model.filing.ts
 
-import hmda.model.filing.lar.LoanApplicationRegister
-
-import scala.concurrent.Future
-
-case class TransmittalLar(ts: TransmittalSheet = TransmittalSheet(),
-                          lars: Seq[LoanApplicationRegister] = List.empty)
+case class TransmittalLar(ts: TransmittalSheet,
+                          larsCount: Int = 0,
+                          larsDistinctCount: Long = 0L,
+                          distinctUliCount: Long = 0L)
