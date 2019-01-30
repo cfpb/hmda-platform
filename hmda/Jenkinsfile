@@ -14,11 +14,11 @@ volumes: [
     def gitCommit = repo.GIT_COMMIT
     def shortCommit = repo.GIT_COMMIT[0..7]
     def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
-    def taggedBranch = env.TAG_NAME != null
+    def gitTagged = env.TAG_NAME != null
      
     if (gitBranch == "master") {
       env.DOCKER_TAG = "latest"
-    } else if (taggedBranch) {
+    } else if (gitTagged) {
       env.DOCKER_TAG = env.TAG_NAME
     } else {
       env.DOCKER_TAG = env.BRANCH_NAME
@@ -40,7 +40,7 @@ volumes: [
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform hmda/target/docker/stage"
-              if (taggedBranch || gitBranch == "master" || isDeployPR) {
+              if (gitTagged || gitBranch == "master" || isDeployPR) {
 
                 //Push to Dockerhub
                 sh """
