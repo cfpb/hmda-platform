@@ -142,7 +142,6 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
               onComplete(fDetails) {
                 case Success(summary) =>
-                  println(summary)
                   complete(ToResponseMarshallable(summary))
                 case Failure(e) =>
                   failedResponse(StatusCodes.InternalServerError, uri, e)
