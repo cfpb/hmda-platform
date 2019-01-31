@@ -66,7 +66,7 @@ object EditDetailsSummaryCodec {
       override def apply(c: HCursor): Result[EditDetailsRow] =
         for {
           id <- c.downField("id").as[String]
-          fields <- c.downField("fields").as[List[FieldDetails]]
+          fields <- c.downField("fields").as[Seq[FieldDetails]]
         } yield EditDetailsRow(id, fields)
     }
 

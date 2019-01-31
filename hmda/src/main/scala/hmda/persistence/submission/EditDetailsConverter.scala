@@ -32,8 +32,8 @@ object EditDetailsConverter {
   }
 
   private def validationErrorToFieldDetails(
-      validationError: ValidationError): List[FieldDetails] = {
-    val fieldDetails = validationError.fields.keys.toList
+      validationError: ValidationError): Seq[FieldDetails] = {
+    val fieldDetails = validationError.fields.keys.toSeq
       .map(fieldKey => {
         println(fieldKey)
         val fieldValue =
