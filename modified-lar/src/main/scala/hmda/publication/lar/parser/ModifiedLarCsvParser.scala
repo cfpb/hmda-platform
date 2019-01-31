@@ -105,6 +105,8 @@ object ModifiedLarCsvParser {
   }
 
   private def convertAge(age: Int): String = age match {
+    case x if x == 8888             => "8888"
+    case x if x == 9999             => "9999"
     case x if 0 until 25 contains x => "<25"
     case x if 25 to 34 contains x   => "25-34"
     case x if 35 to 44 contains x   => "35-44"
