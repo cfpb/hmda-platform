@@ -22,6 +22,9 @@ object EditDetailsConverter {
     val editDetailRows = errors
       .map(e => EditDetailsRow(e.uli, validationErrorToFieldDetails(e)))
 
+    println(editName)
+    println(errors)
+    println(editDetailRows)
     EditDetails(
       editName,
       editDetailRows
@@ -29,15 +32,20 @@ object EditDetailsConverter {
   }
 
   private def validationErrorToFieldDetails(
-      validationError: ValidationError): Seq[FieldDetails] =
-    validationError.fields.keys
+      validationError: ValidationError): List[FieldDetails] = {
+    val fieldDetails = validationError.fields.keys.toList
       .map(fieldKey => {
+        println(fieldKey)
         val fieldValue =
           validationError.fields.getOrElse(fieldKey, "Detail not found")
         val fieldValueFriendly =
           if (fieldValue == "-1") "Invalid input" else fieldValue
-        FieldDetails(fieldKey, fieldValueFriendly)
+        val fieldDetials = FieldDetails(fieldKey, fieldValueFriendly)
+        println(fieldDetials)
+        fieldDetials
       })
-      .toSeq
-
+    println("validationErrorToFieldDetails Result")
+    println(fieldDetails)
+    fieldDetails
+  }
 }

@@ -33,7 +33,7 @@ object EditDetailsProtobufConverter {
   def editDetailsRowFromProtobuf(msg: EditDetailsRowMessage): EditDetailsRow = {
     EditDetailsRow(
       msg.id,
-      msg.fields.map(f => fieldDetailsFromProtobuf((f)))
+      msg.fields.map(f => fieldDetailsFromProtobuf((f))).toList
     )
   }
 

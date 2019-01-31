@@ -1,3 +1,3 @@
 package hmda.model.edits
 
-case class EditDetailsRow(id: String, fields: Seq[FieldDetails] = Nil)
+case class EditDetailsRow(id: String, fields: List[FieldDetails] = Nil)

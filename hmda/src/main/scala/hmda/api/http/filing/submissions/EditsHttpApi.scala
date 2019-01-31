@@ -110,7 +110,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
         }
     }
 
-  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/edit
+  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/<edit>
   def editDetailsPath(oAuth2Authorization: OAuth2Authorization): Route = {
     val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d(?:-\d)?""")
     path(
@@ -142,6 +142,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
 
               onComplete(fDetails) {
                 case Success(summary) =>
+                  println(summary)
                   complete(ToResponseMarshallable(summary))
                 case Failure(e) =>
                   failedResponse(StatusCodes.InternalServerError, uri, e)
@@ -180,6 +181,10 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       .drop(summary.fromIndex)
       .take(summary.count)
       .runWith(Sink.seq)
+    println("SUMMARY")
+    println(summary)
+    println("DETAILS")
+    println(editDetails)
     editDetails.map(e => summary.copy(rows = e.flatMap(r => r.rows)))
   }
 
