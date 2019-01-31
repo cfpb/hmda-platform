@@ -181,10 +181,6 @@ trait EditsHttpApi extends HmdaTimeDirectives {
       .drop(summary.fromIndex)
       .take(summary.count)
       .runWith(Sink.seq)
-    println("SUMMARY")
-    println(summary)
-    println("DETAILS")
-    println(editDetails)
     editDetails.map(e => summary.copy(rows = e.flatMap(r => r.rows)))
   }
 
