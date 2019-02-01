@@ -5,10 +5,6 @@ import sbt.librarymanagement.Resolver
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-lazy val metricDeps = Seq(
-  cinnamon
-)
-
 lazy val authDeps = Seq(
   keycloakAdapter,
   keycloak,
@@ -98,7 +94,7 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ metricDeps
+      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
   )
 
