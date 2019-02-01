@@ -43,11 +43,11 @@ volumes: [
               if (gitTagged || gitBranch == "master" || isDeployPR) {
 
                 //Push to Dockerhub
-                sh """
-                  docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
-                  docker push ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                """
+                //sh """
+                //  docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                //  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD}
+                //  docker push ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                //"""
 
                 //Push to Internal Docker Repo
                 sh """
