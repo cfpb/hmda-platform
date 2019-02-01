@@ -109,12 +109,15 @@ object IrsPublisher {
           val msaMapF = readRawData(submissionId)
             .map(l => l.data)
             .drop(1)
-            .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
-            .foldAsync(MsaMap())((map, lar) => {
-              val msaF = getCensus(lar.geography.tract)
-              msaF.map(msa => map.addLar(lar, msa))
-            })
-            .runWith(Sink.last)
+            .mapAsync(1)(lar => getCensus(lar.geography.tract).map(msa => (msa, lar)))
+            .runWith(Sink.collection)
+
+//            .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
+//            .foldAsync(MsaMap())((map, lar) => {
+//              val msaF = getCensus(lar.geography.tract)
+//              msaF.map(msa => map.addLar(lar, msa))
+//            })
+//            .runWith(Sink.last)
 
           msaMapF.onComplete {
             case Success(msaMap: MsaMap) =>
