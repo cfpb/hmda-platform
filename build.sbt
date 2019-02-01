@@ -5,6 +5,10 @@ import sbt.librarymanagement.Resolver
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
+lazy val metricDeps = Seq(
+  cinnamon
+)
+
 lazy val authDeps = Seq(
   keycloakAdapter,
   keycloak,
@@ -94,14 +98,15 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
+      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ metricDeps
     )
   )
 
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+                 AshScriptPlugin,
+                 Cinnamon)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
