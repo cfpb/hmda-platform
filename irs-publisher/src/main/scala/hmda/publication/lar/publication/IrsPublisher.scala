@@ -11,11 +11,7 @@ import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.scaladsl.{Sink, Source}
-import akka.stream.{
-  ActorMaterializer,
-  ActorMaterializerSettings,
-  Supervision,
-}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
@@ -94,7 +90,8 @@ object IrsPublisher {
           r <- Http().singleRequest(request)
           census <- Unmarshal(r.entity).to[Census]
         } yield {
-          val censusID = if (census.msaMd == 0) "-----" else census.msaMd.toString
+          val censusID =
+            if (census.msaMd == 0) "-----" else census.msaMd.toString
           val censusName =
             if (census.name.isEmpty) "MSA/MD NOT AVAILABLE" else census.name
           Msa(censusID, censusName)
@@ -122,7 +119,7 @@ object IrsPublisher {
                 .drop(1)
                 .map(l => l.data)
                 .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
-                .throttle(32, 1.second) 
+                .throttle(32, 1.second)
                 .mapAsyncUnordered(1)(lar => getCensus(lar.geography.tract))
                 .fold(MsaSummary())((acc, next) => acc + next)
                 .map(_.toCsv)
