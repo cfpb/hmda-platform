@@ -1,5 +1,6 @@
 package hmda.publication.lar.publication
 
+import akka.NotUsed
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
@@ -7,10 +8,14 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.javadsl.S3Client
+import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.scaladsl.{Sink, Source}
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
+import akka.stream.{
+  ActorMaterializer,
+  ActorMaterializerSettings,
+  Supervision,
+}
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
@@ -79,7 +84,7 @@ object IrsPublisher {
         ListBucketVersion2
       )
 
-      val s3Client = new S3Client(s3Settings, system, materializer)
+      val s3Client = new S3Client(s3Settings)
 
       def getCensus(hmdaCensus: String): Future[Msa] = {
         val request = HttpRequest(
@@ -101,30 +106,36 @@ object IrsPublisher {
         case PublishIrs(submissionId) =>
           log.info(s"Publishing IRS for $submissionId")
 
-          val s3Sink = s3Client.multipartUpload(
-            bucket,
-            s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
+          val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
+            s3Client.multipartUpload(
+              bucket,
+              s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
 
-          val futMsaList = readRawData(submissionId)
-            .drop(1)
-            .map(l => l.data)
-            .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
-            .throttle(32, 1.second)
-            .mapAsync(1)(lar => getCensus(lar.geography.tract))
-            .runWith(Sink.collection)
-
-          futMsaList.onComplete {
-            case Success(list) =>
-              log.info(s"Uploading IRS to S3 for $submissionId")
-              val msaSummary = MsaSummary.fromMsaCollection(list)
+          val msaSummarySource: Source[ByteString, NotUsed] = {
+            val msaSummaryHeader: Source[ByteString, NotUsed] = {
               val header =
                 "MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A\n"
-              val bytes = ByteString(header) +:
-                list.map(msa => ByteString(msa.toCsv + "\n")) :+
-                ByteString(msaSummary.toCsv)
-              Source(bytes.toList).runWith(s3Sink)
-            case Failure(e) =>
-              log.error(s"Reading Cassandra journal failed: $e")
+              Source.single(ByteString(header))
+            }
+            val msaSummaryContent: Source[ByteString, NotUsed] =
+              readRawData(submissionId)
+                .drop(1)
+                .map(l => l.data)
+                .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
+                .throttle(32, 1.second) 
+                .mapAsyncUnordered(1)(lar => getCensus(lar.geography.tract))
+                .fold(MsaSummary())((acc, next) => acc + next)
+                .map(_.toCsv)
+                .map(ByteString(_))
+
+            msaSummaryHeader ++ msaSummaryContent
+          }
+
+          log.info(s"Uploading IRS summary to S3 for $submissionId")
+          val result = msaSummarySource.runWith(s3Sink)
+          result.onComplete {
+            case Failure(e) => log.error("Reading Cassandra journal failed", e)
+            case Success(_) => log.info(s"Upload complete for $submissionId")
           }
 
           Behaviors.same
