@@ -21,7 +21,7 @@ import hmda.model.census.Census
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.parser.filing.lar.LarCsvParser
-import hmda.publication.lar.model.{Msa, MsaSummary}
+import hmda.publication.lar.model.{Msa, MsaMap, MsaSummary}
 import hmda.query.HmdaQuery._
 import io.circe.generic.auto._
 
@@ -114,6 +114,7 @@ object IrsPublisher {
                 "MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A\n"
               Source.single(ByteString(header))
             }
+
             val msaSummaryContent: Source[ByteString, NotUsed] =
               readRawData(submissionId)
                 .drop(1)
