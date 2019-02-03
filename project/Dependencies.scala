@@ -51,6 +51,6 @@ object Dependencies {
   lazy val akkaQuartzScheduler = "com.enragedginger" %% "akka-quartz-scheduler" % Version.akkaQuartzScheduler
   lazy val phantomDSL = "com.outworkers" %% "phantom-dsl" % Version.phantom
   lazy val phantomJDK8 = "com.outworkers" %% "phantom-jdk8" % Version.phantom
-  lazy val cinnamon = "com.lightbend.cinnamon" %% "sbt-cinnamon" % Version.cinnamon
+  lazy val cinnamonMetrics = "com.lightbend.cinnamon" %% "sbt-cinnamon" % Version.cinnamonMetrics
   lazy val sbtResolver = "io.spray" %% "sbt-revolver" % Version.sprayresolver
 }
