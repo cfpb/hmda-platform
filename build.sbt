@@ -1,15 +1,10 @@
 import Dependencies._
 import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
-import sbt.librarymanagement.Resolver
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-lazy val metricsDeps = Seq(cinnamonAkka,
-                           cinnamonAkkaStream,
-                           cinnamonAkkHttp,
-                           cinnamonPrometheus,
-                           cinnamonPrometheusHttpServer)
+//lazy val metricsDeps = Seq(cinnamonAkka, cinnamonAkkaStream, cinnamonAkkHttp)
 
 lazy val authDeps = Seq(
   keycloakAdapter,
@@ -100,7 +95,11 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ metricsDeps
+      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
+        ++ Seq(Cinnamon.library.cinnamonAkka,
+               Cinnamon.library.cinnamonAkkaStream,
+               Cinnamon.library.cinnamonPrometheus,
+               Cinnamon.library.cinnamonPrometheusHttpServer)
     )
   )
 
@@ -112,7 +111,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      mainClass in Compile := Some("hmda.HmdaPlatform"),
+      mainClass in Compile := Some("hmda.AkkaQuickstart"),
       assemblyJarName in assembly := "hmda2.jar",
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
