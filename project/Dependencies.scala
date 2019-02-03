@@ -1,3 +1,4 @@
+import com.lightbend.cinnamon.sbt.Cinnamon
 import sbt._
 
 object Dependencies {
@@ -53,4 +54,10 @@ object Dependencies {
   lazy val phantomJDK8 = "com.outworkers" %% "phantom-jdk8" % Version.phantom
   lazy val cinnamonMetrics = "com.lightbend.cinnamon" %% "sbt-cinnamon" % Version.cinnamonMetrics
   lazy val sbtResolver = "io.spray" %% "sbt-revolver" % Version.sprayresolver
+  Cinnamon.library.cinnamonAkka
+  Cinnamon.library.cinnamonAkkaStream
+
+  // Prometheus
+  Cinnamon.library.cinnamonPrometheus
+  Cinnamon.library.cinnamonPrometheusHttpServer
 }
