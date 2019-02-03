@@ -22,3 +22,8 @@ javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
   "-J-XX:+UseCGroupMemoryLimitForHeap"
 )
+
+cinnamon in run := true
+cinnamon in test := true
+
+javaOptions in reStart ++= (javaOptions in run).value

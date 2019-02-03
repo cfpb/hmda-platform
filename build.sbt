@@ -126,11 +126,6 @@ lazy val `hmda-platform` = (project in file("hmda"))
   .dependsOn(`check-digit` % "compile->compile;test->test")
   .dependsOn(`census-api` % "compile->compile;test->test")
 
-cinnamon in run := true
-cinnamon in test := true
-
-javaOptions in reStart ++= (javaOptions in run).value
-
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
