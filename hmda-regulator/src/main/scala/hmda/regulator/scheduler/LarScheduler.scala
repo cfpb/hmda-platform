@@ -30,7 +30,6 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def larRepository = new LarRepository(dbConfig)
 
-
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
       .schedule("LarScheduler", self, LarScheduler)
@@ -54,7 +53,6 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val awsCredentialsProvider = new AWSStaticCredentialsProvider(
         new BasicAWSCredentials(accessKeyId, secretAccess))
 
-
       val awsRegionProvider = new AwsRegionProvider {
         override def getRegion: String = region
       }
@@ -68,7 +66,8 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
         None,
         ListBucketVersion2
       )
-      val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+      val bankFilter =
+        ConfigFactory.load("application.conf").getConfig("filter")
       val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
 
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
