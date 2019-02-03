@@ -84,7 +84,7 @@ object IrsPublisher {
 
       def getCensus(hmdaCensus: String): Future[Msa] = {
         val request = HttpRequest(
-          uri = s"http://$censusHost:$censusPort/census/tract/$hmdaCensus")
+          uri = s"http://localhost:9093/census/tract/$hmdaCensus")
 
         for {
           r <- Http().singleRequest(request)
@@ -120,11 +120,16 @@ object IrsPublisher {
                 .drop(1)
                 .map(l => l.data)
                 .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
-                .throttle(32, 1.second)
-                .mapAsyncUnordered(1)(lar => getCensus(lar.geography.tract))
-                .fold(MsaSummary())((acc, next) => acc + next)
-                .map(_.toCsv)
-                .map(ByteString(_))
+                .throttle(32, 1.second) // TODO: decide whether you need to throttle/how much
+                .mapAsyncUnordered(1)(lar => getCensus(lar.geography.tract).map(msa => (lar, msa)))  // order does not matter
+                .fold(MsaMap()) { case (map, (lar, msa)) => map.addLar(lar, msa) }
+                .flatMapConcat { msaMap =>
+                  val msas = msaMap.msas.values.toList
+                  val msasByteContent: List[ByteString] = msas.map(msa => ByteString(msa.toCsv + "\n"))
+                  val msaSummaryByteContent: ByteString = ByteString(MsaSummary.fromMsaCollection(msas).toCsv)
+                  // first display the contents of all the msas followed by the msa summary (this will be the last line)
+                  Source(msasByteContent) ++ Source.single(msaSummaryByteContent)
+                }
 
             msaSummaryHeader ++ msaSummaryContent
           }
