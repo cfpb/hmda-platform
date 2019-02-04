@@ -11,11 +11,12 @@ volumes: [
 
     def repo = checkout scm
     def gitBranch = repo.GIT_BRANCH
+    def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
     def gitCommit = repo.GIT_COMMIT
     def shortCommit = repo.GIT_COMMIT[0..7]
     def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
     def gitTagged = env.TAG_NAME != null
-     
+
     if (gitBranch == "master") {
       env.DOCKER_TAG = "latest"
     } else if (gitTagged) {
@@ -25,8 +26,6 @@ volumes: [
     }
 
     println "DOCKER_TAG: ${env.DOCKER_TAG}, TAG_NAME: ${env.TAG_NAME}, gitbranch: ${gitBranch}, commitId: ${commitId}, isDeployPR: ${isDeployPR}"
-
-
 
     stage('Build Scala Code and Generate Dockerfile') {
       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'lightbend-commercial',
@@ -41,7 +40,16 @@ volumes: [
         }
         sh 'ls -l commercial.credentials'
         sh 'cat commercial.credentials'
+        sh 'pwd'
+        sh 'mv build.sbt build.txt'
+        sh 'mv commercial-build.txt build.sbt'
+        sh 'mv hmda/build.sbt hmda/build.txt'
+        sh 'mv hmda/commercial-build.txt hmda/build.sbt'
+        sh 'mv project/cinnamon.txt project/cinnamon.sbt'
 
+        sh 'cat hmda/build.sbt'
+        sh 'cat project/cinnamon.sbt'
+        sh 'cat build.sbt'
       container('sbt') {
         sh "sbt -batch hmda-platform/docker:stage"
       }
