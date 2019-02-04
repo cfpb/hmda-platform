@@ -1,3 +1,5 @@
+//Commercial Build -- Includes Lightbend Telemetry
+
 import Dependencies._
 import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._

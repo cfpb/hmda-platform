@@ -1,3 +1,4 @@
+import com.lightbend.cinnamon.sbt.Cinnamon
 import com.typesafe.sbt.packager.docker._
 
 version := "latest"
@@ -18,6 +19,8 @@ dockerCommands :=
     case v => Seq(v)
   }
 
+cinnamon in run := true
+cinnamon in test := true
 
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
