@@ -23,12 +23,17 @@ object Q617 extends EditCheck[LoanApplicationRegister] {
         Try(BigDecimal(lar.loan.combinedLoanToValueRatio))
           .getOrElse(BigDecimal(0))
 
+      println(combinedLoanValueRatio)
+
       val precision = combinedLoanValueRatio.scale
 
+      println(precision)
+
       val calculatedRatio = (lar.loan.amount / propValue) * 100
+      println(calculatedRatio)
       val ratioToPrecision =
         BigDecimal(calculatedRatio).setScale(precision, RoundingMode.HALF_UP)
-
+      println(ratioToPrecision)
       combinedLoanValueRatio is greaterThanOrEqual(ratioToPrecision)
     }
   }

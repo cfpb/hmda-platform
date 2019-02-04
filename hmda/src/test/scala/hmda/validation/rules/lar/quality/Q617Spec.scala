@@ -46,6 +46,18 @@ class Q617Spec extends LarEditCheckSpec {
       roundLar
         .copy(property = roundLar.property.copy(propertyValue = "100.0"))
         .mustFail
+
+      val decLarAmount =
+        lar.copy(loan = lar.loan.copy(amount = 30))
+      val decLar = decLarAmount
+        .copy(property = roundLar.property.copy(propertyValue = "31"))
+
+      decLar
+        .copy(loan = decLar.loan.copy(combinedLoanToValueRatio = "96.77"))
+        .mustPass
+      decLar
+        .copy(loan = decLar.loan.copy(combinedLoanToValueRatio = "96.7"))
+        .mustFail
     }
   }
 }
