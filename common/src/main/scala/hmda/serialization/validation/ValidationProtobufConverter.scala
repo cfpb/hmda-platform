@@ -9,6 +9,8 @@ import hmda.persistence.serialization.validation.{
   ValidationErrorTypeMessage
 }
 
+import scala.collection.immutable._
+
 object ValidationProtobufConverter {
 
   def validationErrorToProtobuf(
@@ -18,7 +20,8 @@ object ValidationProtobufConverter {
       cmd.editName,
       validationErrorTypeToProtobuf(cmd.validationErrorType),
       validationErrorEntityToProtobuf(cmd.validationErrorEntity),
-      cmd.fields
+      cmd.fields.unzip._1.toSeq,
+      cmd.fields.unzip._2.toSeq
     )
   }
 
@@ -28,17 +31,20 @@ object ValidationProtobufConverter {
       msg.validationErrorEntity)
     msg.validationErrorType match {
       case ValidationErrorTypeMessage.SYNTACTICAL =>
-        SyntacticalValidationError(msg.uli,
-                                   msg.editName,
-                                   entityErrorFromProtobuf,
-                                   msg.fields)
+        SyntacticalValidationError(
+          msg.uli,
+          msg.editName,
+          entityErrorFromProtobuf,
+          ListMap(msg.fieldsKey.zip(msg.fieldsValue): _*))
       case ValidationErrorTypeMessage.VALIDITY =>
         ValidityValidationError(msg.uli,
                                 msg.editName,
                                 entityErrorFromProtobuf,
-                                msg.fields)
+                                ListMap(msg.fieldsKey.zip(msg.fieldsValue): _*))
       case ValidationErrorTypeMessage.QUALITY =>
-        QualityValidationError(msg.uli, msg.editName, msg.fields)
+        QualityValidationError(msg.uli,
+                               msg.editName,
+                               ListMap(msg.fieldsKey.zip(msg.fieldsValue): _*))
       case ValidationErrorTypeMessage.MACRO =>
         MacroValidationError(msg.editName)
       case ValidationErrorTypeMessage.Unrecognized(value) =>

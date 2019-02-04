@@ -35,7 +35,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   def institutionRepository = new InstitutionRepository(dbConfig)
   def emailRepository = new InstitutionEmailsRepository(dbConfig)
 
-
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
       .schedule("PanelScheduler", self, PanelScheduler)
@@ -49,9 +48,9 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
   override def receive: Receive = {
 
     case PanelScheduler =>
-
       val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-      val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+      val bankFilter =
+        ConfigFactory.load("application.conf").getConfig("filter")
 
       val accessKeyId = awsConfig.getString("access-key-id")
       val secretAccess = awsConfig.getString("secret-access-key ")
@@ -62,7 +61,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
       val awsCredentialsProvider = new AWSStaticCredentialsProvider(
         new BasicAWSCredentials(accessKeyId, secretAccess))
-
 
       val awsRegionProvider = new AwsRegionProvider {
         override def getRegion: String = region
@@ -77,7 +75,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
         None,
         ListBucketVersion2
       )
-
 
       val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
