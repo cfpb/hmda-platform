@@ -12,11 +12,6 @@ message ValidationErrorMessage {
     repeated string fieldsValue = 6;
 }
 
-message ProtoDetailsPair {
-    string name = 1;
-    string value = 2;
-}
-
 enum ValidationErrorTypeMessage {
     SYNTACTICAL = 0;
     VALIDITY = 1;
