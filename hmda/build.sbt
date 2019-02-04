@@ -1,4 +1,3 @@
-import com.lightbend.cinnamon.sbt.Cinnamon
 import com.typesafe.sbt.packager.docker._
 
 version := "latest"
