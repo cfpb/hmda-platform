@@ -18,8 +18,8 @@ dockerCommands :=
     case v => Seq(v)
   }
 
-cinnamon in run := true
-cinnamon in test := true
+//cinnamon in run := true
+//cinnamon in test := true
 
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
