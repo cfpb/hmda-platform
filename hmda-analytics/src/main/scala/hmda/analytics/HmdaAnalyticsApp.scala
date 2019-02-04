@@ -91,7 +91,8 @@ object HmdaAnalyticsApp
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
-      .filter(id => !bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei)))
+      .filter(id =>
+        !bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei)))
       .mapAsync(1) { id =>
         log.info(s"Adding data for  $id")
         addTs(id)
