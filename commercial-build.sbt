@@ -1,9 +1,13 @@
 import Dependencies._
 import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
-import sbt.librarymanagement.Resolver
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
+
+lazy val metricsDeps = Seq(Cinnamon.library.cinnamonAkka,
+                           Cinnamon.library.cinnamonAkkaStream,
+                           Cinnamon.library.cinnamonPrometheus,
+                           Cinnamon.library.cinnamonPrometheusHttpServer)
 
 lazy val authDeps = Seq(
   keycloakAdapter,
@@ -94,14 +98,15 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
+      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ metricsDeps
     )
   )
 
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+                 AshScriptPlugin,
+                 Cinnamon)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
