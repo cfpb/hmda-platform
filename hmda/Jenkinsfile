@@ -26,7 +26,22 @@ volumes: [
 
     println "DOCKER_TAG: ${env.DOCKER_TAG}, TAG_NAME: ${env.TAG_NAME}, gitbranch: ${gitBranch}, commitId: ${commitId}, isDeployPR: ${isDeployPR}"
 
+
+
     stage('Build Scala Code and Generate Dockerfile') {
+      withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'lightbend-commercial',
+        usernameVariable: 'LIGHTBEND_USER', passwordVariable: 'LIGHTBEND_PASSWORD']]) {
+            writeFile file: 'commercial.credentials',
+                      text: """
+                        realm = Bintray
+                        host = dl.bintray.com
+                        user = ${env.LIGHTBEND_USER}
+                        password = ${env.LIGHTBEND_PASSWORD}
+                      """
+        }
+        sh 'ls -l commercial.credentials'
+        sh 'cat commercial.credentials'
+
       container('sbt') {
         sh "sbt -batch hmda-platform/docker:stage"
       }
