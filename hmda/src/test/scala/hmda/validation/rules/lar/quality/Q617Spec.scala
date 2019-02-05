@@ -60,4 +60,24 @@ class Q617Spec extends LarEditCheckSpec {
         .mustFail
     }
   }
+
+  property(
+    "Calculation should not differentiate between a whole numer and a whole number with .0") {
+    forAll(larGen) { lar =>
+      val failLar =
+        lar.copy(
+          loan =
+            lar.loan.copy(combinedLoanToValueRatio = "55.0", amount = 55402.5))
+      failLar
+        .copy(property = failLar.property.copy(propertyValue = "100000.0"))
+        .mustPass
+      val passLar =
+        lar.copy(
+          loan =
+            lar.loan.copy(combinedLoanToValueRatio = "55", amount = 55402.5))
+      passLar
+        .copy(property = passLar.property.copy(propertyValue = "100000.0"))
+        .mustPass
+    }
+  }
 }
