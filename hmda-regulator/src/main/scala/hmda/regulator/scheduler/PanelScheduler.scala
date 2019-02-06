@@ -49,8 +49,6 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
 
     case PanelScheduler =>
       val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-      val bankFilter =
-        ConfigFactory.load("application.conf").getConfig("filter")
 
       val accessKeyId = awsConfig.getString("access-key-id")
       val secretAccess = awsConfig.getString("secret-access-key ")
@@ -58,7 +56,12 @@ class PanelScheduler extends HmdaActor with RegulatorComponent {
       val bucket = awsConfig.getString("public-bucket")
       val environment = awsConfig.getString("environment")
       val year = awsConfig.getString("year")
-      val bankFilterList = bankFilter.getString("bank-filter-list").split(",")
+
+      val bankFilter =
+        ConfigFactory.load("application.conf").getConfig("filter")
+      val bankFilterList =
+        bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+
       val awsCredentialsProvider = new AWSStaticCredentialsProvider(
         new BasicAWSCredentials(accessKeyId, secretAccess))
 

@@ -58,14 +58,15 @@ object HmdaAnalyticsApp
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config = ConfigFactory.load()
-
+  val bankFilter = config.getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
   val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
   val larRepository =
     new LarRepository(tableName = "loanapplicationregister2018", dbConfig)
   val db = transmittalSheetRepository.db
-  val larDb = transmittalSheetRepository.db
 
   val consumerSettings: ConsumerSettings[String, String] =
     ConsumerSettings(kafkaConfig,
@@ -91,6 +92,8 @@ object HmdaAnalyticsApp
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
+      .filter(id =>
+        !bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei)))
       .mapAsync(1) { id =>
         log.info(s"Adding data for  $id")
         addTs(id)
@@ -164,12 +167,16 @@ object HmdaAnalyticsApp
       for {
         _ <- deleteTsRow
         _ = log.info(s"Deleting data from TS for  $submissionId")
+
         _ <- insertTsRow
         _ = log.info(s"Adding data into TS for  $submissionId")
+
         _ <- deleteLarRows
         _ = log.info(s"Done deleting data from LAR for  $submissionId")
+
         res <- insertLarRows
         _ = log.info(s"Done inserting data into LAR for  $submissionId")
+
       } yield res
     result.recover {
       case t: Throwable =>

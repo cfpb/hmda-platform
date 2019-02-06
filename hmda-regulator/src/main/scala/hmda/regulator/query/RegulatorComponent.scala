@@ -81,7 +81,7 @@ trait RegulatorComponent {
       db.run(
         table
           .filter(_.hmdaFiler === true)
-          .filterNot(_.lei inSet bankIgnoreList)
+          .filterNot(_.lei.toUpperCase inSet bankIgnoreList)
           .result)
     }
 
@@ -205,7 +205,7 @@ trait RegulatorComponent {
 
     def getAllSheets(
         bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] = {
-      db.run(table.filterNot(_.lei inSet bankIgnoreList).result)
+      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
     }
 
   }
@@ -497,7 +497,7 @@ trait RegulatorComponent {
 
     def getAllLARs(
         bankIgnoreList: Array[String]): Future[Seq[LarEntityImpl]] = {
-      db.run(table.filterNot(_.lei inSet bankIgnoreList).result)
+      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
     }
   }
 
