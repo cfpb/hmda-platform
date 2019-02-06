@@ -37,7 +37,10 @@ object IrsPublisher {
   final val name: String = "IrsPublisher"
 
   val config = ConfigFactory.load()
-
+  val bankFilter =
+    ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")
@@ -101,6 +104,9 @@ object IrsPublisher {
       Behaviors.receiveMessage {
 
         case PublishIrs(submissionId) =>
+          if (!bankFilterList.exists(
+            bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))) {
+            
           log.info(s"Publishing IRS for $submissionId")
 
           val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
@@ -148,6 +154,10 @@ object IrsPublisher {
           }
 
           Behaviors.same
+          }
+          else {
+            Behaviors.ignore
+          }
 
         case _ =>
           Behaviors.ignore
