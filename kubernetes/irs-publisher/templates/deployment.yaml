@@ -43,6 +43,11 @@ spec:
                 secretKeyRef:
                   name: cassandra-credentials
                   key: cassandra.password
+            - name: BANK_FILTER_LIST
+              valueFrom:
+                configMapKeyRef:
+                  name: bank-filter-configmap
+                  key: bank-filter-list
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:

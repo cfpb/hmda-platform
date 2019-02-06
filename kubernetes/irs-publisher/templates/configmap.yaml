@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -5,3 +6,10 @@ metadata:
 data:
   census.host: {{ .Values.http.census.host }}
   census.port: "{{ .Values.http.census.port }}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bank-filter-configmap
+data:
+  bank-filter-list: "{{ .Values.filter.bankfilterlist }}"

@@ -106,7 +106,7 @@ object IrsPublisher {
         case PublishIrs(submissionId) =>
           if (!bankFilterList.exists(
             bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))) {
-            
+
           log.info(s"Publishing IRS for $submissionId")
 
           val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
