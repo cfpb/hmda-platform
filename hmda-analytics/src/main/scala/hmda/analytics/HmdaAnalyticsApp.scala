@@ -166,12 +166,16 @@ object HmdaAnalyticsApp
       for {
         _ <- deleteTsRow
         _ = log.info(s"Deleting data from TS for  $submissionId")
+
         _ <- insertTsRow
         _ = log.info(s"Adding data into TS for  $submissionId")
+
         _ <- deleteLarRows
         _ = log.info(s"Done deleting data from LAR for  $submissionId")
+
         res <- insertLarRows
         _ = log.info(s"Done inserting data into LAR for  $submissionId")
+
       } yield res
     result.recover {
       case t: Throwable =>
