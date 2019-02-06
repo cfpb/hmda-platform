@@ -15,6 +15,7 @@ import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.validation.Seq
 import hmda.model.validation._
+import scala.collection.immutable._
 
 class ValidationFlowSpec extends WordSpec with MustMatchers {
 
@@ -37,24 +38,24 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
     "2|B90YWS6AFX2LGWOXJ1LD|B90YWS6AFX2LGWOXJ1LDNIXOQ6OO7BRA5SLR6FSJJ5R89|NA|1|32|2|1|2|356709|6|20180908|1234 Hocus Potato Way|Tatertown|DC|63114|22051|22051025001|4|||||ZUDIP0BD1KDWWIF5E96QGIRIQLRBMLT1CEU42OY6R21HA7LDCI080|4|||||I1N7USFJJ99NVF41XPM1VTGDWOP8ZLEICH4P89VJ2YICHHHMDGDD90SBTSVPYMO3X3NAX96H6DEBPYC9NTKAE651CDW5ZHP|25|3|7|||||MLRGW12RN1406P0XP2KA6TKLDISDRBB9EBN2ZM2S7PLQZELIM0N619TC87JDWA5NQXR94N|UM|10EOG6ICA8M18J1NHCKNT7HAGBQRI5UZQTB4EAAA27UJT2FPWQS28YSDR5CCB06H34EL5RTOBRDUPTP4YU9VWXBN6U7KBUD5|4|||||7I0YNQBHNJC0K12XVX4FNJRK0EB0FNZEIIHAP23EIY3BHHE7JNEWQMF4BVUJW8SLIUSGT8LBN4B1B412EB5RF6Z4TQ9G|K2G17CZW08C|FDWBDIYCGUILGNHGCY1Z6R1RAG3BOTAVT|3|1|4|6|3|2|8888|24|NA|1|NA|3|1|8888|8888|9||9||10|||||NA|NA|7964|1525|8054|11.11|NA|NA|NA|159|19|1111|1111|1111|1111|555271|3|5|24|17|3|3|12345678|6||||||17||||||1111|1111|2\n"
   )
 
-  val mapRecordID = Map("Record Identifier" -> "3")
-  val mapV601 = Map(
+  val mapRecordID = ListMap("Record Identifier" -> "3")
+  val mapV601 = ListMap(
     "Financial Institution Name" -> "Bank0",
     "Contact Person's Office Street Address" -> "1234 Hocus Potato Way",
     "Contact Person's E-mail Address" -> "",
     "Contact Person's Office City" -> "Tatertown",
     "Contact Person's Name" -> "Mr. Smug Pockets"
   )
-  val mapV629_1 = Map(
+  val mapV629_1 = ListMap(
+    "Ethnicity of Applicant or Borrower: 1" -> "4",
     "Ethnicity of Applicant or Borrower: 2" -> "0",
     "Ethnicity of Applicant or Borrower: 3" -> "0",
-    "Ethnicity of Applicant or Borrower: Free Form Text Field for Other Hispanic or Latino" -> "ZUDIP0BD1KDWWIF5E96QGIRIQLRBMLT1CEU42OY6R21HA7LDCI080",
     "Ethnicity of Applicant or Borrower: 4" -> "0",
-    "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "-1",
-    "Ethnicity of Applicant or Borrower: 1" -> "4",
-    "Ethnicity of Applicant or Borrower: 5" -> "0"
+    "Ethnicity of Applicant or Borrower: 5" -> "0",
+    "Ethnicity of Applicant or Borrower: Free Form Text Field for Other Hispanic or Latino" -> "ZUDIP0BD1KDWWIF5E96QGIRIQLRBMLT1CEU42OY6R21HA7LDCI080",
+    "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "-1"
   )
-  val mapV630 = Map(
+  val mapV630 = ListMap(
     "Ethnicity of Applicant or Borrower: 1" -> "4",
     "Ethnicity of Applicant or Borrower Collected on the Basis of Visual Observation or Surname" -> "-1")
 
@@ -193,7 +194,7 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
             "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
             "V612-1",
             LarValidationError,
-            Map("Loan Purpose" -> "-1", "Preapproval" -> "2"))
+            ListMap("Loan Purpose" -> "-1", "Preapproval" -> "2"))
         ))
         .request(1)
         .expectNext(List(
@@ -247,7 +248,7 @@ class ValidationFlowSpec extends WordSpec with MustMatchers {
               "95GVQQ61RS6CWQF0SZD9F4VRXNN1OCVXHP1JURF9ZJS92",
               "V612-1",
               LarValidationError,
-              Map("Loan Purpose" -> "-1", "Preapproval" -> "2"))))
+              ListMap("Loan Purpose" -> "-1", "Preapproval" -> "2"))))
         .request(1)
         .expectNext(List(
           ValidityValidationError(

@@ -1,33 +1,33 @@
 package hmda.publication.lar.publication
 
-import akka.actor.Actor
+import akka.NotUsed
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.javadsl.S3Client
+import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.census.Census
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.publication.lar.model.{Msa, MsaMap, MsaSummary}
 import hmda.query.HmdaQuery._
+import io.circe.generic.auto._
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
-
-import io.circe.generic.auto._
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
 sealed trait IrsPublisherCommand
 case class PublishIrs(submissionId: SubmissionId) extends IrsPublisherCommand
@@ -80,7 +80,7 @@ object IrsPublisher {
         ListBucketVersion2
       )
 
-      val s3Client = new S3Client(s3Settings, system, materializer)
+      val s3Client = new S3Client(s3Settings)
 
       def getCensus(hmdaCensus: String): Future[Msa] = {
         val request = HttpRequest(
@@ -90,7 +90,8 @@ object IrsPublisher {
           r <- Http().singleRequest(request)
           census <- Unmarshal(r.entity).to[Census]
         } yield {
-          val censusID = if (census.msaMd == 0) "-----" else census.msaMd.toString
+          val censusID =
+            if (census.msaMd == 0) "-----" else census.msaMd.toString
           val censusName =
             if (census.name.isEmpty) "MSA/MD NOT AVAILABLE" else census.name
           Msa(censusID, censusName)
@@ -102,32 +103,48 @@ object IrsPublisher {
         case PublishIrs(submissionId) =>
           log.info(s"Publishing IRS for $submissionId")
 
-          val s3Sink = s3Client.multipartUpload(
-            bucket,
-            s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
+          val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
+            s3Client.multipartUpload(
+              bucket,
+              s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
 
-          val msaMapF = readRawData(submissionId)
-            .map(l => l.data)
-            .drop(1)
-            .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
-            .foldAsync(MsaMap())((map, lar) => {
-              val msaF = getCensus(lar.geography.tract)
-              msaF.map(msa => map.addLar(lar, msa))
-            })
-            .runWith(Sink.last)
+          val msaSummarySource: Source[ByteString, NotUsed] = {
+            val msaSummaryHeader: Source[ByteString, NotUsed] = {
+              val header =
+                "MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A\n"
+              Source.single(ByteString(header))
+            }
 
-          msaMapF.onComplete {
-            case Success(msaMap: MsaMap) =>
-              log.info(s"Uploading IRS to S3 for $submissionId")
-              val msaSeq = msaMap.msas.values.toSeq
-              val msaSummary = MsaSummary.fromMsaCollection(msaSeq)
-              val header = "MSA/MD, MSA/MD Name, Total Lars, Total Amount ($000's), CONV, FHA, VA, FSA, Site Built, Manufactured, 1-4 units, 5+ units, Home Purchase, Home Improvement, Refinancing, Cash-out Refinancing, Other Purpose, Purpose N/A\n"
-              val bytes = ByteString(header) +:
-                msaSeq.map(msa => ByteString(msa.toCsv + "\n")) :+
-                ByteString(msaSummary.toCsv)
-              Source(bytes.toList).runWith(s3Sink)
-            case Failure(e) =>
-              log.error(s"Reading Cassandra journal failed: $e")
+            val msaSummaryContent: Source[ByteString, NotUsed] =
+              readRawData(submissionId)
+                .drop(1)
+                .map(l => l.data)
+                .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
+                .mapAsyncUnordered(1)(lar =>
+                  getCensus(lar.geography.tract)
+                    .map(msa => (lar, msa))) // order does not matter
+                .fold(MsaMap()) {
+                  case (map, (lar, msa)) => map.addLar(lar, msa)
+                }
+                .flatMapConcat { msaMap =>
+                  val msas = msaMap.msas.values.toList
+                  val msasByteContent: List[ByteString] =
+                    msas.map(msa => ByteString(msa.toCsv + "\n"))
+                  val msaSummaryByteContent: ByteString =
+                    ByteString(MsaSummary.fromMsaCollection(msas).toCsv)
+                  // first display the contents of all the msas followed by the msa summary (this will be the last line)
+                  Source(msasByteContent) ++ Source.single(
+                    msaSummaryByteContent)
+                }
+
+            msaSummaryHeader ++ msaSummaryContent
+          }
+
+          log.info(s"Uploading IRS summary to S3 for $submissionId")
+          val result = msaSummarySource.runWith(s3Sink)
+          result.onComplete {
+            case Failure(e) => log.error("Reading Cassandra journal failed", e)
+            case Success(_) => log.info(s"Upload complete for $submissionId")
           }
 
           Behaviors.same

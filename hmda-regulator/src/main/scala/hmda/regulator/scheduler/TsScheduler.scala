@@ -44,7 +44,6 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
 
     case TsScheduler =>
       val awsConfig = ConfigFactory.load("application.conf").getConfig("aws")
-
       val accessKeyId = awsConfig.getString("access-key-id")
       val secretAccess = awsConfig.getString("secret-access-key ")
       val region = awsConfig.getString("region")

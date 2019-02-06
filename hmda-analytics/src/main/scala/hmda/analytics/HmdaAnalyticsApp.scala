@@ -80,6 +80,7 @@ object HmdaAnalyticsApp
     .committableSource(consumerSettings,
                        Subscriptions.topics(signTopic, analyticsTopic))
     .mapAsync(parallelism) { msg =>
+      log.info(s"Processing: $msg")
       processData(msg.record.value()).map(_ => msg.committableOffset)
     }
     .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())

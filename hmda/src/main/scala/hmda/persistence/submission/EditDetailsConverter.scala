@@ -29,8 +29,8 @@ object EditDetailsConverter {
   }
 
   private def validationErrorToFieldDetails(
-      validationError: ValidationError): Seq[FieldDetails] =
-    validationError.fields.keys
+      validationError: ValidationError): Seq[FieldDetails] = {
+    validationError.fields.keys.toSeq
       .map(fieldKey => {
         val fieldValue =
           validationError.fields.getOrElse(fieldKey, "Detail not found")
@@ -38,6 +38,5 @@ object EditDetailsConverter {
           if (fieldValue == "-1") "Invalid input" else fieldValue
         FieldDetails(fieldKey, fieldValueFriendly)
       })
-      .toSeq
-
+  }
 }
