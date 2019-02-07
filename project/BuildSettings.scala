@@ -20,9 +20,7 @@ object BuildSettings {
       aggregate in assembly := false,
       parallelExecution in Test := true,
       fork in Test := true,
-      resolvers += Resolver.bintrayRepo("tanukkii007", "maven"),
-      credentials += Credentials(Path.userHome / ".lightbend" / "commercial.credentials"),
-      resolvers += Resolver.url("lightbend-commercial", url("https://repo.lightbend.com/commercial-releases"))(Resolver.ivyStylePatterns)
+      resolvers += Resolver.bintrayRepo("tanukkii007", "maven")
     )
 
 }

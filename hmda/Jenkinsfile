@@ -38,9 +38,11 @@ volumes: [
                         password = ${env.LIGHTBEND_PASSWORD}
                       """
         }
-        sh 'ls -l commercial.credentials'
-        sh 'cat commercial.credentials'
+        sh 'mkdir ~/.lightbend/'
+        sh 'cp commercial.credentials ~/.lightbend/commercial.credentials'
+        sh 'cat ~/.lightbend/commercial.credentials'
         sh 'pwd'
+        sh 'ls -al ~/.ivy2/'
         sh 'mv build.sbt build.txt'
         sh 'mv commercial-build.txt build.sbt'
         sh 'mv hmda/build.sbt hmda/build.txt'
@@ -51,7 +53,7 @@ volumes: [
         sh 'cat project/cinnamon.sbt'
         sh 'cat build.sbt'
       container('sbt') {
-        sh "sbt -batch hmda-platform/docker:stage"
+            sh "sbt -batch hmda-platform/docker:stage"
       }
     }
 

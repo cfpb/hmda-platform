@@ -6,11 +6,6 @@ import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
-lazy val metricsDeps = Seq(Cinnamon.library.cinnamonAkka,
-                           Cinnamon.library.cinnamonAkkaStream,
-                           Cinnamon.library.cinnamonPrometheus,
-                           Cinnamon.library.cinnamonPrometheusHttpServer)
-
 lazy val authDeps = Seq(
   keycloakAdapter,
   keycloak,
@@ -100,7 +95,7 @@ lazy val common = (project in file("common"))
       scalapb.gen() -> (sourceManaged in Compile).value
     ),
     Seq(
-      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ metricsDeps
+      libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
   )
 

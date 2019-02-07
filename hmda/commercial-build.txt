@@ -22,6 +22,12 @@ dockerCommands :=
 cinnamon in run := true
 cinnamon in test := true
 
+libraryDependencies += Cinnamon.library.cinnamonAkka
+libraryDependencies += Cinnamon.library.cinnamonAkkaHttp
+libraryDependencies += Cinnamon.library.cinnamonAkkaStream
+libraryDependencies += Cinnamon.library.cinnamonPrometheus
+libraryDependencies += Cinnamon.library.cinnamonPrometheusHttpServer
+
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
   "-J-XX:+UseCGroupMemoryLimitForHeap"

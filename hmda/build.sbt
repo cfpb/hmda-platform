@@ -18,7 +18,6 @@ dockerCommands :=
     case v => Seq(v)
   }
 
-
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
   "-J-XX:+UseCGroupMemoryLimitForHeap"

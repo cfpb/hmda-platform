@@ -23,7 +23,7 @@ import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.stream.{ActorMaterializer}
+import akka.stream.ActorMaterializer
 import akka.stream.typed.scaladsl.ActorFlow
 import hmda.messages.institution.InstitutionCommands.{
   GetInstitution,
@@ -70,6 +70,14 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 import scala.collection.immutable
+import java.util.concurrent.TimeUnit
+
+import akka.actor._
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl._
+
+import scala.concurrent.duration._
+import scala.util.Random
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,
@@ -119,8 +127,11 @@ object HmdaValidationError
 
         val fSyntacticalValidity = for {
           validationContext <- fValidationContext
-          tsErrors <- validateTs(ctx, submissionId, validationContext).runWith(
-            Sink.ignore)
+
+          tsErrors <- validateTs(ctx, submissionId, validationContext)
+            .toMat(Sink.ignore)(Keep.right)
+            .named("validateTs[Syntactical]-" + submissionId)
+            .run()
 
           tsLarErrors <- validateTsLar(ctx,
                                        submissionId,
@@ -431,7 +442,7 @@ object HmdaValidationError
       hashedString
     }
 
-    val headerResultTest: Future[TransmittalSheet] =
+    def headerResultTest: Future[TransmittalSheet] =
       uploadConsumerRawStr(ctx, submissionId)
         .take(1)
         .via(framing("\n"))
@@ -441,9 +452,11 @@ object HmdaValidationError
         .collect {
           case Right(ts) => ts
         }
-        .runWith(Sink.head)
+        .toMat(Sink.head)(Keep.right)
+        .named("headerResult[Syntactical]-" + submissionId)
+        .run()
 
-    val persistElements =
+    def persistElements: Future[Int] =
       uploadConsumerRawStr(ctx, submissionId)
         .drop(1) // header
         .via(framing("\n"))
@@ -468,7 +481,9 @@ object HmdaValidationError
               260.minutes)
           } yield (line)
         }
-        .runWith(Sink.fold(0)((acc, _) => acc + 1))
+        .toMat(Sink.fold(0)((acc, _) => acc + 1))(Keep.right)
+        .named("persistElements[Syntactical]-" + submissionId)
+        .run()
 
     def validateAndPersistErrors(
         tsLar: TransmittalLar,
@@ -552,6 +567,7 @@ object HmdaValidationError
                                            el.validationErrors,
                                            Some(replyTo))
           ))
+        .named("errorPersisting" + submissionId)
         .runWith(Sink.ignore)
 
     for {
@@ -611,6 +627,7 @@ object HmdaValidationError
       .take(1)
       .via(parseTsFlow)
       .map(_.getOrElse(TransmittalSheet()))
+      .named("maybeTs" + submissionId)
       .runWith(Sink.seq)
       .map(xs => xs.headOption)
   }
