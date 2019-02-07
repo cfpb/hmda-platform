@@ -40,21 +40,19 @@ volumes: [
         }
         sh 'mkdir ~/.lightbend/'
         sh 'cp commercial.credentials ~/.lightbend/commercial.credentials'
-        sh 'cat ~/.lightbend/commercial.credentials'
-        sh 'pwd'
+        sh 'mkdir /home/jenkins/workspace/hmda-platform_PR-2527/.lightbend'
+        sh 'cp commercial.credentials /home/jenkins/workspace/hmda-platform_PR-2527/.lightbend/commercial.credentials'
         sh 'mv build.sbt build.txt'
         sh 'mv commercial-build.txt build.sbt'
         sh 'mv hmda/build.sbt hmda/build.txt'
         sh 'mv hmda/commercial-build.txt hmda/build.sbt'
         sh 'mv project/cinnamon.txt project/cinnamon.sbt'
 
-        sh 'cat hmda/build.sbt'
-        sh 'cat project/cinnamon.sbt'
-        sh 'cat build.sbt'
       container('sbt') {
-            sh "export SBT_CREDENTIALS=/home/jenkins/.lightbend/commercial.credentials"
-            sh "echo $SBT_CREDENTIALS"
-            sh "sbt -batch hmda-platform/docker:stage"
+           // withEnv(["SBT_CREDENTIALS=/home/jenkins/.lightbend/commercial.credentials"]) {
+             //   sh 'echo $SBT_CREDENTIALS'
+                sh "sbt -batch hmda-platform/docker:stage"
+            //}
       }
     }
 
