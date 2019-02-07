@@ -69,28 +69,22 @@ object ModifiedLarPublisher {
       Behaviors.receiveMessage {
 
         case UploadToS3(submissionId) =>
-          if (!bankFilterList.exists(
-                bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei))) {
+          log.info(s"Publishing Modified LAR for $submissionId")
 
-            log.info(s"Publishing Modified LAR for $submissionId")
+          val fileName = s"${submissionId.lei}.txt"
 
-            val fileName = s"${submissionId.lei}.txt"
+          val s3Sink = s3Client.multipartUpload(
+            bucket,
+            s"$environment/modified-lar/$year/$fileName")
 
-            val s3Sink = s3Client.multipartUpload(
-              bucket,
-              s"$environment/modified-lar/$year/$fileName")
+          readRawData(submissionId)
+            .map(l => l.data)
+            .drop(1)
+            .map(s => ModifiedLarCsvParser(s).toCSV + "\n")
+            .map(s => ByteString(s))
+            .runWith(s3Sink)
 
-            readRawData(submissionId)
-              .map(l => l.data)
-              .drop(1)
-              .map(s => ModifiedLarCsvParser(s).toCSV + "\n")
-              .map(s => ByteString(s))
-              .runWith(s3Sink)
-
-            Behaviors.same
-          } else {
-            Behaviors.ignore
-          }
+          Behaviors.same
         case _ =>
           Behaviors.ignore
       }

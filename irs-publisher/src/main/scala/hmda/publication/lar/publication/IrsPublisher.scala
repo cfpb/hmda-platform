@@ -37,7 +37,8 @@ object IrsPublisher {
   final val name: String = "IrsPublisher"
 
   val config = ConfigFactory.load()
-
+  val bankFilter =
+    ConfigFactory.load("application.conf").getConfig("filter")
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")
@@ -143,12 +144,12 @@ object IrsPublisher {
           log.info(s"Uploading IRS summary to S3 for $submissionId")
           val result = msaSummarySource.runWith(s3Sink)
           result.onComplete {
-            case Failure(e) => log.error("Reading Cassandra journal failed", e)
+            case Failure(e) =>
+              log.error("Reading Cassandra journal failed", e)
             case Success(_) => log.info(s"Upload complete for $submissionId")
           }
 
           Behaviors.same
-
         case _ =>
           Behaviors.ignore
       }

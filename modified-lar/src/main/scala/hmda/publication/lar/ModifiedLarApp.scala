@@ -46,7 +46,10 @@ object ModifiedLarApp extends App {
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config = ConfigFactory.load()
-
+  val bankFilter =
+    ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val parallelism = config.getInt("hmda.lar.modified.parallelism")
 
   val modifiedLarPublisher =
@@ -74,6 +77,9 @@ object ModifiedLarApp extends App {
   def processData(msg: String): Future[Done] = {
     Source
       .single(msg)
+      .filter(msg =>
+        !bankFilterList.exists(bankLEI =>
+          bankLEI.equalsIgnoreCase(SubmissionId(msg).lei)))
       .map { msg =>
         val submissionId = SubmissionId(msg)
         modifiedLarPublisher.toUntyped ? UploadToS3(submissionId)
