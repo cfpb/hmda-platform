@@ -7,6 +7,8 @@ object BuildSettings {
   val buildVersion = "2.0.0"
   val buildScalaVersion = "2.12.7"
 
+  println ("Path is: " + Path.userHome)
+
   val hmdaBuildSettings = Defaults.coreDefaultSettings ++
     Seq(
       organization := buildOrganization,
