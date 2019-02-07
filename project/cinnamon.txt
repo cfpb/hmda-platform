@@ -1,3 +1,3 @@
 addSbtPlugin("com.lightbend.cinnamon" % "sbt-cinnamon" % "2.10.13")
-credentials += Credentials("/home/jenkins/.lightbend" / "commercial.credentials")
+//credentials += Credentials("/home/jenkins"+/+".lightbend" / "commercial.credentials")
 resolvers += Resolver.url("lightbend-commercial", url("https://repo.lightbend.com/commercial-releases"))(Resolver.ivyStylePatterns)
