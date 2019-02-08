@@ -6,6 +6,7 @@ projects = [
     [name: "hmda-help", repo: "hmda-help", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-homepage", repo: "hmda-homepage", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-platform", repo: "hmda-platform", jenkinsfilePath: "hmda/Jenkinsfile"],
+    [name: "hmda-platform-ui", repo: "hmda-platform-ui", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-platform-tools", repo: "hmda-platform-tools", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-pub-ui", repo: "hmda-pub-ui", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-regulator", repo: "hmda-platform", jenkinsfilePath: "hmda-regulator/Jenkinsfile"],
