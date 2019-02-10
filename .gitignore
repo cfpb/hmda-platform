@@ -75,6 +75,7 @@ dist/
 ## sbt specific
 .cache/
 .history/
+.lightbend/
 .lib/
 dist/*
 target/
