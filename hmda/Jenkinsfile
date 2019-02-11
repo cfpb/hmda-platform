@@ -27,7 +27,29 @@ volumes: [
 
     println "DOCKER_TAG: ${env.DOCKER_TAG}, TAG_NAME: ${env.TAG_NAME}, gitbranch: ${gitBranch}, commitId: ${commitId}, isDeployPR: ${isDeployPR}"
 
-    stage('Build Scala Code and Generate Dockerfile') {
+    stage('Build Scala Code, Generate Dockerfile, Publish to docker hub') {
+
+      container('sbt') {
+        sh "sbt -batch hmda-platform/docker:stage"
+      }
+
+      container('docker-public') {
+        //Push to Dockerhub
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
+                  usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+            if (gitTagged || gitBranch == "master") {
+                sh """
+                  docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD}
+                  docker push ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                  docker rmi -f ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                """
+            }
+        }
+      }
+    }
+
+    stage('Build Scala Code (w/ Lightbend Telemetry), Generate Dockerfile, Publish to DTR') {
       withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'lightbend-commercial',
         usernameVariable: 'LIGHTBEND_USER', passwordVariable: 'LIGHTBEND_PASSWORD']]) {
             writeFile file: 'commercial.credentials',
@@ -38,10 +60,17 @@ volumes: [
                         password = ${env.LIGHTBEND_PASSWORD}
                       """
         }
+
+        //HMDA utilizes commercial lightbend plugins (Telemetry) to collect metrics.
+        //In order to not break the publicly released docker images and clone of this repository, by default we use build files that
+        //do not include lightbend's commercial jars.
+        //Files that contain lightbends commercial jars are:
+        //commercial-build
+        //hmda/commercial-build
+        //project/cinnamon
+        //These files are renamed before the project is built on Jenkins
         sh 'mkdir ~/.lightbend/'
         sh 'cp commercial.credentials ~/.lightbend/commercial.credentials'
-        sh 'mkdir /home/jenkins/workspace/hmda-platform_PR-2527/.lightbend'
-        sh 'cp commercial.credentials /home/jenkins/workspace/hmda-platform_PR-2527/.lightbend/commercial.credentials'
         sh 'mv build.sbt build.txt'
         sh 'mv commercial-build.txt build.sbt'
         sh 'mv hmda/build.sbt hmda/build.txt'
@@ -49,35 +78,25 @@ volumes: [
         sh 'mv project/cinnamon.txt project/cinnamon.sbt'
 
       container('sbt') {
-           // withEnv(["SBT_CREDENTIALS=/home/jenkins/.lightbend/commercial.credentials"]) {
-             //   sh 'echo $SBT_CREDENTIALS'
+            withEnv(["SBT_CREDENTIALS=/home/jenkins/.lightbend/commercial.credentials"]) {
+                sh 'echo $SBT_CREDENTIALS'
                 sh "sbt -batch hmda-platform/docker:stage"
-            //}
+            }
       }
-    }
 
-    stage('Build And Publish Docker Image') {
-      container('docker') {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
-          usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+      container('docker-DTR') {
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform hmda/target/docker/stage"
               if (gitTagged || gitBranch == "master" || isDeployPR) {
 
-                //Push to Dockerhub
-                //sh """
-                //  docker tag ${env.DOCKER_HUB_USER}/hmda-platform ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                //  docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD}
-                //  docker push ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
-                //"""
-
-                //Push to Internal Docker Repo
+                //Push to DTR
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
                   docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD}
                   docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                  docker rmi -f ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
                 """
 
                 //Cleanup Docker Image
@@ -90,26 +109,27 @@ volumes: [
               }
             }
           }
-        }
-      }
     }
+
 
     stage('Deploy') {
-      if (env.BRANCH_NAME == 'master' || isDeployPR) {
-        container('helm') {
-          sh """
-            helm upgrade --install --force \
-            --namespace=default \
-            --values=kubernetes/hmda-platform/values.yaml \
-            --set commitId=$shortCommit \
-            --set image.tag="latest" \
-            --set image.pullPolicy=Always \
-            hmda-platform kubernetes/hmda-platform
-          """
+        withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
+          if (env.BRANCH_NAME == 'master' || isDeployPR) {
+            container('helm') {
+              sh """
+                helm upgrade --install --force \
+                --namespace=default \
+                --values=kubernetes/hmda-platform/values.yaml \
+                --set image.repository=${DOCKER_REGISTRY_URL}/hmda/hmda-platform
+                --set commitId=$shortCommit \
+                --set image.tag="latest" \
+                --set image.pullPolicy=Always \
+                hmda-platform kubernetes/hmda-platform
+              """
+            }
+          }
         }
-      }
     }
-
   }
-
+}
 }
