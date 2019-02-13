@@ -1,5 +1,7 @@
 package hmda.model.validation
 
+import scala.collection.immutable._
+
 sealed trait ValidationErrorType
 case object Syntactical extends ValidationErrorType
 case object Validity extends ValidationErrorType
@@ -15,53 +17,55 @@ sealed trait ValidationError {
   def editName: String
   def validationErrorType: ValidationErrorType
   def validationErrorEntity: ValidationErrorEntity
-  def fields: Map[String, String]
+  def fields: ListMap[String, String]
   def toCsv: String =
     s"$validationErrorEntity,$validationErrorType, $editName, $uli"
-  def copyWithFields(fields: Map[String, String]): ValidationError
+  def copyWithFields(fields: ListMap[String, String]): ValidationError
 }
 
 case class SyntacticalValidationError(
     uli: String,
     editName: String,
     validationErrorEntity: ValidationErrorEntity,
-    fields: Map[String, String] = Map.empty)
+    fields: ListMap[String, String] = ListMap.empty)
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Syntactical
   override def copyWithFields(
-      fields: Map[String, String]): SyntacticalValidationError =
+      fields: ListMap[String, String]): SyntacticalValidationError =
     this.copy(fields = fields)
 }
 
 case class ValidityValidationError(uli: String,
                                    editName: String,
                                    validationErrorEntity: ValidationErrorEntity,
-                                   fields: Map[String, String] = Map.empty)
+                                   fields: ListMap[String, String] =
+                                     ListMap.empty)
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Validity
   override def copyWithFields(
-      fields: Map[String, String]): ValidityValidationError =
+      fields: ListMap[String, String]): ValidityValidationError =
     this.copy(fields = fields)
 }
 
 case class QualityValidationError(uli: String,
                                   editName: String,
-                                  fields: Map[String, String] = Map.empty)
+                                  fields: ListMap[String, String] =
+                                    ListMap.empty)
     extends ValidationError {
   override def validationErrorType: ValidationErrorType = Quality
   override def validationErrorEntity: ValidationErrorEntity = LarValidationError
   override def copyWithFields(
-      fields: Map[String, String]): QualityValidationError =
+      fields: ListMap[String, String]): QualityValidationError =
     this.copy(fields = fields)
 }
 
 case class MacroValidationError(editName: String) extends ValidationError {
   override def uli: String = ""
-  override def fields: Map[String, String] = Map.empty
+  override def fields: ListMap[String, String] = ListMap.empty
   override def validationErrorType: ValidationErrorType = Macro
   override def validationErrorEntity: ValidationErrorEntity = LarValidationError
   override def copyWithFields(
-      fields: Map[String, String]): MacroValidationError = this.copy()
+      fields: ListMap[String, String]): MacroValidationError = this.copy()
 }
 
 case class EmptyMacroValidationError() extends ValidationError {
@@ -69,7 +73,8 @@ case class EmptyMacroValidationError() extends ValidationError {
   override def editName: String = ""
   override def validationErrorType: ValidationErrorType = Macro
   override def validationErrorEntity: ValidationErrorEntity = LarValidationError
-  override def fields: Map[String, String] = Map.empty
-  override def copyWithFields(fields: Map[String, String]): ValidationError =
+  override def fields: ListMap[String, String] = ListMap.empty
+  override def copyWithFields(
+      fields: ListMap[String, String]): ValidationError =
     this
 }

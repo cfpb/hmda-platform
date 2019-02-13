@@ -30,7 +30,9 @@ object ModifiedLarPublisher {
   val bucket = config.getString("aws.public-bucket")
   val environment = config.getString("aws.environment")
   val year = config.getInt("hmda.lar.modified.year")
-
+  val bankFilter = ConfigFactory.load("application.conf").getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
 
@@ -83,7 +85,6 @@ object ModifiedLarPublisher {
             .runWith(s3Sink)
 
           Behaviors.same
-
         case _ =>
           Behaviors.ignore
       }
