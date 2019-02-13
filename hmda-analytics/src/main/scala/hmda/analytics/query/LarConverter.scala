@@ -107,7 +107,7 @@ object LarConverter {
       convertEmptyField(lar.AUS.aus4.code),
       convertEmptyField(lar.AUS.aus5.code),
       lar.AUS.otherAUS,
-      convertEmptyField(lar.ausResult.ausResult1.code),
+      lar.ausResult.ausResult1.code,
       convertEmptyField(lar.ausResult.ausResult2.code),
       convertEmptyField(lar.ausResult.ausResult3.code),
       convertEmptyField(lar.ausResult.ausResult4.code),

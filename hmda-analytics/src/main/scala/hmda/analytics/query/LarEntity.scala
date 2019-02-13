@@ -102,7 +102,7 @@ case class LarEntity(
     aus4: String = "",
     aus5: String = "",
     otheraus: String = "",
-    aus1Result: String = "",
+    aus1Result: Int = 0,
     aus2Result: String = "",
     aus3Result: String = "",
     aus4Result: String = "",
