@@ -5,6 +5,7 @@ import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import scala.concurrent.Future
+import hmda.query.ts._
 
 trait TransmittalSheetComponent {
 

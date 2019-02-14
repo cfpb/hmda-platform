@@ -1,4 +1,4 @@
-package hmda.regulator.query.ts
+package hmda.query.ts
 
 import hmda.model.filing.ts.TransmittalSheet
 

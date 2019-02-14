@@ -1,4 +1,4 @@
-package hmda.regulator.query.ts
+package hmda.query.ts
 
 case class TransmittalSheetEntity(
     lei: String = "",
