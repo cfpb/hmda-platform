@@ -75,6 +75,16 @@ spec:
                 configMapKeyRef:
                   name: bank-filter-configmap
                   key: bank-filter-list
+            - name: HTTP_CENSUS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: modified-lar-http-configmap
+                  key: census.host
+            - name: HTTP_CENSUS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: modified-lar-http-configmap
+                  key: census.port
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
