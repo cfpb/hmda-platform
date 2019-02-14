@@ -6,7 +6,7 @@ import akka.pattern.pipe
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import com.typesafe.config.{Config,ConfigFactory}
+import com.typesafe.config.{Config, ConfigFactory}
 import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
 import akka.http.scaladsl.server.Directives._
@@ -29,7 +29,8 @@ class HmdaCensusApi extends HttpServer with BaseHttpApi with CensusHttpApi {
   override implicit val ec: ExecutionContext = context.dispatcher
   override val log = Logging(system, getClass)
 
-  val duration: FiniteDuration = config.getInt("hmda.census.http.timeout").seconds
+  val duration: FiniteDuration =
+    config.getInt("hmda.census.http.timeout").seconds
 
   override implicit val timeout: Timeout = Timeout(duration)
 

@@ -2,28 +2,30 @@ package hmda.census.api.http
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-
-import scala.util.{Failure, Success}
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
-import akka.stream.ActorMaterializer
-import akka.util.Timeout
-import hmda.api.http.directives.HmdaTimeDirectives
+import akka.http.scaladsl.common.{
+  EntityStreamingSupport,
+  JsonEntityStreamingSupport
+}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.model.StatusCodes
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import hmda.census.validation.CensusValidation._
+import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.census.dtos.IndexedCensusEntry
+import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.census.dtos.{
+  CountyCheck,
+  IndexedCensusEntry,
+  TractCheck,
+  TractValidated
+}
 import hmda.census.records.CensusRecords
 import hmda.census.records.CensusRecords._
+import hmda.census.validation.CensusValidation._
 import hmda.model.census.Census
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
-import scala.util.Try
-import hmda.util.http.FilingResponseUtils.failedResponse
 trait CensusHttpApi extends HmdaTimeDirectives {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
@@ -31,11 +33,12 @@ trait CensusHttpApi extends HmdaTimeDirectives {
   implicit val timeout: Timeout
   val log: LoggingAdapter
 
-  implicit val jsonStreamingSupport: JsonEntityStreamingSupport = EntityStreamingSupport.json()
+  implicit val jsonStreamingSupport: JsonEntityStreamingSupport =
+    EntityStreamingSupport.json()
 
   def streamCensusRecords(
-                           input: Map[String, Census],
-                           inputType: String): Source[IndexedCensusEntry, NotUsed] =
+      input: Map[String, Census],
+      inputType: String): Source[IndexedCensusEntry, NotUsed] =
     Source
       .fromIterator(() => input.toIterator)
       .map {
@@ -60,16 +63,16 @@ trait CensusHttpApi extends HmdaTimeDirectives {
           path("smallcounty") {
             get {
               complete(streamCensusRecords(CensusRecords.indexedSmallCounty,
-                "smallcounty"))
+                                           "smallcounty"))
             }
           }
       } ~
-      pathPrefix("census" / "tract" / Segment) { tract =>
-        extractUri { uri =>
-          val response = CensusRecords.indexedTract.getOrElse(tract, Census())
-          complete(response)
-        }
-      } ~
+        pathPrefix("census" / "tract" / Segment) { tract =>
+          extractUri { uri =>
+            val response = CensusRecords.indexedTract.getOrElse(tract, Census())
+            complete(response)
+          }
+        } ~
         pathPrefix("census" / "validate") {
           path("tract") {
             extractUri { uri =>
@@ -91,7 +94,8 @@ trait CensusHttpApi extends HmdaTimeDirectives {
               extractUri { uri =>
                 entity(as[CountyCheck]) { tc =>
                   val county = tc.county
-                  complete(TractValidated(isCountySmall(county, indexedSmallCounty)))
+                  complete(
+                    TractValidated(isCountySmall(county, indexedSmallCounty)))
                 }
               }
             }
