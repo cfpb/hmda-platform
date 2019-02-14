@@ -1,11 +1,7 @@
 package hmda.serialization.submission
 
 import hmda.model.edits.{EditDetails, EditDetailsRow, FieldDetails}
-import hmda.persistence.serialization.edit.details.{
-  EditDetailsMessage,
-  EditDetailsRowMessage,
-  FieldDetailsMessage
-}
+import hmda.persistence.serialization.edit.details.{EditDetailsMessage, EditDetailsRowMessage, FieldDetailsMessage}
 
 object EditDetailsProtobufConverter {
 

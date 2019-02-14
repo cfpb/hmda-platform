@@ -26,7 +26,6 @@ import hmda.query.HmdaQuery._
 import io.circe.generic.auto._
 
 import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 sealed trait IrsPublisherCommand

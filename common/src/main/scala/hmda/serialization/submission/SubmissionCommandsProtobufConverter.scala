@@ -1,23 +1,10 @@
 package hmda.serialization.submission
 
 import akka.actor.typed.ActorRefResolver
-import hmda.messages.submission.SubmissionCommands.{
-  CreateSubmission,
-  GetSubmission,
-  ModifySubmission,
-  SubmissionStop
-}
-import hmda.persistence.serialization.submission.commands.{
-  CreateSubmissionMessage,
-  GetSubmissionMessage,
-  ModifySubmissionMessage,
-  SubmissionStopMessage
-}
-import SubmissionProtobufConverter._
-import hmda.persistence.serialization.submission.{
-  SubmissionIdMessage,
-  SubmissionMessage
-}
+import hmda.messages.submission.SubmissionCommands.{CreateSubmission, GetSubmission, ModifySubmission, SubmissionStop}
+import hmda.persistence.serialization.submission.commands.{CreateSubmissionMessage, GetSubmissionMessage, ModifySubmissionMessage, SubmissionStopMessage}
+import hmda.persistence.serialization.submission.{SubmissionIdMessage, SubmissionMessage}
+import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object SubmissionCommandsProtobufConverter {
 

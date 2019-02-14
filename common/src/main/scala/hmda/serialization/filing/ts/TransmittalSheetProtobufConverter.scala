@@ -2,12 +2,7 @@ package hmda.serialization.filing.ts
 
 import hmda.model.filing.ts.{Address, Contact, TransmittalSheet}
 import hmda.model.institution.Agency
-import hmda.persistence.serialization.transmittalsheet.{
-  AddressMessage,
-  AgencyMessage,
-  ContactMessage,
-  TransmittalSheetMessage
-}
+import hmda.persistence.serialization.transmittalsheet.{AddressMessage, AgencyMessage, ContactMessage, TransmittalSheetMessage}
 
 object TransmittalSheetProtobufConverter {
 

@@ -4,19 +4,14 @@ import java.io.NotSerializableException
 
 import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
-import akka.serialization.SerializerWithStringManifest
 import akka.actor.typed.scaladsl.adapter._
-import hmda.messages.submission.SubmissionCommands.{
-  CreateSubmission,
-  GetSubmission,
-  ModifySubmission,
-  SubmissionStop
-}
+import akka.serialization.SerializerWithStringManifest
+import hmda.messages.submission.SubmissionCommands.{CreateSubmission, GetSubmission, ModifySubmission, SubmissionStop}
 import hmda.model.filing.submission.Submission
-import SubmissionProtobufConverter._
-import SubmissionCommandsProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionMessage
 import hmda.persistence.serialization.submission.commands.SubmissionStopMessage
+import hmda.serialization.submission.SubmissionCommandsProtobufConverter._
+import hmda.serialization.submission.SubmissionProtobufConverter._
 
 class SubmissionCommandsSerializer(system: ExtendedActorSystem)
     extends SerializerWithStringManifest {

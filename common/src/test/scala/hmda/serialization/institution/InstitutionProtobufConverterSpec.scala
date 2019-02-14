@@ -1,12 +1,7 @@
 package hmda.serialization.institution
 
-import hmda.persistence.serialization.institution.{
-  InstitutionMessage,
-  ParentMessage,
-  RespondentMessage,
-  TopHolderMessage
-}
 import hmda.model.institution.InstitutionGenerators._
+import hmda.persistence.serialization.institution.{InstitutionMessage, ParentMessage, RespondentMessage, TopHolderMessage}
 import hmda.serialization.institution.InstitutionProtobufConverter._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}

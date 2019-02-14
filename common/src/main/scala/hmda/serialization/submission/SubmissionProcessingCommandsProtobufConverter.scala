@@ -2,12 +2,12 @@ package hmda.serialization.submission
 
 import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.SubmissionProcessingCommands._
-import hmda.persistence.serialization.submission.processing.commands._
-import SubmissionProtobufConverter._
 import hmda.model.validation.MacroValidationError
-import hmda.serialization.validation.ValidationProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionIdMessage
+import hmda.persistence.serialization.submission.processing.commands._
 import hmda.persistence.serialization.validation.ValidationErrorMessage
+import hmda.serialization.submission.SubmissionProtobufConverter._
+import hmda.serialization.validation.ValidationProtobufConverter._
 
 object SubmissionProcessingCommandsProtobufConverter {
 

@@ -4,16 +4,16 @@ import java.time.Instant
 import java.util.concurrent.TimeUnit
 
 import akka.actor
-import akka.actor.typed.{ActorContext, ActorRef, ActorSystem, Behavior}
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.scaladsl.Behaviors
-import hmda.persistence.util.CassandraUtil
-import org.scalatest.{BeforeAndAfterAll, WordSpec}
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.typed.{ActorContext, ActorRef, ActorSystem, Behavior}
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
+import hmda.persistence.util.CassandraUtil
 import org.scalacheck.Gen
+import org.scalatest.{BeforeAndAfterAll, WordSpec}
 
 import scala.concurrent.duration._
 

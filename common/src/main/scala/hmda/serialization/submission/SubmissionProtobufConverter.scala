@@ -1,10 +1,7 @@
 package hmda.serialization.submission
 
 import hmda.model.filing.submission._
-import hmda.persistence.serialization.submission.{
-  SubmissionIdMessage,
-  SubmissionMessage
-}
+import hmda.persistence.serialization.submission.{SubmissionIdMessage, SubmissionMessage}
 
 object SubmissionProtobufConverter {
 

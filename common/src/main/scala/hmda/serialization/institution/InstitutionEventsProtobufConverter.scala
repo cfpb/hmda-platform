@@ -1,23 +1,13 @@
 package hmda.serialization.institution
 
 import hmda.messages.institution.InstitutionEvents._
-import hmda.persistence.serialization.institution.{InstitutionMessage, events}
-import hmda.persistence.serialization.institution.events._
-import InstitutionProtobufConverter._
 import hmda.persistence.serialization.filing.FilingMessage
+import hmda.persistence.serialization.institution.InstitutionMessage
 import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField
-import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField.{
-  InstitutionCreatedField,
-  InstitutionDeletedField,
-  InstitutionModifiedField
-}
-import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField.{
-  InstitutionCreatedField,
-  InstitutionDeletedField,
-  InstitutionModifiedField
-}
+import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField.{InstitutionCreatedField, InstitutionDeletedField, InstitutionModifiedField}
+import hmda.persistence.serialization.institution.events._
 import hmda.serialization.filing.FilingProtobufConverter._
-import jnr.ffi.annotations.In
+import hmda.serialization.institution.InstitutionProtobufConverter._
 
 object InstitutionEventsProtobufConverter {
 
