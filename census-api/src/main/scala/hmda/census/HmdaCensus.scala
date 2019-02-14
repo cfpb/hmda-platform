@@ -18,6 +18,6 @@ object HmdaCensus extends App {
       |                                         |_|
     """.stripMargin)
 
-  implicit val system = ActorSystem("hmda-census")
+  implicit val system: ActorSystem = ActorSystem("hmda-census")
   system.actorOf(HmdaCensusApi.props(), "hmda-census-api")
 }

@@ -39,7 +39,7 @@ object CensusRecords {
       .toList
   }
 
-  val (indexedTract, indexedCounty, indexedSmallCounty) =
+  val (indexedTract: Map[String, Census], indexedCounty: Map[String, Census], indexedSmallCounty: Map[String, Census]) =
     parseCensusFile.foldLeft(
       (Map[String, Census](), Map[String, Census](), Map[String, Census]())) {
       case ((m1, m2, m3), c) =>
