@@ -110,7 +110,7 @@ object HmdaAnalyticsApp
         .map(s => TsCsvParser(s))
         .map(_.getOrElse(TransmittalSheet()))
         .filter(t => t.LEI != "" && t.institutionName != "")
-        .map(ts => TransmittalSheetConverter(ts))
+        .map(ts => TransmittalSheetConverter(ts, submissionId.toString))
         .mapAsync(1) { ts =>
           for {
 
@@ -126,7 +126,7 @@ object HmdaAnalyticsApp
         .map(s => TsCsvParser(s))
         .map(_.getOrElse(TransmittalSheet()))
         .filter(t => t.LEI != "" && t.institutionName != "")
-        .map(ts => TransmittalSheetConverter(ts))
+        .map(ts => TransmittalSheetConverter(ts, submissionId.toString))
         .mapAsync(1) { ts =>
           for {
 

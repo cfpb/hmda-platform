@@ -3,7 +3,8 @@ package hmda.analytics.query
 import hmda.model.filing.ts.TransmittalSheet
 
 object TransmittalSheetConverter {
-  def apply(ts: TransmittalSheet): TransmittalSheetEntity = {
+  def apply(ts: TransmittalSheet,
+            submissionId: String): TransmittalSheetEntity = {
     TransmittalSheetEntity(
       ts.LEI,
       ts.id,
@@ -19,7 +20,8 @@ object TransmittalSheetConverter {
       ts.contact.address.zipCode,
       ts.agency.code,
       ts.totalLines,
-      ts.taxId
+      ts.taxId,
+      submissionId.toString
     )
   }
 }

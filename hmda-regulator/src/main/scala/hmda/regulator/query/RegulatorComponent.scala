@@ -152,6 +152,7 @@ trait RegulatorComponent {
     def agency = column[Int]("agency")
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
+    def submissionId = column[String]("tax_id")
 
     override def * =
       (
@@ -169,7 +170,8 @@ trait RegulatorComponent {
         zipCode,
         agency,
         totalLines,
-        taxId
+        taxId,
+        submissionId
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
