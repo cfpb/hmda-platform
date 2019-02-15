@@ -69,8 +69,8 @@ volumes: [
         //hmda/commercial-build
         //project/cinnamon
         //These files are renamed before the project is built on Jenkins
-        sh 'mkdir ~/.lightbend/'
-        sh 'cp commercial.credentials ~/.lightbend/commercial.credentials'
+        sh "mkdir ${env.WORKSPACE}/.lightbend"
+        sh "cp commercial.credentials ${env.WORKSPACE}/.lightbend/commercial.credentials"
         sh 'mv build.sbt build.txt'
         sh 'mv commercial-build.txt build.sbt'
         sh 'mv hmda/build.sbt hmda/build.txt'
@@ -78,10 +78,7 @@ volumes: [
         sh 'mv project/cinnamon.txt project/cinnamon.sbt'
 
       container('sbt') {
-            withEnv(["SBT_CREDENTIALS=/home/jenkins/.lightbend/commercial.credentials"]) {
-                sh 'echo $SBT_CREDENTIALS'
                 sh "sbt -batch hmda-platform/docker:stage"
-            }
       }
 
       container('docker-DTR') {
@@ -109,7 +106,7 @@ volumes: [
               }
             }
           }
-    }
+      }
 
 
     stage('Deploy') {

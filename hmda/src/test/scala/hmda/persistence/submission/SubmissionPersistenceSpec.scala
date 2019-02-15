@@ -34,6 +34,7 @@ class SubmissionPersistenceSpec extends AkkaCassandraPersistenceSpec {
 
   val sharding = ClusterSharding(typedSystem)
   SubmissionPersistence.startShardRegion(sharding)
+  val duration = 10.seconds
 
   val submissionProbe = TestProbe[SubmissionEvent]("submission-probe")
   val maybeSubmissionProbe =
