@@ -7,9 +7,6 @@ object BuildSettings {
   val buildVersion = "2.0.0"
   val buildScalaVersion = "2.12.7"
 
-  println ("Path is: " + Path.userHome)
-  println ("dir is: " + Path.fileProperty("user.dir"))
-  println ("java home: " + Path.fileProperty("java.home"))
 
   val hmdaBuildSettings = Defaults.coreDefaultSettings ++
     Seq(
