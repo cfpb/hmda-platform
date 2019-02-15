@@ -62,9 +62,7 @@ case class Msa(
   }
 }
 
-case class MsaMap(
-    msas: Map[String, Msa] = Map[String, Msa]()
-) {
+case class MsaMap(msas: Map[String, Msa] = Map[String, Msa]()) {
   def addLar(lar: LoanApplicationRegister, msa: Msa): MsaMap = {
     val id = msa.id
     val original = msas.getOrElse(id, Msa(msa.id, msa.name))

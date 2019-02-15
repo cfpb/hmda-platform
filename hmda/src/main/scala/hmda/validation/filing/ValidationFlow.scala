@@ -19,6 +19,7 @@ import hmda.validation._
 import hmda.validation.context.ValidationContext
 import hmda.util.streams.FlowUtils._
 import hmda.validation.engine.{LarEngine, TsEngine, TsLarEngine}
+import scala.collection.immutable._
 
 import scala.concurrent.Future
 
@@ -142,7 +143,8 @@ object ValidationFlow {
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
-        affectedFields.map(field => (field, lar.valueOf(field))).toMap
+        ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
+      print(fieldMap)
       error.copyWithFields(fieldMap)
     })
   }
@@ -153,7 +155,7 @@ object ValidationFlow {
     errors.map(error => {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
-        affectedFields.map(field => (field, ts.valueOf(field))).toMap
+        ListMap(affectedFields.map(field => (field, ts.valueOf(field))): _*)
       error.copyWithFields(fieldMap)
     })
   }

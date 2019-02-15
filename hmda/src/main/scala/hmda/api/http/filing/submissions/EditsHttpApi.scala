@@ -110,7 +110,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
         }
     }
 
-  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/edit
+  //institutions/<lei>/filings/<period>/submissions/<submissionId>/edits/<edit>
   def editDetailsPath(oAuth2Authorization: OAuth2Authorization): Route = {
     val editNameRegex: Regex = new Regex("""[SVQ]\d\d\d(?:-\d)?""")
     path(
@@ -184,7 +184,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
   }
 
   private val csvHeaderSource =
-    Source.fromIterator(() => Iterator("editType, editId, ULI\n"))
+    Source.fromIterator(() => Iterator("editType,editId,ULI\n"))
 
   private def validationErrorEventStream(
       submissionId: SubmissionId): Source[String, NotUsed] = {
