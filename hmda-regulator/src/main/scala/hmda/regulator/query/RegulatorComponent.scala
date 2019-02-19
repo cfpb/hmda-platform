@@ -5,8 +5,8 @@ import hmda.query.repository.TableRepository
 import hmda.regulator.query.lar.{LarEntityImpl, _}
 import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
 import hmda.regulator.query.ts.TransmittalSheetEntity
-import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
+import slick.basic.{DatabaseConfig, DatabasePublisher}
+import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
 
 import scala.concurrent.Future
 
@@ -494,10 +494,19 @@ trait RegulatorComponent {
     def count(): Future[Int] = {
       db.run(table.size.result)
     }
+    def printList(args: TraversableOnce[_]): Unit = {
+      println("Printing ignore list:")
+      args.foreach(println)
+    }
 
     def getAllLARs(
-        bankIgnoreList: Array[String]): Future[Seq[LarEntityImpl]] = {
-      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
+        bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl] = {
+      db.stream(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result.withStatementParameters(
+        rsType = ResultSetType.ForwardOnly,
+        rsConcurrency = ResultSetConcurrency.ReadOnly,
+        fetchSize = 1000
+      ).transactionally
+      )
     }
   }
 
