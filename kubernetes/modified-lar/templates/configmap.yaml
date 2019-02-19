@@ -2,12 +2,15 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: s3-configmap
+  name: "{{ .Release.Name }}-modifiedlar-config"
 data:
   aws-environment: "{{ .Values.aws.environment }}"
   s3-private-bucket: "{{ .Values.aws.s3privatebucket }}"
   s3-public-bucket: "{{ .Values.aws.s3publicbucket }}"
   aws-region: "{{ .Values.aws.region }}"
+  postgres.ssl: "{{ .Values.postgresql.ssl }}"
+  postgres.user:  "{{ .Values.postgresql.postgresUser }}"
+  postgres.database: "{{ .Values.postgresql.postgresDatabase }}"
 ---
 apiVersion: v1
 kind: ConfigMap

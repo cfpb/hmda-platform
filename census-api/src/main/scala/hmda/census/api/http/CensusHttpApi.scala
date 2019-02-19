@@ -13,16 +13,16 @@ import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
-import hmda.census.dtos.{
+import hmda.census.records.CensusRecords
+import hmda.census.records.CensusRecords._
+import hmda.census.validation.CensusValidation._
+import hmda.model.census.Census
+import hmda.query.dtos.{
   CountyCheck,
   IndexedCensusEntry,
   TractCheck,
   TractValidated
 }
-import hmda.census.records.CensusRecords
-import hmda.census.records.CensusRecords._
-import hmda.census.validation.CensusValidation._
-import hmda.model.census.Census
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext

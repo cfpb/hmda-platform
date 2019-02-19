@@ -54,6 +54,13 @@ aws:
   s3publicbucket: cfpb-hmda-public
   region: us-east-1
 
+postgresql:
+  postgresDatabase: hmda
+  postgresUser: hmda
+  enabled: false
+  createSchema: false
+  ssl: require
+
 http:
   census:
     port: 9093

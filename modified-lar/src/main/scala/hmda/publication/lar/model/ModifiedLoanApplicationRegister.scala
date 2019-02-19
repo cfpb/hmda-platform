@@ -1,6 +1,12 @@
 package hmda.publication.lar.model
 
+import hmda.model.census.Census
 import hmda.model.filing.PipeDelimited
+
+// ModifiedLoanApplicationRegister enriched with tract Census information
+case class EnrichedModifiedLoanApplicationRegister(
+    mlar: ModifiedLoanApplicationRegister,
+    census: Census)
 
 case class ModifiedLoanApplicationRegister(
     id: Int,

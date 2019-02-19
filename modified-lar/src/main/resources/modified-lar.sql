@@ -73,7 +73,7 @@ CREATE TABLE public.modifiedlar2018
     property_value character varying,
     home_security_policy integer,
     lan_property_interest integer,
-    total_units integer,
+    total_units character varying,
     mf_affordable character varying,
     application_submission integer,
     payable integer,
@@ -94,11 +94,14 @@ CREATE TABLE public.modifiedlar2018
     one_to_four_fam_units character varying,
     -- 1 msamd also comes from census_2018_MSAMD_name.txt
     msa_md integer,
-    -- 1 flag logic for this flag is TBD
-    loan_flag boolean,
+    -- TODO: 1 flag logic for this flag is TBD
+    loan_flag character varying,
     created_at timestamp default current_timestamp,
     submission_id character varying
 )
 WITH (
     OIDS = FALSE
 );
+
+ALTER TABLE public.modifiedlar2018
+  OWNER to postgres;
