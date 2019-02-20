@@ -490,23 +490,21 @@ trait RegulatorComponent {
     def deleteByLei(lei: String): Future[Int] = {
       db.run(table.filter(_.lei === lei).delete)
     }
-
     def count(): Future[Int] = {
       db.run(table.size.result)
     }
-    def printList(args: TraversableOnce[_]): Unit = {
-      println("Printing ignore list:")
-      args.foreach(println)
-    }
-
     def getAllLARs(
         bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl] = {
-      db.stream(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result.withStatementParameters(
-        rsType = ResultSetType.ForwardOnly,
-        rsConcurrency = ResultSetConcurrency.ReadOnly,
-        fetchSize = 1000
-      ).transactionally
-      )
+      db.stream(
+        table
+          .filterNot(_.lei.toUpperCase inSet bankIgnoreList)
+          .result
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally)
     }
   }
 

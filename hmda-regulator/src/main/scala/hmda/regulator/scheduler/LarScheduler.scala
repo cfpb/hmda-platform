@@ -1,7 +1,10 @@
 package hmda.regulator.scheduler
 
+import java.sql.Timestamp
+import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 
 import akka.{Done, NotUsed}
 import akka.stream.ActorMaterializer
@@ -20,6 +23,7 @@ import hmda.regulator.query.RegulatorComponent
 import hmda.regulator.query.lar.LarEntityImpl
 import hmda.regulator.scheduler.schedules.Schedules.LarScheduler
 import slick.basic.DatabasePublisher
+
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
@@ -32,6 +36,14 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   implicit val materializer = ActorMaterializer()
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def larRepository = new LarRepository(dbConfig)
+
+  def getCurrentdateTimeStamp: Timestamp = {
+    val today: java.util.Date = Calendar.getInstance.getTime
+    val timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    val now: String = timeFormat.format(today)
+    val re = java.sql.Timestamp.valueOf(now)
+    re
+  }
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
@@ -83,40 +95,30 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val fileName = s"$formattedDate" + s"$year" + "_lar" + ".txt"
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
-
-      println("start")
-
+      
       try {
-        val allResults: DatabasePublisher[LarEntityImpl] =
+        val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
           larRepository.getAllLARs(bankFilterList)
-        val allResultsSource: (LarEntityImpl => Future[Nothing]) => Source[Nothing, NotUsed] =
-          Source.fromPublisher(allResults).mapAsync(parallelism = 3)
+        val allResultsSource: Source[LarEntityImpl, NotUsed] =
+          Source.fromPublisher(allResultsPublisher)
 
-        allResultsSource.
+        var results: Future[MultipartUploadResult] = allResultsSource
+          .map(larEntity => larEntity.toPSV + "\n")
+          .map(s => ByteString(s))
+          .runWith(s3Sink)
 
+        results onComplete {
+          case Success(result) => {
+            log.info(
+              "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
+          }
+          case Failure(t) =>
+            println("An error has occurred getting LAR Data: " + t.getMessage)
 
-
+        }
       } catch {
         case e: Exception =>
           println("An error has occurred getting LAR Data: " + e.getMessage)
       }
-//
-//      val results: Future[MultipartUploadResult] = Source
-//        .fromFuture(allResults)
-//        .map(seek => seek.toList)
-//        .mapConcat(identity)
-//        .map(larEntity => larEntity.toPSV + "\n")
-//        .map(s => ByteString(s))
-//        .runWith(s3Sink)
-//
-//      results onComplete {
-//        case Success(result) => {
-//          log.info(
-//            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
-//        }
-//        case Failure(t) =>
-//          println("An error has occurred getting LAR Data: " + t.getMessage)
-//
-//      }
   }
 }
