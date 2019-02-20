@@ -57,9 +57,7 @@ trait FilersHttpApi extends TsComponent {
     handleRejections(corsRejectionHandler) {
       cors() {
         encodeResponse {
-          pathPrefix("lar") {
-            filerListRoute
-          }
+          filerListRoute
         }
       }
     }
