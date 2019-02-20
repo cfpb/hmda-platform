@@ -4,16 +4,10 @@ import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.SubmissionProcessingEvents._
+import hmda.model.processing.state.{HmdaParserErrorState, HmdaValidationErrorState}
+import hmda.persistence.serialization.submission.processing.events.{HmdaParserErrorStateMessage, HmdaRowParsedCountMessage, HmdaRowParsedErrorMessage, _}
+import hmda.serialization.submission.SubmissionProcessingEventsProtobufConverter._
 import hmda.serialization.validation.ValidationProtobufConverter._
-import hmda.model.processing.state.HmdaValidationErrorState
-import SubmissionProcessingEventsProtobufConverter._
-import hmda.model.processing.state.HmdaParserErrorState
-import hmda.persistence.serialization.submission.processing.events.{
-  HmdaParserErrorStateMessage,
-  HmdaRowParsedCountMessage,
-  HmdaRowParsedErrorMessage
-}
-import hmda.persistence.serialization.submission.processing.events._
 
 class SubmissionProcessingEventsSerializer
     extends SerializerWithStringManifest {

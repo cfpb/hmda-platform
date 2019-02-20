@@ -184,7 +184,7 @@ trait EditsHttpApi extends HmdaTimeDirectives {
   }
 
   private val csvHeaderSource =
-    Source.fromIterator(() => Iterator("editType, editId, ULI\n"))
+    Source.fromIterator(() => Iterator("editType,editId,ULI\n"))
 
   private def validationErrorEventStream(
       submissionId: SubmissionId): Source[String, NotUsed] = {

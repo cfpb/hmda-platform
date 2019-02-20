@@ -1,8 +1,8 @@
 package hmda.serialization.submission
 
-import org.scalatest.{MustMatchers, PropSpec}
+import hmda.serialization.submission.HmdaParserErrorStateGenerator._
 import org.scalatest.prop.PropertyChecks
-import HmdaParserErrorStateGenerator._
+import org.scalatest.{MustMatchers, PropSpec}
 
 class SubmissionProcessingEventsSerializerSpec
     extends PropSpec

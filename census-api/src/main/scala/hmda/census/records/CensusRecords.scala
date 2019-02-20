@@ -1,8 +1,8 @@
 package hmda.census.records
 
 import com.typesafe.config.ConfigFactory
-import hmda.model.census.Census
 import hmda.model.ResourceUtils._
+import hmda.model.census.Census
 
 object CensusRecords {
 

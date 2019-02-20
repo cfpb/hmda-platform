@@ -3,11 +3,7 @@ package hmda.actor
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior, SupervisorStrategy}
 import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.{
-  ClusterSharding,
-  Entity,
-  EntityTypeKey
-}
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, Entity, EntityTypeKey}
 import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._

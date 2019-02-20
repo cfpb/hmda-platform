@@ -9,7 +9,7 @@ V601|Financial Institution Name, Contact Person's Name, Contact Person's E-mail 
 V602|Calendar Quarter must equal 4, and cannot be left blank.|Calendar Quarter
 V603|The required format for the Contact Person's Telephone Number is 999-999-9999, and it cannot be left blank.|Contact Person's Telephone Number
 V604|Contact Person's Office State must be a two letter state code, and cannot be left blank.|Contact Person's Office State
-V605|The required format for the Contact Person's ZIP Code is 12345-1010 or 12345, and it cannot be left blank.|Contact Person's Office ZIP Code
+V605|The required format for the Contact Person's ZIP Code is 12345-1010 or 12345, and it cannot be left blank.|Contact Person's Office Zip Code
 V606|The required format for the Total Number of Entries Contained in Submission is a whole number that is greater than zero, and it cannot be left blank.|Total Number of Entries Contained in Submission
 V607|The required format for the Federal Taxpayer Identification Number is 99-9999999, and it cannot be left blank.|Federal Taxpayer Identification Number
 S305|A duplicate transaction has been reported. Please review and update your file accordingly.|All data fields in the LAR

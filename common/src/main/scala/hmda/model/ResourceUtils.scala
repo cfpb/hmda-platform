@@ -2,8 +2,9 @@ package hmda.model
 
 import java.io.Closeable
 
-import scala.io.{BufferedSource, Source}
 import hmda._
+
+import scala.io.{BufferedSource, Source}
 
 object ResourceUtils {
 

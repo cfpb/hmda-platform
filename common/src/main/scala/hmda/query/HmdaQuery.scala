@@ -2,8 +2,8 @@ package hmda.query
 
 import akka.NotUsed
 import akka.actor.ActorSystem
-import akka.persistence.query.{EventEnvelope, Offset, PersistenceQuery}
 import akka.persistence.query.scaladsl._
+import akka.persistence.query.{EventEnvelope, Offset, PersistenceQuery}
 import akka.stream.scaladsl.Source
 import com.typesafe.config.ConfigFactory
 import hmda.messages.CommonMessages.Event

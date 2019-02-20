@@ -1,8 +1,8 @@
 package hmda.model.institution
 
-import org.scalacheck.Gen
-import InstitutionGenerators._
 import hmda.model.filing.FilingGenerator._
+import hmda.model.institution.InstitutionGenerators._
+import org.scalacheck.Gen
 
 object InstitutionDetailGenerator {
 
