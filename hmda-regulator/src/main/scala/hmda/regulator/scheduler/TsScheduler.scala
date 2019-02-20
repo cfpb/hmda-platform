@@ -17,7 +17,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
 import hmda.query.DbConfiguration.dbConfig
 import hmda.regulator.query.RegulatorComponent
-import hmda.regulator.query.ts.TransmittalSheetEntity
+import hmda.query.ts.TransmittalSheetEntity
 import hmda.regulator.scheduler.schedules.Schedules.TsScheduler
 
 import scala.concurrent.Future

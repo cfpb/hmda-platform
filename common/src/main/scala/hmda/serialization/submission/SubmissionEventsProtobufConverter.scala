@@ -10,11 +10,11 @@ import hmda.persistence.serialization.submission.events.{
   SubmissionModifiedMessage,
   SubmissionNotExistsMessage
 }
-import SubmissionProtobufConverter._
 import hmda.persistence.serialization.submission.{
   SubmissionIdMessage,
   SubmissionMessage
 }
+import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object SubmissionEventsProtobufConverter {
 

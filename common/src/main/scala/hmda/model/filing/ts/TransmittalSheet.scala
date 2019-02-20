@@ -3,8 +3,6 @@ package hmda.model.filing.ts
 import hmda.model.filing.{HmdaFileRow, PipeDelimited}
 import hmda.model.institution.{Agency, UndeterminedAgency}
 
-import scala.concurrent.Future
-
 case class TransmittalSheet(
     id: Int = 1,
     institutionName: String = "",

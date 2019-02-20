@@ -1,19 +1,19 @@
 package hmda.serialization.submission
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
-import hmda.model.submission.SubmissionGenerator._
-import SubmissionProcessingCommandsProtobufConverter._
 import akka.actor.ActorSystem
 import akka.actor.testkit.typed.scaladsl.TestProbe
 import akka.actor.typed.ActorRefResolver
-import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingEvent
-import hmda.persistence.serialization.submission.processing.commands._
-import org.scalacheck.Gen
 import akka.actor.typed.scaladsl.adapter._
 import hmda.messages.submission.SubmissionProcessingCommands._
-import hmda.serialization.validation.ValidationErrorGenerator._
+import hmda.messages.submission.SubmissionProcessingEvents.SubmissionProcessingEvent
 import hmda.model.processing.state.HmdaParserErrorState
+import hmda.model.submission.SubmissionGenerator._
+import hmda.persistence.serialization.submission.processing.commands._
+import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._
+import hmda.serialization.validation.ValidationErrorGenerator._
+import org.scalacheck.Gen
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class SubmissionProcessingCommandsProtobufConverterSpec
     extends PropSpec

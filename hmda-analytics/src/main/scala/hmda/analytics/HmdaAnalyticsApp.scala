@@ -7,13 +7,13 @@ import akka.kafka.scaladsl.Consumer
 import akka.kafka.scaladsl.Consumer.DrainingControl
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
-import akka.util.Timeout
+import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
+import hmda.query.ts.TransmittalSheetConverter
 import hmda.analytics.query.{
   LarComponent,
   LarConverter,
-  TransmittalSheetComponent,
-  TransmittalSheetConverter
+  TransmittalSheetComponent
 }
 import hmda.messages.pubsub.HmdaTopics.{analyticsTopic, signTopic}
 import hmda.model.filing.lar.LoanApplicationRegister
@@ -27,6 +27,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.readRawData
+import hmda.util.streams.FlowUtils.framing
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -110,7 +111,7 @@ object HmdaAnalyticsApp
         .map(s => TsCsvParser(s))
         .map(_.getOrElse(TransmittalSheet()))
         .filter(t => t.LEI != "" && t.institutionName != "")
-        .map(ts => TransmittalSheetConverter(ts))
+        .map(ts => TransmittalSheetConverter(ts, submissionId.toString))
         .mapAsync(1) { ts =>
           for {
 
@@ -122,11 +123,15 @@ object HmdaAnalyticsApp
     def insertTsRow: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
+        .map(ByteString(_))
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
         .take(1)
         .map(s => TsCsvParser(s))
         .map(_.getOrElse(TransmittalSheet()))
         .filter(t => t.LEI != "" && t.institutionName != "")
-        .map(ts => TransmittalSheetConverter(ts))
+        .map(ts => TransmittalSheetConverter(ts, submissionId.toString))
         .mapAsync(1) { ts =>
           for {
 
@@ -139,6 +144,10 @@ object HmdaAnalyticsApp
     def deleteLarRows: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
+        .map(ByteString(_))
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
         .drop(1)
         .take(1)
         .map(s => LarCsvParser(s))
@@ -153,6 +162,10 @@ object HmdaAnalyticsApp
     def insertLarRows: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
+        .map(ByteString(_))
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
         .drop(1)
         .map(s => LarCsvParser(s))
         .map(_.getOrElse(LoanApplicationRegister()))

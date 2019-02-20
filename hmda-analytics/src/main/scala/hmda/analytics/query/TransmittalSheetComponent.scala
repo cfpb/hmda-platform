@@ -5,6 +5,7 @@ import hmda.query.repository.TableRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 import scala.concurrent.Future
+import hmda.query.ts._
 
 trait TransmittalSheetComponent {
 
@@ -28,6 +29,7 @@ trait TransmittalSheetComponent {
     def agency = column[Int]("agency")
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
+    def submissionId = column[String]("submission_id")
 
     override def * =
       (
@@ -45,7 +47,8 @@ trait TransmittalSheetComponent {
         zipCode,
         agency,
         totalLines,
-        taxId
+        taxId,
+        submissionId
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 

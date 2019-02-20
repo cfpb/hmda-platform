@@ -4,9 +4,11 @@ import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.regulator.query.lar.{LarEntityImpl, _}
 import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
-import hmda.regulator.query.ts.TransmittalSheetEntity
-import slick.basic.{DatabaseConfig, DatabasePublisher}
-import slick.jdbc.{JdbcProfile, ResultSetConcurrency, ResultSetType}
+import slick.basic.DatabasePublisher
+import slick.jdbc.{ResultSetConcurrency, ResultSetType}
+import hmda.query.ts.TransmittalSheetEntity
+import slick.basic.DatabaseConfig
+import slick.jdbc.JdbcProfile
 
 import scala.concurrent.Future
 
@@ -152,6 +154,7 @@ trait RegulatorComponent {
     def agency = column[Int]("agency")
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
+    def submissionId = column[String]("submission_id")
 
     override def * =
       (
@@ -169,7 +172,8 @@ trait RegulatorComponent {
         zipCode,
         agency,
         totalLines,
-        taxId
+        taxId,
+        submissionId
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
@@ -231,35 +235,35 @@ trait RegulatorComponent {
     def zip = column[String]("zip")
     def county = column[String]("county")
     def tract = column[String]("tract")
-    def ethnicityApplicant1 = column[Int]("ethnicity_applicant_1")
-    def ethnicityApplicant2 = column[Int]("ethnicity_applicant_2")
-    def ethnicityApplicant3 = column[Int]("ethnicity_applicant_3")
-    def ethnicityApplicant4 = column[Int]("ethnicity_applicant_4")
-    def ethnicityApplicant5 = column[Int]("ethnicity_applicant_5")
+    def ethnicityApplicant1 = column[String]("ethnicity_applicant_1")
+    def ethnicityApplicant2 = column[String]("ethnicity_applicant_2")
+    def ethnicityApplicant3 = column[String]("ethnicity_applicant_3")
+    def ethnicityApplicant4 = column[String]("ethnicity_applicant_4")
+    def ethnicityApplicant5 = column[String]("ethnicity_applicant_5")
     def otherHispanicApplicant = column[String]("other_hispanic_applicant")
-    def ethnicityCoApplicant1 = column[Int]("ethnicity_co_applicant_1")
-    def ethnicityCoApplicant2 = column[Int]("ethnicity_co_applicant_2")
-    def ethnicityCoApplicant3 = column[Int]("ethnicity_co_applicant_3")
-    def ethnicityCoApplicant4 = column[Int]("ethnicity_co_applicant_4")
-    def ethnicityCoApplicant5 = column[Int]("ethnicity_co_applicant_5")
+    def ethnicityCoApplicant1 = column[String]("ethnicity_co_applicant_1")
+    def ethnicityCoApplicant2 = column[String]("ethnicity_co_applicant_2")
+    def ethnicityCoApplicant3 = column[String]("ethnicity_co_applicant_3")
+    def ethnicityCoApplicant4 = column[String]("ethnicity_co_applicant_4")
+    def ethnicityCoApplicant5 = column[String]("ethnicity_co_applicant_5")
     def otherHispanicCoApplicant = column[String]("other_hispanic_co_applicant")
     def ethnicityObservedApplicant = column[Int]("ethnicity_observed_applicant")
     def ethnicityObservedCoApplicant =
       column[Int]("ethnicity_observed_co_applicant")
-    def raceApplicant1 = column[Int]("race_applicant_1")
-    def raceApplicant2 = column[Int]("race_applicant_2")
-    def raceApplicant3 = column[Int]("race_applicant_3")
-    def raceApplicant4 = column[Int]("race_applicant_4")
-    def raceApplicant5 = column[Int]("race_applicant_5")
+    def raceApplicant1 = column[String]("race_applicant_1")
+    def raceApplicant2 = column[String]("race_applicant_2")
+    def raceApplicant3 = column[String]("race_applicant_3")
+    def raceApplicant4 = column[String]("race_applicant_4")
+    def raceApplicant5 = column[String]("race_applicant_5")
     def otherNativeRaceApplicant = column[String]("other_native_race_applicant")
     def otherAsianRaceApplicant = column[String]("other_asian_race_applicant")
     def otherPacificRaceApplicant =
       column[String]("other_pacific_race_applicant")
-    def rateCoApplicant1 = column[Int]("race_co_applicant_1")
-    def rateCoApplicant2 = column[Int]("race_co_applicant_2")
-    def rateCoApplicant3 = column[Int]("race_co_applicant_3")
-    def rateCoApplicant4 = column[Int]("race_co_applicant_4")
-    def rateCoApplicant5 = column[Int]("race_co_applicant_5")
+    def raceCoApplicant1 = column[String]("race_co_applicant_1")
+    def raceCoApplicant2 = column[String]("race_co_applicant_2")
+    def raceCoApplicant3 = column[String]("race_co_applicant_3")
+    def raceCoApplicant4 = column[String]("race_co_applicant_4")
+    def raceCoApplicant5 = column[String]("race_co_applicant_5")
     def otherNativeRaceCoApplicant =
       column[String]("other_native_race_co_applicant")
     def otherAsianRaceCoApplicant =
@@ -288,10 +292,10 @@ trait RegulatorComponent {
       column[Int]("credit_score_type_co_applicant")
     def creditScoreModelCoApplicant =
       column[String]("credit_score_model_co_applicant")
-    def denialReason1 = column[Int]("denial_reason1")
-    def denialReason2 = column[Int]("denial_reason2")
-    def denialReason3 = column[Int]("denial_reason3")
-    def denialReason4 = column[Int]("denial_reason4")
+    def denialReason1 = column[String]("denial_reason1")
+    def denialReason2 = column[String]("denial_reason2")
+    def denialReason3 = column[String]("denial_reason3")
+    def denialReason4 = column[String]("denial_reason4")
     def otherDenialReason = column[String]("other_denial_reason")
     def totalLoanCosts = column[String]("total_loan_costs")
     def totalPoints = column[String]("total_points")
@@ -316,17 +320,17 @@ trait RegulatorComponent {
     def applicationSubmission = column[Int]("application_submission")
     def payable = column[Int]("payable")
     def nmls = column[String]("nmls")
-    def aus1 = column[Int]("aus1")
-    def aus2 = column[Int]("aus2")
-    def aus3 = column[Int]("aus3")
-    def aus4 = column[Int]("aus4")
-    def aus5 = column[Int]("aus5")
+    def aus1 = column[String]("aus1")
+    def aus2 = column[String]("aus2")
+    def aus3 = column[String]("aus3")
+    def aus4 = column[String]("aus4")
+    def aus5 = column[String]("aus5")
     def otheraus = column[String]("other_aus")
-    def aus1Result = column[Int]("aus1_result")
-    def aus2Result = column[Int]("aus2_result")
-    def aus3Result = column[Int]("aus3_result")
-    def aus4Result = column[Int]("aus4_result")
-    def aus5Result = column[Int]("aus5_result")
+    def aus1Result = column[String]("aus1_result")
+    def aus2Result = column[String]("aus2_result")
+    def aus3Result = column[String]("aus3_result")
+    def aus4Result = column[String]("aus4_result")
+    def aus5Result = column[String]("aus5_result")
     def otherAusResult = column[String]("other_aus_result")
     def reverseMortgage = column[Int]("reverse_mortgage")
     def lineOfCredits = column[Int]("line_of_credits")
@@ -385,11 +389,11 @@ trait RegulatorComponent {
       (otherNativeRaceApplicant,
        otherAsianRaceApplicant,
        otherPacificRaceApplicant,
-       rateCoApplicant1,
-       rateCoApplicant2,
-       rateCoApplicant3,
-       rateCoApplicant4,
-       rateCoApplicant5,
+       raceCoApplicant1,
+       raceCoApplicant2,
+       raceCoApplicant3,
+       raceCoApplicant4,
+       raceCoApplicant5,
        otherNativeRaceCoApplicant,
        otherAsianRaceCoApplicant,
        otherPacificRaceCoApplicant,

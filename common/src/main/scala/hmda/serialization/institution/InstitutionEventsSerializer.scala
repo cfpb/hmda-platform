@@ -4,13 +4,7 @@ import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
 import hmda.messages.institution.InstitutionEvents._
-import hmda.persistence.serialization.institution.events.{
-  InstitutionCreatedMessage,
-  InstitutionDeletedMessage,
-  InstitutionModifiedMessage,
-  InstitutionNotExistsMessage,
-  FilingAddedMessage
-}
+import hmda.persistence.serialization.institution.events._
 import hmda.serialization.institution.InstitutionEventsProtobufConverter._
 
 class InstitutionEventsSerializer extends SerializerWithStringManifest {

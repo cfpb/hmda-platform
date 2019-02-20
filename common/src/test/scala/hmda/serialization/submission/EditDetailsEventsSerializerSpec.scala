@@ -1,12 +1,9 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.EditDetailsEvents.{
-  EditDetailsAdded,
-  EditDetailsRowCounted
-}
+import hmda.messages.submission.EditDetailsEvents.{EditDetailsAdded, EditDetailsRowCounted}
 import hmda.model.edits.EditDetailsGenerator.editDetailsGen
-import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class EditDetailsEventsSerializerSpec
     extends PropSpec

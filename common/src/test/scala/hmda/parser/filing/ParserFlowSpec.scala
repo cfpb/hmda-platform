@@ -10,10 +10,7 @@ import hmda.model.filing.lar.LarGenerators._
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.ts.TsGenerators._
-import hmda.parser.ParserErrorModel.{
-  IncorrectNumberOfFields,
-  ParserValidationError
-}
+import hmda.parser.ParserErrorModel.{IncorrectNumberOfFields, ParserValidationError}
 import hmda.parser.filing.ParserFlow._
 import org.scalatest.{MustMatchers, WordSpec}
 

@@ -1,8 +1,8 @@
 package hmda.census.api.grpc
 
 import akka.stream.Materializer
-import hmda.grpc.services._
 import hmda.census.validation.CensusValidation._
+import hmda.grpc.services._
 import hmda.model.census.Census
 
 import scala.concurrent.Future

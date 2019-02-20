@@ -2,11 +2,14 @@ package hmda.analytics.query
 
 import hmda.model.filing.ts.TransmittalSheet
 import hmda.model.filing.ts.TsGenerators._
+import hmda.query.ts._
 
 class TransmittalSheetComponentSpec extends TransmittalSheetAsyncSetup {
 
+  val submissionId = "bank0-2018-1"
   val ts =
-    TransmittalSheetConverter(tsGen.sample.getOrElse(TransmittalSheet()))
+    TransmittalSheetConverter(tsGen.sample.getOrElse(TransmittalSheet()),
+                              submissionId)
 
   "Transmittal Sheet Component" must {
     "find TS by LEI" in {

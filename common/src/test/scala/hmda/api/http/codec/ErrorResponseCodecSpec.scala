@@ -1,10 +1,10 @@
 package hmda.api.http.codec
 
 import akka.http.scaladsl.model.Uri.Path
+import hmda.api.http.codec.ErrorResponseCodec._
 import hmda.api.http.model.ErrorResponse
-import org.scalatest.{MustMatchers, WordSpec}
-import ErrorResponseCodec._
 import io.circe.syntax._
+import org.scalatest.{MustMatchers, WordSpec}
 
 class ErrorResponseCodecSpec extends WordSpec with MustMatchers {
 
