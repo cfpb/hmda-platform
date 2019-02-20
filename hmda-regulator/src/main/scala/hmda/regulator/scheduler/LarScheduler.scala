@@ -37,14 +37,6 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
   private val fullDate = DateTimeFormatter.ofPattern("yyyy-MM-dd-")
   def larRepository = new LarRepository(dbConfig)
 
-  def getCurrentdateTimeStamp: Timestamp = {
-    val today: java.util.Date = Calendar.getInstance.getTime
-    val timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-    val now: String = timeFormat.format(today)
-    val re = java.sql.Timestamp.valueOf(now)
-    re
-  }
-
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
       .schedule("LarScheduler", self, LarScheduler)
@@ -79,7 +71,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
         awsRegionProvider,
         false,
         None,
-        ListBucketVersion1
+        ListBucketVersion2
       )
       val bankFilter =
         ConfigFactory.load("application.conf").getConfig("filter")
