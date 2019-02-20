@@ -22,7 +22,6 @@ trait FilersHttpApi extends TsComponent {
 
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
-  val log: LoggingAdapter
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
 
@@ -36,7 +35,7 @@ trait FilersHttpApi extends TsComponent {
           ts <- tsRepository.getAllSheets()
         } yield {
           ts.map(tsEntity =>
-              HmdaFiler(tsEntity.lei, tsEntity.name, tsEntity.year.toString))
+              HmdaFiler(tsEntity.lei, tsEntity.institutionName, tsEntity.year.toString))
             .toSet
         }
 
