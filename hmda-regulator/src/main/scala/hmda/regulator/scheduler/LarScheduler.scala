@@ -82,29 +82,24 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
 
-      try {
-        val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
-          larRepository.getAllLARs(bankFilterList)
-        val allResultsSource: Source[LarEntityImpl, NotUsed] =
-          Source.fromPublisher(allResultsPublisher)
+      val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
+        larRepository.getAllLARs(bankFilterList)
+      val allResultsSource: Source[LarEntityImpl, NotUsed] =
+        Source.fromPublisher(allResultsPublisher)
 
-        var results: Future[MultipartUploadResult] = allResultsSource
-          .map(larEntity => larEntity.toPSV + "\n")
-          .map(s => ByteString(s))
-          .runWith(s3Sink)
+      var results: Future[MultipartUploadResult] = allResultsSource
+        .map(larEntity => larEntity.toPSV + "\n")
+        .map(s => ByteString(s))
+        .runWith(s3Sink)
 
-        results onComplete {
-          case Success(result) => {
-            log.info(
-              "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
-          }
-          case Failure(t) =>
-            println("An error has occurred getting LAR Data in Future: " + t.getMessage)
-
+      results onComplete {
+        case Success(result) => {
+          log.info(
+            "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         }
-      } catch {
-        case e: Exception =>
-          println("An error has occurred getting LAR Data: " + e.getMessage)
+        case Failure(t) =>
+          println(
+            "An error has occurred getting LAR Data in Future: " + t.getMessage)
       }
   }
 }
