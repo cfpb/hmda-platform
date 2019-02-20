@@ -144,7 +144,6 @@ object ValidationFlow {
       val affectedFields = EditDescriptionLookup.lookupFields(error.editName)
       val fieldMap =
         ListMap(affectedFields.map(field => (field, lar.valueOf(field))): _*)
-      print(fieldMap)
       error.copyWithFields(fieldMap)
     })
   }
