@@ -4,19 +4,19 @@ import java.io.NotSerializableException
 
 import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
-import akka.serialization.SerializerWithStringManifest
 import akka.actor.typed.scaladsl.adapter._
+import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.EditDetailsCommands.{
   GetEditDetails,
   GetEditRowCount,
   PersistEditDetails
 }
-import EditDetailsCommandsProtobufConverter._
 import hmda.persistence.serialization.edit.details.commands.{
   GetEditDetailsMessage,
   GetEditRowCountMessage,
   PersistEditDetailsMessage
 }
+import hmda.serialization.submission.EditDetailsCommandsProtobufConverter._
 
 class EditDetailsCommandsSerializer(system: ExtendedActorSystem)
     extends SerializerWithStringManifest {

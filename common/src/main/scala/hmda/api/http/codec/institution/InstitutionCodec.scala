@@ -1,12 +1,12 @@
 package hmda.api.http.codec.institution
 
+import hmda.api.http.codec.institution.ParentCodec._
+import hmda.api.http.codec.institution.RespondentCodec._
+import hmda.api.http.codec.institution.TopHolderCodec._
 import hmda.model.institution._
-import io.circe.syntax._
 import io.circe.Decoder.Result
+import io.circe.syntax._
 import io.circe.{Decoder, Encoder, HCursor, Json}
-import RespondentCodec._
-import ParentCodec._
-import TopHolderCodec._
 
 object InstitutionCodec {
 

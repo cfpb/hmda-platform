@@ -2,6 +2,7 @@ package hmda.serialization.validation
 
 import hmda.model.validation._
 import org.scalacheck.Gen
+
 import scala.collection.immutable._
 
 object ValidationErrorGenerator {

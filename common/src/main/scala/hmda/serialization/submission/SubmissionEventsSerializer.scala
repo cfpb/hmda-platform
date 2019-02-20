@@ -8,12 +8,12 @@ import hmda.messages.submission.SubmissionEvents.{
   SubmissionModified,
   SubmissionNotExists
 }
-import SubmissionEventsProtobufConverter._
 import hmda.persistence.serialization.submission.events.{
   SubmissionCreatedMessage,
   SubmissionModifiedMessage,
   SubmissionNotExistsMessage
 }
+import hmda.serialization.submission.SubmissionEventsProtobufConverter._
 
 class SubmissionEventsSerializer extends SerializerWithStringManifest {
 

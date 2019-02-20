@@ -13,11 +13,11 @@ import hmda.persistence.serialization.submission.commands.{
   ModifySubmissionMessage,
   SubmissionStopMessage
 }
-import SubmissionProtobufConverter._
 import hmda.persistence.serialization.submission.{
   SubmissionIdMessage,
   SubmissionMessage
 }
+import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object SubmissionCommandsProtobufConverter {
 

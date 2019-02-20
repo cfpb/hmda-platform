@@ -2,8 +2,7 @@ package hmda.auth
 
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model.headers.{Authorization, OAuth2BearerToken}
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Directives.reject
+import akka.http.scaladsl.server.Directives.{reject, _}
 import akka.http.scaladsl.server._
 import com.typesafe.config.ConfigFactory
 

@@ -12,10 +12,10 @@ import hmda.persistence.serialization.filing.events.{
   SubmissionAddedMessage,
   SubmissionUpdatedMessage
 }
-import FilingProtobufConverter._
-import hmda.serialization.submission.SubmissionProtobufConverter._
 import hmda.persistence.serialization.filing.{FilingMessage, events}
 import hmda.persistence.serialization.submission.SubmissionMessage
+import hmda.serialization.filing.FilingProtobufConverter._
+import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object FilingEventsProtobufConverter {
 
