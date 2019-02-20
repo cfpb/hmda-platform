@@ -9,7 +9,12 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
-import hmda.analytics.query.{LarComponent, LarConverter, TransmittalSheetComponent, TransmittalSheetConverter}
+import hmda.query.ts.TransmittalSheetConverter
+import hmda.analytics.query.{
+  LarComponent,
+  LarConverter,
+  TransmittalSheetComponent
+}
 import hmda.messages.pubsub.HmdaTopics.{analyticsTopic, signTopic}
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.model.filing.submission.SubmissionId
@@ -106,7 +111,7 @@ object HmdaAnalyticsApp
         .map(s => TsCsvParser(s))
         .map(_.getOrElse(TransmittalSheet()))
         .filter(t => t.LEI != "" && t.institutionName != "")
-        .map(ts => TransmittalSheetConverter(ts))
+        .map(ts => TransmittalSheetConverter(ts, submissionId.toString))
         .mapAsync(1) { ts =>
           for {
 
@@ -126,7 +131,7 @@ object HmdaAnalyticsApp
         .map(s => TsCsvParser(s))
         .map(_.getOrElse(TransmittalSheet()))
         .filter(t => t.LEI != "" && t.institutionName != "")
-        .map(ts => TransmittalSheetConverter(ts))
+        .map(ts => TransmittalSheetConverter(ts, submissionId.toString))
         .mapAsync(1) { ts =>
           for {
 

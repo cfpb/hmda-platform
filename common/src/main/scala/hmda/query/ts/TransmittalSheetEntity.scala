@@ -1,4 +1,4 @@
-package hmda.analytics.query
+package hmda.query.ts
 
 case class TransmittalSheetEntity(
     lei: String = "",
@@ -16,6 +16,16 @@ case class TransmittalSheetEntity(
     agency: Int = 0,
     totalLines: Int = 0,
     taxId: String = "",
+    submissionId: String = ""
 ) {
   def isEmpty: Boolean = lei == ""
+
+  def toPSV: String = {
+    s"$id|$institutionName|$year|" +
+      s"$quarter|$name|$phone|" +
+      s"$email|$street|$city|" +
+      s"$state|$zipCode|$agency|" +
+      s"$totalLines|$taxId|$lei"
+
+  }
 }

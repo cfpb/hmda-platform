@@ -4,7 +4,11 @@ import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
 import akka.actor.typed.scaladsl.adapter._
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.projection.CommonProjectionMessages.{GetOffset, OffsetSaved, SaveOffset}
+import hmda.messages.projection.CommonProjectionMessages.{
+  GetOffset,
+  OffsetSaved,
+  SaveOffset
+}
 import hmda.messages.projection.projection.OffsetSavedMessage
 import hmda.serialization.projection.ProjectionProtobufConverter._
 

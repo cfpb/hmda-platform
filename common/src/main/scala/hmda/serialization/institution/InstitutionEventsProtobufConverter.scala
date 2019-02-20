@@ -4,7 +4,11 @@ import hmda.messages.institution.InstitutionEvents._
 import hmda.persistence.serialization.filing.FilingMessage
 import hmda.persistence.serialization.institution.InstitutionMessage
 import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField
-import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField.{InstitutionCreatedField, InstitutionDeletedField, InstitutionModifiedField}
+import hmda.persistence.serialization.institution.events.InstitutionKafkaEventMessage.InstitutionEventField.{
+  InstitutionCreatedField,
+  InstitutionDeletedField,
+  InstitutionModifiedField
+}
 import hmda.persistence.serialization.institution.events._
 import hmda.serialization.filing.FilingProtobufConverter._
 import hmda.serialization.institution.InstitutionProtobufConverter._

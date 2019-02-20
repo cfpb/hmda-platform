@@ -1,6 +1,11 @@
 package hmda.model.filing.lar
 
-import hmda.model.filing.lar.enums.{InvalidRaceCode, InvalidRaceObservedCode, RaceEnum, RaceObservedEnum}
+import hmda.model.filing.lar.enums.{
+  InvalidRaceCode,
+  InvalidRaceObservedCode,
+  RaceEnum,
+  RaceObservedEnum
+}
 
 case class Race(
     race1: RaceEnum = InvalidRaceCode,

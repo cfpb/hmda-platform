@@ -1,8 +1,19 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.SubmissionEvents.{SubmissionCreated, SubmissionModified, SubmissionNotExists}
-import hmda.persistence.serialization.submission.events.{SubmissionCreatedMessage, SubmissionModifiedMessage, SubmissionNotExistsMessage}
-import hmda.persistence.serialization.submission.{SubmissionIdMessage, SubmissionMessage}
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionCreated,
+  SubmissionModified,
+  SubmissionNotExists
+}
+import hmda.persistence.serialization.submission.events.{
+  SubmissionCreatedMessage,
+  SubmissionModifiedMessage,
+  SubmissionNotExistsMessage
+}
+import hmda.persistence.serialization.submission.{
+  SubmissionIdMessage,
+  SubmissionMessage
+}
 import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object SubmissionEventsProtobufConverter {

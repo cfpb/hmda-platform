@@ -1,12 +1,26 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.SubmissionEvents.{SubmissionCreated, SubmissionModified, SubmissionNotExists}
-import hmda.messages.submission.SubmissionManagerCommands.{UpdateSubmissionStatus, WrappedSubmissionEventResponse}
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionCreated,
+  SubmissionModified,
+  SubmissionNotExists
+}
+import hmda.messages.submission.SubmissionManagerCommands.{
+  UpdateSubmissionStatus,
+  WrappedSubmissionEventResponse
+}
 import hmda.model.filing.submission.SubmissionId
 import hmda.persistence.serialization.submission.SubmissionMessage
 import hmda.persistence.serialization.submissionmanager.commands.WrappedSubmissionEventResponseMessage.Sub
-import hmda.persistence.serialization.submissionmanager.commands.WrappedSubmissionEventResponseMessage.Sub.{SubmissionCreatedField, SubmissionModifiedField, SubmissionNotExistsField}
-import hmda.persistence.serialization.submissionmanager.commands.{UpdateSubmissionStatusMessage, WrappedSubmissionEventResponseMessage}
+import hmda.persistence.serialization.submissionmanager.commands.WrappedSubmissionEventResponseMessage.Sub.{
+  SubmissionCreatedField,
+  SubmissionModifiedField,
+  SubmissionNotExistsField
+}
+import hmda.persistence.serialization.submissionmanager.commands.{
+  UpdateSubmissionStatusMessage,
+  WrappedSubmissionEventResponseMessage
+}
 import hmda.serialization.submission.SubmissionEventsProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
 

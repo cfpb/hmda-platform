@@ -4,7 +4,7 @@ import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.regulator.query.lar.{LarEntityImpl, _}
 import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
-import hmda.regulator.query.ts.TransmittalSheetEntity
+import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -152,6 +152,7 @@ trait RegulatorComponent {
     def agency = column[Int]("agency")
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
+    def submissionId = column[String]("submission_id")
 
     override def * =
       (
@@ -169,7 +170,8 @@ trait RegulatorComponent {
         zipCode,
         agency,
         totalLines,
-        taxId
+        taxId,
+        submissionId
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 

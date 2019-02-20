@@ -11,10 +11,16 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import com.typesafe.config.ConfigFactory
 import hmda.messages.institution.InstitutionEvents.InstitutionKafkaEvent
-import hmda.serialization.kafka.{InstitutionKafkaEventsDeserializer, InstitutionKafkaEventsSerializer}
+import hmda.serialization.kafka.{
+  InstitutionKafkaEventsDeserializer,
+  InstitutionKafkaEventsSerializer
+}
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
-import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializer}
+import org.apache.kafka.common.serialization.{
+  StringDeserializer,
+  StringSerializer
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 
