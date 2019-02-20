@@ -42,11 +42,11 @@ ingress:
 
 resources:
   limits:
-    memory: "4200Mi"
-    cpu: "2"
+    memory: "6200Mi"
+    cpu: "4"
   requests:
-    memory: "4200Mi"
-    cpu: "1"
+    memory: "6200Mi"
+    cpu: "2"
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -71,3 +71,7 @@ aws:
 
 filter:
     bankfilterlist: BANK1LEIFORTEST12345,BANK3LEIFORTEST12345,BANK4LEIFORTEST12345,999999LE3ZOZXUS7W648,28133080042813308004,B90YWS6AFX2LGWOXJ1LD
+schedule:
+  ts: "\"0 10 06 * * ?\""
+  panel: "\"0 20 06 * * ?\""
+  lar: "\"0 55 05 * * ?\""

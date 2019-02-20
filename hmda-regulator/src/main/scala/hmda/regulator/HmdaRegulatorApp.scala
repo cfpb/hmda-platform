@@ -26,9 +26,13 @@ object HmdaRegulatorApp extends App {
   val larTimer = config.getString("akka.LarScheduler")
   val tsTimer = config.getString("akka.TsScheduler")
 
+  log.info("Panel Timer: " + panelTimer)
+  log.info("LAR Timer: " + larTimer)
+  log.info("TS Timer: " + tsTimer)
+
   val panelActorSystem =
     ActorSystem("panelTask",
-                ConfigFactory.parseString(panelTimer).withFallback(config))
+      ConfigFactory.parseString(panelTimer).withFallback(config))
   panelActorSystem.actorOf(Props[PanelScheduler], "PanelScheduler")
 
   val larActorSystem =
@@ -38,4 +42,5 @@ object HmdaRegulatorApp extends App {
   val tsActorSystem = ActorSystem("tsTask", ConfigFactory.parseString(tsTimer))
   tsActorSystem.actorOf(Props[TsScheduler], "TsScheduler")
 
+}
 }

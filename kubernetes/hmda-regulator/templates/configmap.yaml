@@ -15,3 +15,12 @@ metadata:
   name: bank-filter-configmap
 data:
   bank-filter-list: "{{ .Values.filter.bankfilterlist }}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: regulator-config-schedule
+data:
+  ts: "{{ .Values.schedule.ts }}"
+  panel: "{{ .Values.schedule.panel }}"
+  lar: "{{ .Values.schedule.lar }}"
