@@ -35,7 +35,7 @@ object FilersCodec {
   implicit val HmdaFilerResponseEncoder: Encoder[HmdaFilerResponse] =
     new Encoder[HmdaFilerResponse] {
       override def apply(a: HmdaFilerResponse): Json = Json.obj(
-        ("institutions", a.hmdaFilers.asJson)
+        ("institutions", a.institutions.asJson)
       )
     }
 
