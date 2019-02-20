@@ -14,6 +14,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
+import hmda.util.streams.FlowUtils.framing
 
 sealed trait ModifiedLarCommand
 case class UploadToS3(submissionId: SubmissionId) extends ModifiedLarCommand
@@ -79,6 +80,10 @@ object ModifiedLarPublisher {
 
           readRawData(submissionId)
             .map(l => l.data)
+            .map(ByteString(_))
+            .via(framing("\n"))
+            .map(_.utf8String)
+            .map(_.trim)
             .drop(1)
             .map(s => ModifiedLarCsvParser(s).toCSV + "\n")
             .map(s => ByteString(s))
