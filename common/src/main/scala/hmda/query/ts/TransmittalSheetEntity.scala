@@ -16,7 +16,7 @@ case class TransmittalSheetEntity(
     agency: Int = 0,
     totalLines: Int = 0,
     taxId: String = "",
-    submissionId: String = ""
+    submissionId: Option[String]
 ) {
   def isEmpty: Boolean = lei == ""
 

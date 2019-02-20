@@ -98,7 +98,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
             "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         }
         case Failure(t) =>
-          println(
+          log.info(
             "An error has occurred getting LAR Data in Future: " + t.getMessage)
       }
   }

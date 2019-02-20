@@ -4,7 +4,7 @@ import hmda.model.filing.ts.TransmittalSheet
 
 object TransmittalSheetConverter {
   def apply(ts: TransmittalSheet,
-            submissionId: String): TransmittalSheetEntity = {
+            submissionId: Option[String]): TransmittalSheetEntity = {
     TransmittalSheetEntity(
       ts.LEI,
       ts.id,
