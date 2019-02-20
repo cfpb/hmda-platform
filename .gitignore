@@ -84,6 +84,9 @@ src_managed/
 project/boot/
 project/plugins/project/
 
+#lightbend
+.lightbend/
+
 ## Scala-IDE specific
 .scala_dependencies
 .worksheet
