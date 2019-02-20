@@ -95,7 +95,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val fileName = s"$formattedDate" + s"$year" + "_lar" + ".txt"
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
-      
+
       try {
         val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
           larRepository.getAllLARs(bankFilterList)
