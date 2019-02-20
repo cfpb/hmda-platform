@@ -5,7 +5,6 @@ import hmda.model.filing.lar.enums._
 
 import scala.language.implicitConversions
 import scala.math.BigDecimal.RoundingMode
-import Math._
 
 case class Msa(
     id: String = "",

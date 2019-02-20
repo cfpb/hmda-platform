@@ -3,11 +3,7 @@ package hmda.serialization.validation
 import hmda.messages.submission.SubmissionProcessingEvents.HmdaRowValidatedError
 import hmda.model.validation._
 import hmda.persistence.serialization.submission.processing.events.HmdaRowValidatedErrorMessage
-import hmda.persistence.serialization.validation.{
-  ValidationErrorEntityMessage,
-  ValidationErrorMessage,
-  ValidationErrorTypeMessage
-}
+import hmda.persistence.serialization.validation.{ValidationErrorEntityMessage, ValidationErrorMessage, ValidationErrorTypeMessage}
 
 import scala.collection.immutable._
 

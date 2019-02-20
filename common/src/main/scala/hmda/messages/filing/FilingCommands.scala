@@ -3,11 +3,7 @@ package hmda.messages.filing
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.filing.FilingEvents.FilingCreated
-import hmda.model.filing.submission.{
-  Submission,
-  SubmissionId,
-  SubmissionSummary
-}
+import hmda.model.filing.submission.{Submission, SubmissionId}
 import hmda.model.filing.{Filing, FilingDetails, FilingStatus}
 
 object FilingCommands {

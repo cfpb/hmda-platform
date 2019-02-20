@@ -1,10 +1,10 @@
 package hmda.serialization.institution
 
-import hmda.persistence.serialization.institution.institutiondetail.InstitutionDetailMessage
-import hmda.serialization.filing.FilingProtobufConverter._
-import InstitutionProtobufConverter._
 import hmda.model.institution.InstitutionDetail
 import hmda.persistence.serialization.institution.InstitutionMessage
+import hmda.persistence.serialization.institution.institutiondetail.InstitutionDetailMessage
+import hmda.serialization.filing.FilingProtobufConverter._
+import hmda.serialization.institution.InstitutionProtobufConverter._
 object InstitutionDetailProtobufConverter {
 
   def institutionDetailToProtobuf(

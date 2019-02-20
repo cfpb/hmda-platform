@@ -5,10 +5,10 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.headers.HttpEncodings._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import hmda.api.http.model.HmdaServiceStatus
-import org.scalatest.{MustMatchers, WordSpec}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.api.http.model.HmdaServiceStatus
 import io.circe.generic.auto._
+import org.scalatest.{MustMatchers, WordSpec}
 
 import scala.concurrent.ExecutionContext
 

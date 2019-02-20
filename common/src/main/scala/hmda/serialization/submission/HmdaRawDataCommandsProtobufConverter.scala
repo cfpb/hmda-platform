@@ -3,8 +3,8 @@ package hmda.serialization.submission
 import akka.actor.typed.ActorRefResolver
 import hmda.messages.submission.HmdaRawDataCommands.AddLine
 import hmda.persistence.serialization.raw.data.commands.AddLineMessage
-import SubmissionProtobufConverter._
 import hmda.persistence.serialization.submission.SubmissionIdMessage
+import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object HmdaRawDataCommandsProtobufConverter {
 

@@ -16,8 +16,6 @@ import hmda.persistence.util.CassandraUtil
 import hmda.publication.HmdaPublication
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
 import com.outworkers.phantom.dsl._
-import hmda.census.records.CensusRecords.parseCensusFile
-import hmda.model.census.Census
 
 object HmdaPlatform extends App {
 
