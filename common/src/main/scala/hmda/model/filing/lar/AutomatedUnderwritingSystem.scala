@@ -1,10 +1,7 @@
 package hmda.model.filing.lar
 
 import hmda.model.filing.PipeDelimited
-import hmda.model.filing.lar.enums.{
-  AutomatedUnderwritingSystemEnum,
-  InvalidAutomatedUnderwritingSystemCode
-}
+import hmda.model.filing.lar.enums.{AutomatedUnderwritingSystemEnum, InvalidAutomatedUnderwritingSystemCode}
 
 case class AutomatedUnderwritingSystem(
     aus1: AutomatedUnderwritingSystemEnum =

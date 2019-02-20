@@ -23,10 +23,10 @@ import hmda.model.filing.submission.SubmissionId
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.publication.lar.model.{Msa, MsaMap, MsaSummary}
 import hmda.query.HmdaQuery._
+import hmda.util.streams.FlowUtils.framing
 import io.circe.generic.auto._
 
 import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 sealed trait IrsPublisherCommand
@@ -120,6 +120,10 @@ object IrsPublisher {
               readRawData(submissionId)
                 .drop(1)
                 .map(l => l.data)
+                .map(ByteString(_))
+                .via(framing("\n"))
+                .map(_.utf8String)
+                .map(_.trim)
                 .map(s => LarCsvParser(s).getOrElse(LoanApplicationRegister()))
                 .mapAsyncUnordered(1)(lar =>
                   getCensus(lar.geography.tract)

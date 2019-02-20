@@ -1,12 +1,7 @@
 package hmda.serialization.institution
 
 import hmda.model.institution._
-import hmda.persistence.serialization.institution.{
-  InstitutionMessage,
-  ParentMessage,
-  RespondentMessage,
-  TopHolderMessage
-}
+import hmda.persistence.serialization.institution.{InstitutionMessage, ParentMessage, RespondentMessage, TopHolderMessage}
 
 object InstitutionProtobufConverter {
 

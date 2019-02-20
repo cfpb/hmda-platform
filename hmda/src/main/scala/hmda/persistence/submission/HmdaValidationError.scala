@@ -4,80 +4,53 @@ import java.math.BigInteger
 import java.security.MessageDigest
 import java.time.Instant
 
-import akka.actor.{ActorSystem, Scheduler}
-import akka.pattern.ask
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.actor.typed.scaladsl.Behaviors
+import akka.actor.typed.scaladsl.adapter._
 import akka.actor.typed.{ActorContext, ActorRef, Behavior}
+import akka.actor.{ActorSystem, Scheduler}
+import akka.cluster.sharding.typed.ShardingEnvelope
+import akka.cluster.sharding.typed.scaladsl.{ClusterSharding, EntityRef}
+import akka.pattern.ask
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
 import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
-import akka.stream.scaladsl.{Sink, Source}
+import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
+import akka.stream.ActorMaterializer
+import akka.stream.scaladsl.{Sink, Source, _}
+import akka.stream.typed.scaladsl.ActorFlow
 import akka.util.{ByteString, Timeout}
+import akka.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
+import hmda.HmdaPlatform
+import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
+import hmda.messages.institution.InstitutionEvents.InstitutionEvent
+import hmda.messages.pubsub.HmdaTopics._
+import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
+import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.submission._
-import hmda.model.processing.state.HmdaValidationErrorState
-import hmda.persistence.HmdaTypedPersistentActor
-import akka.actor.typed.scaladsl.adapter._
-import akka.cluster.sharding.typed.ShardingEnvelope
-import akka.cluster.sharding.typed.scaladsl.ClusterSharding
-import akka.stream.ActorMaterializer
-import akka.stream.typed.scaladsl.ActorFlow
-import hmda.messages.institution.InstitutionCommands.{
-  GetInstitution,
-  ModifyInstitution
-}
 import hmda.model.filing.ts.{TransmittalLar, TransmittalSheet}
 import hmda.model.institution.Institution
-import hmda.persistence.institution.InstitutionPersistence
-import hmda.validation.context.ValidationContext
-import hmda.parser.filing.ParserFlow._
-import hmda.validation.filing.ValidationFlow._
-import HmdaProcessingUtils.{
-  readRawData,
-  updateSubmissionReceipt,
-  updateSubmissionStatus
-}
-import EditDetailsConverter._
-import akka.{Done, NotUsed}
-import akka.cluster.sharding.typed.scaladsl.EntityRef
-import hmda.HmdaPlatform
-import hmda.HmdaPlatform.config
-import hmda.messages.institution.InstitutionEvents.{
-  InstitutionEvent,
-  InstitutionKafkaEvent,
-  InstitutionModified
-}
-import hmda.messages.submission.EditDetailsCommands.{
-  EditDetailsPersistenceCommand,
-  PersistEditDetails
-}
-import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
-import hmda.publication.KafkaUtils._
-import hmda.messages.pubsub.HmdaTopics._
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.processing.state.HmdaValidationErrorState
 import hmda.model.validation.{MacroValidationError, ValidationError}
+import hmda.parser.filing.ParserFlow._
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.parser.filing.ts.TsCsvParser
-import hmda.persistence.submission.repositories.SyntacticalDb
+import hmda.persistence.HmdaTypedPersistentActor
+import hmda.persistence.institution.InstitutionPersistence
+import hmda.persistence.submission.EditDetailsConverter._
+import hmda.persistence.submission.HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
+import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
+import hmda.validation.context.ValidationContext
 import hmda.validation.filing.MacroValidationFlow._
+import hmda.validation.filing.ValidationFlow._
 import hmda.validation.{AS, EC, MAT}
 
+import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
 import scala.util.{Failure, Success}
-import scala.collection.immutable
-import java.util.concurrent.TimeUnit
-
-import akka.actor._
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl._
-
-import scala.concurrent.duration._
-import scala.util.Random
 
 object HmdaValidationError
     extends HmdaTypedPersistentActor[SubmissionProcessingCommand,

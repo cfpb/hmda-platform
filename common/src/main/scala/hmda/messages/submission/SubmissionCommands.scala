@@ -2,10 +2,7 @@ package hmda.messages.submission
 
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
-import hmda.messages.submission.SubmissionEvents.{
-  SubmissionCreated,
-  SubmissionEvent
-}
+import hmda.messages.submission.SubmissionEvents.{SubmissionCreated, SubmissionEvent}
 import hmda.model.filing.submission.{Submission, SubmissionId}
 
 object SubmissionCommands {

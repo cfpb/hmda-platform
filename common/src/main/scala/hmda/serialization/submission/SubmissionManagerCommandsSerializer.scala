@@ -3,10 +3,7 @@ package hmda.serialization.submission
 import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.submission.SubmissionManagerCommands.{
-  UpdateSubmissionStatus,
-  WrappedSubmissionEventResponse
-}
+import hmda.messages.submission.SubmissionManagerCommands.{UpdateSubmissionStatus, WrappedSubmissionEventResponse}
 import hmda.serialization.submission.SubmissionManagerCommandsProtobufConverter._
 
 class SubmissionManagerCommandsSerializer extends SerializerWithStringManifest {

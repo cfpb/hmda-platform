@@ -1,9 +1,9 @@
 package hmda.serialization.filing
 
 import hmda.model.filing.FilingDetails
-import hmda.persistence.serialization.filing.filingdetails.FilingDetailsMessage
-import FilingProtobufConverter._
 import hmda.persistence.serialization.filing.FilingMessage
+import hmda.persistence.serialization.filing.filingdetails.FilingDetailsMessage
+import hmda.serialization.filing.FilingProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object FilingDetailsProtobufConverter {

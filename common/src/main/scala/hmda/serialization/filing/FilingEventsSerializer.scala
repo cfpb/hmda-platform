@@ -3,19 +3,9 @@ package hmda.serialization.filing
 import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.filing.FilingEvents.{
-  FilingCreated,
-  FilingStatusUpdated,
-  SubmissionAdded,
-  SubmissionUpdated
-}
-import FilingEventsProtobufConverter._
-import hmda.persistence.serialization.filing.events.{
-  FilingCreatedMessage,
-  FilingStatusUpdatedMessage,
-  SubmissionAddedMessage,
-  SubmissionUpdatedMessage
-}
+import hmda.messages.filing.FilingEvents.{FilingCreated, FilingStatusUpdated, SubmissionAdded, SubmissionUpdated}
+import hmda.persistence.serialization.filing.events.{FilingCreatedMessage, FilingStatusUpdatedMessage, SubmissionAddedMessage, SubmissionUpdatedMessage}
+import hmda.serialization.filing.FilingEventsProtobufConverter._
 
 class FilingEventsSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 106

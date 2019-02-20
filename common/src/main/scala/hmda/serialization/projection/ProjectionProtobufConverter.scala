@@ -4,16 +4,8 @@ import java.util.UUID
 
 import akka.actor.typed.ActorRefResolver
 import akka.persistence.query.TimeBasedUUID
-import hmda.messages.projection.CommonProjectionMessages.{
-  GetOffset,
-  OffsetSaved,
-  SaveOffset
-}
-import hmda.messages.projection.projection.{
-  GetOffsetMessage,
-  OffsetSavedMessage,
-  SaveOffsetMessage
-}
+import hmda.messages.projection.CommonProjectionMessages.{GetOffset, OffsetSaved, SaveOffset}
+import hmda.messages.projection.projection.{GetOffsetMessage, OffsetSavedMessage, SaveOffsetMessage}
 
 object ProjectionProtobufConverter {
 

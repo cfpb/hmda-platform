@@ -1,22 +1,12 @@
 package hmda.serialization.filing
 
-import hmda.messages.filing.FilingEvents.{
-  FilingCreated,
-  FilingStatusUpdated,
-  SubmissionAdded,
-  SubmissionUpdated
-}
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
+import hmda.messages.filing.FilingEvents.{FilingCreated, FilingStatusUpdated, SubmissionAdded, SubmissionUpdated}
 import hmda.model.filing.FilingGenerator._
 import hmda.model.submission.SubmissionGenerator._
-import FilingEventsProtobufConverter._
-import hmda.persistence.serialization.filing.events.{
-  FilingCreatedMessage,
-  FilingStatusUpdatedMessage,
-  SubmissionAddedMessage,
-  SubmissionUpdatedMessage
-}
+import hmda.persistence.serialization.filing.events.{FilingCreatedMessage, FilingStatusUpdatedMessage, SubmissionAddedMessage, SubmissionUpdatedMessage}
+import hmda.serialization.filing.FilingEventsProtobufConverter._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class FilingEventsProtobufConverterSpec
     extends PropSpec

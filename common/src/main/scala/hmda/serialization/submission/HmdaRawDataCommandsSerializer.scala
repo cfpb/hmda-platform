@@ -2,13 +2,13 @@ package hmda.serialization.submission
 
 import java.io.NotSerializableException
 
-import akka.serialization.SerializerWithStringManifest
-import HmdaRawDataCommandsProtobufConverter._
 import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
-import hmda.messages.submission.HmdaRawDataCommands.AddLine
 import akka.actor.typed.scaladsl.adapter._
+import akka.serialization.SerializerWithStringManifest
+import hmda.messages.submission.HmdaRawDataCommands.AddLine
 import hmda.persistence.serialization.raw.data.commands.AddLineMessage
+import hmda.serialization.submission.HmdaRawDataCommandsProtobufConverter._
 
 class HmdaRawDataCommandsSerializer(system: ExtendedActorSystem)
     extends SerializerWithStringManifest {
