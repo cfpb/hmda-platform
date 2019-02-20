@@ -1,9 +1,9 @@
 package hmda.parser.filing.lar
 
-import hmda.model.filing.lar.enums.LarCodeEnum
-import hmda.parser.ParserErrorModel.ParserValidationError
-import hmda.parser.LarParserValidationResult
 import cats.implicits._
+import hmda.model.filing.lar.enums.LarCodeEnum
+import hmda.parser.LarParserValidationResult
+import hmda.parser.ParserErrorModel.ParserValidationError
 
 import scala.util.{Failure, Success, Try}
 

@@ -1,20 +1,23 @@
 package hmda.serialization.submission
 
 import hmda.messages.submission.SubmissionProcessingEvents._
-import hmda.model.processing.state.{EditSummary, HmdaValidationErrorState}
-import hmda.model.processing.state.HmdaParserErrorState
+import hmda.model.filing.submission.SubmissionStatus
+import hmda.model.processing.state.{
+  EditSummary,
+  HmdaParserErrorState,
+  HmdaValidationErrorState
+}
+import hmda.model.validation.MacroValidationError
+import hmda.persistence.serialization.submission.SubmissionIdMessage
 import hmda.persistence.serialization.submission.processing.events.{
   HmdaParserErrorStateMessage,
   HmdaRowParsedCountMessage,
-  HmdaRowParsedErrorMessage
+  HmdaRowParsedErrorMessage,
+  _
 }
-import hmda.persistence.serialization.submission.processing.events._
-import hmda.serialization.validation.ValidationProtobufConverter._
-import SubmissionProtobufConverter._
-import hmda.model.filing.submission.SubmissionStatus
-import hmda.model.validation.MacroValidationError
-import hmda.persistence.serialization.submission.SubmissionIdMessage
 import hmda.persistence.serialization.validation.ValidationErrorMessage
+import hmda.serialization.submission.SubmissionProtobufConverter._
+import hmda.serialization.validation.ValidationProtobufConverter._
 
 object SubmissionProcessingEventsProtobufConverter {
 

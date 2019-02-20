@@ -7,11 +7,11 @@ import hmda.messages.submission.EditDetailsEvents.{
   EditDetailsAdded,
   EditDetailsRowCounted
 }
-import EditDetailsEventsProtobufConverter._
 import hmda.persistence.serialization.edit.details.events.{
   EditDetailsAddedMessage,
   EditDetailsRowCountedMessage
 }
+import hmda.serialization.submission.EditDetailsEventsProtobufConverter._
 
 class EditDetailsEventsSerializer extends SerializerWithStringManifest {
 

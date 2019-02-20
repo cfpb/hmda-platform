@@ -1,11 +1,6 @@
 package hmda.model.institution
 
-import hmda.generators.CommonGenerators.{
-  activityYearGen,
-  emailListGen,
-  leiGen,
-  stateGen
-}
+import hmda.generators.CommonGenerators.{activityYearGen, emailListGen, leiGen, stateGen}
 import org.scalacheck.Gen
 
 object InstitutionGenerators {

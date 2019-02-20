@@ -9,13 +9,13 @@ import hmda.messages.filing.FilingEvents.{
   SubmissionAdded,
   SubmissionUpdated
 }
-import FilingEventsProtobufConverter._
 import hmda.persistence.serialization.filing.events.{
   FilingCreatedMessage,
   FilingStatusUpdatedMessage,
   SubmissionAddedMessage,
   SubmissionUpdatedMessage
 }
+import hmda.serialization.filing.FilingEventsProtobufConverter._
 
 class FilingEventsSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 106

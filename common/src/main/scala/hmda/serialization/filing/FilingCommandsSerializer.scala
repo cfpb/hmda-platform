@@ -4,13 +4,13 @@ import java.io.NotSerializableException
 
 import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
-import akka.serialization.SerializerWithStringManifest
 import akka.actor.typed.scaladsl.adapter._
+import akka.serialization.SerializerWithStringManifest
 import hmda.messages.filing.FilingCommands._
 import hmda.model.filing.Filing
-import FilingCommandsProtobufConverter._
-import FilingProtobufConverter._
 import hmda.persistence.serialization.filing.FilingMessage
+import hmda.serialization.filing.FilingCommandsProtobufConverter._
+import hmda.serialization.filing.FilingProtobufConverter._
 
 class FilingCommandsSerializer(system: ExtendedActorSystem)
     extends SerializerWithStringManifest {

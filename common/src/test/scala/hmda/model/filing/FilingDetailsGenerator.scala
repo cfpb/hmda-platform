@@ -1,6 +1,6 @@
 package hmda.model.filing
 
-import FilingGenerator._
+import hmda.model.filing.FilingGenerator._
 import hmda.model.submission.SubmissionGenerator._
 import org.scalacheck.Gen
 

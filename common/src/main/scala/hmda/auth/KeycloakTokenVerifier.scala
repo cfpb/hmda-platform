@@ -6,14 +6,14 @@ import akka.http.scaladsl.model.HttpRequest
 import akka.stream.ActorMaterializer
 import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
+import io.circe.generic.auto._
+import io.circe.parser.decode
 import org.keycloak.RSATokenVerifier
 import org.keycloak.adapters.KeycloakDeployment
 import org.keycloak.representations.AccessToken
-import io.circe.parser.decode
-import io.circe.generic.auto._
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 class KeycloakTokenVerifier(keycloakDeployment: KeycloakDeployment)(
     implicit system: ActorSystem,

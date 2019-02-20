@@ -17,11 +17,11 @@ import hmda.persistence.serialization.submissionmanager.commands.WrappedSubmissi
   SubmissionModifiedField,
   SubmissionNotExistsField
 }
-import hmda.serialization.submission.SubmissionEventsProtobufConverter._
 import hmda.persistence.serialization.submissionmanager.commands.{
   UpdateSubmissionStatusMessage,
   WrappedSubmissionEventResponseMessage
 }
+import hmda.serialization.submission.SubmissionEventsProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
 
 object SubmissionManagerCommandsProtobufConverter {

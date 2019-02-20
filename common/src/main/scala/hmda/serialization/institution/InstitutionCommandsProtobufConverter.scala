@@ -3,12 +3,12 @@ package hmda.serialization.institution
 import akka.actor.typed.ActorRefResolver
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
-import hmda.persistence.serialization.institution.InstitutionMessage
-import hmda.persistence.serialization.institution.commands._
-import InstitutionProtobufConverter._
 import hmda.model.institution.InstitutionDetail
 import hmda.persistence.serialization.filing.FilingMessage
+import hmda.persistence.serialization.institution.InstitutionMessage
+import hmda.persistence.serialization.institution.commands._
 import hmda.serialization.filing.FilingProtobufConverter._
+import hmda.serialization.institution.InstitutionProtobufConverter._
 
 object InstitutionCommandsProtobufConverter {
 

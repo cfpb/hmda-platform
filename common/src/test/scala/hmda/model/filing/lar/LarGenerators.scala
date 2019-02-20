@@ -3,10 +3,10 @@ package hmda.model.filing.lar
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import hmda.model.census.Census
-import org.scalacheck.Gen
 import hmda.generators.CommonGenerators._
+import hmda.model.census.Census
 import hmda.model.filing.lar.enums.LarEnumGenerators._
+import org.scalacheck.Gen
 
 import scala.language.implicitConversions
 

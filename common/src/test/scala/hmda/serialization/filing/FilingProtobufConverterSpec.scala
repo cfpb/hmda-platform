@@ -1,10 +1,10 @@
 package hmda.serialization.filing
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
 import hmda.model.filing.FilingGenerator._
-import FilingProtobufConverter._
 import hmda.persistence.serialization.filing.FilingMessage
+import hmda.serialization.filing.FilingProtobufConverter._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class FilingProtobufConverterSpec
     extends PropSpec

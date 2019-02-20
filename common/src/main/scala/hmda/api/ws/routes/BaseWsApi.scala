@@ -17,8 +17,8 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Flow
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import hmda.api.http.model.HmdaServiceStatus
-import io.circe.syntax._
 import io.circe.generic.auto._
+import io.circe.syntax._
 
 trait BaseWsApi {
 

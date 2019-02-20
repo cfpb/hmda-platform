@@ -1,10 +1,10 @@
 package hmda.serialization.institution
 
-import org.scalatest.{MustMatchers, PropSpec}
-import org.scalatest.prop.PropertyChecks
 import hmda.model.institution.InstitutionDetailGenerator._
-import InstitutionDetailProtobufConverter._
 import hmda.persistence.serialization.institution.institutiondetail.InstitutionDetailMessage
+import hmda.serialization.institution.InstitutionDetailProtobufConverter._
+import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class InstitutionDetailProtobufConverterSpec
     extends PropSpec

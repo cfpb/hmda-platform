@@ -1,8 +1,8 @@
 package hmda.parser.institution
 
 import hmda.model.institution.InstitutionGenerators._
-import org.scalatest.{MustMatchers, PropSpec}
 import org.scalatest.prop.PropertyChecks
+import org.scalatest.{MustMatchers, PropSpec}
 
 class InstitutionCsvParserSpec
     extends PropSpec

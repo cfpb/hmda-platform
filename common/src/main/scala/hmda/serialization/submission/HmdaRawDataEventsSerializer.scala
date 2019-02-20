@@ -4,12 +4,12 @@ import java.io.NotSerializableException
 
 import akka.serialization.SerializerWithStringManifest
 import hmda.messages.submission.HmdaRawDataEvents.LineAdded
-import HmdaRawDataEventsProtobufConverter._
 import hmda.model.processing.state.HmdaRawDataState
 import hmda.persistence.serialization.raw.data.events.{
   HmdaRawDataStateMessage,
   LineAddedMessage
 }
+import hmda.serialization.submission.HmdaRawDataEventsProtobufConverter._
 
 class HmdaRawDataEventsSerializer extends SerializerWithStringManifest {
   override def identifier: Int = 114
