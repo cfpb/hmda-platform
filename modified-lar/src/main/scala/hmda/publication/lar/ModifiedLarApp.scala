@@ -49,7 +49,7 @@ object ModifiedLarApp extends App {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val ec: ExecutionContextExecutor = system.dispatcher
   implicit val scheduler: Scheduler = system.scheduler
-  implicit val timeout: Timeout = Timeout(5.seconds)
+  implicit val timeout: Timeout = Timeout(1.hour)
   val config = ConfigFactory.load()
   val censusUrl = "http://" + config.getString("hmda.census.http.host") + ":" + config
     .getString("hmda.census.http.port")

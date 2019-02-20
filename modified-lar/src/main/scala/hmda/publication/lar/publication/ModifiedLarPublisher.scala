@@ -154,7 +154,7 @@ object ModifiedLarPublisher {
 
             case Failure(exception) =>
               log.error(
-                s"Failed to delete and persist records for $submissionId",
+                s"Failed to delete and persist records for $submissionId {}",
                 exception)
               respondTo ! PersistModifiedLarResult(submissionId,
                                                    UploadFailed(exception))
