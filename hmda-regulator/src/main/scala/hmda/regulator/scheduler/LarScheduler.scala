@@ -1,17 +1,14 @@
 package hmda.regulator.scheduler
 
-import java.sql.Timestamp
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Calendar
 
-import akka.{Done, NotUsed}
+import akka.NotUsed
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.s3.impl.{ListBucketVersion1, ListBucketVersion2}
+import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
@@ -24,11 +21,8 @@ import hmda.regulator.query.lar.LarEntityImpl
 import hmda.regulator.scheduler.schedules.Schedules.LarScheduler
 import slick.basic.DatabasePublisher
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
-import scala.concurrent.duration._
 
 class LarScheduler extends HmdaActor with RegulatorComponent {
 
