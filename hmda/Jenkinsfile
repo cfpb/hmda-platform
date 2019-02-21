@@ -84,24 +84,21 @@ volumes: [
       }
 
       container('docker') {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub',
-          usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
           withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'hmda-platform-jenkins-service',
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               if (gitTagged || gitBranch == "master" || isDeployPR) {
-                sh "docker build --rm -t=${env.DOCKER_HUB_USER}/hmda-platform:internal hmda/target/docker/stage"
+                sh "docker build --rm -t=hmda/hmda-platform:internal hmda/target/docker/stage"
 
                 //Push to DTR
                 sh """
-                  docker tag ${env.DOCKER_HUB_USER}/hmda-platform:internal ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                  docker tag hmda/hmda-platform:internal ${DOCKER_REGISTRY_URL}/hmda/hmda-platform:${env.DOCKER_TAG}
                   docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD}
-                  docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/hmda-platform:${env.DOCKER_TAG}
+                  docker push ${DOCKER_REGISTRY_URL}/hmda/hmda-platform:${env.DOCKER_TAG}
                 """
               }
             }
           }
-        }
       }
 
 
