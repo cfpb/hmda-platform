@@ -103,8 +103,8 @@ object HmdaAnalyticsApp
       .run()
   }
   private def addTs(submissionId: SubmissionId): Future[Done] = {
-    var submissionIdVal = None: Option[String]
-    submissionIdVal = Some(submissionId.toString)
+    var submissionIdVar = None: Option[String]
+    submissionIdVar = Some(submissionId.toString)
     def deleteTsRow: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
@@ -112,7 +112,7 @@ object HmdaAnalyticsApp
         .map(s => TsCsvParser(s))
         .map(_.getOrElse(TransmittalSheet()))
         .filter(t => t.LEI != "" && t.institutionName != "")
-        .map(ts => TransmittalSheetConverter(ts, submissionIdVal))
+        .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
 
@@ -132,7 +132,7 @@ object HmdaAnalyticsApp
         .map(s => TsCsvParser(s))
         .map(_.getOrElse(TransmittalSheet()))
         .filter(t => t.LEI != "" && t.institutionName != "")
-        .map(ts => TransmittalSheetConverter(ts, submissionIdVal))
+        .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
 
