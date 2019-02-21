@@ -106,6 +106,21 @@ spec:
               secretKeyRef:
                 name: inst-postgres-credentials
                 key: url
+          - name: TS_SCHEDULE
+            valueFrom:
+              configMapKeyRef:
+                name: regulator-config-schedule
+                key: ts
+          - name: LAR_SCHEDULE
+            valueFrom:
+              configMapKeyRef:
+                name: regulator-config-schedule
+                key: lar
+          - name: PANEL_SCHEDULE
+            valueFrom:
+              configMapKeyRef:
+                name: regulator-config-schedule
+                key: panel
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

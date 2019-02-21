@@ -22,13 +22,13 @@ trait TransmittalSheetSetup extends TransmittalSheetComponent {
                                         .getOrElse(TransmittalSheet())
                                         .copy(LEI = "B90YWS6AFX2LGWOXJ1LD")
                                         .copy(institutionName = "Bank 0"),
-                                      "bank0-2018-1")
+                                      Some("bank0-2018-1"))
 
   val ts1 = TransmittalSheetConverter(tsGen.sample
                                         .getOrElse(TransmittalSheet())
                                         .copy(LEI = "BANK1LEIFORTEST12345")
                                         .copy(institutionName = "Bank 1"),
-                                      "bank1-2018-1")
+                                      Some("bank1-2018-1"))
 
   def setup(): Unit = {
     import dbConfig.profile.api._
