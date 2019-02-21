@@ -26,6 +26,10 @@ object HmdaRegulatorApp extends App {
   val larTimer = config.getString("akka.LarScheduler")
   val tsTimer = config.getString("akka.TsScheduler")
 
+  log.info ("Panel Timer: " + panelTimer)
+  log.info ("larTimer: " + larTimer)
+  log.info ("tsTimer: " + tsTimer)
+
   val panelActorSystem =
     ActorSystem("panelTask",
                 ConfigFactory.parseString(panelTimer).withFallback(config))
