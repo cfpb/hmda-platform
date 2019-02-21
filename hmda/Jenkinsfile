@@ -107,7 +107,7 @@ volumes: [
 
     stage('Deploy') {
         withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
-          if (true) {
+          if (env.BRANCH_NAME == 'master' || isDeployPR) {
             container('helm') {
               sh """
                 helm upgrade --install --force \
