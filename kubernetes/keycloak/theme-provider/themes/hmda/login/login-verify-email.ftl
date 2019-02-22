@@ -11,6 +11,7 @@
             <h3 style="margin-top: 0;">Verify your email to activate your account</h3>
             <p>You have been sent an email with a verification code.</p>
             <p>This code will expire in 60 minutes. If you would like a new code or if you haven't received the email, <strong><a style="text-transform: lowercase;" href="${url.loginAction}">${msg("doClickHere")}</a></strong> to send a new one.</p>
+            <p>Please be aware it may take up to 30 minutes to receive the verification code.</p>
           </div>
         </div>
 
