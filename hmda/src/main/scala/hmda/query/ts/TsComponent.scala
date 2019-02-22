@@ -30,7 +30,7 @@ trait TsComponent {
     def agency = column[Int]("agency")
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
-    def submissionId = column[String]("tax_id")
+    def submissionId = column[String]("submission_id")
 
     override def * =
       (
