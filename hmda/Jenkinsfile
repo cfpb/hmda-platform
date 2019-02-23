@@ -112,7 +112,7 @@ volumes: [
                 --values=kubernetes/hmda-platform/values.yaml \
                 --set image.repository=${DOCKER_REGISTRY_URL}/hmda/hmda-platform \
                 --set commitId=$shortCommit \
-                --set image.tag="latest" \
+                --set image.tag=${env.DOCKER_TAG} \
                 --set image.pullPolicy=Always \
                 hmda-platform kubernetes/hmda-platform
               """
