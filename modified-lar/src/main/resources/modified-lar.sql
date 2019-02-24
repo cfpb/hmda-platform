@@ -94,7 +94,7 @@ CREATE TABLE public.modifiedlar2018
     one_to_four_fam_units character varying,
     -- 1 msamd also comes from census_2018_MSAMD_name.txt
     msa_md integer,
-    msa_md character varying,
+    msa_md_name character varying, -- for publication
     -- TODO: 1 flag logic for this flag is TBD
     loan_flag character varying,
     created_at timestamp default current_timestamp,
