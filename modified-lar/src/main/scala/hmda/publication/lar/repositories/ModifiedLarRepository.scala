@@ -122,6 +122,7 @@ class ModifiedLarRepository(tableName: String,
             owner_occupied_units,
             one_to_four_fam_units,
             msa_md,
+            msa_md_name,
             submission_id
           )
           VALUES (
@@ -217,6 +218,7 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.occupiedUnits},
             ${input.census.oneToFourFamilyUnits},
             ${input.census.msaMd},
+            ${input.census.name}
             ${submissionId}
           )
           """)
