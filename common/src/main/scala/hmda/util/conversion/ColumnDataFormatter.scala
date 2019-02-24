@@ -3,7 +3,7 @@ package hmda.util.conversion
 final case object ColumnDataFormatter {
 
 
-  def controlCharactersFilter(value: String): String={
+  def controlCharacterFilter(value: String): String={
     if (!value.isEmpty){
       value.filter(_ >= ' ').toString
     }

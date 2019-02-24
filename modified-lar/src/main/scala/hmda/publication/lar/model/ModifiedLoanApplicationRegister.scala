@@ -109,13 +109,7 @@ case class ModifiedLoanApplicationRegister(
       s"$age|$ageGreaterThanOrEqual62|$coAge|$coAgeGreaterThanOrEqual62|$income|" +
       s"$purchaserType|$rateSpread|$hoepaStatus|" +
       s"$lienStatus|$applicantCredisScoreModel|$coApplicantCreditScoreModel|" +
-      ColumnDataFormatter.controlCharactersFilter(denial1)+
-      "|" +
-      ColumnDataFormatter.controlCharactersFilter(denial2)+
-      "|" +
-      ColumnDataFormatter.controlCharactersFilter(denial3)+
-      "|" +
-      ColumnDataFormatter.controlCharactersFilter(denial4)+
+      ColumnDataFormatter.controlCharacterFilter(s"$denial1|$denial2|$denial3|$denial4") +
       s"|$totalLoanCosts|$totalPointsAndFees|$originationCharges|$discountPoints|$lenderCredits|$interestRate|" +
       s"$prepaymentPenalty|$debtToIncomeRatio|$loanToValueRatio|$loanTerm|" +
       s"$introductoryRatePeriod|$balloonPayment|$interestOnlyPayment|$negativeAmortization|$otherNonAmortizingFeatures|" +
@@ -125,4 +119,5 @@ case class ModifiedLoanApplicationRegister(
       s"$initiallyPayableToInstitution|$AUS1|$AUS2|$AUS3|$AUS4|$AUS5|" +
       s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose"
   }
+
 }
