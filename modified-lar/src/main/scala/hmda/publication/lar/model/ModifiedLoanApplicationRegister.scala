@@ -1,6 +1,7 @@
 package hmda.publication.lar.model
 
 import hmda.model.filing.PipeDelimited
+import hmda.util.conversion.ColumnDataFormatter
 
 case class ModifiedLoanApplicationRegister(
     id: Int,
@@ -92,7 +93,9 @@ case class ModifiedLoanApplicationRegister(
 
   override def toCSV: String = {
 
-    s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|$loanAmount|" +
+    s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
+      BigDecimal.valueOf(loanAmount).toString()+
+      s"|" +
       s"$actionTakenType|$state|$county|$tract|$ethnicity1|" +
       s"$ethnicity2|" +
       s"$ethnicity3|$ethnicity4|$ethnicity5|" +
@@ -105,13 +108,21 @@ case class ModifiedLoanApplicationRegister(
       s"$sexVisualObservation|$coSexVisualObservation|" +
       s"$age|$ageGreaterThanOrEqual62|$coAge|$coAgeGreaterThanOrEqual62|$income|" +
       s"$purchaserType|$rateSpread|$hoepaStatus|" +
-      s"$lienStatus|$applicantCredisScoreModel|$coApplicantCreditScoreModel|$denial1|" +
-      s"$denial2|$denial3|$denial4|$totalLoanCosts|$totalPointsAndFees|$originationCharges|$discountPoints|$lenderCredits|$interestRate|" +
+      s"$lienStatus|$applicantCredisScoreModel|$coApplicantCreditScoreModel|" +
+      ColumnDataFormatter.controlCharactersFilter(denial1)+
+      "|" +
+      ColumnDataFormatter.controlCharactersFilter(denial2)+
+      "|" +
+      ColumnDataFormatter.controlCharactersFilter(denial3)+
+      "|" +
+      ColumnDataFormatter.controlCharactersFilter(denial4)+
+      s"|$totalLoanCosts|$totalPointsAndFees|$originationCharges|$discountPoints|$lenderCredits|$interestRate|" +
       s"$prepaymentPenalty|$debtToIncomeRatio|$loanToValueRatio|$loanTerm|" +
-      s"$introductoryRatePeriod|$balloonPayment|$interestOnlyPayment|$negativeAmortization|$otherNonAmortizingFeatures|$propertyValue|" +
+      s"$introductoryRatePeriod|$balloonPayment|$interestOnlyPayment|$negativeAmortization|$otherNonAmortizingFeatures|" +
+      ColumnDataFormatter.toBigDecimalString(propertyValue) +
+      s"|" +
       s"$homeSecuredPropertyType|$homeLandPropertyType|$totalUnits|$multifamilyAffordableUnits|$applicationSubmission|" +
       s"$initiallyPayableToInstitution|$AUS1|$AUS2|$AUS3|$AUS4|$AUS5|" +
       s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose"
   }
-
 }

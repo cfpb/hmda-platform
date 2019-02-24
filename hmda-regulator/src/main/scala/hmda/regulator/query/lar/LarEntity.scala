@@ -1,5 +1,6 @@
 package hmda.regulator.query.lar
-import hmda.regulator.query.helper.NumberConversion
+
+import hmda.util.conversion.ColumnDataFormatter
 
 case class LarPartOne(id: Int = 0,
                       lei: String = "",
@@ -138,7 +139,7 @@ case class LarPartFive(discountPoints: String = "",
   def toPSV: String = {
     s"$discountPoints|$lenderCredits|$interestRate|$paymentPenalty|$debtToIncome|$loanValueRatio|$loanTerm|" +
       s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|" +
-      NumberConversion.toBigDecimalString(propertyValue) + "|" +
+      ColumnDataFormatter.toBigDecimalString(propertyValue) + "|" +
       s"$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|$applicationSubmission|"
   }
 

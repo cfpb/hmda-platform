@@ -1,7 +1,16 @@
-package hmda.regulator.query.helper
+package hmda.util.conversion
 
-final case object NumberConversion {
+final case object ColumnDataFormatter {
 
+
+  def controlCharactersFilter(value: String): String={
+    if (!value.isEmpty){
+      value.filter(_ >= ' ').toString
+    }
+    else{
+      value
+    }
+  }
   def toBigDecimalString(value: String): String = {
     if (validNum(value)) {
       BigDecimal(value).bigDecimal.toPlainString
