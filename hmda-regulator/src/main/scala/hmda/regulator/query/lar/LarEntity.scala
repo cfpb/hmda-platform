@@ -1,4 +1,5 @@
 package hmda.regulator.query.lar
+import hmda.regulator.query.helper.NumberConversion
 
 case class LarPartOne(id: Int = 0,
                       lei: String = "",
@@ -23,7 +24,8 @@ case class LarPartOne(id: Int = 0,
   def toPSV: String = {
     s"$id|$lei|$uli|$applicationDate|$loanType|" +
       s"$loanPurpose|$preapproval|$constructionMethod|$occupancyType|" +
-      s"$loanAmount|$actionTakenType|$actionTakenDate|$street|$city|$state|" +
+      BigDecimal.valueOf(loanAmount).toString() +
+      s"|$actionTakenType|$actionTakenDate|$street|$city|$state|" +
       s"$zip|$county|$tract|"
   }
 }
@@ -135,9 +137,11 @@ case class LarPartFive(discountPoints: String = "",
 
   def toPSV: String = {
     s"$discountPoints|$lenderCredits|$interestRate|$paymentPenalty|$debtToIncome|$loanValueRatio|$loanTerm|" +
-      s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|$propertyValue|" +
+      s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|" +
+      NumberConversion.toBigDecimalString(propertyValue) + "|" +
       s"$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|$applicationSubmission|"
   }
+
 }
 
 case class LarPartSix(payable: Int = 0,
