@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: http-configmap
+data:
+  check.digit.host: check-digit.default.svc.cluster.local
+  check.digit.port: "9091"
+  census.host: census-api.default.svc.cluster.local
+  census.port: "9093"
+  auth.url:

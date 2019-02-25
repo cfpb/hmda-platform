@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: schedule-configmap
+data:
+  regulator.ts: "{{ .Values.schedule.ts }}"
+  regulator.panel: "{{ .Values.schedule.panel }}"
+  regulator.lar: "{{ .Values.schedule.lar }}"

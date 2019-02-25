@@ -83,7 +83,7 @@ spec:
         - name: KEYCLOAK_AUTH_URL
           valueFrom:
             configMapKeyRef:
-              name: keycloak-configmap
+              name: http-configmap
               key: auth.url
         - name: KAFKA_CLUSTER_HOSTS
           valueFrom:
@@ -138,7 +138,7 @@ spec:
         - name: PG_DATABASE
           valueFrom:
             configMapKeyRef:
-              name: "institutions-api-inst-api-config"
+              name: postgresql-configmap
               key: postgres.database
         - name: PG_USER
           valueFrom:
@@ -153,7 +153,7 @@ spec:
         - name: PG_SSL
           valueFrom:
             configMapKeyRef:
-              name: "institutions-api-inst-api-config"
+              name: postgresql-configmap
               key: postgres.ssl
         - name: JDBC_URL
           valueFrom:
