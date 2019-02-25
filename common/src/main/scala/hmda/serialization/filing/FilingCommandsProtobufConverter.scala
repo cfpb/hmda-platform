@@ -4,7 +4,10 @@ import akka.actor.typed.ActorRefResolver
 import hmda.messages.filing.FilingCommands._
 import hmda.persistence.serialization.filing.FilingMessage
 import hmda.persistence.serialization.filing.commands._
-import hmda.persistence.serialization.submission.{SubmissionIdMessage, SubmissionMessage}
+import hmda.persistence.serialization.submission.{
+  SubmissionIdMessage,
+  SubmissionMessage
+}
 import hmda.serialization.filing.FilingProtobufConverter._
 import hmda.serialization.submission.SubmissionProtobufConverter._
 

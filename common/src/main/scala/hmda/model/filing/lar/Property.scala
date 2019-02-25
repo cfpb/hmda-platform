@@ -1,6 +1,11 @@
 package hmda.model.filing.lar
 
-import hmda.model.filing.lar.enums.{InvalidManufacturedHomeLandPropertyCode, InvalidManufacturedHomeSecuredPropertyCode, ManufacturedHomeLandPropertyInterestEnum, ManufacturedHomeSecuredPropertyEnum}
+import hmda.model.filing.lar.enums.{
+  InvalidManufacturedHomeLandPropertyCode,
+  InvalidManufacturedHomeSecuredPropertyCode,
+  ManufacturedHomeLandPropertyInterestEnum,
+  ManufacturedHomeSecuredPropertyEnum
+}
 
 case class Property(
     propertyValue: String = "",

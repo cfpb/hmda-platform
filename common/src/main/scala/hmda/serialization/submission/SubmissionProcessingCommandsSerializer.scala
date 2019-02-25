@@ -6,7 +6,11 @@ import akka.actor.ExtendedActorSystem
 import akka.actor.typed.ActorRefResolver
 import akka.actor.typed.scaladsl.adapter._
 import akka.serialization.SerializerWithStringManifest
-import hmda.messages.submission.SubmissionProcessingCommands.{CompleteSyntacticalValidity, GetHmdaValidationErrorState, _}
+import hmda.messages.submission.SubmissionProcessingCommands.{
+  CompleteSyntacticalValidity,
+  GetHmdaValidationErrorState,
+  _
+}
 import hmda.persistence.serialization.submission.processing.commands._
 import hmda.serialization.submission.SubmissionProcessingCommandsProtobufConverter._
 

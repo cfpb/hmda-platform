@@ -1,13 +1,14 @@
-package hmda.analytics.query
+package hmda.query.ts
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
+import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
-import scala.concurrent.Future
-import hmda.query.ts._
 
-trait TransmittalSheetComponent {
+import scala.concurrent.Future
+
+trait TsComponent {
 
   import dbConfig.profile.api._
 
@@ -29,7 +30,7 @@ trait TransmittalSheetComponent {
     def agency = column[Int]("agency")
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
-    def submissionId = column[Option[String]]("submission_id")
+    def submissionId = column[String]("submission_id")
 
     override def * =
       (
@@ -71,20 +72,25 @@ trait TransmittalSheetComponent {
     }
 
     def findByLei(lei: String): Future[Seq[TransmittalSheetEntity]] = {
-      db.run(table.filter(_.lei.toUpperCase === lei.toUpperCase).result)
+      db.run(table.filter(_.lei === lei).result)
     }
 
     def deleteByLei(lei: String): Future[Int] = {
-      db.run(table.filter(_.lei.toUpperCase === lei.toUpperCase).delete)
-    }
-
-    def updateByLei(ts: TransmittalSheetEntity): Future[Int] = {
-      db.run(table.insertOrUpdate(ts))
+      db.run(table.filter(_.lei === lei).delete)
     }
 
     def count(): Future[Int] = {
       db.run(table.size.result)
     }
-  }
 
+    def getAllSheetsFiltered(
+        bankIgnoreList: Array[String]): Future[Seq[TransmittalSheetEntity]] = {
+      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
+    }
+
+    def getAllSheets(): Future[Seq[TransmittalSheetEntity]] = {
+      db.run(table.result)
+    }
+
+  }
 }

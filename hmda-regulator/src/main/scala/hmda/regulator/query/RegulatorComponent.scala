@@ -4,7 +4,9 @@ import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository
 import hmda.regulator.query.lar.{LarEntityImpl, _}
 import hmda.regulator.query.panel.{InstitutionEmailEntity, InstitutionEntity}
-import hmda.regulator.query.ts.TransmittalSheetEntity
+import slick.basic.DatabasePublisher
+import slick.jdbc.{ResultSetConcurrency, ResultSetType}
+import hmda.query.ts.TransmittalSheetEntity
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -152,6 +154,7 @@ trait RegulatorComponent {
     def agency = column[Int]("agency")
     def totalLines = column[Int]("total_lines")
     def taxId = column[String]("tax_id")
+    def submissionId = column[Option[String]]("submission_id")
 
     override def * =
       (
@@ -169,7 +172,8 @@ trait RegulatorComponent {
         zipCode,
         agency,
         totalLines,
-        taxId
+        taxId,
+        submissionId
       ) <> (TransmittalSheetEntity.tupled, TransmittalSheetEntity.unapply)
   }
 
@@ -490,14 +494,21 @@ trait RegulatorComponent {
     def deleteByLei(lei: String): Future[Int] = {
       db.run(table.filter(_.lei === lei).delete)
     }
-
     def count(): Future[Int] = {
       db.run(table.size.result)
     }
-
     def getAllLARs(
-        bankIgnoreList: Array[String]): Future[Seq[LarEntityImpl]] = {
-      db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
+        bankIgnoreList: Array[String]): DatabasePublisher[LarEntityImpl] = {
+      db.stream(
+        table
+          .filterNot(_.lei.toUpperCase inSet bankIgnoreList)
+          .result
+          .withStatementParameters(
+            rsType = ResultSetType.ForwardOnly,
+            rsConcurrency = ResultSetConcurrency.ReadOnly,
+            fetchSize = 1000
+          )
+          .transactionally)
     }
   }
 

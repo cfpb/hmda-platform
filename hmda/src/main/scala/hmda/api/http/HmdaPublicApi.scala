@@ -10,7 +10,8 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.http.public.{
   HmdaFileValidationHttpApi,
   LarValidationHttpApi,
-  TsValidationHttpApi
+  TsValidationHttpApi,
+  FilersHttpApi
 }
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
@@ -29,7 +30,8 @@ class HmdaPublicApi
     with BaseHttpApi
     with TsValidationHttpApi
     with LarValidationHttpApi
-    with HmdaFileValidationHttpApi {
+    with HmdaFileValidationHttpApi
+    with FilersHttpApi {
 
   import HmdaPublicApi._
 
@@ -47,7 +49,7 @@ class HmdaPublicApi
     config.getInt("hmda.http.timeout").seconds)
 
   override val paths
-    : Route = routes(s"$name") ~ tsRoutes ~ larRoutes ~ hmdaFileRoutes
+    : Route = routes(s"$name") ~ tsRoutes ~ larRoutes ~ hmdaFileRoutes ~ hmdaFilerRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,

@@ -19,6 +19,7 @@ import hmda.query.DbConfiguration.dbConfig
 import hmda.regulator.query.RegulatorComponent
 import hmda.regulator.query.lar.LarEntityImpl
 import hmda.regulator.scheduler.schedules.Schedules.LarScheduler
+import slick.basic.DatabasePublisher
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -81,13 +82,12 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val s3Sink =
         s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
 
-      val allResults: Future[Seq[LarEntityImpl]] =
+      val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
         larRepository.getAllLARs(bankFilterList)
+      val allResultsSource: Source[LarEntityImpl, NotUsed] =
+        Source.fromPublisher(allResultsPublisher)
 
-      val results: Future[MultipartUploadResult] = Source
-        .fromFuture(allResults)
-        .map(seek => seek.toList)
-        .mapConcat(identity)
+      var results: Future[MultipartUploadResult] = allResultsSource
         .map(larEntity => larEntity.toPSV + "\n")
         .map(s => ByteString(s))
         .runWith(s3Sink)
@@ -98,7 +98,8 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
             "Pushing to S3: " + s"$bucket/$environment/lar/$fileName" + ".")
         }
         case Failure(t) =>
-          println("An error has occurred getting LAR Data: " + t.getMessage)
+          log.info(
+            "An error has occurred getting LAR Data in Future: " + t.getMessage)
       }
   }
 }

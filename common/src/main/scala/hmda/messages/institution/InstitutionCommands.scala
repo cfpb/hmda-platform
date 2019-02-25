@@ -2,7 +2,10 @@ package hmda.messages.institution
 
 import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
-import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionEvent}
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionCreated,
+  InstitutionEvent
+}
 import hmda.model.filing.Filing
 import hmda.model.institution.{Institution, InstitutionDetail}
 

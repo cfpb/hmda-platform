@@ -1,6 +1,11 @@
 package hmda.model.processing.state
 
-import hmda.messages.submission.SubmissionProcessingEvents.{HmdaMacroValidatedError, HmdaRowValidatedError, MacroVerified, QualityVerified}
+import hmda.messages.submission.SubmissionProcessingEvents.{
+  HmdaMacroValidatedError,
+  HmdaRowValidatedError,
+  MacroVerified,
+  QualityVerified
+}
 import hmda.model.filing.submission.{MacroErrors, QualityErrors, Verified}
 import hmda.model.validation._
 

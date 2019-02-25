@@ -4,7 +4,10 @@ import akka.actor.typed.ActorRef
 import hmda.messages.CommonMessages.Command
 import hmda.messages.submission.SubmissionProcessingEvents._
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.processing.state.{HmdaParserErrorState, HmdaValidationErrorState}
+import hmda.model.processing.state.{
+  HmdaParserErrorState,
+  HmdaValidationErrorState
+}
 import hmda.model.validation.{MacroValidationError, ValidationError}
 
 object SubmissionProcessingCommands {

@@ -1,7 +1,10 @@
 package hmda.messages.submission
 
 import akka.actor.typed.ActorRef
-import hmda.messages.submission.EditDetailsEvents.{EditDetailsPersistenceEvent, EditDetailsRowCounted}
+import hmda.messages.submission.EditDetailsEvents.{
+  EditDetailsPersistenceEvent,
+  EditDetailsRowCounted
+}
 import hmda.model.edits.EditDetails
 import hmda.model.filing.submission.SubmissionId
 

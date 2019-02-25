@@ -1,7 +1,17 @@
 package hmda.serialization.filing
 
-import hmda.messages.filing.FilingEvents.{FilingCreated, FilingStatusUpdated, SubmissionAdded, SubmissionUpdated}
-import hmda.persistence.serialization.filing.events.{FilingCreatedMessage, FilingStatusUpdatedMessage, SubmissionAddedMessage, SubmissionUpdatedMessage}
+import hmda.messages.filing.FilingEvents.{
+  FilingCreated,
+  FilingStatusUpdated,
+  SubmissionAdded,
+  SubmissionUpdated
+}
+import hmda.persistence.serialization.filing.events.{
+  FilingCreatedMessage,
+  FilingStatusUpdatedMessage,
+  SubmissionAddedMessage,
+  SubmissionUpdatedMessage
+}
 import hmda.persistence.serialization.filing.{FilingMessage, events}
 import hmda.persistence.serialization.submission.SubmissionMessage
 import hmda.serialization.filing.FilingProtobufConverter._
