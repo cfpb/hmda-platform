@@ -218,7 +218,7 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.occupiedUnits},
             ${input.census.oneToFourFamilyUnits},
             ${input.census.msaMd},
-            ${input.census.name}
+            ${input.census.name},
             ${submissionId}
           )
           """)
