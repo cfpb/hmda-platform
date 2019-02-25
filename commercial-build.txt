@@ -66,9 +66,9 @@ lazy val packageSettings = Seq(
     // universalMappings: Seq[(File,String)]
     val universalMappings = (mappings in Universal).value
     val fatJar = (assembly in Compile).value
-    // removing means filtering
+    // removing means filtering (except cinnamon)
     val filtered = universalMappings filter {
-      case (_, fileName) => !fileName.endsWith(".jar")
+      case (_, fileName) => !fileName.endsWith(".jar") || fileName.contains("cinnamon-agent")
     }
     // add the fat jar
     filtered :+ (fatJar -> ("lib/" + fatJar.getName))

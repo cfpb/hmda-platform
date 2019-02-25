@@ -1,5 +1,7 @@
 package hmda.model.census
 
+import spray.json.{DefaultJsonProtocol, JsonFormat}
+
 object Census {
   val states: Map[String, State] = Map(
     "AL" -> State("01", "Alabama"),
@@ -62,6 +64,10 @@ object Census {
     "PR" -> State("72", "Puerto Rico"),
     "VI" -> State("78", "Virgin Islands")
   )
+
+  // Spray support for encoding and decoding as JSON
+  import DefaultJsonProtocol._
+  implicit val censusJsonFormat: JsonFormat[Census] = jsonFormat16(Census.apply)
 }
 
 case class Census(
