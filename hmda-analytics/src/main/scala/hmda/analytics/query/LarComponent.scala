@@ -20,7 +20,7 @@ trait LarComponent {
         sqlu"""INSERT INTO #${tableName}
         VALUES (
           ${le.id},
-          ${le.lei},
+          ${le.lei.toUpperCase},
           ${le.uli},
           ${le.appDate},
           ${le.loanType},
