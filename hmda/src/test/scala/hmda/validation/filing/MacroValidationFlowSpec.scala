@@ -245,8 +245,7 @@ class MacroValidationFlowSpec
           xs mustBe List(
             MacroValidationError(q635Name),
             MacroValidationError(q636Name),
-            MacroValidationError(q638Name),
-            MacroValidationError(q640Name)
+            MacroValidationError(q638Name)
         ))
 
     }
