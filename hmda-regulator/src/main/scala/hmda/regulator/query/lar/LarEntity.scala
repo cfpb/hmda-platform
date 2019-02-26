@@ -113,7 +113,8 @@ case class LarPartFour(purchaserType: Int = 0,
     s"$purchaserType|$rateSpread|$hoepaStatus|$lienStatus|" +
       s"$creditScoreApplicant|$creditScoreCoApplicant|$creditScoreTypeApplicant|$creditScoreModelApplicant|" +
       s"$creditScoreTypeCoApplicant|$creditScoreModelCoApplicant|" +
-      ColumnDataFormatter.controlCharacterFilter(s"$denialReason1|$denialReason2|$denialReason3|$denialReason4|")+
+      ColumnDataFormatter.controlCharacterFilter(
+        s"$denialReason1|$denialReason2|$denialReason3|$denialReason4|") +
       s"$otherDenialReason|$totalLoanCosts|$totalPoints|$originationCharges|"
   }
 }

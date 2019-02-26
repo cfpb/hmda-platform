@@ -2,12 +2,10 @@ package hmda.util.conversion
 
 final case object ColumnDataFormatter {
 
-
-  def controlCharacterFilter(value: String): String={
-    if (!value.isEmpty){
+  def controlCharacterFilter(value: String): String = {
+    if (!value.isEmpty) {
       value.filter(_ >= ' ').toString
-    }
-    else{
+    } else {
       value
     }
   }
