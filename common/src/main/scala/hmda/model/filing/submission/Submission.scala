@@ -8,7 +8,6 @@ case class Submission(
     fileName: String = "",
     receipt: String = ""
 ) {
-
   def isEmpty: Boolean =
     id == SubmissionId() && status == Created && start == 0 && end == 0 && fileName == "" && receipt == ""
 }
