@@ -47,7 +47,6 @@ object InstitutionPersistence
     val log = ctx.asScala.log
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped
     implicit val materializer: ActorMaterializer = ActorMaterializer()
-    implicit val ec: ExecutionContext = system.dispatcher
     (state, cmd) =>
       cmd match {
         case CreateInstitution(i, replyTo) =>

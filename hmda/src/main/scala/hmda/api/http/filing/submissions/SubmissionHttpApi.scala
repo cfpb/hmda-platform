@@ -10,7 +10,7 @@ import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
 import hmda.api.http.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
-import akka.stream.scaladsl.{Flow, Sink}
+import akka.stream.scaladsl.Sink
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.messages.filing.FilingCommands.{
@@ -34,7 +34,6 @@ import hmda.persistence.submission.SubmissionPersistence
 import hmda.api.http.codec.filing.submission.SubmissionStatusCodec._
 import hmda.auth.OAuth2Authorization
 import hmda.model.filing.ts.TransmittalSheet
-import hmda.parser.filing.ParserFlow.parseTsFlow
 import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.submission.HmdaProcessingUtils._
 import hmda.api.http.codec.filing.TsCodec._

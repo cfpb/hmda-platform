@@ -57,7 +57,6 @@ object SubmissionManager extends HmdaTypedActor[SubmissionManagerCommand] {
         case WrappedSubmissionEventResponse(submissionEvent) =>
           submissionEvent match {
             case SubmissionModified(submission) =>
-              implicit val system: ActorSystem[_] = ctx.system
               submission.status match {
                 case Uploaded =>
                   hmdaParserError ! StartParsing(submission.id)
