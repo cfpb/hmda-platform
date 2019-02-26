@@ -113,10 +113,8 @@ object HmdaAnalyticsApp
 
     def signDate: Future[Long] =
       readSubmission(submissionId)
-        .drop(9)
-        .take(1)
         .map(l => l.submission.end)
-        .runWith(Sink.head)
+        .runWith(Sink.last)
 
     def deleteTsRow: Future[Done] =
       readRawData(submissionId)
