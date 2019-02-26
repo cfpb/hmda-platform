@@ -63,7 +63,7 @@ object MacroValidationFlow {
                         fileClosedForIncompleteness)
       q638 <- Q638(source)
       q639 <- Q639(source)
-      q640 <- macroEdit(source, total, q640Ratio, q640Name, incomeLessThan10)
+      q640 <- macroEdit(source, q640Total, q640Ratio, q640Name, incomeLessThan10)
     } yield {
       List(q634, q635, q636, q637, q638, q639, q640).filter(e =>
         e != EmptyMacroValidationError())
@@ -72,7 +72,7 @@ object MacroValidationFlow {
 
   def macroEdit[as: AS, mat: MAT, ec: EC](
       source: Source[LoanApplicationRegister, NotUsed],
-      total: Int,
+      fTotal: Int,
       editRatio: Double,
       editName: String,
       predicate: LarPredicate): Future[ValidationError] = {
@@ -80,6 +80,7 @@ object MacroValidationFlow {
       editCount <- count(
         source
           .filter(predicate))
+      total <- fTotal
     } yield {
       val ratio = editCount.toDouble / total.toDouble
       if (ratio > editRatio) MacroValidationError(editName)
@@ -199,11 +200,21 @@ object MacroValidationFlow {
   //Q640
   def incomeLessThan10: LarPredicate =
     (lar: LoanApplicationRegister) => {
-      val income: Int = Try(lar.income.toInt) match {
-        case Success(i) => i
-        case Failure(_) => 0
+      Try(lar.income.toInt) match {
+        case Success(i) => i < q640Income
+        case Failure(_) => false
       }
-      income < q640Income
     }
+  
+  def q640Total(lars: Source[LoanApplicationRegister, NotUsed]): Int = {
+    count(
+      lars.filter(
+        Try(lar.income.toInt) match {
+          case Success(_) => true
+          case Failure(_) => false
+        }
+      )
+    )
+  }
 
 }
