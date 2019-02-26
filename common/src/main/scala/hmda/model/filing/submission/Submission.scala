@@ -9,8 +9,6 @@ case class Submission(
     receipt: String = ""
 ) {
 
-  override def toString: String = "This is a test"
-
   def isEmpty: Boolean =
     id == SubmissionId() && status == Created && start == 0 && end == 0 && fileName == "" && receipt == ""
 }
