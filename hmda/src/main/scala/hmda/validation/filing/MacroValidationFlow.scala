@@ -42,22 +42,21 @@ object MacroValidationFlow {
   def macroValidation[as: AS, mat: MAT, ec: EC](
       source: Source[LoanApplicationRegister, NotUsed]
   ): Future[List[ValidationError]] = {
-    val fTotal = count(source)
+    def fTotal: Future[Int] = count(source)
     for {
-      total <- fTotal
       q634 <- Q634(source)
       q635 <- macroEdit(source,
-                        total,
+                        fTotal,
                         q635Ratio,
                         q635Name,
                         applicationApprovedButNotAccepted)
       q636 <- macroEdit(source,
-                        total,
+                        fTotal,
                         q636Ratio,
                         q636Name,
                         applicationWithdrawnByApplicant)
       q637 <- macroEdit(source,
-                        total,
+                        fTotal,
                         q637Ratio,
                         q637Name,
                         fileClosedForIncompleteness)
@@ -72,15 +71,15 @@ object MacroValidationFlow {
 
   def macroEdit[as: AS, mat: MAT, ec: EC](
       source: Source[LoanApplicationRegister, NotUsed],
-      fTotal: Int,
+      fTotal: Future[Int],
       editRatio: Double,
       editName: String,
       predicate: LarPredicate): Future[ValidationError] = {
     for {
+      total <- fTotal
       editCount <- count(
         source
           .filter(predicate))
-      total <- fTotal
     } yield {
       val ratio = editCount.toDouble / total.toDouble
       if (ratio > editRatio) MacroValidationError(editName)
@@ -202,16 +201,16 @@ object MacroValidationFlow {
     (lar: LoanApplicationRegister) => {
       Try(lar.income.toInt) match {
         case Success(i) => i < q640Income
-        case Failure(_) => False
+        case Failure(_) => false
       }
     }
   
-  def q640Total(lars: Source[LoanApplicationRegister, NotUsed]): Int = {
+  def q640Total[as: AS, mat: MAT, ec: EC](source: Source[LoanApplicationRegister, NotUsed]): Future[Int] = {
     count(
-      lars.filter( lar =>
+      source.filter( lar =>
         Try(lar.income.toInt) match {
-          case Success(_) => True
-          case Failure(_) => False
+          case Success(_) => true
+          case Failure(_) => false
         }
       )
     )
