@@ -63,7 +63,7 @@ object MacroValidationFlow {
                         fileClosedForIncompleteness)
       q638 <- Q638(source)
       q639 <- Q639(source)
-      q640 <- macroEdit(source, q640Total, q640Ratio, q640Name, incomeLessThan10)
+      q640 <- macroEdit(source, q640Total(source), q640Ratio, q640Name, incomeLessThan10)
     } yield {
       List(q634, q635, q636, q637, q638, q639, q640).filter(e =>
         e != EmptyMacroValidationError())
@@ -202,16 +202,16 @@ object MacroValidationFlow {
     (lar: LoanApplicationRegister) => {
       Try(lar.income.toInt) match {
         case Success(i) => i < q640Income
-        case Failure(_) => false
+        case Failure(_) => False
       }
     }
   
   def q640Total(lars: Source[LoanApplicationRegister, NotUsed]): Int = {
     count(
-      lars.filter(
+      lars.filter( lar =>
         Try(lar.income.toInt) match {
-          case Success(_) => true
-          case Failure(_) => false
+          case Success(_) => True
+          case Failure(_) => False
         }
       )
     )
