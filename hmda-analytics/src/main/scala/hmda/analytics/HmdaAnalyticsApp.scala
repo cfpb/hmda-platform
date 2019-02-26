@@ -111,10 +111,10 @@ object HmdaAnalyticsApp
     var submissionIdVar = None: Option[String]
     submissionIdVar = Some(submissionId.toString)
 
-    def signDate: Future[Long] =
+    def signDate: Future[Option[Long]] =
       readSubmission(submissionId)
         .map(l => l.submission.end)
-        .runWith(Sink.last)
+        .runWith(Sink.lastOption)
 
     def deleteTsRow: Future[Done] =
       readRawData(submissionId)

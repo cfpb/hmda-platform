@@ -13,7 +13,7 @@ trait SubmissionHistoryComponent {
                                     config: DatabaseConfig[JdbcProfile]) {
     def insert(lei: String,
                submissionId: Option[String],
-               signDate: Long): Future[Int] =
+               signDate: Option[Long]): Future[Int] =
       config.db.run {
         sqlu"""INSERT INTO #${tableName}
            VALUES (
