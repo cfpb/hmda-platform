@@ -34,8 +34,11 @@ trait FilersHttpApi extends TsComponent {
         val filerSet = for {
           ts <- tsRepository.getAllSheets()
         } yield {
-          ts.map(tsEntity =>
-              HmdaFiler(tsEntity.lei, tsEntity.institutionName, tsEntity.year.toString))
+          ts.map(
+              tsEntity =>
+                HmdaFiler(tsEntity.lei,
+                          tsEntity.institutionName,
+                          tsEntity.year.toString))
             .toSet
         }
 

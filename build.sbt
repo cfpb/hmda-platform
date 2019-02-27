@@ -1,3 +1,5 @@
+//Commercial Build -- Includes Lightbend Telemetry
+
 import Dependencies._
 import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
@@ -64,9 +66,10 @@ lazy val packageSettings = Seq(
     // universalMappings: Seq[(File,String)]
     val universalMappings = (mappings in Universal).value
     val fatJar = (assembly in Compile).value
-    // removing means filtering
+    // removing means filtering (except cinnamon)
     val filtered = universalMappings filter {
-      case (_, fileName) => !fileName.endsWith(".jar")
+      case (_, fileName) =>
+        !fileName.endsWith(".jar") || fileName.contains("cinnamon-agent")
     }
     // add the fat jar
     filtered :+ (fatJar -> ("lib/" + fatJar.getName))
@@ -100,7 +103,8 @@ lazy val common = (project in file("common"))
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
-                 AshScriptPlugin)
+                 AshScriptPlugin,
+                 Cinnamon)
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
@@ -108,6 +112,7 @@ lazy val `hmda-platform` = (project in file("hmda"))
       assemblyJarName in assembly := "hmda2.jar",
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
+        case "cinnamon-reference.conf"               => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
         case "logback.xml"                           => MergeStrategy.concat
         case x =>

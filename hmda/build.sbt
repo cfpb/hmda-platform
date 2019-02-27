@@ -1,3 +1,4 @@
+import com.lightbend.cinnamon.sbt.Cinnamon
 import com.typesafe.sbt.packager.docker._
 
 version := "latest"
@@ -17,6 +18,16 @@ dockerCommands :=
       Seq(Cmd("ENTRYPOINT", args.mkString(" ")))
     case v => Seq(v)
   }
+
+cinnamon in run := true
+cinnamon in test := true
+
+libraryDependencies += Cinnamon.library.cinnamonAkka
+libraryDependencies += Cinnamon.library.cinnamonAkkaHttp
+libraryDependencies += Cinnamon.library.cinnamonAkkaStream
+libraryDependencies += Cinnamon.library.cinnamonPrometheus
+libraryDependencies += Cinnamon.library.cinnamonPrometheusHttpServer
+libraryDependencies += "com.lightbend.akka" %% "akka-diagnostics" % "1.1.7"
 
 javaOptions in Universal ++= Seq(
   "-J-XX:+UnlockExperimentalVMOptions",
