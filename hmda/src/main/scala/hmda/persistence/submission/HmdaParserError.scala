@@ -100,7 +100,7 @@ object HmdaParserError
 
       case PersistHmdaRowParsedError(rowNumber, errors, maybeReplyTo) =>
         Effect.persist(HmdaRowParsedError(rowNumber, errors)).thenRun { _ =>
-          log.info(s"Persisted error: $rowNumber, $errors")
+          log.debug(s"Persisted error: $rowNumber, $errors")
           maybeReplyTo match {
             case Some(replyTo) =>
               replyTo ! HmdaRowParsedError(rowNumber, errors)
