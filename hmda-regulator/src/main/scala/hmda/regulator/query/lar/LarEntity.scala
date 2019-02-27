@@ -25,7 +25,7 @@ case class LarPartOne(id: Int = 0,
   def toPSV: String = {
     s"$id|$lei|$uli|$applicationDate|$loanType|" +
       s"$loanPurpose|$preapproval|$constructionMethod|$occupancyType|" +
-      BigDecimal.valueOf(loanAmount).toString() +
+      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
       s"|$actionTakenType|$actionTakenDate|$street|$city|$state|" +
       s"$zip|$county|$tract|"
   }

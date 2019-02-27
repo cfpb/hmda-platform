@@ -100,7 +100,7 @@ case class ModifiedLoanApplicationRegister(
   override def toCSV: String = {
 
     s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
-      BigDecimal.valueOf(loanAmount).toString()+
+      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString+
       s"|" +
       s"$actionTakenType|$state|$county|$tract|$ethnicity1|" +
       s"$ethnicity2|" +
