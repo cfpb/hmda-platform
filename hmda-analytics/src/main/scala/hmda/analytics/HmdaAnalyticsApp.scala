@@ -9,7 +9,6 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.util.{ByteString, Timeout}
 import com.typesafe.config.ConfigFactory
-import .submissionId
 import hmda.query.ts.TransmittalSheetConverter
 import hmda.analytics.query.{
   LarComponent,

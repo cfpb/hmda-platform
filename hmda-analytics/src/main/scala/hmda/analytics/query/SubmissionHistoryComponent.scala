@@ -20,7 +20,10 @@ trait SubmissionHistoryComponent {
             ${lei.toUpperCase},
             ${submissionId},
             ${signDate}
-           )
+           ) ON CONFLICT (lei, submission_id) DO UPDATE SET
+           lei = ${lei.toUpperCase},
+           submission_id = ${submissionId},
+           sign_date = ${signDate}
           """
       }
   }
