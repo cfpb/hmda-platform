@@ -9,7 +9,7 @@
       <fieldset>
         <input type="text" readonly value="this is not a login form" style="display: none;">
         <input type="password" readonly value="this is not a login form" style="display: none;">
-        <legend class="usa-drop_text">Create a test account</legend>
+        <legend class="usa-drop_text">Create an account</legend>
         <span>or <a href="${url.loginUrl}">go back to login</a></span>
         <#if !realm.registrationEmailAsUsername>
           <label for="username" class="${properties.kcLabelClass!}">${msg("username")}</label>
