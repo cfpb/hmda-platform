@@ -6,8 +6,6 @@ import hmda.persistence.AkkaCassandraPersistenceSpec
 import akka.actor.typed.scaladsl.adapter._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.cluster.typed.{Cluster, Join}
-import akka.util.Timeout
-import com.typesafe.config.ConfigFactory
 import hmda.messages.submission.SubmissionCommands.{
   CreateSubmission,
   GetSubmission,

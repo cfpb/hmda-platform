@@ -106,7 +106,6 @@ object ValidationFlow {
 
   def validateLarFlow(checkType: String, ctx: ValidationContext)
     : Flow[ByteString, HmdaValidated[LoanApplicationRegister], NotUsed] = {
-    val lars = List[LoanApplicationRegister]()
     collectLar
       .map { lar =>
         def errors =

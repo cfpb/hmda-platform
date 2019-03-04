@@ -33,7 +33,7 @@ import hmda.messages.institution.InstitutionEvents.{
   InstitutionCreated,
   InstitutionEvent
 }
-import hmda.model.filing.{Filing, InProgress}
+import hmda.model.filing.Filing
 import hmda.persistence.filing.FilingPersistence
 import org.keycloak.adapters.KeycloakDeploymentBuilder
 
