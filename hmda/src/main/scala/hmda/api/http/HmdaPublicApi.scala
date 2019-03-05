@@ -31,7 +31,7 @@ class HmdaPublicApi
     with TsValidationHttpApi
     with LarValidationHttpApi
     with HmdaFileValidationHttpApi
-    with FilersHttpApi {
+    {
 
   import HmdaPublicApi._
 
@@ -49,7 +49,7 @@ class HmdaPublicApi
     config.getInt("hmda.http.timeout").seconds)
 
   override val paths
-    : Route = routes(s"$name") ~ tsRoutes ~ larRoutes ~ hmdaFileRoutes ~ hmdaFilerRoutes
+    : Route = routes(s"$name") ~ tsRoutes ~ larRoutes ~ hmdaFileRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
