@@ -99,6 +99,7 @@ CREATE TABLE public.modifiedlar2018
     loan_flag character varying,
     created_at timestamp default current_timestamp,
     submission_id character varying
+    filing_year integer,
 )
 WITH (
     OIDS = FALSE

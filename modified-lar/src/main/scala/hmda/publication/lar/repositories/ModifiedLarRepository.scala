@@ -18,8 +18,9 @@ class ModifiedLarRepository(tableName: String,
     * @param lei
     * @return the number of rows removed
     */
-  def deleteByLei(lei: String): Future[Int] =
-    db.run(sqlu"DELETE FROM #${tableName} WHERE lei = $lei")
+  def deleteByLei(lei: String, filingYear: Int): Future[Int] =
+    db.run(
+      sqlu"DELETE FROM #${tableName} WHERE lei = $lei and filing_year = $filingYear")
 
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map
@@ -28,7 +29,8 @@ class ModifiedLarRepository(tableName: String,
     * @return
     */
   def insert(input: EnrichedModifiedLoanApplicationRegister,
-             submissionId: String): Future[Int] =
+             submissionId: String,
+             filingYear: Int): Future[Int] =
     db.run(sqlu"""INSERT INTO #${tableName}(
             id,
             lei,
@@ -123,7 +125,8 @@ class ModifiedLarRepository(tableName: String,
             one_to_four_fam_units,
             msa_md,
             msa_md_name,
-            submission_id
+            submission_id,
+            filing_year
           )
           VALUES (
             ${input.mlar.id},
@@ -219,7 +222,8 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.oneToFourFamilyUnits},
             ${input.census.msaMd},
             ${input.census.name},
-            ${submissionId}
+            ${submissionId},
+            ${filingYear}
           )
           """)
 

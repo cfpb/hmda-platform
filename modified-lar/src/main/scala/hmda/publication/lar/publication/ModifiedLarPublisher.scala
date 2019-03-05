@@ -43,6 +43,7 @@ object ModifiedLarPublisher {
 
   val config = ConfigFactory.load()
 
+  val filingYear = config.getInt("hmda.filing.year") // resides in common
   val accessKeyId = config.getString("aws.access-key-id")
   val secretAccess = config.getString("aws.secret-access-key ")
   val region = config.getString("aws.region")
@@ -99,7 +100,7 @@ object ModifiedLarPublisher {
             s"$environment/modified-lar/$year/$fileName")
 
           def removeLei: Future[Int] =
-            modifiedLarRepo.deleteByLei(submissionId.lei)
+            modifiedLarRepo.deleteByLei(submissionId.lei, filingYear)
 
           val mlarSource: Source[ModifiedLoanApplicationRegister, NotUsed] =
             readRawData(submissionId)
@@ -125,7 +126,8 @@ object ModifiedLarPublisher {
                   )
               )
               .mapAsync(parallelism)(enriched =>
-                modifiedLarRepo.insert(enriched, submissionId.toString))
+                modifiedLarRepo
+                  .insert(enriched, submissionId.toString, filingYear))
               .toMat(Sink.ignore)(Keep.right)
 
           val graph = mlarSource
