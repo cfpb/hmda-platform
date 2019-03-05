@@ -38,7 +38,7 @@ class HmdaReportingApi extends HttpServer with BaseHttpApi with ReportingHttpApi
   override val host: String = config.getString("hmda.reporting.http.host")
   override val port: Int = config.getInt("hmda.reporting.http.port")
 
-  override val paths: Route = routes(s"$name") ~ censusHttpRoutes
+  override val paths: Route = routes(s"$name") ~ hmdaFilerRoutes
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,

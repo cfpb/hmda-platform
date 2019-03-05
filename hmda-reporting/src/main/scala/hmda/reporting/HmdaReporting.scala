@@ -1,5 +1,7 @@
 package hmda.reporting
 
+import akka.actor.ActorSystem
+import hmda.reporting.api.http.HmdaReportingApi
 import org.slf4j.LoggerFactory
 
 object HmdaReporting extends App {
@@ -18,5 +20,6 @@ object HmdaReporting extends App {
       |           |_|                           |___/           |_|
       |
     """.stripMargin)
-
+  implicit val system: ActorSystem = ActorSystem("hmda-census")
+  system.actorOf(HmdaReportingApi.props(), "hmda-census-api")
 }
