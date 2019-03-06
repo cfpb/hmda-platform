@@ -1,0 +1,112 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "hmda-reporting.fullname" . }}
+  labels:
+    app: {{ include "hmda-reporting.name" . }}
+    chart: {{ include "hmda-reporting.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "hmda-reporting.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "hmda-reporting.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York    
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime          
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PG_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: host
+            - name: PG_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ .Release.Name }}-reporting-config"
+                  key: postgres.database
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: username
+            - name: PG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: password
+            - name: PG_SSL
+              valueFrom:
+                configMapKeyRef:
+                  name: "{{ .Release.Name }}-reporting-config"
+                  key: postgres.ssl
+            - name: JDBC_URL
+              valueFrom:
+                secretKeyRef:
+                  name: inst-postgres-credentials
+                  key: url
+#            - name: BANK_FILTER_LIST
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: bank-filter-configmap
+#                  key: bank-filter-list
+            - name: CASSANDRA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: cassandra-configmap
+                  key: cassandra-hosts
+            - name: CASSANDRA_CLUSTER_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.username
+            - name: CASSANDRA_CLUSTER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cassandra-credentials
+                  key: cassandra.password
+            - name: KAFKA_CLUSTER_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: kafka-configmap
+                  key: kafka.hosts
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-secret-access-key
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

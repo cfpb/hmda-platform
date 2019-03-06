@@ -2,17 +2,36 @@ package hmda.reporting.api.http
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
+import akka.http.scaladsl.common.{
+  EntityStreamingSupport,
+  JsonEntityStreamingSupport
+}
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives.{complete, encodeResponse, extractUri, get, handleRejections, onComplete, path}
+import akka.http.scaladsl.server.Directives.{
+  complete,
+  encodeResponse,
+  extractUri,
+  get,
+  handleRejections,
+  onComplete,
+  path
+}
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
+  cors,
+  corsRejectionHandler
+}
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.ErrorResponse
-import hmda.model.institution.{HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse}
+import hmda.model.institution.{
+  HmdaFiler,
+  HmdaFilerResponse,
+  MsaMd,
+  MsaMdResponse
+}
 import hmda.query.DbConfiguration.dbConfig
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile

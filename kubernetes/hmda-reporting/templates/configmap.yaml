@@ -1,0 +1,9 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ .Release.Name }}-reporting-config"
+data:
+  postgres.ssl: "{{ .Values.postgresql.ssl }}"
+  postgres.user:  "{{ .Values.postgresql.postgresUser }}"
+  postgres.database: "{{ .Values.postgresql.postgresDatabase }}"
