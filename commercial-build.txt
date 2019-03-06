@@ -86,7 +86,8 @@ lazy val `hmda-root` = (project in file("."))
              `modified-lar`,
              `hmda-analytics`,
              `census-api`,
-             `hmda-regulator`)
+             `hmda-regulator`,
+             `hmda-reporting`)
 
 lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
