@@ -16,13 +16,11 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
-import hmda.publication.lar.model.{
-  EnrichedModifiedLoanApplicationRegister,
-  ModifiedLoanApplicationRegister
-}
+import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
+import hmda.publication.lar.model.EnrichedModifiedLoanApplicationRegister
 import hmda.publication.lar.parser.ModifiedLarCsvParser
-import hmda.publication.lar.repositories.ModifiedLarRepository
 import hmda.query.HmdaQuery._
+import hmda.query.repository.ModifiedLarRepository
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

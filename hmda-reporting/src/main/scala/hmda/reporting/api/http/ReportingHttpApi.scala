@@ -14,13 +14,16 @@ import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.api.http.model.ErrorResponse
 import hmda.model.institution.{HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse}
 import hmda.query.DbConfiguration.dbConfig
-import hmda.reporting.query.ts.TsComponent
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 import akka.http.scaladsl.server.Directives._
+import hmda.query.repository.ModifiedLarRepository
+import hmda.reporting.repository.TsComponent
 trait ReportingHttpApi extends TsComponent {
   import dbConfig.profile.api._
   implicit val system: ActorSystem
@@ -38,10 +41,10 @@ trait ReportingHttpApi extends TsComponent {
           ts <- tsRepository.getAllSheets()
         } yield {
           ts.map(
-            tsEntity =>
-              HmdaFiler(tsEntity.lei,
-                tsEntity.institutionName,
-                tsEntity.year.toString))
+              tsEntity =>
+                HmdaFiler(tsEntity.lei,
+                          tsEntity.institutionName,
+                          tsEntity.year.toString))
             .toSet
         }
 
@@ -55,16 +58,12 @@ trait ReportingHttpApi extends TsComponent {
         }
 
       }
-    } ~ path("filers" / Segment / Segment / "msaMds") { (year, lei) =>
+    } ~ path("filers" / IntNumber / Segment / "msaMds") { (year, lei) =>
       extractUri { uri =>
-        val config: DatabaseConfig[JdbcProfile] = dbConfig
-        println("This is the lei: " + lei)
+        val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
+        val repo = new ModifiedLarRepository("modifiedlar2018", databaseConfig)
         val resultset = for {
-          myres1 <- config.db.run {
-            sql"""select distinct msa_md, msa_md_name
-                         from modifiedlar2018 where UPPER(lei) = ${lei.toUpperCase}"""
-              .as[(String, String)]
-          }
+          myres1 <- repo.msaMds(lei, year)
           institutionResult <- tsRepository.findByLei(lei)
         } yield {
           val myres = myres1
@@ -73,9 +72,9 @@ trait ReportingHttpApi extends TsComponent {
             )
             .toSet
           MsaMdResponse(new HmdaFiler(institutionResult.head.lei,
-            institutionResult.head.name,
-            institutionResult.head.year + ""),
-            myres)
+                                      institutionResult.head.name,
+                                      institutionResult.head.year + ""),
+                        myres)
         }
 
         onComplete(resultset) {

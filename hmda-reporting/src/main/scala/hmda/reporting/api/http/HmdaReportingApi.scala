@@ -3,6 +3,7 @@ package hmda.reporting.api.http
 import akka.actor.{ActorSystem, Props}
 import akka.event.Logging
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
@@ -19,8 +20,10 @@ object HmdaReportingApi {
   def props(): Props = Props(new HmdaReportingApi)
 }
 
-
-class HmdaReportingApi extends HttpServer with BaseHttpApi with ReportingHttpApi {
+class HmdaReportingApi
+    extends HttpServer
+    with BaseHttpApi
+    with ReportingHttpApi {
 
   val config: Config = ConfigFactory.load()
 

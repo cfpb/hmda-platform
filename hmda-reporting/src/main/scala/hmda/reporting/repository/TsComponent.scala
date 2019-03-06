@@ -1,4 +1,4 @@
-package hmda.reporting.query.ts
+package hmda.reporting.repository
 
 import hmda.query.DbConfiguration._
 import hmda.query.repository.TableRepository

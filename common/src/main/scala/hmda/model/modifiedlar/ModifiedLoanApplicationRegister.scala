@@ -1,4 +1,4 @@
-package hmda.publication.lar.model
+package hmda.model.modifiedlar
 
 import hmda.model.census.Census
 import hmda.model.filing.PipeDelimited

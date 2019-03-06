@@ -8,8 +8,7 @@ object HmdaReporting extends App {
 
   val log = LoggerFactory.getLogger("hmda-reporting")
 
-  log.info(
-    """
+  log.info("""
       | _____                       _   _                              _
       ||  __ \                     | | (_)                 /\         (_)
       || |__) |___ _ __   ___  _ __| |_ _ _ __   __ _     /  \   _ __  _
