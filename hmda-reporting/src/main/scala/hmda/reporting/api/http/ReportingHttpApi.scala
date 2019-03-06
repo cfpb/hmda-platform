@@ -85,15 +85,10 @@ trait ReportingHttpApi extends TsComponent {
           myres1 <- repo.msaMds(lei, year)
           institutionResult <- tsRepository.findByLei(lei)
         } yield {
-          val myres = myres1
-            .map(
-              myEntity => MsaMd(myEntity._1, myEntity._2)
-            )
-            .toSet
+          val myres = myres1.map(myEntity => MsaMd(myEntity._1, myEntity._2)).toSet
           MsaMdResponse(new HmdaFiler(institutionResult.head.lei,
                                       institutionResult.head.name,
-                                      institutionResult.head.year + ""),
-                        myres)
+                                      institutionResult.head.year + ""), myres)
         }
 
         onComplete(resultset) {
