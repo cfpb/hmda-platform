@@ -7,12 +7,21 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
+  cors,
+  corsRejectionHandler
+}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
-import hmda.model.institution.{HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse}
+import hmda.model.institution.{
+  HmdaFiler,
+  HmdaFilerResponse,
+  MsaMd,
+  MsaMdResponse
+}
 import hmda.query.repository.ModifiedLarRepository
 import hmda.reporting.repository.TsComponent
+import hmda.util.http.FilingResponseUtils.entityNotPresentResponse
 import io.circe.generic.auto._
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -32,17 +41,21 @@ trait ReportingHttpApi extends TsComponent {
       get {
 
         val futFilerSet =
-          tsRepository.getAllSheets().map(sheets =>
-            sheets
-              .map(tsEntity => HmdaFiler(tsEntity.lei, tsEntity.institutionName, tsEntity.year.toString))
-              .toSet
-          )
+          tsRepository
+            .getAllSheets()
+            .map(
+              sheets =>
+                sheets
+                  .map(tsEntity =>
+                    HmdaFiler(tsEntity.lei,
+                              tsEntity.institutionName,
+                              tsEntity.year.toString))
+                  .toSet)
         onComplete(futFilerSet) {
           case Success(filerSet) =>
-            complete(ToResponseMarshallable(HmdaFilerResponse(filerSet)))
+            complete(HmdaFilerResponse(filerSet))
           case Failure(error) =>
-            complete(
-                StatusCodes.BadRequest -> error.getLocalizedMessage))
+            complete(StatusCodes.BadRequest -> error.getLocalizedMessage)
         }
 
       }
@@ -58,16 +71,15 @@ trait ReportingHttpApi extends TsComponent {
             msaMdsResult.map(myEntity => MsaMd(myEntity._1, myEntity._2)).toSet
           MsaMdResponse(new HmdaFiler(institutionResult.head.lei,
                                       institutionResult.head.name,
-                                      institutionResult.head.year + ""), msaMds)
+                                      institutionResult.head.year + ""),
+                        msaMds)
         }
 
         onComplete(resultset) {
-          case Success(check) =>
-            complete(ToResponseMarshallable(check))
+          case Success(leiMsaMds) =>
+            complete(leiMsaMds)
           case Failure(error) =>
-            val errorResponse =
-              ErrorResponse(404, s"LEI not found", uri.path)
-            complete(ToResponseMarshallable(StatusCodes.NotFound -> errorResponse))
+            entityNotPresentResponse("institution", lei, uri)
         }
       }
     }
