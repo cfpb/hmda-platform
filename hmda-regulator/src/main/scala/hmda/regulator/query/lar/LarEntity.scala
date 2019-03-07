@@ -179,12 +179,10 @@ case class LarEntityImpl(larPartOne: LarPartOne,
                          larPartSix: LarPartSix) {
 
   def toPSV: String =
-  val larCSV=larPartOne.toPSV +
+    larPartOne.toPSV +
       larPartTwo.toPSV +
       larPartThree.toPSV +
       larPartFour.toPSV +
       larPartFive.toPSV +
-      larPartSix.toPSV.replaceAll("(\r\n)|\r|\n","")
-
-  ColumnDataFormatter.controlCharacterFilter(larCSV)
+      larPartSix.toPSV.replaceAll("(\r\n)|\r|\n", "")
 }

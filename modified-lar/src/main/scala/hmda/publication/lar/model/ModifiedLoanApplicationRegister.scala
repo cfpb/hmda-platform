@@ -98,7 +98,6 @@ case class ModifiedLoanApplicationRegister(
 ) extends PipeDelimited {
 
   override def toCSV: String = {
-    val larCSV=
     s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
       BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString+
       s"|" +
@@ -125,7 +124,6 @@ case class ModifiedLoanApplicationRegister(
       s"$initiallyPayableToInstitution|$AUS1|$AUS2|$AUS3|$AUS4|$AUS5|" +
       s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose".replaceAll("(\r\n)|\r|\n","")
 
-    ColumnDataFormatter.controlCharacterFilter(larCSV)
   }
 
 }
