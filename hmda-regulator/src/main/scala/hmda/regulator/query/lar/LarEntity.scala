@@ -113,8 +113,7 @@ case class LarPartFour(purchaserType: Int = 0,
     s"$purchaserType|$rateSpread|$hoepaStatus|$lienStatus|" +
       s"$creditScoreApplicant|$creditScoreCoApplicant|$creditScoreTypeApplicant|$creditScoreModelApplicant|" +
       s"$creditScoreTypeCoApplicant|$creditScoreModelCoApplicant|" +
-      ColumnDataFormatter.controlCharacterFilter(
-        s"$denialReason1|$denialReason2|$denialReason3|$denialReason4|") +
+      s"$denialReason1|$denialReason2|$denialReason3|$denialReason4|" +
       s"$otherDenialReason|$totalLoanCosts|$totalPoints|$originationCharges|"
   }
 }
@@ -180,11 +179,12 @@ case class LarEntityImpl(larPartOne: LarPartOne,
                          larPartSix: LarPartSix) {
 
   def toPSV: String =
-    larPartOne.toPSV +
+  val larCSV=larPartOne.toPSV +
       larPartTwo.toPSV +
       larPartThree.toPSV +
       larPartFour.toPSV +
       larPartFive.toPSV +
-      larPartSix.toPSV
+      larPartSix.toPSV.replaceAll("(\r\n)|\r|\n","")
 
+  ColumnDataFormatter.controlCharacterFilter(larCSV)
 }

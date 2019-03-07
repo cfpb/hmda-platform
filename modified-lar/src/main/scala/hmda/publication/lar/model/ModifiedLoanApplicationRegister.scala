@@ -98,7 +98,7 @@ case class ModifiedLoanApplicationRegister(
 ) extends PipeDelimited {
 
   override def toCSV: String = {
-
+    val larCSV=
     s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
       BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString+
       s"|" +
@@ -115,7 +115,7 @@ case class ModifiedLoanApplicationRegister(
       s"$age|$ageGreaterThanOrEqual62|$coAge|$coAgeGreaterThanOrEqual62|$income|" +
       s"$purchaserType|$rateSpread|$hoepaStatus|" +
       s"$lienStatus|$applicantCredisScoreModel|$coApplicantCreditScoreModel|" +
-      ColumnDataFormatter.controlCharacterFilter(s"$denial1|$denial2|$denial3|$denial4") +
+      s"$denial1|$denial2|$denial3|$denial4" +
       s"|$totalLoanCosts|$totalPointsAndFees|$originationCharges|$discountPoints|$lenderCredits|$interestRate|" +
       s"$prepaymentPenalty|$debtToIncomeRatio|$loanToValueRatio|$loanTerm|" +
       s"$introductoryRatePeriod|$balloonPayment|$interestOnlyPayment|$negativeAmortization|$otherNonAmortizingFeatures|" +
@@ -123,7 +123,9 @@ case class ModifiedLoanApplicationRegister(
       s"|" +
       s"$homeSecuredPropertyType|$homeLandPropertyType|$totalUnits|$multifamilyAffordableUnits|$applicationSubmission|" +
       s"$initiallyPayableToInstitution|$AUS1|$AUS2|$AUS3|$AUS4|$AUS5|" +
-      s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose"
+      s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose".replaceAll("(\r\n)|\r|\n","")
+
+    ColumnDataFormatter.controlCharacterFilter(larCSV)
   }
 
 }
