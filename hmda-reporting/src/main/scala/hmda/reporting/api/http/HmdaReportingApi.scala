@@ -11,6 +11,7 @@ import akka.pattern.pipe
 import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
 import com.typesafe.config.{Config, ConfigFactory}
+import hmda.query.DbConfiguration.dbConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
@@ -42,6 +43,8 @@ class HmdaReportingApi
   override val port: Int = config.getInt("hmda.reporting.http.port")
 
   override val paths: Route = routes(s"$name") ~ hmdaFilerRoutes
+
+  override val tsRepository: TransmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,
