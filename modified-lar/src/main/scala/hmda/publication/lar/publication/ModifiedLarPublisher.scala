@@ -17,7 +17,6 @@ import com.typesafe.config.ConfigFactory
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
-import hmda.publication.lar.model.EnrichedModifiedLoanApplicationRegister
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
