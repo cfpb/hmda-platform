@@ -238,7 +238,7 @@ lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      mainClass in Compile := Some("hmda.calculator.RateSpread"),
+      mainClass in Compile := Some("hmda.calculator.HmdaRateSpread"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

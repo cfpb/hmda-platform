@@ -8,7 +8,7 @@ class APORScheduler extends HmdaActor {
 
   override def preStart() = {
     QuartzSchedulerExtension(context.system)
-      .schedule("LarScheduler", self, APORScheduler)
+      .schedule("APORScheduler", self, APORScheduler)
   }
 
   override def postStop() = {
@@ -18,7 +18,7 @@ class APORScheduler extends HmdaActor {
   override def receive: Receive = {
 
     case APORScheduler =>
-      println("OOOOH SNAP!")
+      println("test")
   }
 
 }

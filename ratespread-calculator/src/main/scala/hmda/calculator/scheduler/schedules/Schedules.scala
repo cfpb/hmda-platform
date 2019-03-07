@@ -4,4 +4,3 @@ object Schedules {
   case object APORScheduler
 
 }
-

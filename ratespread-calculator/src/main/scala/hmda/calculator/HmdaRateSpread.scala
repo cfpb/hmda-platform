@@ -6,7 +6,7 @@ import hmda.calculator.api.http.RateSpreadAPI
 import hmda.calculator.scheduler.APORScheduler
 import org.slf4j.LoggerFactory
 
-object RateSpread extends App {
+object HmdaRateSpread extends App {
 
   val log = LoggerFactory.getLogger("hmda")
 
@@ -24,19 +24,19 @@ object RateSpread extends App {
 
   val config = ConfigFactory.load()
 
-  val host = config.getString("hmda.uli.http.host")
-  val port = config.getInt("hmda.uli.http.port")
-
+  val host = config.getString("hmda.ratespread.http.host")
+  val port = config.getInt("hmda.ratespread.http.port")
 
   val aporUpdateTimer = config.getString("akka.APORScheduler")
 
-
   log.info("APOR Timer: " + aporUpdateTimer)
 
-  val aporUpdaterActorSystem = ActorSystem("aporTask", ConfigFactory.parseString(aporUpdateTimer).withFallback(config))
-
+  val aporUpdaterActorSystem = ActorSystem(
+    "aporTask",
+    ConfigFactory.parseString(aporUpdateTimer).withFallback(config))
   aporUpdaterActorSystem.actorOf(Props[APORScheduler], "APORScheduler")
 
-  implicit val rateSpreadSystem: ActorSystem = ActorSystem("hmda-ratespread")
-  rateSpreadSystem.actorOf(RateSpreadAPI.props(), "hmda-census-api")
+  implicit val rateSpreadSystem: ActorSystem = ActorSystem(
+    "ratespread-api-task")
+  rateSpreadSystem.actorOf(RateSpreadAPI.props(), "hmda-ratespread-api")
 }
