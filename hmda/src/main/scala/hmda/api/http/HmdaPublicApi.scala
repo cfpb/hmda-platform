@@ -10,8 +10,7 @@ import com.typesafe.config.ConfigFactory
 import hmda.api.http.public.{
   HmdaFileValidationHttpApi,
   LarValidationHttpApi,
-  TsValidationHttpApi,
-  FilersHttpApi
+  TsValidationHttpApi
 }
 import akka.http.scaladsl.server.Directives._
 import akka.util.Timeout
