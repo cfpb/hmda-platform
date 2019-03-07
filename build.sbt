@@ -230,6 +230,33 @@ lazy val `census-api` = (project in file("census-api"))
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol`)
 
+lazy val `ratespread-calculator` = (project in file("ratespread-calculator"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin,
+                 AkkaGrpcPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.calculator.RateSpread"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol`)
+
 lazy val `modified-lar` = (project in file("modified-lar"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
