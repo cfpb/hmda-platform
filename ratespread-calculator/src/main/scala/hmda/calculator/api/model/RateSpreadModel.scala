@@ -11,7 +11,6 @@ object RateSpreadModel {
     def toCSV: String =
       s"$actionTakenType,$loanTerm,$amortizationType,$apr,$lockInDate,$reverseMortgage"
   }
-  case class LoanCheckDigitResponse(loanIds: Seq[RateSpread])
   case class RateSpreadCheck(rateSpread: String)
   case class RateSpreadValidated(uli: String, isValid: Boolean) {
     def toCSV: String = s"$uli,$isValid"
