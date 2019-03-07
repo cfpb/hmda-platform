@@ -19,7 +19,7 @@ class ModifiedLarRepository(tableName: String,
     * @return the number of rows removed
     */
   def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
-    db.run{
+    db.run {
       sql"""SELECT DISTINCT msa_md, msa_md_name
                          FROM modifiedlar2018 WHERE UPPER(lei) = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
         .as[(String, String)]
@@ -32,7 +32,7 @@ class ModifiedLarRepository(tableName: String,
     */
   def deleteByLei(lei: String, filingYear: Int): Future[Int] =
     db.run(
-      sqlu"DELETE FROM #${tableName} WHERE lei = $lei and filing_year = $filingYear")
+      sqlu"DELETE FROM #${tableName} WHERE UPPER(lei) = ${lei.toUpperCase} and filing_year = $filingYear")
 
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map
@@ -142,7 +142,7 @@ class ModifiedLarRepository(tableName: String,
           )
           VALUES (
             ${input.mlar.id},
-            ${input.mlar.lei},
+            ${input.mlar.lei.toUpperCase},
             ${input.mlar.loanType},
             ${input.mlar.loanPurpose},
             ${input.mlar.preapproval},

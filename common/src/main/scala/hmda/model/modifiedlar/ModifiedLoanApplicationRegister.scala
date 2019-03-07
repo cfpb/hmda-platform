@@ -100,7 +100,7 @@ case class ModifiedLoanApplicationRegister(
   override def toCSV: String = {
 
     s"$id|$lei|$loanType|$loanPurpose|$preapproval|$constructionMethod|$occupancy|" +
-      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString+
+      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
       s"|" +
       s"$actionTakenType|$state|$county|$tract|$ethnicity1|" +
       s"$ethnicity2|" +
@@ -115,7 +115,8 @@ case class ModifiedLoanApplicationRegister(
       s"$age|$ageGreaterThanOrEqual62|$coAge|$coAgeGreaterThanOrEqual62|$income|" +
       s"$purchaserType|$rateSpread|$hoepaStatus|" +
       s"$lienStatus|$applicantCredisScoreModel|$coApplicantCreditScoreModel|" +
-      ColumnDataFormatter.controlCharacterFilter(s"$denial1|$denial2|$denial3|$denial4") +
+      ColumnDataFormatter.controlCharacterFilter(
+        s"$denial1|$denial2|$denial3|$denial4") +
       s"|$totalLoanCosts|$totalPointsAndFees|$originationCharges|$discountPoints|$lenderCredits|$interestRate|" +
       s"$prepaymentPenalty|$debtToIncomeRatio|$loanToValueRatio|$loanTerm|" +
       s"$introductoryRatePeriod|$balloonPayment|$interestOnlyPayment|$negativeAmortization|$otherNonAmortizingFeatures|" +
