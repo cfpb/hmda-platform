@@ -48,26 +48,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-<<<<<<< HEAD
-=======
-aws:
-  environment: dev
-  s3privatebucket: cfpb-hmda-export
-  s3publicbucket: cfpb-hmda-public
-  region: us-east-1
-
-postgresql:
-  postgresDatabase: hmda
-  postgresUser: hmda
-  enabled: false
-  createSchema: false
-  ssl: require
-
-http:
-  census:
-    port: 9093
-    host: census-api.default.svc.cluster.local
-
-filter:
-    bankfilterlist: BANK1LEIFORTEST12345,BANK3LEIFORTEST12345,BANK4LEIFORTEST12345,999999LE3ZOZXUS7W648,28133080042813308004,B90YWS6AFX2LGWOXJ1LD
->>>>>>> 002546a65245edd64b27987d0f36e779b71ef7d5
