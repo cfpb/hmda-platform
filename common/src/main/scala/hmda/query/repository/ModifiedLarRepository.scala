@@ -14,12 +14,27 @@ class ModifiedLarRepository(tableName: String,
   private val db = databaseConfig.db
 
   /**
+    * Return all tracts for an MSA and LEI
+    * @param lei
+    * @param msaMd
+    * @return
+    */
+  def tractsForMsaMd (lei: String, msaMd: Int, filingYear: Int): Future[Vector[(String)]] = {
+    db.run {
+      sql"""select distinct(tract_to_msamd) from modifiedlar2018
+            where lei = ${lei.toUpperCase}
+            and msa_md = ${msaMd}
+            and filing_year = ${filingYear}""".as[(String)]
+    }
+  }
+
+  /**
     * FHA, FSA/RHS & VA (A): Total Units = 1 through 4; Purpose of Loan = 1; Loan Type = 2, 3, 4
     * @param lei
     * @param msaMd
     * @param tractToMsaMd
     */
-  def dispositionATable1 (lei: String, msaMd: Int, tractToMsaMd: String): Unit = {
+  def dispositionATable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
     db.run {
       sql"""select count(*), sum(loan_amount) from modifiedlar2018
            where UPPER(lei) = ${lei.toUpperCase}
@@ -29,6 +44,7 @@ class ModifiedLarRepository(tableName: String,
            and (loan_type = 2 or loan_type = 3 or loan_type = 4)
            and msa_md = ${msaMd}
            and tract_to_msamd = ${tractToMsaMd}
+           and filing_year = ${filingYear}
            group by lei"""
         .as[(Int, Int)]
     }
@@ -40,7 +56,7 @@ class ModifiedLarRepository(tableName: String,
     * @param msaMd
     * @param tractToMsaMd
     */
-  def dispositionBTable1 (lei: String, msaMd: Int, tractToMsaMd: String): Unit = {
+  def dispositionBTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
     db.run {
       sql"""select count(*), sum(loan_amount) from modifiedlar2018
            where lei = ${lei.toUpperCase}
@@ -50,6 +66,7 @@ class ModifiedLarRepository(tableName: String,
            and loan_type = 1
            and msa_md = ${msaMd}
            and tract_to_msamd = ${tractToMsaMd}
+           and filing_year = ${filingYear}
            group by lei"""
         .as[(Int, Int)]
     }
@@ -61,7 +78,7 @@ class ModifiedLarRepository(tableName: String,
     * @param msaMd
     * @param tractToMsaMd
     */
-  def dispositionCTable1 (lei: String, msaMd: Int, tractToMsaMd: String): Unit = {
+  def dispositionCTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
     db.run {
       sql"""select count(*), sum(loan_amount) from modifiedlar2018
            where lei = ${lei.toUpperCase}
@@ -70,6 +87,7 @@ class ModifiedLarRepository(tableName: String,
            and (loan_purpose = 31 or loan_purpose = 32)
            and msa_md = ${msaMd}
            and tract_to_msamd = ${tractToMsaMd}
+           and filing_year = ${filingYear}
            group by lei"""
         .as[(Int, Int)]
     }
@@ -81,7 +99,7 @@ class ModifiedLarRepository(tableName: String,
     * @param msaMd
     * @param tractToMsaMd
     */
-  def dispositionDTable1 (lei: String, msaMd: Int, tractToMsaMd: String): Unit = {
+  def dispositionDTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
     db.run {
       sql"""select count(*), sum(loan_amount) from modifiedlar2018
             where lei = ${lei.toUpperCase}
@@ -90,6 +108,7 @@ class ModifiedLarRepository(tableName: String,
             and loan_purpose = 2
             and msa_md = ${msaMd}
             and tract_to_msamd = ${tractToMsaMd}
+            and filing_year = ${filingYear}
             group by lei"""
         .as[(Int, Int)]
     }
@@ -101,7 +120,7 @@ class ModifiedLarRepository(tableName: String,
     * @param msaMd
     * @param tractToMsaMd
     */
-  def dispositionETable1 (lei: String, msaMd: Int, tractToMsaMd: String): Unit = {
+  def dispositionETable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
     db.run {
       sql"""select count(*), sum(loan_amount) from modifiedlar2018
             where lei = ${lei.toUpperCase}
@@ -109,6 +128,7 @@ class ModifiedLarRepository(tableName: String,
             and (total_units <> '1' and total_units <> '2' and total_units <> '3' and total_units <> '4')
             and msa_md = ${msaMd}
             and tract_to_msamd = ${tractToMsaMd}
+            and filing_year = ${filingYear}
             group by lei"""
         .as[(Int, Int)]
     }
@@ -120,18 +140,19 @@ class ModifiedLarRepository(tableName: String,
     * @param msaMd
     * @param tractToMsaMd
     */
-  def dispositionFTable1 (lei: String, msaMd: Int, tractToMsaMd: String): Unit = {
+  def dispositionFTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
     db.run {
       sql"""select count(*), sum(loan_amount) from modifiedlar2018
-           |where lei = ${lei.toUpperCase}
-           |and action_taken_type = '1'
-           |and (total_units = '1' or total_units = '2' or total_units = '3' or total_units = '4')
-           |and (loan_purpose = 1 or loan_purpose = 2 or loan_purpose = 31 or loan_purpose = 32)
-           |and (loan_type = 1 or loan_type = 2 or loan_type = 3 or loan_type = 4)
-           |and (occupancy_type = 2 or occupancy_type = 3)
-           |and msa_md = ${msaMd}
-         and tract_to_msamd = ${tractToMsaMd}
-           |group by lei"""
+            where lei = ${lei.toUpperCase}
+            and action_taken_type = '1'
+            and (total_units = '1' or total_units = '2' or total_units = '3' or total_units = '4')
+            and (loan_purpose = 1 or loan_purpose = 2 or loan_purpose = 31 or loan_purpose = 32)
+            and (loan_type = 1 or loan_type = 2 or loan_type = 3 or loan_type = 4)
+            and (occupancy_type = 2 or occupancy_type = 3)
+            and msa_md = ${msaMd}
+            and tract_to_msamd = ${tractToMsaMd}
+            and filing_year = ${filingYear}
+            group by lei"""
         .as[(Int, Int)]
     }
   }
@@ -142,7 +163,7 @@ class ModifiedLarRepository(tableName: String,
     * @param msaMd
     * @param tractToMsaMd
     */
-  def dispositionGTable1 (lei: String, msaMd: Int, tractToMsaMd: String): Unit = {
+  def dispositionGTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
     db.run {
       sql"""select count(*), sum(loan_amount) from modifiedlar2018
             where lei = ${lei.toUpperCase}
@@ -153,6 +174,7 @@ class ModifiedLarRepository(tableName: String,
             and (construction_method = '2')
             and msa_md = ${msaMd}
             and tract_to_msamd = ${tractToMsaMd}
+            and filing_year = ${filingYear}
             group by lei"""
         .as[(Int, Int)]
     }
