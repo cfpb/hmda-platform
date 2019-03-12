@@ -74,7 +74,7 @@ volumes: [
       }
     }
 
-    stage('Docker Clean Up')
+    stage('Docker Clean Up') {
       container('docker') {
         sh """
           docker images
