@@ -78,6 +78,7 @@ volumes: [
         sh 'mv hmda/build.sbt hmda/build.txt'
         sh 'mv hmda/commercial-build.txt hmda/build.sbt'
         sh 'mv project/cinnamon.txt project/cinnamon.sbt'
+        sh 'rm -r hmda/src/test'
 
       container('sbt') {
                 sh "sbt -batch hmda-platform/docker:stage"
@@ -119,18 +120,20 @@ volumes: [
             }
           }
         }
+      }
     }
-  }
-  container('docker') {
-      stage ('cleanup') {
-          //Cleanup Docker Image
+
+    stage('Docker Clean Up')
+        container('docker') {
           sh """
             docker images
             docker image prune -f
             docker images
             docker ps -a
           """
+        }
       }
+    }
+    
   }
-}
 }
