@@ -90,26 +90,6 @@ spec:
             configMapKeyRef:
               name: kafka-configmap
               key: kafka.hosts
-        - name: GRPC_CHECK_DIGIT_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: grpc-configmap
-              key: check.digit.host
-        - name: GRPC_CHECK_DIGIT_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: grpc-configmap
-              key: check.digit.port
-        - name: GRPC_CENSUS_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: grpc-configmap
-              key: census.host
-        - name: GRPC_CENSUS_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: grpc-configmap
-              key: census.port
         - name: HTTP_CENSUS_HOST
           valueFrom:
             configMapKeyRef:
@@ -120,16 +100,6 @@ spec:
             configMapKeyRef:
               name: http-configmap
               key: census.port
-        - name: HTTP_CHECK_DIGIT_HOST
-          valueFrom:
-            configMapKeyRef:
-              name: http-configmap
-              key: check.digit.host
-        - name: HTTP_CHECK_DIGIT_PORT
-          valueFrom:
-            configMapKeyRef:
-              name: http-configmap
-              key: check.digit.port
         - name: PG_HOST
           valueFrom:
             secretKeyRef:
