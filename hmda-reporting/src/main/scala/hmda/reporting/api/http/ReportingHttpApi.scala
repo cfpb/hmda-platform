@@ -7,19 +7,11 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
-  cors,
-  corsRejectionHandler
-}
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{cors, corsRejectionHandler}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.ErrorResponse
-import hmda.model.institution.{
-  HmdaFiler,
-  HmdaFilerResponse,
-  MsaMd,
-  MsaMdResponse
-}
-import hmda.query.repository.ModifiedLarRepository
+import hmda.model.institution.{HmdaFiler, HmdaFilerResponse, MsaMd, MsaMdResponse}
+import hmda.query.repository.{DisclosureRepository, ModifiedLarRepository}
 import hmda.reporting.repository.TsComponent
 import hmda.util.http.FilingResponseUtils.entityNotPresentResponse
 import io.circe.generic.auto._
@@ -62,17 +54,15 @@ trait ReportingHttpApi extends TsComponent {
     } ~ path("filers" / IntNumber / Segment / "msaMds") { (year, lei) =>
       extractUri { uri =>
         val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
-        val repo = new ModifiedLarRepository("modifiedlar2018", databaseConfig)
+        val repo = new DisclosureRepository("modifiedlar2018", databaseConfig)
         val resultset = for {
-          msaMdsResult <- repo.msaMds(lei, year)
+          msaMdsResult: Seq[MsaMd] <- repo.msaMdsByLei(lei, year)
           institutionResult <- tsRepository.findByLei(lei)
         } yield {
-          val msaMds =
-            msaMdsResult.map(myEntity => MsaMd(myEntity._1, myEntity._2)).toSet
           MsaMdResponse(new HmdaFiler(institutionResult.head.lei,
                                       institutionResult.head.name,
                                       institutionResult.head.year + ""),
-                        msaMds)
+            msaMdsResult.toSet)
         }
 
         onComplete(resultset) {

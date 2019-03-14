@@ -95,8 +95,8 @@ CREATE TABLE hmda_user.modifiedlar2018
     msa_md_name character varying,
     loan_flag character varying,
     created_at timestamp default current_timestamp,
-    submission_id character varying
-    filing_year integer,
+    submission_id character varying,
+    filing_year integer
 )
 WITH (
     OIDS = FALSE

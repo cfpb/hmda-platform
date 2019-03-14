@@ -1,10 +1,12 @@
 package hmda.query.repository
 
+import hmda.model.disclosure.LoanType
+import hmda.model.institution.{MsaMd, TractDisclosure}
 import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
 import slick.basic.DatabaseConfig
-import slick.jdbc.JdbcProfile
+import slick.jdbc.{GetResult, JdbcProfile}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class ModifiedLarRepository(tableName: String,
@@ -13,184 +15,13 @@ class ModifiedLarRepository(tableName: String,
 
   private val db = databaseConfig.db
 
-  /**
-    * Return all tracts for an MSA and LEI
-    * @param lei
-    * @param msaMd
-    * @return
-    */
-  def tractsForMsaMd (lei: String, msaMd: Int, filingYear: Int): Future[Vector[(String)]] = {
+  def leiName(lei: String): Future[Option[String]] = {
     db.run {
-      sql"""select distinct(tract_to_msamd) from modifiedlar2018
-            where lei = ${lei.toUpperCase}
-            and msa_md = ${msaMd}
-            and filing_year = ${filingYear}""".as[(String)]
+      sql"""select institution_name from transmittalsheet2018 where upper(lei) = ${lei.toUpperCase}"""
+        .as[String]
+        .headOption
     }
   }
-
-  /**
-    * FHA, FSA/RHS & VA (A): Total Units = 1 through 4; Purpose of Loan = 1; Loan Type = 2, 3, 4
-    * @param lei
-    * @param msaMd
-    * @param tractToMsaMd
-    */
-  def dispositionATable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
-    db.run {
-      sql"""select count(*), sum(loan_amount) from modifiedlar2018
-           where UPPER(lei) = ${lei.toUpperCase}
-           and action_taken_type = '1'
-           and (total_units = '1' or total_units = '2' or total_units = '3' or total_units = '4')
-           and loan_purpose = 1
-           and (loan_type = 2 or loan_type = 3 or loan_type = 4)
-           and msa_md = ${msaMd}
-           and tract_to_msamd = ${tractToMsaMd}
-           and filing_year = ${filingYear}
-           group by lei"""
-        .as[(Int, Int)]
-    }
-  }
-
-  /**
-    * Conventional (B): Total Units = 1 through 4; Purpose of Loan = 1; Loan Type = 1
-    * @param lei
-    * @param msaMd
-    * @param tractToMsaMd
-    */
-  def dispositionBTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
-    db.run {
-      sql"""select count(*), sum(loan_amount) from modifiedlar2018
-           where lei = ${lei.toUpperCase}
-           and action_taken_type = '1'
-           and (total_units = '1' or total_units = '2' or total_units = '3' or total_units = '4')
-           and loan_purpose = 1
-           and loan_type = 1
-           and msa_md = ${msaMd}
-           and tract_to_msamd = ${tractToMsaMd}
-           and filing_year = ${filingYear}
-           group by lei"""
-        .as[(Int, Int)]
-    }
-  }
-
-  /**
-    * Refinancings (C): Total Units = 1 through 4; Purpose of Loan = 31, 32
-    * @param lei
-    * @param msaMd
-    * @param tractToMsaMd
-    */
-  def dispositionCTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
-    db.run {
-      sql"""select count(*), sum(loan_amount) from modifiedlar2018
-           where lei = ${lei.toUpperCase}
-           and action_taken_type = '1'
-           and (total_units = '1' or total_units = '2' or total_units = '3' or total_units = '4')
-           and (loan_purpose = 31 or loan_purpose = 32)
-           and msa_md = ${msaMd}
-           and tract_to_msamd = ${tractToMsaMd}
-           and filing_year = ${filingYear}
-           group by lei"""
-        .as[(Int, Int)]
-    }
-  }
-
-  /**
-    * Home Improvement Loans (D): Total Units = 1 through 4; Purpose of Loan = 2
-    * @param lei
-    * @param msaMd
-    * @param tractToMsaMd
-    */
-  def dispositionDTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
-    db.run {
-      sql"""select count(*), sum(loan_amount) from modifiedlar2018
-            where lei = ${lei.toUpperCase}
-            and action_taken_type = '1'
-            and (total_units = '1' or total_units = '2' or total_units = '3' or total_units = '4')
-            and loan_purpose = 2
-            and msa_md = ${msaMd}
-            and tract_to_msamd = ${tractToMsaMd}
-            and filing_year = ${filingYear}
-            group by lei"""
-        .as[(Int, Int)]
-    }
-  }
-
-  /**
-    * Loans on Dwellings For 5 or More Families (E): Total Units = 5+ Units
-    * @param lei
-    * @param msaMd
-    * @param tractToMsaMd
-    */
-  def dispositionETable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
-    db.run {
-      sql"""select count(*), sum(loan_amount) from modifiedlar2018
-            where lei = ${lei.toUpperCase}
-            and action_taken_type = '1'
-            and (total_units <> '1' and total_units <> '2' and total_units <> '3' and total_units <> '4')
-            and msa_md = ${msaMd}
-            and tract_to_msamd = ${tractToMsaMd}
-            and filing_year = ${filingYear}
-            group by lei"""
-        .as[(Int, Int)]
-    }
-  }
-
-  /**
-    * Nonoccupant Loans from Columns A, B, C ,& D (F): All loans from columns A through @ where Occupancy Type = 2, 3
-    * @param lei
-    * @param msaMd
-    * @param tractToMsaMd
-    */
-  def dispositionFTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
-    db.run {
-      sql"""select count(*), sum(loan_amount) from modifiedlar2018
-            where lei = ${lei.toUpperCase}
-            and action_taken_type = '1'
-            and (total_units = '1' or total_units = '2' or total_units = '3' or total_units = '4')
-            and (loan_purpose = 1 or loan_purpose = 2 or loan_purpose = 31 or loan_purpose = 32)
-            and (loan_type = 1 or loan_type = 2 or loan_type = 3 or loan_type = 4)
-            and (occupancy_type = 2 or occupancy_type = 3)
-            and msa_md = ${msaMd}
-            and tract_to_msamd = ${tractToMsaMd}
-            and filing_year = ${filingYear}
-            group by lei"""
-        .as[(Int, Int)]
-    }
-  }
-
-  /**
-    * Loans On Manufactured Home Dwellings From Columns A, B, C & D (G): Construction Method = 2
-    * @param lei
-    * @param msaMd
-    * @param tractToMsaMd
-    */
-  def dispositionGTable1 (lei: String, msaMd: Int, tractToMsaMd: String, filingYear: Int): Future[Vector[(Int, Int)]] = {
-    db.run {
-      sql"""select count(*), sum(loan_amount) from modifiedlar2018
-            where lei = ${lei.toUpperCase}
-            and action_taken_type = '1'
-            and (total_units = '1' or total_units = '2' or total_units = '3' or total_units = '4')
-            and (loan_purpose = 1 or loan_purpose = 2 or loan_purpose = 31 or loan_purpose = 32)
-            and (loan_type = 1 or loan_type = 2 or loan_type = 3 or loan_type = 4)
-            and (construction_method = '2')
-            and msa_md = ${msaMd}
-            and tract_to_msamd = ${tractToMsaMd}
-            and filing_year = ${filingYear}
-            group by lei"""
-        .as[(Int, Int)]
-    }
-  }
-
-  /**
-    * Deletes entries in the Modified LAR table by their LEI
-    * @param lei
-    * @return the number of rows removed
-    */
-  def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
-    db.run {
-      sql"""SELECT DISTINCT msa_md, msa_md_name
-                         FROM modifiedlar2018 WHERE UPPER(lei) = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
-        .as[(String, String)]
-    }
 
   /**
     * Deletes entries in the Modified LAR table by their LEI

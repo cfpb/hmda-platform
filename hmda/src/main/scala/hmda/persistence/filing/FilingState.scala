@@ -29,17 +29,17 @@ case class FilingState(filing: Filing = Filing(),
         }
       case SubmissionUpdated(updated) =>
         if (submissions.map(_.id).contains(updated.id)
-          && !isSigned(updated)
-          && (!isSigned(
-          submissions
-            .filter(_.id == updated.id)
-            .headOption
-            .getOrElse(Submission())))) {
+            && !isSigned(updated)
+            && (!isSigned(
+              submissions
+                .filter(_.id == updated.id)
+                .headOption
+                .getOrElse(Submission())))) {
           val updatedList = updated :: submissions.filterNot(s =>
             s.id == updated.id)
           FilingState(this.filing, updatedList)
         } else if (submissions.map(_.id).contains(updated.id) && isSigned(
-          updated)) {
+                     updated)) {
           val updatedList = updated.copy(
             status = SubmissionStatus.valueOf(Signed.code),
             receipt = s"${updated.id}-${updated.end}") :: submissions
