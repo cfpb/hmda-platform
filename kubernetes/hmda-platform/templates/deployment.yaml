@@ -31,6 +31,7 @@ spec:
                 operator: In
                 values:
                 - "hmda-platform"
+                - "keycloak"
             topologyKey: kubernetes.io/hostname
       volumes:
         - name: tz-config
@@ -46,10 +47,10 @@ spec:
         resources:
           limits:
             memory: "6200Mi"
-            cpu: "4"
+            cpu: "6"
           requests:
             memory: "6200Mi"
-            cpu: "1"
+            cpu: "2"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
         - name: COMMIT_ID

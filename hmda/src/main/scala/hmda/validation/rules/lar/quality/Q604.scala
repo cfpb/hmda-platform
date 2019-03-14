@@ -1,9 +1,7 @@
 package hmda.validation.rules.lar.quality
 
 import com.typesafe.config.ConfigFactory
-import hmda.HmdaPlatform
 import hmda.census.records.CensusRecords
-import hmda.census.validation.CensusValidation
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.dsl.{
   ValidationFailure,

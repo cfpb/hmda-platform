@@ -147,6 +147,17 @@ WITH (
     OIDS = FALSE
 );
 
+CREATE TABLE hmda_user.submission_history
+(
+    lei character varying COLLATE  NOT NULL,
+    submission_id character varying  NOT NULL,
+    sign_date bigint, --this will be epoc date
+    CONSTRAINT sh2018_pkey PRIMARY KEY (lei, submission_id)
+)
+WITH (
+    OIDS = FALSE
+)
+
 ALTER TABLE public.loanapplicationregister2018
     OWNER to postgres;
 

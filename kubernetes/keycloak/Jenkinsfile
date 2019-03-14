@@ -28,7 +28,7 @@ podTemplate(label: 'buildHelm', containers: [
                                 --set keycloak.username=${env.KEYCLOAK_USER} \
                                 --set keycloak.password=${env.KEYCLOAK_PASSWORD} \
                                 --set image.pullPolicy=Always \
-                                keycloak kubernetes/keycloak
+                                keycloak stable/keycloak
                             """
                         }
                     }

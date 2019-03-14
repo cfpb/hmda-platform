@@ -29,22 +29,20 @@ case class FilingState(filing: Filing = Filing(),
         }
       case SubmissionUpdated(updated) =>
         if (submissions.map(_.id).contains(updated.id)
-            && !isSigned(updated)
-            && (!isSigned(
-              submissions
-                .filter(_.id == updated.id)
-                .headOption
-                .getOrElse(Submission())))) {
+          && !isSigned(updated)
+          && (!isSigned(
+          submissions
+            .filter(_.id == updated.id)
+            .headOption
+            .getOrElse(Submission())))) {
           val updatedList = updated :: submissions.filterNot(s =>
             s.id == updated.id)
           FilingState(this.filing, updatedList)
         } else if (submissions.map(_.id).contains(updated.id) && isSigned(
-                     updated)) {
-          val timestamp = Instant.now().toEpochMilli
+          updated)) {
           val updatedList = updated.copy(
-            end = timestamp,
             status = SubmissionStatus.valueOf(Signed.code),
-            receipt = s"${updated.id}-$timestamp") :: submissions
+            receipt = s"${updated.id}-${updated.end}") :: submissions
             .filterNot(s => s.id == updated.id)
           FilingState(this.filing, updatedList)
         } else {

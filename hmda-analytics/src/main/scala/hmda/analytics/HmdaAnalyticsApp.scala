@@ -13,6 +13,7 @@ import hmda.query.ts.TransmittalSheetConverter
 import hmda.analytics.query.{
   LarComponent,
   LarConverter,
+  SubmissionHistoryComponent,
   TransmittalSheetComponent
 }
 import hmda.messages.pubsub.HmdaTopics.{analyticsTopic, signTopic}
@@ -26,7 +27,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import hmda.query.DbConfiguration.dbConfig
-import hmda.query.HmdaQuery.readRawData
+import hmda.query.HmdaQuery.{readRawData, readSubmission}
 import hmda.util.streams.FlowUtils.framing
 
 import scala.concurrent.Future
@@ -35,7 +36,8 @@ import scala.concurrent.duration._
 object HmdaAnalyticsApp
     extends App
     with TransmittalSheetComponent
-    with LarComponent {
+    with LarComponent
+    with SubmissionHistoryComponent {
 
   val log = LoggerFactory.getLogger("hmda")
 
@@ -67,6 +69,8 @@ object HmdaAnalyticsApp
   val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
   val larRepository =
     new LarRepository(tableName = "loanapplicationregister2018", dbConfig)
+  val submissionHistoryRepository =
+    new SubmissionHistoryRepository(tableName = "submission_history", dbConfig)
   val db = transmittalSheetRepository.db
 
   val consumerSettings: ConsumerSettings[String, String] =
@@ -105,6 +109,12 @@ object HmdaAnalyticsApp
   private def addTs(submissionId: SubmissionId): Future[Done] = {
     var submissionIdVar = None: Option[String]
     submissionIdVar = Some(submissionId.toString)
+
+    def signDate: Future[Option[Long]] =
+      readSubmission(submissionId)
+        .map(l => l.submission.end)
+        .runWith(Sink.lastOption)
+
     def deleteTsRow: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
@@ -121,6 +131,30 @@ object HmdaAnalyticsApp
           } yield delete
         }
         .runWith(Sink.ignore)
+
+    def insertSubmissionHistory: Future[Done] =
+      readRawData(submissionId)
+        .map(l => l.data)
+        .map(ByteString(_))
+        .via(framing("\n"))
+        .map(_.utf8String)
+        .map(_.trim)
+        .take(1)
+        .map(s => TsCsvParser(s))
+        .map(_.getOrElse(TransmittalSheet()))
+        .filter(t => t.LEI != "" && t.institutionName != "")
+        .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
+        .mapAsync(1) { ts =>
+          for {
+            signdate <- signDate
+            submissionHistory <- submissionHistoryRepository.insert(
+              ts.lei,
+              ts.submissionId,
+              signdate)
+          } yield submissionHistory
+        }
+        .runWith(Sink.ignore)
+
     def insertTsRow: Future[Done] =
       readRawData(submissionId)
         .map(l => l.data)
@@ -135,9 +169,7 @@ object HmdaAnalyticsApp
         .map(ts => TransmittalSheetConverter(ts, submissionIdVar))
         .mapAsync(1) { ts =>
           for {
-
             insertorupdate <- transmittalSheetRepository.insert(ts)
-
           } yield insertorupdate
         }
         .runWith(Sink.ignore)
@@ -188,9 +220,11 @@ object HmdaAnalyticsApp
         _ <- deleteLarRows
         _ = log.info(s"Done deleting data from LAR for  $submissionId")
 
-        res <- insertLarRows
+        _ <- insertLarRows
         _ = log.info(s"Done inserting data into LAR for  $submissionId")
 
+        _ <- signDate
+        res <- insertSubmissionHistory
       } yield res
     result.recover {
       case t: Throwable =>

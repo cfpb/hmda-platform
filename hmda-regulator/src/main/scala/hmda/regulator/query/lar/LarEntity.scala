@@ -1,5 +1,7 @@
 package hmda.regulator.query.lar
 
+import hmda.util.conversion.ColumnDataFormatter
+
 case class LarPartOne(id: Int = 0,
                       lei: String = "",
                       uli: String = "",
@@ -23,7 +25,8 @@ case class LarPartOne(id: Int = 0,
   def toPSV: String = {
     s"$id|$lei|$uli|$applicationDate|$loanType|" +
       s"$loanPurpose|$preapproval|$constructionMethod|$occupancyType|" +
-      s"$loanAmount|$actionTakenType|$actionTakenDate|$street|$city|$state|" +
+      BigDecimal.valueOf(loanAmount).bigDecimal.toPlainString +
+      s"|$actionTakenType|$actionTakenDate|$street|$city|$state|" +
       s"$zip|$county|$tract|"
   }
 }
@@ -109,8 +112,10 @@ case class LarPartFour(purchaserType: Int = 0,
   def toPSV: String = {
     s"$purchaserType|$rateSpread|$hoepaStatus|$lienStatus|" +
       s"$creditScoreApplicant|$creditScoreCoApplicant|$creditScoreTypeApplicant|$creditScoreModelApplicant|" +
-      s"$creditScoreTypeCoApplicant|$creditScoreModelCoApplicant|$denialReason1|$denialReason2|$denialReason3|" +
-      s"$denialReason4|$otherDenialReason|$totalLoanCosts|$totalPoints|$originationCharges|"
+      s"$creditScoreTypeCoApplicant|$creditScoreModelCoApplicant|" +
+      ColumnDataFormatter.controlCharacterFilter(
+        s"$denialReason1|$denialReason2|$denialReason3|$denialReason4|") +
+      s"$otherDenialReason|$totalLoanCosts|$totalPoints|$originationCharges|"
   }
 }
 
@@ -135,9 +140,11 @@ case class LarPartFive(discountPoints: String = "",
 
   def toPSV: String = {
     s"$discountPoints|$lenderCredits|$interestRate|$paymentPenalty|$debtToIncome|$loanValueRatio|$loanTerm|" +
-      s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|$propertyValue|" +
+      s"$rateSpreadIntro|$baloonPayment|$insertOnlyPayment|$amortization|$otherAmortization|" +
+      ColumnDataFormatter.toBigDecimalString(propertyValue) + "|" +
       s"$homeSecurityPolicy|$landPropertyInterest|$totalUnits|$mfAffordable|$applicationSubmission|"
   }
+
 }
 
 case class LarPartSix(payable: Int = 0,

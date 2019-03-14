@@ -1,8 +1,6 @@
 package hmda.validation.rules.lar.quality
 
-import hmda.HmdaPlatform
 import hmda.census.records.CensusRecords
-import hmda.census.validation.CensusValidation
 import hmda.model.filing.lar.LoanApplicationRegister
 import hmda.validation.dsl.{
   ValidationFailure,
