@@ -3,7 +3,10 @@ package hmda.census.api.http
 import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http.scaladsl.common.{EntityStreamingSupport, JsonEntityStreamingSupport}
+import akka.http.scaladsl.common.{
+  EntityStreamingSupport,
+  JsonEntityStreamingSupport
+}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
@@ -14,7 +17,12 @@ import hmda.census.records.CensusRecords
 import hmda.census.records.CensusRecords._
 import hmda.census.validation.CensusValidation._
 import hmda.model.census.Census
-import hmda.query.dtos.{CountyCheck, IndexedCensusEntry, TractCheck, TractValidated}
+import hmda.query.dtos.{
+  CountyCheck,
+  IndexedCensusEntry,
+  TractCheck,
+  TractValidated
+}
 import io.circe.generic.auto._
 
 import scala.concurrent.ExecutionContext

@@ -16,7 +16,10 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
+import hmda.model.modifiedlar.{
+  EnrichedModifiedLoanApplicationRegister,
+  ModifiedLoanApplicationRegister
+}
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
@@ -27,7 +30,7 @@ import scala.util.{Failure, Success}
 sealed trait ModifiedLarCommand
 case class PersistToS3AndPostgres(submissionId: SubmissionId,
                                   respondTo: ActorRef[PersistModifiedLarResult])
-  extends ModifiedLarCommand
+    extends ModifiedLarCommand
 sealed trait UploadStatus
 case object UploadSucceeded extends UploadStatus
 case class UploadFailed(exception: Throwable) extends UploadStatus
@@ -58,8 +61,8 @@ object ModifiedLarPublisher {
   }
 
   def behavior(
-                indexTractMap: Map[String, Census],
-                modifiedLarRepo: ModifiedLarRepository): Behavior[ModifiedLarCommand] =
+      indexTractMap: Map[String, Census],
+      modifiedLarRepo: ModifiedLarRepository): Behavior[ModifiedLarCommand] =
     Behaviors.setup { ctx =>
       val log = ctx.log
       val decider: Supervision.Decider = { e: Throwable =>
@@ -106,21 +109,21 @@ object ModifiedLarPublisher {
               .map(s => ModifiedLarCsvParser(s))
 
           val s3Out: Sink[ModifiedLoanApplicationRegister,
-            Future[MultipartUploadResult]] =
+                          Future[MultipartUploadResult]] =
             Flow[ModifiedLoanApplicationRegister]
               .map(mlar => mlar.toCSV + "\n")
               .map(ByteString(_))
               .toMat(s3Sink)(Keep.right)
 
           def postgresOut(parallelism: Int)
-          : Sink[ModifiedLoanApplicationRegister, Future[Done]] =
+            : Sink[ModifiedLoanApplicationRegister, Future[Done]] =
             Flow[ModifiedLoanApplicationRegister]
               .map(
                 mlar =>
                   EnrichedModifiedLoanApplicationRegister(
                     mlar,
                     indexTractMap.getOrElse(mlar.tract, Census())
-                  )
+                )
               )
               .mapAsync(parallelism)(enriched =>
                 modifiedLarRepo
@@ -149,14 +152,14 @@ object ModifiedLarPublisher {
             case Success(_) =>
               log.info("Successfully completed persisting for {}", submissionId)
               respondTo ! PersistModifiedLarResult(submissionId,
-                UploadSucceeded)
+                                                   UploadSucceeded)
 
             case Failure(exception) =>
               log.error(
                 s"Failed to delete and persist records for $submissionId {}",
                 exception)
               respondTo ! PersistModifiedLarResult(submissionId,
-                UploadFailed(exception))
+                                                   UploadFailed(exception))
               // bubble this up to the supervisor
               throw exception
           }
