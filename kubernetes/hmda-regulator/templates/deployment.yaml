@@ -84,7 +84,7 @@ spec:
           - name: PG_DATABASE
             valueFrom:
               configMapKeyRef:
-                name: "institutions-api-inst-api-config"
+                name: postgresql-configmap
                 key: postgres.database
           - name: PG_USER
             valueFrom:
@@ -99,7 +99,7 @@ spec:
           - name: PG_SSL
             valueFrom:
               configMapKeyRef:
-                name: "institutions-api-inst-api-config"
+                name: postgresql-configmap
                 key: postgres.ssl
           - name: JDBC_URL
             valueFrom:
@@ -109,18 +109,18 @@ spec:
           - name: TS_SCHEDULE
             valueFrom:
               configMapKeyRef:
-                name: regulator-config-schedule
-                key: ts
+                name: schedule-configmap
+                key: regulator.ts
           - name: LAR_SCHEDULE
             valueFrom:
               configMapKeyRef:
-                name: regulator-config-schedule
-                key: lar
+                name: schedule-configmap
+                key: regulator.lar
           - name: PANEL_SCHEDULE
             valueFrom:
               configMapKeyRef:
-                name: regulator-config-schedule
-                key: panel
+                name: schedule-configmap
+                key: regulator.panel
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
