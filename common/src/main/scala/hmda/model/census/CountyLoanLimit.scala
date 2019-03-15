@@ -1,5 +1,11 @@
 package hmda.model.census
 
+object CountyLoanLimit {
+    val countyLoanLimits: Seq[CountyLoanLimit] = {
+        val 
+    }
+}
+
 case class CountyLoanLimit (
     stateCode: Int = 0,
     countyCode: Int = 0,
