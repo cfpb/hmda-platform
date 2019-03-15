@@ -6,16 +6,30 @@ podTemplate(label: 'buildSbtPod', containers: [
 volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
-   node('buildSbtPod') {
-     def repo = checkout scm
-     def gitCommit = repo.GIT_COMMIT
-     def gitBranch = repo.GIT_BRANCH
+  node('buildSbtPod') {
+    def repo = checkout scm
+    def gitBranch = repo.GIT_BRANCH
+    def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
+    def gitCommit = repo.GIT_COMMIT
+    def shortCommit = repo.GIT_COMMIT[0..7]
+    def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
+    def gitTagged = env.TAG_NAME != null
 
-     stage('Build Scala Code and Generate Dockerfile') {
-       container('sbt') {
-         sh "sbt -batch check-digit/docker:stage"
-       }
-     }
+    if (gitBranch == "master") {
+      env.DOCKER_TAG = "latest"
+    } else if (gitTagged) {
+      env.DOCKER_TAG = env.TAG_NAME
+    } else {
+      env.DOCKER_TAG = env.BRANCH_NAME
+    }
+
+    println "DOCKER_TAG: ${env.DOCKER_TAG}, TAG_NAME: ${env.TAG_NAME}, gitbranch: ${gitBranch}, isDeployPR: ${isDeployPR}"
+
+    stage('Build Scala Code and Generate Dockerfile') {
+      container('sbt') {
+        sh "sbt -batch check-digit/docker:stage"
+      }
+    }
 
     stage('Build And Publish Docker Image') {
       container('docker') {
@@ -25,12 +39,7 @@ volumes: [
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/check-digit check-digit/target/docker/stage"
-              if (env.TAG_NAME != null || gitBranch == "master") {
-                if (gitBranch == "master") {
-                  env.DOCKER_TAG = "latest"
-                } else {
-                  env.DOCKER_TAG = env.TAG_NAME
-                }
+              if (gitTagged || gitBranch == "master" || isDeployPR) {
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/check-digit ${env.DOCKER_HUB_USER}/check-digit:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
@@ -38,10 +47,6 @@ volumes: [
                   docker tag ${env.DOCKER_HUB_USER}/check-digit:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/check-digit:${env.DOCKER_TAG}
                   docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD} 
                   docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/check-digit:${env.DOCKER_TAG}
-                  docker images
-                  docker image prune -f
-                  docker images
-                  docker ps -a
                 """
               }
             }
@@ -51,20 +56,30 @@ volumes: [
     }
 
     stage('Deploy') {
-        if (env.BRANCH_NAME == 'master') {
-            container('helm') {
-                sh """
-                  helm upgrade --install --force --namespace=default \
-                  --values=kubernetes/check-digit/values.yaml \
-                  --set image.tag=latest \
-                  --set image.pullPolicy=Always \
-                  check-digit \
-                  kubernetes/check-digit
-                """
-            }
+      if (env.BRANCH_NAME == 'master' || isDeployPR) {
+        container('helm') {
+          sh """
+            helm upgrade --install --force --namespace=default \
+            --values=kubernetes/check-digit/values.yaml \
+            --set image.tag=latest \
+            --set image.pullPolicy=Always \
+            check-digit \
+            kubernetes/check-digit
+          """
         }
+      }
     }
 
-   }
+    stage('Docker Clean Up') {
+      container('docker') {
+        sh """
+          docker images
+          docker image prune -f
+          docker images
+          docker ps -a
+        """
+      }
+    } 
 
+  }
 }

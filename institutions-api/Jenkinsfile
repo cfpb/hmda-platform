@@ -6,16 +6,28 @@ podTemplate(label: 'buildSbtPod', containers: [
 volumes: [
   hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
 ]) {
-   node('buildSbtPod') {
-     def repo = checkout scm
-     def gitCommit = repo.GIT_COMMIT
-     def gitBranch = repo.GIT_BRANCH
+  node('buildSbtPod') {
+    def repo = checkout scm
+    def gitBranch = repo.GIT_BRANCH
+    def commitId = sh(returnStdout: true, script: 'git rev-parse HEAD')
+    def gitCommit = repo.GIT_COMMIT
+    def shortCommit = repo.GIT_COMMIT[0..7]
+    def isDeployPR = sh(returnStdout: true, script: "git log -1").contains("[deploy pr]")
+    def gitTagged = env.TAG_NAME != null
 
-     stage('Build Scala Code and Generate Dockerfile') {
-       container('sbt') {
-         sh "sbt -batch institutions-api/docker:stage"
-       }
-     }
+    if (gitBranch == "master") {
+      env.DOCKER_TAG = "latest"
+    } else if (gitTagged) {
+      env.DOCKER_TAG = env.TAG_NAME
+    } else {
+      env.DOCKER_TAG = env.BRANCH_NAME
+    }
+
+    stage('Build Scala Code and Generate Dockerfile') {
+      container('sbt') {
+        sh "sbt -batch institutions-api/docker:stage"
+      }
+    }
 
     stage('Build And Publish Docker Image') {
       container('docker') {
@@ -25,12 +37,7 @@ volumes: [
             usernameVariable: 'DTR_USER', passwordVariable: 'DTR_PASSWORD']]) {
             withCredentials([string(credentialsId: 'internal-docker-registry', variable: 'DOCKER_REGISTRY_URL')]){
               sh "docker build --rm -t=${env.DOCKER_HUB_USER}/institutions-api institutions-api/target/docker/stage"
-              if (env.TAG_NAME != null || gitBranch == "master") {
-                if (gitBranch == "master") {
-                  env.DOCKER_TAG = "latest"
-                } else {
-                  env.DOCKER_TAG = env.TAG_NAME
-                }
+              if (gitTagged || gitBranch == "master" || isDeployPR) {
                 sh """
                   docker tag ${env.DOCKER_HUB_USER}/institutions-api ${env.DOCKER_HUB_USER}/institutions-api:${env.DOCKER_TAG}
                   docker login -u ${env.DOCKER_HUB_USER} -p ${env.DOCKER_HUB_PASSWORD} 
@@ -38,10 +45,6 @@ volumes: [
                   docker tag ${env.DOCKER_HUB_USER}/institutions-api:${env.DOCKER_TAG} ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/institutions-api:${env.DOCKER_TAG}
                   docker login ${DOCKER_REGISTRY_URL} -u ${env.DTR_USER} -p ${env.DTR_PASSWORD} 
                   docker push ${DOCKER_REGISTRY_URL}/${env.DOCKER_HUB_USER}/institutions-api:${env.DOCKER_TAG}
-                  docker images
-                  docker image prune -f
-                  docker images
-                  docker ps -a
                 """
               }
             }
@@ -51,22 +54,32 @@ volumes: [
     }
 
     stage('Deploy') {
-        if (env.BRANCH_NAME == 'master') {
-            container('helm') {
-                sh """
-                  helm upgrade --install --force \
-                  --namespace=default \
-                  --values=kubernetes/institutions-api/values.yaml \
-                  --set image.tag=latest \
-                  --set postgresql.enabled=false \
-                  --set image.pullPolicy=Always \
-                  institutions-api \
-                  kubernetes/institutions-api
-                """
-            }
+      if (env.BRANCH_NAME == 'master' || isDeployPR) {
+        container('helm') {
+          sh """
+            helm upgrade --install --force \
+            --namespace=default \
+            --values=kubernetes/institutions-api/values.yaml \
+            --set image.tag=latest \
+            --set postgresql.enabled=false \
+            --set image.pullPolicy=Always \
+            institutions-api \
+            kubernetes/institutions-api
+          """
         }
+      }
     }
 
-   }
+    stage('Docker Clean Up') {
+      container('docker') {
+        sh """
+          docker images
+          docker image prune -f
+          docker images
+          docker ps -a
+        """
+      }
+    } 
 
+  }
 }
