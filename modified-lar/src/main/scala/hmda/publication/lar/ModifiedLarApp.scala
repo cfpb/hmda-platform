@@ -13,7 +13,7 @@ import akka.stream.scaladsl._
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.model.census.{Census, County}
+import hmda.model.census.Census
 import hmda.model.filing.EditDescriptionLookup
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._

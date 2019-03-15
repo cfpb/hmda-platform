@@ -179,7 +179,7 @@ object ModifiedLarPublisher {
 
           finalResult.onComplete {
             case Success(_) =>
-              log.info("Successfully completed persisting for {}", submissionId)
+              log.info("Successfully completed persisting and generating disclosure reports for {}", submissionId)
               respondTo ! PersistModifiedLarResult(submissionId,
                                                    UploadSucceeded)
 

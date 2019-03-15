@@ -2,7 +2,7 @@ package hmda.disclosure
 
 import akka.Done
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
+import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.scaladsl.S3Client
 import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
 import akka.util.ByteString
@@ -21,7 +21,6 @@ import io.circe.syntax._
 import hmda.disclosure._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.model.disclosure._
-import hmda.model.filing.EditDescriptionLookup
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -101,11 +100,12 @@ object DisclosurePublisher {
                     disposition(lei, msamd, t.tract, 2018, actionTaken)
                   })
                 futDispositions.map { dispositions =>
-                  val county = EditDescriptionLookup.lookupCounty(t.stateCode,
-                                                                  t.countyCode)
+                  //Look up the County and State name by StateCode and CountyCode
+                  val county =
+                    CountyLookup.lookupCounty(t.stateCode, t.countyCode)
                   Tract(s"${county.stateName}/${county.countyName}/${t.tract}",
                         dispositions.toSeq)
-                } //TODO: Get the tract name here
+                }
             })
           futTracts.map { tracts =>
             val msa = Msa(msamd.id, msamd.name, "State", "StateName")
