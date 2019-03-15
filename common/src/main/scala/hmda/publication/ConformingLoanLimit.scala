@@ -46,7 +46,7 @@ object ConformingLoanLimit {
             )
         )
     
-    def assignLoanLimit(lar: LoanApplicationRegister, countyLoanLimits: Seq[CountyLoanLimit]): String {
+    def assignLoanLimit(lar: LoanApplicationRegister): String {
         val loan = LoanLimitInfo(
             lar.property.totalUnits, 
             lar.loan.amount, 

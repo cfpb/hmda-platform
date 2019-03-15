@@ -5,6 +5,7 @@ import Math._
 
 import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
+import hmda.publication.ConformingLoanLimit
 
 object ModifiedLarCsvParser {
 
@@ -100,7 +101,8 @@ object ModifiedLarCsvParser {
       convertEmptyField(lar.AUS.aus5.code),
       lar.reverseMortgage.code,
       lar.lineOfCredit.code,
-      lar.businessOrCommercialPurpose.code
+      lar.businessOrCommercialPurpose.code,
+      assignLoanLimit(lar)
     )
   }
 
