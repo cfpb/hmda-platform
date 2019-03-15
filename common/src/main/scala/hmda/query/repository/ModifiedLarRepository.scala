@@ -1,10 +1,8 @@
 package hmda.query.repository
 
-import hmda.model.disclosure.LoanType
-import hmda.model.institution.{MsaMd, TractDisclosure}
 import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
 import slick.basic.DatabaseConfig
-import slick.jdbc.{GetResult, JdbcProfile}
+import slick.jdbc.JdbcProfile
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try

@@ -24,4 +24,5 @@ object Version {
   val phantom = "2.31.0"
   val cinnamonMetrics = "2.10.13"
   val sprayresolver = "0.9.1"
+  val scalaCsv = "1.3.5"
 }

@@ -1,6 +1,4 @@
-﻿Table with row headers in column A and column headers in row 3,,,,,,,,,,,
-"List 1. CORE BASED STATISTICAL AREAS (CBSAs), METROPOLITAN DIVISIONS, AND COMBINED STATISTICAL AREAS (CSAs), AUGUST 2017",,,,,,,,,,,
-CBSA Code,Metropolitan Division Code,CSA Code,CBSA Title,Metropolitan/Micropolitan Statistical Area,Metropolitan Division Title,CSA Title,County/County Equivalent,State Name,FIPS State Code,FIPS County Code,Central/Outlying County
+﻿CBSA Code,Metropolitan Division Code,CSA Code,CBSA Title,Metropolitan/Micropolitan Statistical Area,Metropolitan Division Title,CSA Title,County/County Equivalent,State Name,FIPS State Code,FIPS County Code,Central/Outlying County
 10100,,,"Aberdeen, SD",Micropolitan Statistical Area,,,Brown County,South Dakota,46,013,Central
 10100,,,"Aberdeen, SD",Micropolitan Statistical Area,,,Edmunds County,South Dakota,46,045,Outlying
 10140,,,"Aberdeen, WA",Micropolitan Statistical Area,,,Grays Harbor County,Washington,53,027,Central
@@ -1900,7 +1898,3 @@ CBSA Code,Metropolitan Division Code,CSA Code,CBSA Title,Metropolitan/Micropolit
 49740,,,"Yuma, AZ",Metropolitan Statistical Area,,,Yuma County,Arizona,04,027,Central
 49780,,198,"Zanesville, OH",Micropolitan Statistical Area,,"Columbus-Marion-Zanesville, OH",Muskingum County,Ohio,39,119,Central
 49820,,,"Zapata, TX",Micropolitan Statistical Area,,,Zapata County,Texas,48,505,Central
-,,,,,,,,,,,
-Note: The 2010 OMB Standards for Delineating Metropolitan and Micropolitan Statistical Areas are at <https://www.gpo.gov/fdsys/pkg/FR-2010-06-28/pdf/2010-15605.pdf> and <https://www.gpo.gov/fdsys/pkg/FR-2010-07-07/pdf/2010-16368.pdf>.,,,,,,,,,,,
-"Source: File prepared by U.S. Census Bureau, Population Division, based on Office of Management and Budget, August 2017 delineations <https://www.whitehouse.gov/sites/whitehouse.gov/files/omb/bulletins/2017/b-17-01.pdf>.",,,,,,,,,,,
-Internet Release Date: January 2018,,,,,,,,,,,

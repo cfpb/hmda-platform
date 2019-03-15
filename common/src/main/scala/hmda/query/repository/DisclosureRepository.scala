@@ -1,7 +1,7 @@
 package hmda.query.repository
 
-import hmda.model.disclosure.LoanType
-import hmda.model.institution.{MsaMd, TractDisclosure}
+import hmda.model.disclosure.{LoanType, TractDisclosure}
+import hmda.model.institution.MsaMd
 import slick.basic.DatabaseConfig
 import slick.jdbc.{GetResult, JdbcProfile, SetParameter}
 
@@ -14,8 +14,7 @@ class DisclosureRepository(tableName: String,
     r => MsaMd(r.<<, r.<<))
   implicit val getLoanTypeResult: AnyRef with GetResult[LoanType] = GetResult(
     r => LoanType(r.<<, r.<<, r.<<))
-  implicit val getTractResult: AnyRef with GetResult[TractDisclosure] =
-    GetResult(r => TractDisclosure(r.<<))
+
   implicit val ec = ExecutionContext.global
   private val db = databaseConfig.db
 
@@ -30,11 +29,9 @@ class DisclosureRepository(tableName: String,
     )
   }
 
-  def actionsTakenTable2: List[Map[String, String]] = {
-    List(
-      Map(
-        "Purchased Loans" -> "6"
-      )
+  def actionsTakenTable2: Map[String, String] = {
+    Map(
+      "Purchased Loans" -> "6"
     )
   }
 
@@ -46,12 +43,12 @@ class DisclosureRepository(tableName: String,
     */
   def tractsForMsaMd(lei: String,
                      msaMd: Int,
-                     filingYear: Int): Future[Vector[TractDisclosure]] = {
+                     filingYear: Int): Future[Vector[String]] = {
     db.run {
-      sql"""select distinct(tract_to_msamd) from modifiedlar2018
+      sql"""select distinct(tract) from modifiedlar2018
             where lei = ${lei.toUpperCase}
             and msa_md = ${msaMd}
-            and filing_year = ${filingYear}""".as[TractDisclosure]
+            and filing_year = ${filingYear}""".as[String]
     }
   }
 

@@ -33,3 +33,5 @@ case class LoanType (
                       count: Int = 0,
                       value: Int = 0
                     )
+//Size of a tract in modifiedlar table is 11 or NA. When it is 11, first two digits are state, next three are county, and last 6 are tract
+case class TractDisclosure(stateCode: Int = 0, countyCode: Int = 0, tract: String = "NA")

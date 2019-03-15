@@ -15,11 +15,13 @@ import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import hmda.disclosure.DisclosurePublisher
+import hmda.disclosure.DisclosurePublisher.databaseConfig
+import hmda.query.repository.DisclosureRepository
 
 //import hmda.disclosure.model.{Disposition, LoanType}
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.institution.{MsaMd, TractDisclosure}
+import hmda.model.institution.MsaMd
 import hmda.model.modifiedlar._
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
@@ -56,7 +58,8 @@ object ModifiedLarPublisher {
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
-
+  val disclosreRepo =
+    new DisclosureRepository("modifiedlar2018", databaseConfig)
   val awsRegionProvider = new AwsRegionProvider {
     override def getRegion: String = region
   }
@@ -145,22 +148,33 @@ object ModifiedLarPublisher {
                   } yield s3Res
               }
 
-          def disclosureGraph(leiName: Option[String]) =
+          def disclosureGraph(leiName: Option[String],
+                              actionsTaken: Map[String, String],
+                              jsonName: String) =
             mlarSource
               .toMat(
                 DisclosurePublisher
-                  .disclosureJsonReport(s3Client, leiName)(system,
-                                                           materializer,
-                                                           ec))(Keep.right)
+                  .disclosureJsonReport(s3Client,
+                                        leiName,
+                                        actionsTaken,
+                                        jsonName)(system, materializer, ec))(
+                Keep.right)
 
-          def leiName: Future[Option[String]] =
+          def leiName(): Future[Option[String]] =
             modifiedLarRepo.leiName(submissionId.lei)
 
           val finalResult: Future[Unit] = for {
             _ <- removeLei
             _ <- graph.run()
-            leiName <- leiName
-            _ <- disclosureGraph(leiName).run()
+            leiName <- leiName()
+            futTable1 = disclosureGraph(leiName,
+                                        disclosreRepo.actionsTakenTable1,
+                                        "1").run()
+            futTable2 = disclosureGraph(leiName,
+                                        disclosreRepo.actionsTakenTable2,
+                                        "2").run()
+            table1 <- futTable1
+            table2 <- futTable2
           } yield ()
 
           finalResult.onComplete {

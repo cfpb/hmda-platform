@@ -4,7 +4,7 @@ import Dependencies._
 import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
 
-lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
+lazy val commonDeps = Seq(logback, scalaTest, scalaCheck, scalaCsv)
 
 lazy val authDeps = Seq(
   keycloakAdapter,

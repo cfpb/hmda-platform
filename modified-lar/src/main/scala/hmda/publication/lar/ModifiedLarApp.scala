@@ -13,7 +13,8 @@ import akka.stream.scaladsl._
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.model.census.Census
+import hmda.model.census.{Census, County}
+import hmda.model.filing.EditDescriptionLookup
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication._
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
+import scala.collection.immutable
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Success}
