@@ -114,7 +114,7 @@ case class ModifiedLoanApplicationRegister(
       s"$age|$ageGreaterThanOrEqual62|$coAge|$coAgeGreaterThanOrEqual62|$income|" +
       s"$purchaserType|$rateSpread|$hoepaStatus|" +
       s"$lienStatus|$applicantCredisScoreModel|$coApplicantCreditScoreModel|" +
-      s"$denial1|$denial2|$denial3|$denial4" +
+      ColumnDataFormatter.controlCharacterFilter(s"$denial1|$denial2|$denial3|$denial4") +
       s"|$totalLoanCosts|$totalPointsAndFees|$originationCharges|$discountPoints|$lenderCredits|$interestRate|" +
       s"$prepaymentPenalty|$debtToIncomeRatio|$loanToValueRatio|$loanTerm|" +
       s"$introductoryRatePeriod|$balloonPayment|$interestOnlyPayment|$negativeAmortization|$otherNonAmortizingFeatures|" +
