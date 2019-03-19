@@ -179,10 +179,10 @@ case class LarEntityImpl(larPartOne: LarPartOne,
                          larPartSix: LarPartSix) {
 
   def toPSV: String =
-    larPartOne.toPSV +
+    (larPartOne.toPSV +
       larPartTwo.toPSV +
       larPartThree.toPSV +
       larPartFour.toPSV +
       larPartFive.toPSV +
-      larPartSix.toPSV.replaceAll("(\r\n)|\r|\n", "")
+      larPartSix.toPSV).replaceAll("(\r\n)|\r|\n", "")
 }
