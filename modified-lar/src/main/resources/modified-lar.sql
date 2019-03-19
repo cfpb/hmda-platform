@@ -1,4 +1,4 @@
-CREATE TABLE public.modifiedlar2018
+CREATE TABLE hmda_user.modifiedlar2018
 (
     id integer NOT NULL,
     lei character varying NOT NULL,
@@ -84,21 +84,19 @@ CREATE TABLE public.modifiedlar2018
     aus5 integer,
     reverse_mortgage integer,
     line_of_credits integer,
-    business_or_commercial integer, -- 85 matches ModifiedLarCsvParser.scala
-    -- 6 census fields will come from census_2018_MSAMD_name.txt
+    business_or_commercial integer,
     population character varying,
     minority_population_percent character varying,
     ffiec_med_fam_income character varying,
     tract_to_msamd character varying,
     owner_occupied_units character varying,
     one_to_four_fam_units character varying,
-    -- 1 msamd also comes from census_2018_MSAMD_name.txt
     msa_md integer,
-    msa_md_name character varying, -- for publication
-    -- TODO: 1 flag logic for this flag is TBD
+    msa_md_name character varying,
     loan_flag character varying,
     created_at timestamp default current_timestamp,
     submission_id character varying
+    filing_year integer,
 )
 WITH (
     OIDS = FALSE

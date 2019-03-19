@@ -1,6 +1,6 @@
-package hmda.publication.lar.repositories
+package hmda.query.repository
 
-import hmda.publication.lar.model.EnrichedModifiedLoanApplicationRegister
+import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -18,8 +18,21 @@ class ModifiedLarRepository(tableName: String,
     * @param lei
     * @return the number of rows removed
     */
-  def deleteByLei(lei: String): Future[Int] =
-    db.run(sqlu"DELETE FROM #${tableName} WHERE lei = $lei")
+  def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
+    db.run {
+      sql"""SELECT DISTINCT msa_md, msa_md_name
+                         FROM modifiedlar2018 WHERE UPPER(lei) = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
+        .as[(String, String)]
+    }
+
+  /**
+    * Deletes entries in the Modified LAR table by their LEI
+    * @param lei
+    * @return the number of rows removed
+    */
+  def deleteByLei(lei: String, filingYear: Int): Future[Int] =
+    db.run(
+      sqlu"DELETE FROM #${tableName} WHERE UPPER(lei) = ${lei.toUpperCase} and filing_year = $filingYear")
 
   /**
     * Inserts Modified Loan Application Register data that has been enhanced with Census information via the tract map
@@ -28,7 +41,8 @@ class ModifiedLarRepository(tableName: String,
     * @return
     */
   def insert(input: EnrichedModifiedLoanApplicationRegister,
-             submissionId: String): Future[Int] =
+             submissionId: String,
+             filingYear: Int): Future[Int] =
     db.run(sqlu"""INSERT INTO #${tableName}(
             id,
             lei,
@@ -123,11 +137,12 @@ class ModifiedLarRepository(tableName: String,
             one_to_four_fam_units,
             msa_md,
             msa_md_name,
-            submission_id
+            submission_id,
+            filing_year
           )
           VALUES (
             ${input.mlar.id},
-            ${input.mlar.lei},
+            ${input.mlar.lei.toUpperCase},
             ${input.mlar.loanType},
             ${input.mlar.loanPurpose},
             ${input.mlar.preapproval},
@@ -219,7 +234,8 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.oneToFourFamilyUnits},
             ${input.census.msaMd},
             ${input.census.name},
-            ${submissionId}
+            ${submissionId},
+            ${filingYear}
           )
           """)
 

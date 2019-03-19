@@ -60,11 +60,5 @@ tolerations: []
 affinity: {}
 
 postgresql:
-  postgresDatabase: hmda
-  postgresUser: hmda
   enabled: false
   createSchema: false
-  ssl: require
-
-cassandra:
-  hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory

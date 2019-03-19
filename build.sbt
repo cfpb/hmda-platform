@@ -84,7 +84,8 @@ lazy val `hmda-root` = (project in file("."))
              `modified-lar`,
              `hmda-analytics`,
              `census-api`,
-             `hmda-regulator`)
+             `hmda-regulator`,
+             `hmda-reporting`)
 
 lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
@@ -292,6 +293,33 @@ lazy val `irs-publisher` = (project in file("irs-publisher"))
   .settings(
     Seq(
       mainClass in Compile := Some("hmda.publication.lar.IrsPublisherApp"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+  .dependsOn(`hmda-protocol`)
+  .dependsOn(common)
+
+lazy val `hmda-reporting` = (project in file("hmda-reporting"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in Compile := Some("hmda.reporting.HmdaReporting"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

@@ -12,7 +12,7 @@ trait LarComponent {
   class LarRepository(tableName: String, config: DatabaseConfig[JdbcProfile]) {
     def deleteByLei(lei: String): Future[Int] =
       config.db.run {
-        sqlu"DELETE FROM #${tableName} WHERE lei = ${lei}"
+        sqlu"DELETE FROM #${tableName} WHERE UPPER(lei) = ${lei.toUpperCase}"
       }
 
     def insert(le: LarEntity): Future[Int] =
@@ -20,7 +20,7 @@ trait LarComponent {
         sqlu"""INSERT INTO #${tableName}
         VALUES (
           ${le.id},
-          ${le.lei},
+          ${le.lei.toUpperCase},
           ${le.uli},
           ${le.appDate},
           ${le.loanType},
