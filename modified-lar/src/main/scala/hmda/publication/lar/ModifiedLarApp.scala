@@ -17,8 +17,8 @@ import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication._
-import hmda.publication.lar.repositories.ModifiedLarRepository
 import hmda.publication.lar.services._
+import hmda.query.repository.ModifiedLarRepository
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory

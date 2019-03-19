@@ -1,9 +1,9 @@
 package hmda.publication.lar.parser
 
 import hmda.model.filing.lar._
-import hmda.publication.lar.model.ModifiedLoanApplicationRegister
 import Math._
 
+import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
 
 object ModifiedLarCsvParser {
