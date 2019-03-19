@@ -171,7 +171,7 @@ object HmdaPlatform extends App {
   if (cluster.selfRoles.contains("publication")) {
     system.actorOf(ModifiedLarPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"), "modified-lar-publisher")
     system.actorOf(RegulatorTsPublisher.props().withDispatcher("publication-dispatcher"), "regulator-ts-publisher")
-    system.actorOf(RegulatorLarPublisher.props().withDispatcher("publication-dispatcher"), "regulator-lar-publisher")
+    system.actorOf(RegulatorLarPublisher.props(supervisorProxy).withDispatcher("publication-dispatcher"), "regulator-lar-publisher")
     system.actorOf(RegulatorPanelPublisher.props().withDispatcher("publication-dispatcher"), "regulator-panel-publisher")
 
     system.actorOf(

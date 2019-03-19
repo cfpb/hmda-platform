@@ -3,34 +3,46 @@ package hmda.publication.regulator.lar
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import scala.concurrent.duration._
 import akka.NotUsed
-import akka.actor.{ ActorRef, ActorSystem, Props }
+import akka.pattern.ask
+import akka.util.Timeout
+import akka.actor.{ ActorRef, Props }
 import akka.http.scaladsl.model.{ ContentType, HttpCharsets, MediaTypes }
 import akka.stream.Supervision.Decider
 import akka.stream.alpakka.s3.impl.{ S3Headers, ServerSideEncryption }
 import akka.stream.alpakka.s3.javadsl.S3Client
 import akka.stream.alpakka.s3.{ MemoryBufferType, S3Settings }
-import akka.stream.scaladsl.{ Flow, Source }
+import akka.stream.scaladsl.Flow
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings, Supervision }
+import hmda.persistence.HmdaSupervisor.{ FindHmdaFilerPersistence, FindSubmissions }
+import hmda.persistence.messages.events.processing.CommonHmdaValidatorEvents.LarValidated
+import hmda.persistence.institutions.{ HmdaFilerPersistence, SubmissionPersistence }
+import hmda.persistence.institutions.SubmissionPersistence.GetLatestSubmission
+import hmda.persistence.messages.CommonMessages.GetState
+import hmda.model.fi.Submission
 import akka.util.ByteString
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
-import hmda.census.model.{ TractExtended, TractLookup }
+import hmda.census.model.TractLookup
 import hmda.model.fi.lar.LoanApplicationRegister
-import hmda.census.model.TractLookup._
+import hmda.model.fi.Signed
+import hmda.model.institution.HmdaFiler
+import hmda.persistence.processing.HmdaQuery._
 import hmda.persistence.model.HmdaActor
 import hmda.publication.regulator.messages._
 import hmda.query.repository.filing.LarConverter._
 import hmda.query.repository.filing.LoanApplicationRegisterCassandraRepository
 
+import scala.concurrent._
+import scala.util.{ Try, Failure, Success }
+import scala.concurrent.ExecutionContext
+
 object RegulatorLarPublisher {
-  def props(): Props = Props(new RegulatorLarPublisher)
-  def createRegulatorLARPublication(system: ActorSystem): ActorRef = {
-    system.actorOf(RegulatorLarPublisher.props().withDispatcher("validation-dispatcher"), "hmda-aggregate-disclosure")
-  }
+  def props(supervisor: ActorRef): Props = Props(new RegulatorLarPublisher(supervisor))
 }
 
-class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassandraRepository {
+class RegulatorLarPublisher(supervisor: ActorRef) extends HmdaActor with LoanApplicationRegisterCassandraRepository {
 
   QuartzSchedulerExtension(system).schedule("LARRegulator", self, PublishRegulatorData)
   QuartzSchedulerExtension(system).schedule("DynamicLARRegulator", self, PublishDynamicData)
@@ -43,7 +55,8 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
   override implicit def system = context.system
   val materializerSettings = ActorMaterializerSettings(system).withSupervisionStrategy(decider)
   override implicit def materializer: ActorMaterializer = ActorMaterializer(materializerSettings)(system)
-  override implicit val ec = context.dispatcher
+  override implicit val ec: ExecutionContext = context.dispatcher
+  implicit val timeout: Timeout = Timeout(10.seconds)
 
   val fetchSize = config.getInt("hmda.query.fetch.size")
 
@@ -70,19 +83,47 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
       val now = LocalDateTime.now()
       val fileName = s"${now.format(DateTimeFormatter.ISO_LOCAL_DATE)}_lar.txt"
       log.info(s"Uploading $fileName to S3")
-      val s3Sink = s3Client.multipartUpload(
-        bucket,
-        s"$environment/lar/$fileName",
-        ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
-        S3Headers(ServerSideEncryption.AES256)
-      )
 
-      val source = readData(fetchSize)
-        .via(filterTestBanks)
-        .map(lar => lar.toCSV + "\n")
-        .map(s => ByteString(s))
+      val ffSubmissions = getFilers(supervisor)
+        .map(filerList => {
+          filerList.map(filer => latestSubmission(supervisor, filer.institutionId))
+        })
 
-      source.runWith(s3Sink)
+      ffSubmissions onComplete {
+        case Success(fSubmissions) => {
+          val bagel = Future.sequence(fSubmissions.map(futureToFutureTry(_))).map(_.collect { case Success(x) => x })
+          bagel onComplete {
+            case Success(submissions) => {
+              submissions
+                .map(_.id)
+                .map(submissionId => {
+                  val persistenceId = s"HmdaFileValidator-$submissionId"
+                  val larSource = events(persistenceId).map {
+                    case LarValidated(lar, _) => lar
+                    case _ => LoanApplicationRegister()
+                  }
+                  val source = larSource
+                    .via(filterTestBanks)
+                    .map(lar => lar.toCSV + "\n")
+                    .map(s => ByteString(s))
+
+                  val s3Sink = s3Client.multipartUpload(
+                    bucket,
+                    s"$environment/test/lar/$submissionId.id.institutionId",
+                    ContentType(MediaTypes.`text/csv`, HttpCharsets.`UTF-8`),
+                    S3Headers(ServerSideEncryption.AES256)
+                  )
+
+                  source.runWith(s3Sink)
+                })
+            }
+            case Failure(error) =>
+              log.error("Stream Failed", error)
+          }
+        }
+        case Failure(error) =>
+          log.error("Stream Failed", error)
+      }
 
     case PublishDynamicData =>
       val fileName = "2017_lar.txt"
@@ -103,6 +144,35 @@ class RegulatorLarPublisher extends HmdaActor with LoanApplicationRegisterCassan
       source.runWith(s3Sink)
 
     case _ => //do nothing
+  }
+
+  def getFilers(supervisor: ActorRef)(implicit ec: ExecutionContext): Future[List[HmdaFiler]] = {
+    val hmdaFilerPersistenceF = (supervisor ? FindHmdaFilerPersistence(HmdaFilerPersistence.name)).mapTo[ActorRef]
+    for {
+      a <- hmdaFilerPersistenceF
+      filers <- (a ? GetState).mapTo[Set[HmdaFiler]]
+    } yield filers.toList
+
+  }
+
+  def futureToFutureTry[T](f: Future[T]): Future[Try[T]] =
+    f.map(Success(_)).recover({ case e => Failure(e) })
+
+  def latestSubmission(supervisor: ActorRef, institutionId: String)(implicit ec: ExecutionContext): Future[Submission] = {
+    val fSubmissionsActor = (supervisor ? FindSubmissions(SubmissionPersistence.name, institutionId, "2017")).mapTo[ActorRef]
+
+    val fSubmissions = for {
+      s <- fSubmissionsActor
+      xs <- (s ? GetLatestSubmission).mapTo[Submission]
+    } yield xs
+
+    fSubmissions.map(submission =>
+      if (submission.status != Signed) {
+        log.error("No submission")
+        submission
+      } else {
+        submission
+      })
   }
 
   def addCensusDataFromMap(lar: LoanApplicationRegister): String = {
