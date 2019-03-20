@@ -10,7 +10,7 @@ projects = [
     [name: "hmda-platform-tools", repo: "hmda-platform-tools", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-pub-ui", repo: "hmda-pub-ui", jenkinsfilePath: "Jenkinsfile"],
     [name: "hmda-regulator", repo: "hmda-platform", jenkinsfilePath: "hmda-regulator/Jenkinsfile"],
-    [name: "hmda-reporting", repo: "hmda-reporting", jenkinsfilePath: "hmda-reporting/Jenkinsfile"],
+    [name: "hmda-reporting", repo: "hmda-platform", jenkinsfilePath: "hmda-reporting/Jenkinsfile"],
     [name: "keycloak", repo: "hmda-platform", jenkinsfilePath: "kubernetes/keycloak/Jenkinsfile"],
     [name: "institutions-api", repo: "hmda-platform", jenkinsfilePath: "institutions-api/Jenkinsfile"],
     [name: "irs-publisher", repo: "hmda-platform", jenkinsfilePath: "irs-publisher/Jenkinsfile"],
