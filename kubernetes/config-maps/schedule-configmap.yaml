@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: schedule-configmap
 data:
-  regulator.ts: "{{ .Values.schedule.ts }}"
-  regulator.panel: "{{ .Values.schedule.panel }}"
-  regulator.lar: "{{ .Values.schedule.lar }}"
+  regulator.ts: "\"0 10 06 * * ?\""
+  regulator.panel: "\"0 20 06 * * ?\""
+  regulator.lar: "\"0 55 05 * * ?\""
