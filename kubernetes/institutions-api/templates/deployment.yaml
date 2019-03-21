@@ -61,7 +61,7 @@ spec:
                   name: postgresql-configmap
                   key: postgres.ssl
             - name: INSTITUTION_PG_CREATE_SCHEMA
-              value: {{ .Values.postgresql.createSchema }}
+              value: " {{ .Values.postgresql.createSchema }} "
             - name: KAFKA_CLUSTER_HOSTS
               valueFrom:
                 configMapKeyRef:

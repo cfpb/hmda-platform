@@ -63,8 +63,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-schedule:
-  ts: "\"0 10 06 * * ?\""
-  panel: "\"0 20 06 * * ?\""
-  lar: "\"0 55 05 * * ?\""
