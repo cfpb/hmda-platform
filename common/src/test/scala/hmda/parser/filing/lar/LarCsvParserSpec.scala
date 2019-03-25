@@ -12,4 +12,14 @@ class LarCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
       LarCsvParser(csv) mustBe Right(lar)
     }
   }
+
+  property(
+    "Loan Application Register CSV Parser must report parsing errors for | in the end") {
+    forAll(larGen) { lar =>
+      val csv = lar.toCSV
+      val csvWithPipeInEnd = csv + "|"
+      LarCsvParser(csvWithPipeInEnd) mustBe Left(lar)
+    }
+  }
+
 }

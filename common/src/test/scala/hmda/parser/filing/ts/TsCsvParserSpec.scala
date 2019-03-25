@@ -16,7 +16,7 @@ class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
   }
 
   property(
-    "Transmittal Seet CSV Parser must report parsing errors for invalid TS") {
+    "Transmittal Shet CSV Parser must report parsing errors for invalid TS") {
     forAll(tsGen) { ts =>
       val badId = badValue()
       val badAgencyCode = badValue()
@@ -26,4 +26,19 @@ class TsCsvParserSpec extends PropSpec with PropertyChecks with MustMatchers {
       TsCsvParser(csv) mustBe Left(List(InvalidId, InvalidAgencyCode))
     }
   }
+
+  property(
+    "Transmittal Shet CSV Parser must report parsing errors for | in the end") {
+    forAll(tsGen) { ts =>
+      val badId = badValue()
+      val badAgencyCode = badValue()
+      val badValues =
+        extractValues(ts).updated(0, badId).updated(11, badAgencyCode)
+      val csv = badValues.mkString("|")
+      val csvWithPipeInEnd = csv + "|"
+      TsCsvParser(csvWithPipeInEnd) mustBe Left(
+        List(InvalidId, InvalidAgencyCode))
+    }
+  }
+
 }

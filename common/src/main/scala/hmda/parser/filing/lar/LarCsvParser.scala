@@ -7,7 +7,7 @@ import hmda.parser.filing.lar.LarFormatValidator.validateLar
 object LarCsvParser {
   def apply(s: String)
     : Either[List[ParserValidationError], LoanApplicationRegister] = {
-    val values = s.split('|').map(_.trim).toList
-    validateLar(values).leftMap(xs => xs.toList).toEither
+    val values = s.trim.split('|').map(_.trim).toList
+    validateLar(values, s).leftMap(xs => xs.toList).toEither
   }
 }
