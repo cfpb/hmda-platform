@@ -20,8 +20,6 @@ object HmdaRateSpread extends App {
              ||_|  \_\/_/    \_\_|  |______|_____/|_|    |_|  \_\______/_/    \_\_____/                                      |_|
            """.stripMargin)
 
-  println("testing stuff")
-
   val config = ConfigFactory.load()
 
   val host = config.getString("hmda.ratespread.http.host")
@@ -29,14 +27,12 @@ object HmdaRateSpread extends App {
 
   val aporUpdateTimer = config.getString("akka.APORScheduler")
 
-  log.info("APOR Timer: " + aporUpdateTimer)
-
-  val aporUpdaterActorSystem = ActorSystem(
-    "aporTask",
-    ConfigFactory.parseString(aporUpdateTimer).withFallback(config))
-  aporUpdaterActorSystem.actorOf(Props[APORScheduler], "APORScheduler")
-
   implicit val rateSpreadSystem: ActorSystem = ActorSystem(
     "ratespread-api-task")
   rateSpreadSystem.actorOf(RateSpreadAPI.props(), "hmda-ratespread-api")
+
+  val aporUpdaterActorSystem =
+    ActorSystem("aporTask", ConfigFactory.parseString(aporUpdateTimer))
+  aporUpdaterActorSystem.actorOf(Props[APORScheduler], "APORScheduler")
+
 }

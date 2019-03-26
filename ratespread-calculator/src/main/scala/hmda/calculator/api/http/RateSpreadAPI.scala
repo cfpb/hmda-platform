@@ -7,14 +7,20 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.pipe
 import akka.stream.ActorMaterializer
-import com.typesafe.config.ConfigFactory
+import akka.util.Timeout
+import com.typesafe.config.{Config, ConfigFactory}
 import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
+import scala.concurrent.duration._
 
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
 object RateSpreadAPI {
-  def props(): Props = Props(new RateSpreadAPI)
+  def props(): Props =
+    Props(new RateSpreadAPI {
+      override implicit val timeout: Timeout = Timeout.zero
+    })
 }
 
 class RateSpreadAPI
@@ -22,7 +28,11 @@ class RateSpreadAPI
     with BaseHttpApi
     with RateSpreadAPIRoutes {
 
-  val config = ConfigFactory.load()
+  val config: Config = ConfigFactory.load()
+  val duration: FiniteDuration =
+    config.getInt("hmda.ratespread.http.timeout").seconds
+
+  override implicit val timeout: Timeout = Timeout(duration)
 
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
