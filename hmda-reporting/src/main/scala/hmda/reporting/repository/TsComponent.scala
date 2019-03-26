@@ -88,8 +88,8 @@ trait TsComponent {
       db.run(table.filterNot(_.lei.toUpperCase inSet bankIgnoreList).result)
     }
 
-    def getAllSheets(): Future[Seq[TransmittalSheetEntity]] = {
-      db.run(table.result)
+    def getAllSheets(filingYear: Int): Future[Seq[TransmittalSheetEntity]] = {
+      db.run(table.filter(_.year === filingYear).result)
     }
 
   }
