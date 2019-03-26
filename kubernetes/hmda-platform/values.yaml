@@ -4,14 +4,8 @@
 
 namespace: default
 
-cassandra:
-  hosts: node-0-server.cassandra.autoip.dcos.thisdcos.directory
-
 keycloak:
   auth.url: https://192.168.99.100:8443/auth
-
-kafka:
-  hosts: broker.kafka.l4lb.thisdcos.directory:9092
 
 rbac:
   enabled: false
@@ -81,14 +75,6 @@ grpc:
   census:
     port: 60081
     host: census-api-grpc.default.svc.cluster.local
-
-http:
-  check_digit:
-    port: 9091
-    host: check-digit.default.svc.cluster.local
-  census:
-    port: 9093
-    host: census-api.default.svc.cluster.local
 
 
 ingress:
