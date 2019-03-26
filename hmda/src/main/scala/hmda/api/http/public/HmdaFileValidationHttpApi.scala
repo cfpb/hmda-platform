@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.{ActorMaterializer, FlowShape}
 import akka.util.{ByteString, Timeout}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.directives.CachingDirectives._
 import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL, Sink, Source}
 import hmda.api.http.model.public.{Validated, ValidatedResponse}
 import hmda.parser.filing.lar.LarCsvParser
@@ -54,40 +55,42 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
     } ~
       path("parse" / "csv") {
         timedPost { _ =>
-          fileUpload("file") {
-            case (_, byteSource) =>
-              val headerSource =
-                Source.fromIterator(() =>
-                  List("lineNumber|errors\n").toIterator)
-              val errors = byteSource
-                .via(processHmdaFile)
-                .map(v => s"${v.lineNumber}|${v.errors}\n")
-                .map(s => ByteString(s))
+          cachingProhibited {
+            fileUpload("file") {
+              case (_, byteSource) =>
+                val headerSource =
+                  Source.fromIterator(() =>
+                    List("lineNumber|errors\n").toIterator)
+                val errors = byteSource
+                  .via(processHmdaFile)
+                  .map(v => s"${v.lineNumber}|${v.errors}\n")
+                  .map(s => ByteString(s))
 
-              val csvF = headerSource
-                .map(s => ByteString(s))
-                .concat(errors)
-                .map(_.utf8String)
-                .runWith(Sink.seq)
+                val csvF = headerSource
+                  .map(s => ByteString(s))
+                  .concat(errors)
+                  .map(_.utf8String)
+                  .runWith(Sink.seq)
 
-              onComplete(csvF) {
-                case Success(csv) =>
-                  complete(
-                    ToResponseMarshallable(
-                      HttpEntity(ContentTypes.`text/csv(UTF-8)`,
-                                 csv.mkString("\n"))))
-                case Failure(error) =>
-                  complete(ToResponseMarshallable(
-                    StatusCodes.BadRequest -> error.getLocalizedMessage))
-              }
+                onComplete(csvF) {
+                  case Success(csv) =>
+                    complete(
+                      ToResponseMarshallable(
+                        HttpEntity(ContentTypes.`text/csv(UTF-8)`,
+                                   csv.mkString("\n"))))
+                  case Failure(error) =>
+                    complete(ToResponseMarshallable(
+                      StatusCodes.BadRequest -> error.getLocalizedMessage))
+                }
 
-            case _ =>
-              complete(ToResponseMarshallable(StatusCodes.BadRequest))
-          }
-        } ~
-          timedOptions { _ =>
-            complete("OPTIONS")
-          }
+              case _ =>
+                complete(ToResponseMarshallable(StatusCodes.BadRequest))
+            }
+          } ~
+            timedOptions { _ =>
+              complete("OPTIONS")
+            }
+        }
       }
 
   def hmdaFileRoutes: Route = {

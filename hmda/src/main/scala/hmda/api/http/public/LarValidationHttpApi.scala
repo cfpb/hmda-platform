@@ -6,6 +6,7 @@ import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.directives.CachingDirectives._
 import akka.http.scaladsl.server.Route
 import hmda.api.http.model.public.LarValidateRequest
 import hmda.parser.filing.lar.LarCsvParser
@@ -36,18 +37,20 @@ trait LarValidationHttpApi
   val parseLarRoute =
     path("parse") {
       timedPost { _ =>
-        entity(as[LarValidateRequest]) { req =>
-          LarCsvParser(req.lar) match {
-            case Right(lar) =>
-              complete(ToResponseMarshallable(lar))
-            case Left(errors) =>
-              completeWithParsingErrors(errors)
+        cachingProhibited {
+          entity(as[LarValidateRequest]) { req =>
+            LarCsvParser(req.lar) match {
+              case Right(lar) =>
+                complete(ToResponseMarshallable(lar))
+              case Left(errors) =>
+                completeWithParsingErrors(errors)
+            }
           }
-        }
-      } ~
-        timedOptions { _ =>
-          complete("OPTIONS")
-        }
+        } ~
+          timedOptions { _ =>
+            complete("OPTIONS")
+          }
+      }
     }
 
   //lar/validate
@@ -55,11 +58,13 @@ trait LarValidationHttpApi
     path("validate") {
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
-          entity(as[LarValidateRequest]) { req =>
-            LarCsvParser(req.lar) match {
-              case Right(lar) => validate(lar, checkType)
-              case Left(errors) =>
-                completeWithParsingErrors(errors)
+          cachingProhibited {
+            entity(as[LarValidateRequest]) { req =>
+              LarCsvParser(req.lar) match {
+                case Right(lar) => validate(lar, checkType)
+                case Left(errors) =>
+                  completeWithParsingErrors(errors)
+              }
             }
           }
         }

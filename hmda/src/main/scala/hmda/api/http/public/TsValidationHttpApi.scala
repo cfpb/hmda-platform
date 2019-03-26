@@ -7,6 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.directives.CachingDirectives._
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.TsValidateRequest
@@ -36,11 +37,13 @@ trait TsValidationHttpApi
   val parseTsRoute =
     path("parse") {
       timedPost { _ =>
-        entity(as[TsValidateRequest]) { req =>
-          TsCsvParser(req.ts) match {
-            case Right(ts) => complete(ToResponseMarshallable(ts))
-            case Left(errors) =>
-              completeWithParsingErrors(errors)
+        cachingProhibited {
+          entity(as[TsValidateRequest]) { req =>
+            TsCsvParser(req.ts) match {
+              case Right(ts) => complete(ToResponseMarshallable(ts))
+              case Left(errors) =>
+                completeWithParsingErrors(errors)
+            }
           }
         }
       } ~
@@ -54,11 +57,14 @@ trait TsValidationHttpApi
     path("validate") {
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
-          entity(as[TsValidateRequest]) { req =>
-            TsCsvParser(req.ts) match {
-              case Right(ts) => validate(ts, checkType, ValidationContext(None))
-              case Left(errors) =>
-                completeWithParsingErrors(errors)
+          cachingProhibited {
+            entity(as[TsValidateRequest]) { req =>
+              TsCsvParser(req.ts) match {
+                case Right(ts) =>
+                  validate(ts, checkType, ValidationContext(None))
+                case Left(errors) =>
+                  completeWithParsingErrors(errors)
+              }
             }
           }
         }

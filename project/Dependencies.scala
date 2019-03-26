@@ -24,6 +24,7 @@ object Dependencies {
   lazy val akkaStreamTyped = "com.typesafe.akka" %% "akka-stream-typed" % Version.akka
   lazy val akkaHttp = "com.typesafe.akka" %% "akka-http" % Version.akkaHttp
   lazy val akkaHttp2 = "com.typesafe.akka" %% "akka-http2-support" % Version.akkaHttp
+  lazy val akkaCachingDirectives = "com.typesafe.akka" %% "akka-http-caching" % Version.akkaHttp
   lazy val akkaHttpTestkit = "com.typesafe.akka" %% "akka-http-testkit" % Version.akkaHttp % Test
   lazy val akkaHttpCirce = "de.heikoseeberger" %% "akka-http-circe" % Version.akkaHttpJson
   lazy val akkaManagementClusterBootstrap = "com.lightbend.akka.management" %% "akka-management-cluster-bootstrap" % Version.akkaClusterManagement
