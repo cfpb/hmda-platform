@@ -2,10 +2,10 @@ package hmda.model.census
 
 case class CountyLoanLimit(
     stateCode: String = "",
-    countyCode: Int = 0,
+    countyCode: String = "",
     countyName: String = "",
     stateName: String = "",
-    cbsa: Int = 0,
+    cbsa: String = "",
     oneUnitLimit: Int = 0,
     twoUnitLimit: Int = 0,
     threeUnitLimit: Int = 0,

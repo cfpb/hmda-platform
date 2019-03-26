@@ -17,10 +17,10 @@ object CountyLoanLimitRecords {
         val values = s.split("\\|", -1).map(_.trim).toList
         CountyLoanLimit(
           stateCode = values(0),
-          countyCode = values(1).toInt,
+          countyCode = values(1),
           countyName = values(2),
           stateName = values(3),
-          cbsa = values(4).toInt,
+          cbsa = values(4),
           oneUnitLimit = values(5).toInt,
           twoUnitLimit = values(6).toInt,
           threeUnitLimit = values(7).toInt,
