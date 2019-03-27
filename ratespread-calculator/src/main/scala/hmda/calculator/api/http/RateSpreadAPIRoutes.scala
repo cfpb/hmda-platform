@@ -54,6 +54,8 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
             }
           }
         }
+      }~  path("rateSpread" / "csv") {
+
       }
     }
   }
