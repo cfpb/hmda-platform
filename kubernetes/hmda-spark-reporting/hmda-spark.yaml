@@ -1,0 +1,39 @@
+apiVersion: "sparkoperator.k8s.io/v1beta1"
+kind: SparkApplication
+metadata:
+  name: hmda-spark-disclosure
+  namespace: default
+spec:
+  type: Scala
+  mode: cluster
+  image: "omnipresent/cfpb-hmda-reports"
+  imagePullPolicy: Always
+  mainClass: com.hmda.reports.DisclosureReports
+  mainApplicationFile: "local:///opt/spark/examples/jars/hmda-reports.jar"
+  sparkVersion: "2.4.0"
+  restartPolicy:
+    type: Never
+  volumes:
+    - name: "test-volume"
+      hostPath:
+        path: "/tmp"
+        type: Directory
+  driver:
+    cores: 2
+    coreLimit: "4000m"
+    memory: "12g"
+    labels:
+      version: 2.4.0
+    serviceAccount: spark-operator-spark
+    volumeMounts:
+      - name: "test-volume"
+        mountPath: "/tmp"
+  executor:
+    cores: 2
+    instances: 3
+    memory: "12g"
+    labels:
+      version: 2.4.0
+    volumeMounts:
+      - name: "test-volume"
+        mountPath: "/tmp"

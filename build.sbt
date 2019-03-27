@@ -1,8 +1,12 @@
 import Dependencies._
 import BuildSettings._
 import com.lucidchart.sbt.scalafmt.ScalafmtCorePlugin.autoImport._
+import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
+
+lazy val sparkDeps =
+  Seq(sparkCore, sparkSql, sparkStreaming, sparkKafka, postgres)
 
 lazy val authDeps = Seq(
   keycloakAdapter,
@@ -53,7 +57,7 @@ lazy val scalafmtSettings = Seq(
 )
 
 lazy val dockerSettings = Seq(
-  Docker / maintainer := "Juan Marin Otero",
+  Docker / maintainer := "Hmda-Ops",
   dockerBaseImage := "openjdk:jre-alpine",
   dockerRepository := Some("hmda")
 )
@@ -62,6 +66,7 @@ lazy val packageSettings = Seq(
   // removes all jar mappings in universal and appends the fat jar
   mappings in Universal := {
     // universalMappings: Seq[(File,String)]
+    println("here")
     val universalMappings = (mappings in Universal).value
     val fatJar = (assembly in Compile).value
     // removing means filtering
@@ -77,15 +82,18 @@ lazy val packageSettings = Seq(
 
 lazy val `hmda-root` = (project in file("."))
   .settings(hmdaBuildSettings: _*)
-  .aggregate(common,
-             `hmda-platform`,
-             `check-digit`,
-             `institutions-api`,
-             `modified-lar`,
-             `hmda-analytics`,
-             `census-api`,
-             `hmda-regulator`,
-             `hmda-reporting`)
+  .aggregate(
+    common,
+    `hmda-platform`,
+    `check-digit`,
+    `institutions-api`,
+    `modified-lar`,
+    `hmda-analytics`,
+    `census-api`,
+    `hmda-regulator`,
+    `hmda-reporting`,
+    `hmda-spark-reporting`
+  )
 
 lazy val common = (project in file("common"))
   .settings(hmdaBuildSettings: _*)
@@ -96,6 +104,40 @@ lazy val common = (project in file("common"))
     Seq(
       libraryDependencies ++= commonDeps ++ authDeps ++ akkaDeps ++ akkaPersistenceDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps
     )
+  )
+
+lazy val `hmda-spark-reporting` = (project in file("hmda-spark-reporting"))
+  .enablePlugins(sbtdocker.DockerPlugin, AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      mainClass in assembly := Some("com.hmda.reports.DisclosureReports"),
+      assemblyJarName in assembly := "hmda-reports.jar.jar",
+      assemblyMergeStrategy in assembly := {
+        case PathList("javax", "servlet", xs @ _*)        => MergeStrategy.last
+        case PathList("javax", "activation", xs @ _*)     => MergeStrategy.last
+        case PathList("org", "apache", xs @ _*)           => MergeStrategy.last
+        case PathList("com", "google", xs @ _*)           => MergeStrategy.last
+        case PathList("com", "esotericsoftware", xs @ _*) => MergeStrategy.last
+        case PathList("com", "codahale", xs @ _*)         => MergeStrategy.last
+        case PathList("com", "yammer", xs @ _*)           => MergeStrategy.last
+        case "META-INF/io.netty.versions.properties"      => MergeStrategy.concat
+        case "META-INF/ECLIPSEF.RSA"                      => MergeStrategy.last
+        case "META-INF/mailcap"                           => MergeStrategy.last
+        case "META-INF/mimetypes.default"                 => MergeStrategy.last
+        case "plugin.properties"                          => MergeStrategy.last
+        case "log4j.properties"                           => MergeStrategy.last
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      }
+    ),
+    Seq(
+      libraryDependencies ++= sparkDeps ++ circeDeps ++ akkaDeps
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
   )
 
 lazy val `hmda-platform` = (project in file("hmda"))

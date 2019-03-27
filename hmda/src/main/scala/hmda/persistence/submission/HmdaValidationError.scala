@@ -22,10 +22,16 @@ import akka.util.{ByteString, Timeout}
 import akka.{Done, NotUsed}
 import com.typesafe.config.ConfigFactory
 import hmda.HmdaPlatform
-import hmda.messages.institution.InstitutionCommands.{GetInstitution, ModifyInstitution}
+import hmda.messages.institution.InstitutionCommands.{
+  GetInstitution,
+  ModifyInstitution
+}
 import hmda.messages.institution.InstitutionEvents.InstitutionEvent
 import hmda.messages.pubsub.HmdaTopics._
-import hmda.messages.submission.EditDetailsCommands.{EditDetailsPersistenceCommand, PersistEditDetails}
+import hmda.messages.submission.EditDetailsCommands.{
+  EditDetailsPersistenceCommand,
+  PersistEditDetails
+}
 import hmda.messages.submission.EditDetailsEvents.EditDetailsPersistenceEvent
 import hmda.messages.submission.SubmissionProcessingCommands._
 import hmda.messages.submission.SubmissionProcessingEvents._
@@ -40,7 +46,11 @@ import hmda.parser.filing.ts.TsCsvParser
 import hmda.persistence.HmdaTypedPersistentActor
 import hmda.persistence.institution.InstitutionPersistence
 import hmda.persistence.submission.EditDetailsConverter._
-import hmda.persistence.submission.HmdaProcessingUtils.{readRawData, updateSubmissionReceipt, updateSubmissionStatus}
+import hmda.persistence.submission.HmdaProcessingUtils.{
+  readRawData,
+  updateSubmissionReceipt,
+  updateSubmissionStatus
+}
 import hmda.publication.KafkaUtils._
 import hmda.util.streams.FlowUtils.framing
 import hmda.validation.context.ValidationContext
