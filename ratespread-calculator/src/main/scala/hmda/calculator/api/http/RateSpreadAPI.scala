@@ -11,9 +11,8 @@ import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigFactory}
 import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
-import scala.concurrent.duration._
 
-import scala.concurrent.duration.FiniteDuration
+import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{ExecutionContext, Future}
 
 object RateSpreadAPI {

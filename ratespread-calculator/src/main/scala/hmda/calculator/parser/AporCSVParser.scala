@@ -2,7 +2,7 @@ package hmda.calculator.parser
 
 import java.time.{LocalDate, Month}
 
-import hmda.calculator.entity.APOR
+import hmda.calculator.apor.APOR
 
 import scala.util.Try
 
@@ -19,5 +19,4 @@ object APORCsvParser {
     val aporList = values.tail.map(_.toDouble)
     APOR(date, aporList)
   }
-
 }

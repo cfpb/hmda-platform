@@ -1,4 +1,4 @@
-package hmda.calculator.entity
+package hmda.calculator.apor
 
 trait RateType
 case object FixedRate extends RateType
