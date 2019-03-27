@@ -17,6 +17,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.directives.HmdaTimeDirectives
+import hmda.calculator.api.CalculatedRateSpreadModel
 import hmda.calculator.api.model.RateSpreadModel
 import hmda.calculator.api.model.RateSpreadModel.RateSpread
 import hmda.calculator.api.validation.RateSpread._
@@ -38,24 +39,15 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
       path("rateSpread") {
         extractUri { uri =>
           entity(as[RateSpread]) { rateSpread =>
-            val maybeRateSpreadRequest = Try(rateSpreadMap(rateSpread))
-            maybeRateSpreadRequest match {
-              case Success(rateRequest) =>
-                val rateSpreadData =
-                  RateSpreadModel.RateSpread(rateRequest.actionTakenType,
-                                             rateRequest.loanTerm,
-                                             rateRequest.amortizationType,
-                                             rateRequest.apr,
-                                             rateRequest.lockInDate,
-                                             rateRequest.reverseMortgage)
-                complete(ToResponseMarshallable(rateSpreadData))
+            val calculatedRateSpread = Try(rateSpreadCalculation(rateSpread))
+            calculatedRateSpread match {
+              case Success(rateSpread) =>
+                complete(ToResponseMarshallable(rateSpread))
               case Failure(error) =>
                 failedResponse(StatusCodes.BadRequest, uri, error)
             }
           }
         }
-      }~  path("rateSpread" / "csv") {
-
       }
     }
   }

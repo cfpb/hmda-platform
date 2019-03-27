@@ -67,8 +67,8 @@ class APORScheduler extends HmdaActor {
       val fixedBucketKey = s"$environment/apor/$fixedRateFileName"
       val variableBucketKey = s"$environment/apor/$variableRateFileName"
 
-      loadAPOR(s3Client,bucket,fixedBucketKey)
-      loadAPOR(s3Client,bucket,variableBucketKey)
+      loadAPOR(s3Client, bucket, fixedBucketKey)
+      loadAPOR(s3Client, bucket, variableBucketKey)
   }
 
   def framing: Flow[ByteString, ByteString, NotUsed] = {
@@ -77,7 +77,7 @@ class APORScheduler extends HmdaActor {
                       allowTruncation = true)
   }
 
-  def loadAPOR(s3Client:S3Client,bucket:String, bucketKey: String) {
+  def loadAPOR(s3Client: S3Client, bucket: String, bucketKey: String) {
 
     val s3FixedSource = s3Client.download(bucket, bucketKey)
     s3FixedSource._1

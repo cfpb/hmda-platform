@@ -10,7 +10,6 @@ object AporEntity {
 
   def AporOperation(apor: APOR, rateType: RateType) {
     if (rateType == FixedRate) {
-
       if (!fixedRateAPORMap.contains(apor.rateDate.toString)) {
         fixedRateAPORMap.put(apor.rateDate.toString, apor)
       } else {
@@ -23,13 +22,5 @@ object AporEntity {
         variableRateAPORMap.update(apor.rateDate.toString, apor)
       }
     }
-  }
-
-  def FixedAporCounter: Int = {
-    fixedRateAPORMap.keySet.size
-  }
-
-  def VariableAporCounter: Int = {
-    variableRateAPORMap.keySet.size
   }
 }
