@@ -12,7 +12,7 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.akka.extension.quartz.QuartzSchedulerExtension
 import com.typesafe.config.ConfigFactory
 import hmda.actor.HmdaActor
-import hmda.calculator.entity.{AporEntity, FixedRate, VariableRate}
+import hmda.calculator.entity.{AporEntity, FixedRate, RateType, VariableRate}
 import hmda.calculator.parser.APORCsvParser
 import hmda.calculator.scheduler.schedules.Schedules.APORScheduler
 
@@ -67,8 +67,8 @@ class APORScheduler extends HmdaActor {
       val fixedBucketKey = s"$environment/apor/$fixedRateFileName"
       val variableBucketKey = s"$environment/apor/$variableRateFileName"
 
-      loadAPOR(s3Client, bucket, fixedBucketKey)
-      loadAPOR(s3Client, bucket, variableBucketKey)
+      loadAPOR(s3Client, bucket, fixedBucketKey, FixedRate)
+      loadAPOR(s3Client, bucket, variableBucketKey, VariableRate)
   }
 
   def framing: Flow[ByteString, ByteString, NotUsed] = {
@@ -77,7 +77,10 @@ class APORScheduler extends HmdaActor {
                       allowTruncation = true)
   }
 
-  def loadAPOR(s3Client: S3Client, bucket: String, bucketKey: String) {
+  def loadAPOR(s3Client: S3Client,
+               bucket: String,
+               bucketKey: String,
+               rateType: RateType) {
 
     val s3FixedSource = s3Client.download(bucket, bucketKey)
     s3FixedSource._1
@@ -85,7 +88,7 @@ class APORScheduler extends HmdaActor {
       .drop(1)
       .map(s => s.utf8String)
       .map(s => APORCsvParser(s))
-      .map(apor => AporEntity.AporOperation(apor, FixedRate))
+      .map(apor => AporEntity.AporOperation(apor, rateType))
       .runWith(Sink.ignore)
     log.info("Loaded APOR data from S3")
 
