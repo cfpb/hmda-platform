@@ -122,8 +122,6 @@ lazy val `hmda-platform` = (project in file("hmda"))
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
-  .dependsOn(`check-digit` % "compile->compile;test->test")
-  .dependsOn(`census-api` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
