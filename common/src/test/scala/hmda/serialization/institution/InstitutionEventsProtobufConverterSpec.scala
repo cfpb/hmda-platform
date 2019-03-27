@@ -1,8 +1,18 @@
 package hmda.serialization.institution
 
-import hmda.messages.institution.InstitutionEvents.{InstitutionCreated, InstitutionDeleted, InstitutionModified, InstitutionNotExists}
+import hmda.messages.institution.InstitutionEvents.{
+  InstitutionCreated,
+  InstitutionDeleted,
+  InstitutionModified,
+  InstitutionNotExists
+}
 import hmda.model.institution.InstitutionGenerators._
-import hmda.persistence.serialization.institution.events.{InstitutionCreatedMessage, InstitutionDeletedMessage, InstitutionModifiedMessage, InstitutionNotExistsMessage}
+import hmda.persistence.serialization.institution.events.{
+  InstitutionCreatedMessage,
+  InstitutionDeletedMessage,
+  InstitutionModifiedMessage,
+  InstitutionNotExistsMessage
+}
 import hmda.serialization.institution.InstitutionEventsProtobufConverter._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}

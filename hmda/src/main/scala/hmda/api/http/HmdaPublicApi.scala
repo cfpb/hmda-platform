@@ -29,8 +29,7 @@ class HmdaPublicApi
     with BaseHttpApi
     with TsValidationHttpApi
     with LarValidationHttpApi
-    with HmdaFileValidationHttpApi
-    {
+    with HmdaFileValidationHttpApi {
 
   import HmdaPublicApi._
 

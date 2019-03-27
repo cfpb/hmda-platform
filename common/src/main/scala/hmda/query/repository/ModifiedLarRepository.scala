@@ -138,7 +138,8 @@ class ModifiedLarRepository(tableName: String,
             msa_md,
             msa_md_name,
             submission_id,
-            filing_year
+            filing_year,
+            conforming_loan_limit
           )
           VALUES (
             ${input.mlar.id},
@@ -235,7 +236,8 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.msaMd},
             ${input.census.name},
             ${submissionId},
-            ${filingYear}
+            ${filingYear},
+            ${input.mlar.conformingLoanLimit}
           )
           """)
 

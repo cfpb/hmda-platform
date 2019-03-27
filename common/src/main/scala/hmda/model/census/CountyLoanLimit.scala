@@ -4,7 +4,7 @@ case class CountyLoanLimit(
     stateCode: String = "",
     countyCode: String = "",
     countyName: String = "",
-    stateName: String = "",
+    stateAbbrv: String = "",
     cbsa: String = "",
     oneUnitLimit: Int = 0,
     twoUnitLimit: Int = 0,

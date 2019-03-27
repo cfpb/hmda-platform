@@ -18,7 +18,7 @@ object ModifiedLarCsvParser {
       .map(county => county.stateCode + county.countyCode -> county)
       .toMap
   val countyLoanLimitsByState =
-    countyLoanLimits.groupBy(county => county.stateCode).mapValues {
+    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
       countyList =>
         val oneUnit = countyList.map(county => county.oneUnitLimit)
         val twoUnit = countyList.map(county => county.twoUnitLimit)

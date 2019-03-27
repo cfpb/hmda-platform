@@ -75,7 +75,7 @@ object ConformingLoanLimit {
     }
 
     if (conformingLoanLimit == "U" && loan.county != "NA") {
-      countyLoanLimitsByCounty.get(loan.state + loan.county) match {
+      countyLoanLimitsByCounty.get(loan.county) match {
         case Some(county) => {
           if (loan.lienStatus == SecuredByFirstLien && loan.totalUnits == 1 && loan.amount <= county.oneUnitLimit)
             "C"
