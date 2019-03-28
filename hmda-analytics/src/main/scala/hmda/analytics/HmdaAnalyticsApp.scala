@@ -28,6 +28,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
 import hmda.query.DbConfiguration.dbConfig
 import hmda.query.HmdaQuery.{readRawData, readSubmission}
+import hmda.util.BankFilterUtils._
 import hmda.util.streams.FlowUtils.framing
 
 import scala.concurrent.Future
@@ -97,8 +98,8 @@ object HmdaAnalyticsApp
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
-      .filter(id =>
-        !bankFilterList.exists(bankLEI => bankLEI.equalsIgnoreCase(id.lei)))
+      .filter(institution =>
+        filterBankWithLogging(institution.lei, bankFilterList))
       .mapAsync(1) { id =>
         log.info(s"Adding data for  $id")
         addTs(id)
