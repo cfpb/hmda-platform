@@ -44,8 +44,8 @@ class HmdaReportingApi
 
   override val paths: Route = routes(s"$name") ~ hmdaFilerRoutes
 
-  override val tsRepository: TransmittalSheetRepository =
-    new TransmittalSheetRepository(dbConfig)
+  override val institutionRepository: InstitutionRepository =
+    new InstitutionRepository(dbConfig)
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,

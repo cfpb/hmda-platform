@@ -1,7 +1,6 @@
 package hmda.reporting.api.http
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
@@ -12,7 +11,6 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
   corsRejectionHandler
 }
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
-import hmda.api.http.model.ErrorResponse
 import hmda.model.institution.{
   HmdaFiler,
   HmdaFilerResponse,
@@ -20,7 +18,7 @@ import hmda.model.institution.{
   MsaMdResponse
 }
 import hmda.query.repository.ModifiedLarRepository
-import hmda.reporting.repository.TsComponent
+import hmda.reporting.repository.InstitutionComponent
 import hmda.util.http.FilingResponseUtils.entityNotPresentResponse
 import io.circe.generic.auto._
 import slick.basic.DatabaseConfig
@@ -28,28 +26,28 @@ import slick.jdbc.JdbcProfile
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
-trait ReportingHttpApi extends TsComponent {
+trait ReportingHttpApi extends InstitutionComponent {
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
 
-  val tsRepository: TransmittalSheetRepository
+  val institutionRepository: InstitutionRepository
 
   val filerListRoute: Route = {
     path("filers" / IntNumber) { filingYear =>
       get {
 
         val futFilerSet =
-          tsRepository
-            .getAllSheets(filingYear)
+          institutionRepository
+            .getAllFilers()
             .map(
               sheets =>
                 sheets
-                  .map(tsEntity =>
-                    HmdaFiler(tsEntity.lei,
-                              tsEntity.institutionName,
-                              tsEntity.year.toString))
+                  .map(instituionEntity =>
+                    HmdaFiler(instituionEntity.lei,
+                              instituionEntity.respondentName,
+                              "2018"))
                   .toSet)
         onComplete(futFilerSet) {
           case Success(filerSet) =>
@@ -65,13 +63,13 @@ trait ReportingHttpApi extends TsComponent {
         val repo = new ModifiedLarRepository("modifiedlar2018", databaseConfig)
         val resultset = for {
           msaMdsResult <- repo.msaMds(lei, year)
-          institutionResult <- tsRepository.findByLei(lei)
+          institutionResult <- institutionRepository.findByLei(lei)
         } yield {
           val msaMds =
             msaMdsResult.map(myEntity => MsaMd(myEntity._1, myEntity._2)).toSet
           MsaMdResponse(new HmdaFiler(institutionResult.head.lei,
-                                      institutionResult.head.name,
-                                      institutionResult.head.year + ""),
+                                      institutionResult.head.respondentName,
+                                      "2018"),
                         msaMds)
         }
 
