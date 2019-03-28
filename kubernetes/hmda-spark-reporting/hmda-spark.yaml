@@ -6,7 +6,12 @@ metadata:
 spec:
   type: Scala
   mode: cluster
-  image: "omnipresent/cfpb-hmda-reports"
+  sparkConf:
+    "spark.streaming.receiver.maxRate": "1"
+    "spark.streaming.receiver.maxRate": "1"
+    "spark.streaming.backpressure.initialRate": "1"
+    "spark.streaming.backpressure.enabled": "true"
+  image: "omnipresent/cfpb-hmda-reports-with-kafka-each-commit"
   imagePullPolicy: Always
   mainClass: com.hmda.reports.DisclosureReports
   mainApplicationFile: "local:///opt/spark/examples/jars/hmda-reports.jar"
@@ -25,6 +30,22 @@ spec:
     labels:
       version: 2.4.0
     serviceAccount: spark-operator-spark
+    configMaps:
+      - name: kafka-configmap
+        path: /mnt/kafka-config-maps
+    envSecretKeyRefs:
+      JDBC_URL:
+        name: inst-postgres-credentials
+        key: url
+      ACCESS_KEY:
+        name: aws-credentials
+        key: aws-access-key-id
+      SECRET_KEY:
+        name: aws-credentials
+        key: aws-secret-access-key
+      KAFKA_HOSTS:
+        name: kafka-hosts
+        key: kafka-hosts
     volumeMounts:
       - name: "test-volume"
         mountPath: "/tmp"
@@ -34,6 +55,26 @@ spec:
     memory: "12g"
     labels:
       version: 2.4.0
+    configMaps:
+      - name: kafka-configmap
+        path: /mnt/kafka-config-maps
+    envSecretKeyRefs:
+      JDBC_URL:
+        name: inst-postgres-credentials
+        key: url
+      ACCESS_KEY:
+        name: aws-credentials
+        key: aws-access-key-id
+      SECRET_KEY:
+        name: aws-credentials
+        key: aws-secret-access-key
+      KAFKA_HOSTS:
+        name: kafka-hosts
+        key: kafka-hosts
     volumeMounts:
       - name: "test-volume"
         mountPath: "/tmp"
+    volumes:
+      - name: config-vol
+        configMap:
+          name: dummy-cm

@@ -6,7 +6,14 @@ import sbtassembly.AssemblyPlugin.autoImport.assemblyMergeStrategy
 lazy val commonDeps = Seq(logback, scalaTest, scalaCheck)
 
 lazy val sparkDeps =
-  Seq(sparkCore, sparkSql, sparkStreaming, sparkKafka, postgres)
+  Seq(sparkCore,
+      sparkSql,
+      sparkStreaming,
+      sparkKafka,
+      postgres,
+      fs2,
+      monix,
+      akkaKafkaStreams)
 
 lazy val authDeps = Seq(
   keycloakAdapter,
@@ -112,7 +119,7 @@ lazy val `hmda-spark-reporting` = (project in file("hmda-spark-reporting"))
   .settings(
     Seq(
       mainClass in assembly := Some("com.hmda.reports.DisclosureReports"),
-      assemblyJarName in assembly := "hmda-reports.jar.jar",
+      assemblyJarName in assembly := "hmda-reports.jar",
       assemblyMergeStrategy in assembly := {
         case PathList("javax", "servlet", xs @ _*)        => MergeStrategy.last
         case PathList("javax", "activation", xs @ _*)     => MergeStrategy.last
