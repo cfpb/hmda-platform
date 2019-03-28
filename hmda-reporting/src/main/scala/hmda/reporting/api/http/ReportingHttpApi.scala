@@ -47,7 +47,7 @@ trait ReportingHttpApi extends InstitutionComponent {
                   .map(instituionEntity =>
                     HmdaFiler(instituionEntity.lei,
                               instituionEntity.respondentName,
-                              "2018"))
+                              instituionEntity.activityYear.toString))
                   .toSet)
         onComplete(futFilerSet) {
           case Success(filerSet) =>
@@ -67,10 +67,11 @@ trait ReportingHttpApi extends InstitutionComponent {
         } yield {
           val msaMds =
             msaMdsResult.map(myEntity => MsaMd(myEntity._1, myEntity._2)).toSet
-          MsaMdResponse(new HmdaFiler(institutionResult.head.lei,
-                                      institutionResult.head.respondentName,
-                                      "2018"),
-                        msaMds)
+          MsaMdResponse(
+            new HmdaFiler(institutionResult.head.lei,
+                          institutionResult.head.respondentName,
+                          institutionResult.head.activityYear.toString),
+            msaMds)
         }
 
         onComplete(resultset) {
