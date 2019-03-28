@@ -163,12 +163,6 @@ trait InstitutionComponent {
 
   }
 
-  def getAllFilers()(
-      implicit ec: ExecutionContext,
-      institutionRepository: InstitutionRepository): Future[Seq[Institution]] = {
-    db.run(table.filter(_.hmdaFiler === true).result)
-  }
-
   def findByFields(lei: String,
                    name: String,
                    taxId: String,
