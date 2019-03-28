@@ -45,7 +45,7 @@ trait ReportingHttpApi extends InstitutionComponent {
               sheets =>
                 sheets
                   .map(instituionEntity =>
-                    HmdaFiler(instituionEntity.lei,
+                    HmdaFiler(instituionEntity.lei.toUpperCase,
                               instituionEntity.respondentName,
                               instituionEntity.activityYear.toString))
                   .toSet)
@@ -68,7 +68,7 @@ trait ReportingHttpApi extends InstitutionComponent {
           val msaMds =
             msaMdsResult.map(myEntity => MsaMd(myEntity._1, myEntity._2)).toSet
           MsaMdResponse(
-            new HmdaFiler(institutionResult.head.lei,
+            new HmdaFiler(institutionResult.head.lei.toUpperCase,
                           institutionResult.head.respondentName,
                           institutionResult.head.activityYear.toString),
             msaMds)
