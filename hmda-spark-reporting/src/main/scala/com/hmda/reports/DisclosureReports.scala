@@ -85,39 +85,14 @@ object DisclosureReports {
     implicit val mat: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
 
-//    val config = ConfigFactory.load()
 
     println(sys.env("KAFKA_HOSTS"))
 
-//    val customConf =
-//      ConfigFactory.parseString(
-//        """
-//akka.kaadfadfka.consasdfasumer.polladsf-interval = 50ms
-//""")
-//
-////    val customConf =
-////      ConfigFactory.parseString(
-////        """
-////akka.kafka.consumer.kafka-clients.enable.auto.commit = false
-////akka.kafka.consumer.poll-interval = 50ms
-////akka.kafka.consumer.poll-timeout = 50ms
-////akka.kafka.consumer.stop-timeout = 30s
-////akka.kafka.consumer.close-timeout = 20s
-////akka.kafka.consumer.commit-timeout = 15s
-////akka.kafka.consumer.commit-time-warning = 1s
-////akka.kafka.consumer.commit-refresh-interval = infinite
-////akka.kafka.consumer.use-dispatcher = "akka.kafka.default-dispatcher"
-////akka.kafka.consumer.wait-close-partition = 500ms
-////akka.kafka.consumer.position-timeout = 5s
-////akka.kafka.consumer.offset-for-times-timeout = 5s
-////akka.kafka.consumer.metadata-request-timeout = 5s
-////""")
-//ConfigFactory.load(customConf)
     val consumerSettings: ConsumerSettings[String, String] =
       ConsumerSettings(system.settings.config.getConfig("akka.kafka.consumer"),
                        new StringDeserializer,
                        new StringDeserializer)
-        .withBootstrapServers("10.153.98.23:1025")
+        .withBootstrapServers(sys.env("KAFKA_HOSTS"))
         .withGroupId("hmda-spark")
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
