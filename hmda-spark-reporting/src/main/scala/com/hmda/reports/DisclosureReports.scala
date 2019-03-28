@@ -1,5 +1,6 @@
 package com.hmda.reports
 
+import akka.NotUsed
 import org.apache.spark.sql.expressions._
 import org.apache.spark.sql._
 import io.circe.generic.auto._
@@ -36,6 +37,7 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 import org.apache.spark.streaming.kafka010._
 import org.apache.spark.streaming.{Seconds, StreamingContext}
+import akka.kafka.scaladsl.Consumer.DrainingControl
 
 import scala.concurrent.duration._
 
@@ -69,6 +71,12 @@ case class OutDisclosure1(lei: String,
                           reportDate: String,
                           msa: Long,
                           tracts: List[Tract])
+
+// Usage
+sealed trait Element
+final case object Data extends Element
+final case object NoData extends Element
+
 
 object DisclosureReports {
 
@@ -122,6 +130,9 @@ object DisclosureReports {
         msg.committableOffset
       }
       .map(offset => offset.commitScaladsl())
+      .toMat(Sink.seq)(Keep.both)
+      .mapMaterializedValue(DrainingControl.apply)
+      .run()
   }
 
   def processKafkaRecord(
@@ -131,4 +142,11 @@ object DisclosureReports {
       s"Received a message - key: ${msg.record.key()}, value: ${msg.record.value()}")
 //    Thread.sleep(40)
   }
+
+
+  def completeIfNoElements[A](duration: FiniteDuration, completionMarker: A): Flow[A, A, NotUsed] =
+    Flow[A].idleTimeout(duration).recover {
+      case _: TimeoutException => completionMarker
+    }
+
 }
