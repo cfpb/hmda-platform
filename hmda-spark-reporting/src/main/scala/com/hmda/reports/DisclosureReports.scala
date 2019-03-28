@@ -10,12 +10,16 @@ import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import akka.actor.ActorSystem
+import akka.kafka.ConsumerMessage.CommittableMessage
+import akka.kafka.{ConsumerMessage, ConsumerSettings, Subscriptions}
+import akka.kafka.scaladsl.Consumer
 import akka.stream._
 
 import scala.concurrent._
 import duration._
 import akka.stream.scaladsl._
 import akka.util.ByteString
+import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
@@ -25,6 +29,7 @@ import org.apache.spark.sql.functions._
 import fs2.concurrent.Queue
 import monix.eval._
 import monix.execution._
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
@@ -68,90 +73,62 @@ case class OutDisclosure1(lei: String,
 object DisclosureReports {
 
   def main(args: Array[String]): Unit = {
-    implicit val system = ActorSystem()
-    implicit val mat = ActorMaterializer()
+    implicit val system: ActorSystem = ActorSystem()
+    implicit val mat: ActorMaterializer = ActorMaterializer()
+    implicit val ec: ExecutionContext = system.dispatcher
 
-    val spark: SparkSession = SparkSession
-      .builder()
-      .appName("Example")
-      .config("spark.streaming.receiver.maxRate", 1)
-      .config("spark.streaming.blockInterval", 600)
-      .config("spark.streaming.backpressure.initialRate", 1)
-      .config("spark.streaming.backpressure.enabled", true)
-      .config("spark.streaming.kafka.maxRatePerPartition", 1)
-      .getOrCreate()
-    spark.sparkContext.setLogLevel("ERROR")
-    println(spark.read.option("multiline", true).json("/mnt/kafka-config-maps"))
+//    val config = ConfigFactory.load()
 
-    println(sys.env("JDBC_URL"))
-    println(sys.env("ACCESS_KEY"))
-    println(sys.env("SECRET_KEY"))
     println(sys.env("KAFKA_HOSTS"))
-    val batchInterval = Seconds(10)
-    val streamingContext =
-      new StreamingContext(spark.sparkContext, batchInterval)
-    val kafkaParams = Map[String, Object](
-      "bootstrap.servers" -> sys.env("KAFKA_HOSTS"),
-      "key.deserializer" -> classOf[StringDeserializer],
-      "value.deserializer" -> classOf[StringDeserializer],
-      "group.id" -> "hmda-spark",
-      "auto.offset.reset" -> "earliest",
-      "enable.auto.commit" -> (false: java.lang.Boolean)
-    )
-    val topics = Array("hmda-spark-reports")
 
-    val kafkaConsumer = KafkaUtils.createDirectStream[String, String](
-      streamingContext,
-      PreferConsistent,
-      Subscribe[String, String](topics, kafkaParams)
-    )
+//    val customConf =
+//      ConfigFactory.parseString(
+//        """
+//akka.kaadfadfka.consasdfasumer.polladsf-interval = 50ms
+//""")
+//
+////    val customConf =
+////      ConfigFactory.parseString(
+////        """
+////akka.kafka.consumer.kafka-clients.enable.auto.commit = false
+////akka.kafka.consumer.poll-interval = 50ms
+////akka.kafka.consumer.poll-timeout = 50ms
+////akka.kafka.consumer.stop-timeout = 30s
+////akka.kafka.consumer.close-timeout = 20s
+////akka.kafka.consumer.commit-timeout = 15s
+////akka.kafka.consumer.commit-time-warning = 1s
+////akka.kafka.consumer.commit-refresh-interval = infinite
+////akka.kafka.consumer.use-dispatcher = "akka.kafka.default-dispatcher"
+////akka.kafka.consumer.wait-close-partition = 500ms
+////akka.kafka.consumer.position-timeout = 5s
+////akka.kafka.consumer.offset-for-times-timeout = 5s
+////akka.kafka.consumer.metadata-request-timeout = 5s
+////""")
+//ConfigFactory.load(customConf)
+    val consumerSettings: ConsumerSettings[String, String] =
+      ConsumerSettings(system.settings.config.getConfig("akka.kafka.consumer"),
+                       new StringDeserializer,
+                       new StringDeserializer)
+        .withBootstrapServers("10.153.98.23:1025")
+        .withGroupId("hmda-spark")
+        .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
-    implicit val taskScheduler: Scheduler = Scheduler.global
-
-    final case class DataReceived()
-
-    val queue = Queue.bounded[Task, DataReceived](1).runSyncUnsafe()
-
-    kafkaConsumer.foreachRDD { rdd =>
-      val offsetRanges = rdd.asInstanceOf[HasOffsetRanges].offsetRanges
-      val localData: Array[(String, String)] =
-        rdd.map(cr => (cr.key(), cr.value())).collect()
-
-      if (localData.nonEmpty) {
-        queue.offer1(DataReceived()).runSyncUnsafe()
+    Consumer
+      .committableSource(consumerSettings,
+                         Subscriptions.topics("hmda-spark-reports"))
+      .map { msg =>
+        println("came in here")
+        processKafkaRecord(msg)
+        msg.committableOffset
       }
-      println("Data Receive: " + localData.size)
-      localData.foreach {
-        case (key, value) =>
-          println(key, value)
-          Thread.sleep(40)
-      }
-      kafkaConsumer.asInstanceOf[CanCommitOffsets].commitAsync(offsetRanges)
-    }
+      .map(offset => offset.commitScaladsl())
+  }
 
-    val beginKafkaConsumer = Task(kafkaConsumer.start())
-    val beginStreaming = Task(streamingContext.start())
-    val stopStreaming = Task(
-      streamingContext.stop(stopSparkContext = true, stopGracefully = true))
-    val waitTermination = Task(streamingContext.awaitTermination()).flatMap(_ =>
-      Task.fromFuture(system.terminate()))
-
-    def delayUntilNoDataIsReceived[A](queue: Queue[Task, DataReceived],
-                                      exit: Task[A],
-                                      delay: FiniteDuration): Task[A] =
-      for {
-        option <- Task.suspend(queue.tryDequeue1).delayExecution(delay)
-        res <- if (option.isEmpty) exit
-        else delayUntilNoDataIsReceived(queue, exit, delay)
-      } yield res
-
-    val program = for {
-      _ <- beginKafkaConsumer
-      _ <- beginStreaming
-      _ <- delayUntilNoDataIsReceived(queue, stopStreaming, 30.seconds)
-      _ <- waitTermination
-    } yield ()
-
-    program.runSyncUnsafe()
+  def processKafkaRecord(
+      msg: ConsumerMessage.CommittableMessage[String, String]) = {
+    // The Spark DF code would go here
+    println(
+      s"Received a message - key: ${msg.record.key()}, value: ${msg.record.value()}")
+//    Thread.sleep(40)
   }
 }

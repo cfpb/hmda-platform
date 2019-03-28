@@ -13,7 +13,8 @@ lazy val sparkDeps =
       postgres,
       fs2,
       monix,
-      akkaKafkaStreams)
+      akkaKafkaStreams,
+      alpakkaS3)
 
 lazy val authDeps = Seq(
   keycloakAdapter,

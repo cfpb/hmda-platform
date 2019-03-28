@@ -24,7 +24,7 @@ spec:
         path: "/tmp"
         type: Directory
   driver:
-    cores: 2
+    cores: 1
     coreLimit: "4000m"
     memory: "12g"
     labels:
@@ -50,8 +50,8 @@ spec:
       - name: "test-volume"
         mountPath: "/tmp"
   executor:
-    cores: 2
-    instances: 3
+    cores: 1
+    instances: 1
     memory: "12g"
     labels:
       version: 2.4.0
