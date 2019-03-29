@@ -122,7 +122,9 @@ object ModifiedLarApp extends App {
                                10,
                                30.seconds)
           }
-          .mapAsync(parallelism * 2)((offset: ConsumerMessage.CommittableOffset) => offset.commitScaladsl())
+          .mapAsync(parallelism * 2)(
+            (offset: ConsumerMessage.CommittableOffset) =>
+              offset.commitScaladsl())
           .toMat(Sink.ignore)(Keep.both)
           .run()
 

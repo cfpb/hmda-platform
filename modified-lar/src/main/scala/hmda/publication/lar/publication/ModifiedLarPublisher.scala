@@ -148,12 +148,12 @@ object ModifiedLarPublisher {
           val finalResult: Future[Unit] = for {
             _ <- removeLei
             _ <- graph.run()
-            _ <- produceRecord(disclosureTopic,
+            _ <- produceRecord("disclosure-test-1",
                                submissionId.lei,
                                submissionId.toString)
-            _ <- produceRecord(adTopic,
-              submissionId.lei,
-              submissionId.toString)
+            _ <- produceRecord("ad-test-1",
+                               submissionId.lei,
+                               submissionId.toString)
           } yield ()
 
           finalResult.onComplete {
