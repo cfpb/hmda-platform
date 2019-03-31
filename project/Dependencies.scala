@@ -57,6 +57,4 @@ object Dependencies {
   lazy val sparkSql = "org.apache.spark" %% "spark-sql" % Version.spark % Provided
   lazy val sparkStreaming = "org.apache.spark" %% "spark-streaming" % Version.spark % Provided
   lazy val sparkKafka = "org.apache.spark"%% "spark-streaming-kafka-0-10" % Version.spark
-  lazy val fs2 = "co.fs2" %% "fs2-core" % "1.0.3"
-  lazy val monix = "io.monix" %% "monix" % "3.0.0-RC2"
 }

@@ -11,8 +11,6 @@ lazy val sparkDeps =
       sparkStreaming,
       sparkKafka,
       postgres,
-      fs2,
-      monix,
       akkaKafkaStreams,
       alpakkaS3)
 
@@ -147,6 +145,7 @@ lazy val `hmda-spark-reporting` = (project in file("hmda-spark-reporting"))
     dockerSettings,
     packageSettings
   )
+  .dependsOn(common % "compile->compile;test->test")
 
 lazy val `hmda-platform` = (project in file("hmda"))
   .enablePlugins(JavaServerAppPackaging,
