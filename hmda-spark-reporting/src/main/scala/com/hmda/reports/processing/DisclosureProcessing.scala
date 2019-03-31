@@ -54,14 +54,14 @@ object DisclosureProcessing {
         .option("url", JDBC_URL)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018 where lei = '${lei}' and filing_year = 2018) as mlar")
+          s"(select * from modifiedlar2018 where lei = '${lei}' and filing_year = ${YEAR}) as mlar")
         .load()
         .cache()
 
     def prepare(df: DataFrame): DataFrame =
       df.filter(col("msa_md") =!= lit(0))
         .filter(upper(col("tract")) =!= lit("NA"))
-        .filter(upper(col("filing_year")) === lit(2018))
+        .filter(upper(col("filing_year")) === lit(YEAR))
 
     def includeZeroAndNonZero(dispInput: DataFrame,
                               title: String,
@@ -389,6 +389,8 @@ object DisclosureProcessing {
       .collect()
       .toList ++ outputGTable2.collect().toList
 
+    val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+
     def jsonFormationTable1(msaMd: Msa,
                             input: List[Data],
                             leiDetails: Institution): OutDisclosure1 = {
@@ -429,8 +431,8 @@ object DisclosureProcessing {
         "1",
         "Disclosure",
         "Loans purchased, by location of property and type of loan",
-        2018,
-        "some date",
+        YEAR.toInt,
+        dateFormat.format(new java.util.Date()),
         msaMd,
         tracts)
     }
@@ -477,8 +479,8 @@ object DisclosureProcessing {
         "2",
         "Disclosure",
         "Loans purchased, by location of property and type of loan",
-        2018,
-        "some date",
+        YEAR.toInt,
+        dateFormat.format(new java.util.Date()),
         msaMd,
         tracts)
     }
