@@ -11,7 +11,7 @@ spec:
     "spark.streaming.receiver.maxRate": "1"
     "spark.streaming.backpressure.initialRate": "1"
     "spark.streaming.backpressure.enabled": "true"
-  image: "omnipresent/cfpb-hmda-reports-with-kafka-each-commit"
+  image: "omnipresent/hmda-spark-reporting"
   imagePullPolicy: Always
   mainClass: com.hmda.reports.DisclosureReports
   mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-reports.jar"

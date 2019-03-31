@@ -11,6 +11,7 @@ import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.hmda.reports.model._
+import hmda.model.census.Census
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.apache.spark.sql.{SparkSession, _}
@@ -487,7 +488,7 @@ object DisclosureProcessing {
         val msaMd = Msa(key.toString(),
                         values.head.msa_md_name,
                         values.head.state,
-                        "get_from_census.scala")
+                        Census.states(values.head.state).name)
         jsonFormationTable1(msaMd, values, leiDetails)
     }
 
@@ -496,7 +497,7 @@ object DisclosureProcessing {
         val msaMd = Msa(key.toString(),
                         values.head.msa_md_name,
                         values.head.state,
-                        "get_from_census.scala")
+                        Census.states(values.head.state).name)
         jsonFormationTable2(msaMd, values, leiDetails)
     }
 
