@@ -20,6 +20,14 @@ class V626Spec extends LarEditCheckSpec {
 
       val emptyCounty = lar.copy(geography = lar.geography.copy(county = ""))
       emptyCounty.mustFail
+
+      val invalidCountyAllDigits =
+        lar.copy(geography = lar.geography.copy(county = "00000"))
+      invalidCountyAllDigits.mustFail
+
+      val invalidCountyString =
+        lar.copy(geography = lar.geography.copy(county = "N/AN/"))
+      invalidCountyString.mustFail
     }
   }
 }
