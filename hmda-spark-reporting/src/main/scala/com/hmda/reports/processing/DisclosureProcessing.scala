@@ -54,7 +54,7 @@ object DisclosureProcessing {
         .option("url", JDBC_URL)
         .option(
           "dbtable",
-          s"(select * from modifiedlar2018 where lei = '${lei}' and filing_year = ${YEAR}) as mlar")
+          s"(select * from wells_mlar where lei = '${lei}' and filing_year = ${YEAR}) as mlar")
         .load()
         .cache()
 
