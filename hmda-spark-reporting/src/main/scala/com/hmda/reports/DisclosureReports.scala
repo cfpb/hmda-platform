@@ -34,13 +34,7 @@ object DisclosureReports {
       .builder()
       .appName("Hmda-Reports")
       .getOrCreate()
-    spark.sparkContext.setLogLevel("INFO")
-    println("printing values")
-    println(JDBC_URL)
-    println(KAFKA_HOSTS)
-    println(AWS_ACCESS_KEY)
-    println(AWS_SECRET_KEY)
-    println(AWS_BUCKET)
+    spark.sparkContext.setLogLevel("WARN")
 
     import spark.implicits._
     //    create lookup map of counties
