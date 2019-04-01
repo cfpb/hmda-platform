@@ -41,7 +41,7 @@ object DisclosureProcessing {
       .option("url", JDBC_URL)
       .option(
         "dbtable",
-        s"(select lei, institution_name as institutionName from transmittalsheet2018 where lei = '${lei}') as transmittalsheet")
+        s"(select lei, respondent_name as institutionName from institutions2018 where lei = '${lei}' and hmda_filer = true) as institutions2018")
       .load()
       .as[Institution]
       .collect()
