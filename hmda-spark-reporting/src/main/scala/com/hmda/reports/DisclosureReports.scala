@@ -23,7 +23,8 @@ object DisclosureReports {
   val KAFKA_HOSTS = sys.env("KAFKA_HOSTS")
   val AWS_ACCESS_KEY = sys.env("ACCESS_KEY")
   val AWS_SECRET_KEY = sys.env("SECRET_KEY")
-  val AWS_BUCKET = sys.env("BUCKET")
+//  val AWS_BUCKET = sys.env("BUCKET")
+  val AWS_BUCKET = "dev"
 
   def main(args: Array[String]): Unit = {
     implicit val system: ActorSystem = ActorSystem()
@@ -33,7 +34,14 @@ object DisclosureReports {
       .builder()
       .appName("Hmda-Reports")
       .getOrCreate()
-    spark.sparkContext.setLogLevel("WARN")
+    spark.sparkContext.setLogLevel("INFO")
+    println("printing values")
+    println(JDBC_URL)
+    println(KAFKA_HOSTS)
+    println(AWS_ACCESS_KEY)
+    println(AWS_SECRET_KEY)
+    println(AWS_BUCKET)
+
     import spark.implicits._
     //    create lookup map of counties
     val lookupMap: Map[(Int, Int), StateMapping] = {

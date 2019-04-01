@@ -14,7 +14,7 @@ spec:
   image: "omnipresent/hmda-spark-reporting"
   imagePullPolicy: Always
   mainClass: com.hmda.reports.DisclosureReports
-  mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-reports.jar"
+  mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
   sparkVersion: "2.4.0"
   restartPolicy:
     type: Never

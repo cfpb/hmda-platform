@@ -34,7 +34,7 @@ object DisclosureProcessing {
                                        system: ActorSystem): Future[Unit] = {
     import spark.implicits._
     println(s"Processing ${lei} ")
-
+    spark.sparkContext.setLocalProperty(lei, s"Processing ${lei}")
     val leiDetails = spark.read
       .format("jdbc")
       .option("driver", "org.postgresql.Driver")
@@ -434,7 +434,8 @@ object DisclosureProcessing {
         YEAR.toInt,
         dateFormat.format(new java.util.Date()),
         msaMd,
-        tracts)
+        tracts
+      )
     }
 
     def jsonFormationTable2(msaMd: Msa,
@@ -482,7 +483,8 @@ object DisclosureProcessing {
         YEAR.toInt,
         dateFormat.format(new java.util.Date()),
         msaMd,
-        tracts)
+        tracts
+      )
     }
 
     val disclosuresTable1 = outputCollectionTable1.groupBy(d => d.msa_md).map {
@@ -534,7 +536,7 @@ object DisclosureProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           persistSingleFile(
-            s"${BUCKET}/reports/disclosure/${YEAR}/${lei}/${input.msa.id}/2.json",
+            s"${BUCKET}/reports/disclosure/${YEAR}/${lei}/${input.msa.id}/1.json",
             data,
             "cfpb-hmda-public")
         }
