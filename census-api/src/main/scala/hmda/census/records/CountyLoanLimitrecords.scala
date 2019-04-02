@@ -19,7 +19,7 @@ object CountyLoanLimitRecords {
           stateCode = values(0),
           countyCode = values(1),
           countyName = values(2),
-          stateName = values(3),
+          stateAbbrv = values(3),
           cbsa = values(4),
           oneUnitLimit = values(5).toInt,
           twoUnitLimit = values(6).toInt,

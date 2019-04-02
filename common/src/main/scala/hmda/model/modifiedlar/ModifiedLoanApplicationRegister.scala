@@ -124,11 +124,7 @@ case class ModifiedLoanApplicationRegister(
       s"|" +
       s"$homeSecuredPropertyType|$homeLandPropertyType|$totalUnits|$multifamilyAffordableUnits|$applicationSubmission|" +
       s"$initiallyPayableToInstitution|$AUS1|$AUS2|$AUS3|$AUS4|$AUS5|" +
-<<<<<<< HEAD
       s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose|$conformingLoanLimit")
-=======
-      s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose")
->>>>>>> 87bd2beb7e3a3b4198fe951bed203c8e9ba23911
       .replaceAll("(\r\n)|\r|\n", "")
 
   }
