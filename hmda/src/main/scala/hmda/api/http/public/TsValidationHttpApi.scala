@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import hmda.parser.filing.ts.TsCsvParser
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.api.http.model.public.TsValidateRequest
@@ -37,7 +37,7 @@ trait TsValidationHttpApi
   val parseTsRoute =
     path("parse") {
       timedPost { _ =>
-        cachingProhibited {
+        respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
           entity(as[TsValidateRequest]) { req =>
             TsCsvParser(req.ts) match {
               case Right(ts) => complete(ToResponseMarshallable(ts))
@@ -57,7 +57,7 @@ trait TsValidationHttpApi
     path("validate") {
       parameters('check.as[String] ? "all") { checkType =>
         timedPost { _ =>
-          cachingProhibited {
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             entity(as[TsValidateRequest]) { req =>
               TsCsvParser(req.ts) match {
                 case Right(ts) =>

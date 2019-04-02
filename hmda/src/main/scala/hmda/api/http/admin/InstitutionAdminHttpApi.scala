@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import hmda.model.institution.Institution
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -55,7 +55,7 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             s"${InstitutionPersistence.name}-${institution.LEI}")
 
           timedPost { uri =>
-            cachingProhibited {
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
               val fInstitution
                 : Future[Option[Institution]] = institutionPersistence ? (
                   ref => GetInstitution(ref)

@@ -13,7 +13,7 @@ import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.MediaTypes._
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.scaladsl.{Flow, Source}
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.uli.api.model.ULIModel._
@@ -74,7 +74,7 @@ trait ULIHttpApi extends HmdaTimeDirectives {
         } ~
           path("checkDigit" / "csv") {
             timedPost { _ =>
-              cachingProhibited {
+              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
                 fileUpload("file") {
                   case (_, byteSource) =>
                     val headerSource = Source.fromIterator(() =>
@@ -135,7 +135,7 @@ trait ULIHttpApi extends HmdaTimeDirectives {
           } ~
           path("validate" / "csv") {
             timedPost { _ =>
-              cachingProhibited {
+              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
                 fileUpload("file") {
                   case (_, byteSource) =>
                     val headerSource =

@@ -17,7 +17,7 @@ import akka.http.scaladsl.server.Directives.{
   path,
   pathPrefix
 }
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Framing, Sink}
@@ -71,7 +71,7 @@ trait UploadHttpApi extends HmdaTimeDirectives {
       (lei, period, seqNr) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedPost { uri =>
-            cachingProhibited {
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
               val submissionId = SubmissionId(lei, period, seqNr)
               val uploadTimestamp = Instant.now.toEpochMilli
 

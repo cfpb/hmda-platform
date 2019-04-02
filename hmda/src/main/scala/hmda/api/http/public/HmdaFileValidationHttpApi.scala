@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.Route
 import akka.stream.{ActorMaterializer, FlowShape}
 import akka.util.{ByteString, Timeout}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.scaladsl.{Broadcast, Concat, Flow, GraphDSL, Sink, Source}
 import hmda.api.http.model.public.{Validated, ValidatedResponse}
 import hmda.parser.filing.lar.LarCsvParser
@@ -55,7 +55,7 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
     } ~
       path("parse" / "csv") {
         timedPost { _ =>
-          cachingProhibited {
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             fileUpload("file") {
               case (_, byteSource) =>
                 val headerSource =
@@ -86,11 +86,11 @@ trait HmdaFileValidationHttpApi extends HmdaTimeDirectives {
               case _ =>
                 complete(ToResponseMarshallable(StatusCodes.BadRequest))
             }
-          } ~
-            timedOptions { _ =>
-              complete("OPTIONS")
-            }
-        }
+          }
+        } ~
+          timedOptions { _ =>
+            complete("OPTIONS")
+          }
       }
 
   def hmdaFileRoutes: Route = {

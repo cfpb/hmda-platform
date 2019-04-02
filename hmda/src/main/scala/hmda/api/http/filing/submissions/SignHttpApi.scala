@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives.{encodeResponse, handleRejections}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -81,7 +81,7 @@ trait SignHttpApi extends HmdaTimeDirectives {
             }
           } ~
             timedPost { uri =>
-              cachingProhibited {
+              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
                 entity(as[EditsSign]) { editsSign =>
                   if (editsSign.signed) {
                     val submissionSignPersistence = sharding

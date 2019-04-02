@@ -1,8 +1,16 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.SubmissionEvents.{SubmissionCreated, SubmissionModified, SubmissionNotExists}
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionCreated,
+  SubmissionModified,
+  SubmissionNotExists
+}
 import hmda.model.submission.SubmissionGenerator._
-import hmda.persistence.serialization.submission.events.{SubmissionCreatedMessage, SubmissionModifiedMessage, SubmissionNotExistsMessage}
+import hmda.persistence.serialization.submission.events.{
+  SubmissionCreatedMessage,
+  SubmissionModifiedMessage,
+  SubmissionNotExistsMessage
+}
 import hmda.serialization.submission.SubmissionEventsProtobufConverter._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}

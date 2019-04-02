@@ -5,13 +5,12 @@ import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes, Uri}
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
 import hmda.api.http.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.directives.CachingDirectives._
 import akka.stream.scaladsl.Sink
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -62,7 +61,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
     path("institutions" / Segment / "filings" / Segment / "submissions") {
       (lei, period) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-          cachingProhibited {
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             timedPost { uri =>
               val institutionPersistence =
                 sharding.entityRefFor(InstitutionPersistence.typeKey,
@@ -189,7 +188,7 @@ trait SubmissionHttpApi extends HmdaTimeDirectives {
       "institutions" / Segment / "filings" / Segment / "submissions" / "latest") {
       (lei, period) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
-          cachingProhibited {
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             timedGet { uri =>
               val filingPersistence =
                 sharding.entityRefFor(FilingPersistence.typeKey,

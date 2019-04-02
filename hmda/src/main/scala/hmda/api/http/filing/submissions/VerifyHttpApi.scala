@@ -9,7 +9,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import hmda.api.http.model.filing.submissions.{
   EditsVerification,
@@ -56,7 +56,7 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
       (lei, period, seqNr, editType) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedPost { uri =>
-            cachingProhibited {
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
               entity(as[EditsVerification]) { editsVerification =>
                 val submissionId = SubmissionId(lei, period, seqNr)
 

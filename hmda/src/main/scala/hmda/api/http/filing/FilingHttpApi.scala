@@ -11,7 +11,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.CachingDirectives._
+import akka.http.scaladsl.model.headers.RawHeader
 import hmda.api.http.directives.HmdaTimeDirectives
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import hmda.messages.filing.FilingCommands.{CreateFiling, GetFilingDetails}
@@ -68,7 +68,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
         } yield (i, d)
 
         timedPost { uri =>
-          cachingProhibited {
+          respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
             onComplete(filingDetailsF) {
               case Success((None, _)) =>
                 entityNotPresentResponse("institution", lei, uri)
@@ -105,7 +105,7 @@ trait FilingHttpApi extends HmdaTimeDirectives {
           }
         } ~
           timedGet { uri =>
-            cachingProhibited {
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
               onComplete(filingDetailsF) {
                 case Success((Some(_), Some(filingDetails))) =>
                   complete(ToResponseMarshallable(filingDetails))
