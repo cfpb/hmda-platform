@@ -15,6 +15,7 @@ import hmda.messages.pubsub.HmdaTopics._
 import hmda.model.filing.submission.SubmissionId
 import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication.{IrsPublisher, PublishIrs}
+import hmda.util.BankFilterUtils._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
@@ -78,8 +79,7 @@ object IrsPublisherApp extends App {
     Source
       .single(msg)
       .filter(msg =>
-        !bankFilterList.exists(bankLEI =>
-          bankLEI.equalsIgnoreCase(SubmissionId(msg).lei)))
+        filterBankWithLogging(SubmissionId(msg).lei, bankFilterList))
       .map { msg =>
         val submissionId = SubmissionId(msg)
         irsPublisher.toUntyped ? PublishIrs(submissionId)
