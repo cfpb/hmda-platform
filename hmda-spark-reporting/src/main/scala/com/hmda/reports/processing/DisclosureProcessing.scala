@@ -1,20 +1,47 @@
 package com.hmda.reports.processing
 
 import akka.Done
+import akka.actor.{Actor, ActorLogging, Props}
 import akka.stream._
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.scaladsl._
+import akka.pattern.pipe
 import akka.util.ByteString
 import com.hmda.reports.model._
-import hmda.model.census.Census
+import hmda.model.census.{Census, State}
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.apache.spark.sql.{SparkSession, _}
 import org.apache.spark.sql.functions._
 
 import scala.concurrent._
+import scala.concurrent.duration._
+import scala.util.{Failure, Success}
+
+class DisclosureProcessing(spark: SparkSession, s3Client: S3Client) extends Actor with ActorLogging {
+  import DisclosureProcessing._
+
+  implicit val mat: ActorMaterializer = ActorMaterializer()(context.system)
+  implicit val ec: ExecutionContext = context.dispatcher
+
+  override def receive: Receive = {
+    case ProcessKafkaRecord(lei, lookupMap, jdbcUrl, bucket, year) =>
+      val originalSender = sender()
+      log.info(s"Beginning process for $lei")
+      processKafkaRecord(lei, spark, lookupMap, jdbcUrl, bucket, year, s3Client)
+        .map(_ => Finished)
+        .pipeTo(originalSender)
+      log.info(s"Finished process for $lei")
+
+  }
+}
 
 object DisclosureProcessing {
+  case class ProcessKafkaRecord(lei: String, lookupMap: Map[(Int, Int), StateMapping], jdbcUrl: String, bucket: String, year: String)
+  case object Finished
+
+  def props(sparkSession: SparkSession, s3Client: S3Client): Props = Props(new DisclosureProcessing(sparkSession, s3Client))
+
   def processKafkaRecord(lei: String,
                          spark: SparkSession,
                          lookupMap: Map[(Int, Int), StateMapping],
@@ -22,8 +49,8 @@ object DisclosureProcessing {
                          bucket: String,
                          year: String,
                          s3Client: S3Client)(
-      implicit mat: ActorMaterializer,
-      ec: ExecutionContext): Future[Unit] = {
+                          implicit mat: ActorMaterializer,
+                          ec: ExecutionContext): Future[Unit] = {
     import spark.implicits._
 
     def prepare(df: DataFrame): DataFrame =
@@ -67,9 +94,9 @@ object DisclosureProcessing {
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispA,
-                            title,
-                            "FHA, FSA/RHS & VA (A)",
-                            allUniqueMsaMdTract)
+        title,
+        "FHA, FSA/RHS & VA (A)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -79,15 +106,15 @@ object DisclosureProcessing {
                      allUniqueMsaMdTract: DataFrame): Dataset[Data] = {
       val dispB = prepare(input)
         .filter(col("action_taken_type").isin(actionsTaken: _*))
-        .filter(col("total_units") isin ("1", "2", "3", "4"))
+        .filter(col("total_units") isin("1", "2", "3", "4"))
         .filter(col("loan_purpose") === lit(1))
         .filter(col("loan_type") === lit(1))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispB,
-                            title,
-                            "Conventional (B)",
-                            allUniqueMsaMdTract)
+        title,
+        "Conventional (B)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -97,15 +124,15 @@ object DisclosureProcessing {
                      allUniqueMsaMdTract: DataFrame): Dataset[Data] = {
       val dispC = prepare(input)
         .filter(col("action_taken_type").isin(actionsTaken: _*))
-        .filter(col("total_units") isin ("1", "2", "3", "4"))
-        .filter(col("loan_purpose") isin (31, 32))
+        .filter(col("total_units") isin("1", "2", "3", "4"))
+        .filter(col("loan_purpose") isin(31, 32))
         .filter(col("loan_type") === lit(1))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispC,
-                            title,
-                            "Refinancings (C)",
-                            allUniqueMsaMdTract)
+        title,
+        "Refinancings (C)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -115,15 +142,15 @@ object DisclosureProcessing {
                      allUniqueMsaMdTract: DataFrame): Dataset[Data] = {
       val dispD = prepare(input)
         .filter(col("action_taken_type").isin(actionsTaken: _*))
-        .filter(col("total_units") isin ("1", "2", "3", "4"))
+        .filter(col("total_units") isin("1", "2", "3", "4"))
         .filter(col("loan_purpose") === lit(2))
         .filter(col("loan_type") === lit(1))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispD,
-                            title,
-                            "Home Improvement Loans (D)",
-                            allUniqueMsaMdTract)
+        title,
+        "Home Improvement Loans (D)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -140,9 +167,9 @@ object DisclosureProcessing {
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispE,
-                            title,
-                            "Loans on Dwellings For 5 or More Families (E)",
-                            allUniqueMsaMdTract)
+        title,
+        "Loans on Dwellings For 5 or More Families (E)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -152,16 +179,16 @@ object DisclosureProcessing {
                      allUniqueMsaMdTract: DataFrame): Dataset[Data] = {
       val dispF = prepare(input)
         .filter(col("action_taken_type").isin(actionsTaken: _*))
-        .filter(col("total_units") isin ("1", "2", "3", "4"))
-        .filter(col("loan_purpose") isin (1, 2, 31, 32))
+        .filter(col("total_units") isin("1", "2", "3", "4"))
+        .filter(col("loan_purpose") isin(1, 2, 31, 32))
         .filter(col("loan_type") === lit(1))
-        .filter(col("occupancy_type") isin (2, 3))
+        .filter(col("occupancy_type") isin(2, 3))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispF,
-                            title,
-                            "Nonoccupant Loans from Columns A, B, C ,& D (F)",
-                            allUniqueMsaMdTract)
+        title,
+        "Nonoccupant Loans from Columns A, B, C ,& D (F)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -171,10 +198,10 @@ object DisclosureProcessing {
                      allUniqueMsaMdTract: DataFrame): Dataset[Data] = {
       val dispG = prepare(input)
         .filter(col("action_taken_type").isin(actionsTaken: _*))
-        .filter(col("total_units") isin ("1", "2", "3", "4"))
-        .filter(col("loan_purpose") isin (1, 2, 31, 32))
-        .filter(col("loan_type") isin (1, 2, 3, 4))
-        .filter(col("occupancy_type") isin (2, 3))
+        .filter(col("total_units") isin("1", "2", "3", "4"))
+        .filter(col("loan_purpose") isin(1, 2, 31, 32))
+        .filter(col("loan_type") isin(1, 2, 3, 4))
+        .filter(col("occupancy_type") isin(2, 3))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(
@@ -194,37 +221,24 @@ object DisclosureProcessing {
         .groupBy(d => d.msa_md)
         .flatMap {
           case (msa, datasByMsa) =>
-            println("(1) Working on: " + msa + " datasByMsa: " + datasByMsa)
             val tracts: List[Tract] = datasByMsa
               .groupBy(_.tract)
               .map {
                 case (tract, datasByTract) =>
-                  println(
-                    "(2) Working on: " + tract + " datasByTract: " + datasByTract)
                   val dispositions: List[Disposition] = datasByTract
                     .groupBy(d => d.title)
                     .map {
                       case (title, datasByTitle) =>
-                        println(
-                          "(3) Working on: " + title + " datasByTitle: " + datasByTitle)
                         val listInfo: List[Info] = datasByTitle.map(d =>
                           Info(d.dispositionName, d.count, d.loan_amount))
                         Disposition(title, listInfo)
                     }
                     .toList
-                  println("stateCode: " + tract.take(2))
-                  println("stateCodetoInt: " + tract.take(2))
-                  println("countyCode: " + tract.slice(2, 5))
-                  println("countyCode: " + tract.slice(2, 5).toInt)
-                  println("remainingTract: " + tract.drop(5))
                   val stateCode = tract.take(2).toInt
                   val countyCode = tract.slice(2, 5).toInt
                   val remainingTract = tract.drop(5)
-
                   val stateMapping =
                     lookupMap.getOrElse((stateCode, countyCode), StateMapping())
-                  println("stateMapping.county: " + stateMapping.county)
-                  println("stateMapping.stateName: " + stateMapping.stateName)
                   Tract(
                     stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract,
                     dispositions)
@@ -373,9 +387,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionA(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -383,9 +397,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionB(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -393,9 +407,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionC(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -403,9 +417,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionD(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -413,9 +427,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionE(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -423,9 +437,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionF(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -433,32 +447,19 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionG(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
-      println("About to collect Table 1 list")
-
-      val aList = outputATable1.collect().toList
-      val bList = outputBTable1.collect().toList
-      val cList = outputCTable1.collect().toList
-      val dList = outputCTable1.collect().toList
-      val eList = outputCTable1.collect().toList
-      val fList = outputCTable1.collect().toList
-      val gList = outputCTable1.collect().toList
-
-      println(
-        s"a size: ${aList.size}, " +
-          s"b size: ${bList.size}, " +
-          s"c size: ${cList.size}, " +
-          s"d size: ${dList.size}, " +
-          s"e size: ${eList.size}, " +
-          s"f size: ${fList.size}, " +
-          s"g size: ${gList.size}")
-      //a size: 407209, b size: 407216, c size: 407211, d size: 407211, e size: 407211, f size: 407211, g size: 407211
-      aList //++ bList ++ cList ++ dList ++ eList ++ gList ++ fList
+      outputATable1.collect().toList ++ outputBTable1
+        .collect()
+        .toList ++ outputCTable1.collect().toList ++ outputDTable1
+        .collect()
+        .toList ++ outputETable1.collect().toList ++ outputFTable1
+        .collect()
+        .toList ++ outputGTable1.collect().toList
     }
 
     def outputCollectionTable2(allUniqueMsaMdTract: DataFrame): List[Data] = {
@@ -470,9 +471,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionA(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -480,9 +481,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionB(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -490,9 +491,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionC(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -500,9 +501,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionD(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -510,9 +511,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionE(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -520,9 +521,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionF(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -530,73 +531,57 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionG(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
-      println("About to collect Table 2 list")
-
-      val aList = outputATable2.collect().toList
-      val bList = outputBTable2.collect().toList
-      val cList = outputCTable2.collect().toList
-      val dList = outputCTable2.collect().toList
-      val eList = outputCTable2.collect().toList
-      val fList = outputCTable2.collect().toList
-      val gList = outputCTable2.collect().toList
-
-      println(
-        s"a 2 size : ${aList.size}, " +
-          s"b 2 size: ${bList.size}, " +
-          s"c 2 size: ${cList.size}, " +
-          s"d 2 size: ${dList.size}, " +
-          s"e 2 size: ${eList.size}, " +
-          s"f 2 size: ${fList.size}, " +
-          s"g 2 size: ${gList.size}")
-
-      aList.take(2) //++ bList ++ cList ++ dList ++ eList ++ gList ++ fList
+      outputATable2.collect().toList ++ outputBTable2
+        .collect()
+        .toList ++ outputCTable2.collect().toList ++ outputDTable2
+        .collect()
+        .toList ++ outputETable2.collect().toList ++ outputFTable2
+        .collect()
+        .toList ++ outputGTable2.collect().toList
     }
 
-    def futDisclosuresTable1: Future[List[OutDisclosure1]] = Future {
-      blocking {
-        outputCollectionTable1(allUniqueMsaMdTract, cachedRecordsDf)
-          .groupBy(d => d.msa_md)
-          .map {
-            case (key, values) =>
-              val msaMd = Msa(key.toString,
-                              values.head.msa_md_name,
-                              values.head.state,
-                              Census.states(values.head.state).name)
-              jsonFormationTable1(msaMd, values, leiDetails)
-          }
-          .toList
-      }
-    }
+    def disclosuresTable1: List[OutDisclosure1] =
+      outputCollectionTable1(allUniqueMsaMdTract, cachedRecordsDf)
+        .groupBy(d => d.msa_md)
+        .map {
+          case (key, values) =>
+            val msaMd = Msa(key.toString,
+              values.head.msa_md_name,
+              values.head.state,
+              Census.states.getOrElse(values.head.state, State("","")).name)
+            jsonFormationTable1(msaMd, values, leiDetails)
+        }.toList
 
-    def futDisclosuresTable2 = Future {
-      blocking {
-        outputCollectionTable2(allUniqueMsaMdTract)
-          .groupBy(d => d.msa_md)
-          .map {
-            case (key, values) =>
-              val msaMd = Msa(key.toString,
-                              values.head.msa_md_name,
-                              values.head.state,
-                              Census.states(values.head.state).name)
-              jsonFormationTable2(msaMd, values, leiDetails)
-          }
-          .toList
-      }
-    }
+    def disclosuresTable2: List[OutDisclosure2] =
+      outputCollectionTable2(allUniqueMsaMdTract)
+        .groupBy(d => d.msa_md).map {
+        case (key, values) =>
+          val msaMd = Msa(key.toString,
+            values.head.msa_md_name,
+            values.head.state,
+            Census.states.getOrElse(values.head.state, State("","")).name)
+          jsonFormationTable2(msaMd, values, leiDetails)
+      }.toList
 
-    println("About to run jsons")
-
-    for {
-      disclosuresTable1 <- futDisclosuresTable1
-//      disclosuresTable2 <- futDisclosuresTable2
+    val result = for {
       _ <- persistJson(disclosuresTable1)
-//      _ <- persistJson2(disclosuresTable2)
+      _ <- persistJson2(disclosuresTable2)
     } yield ()
+
+    result.onComplete {
+      case Success(_) => println(s"Finished processing LEI: $lei")
+      case Failure(exception) =>
+        println(s"Exception happened when processing LEI $lei" + exception.getMessage)
+        println("Printing stacktrace")
+        exception.printStackTrace()
+    }
+
+    result
   }
 }

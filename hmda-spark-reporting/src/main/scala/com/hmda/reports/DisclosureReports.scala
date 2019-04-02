@@ -9,16 +9,20 @@ import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3Client
 import akka.stream.scaladsl._
+import akka.pattern.ask
+import akka.util.Timeout
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.hmda.reports.model.StateMapping
 import com.hmda.reports.processing.DisclosureProcessing
+import com.hmda.reports.processing.DisclosureProcessing.ProcessKafkaRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
 import hmda.messages.pubsub.HmdaTopics.disclosureTopic
+import scala.concurrent.duration._
 
 import scala.concurrent._
 
@@ -29,11 +33,12 @@ object DisclosureReports {
       .builder()
       .appName("Hmda-Reports")
       .getOrCreate()
-    spark.sparkContext.setLogLevel("ERROR")
+    spark.sparkContext.setLogLevel("WARN")
 
     implicit val system: ActorSystem = ActorSystem()
     implicit val mat: ActorMaterializer = ActorMaterializer()
     implicit val ec: ExecutionContext = system.dispatcher
+    implicit val timeout: Timeout = Timeout(2.hours)
 
     val JDBC_URL = sys.env("JDBC_URL")
     val KAFKA_HOSTS = sys.env("KAFKA_HOSTS")
@@ -80,7 +85,9 @@ object DisclosureReports {
         .mapValues(list => list.head)
     }
 
-    println("CAME HERE!!!!")
+    val processorRef = system.actorOf(
+      DisclosureProcessing.props(spark, s3Client),
+      "complex-json-processor")
 
     val consumerSettings: ConsumerSettings[String, String] =
       ConsumerSettings(system.settings.config.getConfig("akka.kafka.consumer"),
@@ -96,15 +103,11 @@ object DisclosureReports {
       // async boundary begin
       .async
       .mapAsync(1) { msg =>
-        println("About to process: " + msg.record.key)
-        DisclosureProcessing
-          .processKafkaRecord(msg.record.key,
-                              spark,
-                              lookupMap,
-                              JDBC_URL,
-                              "dev",
-                              "2018",
-                              s3Client)
+        (processorRef ? ProcessKafkaRecord(lei = msg.record.key,
+                                           lookupMap = lookupMap,
+                                           jdbcUrl = JDBC_URL,
+                                           bucket = AWS_BUCKET,
+                                           year = "2018"))
           .map(_ => msg.committableOffset)
       }
       .async

@@ -11,7 +11,7 @@ lazy val sparkDeps =
       sparkStreaming,
       sparkKafka,
       postgres,
-      akkaKafkaStreams,
+      "com.typesafe.akka" %% "akka-stream-kafka" % "1.0.1",
       alpakkaS3)
 
 lazy val authDeps = Seq(
