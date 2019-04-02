@@ -1,15 +1,10 @@
 package com.hmda.reports.processing
 
 import akka.Done
-import akka.actor.ActorSystem
 import akka.stream._
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.scaladsl._
 import akka.util.ByteString
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
-import com.amazonaws.regions.AwsRegionProvider
 import com.hmda.reports.model._
 import hmda.model.census.Census
 import io.circe.generic.auto._
@@ -20,48 +15,21 @@ import org.apache.spark.sql.functions._
 import scala.concurrent._
 
 object DisclosureProcessing {
-
   def processKafkaRecord(lei: String,
                          spark: SparkSession,
                          lookupMap: Map[(Int, Int), StateMapping],
-                         JDBC_URL: String,
-                         KAFKA_HOSTS: String,
-                         AWS_ACCESS_KEY: String,
-                         AWS_SECRET_KEY: String,
-                         BUCKET: String,
-                         YEAR: String)(implicit mat: ActorMaterializer,
-                                       ec: ExecutionContext,
-                                       system: ActorSystem): Future[Unit] = {
+                         jdbcUrl: String,
+                         bucket: String,
+                         year: String,
+                         s3Client: S3Client)(
+      implicit mat: ActorMaterializer,
+      ec: ExecutionContext): Future[Unit] = {
     import spark.implicits._
-    println(s"Processing ${lei} ")
-    spark.sparkContext.setLocalProperty(lei, s"Processing ${lei}")
-    val leiDetails = spark.read
-      .format("jdbc")
-      .option("driver", "org.postgresql.Driver")
-      .option("url", JDBC_URL)
-      .option(
-        "dbtable",
-        s"(select lei, respondent_name as institutionName from institutions2018 where lei = '${lei}' and hmda_filer = true) as institutions2018")
-      .load()
-      .as[Institution]
-      .collect()
-      .head
-
-    val cachedRecordsDf =
-      spark.read
-        .format("jdbc")
-        .option("driver", "org.postgresql.Driver")
-        .option("url", JDBC_URL)
-        .option(
-          "dbtable",
-          s"(select * from wells_mlar where lei = '${lei}' and filing_year = ${YEAR}) as mlar")
-        .load()
-        .cache()
 
     def prepare(df: DataFrame): DataFrame =
       df.filter(col("msa_md") =!= lit(0))
         .filter(upper(col("tract")) =!= lit("NA"))
-        .filter(upper(col("filing_year")) === lit(YEAR))
+        .filter(upper(col("filing_year")) === lit(year))
 
     def includeZeroAndNonZero(dispInput: DataFrame,
                               title: String,
@@ -217,205 +185,46 @@ object DisclosureProcessing {
         .as[Data]
     }
 
-    val allUniqueMsaMdTract = cachedRecordsDf
-      .select(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
-      .dropDuplicates()
-      .cache()
-
-    val actionsTakenTable1 = Map(
-      "Applications Received" -> List(1, 2, 3, 4, 5),
-      "Loans Originated" -> List(1),
-      "Applications Approved but not Accepted" -> List(2),
-      "Applications Denied by Financial Institution" -> List(3),
-      "Applications Withdrawn by Applicant" -> List(4),
-      "File Closed for Incompleteness" -> List(5)
-    )
-    val outputATable1 = (actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          dispositionA(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputBTable1 = (actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          dispositionB(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputCTable1 = (actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          dispositionC(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputDTable1 = (actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          dispositionD(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputETable1 = (actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          dispositionE(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputFTable1 = (actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          dispositionF(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputGTable1 = (actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          dispositionG(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputCollectionTable1 = outputATable1.collect().toList ++ outputBTable1
-      .collect()
-      .toList ++ outputCTable1.collect().toList ++ outputDTable1
-      .collect()
-      .toList ++ outputETable1.collect().toList ++ outputFTable1
-      .collect()
-      .toList ++ outputGTable1.collect().toList
-
-    val actionsTakenTable2 = Map(
-      "Purchased Loans" -> List(6)
-    )
-    val outputATable2 = (actionsTakenTable2
-      .map {
-        case (description, eachList) =>
-          dispositionA(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputBTable2 = (actionsTakenTable2
-      .map {
-        case (description, eachList) =>
-          dispositionB(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputCTable2 = (actionsTakenTable2
-      .map {
-        case (description, eachList) =>
-          dispositionC(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputDTable2 = (actionsTakenTable2
-      .map {
-        case (description, eachList) =>
-          dispositionD(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputETable2 = (actionsTakenTable2
-      .map {
-        case (description, eachList) =>
-          dispositionE(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputFTable2 = (actionsTakenTable2
-      .map {
-        case (description, eachList) =>
-          dispositionF(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputGTable2 = (actionsTakenTable2
-      .map {
-        case (description, eachList) =>
-          dispositionG(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract)
-      }
-      .reduce(_ union _))
-
-    val outputCollectionTable2 = outputATable2.collect().toList ++ outputBTable2
-      .collect()
-      .toList ++ outputCTable2.collect().toList ++ outputDTable2
-      .collect()
-      .toList ++ outputETable2.collect().toList ++ outputFTable2
-      .collect()
-      .toList ++ outputGTable2.collect().toList
-
-    val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
-
     def jsonFormationTable1(msaMd: Msa,
                             input: List[Data],
                             leiDetails: Institution): OutDisclosure1 = {
+      val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+
       val tracts = input
         .groupBy(d => d.msa_md)
         .flatMap {
           case (msa, datasByMsa) =>
+            println("(1) Working on: " + msa + " datasByMsa: " + datasByMsa)
             val tracts: List[Tract] = datasByMsa
               .groupBy(_.tract)
               .map {
                 case (tract, datasByTract) =>
+                  println(
+                    "(2) Working on: " + tract + " datasByTract: " + datasByTract)
                   val dispositions: List[Disposition] = datasByTract
                     .groupBy(d => d.title)
                     .map {
                       case (title, datasByTitle) =>
+                        println(
+                          "(3) Working on: " + title + " datasByTitle: " + datasByTitle)
                         val listInfo: List[Info] = datasByTitle.map(d =>
                           Info(d.dispositionName, d.count, d.loan_amount))
                         Disposition(title, listInfo)
                     }
                     .toList
+                  println("stateCode: " + tract.take(2))
+                  println("stateCodetoInt: " + tract.take(2))
+                  println("countyCode: " + tract.slice(2, 5))
+                  println("countyCode: " + tract.slice(2, 5).toInt)
+                  println("remainingTract: " + tract.drop(5))
                   val stateCode = tract.take(2).toInt
                   val countyCode = tract.slice(2, 5).toInt
                   val remainingTract = tract.drop(5)
+
                   val stateMapping =
                     lookupMap.getOrElse((stateCode, countyCode), StateMapping())
+                  println("stateMapping.county: " + stateMapping.county)
+                  println("stateMapping.stateName: " + stateMapping.stateName)
                   Tract(
                     stateMapping.county + "/" + stateMapping.stateName + "/" + remainingTract,
                     dispositions)
@@ -431,7 +240,7 @@ object DisclosureProcessing {
         "1",
         "Disclosure",
         "Loans purchased, by location of property and type of loan",
-        YEAR.toInt,
+        year.toInt,
         dateFormat.format(new java.util.Date()),
         msaMd,
         tracts
@@ -441,6 +250,8 @@ object DisclosureProcessing {
     def jsonFormationTable2(msaMd: Msa,
                             input: List[Data],
                             leiDetails: Institution): OutDisclosure2 = {
+      val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+
       val tracts = input
         .groupBy(d => d.msa_md)
         .flatMap {
@@ -480,48 +291,12 @@ object DisclosureProcessing {
         "2",
         "Disclosure",
         "Loans purchased, by location of property and type of loan",
-        YEAR.toInt,
+        year.toInt,
         dateFormat.format(new java.util.Date()),
         msaMd,
         tracts
       )
     }
-
-    val disclosuresTable1 = outputCollectionTable1.groupBy(d => d.msa_md).map {
-      case (key, values) =>
-        val msaMd = Msa(key.toString(),
-                        values.head.msa_md_name,
-                        values.head.state,
-                        Census.states(values.head.state).name)
-        jsonFormationTable1(msaMd, values, leiDetails)
-    }
-
-    val disclosuresTable2 = outputCollectionTable2.groupBy(d => d.msa_md).map {
-      case (key, values) =>
-        val msaMd = Msa(key.toString(),
-                        values.head.msa_md_name,
-                        values.head.state,
-                        Census.states(values.head.state).name)
-        jsonFormationTable2(msaMd, values, leiDetails)
-    }
-
-    val awsCredentialsProvider = new AWSStaticCredentialsProvider(
-      new BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY))
-    val region = "us-east-1"
-    val awsRegionProvider = new AwsRegionProvider {
-      override def getRegion: String = region
-    }
-    val s3Settings = S3Settings(
-      MemoryBufferType,
-      None,
-      awsCredentialsProvider,
-      awsRegionProvider,
-      pathStyleAccess = true,
-      None,
-      ListBucketVersion2
-    )
-
-    val s3Client: S3Client = new S3Client(s3Settings)
 
     def persistSingleFile(fileName: String,
                           data: String,
@@ -536,7 +311,7 @@ object DisclosureProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           persistSingleFile(
-            s"${BUCKET}/reports/disclosure/${YEAR}/${lei}/${input.msa.id}/1.json",
+            s"$bucket/reports/disclosure/$year/$lei/${input.msa.id}/1.json",
             data,
             "cfpb-hmda-public")
         }
@@ -547,17 +322,281 @@ object DisclosureProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           persistSingleFile(
-            s"${BUCKET}/reports/disclosure/${YEAR}/${lei}/${input.msa.id}/2.json",
+            s"$bucket/reports/disclosure/$year/$lei/${input.msa.id}/2.json",
             data,
             "cfpb-hmda-public")
         }
         .runWith(Sink.ignore)
 
+    def leiDetails: Institution =
+      spark.read
+        .format("jdbc")
+        .option("driver", "org.postgresql.Driver")
+        .option("url", jdbcUrl)
+        .option(
+          "dbtable",
+          s"(select lei, respondent_name as institutionName from institutions2018 where lei = '$lei' and hmda_filer = true) as institutions2018")
+        .load()
+        .as[Institution]
+        .collect()
+        .head
+
+    def cachedRecordsDf: DataFrame =
+      spark.read
+        .format("jdbc")
+        .option("driver", "org.postgresql.Driver")
+        .option("url", jdbcUrl)
+        .option(
+          "dbtable",
+          s"(select * from wells_mlar where lei = '$lei' and filing_year = $year) as mlar")
+        .load()
+        .cache()
+
+    def allUniqueMsaMdTract =
+      cachedRecordsDf
+        .select(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
+        .dropDuplicates()
+        .cache()
+
+    def outputCollectionTable1(allUniqueMsaMdTract: DataFrame,
+                               cachedRecordsDf: DataFrame): List[Data] = {
+      val actionsTakenTable1 = Map(
+        "Applications Received" -> List(1, 2, 3, 4, 5),
+        "Loans Originated" -> List(1),
+        "Applications Approved but not Accepted" -> List(2),
+        "Applications Denied by Financial Institution" -> List(3),
+        "Applications Withdrawn by Applicant" -> List(4),
+        "File Closed for Incompleteness" -> List(5)
+      )
+
+      val outputATable1 = actionsTakenTable1
+        .map {
+          case (description, eachList) =>
+            dispositionA(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputBTable1 = actionsTakenTable1
+        .map {
+          case (description, eachList) =>
+            dispositionB(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputCTable1 = actionsTakenTable1
+        .map {
+          case (description, eachList) =>
+            dispositionC(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputDTable1 = actionsTakenTable1
+        .map {
+          case (description, eachList) =>
+            dispositionD(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputETable1 = actionsTakenTable1
+        .map {
+          case (description, eachList) =>
+            dispositionE(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputFTable1 = actionsTakenTable1
+        .map {
+          case (description, eachList) =>
+            dispositionF(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputGTable1 = actionsTakenTable1
+        .map {
+          case (description, eachList) =>
+            dispositionG(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      println("About to collect Table 1 list")
+
+      val aList = outputATable1.collect().toList
+      val bList = outputBTable1.collect().toList
+      val cList = outputCTable1.collect().toList
+      val dList = outputCTable1.collect().toList
+      val eList = outputCTable1.collect().toList
+      val fList = outputCTable1.collect().toList
+      val gList = outputCTable1.collect().toList
+
+      println(
+        s"a size: ${aList.size}, " +
+          s"b size: ${bList.size}, " +
+          s"c size: ${cList.size}, " +
+          s"d size: ${dList.size}, " +
+          s"e size: ${eList.size}, " +
+          s"f size: ${fList.size}, " +
+          s"g size: ${gList.size}")
+      //a size: 407209, b size: 407216, c size: 407211, d size: 407211, e size: 407211, f size: 407211, g size: 407211
+      aList //++ bList ++ cList ++ dList ++ eList ++ gList ++ fList
+    }
+
+    def outputCollectionTable2(allUniqueMsaMdTract: DataFrame): List[Data] = {
+      val actionsTakenTable2 = Map(
+        "Purchased Loans" -> List(6)
+      )
+
+      val outputATable2 = actionsTakenTable2
+        .map {
+          case (description, eachList) =>
+            dispositionA(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputBTable2 = actionsTakenTable2
+        .map {
+          case (description, eachList) =>
+            dispositionB(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputCTable2 = actionsTakenTable2
+        .map {
+          case (description, eachList) =>
+            dispositionC(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputDTable2 = actionsTakenTable2
+        .map {
+          case (description, eachList) =>
+            dispositionD(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputETable2 = actionsTakenTable2
+        .map {
+          case (description, eachList) =>
+            dispositionE(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputFTable2 = actionsTakenTable2
+        .map {
+          case (description, eachList) =>
+            dispositionF(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      val outputGTable2 = actionsTakenTable2
+        .map {
+          case (description, eachList) =>
+            dispositionG(cachedRecordsDf,
+                         description,
+                         eachList,
+                         allUniqueMsaMdTract)
+        }
+        .reduce(_ union _)
+
+      println("About to collect Table 2 list")
+
+      val aList = outputATable2.collect().toList
+      val bList = outputBTable2.collect().toList
+      val cList = outputCTable2.collect().toList
+      val dList = outputCTable2.collect().toList
+      val eList = outputCTable2.collect().toList
+      val fList = outputCTable2.collect().toList
+      val gList = outputCTable2.collect().toList
+
+      println(
+        s"a 2 size : ${aList.size}, " +
+          s"b 2 size: ${bList.size}, " +
+          s"c 2 size: ${cList.size}, " +
+          s"d 2 size: ${dList.size}, " +
+          s"e 2 size: ${eList.size}, " +
+          s"f 2 size: ${fList.size}, " +
+          s"g 2 size: ${gList.size}")
+
+      aList.take(2) //++ bList ++ cList ++ dList ++ eList ++ gList ++ fList
+    }
+
+    def futDisclosuresTable1: Future[List[OutDisclosure1]] = Future {
+      blocking {
+        outputCollectionTable1(allUniqueMsaMdTract, cachedRecordsDf)
+          .groupBy(d => d.msa_md)
+          .map {
+            case (key, values) =>
+              val msaMd = Msa(key.toString,
+                              values.head.msa_md_name,
+                              values.head.state,
+                              Census.states(values.head.state).name)
+              jsonFormationTable1(msaMd, values, leiDetails)
+          }
+          .toList
+      }
+    }
+
+    def futDisclosuresTable2 = Future {
+      blocking {
+        outputCollectionTable2(allUniqueMsaMdTract)
+          .groupBy(d => d.msa_md)
+          .map {
+            case (key, values) =>
+              val msaMd = Msa(key.toString,
+                              values.head.msa_md_name,
+                              values.head.state,
+                              Census.states(values.head.state).name)
+              jsonFormationTable2(msaMd, values, leiDetails)
+          }
+          .toList
+      }
+    }
+
+    println("About to run jsons")
+
     for {
-      _ <- persistJson(disclosuresTable1.toList)
-      _ <- persistJson2(disclosuresTable2.toList)
+      disclosuresTable1 <- futDisclosuresTable1
+//      disclosuresTable2 <- futDisclosuresTable2
+      _ <- persistJson(disclosuresTable1)
+//      _ <- persistJson2(disclosuresTable2)
     } yield ()
-
   }
-
 }
