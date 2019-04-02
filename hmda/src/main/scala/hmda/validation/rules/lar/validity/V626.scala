@@ -11,7 +11,7 @@ object V626 extends EditCheck[LoanApplicationRegister] {
   override def name: String = "V626"
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
-    lar.geography.county.toLowerCase is equalTo("na") or
+    lar.geography.county is equalTo("NA") or
       (
         lar.geography.county.size is equalTo(5) and
           (

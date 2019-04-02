@@ -11,8 +11,8 @@ object V627 extends EditCheck[LoanApplicationRegister] {
 
   override def apply(lar: LoanApplicationRegister): ValidationResult = {
     when(
-      lar.geography.county.toLowerCase not equalTo("na") and (lar.geography.tract.toLowerCase not equalTo(
-        "na"))) {
+      lar.geography.county not equalTo("NA") and (lar.geography.tract not equalTo(
+        "NA"))) {
       when(
         lar.geography.county.size is greaterThanOrEqual(5) and (lar.geography.tract.size is greaterThanOrEqual(
           5))) {

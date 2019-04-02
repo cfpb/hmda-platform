@@ -15,6 +15,11 @@ class V626Spec extends LarEditCheckSpec {
       )
       unappLar.mustPass
 
+      val lowerLar = lar.copy(
+        geography = lar.geography.copy(county = "na")
+      )
+      lowerLar.mustFail
+
       val appLar = lar.copy(geography = lar.geography.copy(county = "1"))
       appLar.mustFail
 
