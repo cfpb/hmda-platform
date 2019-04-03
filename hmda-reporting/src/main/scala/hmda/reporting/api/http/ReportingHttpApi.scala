@@ -6,6 +6,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
+import com.typesafe.config.ConfigFactory
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.{
   cors,
   corsRejectionHandler
@@ -27,10 +28,16 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 trait ReportingHttpApi extends InstitutionComponent {
+
   implicit val system: ActorSystem
   implicit val materializer: ActorMaterializer
   implicit val ec: ExecutionContext
   implicit val timeout: Timeout
+
+  val config = ConfigFactory.load()
+  val bankFilter = config.getConfig("filter")
+  val bankFilterList =
+    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
   val institutionRepository: InstitutionRepository
 
@@ -40,7 +47,7 @@ trait ReportingHttpApi extends InstitutionComponent {
 
         val futFilerSet =
           institutionRepository
-            .getAllFilers()
+            .getFilteredFilers(bankFilterList)
             .map(
               sheets =>
                 sheets

@@ -68,5 +68,14 @@ trait InstitutionComponent {
     def getAllFilers() = {
       db.run(table.filter(_.hmdaFiler === true).result)
     }
+
+    def getFilteredFilers(bankFilterList: Array[String]) = {
+      db.run(
+        table
+          .filter(_.hmdaFiler === true)
+          .filterNot(_.lei.toUpperCase inSet bankFilterList)
+          .result
+      )
+    }
   }
 }
