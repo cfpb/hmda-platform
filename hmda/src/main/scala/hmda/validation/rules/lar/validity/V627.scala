@@ -17,8 +17,8 @@ object V627 extends EditCheck[LoanApplicationRegister] {
       lar.geography.county not equalTo("NA") and (lar.geography.tract not equalTo(
         "NA"))) {
       val firstFive = Try(lar.geography.tract.substring(0, 5)).getOrElse("")
-      firstFive is equalTo(lar.geography.county) and (firstFive is containedIn(
-        CensusRecords.indexedCounty.keys.toList))
+      firstFive is equalTo(lar.geography.county) and
+        (firstFive is containedIn(CensusRecords.indexedCounty.keys.toList))
     }
   }
 }
