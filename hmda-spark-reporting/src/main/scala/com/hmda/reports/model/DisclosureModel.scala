@@ -34,7 +34,7 @@ case class OutDisclosure1(lei: String,
                           msa: Msa,
                           tracts: List[Tract])
 case class Institution(lei: String, institutionName: String)
-case class StateMapping(county: String = "",
-                        stateName: String = "",
+case class StateMapping(county: String = "NA",
+                        stateName: String = "NA",
                         stateCode: Int = 0,
                         countyCode: Int = 0)
