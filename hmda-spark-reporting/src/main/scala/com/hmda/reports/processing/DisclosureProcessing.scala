@@ -89,15 +89,9 @@ object DisclosureProcessing {
                      allUniqueMsaMdTract: DataFrame): Dataset[Data] = {
       val dispA = prepare(input)
         .filter(col("action_taken_type").isin(actionsTaken: _*))
-        .filter(
-          (col("total_units") === lit("1")) or
-            (col("total_units") === lit("2")) or
-            (col("total_units") === lit("3")) or
-            (col("total_units") === lit("3")) or
-            (col("total_units") === lit("4"))
-        )
+        .filter(col("total_units") isin ("1", "2", "3", "4"))
         .filter(col("loan_purpose") === 1)
-        .filter(col("loan_type").isin(1, 2, 3, 4))
+        .filter(col("loan_type") isin (2, 3, 4))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispA,
@@ -133,7 +127,6 @@ object DisclosureProcessing {
         .filter(col("action_taken_type").isin(actionsTaken: _*))
         .filter(col("total_units") isin ("1", "2", "3", "4"))
         .filter(col("loan_purpose") isin (31, 32))
-        .filter(col("loan_type") === lit(1))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispC,
@@ -151,7 +144,6 @@ object DisclosureProcessing {
         .filter(col("action_taken_type").isin(actionsTaken: _*))
         .filter(col("total_units") isin ("1", "2", "3", "4"))
         .filter(col("loan_purpose") === lit(2))
-        .filter(col("loan_type") === lit(1))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispD,
@@ -188,7 +180,7 @@ object DisclosureProcessing {
         .filter(col("action_taken_type").isin(actionsTaken: _*))
         .filter(col("total_units") isin ("1", "2", "3", "4"))
         .filter(col("loan_purpose") isin (1, 2, 31, 32))
-        .filter(col("loan_type") === lit(1))
+        .filter(col("loan_type") isin (1, 2, 3, 4)) //should match A - D
         .filter(col("occupancy_type") isin (2, 3))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
@@ -207,8 +199,8 @@ object DisclosureProcessing {
         .filter(col("action_taken_type").isin(actionsTaken: _*))
         .filter(col("total_units") isin ("1", "2", "3", "4"))
         .filter(col("loan_purpose") isin (1, 2, 31, 32))
-        .filter(col("loan_type") isin (1, 2, 3, 4))
-        .filter(col("occupancy_type") isin (2, 3))
+        .filter(col("loan_type") isin (1, 2, 3, 4)) //should match A - D
+        .filter(col("construction_method") isin ("2"))
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(
