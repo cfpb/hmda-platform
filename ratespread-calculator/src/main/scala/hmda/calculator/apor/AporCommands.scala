@@ -5,15 +5,14 @@ import java.time.temporal.IsoFields
 import java.time.{LocalDate, ZoneId}
 
 import hmda.calculator.api.RateSpreadResponse.RateSpreadResponse
-import hmda.calculator.api.model.RateSpreadRequest.RateSpreadRequest
+import hmda.calculator.api.model.RateSpreadRequest.{RateSpreadBody}
 
 import scala.collection.mutable.Map
 import scala.util.{Failure, Success, Try}
 
 object APORCommands {
 
-  def getRateSpreadResponse(
-      rateSpread: RateSpreadRequest): RateSpreadResponse = {
+  def getRateSpreadResponse(rateSpread: RateSpreadBody): RateSpreadResponse = {
 
     //1.) Validate the Rate Spread Data Otherwise fail
 
@@ -46,10 +45,10 @@ object APORCommands {
                                reverseMortgage: Int): RateSpreadResponse = {
 
     if (!validLoanTerm(loanTerm)) {
-      RateSpreadResponse("invalid loan term")
+      RateSpreadResponse("bad loan term")
 
     } else if (rateSpreadNA(actionTakenType, reverseMortgage)) {
-      RateSpreadResponse("rate spread not applicable")
+      RateSpreadResponse("rate spread NA")
 
     } else {
       aporForDateAndLoanTerm(loanTerm, amortizationType, lockInDate) match {

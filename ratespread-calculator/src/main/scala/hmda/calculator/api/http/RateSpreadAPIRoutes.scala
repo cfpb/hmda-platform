@@ -42,9 +42,9 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
     pathPrefix("v2") {
       path("rateSpread") {
         extractUri { uri =>
-          entity(as[RateSpreadRequest]) { rateSpreadRequest =>
+          entity(as[RateSpreadBody]) { rateSpreadBody =>
             val rateSpreadResponse =
-              Try(APORCommands.getRateSpreadResponse(rateSpreadRequest))
+              Try(APORCommands.getRateSpreadResponse(rateSpreadBody))
             rateSpreadResponse match {
               case Success(response) =>
                 complete(ToResponseMarshallable(response))
@@ -81,10 +81,19 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
       .map(_.utf8String)
       .map(_.trim)
       .map { rateSpreadRow =>
-        val rateSpreadData = try (RateSpreadCSVParser.fromCsv((rateSpreadRow)))
-        val rateSpreadResponse =
-          APORCommands.getRateSpreadResponse(rateSpreadData)
-        rateSpreadRow + "," + rateSpreadResponse.rateSpread
+        val rateSpreadBody = try (RateSpreadCSVParser.fromCsv((rateSpreadRow)))
+        catch {
+          case error: Throwable =>
+            rateSpreadRow + ", " + "error:invalid rate spread CSV :" + error.toString
+        }
+        rateSpreadBody match {
+          case rateSpreadBody: RateSpreadBody =>
+            rateSpreadRow + "," + APORCommands
+              .getRateSpreadResponse(rateSpreadBody)
+              .rateSpread
+
+          case errorMessage => errorMessage
+        }
       }
   }
 }
