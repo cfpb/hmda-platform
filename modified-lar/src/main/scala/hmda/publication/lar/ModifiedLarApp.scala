@@ -72,7 +72,7 @@ object ModifiedLarApp extends App {
       untypedSubmissionId: String)(implicit scheduler: Scheduler,
                                    timeout: Timeout): Future[Done] = {
     val submissionId = SubmissionId(untypedSubmissionId)
-    if (filterBankWithLogging(submissionId.lei, bankFilterList))
+    if !(filterBankWithLogging(submissionId.lei, bankFilterList))
       Future.successful(Done.done())
     else {
       val futRes: Future[PersistModifiedLarResult] =
