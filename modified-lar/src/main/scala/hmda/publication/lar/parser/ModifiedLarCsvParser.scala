@@ -9,7 +9,7 @@ import hmda.parser.filing.lar.LarCsvParser
 object ModifiedLarCsvParser {
 
   def apply(s: String): ModifiedLoanApplicationRegister = {
-    convert(LarCsvParser(s).getOrElse(LoanApplicationRegister()))
+    convert(LarCsvParser(s, true).getOrElse(LoanApplicationRegister()))
   }
 
   private def convert(
