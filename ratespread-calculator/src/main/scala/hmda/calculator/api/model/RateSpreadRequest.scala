@@ -14,4 +14,7 @@ object RateSpreadRequest {
     def toCSV: String =
       s"$actionTakenType,$loanTerm,$amortizationType,$apr,$lockInDate,$reverseMortgage"
   }
+  case class RateSpreadRequestError(
+      error: String,
+  ) {}
 }

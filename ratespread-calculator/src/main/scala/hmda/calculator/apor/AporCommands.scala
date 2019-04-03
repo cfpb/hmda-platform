@@ -46,12 +46,10 @@ object APORCommands {
                                reverseMortgage: Int): RateSpreadResponse = {
 
     if (!validLoanTerm(loanTerm)) {
-      println("bad loan term")
-      RateSpreadResponse("")
+      RateSpreadResponse("invalid loan term")
 
     } else if (rateSpreadNA(actionTakenType, reverseMortgage)) {
-      println("bad loan term")
-      RateSpreadResponse("")
+      RateSpreadResponse("rate spread not applicable")
 
     } else {
       aporForDateAndLoanTerm(loanTerm, amortizationType, lockInDate) match {
