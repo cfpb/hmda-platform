@@ -258,9 +258,9 @@ object DisclosureProcessing {
       OutDisclosure1(
         leiDetails.lei,
         leiDetails.institutionName,
-        "A",
+        "1",
         "Disclosure",
-        "Loans purchased, by location of property and type of loan",
+        "Disposition of loan applications, by location of property and type of loan",
         year.toInt,
         dateFormat.format(new java.util.Date()),
         msaMd,
@@ -309,7 +309,7 @@ object DisclosureProcessing {
       OutDisclosure2(
         leiDetails.lei,
         leiDetails.institutionName,
-        "B",
+        "2",
         "Disclosure",
         "Loans purchased, by location of property and type of loan",
         year.toInt,
