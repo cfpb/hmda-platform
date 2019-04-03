@@ -40,10 +40,15 @@ class V627Spec extends LarEditCheckSpec {
       )
       nonMatching.mustFail
 
-      val matching = lar.copy(
+      val wrongFipsCode = lar.copy(
         geography = lar.geography.copy(county = "12345", tract = "12345678910")
       )
-      matching.mustPass
+      wrongFipsCode.mustFail
+
+      val matchingAndCorrectFipsCode = lar.copy(
+        geography = lar.geography.copy(county = "01001", tract = "01001020100")
+      )
+      matchingAndCorrectFipsCode.mustPass
     }
   }
 }

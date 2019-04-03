@@ -33,6 +33,10 @@ class V626Spec extends LarEditCheckSpec {
       val invalidCountyString =
         lar.copy(geography = lar.geography.copy(county = "N/AN/"))
       invalidCountyString.mustFail
+
+      val validFipsCounty =
+        lar.copy(geography = lar.geography.copy(county = "01001"))
+      validFipsCounty.mustPass
     }
   }
 }
