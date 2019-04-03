@@ -18,7 +18,7 @@ import hmda.model.institution.{Institution, InstitutionDetail}
 import hmda.publication.KafkaUtils._
 import hmda.persistence.HmdaTypedPersistentActor
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 object InstitutionPersistence
     extends HmdaTypedPersistentActor[InstitutionCommand,

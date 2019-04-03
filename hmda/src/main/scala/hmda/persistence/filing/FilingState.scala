@@ -1,7 +1,5 @@
 package hmda.persistence.filing
 
-import java.time.Instant
-
 import hmda.messages.filing.FilingEvents.{
   FilingCreated,
   FilingEvent,

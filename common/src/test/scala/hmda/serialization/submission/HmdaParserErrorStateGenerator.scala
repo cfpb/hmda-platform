@@ -1,6 +1,9 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.SubmissionProcessingEvents.{HmdaRowParsedCount, HmdaRowParsedError}
+import hmda.messages.submission.SubmissionProcessingEvents.{
+  HmdaRowParsedCount,
+  HmdaRowParsedError
+}
 import hmda.model.processing.state.HmdaParserErrorState
 import org.scalacheck.Gen
 

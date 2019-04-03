@@ -8,6 +8,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import hmda.model.institution.Institution
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -54,30 +55,33 @@ trait InstitutionAdminHttpApi extends HmdaTimeDirectives {
             s"${InstitutionPersistence.name}-${institution.LEI}")
 
           timedPost { uri =>
-            val fInstitution
-              : Future[Option[Institution]] = institutionPersistence ? (
-                ref => GetInstitution(ref)
-            )
-            onComplete(fInstitution) {
-              case Success(Some(_)) =>
-                entityAlreadyExists(
-                  StatusCodes.BadRequest,
-                  uri,
-                  s"Institution ${institution.LEI} already exists")
-              case Success(None) =>
-                val fCreated
-                  : Future[InstitutionCreated] = institutionPersistence ? (
-                    ref => CreateInstitution(institution, ref))
-                onComplete(fCreated) {
-                  case Success(InstitutionCreated(i)) =>
-                    complete(ToResponseMarshallable(StatusCodes.Created -> i))
-                  case Failure(error) =>
-                    failedResponse(StatusCodes.InternalServerError, uri, error)
-                }
-              case Failure(error) =>
-                failedResponse(StatusCodes.InternalServerError, uri, error)
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              val fInstitution
+                : Future[Option[Institution]] = institutionPersistence ? (
+                  ref => GetInstitution(ref)
+              )
+              onComplete(fInstitution) {
+                case Success(Some(_)) =>
+                  entityAlreadyExists(
+                    StatusCodes.BadRequest,
+                    uri,
+                    s"Institution ${institution.LEI} already exists")
+                case Success(None) =>
+                  val fCreated
+                    : Future[InstitutionCreated] = institutionPersistence ? (
+                      ref => CreateInstitution(institution, ref))
+                  onComplete(fCreated) {
+                    case Success(InstitutionCreated(i)) =>
+                      complete(ToResponseMarshallable(StatusCodes.Created -> i))
+                    case Failure(error) =>
+                      failedResponse(StatusCodes.InternalServerError,
+                                     uri,
+                                     error)
+                  }
+                case Failure(error) =>
+                  failedResponse(StatusCodes.InternalServerError, uri, error)
+              }
             }
-
           } ~
             timedPut { uri =>
               val originalInst

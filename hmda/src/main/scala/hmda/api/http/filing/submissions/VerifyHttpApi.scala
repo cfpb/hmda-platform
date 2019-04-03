@@ -9,6 +9,7 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import hmda.api.http.directives.HmdaTimeDirectives
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import hmda.api.http.model.filing.submissions.{
   EditsVerification,
@@ -55,71 +56,75 @@ trait VerifyHttpApi extends HmdaTimeDirectives {
       (lei, period, seqNr, editType) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedPost { uri =>
-            entity(as[EditsVerification]) { editsVerification =>
-              val submissionId = SubmissionId(lei, period, seqNr)
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              entity(as[EditsVerification]) { editsVerification =>
+                val submissionId = SubmissionId(lei, period, seqNr)
 
-              val submissionPersistence =
-                sharding.entityRefFor(
-                  SubmissionPersistence.typeKey,
-                  s"${SubmissionPersistence.name}-${submissionId.toString}")
+                val submissionPersistence =
+                  sharding.entityRefFor(
+                    SubmissionPersistence.typeKey,
+                    s"${SubmissionPersistence.name}-${submissionId.toString}")
 
-              val fSubmission
-                : Future[Option[Submission]] = submissionPersistence ? (ref =>
-                GetSubmission(ref))
+                val fSubmission
+                  : Future[Option[Submission]] = submissionPersistence ? (ref =>
+                  GetSubmission(ref))
 
-              val validationPersistence = sharding.entityRefFor(
-                HmdaValidationError.typeKey,
-                s"${HmdaValidationError.name}-$submissionId")
+                val validationPersistence = sharding.entityRefFor(
+                  HmdaValidationError.typeKey,
+                  s"${HmdaValidationError.name}-$submissionId")
 
-              val fVerified
-                : Future[SubmissionProcessingEvent] = validationPersistence ? {
-                ref =>
-                  editType match {
-                    case "quality" =>
-                      VerifyQuality(submissionId,
+                val fVerified
+                  : Future[SubmissionProcessingEvent] = validationPersistence ? {
+                  ref =>
+                    editType match {
+                      case "quality" =>
+                        VerifyQuality(submissionId,
+                                      editsVerification.verified,
+                                      ref)
+                      case "macro" =>
+                        VerifyMacro(submissionId,
                                     editsVerification.verified,
                                     ref)
-                    case "macro" =>
-                      VerifyMacro(submissionId, editsVerification.verified, ref)
-                  }
-              }
+                    }
+                }
 
-              val fVerification = for {
-                submission <- fSubmission
-                verified <- fVerified
-              } yield (submission, verified)
+                val fVerification = for {
+                  submission <- fSubmission
+                  verified <- fVerified
+                } yield (submission, verified)
 
-              onComplete(fVerification) {
-                case Success(result) =>
-                  result match {
-                    case (None, _) =>
-                      submissionNotAvailable(submissionId, uri)
-                    case (Some(s), verifiedStatus) =>
-                      verifiedStatus match {
-                        case NotReadyToBeVerified(_) =>
-                          badRequest(
-                            submissionId,
-                            uri,
-                            s"Submission $submissionId is not ready to be verified")
+                onComplete(fVerification) {
+                  case Success(result) =>
+                    result match {
+                      case (None, _) =>
+                        submissionNotAvailable(submissionId, uri)
+                      case (Some(s), verifiedStatus) =>
+                        verifiedStatus match {
+                          case NotReadyToBeVerified(_) =>
+                            badRequest(
+                              submissionId,
+                              uri,
+                              s"Submission $submissionId is not ready to be verified")
 
-                        case QualityVerified(_, verified, status) =>
-                          val response =
-                            EditsVerificationResponse(verified, status)
-                          complete(ToResponseMarshallable(response))
+                          case QualityVerified(_, verified, status) =>
+                            val response =
+                              EditsVerificationResponse(verified, status)
+                            complete(ToResponseMarshallable(response))
 
-                        case MacroVerified(_, verified, status) =>
-                          val response =
-                            EditsVerificationResponse(verified, status)
-                          complete(ToResponseMarshallable(response))
+                          case MacroVerified(_, verified, status) =>
+                            val response =
+                              EditsVerificationResponse(verified, status)
+                            complete(ToResponseMarshallable(response))
 
-                        case _ =>
-                          badRequest(submissionId,
-                                     uri,
-                                     "Incorrect response event")
-                      }
-                  }
-                case Failure(e) =>
-                  failedResponse(StatusCodes.InternalServerError, uri, e)
+                          case _ =>
+                            badRequest(submissionId,
+                                       uri,
+                                       "Incorrect response event")
+                        }
+                    }
+                  case Failure(e) =>
+                    failedResponse(StatusCodes.InternalServerError, uri, e)
+                }
               }
             }
           }

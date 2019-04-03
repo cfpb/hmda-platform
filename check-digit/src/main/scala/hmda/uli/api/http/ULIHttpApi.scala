@@ -13,6 +13,7 @@ import akka.stream.ActorMaterializer
 import akka.util.{ByteString, Timeout}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.MediaTypes._
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.stream.scaladsl.{Flow, Source}
 import hmda.api.http.directives.HmdaTimeDirectives
 import hmda.uli.api.model.ULIModel._
@@ -73,24 +74,26 @@ trait ULIHttpApi extends HmdaTimeDirectives {
         } ~
           path("checkDigit" / "csv") {
             timedPost { _ =>
-              fileUpload("file") {
-                case (_, byteSource) =>
-                  val headerSource = Source.fromIterator(() =>
-                    List("loanId,checkDigit,uli\n").toIterator)
-                  val checkDigit = processLoanIdFile(byteSource)
-                    .map(l => l.toCSV)
-                    .map(l => l + "\n")
-                    .map(s => ByteString(s))
+              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+                fileUpload("file") {
+                  case (_, byteSource) =>
+                    val headerSource = Source.fromIterator(() =>
+                      List("loanId,checkDigit,uli\n").toIterator)
+                    val checkDigit = processLoanIdFile(byteSource)
+                      .map(l => l.toCSV)
+                      .map(l => l + "\n")
+                      .map(s => ByteString(s))
 
-                  val csv =
-                    headerSource.map(s => ByteString(s)).concat(checkDigit)
-                  complete(
-                    HttpEntity.Chunked.fromData(
-                      `text/csv`.toContentType(HttpCharsets.`UTF-8`),
-                      csv))
+                    val csv =
+                      headerSource.map(s => ByteString(s)).concat(checkDigit)
+                    complete(
+                      HttpEntity.Chunked.fromData(
+                        `text/csv`.toContentType(HttpCharsets.`UTF-8`),
+                        csv))
 
-                case _ =>
-                  complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                  case _ =>
+                    complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                }
               }
             }
           } ~
@@ -132,24 +135,27 @@ trait ULIHttpApi extends HmdaTimeDirectives {
           } ~
           path("validate" / "csv") {
             timedPost { _ =>
-              fileUpload("file") {
-                case (_, byteSource) =>
-                  val headerSource =
-                    Source.fromIterator(() => List("uli,isValid\n").toIterator)
-                  val validated = processUliFile(byteSource)
-                    .map(u => u.toCSV)
-                    .map(l => l + "\n")
-                    .map(s => ByteString(s))
+              respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+                fileUpload("file") {
+                  case (_, byteSource) =>
+                    val headerSource =
+                      Source.fromIterator(() =>
+                        List("uli,isValid\n").toIterator)
+                    val validated = processUliFile(byteSource)
+                      .map(u => u.toCSV)
+                      .map(l => l + "\n")
+                      .map(s => ByteString(s))
 
-                  val csv =
-                    headerSource.map(s => ByteString(s)).concat(validated)
-                  complete(
-                    HttpEntity.Chunked.fromData(
-                      `text/csv`.toContentType(HttpCharsets.`UTF-8`),
-                      csv))
+                    val csv =
+                      headerSource.map(s => ByteString(s)).concat(validated)
+                    complete(
+                      HttpEntity.Chunked.fromData(
+                        `text/csv`.toContentType(HttpCharsets.`UTF-8`),
+                        csv))
 
-                case _ =>
-                  complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                  case _ =>
+                    complete(ToResponseMarshallable(StatusCodes.BadRequest))
+                }
               }
             }
           }

@@ -1,6 +1,10 @@
 package hmda.serialization.submission
 
-import hmda.persistence.serialization.submission.processing.events.{HmdaParserErrorStateMessage, HmdaRowParsedCountMessage, HmdaRowParsedErrorMessage}
+import hmda.persistence.serialization.submission.processing.events.{
+  HmdaParserErrorStateMessage,
+  HmdaRowParsedCountMessage,
+  HmdaRowParsedErrorMessage
+}
 import hmda.serialization.submission.HmdaParserErrorStateGenerator._
 import hmda.serialization.submission.SubmissionProcessingEventsProtobufConverter._
 import org.scalatest.prop.PropertyChecks

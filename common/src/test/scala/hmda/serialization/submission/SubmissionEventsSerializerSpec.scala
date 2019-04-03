@@ -1,6 +1,10 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.SubmissionEvents.{SubmissionCreated, SubmissionModified, SubmissionNotExists}
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionCreated,
+  SubmissionModified,
+  SubmissionNotExists
+}
 import hmda.model.submission.SubmissionGenerator._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}
