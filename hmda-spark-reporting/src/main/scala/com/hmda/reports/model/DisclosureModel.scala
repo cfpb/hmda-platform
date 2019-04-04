@@ -33,6 +33,21 @@ case class OutDisclosure1(lei: String,
                           reportDate: String,
                           msa: Msa,
                           tracts: List[Tract])
+
+case class OutAggregate2(table: String,
+                          `type`: String,
+                          description: String,
+                          year: Int,
+                          reportDate: String,
+                          msa: Msa,
+                          tracts: List[Tract2])
+case class OutAggregate1(table: String,
+                          `type`: String,
+                          description: String,
+                          year: Int,
+                          reportDate: String,
+                          msa: Msa,
+                          tracts: List[Tract])
 case class Institution(lei: String, institutionName: String)
 case class StateMapping(county: String = "NA",
                         stateName: String = "NA",

@@ -8,6 +8,7 @@ import akka.stream.scaladsl._
 import akka.pattern.pipe
 import akka.util.ByteString
 import com.hmda.reports.model._
+import com.hmda.reports.processing.AggregateProcessing.ProcessAggregateKafkaRecord
 import hmda.model.census.{Census, State}
 import io.circe.generic.auto._
 import io.circe.syntax._
@@ -18,8 +19,8 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
-class DisclosureProcessing(spark: SparkSession, s3Client: S3Client)
-    extends Actor
+class AggregateProcessing(spark: SparkSession, s3Client: S3Client)
+  extends Actor
     with ActorLogging {
   import DisclosureProcessing._
 
@@ -27,10 +28,10 @@ class DisclosureProcessing(spark: SparkSession, s3Client: S3Client)
   implicit val ec: ExecutionContext = context.dispatcher
 
   override def receive: Receive = {
-    case ProcessDisclosureKafkaRecord(lei, lookupMap, jdbcUrl, bucket, year) =>
+    case ProcessAggregateKafkaRecord(lei, lookupMap, jdbcUrl, bucket, year) =>
       val originalSender = sender()
       log.info(s"Beginning process for $lei")
-      processDisclosureKafkaRecord(lei, spark, lookupMap, jdbcUrl, bucket, year, s3Client)
+      processAggregateKafkaRecord(lei, spark, lookupMap, jdbcUrl, bucket, year, s3Client)
         .map(_ => Finished)
         .pipeTo(originalSender)
       log.info(s"Finished process for $lei")
@@ -38,8 +39,8 @@ class DisclosureProcessing(spark: SparkSession, s3Client: S3Client)
   }
 }
 
-object DisclosureProcessing {
-  case class ProcessDisclosureKafkaRecord(lei: String,
+object AggregateProcessing {
+  case class ProcessAggregateKafkaRecord(lei: String,
                                 lookupMap: Map[(Int, Int), StateMapping],
                                 jdbcUrl: String,
                                 bucket: String,
@@ -47,17 +48,17 @@ object DisclosureProcessing {
   case object Finished
 
   def props(sparkSession: SparkSession, s3Client: S3Client): Props =
-    Props(new DisclosureProcessing(sparkSession, s3Client))
+    Props(new AggregateProcessing()(sparkSession, s3Client))
 
-  def processDisclosureKafkaRecord(lei: String,
+  def processAggregateKafkaRecord(lei: String,
                          spark: SparkSession,
                          lookupMap: Map[(Int, Int), StateMapping],
                          jdbcUrl: String,
                          bucket: String,
                          year: String,
                          s3Client: S3Client)(
-      implicit mat: ActorMaterializer,
-      ec: ExecutionContext): Future[Unit] = {
+                          implicit mat: ActorMaterializer,
+                          ec: ExecutionContext): Future[Unit] = {
     import spark.implicits._
 
     def prepare(df: DataFrame): DataFrame =
@@ -95,9 +96,9 @@ object DisclosureProcessing {
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispA,
-                            title,
-                            "FHA, FSA/RHS & VA (A)",
-                            allUniqueMsaMdTract)
+        title,
+        "FHA, FSA/RHS & VA (A)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -113,9 +114,9 @@ object DisclosureProcessing {
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispB,
-                            title,
-                            "Conventional (B)",
-                            allUniqueMsaMdTract)
+        title,
+        "Conventional (B)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -130,9 +131,9 @@ object DisclosureProcessing {
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispC,
-                            title,
-                            "Refinancings (C)",
-                            allUniqueMsaMdTract)
+        title,
+        "Refinancings (C)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -147,9 +148,9 @@ object DisclosureProcessing {
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispD,
-                            title,
-                            "Home Improvement Loans (D)",
-                            allUniqueMsaMdTract)
+        title,
+        "Home Improvement Loans (D)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -166,9 +167,9 @@ object DisclosureProcessing {
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispE,
-                            title,
-                            "Loans on Dwellings For 5 or More Families (E)",
-                            allUniqueMsaMdTract)
+        title,
+        "Loans on Dwellings For 5 or More Families (E)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -185,9 +186,9 @@ object DisclosureProcessing {
         .groupBy(col("tract"), col("msa_md"), col("msa_md_name"), col("state"))
         .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
       includeZeroAndNonZero(dispF,
-                            title,
-                            "Nonoccupant Loans from Columns A, B, C ,& D (F)",
-                            allUniqueMsaMdTract)
+        title,
+        "Nonoccupant Loans from Columns A, B, C ,& D (F)",
+        allUniqueMsaMdTract)
         .as[Data]
     }
 
@@ -386,9 +387,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionA(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -396,9 +397,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionB(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -406,9 +407,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionC(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -416,9 +417,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionD(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -426,9 +427,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionE(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -436,9 +437,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionF(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -446,9 +447,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionG(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -479,9 +480,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionA(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -489,9 +490,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionB(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -499,9 +500,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionC(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -509,9 +510,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionD(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -519,9 +520,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionE(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -529,9 +530,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionF(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 
@@ -539,9 +540,9 @@ object DisclosureProcessing {
         .map {
           case (description, eachList) =>
             dispositionG(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueMsaMdTract)
+              description,
+              eachList,
+              allUniqueMsaMdTract)
         }
         .reduce(_ union _)
 

@@ -151,7 +151,6 @@ object ModifiedLarPublisher {
             _ <- produceRecord(disclosureTopic,
                                submissionId.lei,
                                submissionId.toString)
-            _ <- produceRecord(adTopic, submissionId.lei, submissionId.toString)
           } yield ()
 
           finalResult.onComplete {

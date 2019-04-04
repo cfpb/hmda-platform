@@ -14,24 +14,23 @@ import akka.util.Timeout
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.hmda.reports.model.StateMapping
-import com.hmda.reports.processing.DisclosureProcessing
 import com.hmda.reports.processing.DisclosureProcessing.ProcessKafkaRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
-import hmda.messages.pubsub.HmdaTopics.disclosureTopic
-import scala.concurrent.duration._
+import hmda.messages.pubsub.HmdaTopics.adTopic
 
+import scala.concurrent.duration._
 import scala.concurrent._
 
-object DisclosureReports {
+object AggregateReports {
 
   def main(args: Array[String]): Unit = {
     val spark: SparkSession = SparkSession
       .builder()
-      .appName("Hmda-Reports-Disclosure")
+      .appName("Hmda-Reports-Aggregate")
       .getOrCreate()
     spark.sparkContext.setLogLevel("WARN")
 
@@ -86,28 +85,28 @@ object DisclosureReports {
     }
 
     val processorRef = system.actorOf(
-      DisclosureProcessing.props(spark, s3Client),
+      AggregateProcessing.props(spark, s3Client),
       "complex-json-processor")
 
     val consumerSettings: ConsumerSettings[String, String] =
       ConsumerSettings(system.settings.config.getConfig("akka.kafka.consumer"),
-                       new StringDeserializer,
-                       new StringDeserializer)
+        new StringDeserializer,
+        new StringDeserializer)
         .withBootstrapServers(sys.env("KAFKA_HOSTS"))
         .withGroupId("hmda-spark")
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
       .committableSource(consumerSettings,
-                         Subscriptions.topics(disclosureTopic))
+        Subscriptions.topics(adTopic))
       // async boundary begin
       .async
       .mapAsync(1) { msg =>
         (processorRef ? ProcessKafkaRecord(lei = msg.record.key,
-                                           lookupMap = lookupMap,
-                                           jdbcUrl = JDBC_URL,
-                                           bucket = AWS_BUCKET,
-                                           year = "2018"))
+          lookupMap = lookupMap,
+          jdbcUrl = JDBC_URL,
+          bucket = AWS_BUCKET,
+          year = "2018"))
           .map(_ => msg.committableOffset)
       }
       .async
