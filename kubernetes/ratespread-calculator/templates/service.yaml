@@ -23,7 +23,7 @@ metadata:
     getambassador.io/config: |
       apiVersion: ambassador/v0
       kind: Mapping
-      name: ratespread_calculator_mapping
+      name: hmda_ratespread_mapping
       prefix: /v2/rateSpread/
       service: {{ .Values.service.name }}:{{ .Values.ratespread.port }}
 spec:
