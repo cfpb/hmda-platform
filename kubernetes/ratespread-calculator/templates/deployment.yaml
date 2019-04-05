@@ -44,12 +44,19 @@ spec:
             - name: APOR_SCHEDULE
               valueFrom:
                 configMapKeyRef:
-                  name: schedule-configmap
-                  key: ratespread.apor
+                  name: apors-configmap
+                  key: schedule
             - name: APOR_FIXED_FILENAME
-              value: {{.Values.apor.fixed.rate.fileName}}
+              valueFrom:
+                configMapKeyRef:
+                  name: apors-configmap
+                  key: fixed.rate.fileName
             - name: APOR_VARIABLE_FILENAME
-              value: {{.Values.apor.variable.rate.fileName}}
+              valueFrom:
+                configMapKeyRef:
+                  name: apors-configmap
+                  key: variable.rate.fileName
+
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

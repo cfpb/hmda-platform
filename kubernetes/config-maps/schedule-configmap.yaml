@@ -6,4 +6,3 @@ data:
   regulator.ts: "\"0 10 06 * * ?\""
   regulator.panel: "\"0 20 06 * * ?\""
   regulator.lar: "\"0 55 05 * * ?\""
-  ratespread.apor: "\"0/10 * * * * ?\""

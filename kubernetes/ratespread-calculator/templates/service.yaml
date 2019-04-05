@@ -1,36 +1,21 @@
 ---
-kind: Service
-apiVersion: v1
-metadata:
-  name: {{ .Values.service.name }}
-spec:
-  selector:
-    app: ratespread-calculator
-  type: NodePort
-  ports:
-  - name: {{ .Values.ratespread.name }}
-    protocol: {{ .Values.ratespread.protocol }}
-    port: {{ .Values.ratespread.port }}
-    targetPort: {{ .Values.ratespread.port }}
----
 apiVersion: v1
 kind: Service
 metadata:
+  name: {{ template "ratespread-calculator.fullname" . }}
   labels:
-    service: ambassador-ratespread-calculator
-  name: ambassador-ratespread-calculator
-  annotations:
-    getambassador.io/config: |
-      apiVersion: ambassador/v0
-      kind: Mapping
-      name: ratespread_calculator_mapping
-      prefix: /v2/rateSpread/
-      service: {{ .Values.service.name }}:{{ .Values.ratespread.port }}
+    app: {{ template "ratespread-calculator.name" . }}
+    chart: {{ template "ratespread-calculator.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
-  type: {{ .Values.ambassador.service.type }}
+  type: {{ .Values.service.type }}
   ports:
-  - name: ambassador-ratespread-calculator
-    port: {{ .Values.ambassador.port }}
-    targetPort: {{ .Values.ambassador.port }}
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: {{ .Values.service.protocol }}
+      name: {{ .Values.service.name }}
   selector:
-    service: ambassador-ratespread-calculator
+    app: {{ template "ratespread-calculator.name" . }}
+    release: {{ .Release.Name }}
+

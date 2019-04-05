@@ -13,13 +13,9 @@ service:
   type: NodePort
   port: 9100
   targetPort: 9100
-  name: http-chk-digit
+  name: http-ratespread-calc
 
-grpc:
-  type: ClusterIP
-  port: 60090
-  targetPort: 60090
-  name: http2-chk-digit
+fullname: "ratespread-calculator"
 
 ambassador:
   name: ambassador-ratespread-calculator
@@ -64,6 +60,11 @@ tolerations: []
 
 affinity: {}
 
-apor:
-  fixed.rate.fileName: "YieldTableFixed.txt"
-  variable.rate.fileName: "YieldTableAdjustable.txt"
+apors:
+  fixed:
+    rate:
+      fileName: "YieldTableFixed.txt"
+  variable:
+    rate:
+      fileName: "YieldTableAdjustable.txt"
+  schedule: "\"0/10 * * * * ?\""

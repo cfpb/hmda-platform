@@ -34,7 +34,7 @@ class APORScheduler extends HmdaActor {
 
     case APORScheduler =>
       val aporConfig =
-        ConfigFactory.load("application.conf").getConfig("hmda.apor")
+        ConfigFactory.load("application.conf").getConfig("hmda.apors")
       val fixedRateFileName = aporConfig.getString("fixed.rate.fileName")
       val variableRateFileName = aporConfig.getString("variable.rate.fileName ")
 

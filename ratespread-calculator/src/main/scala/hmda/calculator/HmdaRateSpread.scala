@@ -27,6 +27,8 @@ object HmdaRateSpread extends App {
 
   val aporUpdateTimer = config.getString("akka.APORScheduler")
 
+  println("test: " + aporUpdateTimer)
+
   implicit val rateSpreadSystem: ActorSystem = ActorSystem(
     "ratespread-api-task")
   rateSpreadSystem.actorOf(RateSpreadAPI.props(), "hmda-ratespread-api")
