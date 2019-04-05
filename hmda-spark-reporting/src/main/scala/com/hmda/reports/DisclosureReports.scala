@@ -15,15 +15,15 @@ import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.hmda.reports.model.StateMapping
 import com.hmda.reports.processing.DisclosureProcessing
-import com.hmda.reports.processing.DisclosureProcessing.ProcessKafkaRecord
+import com.hmda.reports.processing.DisclosureProcessing.ProcessDisclosureKafkaRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.IntegerType
 import hmda.messages.pubsub.HmdaTopics.disclosureTopic
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import scala.concurrent._
 
 object DisclosureReports {
@@ -94,7 +94,7 @@ object DisclosureReports {
                        new StringDeserializer,
                        new StringDeserializer)
         .withBootstrapServers(sys.env("KAFKA_HOSTS"))
-        .withGroupId("hmda-spark")
+        .withGroupId("hmda-spark-disclosure")
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
@@ -103,11 +103,11 @@ object DisclosureReports {
       // async boundary begin
       .async
       .mapAsync(1) { msg =>
-        (processorRef ? ProcessKafkaRecord(lei = msg.record.key,
-                                           lookupMap = lookupMap,
-                                           jdbcUrl = JDBC_URL,
-                                           bucket = AWS_BUCKET,
-                                           year = "2018"))
+        (processorRef ? ProcessDisclosureKafkaRecord(lei = msg.record.key,
+                                                     lookupMap = lookupMap,
+                                                     jdbcUrl = JDBC_URL,
+                                                     bucket = AWS_BUCKET,
+                                                     year = "2018"))
           .map(_ => msg.committableOffset)
       }
       .async

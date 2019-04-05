@@ -30,7 +30,13 @@ class DisclosureProcessing(spark: SparkSession, s3Client: S3Client)
     case ProcessDisclosureKafkaRecord(lei, lookupMap, jdbcUrl, bucket, year) =>
       val originalSender = sender()
       log.info(s"Beginning process for $lei")
-      processDisclosureKafkaRecord(lei, spark, lookupMap, jdbcUrl, bucket, year, s3Client)
+      processDisclosureKafkaRecord(lei,
+                                   spark,
+                                   lookupMap,
+                                   jdbcUrl,
+                                   bucket,
+                                   year,
+                                   s3Client)
         .map(_ => Finished)
         .pipeTo(originalSender)
       log.info(s"Finished process for $lei")
@@ -39,23 +45,24 @@ class DisclosureProcessing(spark: SparkSession, s3Client: S3Client)
 }
 
 object DisclosureProcessing {
-  case class ProcessDisclosureKafkaRecord(lei: String,
-                                lookupMap: Map[(Int, Int), StateMapping],
-                                jdbcUrl: String,
-                                bucket: String,
-                                year: String)
+  case class ProcessDisclosureKafkaRecord(
+      lei: String,
+      lookupMap: Map[(Int, Int), StateMapping],
+      jdbcUrl: String,
+      bucket: String,
+      year: String)
   case object Finished
 
   def props(sparkSession: SparkSession, s3Client: S3Client): Props =
     Props(new DisclosureProcessing(sparkSession, s3Client))
 
   def processDisclosureKafkaRecord(lei: String,
-                         spark: SparkSession,
-                         lookupMap: Map[(Int, Int), StateMapping],
-                         jdbcUrl: String,
-                         bucket: String,
-                         year: String,
-                         s3Client: S3Client)(
+                                   spark: SparkSession,
+                                   lookupMap: Map[(Int, Int), StateMapping],
+                                   jdbcUrl: String,
+                                   bucket: String,
+                                   year: String,
+                                   s3Client: S3Client)(
       implicit mat: ActorMaterializer,
       ec: ExecutionContext): Future[Unit] = {
     import spark.implicits._

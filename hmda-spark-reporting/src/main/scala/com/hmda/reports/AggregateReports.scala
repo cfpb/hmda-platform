@@ -14,7 +14,8 @@ import akka.util.Timeout
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.hmda.reports.model.StateMapping
-import com.hmda.reports.processing.DisclosureProcessing.ProcessKafkaRecord
+import com.hmda.reports.processing.AggregateProcessing
+import com.hmda.reports.processing.AggregateProcessing.ProcessAggregateKafkaRecord
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.sql.SparkSession
@@ -90,23 +91,21 @@ object AggregateReports {
 
     val consumerSettings: ConsumerSettings[String, String] =
       ConsumerSettings(system.settings.config.getConfig("akka.kafka.consumer"),
-        new StringDeserializer,
-        new StringDeserializer)
+                       new StringDeserializer,
+                       new StringDeserializer)
         .withBootstrapServers(sys.env("KAFKA_HOSTS"))
-        .withGroupId("hmda-spark")
+        .withGroupId("hmda-spark-aggregate")
         .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
     Consumer
-      .committableSource(consumerSettings,
-        Subscriptions.topics(adTopic))
+      .committableSource(consumerSettings, Subscriptions.topics(adTopic))
       // async boundary begin
       .async
       .mapAsync(1) { msg =>
-        (processorRef ? ProcessKafkaRecord(lei = msg.record.key,
-          lookupMap = lookupMap,
-          jdbcUrl = JDBC_URL,
-          bucket = AWS_BUCKET,
-          year = "2018"))
+        (processorRef ? ProcessAggregateKafkaRecord(lookupMap = lookupMap,
+                                                    jdbcUrl = JDBC_URL,
+                                                    bucket = AWS_BUCKET,
+                                                    year = "2018"))
           .map(_ => msg.committableOffset)
       }
       .async
