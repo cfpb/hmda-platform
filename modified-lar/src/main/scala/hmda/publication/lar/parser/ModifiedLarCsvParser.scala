@@ -5,8 +5,36 @@ import Math._
 
 import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
+import hmda.publication.{ConformingLoanLimit, StateBoundries}
+import hmda.model.census.CountyLoanLimit
+import hmda.census.records.CountyLoanLimitRecords
 
 object ModifiedLarCsvParser {
+
+  val countyLoanLimits: Seq[CountyLoanLimit] =
+    CountyLoanLimitRecords.parseCountyLoanLimitFile()
+  val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =
+    countyLoanLimits
+      .map(county => county.stateCode + county.countyCode -> county)
+      .toMap
+  val countyLoanLimitsByState =
+    countyLoanLimits.groupBy(county => county.stateAbbrv).mapValues {
+      countyList =>
+        val oneUnit = countyList.map(county => county.oneUnitLimit)
+        val twoUnit = countyList.map(county => county.twoUnitLimit)
+        val threeUnit = countyList.map(county => county.threeUnitLimit)
+        val fourUnit = countyList.map(county => county.fourUnitLimit)
+        StateBoundries(
+          oneUnitMax = oneUnit.max,
+          oneUnitMin = oneUnit.min,
+          twoUnitMax = twoUnit.max,
+          twoUnitMin = twoUnit.min,
+          threeUnitMax = threeUnit.max,
+          threeUnitMin = threeUnit.min,
+          fourUnitMax = fourUnit.max,
+          fourUnitMin = fourUnit.min
+        )
+    }
 
   def apply(s: String): ModifiedLoanApplicationRegister = {
     convert(LarCsvParser(s, true).getOrElse(LoanApplicationRegister()))
@@ -100,7 +128,10 @@ object ModifiedLarCsvParser {
       convertEmptyField(lar.AUS.aus5.code),
       lar.reverseMortgage.code,
       lar.lineOfCredit.code,
-      lar.businessOrCommercialPurpose.code
+      lar.businessOrCommercialPurpose.code,
+      ConformingLoanLimit.assignLoanLimit(lar,
+                                          countyLoanLimitsByCounty,
+                                          countyLoanLimitsByState)
     )
   }
 

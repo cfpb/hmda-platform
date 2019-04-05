@@ -94,7 +94,8 @@ case class ModifiedLoanApplicationRegister(
     AUS5: String,
     reverseMortgage: Int,
     openEndLineOfCredit: Int,
-    businessOrCommercialPurpose: Int
+    businessOrCommercialPurpose: Int,
+    conformingLoanLimit: String
 ) extends PipeDelimited {
 
   override def toCSV: String = {
@@ -123,7 +124,7 @@ case class ModifiedLoanApplicationRegister(
       s"|" +
       s"$homeSecuredPropertyType|$homeLandPropertyType|$totalUnits|$multifamilyAffordableUnits|$applicationSubmission|" +
       s"$initiallyPayableToInstitution|$AUS1|$AUS2|$AUS3|$AUS4|$AUS5|" +
-      s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose")
+      s"$reverseMortgage|$openEndLineOfCredit|$businessOrCommercialPurpose|$conformingLoanLimit")
       .replaceAll("(\r\n)|\r|\n", "")
 
   }
