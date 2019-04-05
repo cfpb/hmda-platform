@@ -253,7 +253,6 @@ lazy val `modified-lar` = (project in file("modified-lar"))
     packageSettings
   )
   .dependsOn(common % "compile->compile;test->test")
-  .dependsOn(`census-api` % "compile->compile;test->test")
   .dependsOn(`hmda-protocol`)
   .dependsOn(common)
 
