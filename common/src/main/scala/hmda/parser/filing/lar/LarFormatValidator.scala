@@ -15,10 +15,12 @@ sealed trait LarFormatValidator extends LarParser {
 
   val numberOfFields = config.getInt("hmda.filing.lar.length")
 
-  def validateLar(values: Seq[String])
+  def validateLar(values: Seq[String],
+                  rawLine: String = "",
+                  fromCassandra: Boolean = false)
     : LarParserValidationResult[LoanApplicationRegister] = {
 
-    if (values.lengthCompare(numberOfFields) != 0) {
+    if (values.lengthCompare(numberOfFields) != 0 || (rawLine.trim.endsWith("|") && (!fromCassandra))) {
       IncorrectNumberOfFields(values.length, numberOfFields).invalidNel
     } else {
       val id = values.headOption.getOrElse("")

@@ -19,6 +19,7 @@ case class InstitutionState(institution: Option[Institution],
         } else {
           InstitutionState(this.institution, filing :: filings)
         }
+      case _ => this
     }
   }
 }

@@ -1,7 +1,10 @@
 package hmda.serialization.submission
 
 import hmda.model.submission.SubmissionGenerator._
-import hmda.persistence.serialization.submission.{SubmissionIdMessage, SubmissionMessage}
+import hmda.persistence.serialization.submission.{
+  SubmissionIdMessage,
+  SubmissionMessage
+}
 import hmda.serialization.submission.SubmissionProtobufConverter._
 import org.scalatest.prop.PropertyChecks
 import org.scalatest.{MustMatchers, PropSpec}

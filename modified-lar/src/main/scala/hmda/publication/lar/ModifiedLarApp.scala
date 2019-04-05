@@ -19,6 +19,7 @@ import hmda.publication.KafkaUtils._
 import hmda.publication.lar.publication._
 import hmda.publication.lar.services._
 import hmda.query.repository.ModifiedLarRepository
+import hmda.util.BankFilterUtils._
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.slf4j.LoggerFactory
@@ -71,8 +72,7 @@ object ModifiedLarApp extends App {
       untypedSubmissionId: String)(implicit scheduler: Scheduler,
                                    timeout: Timeout): Future[Done] = {
     val submissionId = SubmissionId(untypedSubmissionId)
-    if (bankFilterList.exists(
-          bankLEI => bankLEI.equalsIgnoreCase(submissionId.lei)))
+    if (!filterBankWithLogging(submissionId.lei, bankFilterList))
       Future.successful(Done.done())
     else {
       val futRes: Future[PersistModifiedLarResult] =

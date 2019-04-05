@@ -5,9 +5,9 @@ import hmda.parser.ParserErrorModel.ParserValidationError
 import hmda.parser.filing.lar.LarFormatValidator.validateLar
 
 object LarCsvParser {
-  def apply(s: String)
+  def apply(s: String, fromCassandra: Boolean = false)
     : Either[List[ParserValidationError], LoanApplicationRegister] = {
-    val values = s.split('|').map(_.trim).toList
-    validateLar(values).leftMap(xs => xs.toList).toEither
+    val values = s.trim.split('|').map(_.trim).toList
+    validateLar(values, s, fromCassandra).leftMap(xs => xs.toList).toEither
   }
 }
