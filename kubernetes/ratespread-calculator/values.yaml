@@ -1,28 +1,28 @@
-# Default values for check-digit.
+# Default values for ratespread-calculator.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: hmda/check-digit
+  repository: hmda/ratespread-calculator
   tag: v2.7.2
   pullPolicy: IfNotPresent
 
 service:
   type: NodePort
-  port: 9091
-  targetPort: 9091
-  name: http-chk-digit
+  port: 9100
+  targetPort: 9100
+  name: http-ratespread-calculator
 
 grpc:
   type: ClusterIP
-  port: 60080
-  targetPort: 60080
-  name: http2-chk-digit
+  port: 60090
+  targetPort: 60090
+  name: http2-ratespread-calculator
 
 ambassador:
-  name: ambassador-chk-digit
+  name: ambassador-ratespread-calculator
   port: 80
   service:
     type: NodePort
@@ -34,7 +34,7 @@ ingress:
     # kubernetes.io/tls-acme: "true"
   ContainerPort: 9091
   hosts:
-    - check-digit.local
+    - ratespread-calculator.local
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -42,11 +42,11 @@ ingress:
 
 resources:
   limits:
-    memory: "3200Mi"
-    cpu: "2"
+    memory: "6200Mi"
+    cpu: "4"
   requests:
-    memory: "3200Mi"
-    cpu: "1"
+    memory: "6200Mi"
+    cpu: "2"
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -63,3 +63,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+ apor: {
+    fixed.rate.fileName: "YieldTableFixed.txt",
+    variable.rate.fileName: "YieldTableAdjustable.txt"
+  }
+}

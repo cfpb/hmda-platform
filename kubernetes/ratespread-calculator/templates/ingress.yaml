@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "hmda-reporting.fullname" . -}}
+{{- $fullName := include "ratespread-calculator.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    app: {{ include "hmda-reporting.name" . }}
-    chart: {{ include "hmda-reporting.chart" . }}
+    app: {{ include "ratespread-calculator.name" . }}
+    chart: {{ include "ratespread-calculator.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}

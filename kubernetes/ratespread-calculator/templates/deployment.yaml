@@ -1,22 +1,22 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ include "hmda-reporting.fullname" . }}
+  name: {{ include "ratespread-calculator.fullname" . }}
   labels:
-    app: {{ include "hmda-reporting.name" . }}
-    chart: {{ include "hmda-reporting.chart" . }}
+    app: {{ include "ratespread-calculator.name" . }}
+    chart: {{ include "ratespread-calculator.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "hmda-reporting.name" . }}
+      app: {{ include "ratespread-calculator.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ include "hmda-reporting.name" . }}
+        app: {{ include "ratespread-calculator.name" . }}
         release: {{ .Release.Name }}
     spec:
       volumes:
@@ -31,46 +31,6 @@ spec:
               mountPath: /etc/localtime          
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: PG_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: host
-            - name: PG_DATABASE
-              valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.database
-            - name: PG_USER
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: username
-            - name: PG_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: password
-            - name: PG_SSL
-              valueFrom:
-                configMapKeyRef:
-                  name: postgresql-configmap
-                  key: postgres.ssl
-            - name: JDBC_URL
-              valueFrom:
-                secretKeyRef:
-                  name: inst-postgres-credentials
-                  key: url
-            - name: BANK_FILTER_LIST
-              valueFrom:
-                configMapKeyRef:
-                  name: bank-filter-configmap
-                  key: bank-filter-list
-            - name: KAFKA_CLUSTER_HOSTS
-              valueFrom:
-                configMapKeyRef:
-                  name: kafka-configmap
-                  key: kafka.hosts
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -81,6 +41,15 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: aws-secret-access-key
+            - name: APOR_SCHEDULE
+              valueFrom:
+                configMapKeyRef:
+                  name: schedule-configmap
+                  key: ratespread.apor
+            - name: APOR_FIXED_FILENAME
+              value: {{.Values.apor.fixed.rate.fileName}}
+            - name: APOR_VARIABLE_FILENAME
+              value: {{.Values.apor.variable.rate.fileName}}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

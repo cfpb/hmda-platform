@@ -5,32 +5,32 @@ metadata:
   name: {{ .Values.service.name }}
 spec:
   selector:
-    app: hmda-reporting
+    app: ratespread-calculator
   type: NodePort
   ports:
-  - name: {{ .Values.reporting.name }}
-    protocol: {{ .Values.reporting.protocol }}
-    port: {{ .Values.reporting.port }}
-    targetPort: {{ .Values.reporting.port }}
+  - name: {{ .Values.ratespread.name }}
+    protocol: {{ .Values.ratespread.protocol }}
+    port: {{ .Values.ratespread.port }}
+    targetPort: {{ .Values.ratespread.port }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: ambassador-hmda-reporting
-  name: ambassador-hmda-reporting
+    service: ambassador-ratespread-calculator
+  name: ambassador-ratespread-calculator
   annotations:
     getambassador.io/config: |
       apiVersion: ambassador/v0
       kind: Mapping
-      name: hmda_reporting_mapping
-      prefix: /v2/reporting/
-      service: {{ .Values.service.name }}:{{ .Values.reporting.port }}
+      name: ratespread_calculator_mapping
+      prefix: /v2/rateSpread/
+      service: {{ .Values.service.name }}:{{ .Values.ratespread.port }}
 spec:
   type: {{ .Values.ambassador.service.type }}
   ports:
-  - name: ambassador-hmda-reporting
+  - name: ambassador-ratespread-calculator
     port: {{ .Values.ambassador.port }}
     targetPort: {{ .Values.ambassador.port }}
   selector:
-    service: ambassador-hmda-reporting
+    service: ambassador-ratespread-calculator
