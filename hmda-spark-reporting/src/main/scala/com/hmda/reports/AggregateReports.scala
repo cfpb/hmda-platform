@@ -44,8 +44,7 @@ object AggregateReports {
     val KAFKA_HOSTS = sys.env("KAFKA_HOSTS")
     val AWS_ACCESS_KEY = sys.env("ACCESS_KEY")
     val AWS_SECRET_KEY = sys.env("SECRET_KEY")
-    //  val AWS_BUCKET = sys.env("BUCKET")
-    val AWS_BUCKET = "dev"
+    val AWS_BUCKET = sys.env("AWS_ENV")
 
     val awsCredentialsProvider = new AWSStaticCredentialsProvider(
       new BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY))

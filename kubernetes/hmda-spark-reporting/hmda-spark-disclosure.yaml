@@ -18,17 +18,28 @@ spec:
   sparkVersion: "2.4.0"
   restartPolicy:
     type: Never
-  volumes:
-    - name: "test-volume"
-      hostPath:
-        path: "/tmp"
-        type: Directory
+#  volumes:
+#    - name: "test-volume"
+#      hostPath:
+#        path: "/tmp"
+#        type: Directory
   driver:
-    cores: 1
+    cores: 2
     coreLimit: "4000m"
     memory: "12g"
     labels:
       version: 2.4.0
+    affinity:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - "hmda-platform"
+              - "keycloak"
+          topologyKey: kubernetes.io/hostname
     serviceAccount: spark-operator-spark
     configMaps:
       - name: kafka-configmap
@@ -46,15 +57,29 @@ spec:
       KAFKA_HOSTS:
         name: kafka-hosts
         key: kafka-hosts
-    volumeMounts:
-      - name: "test-volume"
-        mountPath: "/tmp"
+      AWS_ENV:
+        name: aws-env
+        key: aws-env
+#    volumeMounts:
+#      - name: "test-volume"
+#        mountPath: "/tmp"
   executor:
-    cores: 1
-    instances: 1
+    cores: 2
+    instances: 3
     memory: "12g"
     labels:
       version: 2.4.0
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - "hmda-platform"
+              - "keycloak"
+          topologyKey: kubernetes.io/hostname
     configMaps:
       - name: kafka-configmap
         path: /mnt/kafka-config-maps
@@ -68,13 +93,16 @@ spec:
       SECRET_KEY:
         name: aws-credentials
         key: aws-secret-access-key
+      AWS_ENV:
+        name: aws-env
+        key: aws-env
       KAFKA_HOSTS:
         name: kafka-hosts
         key: kafka-hosts
-    volumeMounts:
-      - name: "test-volume"
-        mountPath: "/tmp"
-    volumes:
-      - name: config-vol
-        configMap:
-          name: dummy-cm
+#    volumeMounts:
+#      - name: "test-volume"
+#        mountPath: "/tmp"
+#    volumes:
+#      - name: config-vol
+#        configMap:
+#          name: dummy-cm
