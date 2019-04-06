@@ -39,22 +39,22 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
   val log: LoggingAdapter
 
   val rateSpreadRoutes = encodeResponse {
-    pathPrefix("v2") {
-      path("rateSpread") {
-        extractUri { uri =>
-          entity(as[RateSpreadBody]) { rateSpreadBody =>
-            val rateSpreadResponse =
-              Try(APORCommands.getRateSpreadResponse(rateSpreadBody))
-            rateSpreadResponse match {
-              case Success(response) =>
-                complete(ToResponseMarshallable(response))
-              case Failure(error) =>
-                failedResponse(StatusCodes.BadRequest, uri, error)
-            }
+    path("rateSpread") {
+      extractUri { uri =>
+        entity(as[RateSpreadBody]) { rateSpreadBody =>
+          val rateSpreadResponse =
+            Try(APORCommands.getRateSpreadResponse(rateSpreadBody))
+          rateSpreadResponse match {
+            case Success(response) =>
+              complete(ToResponseMarshallable(response))
+            case Failure(error) =>
+              failedResponse(StatusCodes.BadRequest, uri, error)
           }
         }
-      } ~
-        path("rateSpread" / "csv") {
+      }
+    } ~
+      pathPrefix("rateSpread") {
+        path("csv") {
           fileUpload("file") {
             case (_, byteSource) =>
               val headerSource =
@@ -72,7 +72,7 @@ trait RateSpreadAPIRoutes extends HmdaTimeDirectives {
               complete(ToResponseMarshallable(StatusCodes.BadRequest))
           }
         }
-    }
+      }
   }
 
   private def processRateSpreadRow(byteSource: Source[ByteString, Any]) = {

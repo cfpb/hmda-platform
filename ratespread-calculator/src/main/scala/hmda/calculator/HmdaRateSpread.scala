@@ -35,6 +35,7 @@ object HmdaRateSpread extends App {
 
   val aporUpdaterActorSystem =
     ActorSystem("aporTask", ConfigFactory.parseString(aporUpdateTimer))
-  aporUpdaterActorSystem.actorOf(Props[APORScheduler], "APORScheduler")
+
+  aporUpdaterActorSystem.actorOf(Props[APORScheduler], "APORScheduler") ! "initialize"
 
 }

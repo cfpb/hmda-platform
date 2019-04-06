@@ -32,7 +32,7 @@ class APORScheduler extends HmdaActor {
 
   override def receive: Receive = {
 
-    case APORScheduler =>
+    case APORScheduler | "initialize" =>
       val aporConfig =
         ConfigFactory.load("application.conf").getConfig("hmda.apors")
       val fixedRateFileName = aporConfig.getString("fixed.rate.fileName")

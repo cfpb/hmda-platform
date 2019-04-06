@@ -24,7 +24,7 @@ metadata:
       apiVersion: ambassador/v0
       kind: Mapping
       name: hmda_ratespread_mapping
-      prefix: /v2/rateSpread/
+      prefix: /v2/
       service: {{ .Values.service.name }}:{{ .Values.ratespread.port }}
 spec:
   type: {{ .Values.ambassador.service.type }}
