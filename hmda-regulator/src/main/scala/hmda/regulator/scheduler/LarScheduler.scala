@@ -58,7 +58,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
         override def getRegion: String = region
       }
 
-      val s3Settings = new S3Settings(
+      val s3Settings = S3Settings(
         MemoryBufferType,
         None,
         awsCredentialsProvider,

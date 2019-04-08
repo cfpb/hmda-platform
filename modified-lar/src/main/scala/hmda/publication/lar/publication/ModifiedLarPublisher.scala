@@ -16,7 +16,10 @@ import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
+import hmda.model.modifiedlar.{
+  EnrichedModifiedLoanApplicationRegister,
+  ModifiedLoanApplicationRegister
+}
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
@@ -90,12 +93,14 @@ object ModifiedLarPublisher {
 
           val fileName = s"${submissionId.lei.toUpperCase()}.txt"
 
-          val metaHeaders: Map[String, String] = Map("Content-Disposition" -> "attachment", "filename" -> fileName)
+          val metaHeaders: Map[String, String] =
+            Map("Content-Disposition" -> "attachment", "filename" -> fileName)
 
-          val s3Sink = S3.multipartUpload(
-            bucket,
-            s"$environment/modified-lar/$year/$fileName",
-            metaHeaders = MetaHeaders(metaHeaders)).withAttributes(S3Attributes.settings(s3Settings))
+          val s3Sink = S3
+            .multipartUpload(bucket,
+                             s"$environment/modified-lar/$year/$fileName",
+                             metaHeaders = MetaHeaders(metaHeaders))
+            .withAttributes(S3Attributes.settings(s3Settings))
 
           def removeLei: Future[Int] =
             modifiedLarRepo.deleteByLei(submissionId.lei, filingYear)
