@@ -7,7 +7,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import akka.stream._
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3._
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import akka.{Done, NotUsed}
@@ -88,11 +88,14 @@ object ModifiedLarPublisher {
         case PersistToS3AndPostgres(submissionId, respondTo) =>
           log.info(s"Publishing Modified LAR for $submissionId")
 
-          val fileName = s"${submissionId.lei}.txt"
+          val fileName = s"${submissionId.lei.toUpperCase()}.txt"
+
+          val metaHeaders: Map[String, String] = Map("Content-Disposition" -> "attachment", "filename" -> fileName)
 
           val s3Sink = S3.multipartUpload(
             bucket,
-            s"$environment/modified-lar/$year/$fileName").withAttributes(S3Attributes.settings(s3Settings))
+            s"$environment/modified-lar/$year/$fileName",
+            metaHeaders = MetaHeaders(metaHeaders)).withAttributes(S3Attributes.settings(s3Settings))
 
           def removeLei: Future[Int] =
             modifiedLarRepo.deleteByLei(submissionId.lei, filingYear)
