@@ -3,9 +3,9 @@ package com.hmda.reports.processing
 import akka.Done
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.stream._
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.scaladsl._
 import akka.pattern.pipe
+import akka.stream.alpakka.s3.S3Settings
 import akka.util.ByteString
 import com.hmda.reports.model._
 import hmda.model.census.{Census, State}
@@ -18,7 +18,7 @@ import scala.concurrent._
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
-class DisclosureProcessing(spark: SparkSession, s3Client: S3Client)
+class DisclosureProcessing(spark: SparkSession, s3Settings: S3Settings)
     extends Actor
     with ActorLogging {
   import DisclosureProcessing._
@@ -36,7 +36,7 @@ class DisclosureProcessing(spark: SparkSession, s3Client: S3Client)
                                    jdbcUrl,
                                    bucket,
                                    year,
-                                   s3Client)
+                                   s3Settings)
         .map(_ => Finished)
         .pipeTo(originalSender)
       log.info(s"Finished process for $lei")
@@ -53,8 +53,8 @@ object DisclosureProcessing {
       year: String)
   case object Finished
 
-  def props(sparkSession: SparkSession, s3Client: S3Client): Props =
-    Props(new DisclosureProcessing(sparkSession, s3Client))
+  def props(sparkSession: SparkSession, s3Settings: S3Settings): Props =
+    Props(new DisclosureProcessing(sparkSession, s3Settings))
 
   def processDisclosureKafkaRecord(lei: String,
                                    spark: SparkSession,
@@ -62,7 +62,7 @@ object DisclosureProcessing {
                                    jdbcUrl: String,
                                    bucket: String,
                                    year: String,
-                                   s3Client: S3Client)(
+                                   s3Settings: S3Settings)(
       implicit mat: ActorMaterializer,
       ec: ExecutionContext): Future[Unit] = {
     import spark.implicits._
@@ -175,7 +175,7 @@ object DisclosureProcessing {
             s"$bucket/reports/disclosure/$year/$lei/${input.msa.id}/1.json",
             data,
             "cfpb-hmda-public",
-            s3Client)(mat, ec)
+            s3Settings)(mat, ec)
         }
         .runWith(Sink.ignore)
 
@@ -187,7 +187,7 @@ object DisclosureProcessing {
             s"$bucket/reports/disclosure/$year/$lei/${input.msa.id}/2.json",
             data,
             "cfpb-hmda-public",
-            s3Client)(mat, ec)
+            s3Settings)(mat, ec)
         }
         .runWith(Sink.ignore)
 

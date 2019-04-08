@@ -29,17 +29,17 @@ spec:
     memory: "12g"
     labels:
       version: 2.4.0
-    affinity:
-      podAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-            - key: app
-              operator: In
-              values:
-              - "hmda-platform"
-              - "keycloak"
-          topologyKey: kubernetes.io/hostname
+#    affinity:
+#      podAffinity:
+#        requiredDuringSchedulingIgnoredDuringExecution:
+#        - labelSelector:
+#            matchExpressions:
+#            - key: app
+#              operator: In
+#              values:
+#              - "hmda-platform"
+#              - "keycloak"
+#          topologyKey: kubernetes.io/hostname
     serviceAccount: spark-operator-spark
     configMaps:
       - name: kafka-configmap
@@ -69,17 +69,17 @@ spec:
     memory: "12g"
     labels:
       version: 2.4.0
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-            - key: app
-              operator: In
-              values:
-              - "hmda-platform"
-              - "keycloak"
-          topologyKey: kubernetes.io/hostname
+#    affinity:
+#      podAntiAffinity:
+#        requiredDuringSchedulingIgnoredDuringExecution:
+#        - labelSelector:
+#            matchExpressions:
+#            - key: app
+#              operator: In
+#              values:
+#              - "hmda-platform"
+#              - "keycloak"
+#          topologyKey: kubernetes.io/hostname
     configMaps:
       - name: kafka-configmap
         path: /mnt/kafka-config-maps

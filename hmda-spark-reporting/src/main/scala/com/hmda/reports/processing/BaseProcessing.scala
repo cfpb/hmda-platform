@@ -2,7 +2,8 @@ package com.hmda.reports.processing
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
+import akka.stream.alpakka.s3.{MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.hmda.reports.model._
@@ -379,12 +380,15 @@ object BaseProcessing {
   def persistSingleFile(fileName: String,
                         data: String,
                         s3Bucket: String,
-                        s3Client: S3Client)(
+                        s3Settings: S3Settings)(
       implicit materializer: ActorMaterializer,
       executionContext: ExecutionContext): Future[MultipartUploadResult] =
     Source
       .single(data)
       .map(ByteString(_))
-      .runWith(s3Client.multipartUpload(s3Bucket, fileName))
+      .runWith(
+        S3.multipartUpload(s3Bucket, fileName)
+          .withAttributes(S3Attributes.settings(s3Settings))
+      )
 
 }

@@ -3,9 +3,9 @@ package com.hmda.reports.processing
 import akka.Done
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.stream._
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
 import akka.stream.scaladsl._
 import akka.pattern.pipe
+import akka.stream.alpakka.s3.S3Settings
 import akka.util.ByteString
 import com.hmda.reports.model._
 import hmda.model.census.{Census, State}
@@ -17,7 +17,7 @@ import org.apache.spark.sql.functions._
 import scala.concurrent._
 import scala.util.{Failure, Success, Try}
 
-class AggregateProcessing(spark: SparkSession, s3Client: S3Client)
+class AggregateProcessing(spark: SparkSession, s3Settings: S3Settings)
     extends Actor
     with ActorLogging {
 
@@ -35,7 +35,7 @@ class AggregateProcessing(spark: SparkSession, s3Client: S3Client)
                                   jdbcUrl,
                                   bucket,
                                   year,
-                                  s3Client)
+                                  s3Settings)
         .map(_ => Finished)
         .pipeTo(originalSender)
       log.info(s"Finished process for Aggregate Reports")
@@ -51,15 +51,15 @@ object AggregateProcessing {
       year: String)
   case object Finished
 
-  def props(sparkSession: SparkSession, s3Client: S3Client): Props =
-    Props(new AggregateProcessing(sparkSession, s3Client))
+  def props(sparkSession: SparkSession, s3Settings: S3Settings): Props =
+    Props(new AggregateProcessing(sparkSession, s3Settings))
 
   def processAggregateKafkaRecord(spark: SparkSession,
                                   lookupMap: Map[(Int, Int), StateMapping],
                                   jdbcUrl: String,
                                   bucket: String,
                                   year: String,
-                                  s3Client: S3Client)(
+                                  s3Settings: S3Settings)(
       implicit mat: ActorMaterializer,
       ec: ExecutionContext): Future[Unit] = {
 
@@ -174,7 +174,7 @@ object AggregateProcessing {
             s"$bucket/reports/aggregate/$year/${input.msa.id}/1.json",
             data,
             "cfpb-hmda-public",
-            s3Client)(mat, ec)
+            s3Settings)(mat, ec)
         }
         .runWith(Sink.ignore)
 
@@ -186,7 +186,7 @@ object AggregateProcessing {
             s"$bucket/reports/aggregate/$year/${input.msa.id}/2.json",
             data,
             "cfpb-hmda-public",
-            s3Client)(mat, ec)
+            s3Settings)(mat, ec)
         }
         .runWith(Sink.ignore)
 

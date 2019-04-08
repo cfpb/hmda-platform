@@ -5,9 +5,9 @@ import akka.kafka.scaladsl.Consumer
 import akka.kafka.scaladsl.Consumer.DrainingControl
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.stream._
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.S3Client
+import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
+import akka.stream.alpakka.s3.{MemoryBufferType, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -40,11 +40,11 @@ object DisclosureReports {
     implicit val ec: ExecutionContext = system.dispatcher
     implicit val timeout: Timeout = Timeout(2.hours)
 
-    val JDBC_URL = sys.env("JDBC_URL")
-    val KAFKA_HOSTS = sys.env("KAFKA_HOSTS")
-    val AWS_ACCESS_KEY = sys.env("ACCESS_KEY")
-    val AWS_SECRET_KEY = sys.env("SECRET_KEY")
-    val AWS_BUCKET = sys.env("AWS_ENV")
+    val JDBC_URL = sys.env("JDBC_URL").trim()
+    val KAFKA_HOSTS = sys.env("KAFKA_HOSTS").trim()
+    val AWS_ACCESS_KEY = sys.env("ACCESS_KEY").trim()
+    val AWS_SECRET_KEY = sys.env("SECRET_KEY").trim()
+    val AWS_BUCKET = sys.env("AWS_ENV").trim()
 
     val awsCredentialsProvider = new AWSStaticCredentialsProvider(
       new BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY))
@@ -61,8 +61,6 @@ object DisclosureReports {
       None,
       ListBucketVersion2
     )
-
-    val s3Client: S3Client = new S3Client(s3Settings)
 
     import spark.implicits._
     //    create lookup map of counties
@@ -85,7 +83,7 @@ object DisclosureReports {
     }
 
     val processorRef = system.actorOf(
-      DisclosureProcessing.props(spark, s3Client),
+      DisclosureProcessing.props(spark, s3Settings),
       "complex-json-processor")
 
     val consumerSettings: ConsumerSettings[String, String] =

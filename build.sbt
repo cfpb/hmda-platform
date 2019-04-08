@@ -11,8 +11,7 @@ lazy val sparkDeps =
       sparkStreaming,
       sparkKafka,
       postgres,
-      "com.typesafe.akka" %% "akka-stream-kafka" % "1.0.1",
-      alpakkaS3)
+      "com.typesafe.akka" %% "akka-stream-kafka" % "1.0.1")
 
 lazy val authDeps = Seq(
   keycloakAdapter,
@@ -38,7 +37,7 @@ lazy val akkaDeps = Seq(
   akkaCors,
   akkaKafkaStreams,
   embeddedKafka,
-  alpakkaS3,
+  "com.lightbend.akka" %% "akka-stream-alpakka-s3" % "1.0.0",
   akkaQuartzScheduler,
   phantomDSL,
   phantomJDK8
