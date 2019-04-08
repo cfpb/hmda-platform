@@ -65,7 +65,7 @@ spec:
 #        mountPath: "/tmp"
   executor:
     cores: 2
-    instances: 3
+    instances: 4
     memory: "12g"
     labels:
       version: 2.4.0
