@@ -1,25 +1,22 @@
 package hmda.publication.lar.publication
 
 import akka.actor.ActorSystem
-import akka.{Done, NotUsed}
-import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.stream._
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
+import akka.stream.alpakka.s3.scaladsl.S3
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl._
 import akka.util.ByteString
+import akka.{Done, NotUsed}
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
 import hmda.model.census.Census
 import hmda.model.filing.submission.SubmissionId
-import hmda.model.modifiedlar.{
-  EnrichedModifiedLoanApplicationRegister,
-  ModifiedLoanApplicationRegister
-}
+import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
@@ -86,8 +83,6 @@ object ModifiedLarPublisher {
         ListBucketVersion2
       )
 
-      val s3Client: S3Client = new S3Client(s3Settings)
-
       Behaviors.receiveMessage {
 
         case PersistToS3AndPostgres(submissionId, respondTo) =>
@@ -95,9 +90,9 @@ object ModifiedLarPublisher {
 
           val fileName = s"${submissionId.lei}.txt"
 
-          val s3Sink = s3Client.multipartUpload(
+          val s3Sink = S3.multipartUpload(
             bucket,
-            s"$environment/modified-lar/$year/$fileName")
+            s"$environment/modified-lar/$year/$fileName").withAttributes(S3Attributes.settings(s3Settings))
 
           def removeLei: Future[Int] =
             modifiedLarRepo.deleteByLei(submissionId.lei, filingYear)

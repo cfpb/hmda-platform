@@ -42,10 +42,7 @@ lazy val akkaPersistenceDeps =
       akkaPersistenceCassandra,
       cassandraLauncher)
 
-lazy val akkaHttpDeps = Seq(akkaHttp,
-                            akkaHttp2,
-                            akkaHttpTestkit,
-                            akkaHttpCirce)
+lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
