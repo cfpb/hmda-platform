@@ -5,9 +5,9 @@ import java.time.format.DateTimeFormatter
 
 import akka.NotUsed
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
+import akka.stream.alpakka.s3.scaladsl.S3
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -61,7 +61,7 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
         override def getRegion: String = region
       }
 
-      val s3Settings = new S3Settings(
+      val s3Settings = S3Settings(
         MemoryBufferType,
         None,
         awsCredentialsProvider,
@@ -71,7 +71,6 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
         ListBucketVersion2
       )
 
-      val s3Client = new S3Client(s3Settings)(context.system, materializer)
 
       val now = LocalDateTime.now().minusDays(1)
 
@@ -79,7 +78,7 @@ class TsScheduler extends HmdaActor with RegulatorComponent {
 
       val fileName = s"$formattedDate" + s"$year" + "_ts" + ".txt"
       val s3Sink =
-        s3Client.multipartUpload(bucket, s"$environment/ts/$fileName")
+        S3.multipartUpload(bucket, s"$environment/ts/$fileName").withAttributes(S3Attributes.settings(s3Settings))
 
       val allResults: Future[Seq[TransmittalSheetEntity]] =
         tsRepository.getAllSheets(bankFilterList)

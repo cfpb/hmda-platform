@@ -1,16 +1,16 @@
 package hmda.publication.lar.publication
 
 import akka.actor.ActorSystem
-import akka.{Done, NotUsed}
-import akka.actor.typed.{ActorRef, Behavior}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.typed.{ActorRef, Behavior}
 import akka.stream._
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
+import akka.stream.alpakka.s3.scaladsl.S3
+import akka.stream.alpakka.s3._
 import akka.stream.scaladsl._
 import akka.util.ByteString
+import akka.{Done, NotUsed}
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.regions.AwsRegionProvider
 import com.typesafe.config.ConfigFactory
@@ -86,18 +86,21 @@ object ModifiedLarPublisher {
         ListBucketVersion2
       )
 
-      val s3Client: S3Client = new S3Client(s3Settings)
-
       Behaviors.receiveMessage {
 
         case PersistToS3AndPostgres(submissionId, respondTo) =>
           log.info(s"Publishing Modified LAR for $submissionId")
 
-          val fileName = s"${submissionId.lei}.txt"
+          val fileName = s"${submissionId.lei.toUpperCase()}.txt"
 
-          val s3Sink = s3Client.multipartUpload(
-            bucket,
-            s"$environment/modified-lar/$year/$fileName")
+          val metaHeaders: Map[String, String] =
+            Map("Content-Disposition" -> "attachment", "filename" -> fileName)
+
+          val s3Sink = S3
+            .multipartUpload(bucket,
+                             s"$environment/modified-lar/$year/$fileName",
+                             metaHeaders = MetaHeaders(metaHeaders))
+            .withAttributes(S3Attributes.settings(s3Settings))
 
           def removeLei: Future[Int] =
             modifiedLarRepo.deleteByLei(submissionId.lei, filingYear)
