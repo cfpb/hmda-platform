@@ -1,7 +1,13 @@
 package hmda.serialization.submission
 
-import hmda.messages.submission.SubmissionEvents.{SubmissionModified, SubmissionNotExists}
-import hmda.messages.submission.SubmissionManagerCommands.{UpdateSubmissionStatus, WrappedSubmissionEventResponse}
+import hmda.messages.submission.SubmissionEvents.{
+  SubmissionModified,
+  SubmissionNotExists
+}
+import hmda.messages.submission.SubmissionManagerCommands.{
+  UpdateSubmissionStatus,
+  WrappedSubmissionEventResponse
+}
 import hmda.model.submission.SubmissionGenerator._
 import hmda.serialization.submission.SubmissionManagerCommandsProtobufConverter._
 import org.scalatest.prop.PropertyChecks

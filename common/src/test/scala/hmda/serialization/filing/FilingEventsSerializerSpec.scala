@@ -1,6 +1,11 @@
 package hmda.serialization.filing
 
-import hmda.messages.filing.FilingEvents.{FilingCreated, FilingStatusUpdated, SubmissionAdded, SubmissionUpdated}
+import hmda.messages.filing.FilingEvents.{
+  FilingCreated,
+  FilingStatusUpdated,
+  SubmissionAdded,
+  SubmissionUpdated
+}
 import hmda.model.filing.FilingGenerator._
 import hmda.model.submission.SubmissionGenerator._
 import org.scalatest.prop.PropertyChecks

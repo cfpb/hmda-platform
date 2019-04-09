@@ -10,7 +10,6 @@ import akka.util.Timeout
 import akka.pattern.pipe
 import hmda.api.http.HttpServer
 import hmda.api.http.routes.BaseHttpApi
-import com.typesafe.config.{Config, ConfigFactory}
 import hmda.query.DbConfiguration.dbConfig
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,8 +24,6 @@ class HmdaReportingApi
     extends HttpServer
     with BaseHttpApi
     with ReportingHttpApi {
-
-  val config: Config = ConfigFactory.load()
 
   override implicit val system: ActorSystem = context.system
   override implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -44,8 +41,8 @@ class HmdaReportingApi
 
   override val paths: Route = routes(s"$name") ~ hmdaFilerRoutes
 
-  override val tsRepository: TransmittalSheetRepository =
-    new TransmittalSheetRepository(dbConfig)
+  override val institutionRepository: InstitutionRepository =
+    new InstitutionRepository(dbConfig)
 
   override val http: Future[Http.ServerBinding] = Http(system).bindAndHandle(
     paths,

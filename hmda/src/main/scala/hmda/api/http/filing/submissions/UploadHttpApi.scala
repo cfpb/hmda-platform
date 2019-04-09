@@ -17,6 +17,7 @@ import akka.http.scaladsl.server.Directives.{
   path,
   pathPrefix
 }
+import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Flow, Framing, Sink}
@@ -70,51 +71,53 @@ trait UploadHttpApi extends HmdaTimeDirectives {
       (lei, period, seqNr) =>
         oAuth2Authorization.authorizeTokenWithLei(lei) { _ =>
           timedPost { uri =>
-            val submissionId = SubmissionId(lei, period, seqNr)
-            val uploadTimestamp = Instant.now.toEpochMilli
+            respondWithHeader(RawHeader("Cache-Control", "no-cache")) {
+              val submissionId = SubmissionId(lei, period, seqNr)
+              val uploadTimestamp = Instant.now.toEpochMilli
 
-            val submissionManager =
-              sharding.entityRefFor(
-                SubmissionManager.typeKey,
-                s"${SubmissionManager.name}-${submissionId.toString}")
+              val submissionManager =
+                sharding.entityRefFor(
+                  SubmissionManager.typeKey,
+                  s"${SubmissionManager.name}-${submissionId.toString}")
 
-            val submissionPersistence =
-              sharding.entityRefFor(
-                SubmissionPersistence.typeKey,
-                s"${SubmissionPersistence.name}-${submissionId.toString}")
+              val submissionPersistence =
+                sharding.entityRefFor(
+                  SubmissionPersistence.typeKey,
+                  s"${SubmissionPersistence.name}-${submissionId.toString}")
 
-            val hmdaRaw =
-              sharding.entityRefFor(
-                HmdaRawData.typeKey,
-                s"${HmdaRawData.name}-${submissionId.toString}"
-              )
+              val hmdaRaw =
+                sharding.entityRefFor(
+                  HmdaRawData.typeKey,
+                  s"${HmdaRawData.name}-${submissionId.toString}"
+                )
 
-            val fSubmission
-              : Future[Option[Submission]] = submissionPersistence ? (ref =>
-              GetSubmission(ref))
+              val fSubmission
+                : Future[Option[Submission]] = submissionPersistence ? (ref =>
+                GetSubmission(ref))
 
-            val fCheckSubmission = for {
-              s <- fSubmission.mapTo[Option[Submission]]
-            } yield s
+              val fCheckSubmission = for {
+                s <- fSubmission.mapTo[Option[Submission]]
+              } yield s
 
-            onComplete(fCheckSubmission) {
-              case Success(result) =>
-                result match {
-                  case Some(submission) =>
-                    if (submission.status == Created) {
-                      uploadFile(hmdaRaw,
-                                 submissionManager,
-                                 uploadTimestamp,
-                                 submission,
-                                 uri)
-                    } else {
+              onComplete(fCheckSubmission) {
+                case Success(result) =>
+                  result match {
+                    case Some(submission) =>
+                      if (submission.status == Created) {
+                        uploadFile(hmdaRaw,
+                                   submissionManager,
+                                   uploadTimestamp,
+                                   submission,
+                                   uri)
+                      } else {
+                        submissionNotAvailable(submissionId, uri)
+                      }
+                    case None =>
                       submissionNotAvailable(submissionId, uri)
-                    }
-                  case None =>
-                    submissionNotAvailable(submissionId, uri)
-                }
-              case Failure(error) =>
-                failedResponse(StatusCodes.InternalServerError, uri, error)
+                  }
+                case Failure(error) =>
+                  failedResponse(StatusCodes.InternalServerError, uri, error)
+              }
             }
           }
         }

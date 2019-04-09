@@ -11,7 +11,6 @@ import scala.concurrent.Future
 
 class CheckDigitServiceImpl(materializer: Materializer)
     extends CheckDigitService {
-  private implicit val mat: Materializer = materializer
 
   override def validateUli(in: ValidUliRequest): Future[ValidUliResponse] = {
     val uli = in.uli

@@ -51,7 +51,10 @@ lazy val akkaPersistenceDeps =
       akkaPersistenceCassandra,
       cassandraLauncher)
 
-lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaHttpCirce)
+lazy val akkaHttpDeps = Seq(akkaHttp,
+                            akkaHttp2,
+                            akkaHttpTestkit,
+                            akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
@@ -170,8 +173,6 @@ lazy val `hmda-platform` = (project in file("hmda"))
   )
   .dependsOn(common % "compile->compile;test->test")
   .dependsOn(`hmda-protocol` % "compile->compile;test->test")
-  .dependsOn(`check-digit` % "compile->compile;test->test")
-  .dependsOn(`census-api` % "compile->compile;test->test")
 
 lazy val `check-digit` = (project in file("check-digit"))
   .enablePlugins(JavaServerAppPackaging,
