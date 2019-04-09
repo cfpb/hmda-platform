@@ -1,0 +1,83 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "ratespread-calculator.fullname" . }}
+  labels:
+    app: {{ include "ratespread-calculator.name" . }}
+    chart: {{ include "ratespread-calculator.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "ratespread-calculator.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "ratespread-calculator.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      volumes:
+        - name: tz-config
+          hostPath:
+            path: /usr/share/zoneinfo/America/New_York    
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          volumeMounts:
+            - name: tz-config
+              mountPath: /etc/localtime          
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-credentials
+                  key: aws-secret-access-key
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                 secretKeyRef:
+                   name: aws-credentials
+                   key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                 secretKeyRef:
+                   name: aws-credentials
+                   key: aws-secret-access-key
+            - name: APOR_SCHEDULE
+              valueFrom:
+                 configMapKeyRef:
+                   name: apors-configmap
+                   key: schedule
+            - name: APOR_FIXED_FILENAME
+              valueFrom:
+                 configMapKeyRef:
+                   name: apors-configmap
+                   key: fixed.rate.fileName
+            - name: APOR_VARIABLE_FILENAME
+              valueFrom:
+                 configMapKeyRef:
+                   name: apors-configmap
+                   key: variable.rate.fileName
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
