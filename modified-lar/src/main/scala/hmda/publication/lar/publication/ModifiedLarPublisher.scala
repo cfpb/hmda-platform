@@ -23,6 +23,8 @@ import hmda.model.modifiedlar.{
 import hmda.publication.lar.parser.ModifiedLarCsvParser
 import hmda.query.HmdaQuery._
 import hmda.query.repository.ModifiedLarRepository
+import hmda.publication.KafkaUtils._
+import hmda.messages.pubsub.HmdaTopics._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -149,6 +151,9 @@ object ModifiedLarPublisher {
           val finalResult: Future[Unit] = for {
             _ <- removeLei
             _ <- graph.run()
+            _ <- produceRecord(disclosureTopic,
+                               submissionId.lei,
+                               submissionId.toString)
           } yield ()
 
           finalResult.onComplete {

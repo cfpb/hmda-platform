@@ -6,7 +6,7 @@ import akka.actor.typed.ActorRef
 import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.Http
 import akka.kafka.scaladsl.Consumer
-import akka.kafka.{ConsumerSettings, Subscriptions}
+import akka.kafka.{ConsumerMessage, ConsumerSettings, Subscriptions}
 import akka.actor.typed.scaladsl.AskPattern._
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl._
@@ -122,7 +122,9 @@ object ModifiedLarApp extends App {
                                10,
                                30.seconds)
           }
-          .mapAsync(parallelism * 2)(offset => offset.commitScaladsl())
+          .mapAsync(parallelism * 2)(
+            (offset: ConsumerMessage.CommittableOffset) =>
+              offset.commitScaladsl())
           .toMat(Sink.ignore)(Keep.both)
           .run()
 

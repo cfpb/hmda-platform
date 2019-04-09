@@ -52,4 +52,9 @@ object Dependencies {
   lazy val phantomDSL = "com.outworkers" %% "phantom-dsl" % Version.phantom
   lazy val phantomJDK8 = "com.outworkers" %% "phantom-jdk8" % Version.phantom
   lazy val sbtResolver = "io.spray" %% "sbt-revolver" % Version.sprayresolver
+
+  lazy val sparkCore = "org.apache.spark" %% "spark-core" % Version.spark % Provided
+  lazy val sparkSql = "org.apache.spark" %% "spark-sql" % Version.spark % Provided
+  lazy val sparkStreaming = "org.apache.spark" %% "spark-streaming" % Version.spark % Provided
+  lazy val sparkKafka = "org.apache.spark"%% "spark-streaming-kafka-0-10" % Version.spark
 }
