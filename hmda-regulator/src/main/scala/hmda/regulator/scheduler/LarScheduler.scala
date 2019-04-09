@@ -5,9 +5,9 @@ import java.time.format.DateTimeFormatter
 
 import akka.NotUsed
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
+import akka.stream.alpakka.s3.scaladsl.S3
+import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -58,7 +58,7 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
         override def getRegion: String = region
       }
 
-      val s3Settings = new S3Settings(
+      val s3Settings = S3Settings(
         MemoryBufferType,
         None,
         awsCredentialsProvider,
@@ -72,15 +72,14 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val bankFilterList =
         bankFilter.getString("bank-filter-list").toUpperCase.split(",")
 
-      val s3Client = new S3Client(s3Settings)(context.system, materializer)
-
       val now = LocalDateTime.now().minusDays(1)
 
       val formattedDate = fullDate.format(now)
 
       val fileName = s"$formattedDate" + s"$year" + "_lar" + ".txt"
-      val s3Sink =
-        s3Client.multipartUpload(bucket, s"$environment/lar/$fileName")
+      val s3Sink = S3.multipartUpload(bucket, s"$environment/lar/$fileName")
+                        .withAttributes(S3Attributes.settings(s3Settings))
+
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
         larRepository.getAllLARs(bankFilterList)

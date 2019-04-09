@@ -7,9 +7,14 @@ import akka.actor.typed.scaladsl.adapter._
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.alpakka.s3.impl.ListBucketVersion2
-import akka.stream.alpakka.s3.scaladsl.{MultipartUploadResult, S3Client}
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
+import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
+import akka.stream.alpakka.s3.scaladsl.S3
+import akka.stream.alpakka.s3.{
+  MemoryBufferType,
+  MultipartUploadResult,
+  S3Attributes,
+  S3Settings
+}
 import akka.stream.scaladsl.{Sink, Source}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings, Supervision}
 import akka.util.ByteString
@@ -71,7 +76,7 @@ object IrsPublisher {
 
       log.info(s"Started $name")
 
-      val s3Settings = new S3Settings(
+      val s3Settings = S3Settings(
         MemoryBufferType,
         None,
         awsCredentialsProvider,
@@ -80,8 +85,6 @@ object IrsPublisher {
         None,
         ListBucketVersion2
       )
-
-      val s3Client = new S3Client(s3Settings)
 
       def getCensus(hmdaCensus: String): Future[Msa] = {
         val request = HttpRequest(
@@ -105,9 +108,10 @@ object IrsPublisher {
           log.info(s"Publishing IRS for $submissionId")
 
           val s3Sink: Sink[ByteString, Future[MultipartUploadResult]] =
-            s3Client.multipartUpload(
-              bucket,
-              s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
+            S3.multipartUpload(
+                bucket,
+                s"$environment/reports/disclosure/$year/${submissionId.lei}/nationwide/IRS.csv")
+              .withAttributes(S3Attributes.settings(s3Settings))
 
           val msaSummarySource: Source[ByteString, NotUsed] = {
             val msaSummaryHeader: Source[ByteString, NotUsed] = {

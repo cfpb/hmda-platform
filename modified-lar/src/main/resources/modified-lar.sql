@@ -97,6 +97,11 @@ CREATE TABLE hmda_user.modifiedlar2018
     created_at timestamp default current_timestamp,
     submission_id character varying
     filing_year integer,
+    conforming_loan_limit character varying
+    median_age integer,
+    median_age_calculated integer,
+    median_income_percentage integer,
+
 )
 WITH (
     OIDS = FALSE

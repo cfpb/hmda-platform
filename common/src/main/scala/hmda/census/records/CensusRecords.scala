@@ -30,7 +30,7 @@ object CensusRecords {
           tractMfi = if (values(10).isEmpty) 0 else values(10).toInt,
           tracttoMsaIncomePercent =
             if (values(11).isEmpty) 0.0 else values(11).toDouble,
-          medianAge = if (values(12).isEmpty) 0 else values(12).toInt,
+          medianAge = if (values(12).isEmpty) -1 else values(12).toInt,
           smallCounty =
             if (!values(13).isEmpty && values(13) == "S") true else false,
           name = values(14)

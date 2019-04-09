@@ -139,7 +139,10 @@ class ModifiedLarRepository(tableName: String,
             msa_md_name,
             submission_id,
             filing_year,
-            conforming_loan_limit
+            conforming_loan_limit,
+            median_age,
+            median_age_calculated,
+            median_income_percentage
           )
           VALUES (
             ${input.mlar.id},
@@ -237,10 +240,20 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.name},
             ${submissionId},
             ${filingYear},
-            ${input.mlar.conformingLoanLimit}
+            ${input.mlar.conformingLoanLimit},
+            ${input.census.medianAge},
+            ${medianAgeCalculated(filingYear, input.census.medianAge)},
+            ${input.census.tracttoMsaIncomePercent}
           )
           """)
 
   private def safeConvertToInt(s: String): Option[Int] =
     Try(s.toInt).toOption
+
+  private def medianAgeCalculated(filingYear: Int, medianAge: Int): Int = {
+    if (medianAge == -1)
+      medianAge
+    else
+      filingYear - medianAge
+  }
 }
