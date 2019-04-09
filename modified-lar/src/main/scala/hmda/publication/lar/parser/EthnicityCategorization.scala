@@ -13,6 +13,11 @@ object EthnicityCategorization {
                                 ethnicity.ethnicity3,
                                 ethnicity.ethnicity4,
                                 ethnicity.ethnicity5)
+    val coethnicityFields = Array(ethnicity.ethnicity1,
+                                  ethnicity.ethnicity2,
+                                  ethnicity.ethnicity3,
+                                  ethnicity.ethnicity4,
+                                  ethnicity.ethnicity5)
     val hispanicEnums = Array(HispanicOrLatino,
                               Mexican,
                               PuertoRican,
@@ -31,9 +36,25 @@ object EthnicityCategorization {
       "Not Hispanic or Latino"
     else if (ethnicityFields
                .map(hispanicEnums.contains(_))
-               .reduce(_ || _)) ||
+               .reduce(_ || _) && (coethnicityFields
+               .map(_ == NotHispanicOrLatino)
+               .reduce(_ && _)))
+      "Joint"
+    else if (coethnicityFields
+               .map(hispanicEnums.contains(_))
+               .reduce(_ || _) && (ethnicityFields
+               .map(_ == NotHispanicOrLatino)
+               .reduce(_ && _)))
+      "Joint"
+    else if (ethnicityFields.contains(NotHispanicOrLatino) && ethnicityFields
+               .map(hispanicEnums.contains(_))
+               .reduce(_ || _))
+      "Joint"
+    else if (coethnicityFields.contains(NotHispanicOrLatino) && coethnicityFields
+               .map(hispanicEnums.contains(_))
+               .reduce(_ || _))
       "Joint"
     else
-      "Not Applicable"
+      "Not Determined"
   }
 }

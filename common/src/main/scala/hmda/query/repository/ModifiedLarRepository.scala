@@ -142,7 +142,8 @@ class ModifiedLarRepository(tableName: String,
             conforming_loan_limit,
             median_age,
             median_age_calculated,
-            median_income_percentage
+            median_income_percentage,
+            ethnicity_categorization
           )
           VALUES (
             ${input.mlar.id},
@@ -244,6 +245,7 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.medianAge},
             ${medianAgeCalculated(filingYear, input.census.medianAge)},
             ${input.census.tracttoMsaIncomePercent}
+            ${input.mlar.ethnicityCategorization}
           )
           """)
 
