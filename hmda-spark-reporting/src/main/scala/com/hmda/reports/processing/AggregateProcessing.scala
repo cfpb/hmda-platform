@@ -74,6 +74,37 @@ object AggregateProcessing {
         .load()
         .cache()
 
+    def jsonFormationTable9(msaMd: Msa, input: List[Data]): OutAggregateMedAge = {
+      val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+      val medianAges = input
+        .groupBy(d => d.msa_md)
+        .flatMap {
+          case (msa, datasByMsa) =>
+            val medianAges: List[MedianAge] = datasByMsa
+              .groupBy(_.median_age_calculated)
+              .map {
+                case (medianAge, datasByMedianAges) =>
+                  val dispositions: List[Disposition] = datasByMedianAges
+                    .groupBy(d => d.dispositionName)
+                    .map {
+                      case (dispositionName, datasByDispositionName) =>
+                        val listInfo: List[Info] = datasByDispositionName.map(d => Info(d.title, d.count, d.loan_amount))
+                        Disposition(dispositionName, listInfo)
+                    }.toList
+                  MedianAge(medianAge, dispositions)
+              }.toList
+            medianAges
+        }.toList
+      OutAggregateMedAge(
+        "9",
+        "Aggregate",
+        "Disposition of loan applications, by median age of homes in census tract in which property is located and type of loan",
+        year,
+        dateFormat.format(new java.util.Date()),
+        msaMd,
+        medianAges)
+    }
+
     def jsonFormationAggregateTable1(msaMd: Msa,
                                      input: List[Data]): OutAggregate1 = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
@@ -219,6 +250,32 @@ object AggregateProcessing {
             jsonFormationAggregateTable2(msaMd, values)
         }
         .toList
+
+    def aggregateTable9: List[OutAggregateMedAge] =
+      MedianAgeProcessing.outputCollectionTable1(cachedRecordsDf, spark)
+        .groupBy(d => d.msa_md).map{
+        case(key, values) =>
+          val msaMd = Msa(
+            key.toString(),
+            values.head.msa_md_name,
+            values.head.state,
+            Census.states.getOrElse(values.head.state, State("", ""))
+          jsonFormationTable1(msaMd, values, leiDetails)
+      }
+
+//      BaseProcessing
+//        .outputCollectionTable2(cachedRecordsDf, spark)
+//        .groupBy(d => d.msa_md)
+//        .map {
+//          case (key, values) =>
+//            val msaMd = Msa(
+//              key.toString,
+//              values.head.msa_md_name,
+//              values.head.state,
+//              Census.states.getOrElse(values.head.state, State("", "")).name)
+//            jsonFormationAggregateTable2(msaMd, values)
+//        }
+//        .toList
 
     val result = for {
       _ <- persistJson(aggregateTable1)

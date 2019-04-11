@@ -1,6 +1,14 @@
 package com.hmda.reports.model
 
-case class Data(msa_md: Long, msa_md_name: String, state: String, loan_amount: Double, count: Long, dispositionName: String, title: String, median_age_calculated: String = "")
+case class DataMedAge(msa_md: Long, msa_md_name: String, state: String, loan_amount: Double, count: Long, dispositionName: String, title: String, median_age_calculated: String = "")
+case class Data(tract: String,
+                msa_md: Long,
+                msa_md_name: String,
+                state: String,
+                loan_amount: Double,
+                count: Long,
+                dispositionName: String,
+                title: String)
 case class Info(dispositionName: String, count: Long, value: Double)
 case class Disposition(title: String, values: List[Info])
 case class Tract(tract: String, dispositions: List[Disposition])
@@ -50,7 +58,13 @@ case class StateMapping(county: String = "NA",
 
 
 case class MedianAge (medianAge: String = "", loanCategories: List[Disposition])
-case class OutAggregateMedAge(description: String, year: String, reportDate: String, msa: Msa, medianAges: List[MedianAge])
+case class OutAggregateMedAge(table: String,
+                              `type`: String,
+                              description: String,
+                              year: String,
+                              reportDate: String,
+                              msa: Msa,
+                              medianAges: List[MedianAge])
 
 case class AgeBuckets(medianAgeRange: String)
 case class Grouping(msa_md: Long, msa_md_name: String, state: String)
