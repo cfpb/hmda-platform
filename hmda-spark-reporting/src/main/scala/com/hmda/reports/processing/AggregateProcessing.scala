@@ -279,8 +279,8 @@ object AggregateProcessing {
     }
 
     val result = for {
-      //      _ <- persistJson(aggregateTable1)
-      //      _ <- persistJson2(aggregateTable2)
+            _ <- persistJson(aggregateTable1)
+            _ <- persistJson2(aggregateTable2)
       _ <- persistJsonI(aggregateTableI.toList)
     } yield ()
 
