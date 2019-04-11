@@ -10,11 +10,20 @@
 Example response:
 
 ```json
-{
- "institutions": [
-   {"lei":"12345677654321","name":"Test Bank 1","period":"2018"},
-   {"lei":"5734315621455","name":"Test Bank 12","period":"2018"}
-  ]}
+{  
+   "institutions":[  
+      {  
+         "lei":"12345677654321",
+         "name":"Test Bank 1",
+         "period":"2018"
+      },
+      {  
+         "lei":"5734315621455",
+         "name":"Test Bank 12",
+         "period":"2018"
+      }
+   ]
+}
 ```
 
 * `/filers/<filing year>/<lei>/msaMds`
@@ -24,8 +33,21 @@ Example response:
 Example response:
 
 ```json
-{"institution":
-{"lei":"12345677654321","name":"Test Bank 1","period":"2018"},
-"msaMds":[{"id":"47664","name":"FARMINGTON HILLS,MI"},
-{"id":"19180","name":"DANVILLE,IL"}]}
+{  
+   "institution":{  
+      "lei":"12345677654321",
+      "name":"Test Bank 1",
+      "period":"2018"
+   },
+   "msaMds":[  
+      {  
+         "id":"47664",
+         "name":"FARMINGTON HILLS,MI"
+      },
+      {  
+         "id":"19180",
+         "name":"DANVILLE,IL"
+      }
+   ]
+}
 ```
