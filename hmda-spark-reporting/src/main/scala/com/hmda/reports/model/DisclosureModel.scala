@@ -54,3 +54,17 @@ case class StateMapping(county: String = "NA",
                         stateName: String = "NA",
                         stateCode: Int = 0,
                         countyCode: Int = 0)
+
+//Table I
+//Reporting Institutions
+case class ReportedInstitutions(msa_md: String,
+                                msa_md_name: String,
+                                state: String,
+                                reported_institutions: List[String])
+case class OutReportedInstitutions(table: String,
+                                   `type`: String,
+                                   description: String,
+                                   year: String,
+                                   reportDate: String,
+                                   msa: Msa,
+                                   institutions: Set[String])
