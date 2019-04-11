@@ -74,7 +74,7 @@ object AggregateProcessing {
         .load()
         .cache()
 
-    def jsonFormationTable9(msaMd: Msa, input: List[Data]): OutAggregateMedAge = {
+    def jsonFormationTable9(msaMd: Msa, input: List[DataMedAge]): OutAggregateMedAge = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
       val medianAges = input
         .groupBy(d => d.msa_md)
@@ -259,23 +259,12 @@ object AggregateProcessing {
             key.toString(),
             values.head.msa_md_name,
             values.head.state,
-            Census.states.getOrElse(values.head.state, State("", ""))
-          jsonFormationTable1(msaMd, values, leiDetails)
+            Census.states.getOrElse(values.head.state, State("", "")).name)
+          jsonFormationTable9(msaMd, values)
       }
+      .toList
 
-//      BaseProcessing
-//        .outputCollectionTable2(cachedRecordsDf, spark)
-//        .groupBy(d => d.msa_md)
-//        .map {
-//          case (key, values) =>
-//            val msaMd = Msa(
-//              key.toString,
-//              values.head.msa_md_name,
-//              values.head.state,
-//              Census.states.getOrElse(values.head.state, State("", "")).name)
-//            jsonFormationAggregateTable2(msaMd, values)
-//        }
-//        .toList
+
 
     val result = for {
       _ <- persistJson(aggregateTable1)
