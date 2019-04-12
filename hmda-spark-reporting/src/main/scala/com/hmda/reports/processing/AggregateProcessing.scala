@@ -230,7 +230,6 @@ object AggregateProcessing {
     def persistJson9(input: List[OutAggregateMedAge]): Future[Done] =
       Source(input)
         .mapAsyncUnordered(10) { input =>
-          print(input)
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
             s"$bucket/reports/aggregate/$year/${input.msa.id}/9.json",
@@ -286,8 +285,8 @@ object AggregateProcessing {
         .toList
 
     val result = for {
-//      _ <- persistJson(aggregateTable1)
-//      _ <- persistJson2(aggregateTable2)
+      _ <- persistJson(aggregateTable1)
+      _ <- persistJson2(aggregateTable2)
       _ <- persistJson9(aggregateTable9)
     } yield ()
 

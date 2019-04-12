@@ -228,7 +228,6 @@ object MedianAgeProcessing {
       .flatMapGroups {
         case (Grouping(msa_md, msa_md_name, state), datas) =>
           val listData = datas.toList
-          println("This is listData size: " + listData.size)
           val map = emptyData(msa_md,
                               msa_md_name,
                               state,
@@ -264,84 +263,84 @@ object MedianAgeProcessing {
       }
       .reduce(_ union _)
 
-//    val outputBTable1 = actionsTakenTable1
-//      .map {
-//        case (description, eachList) =>
-//          transformation(dispositionB(cachedRecordsDf,
-//                                      description,
-//                                      eachList,
-//                                      allUniqueMsaMdTract(cachedRecordsDf),
-//                                      spark),
-//                         spark)
-//      }
-//      .reduce(_ union _)
-//
-//    val outputCTable1 = actionsTakenTable1
-//      .map {
-//        case (description, eachList) =>
-//          transformation(dispositionC(cachedRecordsDf,
-//                                      description,
-//                                      eachList,
-//                                      allUniqueMsaMdTract(cachedRecordsDf),
-//                                      spark),
-//                         spark)
-//      }
-//      .reduce(_ union _)
-//
-//    val outputDTable1 = actionsTakenTable1
-//      .map {
-//        case (description, eachList) =>
-//          transformation(dispositionD(cachedRecordsDf,
-//                                      description,
-//                                      eachList,
-//                                      allUniqueMsaMdTract(cachedRecordsDf),
-//                                      spark),
-//                         spark)
-//      }
-//      .reduce(_ union _)
-//
-//    val outputETable1 = actionsTakenTable1
-//      .map {
-//        case (description, eachList) =>
-//          dispositionE(cachedRecordsDf,
-//                       description,
-//                       eachList,
-//                       allUniqueMsaMdTract(cachedRecordsDf),
-//                       spark)
-//      }
-//      .reduce(_ union _)
-//
-//    val outputFTable1 = actionsTakenTable1
-//      .map {
-//        case (description, eachList) =>
-//          dispositionF(cachedRecordsDf,
-//                       description,
-//                       eachList,
-//                       allUniqueMsaMdTract(cachedRecordsDf),
-//                       spark)
-//      }
-//      .reduce(_ union _)
-//
-//    val outputGTable1 = actionsTakenTable1
-//      .map {
-//        case (description, eachList) =>
-//          dispositionG(cachedRecordsDf,
-//                       description,
-//                       eachList,
-//                       allUniqueMsaMdTract(cachedRecordsDf),
-//                       spark)
-//      }
-//      .reduce(_ union _)
+    val outputBTable1 = actionsTakenTable1
+      .map {
+        case (description, eachList) =>
+          transformation(dispositionB(cachedRecordsDf,
+                                      description,
+                                      eachList,
+                                      allUniqueMsaMdTract(cachedRecordsDf),
+                                      spark),
+                         spark)
+      }
+      .reduce(_ union _)
+
+    val outputCTable1 = actionsTakenTable1
+      .map {
+        case (description, eachList) =>
+          transformation(dispositionC(cachedRecordsDf,
+                                      description,
+                                      eachList,
+                                      allUniqueMsaMdTract(cachedRecordsDf),
+                                      spark),
+                         spark)
+      }
+      .reduce(_ union _)
+
+    val outputDTable1 = actionsTakenTable1
+      .map {
+        case (description, eachList) =>
+          transformation(dispositionD(cachedRecordsDf,
+                                      description,
+                                      eachList,
+                                      allUniqueMsaMdTract(cachedRecordsDf),
+                                      spark),
+                         spark)
+      }
+      .reduce(_ union _)
+
+    val outputETable1 = actionsTakenTable1
+      .map {
+        case (description, eachList) =>
+          dispositionE(cachedRecordsDf,
+                       description,
+                       eachList,
+                       allUniqueMsaMdTract(cachedRecordsDf),
+                       spark)
+      }
+      .reduce(_ union _)
+
+    val outputFTable1 = actionsTakenTable1
+      .map {
+        case (description, eachList) =>
+          dispositionF(cachedRecordsDf,
+                       description,
+                       eachList,
+                       allUniqueMsaMdTract(cachedRecordsDf),
+                       spark)
+      }
+      .reduce(_ union _)
+
+    val outputGTable1 = actionsTakenTable1
+      .map {
+        case (description, eachList) =>
+          dispositionG(cachedRecordsDf,
+                       description,
+                       eachList,
+                       allUniqueMsaMdTract(cachedRecordsDf),
+                       spark)
+      }
+      .reduce(_ union _)
 
     val aList = outputATable1.collect().toList
-//    val bList = outputBTable1.collect().toList
-//    val cList = outputCTable1.collect().toList
-//    val dList = outputDTable1.collect().toList
-//    val eList = outputETable1.collect().toList
-//    val fList = outputFTable1.collect().toList
-//    val gList = outputGTable1.collect().toList
+    val bList = outputBTable1.collect().toList
+    val cList = outputCTable1.collect().toList
+    val dList = outputDTable1.collect().toList
+    val eList = outputETable1.collect().toList
+    val fList = outputFTable1.collect().toList
+    val gList = outputGTable1.collect().toList
 
-    aList //++ bList ++ cList ++ dList ++ eList ++ fList ++ gList
+    aList ++ bList ++ cList ++ dList ++ eList ++ fList ++ gList
   }
 
 }
