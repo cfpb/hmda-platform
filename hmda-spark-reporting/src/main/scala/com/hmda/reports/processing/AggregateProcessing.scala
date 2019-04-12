@@ -63,6 +63,8 @@ object AggregateProcessing {
       implicit mat: ActorMaterializer,
       ec: ExecutionContext): Future[Unit] = {
 
+    import spark.implicits._
+
     def cachedRecordsDf: DataFrame =
       spark.read
         .format("jdbc")
@@ -110,6 +112,17 @@ object AggregateProcessing {
         medianAges
       )
     }
+
+    def cachedRecordsInstitions2018: DataFrame =
+      spark.read
+        .format("jdbc")
+        .option("driver", "org.postgresql.Driver")
+        .option("url", jdbcUrl)
+        .option(
+          "dbtable",
+          s"(select lei, respondent_name from institutions2018 where hmda_filer = true) as mlar")
+        .load()
+        .cache()
 
     def jsonFormationAggregateTable1(msaMd: Msa,
                                      input: List[Data]): OutAggregate1 = {
@@ -239,6 +252,18 @@ object AggregateProcessing {
         }
         .runWith(Sink.ignore)
 
+    def persistJsonI(input: List[OutReportedInstitutions]): Future[Done] =
+      Source(input)
+        .mapAsyncUnordered(10) { input =>
+          val data: String = input.asJson.noSpaces
+          BaseProcessing.persistSingleFile(
+            s"$bucket/reports/aggregate/2018/${input.msa.id}/I.json",
+            data,
+            "cfpb-hmda-public",
+            s3Settings)(mat, ec)
+        }
+        .runWith(Sink.ignore)
+
     def aggregateTable1: List[OutAggregate1] =
       BaseProcessing
         .outputCollectionTable1(cachedRecordsDf, spark)
@@ -284,9 +309,43 @@ object AggregateProcessing {
         }
         .toList
 
+    val reportedInstitutions = cachedRecordsDf
+      .join(
+        cachedRecordsInstitions2018,
+        cachedRecordsInstitions2018.col("lei") === cachedRecordsDf.col("lei"),
+        "inner")
+      .groupBy(col("msa_md"), col("msa_md_name"), col("state"))
+      .agg(collect_set(col("respondent_name")) as "reported_institutions")
+      .as[ReportedInstitutions]
+      .collect
+      .toSet
+
+    val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+
+    def aggregateTableI = reportedInstitutions.groupBy(d => d.msa_md).map {
+      case (key, values) =>
+        val msaMd: Msa =
+          Msa(key.toString(),
+              values.head.msa_md_name,
+              values.head.state,
+              Census.states.getOrElse(values.head.state, State("", "")).name)
+        val institutions: Set[String] =
+          values.map(d => d.reported_institutions.head)
+        OutReportedInstitutions(
+          "I",
+          "Aggregate",
+          "List of financial institutions whose data make up the 2018 MSA/MD aggregate report",
+          year,
+          dateFormat.format(new java.util.Date()),
+          msaMd,
+          institutions
+        )
+    }
+
     val result = for {
       _ <- persistJson(aggregateTable1)
       _ <- persistJson2(aggregateTable2)
+      _ <- persistJsonI(aggregateTableI.toList)
       _ <- persistJson9(aggregateTable9)
     } yield ()
 
