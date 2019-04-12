@@ -74,7 +74,8 @@ object AggregateProcessing {
         .load()
         .cache()
 
-    def jsonFormationTable9(msaMd: Msa, input: List[DataMedAge]): OutAggregateMedAge = {
+    def jsonFormationTable9(msaMd: Msa,
+                            input: List[DataMedAge]): OutAggregateMedAge = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
       val medianAges = input
         .groupBy(d => d.msa_md)
@@ -88,13 +89,17 @@ object AggregateProcessing {
                     .groupBy(d => d.dispositionName)
                     .map {
                       case (dispositionName, datasByDispositionName) =>
-                        val listInfo: List[Info] = datasByDispositionName.map(d => Info(d.title, d.count, d.loan_amount))
+                        val listInfo: List[Info] = datasByDispositionName.map(
+                          d => Info(d.title, d.count, d.loan_amount))
                         Disposition(dispositionName, listInfo)
-                    }.toList
+                    }
+                    .toList
                   MedianAge(medianAge, dispositions)
-              }.toList
+              }
+              .toList
             medianAges
-        }.toList
+        }
+        .toList
       OutAggregateMedAge(
         "9",
         "Aggregate",
@@ -102,7 +107,8 @@ object AggregateProcessing {
         year,
         dateFormat.format(new java.util.Date()),
         msaMd,
-        medianAges)
+        medianAges
+      )
     }
 
     def jsonFormationAggregateTable1(msaMd: Msa,
@@ -221,6 +227,19 @@ object AggregateProcessing {
         }
         .runWith(Sink.ignore)
 
+    def persistJson9(input: List[OutAggregateMedAge]): Future[Done] =
+      Source(input)
+        .mapAsyncUnordered(10) { input =>
+          print(input)
+          val data: String = input.asJson.noSpaces
+          BaseProcessing.persistSingleFile(
+            s"$bucket/reports/aggregate/$year/${input.msa.id}/9.json",
+            data,
+            "cfpb-hmda-public",
+            s3Settings)(mat, ec)
+        }
+        .runWith(Sink.ignore)
+
     def aggregateTable1: List[OutAggregate1] =
       BaseProcessing
         .outputCollectionTable1(cachedRecordsDf, spark)
@@ -252,23 +271,24 @@ object AggregateProcessing {
         .toList
 
     def aggregateTable9: List[OutAggregateMedAge] =
-      MedianAgeProcessing.outputCollectionTable1(cachedRecordsDf, spark)
-        .groupBy(d => d.msa_md).map{
-        case(key, values) =>
-          val msaMd = Msa(
-            key.toString(),
-            values.head.msa_md_name,
-            values.head.state,
-            Census.states.getOrElse(values.head.state, State("", "")).name)
-          jsonFormationTable9(msaMd, values)
-      }
-      .toList
-
-
+      MedianAgeProcessing
+        .outputCollectionTable1(cachedRecordsDf, spark)
+        .groupBy(d => d.msa_md)
+        .map {
+          case (key, values) =>
+            val msaMd = Msa(
+              key.toString(),
+              values.head.msa_md_name,
+              values.head.state,
+              Census.states.getOrElse(values.head.state, State("", "")).name)
+            jsonFormationTable9(msaMd, values)
+        }
+        .toList
 
     val result = for {
-      _ <- persistJson(aggregateTable1)
-      _ <- persistJson2(aggregateTable2)
+//      _ <- persistJson(aggregateTable1)
+//      _ <- persistJson2(aggregateTable2)
+      _ <- persistJson9(aggregateTable9)
     } yield ()
 
     result.onComplete {
