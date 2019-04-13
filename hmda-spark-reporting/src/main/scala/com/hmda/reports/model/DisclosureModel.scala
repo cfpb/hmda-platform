@@ -74,3 +74,16 @@ case class OutAggregateMedAge(table: String,
 
 case class AgeBuckets(medianAgeRange: String)
 case class Grouping(msa_md: Long, msa_md_name: String, state: String)
+
+//Reporting Institutions (Table I)
+case class ReportedInstitutions(msa_md: String,
+                                msa_md_name: String,
+                                state: String,
+                                reported_institutions: List[String])
+case class OutReportedInstitutions(table: String,
+                                   `type`: String,
+                                   description: String,
+                                   year: String,
+                                   reportDate: String,
+                                   msa: Msa,
+                                   institutions: Set[String])

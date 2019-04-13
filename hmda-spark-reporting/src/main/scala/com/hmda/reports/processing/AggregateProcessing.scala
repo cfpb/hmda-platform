@@ -72,6 +72,17 @@ object AggregateProcessing {
           "dbtable",
           s"(select * from modifiedlar2018 where filing_year = $year) as mlar")
         .load()
+//        .cache()
+
+    val cachedRecordsInstitions2018: DataFrame =
+      spark.read
+        .format("jdbc")
+        .option("driver", "org.postgresql.Driver")
+        .option("url", jdbcUrl)
+        .option(
+          "dbtable",
+          s"(select lei as institution_lei, respondent_name from institutions2018 where hmda_filer = true) as institutions2018")
+        .load()
         .cache()
 
     def jsonFormationTable9(msaMd: Msa,
@@ -239,6 +250,18 @@ object AggregateProcessing {
         }
         .runWith(Sink.ignore)
 
+    def persistJsonI(input: List[OutReportedInstitutions]): Future[Done] =
+      Source(input)
+        .mapAsyncUnordered(10) { input =>
+          val data: String = input.asJson.noSpaces
+          BaseProcessing.persistSingleFile(
+            s"$bucket/reports/aggregate/2018/${input.msa.id}/I.json",
+            data,
+            "cfpb-hmda-public",
+            s3Settings)(mat, ec)
+        }
+        .runWith(Sink.ignore)
+
     def aggregateTable1: List[OutAggregate1] =
       BaseProcessing
         .outputCollectionTable1(cachedRecordsDf, spark)
@@ -284,10 +307,51 @@ object AggregateProcessing {
         }
         .toList
 
+    def reportedInstitutions() = {
+      import spark.implicits._
+      val clonedRenamed = cachedRecordsInstitions2018
+        .withColumnRenamed("institution_lei", "institution_lei")
+        .withColumnRenamed("respondent_name", "respondent_name")
+      val clonedDf = cachedRecordsDf
+        .withColumnRenamed("lei", "mlar_lei")
+      clonedDf
+        .join(clonedRenamed,
+              clonedRenamed
+                .col("institution_lei") === clonedDf.col("mlar_lei"),
+              "inner")
+        .groupBy(col("msa_md"), col("msa_md_name"), col("state"))
+        .agg(collect_set(col("respondent_name")) as "reported_institutions")
+        .as[ReportedInstitutions]
+        .collect
+        .toSet
+    }
+
+    val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+    def aggregateTableI = reportedInstitutions.groupBy(d => d.msa_md).map {
+      case (key, values) =>
+        val msaMd: Msa =
+          Msa(key.toString(),
+              values.head.msa_md_name,
+              values.head.state,
+              Census.states.getOrElse(values.head.state, State("", "")).name)
+        val institutions: Set[String] =
+          values.map(d => d.reported_institutions.head)
+        OutReportedInstitutions(
+          "I",
+          "Aggregate",
+          "List of financial institutions whose data make up the 2018 MSA/MD aggregate report",
+          year,
+          dateFormat.format(new java.util.Date()),
+          msaMd,
+          institutions
+        )
+    }
+
     val result = for {
       _ <- persistJson(aggregateTable1)
       _ <- persistJson2(aggregateTable2)
       _ <- persistJson9(aggregateTable9)
+      _ <- persistJsonI(aggregateTableI.toList)
     } yield ()
 
     result.onComplete {
