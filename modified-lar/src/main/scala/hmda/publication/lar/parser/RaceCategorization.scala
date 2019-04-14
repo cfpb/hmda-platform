@@ -178,7 +178,7 @@ object RaceCategorization {
         "Joint"
       }
       else
-        "Not Determined"
+        "Race not available"
   }
 
 

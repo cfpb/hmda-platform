@@ -21,7 +21,7 @@ package object SexCategorization {
    }else if(sex == Female && (coSex==Male|| coSex == MaleAndFemale)){
      "Joint"
    }else{
-     "Not Determined"
+     "Sex Not Available"
    }
   }
 }
