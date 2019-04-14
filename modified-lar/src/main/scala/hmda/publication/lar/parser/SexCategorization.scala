@@ -13,9 +13,9 @@ package object SexCategorization {
    if (sex == SexInformationNotProvided ||sex == SexNotApplicable){
      "Sex not available"
    }else if(sex == Male && (coSex!=Female|| coSex != MaleAndFemale)){
-     Male.toString
+     Male.description
    }else if(sex == Female && (coSex!=Male|| coSex != MaleAndFemale)){
-     Female.toString
+     Female.description
    }else if(sex == Male && (coSex==Female|| coSex == MaleAndFemale)){
      "Joint"
    }else if(sex == Female && (coSex==Male|| coSex == MaleAndFemale)){

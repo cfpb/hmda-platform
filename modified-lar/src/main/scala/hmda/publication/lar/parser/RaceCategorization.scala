@@ -68,10 +68,10 @@ object RaceCategorization {
 
 
       if (asianEnums.contains(race.race1)){
-        Asian.toString
+        Asian.description
       }
       else if (hawaiianIslanderEnums.contains((race.race1))){
-        NativeHawaiianOrOtherPacificIslander.toString
+        NativeHawaiianOrOtherPacificIslander.description
       }
 
       else if (race.race1==EmptyRaceValue){
@@ -85,23 +85,23 @@ object RaceCategorization {
         //American Indian
       else if (race.race1 == AmericanIndianOrAlaskaNative &&
       !isCoWhite){
-        AmericanIndianOrAlaskaNative.toString}
+        AmericanIndianOrAlaskaNative.description}
 
 
         //Asian
       else if (asianEnums.contains(race.race1)&&
         isRaceEmpty && !isCoWhite){
-        Asian.toString
+        Asian.description
       }
         //Afrcan American
       else if (race.race1 == BlackOrAfricanAmerican &&
         isRaceEmpty && !isCoWhite){
-        BlackOrAfricanAmerican.toString
+        BlackOrAfricanAmerican.description
       }
 
       else if (hawaiianIslanderEnums.contains(race.race1) &&
         isRaceEmpty && !isCoWhite){
-        NativeHawaiianOrOtherPacificIslander.toString
+        NativeHawaiianOrOtherPacificIslander.description
       }
       else if (race.race1 == AmericanIndianOrAlaskaNative&&
                race.race2==White&&
@@ -109,7 +109,7 @@ object RaceCategorization {
       race.race4 == EmptyRaceValue &&
       race.race5 == EmptyRaceValue &&
       !isCoWhite){
-        AmericanIndianOrAlaskaNative.toString
+        AmericanIndianOrAlaskaNative.description
       }
       else if (asianEnums.contains(race.race1)&&race.race2==White&&
         race.race3==EmptyRaceValue &&
@@ -117,7 +117,7 @@ object RaceCategorization {
         race.race5 == EmptyRaceValue &&
         !isCoWhite
       ){
-        Asian.toString
+        Asian.description
       }
 
       else if (race.race1 == BlackOrAfricanAmerican&&race.race2==White&&
@@ -126,7 +126,7 @@ object RaceCategorization {
         race.race5 == EmptyRaceValue &&
         !isCoWhite
       ){
-        BlackOrAfricanAmerican.toString
+        BlackOrAfricanAmerican.description
       }
 
       else if (race.race1 == NativeHawaiianOrOtherPacificIslander &&race.race2==White&&
@@ -135,15 +135,15 @@ object RaceCategorization {
         race.race5 == EmptyRaceValue &&
         !isCoWhite
       ){
-        NativeHawaiianOrOtherPacificIslander.toString
+        NativeHawaiianOrOtherPacificIslander.description
       }
 
       else if (raceFields.exists(asianEnums.contains)  && !isCoWhite){
-        Asian.toString
+        Asian.description
       }
 
       else if (raceFields.exists(hawaiianIslanderEnums.contains)  && !isCoWhite){
-        NativeHawaiianOrOtherPacificIslander.toString
+        NativeHawaiianOrOtherPacificIslander.description
       }
 
       else if (raceFields.exists(hawaiianIslanderEnums.contains) && raceFields.exists(asianEnums.contains) && !isCoWhite){
@@ -160,7 +160,7 @@ object RaceCategorization {
           coRace.race3 == EmptyRaceValue &&
           coRace.race4 == EmptyRaceValue &&
           coRace.race5 == EmptyRaceValue)){
-        White.toString}
+        White.description}
       else if ( (raceFields.exists(hawaiianIslanderEnums.contains)||
                  raceFields.exists(asianEnums.contains)||
          race.race1==AmericanIndianOrAlaskaNative||
