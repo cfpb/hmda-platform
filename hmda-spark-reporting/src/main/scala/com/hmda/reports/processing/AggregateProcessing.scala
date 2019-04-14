@@ -76,6 +76,17 @@ object AggregateProcessing {
         .load()
         .cache()
 
+    val cachedRecordsInstitions2018: DataFrame =
+      spark.read
+        .format("jdbc")
+        .option("driver", "org.postgresql.Driver")
+        .option("url", jdbcUrl)
+        .option(
+          "dbtable",
+          s"(select lei as institution_lei, respondent_name from institutions2018 where hmda_filer = true) as institutions2018")
+        .load()
+        .cache()
+
     def jsonFormationTable9(msaMd: Msa,
                             input: List[DataMedAge]): OutAggregateMedAge = {
       val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
@@ -112,17 +123,6 @@ object AggregateProcessing {
         medianAges
       )
     }
-
-    def cachedRecordsInstitions2018: DataFrame =
-      spark.read
-        .format("jdbc")
-        .option("driver", "org.postgresql.Driver")
-        .option("url", jdbcUrl)
-        .option(
-          "dbtable",
-          s"(select lei, respondent_name from institutions2018 where hmda_filer = true) as mlar")
-        .load()
-        .cache()
 
     def jsonFormationAggregateTable1(msaMd: Msa,
                                      input: List[Data]): OutAggregate1 = {
@@ -309,19 +309,26 @@ object AggregateProcessing {
         }
         .toList
 
-    val reportedInstitutions = cachedRecordsDf
-      .join(
-        cachedRecordsInstitions2018,
-        cachedRecordsInstitions2018.col("lei") === cachedRecordsDf.col("lei"),
-        "inner")
-      .groupBy(col("msa_md"), col("msa_md_name"), col("state"))
-      .agg(collect_set(col("respondent_name")) as "reported_institutions")
-      .as[ReportedInstitutions]
-      .collect
-      .toSet
+    def reportedInstitutions() = {
+      import spark.implicits._
+      val clonedRenamed = cachedRecordsInstitions2018
+        .withColumnRenamed("institution_lei", "institution_lei")
+        .withColumnRenamed("respondent_name", "respondent_name")
+      val clonedDf = cachedRecordsDf
+        .withColumnRenamed("lei", "mlar_lei")
+      clonedDf
+        .join(clonedRenamed,
+              clonedRenamed
+                .col("institution_lei") === clonedDf.col("mlar_lei"),
+              "inner")
+        .groupBy(col("msa_md"), col("msa_md_name"), col("state"))
+        .agg(collect_set(col("respondent_name")) as "reported_institutions")
+        .as[ReportedInstitutions]
+        .collect
+        .toSet
+    }
 
     val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
-
     def aggregateTableI = reportedInstitutions.groupBy(d => d.msa_md).map {
       case (key, values) =>
         val msaMd: Msa =
@@ -347,6 +354,7 @@ object AggregateProcessing {
       _ <- persistJson2(aggregateTable2)
       _ <- persistJsonI(aggregateTableI.toList)
       _ <- persistJson9(aggregateTable9)
+      _ <- persistJsonI(aggregateTableI.toList)
     } yield ()
 
     result.onComplete {
