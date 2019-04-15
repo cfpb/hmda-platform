@@ -69,6 +69,6 @@ object EthnicityCategorization {
     else if (coethnicityFields.contains(NotHispanicOrLatino) && coApplicantOnlyHispanic)
       "Joint"
     else
-      "Not Determined"
+      "Ethnicity Not Available"
   }
 }
