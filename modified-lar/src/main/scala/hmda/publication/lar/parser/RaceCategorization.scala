@@ -132,7 +132,7 @@ object RaceCategorization {
       }
 
      else if (moreThanOneMinority(coRaceFields, asianEnums, hawaiianIslanderEnums) &&
-        isAnyApplicanttWhite(race)
+        isAnyApplicantWhite(race)
       ){
         "Joint"
       }
@@ -145,6 +145,8 @@ object RaceCategorization {
                                   asianEnums: Array[RaceEnum with Product with Serializable],
                                   hawaiianIslanderEnums: Array[RaceEnum with Product with Serializable]):Boolean = {
     var counter = 0
+
+
     if (raceFields.exists(hawaiianIslanderEnums.contains)){
       counter +=1
     }
@@ -168,7 +170,7 @@ object RaceCategorization {
     false
   }
 
-  private def isAnyApplicanttWhite(race: Race): Boolean = {
+  private def isAnyApplicantWhite(race: Race): Boolean = {
     (
       race.race1 == White ||
         race.race2 == White ||
