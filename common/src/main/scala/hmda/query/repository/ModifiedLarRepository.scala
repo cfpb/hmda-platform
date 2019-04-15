@@ -1,6 +1,6 @@
 package hmda.query.repository
 
-import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
+import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -143,8 +143,12 @@ class ModifiedLarRepository(tableName: String,
             median_age,
             median_age_calculated,
             median_income_percentage,
-            ethnicity_categorization
-          )
+            ethnicity_categorization,
+            race_categorization,
+            sex_categorization
+            )
+
+
           VALUES (
             ${input.mlar.id},
             ${input.mlar.lei.toUpperCase},
@@ -244,8 +248,10 @@ class ModifiedLarRepository(tableName: String,
             ${input.mlar.conformingLoanLimit},
             ${input.census.medianAge},
             ${medianAgeCalculated(filingYear, input.census.medianAge)},
-            ${input.census.tracttoMsaIncomePercent}
-            ${input.mlar.ethnicityCategorization}
+            ${input.census.tracttoMsaIncomePercent},
+            ${input.mlar.ethnicityCategorization},
+            ${input.mlar.raceCategorization},
+            ${input.mlar.sexCategorization}
           )
           """)
 
@@ -258,4 +264,5 @@ class ModifiedLarRepository(tableName: String,
     else
       filingYear - medianAge
   }
+
 }
