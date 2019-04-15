@@ -6,6 +6,7 @@
 
    * `GET` - Returns a list of filers for the filing year defined in the URI.
 
+Note : This endpoint is currently only supported for the 2018 filing year
 
 Example response:
 
@@ -28,7 +29,7 @@ Example response:
 
 * `/filers/<filing year>/<lei>/msaMds`
 
-   * `GET` - Returns all MsaMds for the specificed filer
+   * `GET` - Returns all MsaMds for the specified filer
 
 Example response:
 
