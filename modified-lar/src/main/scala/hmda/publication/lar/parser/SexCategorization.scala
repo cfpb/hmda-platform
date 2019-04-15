@@ -5,23 +5,22 @@ import hmda.model.filing.lar.enums._
 
 package object SexCategorization {
 
-
   def assignSexCategorization(lar: LoanApplicationRegister): String = {
-    val sex = lar.applicant.sex
-    val coSex = lar.coApplicant.sex
+    val sex = lar.applicant.sex.sexEnum
+    val coSex = lar.coApplicant.sex.sexEnum
 
-   if (sex == SexInformationNotProvided ||sex == SexNotApplicable){
-     "Sex not available"
-   }else if(sex == Male && (coSex!=Female|| coSex != MaleAndFemale)){
-     Male.description
-   }else if(sex == Female && (coSex!=Male|| coSex != MaleAndFemale)){
-     Female.description
-   }else if(sex == Male && (coSex==Female|| coSex == MaleAndFemale)){
-     "Joint"
-   }else if(sex == Female && (coSex==Male|| coSex == MaleAndFemale)){
-     "Joint"
-   }else{
-     "Sex Not Available"
-   }
+    if (sex == SexInformationNotProvided || sex == SexNotApplicable) {
+      "Sex not available"
+    } else if (sex == Male && (coSex != Female || coSex != MaleAndFemale)) {
+      Male.description
+    } else if (sex == Female && (coSex != Male || coSex != MaleAndFemale)) {
+      Female.description
+    } else if (sex == Male && (coSex == Female || coSex == MaleAndFemale)) {
+      "Joint"
+    } else if (sex == Female && (coSex == Male || coSex == MaleAndFemale)) {
+      "Joint"
+    } else {
+      "Sex Not Available"
+    }
   }
 }
