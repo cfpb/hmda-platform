@@ -143,9 +143,12 @@ class ModifiedLarRepository(tableName: String,
             median_age,
             median_age_calculated,
             median_income_percentage,
+            ethnicity_categorization,
             race_categorization,
             sex_categorization
             )
+
+
           VALUES (
             ${input.mlar.id},
             ${input.mlar.lei.toUpperCase},
@@ -246,6 +249,7 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.medianAge},
             ${medianAgeCalculated(filingYear, input.census.medianAge)},
             ${input.census.tracttoMsaIncomePercent},
+            ${input.mlar.ethnicityCategorization},
             ${input.mlar.raceCategorization},
             ${input.mlar.sexCategorization}
           )

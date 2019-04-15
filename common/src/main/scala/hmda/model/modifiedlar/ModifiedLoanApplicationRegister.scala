@@ -96,6 +96,7 @@ case class ModifiedLoanApplicationRegister(
     openEndLineOfCredit: Int,
     businessOrCommercialPurpose: Int,
     conformingLoanLimit: String,
+    ethnicityCategorization: String,
     raceCategorization: String,
     sexCategorization: String,
 
