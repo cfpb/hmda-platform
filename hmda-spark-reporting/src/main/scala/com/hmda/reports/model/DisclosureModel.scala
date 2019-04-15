@@ -63,6 +63,7 @@ case class StateMapping(county: String = "NA",
                         stateCode: Int = 0,
                         countyCode: Int = 0)
 
+<<<<<<< HEAD
 case class MedianAge(medianAge: String = "", loanCategories: List[Disposition])
 case class OutAggregateMedAge(table: String,
                               `type`: String,
@@ -75,7 +76,7 @@ case class OutAggregateMedAge(table: String,
 case class AgeBuckets(medianAgeRange: String)
 case class Grouping(msa_md: Long, msa_md_name: String, state: String)
 
-//Reporting Institutions (Table I)
+
 case class ReportedInstitutions(msa_md: String,
                                 msa_md_name: String,
                                 state: String,

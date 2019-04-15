@@ -18,7 +18,7 @@ import scala.concurrent._
 import scala.util.{Failure, Success, Try}
 
 class AggregateProcessing(spark: SparkSession, s3Settings: S3Settings)
-    extends Actor
+  extends Actor
     with ActorLogging {
 
   import AggregateProcessing._
@@ -31,11 +31,11 @@ class AggregateProcessing(spark: SparkSession, s3Settings: S3Settings)
       val originalSender = sender()
       log.info(s"Beginning Aggregate Reports")
       processAggregateKafkaRecord(spark,
-                                  lookupMap,
-                                  jdbcUrl,
-                                  bucket,
-                                  year,
-                                  s3Settings)
+        lookupMap,
+        jdbcUrl,
+        bucket,
+        year,
+        s3Settings)
         .map(_ => Finished)
         .pipeTo(originalSender)
       log.info(s"Finished process for Aggregate Reports")
@@ -45,10 +45,10 @@ class AggregateProcessing(spark: SparkSession, s3Settings: S3Settings)
 
 object AggregateProcessing {
   case class ProcessAggregateKafkaRecord(
-      lookupMap: Map[(Int, Int), StateMapping],
-      jdbcUrl: String,
-      bucket: String,
-      year: String)
+                                          lookupMap: Map[(Int, Int), StateMapping],
+                                          jdbcUrl: String,
+                                          bucket: String,
+                                          year: String)
   case object Finished
 
   def props(sparkSession: SparkSession, s3Settings: S3Settings): Props =
@@ -60,8 +60,8 @@ object AggregateProcessing {
                                   bucket: String,
                                   year: String,
                                   s3Settings: S3Settings)(
-      implicit mat: ActorMaterializer,
-      ec: ExecutionContext): Future[Unit] = {
+                                   implicit mat: ActorMaterializer,
+                                   ec: ExecutionContext): Future[Unit] = {
 
     import spark.implicits._
 
@@ -318,9 +318,9 @@ object AggregateProcessing {
         .withColumnRenamed("lei", "mlar_lei")
       clonedDf
         .join(clonedRenamed,
-              clonedRenamed
-                .col("institution_lei") === clonedDf.col("mlar_lei"),
-              "inner")
+          clonedRenamed
+            .col("institution_lei") === clonedDf.col("mlar_lei"),
+          "inner")
         .groupBy(col("msa_md"), col("msa_md_name"), col("state"))
         .agg(collect_set(col("respondent_name")) as "reported_institutions")
         .as[ReportedInstitutions]
@@ -333,9 +333,9 @@ object AggregateProcessing {
       case (key, values) =>
         val msaMd: Msa =
           Msa(key.toString(),
-              values.head.msa_md_name,
-              values.head.state,
-              Census.states.getOrElse(values.head.state, State("", "")).name)
+            values.head.msa_md_name,
+            values.head.state,
+            Census.states.getOrElse(values.head.state, State("", "")).name)
         val institutions: Set[String] =
           values.map(d => d.reported_institutions.head)
         OutReportedInstitutions(
