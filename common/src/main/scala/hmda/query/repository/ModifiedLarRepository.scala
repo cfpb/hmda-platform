@@ -1,6 +1,9 @@
 package hmda.query.repository
 
-import hmda.model.modifiedlar.{EnrichedModifiedLoanApplicationRegister, ModifiedLoanApplicationRegister}
+import hmda.model.modifiedlar.{
+  EnrichedModifiedLoanApplicationRegister,
+  ModifiedLoanApplicationRegister
+}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -21,7 +24,7 @@ class ModifiedLarRepository(tableName: String,
   def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
     db.run {
       sql"""SELECT DISTINCT msa_md, msa_md_name
-                         FROM modifiedlar2018 WHERE UPPER(lei) = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
+                         FROM modifiedlar2018 WHERE lei = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
         .as[(String, String)]
     }
 
