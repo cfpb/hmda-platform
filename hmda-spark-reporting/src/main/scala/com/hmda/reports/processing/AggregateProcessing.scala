@@ -409,9 +409,7 @@ object AggregateProcessing {
       _ <- persistJson2(aggregateTable2)
       _ <- persistJsonI(aggregateTableI.toList)
       _ <- persistJsonRaceSex(jsonFormationRaceThenGender(RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
-
-
-//      _ <- persistJsonEthnicityGender(jsonFormationRaceThenGender(total))
+      _ <- persistJsonEthnicitySex(jsonTransformationReportByEthnicityThenGender(RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
     } yield ()
 
     result.onComplete {
