@@ -217,6 +217,120 @@ object AggregateProcessing {
       )
     }
 
+    def buildDisposition(input: List[DataRaceEthnicity], dispositionName: String): DispositionRaceEthnicity =
+      input.foldLeft(DispositionRaceEthnicity(dispositionName, 0, 0)) {
+        case (DispositionRaceEthnicity(name, curCount, curValue), next) =>
+          DispositionRaceEthnicity(name, curCount + next.count, curValue + next.loan_amount)
+      }
+
+
+    def jsonTransformationReportByEthnicityThenGender(input: List[DataRaceEthnicity]): List[ReportByEthnicityThenGender] = {
+      val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+      input
+        .groupBy(data => (data.msa_md,data.msa_md_name, data.state))
+        .map {
+          case ((msa_md, msa_md_name, state), dataForMsa: List[DataRaceEthnicity]) =>
+            val totalGrouping: List[Ethnicity] = dataForMsa
+              .groupBy(_.ethnicity)
+              .map {
+                case (eachEthnicity, dataForEthnicity: List[DataRaceEthnicity]) =>
+                  val dispositionsByEthnicity: List[DispositionRaceEthnicity] =
+                    dataForEthnicity
+                      .groupBy(_.dispositionName)
+                      .map {
+                        case (eachDisposition: String, dataForDisposition: List[DataRaceEthnicity]) =>
+                          buildDisposition(dataForDisposition, eachDisposition)
+                      }
+                      .toList
+
+                  val dispositionByEthnicityAndGender: List[Gender] =
+                    dataForEthnicity
+                      .groupBy(_.sex)
+                      .map {
+                        case (eachGender: String, dataForGender: List[DataRaceEthnicity]) =>
+                          val dispositionsForGender: List[DispositionRaceEthnicity] =
+                            dataForGender
+                              .groupBy(_.dispositionName)
+                              .map {
+                                case (eachDisposition: String, dataForDisposition: List[DataRaceEthnicity]) =>
+                                  buildDisposition(dataForDisposition, eachDisposition)
+                              }
+                              .toList
+
+                          Gender(eachGender, dispositionsForGender)
+                      }
+                      .toList
+
+                  Ethnicity(eachEthnicity, dispositionsByEthnicity, dispositionByEthnicityAndGender)
+              }
+              .toList
+            val msa = Msa(msa_md.toString(),msa_md_name, state, Census.states.getOrElse(state, State("", "")).name)
+            ReportByEthnicityThenGender(
+              "4",
+              "Aggregate",
+              "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4- family and manufactured home dwellings, by race and gender",
+              year,
+              dateFormat.format(new java.util.Date()),
+              msa,
+              totalGrouping)
+        }
+        .toList
+    }
+
+
+    def jsonFormationRaceThenGender(input: List[DataRaceEthnicity]): List[ReportByRaceThenGender] = {
+      val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+      input
+        .groupBy(data => (data.msa_md, data.msa_md_name, data.state))
+        .map {
+          case ((msa_md, msa_md_name, state), dataForMsa: List[DataRaceEthnicity]) =>
+            val totalGrouping: List[Race] = dataForMsa
+              .groupBy(_.race)
+              .map {
+                case (eachRace, dataForRace: List[DataRaceEthnicity]) =>
+                  val dispositionsByRace: List[DispositionRaceEthnicity] =
+                    dataForRace
+                      .groupBy(_.dispositionName)
+                      .map {
+                        case (eachDisposition: String, dataForDisposition: List[DataRaceEthnicity]) =>
+                          buildDisposition(dataForDisposition, eachDisposition)
+                      }
+                      .toList
+
+                  val dispositionByRaceAndGender: List[Gender] =
+                    dataForRace
+                      .groupBy(_.sex)
+                      .map {
+                        case (eachGender: String, dataForGender: List[DataRaceEthnicity]) =>
+                          val dispositionsForGender: List[DispositionRaceEthnicity] =
+                            dataForGender
+                              .groupBy(_.dispositionName)
+                              .map {
+                                case (eachDisposition: String, dataForDisposition: List[DataRaceEthnicity]) =>
+                                  buildDisposition(dataForDisposition, eachDisposition)
+                              }
+                              .toList
+
+                          Gender(eachGender, dispositionsForGender)
+                      }
+                      .toList
+
+                  Race(eachRace, dispositionsByRace, dispositionByRaceAndGender)
+              }
+              .toList
+            val msa = Msa(msa_md.toString(),msa_md_name, state, Census.states.getOrElse(state, State("", "")).name)
+            ReportByRaceThenGender(
+              "3",
+              "Aggregate",
+              "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4- family and manufactured home dwellings, by race and gender",
+              year,
+              dateFormat.format(new java.util.Date()),
+              msa,
+              totalGrouping)
+        }
+        .toList
+    }
+
     def persistJson(input: List[OutAggregate1]): Future[Done] =
       Source(input)
         .mapAsyncUnordered(10) { input =>
@@ -264,6 +378,18 @@ object AggregateProcessing {
             s3Settings)(mat, ec)
         }
         .runWith(Sink.ignore)
+
+    def persistJsonEthnicitySex(input: List[ReportByEthnicityThenGender]): Future[Done] =
+      Source(input).mapAsyncUnordered(10) { input =>
+        val data: String =  input.asJson.noSpaces
+        BaseProcessing.persistSingleFile(s"dev/reports/aggregate/2018/${input.msa.id}/4.json", data, "cfpb-hmda-public", s3Settings)(mat, ec)
+      }.runWith(Sink.ignore)
+
+    def persistJsonRaceSex(input: List[ReportByRaceThenGender]): Future[Done] =
+      Source(input).mapAsyncUnordered(10) { input =>
+        val data: String =  input.asJson.noSpaces
+        BaseProcessing.persistSingleFile(s"dev/reports/aggregate/2018/${input.msa.id}/3.json", data, "cfpb-hmda-public", s3Settings)(mat, ec)
+      }.runWith(Sink.ignore)
 
     def aggregateTable1: List[OutAggregate1] =
       BaseProcessing
@@ -355,6 +481,8 @@ object AggregateProcessing {
       _ <- persistJson2(aggregateTable2)
       _ <- persistJson9(aggregateTable9)
       _ <- persistJsonI(aggregateTableI.toList)
+      _ <- persistJsonRaceSex(jsonFormationRaceThenGender(RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
+      _ <- persistJsonEthnicitySex(jsonTransformationReportByEthnicityThenGender(RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
     } yield ()
 
     result.onComplete {

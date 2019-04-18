@@ -1,6 +1,9 @@
 package hmda.query.repository
 
-import hmda.model.modifiedlar.EnrichedModifiedLoanApplicationRegister
+import hmda.model.modifiedlar.{
+  EnrichedModifiedLoanApplicationRegister,
+  ModifiedLoanApplicationRegister
+}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
@@ -21,7 +24,7 @@ class ModifiedLarRepository(tableName: String,
   def msaMds(lei: String, filingYear: Int): Future[Vector[(String, String)]] =
     db.run {
       sql"""SELECT DISTINCT msa_md, msa_md_name
-                         FROM modifiedlar2018 WHERE UPPER(lei) = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
+                         FROM modifiedlar2018 WHERE lei = ${lei.toUpperCase} AND filing_year = ${filingYear}"""
         .as[(String, String)]
     }
 
@@ -142,8 +145,13 @@ class ModifiedLarRepository(tableName: String,
             conforming_loan_limit,
             median_age,
             median_age_calculated,
-            median_income_percentage
-          )
+            median_income_percentage,
+            ethnicity_categorization,
+            race_categorization,
+            sex_categorization
+            )
+
+
           VALUES (
             ${input.mlar.id},
             ${input.mlar.lei.toUpperCase},
@@ -243,7 +251,10 @@ class ModifiedLarRepository(tableName: String,
             ${input.mlar.conformingLoanLimit},
             ${input.census.medianAge},
             ${medianAgeCalculated(filingYear, input.census.medianAge)},
-            ${input.census.tracttoMsaIncomePercent}
+            ${input.census.tracttoMsaIncomePercent},
+            ${input.mlar.ethnicityCategorization},
+            ${input.mlar.raceCategorization},
+            ${input.mlar.sexCategorization}
           )
           """)
 
@@ -256,4 +267,5 @@ class ModifiedLarRepository(tableName: String,
     else
       filingYear - medianAge
   }
+
 }

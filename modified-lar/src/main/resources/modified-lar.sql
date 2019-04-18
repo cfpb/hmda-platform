@@ -109,3 +109,9 @@ WITH (
 
 ALTER TABLE public.modifiedlar2018
   OWNER to postgres;
+
+ALTER TABLE  public.modifiedlar2018
+  ADD COLUMN race_categorization character varying,
+  ADD COLUMN sex_categorization character varying;
+
+CREATE INDEX ON modifiedlar2018 (lei);
