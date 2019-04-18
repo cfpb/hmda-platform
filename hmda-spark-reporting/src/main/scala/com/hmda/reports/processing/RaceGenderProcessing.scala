@@ -2,7 +2,6 @@ package com.hmda.reports.processing
 
 import com.hmda.reports.model.{DataRaceEthnicity, Grouping}
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
-import org.apache.spark.sql.catalyst.expressions.Grouping
 import org.apache.spark.sql.functions._
 
 object RaceGenderProcessing {
