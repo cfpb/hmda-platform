@@ -225,8 +225,8 @@ object IncomeRaceEthnicityProcessing {
       .as[IncomeData]
   }
 
-  def outputCollectionTable3(cachedRecordsDf: DataFrame,
-                             spark: SparkSession): List[IncomeData] = {
+  def outputCollectionTableIncome(cachedRecordsDf: DataFrame,
+                                  spark: SparkSession): List[IncomeData] = {
     val actionsTakenTable1 = Map(
       "Applications Received" -> List(1, 2, 3, 4, 5),
       "Loans Originated" -> List(1),
