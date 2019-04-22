@@ -6,16 +6,13 @@ import akka.stream._
 import akka.stream.scaladsl._
 import akka.pattern.pipe
 import akka.stream.alpakka.s3.S3Settings
-import akka.util.ByteString
 import com.hmda.reports.model._
 import hmda.model.census.{Census, State}
 import io.circe.generic.auto._
 import io.circe.syntax._
 import org.apache.spark.sql.{SparkSession, _}
-import org.apache.spark.sql.functions._
 
 import scala.concurrent._
-import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
 class DisclosureProcessing(spark: SparkSession, s3Settings: S3Settings)

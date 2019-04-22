@@ -68,4 +68,3 @@ case class OutReportedInstitutions(table: String,
                                    reportDate: String,
                                    msa: Msa,
                                    institutions: Set[String])
-
