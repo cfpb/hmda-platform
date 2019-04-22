@@ -95,7 +95,11 @@ case class ModifiedLoanApplicationRegister(
     reverseMortgage: Int,
     openEndLineOfCredit: Int,
     businessOrCommercialPurpose: Int,
-    conformingLoanLimit: String
+    conformingLoanLimit: String,
+    ethnicityCategorization: String,
+    raceCategorization: String,
+    sexCategorization: String,
+
 ) extends PipeDelimited {
 
   override def toCSV: String = {
