@@ -1,6 +1,10 @@
 package com.hmda.reports.processing
 
-import com.hmda.reports.model.{DataRaceEthnicity, Grouping}
+import com.hmda.reports.model.{
+  DataRaceEthnicity,
+  Grouping,
+  GroupingRaceEthnicity
+}
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 
@@ -55,14 +59,15 @@ object RaceGenderProcessing {
     import spark.implicits._
     ds.groupByKey(
         data =>
-          Grouping(data.msa_md,
-                   data.msa_md_name,
-                   data.state,
-                   data.dispositionName,
-                   data.title))
+          GroupingRaceEthnicity(data.msa_md,
+                                data.msa_md_name,
+                                data.state,
+                                data.dispositionName,
+                                data.title))
       .flatMapGroups {
-        case (Grouping(msa_md, msa_md_name, state, dispName, title),
-              elements) =>
+        case (
+            GroupingRaceEthnicity(msa_md, msa_md_name, state, dispName, title),
+            elements) =>
           val defaultMap =
             defaultData(msa_md, msa_md_name, state, dispName, title)
               .map(d => (d.race, d.sex, d.ethnicity) -> d)
