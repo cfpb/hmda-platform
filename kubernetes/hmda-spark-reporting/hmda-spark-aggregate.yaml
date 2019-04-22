@@ -11,18 +11,18 @@ spec:
     "spark.streaming.receiver.maxRate": "1"
     "spark.streaming.backpressure.initialRate": "1"
     "spark.streaming.backpressure.enabled": "true"
-  image: "omnipresent/hmda-spark-reporting"
+  image: "omnipresent/hmda-agg-i"
   imagePullPolicy: Always
   mainClass: com.hmda.reports.AggregateReports
   mainApplicationFile: "local:///opt/spark/cfpb/hmda/jars/hmda-spark-reporting.jar"
   sparkVersion: "2.4.0"
   restartPolicy:
     type: Never
-  volumes:
-    - name: "test-volume"
-      hostPath:
-        path: "/tmp"
-        type: Directory
+#  volumes:
+#    - name: "test-volume"
+#      hostPath:
+#        path: "/tmp"
+#        type: Directory
   driver:
     cores: 1
     coreLimit: "4000m"
@@ -46,6 +46,9 @@ spec:
       KAFKA_HOSTS:
         name: kafka-hosts
         key: kafka-hosts
+      AWS_ENV:
+        name: aws-env
+        key: aws-env
     volumeMounts:
       - name: "test-volume"
         mountPath: "/tmp"
@@ -71,10 +74,13 @@ spec:
       KAFKA_HOSTS:
         name: kafka-hosts
         key: kafka-hosts
-    volumeMounts:
-      - name: "test-volume"
-        mountPath: "/tmp"
-    volumes:
-      - name: config-vol
-        configMap:
-          name: dummy-cm
+      AWS_ENV:
+        name: aws-env
+        key: aws-env
+#    volumeMounts:
+#      - name: "test-volume"
+#        mountPath: "/tmp"
+#    volumes:
+#      - name: config-vol
+#        configMap:
+#          name: dummy-cm
