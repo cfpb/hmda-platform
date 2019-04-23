@@ -53,13 +53,13 @@ object IncomeRaceEthnicityProcessing {
     import spark.implicits._
     ds.groupByKey(
         data =>
-          Grouping(data.msa_md,
-                   data.msa_md_name,
-                   data.state,
-                   data.incomeBracket,
-                   data.title))
+          IncomeGrouping(data.msa_md,
+                         data.msa_md_name,
+                         data.state,
+                         data.incomeBracket,
+                         data.title))
       .flatMapGroups {
-        case (Grouping(msa_md, msa_md_name, state, dispName, title),
+        case (IncomeGrouping(msa_md, msa_md_name, state, dispName, title),
               elements) =>
           val defaultMap =
             defaultData(msa_md, msa_md_name, state, dispName, title)

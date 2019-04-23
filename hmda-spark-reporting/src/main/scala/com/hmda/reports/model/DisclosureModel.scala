@@ -1,5 +1,13 @@
 package com.hmda.reports.model
 
+case class DataMedAge(msa_md: Long,
+                      msa_md_name: String,
+                      state: String,
+                      loan_amount: Double,
+                      count: Long,
+                      dispositionName: String,
+                      title: String,
+                      median_age_calculated: String = "")
 case class Data(tract: String,
                 msa_md: Long,
                 msa_md_name: String,
@@ -9,7 +17,10 @@ case class Data(tract: String,
                 dispositionName: String,
                 title: String)
 case class Info(dispositionName: String, count: Long, value: Double)
+case class InfoMedAge(disposition: String, count: Long, value: Double)
 case class Disposition(title: String, values: List[Info])
+case class DispositionMedAge(loanCategory: String,
+                             dispositions: List[InfoMedAge])
 case class Tract(tract: String, dispositions: List[Disposition])
 case class Tract2(tract: String, values: List[Info])
 case class Msa(id: String, name: String, state: String, stateName: String)
@@ -55,8 +66,20 @@ case class StateMapping(county: String = "NA",
                         stateCode: Int = 0,
                         countyCode: Int = 0)
 
-//Table I
-//Reporting Institutions
+case class MedianAge(medianAge: String = "",
+                     loanCategories: List[DispositionMedAge])
+case class OutAggregateMedAge(table: String,
+                              `type`: String,
+                              description: String,
+                              year: String,
+                              reportDate: String,
+                              msa: Msa,
+                              characteristic: String,
+                              medianAges: List[MedianAge])
+
+case class AgeBuckets(medianAgeRange: String)
+case class Grouping(msa_md: Long, msa_md_name: String, state: String)
+
 case class ReportedInstitutions(msa_md: String,
                                 msa_md_name: String,
                                 state: String,

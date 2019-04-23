@@ -76,16 +76,54 @@ object AggregateProcessing {
         .load()
         .cache()
 
-    def cachedRecordsInstitions2018: DataFrame =
+    val cachedRecordsInstitions2018: DataFrame =
       spark.read
         .format("jdbc")
         .option("driver", "org.postgresql.Driver")
         .option("url", jdbcUrl)
         .option(
           "dbtable",
-          s"(select lei, respondent_name from institutions2018 where hmda_filer = true) as mlar")
+          s"(select lei as institution_lei, respondent_name from institutions2018 where hmda_filer = true) as institutions2018")
         .load()
         .cache()
+
+    def jsonFormationTable9(msaMd: Msa,
+                            input: List[DataMedAge]): OutAggregateMedAge = {
+      val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
+      val medianAges = input
+        .groupBy(d => d.msa_md)
+        .flatMap {
+          case (msa, datasByMsa) =>
+            val medianAges: List[MedianAge] = datasByMsa
+              .groupBy(_.median_age_calculated)
+              .map {
+                case (medianAge, datasByMedianAges) =>
+                  val dispositions: List[DispositionMedAge] = datasByMedianAges
+                    .groupBy(d => d.dispositionName)
+                    .map {
+                      case (dispositionName, datasByDispositionName) =>
+                        val listInfo: List[InfoMedAge] = datasByDispositionName
+                          .map(d => InfoMedAge(d.title, d.count, d.loan_amount))
+                        DispositionMedAge(dispositionName, listInfo)
+                    }
+                    .toList
+                  MedianAge(medianAge, dispositions)
+              }
+              .toList
+            medianAges
+        }
+        .toList
+      OutAggregateMedAge(
+        "9",
+        "Aggregate",
+        "Disposition of loan applications, by median age of homes in census tract in which property is located and type of loan",
+        year,
+        dateFormat.format(new java.util.Date()),
+        msaMd,
+        "Census Tracts by Median Age of Homes",
+        medianAges
+      )
+    }
 
     def jsonFormationAggregateTable1(msaMd: Msa,
                                      input: List[Data]): OutAggregate1 = {
@@ -345,12 +383,24 @@ object AggregateProcessing {
         }
         .runWith(Sink.ignore)
 
+    def persistJson9(input: List[OutAggregateMedAge]): Future[Done] =
+      Source(input)
+        .mapAsyncUnordered(10) { input =>
+          val data: String = input.asJson.noSpaces
+          BaseProcessing.persistSingleFile(
+            s"$bucket/reports/aggregate/$year/${input.msa.id}/9.json",
+            data,
+            "cfpb-hmda-public",
+            s3Settings)(mat, ec)
+        }
+        .runWith(Sink.ignore)
+
     def persistJsonI(input: List[OutReportedInstitutions]): Future[Done] =
       Source(input)
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"$bucket/reports/aggregate/2018/${input.msa.id}/I.json",
+            s"$bucket/reports/aggregate/2018/${input.msa.id}/i.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -412,19 +462,41 @@ object AggregateProcessing {
         }
         .toList
 
-    val reportedInstitutions = cachedRecordsDf
-      .join(
-        cachedRecordsInstitions2018,
-        cachedRecordsInstitions2018.col("lei") === cachedRecordsDf.col("lei"),
-        "inner")
-      .groupBy(col("msa_md"), col("msa_md_name"), col("state"))
-      .agg(collect_set(col("respondent_name")) as "reported_institutions")
-      .as[ReportedInstitutions]
-      .collect
-      .toSet
+    def aggregateTable9: List[OutAggregateMedAge] =
+      MedianAgeProcessing
+        .outputCollectionTable1(cachedRecordsDf, spark)
+        .groupBy(d => d.msa_md)
+        .map {
+          case (key, values) =>
+            val msaMd = Msa(
+              key.toString(),
+              values.head.msa_md_name,
+              values.head.state,
+              Census.states.getOrElse(values.head.state, State("", "")).name)
+            jsonFormationTable9(msaMd, values)
+        }
+        .toList
+
+    def reportedInstitutions() = {
+      import spark.implicits._
+      val clonedRenamed = cachedRecordsInstitions2018
+        .withColumnRenamed("institution_lei", "institution_lei")
+        .withColumnRenamed("respondent_name", "respondent_name")
+      val clonedDf = cachedRecordsDf
+        .withColumnRenamed("lei", "mlar_lei")
+      clonedDf
+        .join(clonedRenamed,
+              clonedRenamed
+                .col("institution_lei") === clonedDf.col("mlar_lei"),
+              "inner")
+        .groupBy(col("msa_md"), col("msa_md_name"), col("state"))
+        .agg(collect_set(col("respondent_name")) as "reported_institutions")
+        .as[ReportedInstitutions]
+        .collect
+        .toSet
+    }
 
     val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
-
     def aggregateTableI = reportedInstitutions.groupBy(d => d.msa_md).map {
       case (key, values) =>
         val msaMd: Msa =
@@ -461,6 +533,7 @@ object AggregateProcessing {
     val result = for {
       _ <- persistJson(aggregateTable1)
       _ <- persistJson2(aggregateTable2)
+      _ <- persistJson9(aggregateTable9)
       _ <- persistJsonI(aggregateTableI.toList)
       _ <- persistJsonRaceSex(
         jsonFormationRaceThenGender(

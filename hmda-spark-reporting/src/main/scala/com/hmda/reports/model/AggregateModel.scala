@@ -34,11 +34,17 @@ case class ReportByRaceThenGender(table: String,
                                   msa: Msa,
                                   races: List[Race])
 
-case class Grouping(msa_md: Long,
-                    msa_md_name: String,
-                    state: String,
-                    dispositionName: String,
-                    title: String)
+case class GroupingRaceEthnicity(msa_md: Long,
+                                 msa_md_name: String,
+                                 state: String,
+                                 dispositionName: String,
+                                 title: String)
+
+case class IncomeGrouping(msa_md: Long,
+                          msa_md_name: String,
+                          state: String,
+                          dispositionName: String,
+                          title: String)
 
 case class IncomeData(msa_md: Long,
                       msa_md_name: String,
