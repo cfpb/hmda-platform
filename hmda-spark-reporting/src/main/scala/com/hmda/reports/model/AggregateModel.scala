@@ -55,14 +55,14 @@ case class ReportByApplicantIncome(table: String,
                                    year: String,
                                    reportDate: String,
                                    msa: Msa,
-                                   applicantIncome: List[ApplicantIncome])
+                                   applicantIncomes: List[ApplicantIncome])
 case class ApplicantIncome(applicantIncome: String,
                            borrowerCharacteristics: BorrowerCharacteristics)
 case class BorrowerCharacteristics(race: BorrowerRace,
                                    ethnicity: BorrowerEthnicity)
-case class BorrowerRace(characteristic: String, Races: List[IncomeRace])
+case class BorrowerRace(characteristic: String, races: List[IncomeRace])
 case class BorrowerEthnicity(characteristic: String,
-                             Ethnicities: List[IncomeEthnicity])
+                             ethnicities: List[IncomeEthnicity])
 case class IncomeRace(race: String, dispositions: List[IncomeDisposition])
 case class IncomeEthnicity(ethnicityName: String,
                            dispositions: List[IncomeDisposition])
