@@ -62,9 +62,7 @@ object HmdaAnalyticsApp
 
   val kafkaConfig = system.settings.config.getConfig("akka.kafka.consumer")
   val config = ConfigFactory.load()
-  val bankFilter = config.getConfig("filter")
-  val bankFilterList =
-    bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+
   val parallelism = config.getInt("hmda.analytics.parallelism")
 
   val transmittalSheetRepository = new TransmittalSheetRepository(dbConfig)
@@ -95,6 +93,11 @@ object HmdaAnalyticsApp
     .run()
 
   def processData(msg: String): Future[Done] = {
+    val config1 = ConfigFactory.load()
+    val bankFilter = config1.getConfig("filter")
+    val bankFilterList =
+      bankFilter.getString("bank-filter-list").toUpperCase.split(",")
+    log.info("This is bank Filter List: " + bankFilterList.size)
     Source
       .single(msg)
       .map(msg => SubmissionId(msg))
