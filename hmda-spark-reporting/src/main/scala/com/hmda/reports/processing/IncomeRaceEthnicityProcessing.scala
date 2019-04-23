@@ -307,7 +307,9 @@ object IncomeRaceEthnicityProcessing {
 
   def jsonFormationApplicantIncome(
       input: List[IncomeData]): List[ReportByApplicantIncome] = {
+
     input
+      .filter(data => (data.race != null && data.ethnicity != null))
       .groupBy(data => (data.msa_md, data.msa_md_name, data.state))
       .map {
         case ((msa_md, msa_md_name, state), dataForMsa: List[IncomeData]) => {
