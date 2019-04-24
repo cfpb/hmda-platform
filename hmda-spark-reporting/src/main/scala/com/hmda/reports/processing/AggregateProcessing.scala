@@ -505,7 +505,7 @@ object AggregateProcessing {
               values.head.state,
               Census.states.getOrElse(values.head.state, State("", "")).name)
         val institutions: Set[String] =
-          values.map(d => d.reported_institutions.head)
+          values.map(d => d.reported_institutions.head.toUpperCase)
         OutReportedInstitutions(
           "I",
           "Aggregate",
