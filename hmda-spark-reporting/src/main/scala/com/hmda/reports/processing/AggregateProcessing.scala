@@ -74,8 +74,9 @@ object AggregateProcessing {
           "dbtable",
           s"(select * from modifiedlar2018 where filing_year = $year) as mlar")
         .load()
-          .withColumnRenamed("race_categorization","race")
-          .withColumnRenamed("sex_categorization","sex")
+        .withColumnRenamed("race_categorization", "race")
+        .withColumnRenamed("sex_categorization", "sex")
+        .withColumnRenamed("ethnicity_categorization", "ethnicity")
         .cache()
 
     val cachedRecordsInstitions2018: DataFrame =
