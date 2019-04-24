@@ -307,6 +307,7 @@ object IncomeRaceEthnicityProcessing {
 
   def jsonFormationApplicantIncome(
       input: List[IncomeData]): List[ReportByApplicantIncome] = {
+    val dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm aa")
 
     input
       .filter(data => (data.race != null && data.ethnicity != null))
@@ -375,7 +376,15 @@ object IncomeRaceEthnicityProcessing {
           }
           val msa =
             Msa(msa_md.toString(), msa_md_name, state, "get_from_census.scala")
-          ReportByApplicantIncome("", "", "", "", "", msa, totalGrouping)
+          ReportByApplicantIncome(
+            "5",
+            "Aggregate",
+            "Disposition of applications by income, race, and ethnicity of applicant",
+            "2018",
+            dateFormat.format(new java.util.Date()),
+            msa,
+            totalGrouping
+          )
         }
       }
       .toList
