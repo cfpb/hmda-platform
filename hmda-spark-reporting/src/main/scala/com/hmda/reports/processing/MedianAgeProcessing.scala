@@ -243,7 +243,7 @@ object MedianAgeProcessing {
                              spark: SparkSession): List[DataMedAge] = {
     import spark.implicits._
     val actionsTakenTable1 = Map(
-      "Applications Received" -> List(1,2,3,4,5),
+      "Applications Received" -> List(1, 2, 3, 4, 5),
       "Loans Originated" -> List(1),
       "Applications Approved but not Accepted" -> List(2),
       "Applications Denied by Financial Institution" -> List(3),
@@ -303,11 +303,11 @@ object MedianAgeProcessing {
       .map {
         case (description, eachList) =>
           transformation(dispositionE(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract(cachedRecordsDf),
-                       spark),
-            spark)
+                                      description,
+                                      eachList,
+                                      allUniqueMsaMdTract(cachedRecordsDf),
+                                      spark),
+                         spark)
       }
       .reduce(_ union _)
 
@@ -315,11 +315,11 @@ object MedianAgeProcessing {
       .map {
         case (description, eachList) =>
           transformation(dispositionF(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract(cachedRecordsDf),
-                       spark),
-            spark)
+                                      description,
+                                      eachList,
+                                      allUniqueMsaMdTract(cachedRecordsDf),
+                                      spark),
+                         spark)
       }
       .reduce(_ union _)
 
@@ -327,11 +327,11 @@ object MedianAgeProcessing {
       .map {
         case (description, eachList) =>
           transformation(dispositionG(cachedRecordsDf,
-                       description,
-                       eachList,
-                       allUniqueMsaMdTract(cachedRecordsDf),
-                       spark),
-            spark)
+                                      description,
+                                      eachList,
+                                      allUniqueMsaMdTract(cachedRecordsDf),
+                                      spark),
+                         spark)
       }
       .reduce(_ union _)
 

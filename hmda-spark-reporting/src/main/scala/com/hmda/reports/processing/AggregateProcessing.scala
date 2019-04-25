@@ -526,7 +526,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"dev/reports/aggregate/2018/${input.msa.id}/IncomeRaceEthinicty.json",
+            s"$bucket/reports/aggregate/2018/${input.msa.id}/5.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -534,8 +534,8 @@ object AggregateProcessing {
         .runWith(Sink.ignore)
 
     val result = for {
-      _ <- persistJson(aggregateTable1)
-      _ <- persistJson2(aggregateTable2)
+//      _ <- persistJson(aggregateTable1)
+//      _ <- persistJson2(aggregateTable2)
       _ <- persistJson9(aggregateTable9)
       _ <- persistJsonI(aggregateTableI.toList)
       _ <- persistJsonRaceSex(
