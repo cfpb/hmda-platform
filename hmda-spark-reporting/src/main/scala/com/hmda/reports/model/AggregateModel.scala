@@ -23,7 +23,7 @@ case class ReportByEthnicityThenGender(table: String,
                                        year: String,
                                        reportDate: String,
                                        msa: Msa,
-                                       ethnicites: List[Ethnicity])
+                                       ethnicities: List[Ethnicity])
 case class Race(race: String,
                 dispositions: List[DispositionRaceEthnicity],
                 genders: List[Gender])
