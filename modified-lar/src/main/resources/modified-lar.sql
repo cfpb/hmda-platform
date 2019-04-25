@@ -101,7 +101,7 @@ CREATE TABLE hmda_user.modifiedlar2018
     median_age integer,
     median_age_calculated integer,
     median_income_percentage integer,
-
+    percent_median_msa_income integer
 )
 WITH (
     OIDS = FALSE

@@ -1,19 +1,15 @@
 package com.hmda.reports.processing
 
-import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.{MultipartUploadResult, S3Attributes, S3Settings}
 import akka.stream.alpakka.s3.scaladsl.S3
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.hmda.reports.model._
-import hmda.model.census.{Census, State}
-import org.apache.spark.SparkContext
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 object BaseProcessing {
 
