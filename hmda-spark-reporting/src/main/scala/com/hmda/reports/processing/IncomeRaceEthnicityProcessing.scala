@@ -233,7 +233,8 @@ object IncomeRaceEthnicityProcessing {
       "Applications Approved but not Accepted" -> List(2),
       "Applications Denied by Financial Institution" -> List(3),
       "Applications Withdrawn by Applicant" -> List(4),
-      "File Closed for Incompleteness" -> List(5)
+      "File Closed for Incompleteness" -> List(5),
+      "Purchased Loans" -> List(6)
     )
 
     val outputATable1: Dataset[IncomeData] = actionsTakenTable1
