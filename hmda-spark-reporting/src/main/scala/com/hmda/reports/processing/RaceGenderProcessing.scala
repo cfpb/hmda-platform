@@ -62,29 +62,6 @@ object RaceGenderProcessing {
     } yield fill(race, gender, ethnicity, title)
   }
 
-//  def defaultData(msa_md: Long,
-//                  msa_md_name: String,
-//                  state: String,
-//                  dispositionName: String,
-//                  title: String): List[DataRaceEthnicity] = {
-//    def fill(race: String, sex: String, ethnicity: String) = DataRaceEthnicity(
-//      msa_md = msa_md,
-//      msa_md_name = msa_md_name,
-//      state = state,
-//      dispositionName = dispositionName,
-//      title = title,
-//      loan_amount = 0,
-//      count = 0,
-//      race = race,
-//      sex = sex,
-//      ethnicity = ethnicity
-//    )
-//    for {
-//      gender <- genders
-//      race <- races
-//      ethnicity <- ethnicities
-//    } yield fill(race, gender, ethnicity)
-//  }
 
   def transformationAddDefaultData(ds: Dataset[DataRaceEthnicity],
                                    spark: SparkSession) = {
