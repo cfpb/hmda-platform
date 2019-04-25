@@ -6,8 +6,7 @@ import akka.kafka.scaladsl.Consumer.DrainingControl
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.stream._
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
-import akka.stream.alpakka.s3.{MemoryBufferType, S3Attributes, S3Settings}
-import akka.stream.alpakka.s3.scaladsl.S3
+import akka.stream.alpakka.s3.{MemoryBufferType, S3Settings}
 import akka.stream.scaladsl._
 import akka.pattern.ask
 import akka.util.Timeout
@@ -41,7 +40,6 @@ object DisclosureReports {
     implicit val timeout: Timeout = Timeout(2.hours)
 
     val JDBC_URL = sys.env("JDBC_URL").trim()
-    val KAFKA_HOSTS = sys.env("KAFKA_HOSTS").trim()
     val AWS_ACCESS_KEY = sys.env("ACCESS_KEY").trim()
     val AWS_SECRET_KEY = sys.env("SECRET_KEY").trim()
     val AWS_BUCKET = sys.env("AWS_ENV").trim()

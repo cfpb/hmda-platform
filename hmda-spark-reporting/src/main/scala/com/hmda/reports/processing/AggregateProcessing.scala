@@ -517,6 +517,19 @@ object AggregateProcessing {
         )
     }
 
+    def persistIncomeRaceEthnicity(
+        input: List[ReportByApplicantIncome]): Future[Done] =
+      Source(input)
+        .mapAsyncUnordered(10) { input =>
+          val data: String = input.asJson.noSpaces
+          BaseProcessing.persistSingleFile(
+            s"dev/reports/aggregate/2018/${input.msa.id}/IncomeRaceEthinicty.json",
+            data,
+            "cfpb-hmda-public",
+            s3Settings)(mat, ec)
+        }
+        .runWith(Sink.ignore)
+
     val result = for {
       _ <- persistJson(aggregateTable1)
       _ <- persistJson2(aggregateTable2)
@@ -528,6 +541,10 @@ object AggregateProcessing {
       _ <- persistJsonEthnicitySex(
         jsonTransformationReportByEthnicityThenGender(
           RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
+      _ <- persistIncomeRaceEthnicity(
+        IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
+          IncomeRaceEthnicityProcessing
+            .outputCollectionTableIncome(cachedRecordsDf, spark)))
     } yield ()
 
     result.onComplete {

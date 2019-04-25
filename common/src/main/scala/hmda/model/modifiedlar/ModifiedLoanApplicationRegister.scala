@@ -99,6 +99,7 @@ case class ModifiedLoanApplicationRegister(
     ethnicityCategorization: String,
     raceCategorization: String,
     sexCategorization: String,
+    incomeCategorization: String
 ) extends PipeDelimited {
 
   override def toCSV: String = {
