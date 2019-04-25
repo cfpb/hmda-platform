@@ -40,7 +40,6 @@ object AggregateReports {
     implicit val timeout: Timeout = Timeout(2.hours)
 
     val JDBC_URL = sys.env("JDBC_URL").trim()
-    val KAFKA_HOSTS = sys.env("KAFKA_HOSTS").trim()
     val AWS_ACCESS_KEY = sys.env("ACCESS_KEY").trim()
     val AWS_SECRET_KEY = sys.env("SECRET_KEY").trim()
     val AWS_BUCKET = sys.env("AWS_ENV").trim()

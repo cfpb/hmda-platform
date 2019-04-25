@@ -302,33 +302,36 @@ object MedianAgeProcessing {
     val outputETable1 = actionsTakenTable1
       .map {
         case (description, eachList) =>
-          dispositionE(cachedRecordsDf,
+          transformation(dispositionE(cachedRecordsDf,
                        description,
                        eachList,
                        allUniqueMsaMdTract(cachedRecordsDf),
-                       spark)
+                       spark),
+            spark)
       }
       .reduce(_ union _)
 
     val outputFTable1 = actionsTakenTable1
       .map {
         case (description, eachList) =>
-          dispositionF(cachedRecordsDf,
+          transformation(dispositionF(cachedRecordsDf,
                        description,
                        eachList,
                        allUniqueMsaMdTract(cachedRecordsDf),
-                       spark)
+                       spark),
+            spark)
       }
       .reduce(_ union _)
 
     val outputGTable1 = actionsTakenTable1
       .map {
         case (description, eachList) =>
-          dispositionG(cachedRecordsDf,
+          transformation(dispositionG(cachedRecordsDf,
                        description,
                        eachList,
                        allUniqueMsaMdTract(cachedRecordsDf),
-                       spark)
+                       spark),
+            spark)
       }
       .reduce(_ union _)
 

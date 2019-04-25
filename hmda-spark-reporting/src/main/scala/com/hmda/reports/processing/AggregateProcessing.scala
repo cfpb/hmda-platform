@@ -75,8 +75,8 @@ object AggregateProcessing {
           s"(select * from modifiedlar2018 where filing_year = $year) as mlar")
         .load()
         .withColumnRenamed("race_categorization", "race")
-        .withColumnRenamed("sex_categorization", "sex")
         .withColumnRenamed("ethnicity_categorization", "ethnicity")
+        .withColumnRenamed("sex_categorization", "sex")
         .cache()
 
     val cachedRecordsInstitions2018: DataFrame =
@@ -221,8 +221,8 @@ object AggregateProcessing {
     }
 
     def buildDisposition(input: List[DataRaceEthnicity],
-                         dispositionName: String): DispositionRaceEthnicity =
-      input.foldLeft(DispositionRaceEthnicity(dispositionName, 0, 0)) {
+                         title: String): DispositionRaceEthnicity =
+      input.foldLeft(DispositionRaceEthnicity(title, 0, 0)) {
         case (DispositionRaceEthnicity(name, curCount, curValue), next) =>
           DispositionRaceEthnicity(name,
                                    curCount + next.count,
@@ -244,7 +244,7 @@ object AggregateProcessing {
                       dataForEthnicity: List[DataRaceEthnicity]) =>
                   val dispositionsByEthnicity: List[DispositionRaceEthnicity] =
                     dataForEthnicity
-                      .groupBy(_.dispositionName)
+                      .groupBy(_.title)
                       .map {
                         case (eachDisposition: String,
                               dataForDisposition: List[DataRaceEthnicity]) =>
@@ -261,7 +261,7 @@ object AggregateProcessing {
                           val dispositionsForGender
                             : List[DispositionRaceEthnicity] =
                             dataForGender
-                              .groupBy(_.dispositionName)
+                              .groupBy(_.title)
                               .map {
                                 case (eachDisposition: String,
                                       dataForDisposition: List[
@@ -311,7 +311,7 @@ object AggregateProcessing {
                 case (eachRace, dataForRace: List[DataRaceEthnicity]) =>
                   val dispositionsByRace: List[DispositionRaceEthnicity] =
                     dataForRace
-                      .groupBy(_.dispositionName)
+                      .groupBy(_.title)
                       .map {
                         case (eachDisposition: String,
                               dataForDisposition: List[DataRaceEthnicity]) =>
@@ -328,7 +328,7 @@ object AggregateProcessing {
                           val dispositionsForGender
                             : List[DispositionRaceEthnicity] =
                             dataForGender
-                              .groupBy(_.dispositionName)
+                              .groupBy(_.title)
                               .map {
                                 case (eachDisposition: String,
                                       dataForDisposition: List[
@@ -508,7 +508,7 @@ object AggregateProcessing {
               values.head.state,
               Census.states.getOrElse(values.head.state, State("", "")).name)
         val institutions: Set[String] =
-          values.map(d => d.reported_institutions.head)
+          values.map(d => d.reported_institutions.head.toUpperCase)
         OutReportedInstitutions(
           "I",
           "Aggregate",
@@ -520,6 +520,19 @@ object AggregateProcessing {
         )
     }
 
+    def persistIncomeRaceEthnicity(
+        input: List[ReportByApplicantIncome]): Future[Done] =
+      Source(input)
+        .mapAsyncUnordered(10) { input =>
+          val data: String = input.asJson.noSpaces
+          BaseProcessing.persistSingleFile(
+            s"dev/reports/aggregate/2018/${input.msa.id}/IncomeRaceEthinicty.json",
+            data,
+            "cfpb-hmda-public",
+            s3Settings)(mat, ec)
+        }
+        .runWith(Sink.ignore)
+
     val result = for {
       _ <- persistJson(aggregateTable1)
       _ <- persistJson2(aggregateTable2)
@@ -527,11 +540,18 @@ object AggregateProcessing {
       _ <- persistJsonI(aggregateTableI.toList)
       _ <- persistJsonRaceSex(
         jsonFormationRaceThenGender(
-          RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+            spark)))
       _ <- persistJsonEthnicitySex(
         jsonTransformationReportByEthnicityThenGender(
-          RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+            spark)))
+      _ <- persistIncomeRaceEthnicity(
+        IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
+          IncomeRaceEthnicityProcessing
+            .outputCollectionTableIncome(cachedRecordsDf, spark)))
     } yield ()
+
 
     result.onComplete {
       case Success(_) => println(s"Finished Aggregate Reports")

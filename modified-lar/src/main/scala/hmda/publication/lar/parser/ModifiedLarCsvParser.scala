@@ -7,13 +7,19 @@ import hmda.model.modifiedlar.ModifiedLoanApplicationRegister
 import hmda.parser.filing.lar.LarCsvParser
 import hmda.publication.{ConformingLoanLimit, StateBoundries}
 import hmda.model.census.CountyLoanLimit
+import hmda.census.records.CensusRecords
 import hmda.census.records.CountyLoanLimitRecords
-import hmda.publication.lar.{RaceCategorization, SexCategorization}
+import hmda.publication.lar.{
+  RaceCategorization,
+  SexCategorization,
+  IncomeCategorization
+}
 
 import hmda.publication.EthnicityCategorization._
 
 object ModifiedLarCsvParser {
 
+  val censusRecords = CensusRecords.parseCensusFile
   val countyLoanLimits: Seq[CountyLoanLimit] =
     CountyLoanLimitRecords.parseCountyLoanLimitFile()
   val countyLoanLimitsByCounty: Map[String, CountyLoanLimit] =
@@ -137,7 +143,8 @@ object ModifiedLarCsvParser {
                                           countyLoanLimitsByState),
       assignEthnicityCategorization(lar),
       RaceCategorization.assignRaceCategorization(lar),
-      SexCategorization.assignSexCategorization(lar)
+      SexCategorization.assignSexCategorization(lar),
+      IncomeCategorization.assignIncomeCategorization(lar, censusRecords)
     )
   }
 

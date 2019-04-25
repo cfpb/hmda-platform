@@ -148,7 +148,8 @@ class ModifiedLarRepository(tableName: String,
             median_income_percentage,
             ethnicity_categorization,
             race_categorization,
-            sex_categorization
+            sex_categorization,
+            percent_median_msa_income
             )
 
 
@@ -254,7 +255,8 @@ class ModifiedLarRepository(tableName: String,
             ${input.census.tracttoMsaIncomePercent},
             ${input.mlar.ethnicityCategorization},
             ${input.mlar.raceCategorization},
-            ${input.mlar.sexCategorization}
+            ${input.mlar.sexCategorization},
+            ${input.mlar.incomeCategorization}
           )
           """)
 
@@ -278,7 +280,7 @@ class ModifiedLarRepository(tableName: String,
     else if (medianYear >= 2011)
       "2011 - Present"
     else
-      ""
+      "Age Unknown"
   }
 
 }
