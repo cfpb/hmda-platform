@@ -3,6 +3,7 @@ package com.hmda.reports.processing
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 import com.hmda.reports.model._
+import hmda.model.census.{Census, State}
 
 object IncomeRaceEthnicityProcessing {
   val races = List(
@@ -375,7 +376,10 @@ object IncomeRaceEthnicityProcessing {
 
           }
           val msa =
-            Msa(msa_md.toString(), msa_md_name, state, "get_from_census.scala")
+            Msa(msa_md.toString(),
+                msa_md_name,
+                state,
+                Census.states.getOrElse(state, State("", "")).name)
           ReportByApplicantIncome(
             "5",
             "Aggregate",
