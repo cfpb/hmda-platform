@@ -278,7 +278,7 @@ class ModifiedLarRepository(tableName: String,
     else if (medianYear >= 2011)
       "2011 - Present"
     else
-      ""
+      "Age Unknown"
   }
 
 }
