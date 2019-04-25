@@ -12,7 +12,7 @@ object IncomeRaceEthnicityProcessing {
     "Race Not Available",
     "American Indian or Alaska Native",
     "Black or African American",
-    "2 Or More Minority Races",
+    "2 or More Minority Races",
     "White",
     "Joint"
   )

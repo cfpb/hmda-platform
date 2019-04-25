@@ -17,7 +17,7 @@ object RaceGenderProcessing {
     "Race Not Available",
     "American Indian or Alaska Native",
     "Black or African American",
-    "2 Or More Minority Races",
+    "2 or More Minority Races",
     "White",
     "Joint"
   )
@@ -61,7 +61,6 @@ object RaceGenderProcessing {
       title <- actionsTaken.keys
     } yield fill(race, gender, ethnicity, title)
   }
-
 
   def transformationAddDefaultData(ds: Dataset[DataRaceEthnicity],
                                    spark: SparkSession) = {
