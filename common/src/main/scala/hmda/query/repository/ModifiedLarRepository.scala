@@ -263,11 +263,24 @@ class ModifiedLarRepository(tableName: String,
   private def safeConvertToInt(s: String): Option[Int] =
     Try(s.toInt).toOption
 
-  private def medianAgeCalculated(filingYear: Int, medianAge: Int): Int = {
+  private def medianAgeCalculated(filingYear: Int, medianAge: Int): String = {
+    val medianYear = filingYear - medianAge
     if (medianAge == -1)
-      medianAge
+      "Age Unknown"
+    else if (medianYear <= 1969)
+      "1969 or Earlier"
+    else if (medianYear >= 1970 && medianYear <= 1979)
+      "1970 - 1979"
+    else if (medianYear >= 1980 && medianYear <= 1989)
+      "1980 - 1989"
+    else if (medianYear >= 1990 && medianYear <= 1999)
+      "1990 - 1999"
+    else if (medianYear >= 2000 && medianYear <= 2010)
+      "2000 - 2010"
+    else if (medianYear >= 2011)
+      "2011 - Present"
     else
-      filingYear - medianAge
+      "Age Unknown"
   }
 
 }
