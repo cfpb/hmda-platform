@@ -21,6 +21,20 @@ case class InfoMedAge(disposition: String, count: Long, value: Double)
 case class Disposition(title: String, values: List[Info])
 case class DispositionMedAge(loanCategory: String,
                              dispositions: List[InfoMedAge])
+
+object DispositionMedAge {
+  implicit val ordering: Ordering[DispositionMedAge] =
+    new Ordering[DispositionMedAge] {
+      override def compare(x: DispositionMedAge, y: DispositionMedAge): Int = {
+        def extractDispositionLetter(full: String): Char =
+          full.takeRight(2).head
+        val xName = extractDispositionLetter(x.loanCategory)
+        val yName = extractDispositionLetter(y.loanCategory)
+        xName compare yName
+      }
+    }
+}
+
 case class Tract(tract: String, dispositions: List[Disposition])
 case class Tract2(tract: String, values: List[Info])
 case class Msa(id: String, name: String, state: String, stateName: String)

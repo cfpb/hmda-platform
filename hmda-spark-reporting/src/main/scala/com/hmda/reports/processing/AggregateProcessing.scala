@@ -110,6 +110,7 @@ object AggregateProcessing {
                         DispositionMedAge(dispositionName, listInfo)
                     }
                     .toList
+                    .sorted
                   MedianAge(medianAge, dispositions)
               }
               .toList
