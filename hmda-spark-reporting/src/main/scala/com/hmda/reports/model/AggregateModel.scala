@@ -26,7 +26,7 @@ case class ReportByEthnicityThenGender(table: String,
                                        ethnicities: List[Ethnicity])
 case class Race(race: String,
                 dispositions: List[DispositionRaceEthnicity],
-                genders: List[Gender])
+                gender: List[Gender])
 case class ReportByRaceThenGender(table: String,
                                   `type`: String,
                                   description: String,
