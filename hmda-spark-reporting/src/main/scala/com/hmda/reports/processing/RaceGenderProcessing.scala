@@ -22,6 +22,15 @@ object RaceGenderProcessing {
     "Joint"
   )
 
+  val actionsTaken = Map(
+    "Loans Originated" -> List(1),
+    "Applications Approved but not Accepted" -> List(2),
+    "Applications Denied by Financial Institution" -> List(3),
+    "Applications Withdrawn by Applicant" -> List(4),
+    "File Closed for Incompleteness" -> List(5),
+    "Purchased Loans" -> List(6)
+  )
+
   val genders = List("Sex Not Available", "Male", "Female", "Joint")
 
   val ethnicities = List("Free Form Text Only",
@@ -32,50 +41,65 @@ object RaceGenderProcessing {
 
   def defaultData(msa_md: Long,
                   msa_md_name: String,
-                  state: String,
-                  dispositionName: String,
-                  title: String): List[DataRaceEthnicity] = {
-    def fill(race: String, sex: String, ethnicity: String) = DataRaceEthnicity(
-      msa_md = msa_md,
-      msa_md_name = msa_md_name,
-      state = state,
-      dispositionName = dispositionName,
-      title = title,
-      loan_amount = 0,
-      count = 0,
-      race = race,
-      sex = sex,
-      ethnicity = ethnicity
-    )
+                  state: String): List[DataRaceEthnicity] = {
+    def fill(race: String, sex: String, ethnicity: String, title: String) =
+      DataRaceEthnicity(
+        msa_md = msa_md,
+        msa_md_name = msa_md_name,
+        state = state,
+        title = title,
+        loan_amount = 0,
+        count = 0,
+        race = race,
+        sex = sex,
+        ethnicity = ethnicity
+      )
     for {
       gender <- genders
       race <- races
       ethnicity <- ethnicities
-    } yield fill(race, gender, ethnicity)
+      title <- actionsTaken.keys
+    } yield fill(race, gender, ethnicity, title)
   }
+
+//  def defaultData(msa_md: Long,
+//                  msa_md_name: String,
+//                  state: String,
+//                  dispositionName: String,
+//                  title: String): List[DataRaceEthnicity] = {
+//    def fill(race: String, sex: String, ethnicity: String) = DataRaceEthnicity(
+//      msa_md = msa_md,
+//      msa_md_name = msa_md_name,
+//      state = state,
+//      dispositionName = dispositionName,
+//      title = title,
+//      loan_amount = 0,
+//      count = 0,
+//      race = race,
+//      sex = sex,
+//      ethnicity = ethnicity
+//    )
+//    for {
+//      gender <- genders
+//      race <- races
+//      ethnicity <- ethnicities
+//    } yield fill(race, gender, ethnicity)
+//  }
 
   def transformationAddDefaultData(ds: Dataset[DataRaceEthnicity],
                                    spark: SparkSession) = {
     import spark.implicits._
-    ds.groupByKey(
-        data =>
-          GroupingRaceEthnicity(data.msa_md,
-                                data.msa_md_name,
-                                data.state,
-                                data.dispositionName,
-                                data.title))
+    ds.groupByKey(data => Grouping(data.msa_md, data.msa_md_name, data.state))
       .flatMapGroups {
-        case (
-            GroupingRaceEthnicity(msa_md, msa_md_name, state, dispName, title),
-            elements) =>
-          val defaultMap =
-            defaultData(msa_md, msa_md_name, state, dispName, title)
-              .map(d => (d.race, d.sex, d.ethnicity) -> d)
-              .toMap
+        case (Grouping(msa_md, msa_md_name, state), elements) =>
+          val defaultMap = defaultData(msa_md, msa_md_name, state)
+            .map(d => (d.race, d.sex, d.ethnicity, d.title) -> d)
+            .toMap
+
           elements
             .foldLeft(defaultMap) {
               case (acc, next) =>
-                acc + ((next.race, next.sex, next.ethnicity) -> next)
+                acc + ((next.race, next.sex, next.ethnicity, next.title) -> next)
             }
             .values
       }
@@ -99,7 +123,6 @@ object RaceGenderProcessing {
 
   def includeZeroAndNonZero(dispInput: DataFrame,
                             title: String,
-                            dispositionName: String,
                             allUniqueMsaMdTract: DataFrame): DataFrame = {
     val leftAnti = allUniqueMsaMdTract.join(
       dispInput,
@@ -110,21 +133,17 @@ object RaceGenderProcessing {
       .withColumn("loan_amount", lit(0.0))
       .withColumn("count", lit(0))
       .union(dispInput)
-      .withColumn("dispositionName", lit(dispositionName))
       .withColumn("title", lit(title))
   }
 
-  def dispositionA(input: DataFrame,
-                   title: String,
-                   actionsTaken: List[Int],
-                   allUniqueCombinations: DataFrame,
-                   spark: SparkSession): Dataset[DataRaceEthnicity] = {
+  def disposition(input: DataFrame,
+                  title: String,
+                  actionsTaken: List[Int],
+                  allUniqueCombinations: DataFrame,
+                  spark: SparkSession): Dataset[DataRaceEthnicity] = {
     import spark.implicits._
-    val dispA = prepare(input)
+    val disp = prepare(input)
       .filter(col("action_taken_type").isin(actionsTaken: _*))
-      .filter(col("total_units") isin ("1", "2", "3", "4"))
-      .filter(col("loan_purpose") === lit(1))
-      .filter(col("loan_type") isin (2, 3, 4))
       .groupBy(col("msa_md"),
                col("msa_md_name"),
                col("state"),
@@ -132,277 +151,28 @@ object RaceGenderProcessing {
                col("sex"),
                col("ethnicity"))
       .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
-    includeZeroAndNonZero(dispA,
-                          title,
-                          "FHA, FSA/RHS & VA (A)",
-                          allUniqueCombinations)
+    includeZeroAndNonZero(disp, title, allUniqueCombinations)
       .as[DataRaceEthnicity]
   }
 
-  def dispositionB(input: DataFrame,
-                   title: String,
-                   actionsTaken: List[Int],
-                   allUniqueCombinations: DataFrame,
-                   spark: SparkSession): Dataset[DataRaceEthnicity] = {
-    import spark.implicits._
-    val dispB = prepare(input)
-      .filter(col("action_taken_type").isin(actionsTaken: _*))
-      .filter(col("total_units") isin ("1", "2", "3", "4"))
-      .filter(col("loan_purpose") === lit(1))
-      .filter(col("loan_type") === lit(1))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("sex"),
-               col("ethnicity"))
-      .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
-    includeZeroAndNonZero(dispB,
-                          title,
-                          "Conventional (B)",
-                          allUniqueCombinations)
-      .as[DataRaceEthnicity]
-  }
+  def outputCollectionTable3and4(
+      cachedRecordsDf: DataFrame,
+      spark: SparkSession): List[DataRaceEthnicity] = {
 
-  def dispositionC(input: DataFrame,
-                   title: String,
-                   actionsTaken: List[Int],
-                   allUniqueCombinations: DataFrame,
-                   spark: SparkSession): Dataset[DataRaceEthnicity] = {
-    import spark.implicits._
-    val dispC = prepare(input)
-      .filter(col("action_taken_type").isin(actionsTaken: _*))
-      .filter(col("total_units") isin ("1", "2", "3", "4"))
-      .filter(col("loan_purpose") isin (31, 32))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("sex"),
-               col("ethnicity"))
-      .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
-    includeZeroAndNonZero(dispC,
-                          title,
-                          "Refinancings (C)",
-                          allUniqueCombinations)
-      .as[DataRaceEthnicity]
-  }
-
-  def dispositionD(input: DataFrame,
-                   title: String,
-                   actionsTaken: List[Int],
-                   allUniqueCombinations: DataFrame,
-                   spark: SparkSession): Dataset[DataRaceEthnicity] = {
-    import spark.implicits._
-    val dispD = prepare(input)
-      .filter(col("action_taken_type").isin(actionsTaken: _*))
-      .filter(col("total_units") isin ("1", "2", "3", "4"))
-      .filter(col("loan_purpose") === lit(2))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("sex"),
-               col("ethnicity"))
-      .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
-    includeZeroAndNonZero(dispD,
-                          title,
-                          "Home Improvement Loans (D)",
-                          allUniqueCombinations)
-      .as[DataRaceEthnicity]
-  }
-
-  def dispositionE(input: DataFrame,
-                   title: String,
-                   actionsTaken: List[Int],
-                   allUniqueCombinations: DataFrame,
-                   spark: SparkSession): Dataset[DataRaceEthnicity] = {
-    import spark.implicits._
-    val dispE = prepare(input)
-      .filter(col("action_taken_type").isin(actionsTaken: _*))
-      .filter(col("total_units") =!= lit("1"))
-      .filter(col("total_units") =!= lit("2"))
-      .filter(col("total_units") =!= lit("3"))
-      .filter(col("total_units") =!= lit("4"))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("sex"),
-               col("ethnicity"))
-      .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
-    includeZeroAndNonZero(dispE,
-                          title,
-                          "Loans on Dwellings For 5 or More Families (E)",
-                          allUniqueCombinations)
-      .as[DataRaceEthnicity]
-  }
-
-  def dispositionF(input: DataFrame,
-                   title: String,
-                   actionsTaken: List[Int],
-                   allUniqueCombinations: DataFrame,
-                   spark: SparkSession): Dataset[DataRaceEthnicity] = {
-    import spark.implicits._
-    val dispF = prepare(input)
-      .filter(col("action_taken_type").isin(actionsTaken: _*))
-      .filter(col("total_units") isin ("1", "2", "3", "4"))
-      .filter(col("loan_purpose") isin (1, 2, 31, 32))
-      .filter(col("loan_type") isin (1, 2, 3, 4)) //should match A - D
-      .filter(col("occupancy_type") isin (2, 3))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("sex"),
-               col("ethnicity"))
-      .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
-    includeZeroAndNonZero(dispF,
-                          title,
-                          "Nonoccupant Loans from Columns A, B, C ,& D (F)",
-                          allUniqueCombinations)
-      .as[DataRaceEthnicity]
-  }
-
-  def dispositionG(input: DataFrame,
-                   title: String,
-                   actionsTaken: List[Int],
-                   allUniqueCombinations: DataFrame,
-                   spark: SparkSession): Dataset[DataRaceEthnicity] = {
-    import spark.implicits._
-    val dispG = prepare(input)
-      .filter(col("action_taken_type").isin(actionsTaken: _*))
-      .filter(col("total_units") isin ("1", "2", "3", "4"))
-      .filter(col("loan_purpose") isin (1, 2, 31, 32))
-      .filter(col("loan_type") isin (1, 2, 3, 4)) //should match A - D
-      .filter(col("construction_method") isin ("2"))
-      .groupBy(col("msa_md"),
-               col("msa_md_name"),
-               col("state"),
-               col("race"),
-               col("sex"),
-               col("ethnicity"))
-      .agg(sum("loan_amount") as "loan_amount", count("*") as "count")
-    includeZeroAndNonZero(
-      dispG,
-      title,
-      "Loans On Manufactured Home Dwellings From Columns A, B, C & D (G)",
-      allUniqueCombinations)
-      .as[DataRaceEthnicity]
-  }
-
-  def outputCollectionTable3(cachedRecordsDf: DataFrame,
-                             spark: SparkSession): List[DataRaceEthnicity] = {
-    val actionsTakenTable1 = Map(
-      "Applications Received" -> List(1, 2, 3, 4, 5),
-      "Loans Originated" -> List(1),
-      "Applications Approved but not Accepted" -> List(2),
-      "Applications Denied by Financial Institution" -> List(3),
-      "Applications Withdrawn by Applicant" -> List(4),
-      "File Closed for Incompleteness" -> List(5)
-    )
-
-    val outputATable1: Dataset[DataRaceEthnicity] = actionsTakenTable1
+    val output: Dataset[DataRaceEthnicity] = actionsTaken
       .map {
         case (description, eachList) =>
           transformationAddDefaultData(
-            dispositionA(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueCombinations(cachedRecordsDf),
-                         spark),
+            disposition(cachedRecordsDf,
+                        description,
+                        eachList,
+                        allUniqueCombinations(cachedRecordsDf),
+                        spark),
             spark)
       }
       .reduce(_ union _)
 
-    val outputBTable1: Dataset[DataRaceEthnicity] = actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          transformationAddDefaultData(
-            dispositionB(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueCombinations(cachedRecordsDf),
-                         spark),
-            spark)
-      }
-      .reduce(_ union _)
-
-    val outputCTable1: Dataset[DataRaceEthnicity] = actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          transformationAddDefaultData(
-            dispositionC(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueCombinations(cachedRecordsDf),
-                         spark),
-            spark)
-      }
-      .reduce(_ union _)
-
-    val outputDTable1: Dataset[DataRaceEthnicity] = actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          transformationAddDefaultData(
-            dispositionD(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueCombinations(cachedRecordsDf),
-                         spark),
-            spark)
-      }
-      .reduce(_ union _)
-
-    val outputETable1: Dataset[DataRaceEthnicity] = actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          transformationAddDefaultData(
-            dispositionE(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueCombinations(cachedRecordsDf),
-                         spark),
-            spark)
-      }
-      .reduce(_ union _)
-
-    val outputFTable1: Dataset[DataRaceEthnicity] = actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          transformationAddDefaultData(
-            dispositionF(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueCombinations(cachedRecordsDf),
-                         spark),
-            spark)
-      }
-      .reduce(_ union _)
-
-    val outputGTable1: Dataset[DataRaceEthnicity] = actionsTakenTable1
-      .map {
-        case (description, eachList) =>
-          transformationAddDefaultData(
-            dispositionG(cachedRecordsDf,
-                         description,
-                         eachList,
-                         allUniqueCombinations(cachedRecordsDf),
-                         spark),
-            spark)
-      }
-      .reduce(_ union _)
-
-    val aList = outputATable1.collect().toList
-    val bList = outputBTable1.collect().toList
-    val cList = outputCTable1.collect().toList
-    val dList = outputDTable1.collect().toList
-    val eList = outputETable1.collect().toList
-    val fList = outputFTable1.collect().toList
-    val gList = outputGTable1.collect().toList
-
-    aList ++ bList ++ cList ++ dList ++ eList ++ fList ++ gList
-
+    output.collect().toList
   }
 
 }

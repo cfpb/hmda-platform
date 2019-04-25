@@ -74,6 +74,9 @@ object AggregateProcessing {
           "dbtable",
           s"(select * from modifiedlar2018 where filing_year = $year) as mlar")
         .load()
+        .withColumnRenamed("race_categorization", "race")
+        .withColumnRenamed("ethnicity_categorization", "ethnicity")
+        .withColumnRenamed("sex_categorization", "sex")
         .cache()
 
     val cachedRecordsInstitions2018: DataFrame =
@@ -218,8 +221,8 @@ object AggregateProcessing {
     }
 
     def buildDisposition(input: List[DataRaceEthnicity],
-                         dispositionName: String): DispositionRaceEthnicity =
-      input.foldLeft(DispositionRaceEthnicity(dispositionName, 0, 0)) {
+                         title: String): DispositionRaceEthnicity =
+      input.foldLeft(DispositionRaceEthnicity(title, 0, 0)) {
         case (DispositionRaceEthnicity(name, curCount, curValue), next) =>
           DispositionRaceEthnicity(name,
                                    curCount + next.count,
@@ -241,7 +244,7 @@ object AggregateProcessing {
                       dataForEthnicity: List[DataRaceEthnicity]) =>
                   val dispositionsByEthnicity: List[DispositionRaceEthnicity] =
                     dataForEthnicity
-                      .groupBy(_.dispositionName)
+                      .groupBy(_.title)
                       .map {
                         case (eachDisposition: String,
                               dataForDisposition: List[DataRaceEthnicity]) =>
@@ -258,7 +261,7 @@ object AggregateProcessing {
                           val dispositionsForGender
                             : List[DispositionRaceEthnicity] =
                             dataForGender
-                              .groupBy(_.dispositionName)
+                              .groupBy(_.title)
                               .map {
                                 case (eachDisposition: String,
                                       dataForDisposition: List[
@@ -308,7 +311,7 @@ object AggregateProcessing {
                 case (eachRace, dataForRace: List[DataRaceEthnicity]) =>
                   val dispositionsByRace: List[DispositionRaceEthnicity] =
                     dataForRace
-                      .groupBy(_.dispositionName)
+                      .groupBy(_.title)
                       .map {
                         case (eachDisposition: String,
                               dataForDisposition: List[DataRaceEthnicity]) =>
@@ -325,7 +328,7 @@ object AggregateProcessing {
                           val dispositionsForGender
                             : List[DispositionRaceEthnicity] =
                             dataForGender
-                              .groupBy(_.dispositionName)
+                              .groupBy(_.title)
                               .map {
                                 case (eachDisposition: String,
                                       dataForDisposition: List[
@@ -518,16 +521,18 @@ object AggregateProcessing {
     }
 
     val result = for {
-      _ <- persistJson(aggregateTable1)
-      _ <- persistJson2(aggregateTable2)
-      _ <- persistJson9(aggregateTable9)
-      _ <- persistJsonI(aggregateTableI.toList)
+//      _ <- persistJson(aggregateTable1)
+//      _ <- persistJson2(aggregateTable2)
+//      _ <- persistJson9(aggregateTable9)
+//      _ <- persistJsonI(aggregateTableI.toList)
       _ <- persistJsonRaceSex(
         jsonFormationRaceThenGender(
-          RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+                                                          spark)))
       _ <- persistJsonEthnicitySex(
         jsonTransformationReportByEthnicityThenGender(
-          RaceGenderProcessing.outputCollectionTable3(cachedRecordsDf, spark)))
+          RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
+                                                          spark)))
     } yield ()
 
     result.onComplete {

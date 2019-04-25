@@ -3,7 +3,6 @@ package com.hmda.reports.model
 case class DataRaceEthnicity(msa_md: Long,
                              msa_md_name: String,
                              state: String,
-                             dispositionName: String,
                              title: String,
                              race: String,
                              sex: String,
@@ -11,7 +10,9 @@ case class DataRaceEthnicity(msa_md: Long,
                              loan_amount: Double,
                              count: Long)
 
-case class DispositionRaceEthnicity(name: String, count: Long, value: Double)
+case class DispositionRaceEthnicity(disposition: String,
+                                    count: Long,
+                                    value: Double)
 case class Gender(gender: String, dispositions: List[DispositionRaceEthnicity])
 case class Ethnicity(ethnicityName: String,
                      dispositions: List[DispositionRaceEthnicity],
