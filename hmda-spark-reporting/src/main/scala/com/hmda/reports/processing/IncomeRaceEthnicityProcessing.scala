@@ -375,7 +375,7 @@ object IncomeRaceEthnicityProcessing {
 
           }
           val msa =
-            Msa(msa_md.toString(), msa_md_name, state, "get_from_census.scala")
+            Msa(msa_md.toString(), msa_md_name, state, Census.states.getOrElse(state, State("", "")).name)
           ReportByApplicantIncome(
             "5",
             "Aggregate",
