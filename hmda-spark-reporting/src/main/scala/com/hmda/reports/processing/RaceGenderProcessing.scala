@@ -14,10 +14,10 @@ object RaceGenderProcessing {
     "Asian",
     "Native Hawaiian or Other Pacific Islander",
     "Free Form Text Only",
-    "Race Not Available",
+    "Race not available",
     "American Indian or Alaska Native",
     "Black or African American",
-    "2 or More Minority Races",
+    "2 or more minority races",
     "White",
     "Joint"
   )
