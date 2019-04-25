@@ -287,7 +287,7 @@ object AggregateProcessing {
             ReportByEthnicityThenGender(
               "4",
               "Aggregate",
-              "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4- family and manufactured home dwellings, by race and gender",
+              "Disposition of loan applications, by ethnicity and sex of applicant",
               year,
               dateFormat.format(new java.util.Date()),
               msa,
@@ -352,7 +352,7 @@ object AggregateProcessing {
             ReportByRaceThenGender(
               "3",
               "Aggregate",
-              "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4- family and manufactured home dwellings, by race and gender",
+              "Disposition of loan applications, by race and sex of applicant",
               year,
               dateFormat.format(new java.util.Date()),
               msa,
@@ -541,17 +541,16 @@ object AggregateProcessing {
       _ <- persistJsonRaceSex(
         jsonFormationRaceThenGender(
           RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-            spark)))
+                                                          spark)))
       _ <- persistJsonEthnicitySex(
         jsonTransformationReportByEthnicityThenGender(
           RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-            spark)))
+                                                          spark)))
       _ <- persistIncomeRaceEthnicity(
         IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
           IncomeRaceEthnicityProcessing
             .outputCollectionTableIncome(cachedRecordsDf, spark)))
     } yield ()
-
 
     result.onComplete {
       case Success(_) => println(s"Finished Aggregate Reports")
