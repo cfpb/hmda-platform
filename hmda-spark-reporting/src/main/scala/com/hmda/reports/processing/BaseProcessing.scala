@@ -388,6 +388,25 @@ object BaseProcessing {
           .withAttributes(S3Attributes.settings(s3Settings))
       )
 
+  def buildSortedIncomeRace(unsortedRace: IncomeRace): IncomeRace = {
+    if (unsortedRace.race == "White")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(A)")
+    else if (unsortedRace.race == "Black or African American")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(B)")
+    else if (unsortedRace.race == "American Indian or Alaska Native")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(C)")
+    else if (unsortedRace.race == "Asian")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(D)")
+    else if (unsortedRace.race == "Joint")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(E)")
+    else if (unsortedRace.race == "2 or more minority races")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(F)")
+    else if (unsortedRace.race == "Race not available")
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(H)")
+    else
+      IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(G)")
+  }
+
   def buildSortedRace(unsortedRace: Race): Race = {
     if (unsortedRace.race == "White")
       Race(unsortedRace.race,
@@ -423,12 +442,12 @@ object BaseProcessing {
       Race(unsortedRace.race,
            unsortedRace.dispositions,
            unsortedRace.gender,
-           "(G)")
+           "(H)")
     else
       Race(unsortedRace.race,
            unsortedRace.dispositions,
            unsortedRace.gender,
-           "(H)")
+           "(G)")
   }
 
   def buildSortedGender(unsortedGender: Gender): Gender = {
@@ -468,6 +487,30 @@ object BaseProcessing {
                 unsortedEthnicity.dispositions,
                 unsortedEthnicity.gender,
                 "(E)")
+  }
+
+  def buildSortedIncomeEthnicity(
+      unsortedEthnicity: IncomeEthnicity): IncomeEthnicity = {
+    if (unsortedEthnicity.ethnicityName == "Hispanic or Latino")
+      IncomeEthnicity(unsortedEthnicity.ethnicityName,
+                      unsortedEthnicity.dispositions,
+                      "(A)")
+    else if (unsortedEthnicity.ethnicityName == "Not Hispanic or Latino")
+      IncomeEthnicity(unsortedEthnicity.ethnicityName,
+                      unsortedEthnicity.dispositions,
+                      "(B)")
+    else if (unsortedEthnicity.ethnicityName == "Joint")
+      IncomeEthnicity(unsortedEthnicity.ethnicityName,
+                      unsortedEthnicity.dispositions,
+                      "(C)")
+    else if (unsortedEthnicity.ethnicityName == "Free Form Text Only")
+      IncomeEthnicity(unsortedEthnicity.ethnicityName,
+                      unsortedEthnicity.dispositions,
+                      "(D)")
+    else
+      IncomeEthnicity(unsortedEthnicity.ethnicityName,
+                      unsortedEthnicity.dispositions,
+                      "(E)")
   }
 
 }

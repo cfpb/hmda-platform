@@ -337,9 +337,11 @@ object IncomeRaceEthnicityProcessing {
                                 }
                               }
                               .toList
-                            IncomeRace(eachRace, dispositions)
+                            BaseProcessing.buildSortedIncomeRace(
+                              IncomeRace(eachRace, dispositions, "unsorted"))
                         }
                         .toList
+                        .sorted
                     BorrowerRace("Race", races)
                   }
 
@@ -360,7 +362,10 @@ object IncomeRaceEthnicityProcessing {
                                 }
                               }
                               .toList
-                            IncomeEthnicity(eachEthnicity, dispositions)
+                            BaseProcessing.buildSortedIncomeEthnicity(
+                              IncomeEthnicity(eachEthnicity,
+                                              dispositions,
+                                              "unsorted"))
                         }
                         .toList
                     }
