@@ -11,24 +11,23 @@ import org.apache.spark.sql.functions._
 object RaceGenderProcessing {
 
   val races = List(
-    "Asian",
-    "Native Hawaiian or Other Pacific Islander",
-    "Free Form Text Only",
-    "Race not available",
-    "American Indian or Alaska Native",
-    "Black or African American",
-    "2 or more minority races",
     "White",
-    "Joint"
+    "Black or African American",
+    "American Indian or Alaska Native",
+    "Asian",
+    "Joint",
+    "2 or more minority races",
+    "Race not available",
+    "Free Form Text Only",
   )
 
   val actionsTaken = Map(
-    "Loans Originated" -> List(1),
-    "Applications Approved but not Accepted" -> List(2),
-    "Applications Denied by Financial Institution" -> List(3),
-    "Applications Withdrawn by Applicant" -> List(4),
-    "File Closed for Incompleteness" -> List(5),
-    "Purchased Loans" -> List(6)
+    "Loans Originated - (A)" -> List(1),
+    "Applications Approved but not Accepted - (B)" -> List(2),
+    "Applications Denied by Financial Institution - (C)" -> List(3),
+    "Applications Withdrawn by Applicant - (D)" -> List(4),
+    "File Closed for Incompleteness - (E)" -> List(5),
+    "Purchased Loans - (F)" -> List(6)
   )
 
   val genders = List("Sex Not Available", "Male", "Female", "Joint")
