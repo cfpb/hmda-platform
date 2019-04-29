@@ -19,7 +19,7 @@ object Q623 extends EditCheck[LoanApplicationRegister] {
       when(
         lar.property.totalUnits is lessThanOrEqual(4) and
           (lar.income.toInt is lessThanOrEqual(income))) {
-        lar.loan.amount is lessThanOrEqual(amount)
+        lar.loan.amount is lessThan(amount)
       }
     }
   }

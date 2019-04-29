@@ -22,7 +22,7 @@ class Q623Spec extends LarEditCheckSpec {
       val appLar = lar.copy(income = larIncome.toString,
                             property = lar.property.copy(totalUnits = 1))
       appLar.copy(loan = appLar.loan.copy(amount = amount - 1)).mustPass
-      appLar.copy(loan = appLar.loan.copy(amount = amount)).mustPass
+      appLar.copy(loan = appLar.loan.copy(amount = amount)).mustFail
       appLar.copy(loan = appLar.loan.copy(amount = amount + 1)).mustFail
     }
   }
