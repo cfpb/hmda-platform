@@ -110,6 +110,7 @@ object AggregateProcessing {
                         DispositionMedAge(dispositionName, listInfo)
                     }
                     .toList
+                    .sorted
                   MedianAge(medianAge, dispositions)
               }
               .toList
@@ -146,9 +147,10 @@ object AggregateProcessing {
                       case (title, datasByTitle) =>
                         val listInfo: List[Info] = datasByTitle.map(d =>
                           Info(d.dispositionName, d.count, d.loan_amount))
-                        Disposition(title, listInfo)
+                        Disposition(title.split("-")(0).trim, listInfo, title)
                     }
                     .toList
+                    .sorted
                   val stateCode = Try(tract.take(2).toInt).getOrElse(-1)
                   val countyCode = Try(tract.slice(2, 5).toInt).getOrElse(-1)
                   val remainingTract = tract.drop(5)
@@ -191,9 +193,10 @@ object AggregateProcessing {
                       case (title, datasByTitle) =>
                         val listInfo: List[Info] = datasByTitle.map(d =>
                           Info(d.dispositionName, d.count, d.loan_amount))
-                        Disposition(title, listInfo)
+                        Disposition(title.split("-")(0).trim, listInfo, title)
                     }
                     .toList
+                    .sorted
                   val stateCode = Try(tract.take(2).toInt).getOrElse(-1)
                   val countyCode = Try(tract.slice(2, 5).toInt).getOrElse(-1)
                   val remainingTract = tract.drop(5)
@@ -222,11 +225,14 @@ object AggregateProcessing {
 
     def buildDisposition(input: List[DataRaceEthnicity],
                          title: String): DispositionRaceEthnicity =
-      input.foldLeft(DispositionRaceEthnicity(title, 0, 0)) {
-        case (DispositionRaceEthnicity(name, curCount, curValue), next) =>
-          DispositionRaceEthnicity(name,
+      input.foldLeft(DispositionRaceEthnicity(title, 0, 0, title)) {
+        case (
+            DispositionRaceEthnicity(name, curCount, curValue, nameForSorting),
+            next) =>
+          DispositionRaceEthnicity(name.split("-")(0).trim,
                                    curCount + next.count,
-                                   curValue + next.loan_amount)
+                                   curValue + next.loan_amount,
+                                   nameForSorting)
       }
 
     def jsonTransformationReportByEthnicityThenGender(
@@ -251,6 +257,7 @@ object AggregateProcessing {
                           buildDisposition(dataForDisposition, eachDisposition)
                       }
                       .toList
+                      .sorted
 
                   val dispositionByEthnicityAndGender: List[Gender] =
                     dataForEthnicity
@@ -270,16 +277,23 @@ object AggregateProcessing {
                                                    eachDisposition)
                               }
                               .toList
-
-                          Gender(eachGender, dispositionsForGender)
+                              .sorted
+                          BaseProcessing.buildSortedGender(
+                            Gender(eachGender,
+                                   dispositionsForGender,
+                                   "unsorted"))
                       }
                       .toList
+                      .sorted
+                  BaseProcessing.buildSortedEthnicity(
+                    Ethnicity(eachEthnicity,
+                              dispositionsByEthnicity,
+                              dispositionByEthnicityAndGender,
+                              "unsorted"))
 
-                  Ethnicity(eachEthnicity,
-                            dispositionsByEthnicity,
-                            dispositionByEthnicityAndGender)
               }
               .toList
+              .sorted
             val msa = Msa(msa_md.toString(),
                           msa_md_name,
                           state,
@@ -287,7 +301,7 @@ object AggregateProcessing {
             ReportByEthnicityThenGender(
               "4",
               "Aggregate",
-              "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4- family and manufactured home dwellings, by race and gender",
+              "Disposition of loan applications, by ethnicity and sex of applicant",
               year,
               dateFormat.format(new java.util.Date()),
               msa,
@@ -318,6 +332,7 @@ object AggregateProcessing {
                           buildDisposition(dataForDisposition, eachDisposition)
                       }
                       .toList
+                      .sorted
 
                   val dispositionByRaceAndGender: List[Gender] =
                     dataForRace
@@ -337,14 +352,23 @@ object AggregateProcessing {
                                                    eachDisposition)
                               }
                               .toList
-
-                          Gender(eachGender, dispositionsForGender)
+                              .sorted
+                          BaseProcessing.buildSortedGender(
+                            Gender(eachGender,
+                                   dispositionsForGender,
+                                   "unsorted"))
                       }
                       .toList
+                      .sorted
 
-                  Race(eachRace, dispositionsByRace, dispositionByRaceAndGender)
+                  BaseProcessing.buildSortedRace(
+                    Race(eachRace,
+                         dispositionsByRace,
+                         dispositionByRaceAndGender,
+                         "unsorted"))
               }
               .toList
+              .sorted
             val msa = Msa(msa_md.toString(),
                           msa_md_name,
                           state,
@@ -352,7 +376,7 @@ object AggregateProcessing {
             ReportByRaceThenGender(
               "3",
               "Aggregate",
-              "Disposition of applications for FHA, FSA/RHS, and VA home-purchase loans, 1- to 4- family and manufactured home dwellings, by race and gender",
+              "Disposition of loan applications, by race and sex of applicant",
               year,
               dateFormat.format(new java.util.Date()),
               msa,
@@ -526,7 +550,7 @@ object AggregateProcessing {
         .mapAsyncUnordered(10) { input =>
           val data: String = input.asJson.noSpaces
           BaseProcessing.persistSingleFile(
-            s"dev/reports/aggregate/2018/${input.msa.id}/IncomeRaceEthinicty.json",
+            s"$bucket/reports/aggregate/2018/${input.msa.id}/5.json",
             data,
             "cfpb-hmda-public",
             s3Settings)(mat, ec)
@@ -541,17 +565,16 @@ object AggregateProcessing {
       _ <- persistJsonRaceSex(
         jsonFormationRaceThenGender(
           RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-            spark)))
+                                                          spark)))
       _ <- persistJsonEthnicitySex(
         jsonTransformationReportByEthnicityThenGender(
           RaceGenderProcessing.outputCollectionTable3and4(cachedRecordsDf,
-            spark)))
+                                                          spark)))
       _ <- persistIncomeRaceEthnicity(
         IncomeRaceEthnicityProcessing.jsonFormationApplicantIncome(
           IncomeRaceEthnicityProcessing
             .outputCollectionTableIncome(cachedRecordsDf, spark)))
     } yield ()
-
 
     result.onComplete {
       case Success(_) => println(s"Finished Aggregate Reports")

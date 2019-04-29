@@ -83,9 +83,10 @@ object DisclosureProcessing {
                       case (title, datasByTitle) =>
                         val listInfo: List[Info] = datasByTitle.map(d =>
                           Info(d.dispositionName, d.count, d.loan_amount))
-                        Disposition(title, listInfo)
+                        Disposition(title.split("-")(0).trim, listInfo, title)
                     }
                     .toList
+                    .sorted
                   val stateCode = Try(tract.take(2).toInt).getOrElse(-1)
                   val countyCode = Try(tract.slice(2, 5).toInt).getOrElse(-1)
                   val remainingTract = tract.drop(5)
@@ -132,9 +133,10 @@ object DisclosureProcessing {
                       case (title, datasByTitle) =>
                         val listInfo: List[Info] = datasByTitle.map(d =>
                           Info(d.dispositionName, d.count, d.loan_amount))
-                        Disposition(title, listInfo)
+                        Disposition(title.split("-")(0).trim, listInfo, title)
                     }
                     .toList
+                    .sorted
                   val stateCode = Try(tract.take(2).toInt).getOrElse(-1)
                   val countyCode = Try(tract.slice(2, 5).toInt).getOrElse(-1)
                   val remainingTract = tract.drop(5)
