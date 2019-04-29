@@ -12,7 +12,8 @@ import hmda.census.records.CountyLoanLimitRecords
 import hmda.publication.lar.{
   RaceCategorization,
   SexCategorization,
-  IncomeCategorization
+  IncomeCategorization,
+  DwellingCategorization
 }
 
 import hmda.publication.EthnicityCategorization._
@@ -144,7 +145,9 @@ object ModifiedLarCsvParser {
       assignEthnicityCategorization(lar),
       RaceCategorization.assignRaceCategorization(lar),
       SexCategorization.assignSexCategorization(lar),
-      IncomeCategorization.assignIncomeCategorization(lar, censusRecords)
+      IncomeCategorization.assignIncomeCategorization(lar, censusRecords),
+      DwellingCategorization.assignDwellingCategorization(lar),
+      "lkj"
     )
   }
 
