@@ -41,7 +41,7 @@ object RaceCategorization {
       "Free Form Text Only"
     } else if (race.race1 == RaceInformationNotProvided ||
                race.race1 == RaceNotApplicable) {
-      "Race not available"
+      "Race Not Available"
     }
 
     // American Indian or Alaska Native
@@ -143,7 +143,7 @@ object RaceCategorization {
                AnyApplicantWhite(race)) {
       "Joint"
     } else
-      "Race not available"
+      "Race Not Available"
   }
 
   private def moreThanOneMinority(

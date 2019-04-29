@@ -17,7 +17,7 @@ object RaceGenderProcessing {
     "Asian",
     "Joint",
     "2 or more minority races",
-    "Race not available",
+    "Race Not Available",
     "Free Form Text Only",
   )
 

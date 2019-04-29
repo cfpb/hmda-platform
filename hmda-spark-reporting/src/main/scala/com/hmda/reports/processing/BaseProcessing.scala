@@ -401,7 +401,7 @@ object BaseProcessing {
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(E)")
     else if (unsortedRace.race == "2 or more minority races")
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(F)")
-    else if (unsortedRace.race == "Race not available")
+    else if (unsortedRace.race == "Race Not Available")
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(H)")
     else
       IncomeRace(unsortedRace.race, unsortedRace.dispositions, "(G)")
@@ -438,7 +438,7 @@ object BaseProcessing {
            unsortedRace.dispositions,
            unsortedRace.gender,
            "(F)")
-    else if (unsortedRace.race == "Race not available")
+    else if (unsortedRace.race == "Race Not Available")
       Race(unsortedRace.race,
            unsortedRace.dispositions,
            unsortedRace.gender,

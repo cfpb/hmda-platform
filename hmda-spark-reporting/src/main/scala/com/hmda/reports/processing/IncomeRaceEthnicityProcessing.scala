@@ -9,7 +9,7 @@ object IncomeRaceEthnicityProcessing {
     "Asian",
     "Native Hawaiian or Other Pacific Islander",
     "Free Form Text Only",
-    "Race not available",
+    "Race Not Available",
     "American Indian or Alaska Native",
     "Black or African American",
     "2 or more minority races",
