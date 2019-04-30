@@ -7,7 +7,9 @@ object IncomeCategorization {
   def assignIncomeCategorization(lar: LoanApplicationRegister,
                                  censusRecords: List[Census]): String = {
     val tract =
-      censusRecords.filter(record => record.tract == lar.geography.tract).head
+      censusRecords
+        .filter(record => record.state + record.county == lar.geography.county)
+        .head
     val medianIncome = tract.medianIncome.toDouble
     val income = lar.income.toDouble
 
