@@ -115,6 +115,8 @@ spec:
                 configMapKeyRef:
                   name: http-configmap
                   key: census.port
+            - name: KAFKA_LOG_LEVEL
+              value: INFO
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

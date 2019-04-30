@@ -3,13 +3,13 @@ package hmda.persistence.institution
 import akka.Done
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, ActorRef, Behavior}
+import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
-import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import akka.stream.ActorMaterializer
 import hmda.messages.institution.InstitutionCommands._
 import hmda.messages.institution.InstitutionEvents._
@@ -30,9 +30,9 @@ object InstitutionPersistence
   override def behavior(entityId: String): Behavior[InstitutionCommand] = {
     Behaviors.setup { ctx =>
       ctx.log.info(s"Started Institution: $entityId")
-      PersistentBehavior[InstitutionCommand,
-                         InstitutionEvent,
-                         InstitutionState](
+      EventSourcedBehavior[InstitutionCommand,
+                           InstitutionEvent,
+                           InstitutionState](
         persistenceId = PersistenceId(entityId),
         emptyState = InstitutionState(None),
         commandHandler = commandHandler(ctx),
@@ -42,7 +42,7 @@ object InstitutionPersistence
     }
   }
 
-  override def commandHandler(ctx: ActorContext[InstitutionCommand])
+  override def commandHandler(ctx: TypedActorContext[InstitutionCommand])
     : CommandHandler[InstitutionCommand, InstitutionEvent, InstitutionState] = {
     val log = ctx.asScala.log
     implicit val system: ActorSystem = ctx.asScala.system.toUntyped

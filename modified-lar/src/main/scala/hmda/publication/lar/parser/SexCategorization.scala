@@ -10,7 +10,7 @@ package object SexCategorization {
     val coSex = lar.coApplicant.sex.sexEnum
 
     if (sex == SexInformationNotProvided || sex == SexNotApplicable) {
-      "Sex not available"
+      "Sex Not Available"
     } else if (sex == Male && (coSex != Female || coSex != MaleAndFemale)) {
       Male.description
     } else if (sex == Female && (coSex != Male || coSex != MaleAndFemale)) {

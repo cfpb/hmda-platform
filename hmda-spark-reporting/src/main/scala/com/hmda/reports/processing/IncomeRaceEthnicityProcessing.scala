@@ -13,7 +13,7 @@ object IncomeRaceEthnicityProcessing {
     "Race Not Available",
     "American Indian or Alaska Native",
     "Black or African American",
-    "2 Or More Minority Races",
+    "2 or more minority races",
     "White",
     "Joint"
   )
@@ -234,7 +234,8 @@ object IncomeRaceEthnicityProcessing {
       "Applications Approved but not Accepted" -> List(2),
       "Applications Denied by Financial Institution" -> List(3),
       "Applications Withdrawn by Applicant" -> List(4),
-      "File Closed for Incompleteness" -> List(5)
+      "File Closed for Incompleteness" -> List(5),
+      "Purchased Loans" -> List(6)
     )
 
     val outputATable1: Dataset[IncomeData] = actionsTakenTable1
@@ -337,9 +338,11 @@ object IncomeRaceEthnicityProcessing {
                                 }
                               }
                               .toList
-                            IncomeRace(eachRace, dispositions)
+                            BaseProcessing.buildSortedIncomeRace(
+                              IncomeRace(eachRace, dispositions, "unsorted"))
                         }
                         .toList
+                        .sorted
                     BorrowerRace("Race", races)
                   }
 
@@ -360,7 +363,10 @@ object IncomeRaceEthnicityProcessing {
                                 }
                               }
                               .toList
-                            IncomeEthnicity(eachEthnicity, dispositions)
+                            BaseProcessing.buildSortedIncomeEthnicity(
+                              IncomeEthnicity(eachEthnicity,
+                                              dispositions,
+                                              "unsorted"))
                         }
                         .toList
                     }

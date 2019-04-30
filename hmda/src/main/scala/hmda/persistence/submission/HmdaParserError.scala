@@ -2,7 +2,7 @@ package hmda.persistence.submission
 
 import akka.actor.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, ActorRef, Behavior}
+import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.stream.ActorMaterializer
@@ -17,8 +17,8 @@ import hmda.model.filing.submission.{Parsed, ParsedWithErrors}
 import hmda.persistence.HmdaTypedPersistentActor
 import akka.actor.typed.scaladsl.adapter._
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
-import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import com.typesafe.config.ConfigFactory
 import hmda.model.filing.submissions.PaginatedResource
 import hmda.model.processing.state.HmdaParserErrorState
@@ -47,9 +47,9 @@ object HmdaParserError
   override def behavior(
       entityId: String): Behavior[SubmissionProcessingCommand] =
     Behaviors.setup { ctx =>
-      PersistentBehavior[SubmissionProcessingCommand,
-                         SubmissionProcessingEvent,
-                         HmdaParserErrorState](
+      EventSourcedBehavior[SubmissionProcessingCommand,
+                           SubmissionProcessingEvent,
+                           HmdaParserErrorState](
         persistenceId = PersistenceId(s"$entityId"),
         emptyState = HmdaParserErrorState(),
         commandHandler = commandHandler(ctx),
@@ -57,7 +57,8 @@ object HmdaParserError
       ).snapshotEvery(1000)
     }
 
-  override def commandHandler(ctx: ActorContext[SubmissionProcessingCommand])
+  override def commandHandler(
+      ctx: TypedActorContext[SubmissionProcessingCommand])
     : CommandHandler[SubmissionProcessingCommand,
                      SubmissionProcessingEvent,
                      HmdaParserErrorState] = { (state, cmd) =>

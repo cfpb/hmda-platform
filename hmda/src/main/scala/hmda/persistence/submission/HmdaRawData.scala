@@ -1,12 +1,12 @@
 package hmda.persistence.submission
 
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorContext, ActorRef, Behavior}
+import akka.actor.typed.{TypedActorContext, ActorRef, Behavior}
 import akka.cluster.sharding.typed.ShardingEnvelope
 import akka.cluster.sharding.typed.scaladsl.ClusterSharding
 import akka.persistence.typed.PersistenceId
-import akka.persistence.typed.scaladsl.{Effect, PersistentBehavior}
-import akka.persistence.typed.scaladsl.PersistentBehavior.CommandHandler
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
+import akka.persistence.typed.scaladsl.EventSourcedBehavior.CommandHandler
 import hmda.messages.submission.HmdaRawDataCommands.{
   AddLine,
   HmdaRawDataCommand
@@ -24,9 +24,9 @@ object HmdaRawData
 
   override def behavior(entityId: String): Behavior[HmdaRawDataCommand] =
     Behaviors.setup { ctx =>
-      PersistentBehavior[HmdaRawDataCommand,
-                         HmdaRawDataEvent,
-                         HmdaRawDataState](
+      EventSourcedBehavior[HmdaRawDataCommand,
+                           HmdaRawDataEvent,
+                           HmdaRawDataState](
         persistenceId = PersistenceId(entityId),
         emptyState = HmdaRawDataState(),
         commandHandler = commandHandler(ctx),
@@ -34,7 +34,7 @@ object HmdaRawData
       ).snapshotEvery(1000)
     }
 
-  override def commandHandler(ctx: ActorContext[HmdaRawDataCommand])
+  override def commandHandler(ctx: TypedActorContext[HmdaRawDataCommand])
     : CommandHandler[HmdaRawDataCommand, HmdaRawDataEvent, HmdaRawDataState] = {
     (_, cmd) =>
       val log = ctx.asScala.log
