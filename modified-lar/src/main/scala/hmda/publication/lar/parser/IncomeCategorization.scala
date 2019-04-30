@@ -6,13 +6,14 @@ import hmda.model.census._
 object IncomeCategorization {
   def assignIncomeCategorization(lar: LoanApplicationRegister,
                                  censusRecords: List[Census]): String = {
-    
-    if (lar.geography.county = "NA") {
+
+    if (lar.geography.county == "NA") {
       "NA"
     } else {
       val tract =
         censusRecords
-          .filter(record => record.state + record.county == lar.geography.county)
+          .filter(record =>
+            record.state + record.county == lar.geography.county)
           .head
       val medianIncome = tract.medianIncome.toDouble
       val income = lar.income.toDouble
