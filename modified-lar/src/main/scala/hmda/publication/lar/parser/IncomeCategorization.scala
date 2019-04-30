@@ -7,7 +7,7 @@ object IncomeCategorization {
   def assignIncomeCategorization(lar: LoanApplicationRegister,
                                  censusRecords: List[Census]): String = {
 
-    if (lar.geography.county == "NA") {
+    if (lar.geography.county == "NA" || lar.income == "NA") {
       "NA"
     } else {
       val tract =
