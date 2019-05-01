@@ -94,7 +94,8 @@ object ModifiedLarPublisher {
 
         case PersistToS3AndPostgres(submissionId, respondTo) =>
           log.info(
-            s"Publishing Modified LAR for $submissionId with isGenerateS3File set to " + isGenerateS3File)
+            s"Publishing Modified LAR for $submissionId with isGenerateS3File set to " + isGenerateS3File +
+              "and isCreateDispositionRecord set to " + isCreateDispositionRecord)
 
           val fileName = s"${submissionId.lei.toUpperCase()}.txt"
 
