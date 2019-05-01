@@ -48,7 +48,7 @@ class ModifiedLarRepository(tableName: String,
              filingYear: Int): Future[Int] =
     db.run(sqlu"""INSERT INTO #${tableName}(
             id,
-            lei,
+            lei.toUpperCase,
             loan_type,
             loan_purpose,
             preapproval,
