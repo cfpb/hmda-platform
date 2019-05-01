@@ -93,9 +93,8 @@ object ModifiedLarPublisher {
       Behaviors.receiveMessage {
 
         case PersistToS3AndPostgres(submissionId, respondTo) =>
-          log.info(
-            s"Publishing Modified LAR for $submissionId with isGenerateS3File set to " + isGenerateS3File +
-              "and isCreateDispositionRecord set to " + isCreateDispositionRecord)
+          log.info(s"Publishing Modified LAR for $submissionId with isGenerateS3File set to " + isGenerateS3File +
+            "and isCreateDispositionRecord set to " + isCreateDispositionRecord)
 
           val fileName = s"${submissionId.lei.toUpperCase()}.txt"
 
