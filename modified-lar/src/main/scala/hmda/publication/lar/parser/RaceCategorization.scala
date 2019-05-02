@@ -112,6 +112,8 @@ object RaceCategorization {
              !raceFields.contains(AmericanIndianOrAlaskaNative) &&
              !isCoWhite) {
       Asian.description
+    } else if (raceFields.exists(asianEnums.contains)) {
+      Asian.description
     }
 
     // Native Hawaiian or Pacific Islander Alt Two
