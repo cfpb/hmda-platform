@@ -117,6 +117,16 @@ spec:
                   key: census.port
             - name: KAFKA_LOG_LEVEL
               value: INFO
+            - name: IS_GENERATE_MLAR_S3_FIES
+              valueFrom:
+                configMapKeyRef:
+                  name: mlar-options-configmap
+                  key: generateMlarS3File
+            - name: IS_CREATE_DISPOSITION_KAFKA_RECORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mlar-options-configmap
+                  key: createDispositionKafkaRecord
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}

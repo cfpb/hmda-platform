@@ -57,7 +57,9 @@ object ModifiedLarPublisher {
     bankFilter.getString("bank-filter-list").toUpperCase.split(",")
   val awsCredentialsProvider = new AWSStaticCredentialsProvider(
     new BasicAWSCredentials(accessKeyId, secretAccess))
-
+  val isGenerateS3File = config.getBoolean("hmda.lar.modified.generateS3Files")
+  val isCreateDispositionRecord =
+    config.getBoolean("hmda.lar.modified.creteDispositionRecord")
   val awsRegionProvider = new AwsRegionProvider {
     override def getRegion: String = region
   }
@@ -91,7 +93,8 @@ object ModifiedLarPublisher {
       Behaviors.receiveMessage {
 
         case PersistToS3AndPostgres(submissionId, respondTo) =>
-          log.info(s"Publishing Modified LAR for $submissionId")
+          log.info(s"Publishing Modified LAR for $submissionId with isGenerateS3File set to " + isGenerateS3File +
+            "and isCreateDispositionRecord set to " + isCreateDispositionRecord)
 
           val fileName = s"${submissionId.lei.toUpperCase()}.txt"
 
@@ -135,8 +138,9 @@ object ModifiedLarPublisher {
                   .insert(enriched, submissionId.toString, filingYear))
               .toMat(Sink.ignore)(Keep.right)
 
-          val graph = mlarSource
-            .alsoToMat(postgresOut(2))(Keep.right) // TODO: provide a way to make this configurable
+          //generate S3 files and write to PG
+          val graphWithS3 = mlarSource
+            .alsoToMat(postgresOut(2))(Keep.right)
             .toMat(s3Out)(Keep.both)
             .mapMaterializedValue {
               // We listen on the completion of both materialized values but we only keep the S3 as the result
@@ -144,13 +148,25 @@ object ModifiedLarPublisher {
               case (futPostgresRes, futS3Res) =>
                 for {
                   _ <- futPostgresRes
-                  s3Res <- futS3Res
+                  s3Res <- if (isGenerateS3File) futS3Res
+                  else Future.successful(Nil)
                 } yield s3Res
+            }
+
+          //only write to PG - do not generate S3 files
+          val graphWithoutS3 = mlarSource
+            .toMat(postgresOut(2))(Keep.right)
+            .mapMaterializedValue {
+              case (futPostgresRes) =>
+                for {
+                  _ <- futPostgresRes
+                } yield futPostgresRes
             }
 
           val finalResult: Future[Unit] = for {
             _ <- removeLei
-            _ <- graph.run()
+            _ <- if (isGenerateS3File) graphWithS3.run()
+            else graphWithoutS3.run()
             _ <- produceRecord(disclosureTopic,
                                submissionId.lei,
                                submissionId.toString)
