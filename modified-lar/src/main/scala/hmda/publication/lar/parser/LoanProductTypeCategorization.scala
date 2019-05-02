@@ -12,9 +12,9 @@ package object LoanProductTypeCategorization {
     else if (lar.loan.loanType == FHAInsured && lar.lienStatus == SecuredByFirstLien)
       "FHA, First Lien"
     else if (lar.loan.loanType == VAGuaranteed && lar.lienStatus == SecuredByFirstLien)
-      "FSA/RHS, First Lien"
+      "VA, First Lien"
     else if (lar.loan.loanType == RHSOrFSAGuaranteed && lar.lienStatus == SecuredByFirstLien)
-      "Conventional, Subordinate Lien"
+      "FSA/RHS, First Lien"
     else if (lar.loan.loanType == Conventional && lar.lienStatus == SecuredBySubordinateLien)
       "Conventional, Subordinate Lien"
     else if (lar.loan.loanType == FHAInsured && lar.lienStatus == SecuredBySubordinateLien)
