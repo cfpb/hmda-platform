@@ -149,7 +149,9 @@ class ModifiedLarRepository(tableName: String,
             ethnicity_categorization,
             race_categorization,
             sex_categorization,
-            percent_median_msa_income
+            percent_median_msa_income,
+            dwelling_category,
+            loan_product_type
             )
 
 
@@ -256,7 +258,9 @@ class ModifiedLarRepository(tableName: String,
             ${input.mlar.ethnicityCategorization},
             ${input.mlar.raceCategorization},
             ${input.mlar.sexCategorization},
-            ${input.mlar.incomeCategorization}
+            ${input.mlar.incomeCategorization},
+            ${input.mlar.dwellingCategorization},
+            ${input.mlar.loanProductTypeCategorization}
           )
           """)
 

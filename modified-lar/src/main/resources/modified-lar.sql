@@ -101,7 +101,9 @@ CREATE TABLE hmda_user.modifiedlar2018
     median_age integer,
     median_age_calculated integer,
     median_income_percentage integer,
-    percent_median_msa_income integer
+    percent_median_msa_income integer,
+    dwelling_category character varying,
+    loan_product_type character varying
 )
 WITH (
     OIDS = FALSE

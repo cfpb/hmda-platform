@@ -9,12 +9,7 @@ import hmda.publication.{ConformingLoanLimit, StateBoundries}
 import hmda.model.census.CountyLoanLimit
 import hmda.census.records.CensusRecords
 import hmda.census.records.CountyLoanLimitRecords
-import hmda.publication.lar.{
-  RaceCategorization,
-  SexCategorization,
-  IncomeCategorization
-}
-
+import hmda.publication.lar._
 import hmda.publication.EthnicityCategorization._
 
 object ModifiedLarCsvParser {
@@ -144,7 +139,9 @@ object ModifiedLarCsvParser {
       assignEthnicityCategorization(lar),
       RaceCategorization.assignRaceCategorization(lar),
       SexCategorization.assignSexCategorization(lar),
-      IncomeCategorization.assignIncomeCategorization(lar, censusRecords)
+      IncomeCategorization.assignIncomeCategorization(lar, censusRecords),
+      DwellingCategorization.assignDwellingCategorization(lar),
+      LoanProductTypeCategorization.assignLoanProductTypeCategorization(lar)
     )
   }
 
