@@ -28,6 +28,7 @@ object Routes {
       pathPrefix("msamd" / MsaMdSegment) { msamd =>
         (extractActions & extractRaces) {
           (actionsTaken: Seq[ActionTaken], races: Seq[Race]) =>
+            // eg. data-browser/view/msamd/45636/csv?actions_taken=1,2,3&races=Asian,Joint,White
             (path("csv") & get) {
               complete(
                 HttpEntity(
@@ -40,6 +41,7 @@ object Routes {
                 )
               )
             } ~
+              // eg. data-browser/view/msamd/45636?actions_taken=1,2,3&races=Asian,Joint,White
               get {
                 val inputParameters = Parameters(msaMd = Some(msamd.msaMd),
                                                  state = None,
