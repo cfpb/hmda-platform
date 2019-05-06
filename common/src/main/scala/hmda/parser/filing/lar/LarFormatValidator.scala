@@ -24,7 +24,7 @@ sealed trait LarFormatValidator extends LarParser {
       IncorrectNumberOfFields(values.length, numberOfFields).invalidNel
     } else {
       val id = values.headOption.getOrElse("")
-      val lei = values(1)
+      val lei = values(1).toUpperCase
       val uli = values(2)
       val applicationDate = values(3)
       val loanType = values(4)
