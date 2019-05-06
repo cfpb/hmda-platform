@@ -39,4 +39,20 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository)
     Task.gatherUnordered(taskList)
   }
 
+  override def fetchAggregate(
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+    val taskList = for {
+      race <- races
+      action <- actionsTaken
+    } yield
+      repo
+        .findAndAggregate(action.value, race.entryName)
+        .map(
+          stat => Aggregation(stat.count, stat.sum, race, action)
+        )
+
+     Task.gatherUnordered(taskList)
+  }
+
 }

@@ -55,6 +55,26 @@ object Routes {
               }
             }
           }
+        } ~
+        path("nationwide") {
+          pathEndOrSingleSlash {
+            (extractActions & extractRaces) { (actionsTaken, races) =>
+              get {
+                val inputParameters = Parameters(msaMd = None,
+                                                 state = None,
+                                                 races = races.map(_.entryName),
+                                                 actionsTaken =
+                                                   actionsTaken.map(_.value))
+
+                val stats =
+                  browserService
+                    .fetchAggregate(races, actionsTaken)
+                    .map(aggs => AggregationResponse(inputParameters, aggs))
+                    .runToFuture
+                complete(OK, stats)
+              }
+            }
+          }
         }
     }
   }
