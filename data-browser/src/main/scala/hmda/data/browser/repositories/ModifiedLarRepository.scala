@@ -15,6 +15,8 @@ trait ModifiedLarRepository {
            actionTaken: Int,
            race: String): Source[ModifiedLarEntity, NotUsed]
 
+  def find(actionTaken: Int, race: String): Source[ModifiedLarEntity, NotUsed]
+
   def findAndAggregate(msaMd: Int,
                        actionTaken: Int,
                        race: String): Future[Statistic]
@@ -22,4 +24,6 @@ trait ModifiedLarRepository {
   def findAndAggregate(state: String,
                        actionTaken: Int,
                        race: String): Future[Statistic]
+
+  def findAndAggregate(actionTaken: Int, race: String): Future[Statistic]
 }

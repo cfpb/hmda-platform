@@ -8,6 +8,7 @@ import akka.stream.scaladsl.Sink
 import scala.concurrent.ExecutionContext
 import akka.actor.typed.scaladsl.adapter._
 import akka.stream.ActorMaterializer
+import hmda.data.browser.models.Race.{Asian, TwoOrMoreMinorityRaces}
 import hmda.data.browser.repositories.PostgresModifiedLarRepository
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -33,15 +34,20 @@ object ServerGuardian {
 
     import scala.concurrent.duration._
     println {
-      Await.result(repository.findAndAggregate(35614, 5, "Asian"), 30.seconds)
+      Await.result(repository.findAndAggregate(35614, 5, Asian.entryName),
+                   30.seconds)
     }
 
-   Await.result(repository
-                   .find("CA", 6, "2 or more minority races")
+    Await.result(repository
+                   .find("CA", 6, TwoOrMoreMinorityRaces.entryName)
                    .runWith(Sink.foreach(println)),
-                 30.seconds)                   
+                 30.seconds)
+
+    Await.result(repository
+                   .find(1, TwoOrMoreMinorityRaces.entryName)
+                   .runWith(Sink.foreach(println)),
+                 30.seconds)
 
     Behaviors.stopped
   }
 }
-//This is a test

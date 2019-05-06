@@ -13,18 +13,6 @@ class PostgresModifiedLarRepository(tableName: String,
   import config._
   import config.profile.api._
 
-  private val races = Set(
-    "Asian",
-    "Native Hawaiian or Other Pacific Islander",
-    "Free Form Text Only",
-    "Race Not Available",
-    "American Indian or Alaska Native",
-    "Black or African American",
-    "2 Or More Minority Races",
-    "White",
-    "Joint"
-  )
-
   private val columns: String =
     """id,
       lei,
@@ -191,6 +179,33 @@ class PostgresModifiedLarRepository(tableName: String,
             WHERE state = '#${state}'
               AND action_taken_type = #${actionTaken}
               AND race_categorization = '#${race}'
+      """.as[Statistic].head
+
+    db.run(query)
+  }
+
+  override def find(actionTaken: Int,
+                    race: String): Source[ModifiedLarEntity, NotUsed] = {
+    val searchQuery = sql"""
+    SELECT #$columns
+    FROM #${tableName}
+    WHERE action_taken_type = #${actionTaken}
+      AND race_categorization = '#${race}'
+    """.as[ModifiedLarEntity]
+
+    val publisher = db.stream(searchQuery)
+    Source.fromPublisher(publisher)
+  }
+
+  override def findAndAggregate(actionTaken: Int,
+                                race: String): Future[Statistic] = {
+    val query =
+      sql"""SELECT
+              COUNT(loan_amount),
+              SUM(loan_amount)
+            FROM #${tableName}
+            WHERE action_taken_type = #${actionTaken}
+            AND race_categorization = '#${race}'
       """.as[Statistic].head
 
     db.run(query)

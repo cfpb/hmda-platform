@@ -53,6 +53,7 @@ lazy val akkaPersistenceDeps =
 
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
+lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
 
@@ -424,7 +425,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= akkaDeps ++ slickDeps,
+      libraryDependencies ++= akkaDeps ++ slickDeps ++ enumeratumDeps,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
