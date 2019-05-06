@@ -1,24 +1,45 @@
 package hmda.data.browser.rest
 
+import akka.http.scaladsl.common.{
+  CsvEntityStreamingSupport,
+  EntityStreamingSupport
+}
 import akka.http.scaladsl.model.StatusCodes.OK
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import DataBrowserDirectives._
-import hmda.data.browser.models._
-import io.circe.generic.auto._
+import akka.stream.ActorMaterializer
+import akka.util.ByteString
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.data.browser.models._
+import hmda.data.browser.rest.DataBrowserDirectives._
 import hmda.data.browser.services.BrowserService
+import io.circe.generic.auto._
 import monix.execution.{Scheduler => MonixScheduler}
 
 object Routes {
-  def apply(browserService: BrowserService)(
-      implicit scheduler: MonixScheduler): Route = {
+  implicit val csvStreamingSupport: CsvEntityStreamingSupport =
+    EntityStreamingSupport.csv()
+
+  def apply(browserService: BrowserService)(implicit scheduler: MonixScheduler,
+                                            mat: ActorMaterializer): Route = {
     pathPrefix("data-browser" / "view") {
-      path("msamd" / MsaMdSegment) { msamd =>
-        pathEndOrSingleSlash {
-          (extractActions & extractRaces) {
-            (actionsTaken: Seq[ActionTaken], races: Seq[Race]) =>
+      pathPrefix("msamd" / MsaMdSegment) { msamd =>
+        (extractActions & extractRaces) {
+          (actionsTaken: Seq[ActionTaken], races: Seq[Race]) =>
+            (path("csv") & get) {
+              complete(
+                HttpEntity(
+                  ContentTypes.`text/csv(UTF-8)`,
+                  browserService
+                    .fetchData(msamd, races, actionsTaken)
+                    .map(_.toCsv)
+                    .map(ByteString(_))
+                    .via(csvStreamingSupport.framingRenderer)
+                )
+              )
+            } ~
               get {
                 val inputParameters = Parameters(msaMd = Some(msamd.msaMd),
                                                  state = None,
@@ -33,12 +54,22 @@ object Routes {
                     .runToFuture
                 complete(OK, stats)
               }
-          }
         }
       } ~
-        path("state" / StateSegment) { state: State =>
-          pathEndOrSingleSlash {
-            (extractActions & extractRaces) { (actionsTaken, races) =>
+        pathPrefix("state" / StateSegment) { state: State =>
+          (extractActions & extractRaces) { (actionsTaken, races) =>
+            (path("csv") & get) {
+              complete(
+                HttpEntity(
+                  ContentTypes.`text/csv(UTF-8)`,
+                  browserService
+                    .fetchData(state, races, actionsTaken)
+                    .map(_.toCsv)
+                    .map(ByteString(_))
+                    .via(csvStreamingSupport.framingRenderer)
+                )
+              )
+            } ~
               get {
                 val inputParameters = Parameters(msaMd = None,
                                                  state = Some(state.entryName),
@@ -53,12 +84,22 @@ object Routes {
                     .runToFuture
                 complete(OK, stats)
               }
-            }
           }
         } ~
-        path("nationwide") {
-          pathEndOrSingleSlash {
-            (extractActions & extractRaces) { (actionsTaken, races) =>
+        pathPrefix("nationwide") {
+          (extractActions & extractRaces) { (actionsTaken, races) =>
+            (path("csv") & get) {
+              complete(
+                HttpEntity(
+                  ContentTypes.`text/csv(UTF-8)`,
+                  browserService
+                    .fetchData(races, actionsTaken)
+                    .map(_.toCsv)
+                    .map(ByteString(_))
+                    .via(csvStreamingSupport.framingRenderer)
+                )
+              )
+            } ~
               get {
                 val inputParameters = Parameters(msaMd = None,
                                                  state = None,
@@ -73,7 +114,6 @@ object Routes {
                     .runToFuture
                 complete(OK, stats)
               }
-            }
           }
         }
     }

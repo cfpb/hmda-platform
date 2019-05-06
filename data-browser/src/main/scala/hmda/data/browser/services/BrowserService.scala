@@ -1,18 +1,40 @@
 package hmda.data.browser.services
 
-import hmda.data.browser.models.{ActionTaken, Aggregation,MsaMd, Race, State}
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+import hmda.data.browser.models.{
+  ActionTaken,
+  Aggregation,
+  ModifiedLarEntity,
+  MsaMd,
+  Race,
+  State
+}
 import monix.eval.Task
 
- trait BrowserService {
+trait BrowserService {
   def fetchAggregate(msaMd: MsaMd,
                      races: Seq[Race],
                      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]]
 
-   def fetchAggregate(state: State,
+  def fetchData(
+      msaMd: MsaMd,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed]
+
+  def fetchAggregate(state: State,
                      races: Seq[Race],
                      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]]
 
-   //nationwide
+  def fetchData(
+      state: State,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed]
+
   def fetchAggregate(races: Seq[Race],
-                     actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]]   
+                     actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]]
+
+  def fetchData(
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed]
 }

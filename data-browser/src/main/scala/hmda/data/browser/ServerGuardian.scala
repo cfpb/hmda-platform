@@ -1,11 +1,9 @@
 package hmda.data.browser
 
-import akka.actor.{ActorSystem => UntypedActorSystem}
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl._
-
-import scala.concurrent.ExecutionContext
 import akka.actor.typed.scaladsl.adapter._
+import akka.actor.{ActorSystem => UntypedActorSystem}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import hmda.data.browser.repositories.{
@@ -29,8 +27,8 @@ object ServerGuardian {
     implicit val untypedSystem: UntypedActorSystem =
       ctx.asScala.system.toUntyped
     implicit val mat: ActorMaterializer = ActorMaterializer()
-    implicit val ec: ExecutionContext = ctx.executionContext
-    implicit val monixScheduler: MonixScheduler = MonixScheduler(ec)
+    implicit val monixScheduler: MonixScheduler =
+      MonixScheduler(ctx.executionContext)
 
     val settings = Settings(untypedSystem)
     val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")

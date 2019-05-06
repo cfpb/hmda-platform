@@ -1,5 +1,7 @@
 package hmda.data.browser.services
-import hmda.data.browser.models.{ActionTaken, Aggregation, MsaMd, Race, State}
+import akka.NotUsed
+import akka.stream.scaladsl.Source
+import hmda.data.browser.models._
 import hmda.data.browser.repositories.ModifiedLarRepository
 import monix.eval.Task
 
@@ -52,7 +54,38 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository)
           stat => Aggregation(stat.count, stat.sum, race, action)
         )
 
-     Task.gatherUnordered(taskList)
+    Task.gatherUnordered(taskList)
   }
 
+  override def fetchData(
+      msaMd: MsaMd,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
+    val list = for {
+      race <- races
+      action <- actionsTaken
+    } yield repo.find(msaMd.msaMd, action.value, race.entryName)
+    list.reduce((s1, s2) => s2 prepend s1)
+  }
+
+  override def fetchData(
+      state: State,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
+    val list = for {
+      race <- races
+      action <- actionsTaken
+    } yield repo.find(state.entryName, action.value, race.entryName)
+    list.reduce((s1, s2) => s2 prepend s1)
+  }
+
+  override def fetchData(
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
+    val list = for {
+      race <- races
+      action <- actionsTaken
+    } yield repo.find(action.value, race.entryName)
+    list.reduce((s1, s2) => s2 prepend s1)
+  }
 }
