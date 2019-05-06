@@ -424,6 +424,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies ++= akkaDeps ++ slickDeps,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
