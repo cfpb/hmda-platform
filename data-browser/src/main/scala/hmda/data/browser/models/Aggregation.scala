@@ -1,13 +1,13 @@
 package hmda.data.browser.models
 
- import io.circe.Encoder
+import io.circe.Encoder
 
- case class Aggregation(count: Long,
+case class Aggregation(count: Long,
                        sum: Double,
                        race: Race,
                        actionTaken: ActionTaken)
 
- object Aggregation {
+object Aggregation {
   // Scala => JSON
   implicit val encoder: Encoder[Aggregation] =
     Encoder.forProduct4("count", "sum", "race", "action_taken")(

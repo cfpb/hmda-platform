@@ -418,7 +418,7 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   )
   .dependsOn(common % "compile->compile;test->test")
 
-  lazy val `data-browser` = (project in file("data-browser"))
+lazy val `data-browser` = (project in file("data-browser"))
   .enablePlugins(JavaServerAppPackaging,
                  sbtdocker.DockerPlugin,
                  AshScriptPlugin)

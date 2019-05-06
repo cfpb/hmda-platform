@@ -1,11 +1,11 @@
 package hmda.data.browser.models
 
- import enumeratum.values._
+import enumeratum.values._
 import scala.collection.immutable
 
- sealed abstract class ActionTaken(override val value: Int) extends IntEnumEntry
+sealed abstract class ActionTaken(override val value: Int) extends IntEnumEntry
 
- object ActionTaken extends IntEnum[ActionTaken] {
+object ActionTaken extends IntEnum[ActionTaken] {
   val values: immutable.IndexedSeq[ActionTaken] = findValues
 
   case object LoansOriginated extends ActionTaken(1)
@@ -17,17 +17,18 @@ import scala.collection.immutable
   case object Placeholder1 extends ActionTaken(7)
   case object Placeholder2 extends ActionTaken(8)
 
-  
-def validateActionsTaken(rawActionsTaken: Seq[Int]): Either[Seq[Int], Seq[ActionTaken]] = {
-	val potentialActions = rawActionsTaken.map(action => (action, ActionTaken.withValueOpt(action)))
-	val isActionsValid = potentialActions.map(_._2).forall(_.isDefined)
+  def validateActionsTaken(
+      rawActionsTaken: Seq[Int]): Either[Seq[Int], Seq[ActionTaken]] = {
+    val potentialActions =
+      rawActionsTaken.map(action => (action, ActionTaken.withValueOpt(action)))
+    val isActionsValid = potentialActions.map(_._2).forall(_.isDefined)
 
-	if (isActionsValid) Right(potentialActions.flatMap(_._2))
-	else
-	  Left(
-	    potentialActions.collect {
-	      case (input, None) => input
-	    }
-	  )
-}  
+    if (isActionsValid) Right(potentialActions.flatMap(_._2))
+    else
+      Left(
+        potentialActions.collect {
+          case (input, None) => input
+        }
+      )
+  }
 }
