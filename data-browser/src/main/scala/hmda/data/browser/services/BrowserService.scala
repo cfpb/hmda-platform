@@ -12,6 +12,7 @@ import monix.eval.Task
                      races: Seq[Race],
                      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]]
 
+   //nationwide
   def fetchAggregate(races: Seq[Race],
                      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]]   
 }
