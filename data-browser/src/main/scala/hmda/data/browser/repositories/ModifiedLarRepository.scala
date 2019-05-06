@@ -2,9 +2,8 @@ package hmda.data.browser.repositories
 
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.data.browser.models.{ModifiedLarEntity, Statistic}
-
-import scala.concurrent.Future
+import hmda.data.browser.models.ModifiedLarEntity
+import monix.eval.Task
 
 trait ModifiedLarRepository {
   def find(msaMd: Int,
@@ -19,11 +18,11 @@ trait ModifiedLarRepository {
 
   def findAndAggregate(msaMd: Int,
                        actionTaken: Int,
-                       race: String): Future[Statistic]
+                       race: String): Task[Statistic]
 
   def findAndAggregate(state: String,
                        actionTaken: Int,
-                       race: String): Future[Statistic]
+                       race: String): Task[Statistic]
 
-  def findAndAggregate(actionTaken: Int, race: String): Future[Statistic]
+  def findAndAggregate(actionTaken: Int, race: String): Task[Statistic]
 }

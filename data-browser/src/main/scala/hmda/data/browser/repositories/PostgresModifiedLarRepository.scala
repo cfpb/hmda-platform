@@ -1,11 +1,10 @@
 package hmda.data.browser.repositories
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.data.browser.models.{ModifiedLarEntity, Statistic}
+import hmda.data.browser.models.ModifiedLarEntity
+import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
-
-import scala.concurrent.Future
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
@@ -154,7 +153,7 @@ class PostgresModifiedLarRepository(tableName: String,
 
   override def findAndAggregate(msaMd: Int,
                                 actionTaken: Int,
-                                race: String): Future[Statistic] = {
+                                race: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
@@ -165,12 +164,12 @@ class PostgresModifiedLarRepository(tableName: String,
               AND race_categorization = '#${race}'
       """.as[Statistic].head
 
-    db.run(query)
+    Task.fromFuture(db.run(query))
   }
 
   override def findAndAggregate(state: String,
                                 actionTaken: Int,
-                                race: String): Future[Statistic] = {
+                                race: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
@@ -181,7 +180,7 @@ class PostgresModifiedLarRepository(tableName: String,
               AND race_categorization = '#${race}'
       """.as[Statistic].head
 
-    db.run(query)
+    Task.fromFuture(db.run(query))
   }
 
   override def find(actionTaken: Int,
@@ -198,7 +197,7 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def findAndAggregate(actionTaken: Int,
-                                race: String): Future[Statistic] = {
+                                race: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
@@ -208,6 +207,6 @@ class PostgresModifiedLarRepository(tableName: String,
             AND race_categorization = '#${race}'
       """.as[Statistic].head
 
-    db.run(query)
+    Task.fromFuture(db.run(query))
   }
 }

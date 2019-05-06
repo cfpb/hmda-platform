@@ -18,4 +18,18 @@ package hmda.data.browser.models
   case object TwoOrMoreMinorityRaces extends Race("2 Or More Minority Races")
   case object White extends Race("White")
   case object Joint extends Race("Joint")
+
+  def validateRaces(rawRaces: Seq[String]): Either[Seq[String], Seq[Race]] = {
+    val potentialRaces =
+      rawRaces.map(action => (action, Race.withNameInsensitiveOption(action)))
+    val isRacesValid = potentialRaces.map(_._2).forall(_.isDefined)
+
+     if (isRacesValid) Right(potentialRaces.flatMap(_._2))
+    else
+      Left(
+        potentialRaces.collect {
+          case (input, None) => input
+        }
+      )
+  }  
 }

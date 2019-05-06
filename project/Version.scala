@@ -27,4 +27,5 @@ object Version {
   val spark = "2.4.0"
   val enumeratum = "1.5.13"
   val enumeratumCirce = "1.5.21"
+  val monix = "3.0.0-RC2"
 }

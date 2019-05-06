@@ -16,4 +16,18 @@ import scala.collection.immutable
   case object PurchasedLoans extends ActionTaken(6)
   case object Placeholder1 extends ActionTaken(7)
   case object Placeholder2 extends ActionTaken(8)
+
+  
+def validateActionsTaken(rawActionsTaken: Seq[Int]): Either[Seq[Int], Seq[ActionTaken]] = {
+	val potentialActions = rawActionsTaken.map(action => (action, ActionTaken.withValueOpt(action)))
+	val isActionsValid = potentialActions.map(_._2).forall(_.isDefined)
+
+	if (isActionsValid) Right(potentialActions.flatMap(_._2))
+	else
+	  Left(
+	    potentialActions.collect {
+	      case (input, None) => input
+	    }
+	  )
+}  
 }
