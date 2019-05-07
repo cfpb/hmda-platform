@@ -7,18 +7,21 @@ import akka.actor.{ActorSystem => UntypedActorSystem}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import hmda.data.browser.repositories.{
+  ModifiedLarAggregateCache,
   ModifiedLarRepository,
-  PostgresModifiedLarRepository
+  PostgresModifiedLarRepository,
+  RedisModifiedLarAggregateCache
 }
 import hmda.data.browser.rest.Routes
 import hmda.data.browser.services.{BrowserService, ModifiedLarBrowserService}
+import io.lettuce.core.RedisClient
 import monix.execution.{Scheduler => MonixScheduler}
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
 
 import scala.util.{Failure, Success}
 
-object ServerGuardian {
+object ApplicationGuardian {
   sealed trait Protocol
   private case class Ready(port: Int) extends Protocol
   private case class Error(errorMessage: String) extends Protocol
@@ -31,10 +34,18 @@ object ServerGuardian {
       MonixScheduler(ctx.executionContext)
 
     val settings = Settings(untypedSystem)
+
     val databaseConfig = DatabaseConfig.forConfig[JdbcProfile]("db")
     val repository: ModifiedLarRepository =
-      new PostgresModifiedLarRepository("modifiedlar2018", databaseConfig)
-    val service: BrowserService = new ModifiedLarBrowserService(repository)
+      new PostgresModifiedLarRepository(settings.database.tableName,
+                                        databaseConfig)
+
+    val cacheConfig = RedisClient.create(settings.redis.url).connect().async()
+    val cache: ModifiedLarAggregateCache =
+      new RedisModifiedLarAggregateCache(cacheConfig, settings.redis.ttl)
+
+    val service: BrowserService =
+      new ModifiedLarBrowserService(repository, cache)
 
     Http()
       .bindAndHandle(Routes(service),

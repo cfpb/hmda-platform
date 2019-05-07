@@ -55,6 +55,8 @@ object Dependencies {
   lazy val enumeratum = "com.beachape" %% "enumeratum" % Version.enumeratum
   lazy val enumeratumCirce = "com.beachape" %% "enumeratum-circe" % Version.enumeratumCirce
   lazy val monix = "io.monix" %% "monix" % Version.monix
+  lazy val lettuce = "io.lettuce" % "lettuce-core" % Version.lettuce
+  lazy val scalaJava8Compat = "org.scala-lang.modules" %% "scala-java8-compat" % Version.java8Compat
 
   lazy val sparkCore = "org.apache.spark" %% "spark-core" % Version.spark % Provided
   lazy val sparkSql = "org.apache.spark" %% "spark-sql" % Version.spark % Provided

@@ -18,6 +18,17 @@ class Settings(config: Config) {
     val port: Int = config.getInt("server.bindings.port")
     val askTimeout: FiniteDuration = getDuration("server.ask-timeout")
   }
+
+  object database {
+    val tableName: String = config.getString("dbconfig.table")
+  }
+
+  object redis {
+    private val host: String = config.getString("redis.hostname")
+    private val port: Int = config.getInt("redis.port")
+    val url = s"redis://$host:$port"
+    val ttl = getDuration("redis.ttl")
+  }
 }
 
 object Settings {

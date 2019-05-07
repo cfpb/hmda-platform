@@ -14,17 +14,17 @@ class PostgresModifiedLarRepository(tableName: String,
 
   private val columns: String =
     """id,
-      lei,
-      loan_type,
-      loan_purpose,
-      preapproval,
-      construction_method,
-      occupancy_type,
-      loan_amount,
-      action_taken_type,
-      state,
-      county,
-      tract,
+    	lei,
+    	loan_type,
+    	loan_purpose,
+    	preapproval,
+    	construction_method,
+    	occupancy_type,
+    	loan_amount,
+    	action_taken_type,
+    	state,
+    	county,
+    	tract,
       ethnicity_applicant_1,
       ethnicity_applicant_2,
       ethnicity_applicant_3,
@@ -163,7 +163,7 @@ class PostgresModifiedLarRepository(tableName: String,
               AND race_categorization = '#${race}'
       """.as[Statistic].head
 
-    Task.fromFuture(db.run(query))
+    Task.deferFuture(db.run(query))
   }
 
   override def findAndAggregate(state: String,
@@ -179,7 +179,7 @@ class PostgresModifiedLarRepository(tableName: String,
               AND race_categorization = '#${race}'
       """.as[Statistic].head
 
-    Task.fromFuture(db.run(query))
+    Task.deferFuture(db.run(query))
   }
 
   override def find(actionTaken: Int,
@@ -206,6 +206,6 @@ class PostgresModifiedLarRepository(tableName: String,
             AND race_categorization = '#${race}'
       """.as[Statistic].head
 
-    Task.fromFuture(db.run(query))
+    Task.deferFuture(db.run(query))
   }
 }

@@ -425,7 +425,8 @@ lazy val `data-browser` = (project in file("data-browser"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
-      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++ enumeratumDeps :+ monix,
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
