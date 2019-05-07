@@ -4,93 +4,113 @@ import akka.stream.scaladsl.Source
 import hmda.data.browser.models._
 import hmda.data.browser.repositories.{
   ModifiedLarAggregateCache,
-  ModifiedLarRepository
+  ModifiedLarRepository,
+  Statistic
 }
 import monix.eval.Task
 
 class ModifiedLarBrowserService(repo: ModifiedLarRepository,
                                 cache: ModifiedLarAggregateCache)
-    extends BrowserService {
-  override def fetchAggregate(
-      msaMd: MsaMd,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+  extends BrowserService {
+
+  /**
+    * This is responsible for performing the following logic for all provided combinations of races and actions taken:
+    *   1. find if the entry is in the cache
+    *   2a. if the entry is in the cache, proceed to 3
+    *   2b. if the entry is not in the cache then obtain it from the database and update the cache
+    *   3. tag entry with race and action taken information
+    *   4. serve all entries
+    *
+    * This function relies on callers of the function to use currying to cover all use cases:
+    * - queries by MSAMD
+    * - queries by State
+    * - nationwide queries
+    *
+    * @param races refers to the races enumeration
+    * @param actionsTaken refers to the actions taken enumeration
+    * @param findInDatabase is a function that retrieves data from the database
+    * @param findInCache is a function that retrieves data from the cache (the data may not be in the cache)
+    * @param updateCache is a function that updates the cache with the data from the database
+    * @return
+    */
+  private def fetchAgg(
+                        races: Seq[Race],
+                        actionsTaken: Seq[ActionTaken],
+                        findInDatabase: (Race, ActionTaken) => Task[Statistic],
+                        findInCache: (Race, ActionTaken) => Task[Option[Statistic]],
+                        updateCache: (Race, ActionTaken, Statistic) => Task[Statistic])
+  : Task[Seq[Aggregation]] = {
     val taskList = for {
       race <- races
-      action <- actionsTaken
+      actionTaken <- actionsTaken
     } yield {
-      // description of finding the entry in the database and then performing a cache update
-      // this will only be executed if the entry is not in the cache
-      val findDbUpdateCache = for {
-        stat <- repo.findAndAggregate(msaMd.msaMd, action.value, race.entryName)
-        _ <- cache.update(msaMd.msaMd, action.value, race.entryName, stat)
+      // this is only executed if the initial cache query comes back empty
+      val findInDbThenUpdateCache = for {
+        stat <- findInDatabase(race, actionTaken)
+        _ <- updateCache(race, actionTaken, stat)
       } yield stat
 
       for {
-        optStat <- cache.find(msaMd.msaMd, action.value, race.entryName)
-        stat <- optStat.fold(ifEmpty = findDbUpdateCache)(cachedStat =>
+        optC <- findInCache(race, actionTaken)
+        stat <- optC.fold(ifEmpty = findInDbThenUpdateCache)(cachedStat =>
           Task(cachedStat))
-      } yield Aggregation(stat.count, stat.sum, race, action)
+      } yield Aggregation(count = stat.count, sum = stat.sum, race, actionTaken)
     }
 
     Task.gatherUnordered(taskList)
   }
 
   override def fetchAggregate(
-      state: State,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
-    val taskList = for {
-      race <- races
-      action <- actionsTaken
-    } yield {
-      // description of finding the entry in the database and then performing a cache update
-      // this will only be executed if the entry is not in the cache
-      val findDbUpdateCache = for {
-        stat <- repo.findAndAggregate(state.entryName,
-                                      action.value,
-                                      race.entryName)
-        _ <- cache.update(state.entryName, action.value, race.entryName, stat)
-      } yield stat
+                               msaMd: MsaMd,
+                               races: Seq[Race],
+                               actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+    def findDb(r: Race, a: ActionTaken): Task[Statistic] =
+      repo.findAndAggregate(msaMd.msaMd, a.value, r.entryName)
 
-      for {
-        optStat <- cache.find(state.entryName, action.value, race.entryName)
-        stat <- optStat.fold(ifEmpty = findDbUpdateCache)(cachedStat =>
-          Task(cachedStat))
-      } yield Aggregation(stat.count, stat.sum, race, action)
-    }
+    def findCache(r: Race, a: ActionTaken): Task[Option[Statistic]] =
+      cache.find(msaMd.msaMd, a.value, r.entryName)
 
-    Task.gatherUnordered(taskList)
+    def updateCache(r: Race, a: ActionTaken, s: Statistic): Task[Statistic] =
+      cache.update(msaMd.msaMd, a.value, r.entryName, s)
+
+    fetchAgg(races, actionsTaken, findDb, findCache, updateCache)
   }
 
   override def fetchAggregate(
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
-    val taskList = for {
-      race <- races
-      action <- actionsTaken
-    } yield {
-      // description of finding the entry in the database and then performing a cache update
-      // this will only be executed if the entry is not in the cache
-      val findDbUpdateCache = for {
-        stat <- repo.findAndAggregate(action.value, race.entryName)
-        _ <- cache.update(action.value, race.entryName, stat)
-      } yield stat
+                               state: State,
+                               races: Seq[Race],
+                               actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+    def findDb(r: Race, a: ActionTaken): Task[Statistic] =
+      repo.findAndAggregate(state.entryName, a.value, r.entryName)
 
-      for {
-        optStat <- cache.find(action.value, race.entryName)
-        stat <- optStat.fold(ifEmpty = findDbUpdateCache)(cachedStat =>
-          Task(cachedStat))
-      } yield Aggregation(stat.count, stat.sum, race, action)
-    }
+    def findCache(r: Race, a: ActionTaken): Task[Option[Statistic]] =
+      cache.find(state.entryName, a.value, r.entryName)
 
-    Task.gatherUnordered(taskList)
+    def updateCache(r: Race, a: ActionTaken, s: Statistic): Task[Statistic] =
+      cache.update(state.entryName, a.value, r.entryName, s)
+
+    fetchAgg(races, actionsTaken, findDb, findCache, updateCache)
+  }
+
+  override def fetchAggregate(
+                               races: Seq[Race],
+                               actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+    def findInDb(r: Race, a: ActionTaken): Task[Statistic] =
+      repo.findAndAggregate(a.value, r.entryName)
+
+    def findInCache(r: Race, a: ActionTaken): Task[Option[Statistic]] =
+      cache.find(a.value, r.entryName)
+
+    def updateCache(r: Race, a: ActionTaken, s: Statistic): Task[Statistic] =
+      cache.update(a.value, r.entryName, s)
+
+    fetchAgg(races, actionsTaken, findInDb, findInCache, updateCache)
   }
 
   override def fetchData(
-      msaMd: MsaMd,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
+                          msaMd: MsaMd,
+                          races: Seq[Race],
+                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
     val list = for {
       race <- races
       action <- actionsTaken
@@ -99,9 +119,9 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
   }
 
   override def fetchData(
-      state: State,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
+                          state: State,
+                          races: Seq[Race],
+                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
     val list = for {
       race <- races
       action <- actionsTaken
@@ -110,8 +130,8 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
   }
 
   override def fetchData(
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
+                          races: Seq[Race],
+                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
     val list = for {
       race <- races
       action <- actionsTaken
