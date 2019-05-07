@@ -107,35 +107,26 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
     fetchAgg(races, actionsTaken, findInDb, findInCache, updateCache)
   }
 
+  // TODO: add headers for the CSV stream
   override def fetchData(
                           msaMd: MsaMd,
                           races: Seq[Race],
-                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
-    val list = for {
-      race <- races
-      action <- actionsTaken
-    } yield repo.find(msaMd.msaMd, action.value, race.entryName)
-    list.reduce((s1, s2) => s2 prepend s1)
-  }
+                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(msaMd = msaMd.msaMd,
+      actionsTaken = actionsTaken.map(_.value),
+      races = races.map(_.entryName))
 
   override def fetchData(
                           state: State,
                           races: Seq[Race],
-                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
-    val list = for {
-      race <- races
-      action <- actionsTaken
-    } yield repo.find(state.entryName, action.value, race.entryName)
-    list.reduce((s1, s2) => s2 prepend s1)
-  }
+                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(state = state.entryName,
+      actionsTaken = actionsTaken.map(_.value),
+      races = races.map(_.entryName))
 
   override def fetchData(
                           races: Seq[Race],
-                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] = {
-    val list = for {
-      race <- races
-      action <- actionsTaken
-    } yield repo.find(action.value, race.entryName)
-    list.reduce((s1, s2) => s2 prepend s1)
-  }
+                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(actionsTaken = actionsTaken.map(_.value),
+      races = races.map(_.entryName))
 }

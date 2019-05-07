@@ -8,7 +8,7 @@ import slick.jdbc.JdbcProfile
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
-    extends ModifiedLarRepository {
+  extends ModifiedLarRepository {
   import config._
   import config.profile.api._
 
@@ -120,15 +120,21 @@ class PostgresModifiedLarRepository(tableName: String,
       percent_median_msa_income
     """.stripMargin
 
+  def formatString(strs: Seq[String]): String =
+    strs.map(each => s"\'$each\'").mkString(start = "(", sep = ",", end = ")")
+
+  def formatInt(ints: Seq[Int]): String =
+    ints.mkString(start = "(", sep = ",", end = ")")
+
   override def find(msaMd: Int,
-                    actionTaken: Int,
-                    race: String): Source[ModifiedLarEntity, NotUsed] = {
+                    actionsTaken: Seq[Int],
+                    races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = sql"""
     SELECT #$columns
     FROM #${tableName}
     WHERE msa_md = #${msaMd}
-      AND action_taken_type = #${actionTaken}
-      AND race_categorization = '#${race}'
+      AND action_taken_type IN #${formatInt(actionsTaken)}
+      AND race_categorization IN #${formatString(races)}
     """.as[ModifiedLarEntity]
 
     val publisher = db.stream(searchQuery)
@@ -136,14 +142,14 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def find(state: String,
-                    actionTaken: Int,
-                    race: String): Source[ModifiedLarEntity, NotUsed] = {
+                    actionsTaken: Seq[Int],
+                    races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = sql"""
     SELECT #$columns
     FROM #${tableName}
     WHERE state = '#${state}'
-      AND action_taken_type = #${actionTaken}
-      AND race_categorization = '#${race}'
+      AND action_taken_type IN #${formatInt(actionsTaken)}
+      AND race_categorization IN #${formatString(races)}
     """.as[ModifiedLarEntity]
 
     val publisher = db.stream(searchQuery)
@@ -182,13 +188,13 @@ class PostgresModifiedLarRepository(tableName: String,
     Task.deferFuture(db.run(query))
   }
 
-  override def find(actionTaken: Int,
-                    race: String): Source[ModifiedLarEntity, NotUsed] = {
+  override def find(actionsTaken: Seq[Int],
+                    races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = sql"""
     SELECT #$columns
     FROM #${tableName}
-    WHERE action_taken_type = #${actionTaken}
-      AND race_categorization = '#${race}'
+    WHERE action_taken_type IN #${formatInt(actionsTaken)}
+      AND race_categorization IN #${formatString(races)}
     """.as[ModifiedLarEntity]
 
     val publisher = db.stream(searchQuery)

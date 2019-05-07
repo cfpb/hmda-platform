@@ -7,14 +7,15 @@ import monix.eval.Task
 
 trait ModifiedLarRepository {
   def find(msaMd: Int,
-           actionTaken: Int,
-           race: String): Source[ModifiedLarEntity, NotUsed]
+           actionsTaken: Seq[Int],
+           races: Seq[String]): Source[ModifiedLarEntity, NotUsed]
 
   def find(state: String,
-           actionTaken: Int,
-           race: String): Source[ModifiedLarEntity, NotUsed]
+           actionsTaken: Seq[Int],
+           races: Seq[String]): Source[ModifiedLarEntity, NotUsed]
 
-  def find(actionTaken: Int, race: String): Source[ModifiedLarEntity, NotUsed]
+  def find(actionsTaken: Seq[Int],
+           races: Seq[String]): Source[ModifiedLarEntity, NotUsed]
 
   def findAndAggregate(msaMd: Int,
                        actionTaken: Int,
