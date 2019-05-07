@@ -23,7 +23,7 @@ trait DataBrowserDirectives {
     EntityStreamingSupport.csv()
 
   def csvSource(
-                 s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+      s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
     val header = Source.single(ModifiedLarEntity.header)
     val content = s.map(_.toCsv)
 

@@ -11,7 +11,7 @@ import monix.eval.Task
 
 class ModifiedLarBrowserService(repo: ModifiedLarRepository,
                                 cache: ModifiedLarAggregateCache)
-  extends BrowserService {
+    extends BrowserService {
 
   /**
     * This is responsible for performing the following logic for all provided combinations of races and actions taken:
@@ -34,12 +34,12 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
     * @return
     */
   private def fetchAgg(
-                        races: Seq[Race],
-                        actionsTaken: Seq[ActionTaken],
-                        findInDatabase: (Race, ActionTaken) => Task[Statistic],
-                        findInCache: (Race, ActionTaken) => Task[Option[Statistic]],
-                        updateCache: (Race, ActionTaken, Statistic) => Task[Statistic])
-  : Task[Seq[Aggregation]] = {
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken],
+      findInDatabase: (Race, ActionTaken) => Task[Statistic],
+      findInCache: (Race, ActionTaken) => Task[Option[Statistic]],
+      updateCache: (Race, ActionTaken, Statistic) => Task[Statistic])
+    : Task[Seq[Aggregation]] = {
     val taskList = for {
       race <- races
       actionTaken <- actionsTaken
@@ -61,9 +61,9 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
   }
 
   override def fetchAggregate(
-                               msaMd: MsaMd,
-                               races: Seq[Race],
-                               actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+      msaMd: MsaMd,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
     def findDb(r: Race, a: ActionTaken): Task[Statistic] =
       repo.findAndAggregate(msaMd.msaMd, a.value, r.entryName)
 
@@ -77,9 +77,9 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
   }
 
   override def fetchAggregate(
-                               state: State,
-                               races: Seq[Race],
-                               actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+      state: State,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
     def findDb(r: Race, a: ActionTaken): Task[Statistic] =
       repo.findAndAggregate(state.entryName, a.value, r.entryName)
 
@@ -93,8 +93,8 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
   }
 
   override def fetchAggregate(
-                               races: Seq[Race],
-                               actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
     def findInDb(r: Race, a: ActionTaken): Task[Statistic] =
       repo.findAndAggregate(a.value, r.entryName)
 
@@ -109,24 +109,24 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
 
   // TODO: add headers for the CSV stream
   override def fetchData(
-                          msaMd: MsaMd,
-                          races: Seq[Race],
-                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
+      msaMd: MsaMd,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
     repo.find(msaMd = msaMd.msaMd,
-      actionsTaken = actionsTaken.map(_.value),
-      races = races.map(_.entryName))
+              actionsTaken = actionsTaken.map(_.value),
+              races = races.map(_.entryName))
 
   override def fetchData(
-                          state: State,
-                          races: Seq[Race],
-                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
+      state: State,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
     repo.find(state = state.entryName,
-      actionsTaken = actionsTaken.map(_.value),
-      races = races.map(_.entryName))
+              actionsTaken = actionsTaken.map(_.value),
+              races = races.map(_.entryName))
 
   override def fetchData(
-                          races: Seq[Race],
-                          actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
     repo.find(actionsTaken = actionsTaken.map(_.value),
-      races = races.map(_.entryName))
+              races = races.map(_.entryName))
 }

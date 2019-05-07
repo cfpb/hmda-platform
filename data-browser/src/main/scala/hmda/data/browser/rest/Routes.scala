@@ -36,10 +36,10 @@ object Routes {
               // eg. data-browser/view/msamd/45636?actions_taken=1,2,3&races=Asian,Joint,White
               get {
                 val inputParameters = Parameters(msaMd = Some(msamd.msaMd),
-                  state = None,
-                  races = races.map(_.entryName),
-                  actionsTaken =
-                    actionsTaken.map(_.value))
+                                                 state = None,
+                                                 races = races.map(_.entryName),
+                                                 actionsTaken =
+                                                   actionsTaken.map(_.value))
 
                 val stats =
                   browserService
@@ -63,10 +63,10 @@ object Routes {
             } ~
               get {
                 val inputParameters = Parameters(msaMd = None,
-                  state = Some(state.entryName),
-                  races = races.map(_.entryName),
-                  actionsTaken =
-                    actionsTaken.map(_.value))
+                                                 state = Some(state.entryName),
+                                                 races = races.map(_.entryName),
+                                                 actionsTaken =
+                                                   actionsTaken.map(_.value))
 
                 val stats =
                   browserService
@@ -90,10 +90,10 @@ object Routes {
             } ~
               get {
                 val inputParameters = Parameters(msaMd = None,
-                  state = None,
-                  races = races.map(_.entryName),
-                  actionsTaken =
-                    actionsTaken.map(_.value))
+                                                 state = None,
+                                                 races = races.map(_.entryName),
+                                                 actionsTaken =
+                                                   actionsTaken.map(_.value))
 
                 val stats =
                   browserService

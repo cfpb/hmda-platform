@@ -8,7 +8,7 @@ import slick.jdbc.JdbcProfile
 
 class PostgresModifiedLarRepository(tableName: String,
                                     config: DatabaseConfig[JdbcProfile])
-  extends ModifiedLarRepository {
+    extends ModifiedLarRepository {
   import config._
   import config.profile.api._
 
