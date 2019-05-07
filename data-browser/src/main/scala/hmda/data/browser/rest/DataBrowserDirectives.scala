@@ -1,10 +1,17 @@
 package hmda.data.browser.rest
 
+import akka.NotUsed
+import akka.http.scaladsl.common.{
+  CsvEntityStreamingSupport,
+  EntityStreamingSupport
+}
 import akka.http.scaladsl.model.StatusCodes.BadRequest
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.http.scaladsl.unmarshalling.PredefinedFromStringUnmarshallers._
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import hmda.data.browser.models.ActionTaken._
 import hmda.data.browser.models.Race._
 import hmda.data.browser.models._
@@ -12,6 +19,19 @@ import io.circe.generic.auto._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
 trait DataBrowserDirectives {
+  private implicit val csvStreamingSupport: CsvEntityStreamingSupport =
+    EntityStreamingSupport.csv()
+
+  def csvSource(
+                 s: Source[ModifiedLarEntity, NotUsed]): Source[ByteString, NotUsed] = {
+    val header = Source.single(ModifiedLarEntity.header)
+    val content = s.map(_.toCsv)
+
+    (header ++ content)
+      .map(ByteString(_))
+      .via(csvStreamingSupport.framingRenderer)
+  }
+
   def extractActions: Directive1[Seq[ActionTaken]] =
     parameters("actions_taken".as(CsvSeq[Int]) ? Nil)
       .flatMap { rawActionsTaken =>
