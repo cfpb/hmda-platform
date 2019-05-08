@@ -1,7 +1,6 @@
-package hmda.ratelimit
+package hmda.rateLimit
 
 import akka.actor.ActorSystem
-import hmda.rateLimit.api._
 import org.slf4j.LoggerFactory
 
 object RateLimitApp extends App {

@@ -1,4 +1,4 @@
-package hmda.rateLimit.api
+package hmda.rateLimit
 
 import akka.actor.{ActorSystem, Props}
 import akka.event.Logging
@@ -7,9 +7,7 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import akka.pattern.pipe
-import hmda.api.http.HttpServer
 import hmda.api.HmdaServer
-import hmda.api.http.routes.BaseHttpApi
 import hmda.rateLimit.api.grpc.RateLimitServiceImpl
 import com.typesafe.config.{Config, ConfigFactory}
 import akka.http.scaladsl.{Http, HttpConnectionContext}
