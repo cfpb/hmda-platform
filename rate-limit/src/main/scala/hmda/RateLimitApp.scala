@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import hmda.rateLimit.api._
 import org.slf4j.LoggerFactory
 
-object RateLimit extends App {
+object RateLimitApp extends App {
 
   val log = LoggerFactory.getLogger("rate-limit")
 
