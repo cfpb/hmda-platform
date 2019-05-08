@@ -9,22 +9,22 @@ object EthnicityCategorization {
     val ethnicity = lar.applicant.ethnicity
     val coEthnicity = lar.coApplicant.ethnicity
     val ethnicityFields = Array(ethnicity.ethnicity1,
-                                ethnicity.ethnicity2,
-                                ethnicity.ethnicity3,
-                                ethnicity.ethnicity4,
-                                ethnicity.ethnicity5)
+      ethnicity.ethnicity2,
+      ethnicity.ethnicity3,
+      ethnicity.ethnicity4,
+      ethnicity.ethnicity5)
 
-    val coethnicityFields = Array(ethnicity.ethnicity1,
-                                  ethnicity.ethnicity2,
-                                  ethnicity.ethnicity3,
-                                  ethnicity.ethnicity4,
-                                  ethnicity.ethnicity5)
+    val coethnicityFields = Array(coEthnicity.ethnicity1,
+      coEthnicity.ethnicity2,
+      coEthnicity.ethnicity3,
+      coEthnicity.ethnicity4,
+      coEthnicity.ethnicity5)
 
     val hispanicEnums = Array(HispanicOrLatino,
-                              Mexican,
-                              PuertoRican,
-                              Cuban,
-                              OtherHispanicOrLatino)
+      Mexican,
+      PuertoRican,
+      Cuban,
+      OtherHispanicOrLatino)
 
     val coapplicantNoHispanicEnums = (!hispanicEnums.contains(
       coEthnicity.ethnicity1) && !hispanicEnums.contains(coEthnicity.ethnicity2) && !hispanicEnums
@@ -47,7 +47,7 @@ object EthnicityCategorization {
       .reduce(_ && _)
 
     val coapplicantNotHispanic = ethnicityFields
-      .map(_ == NotHispanicOrLatino)
+      .map(_ != NotHispanicOrLatino)
       .reduce(_ && _)
 
     if (ethnicity.otherHispanicOrLatino != "" && ethnicity.ethnicity1 == EmptyEthnicityValue)
@@ -59,6 +59,8 @@ object EthnicityCategorization {
     else if (hispanicEnums.contains(ethnicity.ethnicity1) && applicantBlankExcept1 && coapplicantNotHispanic)
       "Hispanic or Latino"
     else if (applicantOnlyHispanic && coapplicantNotHispanic)
+      "Hispanic or Latino"
+    else if (ethnicityFields.contains(hispanicEnums) || coethnicityFields.contains(hispanicEnums))
       "Hispanic or Latino"
     else if (applicantOnlyHispanic && coapplicantNotHispanic)
       "Joint"

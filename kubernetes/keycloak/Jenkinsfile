@@ -10,7 +10,7 @@ podTemplate(label: 'buildHelm', containers: [
         stage('Ambassador Service') {
             if (env.BRANCH_NAME == 'master') {
                 container('kubectl') {
-                    sh "kubectl create -f kubernetes/keycloak/keycloak-ambassador.yaml"
+                    sh "kubectl create --namespace=default -f kubernetes/keycloak/keycloak-ambassador.yaml | exit 0"
                 }
             }
         }

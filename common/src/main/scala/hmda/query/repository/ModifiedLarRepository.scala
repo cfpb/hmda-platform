@@ -157,7 +157,7 @@ class ModifiedLarRepository(tableName: String,
 
           VALUES (
             ${input.mlar.id},
-            ${input.mlar.lei.toUpperCase},
+            ${input.mlar.lei},
             ${input.mlar.loanType},
             ${input.mlar.loanPurpose},
             ${input.mlar.preapproval},
