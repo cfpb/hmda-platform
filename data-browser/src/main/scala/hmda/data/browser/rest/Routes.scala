@@ -19,7 +19,7 @@ object Routes {
   // TODO: Add invalidate endpoints
   def apply(browserService: BrowserService)(implicit scheduler: MonixScheduler,
                                             mat: ActorMaterializer): Route = {
-    pathPrefix("data-browser" / "view") {
+    pathPrefix("view") {
       pathPrefix("msamd" / MsaMdSegment) { msamd =>
         (extractActions & extractRaces) {
           (actionsTaken: Seq[ActionTaken], races: Seq[Race]) =>
