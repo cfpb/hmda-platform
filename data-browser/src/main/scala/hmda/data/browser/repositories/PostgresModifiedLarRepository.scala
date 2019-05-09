@@ -75,7 +75,7 @@ class PostgresModifiedLarRepository(tableName: String,
       lender_credits,
       interest_rate,
       payment_penalty,
-      debt_to_incode,
+      debt_to_income,
       loan_value_ratio,
       loan_term,
       rate_spread_intro,
@@ -85,7 +85,7 @@ class PostgresModifiedLarRepository(tableName: String,
       other_amortization,
       property_value,
       home_security_policy,
-      lan_property_interest,
+      land_property_interest,
       total_units,
       mf_affordable,
       application_submission,
@@ -117,6 +117,7 @@ class PostgresModifiedLarRepository(tableName: String,
       race_categorization,
       sex_categorization,
       ethnicity_categorization,
+      uniq_id,
       percent_median_msa_income
     """.stripMargin
 
@@ -210,6 +211,39 @@ class PostgresModifiedLarRepository(tableName: String,
             FROM #${tableName}
             WHERE action_taken_type = #${actionTaken}
             AND race_categorization = '#${race}'
+      """.as[Statistic].head
+
+    Task.deferFuture(db.run(query))
+  }
+
+  override def find(msaMd: Int,
+                    state: String,
+                    actionsTaken: Seq[Int],
+                    races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
+    val searchQuery = sql"""SELECT #$columns
+                        FROM #${tableName}
+                        WHERE msa_md = #${msaMd}
+                        AND state = '#${state}'
+                        AND action_taken_type IN #${formatInt(actionsTaken)}
+                        AND race_categorization IN #${formatString(races)}
+    """.as[ModifiedLarEntity]
+
+    val publisher = db.stream(searchQuery)
+    Source.fromPublisher(publisher)
+  }
+
+  override def findAndAggregate(msaMd: Int,
+                                state: String,
+                                actionTaken: Int,
+                                race: String): Task[Statistic] = {
+    val query = sql"""SELECT
+        COUNT(loan_amount),
+        SUM(loan_amount)
+      FROM #${tableName}
+      WHERE msa_md = #${msaMd}
+      AND state = '#${state}'
+      AND action_taken_type = #${actionTaken}
+      AND race_categorization = '#${race}'
       """.as[Statistic].head
 
     Task.deferFuture(db.run(query))

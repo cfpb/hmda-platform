@@ -37,4 +37,15 @@ trait BrowserService {
   def fetchData(
       races: Seq[Race],
       actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed]
+
+  def fetchAggregate(msaMd: MsaMd,
+                     state: State,
+                     races: Seq[Race],
+                     actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]]
+
+  def fetchData(
+      msaMd: MsaMd,
+      state: State,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed]
 }

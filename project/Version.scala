@@ -30,4 +30,5 @@ object Version {
   val monix = "3.0.0-RC2"
   val lettuce = "5.1.6.RELEASE"
   val java8Compat = "0.9.0"
+  val scalaMock = "4.2.0"
 }

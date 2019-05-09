@@ -42,6 +42,15 @@ class RedisModifiedLarAggregateCache(
   override def find(actionTaken: Int, race: String): Task[Option[Statistic]] =
     findAndParse(s"$Prefix:$Nationwide:$ActionTaken:$actionTaken:$Race:$race")
 
+  override def find(msaMd: Int,
+                    state: String,
+                    actionTaken: Int,
+                    race: String): Task[Option[Statistic]] = {
+    val key =
+      s"$Prefix:$MsaMd:$msaMd:$State:$state:$ActionTaken:$actionTaken:$Race:$race"
+    findAndParse(key)
+  }
+
   private def updateAndSetTTL(key: String, value: Statistic): Task[Statistic] =
     for {
       _ <- Task.deferFuture(redisClient.set(key, value.asJson.noSpaces).toScala)
@@ -72,6 +81,16 @@ class RedisModifiedLarAggregateCache(
     updateAndSetTTL(key, stat)
   }
 
+  override def update(msaMd: Int,
+                      state: String,
+                      actionTaken: Int,
+                      race: String,
+                      stat: Statistic): Task[Statistic] = {
+    val key =
+      s"$Prefix:$MsaMd:$msaMd:$State:$state:$ActionTaken:$actionTaken:$Race:$race"
+    updateAndSetTTL(key, stat)
+  }
+
   private def invalidateKey(key: String): Task[Unit] =
     Task
       .deferFuture(redisClient.pexpire(key, timeToLive.toMillis).toScala)
@@ -91,4 +110,11 @@ class RedisModifiedLarAggregateCache(
 
   override def invalidate(actionTaken: Int, race: String): Task[Unit] =
     invalidateKey(s"$Prefix:$Nationwide:$ActionTaken:$actionTaken:$Race:$race")
+
+  override def invalidate(msaMd: Int,
+                          state: String,
+                          actionTaken: Int,
+                          race: String): Task[Unit] =
+    invalidateKey(
+      s"$Prefix:$MsaMd:$msaMd:$State:$state:$ActionTaken:$actionTaken:$Race:$race")
 }

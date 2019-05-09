@@ -10,6 +10,7 @@ object Dependencies {
 
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck % Test
+  val scalaMock = "org.scalamock" %% "scalamock" % Version.scalaMock % Test
   val logback = "ch.qos.logback" % "logback-classic" % Version.logback
   lazy val akkaSlf4J = "com.typesafe.akka" %% "akka-slf4j" % Version.akka
   lazy val akkaTyped = "com.typesafe.akka" %% "akka-actor-typed" % Version.akka

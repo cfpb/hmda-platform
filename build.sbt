@@ -426,7 +426,7 @@ lazy val `data-browser` = (project in file("data-browser"))
   .settings(
     Seq(
       libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
-        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat,
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

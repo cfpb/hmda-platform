@@ -107,7 +107,6 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
     fetchAgg(races, actionsTaken, findInDb, findInCache, updateCache)
   }
 
-  // TODO: add headers for the CSV stream
   override def fetchData(
       msaMd: MsaMd,
       races: Seq[Race],
@@ -128,5 +127,32 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
       races: Seq[Race],
       actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
     repo.find(actionsTaken = actionsTaken.map(_.value),
+              races = races.map(_.entryName))
+
+  override def fetchAggregate(
+      msaMd: MsaMd,
+      state: State,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
+    def findDb(r: Race, a: ActionTaken): Task[Statistic] =
+      repo.findAndAggregate(msaMd.msaMd, state.entryName, a.value, r.entryName)
+
+    def findCache(r: Race, a: ActionTaken): Task[Option[Statistic]] =
+      cache.find(msaMd.msaMd, state.entryName, a.value, r.entryName)
+
+    def updateCache(r: Race, a: ActionTaken, s: Statistic): Task[Statistic] =
+      cache.update(msaMd.msaMd, state.entryName, a.value, r.entryName, s)
+
+    fetchAgg(races, actionsTaken, findDb, findCache, updateCache)
+  }
+
+  override def fetchData(
+      msaMd: MsaMd,
+      state: State,
+      races: Seq[Race],
+      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(msaMd = msaMd.msaMd,
+              state = state.entryName,
+              actionsTaken = actionsTaken.map(_.value),
               races = races.map(_.entryName))
 }
