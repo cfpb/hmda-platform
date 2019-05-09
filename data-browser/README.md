@@ -1,7 +1,7 @@
 ## Aggregation By MSAMD
 
 ```
-/data-browser-api/view/msamd/34980?actions_taken=5,6&races=asian1,Joint,White
+/data-browser-api/view/msamd/34980?actions_taken=5,6&races=Asian,Joint,White
 ```
 
 
@@ -14,7 +14,7 @@
 ## Aggregation By State and MSAMD
 
 ```
-/data-browser-api/view/state/CA/msamd/34980??actions_taken=5,6&races=asian1,Joint,White
+/data-browser-api/view/state/CA/msamd/34980?actions_taken=5,6&races=Asian,Joint,White
 ```
 
 ## CSV By MSAMD
@@ -32,13 +32,13 @@
 ## CSV By State and MSAMD
 
 ```
-/data-browser-api/view/state/CA/msamd/34980/csv??actions_taken=5,6&races=asian1,Joint,White
+/data-browser-api/view/state/CA/msamd/34980/csv??actions_taken=5,6&races=Asian,Joint,White
 ```
 
 ## Aggregation By Nationwide
 
 ```
-/data-browser-api/view/nationwide?actions_taken=5,6&races=asian1,Joint,White
+/data-browser-api/view/nationwide?actions_taken=5,6&races=Asian,Joint,White
 ```
 
 ## CSV By Nationwide
