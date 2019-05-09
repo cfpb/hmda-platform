@@ -29,7 +29,7 @@ import org.scalatest.{
 }
 
 class ModifiedLarBrowserServiceSpec
-  extends FunSpec
+    extends FunSpec
     with BeforeAndAfterAll
     with MustMatchers
     with OneInstancePerTest
@@ -152,7 +152,6 @@ class ModifiedLarBrowserServiceSpec
       raceCategorization = "",
       sexCategorization = "",
       ethnicityCategorization = "",
-      uniqId = 1,
       percentMedianMsaIncome = ""
     )
 
@@ -167,16 +166,16 @@ class ModifiedLarBrowserServiceSpec
       (database
         .find(_: Int, _: Seq[Int], _: Seq[String]))
         .expects(*,
-          ActionTaken.values.map(_.value),
-          Race.values.map(_.entryName))
+                 ActionTaken.values.map(_.value),
+                 Race.values.map(_.entryName))
         .returns(Source(List(exampleEntity, exampleEntity, exampleEntity)))
 
       // state
       (database
         .find(_: String, _: Seq[Int], _: Seq[String]))
         .expects(*,
-          ActionTaken.values.map(_.value),
-          Race.values.map(_.entryName))
+                 ActionTaken.values.map(_.value),
+                 Race.values.map(_.entryName))
         .returns(Source(List(exampleEntity)))
 
       val nationwide = Task

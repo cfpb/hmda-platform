@@ -18,7 +18,7 @@ object Routes {
   // TODO: Add invalidate endpoints
   def apply(browserService: BrowserService)(implicit scheduler: MonixScheduler,
                                             mat: ActorMaterializer): Route = {
-    pathPrefix("data-browser" / "view") {
+    pathPrefix("view") {
       pathPrefix("state" / StateSegment) { state =>
         pathPrefix("msamd" / MsaMdSegment) { msaMd =>
           // eg. data-browser/view/state/ca/msamd/45636/csv?actions_taken=1,2,3&races=Asian,Joint,White
@@ -78,6 +78,34 @@ object Routes {
             }
         }
       } ~
+        pathPrefix("msamd" / MsaMdSegment) { msaMd =>
+          (extractActions & extractRaces) { (actionsTaken, races) =>
+            (path("csv") & get) {
+              complete(
+                HttpEntity(
+                  `text/csv(UTF-8)`,
+                  csvSource(
+                    browserService.fetchData(msaMd, races, actionsTaken))
+                )
+              )
+            } ~
+              // eg. data-browser/view/msamd/45636/state/ca?actions_taken=1,2,3&races=Asian,Joint,White
+              get {
+                val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                                 state = None,
+                                                 races = races.map(_.entryName),
+                                                 actionsTaken =
+                                                   actionsTaken.map(_.value))
+
+                val stats =
+                  browserService
+                    .fetchAggregate(msaMd, races, actionsTaken)
+                    .map(aggs => AggregationResponse(inputParameters, aggs))
+                    .runToFuture
+                complete(OK, stats)
+              }
+          }
+        } ~
         pathPrefix("state" / StateSegment) { state: State =>
           (extractActions & extractRaces) { (actionsTaken, races) =>
             (path("csv") & get) {

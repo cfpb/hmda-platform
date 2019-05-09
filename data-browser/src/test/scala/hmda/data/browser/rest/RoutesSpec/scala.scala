@@ -18,7 +18,7 @@ import org.scalatest.{FunSpec, MustMatchers, OneInstancePerTest}
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
 class RoutesSpec
-  extends FunSpec
+    extends FunSpec
     with MustMatchers
     with ScalatestRouteTest
     with MockFactory
@@ -31,9 +31,9 @@ class RoutesSpec
     it("responds with aggregations when performing an aggregate query") {
       val stat = Statistic(10, 100)
       val aggregation = Aggregation(stat.count,
-        stat.sum,
-        Race.Asian,
-        ActionTaken.LoansOriginated)
+                                    stat.sum,
+                                    Race.Asian,
+                                    ActionTaken.LoansOriginated)
       (service
         .fetchAggregate(_: Seq[Race], _: Seq[ActionTaken]))
         .expects(Race.Asian :: Nil, ActionTaken.LoansOriginated :: Nil)
@@ -42,14 +42,14 @@ class RoutesSpec
       Get("/data-browser/view/nationwide?actions_taken=1&races=Asian") ~> router ~> check {
         responseAs[AggregationResponse] mustBe AggregationResponse(
           Parameters(None,
-            None,
-            Race.Asian.entryName :: Nil,
-            ActionTaken.LoansOriginated.value :: Nil),
+                     None,
+                     Race.Asian.entryName :: Nil,
+                     ActionTaken.LoansOriginated.value :: Nil),
           List(
             Aggregation(stat.count,
-              stat.sum,
-              Race.Asian,
-              ActionTaken.LoansOriginated)
+                        stat.sum,
+                        Race.Asian,
+                        ActionTaken.LoansOriginated)
           )
         )
         response.status mustBe OK
