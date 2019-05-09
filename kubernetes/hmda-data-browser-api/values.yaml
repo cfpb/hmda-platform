@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: hmda/hmda-data-browser
+  repository: hmda/hmda-data-browser-api
   tag: v2.7.2
   pullPolicy: IfNotPresent
 
@@ -59,8 +59,8 @@ postgresql:
 service:
   type: NodePort
   account:
-    name: hmda-data-browser
-  name: hmda-data-browser
+    name: hmda-data-browser-api
+  name: hmda-data-browser-api
 
 ambassador:
   port: 80

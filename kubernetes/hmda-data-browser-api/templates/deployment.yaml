@@ -1,22 +1,22 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ include "hmda-data-browser.fullname" . }}
+  name: {{ include "hmda-data-browser-api.fullname" . }}
   labels:
-    app: {{ include "hmda-data-browser.name" . }}
-    chart: {{ include "hmda-data-browser.chart" . }}
+    app: {{ include "hmda-data-browser-api.name" . }}
+    chart: {{ include "hmda-data-browser-api.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "hmda-data-browser.name" . }}
+      app: {{ include "hmda-data-browser-api.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ include "hmda-data-browser.name" . }}
+        app: {{ include "hmda-data-browser-api.name" . }}
         release: {{ .Release.Name }}
     spec:
       volumes:

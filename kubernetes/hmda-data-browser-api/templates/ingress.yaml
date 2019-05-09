@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "hmda-data-browser.fullname" . -}}
+{{- $fullName := include "hmda-data-browser-api.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    app: {{ include "hmda-data-browser.name" . }}
-    chart: {{ include "hmda-data-browser.chart" . }}
+    app: {{ include "hmda-data-browser-api.name" . }}
+    chart: {{ include "hmda-data-browser-api.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}
