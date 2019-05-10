@@ -14,152 +14,130 @@ import hmda.data.browser.services.BrowserService
 import monix.execution.{Scheduler => MonixScheduler}
 
 object Routes {
-
-  // TODO: Add invalidate endpoints
   def apply(browserService: BrowserService)(implicit scheduler: MonixScheduler,
                                             mat: ActorMaterializer): Route = {
+    def stateAndMsaRoute(state: State,
+                         msaMd: MsaMd,
+                         races: Seq[Race],
+                         actionsTaken: Seq[ActionTaken]): Route =
+      (path("csv") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            csvSource(
+              browserService.fetchData(msaMd, state, races, actionsTaken))
+          )
+        )
+      } ~ get {
+        val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                         state = Some(state.entryName),
+                                         races = races.map(_.entryName),
+                                         actionsTaken =
+                                           actionsTaken.map(_.value))
+
+        val stats =
+          browserService
+            .fetchAggregate(msaMd, state, races, actionsTaken)
+            .map(aggs => AggregationResponse(inputParameters, aggs))
+            .runToFuture
+        complete(OK, stats)
+      }
+
+    def stateRoute(state: State,
+                   races: Seq[Race],
+                   actionsTaken: Seq[ActionTaken]): Route =
+      (path("csv") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            csvSource(browserService.fetchData(state, races, actionsTaken))
+          )
+        )
+      } ~ get {
+        val inputParameters =
+          Parameters(msaMd = None,
+                     state = Some(state.entryName),
+                     races = races.map(_.entryName),
+                     actionsTaken = actionsTaken.map(_.value))
+
+        val stats =
+          browserService
+            .fetchAggregate(state, races, actionsTaken)
+            .map(aggs => AggregationResponse(inputParameters, aggs))
+            .runToFuture
+        complete(OK, stats)
+      }
+
+    def nationwideRoute(races: Seq[Race],
+                        actionsTaken: Seq[ActionTaken]): Route =
+      (path("csv") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            csvSource(
+              browserService
+                .fetchData(races, actionsTaken))
+          )
+        )
+      } ~ get {
+        val inputParameters =
+          Parameters(msaMd = None,
+                     state = None,
+                     races = races.map(_.entryName),
+                     actionsTaken = actionsTaken.map(_.value))
+
+        val stats =
+          browserService
+            .fetchAggregate(races, actionsTaken)
+            .map(aggs => AggregationResponse(inputParameters, aggs))
+            .runToFuture
+        complete(OK, stats)
+      }
+
+    def msaRoute(msaMd: MsaMd,
+                 races: Seq[Race],
+                 actionsTaken: Seq[ActionTaken]): Route =
+      (path("csv") & get) {
+        complete(
+          HttpEntity(
+            `text/csv(UTF-8)`,
+            csvSource(browserService.fetchData(msaMd, races, actionsTaken))
+          )
+        )
+      } ~ get {
+        val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                         state = None,
+                                         races = races.map(_.entryName),
+                                         actionsTaken =
+                                           actionsTaken.map(_.value))
+
+        val stats =
+          browserService
+            .fetchAggregate(msaMd, races, actionsTaken)
+            .map(aggs => AggregationResponse(inputParameters, aggs))
+            .runToFuture
+        complete(OK, stats)
+      }
+
+    // TODO: Add invalidate endpoints
     pathPrefix("view") {
-      pathPrefix("state" / StateSegment) { state =>
-        pathPrefix("msamd" / MsaMdSegment) { msaMd =>
-          // eg. data-browser/view/state/ca/msamd/45636/csv?actions_taken=1,2,3&races=Asian,Joint,White
-          (extractActions & extractRaces) { (actionsTaken, races) =>
-            (path("csv") & get) {
-              complete(
-                HttpEntity(
-                  `text/csv(UTF-8)`,
-                  csvSource(
-                    browserService.fetchData(msaMd, state, races, actionsTaken))
-                )
-              )
-            } ~
-              // eg. data-browser/view/msamd/45636/state/ca?actions_taken=1,2,3&races=Asian,Joint,White
-              get {
-                val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
-                                                 state = Some(state.entryName),
-                                                 races = races.map(_.entryName),
-                                                 actionsTaken =
-                                                   actionsTaken.map(_.value))
-
-                val stats =
-                  browserService
-                    .fetchAggregate(msaMd, state, races, actionsTaken)
-                    .map(aggs => AggregationResponse(inputParameters, aggs))
-                    .runToFuture
-                complete(OK, stats)
-              }
+      // ?actions_taken=1&races=Asian
+      (extractActions & extractRaces) { (actionsTaken, races) =>
+        // /data-browser-api/view/nationwide(/csv)
+        pathPrefix("nationwide")(nationwideRoute(races, actionsTaken)) ~
+          // /data-browser-api/view/msamd/<msamd>(/csv)
+          pathPrefix("msamd" / MsaMdSegment) { msaMd =>
+            msaRoute(msaMd, races, actionsTaken)
           } ~
-            (extractActions & extractRaces) {
-              (actionsTaken: Seq[ActionTaken], races: Seq[Race]) =>
-                // eg. data-browser/view/msamd/45636/csv?actions_taken=1,2,3&races=Asian,Joint,White
-                (path("csv") & get) {
-                  complete(
-                    HttpEntity(
-                      `text/csv(UTF-8)`,
-                      csvSource(
-                        browserService.fetchData(msaMd, races, actionsTaken))
-                    )
-                  )
-                } ~
-                  // eg. data-browser/view/msamd/45636?actions_taken=1,2,3&races=Asian,Joint,White
-                  get {
-                    val inputParameters =
-                      Parameters(msaMd = Some(msaMd.msaMd),
-                                 state = None,
-                                 races = races.map(_.entryName),
-                                 actionsTaken = actionsTaken.map(_.value))
-
-                    val stats =
-                      browserService
-                        .fetchAggregate(msaMd, races, actionsTaken)
-                        .map(aggs => AggregationResponse(inputParameters, aggs))
-                        .runToFuture
-                    complete(OK, stats)
-                  }
-            }
-        }
-      } ~
-        pathPrefix("msamd" / MsaMdSegment) { msaMd =>
-          (extractActions & extractRaces) { (actionsTaken, races) =>
-            (path("csv") & get) {
-              complete(
-                HttpEntity(
-                  `text/csv(UTF-8)`,
-                  csvSource(
-                    browserService.fetchData(msaMd, races, actionsTaken))
-                )
-              )
+          pathPrefix("state" / StateSegment) { state =>
+            // /data-browser-api/view/state/<state>/msamd/<msamd>(/csv)
+            pathPrefix("msamd" / MsaMdSegment) { msaMd =>
+              stateAndMsaRoute(state, msaMd, races, actionsTaken)
             } ~
-              // eg. data-browser/view/msamd/45636/state/ca?actions_taken=1,2,3&races=Asian,Joint,White
-              get {
-                val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
-                                                 state = None,
-                                                 races = races.map(_.entryName),
-                                                 actionsTaken =
-                                                   actionsTaken.map(_.value))
-
-                val stats =
-                  browserService
-                    .fetchAggregate(msaMd, races, actionsTaken)
-                    .map(aggs => AggregationResponse(inputParameters, aggs))
-                    .runToFuture
-                complete(OK, stats)
-              }
+              // /data-browser-api/view/state/<state>(/csv)
+              stateRoute(state, races, actionsTaken)
           }
-        } ~
-        pathPrefix("state" / StateSegment) { state: State =>
-          (extractActions & extractRaces) { (actionsTaken, races) =>
-            (path("csv") & get) {
-              complete(
-                HttpEntity(
-                  `text/csv(UTF-8)`,
-                  csvSource(
-                    browserService.fetchData(state, races, actionsTaken))
-                )
-              )
-            } ~
-              get {
-                val inputParameters = Parameters(msaMd = None,
-                                                 state = Some(state.entryName),
-                                                 races = races.map(_.entryName),
-                                                 actionsTaken =
-                                                   actionsTaken.map(_.value))
-
-                val stats =
-                  browserService
-                    .fetchAggregate(state, races, actionsTaken)
-                    .map(aggs => AggregationResponse(inputParameters, aggs))
-                    .runToFuture
-                complete(OK, stats)
-              }
-          }
-        } ~
-        pathPrefix("nationwide") {
-          (extractActions & extractRaces) { (actionsTaken, races) =>
-            (path("csv") & get) {
-              complete(
-                HttpEntity(
-                  `text/csv(UTF-8)`,
-                  csvSource(browserService
-                    .fetchData(races, actionsTaken))
-                )
-              )
-            } ~
-              get {
-                val inputParameters = Parameters(msaMd = None,
-                                                 state = None,
-                                                 races = races.map(_.entryName),
-                                                 actionsTaken =
-                                                   actionsTaken.map(_.value))
-
-                val stats =
-                  browserService
-                    .fetchAggregate(races, actionsTaken)
-                    .map(aggs => AggregationResponse(inputParameters, aggs))
-                    .runToFuture
-                complete(OK, stats)
-              }
-          }
-        }
+      }
     }
   }
 }

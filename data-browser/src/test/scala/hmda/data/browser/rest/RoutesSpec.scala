@@ -2,20 +2,14 @@ package hmda.data.browser.rest
 
 import akka.http.scaladsl.model.StatusCodes._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import hmda.data.browser.models.{
-  ActionTaken,
-  Aggregation,
-  AggregationResponse,
-  Parameters,
-  Race
-}
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import hmda.data.browser.models._
 import hmda.data.browser.repositories.Statistic
 import hmda.data.browser.services.BrowserService
 import monix.eval.Task
 import monix.execution.Scheduler
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{FunSpec, MustMatchers, OneInstancePerTest}
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 
 class RoutesSpec
     extends FunSpec
@@ -39,7 +33,7 @@ class RoutesSpec
         .expects(Race.Asian :: Nil, ActionTaken.LoansOriginated :: Nil)
         .returns(Task(aggregation :: Nil))
 
-      Get("/data-browser/view/nationwide?actions_taken=1&races=Asian") ~> router ~> check {
+      Get("/view/nationwide?actions_taken=1&races=Asian") ~> router ~> check {
         responseAs[AggregationResponse] mustBe AggregationResponse(
           Parameters(None,
                      None,
