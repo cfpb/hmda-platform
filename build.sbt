@@ -53,6 +53,7 @@ lazy val akkaPersistenceDeps =
 
 lazy val akkaHttpDeps = Seq(akkaHttp, akkaHttp2, akkaHttpTestkit, akkaHttpCirce)
 lazy val circeDeps = Seq(circe, circeGeneric, circeParser)
+lazy val enumeratumDeps = Seq(enumeratum, enumeratumCirce)
 
 lazy val slickDeps = Seq(slick, slickHikaryCP, postgres, h2)
 
@@ -400,6 +401,32 @@ lazy val `hmda-analytics` = (project in file("hmda-analytics"))
   .settings(
     Seq(
       mainClass in Compile := Some("hmda.analytics.HmdaAnalyticsApp"),
+      assemblyMergeStrategy in assembly := {
+        case "application.conf"                      => MergeStrategy.concat
+        case "META-INF/io.netty.versions.properties" => MergeStrategy.concat
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      assemblyJarName in assembly := {
+        s"${name.value}.jar"
+      }
+    ),
+    scalafmtSettings,
+    dockerSettings,
+    packageSettings
+  )
+  .dependsOn(common % "compile->compile;test->test")
+
+lazy val `data-browser` = (project in file("data-browser"))
+  .enablePlugins(JavaServerAppPackaging,
+                 sbtdocker.DockerPlugin,
+                 AshScriptPlugin)
+  .settings(hmdaBuildSettings: _*)
+  .settings(
+    Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps ++ circeDeps ++ slickDeps ++
+        enumeratumDeps :+ monix :+ lettuce :+ scalaJava8Compat :+ scalaMock,
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat
         case "META-INF/io.netty.versions.properties" => MergeStrategy.concat

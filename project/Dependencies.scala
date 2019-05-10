@@ -10,6 +10,7 @@ object Dependencies {
 
   val scalaTest = "org.scalatest" %% "scalatest" % Version.scalaTest % Test
   val scalaCheck = "org.scalacheck" %% "scalacheck" % Version.scalaCheck % Test
+  val scalaMock = "org.scalamock" %% "scalamock" % Version.scalaMock % Test
   val logback = "ch.qos.logback" % "logback-classic" % Version.logback
   lazy val akkaSlf4J = "com.typesafe.akka" %% "akka-slf4j" % Version.akka
   lazy val akkaTyped = "com.typesafe.akka" %% "akka-actor-typed" % Version.akka
@@ -52,6 +53,11 @@ object Dependencies {
   lazy val phantomDSL = "com.outworkers" %% "phantom-dsl" % Version.phantom
   lazy val phantomJDK8 = "com.outworkers" %% "phantom-jdk8" % Version.phantom
   lazy val sbtResolver = "io.spray" %% "sbt-revolver" % Version.sprayresolver
+  lazy val enumeratum = "com.beachape" %% "enumeratum" % Version.enumeratum
+  lazy val enumeratumCirce = "com.beachape" %% "enumeratum-circe" % Version.enumeratumCirce
+  lazy val monix = "io.monix" %% "monix" % Version.monix
+  lazy val lettuce = "io.lettuce" % "lettuce-core" % Version.lettuce
+  lazy val scalaJava8Compat = "org.scala-lang.modules" %% "scala-java8-compat" % Version.java8Compat
 
   lazy val sparkCore = "org.apache.spark" %% "spark-core" % Version.spark % Provided
   lazy val sparkSql = "org.apache.spark" %% "spark-sql" % Version.spark % Provided

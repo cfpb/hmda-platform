@@ -9,22 +9,22 @@ object EthnicityCategorization {
     val ethnicity = lar.applicant.ethnicity
     val coEthnicity = lar.coApplicant.ethnicity
     val ethnicityFields = Array(ethnicity.ethnicity1,
-      ethnicity.ethnicity2,
-      ethnicity.ethnicity3,
-      ethnicity.ethnicity4,
-      ethnicity.ethnicity5)
+                                ethnicity.ethnicity2,
+                                ethnicity.ethnicity3,
+                                ethnicity.ethnicity4,
+                                ethnicity.ethnicity5)
 
     val coethnicityFields = Array(coEthnicity.ethnicity1,
-      coEthnicity.ethnicity2,
-      coEthnicity.ethnicity3,
-      coEthnicity.ethnicity4,
-      coEthnicity.ethnicity5)
+                                  coEthnicity.ethnicity2,
+                                  coEthnicity.ethnicity3,
+                                  coEthnicity.ethnicity4,
+                                  coEthnicity.ethnicity5)
 
     val hispanicEnums = Array(HispanicOrLatino,
-      Mexican,
-      PuertoRican,
-      Cuban,
-      OtherHispanicOrLatino)
+                              Mexican,
+                              PuertoRican,
+                              Cuban,
+                              OtherHispanicOrLatino)
 
     val coapplicantNoHispanicEnums = (!hispanicEnums.contains(
       coEthnicity.ethnicity1) && !hispanicEnums.contains(coEthnicity.ethnicity2) && !hispanicEnums
@@ -60,7 +60,8 @@ object EthnicityCategorization {
       "Hispanic or Latino"
     else if (applicantOnlyHispanic && coapplicantNotHispanic)
       "Hispanic or Latino"
-    else if (ethnicityFields.contains(hispanicEnums) || coethnicityFields.contains(hispanicEnums))
+    else if (ethnicityFields.contains(hispanicEnums) || coethnicityFields
+               .contains(hispanicEnums))
       "Hispanic or Latino"
     else if (applicantOnlyHispanic && coapplicantNotHispanic)
       "Joint"
