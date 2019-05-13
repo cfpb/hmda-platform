@@ -12,7 +12,7 @@ import hmda.rateLimit.api.grpc.RateLimitServiceImpl
 import com.typesafe.config.{Config, ConfigFactory}
 import akka.http.scaladsl.{Http, HttpConnectionContext}
 import akka.http.scaladsl.UseHttp2.Always
-import hmda.grpc.services._
+import pb.lyft.ratelimit._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration.FiniteDuration
@@ -41,7 +41,7 @@ class RateLimitApi extends HmdaServer {
   override val port: Int = config.getInt("hmda.rateLimit.grpc.port")
 
   val service: HttpRequest => Future[HttpResponse] =
-    RateLimitServiceHandler(new RateLimitServiceImpl(materializer))
+    RateLimitServiceHandler(new RateLimitServiceImpl)
 
   override val http: Future[Http.ServerBinding] =
     Http(system).bindAndHandleAsync(

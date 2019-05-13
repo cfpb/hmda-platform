@@ -2,10 +2,7 @@
 
 syntax = "proto3";
 
-option java_package = "hmda.grpc.services";
-option java_outer_classname = "RateLimitProto";
-
-package hmda.grpc.services;
+package pb.lyft.ratelimit;
 
 service RateLimitService {
   // Determine whether rate limiting should take place.

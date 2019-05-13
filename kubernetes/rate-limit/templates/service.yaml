@@ -8,7 +8,7 @@ metadata:
       apiVersion: ambassador/v0
       kind: RateLimitService
       name: ratelimiter_svc
-      service: {{ template "rate-limit.fullname" .}}:{{ .Values.grpc.port }}
+      service: "ratelimiter:60080"
   labels:
     app: ratelimiter
 spec:
@@ -17,26 +17,5 @@ spec:
     app: ratelimiter
   ports:
   - protocol: TCP
-    port: {{ .Values.ambassador.port }}
-    name: {{ .Values.ambassador.name }}
-    
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ template "rate-limit.fullname" . }}-grpc
-  labels:
-    app: {{ template "rate-limit.fullname" . }}
-    chart: {{ template "rate-limit.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-spec:
-  type: {{ .Values.grpc.type }}
-  ports:
-    - port: {{ .Values.grpc.port }}
-      targetPort: {{ .Values.grpc.targetPort }}
-      name: {{ .Values.grpc.name }}
-  selector:
-    app: {{ template "rate-limit.name" . }}
-    release: {{ .Release.Name }}
-
+    port: 60080
+    name: http

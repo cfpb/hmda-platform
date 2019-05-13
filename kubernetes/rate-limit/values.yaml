@@ -17,7 +17,7 @@ grpc:
 
 ambassador:
   name: ambassador-rate-limit
-  port: 80
+  port: 60080
   service:
     type: NodePort
 

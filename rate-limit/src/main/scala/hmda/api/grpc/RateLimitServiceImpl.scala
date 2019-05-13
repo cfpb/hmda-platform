@@ -1,19 +1,12 @@
 package hmda.rateLimit.api.grpc
 
-import akka.stream.Materializer
 import scala.concurrent.Future
-import hmda.grpc.services.{
-  RateLimitService,
-  RateLimitRequest,
-  RateLimitResponse
-}
-import hmda.grpc.services.RateLimitResponse.Code._
-import hmda.grpc.services._
+import pb.lyft.ratelimit.{RateLimitService, RateLimitRequest, RateLimitResponse}
+import pb.lyft.ratelimit.RateLimitResponse.Code._
 import scala.concurrent.Future
 import org.slf4j.LoggerFactory
 
-class RateLimitServiceImpl(materializer: Materializer)
-    extends RateLimitService {
+class RateLimitServiceImpl extends RateLimitService {
 
   val log = LoggerFactory.getLogger("hmda")
 
