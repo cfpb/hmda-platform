@@ -1,0 +1,36 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.service.name }}
+spec:
+  selector:
+    app: hmda-data-browser-api
+  type: NodePort
+  ports:
+  - name: {{ .Values.databrowser.name }}
+    protocol: {{ .Values.databrowser.protocol }}
+    port: {{ .Values.databrowser.port }}
+    targetPort: {{ .Values.databrowser.port }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: ambassador-hmda-data-browser-api
+  name: ambassador-hmda-data-browser-api
+  annotations:
+    getambassador.io/config: |
+      apiVersion: ambassador/v0
+      kind: Mapping
+      name: hmda_databrowser_mapping
+      prefix: /v2/data-browser-api/
+      service: {{ .Values.service.name }}:{{ .Values.databrowser.port }}
+spec:
+  type: {{ .Values.ambassador.service.type }}
+  ports:
+  - name: ambassador-hmda-data-browser-api
+    port: {{ .Values.ambassador.port }}
+    targetPort: {{ .Values.ambassador.port }}
+  selector:
+    service: ambassador-hmda-data-browser-api
