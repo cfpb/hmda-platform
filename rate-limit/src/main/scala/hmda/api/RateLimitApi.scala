@@ -32,7 +32,7 @@ class RateLimitApi extends HmdaServer {
   val config: Config = ConfigFactory.load()
 
   val duration: FiniteDuration =
-    config.getInt("hmda.rateLimit.http.timeout").seconds
+    config.getInt("hmda.rateLimit.grpc.timeout").seconds
 
   implicit val timeout: Timeout = Timeout(duration)
 
