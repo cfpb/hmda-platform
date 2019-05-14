@@ -15,6 +15,7 @@ class RateLimitServiceImpl(limit: Int) extends RateLimitService {
 
   override def shouldRateLimit(
       in: RateLimitRequest): Future[RateLimitResponse] = {
+    log.info(in.toString)
     if (rateLimiter.tryAcquire()) {
       Future.successful(RateLimitResponse(OK))
     } else {

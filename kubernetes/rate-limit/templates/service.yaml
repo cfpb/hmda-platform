@@ -1,21 +1,22 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: ratelimiter
+  name: {{ template "rate-limit.name" . }}
   annotations:
     getambassador.io/config: |
       ---
       apiVersion: ambassador/v0
       kind: RateLimitService
-      name: ratelimiter_svc
-      service: "ratelimiter:60080"
+      name: {{ template "rate-limit.name" . }}
+      service: "{{ template "rate-limit.name" . }}:{{ .Values.grpc.port }}"
   labels:
     app: ratelimiter
 spec:
   type: ClusterIP
   selector:
-    app: ratelimiter
+    app: {{ template "rate-limit.name" . }}
   ports:
   - protocol: TCP
-    port: 60080
+    port: {{ .Values.grpc.port }}
+    targetPort: {{ .Values.grpc.port }}
     name: http

@@ -27,7 +27,7 @@ metadata:
       prefix: /v2/reporting/
       service: {{ .Values.service.name }}:{{ .Values.reporting.port }}
       rate_limits:
-        - descriptor: Example descriptor
+        - service: hmda-reporting
 spec:
   type: {{ .Values.ambassador.service.type }}
   ports:
