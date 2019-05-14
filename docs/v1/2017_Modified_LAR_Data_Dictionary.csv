@@ -1,0 +1,37 @@
+Data Field Name,Data Field Type,Valid Values 
+ Record Identifier,Numeric,2
+ Respondent-ID,Alphanumeric,Identification Numbers Based on the FIG
+ Agency Code,Numeric,1 2 3 5 7 9
+ Loan Type,Numeric,1 2 3 4
+ Property Type,Numeric,1 2 3
+ Loan Purpose,Numeric,1 2 3
+ Owner Occupancy,Numeric,1 2 3
+ Loan Amount,Numeric,Integer Reported in thousands. Rounded to the nearest thousand without leading zeros and without commas.
+ Preapprovals,Numeric,1 2 3
+ Type of Action Taken,Numeric,1 2 3 4 5 6 7 8
+ Metropolitan Statistical Area/Metropolitan Division,Character Varying,MSA code or 'NA'
+ State Code,Character Varying,2 digit FIPS State Code or 'NA'
+ County Code,Character Varying,3 digit FIPS County Code or 'NA'
+ Census Tract,Character Varying ,6 digit tract number (include decimal point) or 'NA'
+ Applicant Ethnicity,Numeric,1 2 3 4
+ Co-applicant Ethnicity,Numeric,1 2 3 4 5
+ Applicant Race: 1,Numeric,1 2 3 4 5 6 7
+ Applicant Race: 2,Character Varying,1 2 3 4 5 blank
+ Applicant Race: 3,Character Varying,1 2 3 4 5 blank
+ Applicant Race: 4,Character Varying,1 2 3 4 5 blank
+ Applicant Race: 5,Character Varying,1 2 3 4 5 blank
+ Co-applicant Race: 1,Numeric,1 2 3 4 5 6 7 8
+ Co-applicant Race: 2,Character Varying,1 2 3 4 5 blank
+ Co-applicant Race: 3,Character Varying,1 2 3 4 5 blank
+ Co-applicant Race: 4,Character Varying,1 2 3 4 5 blank
+ Co-applicant Race: 5,Character Varying,1 2 3 4 5 blank 
+ Applicant Sex,Numeric,1 2 3 4
+ Co-applicant Sex,Numeric,1 2 3 4 5
+ Applicant Income,Alphanumeric,Integer reported in thousands and rounded to the nearest thousand and without commas or 'NA.'
+ Type of Purchaser,Numeric,0 1 2 3 4 5 6 7 8 9 
+ Denial Reason: 1,Character Varying,1 2 3 4 5 6 7 8 9 blank
+ Denial Reason: 2,Character Varying,1 2 3 4 5 6 7 8 9 blank
+ Denial Reason: 3,Character Varying,1 2 3 4 5 6 7 8 9 blank 
+ Rate Spread,Alphanumeric,Double or 'NA'
+ HOEPA Status,Numeric,1 2
+ Lien Status,Numeric,1 2 3 4
