@@ -12,8 +12,8 @@ class RateLimitServiceImplTest
     with MustMatchers
     with ScalaFutures {
 
-  val service = new RateLimitServiceImpl
-  val request = RateLimitRequest(2)
+  val service = new RateLimitServiceImpl(2)
+  val request = RateLimitRequest()
   "RateLimitServiceImpl" must {
     "return over limit" in {
       val reply = service.shouldRateLimit(request)
