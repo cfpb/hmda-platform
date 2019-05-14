@@ -13,11 +13,11 @@ class RateLimitServiceImplTest
     with ScalaFutures {
 
   val service = new RateLimitServiceImpl
-  val request = RateLimitRequest()
+  val request = RateLimitRequest(2)
   "RateLimitServiceImpl" must {
     "return over limit" in {
       val reply = service.shouldRateLimit(request)
-      reply.futureValue mustBe RateLimitResponse(OVER_LIMIT)
+      reply.futureValue mustBe RateLimitResponse(OK)
     }
   }
 

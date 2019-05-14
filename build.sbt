@@ -426,6 +426,7 @@ lazy val `rate-limit` = (project in file("rate-limit"))
   .settings(hmdaBuildSettings: _*)
   .settings(
     Seq(
+      libraryDependencies ++= commonDeps ++ akkaDeps ++ akkaHttpDeps :+ guava,
       mainClass in Compile := Some("hmda.rateLimit.RateLimitApp"),
       assemblyMergeStrategy in assembly := {
         case "application.conf"                      => MergeStrategy.concat

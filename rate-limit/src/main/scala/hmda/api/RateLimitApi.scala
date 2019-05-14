@@ -31,6 +31,7 @@ class RateLimitApi extends HmdaServer {
 
   val config: Config = ConfigFactory.load()
 
+  val limit = config.getInt("hmda.rateLimit.limit")
   val duration: FiniteDuration =
     config.getInt("hmda.rateLimit.grpc.timeout").seconds
 
@@ -41,7 +42,7 @@ class RateLimitApi extends HmdaServer {
   override val port: Int = config.getInt("hmda.rateLimit.grpc.port")
 
   val service: HttpRequest => Future[HttpResponse] =
-    RateLimitServiceHandler(new RateLimitServiceImpl)
+    RateLimitServiceHandler(new RateLimitServiceImpl(limit))
 
   override val http: Future[Http.ServerBinding] =
     Http(system).bindAndHandleAsync(
