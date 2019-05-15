@@ -27,7 +27,7 @@ metadata:
       prefix: /v2/data-browser-api/
       service: {{ .Values.service.name }}:{{ .Values.databrowser.port }}
       rate_limits:
-        - service: hmda-reporting
+        - descriptor: hmda-reporting
 spec:
   type: {{ .Values.ambassador.service.type }}
   ports:
