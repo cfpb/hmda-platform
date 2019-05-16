@@ -1,0 +1,13 @@
+﻿Field Name,Field Data Type,Valid Values
+Record Identifier,Numeric,1
+Financial Institution Name,Character Varying,Institution Name
+Calendar Year ,Numeric,Year  (e.g. 2018)
+Calendar Quarter,Numeric,4
+Contact Person's Office Street Address ,Character Varying,Street Address (e.g. 4321 Random Blvd Ste 201)
+Contact Person's Office City,Character Varying,City (e.g. Somecity)
+Contact Person's Office State,Character Varying,Two-Letter State Codes
+Contact Person's Office Zip Code,Character Varying,5 digit zip code or 5 digit zip code with 4 digit extension (e.g. 12345-1010)
+Federal Agency,Numeric,1 2 3 5 7 9
+Total Number of Entries Contained in Submission,Numeric,Number of Loan Application Records in Submission (e.g. 5000)
+Federal Taxpayer Identification Number,Character Varying,"Two digit number, followed by a dash and 7 digits (e.g. 99-9999999)"
+Legal Entity Identifier (LEI),Character Varying ,20 Character LEI
