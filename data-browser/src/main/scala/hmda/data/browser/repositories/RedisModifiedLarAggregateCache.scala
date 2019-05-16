@@ -30,24 +30,35 @@ class RedisModifiedLarAggregateCache(
           decode[Statistic](stringResponse).toOption))
 
   override def find(msaMd: Int,
-                    actionTaken: Int,
-                    race: String): Task[Option[Statistic]] =
-    findAndParse(s"$Prefix:$MsaMd:$msaMd:$ActionTaken:$actionTaken:$Race:$race")
+                    field1Name: String,
+                    field1: String,
+                    field2Name: String,
+                    field2: String): Task[Option[Statistic]] =
+    findAndParse(
+      s"$Prefix:$MsaMd:$msaMd:$field1Name:$field1:$field2Name:$field2")
 
   override def find(state: String,
-                    actionTaken: Int,
-                    race: String): Task[Option[Statistic]] =
-    findAndParse(s"$Prefix:$State:$state:$ActionTaken:$actionTaken:$Race:$race")
+                    field1Name: String,
+                    field1: String,
+                    field2Name: String,
+                    field2: String): Task[Option[Statistic]] =
+    findAndParse(
+      s"$Prefix:$State:$state:$field1Name:$field1:$field2Name:$field2")
 
-  override def find(actionTaken: Int, race: String): Task[Option[Statistic]] =
-    findAndParse(s"$Prefix:$Nationwide:$ActionTaken:$actionTaken:$Race:$race")
+  override def find(field1Name: String,
+                    field1: String,
+                    field2Name: String,
+                    field2: String): Task[Option[Statistic]] =
+    findAndParse(s"$Prefix:$Nationwide:$field1Name:$field1:$field2Name:$field2")
 
   override def find(msaMd: Int,
                     state: String,
-                    actionTaken: Int,
-                    race: String): Task[Option[Statistic]] = {
+                    field1Name: String,
+                    field1: String,
+                    field2Name: String,
+                    field2: String): Task[Option[Statistic]] = {
     val key =
-      s"$Prefix:$MsaMd:$msaMd:$State:$state:$ActionTaken:$actionTaken:$Race:$race"
+      s"$Prefix:$MsaMd:$msaMd:$State:$state:$field1Name:$field1:$field2Name:$field2"
     findAndParse(key)
   }
 
@@ -59,35 +70,43 @@ class RedisModifiedLarAggregateCache(
     } yield value
 
   override def update(msaMd: Int,
-                      actionTaken: Int,
-                      race: String,
+                      field1Name: String,
+                      field1: String,
+                      field2Name: String,
+                      field2: String,
                       stat: Statistic): Task[Statistic] = {
-    val key = s"$Prefix:$MsaMd:$msaMd:$ActionTaken:$actionTaken:$Race:$race"
+    val key = s"$Prefix:$MsaMd:$msaMd:$field1Name:$field1:$field2Name:$field2"
     updateAndSetTTL(key, stat)
   }
 
   override def update(state: String,
-                      actionTaken: Int,
-                      race: String,
+                      field1Name: String,
+                      field1: String,
+                      field2Name: String,
+                      field2: String,
                       stat: Statistic): Task[Statistic] = {
-    val key = s"$Prefix:$State:$state:$ActionTaken:$actionTaken:$Race:$race"
+    val key = s"$Prefix:$State:$state:$field1Name:$field1:$field2Name:$field2"
     updateAndSetTTL(key, stat)
   }
 
-  override def update(actionTaken: Int,
-                      race: String,
+  override def update(field1Name: String,
+                      field1: String,
+                      field2Name: String,
+                      field2: String,
                       stat: Statistic): Task[Statistic] = {
-    val key = s"$Prefix:$Nationwide:$ActionTaken:$actionTaken:$Race:$race"
+    val key = s"$Prefix:$Nationwide:$field1Name:$field1:$field2Name:$field2"
     updateAndSetTTL(key, stat)
   }
 
   override def update(msaMd: Int,
                       state: String,
-                      actionTaken: Int,
-                      race: String,
+                      field1Name: String,
+                      field1: String,
+                      field2Name: String,
+                      field2: String,
                       stat: Statistic): Task[Statistic] = {
     val key =
-      s"$Prefix:$MsaMd:$msaMd:$State:$state:$ActionTaken:$actionTaken:$Race:$race"
+      s"$Prefix:$MsaMd:$msaMd:$State:$state:$field1Name:$field1:$field2Name:$field2"
     updateAndSetTTL(key, stat)
   }
 
@@ -97,24 +116,34 @@ class RedisModifiedLarAggregateCache(
       .map(_ => Task.unit)
 
   override def invalidate(msaMd: Int,
-                          actionTaken: Int,
-                          race: String): Task[Unit] =
+                          field1Name: String,
+                          field1: String,
+                          field2Name: String,
+                          field2: String): Task[Unit] =
     invalidateKey(
-      s"$Prefix:$MsaMd:$msaMd:$ActionTaken:$actionTaken:$Race:$race")
+      s"$Prefix:$MsaMd:$msaMd:$field1Name:$field1:$field2Name:$field2")
 
   override def invalidate(state: String,
-                          actionTaken: Int,
-                          race: String): Task[Unit] =
+                          field1Name: String,
+                          field1: String,
+                          field2Name: String,
+                          field2: String): Task[Unit] =
     invalidateKey(
-      s"$Prefix:$State:$state:$ActionTaken:$actionTaken:$Race:$race")
+      s"$Prefix:$State:$state:$field1Name:$field1:$field2Name:$field2")
 
-  override def invalidate(actionTaken: Int, race: String): Task[Unit] =
-    invalidateKey(s"$Prefix:$Nationwide:$ActionTaken:$actionTaken:$Race:$race")
+  override def invalidate(field1Name: String,
+                          field1: String,
+                          field2Name: String,
+                          field2: String): Task[Unit] =
+    invalidateKey(
+      s"$Prefix:$Nationwide:$field1Name:$field1:$field2Name:$field2")
 
   override def invalidate(msaMd: Int,
                           state: String,
-                          actionTaken: Int,
-                          race: String): Task[Unit] =
+                          field1Name: String,
+                          field1: String,
+                          field2Name: String,
+                          field2: String): Task[Unit] =
     invalidateKey(
-      s"$Prefix:$MsaMd:$msaMd:$State:$state:$ActionTaken:$actionTaken:$Race:$race")
+      s"$Prefix:$MsaMd:$msaMd:$State:$state:$field1Name:$field1:$field2Name:$field2")
 }

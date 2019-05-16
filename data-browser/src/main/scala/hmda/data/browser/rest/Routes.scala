@@ -9,133 +9,291 @@ import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.stream.ActorMaterializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.data.browser.models._
+import hmda.data.browser.models.BrowserField
 import hmda.data.browser.rest.DataBrowserDirectives._
 import hmda.data.browser.services.BrowserService
 import monix.execution.{Scheduler => MonixScheduler}
+import akka.http.scaladsl.model.StatusCodes.BadRequest
 
 object Routes {
   def apply(browserService: BrowserService)(implicit scheduler: MonixScheduler,
                                             mat: ActorMaterializer): Route = {
     def stateAndMsaRoute(state: State,
                          msaMd: MsaMd,
-                         races: Seq[Race],
-                         actionsTaken: Seq[ActionTaken]): Route =
-      (path("csv") & get) {
-        complete(
-          HttpEntity(
-            `text/csv(UTF-8)`,
-            csvSource(
-              browserService.fetchData(msaMd, state, races, actionsTaken))
-          )
-        )
-      } ~ get {
-        val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
-                                         state = Some(state.entryName),
-                                         races = races.map(_.entryName),
-                                         actionsTaken =
-                                           actionsTaken.map(_.value))
+                         actionsTaken: BrowserField,
+                         race: BrowserField): Route = {
+      val filteredfields = List(actionsTaken, race).filter(_.name != "empty")
+      if (filteredfields.length > 2) {
+        complete((BadRequest, "More than 2 fields provided"))
+      } else {
 
-        val stats =
-          browserService
-            .fetchAggregate(msaMd, state, races, actionsTaken)
-            .map(aggs => AggregationResponse(inputParameters, aggs))
-            .runToFuture
-        complete(OK, stats)
+        if (filteredfields.length == 2) {
+          val sortedFields = filteredfields.sortBy(_.name)
+          val field1 = sortedFields.head
+          val field2 = sortedFields.last
+
+          (path("csv") & get) {
+            complete(
+              HttpEntity(
+                `text/csv(UTF-8)`,
+                csvSource(
+                  browserService.fetchData(msaMd, state, field1, field2))
+              )
+            )
+          } ~ get {
+            val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                             state = Some(state.entryName),
+                                             field1 = field1,
+                                             field2 = field2)
+
+            val stats =
+              browserService
+                .fetchAggregate(msaMd, state, field1, field2)
+                .map(aggs => AggregationResponse(inputParameters, aggs))
+                .runToFuture
+            complete(OK, stats)
+          }
+        } else {
+          val field1 = filteredfields.head
+          val field2 = BrowserField("raceApplicant1",
+                                    List("*"),
+                                    "raceApplicant1",
+                                    "raceApplicant1")
+          (path("csv") & get) {
+            complete(
+              HttpEntity(
+                `text/csv(UTF-8)`,
+                csvSource(
+                  browserService.fetchData(msaMd, state, field1, field2))
+              )
+            )
+          } ~ get {
+            val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                             state = Some(state.entryName),
+                                             field1 = field1,
+                                             field2 = field2)
+
+            val stats =
+              browserService
+                .fetchAggregate(msaMd, state, field1, field2)
+                .map(aggs => AggregationResponse(inputParameters, aggs))
+                .runToFuture
+            complete(OK, stats)
+          }
+        }
       }
+    }
 
     def stateRoute(state: State,
-                   races: Seq[Race],
-                   actionsTaken: Seq[ActionTaken]): Route =
-      (path("csv") & get) {
-        complete(
-          HttpEntity(
-            `text/csv(UTF-8)`,
-            csvSource(browserService.fetchData(state, races, actionsTaken))
-          )
-        )
-      } ~ get {
-        val inputParameters =
-          Parameters(msaMd = None,
-                     state = Some(state.entryName),
-                     races = races.map(_.entryName),
-                     actionsTaken = actionsTaken.map(_.value))
+                   actionsTaken: BrowserField,
+                   race: BrowserField): Route = {
+      val filteredfields = List(actionsTaken, race).filter(_.name != "empty")
+      if (filteredfields.length > 2) {
+        complete((BadRequest, "More than 2 fields provided"))
+      } else {
 
-        val stats =
-          browserService
-            .fetchAggregate(state, races, actionsTaken)
-            .map(aggs => AggregationResponse(inputParameters, aggs))
-            .runToFuture
-        complete(OK, stats)
-      }
+        if (filteredfields.length == 2) {
+          val sortedFields = filteredfields.sortBy(_.name)
+          val field1 = sortedFields.head
+          val field2 = sortedFields.last
+          (path("csv") & get) {
+            complete(
+              HttpEntity(
+                `text/csv(UTF-8)`,
+                csvSource(browserService.fetchData(state, field1, field2))
+              )
+            )
+          } ~ get {
+            val inputParameters =
+              Parameters(msaMd = None,
+                         state = Some(state.entryName),
+                         field1 = field1,
+                         field2 = field2)
 
-    def nationwideRoute(races: Seq[Race],
-                        actionsTaken: Seq[ActionTaken]): Route =
-      (path("csv") & get) {
-        complete(
-          HttpEntity(
-            `text/csv(UTF-8)`,
-            csvSource(
+            val stats =
               browserService
-                .fetchData(races, actionsTaken))
-          )
-        )
-      } ~ get {
-        val inputParameters =
-          Parameters(msaMd = None,
-                     state = None,
-                     races = races.map(_.entryName),
-                     actionsTaken = actionsTaken.map(_.value))
+                .fetchAggregate(state, field1, field2)
+                .map(aggs => AggregationResponse(inputParameters, aggs))
+                .runToFuture
+            complete(OK, stats)
+          }
+        } else {
+          val field1 = filteredfields.head
+          val field2 = BrowserField("raceApplicant1",
+                                    List("*"),
+                                    "raceApplicant1",
+                                    "raceApplicant1")
+          (path("csv") & get) {
+            complete(
+              HttpEntity(
+                `text/csv(UTF-8)`,
+                csvSource(browserService.fetchData(state, field1, field2))
+              )
+            )
+          } ~ get {
+            val inputParameters =
+              Parameters(msaMd = None,
+                         state = Some(state.entryName),
+                         field1 = field1,
+                         field2 = field2)
 
-        val stats =
-          browserService
-            .fetchAggregate(races, actionsTaken)
-            .map(aggs => AggregationResponse(inputParameters, aggs))
-            .runToFuture
-        complete(OK, stats)
+            val stats =
+              browserService
+                .fetchAggregate(state, field1, field2)
+                .map(aggs => AggregationResponse(inputParameters, aggs))
+                .runToFuture
+            complete(OK, stats)
+          }
+        }
       }
+    }
+
+    def nationwideRoute(actionsTaken: BrowserField,
+                        race: BrowserField): Route = {
+      val filteredfields = List(actionsTaken, race).filter(_.name != "empty")
+      if (filteredfields.length > 2) {
+        complete((BadRequest, "More than 2 fields provided"))
+      } else {
+
+        if (filteredfields.length == 2) {
+          val sortedFields = filteredfields.sortBy(_.name)
+          val field1 = sortedFields.head
+          val field2 = sortedFields.last
+          (path("csv") & get) {
+            complete(
+              HttpEntity(
+                `text/csv(UTF-8)`,
+                csvSource(
+                  browserService
+                    .fetchData(field1, field2))
+              )
+            )
+          } ~ get {
+            val inputParameters =
+              Parameters(msaMd = None,
+                         state = None,
+                         field1 = field1,
+                         field2 = field2)
+
+            val stats =
+              browserService
+                .fetchAggregate(field1, field2)
+                .map(aggs => AggregationResponse(inputParameters, aggs))
+                .runToFuture
+            complete(OK, stats)
+          }
+        } else {
+          val field1 = filteredfields.head
+          val field2 = BrowserField("raceApplicant1",
+                                    List("*"),
+                                    "raceApplicant1",
+                                    "raceApplicant1")
+          (path("csv") & get) {
+            complete(
+              HttpEntity(
+                `text/csv(UTF-8)`,
+                csvSource(
+                  browserService
+                    .fetchData(field1, field2))
+              )
+            )
+          } ~ get {
+            val inputParameters =
+              Parameters(msaMd = None,
+                         state = None,
+                         field1 = field1,
+                         field2 = field2)
+
+            val stats =
+              browserService
+                .fetchAggregate(field1, field2)
+                .map(aggs => AggregationResponse(inputParameters, aggs))
+                .runToFuture
+            complete(OK, stats)
+          }
+        }
+      }
+    }
 
     def msaRoute(msaMd: MsaMd,
-                 races: Seq[Race],
-                 actionsTaken: Seq[ActionTaken]): Route =
-      (path("csv") & get) {
-        complete(
-          HttpEntity(
-            `text/csv(UTF-8)`,
-            csvSource(browserService.fetchData(msaMd, races, actionsTaken))
-          )
-        )
-      } ~ get {
-        val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
-                                         state = None,
-                                         races = races.map(_.entryName),
-                                         actionsTaken =
-                                           actionsTaken.map(_.value))
+                 actionsTaken: BrowserField,
+                 race: BrowserField): Route = {
+      val filteredfields = List(actionsTaken, race).filter(_.name != "empty")
+      if (filteredfields.length > 2) {
+        complete((BadRequest, "More than 2 fields provided"))
+      } else {
 
-        val stats =
-          browserService
-            .fetchAggregate(msaMd, races, actionsTaken)
-            .map(aggs => AggregationResponse(inputParameters, aggs))
-            .runToFuture
-        complete(OK, stats)
+        if (filteredfields.length == 2) {
+          val sortedFields = filteredfields.sortBy(_.name)
+          val field1 = sortedFields.head
+          val field2 = sortedFields.last
+          (path("csv") & get) {
+            complete(
+              HttpEntity(
+                `text/csv(UTF-8)`,
+                csvSource(browserService.fetchData(msaMd, field1, field2))
+              )
+            )
+          } ~ get {
+            val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                             state = None,
+                                             field1 = field1,
+                                             field2 = field2)
+
+            val stats =
+              browserService
+                .fetchAggregate(msaMd, field1, field2)
+                .map(aggs => AggregationResponse(inputParameters, aggs))
+                .runToFuture
+            complete(OK, stats)
+          }
+        } else {
+          val field1 = filteredfields.head
+          val field2 = BrowserField("raceApplicant1",
+                                    List("*"),
+                                    "raceApplicant1",
+                                    "raceApplicant1")
+          (path("csv") & get) {
+            complete(
+              HttpEntity(
+                `text/csv(UTF-8)`,
+                csvSource(browserService.fetchData(msaMd, field1, field2))
+              )
+            )
+          } ~ get {
+            val inputParameters = Parameters(msaMd = Some(msaMd.msaMd),
+                                             state = None,
+                                             field1 = field1,
+                                             field2 = field2)
+
+            val stats =
+              browserService
+                .fetchAggregate(msaMd, field1, field2)
+                .map(aggs => AggregationResponse(inputParameters, aggs))
+                .runToFuture
+            complete(OK, stats)
+          }
+        }
       }
+    }
 
     // TODO: Add invalidate endpoints
     pathPrefix("view") {
       // ?actions_taken=1&races=Asian
       (extractActions & extractRaces) { (actionsTaken, races) =>
         // /data-browser-api/view/nationwide(/csv)
-        pathPrefix("nationwide")(nationwideRoute(races, actionsTaken)) ~
+        pathPrefix("nationwide")(nationwideRoute(actionsTaken, races)) ~
           // /data-browser-api/view/msamd/<msamd>(/csv)
           pathPrefix("msamd" / MsaMdSegment) { msaMd =>
-            msaRoute(msaMd, races, actionsTaken)
+            msaRoute(msaMd, actionsTaken, races)
           } ~
           pathPrefix("state" / StateSegment) { state =>
             // /data-browser-api/view/state/<state>/msamd/<msamd>(/csv)
             pathPrefix("msamd" / MsaMdSegment) { msaMd =>
-              stateAndMsaRoute(state, msaMd, races, actionsTaken)
+              stateAndMsaRoute(state, msaMd, actionsTaken, races)
             } ~
               // /data-browser-api/view/state/<state>(/csv)
-              stateRoute(state, races, actionsTaken)
+              stateRoute(state, actionsTaken, races)
           }
       }
     }

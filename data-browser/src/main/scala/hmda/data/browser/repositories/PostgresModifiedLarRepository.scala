@@ -1,7 +1,7 @@
 package hmda.data.browser.repositories
 import akka.NotUsed
 import akka.stream.scaladsl.Source
-import hmda.data.browser.models.ModifiedLarEntity
+import hmda.data.browser.models.{ModifiedLarEntity, BrowserField}
 import monix.eval.Task
 import slick.basic.DatabaseConfig
 import slick.jdbc.JdbcProfile
@@ -124,33 +124,32 @@ class PostgresModifiedLarRepository(tableName: String,
   def formatString(strs: Seq[String]): String =
     strs.map(each => s"\'$each\'").mkString(start = "(", sep = ",", end = ")")
 
-  def formatInt(ints: Seq[Int]): String =
-    ints.mkString(start = "(", sep = ",", end = ")")
-
-  override def find(msaMd: Int,
-                    actionsTaken: Seq[Int],
-                    races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
+  override def find(
+      msaMd: Int,
+      field1: BrowserField,
+      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = sql"""
     SELECT #$columns
     FROM #${tableName}
     WHERE msa_md = #${msaMd}
-      AND action_taken_type IN #${formatInt(actionsTaken)}
-      AND race_categorization IN #${formatString(races)}
+      AND #${field1.dbName} IN #${formatString(field1.value)}
+      AND #${field2.dbName} IN #${formatString(field2.value)}
     """.as[ModifiedLarEntity]
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
   }
 
-  override def find(state: String,
-                    actionsTaken: Seq[Int],
-                    races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
+  override def find(
+      state: String,
+      field1: BrowserField,
+      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = sql"""
     SELECT #$columns
     FROM #${tableName}
     WHERE state = '#${state}'
-      AND action_taken_type IN #${formatInt(actionsTaken)}
-      AND race_categorization IN #${formatString(races)}
+      AND #${field1.dbName} IN #${formatString(field1.value)}
+      AND #${field2.dbName} IN #${formatString(field2.value)}
     """.as[ModifiedLarEntity]
 
     val publisher = db.stream(searchQuery)
@@ -158,74 +157,82 @@ class PostgresModifiedLarRepository(tableName: String,
   }
 
   override def findAndAggregate(msaMd: Int,
-                                actionTaken: Int,
-                                race: String): Task[Statistic] = {
+                                field1: String,
+                                field1DbName: String,
+                                field2: String,
+                                field2DbName: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
             WHERE msa_md = #${msaMd}
-              AND action_taken_type = #${actionTaken}
-              AND race_categorization = '#${race}'
+              AND #${field1DbName} = #${field1}
+              AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
 
     Task.deferFuture(db.run(query))
   }
 
   override def findAndAggregate(state: String,
-                                actionTaken: Int,
-                                race: String): Task[Statistic] = {
+                                field1: String,
+                                field1DbName: String,
+                                field2: String,
+                                field2DbName: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
             WHERE state = '#${state}'
-              AND action_taken_type = #${actionTaken}
-              AND race_categorization = '#${race}'
+              AND #${field1DbName} = #${field1.value}
+              AND #${field2DbName} = '#${field2.value}'
       """.as[Statistic].head
 
     Task.deferFuture(db.run(query))
   }
 
-  override def find(actionsTaken: Seq[Int],
-                    races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
+  override def find(
+      field1: BrowserField,
+      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = sql"""
     SELECT #$columns
     FROM #${tableName}
-    WHERE action_taken_type IN #${formatInt(actionsTaken)}
-      AND race_categorization IN #${formatString(races)}
+    WHERE #${field1.dbName} IN #${formatString(field1.value)}
+      AND #${field2.dbName} IN #${formatString(field2.value)}
     """.as[ModifiedLarEntity]
 
     val publisher = db.stream(searchQuery)
     Source.fromPublisher(publisher)
   }
 
-  override def findAndAggregate(actionTaken: Int,
-                                race: String): Task[Statistic] = {
+  override def findAndAggregate(field1: String,
+                                field1DbName: String,
+                                field2: String,
+                                field2DbName: String): Task[Statistic] = {
     val query =
       sql"""SELECT
               COUNT(loan_amount),
               SUM(loan_amount)
             FROM #${tableName}
-            WHERE action_taken_type = #${actionTaken}
-            AND race_categorization = '#${race}'
+            WHERE #${field1DbName} = #${field1}
+            AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
 
     Task.deferFuture(db.run(query))
   }
 
-  override def find(msaMd: Int,
-                    state: String,
-                    actionsTaken: Seq[Int],
-                    races: Seq[String]): Source[ModifiedLarEntity, NotUsed] = {
+  override def find(
+      msaMd: Int,
+      state: String,
+      field1: BrowserField,
+      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] = {
     val searchQuery = sql"""SELECT #$columns
                         FROM #${tableName}
                         WHERE msa_md = #${msaMd}
                         AND state = '#${state}'
-                        AND action_taken_type IN #${formatInt(actionsTaken)}
-                        AND race_categorization IN #${formatString(races)}
+                        AND #${field1.dbName} IN #${formatString(field1.value)}
+                        AND #${field2.dbName} IN #${formatString(field2.value)}
     """.as[ModifiedLarEntity]
 
     val publisher = db.stream(searchQuery)
@@ -234,16 +241,18 @@ class PostgresModifiedLarRepository(tableName: String,
 
   override def findAndAggregate(msaMd: Int,
                                 state: String,
-                                actionTaken: Int,
-                                race: String): Task[Statistic] = {
+                                field1: String,
+                                field1DbName: String,
+                                field2: String,
+                                field2DbName: String): Task[Statistic] = {
     val query = sql"""SELECT
         COUNT(loan_amount),
         SUM(loan_amount)
       FROM #${tableName}
       WHERE msa_md = #${msaMd}
       AND state = '#${state}'
-      AND action_taken_type = #${actionTaken}
-      AND race_categorization = '#${race}'
+      AND #${field1DbName} = #${field1}
+      AND #${field2DbName} = '#${field2}'
       """.as[Statistic].head
 
     Task.deferFuture(db.run(query))

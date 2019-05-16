@@ -4,8 +4,8 @@ import io.circe.{Decoder, Encoder, HCursor}
 
 case class Parameters(msaMd: Option[Int],
                       state: Option[String],
-                      races: Seq[String],
-                      actionsTaken: Seq[Int])
+                      field1: BrowserField,
+                      field2: BrowserField)
 case class AggregationResponse(parameters: Parameters,
                                aggregations: Seq[Aggregation])
 
@@ -13,14 +13,14 @@ object Parameters {
   private object constants {
     val MsaMd = "msamd"
     val State = "state"
-    val Races = "races"
-    val ActionsTaken = "actions_taken"
+    val Field = field1.name
+    val Field2 = field2.name
   }
 
   implicit val encoder: Encoder[Parameters] = {
     val c = constants
-    Encoder.forProduct4(c.MsaMd, c.State, c.Races, c.ActionsTaken)(p =>
-      (p.msaMd, p.state, p.races, p.actionsTaken))
+    Encoder.forProduct4(c.MsaMd, c.State, c.Field1, c.Field2)(p =>
+      (p.msaMd, p.state, p.Field1, p.Field2))
   }
 
   implicit val decoder: Decoder[Parameters] = (c: HCursor) => {
@@ -28,9 +28,9 @@ object Parameters {
     for {
       msaMd <- c.downField(cons.MsaMd).as[Option[Int]]
       state <- c.downField(cons.State).as[Option[String]]
-      races <- c.downField(cons.Races).as[Seq[String]]
-      actionsTaken <- c.downField(cons.ActionsTaken).as[Seq[Int]]
-    } yield Parameters(msaMd, state, races, actionsTaken)
+      Field1 <- c.downField(cons.Field1).as[Seq[String]]
+      Field2 <- c.downField(cons.Field2).as[Seq[String]]
+    } yield Parameters(msaMd, state, Field1, Field2)
   }
 }
 

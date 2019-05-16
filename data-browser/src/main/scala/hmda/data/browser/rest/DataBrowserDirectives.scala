@@ -32,34 +32,50 @@ trait DataBrowserDirectives {
       .via(csvStreamingSupport.framingRenderer)
   }
 
-  def extractActions: Directive1[Seq[ActionTaken]] =
-    parameters("actions_taken".as(CsvSeq[Int]) ? Nil)
+  def extractActions: Directive1[BrowserField] =
+    parameters("actions_taken".as(CsvSeq[String]) ? Nil)
       .flatMap { rawActionsTaken =>
         validateActionsTaken(rawActionsTaken) match {
           case Left(invalidActions) =>
             complete((BadRequest, InvalidActions(invalidActions)))
 
           case Right(actionsTaken) if actionsTaken.nonEmpty =>
-            provide(actionsTaken)
+            provide(
+              BrowserField("actions_taken",
+                           actionsTaken.map(_.value),
+                           "action_taken_type",
+                           "ACTION"))
 
           // if the user provides no filters, it meas they want to see all actions
           case Right(_) =>
-            provide(ActionTaken.values)
+            provide(
+              BrowserField("actions_taken",
+                           ActionTaken.values.map(_.value),
+                           "action_taken_type",
+                           "ACTION"))
         }
       }
 
-  def extractRaces: Directive1[Seq[Race]] =
+  def extractRaces: Directive1[BrowserField] =
     parameters("races".as(CsvSeq[String]) ? Nil).flatMap { rawRaces =>
       validateRaces(rawRaces) match {
         case Left(invalidRaces) =>
           complete((BadRequest, InvalidRaces(invalidRaces)))
 
         case Right(races) if races.nonEmpty =>
-          provide(races)
+          provide(
+            BrowserField("race",
+                         races.map(_.entryName),
+                         "race_categorization",
+                         "RACE"))
 
         // if the user provides no filters, it means they want to see all races
         case Right(_) =>
-          provide(Race.values)
+          provide(
+            BrowserField("race",
+                         Race.values.map(_.entryName),
+                         "race_categorization",
+                         "RACE"))
       }
     }
 

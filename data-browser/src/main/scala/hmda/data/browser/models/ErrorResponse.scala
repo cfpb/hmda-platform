@@ -6,6 +6,6 @@ sealed trait ErrorResponse {
 final case class InvalidRaces(invalidRaces: Seq[String],
                               errorType: String = "invalid-races")
     extends ErrorResponse
-final case class InvalidActions(invalidActions: Seq[Int],
+final case class InvalidActions(invalidActions: Seq[String],
                                 errorType: String = "invalid-actions")
     extends ErrorResponse
