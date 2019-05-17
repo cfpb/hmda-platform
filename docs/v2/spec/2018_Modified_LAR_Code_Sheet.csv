@@ -64,8 +64,8 @@
 25,Race of Applicant or Borrower,43,Samoan,
 25,Race of Applicant or Borrower,44,Other Pacific Islander,
 25,Race of Applicant or Borrower,5,White,
-25,Race of Applicant or Borrower,6,"Information not provided by applicant in mail, internet, or telephone application. ",Note Code 6 is only valid for Race of Applicant or Borrower: 1. 
-25,Race of Applicant or Borrower,7,Not applicable. ,Note Code 7 is only valid for Race of Applicant or Borrower: 1. 
+25,Race of Applicant or Borrower,6,"Information not provided by applicant in mail, internet, or telephone application. ",Note: Code 6 is only valid for Race of Applicant or Borrower: 1. 
+25,Race of Applicant or Borrower,7,Not applicable. ,Note: Code 7 is only valid for Race of Applicant or Borrower: 1. 
 30,Race of Co-Applicant or Co-Borrower,1,American Indian or Alaska Native,
 30,Race of Co-Applicant or Co-Borrower,2,Asian,
 30,Race of Co-Applicant or Co-Borrower,21,Asian Indian,
@@ -82,7 +82,7 @@
 30,Race of Co-Applicant or Co-Borrower,43,Samoan,
 30,Race of Co-Applicant or Co-Borrower,44,Other Pacific Islander,
 30,Race of Co-Applicant or Co-Borrower,5,White,
-30,Race of Co-Applicant or Co-Borrower,6,"Information not provided by applicant in mail, internet, or telephone application. ",Note Code 6 is only valid for Race of Co-Applicant or Co-Borrower: 1
+30,Race of Co-Applicant or Co-Borrower,6,"Information not provided by applicant in mail, internet, or telephone application. ",Note: Code 6 is only valid for Race of Co-Applicant or Co-Borrower: 1
 30,Race of Co-Applicant or Co-Borrower,7,Not applicable. ,Note: Code 7 is only valid for Race of Co-Applicant or Co-Borrower: 1
 30,Race of Co-Applicant or Co-Borrower,8,No co-applicant. ,Note: Code 8 is only valid for Race of Co-Applicant or Co-Borrower: 1
 35,Race of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
@@ -91,7 +91,7 @@
 36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
 36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,2,Not collected on the basis of visual observation or surname,
 36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,3,Not applicable ,
-36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,4,No co-applicant. ,Note: Code 4 is only valid for Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname
+36,Race of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,4,No co-applicant. ,
 37,Sex of Applicant or Borrower,1,Male ,
 37,Sex of Applicant or Borrower,2,Female,
 37,Sex of Applicant or Borrower,3,"Information not provided by applicant in mail, internet, or telephone application.",
@@ -101,7 +101,7 @@
 38,Sex of Co-Applicant or Co-Borrower,2,Female,
 38,Sex of Co-Applicant or Co-Borrower,3,"Information not provided by applicant in mail, internet, or telephone application.",
 38,Sex of Co-Applicant or Co-Borrower,4,Not applicable,
-38,Sex of Co-Applicant or Co-Borrower,5,No co-applicant. ,Note Code 5 is only valid for Sex of Co-Applicant or Co-Borrower
+38,Sex of Co-Applicant or Co-Borrower,5,No co-applicant. ,
 38,Sex of Co-Applicant or Co-Borrower,6,Co-applicant selected both male and female,
 39,Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
 39,Sex of Applicant or Borrower Collected on the Basis of Visual Observation or Surname,2,Not collected on the basis of visual observation or surname,
@@ -109,7 +109,7 @@
 40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,1,Collected on the basis of visual observation or surname,
 40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,2,Not collected on the basis of visual observation or surname,
 40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,3,Not applicable,
-40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,4,No co-applicant. ,Note Code 4 is only available for Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname
+40,Sex of Co-Applicant or Co-Borrower Collected on the Basis of Visual Observation or Surname,4,No co-applicant. ,
 41,Age of Applicant or Borrower,<25,Age is less than 25,
 41,Age of Applicant or Borrower,25-34,Age is between 25 and 34,
 41,Age of Applicant or Borrower,35-44,Age is between 35 and 44,
@@ -179,8 +179,8 @@
 52,Reason for Denial,7,Credit application incomplete,
 52,Reason for Denial,8,Mortgage insruance denied,
 52,Reason for Denial,9,Other,
-52,Reason for Denial,10,Not applicable. ,Note Code 10 is only valid for Reason for Denial: 1
-52,Reason for Denial,1111,Exempt. ,Note Code 1111 is only valid for Reason for Denial: 1. 
+52,Reason for Denial,10,Not applicable. ,Note: Code 10 is only valid for Reason for Denial: 1
+52,Reason for Denial,1111,Exempt. ,Note: Code 1111 is only valid for Reason for Denial: 1. 
 63,Debt-to-Income Ratio,Exact values between 36% and 50%,Published with modification. ,
 63,Debt-to-Income Ratio,<20%,Debt-to-income ratio is less than 20%,
 63,Debt-to-Income Ratio,20%-<30%,Debt-to-income ratio is between 20% and is less than 30%,
