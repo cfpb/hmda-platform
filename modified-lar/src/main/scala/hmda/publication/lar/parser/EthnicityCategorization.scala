@@ -1,6 +1,6 @@
 package hmda.publication
 
-import hmda.model.filing.lar.LoanApplicationRegister
+import hmda.model.filing.lar.{LoanApplicationRegister,Ethnicity}
 import hmda.model.filing.lar.enums._
 
 object EthnicityCategorization {
@@ -26,51 +26,82 @@ object EthnicityCategorization {
                               Cuban,
                               OtherHispanicOrLatino)
 
-    val coapplicantNoHispanicEnums = (!hispanicEnums.contains(
-      coEthnicity.ethnicity1) && !hispanicEnums.contains(coEthnicity.ethnicity2) && !hispanicEnums
-      .contains(coEthnicity.ethnicity3) && !hispanicEnums.contains(
-      coEthnicity.ethnicity4) && !hispanicEnums.contains(
-      coEthnicity.ethnicity5))
+    def checkEthnicityTwoToFiveEmpty(ethnicity: Ethnicity): Boolean = {
+      ethnicity.ethnicity2 == EmptyEthnicityValue &&
+        ethnicity.ethnicity3 == EmptyEthnicityValue &&
+        ethnicity.ethnicity4 == EmptyEthnicityValue &&
+        ethnicity.ethnicity5 == EmptyEthnicityValue
+    }
 
-    val applicantBlankExcept1 = ethnicity.ethnicity2 == EmptyEthnicityValue && ethnicity.ethnicity3 == EmptyEthnicityValue && ethnicity.ethnicity4 == EmptyEthnicityValue && ethnicity.ethnicity5 == EmptyEthnicityValue
+    def cotainsNotHispanicOrLatinoFlag(ethnicity: Ethnicity): Boolean = {
+      ethnicity.ethnicity1 == NotHispanicOrLatino ||
+      ethnicity.ethnicity2 == NotHispanicOrLatino ||
+        ethnicity.ethnicity3 == EmptyEthnicityValue ||
+        ethnicity.ethnicity4 == EmptyEthnicityValue ||
+        ethnicity.ethnicity5 == EmptyEthnicityValue
+    }
 
-    val applicantOnlyHispanic = ethnicityFields
-      .map(hispanicEnums.contains(_))
-      .reduce(_ || _)
+     def OnlyHispanicFlag(ethnicityFields: Array[EthnicityEnum],
+                          ethnicityEnum: Array[EthnicityEnum with Product with Serializable])
+     : Boolean = {
+      ethnicityFields.exists(ethnicityEnum.contains) &&
+        !ethnicityFields.contains(NotHispanicOrLatino)
+    }
 
-    val coApplicantOnlyHispanic = coethnicityFields
-      .map(hispanicEnums.contains(_))
-      .reduce(_ || _)
+    def NotHispanicFlagExist(ethnicityFields: Array[EthnicityEnum])
+    : Boolean = {
+        ethnicityFields.contains(NotHispanicOrLatino)
+    }
 
-    val applicantNotHispanic = ethnicityFields
-      .map(_ == NotHispanicOrLatino)
-      .reduce(_ && _)
 
-    val coapplicantNotHispanic = ethnicityFields
-      .map(_ != NotHispanicOrLatino)
-      .reduce(_ && _)
-
-    if (ethnicity.otherHispanicOrLatino != "" && ethnicity.ethnicity1 == EmptyEthnicityValue)
+    //Free form text only
+    if (ethnicity.ethnicity1 == EmptyEthnicityValue)
       "Free Form Text Only"
+
+    //Ethnicity Not Available
     else if (ethnicity.ethnicity1 == InformationNotProvided || ethnicity.ethnicity1 == EthnicityNotApplicable)
       "Ethnicity Not Available"
-    else if (ethnicity.ethnicity1 == NotHispanicOrLatino && applicantBlankExcept1 && coapplicantNoHispanicEnums)
+
+
+    //Hispanic or Latino
+    else if (hispanicEnums.contains(ethnicity.ethnicity1) &&
+         checkEthnicityTwoToFiveEmpty(ethnicity)  &&
+         !cotainsNotHispanicOrLatinoFlag(coEthnicity))
+      "Hispanic or Latino"
+
+    else if (OnlyHispanicFlag(ethnicityFields,hispanicEnums)&&
+      !NotHispanicFlagExist(coethnicityFields)
+    )
+      "Hispanic or Latino"
+
+    //Not Hispanic or Latino
+    else if ( ethnicity.ethnicity1 ==NotHispanicOrLatino &&
+      checkEthnicityTwoToFiveEmpty(ethnicity)&&
+      !coethnicityFields.exists(hispanicEnums.contains))
       "Not Hispanic or Latino"
-    else if (hispanicEnums.contains(ethnicity.ethnicity1) && applicantBlankExcept1 && coapplicantNotHispanic)
-      "Hispanic or Latino"
-    else if (applicantOnlyHispanic && coapplicantNotHispanic)
-      "Hispanic or Latino"
-    else if (ethnicityFields.contains(hispanicEnums) || coethnicityFields
-               .contains(hispanicEnums))
-      "Hispanic or Latino"
-    else if (applicantOnlyHispanic && coapplicantNotHispanic)
+
+
+    //Joint
+    else if ( ethnicityFields.exists(hispanicEnums.contains)&&
+      cotainsNotHispanicOrLatinoFlag(coEthnicity)
+    )
       "Joint"
-    else if (coApplicantOnlyHispanic && applicantNotHispanic)
+
+    else if (cotainsNotHispanicOrLatinoFlag(ethnicity) &&
+      coethnicityFields.exists(hispanicEnums.contains)
+    )
       "Joint"
-    else if (ethnicityFields.contains(NotHispanicOrLatino) && applicantOnlyHispanic)
+
+    else if (cotainsNotHispanicOrLatinoFlag(ethnicity) &&
+      ethnicityFields.exists(hispanicEnums.contains)
+    )
       "Joint"
-    else if (coethnicityFields.contains(NotHispanicOrLatino) && coApplicantOnlyHispanic)
+
+    else if (cotainsNotHispanicOrLatinoFlag(coEthnicity) &&
+      coethnicityFields.exists(hispanicEnums.contains)
+    )
       "Joint"
+//TBD
     else
       "Ethnicity Not Available"
   }
