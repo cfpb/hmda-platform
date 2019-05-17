@@ -45,7 +45,7 @@ Age of Co-Applicant or Co-Borrower,Character Varying,<25; 25-34; 35-44; 45-54; 5
 Age of Co-Applicant >= 62,Character Varying,Yes; No; NA
 Income,Character Varying,Integers or 'NA'
 Type of Purchaser,Numeric,0 1 2 3 4 5 6 71 72 8 9
-Rate Spread,Character Varying,Doubles (double-precision floating point,for example:  3.25),'NA' or 'Exempt'
+Rate Spread,Character Varying Doubles (Double-precision floating point. For example:  3.25),'NA' or 'Exempt'
 HOEPA Status,Numeric,1 2 3
 Lien Status,Numeric,1 2
 Applicant or Borrower - Name and Version of Credit Scoring Model,Numeric,1 2 3 4 5 6 7 8 9 1111
