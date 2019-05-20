@@ -76,6 +76,8 @@ spec:
                 secretKeyRef:
                   name: aws-credentials
                   key: aws-access-key-id
+            - name: BROWSER_LOG_LEVEL
+              value: INFO
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
