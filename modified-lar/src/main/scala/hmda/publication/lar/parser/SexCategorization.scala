@@ -11,15 +11,17 @@ package object SexCategorization {
 
     if (sex == SexInformationNotProvided || sex == SexNotApplicable) {
       "Sex Not Available"
-    } else if (sex == Male && (coSex != Female || coSex != MaleAndFemale)) {
+    } else if (sex == Male && (coSex != Female && coSex != MaleAndFemale)) {
       Male.description
-    } else if (sex == Female && (coSex != Male || coSex != MaleAndFemale)) {
+    } else if (sex == Female && (coSex != Male && coSex != MaleAndFemale)) {
       Female.description
     } else if (sex == Male && (coSex == Female || coSex == MaleAndFemale)) {
       "Joint"
     } else if (sex == Female && (coSex == Male || coSex == MaleAndFemale)) {
       "Joint"
-    } else {
+    }  else if (sex == MaleAndFemale) {
+      "Joint"
+    }else {
       "Sex Not Available"
     }
   }
