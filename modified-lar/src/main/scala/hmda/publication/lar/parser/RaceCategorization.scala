@@ -49,9 +49,8 @@ object RaceCategorization {
              isRaceTwoToFiveEmpty &&
              !isCoWhite) {
       AmericanIndianOrAlaskaNative.description
-    }
-    else if((race.race1 == AmericanIndianOrAlaskaNative && race.race2 == White) ||
-      (race.race2 == AmericanIndianOrAlaskaNative && race.race1 == White)){
+    } else if ((race.race1 == AmericanIndianOrAlaskaNative && race.race2 == White) ||
+               (race.race2 == AmericanIndianOrAlaskaNative && race.race1 == White)) {
       AmericanIndianOrAlaskaNative.description
     }
 
@@ -60,11 +59,8 @@ object RaceCategorization {
              isRaceTwoToFiveEmpty &&
              !isCoWhite) {
       Asian.description
-    }
-
-    else if((asianEnums.contains(race.race1) && race.race2 == White) ||
-      (asianEnums.contains(race.race2) && race.race1 == White))
-    {
+    } else if ((asianEnums.contains(race.race1) && race.race2 == White) ||
+               (asianEnums.contains(race.race2) && race.race1 == White)) {
       Asian.description
     }
 
@@ -73,10 +69,8 @@ object RaceCategorization {
              isRaceTwoToFiveEmpty &&
              !isCoWhite) {
       BlackOrAfricanAmerican.description
-    }
-
-    else if((race.race1 == BlackOrAfricanAmerican && race.race2 == White) ||
-      (race.race2 == BlackOrAfricanAmerican && race.race1 == White)){
+    } else if ((race.race1 == BlackOrAfricanAmerican && race.race2 == White) ||
+               (race.race2 == BlackOrAfricanAmerican && race.race1 == White)) {
       BlackOrAfricanAmerican.description
     }
 
@@ -85,10 +79,8 @@ object RaceCategorization {
              isRaceTwoToFiveEmpty &&
              !isCoWhite) {
       NativeHawaiianOrOtherPacificIslander.description
-    }
-    else if((hawaiianIslanderEnums.contains(race.race1) && race.race2 == White) ||
-      (hawaiianIslanderEnums.contains(race.race2) && race.race1 == White))
-    {
+    } else if ((hawaiianIslanderEnums.contains(race.race1) && race.race2 == White) ||
+               (hawaiianIslanderEnums.contains(race.race2) && race.race1 == White)) {
       NativeHawaiianOrOtherPacificIslander.description
     }
 

@@ -11,8 +11,8 @@ object Aggregation {
   private object constants {
     val Count = "count"
     val Sum = "sum"
-    val Field1 = field1.name
-    val Field2 = field2.name
+    val Field1 = "field 1"
+    val Field2 = "field 2"
   }
 
   // Scala => JSON
@@ -21,7 +21,7 @@ object Aggregation {
                         constants.Sum,
                         constants.Field1,
                         constants.Field2)(
-      agg => (agg.count, agg.sum, agg.Field1.entryName, agg.Field2.value)
+      agg => (agg.count, agg.sum, agg.field1.value, agg.field2.value)
     )
 
   implicit val decoder: Decoder[Aggregation] = (h: HCursor) =>
@@ -31,10 +31,10 @@ object Aggregation {
       field1 <- h
         .downField(constants.Field1)
         .as[String]
-        .map(Field1.withNameInsensitive)
+        .map(x => BrowserField("", Seq(x), "", ""))
       field2 <- h
         .downField(constants.Field2)
         .as[String]
-        .map(Field2.withValue)
-    } yield Aggregation(count, sum, Field1, Field2)
+        .map(x => BrowserField("", Seq(x), "", ""))
+    } yield Aggregation(count, sum, field1, field2)
 }

@@ -13,14 +13,14 @@ object Parameters {
   private object constants {
     val MsaMd = "msamd"
     val State = "state"
-    val Field = field1.name
-    val Field2 = field2.name
+    val Field1 = "field 1"
+    val Field2 = "field 2"
   }
 
   implicit val encoder: Encoder[Parameters] = {
     val c = constants
     Encoder.forProduct4(c.MsaMd, c.State, c.Field1, c.Field2)(p =>
-      (p.msaMd, p.state, p.Field1, p.Field2))
+      (p.msaMd, p.state, p.field1.value, p.field2.value))
   }
 
   implicit val decoder: Decoder[Parameters] = (c: HCursor) => {
@@ -28,9 +28,13 @@ object Parameters {
     for {
       msaMd <- c.downField(cons.MsaMd).as[Option[Int]]
       state <- c.downField(cons.State).as[Option[String]]
-      Field1 <- c.downField(cons.Field1).as[Seq[String]]
-      Field2 <- c.downField(cons.Field2).as[Seq[String]]
-    } yield Parameters(msaMd, state, Field1, Field2)
+      field1 <- c.downField(cons.Field1).as[Seq[String]]
+      field2 <- c.downField(cons.Field2).as[Seq[String]]
+    } yield
+      Parameters(msaMd,
+                 state,
+                 BrowserField("", field1, "", ""),
+                 BrowserField("", field2, "", ""))
   }
 }
 

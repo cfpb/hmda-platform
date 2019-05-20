@@ -34,125 +34,171 @@ class ModifiedLarBrowserService(repo: ModifiedLarRepository,
     * @return
     */
   private def fetchAgg(
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken],
-      findInDatabase: (Race, ActionTaken) => Task[Statistic],
-      findInCache: (Race, ActionTaken) => Task[Option[Statistic]],
-      updateCache: (Race, ActionTaken, Statistic) => Task[Statistic])
-    : Task[Seq[Aggregation]] = {
+      field1: BrowserField,
+      field2: BrowserField,
+      findInDatabase: (String, String, String, String) => Task[Statistic],
+      findInCache: (String, String, String, String) => Task[Option[Statistic]],
+      updateCache: (String,
+                    String,
+                    String,
+                    String,
+                    Statistic) => Task[Statistic]): Task[Seq[Aggregation]] = {
     val taskList = for {
-      race <- races
-      actionTaken <- actionsTaken
+      field1Entry <- field1.value
+      field2Entry <- field2.value
     } yield {
       // this is only executed if the initial cache query comes back empty
       val findInDbThenUpdateCache = for {
-        stat <- findInDatabase(race, actionTaken)
-        _ <- updateCache(race, actionTaken, stat)
+        stat <- findInDatabase(field1.redisName,
+                               field1Entry,
+                               field2.redisName,
+                               field2Entry)
+        _ <- updateCache(field1.redisName,
+                         field1Entry,
+                         field2.redisName,
+                         field2Entry,
+                         stat)
       } yield stat
 
       for {
-        optC <- findInCache(race, actionTaken)
+        optC <- findInCache(field1.redisName,
+                            field1Entry,
+                            field2.redisName,
+                            field2Entry)
         stat <- optC.fold(ifEmpty = findInDbThenUpdateCache)(cachedStat =>
           Task(cachedStat))
-      } yield Aggregation(count = stat.count, sum = stat.sum, race, actionTaken)
+      } yield Aggregation(count = stat.count, sum = stat.sum, field1, field2)
     }
 
     Task.gatherUnordered(taskList)
   }
 
-  override def fetchAggregate(
-      msaMd: MsaMd,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
-    def findDb(r: Race, a: ActionTaken): Task[Statistic] =
-      repo.findAndAggregate(msaMd.msaMd, a.value, r.entryName)
+  override def fetchAggregate(msaMd: MsaMd,
+                              field1: BrowserField,
+                              field2: BrowserField): Task[Seq[Aggregation]] = {
+    def findDb(oneName: String,
+               one: String,
+               twoName: String,
+               two: String): Task[Statistic] =
+      repo.findAndAggregate(msaMd.msaMd, oneName, one, twoName, two)
 
-    def findCache(r: Race, a: ActionTaken): Task[Option[Statistic]] =
-      cache.find(msaMd.msaMd, a.value, r.entryName)
+    def findCache(oneName: String,
+                  one: String,
+                  twoName: String,
+                  two: String): Task[Option[Statistic]] =
+      cache.find(msaMd.msaMd, oneName, one, twoName, two)
 
-    def updateCache(r: Race, a: ActionTaken, s: Statistic): Task[Statistic] =
-      cache.update(msaMd.msaMd, a.value, r.entryName, s)
+    def updateCache(oneName: String,
+                    one: String,
+                    twoName: String,
+                    two: String,
+                    s: Statistic): Task[Statistic] =
+      cache.update(msaMd.msaMd, oneName, one, twoName, two, s)
 
-    fetchAgg(races, actionsTaken, findDb, findCache, updateCache)
+    fetchAgg(field1, field2, findDb, findCache, updateCache)
   }
 
-  override def fetchAggregate(
-      state: State,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
-    def findDb(r: Race, a: ActionTaken): Task[Statistic] =
-      repo.findAndAggregate(state.entryName, a.value, r.entryName)
+  override def fetchAggregate(state: State,
+                              field1: BrowserField,
+                              field2: BrowserField): Task[Seq[Aggregation]] = {
+    def findDb(oneName: String,
+               one: String,
+               twoName: String,
+               two: String): Task[Statistic] =
+      repo.findAndAggregate(state.entryName, oneName, one, twoName, two)
 
-    def findCache(r: Race, a: ActionTaken): Task[Option[Statistic]] =
-      cache.find(state.entryName, a.value, r.entryName)
+    def findCache(oneName: String,
+                  one: String,
+                  twoName: String,
+                  two: String): Task[Option[Statistic]] =
+      cache.find(state.entryName, oneName, one, twoName, two)
 
-    def updateCache(r: Race, a: ActionTaken, s: Statistic): Task[Statistic] =
-      cache.update(state.entryName, a.value, r.entryName, s)
+    def updateCache(oneName: String,
+                    one: String,
+                    twoName: String,
+                    two: String,
+                    s: Statistic): Task[Statistic] =
+      cache.update(state.entryName, oneName, one, twoName, two, s)
 
-    fetchAgg(races, actionsTaken, findDb, findCache, updateCache)
+    fetchAgg(field1, field2, findDb, findCache, updateCache)
   }
 
-  override def fetchAggregate(
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
-    def findInDb(r: Race, a: ActionTaken): Task[Statistic] =
-      repo.findAndAggregate(a.value, r.entryName)
+  override def fetchAggregate(field1: BrowserField,
+                              field2: BrowserField): Task[Seq[Aggregation]] = {
+    def findInDb(oneName: String,
+                 one: String,
+                 twoName: String,
+                 two: String): Task[Statistic] =
+      repo.findAndAggregate(oneName, one, twoName, two)
 
-    def findInCache(r: Race, a: ActionTaken): Task[Option[Statistic]] =
-      cache.find(a.value, r.entryName)
+    def findInCache(oneName: String,
+                    one: String,
+                    twoName: String,
+                    two: String): Task[Option[Statistic]] =
+      cache.find(oneName, one, twoName, two)
 
-    def updateCache(r: Race, a: ActionTaken, s: Statistic): Task[Statistic] =
-      cache.update(a.value, r.entryName, s)
+    def updateCache(oneName: String,
+                    one: String,
+                    twoName: String,
+                    two: String,
+                    s: Statistic): Task[Statistic] =
+      cache.update(oneName, one, twoName, two, s)
 
-    fetchAgg(races, actionsTaken, findInDb, findInCache, updateCache)
+    fetchAgg(field1, field2, findInDb, findInCache, updateCache)
+  }
+
+  override def fetchAggregate(msaMd: MsaMd,
+                              state: State,
+                              field1: BrowserField,
+                              field2: BrowserField): Task[Seq[Aggregation]] = {
+    def findDb(oneName: String,
+               one: String,
+               twoName: String,
+               two: String): Task[Statistic] =
+      repo.findAndAggregate(msaMd.msaMd,
+                            state.entryName,
+                            oneName,
+                            one,
+                            twoName,
+                            two)
+
+    def findCache(oneName: String,
+                  one: String,
+                  twoName: String,
+                  two: String): Task[Option[Statistic]] =
+      cache.find(msaMd.msaMd, state.entryName, oneName, one, twoName, two)
+
+    def updateCache(oneName: String,
+                    one: String,
+                    twoName: String,
+                    two: String,
+                    s: Statistic): Task[Statistic] =
+      cache.update(msaMd.msaMd, state.entryName, oneName, one, twoName, two, s)
+
+    fetchAgg(field1, field2, findDb, findCache, updateCache)
   }
 
   override def fetchData(
       msaMd: MsaMd,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
-    repo.find(msaMd = msaMd.msaMd,
-              actionsTaken = actionsTaken.map(_.value),
-              races = races.map(_.entryName))
+      field1: BrowserField,
+      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(msaMd = msaMd.msaMd, field1, field2)
 
   override def fetchData(
       state: State,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
-    repo.find(state = state.entryName,
-              actionsTaken = actionsTaken.map(_.value),
-              races = races.map(_.entryName))
+      field1: BrowserField,
+      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(state = state.entryName, field1, field2)
 
   override def fetchData(
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
-    repo.find(actionsTaken = actionsTaken.map(_.value),
-              races = races.map(_.entryName))
-
-  override def fetchAggregate(
-      msaMd: MsaMd,
-      state: State,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Task[Seq[Aggregation]] = {
-    def findDb(r: Race, a: ActionTaken): Task[Statistic] =
-      repo.findAndAggregate(msaMd.msaMd, state.entryName, a.value, r.entryName)
-
-    def findCache(r: Race, a: ActionTaken): Task[Option[Statistic]] =
-      cache.find(msaMd.msaMd, state.entryName, a.value, r.entryName)
-
-    def updateCache(r: Race, a: ActionTaken, s: Statistic): Task[Statistic] =
-      cache.update(msaMd.msaMd, state.entryName, a.value, r.entryName, s)
-
-    fetchAgg(races, actionsTaken, findDb, findCache, updateCache)
-  }
+      field1: BrowserField,
+      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(field1, field2)
 
   override def fetchData(
       msaMd: MsaMd,
       state: State,
-      races: Seq[Race],
-      actionsTaken: Seq[ActionTaken]): Source[ModifiedLarEntity, NotUsed] =
-    repo.find(msaMd = msaMd.msaMd,
-              state = state.entryName,
-              actionsTaken = actionsTaken.map(_.value),
-              races = races.map(_.entryName))
+      field1: BrowserField,
+      field2: BrowserField): Source[ModifiedLarEntity, NotUsed] =
+    repo.find(msaMd = msaMd.msaMd, state = state.entryName, field1, field2)
 }

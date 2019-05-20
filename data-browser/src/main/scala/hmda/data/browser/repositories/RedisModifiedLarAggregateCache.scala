@@ -18,8 +18,6 @@ class RedisModifiedLarAggregateCache(
   private val Nationwide = "Nationwide"
   private val MsaMd = "MSAMD"
   private val State = "STATE"
-  private val ActionTaken = "ACTION"
-  private val Race = "RACE"
 
   private def findAndParse(key: String): Task[Option[Statistic]] =
     Task

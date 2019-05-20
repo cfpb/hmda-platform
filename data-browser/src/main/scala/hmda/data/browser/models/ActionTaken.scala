@@ -1,9 +1,10 @@
 package hmda.data.browser.models
 
-import enumeratum.values._
+import enumeratum._
 import scala.collection.immutable
 
-sealed abstract class ActionTaken(override val value: String) extends EnumEntry
+sealed abstract class ActionTaken(override val entryName: String)
+    extends EnumEntry
 
 object ActionTaken extends Enum[ActionTaken] {
   val values: immutable.IndexedSeq[ActionTaken] = findValues

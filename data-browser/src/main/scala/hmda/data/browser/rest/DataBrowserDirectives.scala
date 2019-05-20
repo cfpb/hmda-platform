@@ -42,7 +42,7 @@ trait DataBrowserDirectives {
           case Right(actionsTaken) if actionsTaken.nonEmpty =>
             provide(
               BrowserField("actions_taken",
-                           actionsTaken.map(_.value),
+                           actionsTaken.map(_.entryName),
                            "action_taken_type",
                            "ACTION"))
 
@@ -50,7 +50,7 @@ trait DataBrowserDirectives {
           case Right(_) =>
             provide(
               BrowserField("actions_taken",
-                           ActionTaken.values.map(_.value),
+                           ActionTaken.values.map(_.entryName),
                            "action_taken_type",
                            "ACTION"))
         }

@@ -6,7 +6,6 @@ import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.RouteDirectives.complete
-import akka.stream.ActorMaterializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import hmda.data.browser.models._
 import hmda.data.browser.models.BrowserField
@@ -16,8 +15,8 @@ import monix.execution.{Scheduler => MonixScheduler}
 import akka.http.scaladsl.model.StatusCodes.BadRequest
 
 object Routes {
-  def apply(browserService: BrowserService)(implicit scheduler: MonixScheduler,
-                                            mat: ActorMaterializer): Route = {
+  def apply(browserService: BrowserService)(
+      implicit scheduler: MonixScheduler): Route = {
     def stateAndMsaRoute(state: State,
                          msaMd: MsaMd,
                          actionsTaken: BrowserField,
@@ -51,7 +50,7 @@ object Routes {
                 .fetchAggregate(msaMd, state, field1, field2)
                 .map(aggs => AggregationResponse(inputParameters, aggs))
                 .runToFuture
-            complete(OK, stats)
+            complete((OK, stats))
           }
         } else {
           val field1 = filteredfields.head
@@ -78,7 +77,7 @@ object Routes {
                 .fetchAggregate(msaMd, state, field1, field2)
                 .map(aggs => AggregationResponse(inputParameters, aggs))
                 .runToFuture
-            complete(OK, stats)
+            complete((OK, stats))
           }
         }
       }
@@ -115,7 +114,7 @@ object Routes {
                 .fetchAggregate(state, field1, field2)
                 .map(aggs => AggregationResponse(inputParameters, aggs))
                 .runToFuture
-            complete(OK, stats)
+            complete((OK, stats))
           }
         } else {
           val field1 = filteredfields.head
@@ -142,7 +141,7 @@ object Routes {
                 .fetchAggregate(state, field1, field2)
                 .map(aggs => AggregationResponse(inputParameters, aggs))
                 .runToFuture
-            complete(OK, stats)
+            complete((OK, stats))
           }
         }
       }
@@ -180,7 +179,7 @@ object Routes {
                 .fetchAggregate(field1, field2)
                 .map(aggs => AggregationResponse(inputParameters, aggs))
                 .runToFuture
-            complete(OK, stats)
+            complete((OK, stats))
           }
         } else {
           val field1 = filteredfields.head
@@ -209,7 +208,7 @@ object Routes {
                 .fetchAggregate(field1, field2)
                 .map(aggs => AggregationResponse(inputParameters, aggs))
                 .runToFuture
-            complete(OK, stats)
+            complete((OK, stats))
           }
         }
       }
@@ -245,7 +244,7 @@ object Routes {
                 .fetchAggregate(msaMd, field1, field2)
                 .map(aggs => AggregationResponse(inputParameters, aggs))
                 .runToFuture
-            complete(OK, stats)
+            complete((OK, stats))
           }
         } else {
           val field1 = filteredfields.head
@@ -271,7 +270,7 @@ object Routes {
                 .fetchAggregate(msaMd, field1, field2)
                 .map(aggs => AggregationResponse(inputParameters, aggs))
                 .runToFuture
-            complete(OK, stats)
+            complete((OK, stats))
           }
         }
       }

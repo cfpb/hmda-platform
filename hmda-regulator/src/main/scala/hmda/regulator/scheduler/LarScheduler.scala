@@ -7,7 +7,12 @@ import akka.NotUsed
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.s3.ApiVersion.ListBucketVersion2
 import akka.stream.alpakka.s3.scaladsl.S3
-import akka.stream.alpakka.s3.{MemoryBufferType, MultipartUploadResult, S3Attributes, S3Settings}
+import akka.stream.alpakka.s3.{
+  MemoryBufferType,
+  MultipartUploadResult,
+  S3Attributes,
+  S3Settings
+}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
@@ -77,9 +82,9 @@ class LarScheduler extends HmdaActor with RegulatorComponent {
       val formattedDate = fullDate.format(now)
 
       val fileName = s"$formattedDate" + s"$year" + "_lar" + ".txt"
-      val s3Sink = S3.multipartUpload(bucket, s"$environment/lar/$fileName")
-                        .withAttributes(S3Attributes.settings(s3Settings))
-
+      val s3Sink = S3
+        .multipartUpload(bucket, s"$environment/lar/$fileName")
+        .withAttributes(S3Attributes.settings(s3Settings))
 
       val allResultsPublisher: DatabasePublisher[LarEntityImpl] =
         larRepository.getAllLARs(bankFilterList)
